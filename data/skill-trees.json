@@ -7386,7 +7386,13 @@
           "getLevel": 20,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 2300
+          "levelUpSp": 2300,
+          "requiredItems": [
+            {
+              "itemId": 1097,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 70,
@@ -7714,7 +7720,13 @@
           "getLevel": 28,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 4000
+          "levelUpSp": 4000,
+          "requiredItems": [
+            {
+              "itemId": 1378,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 45,
@@ -26992,7 +27004,13 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 30000
+          "levelUpSp": 30000,
+          "requiredItems": [
+            {
+              "itemId": 3042,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 153,
@@ -27016,7 +27034,13 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 30000
+          "levelUpSp": 30000,
+          "requiredItems": [
+            {
+              "itemId": 3056,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 86,
@@ -27024,7 +27048,13 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 30000
+          "levelUpSp": 30000,
+          "requiredItems": [
+            {
+              "itemId": 3048,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 217,
@@ -27032,7 +27062,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 217,
@@ -27040,7 +27070,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 217,
@@ -27048,7 +27078,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 232,
@@ -27056,7 +27086,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 232,
@@ -27064,7 +27094,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 232,
@@ -27072,7 +27102,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 147,
@@ -27080,7 +27110,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 147,
@@ -27088,7 +27118,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 147,
@@ -27096,7 +27126,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 92,
@@ -27104,7 +27134,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 92,
@@ -27112,7 +27142,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 92,
@@ -27120,7 +27150,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 70,
@@ -27128,7 +27158,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 70,
@@ -27136,7 +27166,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 70,
@@ -27144,7 +27174,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 28,
@@ -27152,7 +27182,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 28,
@@ -27160,7 +27190,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 28,
@@ -27168,7 +27198,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 18,
@@ -27176,7 +27206,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 18,
@@ -27184,7 +27214,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 18,
@@ -27192,7 +27222,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 127,
@@ -27200,7 +27230,13 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 38000,
+          "requiredItems": [
+            {
+              "itemId": 3052,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 46,
@@ -27208,7 +27244,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 38000
         },
         {
           "skillId": 112,
@@ -27216,7 +27252,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 38000
         },
         {
           "skillId": 191,
@@ -27224,7 +27260,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 38000
         },
         {
           "skillId": 72,
@@ -27232,7 +27268,13 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 38000,
+          "requiredItems": [
+            {
+              "itemId": 3047,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 217,
@@ -27416,7 +27458,13 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 46000
+          "levelUpSp": 46000,
+          "requiredItems": [
+            {
+              "itemId": 3044,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 46,
@@ -27448,7 +27496,13 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 46000
+          "levelUpSp": 46000,
+          "requiredItems": [
+            {
+              "itemId": 3049,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 217,
@@ -27680,7 +27734,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 217,
@@ -27688,7 +27742,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 217,
@@ -27696,7 +27750,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 232,
@@ -27704,7 +27758,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 232,
@@ -27712,7 +27766,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 232,
@@ -27720,7 +27774,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 147,
@@ -27728,7 +27782,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 147,
@@ -27736,7 +27790,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 147,
@@ -27744,7 +27798,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 92,
@@ -27752,7 +27806,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 92,
@@ -27760,7 +27814,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 92,
@@ -27768,7 +27822,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 70,
@@ -27776,7 +27830,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 70,
@@ -27784,7 +27838,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 70,
@@ -27792,7 +27846,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 28,
@@ -27800,7 +27854,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 28,
@@ -27808,7 +27862,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 28,
@@ -27816,7 +27870,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 18,
@@ -27824,7 +27878,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 18,
@@ -27832,7 +27886,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 18,
@@ -27840,7 +27894,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 36000
+          "levelUpSp": 38000
         },
         {
           "skillId": 127,
@@ -27848,7 +27902,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 65,
@@ -27856,7 +27910,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 46,
@@ -27864,7 +27918,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 291,
@@ -27872,7 +27926,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 153,
@@ -27880,7 +27934,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 86,
@@ -27888,7 +27942,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 110000
+          "levelUpSp": 115000
         },
         {
           "skillId": 217,
@@ -28384,7 +28438,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 217,
@@ -28392,7 +28446,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 232,
@@ -28400,7 +28454,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 232,
@@ -28408,7 +28462,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 147,
@@ -28416,7 +28470,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 147,
@@ -28424,7 +28478,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 92,
@@ -28432,7 +28486,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 92,
@@ -28440,7 +28494,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 70,
@@ -28448,7 +28502,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 70,
@@ -28456,7 +28510,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 28,
@@ -28464,7 +28518,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 28,
@@ -28472,7 +28526,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 18,
@@ -28480,7 +28534,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 18,
@@ -28488,7 +28542,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 127,
@@ -28496,7 +28550,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 65,
@@ -28504,7 +28558,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 46,
@@ -28512,7 +28566,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 291,
@@ -28520,7 +28574,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 401,
@@ -28528,7 +28582,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 403,
@@ -28536,7 +28590,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 450,
@@ -28544,7 +28598,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 208000
         },
         {
           "skillId": 217,
@@ -28736,7 +28790,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 217,
@@ -28744,7 +28798,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 232,
@@ -28752,7 +28806,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 232,
@@ -28760,7 +28814,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 147,
@@ -28768,7 +28822,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 147,
@@ -28776,7 +28830,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 92,
@@ -28784,7 +28838,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 92,
@@ -28792,7 +28846,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 70,
@@ -28800,7 +28854,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 70,
@@ -28808,7 +28862,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 28,
@@ -28816,7 +28870,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 28,
@@ -28824,7 +28878,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 18,
@@ -28832,7 +28886,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 18,
@@ -28840,7 +28894,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 127,
@@ -28848,7 +28902,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 65,
@@ -28856,7 +28910,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 46,
@@ -28864,7 +28918,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 291,
@@ -28872,7 +28926,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 191,
@@ -28880,7 +28934,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 322,
@@ -28888,7 +28942,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 401,
@@ -28896,7 +28950,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 403,
@@ -28904,7 +28958,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 450,
@@ -28912,7 +28966,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 217,
@@ -29104,7 +29158,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 217,
@@ -29112,7 +29166,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 232,
@@ -29120,7 +29174,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 232,
@@ -29128,7 +29182,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 147,
@@ -29136,7 +29190,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 147,
@@ -29144,7 +29198,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 92,
@@ -29152,7 +29206,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 92,
@@ -29160,7 +29214,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 70,
@@ -29168,7 +29222,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 70,
@@ -29176,7 +29230,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 28,
@@ -29184,7 +29238,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 28,
@@ -29192,7 +29246,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 18,
@@ -29200,7 +29254,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 18,
@@ -29208,7 +29262,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 127,
@@ -29216,7 +29270,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 65,
@@ -29224,7 +29278,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 46,
@@ -29232,7 +29286,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 291,
@@ -29240,7 +29294,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 322,
@@ -29248,7 +29302,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 401,
@@ -29256,7 +29310,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 403,
@@ -29264,7 +29318,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 450,
@@ -29272,7 +29326,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 217,
@@ -29280,7 +29334,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 217,
@@ -29288,7 +29342,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 232,
@@ -29296,7 +29350,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 232,
@@ -29304,7 +29358,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 147,
@@ -29312,7 +29366,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 147,
@@ -29320,7 +29374,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 92,
@@ -29328,7 +29382,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 92,
@@ -29336,7 +29390,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 70,
@@ -29344,7 +29398,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 70,
@@ -29352,7 +29406,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 28,
@@ -29360,7 +29414,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 28,
@@ -29368,7 +29422,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 18,
@@ -29376,7 +29430,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 18,
@@ -29384,7 +29438,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 260000
+          "levelUpSp": 270000
         },
         {
           "skillId": 127,
@@ -29392,7 +29446,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 65,
@@ -29400,7 +29454,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 46,
@@ -29408,7 +29462,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 291,
@@ -29416,7 +29470,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 103,
@@ -29424,7 +29478,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 283,
@@ -29432,7 +29486,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 322,
@@ -29440,7 +29494,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 401,
@@ -29448,7 +29502,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 403,
@@ -29456,7 +29510,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 450,
@@ -29464,7 +29518,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 520000
+          "levelUpSp": 550000
         },
         {
           "skillId": 217,
@@ -29472,7 +29526,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 217,
@@ -29480,7 +29534,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 232,
@@ -29488,7 +29542,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 232,
@@ -29496,7 +29550,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 147,
@@ -29504,7 +29558,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 147,
@@ -29512,7 +29566,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 92,
@@ -29520,7 +29574,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 92,
@@ -29528,7 +29582,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 70,
@@ -29536,7 +29590,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 70,
@@ -29544,7 +29598,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 28,
@@ -29552,7 +29606,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 28,
@@ -29560,7 +29614,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 18,
@@ -29568,7 +29622,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 18,
@@ -29576,7 +29630,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 127,
@@ -29584,7 +29638,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 65,
@@ -29592,7 +29646,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 46,
@@ -29600,7 +29654,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 291,
@@ -29608,7 +29662,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 191,
@@ -29616,7 +29670,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 322,
@@ -29624,7 +29678,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 401,
@@ -29632,7 +29686,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 403,
@@ -29640,7 +29694,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 450,
@@ -29648,7 +29702,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 710000
+          "levelUpSp": 750000
         },
         {
           "skillId": 217,
@@ -44369,7 +44423,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 233,
@@ -44377,7 +44431,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 208,
@@ -44385,7 +44439,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 208,
@@ -44393,7 +44447,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 101,
@@ -44401,7 +44455,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 101,
@@ -44409,7 +44463,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 19,
@@ -44417,7 +44471,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 19,
@@ -44425,7 +44479,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 24,
@@ -44433,7 +44487,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 24,
@@ -44441,7 +44495,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 930000
+          "levelUpSp": 1080000
         },
         {
           "skillId": 312,
@@ -44449,7 +44503,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 171,
@@ -44457,7 +44511,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 313,
@@ -44465,7 +44519,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 417,
@@ -44473,7 +44527,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 418,
@@ -44481,7 +44535,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 415,
@@ -44489,7 +44543,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         },
         {
           "skillId": 416,
@@ -44497,7 +44551,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1900000
+          "levelUpSp": 2170000
         }
       ]
     },
@@ -51942,7 +51996,13 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 12000,
+          "requiredItems": [
+            {
+              "itemId": 3053,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 262,
@@ -52014,7 +52074,13 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 35000,
+          "requiredItems": [
+            {
+              "itemId": 3432,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 217,
@@ -52022,7 +52088,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 217,
@@ -52030,7 +52096,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 217,
@@ -52038,7 +52104,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 232,
@@ -52046,7 +52112,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 232,
@@ -52054,7 +52120,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 232,
@@ -52062,7 +52128,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 147,
@@ -52070,7 +52136,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 147,
@@ -52078,7 +52144,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 147,
@@ -52086,7 +52152,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 92,
@@ -52094,7 +52160,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 92,
@@ -52102,7 +52168,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 92,
@@ -52110,7 +52176,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 28,
@@ -52118,7 +52184,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 28,
@@ -52126,7 +52192,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 28,
@@ -52134,7 +52200,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 262,
@@ -52142,7 +52208,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 262,
@@ -52150,7 +52216,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 262,
@@ -52158,7 +52224,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 18,
@@ -52166,7 +52232,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 18,
@@ -52174,7 +52240,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 18,
@@ -52182,7 +52248,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 13000
+          "levelUpSp": 14000
         },
         {
           "skillId": 112,
@@ -52190,7 +52256,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 191,
@@ -52198,7 +52264,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 72,
@@ -52206,7 +52272,13 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000,
+          "requiredItems": [
+            {
+              "itemId": 3047,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 196,
@@ -52214,7 +52286,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 217,
@@ -52390,7 +52462,13 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 27000
+          "levelUpSp": 27000,
+          "requiredItems": [
+            {
+              "itemId": 3043,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 49,
@@ -52646,7 +52724,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 217,
@@ -52654,7 +52732,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 217,
@@ -52662,7 +52740,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 232,
@@ -52670,7 +52748,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 232,
@@ -52678,7 +52756,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 232,
@@ -52686,7 +52764,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 147,
@@ -52694,7 +52772,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 147,
@@ -52702,7 +52780,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 147,
@@ -52710,7 +52788,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 92,
@@ -52718,7 +52796,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 92,
@@ -52726,7 +52804,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 92,
@@ -52734,7 +52812,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 28,
@@ -52742,7 +52820,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 28,
@@ -52750,7 +52828,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 28,
@@ -52758,7 +52836,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 262,
@@ -52766,7 +52844,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 262,
@@ -52774,7 +52852,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 262,
@@ -52782,7 +52860,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 18,
@@ -52790,7 +52868,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 18,
@@ -52798,7 +52876,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 18,
@@ -52806,7 +52884,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 49,
@@ -52814,7 +52892,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 58000
+          "levelUpSp": 63000
         },
         {
           "skillId": 49,
@@ -52822,7 +52900,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 58000
+          "levelUpSp": 63000
         },
         {
           "skillId": 69,
@@ -52830,7 +52908,13 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000,
+          "requiredItems": [
+            {
+              "itemId": 3046,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 69,
@@ -52838,7 +52922,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 69,
@@ -52846,7 +52930,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 38000
+          "levelUpSp": 42000
         },
         {
           "skillId": 97,
@@ -52854,7 +52938,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 115000
+          "levelUpSp": 125000
         },
         {
           "skillId": 291,
@@ -52862,7 +52946,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 115000
+          "levelUpSp": 125000
         },
         {
           "skillId": 153,
@@ -52870,7 +52954,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 115000
+          "levelUpSp": 125000
         },
         {
           "skillId": 217,
@@ -53142,7 +53226,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 47000
+          "levelUpSp": 67000
         },
         {
           "skillId": 217,
@@ -53414,7 +53498,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 217,
@@ -53422,7 +53506,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 232,
@@ -53430,7 +53514,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 232,
@@ -53438,7 +53522,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 147,
@@ -53446,7 +53530,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 147,
@@ -53454,7 +53538,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 92,
@@ -53462,7 +53546,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 92,
@@ -53470,7 +53554,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 28,
@@ -53478,7 +53562,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 28,
@@ -53486,7 +53570,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 262,
@@ -53494,7 +53578,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 262,
@@ -53502,7 +53586,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 18,
@@ -53510,7 +53594,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 18,
@@ -53518,7 +53602,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 49,
@@ -53526,7 +53610,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 49,
@@ -53534,7 +53618,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 69,
@@ -53542,7 +53626,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 69,
@@ -53550,7 +53634,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 90000
+          "levelUpSp": 104000
         },
         {
           "skillId": 97,
@@ -53558,7 +53642,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 207000
         },
         {
           "skillId": 291,
@@ -53566,7 +53650,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 207000
         },
         {
           "skillId": 405,
@@ -53574,7 +53658,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 207000
         },
         {
           "skillId": 403,
@@ -53582,7 +53666,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 207000
         },
         {
           "skillId": 400,
@@ -53590,7 +53674,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 180000
+          "levelUpSp": 207000
         },
         {
           "skillId": 217,
@@ -53798,7 +53882,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 217,
@@ -53806,7 +53890,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 232,
@@ -53814,7 +53898,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 232,
@@ -53822,7 +53906,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 147,
@@ -53830,7 +53914,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 147,
@@ -53838,7 +53922,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 92,
@@ -53846,7 +53930,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 92,
@@ -53854,7 +53938,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 28,
@@ -53862,7 +53946,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 28,
@@ -53870,7 +53954,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 262,
@@ -53878,7 +53962,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 262,
@@ -53886,7 +53970,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 18,
@@ -53894,7 +53978,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 18,
@@ -53902,7 +53986,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 49,
@@ -53910,7 +53994,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 49,
@@ -53918,7 +54002,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 69,
@@ -53926,7 +54010,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 69,
@@ -53934,7 +54018,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 97,
@@ -53942,7 +54026,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 291,
@@ -53950,7 +54034,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 191,
@@ -53958,7 +54042,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 322,
@@ -53966,7 +54050,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 405,
@@ -53974,7 +54058,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 403,
@@ -53982,7 +54066,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 400,
@@ -53990,7 +54074,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 300000
         },
         {
           "skillId": 217,
@@ -54206,7 +54290,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 217,
@@ -54214,7 +54298,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 232,
@@ -54222,7 +54306,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 232,
@@ -54230,7 +54314,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 147,
@@ -54238,7 +54322,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 147,
@@ -54246,7 +54330,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 92,
@@ -54254,7 +54338,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 92,
@@ -54262,7 +54346,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 28,
@@ -54270,7 +54354,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 28,
@@ -54278,7 +54362,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 262,
@@ -54286,7 +54370,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 262,
@@ -54294,7 +54378,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 18,
@@ -54302,7 +54386,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 18,
@@ -54310,7 +54394,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 49,
@@ -54318,7 +54402,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 49,
@@ -54326,7 +54410,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 69,
@@ -54334,7 +54418,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 69,
@@ -54342,7 +54426,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 240000
+          "levelUpSp": 260000
         },
         {
           "skillId": 97,
@@ -54350,7 +54434,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 291,
@@ -54358,7 +54442,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 322,
@@ -54366,7 +54450,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 405,
@@ -54374,7 +54458,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 403,
@@ -54382,7 +54466,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 400,
@@ -54390,7 +54474,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 490000
+          "levelUpSp": 520000
         },
         {
           "skillId": 217,
@@ -54398,7 +54482,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 217,
@@ -54406,7 +54490,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 232,
@@ -54414,7 +54498,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 232,
@@ -54422,7 +54506,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 147,
@@ -54430,7 +54514,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 147,
@@ -54438,7 +54522,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 92,
@@ -54446,7 +54530,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 92,
@@ -54454,7 +54538,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 28,
@@ -54462,7 +54546,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 28,
@@ -54470,7 +54554,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 262,
@@ -54478,7 +54562,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 262,
@@ -54486,7 +54570,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 18,
@@ -54494,7 +54578,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 18,
@@ -54502,7 +54586,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 49,
@@ -54510,7 +54594,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 49,
@@ -54518,7 +54602,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 69,
@@ -54526,7 +54610,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 69,
@@ -54534,7 +54618,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 270000
+          "levelUpSp": 290000
         },
         {
           "skillId": 97,
@@ -54542,7 +54626,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 291,
@@ -54550,7 +54634,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 322,
@@ -54558,7 +54642,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 405,
@@ -54566,7 +54650,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 403,
@@ -54574,7 +54658,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 400,
@@ -54582,7 +54666,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 404,
@@ -54590,7 +54674,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 580000
         },
         {
           "skillId": 217,
@@ -54598,7 +54682,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 217,
@@ -54606,7 +54690,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 232,
@@ -54614,7 +54698,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 232,
@@ -54622,7 +54706,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 147,
@@ -54630,7 +54714,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 147,
@@ -54638,7 +54722,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 92,
@@ -54646,7 +54730,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 92,
@@ -54654,7 +54738,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 28,
@@ -54662,7 +54746,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 28,
@@ -54670,7 +54754,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 262,
@@ -54678,7 +54762,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 262,
@@ -54686,7 +54770,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 18,
@@ -54694,7 +54778,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 18,
@@ -54702,7 +54786,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 49,
@@ -54710,7 +54794,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 49,
@@ -54718,7 +54802,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 69,
@@ -54726,7 +54810,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 69,
@@ -54734,7 +54818,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 350000
+          "levelUpSp": 380000
         },
         {
           "skillId": 97,
@@ -54742,7 +54826,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 291,
@@ -54750,7 +54834,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 191,
@@ -54758,7 +54842,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 322,
@@ -54766,7 +54850,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 405,
@@ -54774,7 +54858,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 403,
@@ -54782,7 +54866,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 400,
@@ -54790,7 +54874,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 750000
         },
         {
           "skillId": 217,
@@ -54958,7 +55042,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1530000
+          "levelUpSp": 1900000
         },
         {
           "skillId": 405,
@@ -90095,7 +90179,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 121000
+          "levelUpSp": 132000
         },
         {
           "skillId": 209,
@@ -90103,7 +90187,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 121000
+          "levelUpSp": 132000
         },
         {
           "skillId": 233,
@@ -99233,7 +99317,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 216,
@@ -99241,7 +99325,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 216,
@@ -99249,7 +99333,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 227,
@@ -99257,7 +99341,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 227,
@@ -99265,7 +99349,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 227,
@@ -99273,7 +99357,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 231,
@@ -99281,7 +99365,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 231,
@@ -99289,7 +99373,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 231,
@@ -99297,7 +99381,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 36,
@@ -99305,7 +99389,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 36,
@@ -99313,7 +99397,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 36,
@@ -99321,7 +99405,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 48,
@@ -99329,7 +99413,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 48,
@@ -99337,7 +99421,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 48,
@@ -99345,7 +99429,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 12000
+          "levelUpSp": 13000
         },
         {
           "skillId": 312,
@@ -99353,7 +99437,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 39000
         },
         {
           "skillId": 212,
@@ -99361,7 +99445,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 39000
         },
         {
           "skillId": 121,
@@ -99369,7 +99453,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 39000
         },
         {
           "skillId": 87,
@@ -99377,7 +99461,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 39000
         },
         {
           "skillId": 317,
@@ -99385,7 +99469,7 @@
           "getLevel": 40,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 35000
+          "levelUpSp": 39000
         },
         {
           "skillId": 216,
@@ -99393,7 +99477,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 216,
@@ -99401,7 +99485,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 216,
@@ -99409,7 +99493,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 227,
@@ -99417,7 +99501,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 227,
@@ -99425,7 +99509,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 227,
@@ -99433,7 +99517,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 231,
@@ -99441,7 +99525,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 231,
@@ -99449,7 +99533,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 231,
@@ -99457,7 +99541,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 36,
@@ -99465,7 +99549,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 36,
@@ -99473,7 +99557,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 36,
@@ -99481,7 +99565,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 48,
@@ -99489,7 +99573,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 48,
@@ -99497,7 +99581,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 48,
@@ -99505,7 +99589,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 14000
+          "levelUpSp": 15000
         },
         {
           "skillId": 312,
@@ -99513,7 +99597,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 42000
+          "levelUpSp": 46000
         },
         {
           "skillId": 116,
@@ -99521,7 +99605,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 42000
+          "levelUpSp": 46000
         },
         {
           "skillId": 290,
@@ -99529,7 +99613,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 42000
+          "levelUpSp": 46000
         },
         {
           "skillId": 211,
@@ -99537,7 +99621,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 42000
+          "levelUpSp": 46000
         },
         {
           "skillId": 286,
@@ -99545,7 +99629,7 @@
           "getLevel": 43,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 42000
+          "levelUpSp": 46000
         },
         {
           "skillId": 216,
@@ -99553,7 +99637,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 216,
@@ -99561,7 +99645,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 216,
@@ -99569,7 +99653,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 227,
@@ -99577,7 +99661,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 227,
@@ -99585,7 +99669,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 227,
@@ -99593,7 +99677,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 231,
@@ -99601,7 +99685,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 231,
@@ -99609,7 +99693,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 231,
@@ -99617,7 +99701,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 36,
@@ -99625,7 +99709,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 36,
@@ -99633,7 +99717,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 36,
@@ -99641,7 +99725,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 48,
@@ -99649,7 +99733,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 48,
@@ -99657,7 +99741,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 48,
@@ -99665,7 +99749,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 17000
+          "levelUpSp": 18000
         },
         {
           "skillId": 312,
@@ -99673,7 +99757,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 116,
@@ -99681,7 +99765,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 290,
@@ -99689,7 +99773,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 212,
@@ -99697,7 +99781,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 130,
@@ -99705,7 +99789,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 104,
@@ -99713,7 +99797,7 @@
           "getLevel": 46,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 55000
         },
         {
           "skillId": 216,
@@ -99721,7 +99805,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 216,
@@ -99729,7 +99813,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 216,
@@ -99737,7 +99821,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 227,
@@ -99745,7 +99829,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 227,
@@ -99753,7 +99837,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 227,
@@ -99761,7 +99845,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 231,
@@ -99769,7 +99853,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 231,
@@ -99777,7 +99861,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 231,
@@ -99785,7 +99869,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 36,
@@ -99793,7 +99877,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 36,
@@ -99801,7 +99885,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 36,
@@ -99809,7 +99893,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 48,
@@ -99817,7 +99901,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 48,
@@ -99825,7 +99909,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 48,
@@ -99833,7 +99917,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 25000
+          "levelUpSp": 27000
         },
         {
           "skillId": 312,
@@ -99841,7 +99925,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 116,
@@ -99849,7 +99933,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 290,
@@ -99857,7 +99941,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 211,
@@ -99865,7 +99949,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 121,
@@ -99873,7 +99957,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 287,
@@ -99881,7 +99965,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 317,
@@ -99889,7 +99973,7 @@
           "getLevel": 49,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 75000
+          "levelUpSp": 82000
         },
         {
           "skillId": 216,
@@ -99897,7 +99981,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 216,
@@ -99905,7 +99989,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 216,
@@ -99913,7 +99997,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 227,
@@ -99921,7 +100005,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 227,
@@ -99929,7 +100013,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 227,
@@ -99937,7 +100021,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 231,
@@ -99945,7 +100029,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 231,
@@ -99953,7 +100037,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 231,
@@ -99961,7 +100045,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 36,
@@ -99969,7 +100053,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 36,
@@ -99977,7 +100061,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 36,
@@ -99985,7 +100069,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 48,
@@ -99993,7 +100077,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 48,
@@ -100001,7 +100085,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 48,
@@ -100009,7 +100093,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 45000
+          "levelUpSp": 50000
         },
         {
           "skillId": 312,
@@ -100017,7 +100101,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 116,
@@ -100025,7 +100109,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 290,
@@ -100033,7 +100117,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 212,
@@ -100041,7 +100125,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 80,
@@ -100049,7 +100133,7 @@
           "getLevel": 52,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 140000
+          "levelUpSp": 150000
         },
         {
           "skillId": 216,
@@ -100057,7 +100141,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 216,
@@ -100065,7 +100149,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 216,
@@ -100073,7 +100157,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 227,
@@ -100081,7 +100165,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 227,
@@ -100089,7 +100173,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 227,
@@ -100097,7 +100181,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 231,
@@ -100105,7 +100189,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 231,
@@ -100113,7 +100197,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 231,
@@ -100121,7 +100205,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 36,
@@ -100129,7 +100213,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 36,
@@ -100137,7 +100221,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 36,
@@ -100145,7 +100229,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 48,
@@ -100153,7 +100237,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 48,
@@ -100161,7 +100245,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 48,
@@ -100169,7 +100253,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 50000
+          "levelUpSp": 51000
         },
         {
           "skillId": 312,
@@ -100177,7 +100261,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 116,
@@ -100185,7 +100269,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 290,
@@ -100193,7 +100277,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 211,
@@ -100201,7 +100285,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 130,
@@ -100209,7 +100293,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 181,
@@ -100217,7 +100301,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 286,
@@ -100225,7 +100309,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 452,
@@ -100233,7 +100317,7 @@
           "getLevel": 55,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000
+          "levelUpSp": 154000
         },
         {
           "skillId": 216,
@@ -100241,7 +100325,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 216,
@@ -100249,7 +100333,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 216,
@@ -100257,7 +100341,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 227,
@@ -100265,7 +100349,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 227,
@@ -100273,7 +100357,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 227,
@@ -100281,7 +100365,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 231,
@@ -100289,7 +100373,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 231,
@@ -100297,7 +100381,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 231,
@@ -100305,7 +100389,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 36,
@@ -100313,7 +100397,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 36,
@@ -100321,7 +100405,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 36,
@@ -100329,7 +100413,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 48,
@@ -100337,7 +100421,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 48,
@@ -100345,7 +100429,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 48,
@@ -100353,7 +100437,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 52000
+          "levelUpSp": 58000
         },
         {
           "skillId": 312,
@@ -100361,7 +100445,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 116,
@@ -100369,7 +100453,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 290,
@@ -100377,7 +100461,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 212,
@@ -100385,7 +100469,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 121,
@@ -100393,7 +100477,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 88,
@@ -100401,7 +100485,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 317,
@@ -100409,7 +100493,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 421,
@@ -100417,7 +100501,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 424,
@@ -100425,7 +100509,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 422,
@@ -100433,7 +100517,7 @@
           "getLevel": 58,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 157000
+          "levelUpSp": 173000
         },
         {
           "skillId": 216,
@@ -100441,7 +100525,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 216,
@@ -100449,7 +100533,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 227,
@@ -100457,7 +100541,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 227,
@@ -100465,7 +100549,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 231,
@@ -100473,7 +100557,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 231,
@@ -100481,7 +100565,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 36,
@@ -100489,7 +100573,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 36,
@@ -100497,7 +100581,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 48,
@@ -100505,7 +100589,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 48,
@@ -100513,7 +100597,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 132000
+          "levelUpSp": 145000
         },
         {
           "skillId": 312,
@@ -100521,7 +100605,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 264000
+          "levelUpSp": 290000
         },
         {
           "skillId": 116,
@@ -100529,7 +100613,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 264000
+          "levelUpSp": 290000
         },
         {
           "skillId": 290,
@@ -100537,7 +100621,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 264000
+          "levelUpSp": 290000
         },
         {
           "skillId": 286,
@@ -100545,7 +100629,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 264000
+          "levelUpSp": 290000
         },
         {
           "skillId": 452,
@@ -100553,7 +100637,7 @@
           "getLevel": 60,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 264000
+          "levelUpSp": 290000
         },
         {
           "skillId": 216,
@@ -100561,7 +100645,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 216,
@@ -100569,7 +100653,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 227,
@@ -100577,7 +100661,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 227,
@@ -100585,7 +100669,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 231,
@@ -100593,7 +100677,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 231,
@@ -100601,7 +100685,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 36,
@@ -100609,7 +100693,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 36,
@@ -100617,7 +100701,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 48,
@@ -100625,7 +100709,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 48,
@@ -100633,7 +100717,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 170000
+          "levelUpSp": 180000
         },
         {
           "skillId": 312,
@@ -100641,7 +100725,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 116,
@@ -100649,7 +100733,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 290,
@@ -100657,7 +100741,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 211,
@@ -100665,7 +100749,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 287,
@@ -100673,7 +100757,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 421,
@@ -100681,7 +100765,7 @@
           "getLevel": 62,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 360000
         },
         {
           "skillId": 216,
@@ -100689,7 +100773,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 216,
@@ -100697,21 +100781,23 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 227,
           "level": 39,
           "getLevel": 64,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 240000
         },
         {
           "skillId": 227,
           "level": 40,
           "getLevel": 64,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 240000
         },
         {
           "skillId": 231,
@@ -100719,7 +100805,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 231,
@@ -100727,7 +100813,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 36,
@@ -100735,7 +100821,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 36,
@@ -100743,7 +100829,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 48,
@@ -100751,7 +100837,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 48,
@@ -100759,7 +100845,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 220000
+          "levelUpSp": 240000
         },
         {
           "skillId": 312,
@@ -100767,7 +100853,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 440000
+          "levelUpSp": 480000
         },
         {
           "skillId": 116,
@@ -100775,7 +100861,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 440000
+          "levelUpSp": 480000
         },
         {
           "skillId": 290,
@@ -100783,7 +100869,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 440000
+          "levelUpSp": 480000
         },
         {
           "skillId": 121,
@@ -100791,7 +100877,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 440000
+          "levelUpSp": 480000
         },
         {
           "skillId": 452,
@@ -100799,7 +100885,7 @@
           "getLevel": 64,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 440000
+          "levelUpSp": 480000
         },
         {
           "skillId": 216,
@@ -100807,7 +100893,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 216,
@@ -100815,7 +100901,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 227,
@@ -100823,7 +100909,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 227,
@@ -100831,7 +100917,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 231,
@@ -100839,7 +100925,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 231,
@@ -100847,7 +100933,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 36,
@@ -100855,7 +100941,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 36,
@@ -100863,7 +100949,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 48,
@@ -100871,7 +100957,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 48,
@@ -100879,7 +100965,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 312,
@@ -100887,7 +100973,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 116,
@@ -100895,7 +100981,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 290,
@@ -100903,7 +100989,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 211,
@@ -100911,7 +100997,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 320,
@@ -100919,7 +101005,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 320,
@@ -100927,7 +101013,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 230000
+          "levelUpSp": 250000
         },
         {
           "skillId": 317,
@@ -100935,7 +101021,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 421,
@@ -100943,7 +101029,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 424,
@@ -100951,7 +101037,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 422,
@@ -100959,7 +101045,7 @@
           "getLevel": 66,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 470000
+          "levelUpSp": 500000
         },
         {
           "skillId": 216,
@@ -100967,7 +101053,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 216,
@@ -100975,7 +101061,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 227,
@@ -100983,7 +101069,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 227,
@@ -100991,7 +101077,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 231,
@@ -100999,7 +101085,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 231,
@@ -101007,7 +101093,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 36,
@@ -101015,7 +101101,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 36,
@@ -101023,7 +101109,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 48,
@@ -101031,7 +101117,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 48,
@@ -101039,7 +101125,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 312,
@@ -101047,7 +101133,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 650000
+          "levelUpSp": 710000
         },
         {
           "skillId": 116,
@@ -101055,7 +101141,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 650000
+          "levelUpSp": 710000
         },
         {
           "skillId": 290,
@@ -101063,7 +101149,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 650000
+          "levelUpSp": 710000
         },
         {
           "skillId": 212,
@@ -101071,7 +101157,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 650000
+          "levelUpSp": 710000
         },
         {
           "skillId": 320,
@@ -101079,7 +101165,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 320,
@@ -101087,7 +101173,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 330000
+          "levelUpSp": 350000
         },
         {
           "skillId": 452,
@@ -101095,7 +101181,7 @@
           "getLevel": 68,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 650000
+          "levelUpSp": 710000
         },
         {
           "skillId": 216,
@@ -101103,7 +101189,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 216,
@@ -101111,7 +101197,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 227,
@@ -101119,7 +101205,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 227,
@@ -101127,7 +101213,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 231,
@@ -101135,7 +101221,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 231,
@@ -101143,7 +101229,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 36,
@@ -101151,7 +101237,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 36,
@@ -101159,7 +101245,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 48,
@@ -101167,7 +101253,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 48,
@@ -101175,7 +101261,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 312,
@@ -101183,7 +101269,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 116,
@@ -101191,7 +101277,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 290,
@@ -101199,7 +101285,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 121,
@@ -101207,7 +101293,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 211,
@@ -101215,7 +101301,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 320,
@@ -101223,7 +101309,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 320,
@@ -101231,7 +101317,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 360000
+          "levelUpSp": 390000
         },
         {
           "skillId": 421,
@@ -101239,7 +101325,7 @@
           "getLevel": 70,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 720000
+          "levelUpSp": 780000
         },
         {
           "skillId": 216,
@@ -101247,7 +101333,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 216,
@@ -101255,7 +101341,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 227,
@@ -101263,7 +101349,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 227,
@@ -101271,7 +101357,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 231,
@@ -101279,7 +101365,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 231,
@@ -101287,7 +101373,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 36,
@@ -101295,7 +101381,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 36,
@@ -101303,7 +101389,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 48,
@@ -101311,7 +101397,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 48,
@@ -101319,7 +101405,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 312,
@@ -101327,7 +101413,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1100000
+          "levelUpSp": 1200000
         },
         {
           "skillId": 116,
@@ -101335,7 +101421,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1100000
+          "levelUpSp": 1200000
         },
         {
           "skillId": 290,
@@ -101343,7 +101429,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1100000
+          "levelUpSp": 1200000
         },
         {
           "skillId": 320,
@@ -101351,7 +101437,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 320,
@@ -101359,7 +101445,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 550000
+          "levelUpSp": 600000
         },
         {
           "skillId": 452,
@@ -101367,7 +101453,7 @@
           "getLevel": 72,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1100000
+          "levelUpSp": 1200000
         },
         {
           "skillId": 216,
@@ -101375,7 +101461,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 216,
@@ -101383,7 +101469,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 227,
@@ -101391,7 +101477,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 227,
@@ -101399,7 +101485,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 231,
@@ -101407,7 +101493,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 231,
@@ -101415,7 +101501,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 36,
@@ -101423,7 +101509,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 36,
@@ -101431,7 +101517,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 48,
@@ -101439,7 +101525,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 48,
@@ -101447,7 +101533,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 312,
@@ -101455,7 +101541,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 116,
@@ -101463,7 +101549,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 290,
@@ -101471,7 +101557,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 211,
@@ -101479,7 +101565,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 212,
@@ -101487,7 +101573,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 320,
@@ -101495,7 +101581,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 320,
@@ -101503,7 +101589,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 810000
+          "levelUpSp": 870000
         },
         {
           "skillId": 317,
@@ -101511,7 +101597,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 421,
@@ -101519,7 +101605,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 424,
@@ -101527,7 +101613,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         },
         {
           "skillId": 422,
@@ -101535,7 +101621,7 @@
           "getLevel": 74,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 1600000
+          "levelUpSp": 1700000
         }
       ]
     },
@@ -103848,7 +103934,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 14670000
         },
         {
           "skillId": 358,
@@ -103904,7 +103991,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8898,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -104393,7 +104486,7 @@
           "getLevel": 76,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 8300000
+          "levelUpSp": 10000000
         },
         {
           "skillId": 329,
@@ -104401,7 +104494,7 @@
           "getLevel": 76,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 8300000
+          "levelUpSp": 10000000
         },
         {
           "skillId": 330,
@@ -104432,7 +104525,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 12250000
         },
         {
           "skillId": 339,
@@ -104480,7 +104574,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8895,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -104532,7 +104632,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 12250000
         },
         {
           "skillId": 345,
@@ -104580,7 +104681,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8896,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -105252,7 +105359,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 13000000
         },
         {
           "skillId": 342,
@@ -105292,7 +105400,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8892,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -105689,7 +105803,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 13000000
         },
         {
           "skillId": 341,
@@ -105721,7 +105836,13 @@
           "getLevel": 79,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 80000000
+          "levelUpSp": 80000000,
+          "requiredItems": [
+            {
+              "itemId": 8877,
+              "count": 1
+            }
+          ]
         },
         {
           "skillId": 454,
@@ -105729,7 +105850,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8892,
+              "count": 1
+            }
+          ]
         }
       ]
     },
@@ -105773,7 +105900,8 @@
           "level": 1,
           "getLevel": 77,
           "autoGet": false,
-          "learnedByNpc": true
+          "learnedByNpc": true,
+          "levelUpSp": 14670000
         },
         {
           "skillId": 334,
@@ -105797,7 +105925,13 @@
           "getLevel": 80,
           "autoGet": false,
           "learnedByNpc": true,
-          "levelUpSp": 150000000
+          "levelUpSp": 150000000,
+          "requiredItems": [
+            {
+              "itemId": 8897,
+              "count": 1
+            }
+          ]
         }
       ]
     },
