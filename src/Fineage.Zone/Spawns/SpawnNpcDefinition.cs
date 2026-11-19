@@ -54,7 +54,10 @@ public sealed record SpawnNpcDefinition(
     IReadOnlyDictionary<string, double>? DefenceTraits = null,
     IReadOnlyList<Fineage.Zone.Npcs.NpcAiSkill>? AiSkills = null,
     int MinSkillChance = 7,
-    int MaxSkillChance = 15);
+    int MaxSkillChance = 15,
+    string AttackType = "",
+    int Rhand = 0,
+    int Lhand = 0);
 
 public sealed record SpawnMapDefinition(
     string MapId,

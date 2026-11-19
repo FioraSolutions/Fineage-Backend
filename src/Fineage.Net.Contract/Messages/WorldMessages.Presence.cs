@@ -90,6 +90,13 @@ namespace Fineage.Net.Contract
         public int[] Cubics { get; set; } = System.Array.Empty<int>();
         /// <summary>Players only: duel team circle (Mobius setTeam: 0 none, 1 blue, 2 red). Optional tail after <see cref="Cubics"/>.</summary>
         public byte Team { get; set; }
+        /// <summary>
+        /// Mobius NpcInfo rhand item id (0 = none / omitted on old peers). Optional tail after <see cref="Team"/>.
+        /// Players already carry the paperdoll; this is for NPCs.
+        /// </summary>
+        public int Rhand { get; set; }
+        /// <summary>Mobius NpcInfo lhand item id (0 = none). Optional tail after <see cref="Rhand"/>.</summary>
+        public int Lhand { get; set; }
     }
 
     public sealed class PlayerStatsMsg

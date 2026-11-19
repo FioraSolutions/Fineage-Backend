@@ -112,6 +112,27 @@ sealed partial class ZoneEntity
         init => EnsureNpcTemplate().AttackRange = value;
     }
 
+    /// <summary>Mobius <c>stats/attack type</c> (BOW, SWORD, …); empty for players or typeless NPCs.</summary>
+    public string AttackType
+    {
+        get => NpcTemplate?.AttackType ?? "";
+        init => EnsureNpcTemplate().AttackType = value ?? "";
+    }
+
+    /// <summary>Mobius <c>equipment rhand</c> item id (0 = none / player).</summary>
+    public int Rhand
+    {
+        get => NpcTemplate?.Rhand ?? 0;
+        init => EnsureNpcTemplate().Rhand = value;
+    }
+
+    /// <summary>Mobius <c>equipment lhand</c> item id (0 = none).</summary>
+    public int Lhand
+    {
+        get => NpcTemplate?.Lhand ?? 0;
+        init => EnsureNpcTemplate().Lhand = value;
+    }
+
     /// <summary>Mobius NPC <c>collisionRadius</c>; 0 when unknown (range checks then use the default NPC radius).</summary>
     public int CollisionRadius
     {
