@@ -97,7 +97,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: Cancellation is isBad() (negative effectPoint, non-SELF) → attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
         if (levelData.MagicLevel <= 0)
@@ -162,7 +163,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: a mana burn is isBad() (negative effectPoint, non-SELF) → attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
         int power = Math.Max(1, levelData.Power);
@@ -269,6 +271,28 @@ public sealed partial class ZoneWorld
 
     void IncorrectTarget(ZoneSession session) =>
         ShotNotice(session, SysMsgIncorrectTarget, "That is an incorrect target.");
+
+    /// <summary>
+    /// Mobius <c>Skill.isBad()</c>: <c>effectPoint &lt; 0 &amp;&amp; targetType != SELF</c>. Only a "bad" cast puts the caster
+    /// into the attack stance — <c>Creature.onMagicFinalizer</c> runs <c>clientStartAutoAttack()</c> under exactly this
+    /// condition, and <c>AttackStanceTaskManager</c> then holds <c>atkwait</c> for 15 s.
+    /// <para>
+    /// A self/party buff is not bad: Dash (4) carries <c>effectPoint +204/+438</c> with <c>targetType SELF</c>, Heal
+    /// (1011) and the cleanses are positive as well. Writing <c>CombatUntilUnixMs</c> for those raised the weapon
+    /// stance after a Dash, and the same window blocks summon / private store / clan actions for 15 s.
+    /// </para>
+    /// </summary>
+    static bool IsBadSkillForStance(SkillDefinition template, int level) =>
+        template.EffectPointAt(level) < 0 &&
+        !string.Equals(template.TargetType, "SELF", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Stance after a cast: Mobius <c>onMagicFinalizer</c> keeps the 15 s attack stance only for an <see
+    /// cref="IsBadSkillForStance">offensive</see> skill. Anything else leaves whatever window was already running.</summary>
+    void EnterCombatStanceOnCast(ZoneEntity player, SkillDefinition template, int level, long now)
+    {
+        if (IsBadSkillForStance(template, level))
+            player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+    }
 
     /// <summary>Mobius calcAtkSpd for skill HitTime / ReuseDelay (magic ·333/Cspd, phys ·300/Pspd for hit).</summary>
     (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template)
