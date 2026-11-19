@@ -35,6 +35,17 @@ public static partial class ZoneCombat
         return (int)(angle * 182.044444444);
     }
 
+    /// <summary>
+    /// Inverse of <see cref="HeadingFrom"/>: a point <paramref name="distance"/> units along
+    /// <paramref name="heading"/> (0 = +X / east, heading units are degrees · 182.044444444).
+    /// </summary>
+    public static (int X, int Y) PointAlongHeading(int x, int y, int heading, int distance)
+    {
+        double rad = (heading / 182.044444444) * Math.PI / 180.0;
+        return (x + (int)Math.Round(Math.Cos(rad) * distance),
+            y + (int)Math.Round(Math.Sin(rad) * distance));
+    }
+
     /// <summary>Mobius <c>Util.calculateAngleFrom</c>: degrees 0..360 from (x1,y1) towards (x2,y2).</summary>
     public static double AngleFrom(int x1, int y1, int x2, int y2)
     {

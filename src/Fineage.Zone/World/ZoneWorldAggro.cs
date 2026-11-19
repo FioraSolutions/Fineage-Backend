@@ -54,6 +54,21 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Hate list only, no AI wake. Mobius <c>addDamageHate</c> on a skill hit writes aggro without
+    /// <c>notifyActionAttacked</c> (which is what actually sets intention ATTACK). Used for skills
+    /// that suppress the attack notify (EffectType.HATE, TURN_PASSIVE, Lure/Temptation).
+    /// </summary>
+    void RecordHate(ZoneEntity npc, ZoneEntity attacker, long hate)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0 ||
+            (attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null))
+            return;
+        if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
+            return;
+        npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
+    }
+
+    /// <summary>
     /// Mobius <c>AttackableAI.checkAggroCondition</c> / <c>AggroInfo.checkHate</c>: <c>target.isAlikeDead()</c> covers
     /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
     /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
