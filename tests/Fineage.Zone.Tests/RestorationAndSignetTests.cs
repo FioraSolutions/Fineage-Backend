@@ -1,5 +1,6 @@
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.World;
 using Xunit;
@@ -22,6 +23,7 @@ public sealed class RestorationAndSignetTests
     const int BattleSymbol = 8875;
     const int ChestKeyGrade5 = 6669;
     const int SignetNpc = 13024;
+    const int BattleForce = 5104;
 
     static (NetTestKit Kit, ZoneSession S, ZoneEntity P) Enter(NetTestKit? kit = null)
     {
@@ -114,6 +116,16 @@ public sealed class RestorationAndSignetTests
     {
         var (kit, s, p) = Enter();
         Grant(p, BattleSymbol, 1);
+        // Mobius: Symbol of the Assassin requires Battle Force lv2+.
+        long now = kit.Now.ToUnixTimeMilliseconds();
+        p.Abnormals.Add(new ZoneAbnormalEntry
+        {
+            Id = BattleForce,
+            Value = 2,
+            SkillLevel = 2,
+            Slot = "PHYSICAL_STANCE",
+            ExpiresAtUnixMs = now + 15_000
+        });
 
         Assert.Null(kit.World.TrySkillUseAsync(s, SymbolOfTheAssassin, 0, CancellationToken.None)
             .GetAwaiter().GetResult());
