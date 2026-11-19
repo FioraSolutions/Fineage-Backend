@@ -233,7 +233,14 @@ public sealed partial class PostgresAccountStore
         _inner.TryClearDeletion(account, characterId);
 
     public bool TryHardDelete(string account, int characterId) =>
-        _inner.TryHardDelete(account, characterId);
+        RunSilent(
+            () => _inner.TryHardDelete(account, characterId),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.DeleteCharacter(conn, tx, characterId);
+                tx.Commit();
+            });
 
     public CharacterRecord? FindById(string account, int characterId)
     {

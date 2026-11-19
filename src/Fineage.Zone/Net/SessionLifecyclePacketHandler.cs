@@ -71,6 +71,7 @@ sealed partial class SessionLifecyclePacketHandler
         // handoff inside the same connection, so refuse it the way the retired V2 listener did.
         if (zoneSession.Bound)
         {
+            Console.Error.WriteLine($"[ZONE] auth rejected already_authenticated account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name}");
             await _reject(conn, "already_authenticated", "This session already completed zone auth.", ct)
                 .ConfigureAwait(false);
             return default;
@@ -86,6 +87,7 @@ sealed partial class SessionLifecyclePacketHandler
         var status = _handoff.TryConsume(auth.Token, _clock(), out var parsed);
         if (status == HandoffTokens.ValidateStatus.Expired)
         {
+            Console.Error.WriteLine($"[ZONE] auth rejected handoff_expired account={auth.Account}");
             await conn.SendAsync(
                 NetOpcode.ZoneAuthResult,
                 NetCodec.EncodeZoneAuthResult(new ZoneAuthResultMsg
@@ -102,6 +104,7 @@ sealed partial class SessionLifecyclePacketHandler
         if (status != HandoffTokens.ValidateStatus.Ok ||
             !string.Equals(parsed.Account, auth.Account, StringComparison.OrdinalIgnoreCase))
         {
+            Console.Error.WriteLine($"[ZONE] auth rejected invalid_credentials status={status} account={auth.Account}");
             await conn.SendAsync(
                 NetOpcode.ZoneAuthResult,
                 NetCodec.EncodeZoneAuthResult(new ZoneAuthResultMsg
@@ -130,6 +133,7 @@ sealed partial class SessionLifecyclePacketHandler
             envelope.RequestSequence,
             ct).ConfigureAwait(false);
 
+        Console.WriteLine($"[ZONE] auth ok account={parsed.Account} char={parsed.CharacterId} name={parsed.CharacterName} entity={entityId.Value}");
         return entityId;
     }
 }

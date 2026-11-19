@@ -1,10 +1,13 @@
 using Fineage.Accounts;
 namespace Fineage.Login;
 
-/// <summary>Lobby character policy. Delete delay matches Mobius <c>DeleteCharAfterDays</c> (0 deletes immediately).</summary>
+/// <summary>
+/// Lobby character policy. Default is immediate hard delete. Set
+/// <c>FINEAGE_DELETE_CHAR_AFTER_DAYS</c> above 0 for a Mobius-style pending timer.
+/// </summary>
 public static class CharacterRules
 {
-    public const int DefaultDeleteAfterDays = 7;
+    public const int DefaultDeleteAfterDays = 0;
 
     public static int DeleteAfterDays =>
         ReadInt("FINEAGE_DELETE_CHAR_AFTER_DAYS", DefaultDeleteAfterDays, min: 0, max: 3650);

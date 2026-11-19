@@ -15,6 +15,7 @@ sealed partial class SessionLifecyclePacketHandler
         RequireHello(conn);
         if (!zoneSession.Bound)
         {
+            Console.Error.WriteLine("[ZONE] enter rejected auth_required (no handoff bind)");
             await _reject(conn, "auth_required", "Auth with a handoff token first.", ct).ConfigureAwait(false);
             return;
         }
@@ -22,15 +23,19 @@ sealed partial class SessionLifecyclePacketHandler
         bool ok = await _world.TryEnterAsync(zoneSession, ct).ConfigureAwait(false);
         if (!ok)
         {
+            Console.Error.WriteLine($"[ZONE] enter rejected enter_failed account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name}");
             await _reject(conn, "enter_failed", "Could not enter world.", ct).ConfigureAwait(false);
             return;
         }
 
         if (!_world.TryGetLivePlayer(zoneSession, out var entity))
         {
+            Console.Error.WriteLine($"[ZONE] enter rejected no_live_entity account={zoneSession.Account} char={zoneSession.ObjectId}");
             await _reject(conn, "enter_failed", "Enter world produced no live player entity.", ct).ConfigureAwait(false);
             return;
         }
+
+        Console.WriteLine($"[ZONE] enter ok account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name} obj={zoneSession.ObjectId}");
 
         // Single source of truth: ZoneEntity after TryEnter (inventory, vitals, AutoSkills already applied).
         var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), _playerSpawnPAtkSpd(entity));
