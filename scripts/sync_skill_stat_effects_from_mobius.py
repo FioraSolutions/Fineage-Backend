@@ -114,11 +114,21 @@ def is_enchant_ref(raw: str | None) -> bool:
     return bool(raw) and "ench" in raw.lower()
 
 
-def func_meta(el: ET.Element) -> tuple[str | None, list[str], int | None]:
-    """Return (value-ref-or-text, using kinds, hpBelow)."""
+def func_meta(el: ET.Element) -> tuple[str | None, list[str], int | None, dict[str, bool]]:
+    """Return (value-ref-or-text, using kinds, hpBelow, player flags)."""
     using: list[str] = []
     hp = None
+    flags: dict[str, bool] = {}
     raw = (el.text or "").strip() or None
+
+    def take_player(p: ET.Element) -> None:
+        nonlocal hp
+        if p.get("hp") is not None:
+            hp = int(float(p.get("hp")))
+        for key in ("resting", "moving", "standing"):
+            if p.get(key) is not None:
+                flags[key] = p.get(key, "").strip().lower() == "true"
+
     for ch in list(el):
         tag = ch.tag.split("}")[-1]
         if tag == "value":
@@ -127,13 +137,13 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], int | None]:
                 gt = gch.tag.split("}")[-1]
                 if gt == "using" and gch.get("kind"):
                     using.extend(k.upper() for k in gch.get("kind", "").split())
-                if gt == "player" and gch.get("hp") is not None:
-                    hp = int(float(gch.get("hp")))
+                if gt == "player":
+                    take_player(gch)
         elif tag == "using" and ch.get("kind"):
             using.extend(k.upper() for k in ch.get("kind", "").split())
-        elif tag == "player" and ch.get("hp") is not None:
-            hp = int(float(ch.get("hp")))
-    return raw, using, hp
+        elif tag == "player":
+            take_player(ch)
+    return raw, using, hp, flags
 
 
 def parse_skill(skill: ET.Element) -> dict | None:
@@ -158,7 +168,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
             stat = el.get("stat") or ""
             if stat not in STAT_NAMES:
                 continue
-            raw, using, hp = func_meta(el)
+            raw, using, hp, flags = func_meta(el)
             if is_enchant_ref(raw):
                 continue
             values = resolve(raw, tables, levels)
@@ -167,7 +177,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
             # Skip obvious enchant tables even if resolved via a non-hash name
             if raw and is_enchant_ref(raw):
                 continue
-            key = (stat, tag, tuple(values), tuple(using), hp)
+            key = (stat, tag, tuple(values), tuple(using), hp, tuple(sorted(flags.items())))
             if key in seen_stat_ops:
                 continue
             seen_stat_ops.add(key)
@@ -176,6 +186,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
                 row["using"] = using
             if hp is not None:
                 row["hpBelow"] = hp
+            row.update(flags)
             effects.append(row)
     if not effects:
         return None

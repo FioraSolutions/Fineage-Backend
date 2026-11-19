@@ -149,7 +149,8 @@ public sealed partial class ZoneWorld
                 kinds => ConditionUsingItemType.Matches(player.Inventory, kinds),
                 mods,
                 resting: player.Sitting,
-                hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp);
+                hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp,
+                moving: player.MoveActive);
     }
 
     /// <summary>

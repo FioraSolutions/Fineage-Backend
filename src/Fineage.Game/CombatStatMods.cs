@@ -88,7 +88,9 @@ public sealed record SkillStatFunc(
     string[]? Using = null,
     bool Resting = false,
     SkillPosition Position = SkillPosition.None,
-    int? HpBelowPercent = null)
+    int? HpBelowPercent = null,
+    bool Moving = false,
+    bool Standing = false)
 {
     public double ValueAt(int level) => Values.Length == 0 ? 0 : Values[Math.Clamp(level, 1, Values.Length) - 1];
 }

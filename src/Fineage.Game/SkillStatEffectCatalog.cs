@@ -109,13 +109,15 @@ public sealed class SkillStatEffectCatalog
     /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it;
     /// <c>resting</c> funcs (Vital Force) apply only when <paramref name="resting"/> says the owner is seated;
     /// <c>hpBelow</c> funcs (Final Frenzy / Final Fortress) apply only when current HP is at or below that percent.
+    /// <c>moving</c> / <c>standing</c> funcs (Clear Mind) apply while the owner is moving, or standing still (not seated).
     /// </summary>
     public CombatStatMods CollectPassives(
         IReadOnlyDictionary<int, int> known,
         Func<string[], bool> wearing,
         CombatStatMods? mods = null,
         bool resting = false,
-        double hpPercent = 100d)
+        double hpPercent = 100d,
+        bool moving = false)
     {
         foreach (var (skillId, level) in known)
         {
@@ -126,6 +128,10 @@ public sealed class SkillStatEffectCatalog
                 if (f.Using != null && !wearing(f.Using))
                     continue;
                 if (f.Resting && !resting)
+                    continue;
+                if (f.Moving && !moving)
+                    continue;
+                if (f.Standing && (moving || resting))
                     continue;
                 if (f.HpBelowPercent is int maxHpPct && hpPercent > maxHpPct)
                     continue;
@@ -211,7 +217,9 @@ public sealed class SkillStatEffectCatalog
                         ? parsedPosition
                         : SkillPosition.None;
                 int? hpBelow = e.TryGetProperty("hpBelow", out var hp) ? hp.GetInt32() : null;
-                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow));
+                bool moving = e.TryGetProperty("moving", out var mv) && mv.GetBoolean();
+                bool standing = e.TryGetProperty("standing", out var st) && st.GetBoolean();
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing));
             }
             if (funcs.Count > 0)
             {

@@ -2887,6 +2887,74 @@
    ]
   },
   {
+   "skillId": 1043,
+   "name": "Holy Weapon",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1044,
+   "name": "Regeneration",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1045,
+   "name": "Blessed Body",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1048,
+   "name": "Blessed Soul",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1059,
    "name": "Empower",
    "levels": 3,
@@ -2985,6 +3053,21 @@
       1.08,
       1.12,
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1073,
+   "name": "Kiss of Eva",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "mul",
+     "values": [
+      5.0,
+      7.0
      ]
     }
    ]
@@ -3448,6 +3531,22 @@
    ]
   },
   {
+   "skillId": 1232,
+   "name": "Blazing Skin",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1236,
    "name": "Frost Bolt",
    "levels": 19,
@@ -3507,6 +3606,25 @@
       1.25,
       1.3,
       1.35
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1243,
+   "name": "Bless Shield",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8
      ]
     }
    ]
@@ -3688,6 +3806,28 @@
    ]
   },
   {
+   "skillId": 1269,
+   "name": "Curse Disease",
+   "levels": 9,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1282,
    "name": "Pa'agrian Haste",
    "levels": 2,
@@ -3803,6 +3943,22 @@
      "values": [
       1.0,
       2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1307,
+   "name": "Prayer",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.1,
+      1.12
      ]
     }
    ]
@@ -3926,6 +4082,41 @@
      "op": "mul",
      "values": [
       0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1338,
+   "name": "Arcane Chaos",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "add",
+     "values": [
+      30.0
      ]
     }
    ]
@@ -4243,6 +4434,20 @@
      "op": "mul",
      "values": [
       1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1353,
+   "name": "Divine Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      30.0
      ]
     }
    ]
@@ -4759,6 +4964,61 @@
    ]
   },
   {
+   "skillId": 1393,
+   "name": "Unholy Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1396,
+   "name": "Magical Backfire",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.6,
+      1.65,
+      1.7,
+      1.75,
+      1.8,
+      1.85,
+      1.9,
+      1.95,
+      2.0
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.6,
+      1.65,
+      1.7,
+      1.75,
+      1.8,
+      1.85,
+      1.9,
+      1.95,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1413,
    "name": "Magnus' Chant",
    "levels": 1,
@@ -4859,6 +5119,20 @@
      "op": "mul",
      "values": [
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1418,
+   "name": "Celestial Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      100.0
      ]
     }
    ]

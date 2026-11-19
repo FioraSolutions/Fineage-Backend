@@ -20,6 +20,20 @@
    ]
   },
   {
+   "skillId": 118,
+   "name": "Magician's Movement",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 134,
    "name": "Toughness",
    "levels": 1,
@@ -358,6 +372,36 @@
      ],
      "using": [
       "HEAVY"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 163,
+   "name": "Spellcraft",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 164,
+   "name": "Quick Recovery",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mReuse",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.75,
+      0.7
      ]
     }
    ]
@@ -787,6 +831,27 @@
       2.7,
       3.4,
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 213,
+   "name": "Boost Mana",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      30.0,
+      50.0,
+      70.0,
+      100.0,
+      140.0,
+      152.0,
+      180.0,
+      200.0
      ]
     }
    ]
@@ -2422,6 +2487,20 @@
    ]
   },
   {
+   "skillId": 331,
+   "name": "Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCritical",
+     "op": "add",
+     "values": [
+      2.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 373,
    "name": "Clan Lifeblood",
    "levels": 3,
@@ -2772,6 +2851,53 @@
      "using": [
       "MAGIC"
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 436,
+   "name": "Divine Lore",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1297,
+   "name": "Clear Mind",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      3.2,
+      4.0,
+      4.3,
+      5.1,
+      5.8,
+      6.2
+     ],
+     "moving": true
+    },
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      2.6,
+      3.2,
+      3.5,
+      4.1,
+      4.7,
+      4.9
+     ],
+     "standing": true
     }
    ]
   },
