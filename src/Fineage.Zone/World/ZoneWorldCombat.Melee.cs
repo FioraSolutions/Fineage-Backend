@@ -23,6 +23,9 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
             return;
+        // Mobius onHitTimer: recharge auto shots at hit time — also when the target died or left reach meanwhile.
+        if (hit.RechargeShots && attacker.Kind == ZoneEntityKind.Player)
+            RechargeAutoShots(attacker);
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
             return;
         // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
