@@ -70,7 +70,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         if (_skillCombat.TryGet(request.SkillId, out var combat))
-            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, now);
+            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, template, now);
 
         // Fail-loud: attack skills without skill-combat.json rows must not invent damage (was power+10 stub).
         ZoneLog.Warn($"skill-combat missing skillId={request.SkillId} — refuse cast");
@@ -119,7 +119,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: a friendly buff (Dash, Might, Wind Walk) is not isBad() → no attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         // Mobius onMagicHitTimer: the buff lands at hitTime (interruptible for magic/static skills).
         ScheduleEffect(player, target, template, level, now, hitMs,
