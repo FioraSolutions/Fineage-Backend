@@ -381,6 +381,10 @@ def apply_definition(row: dict, ms: dict) -> list[str]:
                 changed.append("reuseDelayMs")
 
     magic = int(ms["isMagic"] or 0)
+    # Fineage SkillCatalog clamps MagicType to 0-2 (0 physical, 1 magical, 2 static
+    # including song/dance). Mobius isMagic 3 (dance/song) maps to that static bucket.
+    if magic > 2:
+        magic = 2
     if (row.get("magicType") or 0) != magic:
         if magic:
             row["magicType"] = magic
@@ -474,6 +478,10 @@ def apply_definition(row: dict, ms: dict) -> list[str]:
                 continue
             want = table[i] if i < len(table) else table[-1]
             want = int(want)
+            # Fineage skill power is non-negative; Mobius uses negative <power> on some
+            # non-damage utilities (Charm). Do not transcribe those as catalog power.
+            if field == "power" and want < 0:
+                continue
             got = int(lv.get(field) or 0)
             if got != want:
                 if want or field != "mpInitialConsume":
@@ -586,7 +594,7 @@ def definition_snapshot_row(ms: dict) -> dict:
         "reuseDelayMs": None if ms["reuseDelay"] is None else (
             as_int_list(ms["reuseDelay"]) if len(set(ms["reuseDelay"])) > 1 else int(ms["reuseDelay"][0])
         ),
-        "magicType": int(ms["isMagic"] or 0),
+        "magicType": min(2, int(ms["isMagic"] or 0)),
         "isDebuff": bool(ms["isDebuff"]),
         "abnormalType": ms["abnormalType"] or "",
         "abnormalVisualEffect": ave,
@@ -598,10 +606,12 @@ def definition_snapshot_row(ms: dict) -> dict:
         "usingKinds": list(ms["usingKinds"]),
         "effectPoint": as_int_list(ms["effectPoint"]) if ms["effectPoint"] is not None else [],
         "mpConsume": as_int_list(ms["mpConsume"]) if ms["mpConsume"] is not None else [],
-        "power": as_int_list(ms["power"]) if ms["power"] is not None else [],
         "magicLevel": as_int_list(ms["magicLevel"]) if ms["magicLevel"] is not None else [],
         "mpInitialConsume": as_int_list(ms["mpInitialConsume"]) if ms["mpInitialConsume"] is not None else [],
     }
+    powers = as_int_list(ms["power"]) if ms["power"] is not None else []
+    if powers and all(p >= 0 for p in powers):
+        snap["power"] = powers
     if ms["hasCastRange"] and ms["castRange"] is not None:
         cr = int(first_or_scalar(ms["castRange"]))
         if cr >= 0:
