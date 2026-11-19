@@ -114,9 +114,10 @@ def is_enchant_ref(raw: str | None) -> bool:
     return bool(raw) and "ench" in raw.lower()
 
 
-def func_meta(el: ET.Element) -> tuple[str | None, list[str], int | None, dict[str, bool]]:
-    """Return (value-ref-or-text, using kinds, hpBelow, player flags)."""
+def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | None, dict[str, bool]]:
+    """Return (value-ref-or-text, using kinds, not-using kinds, hpBelow, player flags)."""
     using: list[str] = []
+    not_using: list[str] = []
     hp = None
     flags: dict[str, bool] = {}
     raw = (el.text or "").strip() or None
@@ -129,21 +130,32 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], int | None, dict[s
             if p.get(key) is not None:
                 flags[key] = p.get(key, "").strip().lower() == "true"
 
-    for ch in list(el):
-        tag = ch.tag.split("}")[-1]
+    def take_using(kinds: str, inverted: bool) -> None:
+        dest = not_using if inverted else using
+        dest.extend(k.upper() for k in kinds.split() if k.strip())
+
+    def walk(node: ET.Element, inverted: bool = False) -> None:
+        nonlocal raw, hp
+        tag = node.tag.split("}")[-1]
         if tag == "value":
-            raw = (ch.text or "").strip() or raw
-            for gch in list(ch):
-                gt = gch.tag.split("}")[-1]
-                if gt == "using" and gch.get("kind"):
-                    using.extend(k.upper() for k in gch.get("kind", "").split())
-                if gt == "player":
-                    take_player(gch)
-        elif tag == "using" and ch.get("kind"):
-            using.extend(k.upper() for k in ch.get("kind", "").split())
+            raw = (node.text or "").strip() or raw
+            for ch in list(node):
+                walk(ch, inverted)
+        elif tag == "using" and node.get("kind"):
+            take_using(node.get("kind", ""), inverted)
         elif tag == "player":
-            take_player(ch)
-    return raw, using, hp, flags
+            take_player(node)
+        elif tag == "not":
+            for ch in list(node):
+                walk(ch, inverted=not inverted)
+        else:
+            for ch in list(node):
+                walk(ch, inverted)
+
+    for ch in list(el):
+        walk(ch)
+    # bare text still counts as the value when there are no <value> children
+    return raw, using, not_using, hp, flags
 
 
 def parse_skill(skill: ET.Element) -> dict | None:
@@ -168,7 +180,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
             stat = el.get("stat") or ""
             if stat not in STAT_NAMES:
                 continue
-            raw, using, hp, flags = func_meta(el)
+            raw, using, not_using, hp, flags = func_meta(el)
             if is_enchant_ref(raw):
                 continue
             values = resolve(raw, tables, levels)
@@ -177,13 +189,15 @@ def parse_skill(skill: ET.Element) -> dict | None:
             # Skip obvious enchant tables even if resolved via a non-hash name
             if raw and is_enchant_ref(raw):
                 continue
-            key = (stat, tag, tuple(values), tuple(using), hp, tuple(sorted(flags.items())))
+            key = (stat, tag, tuple(values), tuple(using), tuple(not_using), hp, tuple(sorted(flags.items())))
             if key in seen_stat_ops:
                 continue
             seen_stat_ops.add(key)
             row: dict = {"stat": stat, "op": tag, "values": values}
             if using:
                 row["using"] = using
+            if not_using:
+                row["notUsing"] = not_using
             if hp is not None:
                 row["hpBelow"] = hp
             row.update(flags)

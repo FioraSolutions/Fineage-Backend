@@ -94,7 +94,7 @@ public sealed class SkillStatEffectCatalog
                 if (f.Position != SkillPosition.None && f.Position != position)
                     continue;
                 // Mobius skill-level <cond><using kind> (Focus Chance / Focus Power require a dagger in hand).
-                if (f.Using != null && wearing != null && !wearing(f.Using))
+                if (UsingGateFails(f, wearing))
                     continue;
                 if (f.HpBelowPercent is int maxHpPct && hpPercent > maxHpPct)
                     continue;
@@ -104,9 +104,21 @@ public sealed class SkillStatEffectCatalog
         return mods ?? CombatStatMods.None;
     }
 
+
+    static bool UsingGateFails(SkillStatFunc f, Func<string[], bool>? wearing)
+    {
+        if (wearing == null)
+            return false;
+        if (f.Using != null && !wearing(f.Using))
+            return true;
+        if (f.NotUsing != null && wearing(f.NotUsing))
+            return true;
+        return false;
+    }
+
     /// <summary>
     /// Folds passive skill funcs (Mobius operateType P) for the <paramref name="known"/> skill → level map into
-    /// <paramref name="mods"/>. Funcs with a <c>using</c> condition apply only when <paramref name="wearing"/> accepts it;
+    /// <paramref name="mods"/>. Funcs with a <c>using</c> / <c>notUsing</c> condition apply only when <paramref name="wearing"/> matches (or does not match);
     /// <c>resting</c> funcs (Vital Force) apply only when <paramref name="resting"/> says the owner is seated;
     /// <c>hpBelow</c> funcs (Final Frenzy / Final Fortress) apply only when current HP is at or below that percent.
     /// <c>moving</c> / <c>standing</c> funcs (Clear Mind) apply while the owner is moving, or standing still (not seated).
@@ -125,7 +137,7 @@ public sealed class SkillStatEffectCatalog
                 continue;
             foreach (var f in effect.Funcs)
             {
-                if (f.Using != null && !wearing(f.Using))
+                if (UsingGateFails(f, wearing))
                     continue;
                 if (f.Resting && !resting)
                     continue;
@@ -166,7 +178,7 @@ public sealed class SkillStatEffectCatalog
             {
                 if (f.Position == SkillPosition.None || f.Position != position)
                     continue;
-                if (f.Using != null && wearing != null && !wearing(f.Using))
+                if (UsingGateFails(f, wearing))
                     continue;
                 mods ??= new CombatStatMods();
                 mods.Add(f, level);
@@ -219,7 +231,10 @@ public sealed class SkillStatEffectCatalog
                 int? hpBelow = e.TryGetProperty("hpBelow", out var hp) ? hp.GetInt32() : null;
                 bool moving = e.TryGetProperty("moving", out var mv) && mv.GetBoolean();
                 bool standing = e.TryGetProperty("standing", out var st) && st.GetBoolean();
-                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing));
+                string[]? notUsing = e.TryGetProperty("notUsing", out var nu)
+                    ? nu.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
+                    : null;
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing, notUsing));
             }
             if (funcs.Count > 0)
             {

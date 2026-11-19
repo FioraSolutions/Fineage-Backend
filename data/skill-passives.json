@@ -29,6 +29,9 @@
      "op": "mul",
      "values": [
       0.8
+     ],
+     "notUsing": [
+      "MAGIC"
      ]
     }
    ]
@@ -386,6 +389,9 @@
      "op": "mul",
      "values": [
       0.5
+     ],
+     "notUsing": [
+      "MAGIC"
      ]
     }
    ]
