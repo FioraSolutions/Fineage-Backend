@@ -84,7 +84,7 @@ public sealed partial class ZoneWorld
 
         var ps = PlayerStats(player);
         int hitMs = ZoneCombat.SkillTimeMs(template.HitTimeMs, template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
-        int reuseMs = ZoneCombat.SkillReuseMs(template.ReuseDelayMs, template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
+        int reuseMs = ZoneCombat.SkillReuseMs(template.ReuseDelayMsAt(level), template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 

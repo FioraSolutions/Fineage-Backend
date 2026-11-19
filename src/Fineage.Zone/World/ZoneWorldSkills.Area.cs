@@ -84,13 +84,13 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -150,13 +150,13 @@ public sealed partial class ZoneWorld
             return null;
         if (!VisibleTo(player.ObjectId, targetId))
             return SkillProtocol.Target;
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
-            return SkillProtocol.Range;
+        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
+            return rangeError;
         // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
         UpdatePvPStatus(player, target, now);
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -295,13 +295,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius calcAtkSpd for skill HitTime / ReuseDelay (magic ·333/Cspd, phys ·300/Pspd for hit).</summary>
-    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template)
+    (int HitMs, int ReuseMs) ScaledSkillTimes(ZoneEntity player, SkillDefinition template, int level = 1)
     {
         var ps = PlayerStats(player);
         bool magic = template.MagicType == 1;
         return (
             ZoneCombat.SkillTimeMs(template.HitTimeMs, magic, ps.MAtkSpd, ps.PAtkSpd),
-            ZoneCombat.SkillReuseMs(template.ReuseDelayMs, magic, ps.MAtkSpd, ps.PAtkSpd));
+            ZoneCombat.SkillReuseMs(template.ReuseDelayMsAt(level), magic, ps.MAtkSpd, ps.PAtkSpd));
     }
 
     static MagicSkillUseMsg BuildCast(

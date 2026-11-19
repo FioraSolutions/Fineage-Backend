@@ -236,10 +236,11 @@ public sealed partial class ZoneWorld
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
 
         // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a
-        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) are exactly that: ONE-target
-        // derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe / RandomizeHate) are
-        // the whole behaviour. They must never be mistaken for an instant support heal, so they are routed to the
-        // hostile path — the debuff handler when they carry an abnormal, the attack handler otherwise.
+        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) / Lure (51) are that family:
+        // ONE-target derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe /
+        // RandomizeHate / AddHate) are the whole behaviour. They must never fall through to the attack handler
+        // (which refuses skills missing skill-combat.json as skill_no_combat). Debuff handler when they carry an
+        // abnormal, hostile-utility otherwise.
         if (_skillEffects.TryGet(request.SkillId, out var hostileRows) && HasDerangementPayload(hostileRows))
         {
             if (liveTemplate.IsDebuffSkill)
@@ -309,6 +310,7 @@ public sealed partial class ZoneWorld
                 row.Name.Equals("RandomizeHate", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("TargetCancel", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("TransferHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("AddHate", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase))
                 return true;
         }

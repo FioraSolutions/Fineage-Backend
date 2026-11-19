@@ -82,7 +82,7 @@ public sealed class NetMeleeApproachTests
         Assert.Equal(player.ObjectId, swing.AttackerObjectId);
         Assert.Equal(MobId, swing.TargetObjectId);
         Assert.False(player.MoveActive);
-        Assert.True(ZoneCombat.Within(player.X, player.Y, mob.X, mob.Y, ZoneCombat.MeleeRange + ZoneCombat.HitRangeTolerance));
+        Assert.True(ZoneCombat.Within(player.X, player.Y, mob.X, mob.Y, ZoneCombat.MeleeRange));
         Assert.True(Math.Abs(player.X - mob.X) >= 10, "pawn must stop in front of the mob, not on it");
         Assert.False(kit.World.ValidateClientPosition(session, player.X, player.Y, player.Z, out _, out _));
     }

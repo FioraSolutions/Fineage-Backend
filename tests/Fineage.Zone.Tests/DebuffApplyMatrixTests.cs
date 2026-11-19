@@ -141,7 +141,7 @@ public sealed class DebuffApplyMatrixTests
         var cancel = new NetTestKit().Game.Skills.Find(1056);
         Assert.NotNull(cancel);
         Assert.False(cancel!.IsDebuffSkill);
-        Assert.Equal(30_000, cancel.ReuseDelayMs);
+        Assert.Equal(120_000, cancel.ReuseDelayMs);
     }
 
     static void ApplyForced(NetTestKit kit, ZoneEntity npc, int skillId, int level)

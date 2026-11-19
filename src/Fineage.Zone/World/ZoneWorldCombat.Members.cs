@@ -143,6 +143,8 @@ public sealed partial class ZoneWorld
                 session.ClearApproach();
                 continue;
             }
+            if (target.MoveActive)
+                AdvanceMove(target, now);
             if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
                 HostilePlayableRefused(session, player, target, badSkill: false) ||
                 SiegeFriendRefused(session, player, target) ||
@@ -159,10 +161,10 @@ public sealed partial class ZoneWorld
                 bool targetMoved = !ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY,
                     ZoneCombat.ApproachRepathDistance);
                 bool stuckShort = !player.MoveActive
-                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player));
+                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
                 if (targetMoved || stuckShort)
                 {
-                    long re = ApproachTarget(player, target, PlayerReach(player));
+                    long re = ApproachTarget(player, target, PlayerReach(player, target));
                     if (re < 0)
                     {
                         session.AutoAttackTargetId = 0;
@@ -177,10 +179,10 @@ public sealed partial class ZoneWorld
 
             if (now < session.NextAutoAttackUnixMs)
                 continue;
-            if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
+            if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
             {
                 // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
-                long ms = ApproachTarget(player, target, PlayerReach(player));
+                long ms = ApproachTarget(player, target, PlayerReach(player, target));
                 if (ms < 0)
                 {
                     session.AutoAttackTargetId = 0;

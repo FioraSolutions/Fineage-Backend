@@ -28,8 +28,10 @@ public sealed partial class ZoneWorld
             RechargeAutoShots(attacker);
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
             return;
-        // Mobius onHitTimer: target ran out of reach during the swing -> no damage.
-        int reach = (attacker.Kind == ZoneEntityKind.Npc ? ZoneCombat.MobAttackReach(attacker.AttackRange) : PlayerReach(attacker)) + ZoneCombat.HitRangeTolerance;
+        // Mobius onHitTimer has no second range gate (the swing already started in range). We still drop the
+        // hit if the target has left the same attack reach used to start the swing — no extra HitRangeTolerance,
+        // which previously let a dagger land from ~120 instead of weapon 40 + collisions.
+        int reach = AttackReachAgainst(attacker, target);
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
             return;
 
@@ -247,7 +249,6 @@ public sealed partial class ZoneWorld
             NetBridge.FanoutEntityDespawn(netWatchers, objectId);
         }
     }
-
 
     internal int LastDeathDropNpcIdForTest { get; private set; }
 

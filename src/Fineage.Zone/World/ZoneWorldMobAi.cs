@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
         if (hit.Combat != null)
         {
             int escape = Fineage.Game.Combat.CastRules.EscapeRange(hit.Combat.CastRange, hit.Combat.EffectRange);
-            if (escape > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, escape + ZoneCombat.HitRangeTolerance))
+            if (escape > 0 && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, SkillCastReach(escape, player, target)))
             {
                 AbortCast(player, "escaped", notify: false);
                 return;
@@ -262,7 +262,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
             // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
-            if (!ZoneCombat.InMobReach(npc.X, npc.Y, player.X, player.Y, ZoneCombat.MobAttackReach(npc.AttackRange)) ||
+            if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, AttackReachAgainst(npc, player)) ||
                 !CanSeeTarget(npc, player))
             {
                 // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.

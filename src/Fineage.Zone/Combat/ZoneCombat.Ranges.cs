@@ -4,8 +4,12 @@ public static partial class ZoneCombat
 {
     public static bool InMobMeleeRange(int ax, int ay, int bx, int by) => InMobReach(ax, ay, bx, by, MobMeleeRange);
 
-    /// <summary>NPC reach for its template atkRange (Mobius physRange + collisions): max(40, range) + collision allowance.</summary>
-    public static int MobAttackReach(int attackRange) => PlayerAttackReach(attackRange);
+    /// <summary>
+    /// NPC reach with default collisions (NPC <see cref="DefaultNpcCollision"/> + player 9). Prefer
+    /// <see cref="AttackReach"/> with the live radii when a target is known.
+    /// </summary>
+    public static int MobAttackReach(int attackRange) =>
+        AttackReach(attackRange, DefaultNpcCollision, PlayerCollisionRadius);
 
     public static bool InMobReach(int ax, int ay, int bx, int by, int reach)
     {

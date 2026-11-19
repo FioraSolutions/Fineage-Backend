@@ -105,11 +105,11 @@ public sealed partial class ZoneWorld
         if (player.CurMp < levelData.MpConsume)
             return SkillProtocol.Mp;
         AdvanceMove(player, now);
-        if (!ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, Math.Max(40, template.CastRange) + 100))
+        if (!InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, 1);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[skillId] = now + reuseMs;
         var cast = BuildCast(player, target, skillId, 1, hitMs, reuseMs);
