@@ -159,9 +159,13 @@ public sealed class SkillDefinition
     /// <summary>Mobius <c>mpPerChanneling</c> spent on each CA1 tick after the initial consume.</summary>
     public int MpPerChanneling { get; init; }
 
-    public bool IsChanneled =>
-        ChannelingTickMs > 0 ||
-        OperateType.StartsWith("CA", StringComparison.OrdinalIgnoreCase);
+    /// <summary>Mobius <c>channelingSkillId</c> (CA5 Spell/Battle Force applies this skill to the target).</summary>
+    public int ChannelingSkillId { get; init; }
+
+    /// <summary>CA1 ground-damage channels (Volcano / Gehenna). CA5 force channels use <see cref="ChannelingSkillId"/>.</summary>
+    public bool IsGroundDamageChannel =>
+        OperateType.StartsWith("CA1", StringComparison.OrdinalIgnoreCase) ||
+        (ChannelingTickMs > 0 && TargetType.Equals("GROUND", StringComparison.OrdinalIgnoreCase));
 
     public int MaxLevel => _levels.Length;
 

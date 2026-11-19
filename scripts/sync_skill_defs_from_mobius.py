@@ -131,6 +131,35 @@ def bool_of(node: ET.Element, tag: str) -> bool:
     return text_of(node, tag).lower() == "true"
 
 
+def parse_player_conditions(node: ET.Element) -> list[dict]:
+    """Mobius <conditions msgId="113"><player …/></conditions>."""
+    out: list[dict] = []
+    for el in node.iter():
+        if el.tag.split("}")[-1] != "player":
+            continue
+        if el.get("elementSeeds"):
+            out.append({"type": "elementSeeds", "value": int(el.get("elementSeeds"))})
+        elif el.get("elementSeed"):
+            raw = el.get("elementSeed", "")
+            parts = [x.strip() for x in raw.split(",") if x.strip()]
+            if not parts:
+                continue
+            rec = {"type": "elementSeed", "element": parts[0], "value": 1}
+            if len(parts) > 1:
+                rec["value"] = int(parts[1])
+            out.append(rec)
+        elif el.get("active_effect_id_lvl"):
+            raw = el.get("active_effect_id_lvl", "")
+            parts = [x.strip() for x in raw.split(",") if x.strip()]
+            if not parts:
+                continue
+            rec = {"type": "activeEffectIdLvl", "skillId": int(parts[0]), "level": 1}
+            if len(parts) > 1:
+                rec["level"] = int(parts[1])
+            out.append(rec)
+    return out
+
+
 def parse_using(node: ET.Element) -> list[str]:
     kinds: list[str] = []
     seen: set[str] = set()
@@ -183,9 +212,15 @@ def parse_mobius_skills(src: Path) -> dict[int, dict]:
                 "itemConsumeId": resolve(node, "itemConsumeId", tables, levels),
                 "itemConsumeCount": resolve(node, "itemConsumeCount", tables, levels),
                 "usingKinds": parse_using(node),
+                "playerConditions": parse_player_conditions(node),
                 "baseCritRate": parse_num(text_of(node, "baseCritRate")) or 0,
+                "affectRange": resolve(node, "affectRange", tables, levels),
+                "channelingTickInterval": parse_num(text_of(node, "channelingTickInterval")),
+                "mpPerChanneling": parse_num(text_of(node, "mpPerChanneling")),
+                "channelingSkillId": parse_num(text_of(node, "channelingSkillId")),
                 "hasCastRange": direct(node, "castRange") is not None or "#castRange" in tables or "castRange" in tables,
                 "hasEffectRange": direct(node, "effectRange") is not None or "#effectRange" in tables or "effectRange" in tables,
+                "hasAffectRange": direct(node, "affectRange") is not None or "#affectRange" in tables or "affectRange" in tables,
                 "hasCoolTime": direct(node, "coolTime") is not None,
             }
     return skills
@@ -463,6 +498,43 @@ def apply_definition(row: dict, ms: dict) -> list[str]:
                     lv.pop("itemConsumeCount", None)
                 changed.append("level.itemConsume")
 
+    if ms.get("hasAffectRange") and ms.get("affectRange") is not None:
+        ar = int(first_or_scalar(ms["affectRange"]))
+        if (row.get("affectRange") or 0) != ar:
+            if ar:
+                row["affectRange"] = ar
+            else:
+                row.pop("affectRange", None)
+            changed.append("affectRange")
+    if ms.get("channelingTickInterval") is not None:
+        tick = int(ms["channelingTickInterval"])
+        if (row.get("channelingTickInterval") or 0) != tick:
+            if tick:
+                row["channelingTickInterval"] = tick
+            else:
+                row.pop("channelingTickInterval", None)
+            changed.append("channelingTickInterval")
+    if ms.get("mpPerChanneling") is not None:
+        mp = int(ms["mpPerChanneling"])
+        if (row.get("mpPerChanneling") or 0) != mp:
+            if mp:
+                row["mpPerChanneling"] = mp
+            else:
+                row.pop("mpPerChanneling", None)
+            changed.append("mpPerChanneling")
+    if ms.get("channelingSkillId") is not None:
+        cid = int(ms["channelingSkillId"])
+        if (row.get("channelingSkillId") or 0) != cid:
+            if cid:
+                row["channelingSkillId"] = cid
+            else:
+                row.pop("channelingSkillId", None)
+            changed.append("channelingSkillId")
+    want_conds = ms.get("playerConditions") or []
+    if want_conds and row.get("playerConditions") != want_conds:
+        row["playerConditions"] = want_conds
+        changed.append("playerConditions")
+
     return changed
 
 
@@ -492,9 +564,13 @@ def combat_snapshot_row(row: dict, ms: dict) -> dict:
     }
     # Unpublished Mobius castRange must not force Fineage AoE sentinels (-1) to 0.
     if ms["hasCastRange"] and ms["castRange"] is not None:
-        snap["castRange"] = int(first_or_scalar(ms["castRange"]))
+        cr = int(first_or_scalar(ms["castRange"]))
+        if cr >= 0:
+            snap["castRange"] = cr
     if ms["hasEffectRange"] and ms["effectRange"] is not None:
-        snap["effectRange"] = int(first_or_scalar(ms["effectRange"]))
+        er = int(first_or_scalar(ms["effectRange"]))
+        if er >= 0:
+            snap["effectRange"] = er
     return snap
 
 
@@ -527,9 +603,13 @@ def definition_snapshot_row(ms: dict) -> dict:
         "mpInitialConsume": as_int_list(ms["mpInitialConsume"]) if ms["mpInitialConsume"] is not None else [],
     }
     if ms["hasCastRange"] and ms["castRange"] is not None:
-        snap["castRange"] = int(first_or_scalar(ms["castRange"]))
+        cr = int(first_or_scalar(ms["castRange"]))
+        if cr >= 0:
+            snap["castRange"] = cr
     if ms["hasEffectRange"] and ms["effectRange"] is not None:
-        snap["effectRange"] = int(first_or_scalar(ms["effectRange"]))
+        er = int(first_or_scalar(ms["effectRange"]))
+        if er >= 0:
+            snap["effectRange"] = er
     return snap
 
 
@@ -554,6 +634,38 @@ def apply_retail_overrides(skills_by: dict[int, dict], def_map: dict | None = No
                 def_map[sid][key] = value
         applied += 1
     return applied
+
+
+
+def replace_skill_objects(raw: str, updated: dict[int, dict], indent: int, obj_indent: int) -> str:
+    """Replace existing skill objects in a catalog file without rewriting siblings."""
+    import re
+
+    def dump(obj: dict) -> str:
+        blob = json.dumps(obj, indent=indent, ensure_ascii=False)
+        pad = " " * obj_indent
+        return pad + blob.replace("\n", "\n" + pad)
+
+    for sid, obj in updated.items():
+        m = re.search("\n" + (" " * obj_indent) + "{\n" + (" " * (obj_indent + indent)) + f'"skillId": {sid},\n', raw)
+        if not m:
+            raise SystemExit(f"skillId {sid} block not found for surgical replace")
+        start = m.start() + 1
+        depth = 0
+        end = None
+        for i, ch in enumerate(raw[start:], start):
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i
+                    break
+        if end is None:
+            raise SystemExit(f"skillId {sid} unclosed object")
+        raw = raw[:start] + dump(obj) + raw[end + 1:]
+    json.loads(raw)
+    return raw if raw.endswith("\n") else raw + "\n"
 
 
 def main() -> int:
@@ -590,20 +702,28 @@ def main() -> int:
     combat_by = {s["skillId"]: s for s in combat_doc["skills"]}
 
     def_changed = combat_changed = 0
+    def_ids: list[int] = []
+    combat_ids: list[int] = []
     if not args.snapshot_only:
+        skills_raw = SKILLS_JSON.read_text()
+        combat_raw = COMBAT_JSON.read_text()
         for sid in sorted(skill_ids):
             ms = mobius[sid]
             if sid in skills_by:
                 ch = apply_definition(skills_by[sid], ms)
                 if ch:
                     def_changed += 1
+                    def_ids.append(sid)
             if sid in combat_by:
                 ch = apply_combat(combat_by[sid], ms)
                 if ch:
                     combat_changed += 1
+                    combat_ids.append(sid)
         apply_retail_overrides(skills_by)
-        SKILLS_JSON.write_text(json.dumps(skills_doc, indent=2, ensure_ascii=False) + "\n")
-        COMBAT_JSON.write_text(json.dumps(combat_doc, indent=1, ensure_ascii=False) + "\n")
+        if def_ids:
+            SKILLS_JSON.write_text(replace_skill_objects(skills_raw, {sid: skills_by[sid] for sid in def_ids}, indent=2, obj_indent=4))
+        if combat_ids:
+            COMBAT_JSON.write_text(replace_skill_objects(combat_raw, {sid: combat_by[sid] for sid in combat_ids}, indent=1, obj_indent=2))
 
     # snapshots: merge selected family into existing files
     def_snap = json.loads(DEF_SNAP.read_text()) if DEF_SNAP.exists() else {"skills": []}

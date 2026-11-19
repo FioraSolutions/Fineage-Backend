@@ -116,7 +116,8 @@ public sealed class SkillCatalog
                 UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray(),
                 PlayerConditions = ReadPlayerConditions(row),
                 ChannelingTickMs = row.ChannelingTickInterval > 0 ? row.ChannelingTickInterval * 1000 : 0,
-                MpPerChanneling = Math.Max(0, row.MpPerChanneling)
+                MpPerChanneling = Math.Max(0, row.MpPerChanneling),
+                ChannelingSkillId = Math.Max(0, row.ChannelingSkillId)
             });
         }
 
@@ -173,6 +174,7 @@ public sealed class SkillCatalog
         public List<string>? UsingKinds { get; set; }
         public int ChannelingTickInterval { get; set; }
         public int MpPerChanneling { get; set; }
+        public int ChannelingSkillId { get; set; }
         public List<PlayerConditionDto>? PlayerConditions { get; set; }
         public List<LevelDto>? LevelData { get; set; }
     }
