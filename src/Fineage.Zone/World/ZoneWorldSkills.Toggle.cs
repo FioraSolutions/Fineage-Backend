@@ -154,7 +154,7 @@ public sealed partial class ZoneWorld
         if (skillId == ToggleFakeDeath)
             StartFakeDeath(player, now);
         else if (IsRelaxingEffect(skillId))
-            SitForRelaxingToggle(player, now);
+            SitDown(player, checkCast: false);
     }
 
     /// <summary>Effect payload is <c>Relax</c> or <c>ChameleonRest</c> (skills 226 / 296 and any peer).</summary>
@@ -167,26 +167,6 @@ public sealed partial class ZoneWorld
                 return true;
         }
         return false;
-    }
-
-    /// <summary>
-    /// Mobius Relax/ChameleonRest <c>onStart</c> → <c>sitDown(false)</c>: sit immediately, stop an
-    /// in-flight move, and broadcast ChangeWaitType. The usual sit action may refuse while casting;
-    /// this path skips that check because the toggle itself is the caster.
-    /// </summary>
-    void SitForRelaxingToggle(ZoneEntity player, long now)
-    {
-        if (player.Sitting)
-            return;
-        AdvanceMove(player, now);
-        bool wasMoving = player.MoveActive;
-        StopTimedMove(player);
-        if (wasMoving)
-            FanoutStopInPlace(player);
-        player.Sitting = true;
-        if (player.Session != null)
-            player.Session.SitOnArrive = false;
-        FanoutWaitType(player, ActionProtocol.WaitSitting);
     }
 
     /// <summary>
