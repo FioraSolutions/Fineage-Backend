@@ -11809,8 +11809,11 @@
       "id": 1342,
       "name": "Steel Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_fine_steel_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "c",
       "price": 5,
       "weight": 4
     },
@@ -11818,8 +11821,11 @@
       "id": 1343,
       "name": "Silver Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_silver_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "b",
       "price": 7,
       "weight": 4
     },
@@ -11827,9 +11833,24 @@
       "id": 1344,
       "name": "Mithril Arrow",
       "kind": "etc",
-      "stackable": true,
       "icon": "icon.etc_mithril_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "a",
       "price": 8,
+      "weight": 3
+    },
+    {
+      "id": 1345,
+      "name": "Shining Arrow",
+      "kind": "etc",
+      "icon": "icon.etc_shining_quiver_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "crystal": "s",
+      "price": 20,
       "weight": 3
     },
     {
@@ -64880,6 +64901,17 @@
       "crystalCount": 230,
       "mDef": 95,
       "maxMp": 42
+    },
+    {
+      "id": 8192,
+      "name": "Breaking Arrow",
+      "kind": "etc",
+      "icon": "icon.etc_destory_soul_arrow_i00",
+      "bodySlot": "lhand",
+      "etcType": "arrow",
+      "stackable": true,
+      "price": 0,
+      "weight": 3
     },
     {
       "id": 8193,

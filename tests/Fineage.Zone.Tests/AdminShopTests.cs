@@ -237,6 +237,61 @@ public sealed class AdminShopTests : IDisposable
     }
 
     [Fact]
+    public async Task Gm_shop_arrows_buy_any_quantity_and_stack_into_the_existing_row()
+    {
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        foreach (int id in new[] { 17, 1341, 1342, 1343, 1344, 1345, 8192 })
+        {
+            Assert.True(kit.Game.Items.TryGet(id, out var template), $"arrow {id} missing from items.json");
+            Assert.True(template!.Stackable, $"arrow {id} must be stackable");
+            Assert.Equal(Fineage.Game.EtcItemType.Arrow, template.EtcType);
+        }
+
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9979"));
+        int before = me.Inventory.CountOf(17);
+        Assert.Null(await me.Buy(0, 9979, (17, 2500)));
+        Assert.Equal(before + 2500, me.Inventory.CountOf(17));
+        Assert.Single(me.Inventory.Items, item => item.ItemId == 17);
+
+        Assert.Null(await me.Buy(0, 9979, (17, 500)));
+        Assert.Equal(before + 3000, me.Inventory.CountOf(17));
+        Assert.Single(me.Inventory.Items, item => item.ItemId == 17);
+
+        int bone = me.Inventory.CountOf(1341);
+        int steel = me.Inventory.CountOf(1342);
+        int silver = me.Inventory.CountOf(1343);
+        int mithril = me.Inventory.CountOf(1344);
+        int shining = me.Inventory.CountOf(1345);
+        int breaking = me.Inventory.CountOf(8192);
+        Assert.Null(await me.Buy(0, 9979, (1341, 100), (1342, 100), (1343, 100), (1344, 100), (1345, 1000), (8192, 50)));
+        Assert.Equal(bone + 100, me.Inventory.CountOf(1341));
+        Assert.Equal(steel + 100, me.Inventory.CountOf(1342));
+        Assert.Equal(silver + 100, me.Inventory.CountOf(1343));
+        Assert.Equal(mithril + 100, me.Inventory.CountOf(1344));
+        Assert.Equal(shining + 1000, me.Inventory.CountOf(1345));
+        Assert.Equal(breaking + 50, me.Inventory.CountOf(8192));
+        Assert.Single(me.Inventory.Items, item => item.ItemId == 1345);
+    }
+
+    [Fact]
+    public async Task Bought_mana_potion_restores_mp()
+    {
+        var kit = new WorldBench();
+        BenchPlayer me = await kit.EnterAsync(name: "KuK");
+        Assert.Null(await me.BypassAsync(0, "admin_buy 9928"));
+        int before = me.Inventory.CountOf(728);
+        Assert.Null(await me.Buy(0, 9928, (728, 3)));
+        Assert.Equal(before + 3, me.Inventory.CountOf(728));
+        Assert.Single(me.Inventory.Items, item => item.ItemId == 728);
+
+        me.Player.CurMp = 0;
+        Assert.Null(await me.Use(me.Slot(728)));
+        Assert.Equal(System.Math.Min(me.Player.MaxMp, 1000), me.Player.CurMp);
+        Assert.Equal(before + 2, me.Inventory.CountOf(728));
+    }
+
+    [Fact]
     public async Task Admin_spawn_places_the_npc_in_front_of_the_gm()
     {
         const int ChestId = 18268; // Treasure Chest lv 30
