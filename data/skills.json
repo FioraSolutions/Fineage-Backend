@@ -25195,7 +25195,7 @@
           "level": 1,
           "mpConsume": 64,
           "power": 82,
-          "abnormalLevel": 1,
+          "abnormalLevel": 0,
           "magicLevel": 58,
           "mpInitialConsume": 16
         },
@@ -25203,7 +25203,7 @@
           "level": 2,
           "mpConsume": 69,
           "power": 89,
-          "abnormalLevel": 1,
+          "abnormalLevel": 0,
           "magicLevel": 62,
           "mpInitialConsume": 18
         },
@@ -25211,7 +25211,7 @@
           "level": 3,
           "mpConsume": 74,
           "power": 96,
-          "abnormalLevel": 1,
+          "abnormalLevel": 0,
           "magicLevel": 66,
           "mpInitialConsume": 19
         },
@@ -25219,7 +25219,7 @@
           "level": 4,
           "mpConsume": 78,
           "power": 102,
-          "abnormalLevel": 1,
+          "abnormalLevel": 0,
           "magicLevel": 70,
           "mpInitialConsume": 20
         },
@@ -25227,7 +25227,7 @@
           "level": 5,
           "mpConsume": 82,
           "power": 108,
-          "abnormalLevel": 1,
+          "abnormalLevel": 0,
           "magicLevel": 74,
           "mpInitialConsume": 21
         }
@@ -26565,7 +26565,6 @@
           "abnormalLevel": 1
         }
       ],
-      "abnormalType": "REAL_TARGET",
       "effectPoint": [
         -136,
         -175,
@@ -29928,7 +29927,7 @@
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
       "effectRange": 400,
-      "abnormalType": "CRITICAL_PROB_DOWN",
+      "abnormalType": "HIT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
@@ -30034,7 +30033,7 @@
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
       "effectRange": 400,
-      "abnormalType": "CRITICAL_DMG_DOWN",
+      "abnormalType": "HIT_DOWN",
       "activateRate": 80,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
@@ -31551,7 +31550,7 @@
         }
       ],
       "abnormalTimeSeconds": 60,
-      "abnormalType": "POLEARM_ATTACK",
+      "abnormalType": "POSSESSION",
       "effectPoint": [
         549,
         582,
@@ -41505,6 +41504,7 @@
         }
       ],
       "abnormalTimeSeconds": 20,
+      "abnormalType": "DISTRUST",
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 1100,
@@ -52475,7 +52475,6 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK",
       "effectPoint": [
         100
       ]
@@ -52502,7 +52501,6 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK",
       "effectPoint": [
         100
       ]
@@ -52529,7 +52527,6 @@
       ],
       "abnormalTimeSeconds": 5,
       "magicType": 1,
-      "abnormalType": "HOLY_ATTACK",
       "effectPoint": [
         100
       ]
@@ -55238,7 +55235,7 @@
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 1100,
-      "abnormalType": "BLOCK_SHIELD_UP",
+      "abnormalType": "PD_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
@@ -55270,7 +55267,7 @@
       "isDebuff": true,
       "magicType": 1,
       "effectRange": 1100,
-      "abnormalType": "BLOCK_SPEED_UP",
+      "abnormalType": "SPEED_UP",
       "activateRate": 80,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
@@ -55301,7 +55298,7 @@
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
       "magicType": 1,
-      "abnormalType": "BLOCK_SHIELD_UP",
+      "abnormalType": "PD_UP",
       "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
@@ -55332,7 +55329,7 @@
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
       "magicType": 1,
-      "abnormalType": "BLOCK_SPEED_UP",
+      "abnormalType": "SPEED_UP",
       "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
@@ -55418,7 +55415,7 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "IMPROVE_HIT_DEFENCE_CRT_RATE_UP",
+      "abnormalType": "CRITICAL_DMG_UP",
       "effectPoint": [
         666
       ]
@@ -55445,7 +55442,7 @@
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "abnormalType": "IMPROVE_MA_MD_UP",
+      "abnormalType": "MA_UP",
       "effectPoint": [
         666
       ]
@@ -55761,7 +55758,6 @@
       ],
       "magicType": 1,
       "effectRange": 1000,
-      "abnormalType": "TURN_FLEE",
       "trait": "DERANGEMENT",
       "activateRate": 30,
       "lvlBonusRate": 1,

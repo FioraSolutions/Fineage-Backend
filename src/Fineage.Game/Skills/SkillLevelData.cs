@@ -16,7 +16,7 @@ public sealed class SkillLevelData
         Level = level;
         MpConsume = mpConsume;
         Power = power;
-        AbnormalLevel = Math.Max(1, abnormalLevel);
+        AbnormalLevel = Math.Max(0, abnormalLevel);
         MagicLevel = Math.Max(0, magicLevel);
         MpInitialConsume = Math.Max(0, mpInitialConsume);
         ItemConsumeId = Math.Max(0, itemConsumeId);

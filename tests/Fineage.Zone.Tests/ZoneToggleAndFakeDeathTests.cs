@@ -7,7 +7,7 @@ namespace Fineage.Zone.Tests;
 
 /// <summary>
 /// Mobius <c>operateType T</c> toggles and Fake Death (skill 60) through the zone world: activation cost, per-tick MP
-/// drain, the second press switching off, the seated-only gate of Relax and the fake-death pose
+/// drain, the second press switching off, Relax sitting the caster on start and the fake-death pose
 /// (<c>WT_START_FAKEDEATH</c> / <c>WT_STOP_FAKEDEATH</c> + <c>Revive</c>).
 /// </summary>
 public sealed class ZoneToggleAndFakeDeathTests
@@ -121,14 +121,19 @@ public sealed class ZoneToggleAndFakeDeathTests
     }
 
     [Fact]
-    public async Task Relax_needs_a_seated_caster()
+    public async Task Relax_sits_the_caster()
     {
-        var (kit, _, session, player) = await EnterWithBridgeAsync();
+        var (kit, rec, session, player) = await EnterWithBridgeAsync();
         player.KnownSkills[Relax] = 1;
         player.CurMp = 500;
+        player.Sitting = false;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
-        Assert.DoesNotContain(player.Abnormals, a => a.Id == Relax);
+        Assert.True(player.Sitting);
+        Assert.Contains(player.Abnormals, a => a.Id == Relax);
+        var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
+        Assert.Contains(waits, a =>
+            (int)a[1]! == player.ObjectId && (int)a[2]! == ActionProtocol.WaitSitting);
     }
 
     [Fact]

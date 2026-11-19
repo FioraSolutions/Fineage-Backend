@@ -24,14 +24,17 @@ public sealed partial class ZoneWorld
             return false;
 
         int duration = durationSeconds ?? template.AbnormalTimeSeconds;
-        ZoneAbnormals.Apply(
+        // The land roll already passed; a lower-level same-slot occupant is rejected silently
+        // (Mobius EffectList.add returns without initializeEffects) and is not a resist.
+        if (!ZoneAbnormals.Apply(
             target.Abnormals,
             template.SkillId,
             levelData.AbnormalLevel,
             duration,
             nowUnixMs,
             levelData.Level,
-            template.AbnormalType);
+            template.AbnormalType))
+            return true;
         if (target.Abnormals.Count > 0)
             _withAbnormals.Add(target.ObjectId);
         FanoutAbnormal(target);
