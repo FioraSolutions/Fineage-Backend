@@ -12161,11 +12161,43 @@
       "weight": 120
     },
     {
+      "id": 1379,
+      "name": "Spellbook: Cure Bleeding",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_efighter_i00",
+      "price": 1150,
+      "weight": 120
+    },
+    {
+      "id": 1380,
+      "name": "Spellbook: Entangle",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_efighter_i00",
+      "price": 2600,
+      "weight": 120
+    },
+    {
       "id": 1383,
       "name": "Spellbook: Poison",
       "kind": "etc",
       "icon": "icon.etc_spell_books_defighter_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1384,
+      "name": "Spellbook: Sprint",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_efighter_i00",
+      "price": 2600,
+      "weight": 120
+    },
+    {
+      "id": 1385,
+      "name": "Spellbook: Recharge",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 1800,
       "weight": 120
     },
     {
@@ -12265,6 +12297,14 @@
       "weight": 120
     },
     {
+      "id": 1402,
+      "name": "Spellbook: Agility",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1403,
       "name": "Spellbook: Summon Kat the Cat",
       "kind": "etc",
@@ -12291,6 +12331,14 @@
     {
       "id": 1406,
       "name": "Spellbook: Servitor Wind Walk",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1407,
+      "name": "Spellbook: Servitor Magic Boost",
       "kind": "etc",
       "icon": "icon.etc_spell_books_summon_i00",
       "price": 2450,
@@ -12358,6 +12406,14 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_black_i00",
       "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1417,
+      "name": "Spellbook: Surrender To Earth",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -14440,6 +14496,14 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_summon_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1670,
+      "name": "Spellbook: Summon Mirage the Unicorn",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -35119,6 +35183,14 @@
       "weight": 120
     },
     {
+      "id": 3944,
+      "name": "Spellbook: Decrease Weight",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_blue_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
       "id": 3945,
       "name": "Boat Ticket: Talking Island to Giran",
       "kind": "etc",
@@ -43817,6 +43889,22 @@
       "randomDamage": 20,
       "soulshots": 1,
       "spiritshots": 1
+    },
+    {
+      "id": 4906,
+      "name": "Spellbook: Solar Spark",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 4907,
+      "name": "Spellbook: Solar Flare",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 3200,
+      "weight": 120
     },
     {
       "id": 4911,
@@ -76241,6 +76329,14 @@
       "weight": 120
     },
     {
+      "id": 8901,
+      "name": "Ancient Spellbook: Raging Waves",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 120000,
+      "weight": 120
+    },
+    {
       "id": 8902,
       "name": "Ancient Spellbook: Day of Doom",
       "kind": "etc",
@@ -76281,6 +76377,14 @@
       "name": "Ancient Spellbook: Miracle",
       "kind": "etc",
       "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8908,
+      "name": "Ancient Spellbook: Mass Recharge",
+      "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 40000,
       "weight": 120
