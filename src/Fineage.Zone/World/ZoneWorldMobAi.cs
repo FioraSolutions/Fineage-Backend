@@ -106,13 +106,18 @@ public sealed partial class ZoneWorld
         {
             UpdatePvPStatus(player, CreditOf(target), now);
             DamageSummon(player, target, damage, now);
+            if (hit.Combat != null && damage > 0)
+                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
             return;
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
             ApplySkillDamageToPlayer(player, target, damage, now);
             if (hit.Combat != null && damage > 0)
+            {
+                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
                 ApplySkillAbnormal(player, target, hit, now);
+            }
             return;
         }
         if (SiegeNpcHit(player, target, damage, now))
@@ -128,6 +133,8 @@ public sealed partial class ZoneWorld
         DuelNoteOutsideHit(player, target);
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
+        if (hit.Combat != null && damage > 0)
+            ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
         RecordDamage(target, player, damage);
         ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));

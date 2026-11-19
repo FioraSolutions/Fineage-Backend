@@ -8,11 +8,12 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>Mobius AREA affectRange around the primary target. Falls back to 200 when unset.</summary>
+    /// <summary>Mobius <c>affectRange</c>: stored on the template when present, else 200 for AURA/AREA.</summary>
     static int ResolveAffectRange(SkillDefinition template)
     {
-        // skills.json currently stores Mobius effectRange (escape) not affectRange; Poisonous Cloud
-        // affectRange is 200. Prefer a sane AoE radius over the 1000 escape value.
+        if (template.AffectRange > 0)
+            return template.AffectRange;
+        // skills.json historically stored Mobius effectRange (escape) on some AREA skills (Poisonous Cloud 200).
         if (template.EffectRange > 0 && template.EffectRange <= 400)
             return template.EffectRange;
         return 200;
