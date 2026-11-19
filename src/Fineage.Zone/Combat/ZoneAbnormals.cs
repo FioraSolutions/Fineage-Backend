@@ -15,7 +15,9 @@ public static class ZoneAbnormals
     public static AbnormalEffectMsg ToWire(long nowUnixMs, ZoneAbnormalEntry entry, string visual = "") => new()
     {
         Id = entry.Id,
-        Value = entry.Value,
+        // Client skillgrp / buff-bar lookups use Value as the skill level. An applied
+        // abnormal should never go out as 0 (AddDataCellToTime would drop the icon).
+        Value = entry.Value > 0 ? entry.Value : Math.Max(1, entry.SkillLevel),
         DurationSeconds = RemainingSeconds(nowUnixMs, entry),
         Slot = entry.Slot ?? "",
         Visual = visual ?? ""

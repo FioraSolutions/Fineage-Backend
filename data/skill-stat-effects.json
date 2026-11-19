@@ -17,6 +17,13 @@
    ]
   },
   {
+   "skillId": 60,
+   "name": "Fake Death",
+   "levels": 1,
+   "effects": [
+   ]
+  },
+  {
    "skillId": 72,
    "name": "Iron Will",
    "levels": 3,
@@ -737,6 +744,13 @@
    ]
   },
   {
+   "skillId": 226,
+   "name": "Relax",
+   "levels": 1,
+   "effects": [
+   ]
+  },
+  {
    "skillId": 230,
    "name": "Sprint",
    "levels": 2,
@@ -1060,6 +1074,13 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 296,
+   "name": "Chameleon Rest",
+   "levels": 1,
+   "effects": [
    ]
   },
   {

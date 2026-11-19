@@ -213,6 +213,15 @@ public sealed partial class ZoneWorld
     void FanoutWaitType(ZoneEntity player, int waitType)
     {
         // Mobius Player.sitDown/standUp: broadcastPacket(new ChangeWaitType(this, ...)), self included.
+        string label = waitType switch
+        {
+            ActionProtocol.WaitSitting => "sit",
+            ActionProtocol.WaitStanding => "stand",
+            ActionProtocol.WaitStartFakeDeath => "fakedeath",
+            ActionProtocol.WaitStopFakeDeath => "stop-fakedeath",
+            _ => waitType.ToString()
+        };
+        ZoneLog.Info($"[wait-type] obj={player.ObjectId} type={label} x={player.X} y={player.Y} z={player.Z}");
         NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 
