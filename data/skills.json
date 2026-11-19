@@ -17608,6 +17608,7 @@
     },
     {
       "skillId": 221,
+    "abnormalVisualEffect": "STEALTH",
       "name": "Silent Move",
       "levels": 1,
       "passive": false,
@@ -27229,6 +27230,7 @@
     },
     {
       "skillId": 296,
+    "abnormalVisualEffect": "STEALTH",
       "name": "Chameleon Rest",
       "levels": 1,
       "passive": false,
@@ -29746,6 +29748,7 @@
       "abnormalTimeSeconds": 120,
       "magicType": 1,
       "abnormalType": "DANCE_OF_SHADOW",
+    "abnormalVisualEffect": "STEALTH",
       "effectPoint": [
         666
       ],
@@ -30867,6 +30870,7 @@
       ],
       "abnormalTimeSeconds": 120,
       "abnormalType": "STEALTH",
+    "abnormalVisualEffect": "STEALTH",
       "effectPoint": [
         549,
         611,

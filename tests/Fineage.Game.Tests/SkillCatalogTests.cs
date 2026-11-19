@@ -145,4 +145,23 @@ public sealed class SkillCatalogTests
             }
         }
     }
+
+    /// <summary>
+    /// Official Interlude patch: Silent Move, Chameleon Rest, Dance of Shadows, and Stealth
+    /// use <c>abnormalVisualEffect=STEALTH</c> (semi-invisible). Silent Move must not share
+    /// the STEALTH abnormalType slot with skill 411.
+    /// </summary>
+    [Theory]
+    [InlineData(221, "")]
+    [InlineData(296, "")]
+    [InlineData(366, "DANCE_OF_SHADOW")]
+    [InlineData(411, "STEALTH")]
+    public void Stealth_ave_skills_carry_stealth_visual(int skillId, string expectedSlot)
+    {
+        var data = GameData.LoadDefault();
+        var skill = data.Skills.Find(skillId);
+        Assert.NotNull(skill);
+        Assert.Equal("STEALTH", skill!.AbnormalVisualEffect);
+        Assert.Equal(expectedSlot, skill.AbnormalType ?? "");
+    }
 }

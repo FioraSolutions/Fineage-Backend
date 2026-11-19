@@ -12,12 +12,13 @@ public static class ZoneAbnormals
         return (int)Math.Max(1, (remainingMs + 999) / 1000);
     }
 
-    public static AbnormalEffectMsg ToWire(long nowUnixMs, ZoneAbnormalEntry entry) => new()
+    public static AbnormalEffectMsg ToWire(long nowUnixMs, ZoneAbnormalEntry entry, string visual = "") => new()
     {
         Id = entry.Id,
         Value = entry.Value,
         DurationSeconds = RemainingSeconds(nowUnixMs, entry),
-        Slot = entry.Slot ?? ""
+        Slot = entry.Slot ?? "",
+        Visual = visual ?? ""
     };
 
     /// <summary>

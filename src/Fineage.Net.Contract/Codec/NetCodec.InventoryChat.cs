@@ -277,6 +277,7 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(e.Value);
                 w.WriteInt32(e.DurationSeconds);
                 w.WriteString(e.Slot ?? "");
+                w.WriteString(e.Visual ?? "");
             }
         });
 
@@ -295,7 +296,8 @@ namespace Fineage.Net.Contract
                     Id = r.ReadInt32(),
                     Value = r.ReadInt32(),
                     DurationSeconds = r.ReadInt32(),
-                    Slot = r.ReadString()
+                    Slot = r.ReadString(),
+                    Visual = r.ReadString()
                 };
             }
 

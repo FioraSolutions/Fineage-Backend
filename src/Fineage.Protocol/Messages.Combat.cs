@@ -100,6 +100,8 @@ public sealed class AbnormalEffectMsg
     public int DurationSeconds { get; set; }
     /// <summary>Mobius <c>abnormalType</c> slot (SLEEP, STUN, PARALYZE, ROOT_MAGICALLY, …).</summary>
     public string Slot { get; set; } = "";
+    /// <summary>Mobius <c>abnormalVisualEffect</c> (STEALTH, DOT_POISON, …). Empty when unset.</summary>
+    public string Visual { get; set; } = "";
 }
 
 /// <summary>Opcode <see cref="MsgType.AbnormalStatusUpdate"/> (1017). Full effect list for one object.</summary>

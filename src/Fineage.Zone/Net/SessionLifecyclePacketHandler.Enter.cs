@@ -200,7 +200,8 @@ sealed partial class SessionLifecyclePacketHandler
                 Id = e.Id,
                 Value = e.Value,
                 DurationSeconds = e.DurationSeconds,
-                Slot = e.Slot ?? ""
+                Slot = e.Slot ?? "",
+                Visual = e.Visual ?? ""
             };
         }
 

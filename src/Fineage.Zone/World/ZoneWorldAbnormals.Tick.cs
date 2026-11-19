@@ -192,7 +192,7 @@ public sealed partial class ZoneWorld
         int spoilExtra = entity.SpoilerObjectId != 0 ? 1 : 0;
         var effects = new AbnormalEffectMsg[entity.Abnormals.Count + spoilExtra];
         for (int i = 0; i < entity.Abnormals.Count; i++)
-            effects[i] = ZoneAbnormals.ToWire(now, entity.Abnormals[i]);
+            effects[i] = ZoneAbnormals.ToWire(now, entity.Abnormals[i], VisualFor(entity.Abnormals[i]));
         if (spoilExtra > 0)
         {
             effects[^1] = new AbnormalEffectMsg
@@ -207,6 +207,15 @@ public sealed partial class ZoneWorld
             ObjectId = entity.ObjectId,
             Effects = effects
         };
+    }
+
+    /// <summary>Look up Mobius <c>abnormalVisualEffect</c> from the skill template (Silent Move has no slot).</summary>
+    string VisualFor(ZoneAbnormalEntry entry)
+    {
+        if (entry == null)
+            return "";
+        var skill = _game.Skills.Find(entry.Id);
+        return skill?.AbnormalVisualEffect ?? "";
     }
 
     /// <summary>

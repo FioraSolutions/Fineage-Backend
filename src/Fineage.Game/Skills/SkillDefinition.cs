@@ -66,6 +66,9 @@ public sealed class SkillDefinition
     /// <summary>Mobius <c>abnormalType</c> slot (POISON, TURN_FLEE, BLEEDING, …). Empty when unset.</summary>
     public string AbnormalType { get; init; } = "";
 
+    /// <summary>Mobius <c>abnormalVisualEffect</c> (STEALTH, DOT_POISON, FLESH_STONE, …). Empty when unset.</summary>
+    public string AbnormalVisualEffect { get; init; } = "";
+
     /// <summary>Mobius <c>trait</c> (POISON, HOLD, DERANGEMENT, …). Empty when unset.</summary>
     public string Trait { get; init; } = "";
 
