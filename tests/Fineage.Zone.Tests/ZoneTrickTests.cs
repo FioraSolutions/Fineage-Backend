@@ -174,4 +174,50 @@ public sealed class ZoneTrickTests
         Assert.Equal(other.ObjectId, raid.AggroTargetId);
         Assert.Contains(other.ObjectId, raid.HateList.Keys);
     }
+
+    [Fact]
+    public async Task Trick_magic_skill_use_carries_the_mob_as_target_for_the_whole_cast()
+    {
+        var (kit, rec, session, player, mob) = await EnterAsync();
+        mob.HateList[player.ObjectId] = 5_000;
+        mob.AggroTargetId = player.ObjectId;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Trick, MobId, CancellationToken.None));
+        kit.Now = kit.Now.AddSeconds(2);
+        kit.World.ResolvePendingHitForTest(player);
+
+        // The client paints the hit art (m_u018_b / at_fatal_strike_ta) on MagicSkillUse.TargetObjectId, so every
+        // Trick cast packet the caster sees must name the mob, never the caster itself.
+        var casts = rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse))
+            .Select(a => (Watchers: (IReadOnlyList<int>)a[0]!, Cast: (Fineage.Protocol.MagicSkillUseMsg)a[1]!))
+            .Where(c => c.Cast.SkillId == Trick)
+            .ToList();
+        var cast = Assert.Single(casts);
+        Assert.Equal(player.ObjectId, cast.Cast.CasterObjectId);
+        Assert.Equal(MobId, cast.Cast.TargetObjectId);
+        Assert.Contains(player.ObjectId, cast.Watchers);
+    }
+
+    [Fact]
+    public async Task Skill_on_reuse_while_running_is_refused_without_stopping_the_run()
+    {
+        var (kit, rec, session, player, _) = await EnterAsync();
+        player.SkillReuseUntilMs[Trick] = kit.Now.ToUnixTimeMilliseconds() + 15_000;
+        int destX = player.X - 600;
+        Assert.Null(await kit.World.TryMoveAsync(session, destX, player.Y, player.Z, CancellationToken.None));
+        Assert.True(player.MoveActive);
+        int castsBefore = rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)).Count;
+
+        // Mobius Player.useMagic: isSkillDisabled → SystemMessage + ActionFailed; the move is never touched.
+        Assert.Equal(Fineage.Protocol.SkillProtocol.Reuse,
+            await kit.World.TrySkillUseAsync(session, Trick, MobId, CancellationToken.None));
+        Assert.True(player.MoveActive);
+        Assert.Equal(destX, player.MoveDestX);
+        Assert.Equal(castsBefore, rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)).Count);
+
+        int startX = player.X;
+        kit.Now = kit.Now.AddSeconds(1);
+        await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
+        Assert.True(player.X < startX, "the run keeps going after the refused press");
+    }
 }
