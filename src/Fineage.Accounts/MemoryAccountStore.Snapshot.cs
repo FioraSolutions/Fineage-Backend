@@ -214,6 +214,9 @@ public sealed partial class MemoryAccountStore
             character.HennaDye3,
             character.Effects == null
                 ? null
-                : character.Effects.Select(e => new StoredEffect(e.SkillId, e.Level, e.RemainingSeconds)).ToArray(),
-            character.ClassState?.Clone());
+                : character.Effects.Select(e => new StoredEffect(
+                    e.SkillId, e.Level, e.RemainingSeconds, e.ReuseDelayMs, e.SystimeMs, e.RestoreType)).ToArray(),
+            character.ClassState?.Clone(),
+            character.MaxCp,
+            character.Cp);
 }

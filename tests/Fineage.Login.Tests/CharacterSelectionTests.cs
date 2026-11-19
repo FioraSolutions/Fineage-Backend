@@ -288,7 +288,7 @@ public class CharacterSelectionTests
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.Equal(CreateCharacterStatus.Ok,
             store.TryAddCharacter("alice", "Aria", HumanClasses.Fighter, 0, 0, out var created));
-        Assert.True(store.TrySaveVitals("alice", created!.Id, hp: 90, mp: 12));
+        Assert.True(store.TrySaveVitals("alice", created!.Id, hp: 90, mp: 12, cp: 40));
         var reloaded = store.FindById("alice", created.Id);
         Assert.NotNull(reloaded);
         Assert.Equal(90, reloaded.Hp);

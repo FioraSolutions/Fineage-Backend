@@ -71,9 +71,21 @@ public sealed record StoredSkill(int SkillId, int Level)
 /// <summary>
 /// Mobius <c>character_skills_save</c> row: active abnormal remaining time across logout.
 /// </summary>
-public sealed record StoredEffect(int SkillId, int Level, int RemainingSeconds)
+public sealed record StoredEffect(
+    int SkillId,
+    int Level,
+    int RemainingSeconds,
+    long ReuseDelayMs = 0,
+    long SystimeMs = 0,
+    int RestoreType = 0)
 {
-    public bool IsValid => SkillId > 0 && Level > 0 && RemainingSeconds > 0;
+    /// <summary>Mobius restore_type 0: an abnormal still running at logout (remaining_time &gt; 0).</summary>
+    public bool IsEffect => RestoreType == 0 && SkillId > 0 && Level > 0 && RemainingSeconds > 0;
+
+    /// <summary>A reuse timestamp that has not yet expired (Mobius systime / reuse_delay).</summary>
+    public bool IsReuse => SkillId > 0 && SystimeMs > 0 && ReuseDelayMs > 0;
+
+    public bool IsValid => IsEffect || IsReuse;
 }
 
 public sealed record CharacterRecord(
@@ -123,7 +135,9 @@ public sealed record CharacterRecord(
     int HennaDye2 = 0,
     int HennaDye3 = 0,
     IReadOnlyList<StoredEffect>? Effects = null,
-    CharacterClassState? ClassState = null)
+    CharacterClassState? ClassState = null,
+    int MaxCp = 0,
+    int Cp = 0)
 {
     /// <summary>Mobius <c>getBaseClass</c>: the class the character was created into (falls back to the active class).</summary>
     public int BaseClassId => ClassState is { BaseClassId: > 0 } s ? s.BaseClassId : ClassId;

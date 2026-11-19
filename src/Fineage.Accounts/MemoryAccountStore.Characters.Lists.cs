@@ -65,7 +65,10 @@ public sealed partial class MemoryAccountStore
                 {
                     SkillId = e.SkillId,
                     Level = e.Level,
-                    RemainingSeconds = e.RemainingSeconds
+                    RemainingSeconds = e.RemainingSeconds,
+                    ReuseDelayMs = e.ReuseDelayMs,
+                    SystimeMs = e.SystimeMs,
+                    RestoreType = e.RestoreType
                 }).ToList();
             Save();
             return true;

@@ -81,7 +81,8 @@ static partial class NormalizedStoreReader
                c.clan_id, c.clan_join_expiry_unix_ms, c.clan_create_expiry_unix_ms,
                c.death_penalty_level, c.karma, c.pk_kills, c.pvp_kills,
                c.henna_dye1, c.henna_dye2, c.henna_dye3,
-               c.created_at, c.last_access, c.delete_at
+               c.created_at, c.last_access, c.delete_at,
+               c.max_cp, c.cp
         FROM characters c
         """;
 
@@ -120,7 +121,9 @@ static partial class NormalizedStoreReader
         int HennaDye3,
         DateTimeOffset CreatedAt,
         DateTimeOffset LastAccess,
-        DateTimeOffset? DeleteAt);
+        DateTimeOffset? DeleteAt,
+        int MaxCp,
+        int Cp);
 
     static CharacterRecord? ReadOneCharacter(NpgsqlConnection conn, NpgsqlCommand cmd)
     {
@@ -172,7 +175,9 @@ static partial class NormalizedStoreReader
                 : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(33), DateTimeKind.Utc)),
             reader.IsDBNull(34)
                 ? null
-                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(34), DateTimeKind.Utc)));
+                : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(34), DateTimeKind.Utc)),
+            reader.FieldCount > 35 && !reader.IsDBNull(35) ? reader.GetInt32(35) : 0,
+            reader.FieldCount > 36 && !reader.IsDBNull(36) ? reader.GetInt32(36) : 0);
 
     static CharacterRecord Materialize(NpgsqlConnection conn, CharacterStub stub)
     {
@@ -226,6 +231,8 @@ static partial class NormalizedStoreReader
             HennaDye2: stub.HennaDye2,
             HennaDye3: stub.HennaDye3,
             Effects: effects,
-            ClassState: classState);
+            ClassState: classState,
+            MaxCp: stub.MaxCp,
+            Cp: stub.Cp);
     }
 }

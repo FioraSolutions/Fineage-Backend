@@ -156,6 +156,8 @@ public sealed partial class ZoneWorld
             CurHp = vitals.hp,
             MaxMp = vitals.maxMp,
             CurMp = vitals.mp,
+            MaxCp = vitals.maxCp,
+            CurCp = vitals.cp,
             Level = vitals.level,
             Race = vitals.race,
             Sex = vitals.sex,

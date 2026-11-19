@@ -258,6 +258,8 @@ static partial class NormalizedStoreWriter
             character.HennaDye1,
             character.HennaDye2,
             character.HennaDye3,
+            character.MaxCp,
+            character.Cp,
             insertOnly: true);
     }
 
@@ -350,17 +352,18 @@ static partial class NormalizedStoreWriter
         cmd.ExecuteNonQuery();
     }
 
-    public static void UpdateVitals(NpgsqlConnection conn, int characterId, int hp, int mp)
+    public static void UpdateVitals(NpgsqlConnection conn, int characterId, int hp, int mp, int cp)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText =
             """
-            UPDATE characters SET hp = @hp, mp = @mp, updated_at = now()
+            UPDATE characters SET hp = @hp, mp = @mp, cp = @cp, updated_at = now()
             WHERE id = @id
             """;
         cmd.Parameters.AddWithValue("id", characterId);
         cmd.Parameters.AddWithValue("hp", hp);
         cmd.Parameters.AddWithValue("mp", mp);
+        cmd.Parameters.AddWithValue("cp", cp);
         cmd.ExecuteNonQuery();
     }
 
@@ -449,7 +452,9 @@ static partial class NormalizedStoreWriter
         int maxHp,
         int hp,
         int maxMp,
-        int mp)
+        int mp,
+        int maxCp,
+        int cp)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText =
@@ -457,6 +462,7 @@ static partial class NormalizedStoreWriter
             UPDATE characters
             SET level = @level, exp = @exp, sp = @sp,
                 max_hp = @maxHp, hp = @hp, max_mp = @maxMp, mp = @mp,
+                max_cp = @maxCp, cp = @cp,
                 updated_at = now()
             WHERE id = @id
             """;
@@ -468,6 +474,8 @@ static partial class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("hp", hp);
         cmd.Parameters.AddWithValue("maxMp", maxMp);
         cmd.Parameters.AddWithValue("mp", mp);
+        cmd.Parameters.AddWithValue("maxCp", maxCp);
+        cmd.Parameters.AddWithValue("cp", cp);
         cmd.ExecuteNonQuery();
     }
 }
