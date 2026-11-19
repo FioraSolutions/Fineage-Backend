@@ -66,7 +66,7 @@ public sealed class SkillCatalog
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
-                int abnormalLevel = levelRow.AbnormalLevel <= 0 ? 1 : levelRow.AbnormalLevel;
+                int abnormalLevel = levelRow.AbnormalLevel ?? 1;
                 levels[i] = new SkillLevelData(
                     level,
                     Math.Max(0, levelRow.MpConsume),
@@ -154,7 +154,7 @@ public sealed class SkillCatalog
         public int Level { get; set; }
         public int MpConsume { get; set; }
         public int Power { get; set; }
-        public int AbnormalLevel { get; set; } = 1;
+        public int? AbnormalLevel { get; set; }
         public int MagicLevel { get; set; }
         public int MpInitialConsume { get; set; }
         public int ItemConsumeId { get; set; }
