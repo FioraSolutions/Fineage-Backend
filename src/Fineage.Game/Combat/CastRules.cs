@@ -10,14 +10,24 @@ public static class CastRules
     /// Mobius calcAtkBreak with AltGameCancelByHit=Cast: casting → init 15, + √(13·dmg), − (MEN bonus·100 − 100),
     /// clamped to 1..99 %. Zero damage never breaks.
     /// </summary>
-    public static double AttackBreakRate(double damage, double menBonus)
-    {
-        double init = 15 + Math.Sqrt(13 * Math.Max(0, damage)) - (menBonus * 100 - 100);
-        return Math.Clamp(init, 1, 99);
-    }
+    /// <summary>Unclamped calcAtkBreak init, before ATTACK_CANCEL (<c>cancel</c>) funcs and the 1..99 clamp.</summary>
+    public static double AttackBreakInit(double damage, double menBonus) =>
+        15 + Math.Sqrt(13 * Math.Max(0, damage)) - (menBonus * 100 - 100);
+
+    public static double AttackBreakRate(double damage, double menBonus) =>
+        Math.Clamp(AttackBreakInit(damage, menBonus), 1, 99);
+
+    /// <summary>
+    /// Like <see cref="AttackBreakRate(double, double)"/> after Mobius <c>calcStat(ATTACK_CANCEL, init)</c>.
+    /// </summary>
+    public static double AttackBreakRate(double damage, double menBonus, Func<double, double> applyCancel) =>
+        Math.Clamp(applyCancel(AttackBreakInit(damage, menBonus)), 1, 99);
 
     public static bool RollAttackBreak(Random rnd, double damage, double menBonus) =>
         damage > 0 && rnd.Next(100) < AttackBreakRate(damage, menBonus);
+
+    public static bool RollAttackBreak(Random rnd, double damage, double menBonus, Func<double, double> applyCancel) =>
+        damage > 0 && rnd.Next(100) < AttackBreakRate(damage, menBonus, applyCancel);
 
     /// <summary>Creature.breakCast: only magic and static skills are interruptible; physical skills keep going.</summary>
     public static bool Interruptible(bool magic) => magic;

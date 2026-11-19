@@ -62,6 +62,21 @@ public sealed class ZoneStatPipelineTests
         Assert.Equal(0.9, blessing.Funcs[0].ValueAt(1));
         Assert.True(stats.TryGet(415, out var spirit));
         Assert.Equal(CombatStat.PhysicalMpConsumeRate, spirit.Funcs[0].Stat);
+
+        Assert.True(passives.TryGet(316, out var aegisPassive));
+        Assert.Contains(aegisPassive.Funcs, f => f.Stat == CombatStat.ShieldDefAngle && f.Op == '=' && f.ValueAt(1) == 360);
+        Assert.True(passives.TryGet(428, out var rhythm));
+        Assert.Equal(CombatStat.DanceMpConsumeRate, rhythm.Funcs[0].Stat);
+        Assert.Equal(0.9, rhythm.Funcs[0].ValueAt(1));
+        Assert.True(stats.TryGet(1078, out var concentration));
+        Assert.Equal(CombatStat.Cancel, concentration.Funcs[0].Stat);
+        Assert.Equal('s', concentration.Funcs[0].Op);
+        Assert.Equal(18, concentration.Funcs[0].ValueAt(1));
+        Assert.True(stats.TryGet(306, out var flame));
+        Assert.Equal(CombatStat.FireRes, flame.Funcs[0].Stat);
+        Assert.True(stats.TryGet(1262, out var transfer));
+        Assert.Equal(CombatStat.TransDam, transfer.Funcs[0].Stat);
+        Assert.Equal(50, transfer.Funcs[0].ValueAt(5));
     }
 
     [Fact]

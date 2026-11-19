@@ -52,7 +52,8 @@ public sealed partial class ZoneWorld
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
             men = EffectiveAttributes(player, t).MenBonus;
-        if (CastRules.RollAttackBreak(_combatRandom, damage, men))
+        // Mobius calcStat(ATTACK_CANCEL, init): Concentration etc. sub/add the cancel stat before the 1..99 clamp.
+        if (CastRules.RollAttackBreak(_combatRandom, damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
             AbortCast(player, "hit", notify: true);
     }
 

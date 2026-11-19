@@ -35,6 +35,7 @@ STAT_NAMES = {
     "absorbDam", "physicalMpConsumeRate", "magicalMpConsumeRate", "danceMpConsumeRate",
     "shieldDefAngle", "skillCritical", "skillCriticalProbability", "atkCountMax", "pAtkRange",
     "breath", "fall", "cancelVuln", "debuffVuln", "holyPower", "darkRes",
+    "holyRes", "fireRes", "waterRes", "windRes", "earthRes", "transDam", "cancel",
 }
 
 
