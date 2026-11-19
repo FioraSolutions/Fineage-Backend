@@ -3025,18 +3025,18 @@
    "kind": "physical",
    "magic": false,
    "power": [
-    825.0,
-    1023.0,
-    1194.0,
-    1373.0,
-    1554.0
+    229.0,
+    284.0,
+    321.0,
+    382.0,
+    432.0
    ],
    "mpConsume": [
-    58,
-    64,
-    69,
-    73,
-    77
+    120,
+    133,
+    142,
+    152,
+    160
    ],
    "mpInitialConsume": [
     0,
@@ -3050,7 +3050,7 @@
    "reuseDelayMs": 60000,
    "castRange": 40,
    "baseCritRate": 10,
-   "overHit": true,
+   "overHit": false,
    "effectRange": 400,
    "magicLevel": [
     55,
@@ -5318,7 +5318,7 @@
    "power": [
     2751.0,
     2850.0,
-    2950.0,
+    2850.0,
     3050.0,
     3151.0,
     3252.0,
@@ -5328,16 +5328,16 @@
     3653.0
    ],
    "mpConsume": [
-    63,
-    64,
-    65,
-    66,
     67,
     68,
     69,
     70,
     71,
-    72
+    72,
+    73,
+    74,
+    75,
+    76
    ],
    "mpInitialConsume": [
     0,
@@ -5356,7 +5356,7 @@
    "reuseDelayMs": 90000,
    "castRange": 40,
    "baseCritRate": 0,
-   "overHit": true,
+   "overHit": false,
    "blowEffect": "fatalBlow",
    "blowChance": 15,
    "magicLevel": [
@@ -5679,7 +5679,7 @@
     2020.0
    ],
    "mpConsume": [
-    114
+    122
    ],
    "mpInitialConsume": [
     0
@@ -5849,16 +5849,16 @@
     457.0
    ],
    "mpConsume": [
-    78,
-    84,
-    87,
-    90,
-    93,
-    96,
-    99,
-    102,
+    83,
+    88,
+    92,
+    95,
+    98,
+    101,
     105,
-    107
+    108,
+    111,
+    113
    ],
    "mpInitialConsume": [
     0,
@@ -5877,7 +5877,7 @@
    "reuseDelayMs": 300000,
    "castRange": -1,
    "baseCritRate": 10,
-   "overHit": true,
+   "overHit": false,
    "magicLevel": [
     55,
     58,
@@ -6720,7 +6720,7 @@
    "hitTimeMs": 3000,
    "coolTimeMs": 0,
    "reuseDelayMs": 15000,
-   "castRange": 100,
+   "castRange": 40,
    "baseCritRate": 0,
    "overHit": false,
    "effectRange": 400,
@@ -7775,23 +7775,23 @@
     54.0
    ],
    "mpConsume": [
-    29,
-    31,
-    31,
+    30,
+    32,
     34,
-    35,
-    37,
+    36,
     38,
+    39,
     41,
-    42,
     43,
     45,
     46,
-    47,
-    50,
-    50,
+    48,
+    49,
+    51,
     53,
-    53
+    54,
+    56,
+    57
    ],
    "mpInitialConsume": [
     8,
@@ -8372,7 +8372,7 @@
    "kind": "magical",
    "magic": true,
    "power": [
-    150.0
+    350.0
    ],
    "mpConsume": [
     200
@@ -8380,7 +8380,7 @@
    "mpInitialConsume": [
     50
    ],
-   "hitTimeMs": 4000,
+   "hitTimeMs": 7000,
    "coolTimeMs": 0,
    "reuseDelayMs": 3600000,
    "castRange": 900,
@@ -8450,7 +8450,7 @@
    "kind": "magical",
    "magic": true,
    "power": [
-    200.0
+    500.0
    ],
    "mpConsume": [
     200
@@ -8458,7 +8458,7 @@
    "mpInitialConsume": [
     50
    ],
-   "hitTimeMs": 4000,
+   "hitTimeMs": 7000,
    "coolTimeMs": 0,
    "reuseDelayMs": 3600000,
    "castRange": 900,
@@ -8785,6 +8785,32 @@
   {
    "skillId": 1419,
    "name": "Volcano",
+   "levels": 1,
+   "kind": "magical",
+   "magic": true,
+   "power": [
+    500.0
+   ],
+   "mpConsume": [
+    36
+   ],
+   "mpInitialConsume": [
+    36
+   ],
+   "hitTimeMs": 15000,
+   "coolTimeMs": 0,
+   "reuseDelayMs": 1800000,
+   "castRange": 900,
+   "baseCritRate": 0,
+   "overHit": false,
+   "effectRange": 1000,
+   "magicLevel": [
+    80
+   ]
+  },
+  {
+   "skillId": 1421,
+   "name": "Raging Waves",
    "levels": 1,
    "kind": "magical",
    "magic": true,

@@ -4318,7 +4318,8 @@
       ],
       "usingKinds": [
         "BOW"
-      ]
+      ],
+      "affectRange": 150
     },
     {
       "skillId": 25,
@@ -8380,7 +8381,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 24,
-          "mpInitialConsume": 5
+          "mpInitialConsume": 4
         },
         {
           "level": 2,
@@ -8388,7 +8389,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 46,
-          "mpInitialConsume": 9
+          "mpInitialConsume": 8
         },
         {
           "level": 3,
@@ -10736,7 +10737,9 @@
         -450,
         -470,
         -487
-      ]
+      ],
+      "abnormalVisualEffect": "SILENCE",
+      "affectRange": 150
     },
     {
       "skillId": 99,
@@ -11968,7 +11971,9 @@
         -635,
         -646,
         -655
-      ]
+      ],
+      "abnormalVisualEffect": "ROOT",
+      "affectRange": 200
     },
     {
       "skillId": 109,
@@ -24850,11 +24855,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_EARTH",
       "effectPoint": [
         523
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 265,
@@ -24876,11 +24882,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_LIFE",
       "effectPoint": [
         495
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 266,
@@ -24902,11 +24909,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_WATER",
       "effectPoint": [
         549
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 267,
@@ -24924,15 +24932,16 @@
           "mpConsume": 60,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 43
+          "magicLevel": 40
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_WARDING",
       "effectPoint": [
         379
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 268,
@@ -24954,11 +24963,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_WIND",
       "effectPoint": [
         438
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 269,
@@ -24976,15 +24986,16 @@
           "mpConsume": 60,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 40
+          "magicLevel": 49
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_HUNTER",
       "effectPoint": [
         467
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 270,
@@ -25002,15 +25013,16 @@
           "mpConsume": 60,
           "power": 0,
           "abnormalLevel": 1,
-          "magicLevel": 49
+          "magicLevel": 43
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_INVOCATION",
       "effectPoint": [
         408
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 271,
@@ -27663,11 +27675,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_VITALITY",
       "effectPoint": [
         611
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 305,
@@ -27689,11 +27702,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_VENGEANCE",
       "effectPoint": [
         655
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 306,
@@ -27715,11 +27729,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_FLAME_GUARD",
       "effectPoint": [
         582
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 307,
@@ -27770,11 +27785,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_STORM_GUARD",
       "effectPoint": [
         635
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 309,
@@ -28736,8 +28752,7 @@
         -333
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -29365,11 +29380,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_RENEWAL",
       "effectPoint": [
         666
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 350,
@@ -29459,7 +29475,8 @@
       ],
       "usingKinds": [
         "SHIELD"
-      ]
+      ],
+      "abnormalVisualEffect": "STUN"
     },
     {
       "skillId": 353,
@@ -29554,8 +29571,7 @@
         669
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -29792,11 +29808,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_MEDITATION",
       "effectPoint": [
         666
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 364,
@@ -29818,11 +29835,12 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "magicType": 1,
+      "magicType": 2,
       "abnormalType": "SONG_OF_CHAMPION",
       "effectPoint": [
         669
-      ]
+      ],
+      "affectRange": 1000
     },
     {
       "skillId": 365,
@@ -29941,7 +29959,8 @@
       ],
       "usingKinds": [
         "SHIELD"
-      ]
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 369,
@@ -30268,24 +30287,25 @@
       ],
       "abnormalTimeSeconds": 15,
       "isDebuff": true,
-      "effectRange": 650,
+      "effectRange": 300,
       "abnormalType": "ROOT_PHYSICALLY",
       "trait": "HOLD",
-      "activateRate": 80,
+      "activateRate": 60,
       "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
-        -1046,
-        -1098,
-        -1132,
-        -1163,
-        -1193,
-        -1221,
-        -1247,
-        -1270,
-        -1291,
-        -1309
-      ]
+        -227,
+        -235,
+        -243,
+        -268,
+        -277,
+        -285,
+        -313,
+        -322,
+        -331,
+        -360
+      ],
+      "abnormalVisualEffect": "ROOT"
     },
     {
       "skillId": 403,
@@ -30702,21 +30722,22 @@
       "abnormalTimeSeconds": 30,
       "isDebuff": true,
       "abnormalType": "ALL_SPEED_DOWN",
-      "activateRate": 50,
+      "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
       "effectPoint": [
-        -523,
-        -549,
-        -566,
-        -582,
-        -597,
-        -611,
-        -624,
-        -635,
-        -646,
-        -655
-      ]
+        -669,
+        -669,
+        -669,
+        -669,
+        -669,
+        -669,
+        -669,
+        -669,
+        -669,
+        -669
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 408,
@@ -30959,13 +30980,12 @@
       "abnormalTimeSeconds": 120,
       "abnormalType": "MIGHT_MORTAL",
       "effectPoint": [
-        549,
-        611,
-        655
+        243,
+        418,
+        495
       ],
       "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
+        "DAGGER"
       ]
     },
     {
@@ -31110,7 +31130,8 @@
         -100,
         -100,
         -100
-      ]
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 413,
@@ -31183,14 +31204,14 @@
       "abnormalTimeSeconds": 120,
       "abnormalType": "SNIPE",
       "effectPoint": [
-        566,
-        582,
-        597,
-        611,
-        624,
-        635,
-        646,
-        655
+        121,
+        121,
+        121,
+        121,
+        121,
+        121,
+        121,
+        121
       ],
       "usingKinds": [
         "BOW"
@@ -31862,7 +31883,9 @@
       "effectRange": 600,
       "effectPoint": [
         1
-      ]
+      ],
+      "mpPerChanneling": 15,
+      "channelingSkillId": 5104
     },
     {
       "skillId": 427,
@@ -32114,12 +32137,14 @@
       "isDebuff": true,
       "abnormalType": "SILENCE_ALL",
       "trait": "DERANGEMENT",
-      "activateRate": 60,
+      "activateRate": 40,
       "lvlBonusRate": 1,
       "basicProperty": "MEN",
       "effectPoint": [
-        -507
-      ]
+        -523
+      ],
+      "abnormalVisualEffect": "SILENCE",
+      "affectRange": 150
     },
     {
       "skillId": 438,
@@ -32326,7 +32351,7 @@
       "abnormalTimeSeconds": 5,
       "abnormalType": "AVOID_SKILL",
       "effectPoint": [
-        337
+        669
       ]
     },
     {
@@ -32691,7 +32716,14 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 2
+      "magicType": 2,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5104,
+          "level": 2
+        }
+      ]
     },
     {
       "skillId": 455,
@@ -32715,7 +32747,14 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 2
+      "magicType": 2,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5104,
+          "level": 2
+        }
+      ]
     },
     {
       "skillId": 456,
@@ -32811,7 +32850,14 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 2
+      "magicType": 2,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5104,
+          "level": 2
+        }
+      ]
     },
     {
       "skillId": 460,
@@ -32835,7 +32881,14 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 2
+      "magicType": 2,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5104,
+          "level": 2
+        }
+      ]
     },
     {
       "skillId": 461,
@@ -42921,7 +42974,8 @@
         -388,
         -390,
         -393
-      ]
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 1175,
@@ -43460,7 +43514,8 @@
         -619,
         -746,
         -818
-      ]
+      ],
+      "abnormalVisualEffect": "DOT_BLEEDING"
     },
     {
       "skillId": 1184,
@@ -45850,7 +45905,7 @@
       "passive": false,
       "operateType": "A2",
       "targetType": "ONE",
-      "castRange": 40,
+      "castRange": 750,
       "hitTimeMs": 1500,
       "reuseDelayMs": 8000,
       "levelData": [
@@ -45998,7 +46053,8 @@
         -635,
         -646,
         -655
-      ]
+      ],
+      "effectRange": 1250
     },
     {
       "skillId": 1224,
@@ -46407,8 +46463,9 @@
           "abnormalLevel": 1,
           "magicLevel": 20,
           "mpInitialConsume": 8,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 1
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 3,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 2,
@@ -46417,8 +46474,9 @@
           "abnormalLevel": 1,
           "magicLevel": 25,
           "mpInitialConsume": 9,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 1
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 4,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 3,
@@ -46427,8 +46485,9 @@
           "abnormalLevel": 1,
           "magicLevel": 30,
           "mpInitialConsume": 11,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 1,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 4,
@@ -46437,8 +46496,9 @@
           "abnormalLevel": 1,
           "magicLevel": 35,
           "mpInitialConsume": 12,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 3,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 5,
@@ -46448,8 +46508,8 @@
           "abnormalLevel": 1,
           "magicLevel": 40,
           "mpInitialConsume": 14,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 7
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 5
         },
         {
           "level": 6,
@@ -46459,8 +46519,8 @@
           "abnormalLevel": 1,
           "magicLevel": 44,
           "mpInitialConsume": 16,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 1
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 3
         },
         {
           "level": 7,
@@ -46470,8 +46530,8 @@
           "abnormalLevel": 1,
           "magicLevel": 48,
           "mpInitialConsume": 18,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 1
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 4
         },
         {
           "level": 8,
@@ -46481,7 +46541,7 @@
           "abnormalLevel": 1,
           "magicLevel": 52,
           "mpInitialConsume": 19,
-          "itemConsumeId": 3031,
+          "itemConsumeId": 1458,
           "itemConsumeCount": 4
         },
         {
@@ -46492,7 +46552,7 @@
           "abnormalLevel": 1,
           "magicLevel": 56,
           "mpInitialConsume": 21,
-          "itemConsumeId": 3031,
+          "itemConsumeId": 1458,
           "itemConsumeCount": 5
         },
         {
@@ -46503,7 +46563,7 @@
           "abnormalLevel": 1,
           "magicLevel": 58,
           "mpInitialConsume": 22,
-          "itemConsumeId": 3031,
+          "itemConsumeId": 1458,
           "itemConsumeCount": 6
         },
         {
@@ -46514,8 +46574,8 @@
           "abnormalLevel": 1,
           "magicLevel": 60,
           "mpInitialConsume": 22,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 11
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 6
         },
         {
           "level": 12,
@@ -46525,8 +46585,8 @@
           "abnormalLevel": 1,
           "magicLevel": 62,
           "mpInitialConsume": 23,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 12
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 7
         },
         {
           "level": 13,
@@ -46536,8 +46596,8 @@
           "abnormalLevel": 1,
           "magicLevel": 64,
           "mpInitialConsume": 24,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 5
         },
         {
           "level": 14,
@@ -46547,8 +46607,8 @@
           "abnormalLevel": 1,
           "magicLevel": 66,
           "mpInitialConsume": 25,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 6
         },
         {
           "level": 15,
@@ -46558,8 +46618,8 @@
           "abnormalLevel": 1,
           "magicLevel": 68,
           "mpInitialConsume": 26,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 4
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 7
         },
         {
           "level": 16,
@@ -46569,8 +46629,8 @@
           "abnormalLevel": 1,
           "magicLevel": 70,
           "mpInitialConsume": 26,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 4
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 9
         },
         {
           "level": 17,
@@ -46580,8 +46640,8 @@
           "abnormalLevel": 1,
           "magicLevel": 72,
           "mpInitialConsume": 27,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 9
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 7
         },
         {
           "level": 18,
@@ -46591,8 +46651,8 @@
           "abnormalLevel": 1,
           "magicLevel": 74,
           "mpInitialConsume": 28,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 10
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 8
         }
       ],
       "magicType": 1
@@ -46616,7 +46676,8 @@
           "magicLevel": 20,
           "mpInitialConsume": 8,
           "itemConsumeId": 1458,
-          "itemConsumeCount": 1
+          "itemConsumeCount": 1,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 2,
@@ -46626,7 +46687,8 @@
           "magicLevel": 25,
           "mpInitialConsume": 9,
           "itemConsumeId": 1458,
-          "itemConsumeCount": 1
+          "itemConsumeCount": 1,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 3,
@@ -46636,7 +46698,8 @@
           "magicLevel": 30,
           "mpInitialConsume": 11,
           "itemConsumeId": 1458,
-          "itemConsumeCount": 1
+          "itemConsumeCount": 1,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 4,
@@ -46646,7 +46709,8 @@
           "magicLevel": 35,
           "mpInitialConsume": 12,
           "itemConsumeId": 1458,
-          "itemConsumeCount": 1
+          "itemConsumeCount": 1,
+          "reuseDelayMs": 21600000
         },
         {
           "level": 5,
@@ -48748,7 +48812,8 @@
         -635,
         -646,
         -653
-      ]
+      ],
+      "abnormalVisualEffect": "DOT_BLEEDING"
     },
     {
       "skillId": 1238,
@@ -48783,7 +48848,7 @@
           "power": 0,
           "abnormalLevel": 3,
           "magicLevel": 56,
-          "mpInitialConsume": 11
+          "mpInitialConsume": 10
         }
       ],
       "abnormalTimeSeconds": 1200,
@@ -50138,7 +50203,7 @@
       "operateType": "A1",
       "targetType": "PARTY",
       "castRange": 40,
-      "hitTimeMs": 0,
+      "hitTimeMs": 20000,
       "reuseDelayMs": 600000,
       "levelData": [
         {
@@ -50147,7 +50212,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 48,
-          "mpInitialConsume": 52
+          "mpInitialConsume": 51
         },
         {
           "level": 2,
@@ -50158,7 +50223,8 @@
           "mpInitialConsume": 61
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "affectRange": 1000
     },
     {
       "skillId": 1256,
@@ -51541,7 +51607,8 @@
         }
       ],
       "magicType": 1,
-      "trait": "DERANGEMENT"
+      "trait": "DERANGEMENT",
+      "affectRange": 200
     },
     {
       "skillId": 1274,
@@ -51930,7 +51997,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 48,
-          "mpInitialConsume": 18,
+          "mpInitialConsume": 17,
           "itemConsumeId": 1459,
           "itemConsumeCount": 1
         },
@@ -51960,7 +52027,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 58,
-          "mpInitialConsume": 22,
+          "mpInitialConsume": 21,
           "itemConsumeId": 1459,
           "itemConsumeCount": 2
         },
@@ -52010,7 +52077,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 68,
-          "mpInitialConsume": 26,
+          "mpInitialConsume": 25,
           "itemConsumeId": 1459,
           "itemConsumeCount": 3
         },
@@ -52040,7 +52107,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 74,
-          "mpInitialConsume": 28,
+          "mpInitialConsume": 27,
           "itemConsumeId": 1459,
           "itemConsumeCount": 4
         }
@@ -52323,7 +52390,7 @@
           "abnormalLevel": 1,
           "magicLevel": 40,
           "mpInitialConsume": 7,
-          "itemConsumeId": 3031,
+          "itemConsumeId": 1458,
           "itemConsumeCount": 2
         },
         {
@@ -52333,8 +52400,8 @@
           "abnormalLevel": 1,
           "magicLevel": 44,
           "mpInitialConsume": 8,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 3
         },
         {
           "level": 3,
@@ -52343,8 +52410,8 @@
           "abnormalLevel": 1,
           "magicLevel": 48,
           "mpInitialConsume": 9,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 3
         },
         {
           "level": 4,
@@ -52353,8 +52420,8 @@
           "abnormalLevel": 1,
           "magicLevel": 52,
           "mpInitialConsume": 10,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 4
         },
         {
           "level": 5,
@@ -52363,8 +52430,8 @@
           "abnormalLevel": 1,
           "magicLevel": 56,
           "mpInitialConsume": 11,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 4
         },
         {
           "level": 6,
@@ -52373,8 +52440,8 @@
           "abnormalLevel": 1,
           "magicLevel": 62,
           "mpInitialConsume": 11,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 4
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 5
         },
         {
           "level": 7,
@@ -52383,8 +52450,8 @@
           "abnormalLevel": 1,
           "magicLevel": 66,
           "mpInitialConsume": 12,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 5
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 6
         },
         {
           "level": 8,
@@ -52393,8 +52460,8 @@
           "abnormalLevel": 1,
           "magicLevel": 70,
           "mpInitialConsume": 13,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 5
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 6
         },
         {
           "level": 9,
@@ -52403,8 +52470,8 @@
           "abnormalLevel": 1,
           "magicLevel": 74,
           "mpInitialConsume": 14,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 6
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 7
         }
       ],
       "magicType": 1
@@ -52762,7 +52829,8 @@
       "magicType": 1,
       "effectPoint": [
         100
-      ]
+      ],
+      "effectRange": 1100
     },
     {
       "skillId": 1287,
@@ -52996,6 +53064,18 @@
       "effectRange": 1400,
       "effectPoint": [
         -6000
+      ],
+      "playerConditions": [
+        {
+          "type": "elementSeed",
+          "element": "FIRE",
+          "value": 1
+        },
+        {
+          "type": "elementSeed",
+          "element": "WIND",
+          "value": 1
+        }
       ]
     },
     {
@@ -53120,7 +53200,8 @@
         -318,
         -323,
         -328
-      ]
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 1296,
@@ -53581,7 +53662,7 @@
           "power": 0,
           "abnormalLevel": 2,
           "magicLevel": 66,
-          "mpInitialConsume": 13
+          "mpInitialConsume": 12
         },
         {
           "level": 3,
@@ -53589,7 +53670,7 @@
           "power": 0,
           "abnormalLevel": 3,
           "magicLevel": 72,
-          "mpInitialConsume": 14
+          "mpInitialConsume": 13
         }
       ],
       "abnormalTimeSeconds": 1200,
@@ -54228,8 +54309,8 @@
           "abnormalLevel": 1,
           "magicLevel": 40,
           "mpInitialConsume": 28,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 7
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 8
         },
         {
           "level": 2,
@@ -54238,8 +54319,8 @@
           "abnormalLevel": 1,
           "magicLevel": 44,
           "mpInitialConsume": 31,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 10
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 12
         },
         {
           "level": 3,
@@ -54247,9 +54328,9 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 48,
-          "mpInitialConsume": 35,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 10
+          "mpInitialConsume": 34,
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 12
         },
         {
           "level": 4,
@@ -54258,8 +54339,8 @@
           "abnormalLevel": 1,
           "magicLevel": 52,
           "mpInitialConsume": 38,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 13
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 16
         },
         {
           "level": 5,
@@ -54268,8 +54349,8 @@
           "abnormalLevel": 1,
           "magicLevel": 56,
           "mpInitialConsume": 41,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 13
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 16
         },
         {
           "level": 6,
@@ -54278,8 +54359,8 @@
           "abnormalLevel": 1,
           "magicLevel": 62,
           "mpInitialConsume": 46,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 16
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 20
         },
         {
           "level": 7,
@@ -54288,8 +54369,8 @@
           "abnormalLevel": 1,
           "magicLevel": 66,
           "mpInitialConsume": 49,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 20
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 24
         },
         {
           "level": 8,
@@ -54298,8 +54379,8 @@
           "abnormalLevel": 1,
           "magicLevel": 70,
           "mpInitialConsume": 52,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 20
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 24
         },
         {
           "level": 9,
@@ -54307,12 +54388,13 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 74,
-          "mpInitialConsume": 55,
-          "itemConsumeId": 3031,
-          "itemConsumeCount": 23
+          "mpInitialConsume": 54,
+          "itemConsumeId": 1458,
+          "itemConsumeCount": 28
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "affectRange": 1000
     },
     {
       "skillId": 1330,
@@ -55446,7 +55528,7 @@
           "power": 0,
           "abnormalLevel": 1,
           "magicLevel": 78,
-          "mpInitialConsume": 15,
+          "mpInitialConsume": 14,
           "itemConsumeId": 3031,
           "itemConsumeCount": 10
         }
@@ -56267,7 +56349,8 @@
           "abnormalLevel": 4,
           "magicLevel": 58,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeCount": 2,
+          "mpInitialConsume": 16
         },
         {
           "level": 2,
@@ -56276,7 +56359,8 @@
           "abnormalLevel": 4,
           "magicLevel": 62,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeCount": 2,
+          "mpInitialConsume": 17
         },
         {
           "level": 3,
@@ -56285,7 +56369,8 @@
           "abnormalLevel": 4,
           "magicLevel": 66,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeCount": 2,
+          "mpInitialConsume": 19
         },
         {
           "level": 4,
@@ -56294,7 +56379,8 @@
           "abnormalLevel": 4,
           "magicLevel": 70,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeCount": 3,
+          "mpInitialConsume": 20
         },
         {
           "level": 5,
@@ -56303,7 +56389,8 @@
           "abnormalLevel": 4,
           "magicLevel": 74,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeCount": 3,
+          "mpInitialConsume": 21
         }
       ],
       "abnormalTimeSeconds": 30,
@@ -56312,15 +56399,16 @@
       "effectRange": 1400,
       "abnormalType": "ARMOR_WATER",
       "activateRate": 40,
-      "lvlBonusRate": 1,
+      "lvlBonusRate": 2,
       "basicProperty": "MEN",
       "effectPoint": [
         -549,
+        -566,
         -582,
-        -611,
-        -635,
-        -655
-      ]
+        -597,
+        -611
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 1385,
@@ -57304,7 +57392,8 @@
           "abnormalLevel": 1,
           "magicLevel": 58,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 1
+          "itemConsumeCount": 1,
+          "mpInitialConsume": 11
         },
         {
           "level": 2,
@@ -57313,7 +57402,8 @@
           "abnormalLevel": 2,
           "magicLevel": 66,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 2
+          "itemConsumeCount": 2,
+          "mpInitialConsume": 12
         },
         {
           "level": 3,
@@ -57322,17 +57412,18 @@
           "abnormalLevel": 3,
           "magicLevel": 74,
           "itemConsumeId": 3031,
-          "itemConsumeCount": 3
+          "itemConsumeCount": 3,
+          "mpInitialConsume": 14
         }
       ],
       "abnormalTimeSeconds": 1200,
       "magicType": 1,
-      "effectRange": 900,
+      "effectRange": 1100,
       "abnormalType": "CHEAP_MAGIC",
       "effectPoint": [
-        549,
-        611,
-        655
+        227,
+        235,
+        243
       ]
     },
     {
@@ -58398,6 +58489,18 @@
       "magicType": 1,
       "effectPoint": [
         -676
+      ],
+      "effectRange": 1000,
+      "affectRange": 200,
+      "channelingTickInterval": 2,
+      "mpPerChanneling": 80,
+      "channelingSkillId": 1421,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5105,
+          "level": 3
+        }
       ]
     },
     {
@@ -58611,7 +58714,15 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 1
+      "magicType": 1,
+      "affectRange": 1000,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5105,
+          "level": 3
+        }
+      ]
     },
     {
       "skillId": 1429,
@@ -58785,6 +58896,46 @@
       ],
       "magicType": 2,
       "effectRange": 400
+    },
+    {
+      "skillId": 5104,
+      "name": "Battle Force",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 0,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "abnormalTimeSeconds": 15,
+      "abnormalType": "PHYSICAL_STANCE",
+      "magicType": 2,
+      "effectPoint": [
+        100
+      ],
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1,
+          "magicLevel": 77
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 2,
+          "magicLevel": 77
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 3,
+          "magicLevel": 77
+        }
+      ]
     },
     {
       "skillId": 5105,
