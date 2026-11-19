@@ -12177,11 +12177,83 @@
       "weight": 120
     },
     {
+      "id": 1387,
+      "name": "Spellbook: Resist Poison",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1388,
+      "name": "Spellbook: Mental Shield",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1389,
+      "name": "Spellbook: Holy Weapon",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1390,
+      "name": "Spellbook: Regeneration",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1392,
+      "name": "Spellbook: Berserker Spirit",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1394,
+      "name": "Spellbook: Sleep",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1397,
+      "name": "Spellbook: Peace",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1398,
+      "name": "Spellbook: Focus",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1399,
       "name": "Spellbook: Concentration",
       "kind": "etc",
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1400,
+      "name": "Spellbook: Surrender To Fire",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -12201,6 +12273,14 @@
       "weight": 120
     },
     {
+      "id": 1404,
+      "name": "Spellbook: Servitor Recharge",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1405,
       "name": "Spellbook: Servitor Heal",
       "kind": "etc",
@@ -12209,11 +12289,75 @@
       "weight": 120
     },
     {
+      "id": 1406,
+      "name": "Spellbook: Servitor Wind Walk",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1409,
+      "name": "Spellbook: Slow",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1410,
+      "name": "Spellbook: Poisonous Cloud",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
       "id": 1411,
       "name": "Spellbook: Aura Burn",
       "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1412,
+      "name": "Spellbook: Resist Aqua",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1413,
+      "name": "Spellbook: Resist Wind",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1414,
+      "name": "Spellbook: Resist Fire",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1415,
+      "name": "Spellbook: Dryad Root",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1416,
+      "name": "Spellbook: Curse of Chaos",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 2450,
       "weight": 120
     },
     {
@@ -13122,6 +13266,22 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1516,
+      "name": "Spellbook: Corpse Life Drain",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1517,
+      "name": "Spellbook: Body To Mind",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -14264,6 +14424,14 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_summon_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1668,
+      "name": "Spellbook: Summon Mew the Cat",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 1250,
       "weight": 120
     },
     {
@@ -43701,6 +43869,14 @@
       "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 4917,
+      "name": "Spellbook: Aura Bolt",
+      "kind": "etc",
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 3200,
       "weight": 120
     },
     {
@@ -75939,6 +76115,15 @@
       "weight": 120
     },
     {
+      "id": 8883,
+      "name": "Spellbook: Mystic Immunity",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 30000,
+      "weight": 120
+    },
+    {
       "id": 8884,
       "name": "Spellbook: Spell Turning",
       "kind": "etc",
@@ -75981,6 +76166,15 @@
       "stackable": true,
       "icon": "icon.etc_spell_books_summon_i00",
       "price": 7700,
+      "weight": 120
+    },
+    {
+      "id": 8891,
+      "name": "Spellbook: Aura Flash",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 6750,
       "weight": 120
     },
     {
@@ -76056,8 +76250,26 @@
       "weight": 120
     },
     {
+      "id": 8903,
+      "name": "Ancient Spellbook: Gehenna",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
       "id": 8904,
       "name": "Ancient Spellbook: Anti-Summoning Field",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8905,
+      "name": "Ancient Spellbook: Purification Field",
       "kind": "etc",
       "stackable": true,
       "icon": "icon.etc_spell_books_element_i00",
