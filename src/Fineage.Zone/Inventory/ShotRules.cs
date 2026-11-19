@@ -9,6 +9,8 @@ namespace Fineage.Zone.Inventory;
 public static class ShotRules
 {
     public const string NotAShot = "not_a_shot";
+    /// <summary>Mobius: beast shots cannot auto-enable without a pet or servitor.</summary>
+    public const string NoSummon = "no_summon";
 
     public enum ChargeDeny
     {
@@ -43,4 +45,11 @@ public static class ShotRules
 
     public static string? AutoEnableError(bool owned, bool isShot) =>
         !owned ? InventoryProtocol.NotOwned : !isShot ? NotAShot : null;
+
+    public static string? AutoEnableError(bool owned, bool isShot, bool isBeastShot, bool hasSummon)
+    {
+        if (AutoEnableError(owned, isShot) is { } error)
+            return error;
+        return isBeastShot && !hasSummon ? NoSummon : null;
+    }
 }

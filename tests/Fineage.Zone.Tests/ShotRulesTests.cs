@@ -23,4 +23,13 @@ public sealed class ShotRulesTests
         Assert.Equal(ShotRules.NotAShot, ShotRules.AutoEnableError(true, false));
         Assert.Null(ShotRules.AutoEnableError(true, true));
     }
+
+    [Fact]
+    public void Auto_enable_rejects_beast_shot_without_a_summon()
+    {
+        Assert.Equal(ShotRules.NoSummon, ShotRules.AutoEnableError(true, true, isBeastShot: true, hasSummon: false));
+        Assert.Null(ShotRules.AutoEnableError(true, true, isBeastShot: true, hasSummon: true));
+        Assert.Null(ShotRules.AutoEnableError(true, true, isBeastShot: false, hasSummon: false));
+        Assert.Equal(ShotRules.NotAShot, ShotRules.AutoEnableError(true, false, isBeastShot: true, hasSummon: true));
+    }
 }
