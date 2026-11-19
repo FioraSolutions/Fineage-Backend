@@ -141,6 +141,13 @@ public sealed class ZoneToggleAndFakeDeathTests
         var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         Assert.Contains(waits, a =>
             (int)a[1]! == player.ObjectId && (int)a[2]! == ActionProtocol.WaitSitting);
+        var relaxUpdates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.Contains(relaxUpdates, a =>
+        {
+            var msg = (AbnormalStatusUpdateMsg)a[1]!;
+            return msg.ObjectId == player.ObjectId &&
+                   msg.Effects.Any(e => e.Id == Relax && e.Value > 0);
+        });
         // Same sit pipeline as the Sit action: ChangeWaitType only, no extra stop/move packet
         // for a standing-still caster (Mobius sitDown broadcasts only the wait type).
         Assert.Equal(movesBefore, rec.Of(nameof(IWorldEventPublisher.FanoutMoveState)).Count);
@@ -231,6 +238,16 @@ public sealed class ZoneToggleAndFakeDeathTests
 
         var waits = rec.Of(nameof(IWorldEventPublisher.FanoutChangeWaitType));
         Assert.Contains(waits, a => (int)a[2]! == ActionProtocol.WaitStartFakeDeath);
+
+        // Mobius updateEffectIcons includes a toggle; Fake Death must be on the bar and
+        // the shortcut toggle shine (client reads AbnormalStatusUpdate, self included).
+        var updates = rec.Of(nameof(IWorldEventPublisher.FanoutAbnormalStatusUpdate));
+        Assert.Contains(updates, a =>
+        {
+            var msg = (AbnormalStatusUpdateMsg)a[1]!;
+            return msg.ObjectId == player.ObjectId &&
+                   msg.Effects.Any(e => e.Id == FakeDeath && e.Value > 0);
+        });
     }
 
     [Fact]
