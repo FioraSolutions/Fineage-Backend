@@ -60,7 +60,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: a cleanse is a positive support skill → no attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
 

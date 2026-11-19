@@ -2010,7 +2010,7 @@
       "targetType": "ONE",
       "castRange": 400,
       "hitTimeMs": 1200,
-      "reuseDelayMs": 5000,
+      "reuseDelayMs": 20000,
       "levelData": [
         {
           "level": 1,
@@ -2112,6 +2112,9 @@
         -162,
         -164,
         -167
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {
@@ -2241,6 +2244,9 @@
         -162,
         -164,
         -167
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {

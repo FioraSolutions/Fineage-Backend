@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
@@ -12,7 +13,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     string? CastMobiusAttack(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int level,
-        SkillCombatData combat, long now)
+        SkillCombatData combat, SkillDefinition template, long now)
     {
         int mpInitial = combat.MpInitialAt(level);
         if (player.CurMp < mpInitial + combat.MpAt(level))
@@ -39,7 +40,8 @@ public sealed partial class ZoneWorld
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
 
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: attack/stance only for isBad() (negative effectPoint, non-SELF target type).
+        EnterCombatStanceOnCast(player, template, level, now);
         session.SelectedTargetId = target.ObjectId;
         player.CastingUntilMs = now + hitTime + coolTime;
         SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level));

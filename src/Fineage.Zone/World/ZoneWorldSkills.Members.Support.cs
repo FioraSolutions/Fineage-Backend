@@ -59,7 +59,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: a heal / resurrection is not isBad() → no attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         // Mobius Heal effect at hitTime: HP rises when the cast completes, not when it starts.
         ScheduleEffect(player, target, template, level, now, hitMs, (t, _) =>
@@ -139,7 +140,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: resurrection is a positive self/support skill → no attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
 
         // Offer lands at hitTime (Mobius BuffInfo onStart for Resurrection).
@@ -206,7 +208,9 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: stance follows isBad(). Veil (106) has no effectPoint, so it is not bad and
+        // leaves the caster out of the stance even though it is a hostile cast.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
         // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
@@ -281,7 +285,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: stance follows isBad(). Trick/Switch/Bluff carry a negative effectPoint → stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
 

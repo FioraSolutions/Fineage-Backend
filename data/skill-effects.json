@@ -101,11 +101,11 @@
       "effects": [
         {
           "name": "DeleteHateOfMe",
-          "chance": "80"
+          "chance": "50"
         },
         {
           "name": "TargetCancel",
-          "chance": "80"
+          "chance": "70"
         }
       ]
     },
