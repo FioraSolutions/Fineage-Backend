@@ -105,6 +105,7 @@ public sealed class SkillCatalog
             {
                 MagicType = Math.Clamp(row.MagicType, 0, 2),
                 EffectRange = Math.Max(0, row.EffectRange),
+                AffectRange = Math.Max(0, row.AffectRange),
                 AbnormalType = (row.AbnormalType ?? "").Trim(),
                 AbnormalVisualEffect = (row.AbnormalVisualEffect ?? "").Trim(),
                 Trait = (row.Trait ?? "").Trim().ToUpperInvariant(),
@@ -144,6 +145,7 @@ public sealed class SkillCatalog
         public string? BasicProperty { get; set; }
         public int MagicType { get; set; }
         public int EffectRange { get; set; }
+        public int AffectRange { get; set; }
         /// <summary>Mobius <c>effectPoint</c>: a scalar row, or the per-level table expanded to a list.</summary>
         public List<int>? EffectPoint { get; set; }
         /// <summary>Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind=".."/&gt;</c> weapon gate.</summary>

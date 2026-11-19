@@ -28,6 +28,15 @@ public sealed class SkillEffectCatalog
         public string DispelAt(int level) =>
             Dispel.Count == 0 ? "" : Dispel[Math.Clamp(Math.Max(1, level), 1, Dispel.Count) - 1];
 
+        /// <summary>
+        /// Per-level <c>power</c> table (Life Scavenge <c>#drain</c>, Wrath <c>#power</c>). Empty = use <see cref="Power"/>.
+        /// </summary>
+        public IReadOnlyList<double> Powers { get; init; } = EmptyPowers;
+
+        /// <summary>Effect power at the skill level, falling back to the scalar <see cref="Power"/>.</summary>
+        public double PowerAt(int level) =>
+            Powers.Count == 0 ? Power : Powers[Math.Clamp(Math.Max(1, level), 1, Powers.Count) - 1];
+
         public int Chance => ReadInt("chance");
         public int SkillId => ReadInt("skillId");
         public int SkillLevel => ReadInt("skillLevel", 1);
@@ -42,6 +51,9 @@ public sealed class SkillEffectCatalog
         /// <summary>Same as <see cref="ReadInt"/> but public for the zone's skill handlers (signet <c>npcId</c>).</summary>
         public int ReadExtraInt(string key, int fallback = 0) => ReadInt(key, fallback);
 
+        /// <summary>Raw extra param (GetAgro <c>affectPlayers</c>, etc.).</summary>
+        public string ReadExtra(string key) => Read(key);
+
         string Read(string key) => Extra.TryGetValue(key, out string? v) ? v : "";
 
         /// <summary>Remaining <c>&lt;param&gt;</c> values (chance, trigger skillId/level, attacker bounds) for effect lookups.</summary>
@@ -51,6 +63,9 @@ public sealed class SkillEffectCatalog
     static readonly Dictionary<string, string> EmptyExtra = new();
 
     static readonly string[] EmptyDispel = [];
+
+    static readonly double[] EmptyPowers = [];
+
 
     readonly Dictionary<int, Effect[]> _byId;
 
@@ -163,6 +178,9 @@ public sealed class SkillEffectCatalog
                 int max = ReadInt(e, "max", 1);
                 int ticks = ReadInt(e, "ticks", 0);
                 double power = ReadDouble(e, "power");
+                var powers = ReadDoubles(e, "power");
+                if (powers.Length == 1)
+                    power = powers[0];
                 var extra = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var p in e.EnumerateObject())
                 {
@@ -175,7 +193,8 @@ public sealed class SkillEffectCatalog
                 list.Add(new Effect(name, slot, rate, max, power, ticks)
                 {
                     Extra = extra,
-                    Dispel = ReadDispel(e)
+                    Dispel = ReadDispel(e),
+                    Powers = powers
                 });
             }
             if (list.Count > 0)
@@ -211,6 +230,33 @@ public sealed class SkillEffectCatalog
         foreach (var item in v.EnumerateArray())
             rows.Add(item.ValueKind == JsonValueKind.String ? item.GetString() ?? "" : item.ToString());
         return rows.Count > 0 ? rows.ToArray() : EmptyDispel;
+    }
+
+    static double[] ReadDoubles(JsonElement e, string key)
+    {
+        if (!e.TryGetProperty(key, out var v))
+            return EmptyPowers;
+        if (v.ValueKind == JsonValueKind.Array)
+        {
+            var list = new List<double>();
+            foreach (var item in v.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.Number && item.TryGetDouble(out double d))
+                    list.Add(d);
+                else if (item.ValueKind == JsonValueKind.String &&
+                    double.TryParse(item.GetString(), System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out d))
+                    list.Add(d);
+            }
+            return list.Count > 0 ? list.ToArray() : EmptyPowers;
+        }
+        if (v.ValueKind == JsonValueKind.Number && v.TryGetDouble(out double one))
+            return [one];
+        if (v.ValueKind == JsonValueKind.String &&
+            double.TryParse(v.GetString(), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out one))
+            return [one];
+        return EmptyPowers;
     }
 
     static double ReadDouble(JsonElement e, string key)

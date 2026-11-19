@@ -121,10 +121,13 @@ public sealed partial class ZoneWorld
     /// <c>Bluff</c> (the victim turns its back on the caster) plus <c>TargetCancel</c> / <c>DeleteHateOfMe</c>
     /// (the victim forgets who hit it). Each rolls its own <c>chance</c>; a skill without these rows is a no-op.
     /// </summary>
-    void RunInstantPayloadEffects(ZoneEntity caster, ZoneEntity target, int skillId)
+    void RunInstantPayloadEffects(ZoneEntity caster, ZoneEntity target, int skillId, int level = 1, long now = 0)
     {
         if (caster == null || target == null || skillId <= 0)
             return;
+        if (now <= 0)
+            now = _clock().ToUnixTimeMilliseconds();
+        var template = _game.Skills.Find(skillId);
         foreach (var effect in EffectsOf(skillId))
         {
             switch (effect.Name)
@@ -149,6 +152,28 @@ public sealed partial class ZoneWorld
                     {
                         long power = effect.Power > 0 ? (long)effect.Power : 1;
                         AddHate(target, caster, power);
+                    }
+                    break;
+                case "GetAgro":
+                    ApplyGetAgro(caster, target, effect, now);
+                    break;
+                case "TargetMe":
+                    ApplyTargetMe(caster, target, effect);
+                    break;
+                case "CpDamPercent":
+                    ApplyCpDamPercent(caster, target, effect, level);
+                    break;
+                case "Lethal":
+                    ApplyLethalEffect(caster, target, effect, template, level);
+                    break;
+                case "RunAway":
+                    ApplyRunAway(caster, target, effect, skillId, now);
+                    break;
+                case "DispelByCategory":
+                    if (!string.IsNullOrEmpty(effect.Slot) && effect.Rate > 0)
+                    {
+                        int ml = template != null && template.TryLevelData(level, out var ld) ? ld.MagicLevel : caster.Level;
+                        ApplyDispelByCategory(target, effect.Slot, effect.Rate, Math.Max(1, effect.Max), ml);
                     }
                     break;
             }

@@ -13,7 +13,7 @@ public readonly record struct PlayerCombatStats(
     int ShieldDefAngle = 0, double PReuse = 1d, double MReuse = 1d, double DReuse = 1d,
     double PhysicalMpConsumeRate = 1d, double MagicalMpConsumeRate = 1d, double DanceMpConsumeRate = 1d,
     double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
-    int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 0);
+    int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1);
 
 public sealed partial class ZoneWorld
 {
@@ -72,7 +72,8 @@ public sealed partial class ZoneWorld
             HealEffect: mods.Apply(CombatStat.HealEffect, 1d),
             SkillCritical: mods.Apply(CombatStat.SkillCritical, 0),
             SkillCriticalProbability: mods.Apply(CombatStat.SkillCriticalProbability, 1d),
-            AtkCountMax: Math.Max(0, mods.Apply(CombatStat.AtkCountMax, 0)));
+            // Mobius calcStat(ATTACK_COUNT_MAX, 1): a pole starts at 1 hit; Fell Swoop adds extras.
+            AtkCountMax: Math.Max(1, mods.Apply(CombatStat.AtkCountMax, 1)));
     }
 
     /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>

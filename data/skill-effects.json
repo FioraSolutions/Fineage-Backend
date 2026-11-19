@@ -165,10 +165,14 @@
       "skillId": 18,
       "effects": [
         {
-          "name": "TargetMe"
+          "name": "TargetMe",
+          "chance": 60
         },
         {
-          "name": "GetAgro"
+          "name": "GetAgro",
+          "chance": 60,
+          "affectPlayers": "true",
+          "range": "500"
         }
       ]
     },
@@ -244,10 +248,14 @@
       "skillId": 28,
       "effects": [
         {
-          "name": "TargetMe"
+          "name": "TargetMe",
+          "chance": 60
         },
         {
-          "name": "GetAgro"
+          "name": "GetAgro",
+          "chance": 60,
+          "affectPlayers": "true",
+          "range": "500"
         }
       ]
     },
@@ -357,7 +365,23 @@
       "effects": [
         {
           "name": "HpByLevel",
-          "power": "#drain"
+          "power": [
+            105,
+            113,
+            122,
+            131,
+            140,
+            150,
+            159,
+            169,
+            180,
+            190,
+            201,
+            211,
+            222,
+            232,
+            243
+          ]
         },
         {
           "name": "ConsumeBody"
@@ -489,7 +513,7 @@
       "effects": [
         {
           "name": "HpDrain",
-          "power": "0.2"
+          "power": 0.2
         }
       ]
     },
@@ -1997,6 +2021,9 @@
       "effects": [
         {
           "name": "Buff"
+        },
+        {
+          "name": "PolearmSingleTarget"
         }
       ]
     },
@@ -2021,7 +2048,18 @@
       "effects": [
         {
           "name": "CpDamPercent",
-          "power": "#power"
+          "power": [
+            7,
+            10,
+            12,
+            15,
+            17,
+            20,
+            22,
+            25,
+            27,
+            30
+          ]
         }
       ]
     },
@@ -2249,7 +2287,7 @@
         },
         {
           "name": "CpDamPercent",
-          "power": "90"
+          "power": 90
         }
       ]
     },
@@ -2809,12 +2847,12 @@
       "effects": [
         {
           "name": "RunAway",
-          "power": "30",
-          "time": "20"
+          "power": 30,
+          "time": 20
         },
         {
           "name": "Lethal",
-          "fullLethal": "25"
+          "fullLethal": 25
         }
       ]
     },
@@ -3227,12 +3265,12 @@
       "effects": [
         {
           "name": "RunAway",
-          "power": "30",
-          "time": "20"
+          "power": 30,
+          "time": 20
         },
         {
           "name": "Lethal",
-          "fullLethal": "25"
+          "halfLethal": 50
         }
       ]
     },

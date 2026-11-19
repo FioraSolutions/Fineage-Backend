@@ -39,6 +39,9 @@ public sealed class SkillDefinition
     /// <summary>Mobius effectRange (escape range at launch); 0 = use <see cref="CastRange"/>.</summary>
     public int EffectRange { get; init; }
 
+    /// <summary>Mobius <c>affectRange</c> for AURA / AREA / FRONT_AREA. 0 = use the family default.</summary>
+    public int AffectRange { get; init; }
+
     public string Name { get; }
 
     public bool Passive { get; }

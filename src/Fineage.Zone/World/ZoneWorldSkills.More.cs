@@ -280,6 +280,10 @@ public sealed partial class ZoneWorld
         if (_skillEffects.TryGet(request.SkillId, out var openRows) && HasOpenChest(openRows))
             return TrySkillUseOpenChest(session, player, request, liveTemplate, liveLevelData, level, now);
 
+        if (_skillEffects.TryGet(request.SkillId, out var scavengeRows) && HasCorpseScavengePayload(scavengeRows) &&
+            liveTemplate.TargetType.Equals("CORPSE_MOB", StringComparison.OrdinalIgnoreCase))
+            return TrySkillUseLifeScavenge(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
@@ -311,7 +315,12 @@ public sealed partial class ZoneWorld
                 row.Name.Equals("TargetCancel", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("TransferHate", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("AddHate", StringComparison.OrdinalIgnoreCase) ||
-                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase))
+                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("GetAgro", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TargetMe", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("CpDamPercent", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Lethal", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("RunAway", StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

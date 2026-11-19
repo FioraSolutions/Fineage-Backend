@@ -170,6 +170,11 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+
+    /// <summary>
+    /// Hostile debuff: abnormal plus instant payloads. AURA / FRONT_AREA centre on the caster and do not
+    /// require an attackable primary; AREA still fans out around the primary target.
+    /// </summary>
     string? TrySkillUseDebuff(
         ZoneSession session,
         ZoneEntity player,
@@ -179,75 +184,18 @@ public sealed partial class ZoneWorld
         int level,
         long now)
     {
-        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
-        if (targetId <= 0)
-            return SkillProtocol.Target;
-        if (!_byId.TryGetValue(targetId, out var target))
-            return SkillProtocol.Target;
-        if (!IsAttackable(player, target))
-            return SkillProtocol.Target;
-        // Mobius Player.useMagic: an offensive skill on a player that is not auto-attackable needs Ctrl.
-        if (!request.CtrlPressed && NeedsForce(player, target))
-            return null;
-        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
-            SiegeFriendRefused(session, player, target) ||
-            PeacePlayableRefused(session, player, target))
-            return null;
-        if (!VisibleTo(player.ObjectId, targetId))
-            return SkillProtocol.Target;
-        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
-            return rangeError;
-        // Mobius callSkill: a negative skill on a playable flags the caster (landing or resisted).
-        UpdatePvPStatus(player, target, now);
-
-        ConsumeSkillMp(player, template, levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
-        if (reuseMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
-
-        var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
-        StopForCast(player, target, now);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        // Mobius onMagicFinalizer: stance follows isBad(). Veil (106) has no effectPoint, so it is not bad and
-        // leaves the caster out of the stance even though it is a hostile cast.
-        EnterCombatStanceOnCast(player, template, level, now);
-        player.CastingUntilMs = now + Math.Max(0, hitMs);
-        session.SelectedTargetId = targetId;
-        // Mobius onMagicHitTimer: debuff lands at hitTime; a dead/escaped/hidden target aborts it.
-        // Hate on landing is Mobius `effectPoint`, not `power`: onMagicHitTimer runs
-        // `addDamageHate(this, 0, -effectPoint)` for a negative point and `reduceHate(this, effectPoint)` for a
-        // positive one, BEFORE the `<for>` payloads. Veil (106) has no effectPoint at all, so it writes no hate —
-        // the old unconditional AddHate(power) is what made a Veil'd monster turn on the caster.
-        // AREA (Poisonous Cloud): affect around the primary target (Mobius affectRange, typically 200).
-        bool isArea = template.TargetType.Equals("AREA", StringComparison.OrdinalIgnoreCase);
-        int affectRange = isArea ? ResolveAffectRange(template) : 0;
-        int effectPoint = template.EffectPointAt(level);
-        ScheduleEffect(player, target, template, level, now, hitMs, (t, at) =>
-        {
-            if (isArea)
-            {
-                ApplyAreaDebuff(player, t, template, levelData, at, affectRange);
-                return;
-            }
-            if (!ApplyAbnormalFromSkill(template, levelData, t, at, attacker: player))
-                return;
-            if (t.Kind == ZoneEntityKind.Npc)
-                ApplyEffectPointHate(player, t, effectPoint, template, request.SkillId);
-            // Mobius `Passive` (Veil's whole payload) sets EffectFlag.PASSIVE: Monster.isAggressive() turns false, so
-            // the victim stops starting fights. TURN_PASSIVE also skips the EVT_ATTACKED notify entirely, and the
-            // pawn forgets the caster it was hitting.
-            if (IsTurnPassive(template.AbnormalType))
-                PacifyNpc(t, player, at);
-            RunInstantPayloadEffects(player, t, request.SkillId);
-        });
-        return null;
+        if (!TryResolveHostileSkillTarget(session, player, request, template, now, out var target, out var error))
+            return error;
+        return LaunchHostileSkill(session, player, request, template, levelData, level, now, target);
     }
+
 
     /// <summary>
     /// Mobius hostile A1 utility: Trick (11) and Switch (12) carry no abnormal at all — their whole payload is the
     /// <c>&lt;for&gt;</c> block (<c>DeleteHateOfMe</c> / <c>RandomizeHate</c> / <c>TargetCancel</c>) plus the negative
     /// <c>effectPoint</c> hate. Same target/range/refusal gates as a debuff, but nothing is applied to the abnormal
-    /// bar; the instant payloads run when the hit lands.
+    /// bar; the instant payloads run when the hit lands. AURA / FRONT_AREA utilities (Aura of Hate-style hate and
+    /// Wrath-style CpDamPercent) centre on the caster and do not require a primary target.
     /// </summary>
     string? TrySkillUseHostileUtility(
         ZoneSession session,
@@ -258,46 +206,9 @@ public sealed partial class ZoneWorld
         int level,
         long now)
     {
-        int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
-        if (targetId <= 0)
-            return SkillProtocol.Target;
-        if (!_byId.TryGetValue(targetId, out var target))
-            return SkillProtocol.Target;
-        if (!IsAttackable(player, target))
-            return SkillProtocol.Target;
-        if (!request.CtrlPressed && NeedsForce(player, target))
-            return null;
-        if (HostilePlayableRefused(session, player, target, badSkill: true) ||
-            SiegeFriendRefused(session, player, target) ||
-            PeacePlayableRefused(session, player, target))
-            return null;
-        if (!VisibleTo(player.ObjectId, targetId))
-            return SkillProtocol.Target;
-        if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
-            return rangeError;
-        UpdatePvPStatus(player, target, now);
-
-        ConsumeSkillMp(player, template, levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
-        if (reuseMs > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
-
-        var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
-        StopForCast(player, target, now);
-        FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        // Mobius onMagicFinalizer: stance follows isBad(). Trick/Switch/Bluff carry a negative effectPoint → stance.
-        EnterCombatStanceOnCast(player, template, level, now);
-        player.CastingUntilMs = now + Math.Max(0, hitMs);
-        session.SelectedTargetId = targetId;
-
-        int effectPoint = template.EffectPointAt(level);
-        ScheduleEffect(player, target, template, level, now, hitMs, (t, at) =>
-        {
-            if (t.Kind == ZoneEntityKind.Npc)
-                ApplyEffectPointHate(player, t, effectPoint, template, request.SkillId);
-            RunInstantPayloadEffects(player, t, request.SkillId);
-        });
-        return null;
+        if (!TryResolveHostileSkillTarget(session, player, request, template, now, out var target, out var error))
+            return error;
+        return LaunchHostileSkill(session, player, request, template, levelData, level, now, target);
     }
 
     /// <summary>Mobius <c>AbnormalType.TURN_PASSIVE</c> — Veil's slot, the one abnormal Creature.callSkill exempts.</summary>

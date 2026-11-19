@@ -470,9 +470,11 @@ public sealed partial class ZoneWorld
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags, RechargeShots: true));
+        long due = now + (dual ? atk / 4 : atk / 2);
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true));
         if (dual)
             _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
+        QueuePoleSplashHits(player, target, ps, soulshot, due);
 
         return null;
     }
