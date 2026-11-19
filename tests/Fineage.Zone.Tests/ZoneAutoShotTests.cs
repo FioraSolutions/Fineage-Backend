@@ -108,4 +108,45 @@ public sealed class ZoneAutoShotTests
         Assert.Equal(0, player.SpiritshotCharge);
         Assert.Equal(100, player.Inventory.FindByItemId(6645)!.Count);
     }
+
+    [Fact]
+    public async Task Melee_soulshot_recharges_at_hit_time_not_at_swing_start()
+    {
+        var kit = new NetTestKit(Adjacent(), "ss-timing");
+        var (session, player) = await kit.EnterAsync(classId: 0, race: 0);
+        var bag = player.Inventory!;
+        if (bag.GetEquipped(PaperdollSlot.RHand)?.Template.Soulshots is not > 0)
+            bag.Equip(bag.Add(219));
+        bag.Add(1835, 100);
+        Assert.Null(await kit.World.TryAutoSoulShotAsync(session, 1835, true, CancellationToken.None));
+        Assert.True(player.SoulshotCharged);
+
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
+        Assert.False(player.SoulshotCharged); // fired with the swing, not yet recharged
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse))); // glow waits for onHitTimer
+
+        // Stop the auto loop so the next swing cannot consume the recharge in the same tick.
+        session.AutoAttackTargetId = 0;
+        kit.Now = kit.Now.AddSeconds(2);
+        await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
+        Assert.True(player.SoulshotCharged); // onHitTimer recharge
+        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)));
+    }
+
+    const int MobId = 9_300_077;
+
+    static Fineage.Zone.Spawns.SpawnCatalog Adjacent() =>
+        Fineage.Zone.Spawns.SpawnCatalog.From(new Dictionary<string, Fineage.Zone.Spawns.SpawnMapDefinition>
+        {
+            ["ss-timing"] = new("ss-timing", true,
+            [
+                new Fineage.Zone.Spawns.SpawnNpcDefinition(MobId, 90_001, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
+                    0, true, 50_000, 1f, 1f, 60, 0, "", "Monster",
+                    Level: 1, AttackRange: 40, AttackSpeed: 253, Aggressive: false, AggroRange: 0, ClanHelpRange: 0, Clans: [])
+            ])
+        });
 }

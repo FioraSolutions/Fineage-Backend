@@ -423,10 +423,9 @@ public sealed partial class ZoneWorld
             }
         }
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
+        // The next auto shot is recharged in onHitTimer (first hit), so its glow follows the hit, not the swing start.
         bool soulshot = player.SoulshotCharged;
         player.SoulshotCharged = false;
-        if (soulshot)
-            RechargeAutoShots(player);
         // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
         player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
         // Mobius doAttackHitByDual: two independent rolls, each damage / 2. timeToHit is timeAtk/2, then the
@@ -469,7 +468,7 @@ public sealed partial class ZoneWorld
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags));
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags, RechargeShots: true));
         if (dual)
             _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
 
