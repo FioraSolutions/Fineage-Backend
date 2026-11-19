@@ -63,7 +63,13 @@ public sealed record NpcTemplate(
     /// <summary>Mobius <c>&lt;param name="despawn_time"&gt;</c> on EffectPoint signets, in seconds.</summary>
     int DespawnTimeSeconds = 0,
     /// <summary>Mobius <c>&lt;param name="skill_delay"&gt;</c>: seconds between signet aura pulses.</summary>
-    int SkillDelaySeconds = 0);
+    int SkillDelaySeconds = 0,
+    /// <summary>Mobius <c>stats/attack type</c> (SWORD, BOW, FIST, …). Empty when the XML omits it.</summary>
+    string AttackType = "",
+    /// <summary>Mobius <c>equipment rhand</c> item id (0 = none).</summary>
+    int Rhand = 0,
+    /// <summary>Mobius <c>equipment lhand</c> item id (0 = none).</summary>
+    int Lhand = 0);
 
 /// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
 public readonly record struct NpcAiSkill(int SkillId, int Level);
@@ -205,7 +211,10 @@ public sealed class NpcCatalog
                 row.MinSkillChance > 0 ? row.MinSkillChance : 7,
                 row.MaxSkillChance > 0 ? row.MaxSkillChance : 15,
                 Math.Max(0, row.DespawnTimeSeconds),
-                Math.Max(0, row.SkillDelaySeconds)));
+                Math.Max(0, row.SkillDelaySeconds),
+                (row.AttackType ?? "").Trim(),
+                Math.Max(0, row.Rhand),
+                Math.Max(0, row.Lhand)));
         }
 
     static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
@@ -291,6 +300,11 @@ public sealed class NpcCatalog
         public int DespawnTimeSeconds { get; set; }
         /// <summary>Mobius EffectPoint <c>&lt;param name="skill_delay"&gt;</c>, in seconds.</summary>
         public int SkillDelaySeconds { get; set; }
+        /// <summary>Mobius <c>stats/attack type</c> (SWORD, BOW, FIST, …).</summary>
+        public string? AttackType { get; set; }
+        /// <summary>Mobius <c>equipment rhand</c> / <c>lhand</c> item ids.</summary>
+        public int Rhand { get; set; }
+        public int Lhand { get; set; }
     }
 
     sealed class AiSkillDto

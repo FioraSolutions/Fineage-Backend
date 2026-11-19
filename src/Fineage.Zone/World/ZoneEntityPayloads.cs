@@ -77,6 +77,9 @@ sealed class ZoneNpcTemplatePayload
     public double PDef { get; set; }
     public int PAtkSpd { get; set; }
     public int AttackRange { get; set; }
+    public string AttackType { get; set; } = "";
+    public int Rhand { get; set; }
+    public int Lhand { get; set; }
     public int CollisionRadius { get; set; }
     public bool Aggressive { get; set; }
     public int AggroRange { get; set; }
