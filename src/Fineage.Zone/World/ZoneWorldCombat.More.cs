@@ -71,7 +71,7 @@ public sealed partial class ZoneWorld
         {
             pDef = NpcPDef(target);
             evasion = NpcEvasion(target);
-            shieldRate = NpcShieldRate(target);
+            shieldRate = ShieldRateInArc(target, player, NpcShieldRate(target), 0);
             shieldDef = target.ShieldDef;
         }
         else
@@ -79,7 +79,7 @@ public sealed partial class ZoneWorld
             var ts = PlayerStats(target);
             pDef = Math.Max(1d, ts.PDef);
             evasion = ts.Evasion;
-            shieldRate = ts.ShieldRate;
+            shieldRate = ShieldRateInArc(target, player, ts.ShieldRate, ts.ShieldDefAngle);
             shieldDef = ts.ShieldDef;
         }
 

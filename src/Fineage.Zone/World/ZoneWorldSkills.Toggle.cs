@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
 
         var ps = PlayerStats(player);
         int hitMs = ZoneCombat.SkillTimeMs(template.HitTimeMs, template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
-        int reuseMs = ZoneCombat.SkillReuseMs(template.ReuseDelayMsAt(level), template.MagicType == 1, ps.MAtkSpd, ps.PAtkSpd);
+        int reuseMs = SkillReuseMsFor(player, template, template.ReuseDelayMsAt(level));
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
@@ -119,7 +119,7 @@ public sealed partial class ZoneWorld
     /// <c>Creature.checkDoCastConditions</c> gates on exactly this sum.
     /// </summary>
     int ToggleInitialMpCost(ZoneEntity player, SkillDefinition template, SkillLevelData levelData) =>
-        Math.Max(0, levelData.MpConsume) + Math.Max(0, levelData.MpInitialConsume);
+        SkillMpCost(player, template, Math.Max(0, levelData.MpConsume) + Math.Max(0, levelData.MpInitialConsume));
 
     void ApplyToggleAbnormal(
         ZoneEntity player, SkillDefinition template, SkillLevelData levelData, int level, long now, int skillId)

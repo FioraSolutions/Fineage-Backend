@@ -158,6 +158,8 @@ public sealed partial class ZoneWorld
         // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd)
         // and a fresh run speed (Wind Walk/Slow change how fast the pawn actually travels).
         bool statful = target.Abnormals.Any(a => _statEffects.TryGet(a.Id, out _));
+        if (target.Kind == ZoneEntityKind.Player)
+            RefreshPlayerMaxima(target, fanout: false);
         bool speedChanged = RefreshRunSpeed(target);
         if (speedChanged)
             FanoutNetMoveType(target);

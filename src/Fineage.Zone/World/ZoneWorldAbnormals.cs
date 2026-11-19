@@ -24,6 +24,15 @@ public sealed partial class ZoneWorld
             return false;
 
         int duration = durationSeconds ?? template.AbnormalTimeSeconds;
+        // Independent of the reuse roll: Mobius calcSkillMastery may double the abnormal time.
+        if (durationSeconds == null && attacker is { Kind: ZoneEntityKind.Player } && duration > 0)
+        {
+            var ps = PlayerStats(attacker);
+            var attrs = EffectiveAttributes(attacker);
+            if (ZoneCombat.RollSkillMastery(
+                    _combatRandom, ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus))
+                duration *= 2;
+        }
         // The land roll already passed; a lower-level same-slot occupant is rejected silently
         // (Mobius EffectList.add returns without initializeEffects) and is not a resist.
         if (!ZoneAbnormals.Apply(

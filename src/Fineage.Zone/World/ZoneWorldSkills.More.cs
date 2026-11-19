@@ -176,7 +176,7 @@ public sealed partial class ZoneWorld
                 levelDataOk: levelDataOk,
                 onReuse: onReuse,
                 curMp: player.CurMp,
-                mpConsume: levelData?.MpConsume ?? 0) is { } precheckError)
+                mpConsume: SkillMpCost(player, template, levelData?.MpConsume ?? 0)) is { } precheckError)
             return precheckError;
 
         var liveTemplate = template!;

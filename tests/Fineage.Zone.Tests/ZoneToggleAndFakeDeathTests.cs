@@ -88,14 +88,15 @@ public sealed class ZoneToggleAndFakeDeathTests
     {
         var (kit, _, session, player) = await EnterWithBridgeAsync();
         player.KnownSkills[Relax] = 1;
-        player.CurMp = 500;
+        kit.World.RefreshPlayerMaxima(player, fanout: false);
+        player.CurMp = player.MaxMp;
         player.Sitting = true;
         if (player.MaxHp > 1)
             player.CurHp = player.MaxHp - 1;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Relax, 0, CancellationToken.None));
         int afterStart = player.CurMp;
-        Assert.Equal(498, afterStart);
+        Assert.Equal(player.MaxMp - 2, afterStart);
 
         // Relax ticks 3 → 3 · 666 ms ≈ 1998 ms, power 1.
         kit.Now = kit.Now.AddMilliseconds(2000);

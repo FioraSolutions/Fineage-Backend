@@ -172,6 +172,7 @@ public sealed partial class ZoneWorld
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
         target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyReflectAndAbsorb(attacker, target, damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(attacker, target, damage, 0);

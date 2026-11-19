@@ -799,7 +799,7 @@ public sealed partial class ZoneWorld
     {
         if (template.CastRange > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
             return SkillProtocol.Range;
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[skillId] = now + reuseMs;
