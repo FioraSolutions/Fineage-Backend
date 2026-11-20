@@ -119,13 +119,7 @@ public sealed partial class ZoneWorld
             SkillId = skill,
             SkillLevel = 1
         };
-        List<int> netWatchers = [player.ObjectId];
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, player) || !watcher.Knownlist.Contains(player.ObjectId))
-                continue;
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(player);
         NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg
         {
             CasterObjectId = player.ObjectId,

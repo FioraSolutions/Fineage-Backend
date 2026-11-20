@@ -222,24 +222,12 @@ public sealed partial class ZoneWorld
             _ => waitType.ToString()
         };
         ZoneLog.Info($"[wait-type] obj={player.ObjectId} type={label} x={player.X} y={player.Y} z={player.Z}");
-        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
+        var waitWatchers = NetWatchersOf(player);
+        if (waitWatchers.Count > 0)
+            NetBridge?.FanoutChangeWaitType(waitWatchers, player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 
     void FanoutMoveType(ZoneEntity player) => FanoutNetMoveType(player);
-
-    /// <summary>Self (players) + knownlist players: the Net ChangeMoveType audience.</summary>
-    List<int> NetWatchersOf(ZoneEntity actor)
-    {
-        var list = new List<int>();
-        if (actor.Session != null)
-            list.Add(actor.ObjectId);
-        foreach (int id in actor.Knownlist)
-        {
-            if (_byId.TryGetValue(id, out var w) && w.Session != null && w.Kind == ZoneEntityKind.Player)
-                list.Add(id);
-        }
-        return list;
-    }
 
     /// <summary>
     /// Net ChangeMoveType (gait + effective run/walk speed, swim-aware) to self + watchers.

@@ -149,12 +149,7 @@ public sealed partial class ZoneWorld
         int y = npc.Y;
         int z = npc.Z;
 
-        var watchers = new List<ZoneEntity>();
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(objectId))
-                watchers.Add(player);
-        }
+        var watchers = WatchingPlayers(objectId);
 
         // Mobius Creature.doDie -> stopAllEffects(): a corpse carries no debuffs. Clearing them before the Die packet
         // also empties the watchers' abnormal bar, so the client's stun/sleep pose no longer holds the pawn on the
@@ -233,18 +228,19 @@ public sealed partial class ZoneWorld
         ScheduleRespawn(objectId);
 
         List<int>? netWatchers = null;
-        foreach (var player in Players())
+        ForEachWatchingPlayer(objectId, player =>
         {
-            if (player.Session == null)
-                continue;
             if (player.Knownlist.Remove(objectId))
             {
+                UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }
-            if (player.Session.SelectedTargetId == objectId)
+
+            if (player.Session!.SelectedTargetId == objectId)
                 player.Session.SelectedTargetId = 0;
-        }
+        });
+        DropWatcherIndex(objectId);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {

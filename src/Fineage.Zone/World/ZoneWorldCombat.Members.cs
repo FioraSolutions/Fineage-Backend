@@ -254,23 +254,7 @@ public sealed partial class ZoneWorld
     /// MagicSkillCanceled): the actor itself plus every player whose knownlist holds the actor. A player target is
     /// always included (it is necessarily in the actor's AOI when the packet is legal).
     /// </summary>
-    List<int>? ActorAudience(ZoneEntity actor, ZoneEntity? target = null)
-    {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, actor) ||
-                         (target != null && ReferenceEquals(watcher, target)) ||
-                         watcher.Knownlist.Contains(actor.ObjectId);
-            if (!cares)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-        return netWatchers;
-    }
+    List<int>? ActorAudience(ZoneEntity actor, ZoneEntity? target = null) => ActorNetWatchers(actor, target);
 
     void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
     {

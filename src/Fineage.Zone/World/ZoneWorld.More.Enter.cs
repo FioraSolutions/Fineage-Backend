@@ -209,8 +209,12 @@ public sealed partial class ZoneWorld
         foreach (var other in OrderedVisible(entity.ObjectId))
         {
             entity.Knownlist.Add(other.ObjectId);
+            TrackWatcher(entity.ObjectId, other.ObjectId);
             if (other.Session != null)
+            {
                 other.Knownlist.Add(entity.ObjectId);
+                TrackWatcher(other.ObjectId, entity.ObjectId);
+            }
             else
                 TrackThink(other);
         }

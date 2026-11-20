@@ -425,6 +425,7 @@ public sealed partial class ZoneWorld
                 if (!VisibleTo(player.ObjectId, npc.ObjectId))
                     continue;
                 player.Knownlist.Add(npc.ObjectId);
+                TrackWatcher(player.ObjectId, npc.ObjectId);
                 TrackThink(npc);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
                 ZoneLog.Info($"[aoi] npc enter npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
@@ -433,6 +434,7 @@ public sealed partial class ZoneWorld
                      (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
             {
                 player.Knownlist.Remove(npc.ObjectId);
+                UntrackWatcher(player.ObjectId, npc.ObjectId);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [], [npc.ObjectId]);
                 ReleaseThink(npc);
                 ZoneLog.Info($"[aoi] npc leave npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");

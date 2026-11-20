@@ -218,16 +218,7 @@ public sealed partial class ZoneWorld
             SelfUserInfo(player);
         if (NetBridge == null)
             return;
-        List<int>? watchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, player))
-                continue;
-            if (!watcher.Knownlist.Contains(player.ObjectId))
-                continue;
-            watchers ??= [];
-            watchers.Add(watcher.ObjectId);
-        }
+        var watchers = NetWatchersOfCharInfo(player);
         if (watchers is { Count: > 0 })
             NetBridge.FanoutCharInfo(watchers, player.ObjectId);
     }

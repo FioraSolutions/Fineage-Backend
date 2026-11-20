@@ -250,19 +250,9 @@ public sealed partial class ZoneWorld
             Values = [0, dead.MaxHp]
         };
 
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (!ReferenceEquals(watcher, dead) && !watcher.Knownlist.Contains(dead.ObjectId))
-                continue;
+        var netWatchers = NetWatchersOf(dead);
 
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
         {
             NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId, RestartFlagsFor(dead));
             NetBridge.FanoutStatusUpdate(netWatchers, status);
@@ -271,19 +261,7 @@ public sealed partial class ZoneWorld
 
     void FanoutRevive(ZoneEntity actor)
     {
-        List<int>? netWatchers = null;
-        if (actor.Session != null)
-            netWatchers = [actor.ObjectId];
-
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, actor))
-                continue;
-            if (!watcher.Knownlist.Contains(actor.ObjectId))
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOfRevive(actor);
 
         if (netWatchers is { Count: > 0 })
         {

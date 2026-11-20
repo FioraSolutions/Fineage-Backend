@@ -150,10 +150,16 @@ public sealed partial class ZoneWorld
             return;
 
         self.Knownlist.Add(otherId);
+        TrackWatcher(self.ObjectId, otherId);
         if (other.Session != null)
+        {
             other.Knownlist.Add(self.ObjectId);
+            TrackWatcher(other.ObjectId, self.ObjectId);
+        }
         else
             TrackThink(other);
+        AssertWatcherIndexConsistent(otherId);
+        AssertWatcherIndexConsistent(self.ObjectId);
     }
 
     void Forget(ZoneEntity self, int otherId)
@@ -161,9 +167,12 @@ public sealed partial class ZoneWorld
         if (self.Session == null)
             return;
 
-        self.Knownlist.Remove(otherId);
-        if (_byId.TryGetValue(otherId, out var other))
-            other.Knownlist.Remove(self.ObjectId);
+        if (self.Knownlist.Remove(otherId))
+            UntrackWatcher(self.ObjectId, otherId);
+        if (_byId.TryGetValue(otherId, out var other) && other.Knownlist.Remove(self.ObjectId))
+            UntrackWatcher(other.ObjectId, self.ObjectId);
+        AssertWatcherIndexConsistent(otherId);
+        AssertWatcherIndexConsistent(self.ObjectId);
     }
 
     /// <returns>False when nothing was detached (stale session / object id).</returns>
@@ -192,7 +201,9 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var other))
                 continue;
-            other.Knownlist.Remove(session.ObjectId);
+            if (other.Knownlist.Remove(session.ObjectId))
+                UntrackWatcher(other.ObjectId, session.ObjectId);
+            UntrackWatcher(session.ObjectId, id);
         }
 
         NoteOlympiadDisconnect(entity);
@@ -201,6 +212,7 @@ public sealed partial class ZoneWorld
         DuelOnLeave(entity);
 
         entity.Knownlist.Clear();
+        DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
         ForgetActiveSets(session.ObjectId);

@@ -255,16 +255,7 @@ public sealed partial class ZoneWorld
         NetBridge.FanoutSummonInfo([owner.ObjectId], BuildSummonInfo(summon));
     }
 
-    List<int> KnownWatchers(int objectId)
-    {
-        var list = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && player.Knownlist.Contains(objectId))
-                list.Add(player.ObjectId);
-        }
-        return list;
-    }
+    List<int> KnownWatchers(int objectId) => CopyNetWatcherIds(objectId);
 
     // ---------------------------------------------------------------- removal / death
 
@@ -289,17 +280,20 @@ public sealed partial class ZoneWorld
         ForgetActiveSets(id);
 
         List<int>? watchers = null;
-        foreach (var player in Players())
+        ForEachWatchingPlayer(id, player =>
         {
-            if (player.Session == null)
-                continue;
             if (player.Knownlist.Remove(id))
+            {
+                UntrackWatcher(player.ObjectId, id);
                 (watchers ??= []).Add(player.ObjectId);
-            if (player.Session.SelectedTargetId == id)
+            }
+
+            if (player.Session!.SelectedTargetId == id)
                 player.Session.SelectedTargetId = 0;
             if (player.Session.AutoAttackTargetId == id)
                 player.Session.AutoAttackTargetId = 0;
-        }
+        });
+        DropWatcherIndex(id);
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
         if (owner?.Session != null)
