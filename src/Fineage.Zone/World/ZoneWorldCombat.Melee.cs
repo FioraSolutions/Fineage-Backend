@@ -227,20 +227,21 @@ public sealed partial class ZoneWorld
         ForgetActiveSets(objectId);
         ScheduleRespawn(objectId);
 
+        // Every player, not only watchers: a target selected before the NPC left view must be cleared too.
         List<int>? netWatchers = null;
-        ForEachWatchingPlayer(objectId, player =>
+        foreach (var player in Players())
         {
+            if (player.Session == null)
+                continue;
             if (player.Knownlist.Remove(objectId))
             {
                 UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }
-
-            if (player.Session!.SelectedTargetId == objectId)
+            if (player.Session.SelectedTargetId == objectId)
                 player.Session.SelectedTargetId = 0;
-        });
-        DropWatcherIndex(objectId);
+        }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {

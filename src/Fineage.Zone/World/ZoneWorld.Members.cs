@@ -158,8 +158,6 @@ public sealed partial class ZoneWorld
         }
         else
             TrackThink(other);
-        AssertWatcherIndexConsistent(otherId);
-        AssertWatcherIndexConsistent(self.ObjectId);
     }
 
     void Forget(ZoneEntity self, int otherId)
@@ -171,8 +169,6 @@ public sealed partial class ZoneWorld
             UntrackWatcher(self.ObjectId, otherId);
         if (_byId.TryGetValue(otherId, out var other) && other.Knownlist.Remove(self.ObjectId))
             UntrackWatcher(other.ObjectId, self.ObjectId);
-        AssertWatcherIndexConsistent(otherId);
-        AssertWatcherIndexConsistent(self.ObjectId);
     }
 
     /// <returns>False when nothing was detached (stale session / object id).</returns>
@@ -203,7 +199,6 @@ public sealed partial class ZoneWorld
                 continue;
             if (other.Knownlist.Remove(session.ObjectId))
                 UntrackWatcher(other.ObjectId, session.ObjectId);
-            UntrackWatcher(session.ObjectId, id);
         }
 
         NoteOlympiadDisconnect(entity);
@@ -211,6 +206,8 @@ public sealed partial class ZoneWorld
         RemoveAllCubics(entity, broadcast: false);
         DuelOnLeave(entity);
 
+        foreach (int id in entity.Knownlist)
+            UntrackWatcher(session.ObjectId, id);
         entity.Knownlist.Clear();
         DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);

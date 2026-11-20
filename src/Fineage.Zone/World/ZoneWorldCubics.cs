@@ -148,7 +148,7 @@ public sealed partial class ZoneWorld
         if (player.Session == null)
             return;
         SelfUserInfo(player);
-        var peers = NetWatchersOf(player).Where(id => id != player.ObjectId).ToList();
+        var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);
     }
@@ -288,20 +288,20 @@ public sealed partial class ZoneWorld
                 }
                 return null;
             case "WEIGHTED":
-            {
-                int total = skills.Where(static s => s.TriggerRate > 0).Sum(static s => s.TriggerRate);
-                if (total > 0)
                 {
-                    int roll = _combatRandom.Next(total);
-                    foreach (var s in skills.Where(static s => s.TriggerRate > 0))
+                    int total = skills.Where(static s => s.TriggerRate > 0).Sum(static s => s.TriggerRate);
+                    if (total > 0)
                     {
-                        roll -= s.TriggerRate;
-                        if (roll < 0)
-                            return s;
+                        int roll = _combatRandom.Next(total);
+                        foreach (var s in skills.Where(static s => s.TriggerRate > 0))
+                        {
+                            roll -= s.TriggerRate;
+                            if (roll < 0)
+                                return s;
+                        }
                     }
+                    return skills[_combatRandom.Next(skills.Count)];
                 }
-                return skills[_combatRandom.Next(skills.Count)];
-            }
             default:
                 return skills[_combatRandom.Next(skills.Count)];
         }
@@ -333,8 +333,8 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(owner);
-        foreach (int id in NetWatchersOf(target))
+        var watchers = KnownNetPlayersOf(owner);
+        foreach (int id in KnownNetPlayersOf(target))
         {
             if (!watchers.Contains(id))
                 watchers.Add(id);

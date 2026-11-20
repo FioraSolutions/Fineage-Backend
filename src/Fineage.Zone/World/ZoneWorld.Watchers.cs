@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Fineage.Protocol;
 
@@ -12,10 +11,9 @@ public sealed partial class ZoneWorld
 
     void TrackWatcher(int watcherPlayerId, int subjectId)
     {
-        if (watcherPlayerId <= 0 || subjectId <= 0)
-            return;
         if (!_byId.TryGetValue(watcherPlayerId, out var watcher) || watcher.Session == null)
-            return;
+            throw new InvalidOperationException(
+                $"watcher index: entity {watcherPlayerId} learned of {subjectId} but is not a live player");
         if (!_watchersOfSet.TryGetValue(subjectId, out var set))
         {
             set = [];
@@ -30,10 +28,9 @@ public sealed partial class ZoneWorld
 
     void UntrackWatcher(int watcherPlayerId, int subjectId)
     {
-        if (watcherPlayerId <= 0 || subjectId <= 0)
-            return;
         if (!_watchersOfSet.TryGetValue(subjectId, out var set) || !set.Remove(watcherPlayerId))
-            return;
+            throw new InvalidOperationException(
+                $"watcher index: player {watcherPlayerId} forgot {subjectId} but was not indexed as its watcher");
         var list = _watchersOf[subjectId];
         for (int i = 0; i < list.Count; i++)
         {
@@ -52,36 +49,49 @@ public sealed partial class ZoneWorld
 
     void DropWatcherIndex(int subjectId)
     {
-        if (subjectId <= 0)
-            return;
         _watchersOf.Remove(subjectId);
         _watchersOfSet.Remove(subjectId);
     }
 
-    [Conditional("DEBUG")]
-    internal void AssertWatcherIndexConsistent(int subjectId)
+    /// <summary>
+    /// Whole-world check (tests): the index holds exactly the live players whose knownlist contains each subject, with
+    /// the ordered list and the set in agreement. Throws naming the first mismatch.
+    /// </summary>
+    internal void AssertWatcherIndexConsistent()
     {
-        _watchersOfSet.TryGetValue(subjectId, out var index);
-        index ??= [];
-        foreach (var player in Players())
+        lock (_gate)
         {
-            if (player.Session == null)
-                continue;
-            bool known = player.Knownlist.Contains(subjectId);
-            bool listed = index.Contains(player.ObjectId);
-            if (known != listed)
-                throw new InvalidOperationException(
-                    $"watcher index inconsistent for entity {subjectId}: player {player.ObjectId} knownlist={known} index={listed}");
-        }
+            var expected = new Dictionary<int, HashSet<int>>();
+            foreach (var player in Players())
+            {
+                if (player.Session == null)
+                    continue;
+                foreach (int subjectId in player.Knownlist)
+                {
+                    if (!expected.TryGetValue(subjectId, out var set))
+                        expected[subjectId] = set = [];
+                    set.Add(player.ObjectId);
+                }
+            }
 
-        foreach (int watcherId in index)
-        {
-            if (!_byId.TryGetValue(watcherId, out var watcher) || watcher.Session == null)
-                throw new InvalidOperationException(
-                    $"watcher index lists offline player {watcherId} for entity {subjectId}");
-            if (!watcher.Knownlist.Contains(subjectId))
-                throw new InvalidOperationException(
-                    $"watcher index lists player {watcherId} for entity {subjectId} but knownlist does not");
+            foreach (var (subjectId, watchers) in expected)
+            {
+                if (!_watchersOfSet.TryGetValue(subjectId, out var indexed) || !indexed.SetEquals(watchers))
+                    throw new InvalidOperationException(
+                        $"watcher index for entity {subjectId}: knownlists [{string.Join(",", watchers.Order())}] " +
+                        $"index [{string.Join(",", (indexed ?? []).Order())}]");
+            }
+
+            foreach (var (subjectId, indexed) in _watchersOfSet)
+            {
+                if (!expected.ContainsKey(subjectId))
+                    throw new InvalidOperationException(
+                        $"watcher index lists [{string.Join(",", indexed.Order())}] for entity {subjectId} no knownlist holds");
+                var ordered = _watchersOf[subjectId];
+                if (ordered.Count != indexed.Count || !indexed.SetEquals(ordered))
+                    throw new InvalidOperationException(
+                        $"watcher index for entity {subjectId}: list [{string.Join(",", ordered)}] disagrees with set");
+            }
         }
     }
 
@@ -299,7 +309,6 @@ public sealed partial class ZoneWorld
                 Forget(player, id);
             foreach (var other in OrderedVisible(player.ObjectId))
                 LinkSeen(player, other.ObjectId);
-            AssertWatcherIndexConsistent(player.ObjectId);
         }
     }
 

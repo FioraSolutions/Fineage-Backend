@@ -279,21 +279,22 @@ public sealed partial class ZoneWorld
         _byId.Remove(id);
         ForgetActiveSets(id);
 
+        // Every player, not only watchers: a target or auto-attack set before the summon left view must be cleared.
         List<int>? watchers = null;
-        ForEachWatchingPlayer(id, player =>
+        foreach (var player in Players())
         {
+            if (player.Session == null)
+                continue;
             if (player.Knownlist.Remove(id))
             {
                 UntrackWatcher(player.ObjectId, id);
                 (watchers ??= []).Add(player.ObjectId);
             }
-
-            if (player.Session!.SelectedTargetId == id)
+            if (player.Session.SelectedTargetId == id)
                 player.Session.SelectedTargetId = 0;
             if (player.Session.AutoAttackTargetId == id)
                 player.Session.AutoAttackTargetId = 0;
-        });
-        DropWatcherIndex(id);
+        }
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
         if (owner?.Session != null)
@@ -558,8 +559,12 @@ public sealed partial class ZoneWorld
             TargetObjectId = target.ObjectId,
             Damage = damage,
             Flags = flags,
-            AttackerX = s.X, AttackerY = s.Y, AttackerZ = s.Z,
-            TargetX = target.X, TargetY = target.Y, TargetZ = target.Z
+            AttackerX = s.X,
+            AttackerY = s.Y,
+            AttackerZ = s.Z,
+            TargetX = target.X,
+            TargetY = target.Y,
+            TargetZ = target.Z
         };
         FanoutAttack(s, target, attack);
         _meleeHits.Add(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
@@ -670,27 +675,27 @@ public sealed partial class ZoneWorld
                 break;
             case SummonCommandKind.Attack:
             case SummonCommandKind.UseSkill:
-            {
-                int targetId = msg.TargetObjectId > 0 ? msg.TargetObjectId : session.SelectedTargetId;
-                if (!_byId.TryGetValue(targetId, out var target) || !SummonTargetAllowed(session, owner, s, target, msg.Forced))
                 {
-                    SelfLine(session, SysMsgSummonWrongTarget, "The target of the summoned monster is wrong.");
-                    return null;
-                }
-                if (msg.Kind == SummonCommandKind.UseSkill)
-                {
-                    if (!st.Skills.Any(k => k.SkillId == msg.SkillId))
+                    int targetId = msg.TargetObjectId > 0 ? msg.TargetObjectId : session.SelectedTargetId;
+                    if (!_byId.TryGetValue(targetId, out var target) || !SummonTargetAllowed(session, owner, s, target, msg.Forced))
+                    {
+                        SelfLine(session, SysMsgSummonWrongTarget, "The target of the summoned monster is wrong.");
                         return null;
-                    st.PendingSkillId = msg.SkillId;
+                    }
+                    if (msg.Kind == SummonCommandKind.UseSkill)
+                    {
+                        if (!st.Skills.Any(k => k.SkillId == msg.SkillId))
+                            return null;
+                        st.PendingSkillId = msg.SkillId;
+                    }
+                    else
+                    {
+                        st.PendingSkillId = 0;
+                    }
+                    st.TargetId = target.ObjectId;
+                    st.MoveOrder = false;
+                    break;
                 }
-                else
-                {
-                    st.PendingSkillId = 0;
-                }
-                st.TargetId = target.ObjectId;
-                st.MoveOrder = false;
-                break;
-            }
             case SummonCommandKind.Unsummon when pet != null:
                 // Mobius RequestActionUse 19.
                 if (dead)
