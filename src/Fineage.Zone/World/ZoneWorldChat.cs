@@ -30,25 +30,33 @@ public sealed partial class ZoneWorld
             if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var speaker) || speaker.Session == null)
                 return Task.FromResult<string?>("world");
 
-            long nowMs = now.ToUnixTimeMilliseconds();
-            if (SayRules.IsFlood(session.LastChatUnixMs, nowMs))
+            if (GmChatCommand.TrySplit(normalized, out _, out _))
             {
-                notice = SayRules.Flood();
-            }
-            else if (!SayRules.IsDelivered(chatType))
-            {
-                session.LastChatUnixMs = nowMs;
-                notice = SayRules.NotSupported(chatType);
-            }
-            else if (session.ChatBannedUntilUnixMs > nowMs && BanCovers(chatType))
-            {
-                // Mobius Say2.runImpl: a chat-banned player gets CHATTING_IS_CURRENTLY_PROHIBITED on banned channels.
-                notice = new SystemMessageMsg { Id = ChatProtocol.ChattingProhibited, Params = [], Text = "Chatting is currently prohibited." };
+                session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
+                notice = TryGmChat(speaker, session, normalized);
             }
             else
             {
-                session.LastChatUnixMs = nowMs;
-                notice = Deliver(speaker, chatType, normalized, target?.Trim() ?? "", nowMs);
+                long nowMs = now.ToUnixTimeMilliseconds();
+                if (SayRules.IsFlood(session.LastChatUnixMs, nowMs))
+                {
+                    notice = SayRules.Flood();
+                }
+                else if (!SayRules.IsDelivered(chatType))
+                {
+                    session.LastChatUnixMs = nowMs;
+                    notice = SayRules.NotSupported(chatType);
+                }
+                else if (session.ChatBannedUntilUnixMs > nowMs && BanCovers(chatType))
+                {
+                    // Mobius Say2.runImpl: a chat-banned player gets CHATTING_IS_CURRENTLY_PROHIBITED on banned channels.
+                    notice = new SystemMessageMsg { Id = ChatProtocol.ChattingProhibited, Params = [], Text = "Chatting is currently prohibited." };
+                }
+                else
+                {
+                    session.LastChatUnixMs = nowMs;
+                    notice = Deliver(speaker, chatType, normalized, target?.Trim() ?? "", nowMs);
+                }
             }
         }
 
@@ -66,7 +74,8 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>(null);
         }
 
-        ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={chatType} text={normalized}");
+        if (!GmChatCommand.TrySplit(normalized, out _, out _))
+            ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={chatType} text={normalized}");
         return Task.FromResult<string?>(null);
     }
 
@@ -102,14 +111,14 @@ public sealed partial class ZoneWorld
                     Players().Where(p => p.ClanId == speaker.ClanId).Select(p => p.ObjectId));
                 return null;
             case ChatProtocol.Alliance:
-            {
-                // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
-                int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
-                if (allyId == 0)
-                    return Plain("You are not in an alliance.");
-                SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
-                return null;
-            }
+                {
+                    // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
+                    int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
+                    if (allyId == 0)
+                        return Plain("You are not in an alliance.");
+                    SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
+                    return null;
+                }
             case ChatProtocol.Hero:
                 if (!speaker.Hero)
                     return Plain("Only Heroes can enter the Hero channel.");

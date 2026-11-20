@@ -44,7 +44,9 @@ internal sealed class WorldBench
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
         Random? fishingRandom = null,
-        Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null)
+        Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null,
+        bool includeEnabledMaps = false,
+        Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null)
     {
         Game = game ?? GameData.LoadDefault();
         Store = MemoryAccountStore.InMemory();
@@ -78,7 +80,9 @@ internal sealed class WorldBench
             combatRandom: combatRandom,
             manor: manor,
             manorRandom: manorRandom,
-            fishingRandom: fishingRandom);
+            fishingRandom: fishingRandom,
+            includeEnabledMaps: includeEnabledMaps,
+            gmTeleports: gmTeleports);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

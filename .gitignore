@@ -30,6 +30,7 @@ data/*
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/gm-teleports.json
 !data/newbie-buffs.json
 !data/item-weights.json
 !data/spawns/

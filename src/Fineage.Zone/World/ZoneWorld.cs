@@ -50,6 +50,7 @@ public sealed partial class ZoneWorld
     readonly BypassRegistry _bypasses;
     readonly OlympiadBoard _olympiad;
     readonly TeleportCatalog _teleports;
+    readonly GmTeleportCatalog _gmTeleports;
     readonly NewbieBuffCatalog _newbieBuffs;
     readonly ItemWeights _weights;
     /// <summary>Mobius <c>handler="ItemSkills"</c> items: what a potion or scroll actually does (data/item-skills.json).</summary>
@@ -155,6 +156,7 @@ public sealed partial class ZoneWorld
         OlympiadSettings? olympiadSettings = null,
         Random? olympiadRandom = null,
         TeleportCatalog? teleports = null,
+        GmTeleportCatalog? gmTeleports = null,
         NewbieBuffCatalog? newbieBuffs = null,
         ItemWeights? weights = null,
         int? teleportOffset = null,
@@ -233,6 +235,7 @@ public sealed partial class ZoneWorld
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
         _olympiad = olympiad ?? new OlympiadBoard(_clock(), olympiadSettings ?? OlympiadSettings.FromEnvironment(), random: olympiadRandom);
         _teleports = teleports ?? TeleportCatalog.LoadDefault();
+        _gmTeleports = gmTeleports ?? GmTeleportCatalog.LoadDefault();
         _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
         _weights = weights ?? ItemWeights.LoadDefault();
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
