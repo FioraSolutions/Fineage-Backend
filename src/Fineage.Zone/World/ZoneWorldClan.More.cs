@@ -29,11 +29,11 @@ public sealed partial class ZoneWorld
             return block;
         }
 
-        _pendingClanInvites[invite.TargetObjectId] = new PendingClanInvite(
+        _clan.Invite(invite.TargetObjectId, new PendingClanInvite(
             session.ObjectId,
             clan!.Id,
             ClanRules.InviteDeadline(nowMs),
-            invite.PledgeType);
+            invite.PledgeType));
         var target = _byId[invite.TargetObjectId].Session!;
         // Mobius AskJoinPledge names the sub-unit for a sub-unit invite.
         string unitName = invite.PledgeType == ClanProtocol.MainPledge ? clan.Name : SubPledge(clan, invite.PledgeType)?.Name ?? clan.Name;
@@ -56,11 +56,11 @@ public sealed partial class ZoneWorld
             return "world";
 
         ClearExpiredClanInvites(nowMs);
-        if (!_pendingClanInvites.TryGetValue(session.ObjectId, out var pending) ||
+        if (!_clan.TryGetInvite(session.ObjectId, out var pending) ||
             pending.InviterObjectId != answer.RequestorObjectId)
             return ClanProtocol.Invite;
 
-        _pendingClanInvites.Remove(session.ObjectId);
+        _clan.DropInvite(session.ObjectId);
         bool requestorOnline = _byId.TryGetValue(pending.InviterObjectId, out var requestorEntity) &&
                                requestorEntity.Session != null &&
                                IsLive(requestorEntity.Session);
@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (!requestorOnline || !_clans.TryGetValue(pending.ClanId, out var clan) || ClanOf(pending.InviterObjectId) != clan)
+        if (!requestorOnline || !_clan.TryGet(pending.ClanId, out var clan) || ClanOf(pending.InviterObjectId) != clan)
             return ClanProtocol.Invite;
 
         string? block = JoinBlock(clan, pending.InviterObjectId, pending.PledgeType, session.ObjectId, self: false, visible: true,
@@ -111,8 +111,8 @@ public sealed partial class ZoneWorld
         }
 
         clan.Members.Add(member);
-        _clanByPlayer[session.ObjectId] = clan.Id;
-        _joinExpiry[session.ObjectId] = 0;
+        _clan.Link(session.ObjectId, clan.Id);
+        _clan.SetJoinExpiry(session.ObjectId, 0);
         entity.ClanId = clan.Id;
         SyncClanStanding(entity);
 
@@ -161,8 +161,8 @@ public sealed partial class ZoneWorld
 
         clan.Members.Remove(member);
         ClearMemberTitle(entity);
-        _clanByPlayer.Remove(session.ObjectId);
-        _joinExpiry[session.ObjectId] = join;
+        _clan.Unlink(session.ObjectId);
+        _clan.SetJoinExpiry(session.ObjectId, join);
         entity.ClanId = 0;
         SyncClanStanding(entity);
 

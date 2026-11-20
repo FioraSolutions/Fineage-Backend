@@ -149,7 +149,7 @@ public sealed partial class ZoneWorld
         _questSpawns.Remove(npc.ObjectId);
         if (QuestSpawnOwner(npc) is not { } owner)
             return;
-        bool solo = ReferenceEquals(killer, owner) && !_partyByPlayer.ContainsKey(owner.ObjectId);
+        bool solo = ReferenceEquals(killer, owner) && !_party.InParty(owner.ObjectId);
         if (_quests.HasOwnedSteps(npc.NpcId))
             PublishKill(owner, _quests.OnOwned(owner.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Kill, solo), npc);
         ApplySpawnVars(npc, summon.DeadVars);
@@ -168,7 +168,7 @@ public sealed partial class ZoneWorld
             return true;
         var owner = QuestSpawnOwner(npc);
         bool isOwner = owner != null && ReferenceEquals(attacker, owner);
-        bool solo = isOwner && !_partyByPlayer.ContainsKey(owner!.ObjectId);
+        bool solo = isOwner && !_party.InParty(owner!.ObjectId);
         if (summon.SoloGuard && !solo)
         {
             if (!string.IsNullOrEmpty(summon.GuardSay))

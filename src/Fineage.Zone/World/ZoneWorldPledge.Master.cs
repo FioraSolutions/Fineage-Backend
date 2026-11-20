@@ -315,7 +315,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || clan.D.NewLeaderId == 0)
+            if (!_clan.TryGet(clanId, out var clan) || clan.D.NewLeaderId == 0)
                 return false;
             ApplyLeaderDelegation(clan);
             BroadcastClan(clan, charInfo: true);
@@ -339,7 +339,7 @@ public sealed partial class ZoneWorld
     }
 
     bool UnitNameTaken(string name) =>
-        _clans.Values.Any(c => c.D.SubPledges.Any(sp => string.Equals(sp.Name, name, StringComparison.OrdinalIgnoreCase)));
+        _clan.All.Any(c => c.D.SubPledges.Any(sp => string.Equals(sp.Name, name, StringComparison.OrdinalIgnoreCase)));
 
     /// <summary>Mobius <c>VillageMaster.createSubPledge</c> + <c>Clan.createSubPledge</c>.</summary>
     string? CreateSubUnit(ZoneSession session, ZoneClan clan, string name, string leaderName, int family, int minLevel)

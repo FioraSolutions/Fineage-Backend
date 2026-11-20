@@ -6,6 +6,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Rewards;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -57,7 +58,7 @@ public sealed partial class ZoneWorld
             if (settled.Contains(id) || !_byId.TryGetValue(id, out var attacker) || attacker.Session == null)
                 continue;
 
-            if (_partyByPlayer.TryGetValue(id, out int partyId) && _parties.TryGetValue(partyId, out var party))
+            if (_party.Of(id) is { } party)
             {
                 SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled);
                 continue;

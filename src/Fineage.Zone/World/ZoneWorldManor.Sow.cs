@@ -19,7 +19,7 @@ public sealed partial class ZoneWorld
     bool SameOrPartyIds(ZoneEntity player, out List<int> ids)
     {
         ids = [player.ObjectId];
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int partyId) && _parties.TryGetValue(partyId, out var party))
+        if (_party.Of(player.ObjectId) is { } party)
         {
             ids = [.. party.MemberIds];
             return true;

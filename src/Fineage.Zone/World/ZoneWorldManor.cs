@@ -4,6 +4,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Simulation;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -58,7 +59,7 @@ public sealed partial class ZoneWorld
             case ManorProtocol.ModeModifiable:
                 foreach (var castle in _siege.Board.Castles)
                 {
-                    if (castle.OwnerClanId > 0 && _clans.TryGetValue(castle.OwnerClanId, out var owner))
+                    if (castle.OwnerClanId > 0 && _clan.TryGet(castle.OwnerClanId, out var owner))
                         LeaderLine(owner, ManorProtocol.ManorUpdated, "The manor information has been updated.");
                 }
 
@@ -87,7 +88,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void CloseManorPeriod(Siege.CastleSiege castle)
     {
-        if (castle.OwnerClanId <= 0 || !_clans.TryGetValue(castle.OwnerClanId, out var owner))
+        if (castle.OwnerClanId <= 0 || !_clan.TryGet(castle.OwnerClanId, out var owner))
             return;
         int castleId = castle.Id;
         var warehouse = ClanWarehouseOf(owner);
@@ -137,7 +138,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ApproveManorPeriod(Siege.CastleSiege castle)
     {
-        if (castle.OwnerClanId <= 0 || !_clans.TryGetValue(castle.OwnerClanId, out var owner))
+        if (castle.OwnerClanId <= 0 || !_clan.TryGet(castle.OwnerClanId, out var owner))
             return;
         int castleId = castle.Id;
         var warehouse = ClanWarehouseOf(owner);

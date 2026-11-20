@@ -210,7 +210,7 @@ public sealed partial class ZoneWorld
             return true;
         }
 
-        if (info.Role == SiegeNpcRole.Flag && now - info.LastAttackNoticeMs >= 30_000 && _clans.TryGetValue(info.FlagClanId, out var flagClan))
+        if (info.Role == SiegeNpcRole.Flag && now - info.LastAttackNoticeMs >= 30_000 && _clan.TryGet(info.FlagClanId, out var flagClan))
         {
             info.LastAttackNoticeMs = now;
             ClanLine(OnlineIds(flagClan), SiegeProtocol.BaseAttacked, "Your base is being attacked.");
@@ -372,7 +372,7 @@ public sealed partial class ZoneWorld
 
             FanInventory(session, Collapse(changes));
             SaveInventory(session, inventory);
-            string title = _clans.TryGetValue(SiegeClanOf(player), out var clan) ? clan.Name : "";
+            string title = _clan.TryGet(SiegeClanOf(player), out var clan) ? clan.Name : "";
             var flag = SpawnSiegeNpc(SiegeProtocol.HeadquartersNpcId, player.X, player.Y, player.Z, player.Heading,
                 new SiegeNpcInfo { Role = SiegeNpcRole.Flag, CastleId = castle.Id, FlagClanId = SiegeClanOf(player) }, title);
             if (flag != null && _siegeRun.TryGetValue(castle.Id, out var run))

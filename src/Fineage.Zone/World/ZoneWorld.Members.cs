@@ -218,6 +218,7 @@ public sealed partial class ZoneWorld
                 ReleaseThink(other);
         }
         session.InWorld = false;
+        _chat.Left(session.ObjectId);
 
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);

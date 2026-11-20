@@ -99,7 +99,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>RequestPledgeInfo</c>: name, crest and alliance of any clan by id.</summary>
     string? SendPledgeInfo(ZoneSession session, int clanId)
     {
-        if (!_clans.TryGetValue(clanId, out var clan))
+        if (!_clan.TryGet(clanId, out var clan))
             return PledgeProtocol.NoSuchClan;
         NetBridge?.FanoutPledgeInfo([session.ObjectId], new PledgeInfoNetMsg
         {
@@ -344,8 +344,8 @@ public sealed partial class ZoneWorld
 
         clan.Members.Remove(member);
         ClearMemberTitle(player);
-        _clanByPlayer.Remove(player.ObjectId);
-        _joinExpiry[player.ObjectId] = 0;
+        _clan.Unlink(player.ObjectId);
+        _clan.SetJoinExpiry(player.ObjectId, 0);
         player.ClanId = 0;
         SyncClanStanding(player);
         int rep = PledgeProtocol.AcademyGraduationRep(joined);
@@ -409,7 +409,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || MemberOf(clan, characterId) == null)
+            if (!_clan.TryGet(clanId, out var clan) || MemberOf(clan, characterId) == null)
                 return false;
             clan.D.NewLeaderId = characterId;
             return SaveClan(clan);

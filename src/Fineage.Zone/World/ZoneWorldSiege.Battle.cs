@@ -3,6 +3,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -153,7 +154,7 @@ public sealed partial class ZoneWorld
         if (!_siegeRun.Remove(castle.Id, out var run))
             return;
         Broadcast(SiegeLines.SiegeFinished(castle.Name));
-        if (castle.OwnerClanId > 0 && _clans.TryGetValue(castle.OwnerClanId, out var winner))
+        if (castle.OwnerClanId > 0 && _clan.TryGet(castle.OwnerClanId, out var winner))
             Broadcast(SiegeLines.Victorious(winner.Name, castle.Name));
         else
             Broadcast(SiegeLines.Draw(castle.Name));
@@ -186,7 +187,7 @@ public sealed partial class ZoneWorld
         if (run.FormerOwnerClanId == 0 && previousOwner > 0 && previousOwner != castle.OwnerClanId)
             run.FormerOwnerClanId = previousOwner;
         NoteSiegeClans(castle, run);
-        if (previousOwner > 0 && previousOwner != castle.OwnerClanId && _clans.TryGetValue(previousOwner, out var loser))
+        if (previousOwner > 0 && previousOwner != castle.OwnerClanId && _clan.TryGet(previousOwner, out var loser))
             RemoveCirclets(loser, castle.Id);
 
         foreach (int defender in _siege.Board.SideClans(castle.Id, attackers: false))
@@ -221,7 +222,7 @@ public sealed partial class ZoneWorld
             SpawnSiegeTowers(run, data);
         RespawnCastleDoors(castle.Id, weak: true);
 
-        if (_clans.TryGetValue(castle.OwnerClanId, out var owner))
+        if (_clan.TryGet(castle.OwnerClanId, out var owner))
             PlaySoundToClan(owner, "Siege_Victory");
         RefreshSiegeRelations(run);
     }
@@ -239,8 +240,8 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>Castle.updateClansReputation</c> with this siege's former owner.</summary>
     void UpdateSiegeReputation(SiegeRuntime run, int ownerId)
     {
-        _clans.TryGetValue(ownerId, out var owner);
-        if (run.FormerOwnerClanId > 0 && _clans.TryGetValue(run.FormerOwnerClanId, out var former))
+        _clan.TryGet(ownerId, out var owner);
+        if (run.FormerOwnerClanId > 0 && _clan.TryGet(run.FormerOwnerClanId, out var former))
         {
             if (former != owner)
             {
@@ -321,7 +322,7 @@ public sealed partial class ZoneWorld
         var ids = new List<int>();
         foreach (int clanId in clans)
         {
-            if (_clans.TryGetValue(clanId, out var clan))
+            if (_clan.TryGet(clanId, out var clan))
                 ids.AddRange(OnlineIds(clan));
         }
 
@@ -363,7 +364,7 @@ public sealed partial class ZoneWorld
     {
         foreach (int clanId in run.Clans)
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 continue;
             foreach (var session in OnlineMembers(clan))
             {

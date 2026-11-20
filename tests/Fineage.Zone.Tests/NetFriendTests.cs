@@ -34,8 +34,8 @@ public sealed class NetFriendTests
         Assert.Equal(a.Name, ask.RequestorName);
 
         Assert.Null(await kit.World.TryFriendAnswerAsync(sessionB, new FriendAnswerMsg { Response = 1 }, default));
-        Assert.Contains(playerB.ObjectId, playerA.Friends.Keys);
-        Assert.Contains(playerA.ObjectId, playerB.Friends.Keys);
+        Assert.Contains(playerB.ObjectId, kit.World.SocialListsForTests(playerA).Friends.Keys);
+        Assert.Contains(playerA.ObjectId, kit.World.SocialListsForTests(playerB).Friends.Keys);
 
         Assert.Null(await kit.World.TryFriendListAsync(sessionA, default));
         var list = Assert.IsType<Fineage.Protocol.FriendListMsg>(
@@ -63,7 +63,7 @@ public sealed class NetFriendTests
             Type = FriendProtocol.BlockAdd,
             Name = b.Name
         }, default));
-        Assert.Contains(b.CharacterId, playerA.Blocked.Keys);
+        Assert.Contains(b.CharacterId, kit.World.SocialListsForTests(playerA).Blocked.Keys);
 
         Assert.Equal(FriendProtocol.Blocked,
             await kit.World.TryFriendInviteAsync(sessionB, new FriendInviteMsg { Name = a.Name }, default));
@@ -87,8 +87,8 @@ public sealed class NetFriendTests
         Assert.Null(await kit.World.TryFriendAnswerAsync(sessionB, new FriendAnswerMsg { Response = 1 }, default));
 
         Assert.Null(await kit.World.TryFriendDeleteAsync(sessionA, new FriendDeleteMsg { Name = b.Name }, default));
-        Assert.Empty(playerA.Friends);
-        Assert.Empty(playerB.Friends);
+        Assert.Empty(kit.World.SocialListsForTests(playerA).Friends);
+        Assert.Empty(kit.World.SocialListsForTests(playerB).Friends);
     }
 
     [Fact]

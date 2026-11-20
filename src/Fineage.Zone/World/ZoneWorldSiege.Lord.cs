@@ -3,6 +3,7 @@ using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Siege;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -128,7 +129,7 @@ public sealed partial class ZoneWorld
             CastleId = castle.Id,
             Name = castle.Name,
             OwnerClanId = castle.OwnerClanId,
-            OwnerClanName = _clans.TryGetValue(castle.OwnerClanId, out var oc) ? oc.Name : "",
+            OwnerClanName = _clan.TryGet(castle.OwnerClanId, out var oc) ? oc.Name : "",
             TaxPercent = castle.TaxPercent,
             MaxTaxPercent = SiegeProtocol.MaxTaxPercent,
             Treasury = vault ? castle.Treasury : 0,

@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Party;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -7,22 +8,19 @@ public sealed partial class ZoneWorld
 {
     public const int MaxPartyMembers = PartyRules.MaxMembers;
 
-    readonly Dictionary<int, ZoneParty> _parties = [];
-    readonly Dictionary<int, int> _partyByPlayer = [];
-    readonly Dictionary<int, PendingPartyInvite> _pendingInvites = [];
-    int _nextPartyId = 1;
+    readonly PartyActor _party;
 
-    sealed class ZoneParty
+    /// <summary>The party actor's view of the members: their entities, read on the scheduler thread.</summary>
+    sealed class PartyMembers(ZoneWorld world) : IPartyMembers
     {
-        public required int PartyId { get; init; }
-        public int LeaderObjectId { get; set; }
-        public int ItemDistribution { get; set; }
-        /// <summary>Mobius <c>Party._itemLastLoot</c> cursor for BY_TURN* modes.</summary>
-        public int ItemLastLoot { get; set; }
-        public List<int> MemberIds { get; } = [];
-    }
+        public bool IsOnline(int objectId) => world.Online(objectId) != null;
 
-    readonly record struct PendingPartyInvite(int InviterObjectId, int ItemDistribution);
+        public PartyMemberUpdateMsg? Bars(int objectId) =>
+            world._byId.TryGetValue(objectId, out var e) ? world.PartyMemberUpdateFor(e) : null;
+
+        public (int X, int Y, int Z)? Position(int objectId) =>
+            world.Online(objectId) != null && world._byId.TryGetValue(objectId, out var e) ? (e.X, e.Y, e.Z) : null;
+    }
 
     public Task<string?> TryPartyInviteAsync(
         ZoneSession session, int targetObjectId, int itemDistribution, CancellationToken ct)
@@ -83,13 +81,11 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(leader))
             return "world";
-        if (!_partyByPlayer.TryGetValue(leader.ObjectId, out int partyId) ||
-            !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(leader.ObjectId) is not { } party)
             return "party";
         if (party.LeaderObjectId != leader.ObjectId)
             return "party_leader";
-        if (targetObjectId == leader.ObjectId ||
-            !_partyByPlayer.TryGetValue(targetObjectId, out int targetPartyId) || targetPartyId != partyId ||
+        if (targetObjectId == leader.ObjectId || !_party.SameParty(leader.ObjectId, targetObjectId) ||
             Online(targetObjectId) == null)
             return "target";
 
@@ -101,35 +97,30 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>Coalescing window for <c>PartyMemberUpdate</c>: at most one frame per member per window.</summary>
-    internal const int PartyUpdateIntervalMs = 300;
-    /// <summary>Interlude PartyMemberPosition cadence (map dots), only changed rows are sent.</summary>
-    internal const int PartyPositionIntervalMs = 3000;
-
-    readonly HashSet<int> _partyVitalsDirty = [];
-    readonly Dictionary<int, (long At, PartyMemberUpdateMsg Msg)> _partyVitalsSent = [];
-    readonly Dictionary<int, (int X, int Y, int Z)> _partyPositionSent = [];
-    long _partyPositionNextAtMs;
-
     /// <summary>
-    /// Mobius broadcasts PartySmallWindowUpdate on every HP/MP/CP/level change. Here the change only marks the
-    /// member; <see cref="TickParty"/> coalesces it into one <c>PartyMemberUpdate</c> per window and skips no-ops.
+    /// Mobius broadcasts PartySmallWindowUpdate on every HP/MP/CP/level change. Here the change is reported to the
+    /// party actor, which coalesces it into one <c>PartyMemberUpdate</c> per window and skips no-ops.
     /// </summary>
     void FanPartyVitals(ZoneEntity subject)
     {
-        if (subject.Kind == ZoneEntityKind.Player && _partyByPlayer.ContainsKey(subject.ObjectId))
-            AtBarrier(() => _partyVitalsDirty.Add(subject.ObjectId));
+        if (subject.Kind == ZoneEntityKind.Player)
+            AtBarrier(() => _party.Changed(subject.ObjectId));
     }
 
     /// <summary>Mobius PartySpelled: a member's effect list to the other members (apply / remove / expire).</summary>
     void FanPartySpelled(ZoneEntity subject)
     {
-        if (NetBridge == null || subject.Kind != ZoneEntityKind.Player ||
-            !_partyByPlayer.TryGetValue(subject.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+        if (NetBridge == null || subject.Kind != ZoneEntityKind.Player)
             return;
-        var mates = OnlineMatesOf(party, subject.ObjectId);
-        if (mates.Count > 0)
-            NetBridge.FanoutPartySpelled(mates, AbnormalFor(subject));
+        var update = AbnormalFor(subject);
+        AtBarrier(() =>
+        {
+            if (_party.Of(subject.ObjectId) is not { } party)
+                return;
+            var mates = _party.OnlineMatesOf(party, subject.ObjectId);
+            if (mates.Count > 0)
+                NetBridge?.FanoutPartySpelled(mates, update);
+        });
     }
 
     /// <summary>On join: the newcomer gets every member's effects and the others get the newcomer's.</summary>
@@ -141,26 +132,12 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var member) || member.Session == null)
                 continue;
-            var watchers = id == newcomerId ? OnlineMatesOf(party, id) : (Online(newcomerId) != null ? [newcomerId] : []);
+            var watchers = id == newcomerId ? _party.OnlineMatesOf(party, id) : (Online(newcomerId) != null ? [newcomerId] : []);
             if (watchers.Count > 0)
                 NetBridge.FanoutPartySpelled(watchers, AbnormalFor(member));
         }
         // Fresh member: everyone's map dot and bars are (re)sent on the next tick.
-        foreach (int id in party.MemberIds)
-        {
-            _partyPositionSent.Remove(id);
-            _partyVitalsSent.Remove(id);
-        }
-        _partyPositionNextAtMs = 0;
-    }
-
-    List<int> OnlineMatesOf(ZoneParty party, int exceptId)
-    {
-        var list = new List<int>(party.MemberIds.Count);
-        foreach (int id in party.MemberIds)
-            if (id != exceptId && Online(id) != null)
-                list.Add(id);
-        return list;
+        _party.Resync(party);
     }
 
     PartyMemberUpdateMsg PartyMemberUpdateFor(ZoneEntity e)
@@ -188,70 +165,29 @@ public sealed partial class ZoneWorld
         catch (ArgumentOutOfRangeException) { return template.MaxCp; }
     }
 
-    static bool SameBars(PartyMemberUpdateMsg a, PartyMemberUpdateMsg b) =>
-        a.Level == b.Level && a.ClassId == b.ClassId && a.CurHp == b.CurHp && a.MaxHp == b.MaxHp &&
-        a.CurMp == b.CurMp && a.MaxMp == b.MaxMp && a.CurCp == b.CurCp && a.MaxCp == b.MaxCp;
-
-    /// <summary>Party bars (coalesced) + PartyMemberPosition (periodic). Runs on the combat/movement tick.</summary>
-    void TickParty(long now)
+    /// <summary>Party bars (coalesced) and PartyMemberPosition (periodic) the party actor produced this step.</summary>
+    void FanParty(IReadOnlyList<PartyFrame> frames)
     {
-        if (_parties.Count == 0 || NetBridge == null)
+        foreach (var frame in frames)
         {
-            _partyVitalsDirty.Clear();
-            return;
+            switch (frame)
+            {
+                case PartyBarsFrame bars:
+                    NetBridge?.FanoutPartyMemberUpdate(bars.To, bars.Bars);
+                    break;
+                case PartyPositionsFrame positions:
+                    NetBridge?.FanoutPartyMemberPosition(positions.To, positions.Positions);
+                    break;
+            }
         }
+    }
 
-        if (_partyVitalsDirty.Count > 0)
-        {
-            foreach (int id in _partyVitalsDirty.ToArray())
-            {
-                if (!_byId.TryGetValue(id, out var e) || !_partyByPlayer.TryGetValue(id, out int partyId) ||
-                    !_parties.TryGetValue(partyId, out var party))
-                {
-                    _partyVitalsDirty.Remove(id);
-                    continue;
-                }
-                bool hadSent = _partyVitalsSent.TryGetValue(id, out var last);
-                if (hadSent && now - last.At < PartyUpdateIntervalMs)
-                    continue;   // stays dirty: flushed once the window passes
-                _partyVitalsDirty.Remove(id);
-                var msg = PartyMemberUpdateFor(e);
-                if (hadSent && SameBars(last.Msg, msg))
-                    continue;
-                _partyVitalsSent[id] = (now, msg);
-                var mates = OnlineMatesOf(party, id);
-                if (mates.Count > 0)
-                    NetBridge.FanoutPartyMemberUpdate(mates, msg);
-            }
-        }
-
-        if (now < _partyPositionNextAtMs)
-            return;
-        _partyPositionNextAtMs = now + PartyPositionIntervalMs;
-        foreach (var party in _parties.Values)
-        {
-            List<PartyMemberPositionEntryMsg>? changed = null;
-            foreach (int id in party.MemberIds)
-            {
-                if (Online(id) == null || !_byId.TryGetValue(id, out var e))
-                    continue;
-                var pos = (e.X, e.Y, e.Z);
-                if (_partyPositionSent.TryGetValue(id, out var sent) && sent == pos)
-                    continue;
-                _partyPositionSent[id] = pos;
-                (changed ??= []).Add(new PartyMemberPositionEntryMsg { ObjectId = id, X = e.X, Y = e.Y, Z = e.Z });
-            }
-            if (changed == null)
-                continue;
-            foreach (int watcher in party.MemberIds)
-            {
-                if (Online(watcher) == null)
-                    continue;
-                var rows = changed.Where(r => r.ObjectId != watcher).ToArray();
-                if (rows.Length > 0)
-                    NetBridge.FanoutPartyMemberPosition([watcher], new PartyMemberPositionMsg { Members = rows });
-            }
-        }
+    void TickParty(TickContext tick)
+    {
+        if (NetBridge == null)
+            _party.DiscardChanges();
+        else
+            FanParty(_party.Step(tick));
     }
 
     /// <summary>Test hook: set a player's HP through the normal vitals fanout (party bars included).</summary>
@@ -267,7 +203,11 @@ public sealed partial class ZoneWorld
     internal Task RunPartyTickForTest()
     {
         lock (_gate)
-            TickParty(NowUnixMs());
+            AtHookTick(tick =>
+            {
+                TickParty(tick);
+                return 0;
+            });
         return Task.CompletedTask;
     }
 
@@ -278,23 +218,10 @@ public sealed partial class ZoneWorld
         return Task.CompletedTask;
     }
 
-    void ForgetPartyMemberCaches(int objectId)
-    {
-        _partyVitalsDirty.Remove(objectId);
-        _partyVitalsSent.Remove(objectId);
-        _partyPositionSent.Remove(objectId);
-    }
-
     void PartyPlayerLeftWorld(int objectId)
     {
-        _pendingInvites.Remove(objectId);
-        foreach (var (inviteeId, pending) in _pendingInvites.ToList())
-        {
-            if (pending.InviterObjectId == objectId)
-                _pendingInvites.Remove(inviteeId);
-        }
-
-        if (!_partyByPlayer.ContainsKey(objectId))
+        _party.DropInvitesOf(objectId);
+        if (!_party.InParty(objectId))
             return;
 
         TryPartyLeave(objectId);
@@ -310,15 +237,15 @@ public sealed partial class ZoneWorld
             !targetEntity.Session.InWorld)
             return "target";
 
-        if (_partyByPlayer.ContainsKey(targetObjectId))
+        if (_party.InParty(targetObjectId))
             return "party_busy";
-        if (_pendingInvites.ContainsKey(targetObjectId))
+        if (_party.IsInvited(targetObjectId))
             return "party_busy";
 
         int distribution = itemDistribution;
-        if (_partyByPlayer.TryGetValue(inviter.ObjectId, out int partyId))
+        if (_party.InParty(inviter.ObjectId))
         {
-            if (!_parties.TryGetValue(partyId, out var party))
+            if (_party.Of(inviter.ObjectId) is not { } party)
                 return "party";
             if (party.LeaderObjectId != inviter.ObjectId)
                 return "party_leader";
@@ -327,7 +254,7 @@ public sealed partial class ZoneWorld
             distribution = party.ItemDistribution;
         }
 
-        _pendingInvites[targetObjectId] = new PendingPartyInvite(inviter.ObjectId, distribution);
+        _party.Invite(targetObjectId, new PendingPartyInvite(inviter.ObjectId, distribution));
         FanPartyAsk([targetEntity.ObjectId], new PartyAskJoinMsg
         {
             RequestorObjectId = inviter.ObjectId,
@@ -341,11 +268,11 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(invitee))
             return "world";
-        if (!_pendingInvites.TryGetValue(invitee.ObjectId, out var pending) ||
+        if (!_party.TryGetInvite(invitee.ObjectId, out var pending) ||
             pending.InviterObjectId != requestorObjectId)
             return "party_invite";
 
-        _pendingInvites.Remove(invitee.ObjectId);
+        _party.DropInvite(invitee.ObjectId);
 
         if (!_byId.TryGetValue(requestorObjectId, out var requestorEntity) ||
             requestorEntity.Session == null ||
@@ -360,14 +287,15 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (_partyByPlayer.ContainsKey(invitee.ObjectId))
+        if (_party.InParty(invitee.ObjectId))
             return "party_busy";
 
         ZoneParty party;
-        if (_partyByPlayer.TryGetValue(requestorObjectId, out int partyId))
+        if (_party.InParty(requestorObjectId))
         {
-            if (!_parties.TryGetValue(partyId, out party!))
+            if (_party.Of(requestorObjectId) is not { } existing)
                 return "party";
+            party = existing;
             if (PartyRules.IsFull(party.MemberIds.Count))
             {
                 FanPartyJoinResult([requestorEntity.ObjectId], 0);
@@ -376,19 +304,10 @@ public sealed partial class ZoneWorld
         }
         else
         {
-            party = new ZoneParty
-            {
-                PartyId = _nextPartyId++,
-                LeaderObjectId = requestorObjectId,
-                ItemDistribution = pending.ItemDistribution
-            };
-            party.MemberIds.Add(requestorObjectId);
-            _parties[party.PartyId] = party;
-            _partyByPlayer[requestorObjectId] = party.PartyId;
+            party = _party.Create(requestorObjectId, pending.ItemDistribution);
         }
 
-        party.MemberIds.Add(invitee.ObjectId);
-        _partyByPlayer[invitee.ObjectId] = party.PartyId;
+        _party.Join(party, invitee.ObjectId);
 
         FanPartyJoinResult([requestorEntity.ObjectId], 1);
         FanPartyList(party);

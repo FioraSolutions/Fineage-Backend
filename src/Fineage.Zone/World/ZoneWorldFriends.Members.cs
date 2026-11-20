@@ -14,27 +14,28 @@ public sealed partial class ZoneWorld
         if (name.Length == 0)
             return "bad_request";
 
-        int friendId = self.Friends
+        int friendId = Lists(self).Friends
             .FirstOrDefault(kv => string.Equals(kv.Value, name, StringComparison.OrdinalIgnoreCase))
             .Key;
         if (friendId == 0)
         {
             // Name may have changed — try live / store lookup.
             var online = FindOnlinePlayerByName(name);
-            if (online != null && self.Friends.ContainsKey(online.ObjectId))
+            if (online != null && Lists(self).Friends.ContainsKey(online.ObjectId))
                 friendId = online.ObjectId;
-            else if (_accounts?.FindByCharacterName(name) is { } stored && self.Friends.ContainsKey(stored.Id))
+            else if (_accounts?.FindByCharacterName(name) is { } stored && Lists(self).Friends.ContainsKey(stored.Id))
                 friendId = stored.Id;
         }
-        if (friendId == 0 || !self.Friends.Remove(friendId, out string? friendName))
+        if (friendId == 0 || !Lists(self).Friends.Remove(friendId, out string? friendName))
             return FriendProtocol.NotFriend;
 
         PersistFriends(self);
         FanoutFriendUpdate(self.ObjectId, added: false, friendId, friendName, online: 0);
 
-        if (_byId.TryGetValue(friendId, out var peer) && peer.Kind == ZoneEntityKind.Player)
+        if (_byId.TryGetValue(friendId, out var peer) && peer.Kind == ZoneEntityKind.Player &&
+            _friends.TryGet(friendId, out var peerLists))
         {
-            if (peer.Friends.Remove(self.ObjectId))
+            if (peerLists.Friends.Remove(self.ObjectId))
             {
                 PersistFriends(peer);
                 if (peer.Session != null && peer.Session.InWorld)
@@ -67,12 +68,12 @@ public sealed partial class ZoneWorld
                 SendBlockList(self);
                 return null;
             case FriendProtocol.BlockAllOn:
-                self.BlockAll = true;
+                Lists(self).BlockAll = true;
                 PersistBlocked(self);
                 NotifyLine(self.ObjectId, 0, "Message refusal mode.");
                 return null;
             case FriendProtocol.BlockAllOff:
-                self.BlockAll = false;
+                Lists(self).BlockAll = false;
                 PersistBlocked(self);
                 NotifyLine(self.ObjectId, 0, "Message acceptance mode.");
                 return null;
@@ -102,16 +103,17 @@ public sealed partial class ZoneWorld
                     name,
                     self.Name,
                     targetId,
-                    alreadyBlocked: self.Blocked.ContainsKey(targetId),
-                    blockedCount: self.Blocked.Count) is { } blockError)
+                    alreadyBlocked: Lists(self).Blocked.ContainsKey(targetId),
+                    blockedCount: Lists(self).Blocked.Count) is { } blockError)
                 return blockError;
-            self.Blocked[targetId] = targetName;
+            Lists(self).Blocked[targetId] = targetName;
             // Mobius: blocking removes from friends both ways when present.
-            if (self.Friends.Remove(targetId))
+            if (Lists(self).Friends.Remove(targetId))
             {
                 PersistFriends(self);
                 FanoutFriendUpdate(self.ObjectId, added: false, targetId, targetName, online: 0);
-                if (_byId.TryGetValue(targetId, out var peer) && peer.Friends.Remove(self.ObjectId))
+                if (_byId.TryGetValue(targetId, out var peer) && _friends.TryGet(targetId, out var peerLists) &&
+                    peerLists.Friends.Remove(self.ObjectId))
                 {
                     PersistFriends(peer);
                     if (peer.Session?.InWorld == true)
@@ -125,7 +127,7 @@ public sealed partial class ZoneWorld
 
         if (name.Length == 0)
             return "bad_request";
-        if (!self.Blocked.Remove(targetId))
+        if (!Lists(self).Blocked.Remove(targetId))
             return FriendProtocol.Missing;
         PersistBlocked(self);
         NotifyLine(self.ObjectId, 0, $"You have unblocked {targetName}.");
@@ -134,7 +136,7 @@ public sealed partial class ZoneWorld
 
     void SendBlockList(ZoneEntity self)
     {
-        var rows = self.Blocked
+        var rows = Lists(self).Blocked
             .OrderBy(kv => kv.Value, StringComparer.OrdinalIgnoreCase)
             .Select(kv => new FriendRowMsg
             {
@@ -145,7 +147,7 @@ public sealed partial class ZoneWorld
             .ToArray();
         NetBridge?.FanoutBlockList([self.ObjectId], new BlockListMsg
         {
-            BlockAll = self.BlockAll ? 1 : 0,
+            BlockAll = Lists(self).BlockAll ? 1 : 0,
             Blocked = rows
         });
     }
@@ -154,7 +156,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Session == null)
             return;
-        var rows = player.Friends
+        var rows = Lists(player).Friends
             .OrderBy(kv => kv.Key)
             .Select(kv => new StoredSocial(kv.Key, kv.Value))
             .ToArray();
@@ -165,24 +167,15 @@ public sealed partial class ZoneWorld
     {
         if (player.Session == null)
             return;
-        var rows = player.Blocked
+        var rows = Lists(player).Blocked
             .OrderBy(kv => kv.Key)
             .Select(kv => new StoredSocial(kv.Key, kv.Value))
             .ToArray();
-        _persist.ReplaceBlocked(player.Session.Account, player.ObjectId, rows, player.BlockAll);
+        _persist.ReplaceBlocked(player.Session.Account, player.ObjectId, rows, Lists(player).BlockAll);
     }
 
-    ZoneEntity? FindOnlinePlayerByName(string name)
-    {
-        foreach (var player in Players())
-        {
-            if (player.Session != null
-                && player.Session.InWorld
-                && string.Equals(player.Name, name, StringComparison.OrdinalIgnoreCase))
-                return player;
-        }
-        return null;
-    }
+    ZoneEntity? FindOnlinePlayerByName(string name) =>
+        OnlinePlayerNamed(name) is { Session.InWorld: true } player ? player : null;
 
     bool IsOnlinePlayer(int objectId) =>
         _byId.TryGetValue(objectId, out var entity)
@@ -195,8 +188,7 @@ public sealed partial class ZoneWorld
             ? entity.Name
             : fallback;
 
-    static bool IsBlocked(ZoneEntity owner, ZoneEntity other) =>
-        owner.BlockAll || owner.Blocked.ContainsKey(other.ObjectId);
+    bool IsBlocked(ZoneEntity owner, ZoneEntity other) => _friends.Blocks(owner.ObjectId, other.ObjectId);
 
     void FanoutFriendUpdate(int watcherObjectId, bool added, int objectId, string name, bool online) =>
         FanoutFriendUpdate(watcherObjectId, added, objectId, name, online ? 1 : 0);

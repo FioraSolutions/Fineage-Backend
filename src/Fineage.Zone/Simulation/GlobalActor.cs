@@ -11,25 +11,46 @@ public enum ActorTime
 }
 
 /// <summary>
-/// A world-wide system (olympiad, sieges, seven signs, ...) that owns its state and runs on the scheduler thread,
-/// section 3.4 of <c>docs/architecture/zone-simulation.md</c>. It holds no clock: its scheduled step reads the time of
-/// the step it is given (<see cref="Time"/>), and requests made inside a step pass the step's time. A roll draws from
-/// the actor's own seeded stream. The step never touches entities, sessions or the network: it returns effects, and the
-/// world applies them after the actor returned. Region bodies never reach an actor (<see cref="RequireActorThread"/>);
-/// what they have to tell one is deferred to the stage barrier, where it runs on the scheduler thread in a fixed order.
+/// A world-wide system (olympiad, sieges, seven signs, party, clan, ...) that owns its state and runs on the scheduler
+/// thread, section 3.4 of <c>docs/architecture/zone-simulation.md</c>. It holds no clock: requests pass the step's
+/// time, and a roll draws from the actor's own seeded stream. Region bodies never reach an actor
+/// (<see cref="RequireActorThread"/>); what they have to tell one is deferred to the stage barrier, where it runs on
+/// the scheduler thread in a fixed order. An actor with scheduled work derives from <see cref="GlobalActor{TEffect}"/>.
 /// </summary>
-public abstract class GlobalActor<TEffect>
+public abstract class GlobalActor
 {
-    protected GlobalActor(string name, ActorTime time)
+    protected GlobalActor(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("A global actor needs a name.", nameof(name));
         Name = name;
-        Time = time;
     }
 
-    /// <summary>The actor's simulation stage.</summary>
     public string Name { get; }
+
+    /// <summary>Throws inside a region body: other regions may be running, and the actor is single-threaded.</summary>
+    protected void RequireActorThread()
+    {
+        if (RegionTickScheduler.CurrentBody is { } region)
+        {
+            throw new InvalidOperationException(
+                $"global actor '{Name}' reached from the body of region {region}; defer the request to the barrier");
+        }
+    }
+}
+
+/// <summary>
+/// A global actor with scheduled work, run as the world stage named <see cref="GlobalActor.Name"/>: the step reads the
+/// time of the step it is given (<see cref="Time"/>) and never touches entities, sessions or the network. It returns
+/// effects, and the world applies them after the actor returned.
+/// </summary>
+public abstract class GlobalActor<TEffect> : GlobalActor
+{
+    protected GlobalActor(string name, ActorTime time)
+        : base(name)
+    {
+        Time = time;
+    }
 
     public ActorTime Time { get; }
 
@@ -43,14 +64,4 @@ public abstract class GlobalActor<TEffect>
     }
 
     protected abstract void OnStep(long nowUnixMs, List<TEffect> effects);
-
-    /// <summary>Throws inside a region body: other regions may be running, and the actor is single-threaded.</summary>
-    protected void RequireActorThread()
-    {
-        if (RegionTickScheduler.CurrentBody is { } region)
-        {
-            throw new InvalidOperationException(
-                $"global actor '{Name}' reached from the body of region {region}; defer the request to the barrier");
-        }
-    }
 }

@@ -16,6 +16,7 @@ using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Zone.Party;
 using Fineage.Zone.Lottery;
 using Fineage.Game.Services;
 using Fineage.Zone.Simulation;
@@ -242,6 +243,7 @@ public sealed partial class ZoneWorld
             bossRandom ?? GlobalStream(RandomPurpose.Boss));
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
+        _party = new PartyActor(new PartyMembers(this));
         _olympiad = new OlympiadActor(olympiad ?? new OlympiadBoard(WallNow(), olympiadSettings ?? OlympiadSettings.FromEnvironment()),
             LookupOlympiad, GlobalStream(RandomPurpose.Olympiad));
         _teleports = teleports ?? TeleportCatalog.LoadDefault();

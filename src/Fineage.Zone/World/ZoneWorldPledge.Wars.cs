@@ -1,5 +1,6 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -10,10 +11,10 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    bool IsAtWar(ZoneClan clan) => clan.D.WarTargets.Count > 0 || _clans.Values.Any(c => c.D.WarTargets.Contains(clan.Id));
+    bool IsAtWar(ZoneClan clan) => clan.D.WarTargets.Count > 0 || _clan.All.Any(c => c.D.WarTargets.Contains(clan.Id));
 
     bool Declared(int fromClanId, int toClanId) =>
-        _clans.TryGetValue(fromClanId, out var from) && from.D.WarTargets.Contains(toClanId);
+        _clan.TryGet(fromClanId, out var from) && from.D.WarTargets.Contains(toClanId);
 
     bool MutualWar(int a, int b) => a != 0 && b != 0 && a != b && Declared(a, b) && Declared(b, a);
 
@@ -138,7 +139,7 @@ public sealed partial class ZoneWorld
         }
         var target = string.IsNullOrWhiteSpace(targetName)
             ? null
-            : _clans.Values.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
+            : _clan.All.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
         if (target == null || target.Id == clan.Id)
         {
             SelfLine(session, 1565, "A clan war cannot be declared against a clan that does not exist!");
@@ -185,7 +186,7 @@ public sealed partial class ZoneWorld
         }
         var target = string.IsNullOrWhiteSpace(targetName)
             ? null
-            : _clans.Values.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
+            : _clan.All.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
         if (target == null)
         {
             SelfLine(session, 1565, "The clan does not exist.");
@@ -232,10 +233,10 @@ public sealed partial class ZoneWorld
     void SendWarList(ZoneSession session, ZoneClan clan)
     {
         var declared = clan.D.WarTargets
-            .Where(_clans.ContainsKey)
-            .Select(id => new PledgeWarNet { ClanId = id, Name = _clans[id].Name, Mutual = Declared(id, clan.Id) })
+            .Where(_clan.Contains)
+            .Select(id => new PledgeWarNet { ClanId = id, Name = _clan.Get(id).Name, Mutual = Declared(id, clan.Id) })
             .ToArray();
-        var attackers = _clans.Values
+        var attackers = _clan.All
             .Where(c => c.D.WarTargets.Contains(clan.Id))
             .Select(c => new PledgeWarNet { ClanId = c.Id, Name = c.Name, Mutual = clan.D.WarTargets.Contains(c.Id) })
             .ToArray();
@@ -245,8 +246,8 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius war kill reputation: killer clan +1 when the victim clan's score is above 0; victim clan −1 when the killer clan's is.</summary>
     void ApplyWarKillReputation(ZoneEntity killer, ZoneEntity victim)
     {
-        if (!_clans.TryGetValue(ClanIdFor(killer.ObjectId), out var killerClan) ||
-            !_clans.TryGetValue(ClanIdFor(victim.ObjectId), out var victimClan))
+        if (!_clan.TryGet(ClanIdFor(killer.ObjectId), out var killerClan) ||
+            !_clan.TryGet(ClanIdFor(victim.ObjectId), out var victimClan))
             return;
         bool victimHadRep = victimClan.D.Reputation > 0;
         bool killerHadRep = killerClan.D.Reputation > 0;
@@ -259,7 +260,7 @@ public sealed partial class ZoneWorld
     /// <summary>Drops every war row naming <paramref name="clanId"/> (clan destroyed).</summary>
     void ForgetWars(int clanId)
     {
-        foreach (var other in _clans.Values)
+        foreach (var other in _clan.All)
         {
             if (other.D.WarTargets.Remove(clanId))
             {
@@ -281,7 +282,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(a, out var ca) || !_clans.TryGetValue(b, out var cb))
+            if (!_clan.TryGet(a, out var ca) || !_clan.TryGet(b, out var cb))
                 return false;
             if (!ca.D.WarTargets.Contains(b))
                 ca.D.WarTargets.Add(b);

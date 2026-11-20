@@ -1,51 +1,13 @@
 using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    readonly Dictionary<int, ZoneClan> _clans = [];
-    readonly Dictionary<int, int> _clanByPlayer = [];
-    readonly Dictionary<int, long> _joinExpiry = [];
-    readonly Dictionary<int, long> _createExpiry = [];
-    readonly Dictionary<int, PendingClanInvite> _pendingClanInvites = [];
-    int _nextClanId = 1;
-
-    sealed class ZoneClan
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public int Level { get; set; }
-        public int LeaderId { get; set; }
-        public long DissolvingExpiryUnixMs { get; set; }
-        public long CharPenaltyExpiryUnixMs { get; set; }
-        /// <summary>Mobius <c>hasCastle</c>. 0 when this clan owns no castle.</summary>
-        public int CastleId { get; set; }
-        /// <summary>Mobius <c>crest_id</c> (pledge crest, 0 none).</summary>
-        public int CrestId { get; set; }
-        /// <summary>Mobius <c>clan_skills</c> book. Copied onto members via <see cref="RefreshClanSkills"/>.</summary>
-        public Dictionary<int, int> Skills { get; } = [];
-        public List<ZoneClanMember> Members { get; } = [];
-        /// <summary>Reputation, sub-units, privileges, wars, ally, member grades, warehouse rows (persisted in the clan payload).</summary>
-        public ClanDetails D { get; set; } = new();
-        /// <summary>Mobius <c>ClanWarehouse</c>, rebuilt from <see cref="ClanDetails.Warehouse"/> on first use.</summary>
-        public Fineage.Game.Services.PrivateWarehouse? Warehouse { get; set; }
-    }
-
-    sealed class ZoneClanMember
-    {
-        public int CharacterId { get; init; }
-        public string Account { get; set; } = "";
-        public string Name { get; set; } = "";
-        public int ClassId { get; set; }
-        public int Level { get; set; }
-        /// <summary>Mobius <c>ClanMember.getPledgeType</c>: 0 main, -1 academy, 100/200 royal, 1001..2002 knights.</summary>
-        public int PledgeType { get; set; }
-    }
-
-    readonly record struct PendingClanInvite(int InviterObjectId, int ClanId, long ExpiresUnixMs, int PledgeType = 0);
+    readonly ClanActor _clan = new();
 
     public async Task<string?> TryClanCreateAsync(
         ZoneSession session,
@@ -148,11 +110,14 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    public void CompleteDueDissolutions(DateTimeOffset now)
+    /// <summary>Test and admin hook: runs the clan actor's dissolution step at the current tick.</summary>
+    public void CompleteDueDissolutions()
     {
         lock (_gate)
-            CompleteDueDissolutions(now.ToUnixTimeMilliseconds());
+            CompleteDueDissolutionsNow();
     }
+
+    void CompleteDueDissolutionsNow() => AtHookTick(tick => DissolveClans(tick, _clan.Step(tick)));
 
     void LoadClans()
     {
@@ -162,20 +127,20 @@ public sealed partial class ZoneWorld
         foreach (var record in _accounts.ListClans())
         {
             var clan = FromRecord(record);
-            _clans[clan.Id] = clan;
+            _clan.Add(clan);
             foreach (var member in clan.Members)
-                _clanByPlayer[member.CharacterId] = clan.Id;
+                _clan.Link(member.CharacterId, clan.Id);
         }
 
         // Mobius ClanTable load: a pending leader delegation takes effect at server start.
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
         {
             if (clan.D.NewLeaderId != 0)
                 ApplyLeaderDelegation(clan);
         }
         _hallAuctions.Halls = null;
 
-        CompleteDueDissolutions(NowUnixMs());
+        CompleteDueDissolutionsNow();
     }
 
     /// <summary>Test hook: reread clan rows the store gained after boot (siege registration reads this cache).</summary>
@@ -183,8 +148,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            _clans.Clear();
-            _clanByPlayer.Clear();
+            _clan.Clear();
             LoadClans();
             foreach (var entity in _byId.Values)
             {
@@ -193,21 +157,15 @@ public sealed partial class ZoneWorld
                 entity.ClanId = ClanIdFor(entity.ObjectId);
                 SyncClanStanding(entity);
             }
-            return _clans.Count > 0;
+            return _clan.Count > 0;
         }
     }
 
-    void CompleteDueDissolutions(long nowMs)
+    int DissolveClans(TickContext tick, IReadOnlyList<ClanDissolutionDue> due)
     {
-        var due = new List<int>();
-        foreach (var clan in _clans.Values)
-        {
-            if (ClanRules.DissolveDue(clan.DissolvingExpiryUnixMs, nowMs))
-                due.Add(clan.Id);
-        }
-
-        foreach (int id in due)
-            DestroyClan(id, nowMs);
+        foreach (var clan in due)
+            DestroyClan(clan.ClanId, tick.WallUnixMs);
+        return due.Count;
     }
 
     void RememberPenalties(ZoneSession session, CharacterRecord? stored = null)
@@ -215,8 +173,8 @@ public sealed partial class ZoneWorld
         if (stored == null)
             return;
 
-        _joinExpiry[session.ObjectId] = stored.ClanJoinExpiryUnixMs;
-        _createExpiry[session.ObjectId] = stored.ClanCreateExpiryUnixMs;
+        _clan.SetJoinExpiry(session.ObjectId, stored.ClanJoinExpiryUnixMs);
+        _clan.SetCreateExpiry(session.ObjectId, stored.ClanCreateExpiryUnixMs);
         int clanId = ClanIdFor(session.ObjectId);
         if (stored.ClanId == clanId)
             return;
@@ -232,7 +190,7 @@ public sealed partial class ZoneWorld
     {
         if (entity.ClanId == 0 || entity.Session == null)
             return;
-        if (!_clans.TryGetValue(entity.ClanId, out var clan))
+        if (!_clan.TryGet(entity.ClanId, out var clan))
             return;
 
         RefreshOnlineMember(entity);
@@ -247,17 +205,17 @@ public sealed partial class ZoneWorld
 
     void ClanPlayerLeftWorld(int objectId, string name)
     {
-        if (_pendingClanInvites.Remove(objectId, out var pending) &&
+        if (_clan.TakeInvite(objectId, out var pending) &&
             Online(pending.InviterObjectId) is { } inviter)
         {
             FanLine([inviter.ObjectId], ClanLines.InviteDeclinedRequestor(name));
             FanJoinResult([inviter.ObjectId], 0);
         }
 
-        foreach (var pair in _pendingClanInvites.ToList())
+        foreach (var pair in _clan.Invites)
         {
             if (pair.Value.InviterObjectId == objectId)
-                _pendingClanInvites.Remove(pair.Key);
+                _clan.DropInvite(pair.Key);
         }
 
         if (ClanOf(objectId) is { } clan)
@@ -299,10 +257,10 @@ public sealed partial class ZoneWorld
         if (!PersistNew(clan, leader))
             return NameTaken(name) ? ClanProtocol.NameTaken : ClanProtocol.Store;
 
-        _clans[clan.Id] = clan;
-        _clanByPlayer[session.ObjectId] = clan.Id;
-        _joinExpiry[session.ObjectId] = 0;
-        _createExpiry[session.ObjectId] = 0;
+        _clan.Add(clan);
+        _clan.Link(session.ObjectId, clan.Id);
+        _clan.SetJoinExpiry(session.ObjectId, 0);
+        _clan.SetCreateExpiry(session.ObjectId, 0);
         entity.ClanId = clan.Id;
         SyncClanStanding(entity);
 

@@ -128,7 +128,7 @@ public sealed partial class ZoneWorld
         if (!_html.TryGet(file, out var html))
             html = "<html><body>%castlename%</body></html>";
         string clanName = "", leaderName = "";
-        if (owned && _clans.TryGetValue(castle!.OwnerClanId, out var clan))
+        if (owned && _clan.TryGet(castle!.OwnerClanId, out var clan))
         {
             clanName = clan.Name;
             leaderName = clan.Members.FirstOrDefault(m => m.CharacterId == clan.LeaderId)?.Name ?? "";
