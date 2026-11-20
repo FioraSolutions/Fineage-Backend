@@ -41,14 +41,15 @@ public sealed class PrivateStorePacketHandler
             Count = row.Count,
             Price = row.Price
         }).ToArray();
-        string? error = await _world.TrySetPrivateStoreSellAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SetPrivateStoreSellMsg
-            {
-                Message = req.Message ?? "",
-                Packaged = req.Packaged != 0,
-                Items = items
-            },
+            new SetPrivateStoreSellCommand(
+                new SetPrivateStoreSellMsg
+                {
+                    Message = req.Message ?? "",
+                    Packaged = req.Packaged != 0,
+                    Items = items
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store sell failed.", ct).ConfigureAwait(false);
@@ -63,7 +64,7 @@ public sealed class PrivateStorePacketHandler
             return;
         }
 
-        string? error = await _world.TryPrivateStoreQuitAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new PrivateStoreQuitCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store quit failed.", ct).ConfigureAwait(false);
     }
@@ -82,9 +83,9 @@ public sealed class PrivateStorePacketHandler
         }
 
         var req = NetCodec.DecodePrivateStoreListRequest(envelope.Payload);
-        string? error = await _world.TryPrivateStoreListAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new PrivateStoreListRequestMsg { StoreObjectId = req.StoreObjectId },
+            new PrivateStoreListCommand(new PrivateStoreListRequestMsg { StoreObjectId = req.StoreObjectId }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store list failed.", ct).ConfigureAwait(false);
@@ -110,9 +111,9 @@ public sealed class PrivateStorePacketHandler
             Count = row.Count,
             Price = row.Price
         }).ToArray();
-        string? error = await _world.TryPrivateStoreBuyAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new PrivateStoreBuyMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            new PrivateStoreBuyCommand(new PrivateStoreBuyMsg { StoreObjectId = req.StoreObjectId, Items = items }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store buy failed.", ct).ConfigureAwait(false);
@@ -138,9 +139,9 @@ public sealed class PrivateStorePacketHandler
             Count = row.Count,
             Price = row.Price
         }).ToArray();
-        string? error = await _world.TrySetPrivateStoreBuyAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SetPrivateStoreBuyMsg { Message = req.Message ?? "", Items = items },
+            new SetPrivateStoreBuyCommand(new SetPrivateStoreBuyMsg { Message = req.Message ?? "", Items = items }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store buy open failed.", ct).ConfigureAwait(false);
@@ -166,9 +167,9 @@ public sealed class PrivateStorePacketHandler
             Count = row.Count,
             Price = row.Price
         }).ToArray();
-        string? error = await _world.TryPrivateStoreSellToAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new PrivateStoreSellToMsg { StoreObjectId = req.StoreObjectId, Items = items },
+            new PrivateStoreSellToCommand(new PrivateStoreSellToMsg { StoreObjectId = req.StoreObjectId, Items = items }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Private store sell-to failed.", ct).ConfigureAwait(false);

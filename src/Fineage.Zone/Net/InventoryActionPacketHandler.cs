@@ -34,7 +34,7 @@ public sealed class InventoryActionPacketHandler
         }
 
         var pickup = NetCodec.DecodePickupRequest(envelope.Payload);
-        string? error = await _world.TryPickupAsync(zoneSession, pickup.GroundObjectId, ct)
+        string? error = await _world.ExecuteAsync(zoneSession, new PickupCommand(pickup.GroundObjectId), ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Pickup failed.", ct).ConfigureAwait(false);
@@ -55,8 +55,10 @@ public sealed class InventoryActionPacketHandler
         }
 
         var destroy = NetCodec.DecodeDestroyItemRequest(envelope.Payload);
-        string? error = await _world.TryDestroyItemAsync(
-            zoneSession, destroy.ObjectId, destroy.Count, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new DestroyItemCommand(destroy.ObjectId, destroy.Count),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Destroy item failed.", ct).ConfigureAwait(false);
         // InventoryUpdate fans out from ZoneWorldGround.
@@ -76,8 +78,10 @@ public sealed class InventoryActionPacketHandler
         }
 
         var drop = NetCodec.DecodeDropItemRequest(envelope.Payload);
-        string? error = await _world.TryDropItemAsync(
-            zoneSession, drop.ObjectId, drop.Count, drop.X, drop.Y, drop.Z, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new DropItemCommand(drop.ObjectId, drop.Count, drop.X, drop.Y, drop.Z),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Drop failed.", ct).ConfigureAwait(false);
     }
@@ -96,7 +100,7 @@ public sealed class InventoryActionPacketHandler
         }
 
         var use = NetCodec.DecodeUseItem(envelope.Payload);
-        string? error = await _world.TryUseItemAsync(zoneSession, use.ObjectId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new UseItemCommand(use.ObjectId), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "UseItem failed.", ct).ConfigureAwait(false);
     }
@@ -115,7 +119,7 @@ public sealed class InventoryActionPacketHandler
         }
 
         var unequip = NetCodec.DecodeUnequipItem(envelope.Payload);
-        string? error = await _world.TryUnequipItemAsync(zoneSession, unequip.PaperdollSlot, ct)
+        string? error = await _world.ExecuteAsync(zoneSession, new UnequipItemCommand(unequip.PaperdollSlot), ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Unequip failed.", ct).ConfigureAwait(false);

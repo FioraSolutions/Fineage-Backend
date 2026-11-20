@@ -62,6 +62,15 @@ public sealed record StopMoveCommand : ZoneCommand
     }
 }
 
+/// <summary>The client's reported position; refused (with the drift) when it is too far from the server's.</summary>
+public sealed record ValidatePositionCommand(int ClientX, int ClientY, int ClientZ) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        world.ValidateClientPosition(session, ClientX, ClientY, ClientZ, out int dxy, out int dz)
+            ? $"position drift dxy={dxy} dz={dz}"
+            : null;
+}
+
 public sealed record AttackCommand(int TargetObjectId, bool Forced) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

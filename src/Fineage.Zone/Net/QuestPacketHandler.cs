@@ -29,7 +29,7 @@ public sealed class QuestPacketHandler
             return;
         }
 
-        string? error = await _world.TryQuestListAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new QuestListCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Quest list failed.", ct).ConfigureAwait(false);
     }
@@ -48,7 +48,7 @@ public sealed class QuestPacketHandler
         }
 
         var abort = NetCodec.DecodeRequestQuestAbort(envelope.Payload);
-        string? error = await _world.TryQuestAbortAsync(zoneSession, abort.QuestId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new QuestAbortCommand(abort.QuestId), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Quest abort failed.", ct).ConfigureAwait(false);
     }

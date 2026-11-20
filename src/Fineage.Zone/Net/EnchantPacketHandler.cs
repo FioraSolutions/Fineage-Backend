@@ -36,7 +36,7 @@ public sealed class EnchantPacketHandler
 
         var request = NetCodec.DecodeEnchantRequest(envelope.Payload);
         string? error = await _world
-            .TryEnchantRequestAsync(zoneSession, request.ScrollObjectId, ct)
+            .ExecuteAsync(zoneSession, new EnchantRequestCommand(request.ScrollObjectId), ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Enchant scroll select failed.", ct).ConfigureAwait(false);
@@ -57,7 +57,7 @@ public sealed class EnchantPacketHandler
 
         var confirm = NetCodec.DecodeEnchantConfirm(envelope.Payload);
         string? error = await _world
-            .TryEnchantConfirmAsync(zoneSession, confirm.TargetObjectId, ct)
+            .ExecuteAsync(zoneSession, new EnchantConfirmCommand(confirm.TargetObjectId), ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Enchant failed.", ct).ConfigureAwait(false);
@@ -75,7 +75,7 @@ public sealed class EnchantPacketHandler
             return;
         }
 
-        string? error = await _world.TryEnchantCancelAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new EnchantCancelCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Enchant cancel failed.", ct).ConfigureAwait(false);
     }

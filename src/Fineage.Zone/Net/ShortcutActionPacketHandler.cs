@@ -42,8 +42,10 @@ public sealed class ShortcutActionPacketHandler
             return;
         }
 
-        string? actionError = await _world.TryCharacterActionAsync(
-            zoneSession, use.ActionId, targetObjectId: 0, ct).ConfigureAwait(false);
+        string? actionError = await _world.ExecuteAsync(
+            zoneSession,
+            new CharacterActionCommand(use.ActionId, 0),
+            ct).ConfigureAwait(false);
         if (actionError != null)
             await _reject(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
     }
@@ -58,7 +60,10 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var auto = NetCodec.DecodeAutoSoulShot(envelope.Payload);
-        string? autoError = await _world.TryAutoSoulShotAsync(zoneSession, auto.ItemId, auto.Enabled, ct).ConfigureAwait(false);
+        string? autoError = await _world.ExecuteAsync(
+            zoneSession,
+            new AutoSoulShotCommand(auto.ItemId, auto.Enabled),
+            ct).ConfigureAwait(false);
         if (autoError != null)
             await _reject(conn, autoError, "Auto shot failed.", ct).ConfigureAwait(false);
     }

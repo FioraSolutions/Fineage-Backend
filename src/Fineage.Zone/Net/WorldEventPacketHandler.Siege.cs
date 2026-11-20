@@ -21,7 +21,7 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeSiegeListRequest(envelope.Payload);
-        string? error = await _world.TrySiegeListAsync(zoneSession, request.CastleId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new SiegeListCommand(request.CastleId), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Siege list failed.", ct).ConfigureAwait(false);
         // SiegeInfo goes out as fanout, so the reply body is empty on purpose.
@@ -41,14 +41,15 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeSiegeRegisterRequest(envelope.Payload);
-        string? error = await _world.TrySiegeRegisterAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SiegeRegisterRequestMsg
-            {
-                CastleId = request.CastleId,
-                Attacker = request.Attacker,
-                Joining = request.Joining
-            },
+            new SiegeRegisterCommand(
+                new SiegeRegisterRequestMsg
+                {
+                    CastleId = request.CastleId,
+                    Attacker = request.Attacker,
+                    Joining = request.Joining
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Siege registration was rejected.", ct).ConfigureAwait(false);
@@ -68,14 +69,15 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeSiegeDefenderAnswerRequest(envelope.Payload);
-        string? error = await _world.TrySiegeAnswerAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SiegeDefenderAnswerRequestMsg
-            {
-                CastleId = request.CastleId,
-                ClanId = request.ClanId,
-                Approved = request.Approved
-            },
+            new SiegeAnswerCommand(
+                new SiegeDefenderAnswerRequestMsg
+                {
+                    CastleId = request.CastleId,
+                    ClanId = request.ClanId,
+                    Approved = request.Approved
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Siege answer was rejected.", ct).ConfigureAwait(false);
@@ -101,7 +103,10 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeAdminCaptureCastle(envelope.Payload);
-        string? error = await _world.TryAdminCaptureAsync(zoneSession, request.CastleId, request.ClanId, ct)
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new AdminCaptureCommand(request.CastleId, request.ClanId),
+            ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminCaptureCastle was rejected.", ct).ConfigureAwait(false);
