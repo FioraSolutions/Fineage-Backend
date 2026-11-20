@@ -435,7 +435,10 @@ public sealed partial class ZoneWorld
         }
 
         if (outcome.JournalChanged)
+        {
             QueueList(session);
+            FanoutQuestClientFx(session, player);
+        }
 
         // Mobius addLevel runs after the exp/sp that caused it, so the level packets follow the quest reward lines.
         if (levelled)

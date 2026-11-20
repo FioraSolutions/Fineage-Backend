@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Quests;
+using Fineage.Net.Contract;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -100,14 +101,66 @@ public sealed partial class ZoneWorld
         }).ToArray();
         if (NetBridge != null)
         {
-            NetBridge.FanoutQuestList([session.ObjectId], new QuestListMsg
+            var questList = new QuestListMsg
             {
                 Active = active,
                 CompletedMask = list.CompletedMask ?? [],
                 CompletedQuestIds = list.CompletedQuestIds ?? [],
                 MaxActive = list.MaxActive
-            });
+            };
+            NetBridge.FanoutQuestList([session.ObjectId], questList);
+            FanoutQuestClientFx(session, player);
         }
+    }
+
+    internal void NetQuestClientFx(ZoneSession session)
+    {
+        if (TryPlayer(session, out var player))
+            FanoutQuestClientFx(session, player);
+    }
+
+    void FanoutQuestClientFx(ZoneSession session, ZoneEntity player)
+    {
+        if (NetBridge == null)
+            return;
+
+        var marks = _quests.CollectNpcMarks(player.Quests, new QuestActor(player.Race, player.Level, player.ClassId));
+        NetBridge.FanoutQuestNpcMarks([session.ObjectId], new QuestNpcMarksNetMsg
+        {
+            Marks = marks.Select(m => new QuestNpcMarkNet { NpcId = m.NpcId, Mark = m.Mark }).ToArray()
+        });
+
+        QuestProgress? tracked = null;
+        foreach (var row in player.Quests.All())
+        {
+            if (row.Phase == QuestPhase.Started)
+            {
+                tracked = row;
+                break;
+            }
+        }
+
+        if (tracked == null)
+        {
+            NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg { Show = false });
+            return;
+        }
+
+        int step = tracked.JournalWord != 0 ? tracked.JournalWord : tracked.Cond;
+        if (!_questGeometry.TryTarget(tracked.QuestId, step, out int x, out int y, out int z))
+        {
+            NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg { QuestId = tracked.QuestId, Show = false });
+            return;
+        }
+
+        NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg
+        {
+            QuestId = tracked.QuestId,
+            Show = true,
+            X = x,
+            Y = y,
+            Z = z
+        });
     }
 
     /// <summary>

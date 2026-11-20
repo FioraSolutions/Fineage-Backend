@@ -40,4 +40,25 @@ sealed partial class NetWorldEventPublisher
             MaxActive = list.MaxActive
         };
     }
+
+    void IWorldEventPublisher.FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, QuestDirectionNetMsg msg)
+    {
+        var payload = NetCodec.EncodeQuestDirection(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.QuestDirection, payload);
+    }
+
+    void IWorldEventPublisher.FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, QuestNpcMarksNetMsg msg)
+    {
+        var payload = NetCodec.EncodeQuestNpcMarks(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.QuestNpcMarks, payload);
+    }
+
+    void IWorldEventPublisher.FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, TutorialUiNetMsg msg)
+    {
+        var payload = NetCodec.EncodeTutorialUi(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.TutorialUi, payload);
+    }
 }
