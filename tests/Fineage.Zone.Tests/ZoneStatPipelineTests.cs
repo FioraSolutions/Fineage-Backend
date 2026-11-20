@@ -84,6 +84,42 @@ public sealed class ZoneStatPipelineTests
         Assert.Equal(CombatStat.DamageZoneVuln, protection.Funcs[0].Stat);
         Assert.Equal('s', protection.Funcs[0].Op);
         Assert.Equal(30, protection.Funcs[0].ValueAt(1));
+        Assert.True(passives.TryGet(293, out var twoHand));
+        Assert.Equal(CombatStat.PAtk, twoHand.Funcs[0].Stat);
+        Assert.Equal(new[] { "SWORD", "BLUNT" }, twoHand.Funcs[0].Using);
+        Assert.Equal(new[] { "lrhand" }, twoHand.Funcs[0].UsingSlot);
+        Assert.Equal(4.5, twoHand.Funcs[0].ValueAt(1));
+        Assert.True(passives.TryGet(295, out var ironBody));
+        Assert.Equal(CombatStat.DamageZoneVuln, ironBody.Funcs[0].Stat);
+        Assert.Equal(40, ironBody.Funcs[0].ValueAt(1));
+        Assert.True(stats.TryGet(423, out var infernal));
+        Assert.Equal(CombatStat.FirePower, infernal.Funcs[0].Stat);
+        Assert.Equal(10, infernal.Funcs[0].ValueAt(1));
+        Assert.Equal(CombatStat.FireRes, infernal.Funcs[1].Stat);
+        Assert.True(stats.TryGet(94, out var rage));
+        Assert.Equal(new[] { "BOW", "DAGGER", "FIST", "DUALFIST" }, rage.Funcs[0].Using);
+        Assert.Equal(new[] { "lrhand" }, rage.Funcs[2].UsingSlot);
+    }
+
+    [Fact]
+    public void Two_handed_weapon_mastery_applies_only_to_lrhand_sword_or_blunt()
+    {
+        var (world, p, bag) = Fighter();
+        bag.Equip(bag.Add(1)); // Short Sword, rhand
+        int oneHand = world.PlayerStats(p).PAtk;
+        int oneHandAcc = world.PlayerStats(p).Accuracy;
+        p.KnownSkills[293] = 1;
+        Assert.Equal(oneHand, world.PlayerStats(p).PAtk);
+        Assert.Equal(oneHandAcc, world.PlayerStats(p).Accuracy);
+
+        p.KnownSkills.Remove(293);
+        bag.Equip(bag.Add(70)); // Claymore, lrhand
+        int twoHand = world.PlayerStats(p).PAtk;
+        int twoHandAcc = world.PlayerStats(p).Accuracy;
+        p.KnownSkills[293] = 1;
+        // pAtk add 4.5 truncates in Apply(int)
+        Assert.Equal(twoHand + 4, world.PlayerStats(p).PAtk);
+        Assert.Equal(twoHandAcc + 3, world.PlayerStats(p).Accuracy);
     }
 
     [Fact]

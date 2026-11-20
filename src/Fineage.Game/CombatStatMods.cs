@@ -53,6 +53,7 @@ public enum CombatStat
     CancelVuln,    // cancelVuln
     DebuffVuln,    // debuffVuln
     HolyPower,     // holyPower
+    FirePower,     // firePower (Infernal Form)
     DarkRes,       // darkRes
     HolyRes,       // holyRes
     FireRes,       // fireRes
@@ -99,7 +100,8 @@ public sealed record SkillStatFunc(
     int? HpBelowPercent = null,
     bool Moving = false,
     bool Standing = false,
-    string[]? NotUsing = null)
+    string[]? NotUsing = null,
+    string[]? UsingSlot = null)
 {
     public double ValueAt(int level) => Values.Length == 0 ? 0 : Values[Math.Clamp(level, 1, Values.Length) - 1];
 }

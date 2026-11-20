@@ -34,7 +34,7 @@ STAT_NAMES = {
     "reflectDam", "reflectSkillPhysic", "reflectSkillMagic", "vengeancePdam", "vengeanceMdam",
     "absorbDam", "physicalMpConsumeRate", "magicalMpConsumeRate", "danceMpConsumeRate",
     "shieldDefAngle", "skillCritical", "skillCriticalProbability", "atkCountMax", "pAtkRange",
-    "breath", "fall", "cancelVuln", "debuffVuln", "holyPower", "darkRes",
+    "breath", "fall", "cancelVuln", "debuffVuln", "holyPower", "firePower", "darkRes",
     "holyRes", "fireRes", "waterRes", "windRes", "earthRes", "transDam", "cancel", "damageZoneVuln",
 }
 
@@ -115,10 +115,11 @@ def is_enchant_ref(raw: str | None) -> bool:
     return bool(raw) and "ench" in raw.lower()
 
 
-def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | None, dict[str, bool]]:
-    """Return (value-ref-or-text, using kinds, not-using kinds, hpBelow, player flags)."""
+def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | None, dict[str, bool], list[str]]:
+    """Return (value-ref-or-text, using kinds, not-using kinds, hpBelow, player flags, using slots)."""
     using: list[str] = []
     not_using: list[str] = []
+    slots: list[str] = []
     hp = None
     flags: dict[str, bool] = {}
     raw = (el.text or "").strip() or None
@@ -133,7 +134,7 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | N
 
     def take_using(kinds: str, inverted: bool) -> None:
         dest = not_using if inverted else using
-        dest.extend(k.upper() for k in kinds.split() if k.strip())
+        dest.extend(k.upper() for k in re.split(r"[\s,]+", kinds) if k.strip())
 
     def walk(node: ET.Element, inverted: bool = False) -> None:
         nonlocal raw, hp
@@ -142,8 +143,12 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | N
             raw = (node.text or "").strip() or raw
             for ch in list(node):
                 walk(ch, inverted)
-        elif tag == "using" and node.get("kind"):
-            take_using(node.get("kind", ""), inverted)
+        elif tag == "using":
+            if node.get("kind"):
+                take_using(node.get("kind", ""), inverted)
+            slot = (node.get("slot") or "").strip().lower()
+            if slot and not inverted:
+                slots.append(slot)
         elif tag == "player":
             take_player(node)
         elif tag == "not":
@@ -156,7 +161,7 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | N
     for ch in list(el):
         walk(ch)
     # bare text still counts as the value when there are no <value> children
-    return raw, using, not_using, hp, flags
+    return raw, using, not_using, hp, flags, slots
 
 
 def parse_skill(skill: ET.Element) -> dict | None:
@@ -181,7 +186,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
             stat = el.get("stat") or ""
             if stat not in STAT_NAMES:
                 continue
-            raw, using, not_using, hp, flags = func_meta(el)
+            raw, using, not_using, hp, flags, slots = func_meta(el)
             if is_enchant_ref(raw):
                 continue
             values = resolve(raw, tables, levels)
@@ -190,7 +195,7 @@ def parse_skill(skill: ET.Element) -> dict | None:
             # Skip obvious enchant tables even if resolved via a non-hash name
             if raw and is_enchant_ref(raw):
                 continue
-            key = (stat, tag, tuple(values), tuple(using), tuple(not_using), hp, tuple(sorted(flags.items())))
+            key = (stat, tag, tuple(values), tuple(using), tuple(not_using), hp, tuple(sorted(flags.items())), tuple(slots))
             if key in seen_stat_ops:
                 continue
             seen_stat_ops.add(key)
@@ -199,6 +204,8 @@ def parse_skill(skill: ET.Element) -> dict | None:
                 row["using"] = using
             if not_using:
                 row["notUsing"] = not_using
+            if slots:
+                row["usingSlot"] = slots
             if hp is not None:
                 row["hpBelow"] = hp
             row.update(flags)
