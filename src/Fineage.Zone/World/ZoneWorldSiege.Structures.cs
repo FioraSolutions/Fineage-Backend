@@ -395,7 +395,7 @@ public sealed partial class ZoneWorld
     void StartStaticCast(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, SkillDefinition template,
         SkillLevelData levelData, int level, long now, Action<ZoneEntity, long> effect)
     {
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         int hitMs = Math.Max(0, template.HitTimeMs);
         int reuseMs = Math.Max(0, template.ReuseDelayMs);
         if (reuseMs > 0)

@@ -123,7 +123,7 @@
      "id": 5195,
      "level": 6,
      "hitTimeMs": 5000,
-     "reuseDelayMs": 6000,
+     "reuseDelayMs": 10000,
      "mp": 39,
      "mpInitial": 10,
      "amount": 380
@@ -247,7 +247,7 @@
      "id": 5195,
      "level": 6,
      "hitTimeMs": 5000,
-     "reuseDelayMs": 6000,
+     "reuseDelayMs": 10000,
      "mp": 39,
      "mpInitial": 10,
      "amount": 380
@@ -371,7 +371,7 @@
      "id": 5195,
      "level": 6,
      "hitTimeMs": 5000,
-     "reuseDelayMs": 6000,
+     "reuseDelayMs": 10000,
      "mp": 39,
      "mpInitial": 10,
      "amount": 380
@@ -511,7 +511,7 @@
      "id": 5195,
      "level": 6,
      "hitTimeMs": 5000,
-     "reuseDelayMs": 6000,
+     "reuseDelayMs": 10000,
      "mp": 39,
      "mpInitial": 10,
      "amount": 380
@@ -589,7 +589,7 @@
      "id": 5195,
      "level": 6,
      "hitTimeMs": 5000,
-     "reuseDelayMs": 6000,
+     "reuseDelayMs": 10000,
      "mp": 39,
      "mpInitial": 10,
      "amount": 380

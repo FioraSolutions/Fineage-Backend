@@ -19,6 +19,9 @@ public sealed partial class ZoneWorld
         int level = Math.Max(1, player.Level);
         int maxHp = template.ModifiedHp(level);
         int maxMp = template.ModifiedMp(level);
+        int maxCp;
+        try { maxCp = template.ModifiedCp(level); }
+        catch (ArgumentOutOfRangeException) { maxCp = template.MaxCp; }
         if (player.Inventory != null)
         {
             foreach (var item in player.Inventory.Items)
@@ -30,15 +33,20 @@ public sealed partial class ZoneWorld
             }
         }
 
-        maxHp = Math.Max(1, maxHp);
-        maxMp = Math.Max(1, maxMp);
-        bool changed = player.MaxHp != maxHp || player.MaxMp != maxMp;
+        var mods = PlayerStatMods(player);
+        maxHp = Math.Max(1, mods.Apply(CombatStat.MaxHp, maxHp));
+        maxMp = Math.Max(1, mods.Apply(CombatStat.MaxMp, maxMp));
+        maxCp = Math.Max(0, mods.Apply(CombatStat.MaxCp, maxCp));
+        bool changed = player.MaxHp != maxHp || player.MaxMp != maxMp || player.MaxCp != maxCp;
         player.MaxHp = maxHp;
         player.MaxMp = maxMp;
+        player.MaxCp = maxCp;
         if (player.CurHp > maxHp)
             player.CurHp = maxHp;
         if (player.CurMp > maxMp)
             player.CurMp = maxMp;
+        if (player.CurCp > maxCp)
+            player.CurCp = maxCp;
 
         if (changed && fanout && player.Session != null)
         {

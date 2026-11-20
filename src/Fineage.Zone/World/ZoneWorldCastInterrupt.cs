@@ -52,7 +52,8 @@ public sealed partial class ZoneWorld
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
             men = EffectiveAttributes(player, t).MenBonus;
-        if (CastRules.RollAttackBreak(_combatRandom, damage, men))
+        // Mobius calcStat(ATTACK_CANCEL, init): Concentration etc. sub/add the cancel stat before the 1..99 clamp.
+        if (CastRules.RollAttackBreak(_combatRandom, damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
             AbortCast(player, "hit", notify: true);
     }
 
@@ -109,7 +110,7 @@ public sealed partial class ZoneWorld
 
         if (!ReferenceEquals(player, target!))
         {
-            if (hit.EscapeRange > 0 && !ZoneCombat.InCastRange(player.X, player.Y, target!.X, target.Y, hit.EscapeRange + ZoneCombat.HitRangeTolerance))
+            if (hit.EscapeRange > 0 && !ZoneCombat.Within(player.X, player.Y, target!.X, target.Y, SkillCastReach(hit.EscapeRange, player, target)))
             {
                 AbortCast(player, "escaped", notify: false);
                 return;

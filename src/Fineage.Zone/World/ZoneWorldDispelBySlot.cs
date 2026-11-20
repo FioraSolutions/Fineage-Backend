@@ -44,7 +44,7 @@ public sealed partial class ZoneWorld
         }
         if (template.CastRange > 0 &&
             targetId != player.ObjectId &&
-            !ZoneCombat.InCastRange(player.X, player.Y, target.X, target.Y, template.CastRange))
+            !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
         // One level's worth of pairs per cast: the table index is the skill level, not the target.
@@ -52,15 +52,16 @@ public sealed partial class ZoneWorld
         if (pairs.Count == 0)
             return null;
 
-        player.CurMp = Math.Max(0, player.CurMp - levelData.MpConsume);
-        var (hitMs, reuseMs) = ScaledSkillTimes(player, template);
+        ConsumeSkillMp(player, template, levelData.MpConsume);
+        var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
 
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
-        player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
+        // Mobius onMagicFinalizer: a cleanse is a positive support skill → no attack stance.
+        EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         session.SelectedTargetId = targetId;
 

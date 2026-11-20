@@ -12,15 +12,24 @@ public static class ZoneAbnormals
         return (int)Math.Max(1, (remainingMs + 999) / 1000);
     }
 
-    public static AbnormalEffectMsg ToWire(long nowUnixMs, ZoneAbnormalEntry entry) => new()
+    public static AbnormalEffectMsg ToWire(long nowUnixMs, ZoneAbnormalEntry entry, string visual = "") => new()
     {
         Id = entry.Id,
-        Value = entry.Value,
+        // Client skillgrp / buff-bar lookups use Value as the skill level. An applied
+        // abnormal should never go out as 0 (AddDataCellToTime would drop the icon).
+        Value = entry.Value > 0 ? entry.Value : Math.Max(1, entry.SkillLevel),
         DurationSeconds = RemainingSeconds(nowUnixMs, entry),
-        Slot = entry.Slot ?? ""
+        Slot = entry.Slot ?? "",
+        Visual = visual ?? ""
     };
 
-    public static void Apply(
+    /// <summary>
+    /// Mobius <c>EffectList.add</c>: an empty/NONE slot replaces only the same skill id (different
+    /// skills stack). A named <paramref name="slot"/> (<c>abnormalType</c>) is exclusive — an equal
+    /// or higher <paramref name="value"/> (<c>abnormalLevel</c>) replaces the occupant and a lower
+    /// level is rejected. Returns false when the incoming effect is not applied.
+    /// </summary>
+    public static bool Apply(
         IList<ZoneAbnormalEntry> list,
         int effectId,
         int value,
@@ -30,31 +39,36 @@ public static class ZoneAbnormals
         string slot = "")
     {
         if (effectId <= 0 || durationSeconds <= 0)
-            return;
+            return false;
 
         long expires = nowUnixMs + durationSeconds * 1000L;
-        int index = FindIndex(list, effectId);
-        if (index >= 0)
+        if (!string.IsNullOrWhiteSpace(slot))
         {
-            list[index].Value = value;
-            list[index].SkillLevel = skillLevel;
-            list[index].ExpiresAtUnixMs = expires;
-            list[index].NextDotAtUnixMs = 0;
-            if (slot.Length > 0)
-                list[index].Slot = slot;
+            int bySlot = FindIndexBySlot(list, slot);
+            if (bySlot >= 0)
+            {
+                if (value < list[bySlot].Value)
+                    return false;
+                list.RemoveAt(bySlot);
+            }
         }
         else
         {
-            list.Add(new ZoneAbnormalEntry
-            {
-                Id = effectId,
-                Value = value,
-                SkillLevel = skillLevel,
-                Slot = slot,
-                ExpiresAtUnixMs = expires,
-                NextDotAtUnixMs = 0
-            });
+            int index = FindIndex(list, effectId);
+            if (index >= 0)
+                list.RemoveAt(index);
         }
+
+        list.Add(new ZoneAbnormalEntry
+        {
+            Id = effectId,
+            Value = value,
+            SkillLevel = skillLevel,
+            Slot = slot ?? "",
+            ExpiresAtUnixMs = expires,
+            NextDotAtUnixMs = 0
+        });
+        return true;
     }
 
     public static bool TickExpired(IList<ZoneAbnormalEntry> list, long nowUnixMs)
@@ -125,6 +139,18 @@ public static class ZoneAbnormals
         for (int i = 0; i < list.Count; i++)
         {
             if (list[i].Id == effectId)
+                return i;
+        }
+
+        return -1;
+    }
+
+    static int FindIndexBySlot(IList<ZoneAbnormalEntry> list, string slot)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].Slot is { Length: > 0 } entrySlot &&
+                string.Equals(entrySlot, slot, StringComparison.OrdinalIgnoreCase))
                 return i;
         }
 

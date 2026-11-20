@@ -57,9 +57,8 @@ public sealed partial class ZoneWorld
                 continue;
             // The drain already printed the specific message (140 / 175) when notified; otherwise the toggle ends
             // silently and DeactivateToggle sends S1_HAS_BEEN_ABORTED. Either way the skill's exit hook must run —
-            // for Fake Death that is what stands the pawn back up (WT_STOP_FAKEDEATH + Revive).
-            if (notified)
-                entity.Abnormals.RemoveAt(i);
+            // for Fake Death that is what stands the pawn back up (WT_STOP_FAKEDEATH + Revive). Always go through
+            // DeactivateToggle so FanoutAbnormal reaches the client (removing the row first skipped the glow clear).
             DeactivateToggle(entity.Session, entity, entry.Id, _game.Skills.Find(entry.Id), "tick", sendAbort: !notified);
         }
         if (entity.Abnormals.Count == 0)
@@ -159,6 +158,8 @@ public sealed partial class ZoneWorld
         // Mobius: a buff/debuff that changes combat stats triggers UserInfo (status window P.Atk/P.Def/Spd)
         // and a fresh run speed (Wind Walk/Slow change how fast the pawn actually travels).
         bool statful = target.Abnormals.Any(a => _statEffects.TryGet(a.Id, out _));
+        if (target.Kind == ZoneEntityKind.Player)
+            RefreshPlayerMaxima(target, fanout: false);
         bool speedChanged = RefreshRunSpeed(target);
         if (speedChanged)
             FanoutNetMoveType(target);
@@ -192,7 +193,7 @@ public sealed partial class ZoneWorld
         int spoilExtra = entity.SpoilerObjectId != 0 ? 1 : 0;
         var effects = new AbnormalEffectMsg[entity.Abnormals.Count + spoilExtra];
         for (int i = 0; i < entity.Abnormals.Count; i++)
-            effects[i] = ZoneAbnormals.ToWire(now, entity.Abnormals[i]);
+            effects[i] = ZoneAbnormals.ToWire(now, entity.Abnormals[i], VisualFor(entity.Abnormals[i]));
         if (spoilExtra > 0)
         {
             effects[^1] = new AbnormalEffectMsg
@@ -207,6 +208,15 @@ public sealed partial class ZoneWorld
             ObjectId = entity.ObjectId,
             Effects = effects
         };
+    }
+
+    /// <summary>Look up Mobius <c>abnormalVisualEffect</c> from the skill template (Silent Move has no slot).</summary>
+    string VisualFor(ZoneAbnormalEntry entry)
+    {
+        if (entry == null)
+            return "";
+        var skill = _game.Skills.Find(entry.Id);
+        return skill?.AbnormalVisualEffect ?? "";
     }
 
     /// <summary>

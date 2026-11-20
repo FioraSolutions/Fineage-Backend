@@ -148,7 +148,8 @@ sealed partial class NetWorldEventPublisher
                 Id = src.Id,
                 Value = src.Value,
                 DurationSeconds = src.DurationSeconds,
-                Slot = src.Slot ?? ""
+                Slot = src.Slot ?? "",
+                Visual = src.Visual ?? ""
             };
         }
         var payload = NetCodec.EncodeAbnormalStatusUpdate(new AbnormalStatusUpdateNetMsg

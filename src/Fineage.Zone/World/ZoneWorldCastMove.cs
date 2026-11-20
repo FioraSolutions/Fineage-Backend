@@ -37,6 +37,22 @@ public sealed partial class ZoneWorld
         FanoutStopInPlace(player);
     }
 
+    /// <summary>Mobius <c>stopMove</c> before <c>doAttack</c>: halt the run and tell watchers, all weapons.</summary>
+    void StopForAttack(ZoneEntity player, ZoneSession session)
+    {
+        if (session != null)
+        {
+            session.ClearApproach();
+            session.SitOnArrive = false;
+        }
+        if (!player.MoveActive)
+            return;
+        StopTimedMove(player);
+        if (session != null)
+            SyncSession(player, session);
+        FanoutStopInPlace(player);
+    }
+
     /// <summary>Tell remote Net watchers the pawn halted here (origin == dest). The caster's own client stops on MagicSkillUse.</summary>
     void FanoutStopInPlace(ZoneEntity player)
     {

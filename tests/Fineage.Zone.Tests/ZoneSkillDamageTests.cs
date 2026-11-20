@@ -13,8 +13,8 @@ public sealed class ZoneSkillDamageTests
         Assert.True(cat.Count > 300);
         Assert.True(cat.TryGet(3, out var ps));      // Power Strike
         Assert.Equal(SkillDamageKind.Physical, ps.Kind);
-        Assert.Equal(30, ps.PowerAt(1));
-        Assert.Equal(3000, ps.ReuseDelayMs);
+        Assert.Equal(25, ps.PowerAt(1));
+        Assert.Equal(13_000, ps.ReuseDelayMs);
         Assert.Equal(720, ps.CoolTimeMs);
         Assert.True(cat.TryGet(1177, out var ws));   // Wind Strike
         Assert.True(ws.Magic);
@@ -37,9 +37,9 @@ public sealed class ZoneSkillDamageTests
     [Fact]
     public void Damage_formulas_match_interlude()
     {
-        // Power Strike 1, fighter P.Atk 29 vs Gremlin pDef 44.444: 70·(29+30)/44.444
-        Assert.Equal((int)(70d * 59 / 44.444), ZoneCombat.PhysicalSkillDamage(29, 44.444, 30, false));
-        Assert.Equal((int)(70d * 88 / 44.444), ZoneCombat.PhysicalSkillDamage(29, 44.444, 30, true));
+        // Power Strike 1, fighter P.Atk 29 vs Gremlin pDef 44.444: 70·(29+25)/44.444
+        Assert.Equal((int)(70d * 54 / 44.444), ZoneCombat.PhysicalSkillDamage(29, 44.444, 25, false));
+        Assert.Equal((int)(70d * 83 / 44.444), ZoneCombat.PhysicalSkillDamage(29, 44.444, 25, true));
         // Wind Strike 1, M.Atk 6 vs Gremlin mDef 29.59: 91·√6/29.59·12
         Assert.Equal((int)(91d * Math.Sqrt(6) / 29.59 * 12), ZoneCombat.MagicDamage(6, 29.59, 12));
     }

@@ -176,7 +176,7 @@ public sealed partial class ZoneWorld
                 levelDataOk: levelDataOk,
                 onReuse: onReuse,
                 curMp: player.CurMp,
-                mpConsume: levelData?.MpConsume ?? 0) is { } precheckError)
+                mpConsume: SkillMpCost(player, template, levelData?.MpConsume ?? 0)) is { } precheckError)
             return precheckError;
 
         var liveTemplate = template!;
@@ -198,6 +198,10 @@ public sealed partial class ZoneWorld
             SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
         }
+
+        // Mobius Skill.checkCondition <player elementSeed(s)|active_effect_id_lvl> (SysMsg 113).
+        if (!PlayerConditionsMet(session, player, liveTemplate))
+            return null;
 
         // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
         // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
@@ -235,11 +239,15 @@ public sealed partial class ZoneWorld
         if (_skillEffects.HasResurrection(request.SkillId))
             return TrySkillUseResurrection(session, player, request, liveTemplate, liveLevelData, level, now);
 
+        if (liveTemplate.IsGroundDamageChannel)
+            return TrySkillUseChannel(session, player, request, liveTemplate, liveLevelData, level, now);
+
         // Mobius `isBad()` is `effectPoint < 0 && targetType != SELF`, and RequestMagicSkillUse's target check lets a
-        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) are exactly that: ONE-target
-        // derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe / RandomizeHate) are
-        // the whole behaviour. They must never be mistaken for an instant support heal, so they are routed to the
-        // hostile path — the debuff handler when they carry an abnormal, the attack handler otherwise.
+        // bad skill pick an attackable victim. Trick (11) / Switch (12) / Bluff (358) / Lure (51) are that family:
+        // ONE-target derangement skills with power 0, whose `<for>` payloads (TargetCancel / DeleteHateOfMe /
+        // RandomizeHate / AddHate) are the whole behaviour. They must never fall through to the attack handler
+        // (which refuses skills missing skill-combat.json as skill_no_combat). Debuff handler when they carry an
+        // abnormal, hostile-utility otherwise.
         if (_skillEffects.TryGet(request.SkillId, out var hostileRows) && HasDerangementPayload(hostileRows))
         {
             if (liveTemplate.IsDebuffSkill)
@@ -276,6 +284,13 @@ public sealed partial class ZoneWorld
         if (SignetSkillIds.Contains(request.SkillId))
             return TrySkillUseSignet(session, player, request, liveTemplate, liveLevelData, level, now);
 
+        if (_skillEffects.TryGet(request.SkillId, out var openRows) && HasOpenChest(openRows))
+            return TrySkillUseOpenChest(session, player, request, liveTemplate, liveLevelData, level, now);
+
+        if (_skillEffects.TryGet(request.SkillId, out var scavengeRows) && HasCorpseScavengePayload(scavengeRows) &&
+            liveTemplate.TargetType.Equals("CORPSE_MOB", StringComparison.OrdinalIgnoreCase))
+            return TrySkillUseLifeScavenge(session, player, request, liveTemplate, liveLevelData, level, now);
+
         if (liveTemplate.IsInstantSupportSkill(level) || _skillEffects.HasHeal(request.SkillId))
             return TrySkillUseSupport(session, player, request, liveTemplate, liveLevelData, level, now);
 
@@ -306,7 +321,16 @@ public sealed partial class ZoneWorld
                 row.Name.Equals("RandomizeHate", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("TargetCancel", StringComparison.OrdinalIgnoreCase) ||
                 row.Name.Equals("TransferHate", StringComparison.OrdinalIgnoreCase) ||
-                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase))
+                row.Name.Equals("AddHate", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Bluff", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("GetAgro", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("TargetMe", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("CpDamPercent", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Lethal", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("RunAway", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Fear", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Confuse", StringComparison.OrdinalIgnoreCase) ||
+                row.Name.Equals("Distrust", StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

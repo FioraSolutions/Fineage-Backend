@@ -368,7 +368,10 @@ public sealed partial class ZoneWorld
         }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
-        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        long nowMove = _clock().ToUnixTimeMilliseconds();
+        AdvanceMove(player, nowMove);
+        if (target.MoveActive)
+            AdvanceMove(target, nowMove);
         var armed = PlayerStats(player);
         // Mobius doAttack: isAttackWeapon false (datapack: the six fishing rods) refuses the swing unless GM.
         if (armed.Weapon == Fineage.Game.WeaponType.FishingRod && !ZoneAdmin.AllowPeaceAttack(player.Name))
@@ -388,16 +391,15 @@ public sealed partial class ZoneWorld
             approachMs = -1;
             return null;
         }
-        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player)))
+        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
         {
-            approachMs = ApproachTarget(player, target, PlayerReach(player));
+            approachMs = ApproachTarget(player, target, PlayerReach(player, target));
             return approachMs < 0 ? "attack" : null;
         }
         if (player.MoveActive)
         {
-            // Mobius onEvtArrived: in reach -> stop the run and swing from here (no slide past the target).
-            StopTimedMove(player);
-            SyncSession(player, session);
+            // Mobius stopMove before doAttack: in reach -> stop the run and swing from here (no slide past the target).
+            StopForAttack(player, session);
         }
         session.ClearApproach();
         // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.
@@ -423,10 +425,9 @@ public sealed partial class ZoneWorld
             }
         }
         // Mobius doAttack: a charged weapon fires its soulshot on this swing (hit or miss) and is uncharged.
+        // The next auto shot is recharged in onHitTimer (first hit), so its glow follows the hit, not the swing start.
         bool soulshot = player.SoulshotCharged;
         player.SoulshotCharged = false;
-        if (soulshot)
-            RechargeAutoShots(player);
         // Mobius doAttack turns the attacker to its target; the target's own facing decides back/side/front.
         player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
         // Mobius doAttackHitByDual: two independent rolls, each damage / 2. timeToHit is timeAtk/2, then the
@@ -469,9 +470,11 @@ public sealed partial class ZoneWorld
         long now = _clock().ToUnixTimeMilliseconds();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, now + (dual ? atk / 4 : atk / 2), flags));
+        long due = now + (dual ? atk / 4 : atk / 2);
+        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true));
         if (dual)
             _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
+        QueuePoleSplashHits(player, target, ps, soulshot, due);
 
         return null;
     }

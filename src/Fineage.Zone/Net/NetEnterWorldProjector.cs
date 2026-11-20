@@ -133,7 +133,10 @@ static class NetEnterWorldProjector
             // Mobius SummonInfo / PetInfo: title is the owner's name; the tail ties the pawn to its owner.
             Title = entity.Summon != null ? entity.Title : "",
             SummonKind = entity.Summon?.Kind ?? SummonKindNet.None,
-            OwnerObjectId = entity.Summon?.OwnerObjectId ?? 0
+            OwnerObjectId = entity.Summon?.OwnerObjectId ?? 0,
+            // Mobius NpcInfo rhand/lhand: the client picks the attack/locomotion clip from the weapon type.
+            Rhand = entity.Rhand,
+            Lhand = entity.Lhand
         };
     }
 
@@ -190,8 +193,8 @@ static class NetEnterWorldProjector
             MaxHp = entity.MaxHp,
             Mp = entity.CurMp,
             MaxMp = entity.MaxMp,
-            Cp = maxCp,
-            MaxCp = maxCp
+            Cp = entity.MaxCp > 0 ? entity.CurCp : maxCp,
+            MaxCp = entity.MaxCp > 0 ? entity.MaxCp : maxCp
         };
 
     static ItemListNetMsg BuildItems(PlayerInventory inventory)

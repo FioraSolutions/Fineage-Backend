@@ -121,10 +121,13 @@ public sealed partial class ZoneWorld
     /// <c>Bluff</c> (the victim turns its back on the caster) plus <c>TargetCancel</c> / <c>DeleteHateOfMe</c>
     /// (the victim forgets who hit it). Each rolls its own <c>chance</c>; a skill without these rows is a no-op.
     /// </summary>
-    void RunInstantPayloadEffects(ZoneEntity caster, ZoneEntity target, int skillId)
+    void RunInstantPayloadEffects(ZoneEntity caster, ZoneEntity target, int skillId, int level = 1, long now = 0)
     {
         if (caster == null || target == null || skillId <= 0)
             return;
+        if (now <= 0)
+            now = _clock().ToUnixTimeMilliseconds();
+        var template = _game.Skills.Find(skillId);
         foreach (var effect in EffectsOf(skillId))
         {
             switch (effect.Name)
@@ -140,6 +143,42 @@ public sealed partial class ZoneWorld
                     break;
                 case "RandomizeHate":
                     RandomizeHate(caster, target, effect.Chance);
+                    break;
+                case "AddHate":
+                    // Mobius AddHate.onStart: attackable only, addDamageHate(effector, 0, power).
+                    // AddHate payloads skip EVT_ATTACKED / addAttackerToAttackByList (the payload itself wakes the mob),
+                    // so this is the only hate write — quietly pulls the mob without clan-help notify.
+                    if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
+                    {
+                        long power = effect.Power > 0 ? (long)effect.Power : 1;
+                        AddHate(target, caster, power);
+                    }
+                    break;
+                case "GetAgro":
+                    ApplyGetAgro(caster, target, effect, now);
+                    break;
+                case "TargetMe":
+                    ApplyTargetMe(caster, target, effect);
+                    break;
+                case "CpDamPercent":
+                    ApplyCpDamPercent(caster, target, effect, level);
+                    break;
+                case "Lethal":
+                    ApplyLethalEffect(caster, target, effect, template, level);
+                    break;
+                case "RunAway":
+                case "Fear":
+                    ApplyRunAway(caster, target, effect, skillId, now);
+                    break;
+                case "Confuse":
+                    ApplyConfuse(caster, target, effect, skillId, now);
+                    break;
+                case "DispelByCategory":
+                    if (!string.IsNullOrEmpty(effect.Slot) && effect.Rate > 0)
+                    {
+                        int ml = template != null && template.TryLevelData(level, out var ld) ? ld.MagicLevel : caster.Level;
+                        ApplyDispelByCategory(target, effect.Slot, effect.Rate, Math.Max(1, effect.Max), ml);
+                    }
                     break;
             }
         }
@@ -183,7 +222,15 @@ public sealed partial class ZoneWorld
             NetBridge.FanoutPositionCorrection(netWatchers, entity.ObjectId, entity.X, entity.Y, entity.Z, heading);
     }
 
-    /// <summary>Mobius <c>DeleteHateOfMe.onStart</c>: <c>stopHating(effector)</c> on an attackable victim.</summary>
+    /// <summary>
+    /// Mobius <c>DeleteHateOfMe.onStart</c> (Trick 11): <c>stopHating(effector)</c>, <c>setWalking()</c> and
+    /// <c>getAI().setIntention(AI_INTENTION_ACTIVE)</c> on an attackable victim.
+    /// <para>
+    /// Dropping the hate entry alone is not enough: the monster keeps its current <c>AggroTargetId</c> while the
+    /// entry is gone from <c>HateList</c>, so it went on chasing and swinging at the player who just Trickshot it.
+    /// Retail returns the victim to ACTIVE — it stops the chase, drops any swing in flight and walks.
+    /// </para>
+    /// </summary>
     void DeleteHateOf(ZoneEntity caster, ZoneEntity target, int chance)
     {
         if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
@@ -192,8 +239,38 @@ public sealed partial class ZoneWorld
             return;
         if (!target.HateList.Remove(caster.ObjectId))
             return;
+
+        // Mobius setWalking(): return home is a walk, not a run.
+        if (target.Running)
+        {
+            target.Running = false;
+            FanoutMoveType(target);
+        }
+
+        int next = MostHated(target);
+        if (next == caster.ObjectId)
+            next = 0;
+        if (next > 0)
+        {
+            // Another attacker is still hated: the mob keeps fighting, only the caster stops being a target.
+            if (target.AggroTargetId == caster.ObjectId)
+                SetAggroTarget(target, next);
+            return;
+        }
+
+        // Nobody left: Mobius AI_INTENTION_ACTIVE — stop chasing, drop the swing, go idle (not returnHome: the
+        // victim stays where it is until the normal thinkActive drift/returnHome tick).
         if (target.AggroTargetId == caster.ObjectId)
-            SetAggroTarget(target, MostHated(target));
+            SetAggroTarget(target, 0);
+        _meleeHits.RemoveAll(h => h.AttackerId == target.ObjectId);
+        target.NextMobAttackMs = 0;
+        AbortCast(target, "trigger-delete-hate", notify: false);
+        if (target.Chasing || target.MoveActive)
+        {
+            target.Chasing = false;
+            StopTimedMove(target);
+            BroadcastNpcMove(target, target.X, target.Y, target.Z);
+        }
     }
 
     /// <summary>
@@ -230,10 +307,13 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius <c>TargetCancel.onStart</c>: <c>setTarget(null)</c> + <c>abortAttack</c> + <c>abortCast</c> +
     /// <c>AI_INTENTION_IDLE</c>. Player targets see their client target cleared; a monster drops its hate target and
-    /// forgets the current victim for the swing in flight.
+    /// forgets the current victim for the swing in flight. Mobius skips <c>effected.isRaid()</c>: raid bosses, grand
+    /// bosses and raid minions (<c>setIsRaidMinion</c> also sets <c>_isRaid</c>) keep their target.
     /// </summary>
     void CancelTargetOf(ZoneEntity entity, int chance)
     {
+        if (IsRaidForEffects(entity))
+            return;
         if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
             return;
 
@@ -267,4 +347,8 @@ public sealed partial class ZoneWorld
         }
         AbortCast(entity, "trigger-target-cancel", notify: false);
     }
+
+    /// <summary>Mobius <c>Attackable.isRaid()</c>: true for raid/grand bosses and for minions spawned by a raid.</summary>
+    static bool IsRaidForEffects(ZoneEntity entity) =>
+        entity.Kind == ZoneEntityKind.Npc && (entity.NpcType is "RaidBoss" or "GrandBoss" || entity.RaidMinion);
 }

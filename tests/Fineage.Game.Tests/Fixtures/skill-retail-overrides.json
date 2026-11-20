@@ -1,0 +1,10 @@
+{
+  "reference": "Retail client skillgrp timings that differ from Mobius CT_0 XML. Applied after the Mobius sync so documented animation locks are not overwritten.",
+  "skills": [
+    {
+      "skillId": 453,
+      "hitTimeMs": 1000,
+      "reason": "Escape Shackle: Mobius hitTime is 4000, but retail skillgrp_Classic.hit_time is 1.0. The 4000 ms server window held the escape pose after the animation ended."
+    }
+  ]
+}

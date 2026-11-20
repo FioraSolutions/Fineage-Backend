@@ -20,6 +20,41 @@ public sealed partial class ZoneWorld
 
     int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
 
+    /// <summary>Mobius <c>physRange + both collision radii</c> for this attacker/target pair.</summary>
+    int PlayerReach(ZoneEntity player, ZoneEntity target) => AttackReachAgainst(player, target);
+
+    int AttackReachAgainst(ZoneEntity attacker, ZoneEntity target)
+    {
+        int weapon = attacker.Kind == ZoneEntityKind.Npc
+            ? attacker.AttackRange
+            : PlayerStats(attacker).AttackRange;
+        return ZoneCombat.AttackReach(weapon, CollisionRadiusOf(attacker), CollisionRadiusOf(target));
+    }
+
+    /// <summary>
+    /// Mobius <c>maybeMoveToPawn(target, skill.getCastRange())</c>. Skills with no listed castRange (self/passive)
+    /// use 0, so the gate is just the two collision radii.
+    /// </summary>
+    int SkillCastReach(int castRange, ZoneEntity caster, ZoneEntity target) =>
+        ZoneCombat.SkillCastReach(Math.Max(0, castRange), CollisionRadiusOf(caster), CollisionRadiusOf(target));
+
+    int CollisionRadiusOf(ZoneEntity entity)
+    {
+        if (entity.Kind == ZoneEntityKind.Player)
+            return ZoneCombat.PlayerCollisionRadius;
+        if (entity.CollisionRadius > 0)
+            return entity.CollisionRadius;
+        if (entity.NpcId > 0)
+        {
+            _npcCollisionCatalog ??= Fineage.Zone.Npcs.NpcCatalog.LoadDefault();
+            if (_npcCollisionCatalog.ById.TryGetValue(entity.NpcId, out var template) && template.CollisionRadius > 0)
+                return (int)template.CollisionRadius;
+        }
+        return ZoneCombat.DefaultNpcCollision;
+    }
+
+    Fineage.Zone.Npcs.NpcCatalog? _npcCollisionCatalog;
+
     /// <summary>
     /// One physical swing from a player. A monster target rolls against its template P.Def / evasion / shield; a player
     /// target rolls against the same player stat pipeline an incoming mob swing uses (<see cref="PlayerStats"/>), so a
@@ -36,7 +71,7 @@ public sealed partial class ZoneWorld
         {
             pDef = NpcPDef(target);
             evasion = NpcEvasion(target);
-            shieldRate = NpcShieldRate(target);
+            shieldRate = ShieldRateInArc(target, player, NpcShieldRate(target), 0);
             shieldDef = target.ShieldDef;
         }
         else
@@ -44,7 +79,7 @@ public sealed partial class ZoneWorld
             var ts = PlayerStats(target);
             pDef = Math.Max(1d, ts.PDef);
             evasion = ts.Evasion;
-            shieldRate = ts.ShieldRate;
+            shieldRate = ShieldRateInArc(target, player, ts.ShieldRate, ts.ShieldDefAngle);
             shieldDef = ts.ShieldDef;
         }
 

@@ -34,6 +34,8 @@ public sealed class HerbCatalog
 
     public bool IsHerb(int itemId) => _items.ContainsKey(itemId);
 
+    public bool IsHerbSkill(int skillId) => _skills.ContainsKey(skillId);
+
     public IReadOnlyList<(HerbSkill Skill, int Level)> EffectsOf(int itemId) =>
         _items.TryGetValue(itemId, out var rows)
             ? rows.Where(r => _skills.ContainsKey(r.SkillId)).Select(r => (_skills[r.SkillId], r.Level)).ToList()

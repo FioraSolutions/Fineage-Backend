@@ -102,6 +102,14 @@ public sealed partial class ZoneWorld
             return TryBuffRequest(session, player.ObjectId, effectId: 0, remove: true);
         }
 
+        if (verb.Equals("admin_spawn", StringComparison.OrdinalIgnoreCase)
+            || verb.Equals("admin_spawn_monster", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!TryParseSpawnArgs(args, out int npcId, out int count))
+                return "bad_request";
+            return AdminSpawn(session, player, npcId, count);
+        }
+
         // Unknown admin_* — show shop hub rather than hard-failing HTML clicks we have not wired yet.
         ZoneLog.Info($"admin unknown object={player.ObjectId} cmd={command}");
         return SendAdminHtml(session, player, AdminGmShopPage);

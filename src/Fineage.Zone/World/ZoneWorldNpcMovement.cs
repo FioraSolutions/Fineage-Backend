@@ -134,7 +134,7 @@ public sealed partial class ZoneWorld
                 _thinking.Remove(id);
                 continue;
             }
-            if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+            if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
                 continue;
             // One step of _globalAggro toward 0 per think (AttackableAI.thinkActive).
             if (npc.GlobalAggro != 0)
@@ -272,6 +272,9 @@ public sealed partial class ZoneWorld
                     PDef = template.PDef,
                     PAtkSpd = template.AttackSpeed,
                     AttackRange = template.AttackRange,
+                    AttackType = template.AttackType,
+                    Rhand = template.Rhand,
+                    Lhand = template.Lhand,
                     Aggressive = template.Aggressive,
                     AggroRange = template.AggroRange,
                     ClanHelpRange = template.ClanHelpRange,

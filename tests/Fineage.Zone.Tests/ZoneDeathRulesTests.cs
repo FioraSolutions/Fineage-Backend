@@ -155,18 +155,19 @@ public sealed class ZoneDeathRulesTests
     public async Task Revive_restores_65_percent_hp_and_leaves_mp_alone()
     {
         var (kit, session, player) = await EnterAsync();
-        player.MaxHp = 1000;
-        player.MaxMp = 800;
-        player.CurMp = 400;
+        kit.World.RefreshPlayerMaxima(player, fanout: false);
+        int maxHp = player.MaxHp;
+        player.CurMp = Math.Min(player.MaxMp, 400);
+        int mpAtDeath = player.CurMp;
         await KillPlayerAsync(kit, session, player);
         Assert.Equal(0, player.CurHp);
 
         await ReviveAsync(kit, session, player);
 
         // Creature.doDie only zeroes HP; MP is whatever the character died with, and RespawnRestoreMP = 0 does not
-        // touch it either.
-        Assert.Equal(650, player.CurHp);
-        Assert.Equal(400, player.CurMp);
+        // touch it either. 65% of the live (class + gear + maxHp funcs) maximum.
+        Assert.Equal((int)(maxHp * 0.65), player.CurHp);
+        Assert.Equal(mpAtDeath, player.CurMp);
     }
 
     /// <summary>
@@ -177,16 +178,17 @@ public sealed class ZoneDeathRulesTests
     public async Task Revive_does_not_clip_a_bar_that_is_already_higher()
     {
         var (kit, session, player) = await EnterAsync();
-        player.MaxHp = 1000;
-        player.MaxMp = 800;
+        kit.World.RefreshPlayerMaxima(player, fanout: false);
+        int alreadyHigh = Math.Max(1, (int)(player.MaxHp * 0.9));
+        int mp = Math.Min(player.MaxMp, 400);
         await KillPlayerAsync(kit, session, player);
-        player.CurHp = 900;   // a resurrection spell restored more than the respawn share
-        player.CurMp = 400;
+        player.CurHp = alreadyHigh;   // a resurrection spell restored more than the respawn share
+        player.CurMp = mp;
 
         await ReviveAsync(kit, session, player);
 
-        Assert.Equal(900, player.CurHp);
-        Assert.Equal(400, player.CurMp);
+        Assert.Equal(alreadyHigh, player.CurHp);
+        Assert.Equal(mp, player.CurMp);
     }
 
     /// <summary>

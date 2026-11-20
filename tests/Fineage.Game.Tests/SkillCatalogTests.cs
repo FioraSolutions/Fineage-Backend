@@ -43,8 +43,8 @@ public sealed class SkillCatalogTests
         var level = skill!.LevelData(1);
         Assert.Equal(10, level.MpConsume);
         Assert.Equal(25, level.Power);
-        // Mobius CT0 Interlude Power Strike set reuseDelay="3000".
-        Assert.Equal(3000, skill.ReuseDelayMs);
+        // Mobius CT0 Interlude Power Strike <reuseDelay>13000</reuseDelay> (base, before MReuse/PReuse).
+        Assert.Equal(13_000, skill.ReuseDelayMs);
     }
 
     [Fact]
@@ -144,5 +144,24 @@ public sealed class SkillCatalogTests
                     Assert.True(prereq.Level > 0 && prereq.SkillId > 0);
             }
         }
+    }
+
+    /// <summary>
+    /// Official Interlude patch: Silent Move, Chameleon Rest, Dance of Shadows, and Stealth
+    /// use <c>abnormalVisualEffect=STEALTH</c> (semi-invisible). Silent Move must not share
+    /// the STEALTH abnormalType slot with skill 411.
+    /// </summary>
+    [Theory]
+    [InlineData(221, "")]
+    [InlineData(296, "")]
+    [InlineData(366, "DANCE_OF_SHADOW")]
+    [InlineData(411, "STEALTH")]
+    public void Stealth_ave_skills_carry_stealth_visual(int skillId, string expectedSlot)
+    {
+        var data = GameData.LoadDefault();
+        var skill = data.Skills.Find(skillId);
+        Assert.NotNull(skill);
+        Assert.Equal("STEALTH", skill!.AbnormalVisualEffect);
+        Assert.Equal(expectedSlot, skill.AbnormalType ?? "");
     }
 }

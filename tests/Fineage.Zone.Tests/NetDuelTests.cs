@@ -290,7 +290,7 @@ public sealed class NetDuelTests
         Assert.Equal(new[] { 1 }, spawn.Cubics);
         // An old peer without the team byte still decodes.
         var bytes = NetCodec.EncodeEntitySpawn(new EntitySpawnMsg { Name = "P", Team = 2 });
-        Assert.Equal((byte)0, NetCodec.DecodeEntitySpawn(bytes.AsSpan(0, bytes.Length - 1)).Team);
+        Assert.Equal((byte)0, NetCodec.DecodeEntitySpawn(bytes.AsSpan(0, bytes.Length - 1 - 8)).Team);
 
         var ui = NetCodec.DecodeUserInfo(NetCodec.EncodeUserInfo(new UserInfoNetMsg { Team = 2 }));
         Assert.Equal((byte)2, ui.Team);

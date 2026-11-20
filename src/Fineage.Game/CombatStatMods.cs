@@ -24,7 +24,45 @@ public enum CombatStat
     CritRatePos,   // critRatePos (Focus Chance 356: multiplier on the plain-attack crit rate, by attack side)
     CritDmgPos,    // critDmgPos (Focus Power 357 / Focus Death 355: multiplier on crit damage, by attack side)
     BlowRate,      // blowRate
-    PSkillEvasion  // pSkillEvas
+    PSkillEvasion, // pSkillEvas
+    MaxHp,         // maxHp
+    MaxMp,         // maxMp
+    MaxCp,         // maxCp
+    HealEffect,    // healEffect
+    PReuse,        // pReuse
+    MReuse,        // mReuse
+    DReuse,        // dReuse
+    SDef,          // sDef
+    RShld,         // rShld
+    ReflectDam,    // reflectDam
+    ReflectSkillPhysic, // reflectSkillPhysic
+    ReflectSkillMagic,  // reflectSkillMagic
+    VengeancePdam, // vengeancePdam
+    VengeanceMdam, // vengeanceMdam
+    AbsorbDam,     // absorbDam
+    PhysicalMpConsumeRate, // physicalMpConsumeRate
+    MagicalMpConsumeRate,  // magicalMpConsumeRate
+    DanceMpConsumeRate,    // danceMpConsumeRate
+    ShieldDefAngle,        // shieldDefAngle
+    SkillCritical,         // skillCritical
+    SkillCriticalProbability, // skillCriticalProbability
+    AtkCountMax,   // atkCountMax
+    PAtkRange,     // pAtkRange
+    Breath,        // breath
+    Fall,          // fall
+    CancelVuln,    // cancelVuln
+    DebuffVuln,    // debuffVuln
+    HolyPower,     // holyPower
+    FirePower,     // firePower (Infernal Form)
+    DarkRes,       // darkRes
+    HolyRes,       // holyRes
+    FireRes,       // fireRes
+    WaterRes,      // waterRes
+    WindRes,       // windRes
+    EarthRes,      // earthRes
+    TransDam,      // transDam (Transfer Pain: percent of incoming damage sent to the servitor)
+    Cancel,        // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
+    DamageZoneVuln // damageZoneVuln (Dance of Protection)
 }
 
 /// <summary>
@@ -48,13 +86,22 @@ public enum SkillPosition
 /// Mobius <c>&lt;player front|behind&gt;</c> condition (Focus Chance 356 crit rate, Focus Power 357 crit damage):
 /// the func applies only when the owner attacks from that side; <see cref="SkillPosition.None"/> = unconditional.
 /// </param>
+/// <param name="HpBelowPercent">
+/// Mobius <c>&lt;player hp="30"/&gt;</c> (Final Frenzy / Final Fortress): the func applies only when current HP
+/// is at or below this percent. Null = unconditional.
+/// </param>
 public sealed record SkillStatFunc(
     CombatStat Stat,
     char Op,
     double[] Values,
     string[]? Using = null,
     bool Resting = false,
-    SkillPosition Position = SkillPosition.None)
+    SkillPosition Position = SkillPosition.None,
+    int? HpBelowPercent = null,
+    bool Moving = false,
+    bool Standing = false,
+    string[]? NotUsing = null,
+    string[]? UsingSlot = null)
 {
     public double ValueAt(int level) => Values.Length == 0 ? 0 : Values[Math.Clamp(level, 1, Values.Length) - 1];
 }

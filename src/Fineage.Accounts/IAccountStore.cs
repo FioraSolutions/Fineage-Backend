@@ -49,10 +49,10 @@ public interface IAccountStore
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
 
     /// <summary>Writes current HP/MP after zone play. Maxima are unchanged.</summary>
-    bool TrySaveVitals(string account, int characterId, int hp, int mp);
+    bool TrySaveVitals(string account, int characterId, int hp, int mp, int cp);
 
     /// <summary>Writes level, experience, SP, and the vitals that a level change may have raised.</summary>
-    bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp);
+    bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp, int maxCp, int cp);
 
     /// <summary>Writes the class after a class transfer (Mobius setClassId / setBaseClass).</summary>
     bool TrySaveClass(string account, int characterId, int classId);

@@ -7,8 +7,28 @@ public static partial class ZoneCombat
     public enum ShieldResult { None, Block, Perfect }
 
     /// <summary>
-    /// Mobius <c>Formulas.calcShldUse</c> (no facing-angle check yet): rate = rShld · DEX bonus (×1.3 vs bows);
+    /// Mobius <c>Formulas.calcShldUse</c> facing cone: <c>degreeside = shieldDefAngle + 120</c>.
+    /// Aegis Stance sets the angle to 360, so the cone is a full circle. Default is a 120° arc
+    /// (60° either side of the defender's heading).
+    /// </summary>
+    public static bool ShieldArcCovers(
+        int defenderX, int defenderY, int defenderHeading, int attackerX, int attackerY, int shieldDefAngleBonus)
+    {
+        int degreeside = shieldDefAngleBonus + 120;
+        if (degreeside >= 360)
+            return true;
+        double dir = AngleFrom(defenderX, defenderY, attackerX, attackerY);
+        double headingDeg = defenderHeading / 182.044444444;
+        double diff = Math.Abs(dir - headingDeg);
+        if (diff > 180)
+            diff = 360 - diff;
+        return diff <= degreeside / 2.0;
+    }
+
+    /// <summary>
+    /// Mobius <c>Formulas.calcShldUse</c>: rate = rShld · DEX bonus (×1.3 vs bows);
     /// perfect block when Rnd(100) &gt; 100 − 5, else block when rate &gt; Rnd(100).
+    /// Facing is applied by the caller via <see cref="ShieldArcCovers"/> (rate 0 when out of arc).
     /// </summary>
     public static ShieldResult RollShield(Random rnd, double shieldRate, bool attackerBow)
     {
@@ -33,6 +53,17 @@ public static partial class ZoneCombat
     {
         double angle = AngleFrom(fromX, fromY, toX, toY);
         return (int)(angle * 182.044444444);
+    }
+
+    /// <summary>
+    /// Inverse of <see cref="HeadingFrom"/>: a point <paramref name="distance"/> units along
+    /// <paramref name="heading"/> (0 = +X / east, heading units are degrees · 182.044444444).
+    /// </summary>
+    public static (int X, int Y) PointAlongHeading(int x, int y, int heading, int distance)
+    {
+        double rad = (heading / 182.044444444) * Math.PI / 180.0;
+        return (x + (int)Math.Round(Math.Cos(rad) * distance),
+            y + (int)Math.Round(Math.Sin(rad) * distance));
     }
 
     /// <summary>Mobius <c>Util.calculateAngleFrom</c>: degrees 0..360 from (x1,y1) towards (x2,y2).</summary>

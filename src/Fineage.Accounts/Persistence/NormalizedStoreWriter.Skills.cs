@@ -62,15 +62,23 @@ static partial class NormalizedStoreWriter
             ins.Transaction = tx;
             ins.CommandText =
                 """
-                INSERT INTO character_skills_save (character_id, skill_id, skill_level, remaining_time)
-                VALUES (@cid, @sid, @lvl, @rem)
+                INSERT INTO character_skills_save (
+                    character_id, skill_id, skill_level, remaining_time, reuse_delay, systime, restore_type)
+                VALUES (@cid, @sid, @lvl, @rem, @reuse, @sys, @rtype)
                 ON CONFLICT (character_id, skill_id) DO UPDATE
-                SET skill_level = excluded.skill_level, remaining_time = excluded.remaining_time
+                SET skill_level = excluded.skill_level,
+                    remaining_time = excluded.remaining_time,
+                    reuse_delay = excluded.reuse_delay,
+                    systime = excluded.systime,
+                    restore_type = excluded.restore_type
                 """;
             ins.Parameters.AddWithValue("cid", characterId);
             ins.Parameters.AddWithValue("sid", e.SkillId);
-            ins.Parameters.AddWithValue("lvl", e.Level);
-            ins.Parameters.AddWithValue("rem", e.RemainingSeconds);
+            ins.Parameters.AddWithValue("lvl", Math.Max(1, e.Level));
+            ins.Parameters.AddWithValue("rem", e.IsEffect ? e.RemainingSeconds : -1);
+            ins.Parameters.AddWithValue("reuse", e.ReuseDelayMs);
+            ins.Parameters.AddWithValue("sys", e.SystimeMs);
+            ins.Parameters.AddWithValue("rtype", e.RestoreType);
             ins.ExecuteNonQuery();
         }
     }

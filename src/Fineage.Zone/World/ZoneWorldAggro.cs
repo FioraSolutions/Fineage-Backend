@@ -32,10 +32,11 @@ public sealed partial class ZoneWorld
         npc.DamageBy[attacker.ObjectId] = npc.DamageBy.GetValueOrDefault(attacker.ObjectId) + damage;
     }
 
-    void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1)
+    void AddHate(ZoneEntity npc, ZoneEntity attacker, long hate = 1, bool allowNpcAttacker = false)
     {
-        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0 ||
-            (attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null))
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0)
+            return;
+        if (!allowNpcAttacker && attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null)
             return;
         // Mobius FolkStatus: merchants/trainers/folk never hate. Guards/Monsters (Attackable types) do.
         if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
@@ -54,13 +55,29 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Hate list only, no AI wake. Mobius <c>addDamageHate</c> on a skill hit writes aggro without
+    /// <c>notifyActionAttacked</c> (which is what actually sets intention ATTACK). Used for skills
+    /// that suppress the attack notify (EffectType.HATE, TURN_PASSIVE, Lure/Temptation).
+    /// </summary>
+    void RecordHate(ZoneEntity npc, ZoneEntity attacker, long hate)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Summon != null || npc.CurHp <= 0 ||
+            (attacker.Kind != ZoneEntityKind.Player && attacker.Summon == null))
+            return;
+        if (!ZoneCombat.TakesNpcCombatDamage(npc.NpcType, npc.Attackable))
+            return;
+        npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
+    }
+
+    /// <summary>
     /// Mobius <c>AttackableAI.checkAggroCondition</c> / <c>AggroInfo.checkHate</c>: <c>target.isAlikeDead()</c> covers
     /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
     /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
     /// </summary>
-    bool ValidHateTarget(ZoneEntity npc, int playerId) =>
-        _byId.TryGetValue(playerId, out var p) && IsLivePlayable(p) && !p.FakeDeath &&
-        SameInstance(npc.ObjectId, p.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, p.X, p.Y);
+    bool ValidHateTarget(ZoneEntity npc, int targetId) =>
+        _byId.TryGetValue(targetId, out var t) && !t.FakeDeath &&
+        SameInstance(npc.ObjectId, t.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, t.X, t.Y) &&
+        IsValidMobAttackTarget(npc, t);
 
     /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>
     static bool IsLivePlayable(ZoneEntity p) =>
@@ -154,7 +171,8 @@ public sealed partial class ZoneWorld
             // players carrying karma, inside its template aggro range and line of sight.
             bool guard = IsGuard(npc);
             if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
-                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs)
+                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs ||
+                IsTreasureBox(npc.NpcId))
                 continue;
             // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
             if (npc.GlobalAggro < 0)

@@ -100,7 +100,9 @@ public sealed partial class ZoneWorld
             player.MaxHp,
             player.CurHp,
             player.MaxMp,
-            player.CurMp);
+            player.CurMp,
+            player.MaxCp,
+            player.CurCp);
         ZoneLog.Info($"admin setlevel object={player.ObjectId} {previous}->{player.Level}");
         return null;
     }
@@ -204,6 +206,60 @@ public sealed partial class ZoneWorld
             throw new InvalidOperationException("admin buffset applied zero skills");
 
         ZoneLog.Info($"admin buffset object={player.ObjectId} applied={applied}");
+        return null;
+    }
+
+    const int AdminSpawnAhead = 80;
+    const int AdminSpawnMaxCount = 20;
+
+    static bool TryParseSpawnArgs(string args, out int npcId, out int count)
+    {
+        npcId = 0;
+        count = 1;
+        string[] parts = args.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 1 || !int.TryParse(parts[0], out npcId) || npcId <= 0)
+            return false;
+        if (parts.Length >= 2)
+        {
+            if (!int.TryParse(parts[1], out count) || count < 1)
+                return false;
+            if (count > AdminSpawnMaxCount)
+                count = AdminSpawnMaxCount;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Mobius <c>admin_spawn</c> / <c>admin_spawn_monster</c>: place the NPC template in front of the GM
+    /// (~80 units along heading). One-shot — not registered in the respawn book, so an unlocked or
+    /// killed treasure chest stays gone instead of coming back on the timer.
+    /// </summary>
+    string? AdminSpawn(ZoneSession session, ZoneEntity player, int npcId, int count)
+    {
+        if (!Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
+            return "bad_request";
+
+        var ahead = Fineage.Zone.Combat.ZoneCombat.PointAlongHeading(
+            player.X, player.Y, player.Heading, AdminSpawnAhead);
+        var side = Fineage.Zone.Combat.ZoneCombat.PointAlongHeading(
+            0, 0, player.Heading + 16384, 40);
+
+        int spawned = 0;
+        for (int i = 0; i < count; i++)
+        {
+            int shift = count <= 1 ? 0 : i - (count - 1) / 2;
+            int x = ahead.X + side.X * shift;
+            int y = ahead.Y + side.Y * shift;
+            int objectId = AllocateQuestNpcObjectId();
+            MaterializeSpawn(
+                Fineage.Zone.Spawns.SpawnCatalog.FromTemplate(
+                    objectId, template, x, y, player.Z, player.Heading, respawnDelaySeconds: 0),
+                _activeMapId);
+            FanoutNewNpc(_byId[objectId]);
+            spawned++;
+        }
+
+        ZoneLog.Info($"admin spawn object={player.ObjectId} npc={npcId} x={ahead.X} y={ahead.Y} count={spawned}");
         return null;
     }
 }

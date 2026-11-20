@@ -174,6 +174,9 @@ public sealed partial class ZoneWorld
             MAtk = template.MAtk,
             MDef = template.MDef,
             AttackRange = template.AttackRange,
+            AttackType = template.AttackType,
+            Rhand = template.Rhand,
+            Lhand = template.Lhand,
             Aggressive = false,
             DefenceTraits = template.DefenceTraits,
             RunSpeed = template.RunSpeed,
@@ -500,8 +503,8 @@ public sealed partial class ZoneWorld
                 TrySummonSkill(s, st, target, now);
                 return;
             }
-            int reach = ZoneCombat.MobAttackReach(s.AttackRange);
-            if (!ZoneCombat.InMobReach(s.X, s.Y, target.X, target.Y, reach) || !CanSeeTarget(s, target))
+            int reach = AttackReachAgainst(s, target);
+            if (!ZoneCombat.Within(s.X, s.Y, target.X, target.Y, reach) || !CanSeeTarget(s, target))
             {
                 SummonApproach(s, target, reach - ZoneCombat.ApproachSlack, now);
                 return;
@@ -589,8 +592,10 @@ public sealed partial class ZoneWorld
             st.PendingSkillId = 0;
             return;
         }
-        int range = combat.CastRange > 0 ? combat.CastRange : ZoneCombat.MobAttackReach(s.AttackRange);
-        if (!ZoneCombat.InCastRange(s.X, s.Y, target.X, target.Y, range) || !CanSeeTarget(s, target))
+        int range = combat.CastRange > 0
+            ? SkillCastReach(combat.CastRange, s, target)
+            : AttackReachAgainst(s, target);
+        if (!ZoneCombat.Within(s.X, s.Y, target.X, target.Y, range) || !CanSeeTarget(s, target))
         {
             SummonApproach(s, target, Math.Max(10, range - ZoneCombat.ApproachSlack), now);
             return;

@@ -127,15 +127,15 @@ public sealed partial class PostgresAccountStore
             () => _inner.TrySavePresence(account, characterId, x, y, z, lastAccess),
             conn => NormalizedStoreWriter.UpdatePresence(conn, characterId, x, y, z, lastAccess));
 
-    public bool TrySaveVitals(string account, int characterId, int hp, int mp) =>
+    public bool TrySaveVitals(string account, int characterId, int hp, int mp, int cp) =>
         RunSilent(
-            () => _inner.TrySaveVitals(account, characterId, hp, mp),
-            conn => NormalizedStoreWriter.UpdateVitals(conn, characterId, hp, mp));
+            () => _inner.TrySaveVitals(account, characterId, hp, mp, cp),
+            conn => NormalizedStoreWriter.UpdateVitals(conn, characterId, hp, mp, cp));
 
-    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp) =>
+    public bool TrySaveProgress(string account, int characterId, int level, long exp, int sp, int maxHp, int hp, int maxMp, int mp, int maxCp, int cp) =>
         RunSilent(
-            () => _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp),
-            conn => NormalizedStoreWriter.UpdateProgress(conn, characterId, level, exp, sp, maxHp, hp, maxMp, mp));
+            () => _inner.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp),
+            conn => NormalizedStoreWriter.UpdateProgress(conn, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp));
 
     public bool TrySaveClass(string account, int characterId, int classId) =>
         RunSilent(
@@ -233,7 +233,14 @@ public sealed partial class PostgresAccountStore
         _inner.TryClearDeletion(account, characterId);
 
     public bool TryHardDelete(string account, int characterId) =>
-        _inner.TryHardDelete(account, characterId);
+        RunSilent(
+            () => _inner.TryHardDelete(account, characterId),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.DeleteCharacter(conn, tx, characterId);
+                tx.Commit();
+            });
 
     public CharacterRecord? FindById(string account, int characterId)
     {

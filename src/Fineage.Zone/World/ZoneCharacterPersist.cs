@@ -18,8 +18,8 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void SavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
         _accounts?.TrySavePresence(account, characterId, x, y, z, lastAccess);
 
-    public void SaveVitals(string account, int characterId, int hp, int mp) =>
-        _accounts?.TrySaveVitals(account, characterId, hp, mp);
+    public void SaveVitals(string account, int characterId, int hp, int mp, int cp) =>
+        _accounts?.TrySaveVitals(account, characterId, hp, mp, cp);
 
     public void SaveProgress(
         string account,
@@ -30,8 +30,10 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
         int maxHp,
         int hp,
         int maxMp,
-        int mp) =>
-        _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp);
+        int mp,
+        int maxCp,
+        int cp) =>
+        _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp);
 
     public StoredPet? FindPet(int controlObjectId) => _accounts?.FindPet(controlObjectId);
 
@@ -98,6 +100,8 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
             entity.MaxHp,
             entity.CurHp,
             entity.MaxMp,
-            entity.CurMp);
+            entity.CurMp,
+            entity.MaxCp,
+            entity.CurCp);
     }
 }

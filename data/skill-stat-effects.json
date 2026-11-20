@@ -17,6 +17,13 @@
    ]
   },
   {
+   "skillId": 60,
+   "name": "Fake Death",
+   "levels": 1,
+   "effects": [
+   ]
+  },
+  {
    "skillId": 72,
    "name": "Iron Will",
    "levels": 3,
@@ -158,6 +165,22 @@
    ]
   },
   {
+   "skillId": 86,
+   "name": "Reflect Damage",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 91,
    "name": "Defense Aura",
    "levels": 2,
@@ -172,7 +195,7 @@
     }
    ]
   },
-  {
+    {
    "skillId": 94,
    "name": "Rage",
    "levels": 2,
@@ -181,21 +204,57 @@
      "stat": "pAtk",
      "op": "mul",
      "values": [
-      1.2,
+      1.15,
       1.2
+     ],
+     "using": [
+      "BOW",
+      "DAGGER",
+      "FIST",
+      "DUALFIST"
      ]
     },
     {
      "stat": "pAtk",
      "op": "mul",
      "values": [
-      1.21,
-      1.29
+      1.45,
+      1.55
      ],
      "using": [
       "SWORD",
       "BLUNT",
       "POLE"
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.07,
+      1.06
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
      ]
     },
     {
@@ -678,7 +737,7 @@
     }
    ]
   },
-  {
+    {
    "skillId": 176,
    "name": "Frenzy",
    "levels": 3,
@@ -690,20 +749,85 @@
       1.3,
       1.4,
       1.5
+     ],
+     "using": [
+      "BOW",
+      "DUALFIST"
      ]
     },
     {
      "stat": "pAtk",
      "op": "mul",
      "values": [
-      1.54,
-      1.92,
-      2.31
+      2.0,
+      2.5,
+      3.0
      ],
      "using": [
       "SWORD",
       "BLUNT",
       "POLE"
+     ]
+    },
+    {
+     "stat": "pAtk",
+     "op": "mul",
+     "values": [
+      1.2,
+      1.25,
+      1.34
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      2.0,
+      4.0,
+      6.0
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 196,
+   "name": "Holy Blade",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      10.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 197,
+   "name": "Holy Armor",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      7.0,
+      10.0
      ]
     }
    ]
@@ -734,6 +858,13 @@
       1.25
      ]
     }
+   ]
+  },
+  {
+   "skillId": 226,
+   "name": "Relax",
+   "levels": 1,
+   "effects": [
    ]
   },
   {
@@ -775,6 +906,20 @@
      "op": "mul",
      "values": [
       1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 265,
+   "name": "Song of Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.2
      ]
     }
    ]
@@ -831,6 +976,20 @@
      "op": "mul",
      "values": [
       2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 270,
+   "name": "Song of Invocation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      20.0
      ]
     }
    ]
@@ -956,6 +1115,20 @@
    ]
   },
   {
+   "skillId": 277,
+   "name": "Dance of Light",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 279,
    "name": "Lightning Strike",
    "levels": 5,
@@ -1026,6 +1199,22 @@
    ]
   },
   {
+   "skillId": 287,
+   "name": "Lionheart",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      60.0,
+      60.0,
+      60.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 288,
    "name": "Guard Stance",
    "levels": 4,
@@ -1060,6 +1249,13 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 296,
+   "name": "Chameleon Rest",
+   "levels": 1,
+   "effects": [
    ]
   },
   {
@@ -1118,6 +1314,135 @@
    ],
    "using": [
     "DUALFIST"
+   ]
+  },
+  {
+   "skillId": 303,
+   "name": "Soul of Sagittarius",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 304,
+   "name": "Song of Vitality",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 305,
+   "name": "Song of Vengeance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 306,
+   "name": "Song of Flame Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 307,
+   "name": "Dance of Aqua Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 308,
+   "name": "Song of Storm Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 309,
+   "name": "Dance of Earth Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 310,
+   "name": "Dance of the Vampire",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      8.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 311,
+   "name": "Dance of Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "damageZoneVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    }
    ]
   },
   {
@@ -1250,6 +1575,60 @@
    ]
   },
   {
+   "skillId": 318,
+   "name": "Aegis Stance",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      0.6
+     ]
+    },
+    {
+     "stat": "shieldDefAngle",
+     "op": "set",
+     "values": [
+      360.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 322,
+   "name": "Shield Fortress",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "add",
+     "values": [
+      446.0,
+      469.0,
+      491.0,
+      514.0,
+      537.0,
+      560.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 334,
+   "name": "Focus Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCriticalProbability",
+     "op": "mul",
+     "values": [
+      11.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 336,
    "name": "Arcane Wisdom",
    "levels": 1,
@@ -1357,6 +1736,151 @@
      "op": "sub",
      "values": [
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 341,
+   "name": "Touch of Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      60.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 342,
+   "name": "Touch of Death",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      0.1
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 349,
+   "name": "Song of Renewal",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 350,
+   "name": "Physical Mirror",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectSkillPhysic",
+     "op": "add",
+     "values": [
+      30.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    },
+    {
+     "stat": "reflectSkillMagic",
+     "op": "add",
+     "values": [
+      10.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 351,
+   "name": "Magical Mirror",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectSkillPhysic",
+     "op": "add",
+     "values": [
+      10.0
+     ],
+     "using": [
+      "SHIELD"
+     ]
+    },
+    {
+     "stat": "reflectSkillMagic",
+     "op": "add",
+     "values": [
+      30.0
+     ],
+     "using": [
+      "SHIELD"
      ]
     }
    ]
@@ -1593,6 +2117,48 @@
    "using": [
     "BLUNT",
     "SWORD"
+   ]
+  },
+  {
+   "skillId": 363,
+   "name": "Song of Meditation",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 364,
+   "name": "Song of Champion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.7
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.8
+     ]
+    }
    ]
   },
   {
@@ -2206,6 +2772,38 @@
    ]
   },
   {
+   "skillId": 415,
+   "name": "Spirit of Sagittarius",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.7,
+      0.6,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 416,
+   "name": "Blessing of Sagittarius",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 420,
    "name": "Zealot",
    "levels": 3,
@@ -2278,6 +2876,24 @@
    ]
   },
   {
+   "skillId": 421,
+   "name": "Fell Swoop",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 422,
    "name": "Polearm Accuracy",
    "levels": 3,
@@ -2301,6 +2917,31 @@
      ],
      "using": [
       "POLE"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 423,
+   "name": "Infernal Form",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "firePower",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "mul",
+     "values": [
+      0.85,
+      0.77,
+      0.7
      ]
     }
    ]
@@ -2346,6 +2987,20 @@
    ]
   },
   {
+   "skillId": 439,
+   "name": "Shield of Revenge",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "vengeancePdam",
+     "op": "add",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 441,
    "name": "Force Meditation",
    "levels": 1,
@@ -2369,6 +3024,20 @@
      "op": "add",
      "values": [
       90.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 447,
+   "name": "Counterattack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "vengeancePdam",
+     "op": "add",
+     "values": [
+      100.0
      ]
     }
    ]
@@ -2587,6 +3256,91 @@
    ]
   },
   {
+   "skillId": 1043,
+   "name": "Holy Weapon",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1044,
+   "name": "Regeneration",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1045,
+   "name": "Blessed Body",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1047,
+   "name": "Mana Regeneration",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      1.72,
+      2.16,
+      2.74,
+      3.09
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1048,
+   "name": "Blessed Soul",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.15,
+      1.2,
+      1.25,
+      1.3,
+      1.35
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1059,
    "name": "Empower",
    "levels": 3,
@@ -2690,6 +3444,115 @@
    ]
   },
   {
+   "skillId": 1071,
+   "name": "Surrender To Water",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1073,
+   "name": "Kiss of Eva",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "mul",
+     "values": [
+      5.0,
+      7.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1074,
+   "name": "Surrender To Wind",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1077,
    "name": "Focus",
    "levels": 3,
@@ -2701,6 +3564,25 @@
       1.2,
       1.25,
       1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1078,
+   "name": "Concentration",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "cancel",
+     "op": "sub",
+     "values": [
+      18.0,
+      25.0,
+      36.0,
+      42.0,
+      48.0,
+      53.0
      ]
     }
    ]
@@ -3054,6 +3936,22 @@
    ]
   },
   {
+   "skillId": 1182,
+   "name": "Resist Aqua",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1184,
    "name": "Ice Bolt",
    "levels": 6,
@@ -3068,6 +3966,22 @@
       0.8,
       0.8,
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1189,
+   "name": "Resist Wind",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
      ]
     }
    ]
@@ -3148,6 +4062,71 @@
    ]
   },
   {
+   "skillId": 1223,
+   "name": "Surrender To Earth",
+   "levels": 15,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1232,
+   "name": "Blazing Skin",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1236,
    "name": "Frost Bolt",
    "levels": 19,
@@ -3175,6 +4154,22 @@
       0.8,
       0.8,
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1238,
+   "name": "Freezing Skin",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
      ]
     }
    ]
@@ -3212,6 +4207,95 @@
    ]
   },
   {
+   "skillId": 1243,
+   "name": "Bless Shield",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1247,
+   "name": "Seal of Scourge",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "regHp",
+     "op": "mul",
+     "values": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1248,
+   "name": "Seal of Suspension",
+   "levels": 12,
+   "effects": [
+    {
+     "stat": "mReuse",
+     "op": "mul",
+     "values": [
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "stat": "pReuse",
+     "op": "mul",
+     "values": [
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1249,
    "name": "The Vision of Pa'agrio",
    "levels": 3,
@@ -3223,6 +4307,22 @@
       2.0,
       3.0,
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1250,
+   "name": "Under the Protection of Pa'agrio",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.4,
+      1.5
      ]
     }
    ]
@@ -3270,6 +4370,22 @@
       1.25,
       1.3,
       1.35
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1257,
+   "name": "Decrease Weight",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "weightPenalty",
+     "op": "add",
+     "values": [
+      3000.0,
+      6000.0,
+      9000.0
      ]
     }
    ]
@@ -3362,6 +4478,24 @@
    ]
   },
   {
+   "skillId": 1262,
+   "name": "Transfer Pain",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "transDam",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1263,
    "name": "Curse Gloom",
    "levels": 13,
@@ -3383,6 +4517,45 @@
       0.77,
       0.77,
       0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1268,
+   "name": "Vampiric Rage",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      6.0,
+      7.0,
+      8.0,
+      9.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1269,
+   "name": "Curse Disease",
+   "levels": 9,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
      ]
     }
    ]
@@ -3429,12 +4602,42 @@
    ]
   },
   {
+   "skillId": 1284,
+   "name": "Chant of Revenge",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      10.0,
+      15.0,
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1290,
    "name": "Blizzard",
    "levels": 1,
    "effects": [
     {
      "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1291,
+   "name": "Demon Wind",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "healEffect",
      "op": "mul",
      "values": [
       0.5
@@ -3508,6 +4711,38 @@
    ]
   },
   {
+   "skillId": 1304,
+   "name": "Advanced Block",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.6,
+      1.8,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1307,
+   "name": "Prayer",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.08,
+      1.1,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1308,
    "name": "Chant of Predator",
    "levels": 3,
@@ -3535,6 +4770,23 @@
       2.0,
       3.0,
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1310,
+   "name": "Chant of Vampire",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      6.0,
+      7.0,
+      8.0,
+      9.0
      ]
     }
    ]
@@ -3626,6 +4878,41 @@
      "op": "mul",
      "values": [
       0.7
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1338,
+   "name": "Arcane Chaos",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "add",
+     "values": [
+      30.0
      ]
     }
    ]
@@ -3948,6 +5235,41 @@
    ]
   },
   {
+   "skillId": 1353,
+   "name": "Divine Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1354,
+   "name": "Arcane Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1355,
    "name": "Prophecy of Water",
    "levels": 1,
@@ -4123,6 +5445,27 @@
    ]
   },
   {
+   "skillId": 1362,
+   "name": "Chant of Spirit",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1363,
    "name": "Chant of Victory",
    "levels": 1,
@@ -4291,6 +5634,20 @@
    ]
   },
   {
+   "skillId": 1367,
+   "name": "Seal of Disease",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1374,
    "name": "Heroic Valor",
    "levels": 1,
@@ -4367,6 +5724,64 @@
       0.77,
       0.77,
       0.77
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1384,
+   "name": "Mass Surrender to Water",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1385,
+   "name": "Mass Surrender to Wind",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
      ]
     }
    ]
@@ -4454,6 +5869,102 @@
       1.05,
       1.1,
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1392,
+   "name": "Holy Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1393,
+   "name": "Unholy Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1396,
+   "name": "Magical Backfire",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.6,
+      1.65,
+      1.7,
+      1.75,
+      1.8,
+      1.85,
+      1.9,
+      1.95,
+      2.0
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.6,
+      1.65,
+      1.7,
+      1.75,
+      1.8,
+      1.85,
+      1.9,
+      1.95,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1397,
+   "name": "Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
      ]
     }
    ]
@@ -4559,6 +6070,55 @@
      "op": "mul",
      "values": [
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1415,
+   "name": "Pa'agrio's Emblem",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      30.0
+     ]
+    },
+    {
+     "stat": "debuffVuln",
+     "op": "sub",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1416,
+   "name": "Pa'agrio's Fist",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      800.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1418,
+   "name": "Celestial Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      100.0
      ]
     }
    ]

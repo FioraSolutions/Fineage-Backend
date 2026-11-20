@@ -239,4 +239,62 @@ public class PostgresNormalizedStoreTests
         Assert.Equal(57, row.Items![0].ItemId);
         Assert.Equal(42, row.Items[0].Count);
     }
+
+    [Fact]
+    public void Hard_delete_removes_character_rows_from_sql()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgdel" + suffix;
+        using var store = PostgresAccountStore.Open(url);
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register(account, "secret1").Ok);
+        var created = service.CreateHuman(account, "Dl" + suffix, HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        int characterId = created.Value!.Id;
+        Assert.True(store.TryReplaceShortcuts(account, characterId, [
+            new StoredShortcut(0, 0, StoredShortcut.TypeItem, 57, 1)
+        ]));
+        Assert.True(store.SavePet(new StoredPet(
+            characterId * 10 + 1, characterId, 12077, "Wolf", 1, 0, 100, 100, 10, [])));
+
+        var deleted = service.Delete(account, characterId: characterId);
+        Assert.True(deleted.Ok, deleted.Message);
+        Assert.True(deleted.Value!.HardDeleted);
+        Assert.Null(store.FindById(account, characterId));
+
+        using var conn = new NpgsqlConnection(url);
+        conn.Open();
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT count(*) FROM characters WHERE id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(0L, (long)cmd.ExecuteScalar()!);
+        }
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT count(*) FROM character_items WHERE character_id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(0L, (long)cmd.ExecuteScalar()!);
+        }
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT count(*) FROM character_shortcuts WHERE character_id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(0L, (long)cmd.ExecuteScalar()!);
+        }
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = "SELECT count(*) FROM pets WHERE owner_character_id = @id";
+            cmd.Parameters.AddWithValue("id", characterId);
+            Assert.Equal(0L, (long)cmd.ExecuteScalar()!);
+        }
+
+        // A reopen must not resurrect the row from a stale snapshot backup.
+        using var reopened = PostgresAccountStore.Open(url);
+        Assert.Null(reopened.FindById(account, characterId));
+    }
 }

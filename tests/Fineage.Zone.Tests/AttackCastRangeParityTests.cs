@@ -60,4 +60,59 @@ public sealed class AttackCastRangeParityTests
         Assert.Equal(1, slow.MagicType);
         Assert.Equal(0, powerStrike.MagicType);
     }
+
+    [Fact]
+    public void Collision_aware_reach_matches_mobius_maybeMoveToPawn()
+    {
+        // Dagger/fists: 40 + player 9 + default NPC 31 = 80 (legacy PlayerAttackReach).
+        Assert.Equal(80, ZoneCombat.PlayerAttackReach(40));
+        Assert.Equal(ZoneCombat.DefaultNpcCollision, 31);
+        // A small mob (Gremlin-sized collision 8) is 40+9+8=57, not the old flat 80+40=120 hit window.
+        Assert.Equal(57, ZoneCombat.PlayerAttackReach(40, 8));
+        Assert.Equal(80, ZoneCombat.SkillCastReach(40, ZoneCombat.PlayerCollisionRadius, ZoneCombat.DefaultNpcCollision));
+        Assert.Equal(57, ZoneCombat.SkillCastReach(40, ZoneCombat.PlayerCollisionRadius, 8));
+        // The old TrySkillUseAttack gate (castRange + 100) let a 40-range blow start at 140.
+        Assert.False(ZoneCombat.Within(0, 0, 140, 0, ZoneCombat.SkillCastReach(40, 9, 31)));
+        Assert.False(ZoneCombat.Within(0, 0, 100, 0, ZoneCombat.SkillCastReach(40, 9, 8)));
+        Assert.True(ZoneCombat.Within(0, 0, 57, 0, ZoneCombat.SkillCastReach(40, 9, 8)));
+    }
+
+    [Theory]
+    [InlineData(11, 400, 900)]   // Trick
+    [InlineData(12, 600, 1100)]  // Switch
+    [InlineData(16, 40, 400)]    // Mortal Blow
+    [InlineData(27, 40, 400)]    // Unlock
+    [InlineData(30, 40, 400)]    // Backstab
+    [InlineData(51, 400, 900)]   // Lure
+    [InlineData(56, 700, 1200)]  // Power Shot
+    [InlineData(96, 40, 400)]    // Bleed
+    [InlineData(263, 40, 400)]   // Deadly Blow
+    [InlineData(344, 40, 400)]   // Lethal Blow
+    [InlineData(358, 40, 400)]   // Bluff
+    [InlineData(409, 40, 400)]   // Critical Blow
+    [InlineData(412, 150, 300)]  // Sand Bomb (Mobius effectRange 300, was 650)
+    public void Adventurer_targeted_skill_ranges_match_mobius(int skillId, int castRange, int effectRange)
+    {
+        var skill = GameData.LoadDefault().Skills.Find(skillId);
+        Assert.NotNull(skill);
+        Assert.Equal(castRange, skill!.CastRange);
+        Assert.Equal(effectRange, skill.EffectRange);
+    }
+
+    [Fact]
+    public void Lure_datapack_matches_mobius()
+    {
+        var skill = GameData.LoadDefault().Skills.Find(51);
+        Assert.NotNull(skill);
+        Assert.Equal("Lure", skill!.Name);
+        Assert.Equal(400, skill.CastRange);
+        Assert.Equal(900, skill.EffectRange);
+        Assert.Equal(1500, skill.HitTimeMs);
+        Assert.Equal(10_000, skill.ReuseDelayMs);
+        Assert.Equal("ONE", skill.TargetType);
+        Assert.True(SkillEffectCatalog.LoadDefault().TryGet(51, out var rows));
+        var add = Assert.Single(rows);
+        Assert.Equal("AddHate", add.Name);
+        Assert.Equal(500, add.Power);
+    }
 }

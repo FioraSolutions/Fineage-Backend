@@ -39,6 +39,9 @@ public sealed class SkillDefinition
     /// <summary>Mobius effectRange (escape range at launch); 0 = use <see cref="CastRange"/>.</summary>
     public int EffectRange { get; init; }
 
+    /// <summary>Mobius <c>affectRange</c> for AURA / AREA / FRONT_AREA. 0 = use the family default.</summary>
+    public int AffectRange { get; init; }
+
     public string Name { get; }
 
     public bool Passive { get; }
@@ -53,6 +56,11 @@ public sealed class SkillDefinition
 
     public int ReuseDelayMs { get; }
 
+    /// <summary>Template reuse, or the per-level table when this rank lists its own delay.</summary>
+    public int ReuseDelayMsAt(int level) =>
+        TryLevelData(level, out var data) && data.ReuseDelayMs is int ms ? Math.Max(0, ms) : ReuseDelayMs;
+
+
     /// <summary>Mobius <c>abnormalTime</c> in seconds. 0 when the skill does not apply an abnormal.</summary>
     public int AbnormalTimeSeconds { get; }
 
@@ -60,6 +68,9 @@ public sealed class SkillDefinition
 
     /// <summary>Mobius <c>abnormalType</c> slot (POISON, TURN_FLEE, BLEEDING, …). Empty when unset.</summary>
     public string AbnormalType { get; init; } = "";
+
+    /// <summary>Mobius <c>abnormalVisualEffect</c> (STEALTH, DOT_POISON, FLESH_STONE, …). Empty when unset.</summary>
+    public string AbnormalVisualEffect { get; init; } = "";
 
     /// <summary>Mobius <c>trait</c> (POISON, HOLD, DERANGEMENT, …). Empty when unset.</summary>
     public string Trait { get; init; } = "";
@@ -138,6 +149,23 @@ public sealed class SkillDefinition
             || targetType.Equals("SERVITOR", StringComparison.OrdinalIgnoreCase)
             || targetType.Equals("PET", StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>Mobius <c>&lt;player elementSeeds|elementSeed|active_effect_id_lvl&gt;</c> gates (all must pass).</summary>
+    public IReadOnlyList<SkillPlayerCondition> PlayerConditions { get; init; } = [];
+
+    /// <summary>Mobius <c>channelingTickInterval</c> in milliseconds (CA1 ticks). 0 = not a channeled skill.</summary>
+    public int ChannelingTickMs { get; init; }
+
+    /// <summary>Mobius <c>mpPerChanneling</c> spent on each CA1 tick after the initial consume.</summary>
+    public int MpPerChanneling { get; init; }
+
+    /// <summary>Mobius <c>channelingSkillId</c> (CA5 Spell/Battle Force applies this skill to the target).</summary>
+    public int ChannelingSkillId { get; init; }
+
+    /// <summary>CA1 ground-damage channels (Volcano / Gehenna). CA5 force channels use <see cref="ChannelingSkillId"/>.</summary>
+    public bool IsGroundDamageChannel =>
+        OperateType.StartsWith("CA1", StringComparison.OrdinalIgnoreCase) ||
+        (ChannelingTickMs > 0 && TargetType.Equals("GROUND", StringComparison.OrdinalIgnoreCase));
 
     public int MaxLevel => _levels.Length;
 

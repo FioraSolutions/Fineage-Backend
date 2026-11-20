@@ -2,6 +2,41 @@
  "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/\u2026).",
  "skills": [
   {
+   "skillId": 113,
+   "name": "Long Shot",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "pAtkRange",
+     "op": "add",
+     "values": [
+      200.0,
+      400.0
+     ],
+     "using": [
+      "BOW"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 118,
+   "name": "Magician's Movement",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      0.8
+     ],
+     "notUsing": [
+      "MAGIC"
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 134,
    "name": "Toughness",
    "levels": 1,
@@ -345,6 +380,39 @@
    ]
   },
   {
+   "skillId": 163,
+   "name": "Spellcraft",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "mAtkSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ],
+     "notUsing": [
+      "MAGIC"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 164,
+   "name": "Quick Recovery",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "mReuse",
+     "op": "mul",
+     "values": [
+      0.8,
+      0.75,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 168,
    "name": "Boost Attack Speed",
    "levels": 3,
@@ -394,6 +462,21 @@
    }
   },
   {
+   "skillId": 173,
+   "name": "Acrobatics",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "fall",
+     "op": "sub",
+     "values": [
+      60.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 191,
    "name": "Focus Mind",
    "levels": 6,
@@ -427,6 +510,21 @@
       177.0,
       295.0,
       384.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 195,
+   "name": "Breath Boost",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "add",
+     "values": [
+      180.0,
+      300.0
      ]
     }
    ]
@@ -700,6 +798,29 @@
    ]
   },
   {
+   "skillId": 211,
+   "name": "Boost HP",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      60.0,
+      100.0,
+      150.0,
+      200.0,
+      250.0,
+      300.0,
+      350.0,
+      400.0,
+      440.0,
+      480.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 212,
    "name": "Fast HP Recovery",
    "levels": 8,
@@ -716,6 +837,27 @@
       2.7,
       3.4,
       4.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 213,
+   "name": "Boost Mana",
+   "levels": 8,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      30.0,
+      50.0,
+      70.0,
+      100.0,
+      140.0,
+      152.0,
+      180.0,
+      200.0
      ]
     }
    ]
@@ -2224,6 +2366,174 @@
    ]
   },
   {
+   "skillId": 290,
+   "name": "Final Frenzy",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      32.9,
+      39.4,
+      46.6,
+      54.6,
+      63.3,
+      72.7,
+      79.3,
+      86.1,
+      93.1,
+      100.2,
+      107.5,
+      114.8,
+      122.1,
+      129.3
+     ],
+     "hpBelow": 30
+    }
+   ]
+  },
+  {
+   "skillId": 291,
+   "name": "Final Fortress",
+   "levels": 11,
+   "effects": [
+    {
+     "stat": "pDef",
+     "op": "add",
+     "values": [
+      116.875,
+      129.0,
+      141.625,
+      150.375,
+      159.25,
+      168.375,
+      177.625,
+      187.0,
+      196.5,
+      206.125,
+      215.75
+     ],
+     "hpBelow": 30
+    }
+   ]
+  },
+  {
+   "skillId": 293,
+   "name": "Two-handed Weapon Mastery",
+   "levels": 20,
+   "effects": [
+    {
+     "stat": "pAtk",
+     "op": "add",
+     "values": [
+      4.5,
+      7.3,
+      10.7,
+      15.1,
+      20.5,
+      27.1,
+      32.9,
+      39.4,
+      46.6,
+      54.6,
+      63.3,
+      72.7,
+      79.3,
+      86.1,
+      93.1,
+      100.2,
+      107.5,
+      114.8,
+      122.1,
+      129.3
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
+     ]
+    },
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0,
+      3.0
+     ],
+     "using": [
+      "SWORD",
+      "BLUNT"
+     ],
+     "usingSlot": [
+      "lrhand"
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 294,
+   "name": "Shadow Sense",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 295,
+   "name": "Iron Body",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "damageZoneVuln",
+     "op": "sub",
+     "values": [
+      40.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 316,
+   "name": "Aegis",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "shieldDefAngle",
+     "op": "set",
+     "values": [
+      360.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 319,
    "name": "Agile Movement",
    "levels": 2,
@@ -2282,6 +2592,34 @@
      20.0
     ]
    }
+  },
+  {
+   "skillId": 330,
+   "name": "Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCritical",
+     "op": "add",
+     "values": [
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 331,
+   "name": "Skill Mastery",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "skillCritical",
+     "op": "add",
+     "values": [
+      2.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 373,
@@ -2483,6 +2821,20 @@
    ]
   },
   {
+   "skillId": 428,
+   "name": "Inner Rhythm",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "danceMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 429,
    "name": "Knighthood",
    "levels": 1,
@@ -2634,6 +2986,53 @@
      "using": [
       "MAGIC"
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 436,
+   "name": "Divine Lore",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.95
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1297,
+   "name": "Clear Mind",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      3.2,
+      4.0,
+      4.3,
+      5.1,
+      5.8,
+      6.2
+     ],
+     "moving": true
+    },
+    {
+     "stat": "regMp",
+     "op": "add",
+     "values": [
+      2.6,
+      3.2,
+      3.5,
+      4.1,
+      4.7,
+      4.9
+     ],
+     "standing": true
     }
    ]
   },

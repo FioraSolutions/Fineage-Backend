@@ -24,4 +24,27 @@ public sealed class CombatStatModsTests
         Assert.False(ReferenceEquals(mods, CombatStatMods.None));
         Assert.True(mods.Apply(CombatStat.MAtkSpd, 100) > 100);
     }
+
+    [Fact]
+    public void Spellcraft_halves_mAtkSpd_only_when_not_wearing_magic()
+    {
+        var cat = SkillStatEffectCatalog.LoadPassives();
+        var known = new Dictionary<int, int> { [163] = 1 };
+        // Mobius: <not><using kind="MAGIC"/></not> — penalty applies off robes, not on them.
+        var robes = cat.CollectPassives(known, wearing: _ => true);
+        Assert.Equal(400, robes.Apply(CombatStat.MAtkSpd, 400));
+        var other = cat.CollectPassives(known, wearing: _ => false);
+        Assert.Equal(200, other.Apply(CombatStat.MAtkSpd, 400));
+    }
+
+    [Fact]
+    public void Magicians_movement_slows_pAtkSpd_only_when_not_wearing_magic()
+    {
+        var cat = SkillStatEffectCatalog.LoadPassives();
+        var known = new Dictionary<int, int> { [118] = 1 };
+        var robes = cat.CollectPassives(known, wearing: _ => true);
+        Assert.Equal(300, robes.Apply(CombatStat.PAtkSpd, 300));
+        var other = cat.CollectPassives(known, wearing: _ => false);
+        Assert.Equal(240, other.Apply(CombatStat.PAtkSpd, 300));
+    }
 }

@@ -153,6 +153,27 @@ public class CharacterSelectionTests
     }
 
     [Fact]
+    public void Default_delete_is_permanent_and_drops_pets()
+    {
+        Assert.Equal(0, CharacterRules.DefaultDeleteAfterDays);
+        var store = MemoryAccountStore.InMemory();
+        var service = Service(store);
+        var created = service.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
+        Assert.True(store.TryReplaceShortcuts("alice", created.CharacterId, [
+            new StoredShortcut(0, 0, StoredShortcut.TypeItem, 57, 1)
+        ]));
+        Assert.True(store.SavePet(new StoredPet(
+            1001, created.CharacterId, 12077, "Wolf", 1, 0, 100, 100, 10, [])));
+
+        var deleted = service.Delete("alice", characterId: created.CharacterId);
+        Assert.True(deleted.Ok, deleted.Message);
+        Assert.True(deleted.Value!.HardDeleted);
+        Assert.Empty(deleted.Value.Roster);
+        Assert.Null(store.FindById("alice", created.CharacterId));
+        Assert.Null(store.FindPet(1001));
+    }
+
+    [Fact]
     public void Expired_characters_are_purged_on_roster_load_and_the_name_is_free()
     {
         var now = DateTimeOffset.UnixEpoch;
@@ -288,7 +309,7 @@ public class CharacterSelectionTests
         Assert.True(service.Register("alice", "secret1").Ok);
         Assert.Equal(CreateCharacterStatus.Ok,
             store.TryAddCharacter("alice", "Aria", HumanClasses.Fighter, 0, 0, out var created));
-        Assert.True(store.TrySaveVitals("alice", created!.Id, hp: 90, mp: 12));
+        Assert.True(store.TrySaveVitals("alice", created!.Id, hp: 90, mp: 12, cp: 40));
         var reloaded = store.FindById("alice", created.Id);
         Assert.NotNull(reloaded);
         Assert.Equal(90, reloaded.Hp);
