@@ -44,7 +44,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             var step = _olympiad.Advance(now, LookupOlympiad);
             ApplyOlympiad(step);
             if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
@@ -94,7 +94,7 @@ public sealed partial class ZoneWorld
         // Rewards may SaveInventory → flush after unlock (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
-            var step = _olympiad.Report(matchId, winnerObjectId, _clock().ToUnixTimeMilliseconds());
+            var step = _olympiad.Report(matchId, winnerObjectId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
             return step.Error;
@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
 
     void TickOlympiad()
     {
-        var step = _olympiad.Advance(_clock().ToUnixTimeMilliseconds(), LookupOlympiad, announce: false);
+        var step = _olympiad.Advance(NowUnixMs(), LookupOlympiad, announce: false);
         ApplyOlympiad(step);
     }
 
@@ -113,7 +113,7 @@ public sealed partial class ZoneWorld
             return;
         _olympiadArena.Remove(entity.ObjectId);
         _olympiadObservers.Remove(entity.ObjectId);
-        var step = _olympiad.Disconnect(entity.ObjectId, _clock().ToUnixTimeMilliseconds(), LookupOlympiad);
+        var step = _olympiad.Disconnect(entity.ObjectId, NowUnixMs(), LookupOlympiad);
         ApplyOlympiad(step);
     }
 
@@ -121,7 +121,7 @@ public sealed partial class ZoneWorld
     {
         string? error = WithDeferredInventoryPersist(() =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             var step = action(now);
             ApplyOlympiad(step);
             return step.Error;
@@ -132,7 +132,7 @@ public sealed partial class ZoneWorld
 
     void ApplyOlympiad(OlympiadStep step)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var notice in step.Notices)
             QueueNotice(notice);
         foreach (var move in step.Moves)

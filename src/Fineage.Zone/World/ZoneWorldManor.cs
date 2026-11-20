@@ -3,6 +3,7 @@ using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Manor;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -15,19 +16,19 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     ManorBoard _manor = null!;
-    Random _manorRandom = Random.Shared;
+    Random _manorRandom = null!;
 
     internal ManorBoard Manor => _manor;
 
     void InitManor(ManorSettings? settings, Random? random)
     {
-        _manorRandom = random ?? Random.Shared;
+        _manorRandom = random ?? GlobalStream(RandomPurpose.Manor);
         _manor = new ManorBoard(ManorData.Default, settings ?? ManorSettings.FromEnvironment());
         if (_accounts != null)
             _manor.Import(_accounts.ListManorProduction(), _accounts.ListManorProcure());
         if (_manor.Settings.Enabled)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             _manor.Mode = ManorRules.ModeAt(now, _manor.Settings.UtcOffsetMinutes);
             _manor.NextChangeMs = ManorRules.NextChange(_manor.Mode, now, _manor.Settings.UtcOffsetMinutes);
         }
@@ -631,12 +632,12 @@ public sealed partial class ZoneWorld
     internal void ChangeManorModeForTests()
     {
         lock (_gate)
-            ChangeManorMode(_clock().ToUnixTimeMilliseconds());
+            ChangeManorMode(NowUnixMs());
     }
 
     internal void TickManorForTests()
     {
         lock (_gate)
-            TickManor(_clock().ToUnixTimeMilliseconds());
+            TickManor(NowUnixMs());
     }
 }

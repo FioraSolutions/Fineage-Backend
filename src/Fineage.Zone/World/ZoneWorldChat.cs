@@ -257,7 +257,7 @@ public sealed partial class ZoneWorld
     internal void SetChatBan(ZoneSession session, long durationMs)
     {
         lock (_gate)
-            session.ChatBannedUntilUnixMs = durationMs > 0 ? _clock().ToUnixTimeMilliseconds() + durationMs : 0;
+            session.ChatBannedUntilUnixMs = durationMs > 0 ? NowUnixMs() + durationMs : 0;
     }
 
     static bool HearsLocal(ZoneEntity speaker, ZoneEntity other) =>

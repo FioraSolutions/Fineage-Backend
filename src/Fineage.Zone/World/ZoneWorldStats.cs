@@ -121,7 +121,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius GameTimeTaskManager.isNight for HitConditionBonus dark −10.</summary>
-    internal bool IsNight => _gameTime.IsNight(_clock().ToUnixTimeMilliseconds());
+    internal bool IsNight => _gameTime.IsNight(NowUnixMs());
 
     /// <summary>
     /// Named mod stages shared by combat / speed / regen / load getters:

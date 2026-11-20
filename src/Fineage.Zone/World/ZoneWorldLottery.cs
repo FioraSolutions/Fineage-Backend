@@ -20,9 +20,9 @@ public sealed partial class ZoneWorld
 
     LotteryBoard? _lottery;
 
-    internal LotteryBoard Lottery => _lottery ??= new LotteryBoard(nowUnixMs: _clock().ToUnixTimeMilliseconds());
+    internal LotteryBoard Lottery => _lottery ??= new LotteryBoard(nowUnixMs: NowUnixMs());
 
-    internal Random LotteryRandom { get; set; } = Random.Shared;
+    internal Random LotteryRandom { get; set; }
 
     /// <summary>Swap in the persisted board (host: <c>lottery.json</c> in the state directory).</summary>
     public void UseLottery(LotteryBoard board)
@@ -47,7 +47,7 @@ public sealed partial class ZoneWorld
     internal void TickLotteryForTests()
     {
         lock (_gate)
-            TickLottery(_clock().ToUnixTimeMilliseconds());
+            TickLottery(NowUnixMs());
     }
 
     /// <summary>Test: one <c>Loto N</c> bypass against a lottery seller (spawned or a stand-in).</summary>
@@ -74,7 +74,7 @@ public sealed partial class ZoneWorld
     string? ShowLoto(ZoneSession session, ZoneEntity player, ZoneEntity npc, int value)
     {
         var board = Lottery;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var picks = session.LotoPicks;
         string html;
         switch (value)

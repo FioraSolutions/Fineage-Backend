@@ -102,7 +102,9 @@ public sealed partial class ZoneWorld
             var npc = _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId)
                 ?? new ZoneEntity
                 {
-                    Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0,
+                    Kind = ZoneEntityKind.Npc,
+                    NpcId = npcId,
+                    ObjectId = 0,
                     MerchantCastleId = Fineage.Zone.Shops.MerchantTowns.For(mapId).CastleId,
                     MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
                 };
@@ -251,7 +253,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var (x, y) = Offset(loc.X, loc.Y);
+        var (x, y) = Offset(player, loc.X, loc.Y);
         if (!Loaded(x, y))
         {
             Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);

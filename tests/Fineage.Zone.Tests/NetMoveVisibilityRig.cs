@@ -53,7 +53,9 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
         var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty,
             activeMapId: mapId ?? SpawnCatalog.DefaultMapId);
         var host = await NetZoneHost.StartAsync(world, store, clock: Clock);
-        rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
+        long step = ZoneSimulationSettings.StepMilliseconds;
+        // Stages run at tick time; starting on a tick boundary keeps AdvanceAsync's whole-step totals exact.
+        rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / step * step };
         return rig;
     }
 

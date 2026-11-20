@@ -143,7 +143,7 @@ public sealed partial class ZoneWorld
             MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race),
             _shopStock,
-            _clock().ToUnixTimeMilliseconds());
+            NowUnixMs());
         if (!mutation.Ok)
         {
             SendDeny(session, mutation);

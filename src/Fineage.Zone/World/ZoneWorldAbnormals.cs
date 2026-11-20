@@ -30,7 +30,7 @@ public sealed partial class ZoneWorld
             var ps = PlayerStats(attacker);
             var attrs = EffectiveAttributes(attacker);
             if (ZoneCombat.RollSkillMastery(
-                    _combatRandom, ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus))
+                    Rng(_combatRandom, attacker), ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus))
                 duration *= 2;
         }
         // The land roll already passed; a lower-level same-slot occupant is rejected silently
@@ -88,7 +88,7 @@ public sealed partial class ZoneWorld
             traitMod,
             mAtkMod);
 
-        bool landed = ZoneCombat.RollDebuffLand(_combatRandom, chance);
+        bool landed = ZoneCombat.RollDebuffLand(Rng(_combatRandom, target), chance);
         ZoneLog.Info(
             $"[debuff-land] skill={template.SkillId} lv={levelData.Level} ml={levelData.MagicLevel} " +
             $"rate={template.ActivateRate} trait={template.Trait} traitMod={traitMod:F3} mAtkMod={mAtkMod:F3} " +

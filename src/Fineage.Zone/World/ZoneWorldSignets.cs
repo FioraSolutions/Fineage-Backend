@@ -87,7 +87,7 @@ public sealed partial class ZoneWorld
     internal void TickSignetsForTest(long? now = null)
     {
         lock (_gate)
-            TickSignets(now ?? _clock().ToUnixTimeMilliseconds());
+            TickSignets(now ?? NowUnixMs());
     }
 
     /// <summary>Test hook: every live NPC in the world (signets included).</summary>

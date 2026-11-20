@@ -205,7 +205,7 @@ public sealed partial class ZoneWorld
         RefreshClanSkills(entity, clan);
         if (SyncSiegeSkills(entity, clan) && entity.Session is { InWorld: true } && NetBridge != null)
             NetBridge.FanoutSkillList([entity.ObjectId],
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, NowUnixMs()));
     }
 
     /// <summary>

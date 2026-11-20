@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
         string command = parts[0].ToLowerInvariant();
         string arg1 = parts.Length > 1 ? parts[1] : "";
         string arg2 = parts.Length > 2 ? parts[2] : "";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var clan = ClanOf(session.ObjectId);
         error = command switch
         {

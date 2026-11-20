@@ -23,7 +23,7 @@ public sealed partial class ZoneWorld
         if (player.Sitting || player.Dead || IsImmobilized(player))
             return -1;
         var session = player.Session;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // Net: bring the timed-move position up to date before measuring (the pawn may already be running).
         AdvanceMove(player, now);
 
@@ -62,8 +62,12 @@ public sealed partial class ZoneWorld
         var ack = new MoveToMsg
         {
             ObjectId = player.ObjectId,
-            DestX = destX, DestY = destY, DestZ = destZ,
-            OriginX = player.X, OriginY = player.Y, OriginZ = player.Z
+            DestX = destX,
+            DestY = destY,
+            DestZ = destZ,
+            OriginX = player.X,
+            OriginY = player.Y,
+            OriginZ = player.Z
         };
         int originX = player.X, originY = player.Y;
 
@@ -117,7 +121,7 @@ public sealed partial class ZoneWorld
     /// <summary>Client MoveTo that lies on the current approach leg is a position report, not a new order.</summary>
     bool IsApproachSync(ZoneSession session, MoveToMsg move)
     {
-        if (session.ApproachTargetId <= 0 || _clock().ToUnixTimeMilliseconds() >= session.ApproachArriveUnixMs)
+        if (session.ApproachTargetId <= 0 || NowUnixMs() >= session.ApproachArriveUnixMs)
             return false;
         return ZoneCombat.DistanceToSegment(move.DestX, move.DestY,
             session.ApproachOriginX, session.ApproachOriginY,

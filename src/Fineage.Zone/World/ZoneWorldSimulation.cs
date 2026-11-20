@@ -10,6 +10,9 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    readonly ulong _simulationSeed;
+    SimulationClock _simulationClock;
+    IRegionPartition _regions;
     RegionTickScheduler _simulationTicks;
     IRegionStage _regenPlayersStage;
     IRegionStage _regenNpcsStage;
@@ -17,11 +20,24 @@ public sealed partial class ZoneWorld
 
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
-    /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
-    internal void StepSimulation() => RunUnderGate(_simulationTicks.Step);
+    /// <summary>Seed of every random stream in this world; log it to replay a run (<c>FINEAGE_ZONE_SEED</c>).</summary>
+    public ulong SimulationSeed => _simulationSeed;
 
     /// <summary>
-    /// Runs <paramref name="body"/> under <c>_gate</c> with one time sample. Its fan-out is recorded into one batch that
+    /// Simulation time for rules: the tick time inside a step, the command's time sample inside a command, otherwise
+    /// (handlers not yet routed through commands) the wall clock.
+    /// </summary>
+    long NowUnixMs() => _simulationClock.NowUnixMs();
+
+    /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
+    internal void StepSimulation() => RunUnderGate(wall =>
+    {
+        _simulationTicks.Step(wall);
+        _commandLog?.AppendStep(_simulationTicks.Tick, wall);
+    });
+
+    /// <summary>
+    /// Runs <paramref name="body"/> under <c>_gate</c> with one wall sample. Its fan-out is recorded into one batch that
     /// is sealed before the lock is released and sent after it; inventory/warehouse Postgres writes the stages dirtied
     /// are flushed after the lock too.
     /// </summary>
@@ -34,7 +50,7 @@ public sealed partial class ZoneWorld
                 _fanout.Begin();
                 try
                 {
-                    body(_clock().ToUnixTimeMilliseconds());
+                    body(_simulationClock.WallUnixMs());
                 }
                 finally
                 {
@@ -50,9 +66,23 @@ public sealed partial class ZoneWorld
         }
     }
 
-    [MemberNotNull(nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
+    /// <summary>Per-region streams for <paramref name="purpose"/>, or one injected generator for every region.</summary>
+    IRegionRandom Streams(Random? injected, RandomPurpose purpose) =>
+        injected is null ? new SeededRegionRandom(_simulationSeed, purpose) : new SharedRegionRandom(injected);
+
+    /// <summary>The stream of a global system (fishing, manor, lottery, mammon) until it becomes its own actor.</summary>
+    Random GlobalStream(RandomPurpose purpose) => new SimulationRandom(SimulationRandom.StreamSeed(_simulationSeed, purpose));
+
+    /// <summary>The stream a roll made by <paramref name="actor"/> draws from: the one of the region it stands in.</summary>
+    Random Rng(IRegionRandom streams, ZoneEntity actor) =>
+        streams.For(_regions.RegionOf(actor.InstanceId, actor.X, actor.Y));
+
+    [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_simulationTicks), nameof(_regenPlayersStage),
+        nameof(_regenNpcsStage), nameof(_abnormalsStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer)
     {
+        _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
+        _regions = partition;
         _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id));
         _regenNpcsStage = new RegionStage("regen.npcs", CollectRegenNpcs, (_, id) => RegenNpc(id));
         _abnormalsStage = new RegionStage("abnormals", CollectAbnormals, (tick, id) => TickEntityAbnormals(id, tick.NowUnixMs));
@@ -60,8 +90,7 @@ public sealed partial class ZoneWorld
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
         // Region bodies still fan out through world-wide Players() scans and party state, so regions run one after
         // another under _gate until that state is region-owned.
-        var ticks = new RegionTickScheduler(
-            ZoneSimulationSettings.StepMilliseconds, partition, SequentialRegionExecutor.Instance, observer);
+        var ticks = new RegionTickScheduler(_simulationClock, partition, SequentialRegionExecutor.Instance, observer);
 
         // Every step: the former 200 ms combat loop, in its original order.
         ticks.AddWorldStage("movement.player", tick => TickPlayerMovement(tick.NowUnixMs));
@@ -89,20 +118,21 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
 
-        // Every slow period: the former 3 s loop, in its original order.
+        // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
+        // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.
         ticks.AddRegionStage(_regenPlayersStage, slow);
         ticks.AddRegionStage(_regenNpcsStage, slow);
         ticks.AddWorldStage("spawns", _ => TickSpawns(), slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
         ticks.AddWorldStage("bosses", _ => TickBosses(), slow);
-        ticks.AddWorldStage("clan.dissolutions", tick => CompleteDueDissolutions(tick.NowUnixMs), slow);
-        ticks.AddWorldStage("clan.hall-auctions", tick => TickHallAuctions(tick.NowUnixMs), slow);
-        ticks.AddWorldStage("sieges", tick => TickSieges(tick.NowUnixMs), slow);
-        ticks.AddWorldStage("manor", tick => TickManor(tick.NowUnixMs), slow);
+        ticks.AddWorldStage("clan.dissolutions", tick => CompleteDueDissolutions(tick.WallUnixMs), slow);
+        ticks.AddWorldStage("clan.hall-auctions", tick => TickHallAuctions(tick.WallUnixMs), slow);
+        ticks.AddWorldStage("sieges", tick => TickSieges(tick.WallUnixMs), slow);
+        ticks.AddWorldStage("manor", tick => TickManor(tick.WallUnixMs), slow);
         ticks.AddWorldStage("fishing", tick => TickFishing(tick.NowUnixMs), slow);
-        ticks.AddWorldStage("lottery", tick => TickLottery(tick.NowUnixMs), slow);
+        ticks.AddWorldStage("lottery", tick => TickLottery(tick.WallUnixMs), slow);
         ticks.AddWorldStage("seven-signs", _ => TickSevenSigns(), slow);
-        ticks.AddWorldStage("mammon", tick => TickMammon(tick.NowUnixMs), slow);
+        ticks.AddWorldStage("mammon", tick => TickMammon(tick.WallUnixMs), slow);
         ticks.AddWorldStage("olympiad", _ => TickOlympiad(), slow);
         _simulationTicks = ticks;
     }

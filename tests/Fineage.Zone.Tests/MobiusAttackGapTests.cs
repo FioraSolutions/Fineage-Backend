@@ -48,12 +48,12 @@ public sealed class MobiusAttackGapTests
         Assert.Equal(hp, mob.CurHp);
 
         long atk = ZoneCombat.AttackTimeMs(kit.World.PlayerStats(player).PAtkSpd);
-        kit.Now = kit.Now.AddMilliseconds(atk / 4 + 1);
+        kit.AdvanceToTickCovering(kit.Now.ToUnixTimeMilliseconds() + atk / 4 + 1);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         int afterFirst = mob.CurHp;
         Assert.True(afterFirst < hp);
 
-        kit.Now = kit.Now.AddMilliseconds(atk / 2);
+        kit.AdvanceToTickCovering(kit.Now.ToUnixTimeMilliseconds() + atk / 2);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.True(mob.CurHp < afterFirst);
         Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));

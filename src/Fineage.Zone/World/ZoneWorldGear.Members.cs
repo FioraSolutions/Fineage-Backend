@@ -30,7 +30,7 @@ public sealed partial class ZoneWorld
         {
             NetBridge.FanoutSkillList(
                 [session.ObjectId],
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         }
         List<int>? netPeers = null;
         foreach (int id in player.Knownlist)

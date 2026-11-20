@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
             session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         SaveQuestProgress(session, player); // persists exp/sp like quest rewards
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         // Mobius SystemMessage 277 "You have earned $s1."
         Notice(session, 277, $"You have earned {skillName}.");
@@ -122,7 +122,7 @@ public sealed partial class ZoneWorld
             .OrderBy(pair => pair.Key)
             .Select(pair => new KnownSkill(pair.Key, pair.Value))
             .ToList();
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         return SkillMessages.List(rows, entity.SkillReuseUntilMs, now);
     }
 
@@ -140,7 +140,7 @@ public sealed partial class ZoneWorld
             levelData = ld;
             levelDataOk = true;
         }
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // A toggle that is already running is switched OFF by this press, and Mobius handles that in
         // checkUseMagicConditions before the reuse / MP gates (isSkillDisabled is checked much later), so the active
         // toggle's own reuse delay must not refuse the second press.

@@ -14,7 +14,7 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind != ZoneEntityKind.Player)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var rows = new List<StoredEffect>();
         var storedSkillIds = new HashSet<int>();
 
@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind != ZoneEntityKind.Player || stored?.Effects == null || stored.Effects.Count == 0)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var e in stored.Effects)
         {
             if (e == null || !e.IsValid)

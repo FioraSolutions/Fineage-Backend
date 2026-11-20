@@ -38,7 +38,7 @@ public sealed partial class ZoneWorld
 
     string? ToggleSitStand(ZoneEntity player)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // Mobius RequestActionUse case 0 / useSit: a fake-dead pawn is stood up by the sit action
         // (player.stopEffects(FAKE_DEATH)) instead of toggling the seat.
         if (player.FakeDeath)
@@ -80,7 +80,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Sitting)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (checkCast && IsCasting(player, now))
             return;
         // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
@@ -127,7 +127,7 @@ public sealed partial class ZoneWorld
             return ActionProtocol.Blocked;
 
         // Settle the in-flight segment at the old speed before switching gait (Mobius setWalking/setRunning).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(player, now);
         player.Running = !player.Running;
         ZoneLog.Info($"[move] obj={player.ObjectId} {(player.Running ? "run" : "walk")} speed={MoveSpeedOf(player)}");
@@ -196,7 +196,7 @@ public sealed partial class ZoneWorld
     {
         // Mobius RequestActionUse.useSocial: no store, no pending/active trade request, not casting,
         // and AI intention IDLE (not sitting / running / attacking).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(player, now);
         if (player.Sitting || player.MoveActive || IsCasting(player, now) ||
             player.PrivateStoreType != PrivateStoreProtocol.TypeNone ||

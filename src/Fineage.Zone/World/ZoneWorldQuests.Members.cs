@@ -67,7 +67,7 @@ public sealed partial class ZoneWorld
             });
             NetBridge.FanoutStatusUpdate(self, status);
             NetBridge.FanoutSkillList(self,
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
             NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
             {
                 ObjectId = player.ObjectId,

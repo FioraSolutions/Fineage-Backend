@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
     string? TryUseConsumable(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
         bool known = _itemSkills.TryGet(item.ItemId, out var use);
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // Mobius keeps one reuse stamp per item id on the character; a stack shares that timer.
         bool onReuse = known
             && use!.ReuseDelayMs > 0

@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
         RefreshRunSpeed(player);
         if (player.Session != null)
         {
-            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
             NetBridge?.FanoutAbnormalStatusUpdate([player.ObjectId], AbnormalFor(player));
         }
     }
@@ -121,7 +121,7 @@ public sealed partial class ZoneWorld
         if (wasDown)
             FanoutRevive(player);
         if (player.Session != null)
-            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
     }
 
     void FillBars(ZoneEntity player)
@@ -153,7 +153,7 @@ public sealed partial class ZoneWorld
         FanoutPlayerDeath(player, killerObjectId);
         if (state is { Phase: OlympiadMatchPhase.Fighting } s)
         {
-            var step = _olympiad.Report(s.MatchId, s.OpponentId, _clock().ToUnixTimeMilliseconds());
+            var step = _olympiad.Report(s.MatchId, s.OpponentId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
         }

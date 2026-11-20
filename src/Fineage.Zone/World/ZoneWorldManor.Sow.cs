@@ -92,7 +92,7 @@ public sealed partial class ZoneWorld
     string? CastManorSkill(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int itemId,
         DeferredEffect effect, bool allowDeadTarget = false)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var template = _game.Skills.Find(skillId);
         if (template == null || !template.TryLevelData(1, out var levelData))
             return SkillProtocol.Unknown;

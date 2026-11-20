@@ -73,7 +73,7 @@ public sealed partial class ZoneWorld
 
     BuyListMsg BuyList(ZoneEntity npc, BuyListDefinition list, int baseTax, int castleTax)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var items = new BuyListItemMsg[list.Products.Count];
         for (int i = 0; i < items.Length; i++)
         {

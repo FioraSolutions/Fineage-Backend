@@ -142,7 +142,7 @@ public sealed partial class ZoneWorld
         bool force = true,
         ZoneEntity? attacker = null)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         lock (_gate)
             return ApplyAbnormalFromSkill(template, levelData, target, now, attacker, force: force);
     }
@@ -181,7 +181,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     AbnormalStatusUpdateMsg AbnormalFor(ZoneEntity entity)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int spoilExtra = entity.SpoilerObjectId != 0 ? 1 : 0;
         var effects = new AbnormalEffectMsg[entity.Abnormals.Count + spoilExtra];
         for (int i = 0; i < entity.Abnormals.Count; i++)

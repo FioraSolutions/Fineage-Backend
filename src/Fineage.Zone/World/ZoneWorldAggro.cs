@@ -44,14 +44,14 @@ public sealed partial class ZoneWorld
         // Mobius onEvtAttacked: _globalAggro = 0 and the attack timeout restarts (1200 game ticks, 2 min).
         if (npc.GlobalAggro < 0)
             npc.GlobalAggro = 0;
-        npc.AttackTimeoutAtMs = _clock().ToUnixTimeMilliseconds() + AttackTimeoutMs;
+        npc.AttackTimeoutAtMs = NowUnixMs() + AttackTimeoutMs;
         npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
         int top = MostHated(npc);
         if (top == npc.AggroTargetId || top == 0)
             return;
         SetAggroTarget(npc, top);
         // Mobius: first swing after attack-speed delay, not instantly.
-        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+        npc.NextMobAttackMs = NowUnixMs() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
     /// <summary>

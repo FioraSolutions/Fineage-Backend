@@ -183,16 +183,18 @@ public sealed class MetricsCollectorTests
     }
 
     [Fact]
-    public void Collector_reads_stage_durations_failures_and_overruns()
+    public void Collector_reads_stage_durations_failures_overruns_and_skipped_ticks()
     {
         string stage = "stage" + Guid.NewGuid().ToString("N");
         var tag = new KeyValuePair<string, object?>("stage", stage);
         using var collector = new MetricsCollector();
         long overrunsBefore = collector.Snapshot().TickOverruns;
+        long skippedBefore = collector.Snapshot().TicksSkipped;
 
         FineageTelemetry.StageMilliseconds.Record(3.5, tag);
         FineageTelemetry.StageFailures.Add(2, tag);
         FineageTelemetry.TickOverruns.Add(1);
+        FineageTelemetry.TicksSkipped.Add(4);
 
         MetricsSnapshot snapshot = collector.Snapshot();
         StageMetrics row = Assert.Single(snapshot.Stages, s => s.Stage == stage);
@@ -200,11 +202,13 @@ public sealed class MetricsCollectorTests
         Assert.Equal(3.5, row.Duration.Sum, 3);
         Assert.Equal(2, row.Failures);
         Assert.True(snapshot.TickOverruns >= overrunsBefore + 1);
+        Assert.True(snapshot.TicksSkipped >= skippedBefore + 4);
 
         string text = MetricsText.Prometheus(snapshot, 0, 0);
         Assert.Contains($"fineage_tick_stage_ms_count{{stage=\"{stage}\"}} 1\n", text);
         Assert.Contains($"fineage_tick_stage_failures_total{{stage=\"{stage}\"}} 2\n", text);
         Assert.Contains("# TYPE fineage_tick_overruns_total counter\n", text);
+        Assert.Contains("# TYPE fineage_tick_skipped_total counter\n", text);
     }
 }
 

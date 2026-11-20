@@ -57,6 +57,16 @@ internal sealed class NetTestKit
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
 
+    /// <summary>
+    /// Moves <see cref="Now"/> to the first simulation tick at or after <paramref name="unixMs"/>. Stages run at tick
+    /// time, so that is the tick a deadline at <paramref name="unixMs"/> is honoured on.
+    /// </summary>
+    public void AdvanceToTickCovering(long unixMs)
+    {
+        long step = ZoneSimulationSettings.StepMilliseconds;
+        Now = DateTimeOffset.FromUnixTimeMilliseconds(Math.DivRem(unixMs, step, out long rest) * step + (rest > 0 ? step : 0));
+    }
+
     public NetTestKit(
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? map = null,
@@ -71,13 +81,14 @@ internal sealed class NetTestKit
         Fineage.Game.Services.ItemWeights? weights = null,
         MemoryAccountStore? store = null,
         Fineage.Zone.Simulation.IRegionPartition? regions = null,
-        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null)
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
+        ulong? simulationSeed = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
-            simulationObserver: simulationObserver);
+            simulationObserver: simulationObserver, simulationSeed: simulationSeed);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

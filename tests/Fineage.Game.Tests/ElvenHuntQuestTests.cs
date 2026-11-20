@@ -119,4 +119,20 @@ public sealed class ElvenHuntQuestTests
         Assert.Equal(13890, bag.CountOf(57));
         Assert.Equal(QuestPhase.Completed, j.Find(Q)!.Phase);
     }
+
+    [Fact]
+    public void The_actors_own_roll_decides_its_drops_instead_of_the_machine_source()
+    {
+        var (m, bag, j) = Setup(roll: 0.999_999);
+        const int Q = 163, Starden = 30220, Poem = 1038;
+        Assert.True(m.AdvEvent(j, bag, Q, Starden, "30220-05", Elf(11)).Ok);
+
+        m.OnKill(j, bag, 20372, Elf(11));
+        Assert.Equal(0, bag.CountOf(Poem));
+
+        int draws = 0;
+        m.OnKill(j, bag, 20372, Elf(11) with { Roll = () => { draws++; return 0.0; } });
+        Assert.Equal(1, bag.CountOf(Poem));
+        Assert.True(draws > 0);
+    }
 }

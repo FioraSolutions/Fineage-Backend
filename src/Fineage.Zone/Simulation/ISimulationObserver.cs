@@ -16,17 +16,22 @@ public interface ISimulationObserver
 
     void StageFailed(StageFailure failure);
 
+    /// <summary>The step to <paramref name="tick"/> jumped over <paramref name="skipped"/> ticks because it ran late.</summary>
+    void TicksSkipped(TickContext tick, long skipped);
+
     void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget);
 }
 
 /// <summary>
-/// Production observer: per-stage histograms, a fault counter with the full exception in the log, and an overrun
-/// warning naming the slowest stages whenever a step takes longer than its fixed step.
+/// Production observer: per-stage histograms, a fault counter with the full exception in the log, an overrun warning
+/// naming the slowest stages whenever a step takes longer than its fixed step, a skipped-tick counter and warning, and
+/// a warning when the wall clock falls a step or more behind simulation time (and when it catches up).
 /// </summary>
 sealed class ZoneSimulationObserver : ISimulationObserver
 {
     const int SlowestStagesLogged = 3;
     readonly List<(string Stage, double Ms)> _stepStages = [];
+    bool _wallBehind;
 
     public void StageCompleted(string stage, TickContext tick, int regions, int entities, TimeSpan elapsed)
     {
@@ -43,6 +48,13 @@ sealed class ZoneSimulationObserver : ISimulationObserver
         ZoneLog.Warn($"simulation stage failed: {failure}\n{failure.Error}");
     }
 
+    public void TicksSkipped(TickContext tick, long skipped)
+    {
+        FineageTelemetry.TicksSkipped.Add(skipped);
+        ZoneLog.Warn(
+            $"simulation skipped {skipped} tick(s) before tick {tick.Tick}: the step ran {tick.WallUnixMs - tick.NowUnixMs} ms into its interval; their stages run once now");
+    }
+
     public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget)
     {
         if (elapsed > budget)
@@ -54,6 +66,15 @@ sealed class ZoneSimulationObserver : ISimulationObserver
                 .Select(s => $"{s.Stage}={s.Ms:F1}ms"));
             ZoneLog.Warn(
                 $"simulation tick {tick.Tick} took {elapsed.TotalMilliseconds:F1} ms, over its {budget.TotalMilliseconds:F0} ms step; slowest: {slowest}");
+        }
+
+        bool wallBehind = tick.NowUnixMs - tick.WallUnixMs >= budget.TotalMilliseconds;
+        if (wallBehind != _wallBehind)
+        {
+            _wallBehind = wallBehind;
+            ZoneLog.Warn(wallBehind
+                ? $"wall clock is {tick.NowUnixMs - tick.WallUnixMs} ms behind simulation tick {tick.Tick}; the simulation keeps its fixed step until the wall clock catches up"
+                : $"wall clock caught up with simulation tick {tick.Tick}");
         }
 
         _stepStages.Clear();

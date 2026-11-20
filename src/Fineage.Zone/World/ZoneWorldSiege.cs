@@ -50,7 +50,7 @@ public sealed partial class ZoneWorld
         string? error;
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             AnnounceClosed(now);
             bool joining = request.Joining == 1;
             bool attacker = request.Attacker == 1;
@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
         string? error;
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             AnnounceClosed(now);
             error = _siege.AnswerDefender(
                 new SiegeActor(session.ObjectId),
@@ -120,7 +120,7 @@ public sealed partial class ZoneWorld
         string? error;
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             AnnounceClosed(now);
             if (_siege.List(castleId, now) == null)
                 error = SiegeProtocol.Castle;
@@ -143,7 +143,7 @@ public sealed partial class ZoneWorld
 
         string? error;
         lock (_gate)
-            error = CaptureLocked(clanId, castleId, _clock().ToUnixTimeMilliseconds(), session);
+            error = CaptureLocked(clanId, castleId, NowUnixMs(), session);
 
         if (error != null)
             return Task.FromResult<string?>(error);

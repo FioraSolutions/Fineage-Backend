@@ -178,7 +178,7 @@ public sealed partial class ZoneWorld
         }
 
         int chance = OpenChestSuccessChance(skillId, skillLevel, target.Level);
-        bool success = forceSuccess ?? (_combatRandom.Next(100) < chance);
+        bool success = forceSuccess ?? (Rng(_combatRandom, caster).Next(100) < chance);
         if (success)
         {
             BroadcastSocial(target, SocialChestOpenOk);
@@ -193,7 +193,7 @@ public sealed partial class ZoneWorld
 
     void OpenChestKill(ZoneEntity chest, ZoneEntity opener)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int damage = Math.Max(1, chest.CurHp);
         RecordDamage(chest, opener, damage);
         chest.CurHp = 0;

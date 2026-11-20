@@ -120,7 +120,7 @@ public sealed partial class ZoneWorld
             // Life Cubic for Beginners (4338) is a SummonCubic skill, not a buff.
             if (Cubics.SummonSkill(buff.SkillId) is { } cubicSkill)
             {
-                SummonCubic(player, cubicSkill, Math.Max(1, buff.SkillLevel), givenByOther: true, _clock().ToUnixTimeMilliseconds());
+                SummonCubic(player, cubicSkill, Math.Max(1, buff.SkillLevel), givenByOther: true, NowUnixMs());
                 continue;
             }
             CastBuff(npc, player, buff.SkillId, buff.SkillLevel, buff.AbnormalLevel, buff.DurationSeconds);

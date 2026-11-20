@@ -153,7 +153,7 @@ public sealed class NetGroundItemTests
         Assert.Equal(groundId, session.PendingPickupId);
         Assert.Empty(InvRows(rec));
 
-        kit.Now = kit.Now.AddMilliseconds(session.PendingPickupAtUnixMs - kit.Now.ToUnixTimeMilliseconds() + 50);
+        kit.AdvanceToTickCovering(session.PendingPickupAtUnixMs);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
 
         Assert.Equal(1000, stack.Count);
@@ -207,7 +207,7 @@ public sealed class NetGroundItemTests
         Assert.Equal(groundId, session.PendingPickupId);
         Assert.Empty(InvRows(rec));
 
-        kit.Now = kit.Now.AddMilliseconds(session.PendingPickupAtUnixMs - kit.Now.ToUnixTimeMilliseconds() + 50);
+        kit.AdvanceToTickCovering(session.PendingPickupAtUnixMs);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
 
         Assert.Equal(before + 10, stack.Count);

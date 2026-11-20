@@ -95,7 +95,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Session == null)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         ZoneAbnormals.Apply(player.Abnormals, skillId, abnormalLevel, durationSeconds, now, level);
         var cast = new MagicSkillUseMsg
         {
@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
             HitTimeMs = 0,
             ReuseDelayMs = 0
         };
-                // Net clients only see the gesture through the bridge; the abnormal row alone leaves the pawn silent.
+        // Net clients only see the gesture through the bridge; the abnormal row alone leaves the pawn silent.
         NetBridge?.FanoutMagicSkillUse([player.ObjectId], cast);
         foreach (var other in Players())
         {

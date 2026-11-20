@@ -517,7 +517,7 @@ public sealed partial class ZoneWorld
                 {
                     var row = data.Guards.FirstOrDefault(g => g.NpcId == npc.NpcId && g.X == npc.HomeX && g.Y == npc.HomeY);
                     if (row != null && (tower < 0 || run.ControlTowers.ContainsKey(tower)))
-                        run.GuardRespawns.Add((_clock().ToUnixTimeMilliseconds() + Math.Max(1, row.RespawnSeconds) * 1000L, row, tower));
+                        run.GuardRespawns.Add((NowUnixMs() + Math.Max(1, row.RespawnSeconds) * 1000L, row, tower));
                 }
                 break;
         }
@@ -527,7 +527,7 @@ public sealed partial class ZoneWorld
     internal void TickSiegesForTests()
     {
         lock (_gate)
-            TickSieges(_clock().ToUnixTimeMilliseconds());
+            TickSieges(NowUnixMs());
     }
 
     internal IReadOnlyList<ZoneEntity> SiegeNpcsForTests(int castleId)

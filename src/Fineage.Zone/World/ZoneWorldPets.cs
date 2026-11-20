@@ -111,7 +111,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>SummonItems.onItemUse</c> refusals, then the 5 s static cast; the pet appears at hit time.</summary>
     string? TryUseCollar(ZoneSession session, ZoneEntity player, ItemInstance collar, PetTemplate template)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.Dead || now < player.CastingUntilMs || player.PendingHit != null)
             return null;
         if (player.Sitting)
@@ -568,7 +568,7 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doRevive: 70 % HP / MP unless the restore was 100 %.
         s.CurHp = Math.Max(1, (int)(s.MaxHp * 0.7));
         s.CurMp = (int)(s.MaxMp * 0.7);
-        pet.NextFeedMs = _clock().ToUnixTimeMilliseconds() + PetFeedTickMs;
+        pet.NextFeedMs = NowUnixMs() + PetFeedTickMs;
         FanoutRevive(s);
         FanoutVitals(s, StatusFor(s));
         SyncNeedRegen(s);
@@ -818,7 +818,7 @@ public sealed partial class ZoneWorld
     /// <summary>Blessed Scroll of Resurrection for Pets (Mobius 2179): 15 s static cast on the dead pet, 100 % exp back.</summary>
     string? TryUsePetResurrectScroll(ZoneSession session, ZoneEntity player, ItemInstance scroll)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.Dead || now < player.CastingUntilMs)
             return null;
         int targetId = session.SelectedTargetId;
@@ -860,7 +860,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             if (PetEntityOf(player) is { } s && OwnerOf(s) is { } owner)
-                TickPetFeed(owner, s, s.Summon!.Pet!, _clock().ToUnixTimeMilliseconds());
+                TickPetFeed(owner, s, s.Summon!.Pet!, NowUnixMs());
         }
     }
 
@@ -876,7 +876,7 @@ public sealed partial class ZoneWorld
     internal void KillSummonForTest(ZoneEntity summon)
     {
         lock (_gate)
-            SummonDied(summon, null, _clock().ToUnixTimeMilliseconds());
+            SummonDied(summon, null, NowUnixMs());
     }
 
     internal StoredPet? LoadPetForTest(int controlObjectId)

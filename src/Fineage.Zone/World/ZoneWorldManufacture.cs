@@ -203,7 +203,7 @@ public sealed partial class ZoneWorld
             });
         }
 
-        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, Rng(_spawnRandom, maker).Next(100));
         int result = success ? 0 : 1;
         if (success)
         {

@@ -95,7 +95,7 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
-        return ZoneCombat.RollMelee(_combatRandom, ps.PAtk, pDef,
+        return ZoneCombat.RollMelee(Rng(_combatRandom, player), ps.PAtk, pDef,
             ps.Accuracy, evasion, critPermille, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),

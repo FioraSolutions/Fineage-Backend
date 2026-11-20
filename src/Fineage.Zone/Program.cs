@@ -110,6 +110,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
 Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} aoi={ZoneAoiSettings.DescribeEffective()} npcs={world.NpcObjectIds.Count})");
+Console.WriteLine($"[ZONE] simulation seed={world.SimulationSeed} step={ZoneSimulationSettings.StepMilliseconds}ms (FINEAGE_ZONE_SEED replays the random streams)");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored as seven-signs.json in the state directory.");
 Console.WriteLine("[ZONE] Olympiad registration and points are stored as olympiad.json in the state directory.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");

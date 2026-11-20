@@ -185,7 +185,7 @@ public sealed partial class ZoneWorld
         int killerLevel = killer?.Level ?? npc.Level;
         if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
         {
-            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates, npc.Level, killerLevel, raid))
+            foreach (var stack in DropRoller.RollCorpse(definition, Rng(_dropRandom, npc), _dropRates, npc.Level, killerLevel, raid))
                 npc.SweepItems.Add(stack);
         }
 
@@ -198,7 +198,7 @@ public sealed partial class ZoneWorld
         if (spoiled)
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
         // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
-        SetDecayAtMs(npc, _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled));
+        SetDecayAtMs(npc, NowUnixMs() + _spoilRules.CorpseMs(spoiled));
         if (npc.NpcType is "RaidBoss" or "GrandBoss")
         {
             foreach (int minionId in npc.MinionIds.ToArray())
@@ -254,7 +254,7 @@ public sealed partial class ZoneWorld
     internal void DamageNpcByForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
         lock (_gate)
-            DamageNpcBy(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+            DamageNpcBy(attacker, target, damage, NowUnixMs());
     }
 
     bool VisibleTo(int observerId, int otherId)

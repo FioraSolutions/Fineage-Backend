@@ -61,6 +61,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> TickOverruns =
         Meter.CreateCounter<long>("fineage.tick.overruns", description: "Simulation steps that took longer than the fixed step");
 
+    public static readonly Counter<long> TicksSkipped =
+        Meter.CreateCounter<long>("fineage.tick.skipped", description: "Simulation ticks a late step jumped over");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,

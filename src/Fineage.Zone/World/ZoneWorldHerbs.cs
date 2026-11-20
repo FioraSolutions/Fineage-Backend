@@ -23,21 +23,21 @@ public sealed partial class ZoneWorld
             switch (skill.Kind)
             {
                 case HerbKind.HpPercent:
-                {
-                    int hp = HerbCatalog.RestorePercent(player.CurHp, player.MaxHp, skill.AmountAt(level));
-                    player.CurHp += hp;
-                    vitals = true;
-                    NotifyLine(session.ObjectId, _herbs.HpRestoredMessage, $"{hp} HP has been restored.");
-                    break;
-                }
+                    {
+                        int hp = HerbCatalog.RestorePercent(player.CurHp, player.MaxHp, skill.AmountAt(level));
+                        player.CurHp += hp;
+                        vitals = true;
+                        NotifyLine(session.ObjectId, _herbs.HpRestoredMessage, $"{hp} HP has been restored.");
+                        break;
+                    }
                 case HerbKind.MpPercent:
-                {
-                    int mp = HerbCatalog.RestorePercent(player.CurMp, player.MaxMp, skill.AmountAt(level));
-                    player.CurMp += mp;
-                    vitals = true;
-                    NotifyLine(session.ObjectId, _herbs.MpRestoredMessage, $"{mp} MP has been restored.");
-                    break;
-                }
+                    {
+                        int mp = HerbCatalog.RestorePercent(player.CurMp, player.MaxMp, skill.AmountAt(level));
+                        player.CurMp += mp;
+                        vitals = true;
+                        NotifyLine(session.ObjectId, _herbs.MpRestoredMessage, $"{mp} MP has been restored.");
+                        break;
+                    }
                 default:
                     // Self-cast like ItemSkills: caster = target = picker.
                     CastBuff(player, player, skill.SkillId, level, skill.AbnormalLevel, skill.DurationSeconds);
@@ -68,7 +68,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             var before = _byId.Keys.ToHashSet();
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             SpawnGroundStack(itemId, count, player.X, player.Y, player.Z, 0, [player],
                 expireAtMs: now + (IsHerb(itemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
             return _byId.Keys.First(id => !before.Contains(id));

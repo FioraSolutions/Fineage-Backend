@@ -83,12 +83,13 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    (int X, int Y) Offset(int x, int y)
+    (int X, int Y) Offset(ZoneEntity player, int x, int y)
     {
         if (_teleportOffset <= 0)
             return (x, y);
-        int ox = x + _serviceRandom.Next(-_teleportOffset, _teleportOffset + 1);
-        int oy = y + _serviceRandom.Next(-_teleportOffset, _teleportOffset + 1);
+        var serviceRng = Rng(_serviceRandom, player);
+        int ox = x + serviceRng.Next(-_teleportOffset, _teleportOffset + 1);
+        int oy = y + serviceRng.Next(-_teleportOffset, _teleportOffset + 1);
         return Loaded(ox, oy) ? (ox, oy) : (x, y);
     }
 
@@ -116,7 +117,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Warehouse == null)
             return;
-        if (_deferInventoryPersist)
+        if (InventoryPersistDeferred)
         {
             _dirtyWarehouses[session.ObjectId] = player;
             return;

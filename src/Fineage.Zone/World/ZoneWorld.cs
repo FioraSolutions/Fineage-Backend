@@ -17,6 +17,7 @@ using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Game.Services;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -32,8 +33,8 @@ public sealed partial class ZoneWorld
     readonly IAoi _aoi;
     readonly GameData _game;
     readonly ItemObjectIdAllocator _itemIds;
-    readonly Random _spawnRandom;
-    readonly Random _dropRandom;
+    readonly IRegionRandom _spawnRandom;
+    readonly IRegionRandom _dropRandom;
     readonly IAccountStore? _accounts;
     readonly ZoneCharacterPersist _persist;
     readonly bool _expertisePenalty;
@@ -58,9 +59,9 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
     readonly int _teleportOffset;
-    readonly Random _serviceRandom;
+    readonly IRegionRandom _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
-    readonly Random _combatRandom;
+    readonly IRegionRandom _combatRandom;
     /// <summary>Mobius GameTimeTaskManager (IG day / night for HitConditionBonus dark).</summary>
     readonly ZoneGameTime _gameTime;
     /// <summary>Buff/debuff combat stat funcs (Mobius skill &lt;for&gt;&lt;effect&gt;).</summary>
@@ -92,17 +93,20 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>Player.onDieDropItem</c> rates (data/death-drop.json).</summary>
     readonly Fineage.Game.Services.DeathDropRules _deathDrop;
     /// <summary>Mobius <c>Rnd.get</c> for the Death Penalty roll (separate from the damage rolls).</summary>
-    readonly Random _deathRandom;
+    readonly IRegionRandom _deathRandom;
     readonly Dictionary<int, ZoneEntity> _byId = [];
     readonly DropCatalog _dropCatalog;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly object _gate = new();
     /// <summary>
-    /// When true, <see cref="SaveInventory"/> / <see cref="SaveWarehouse"/> refresh under the lock but
-    /// queue Postgres until <see cref="FlushDirtyInventories"/> (Claude B8 — keep SQL off <c>_gate</c>).
+    /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
+    /// <see cref="SaveWarehouse"/> refresh under the lock but queue Postgres until the outermost call has released
+    /// <c>_gate</c> and runs <see cref="FlushDirtyInventories"/> (Claude B8 — keep SQL off <c>_gate</c>).
     /// </summary>
-    bool _deferInventoryPersist;
+    int _deferInventoryPersistDepth;
+
+    bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly bool _npcRegen;
@@ -185,12 +189,13 @@ public sealed partial class ZoneWorld
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
         Random? fishingRandom = null,
-        Fineage.Zone.Simulation.IRegionPartition? regions = null,
-        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null)
+        IRegionPartition? regions = null,
+        ISimulationObserver? simulationObserver = null,
+        ulong? simulationSeed = null)
     {
-        InitSimulation(
-            regions ?? Fineage.Zone.Simulation.GridRegionPartition.MapTiles,
-            simulationObserver ?? new Fineage.Zone.Simulation.ZoneSimulationObserver());
+        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
+        InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver());
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
@@ -203,13 +208,13 @@ public sealed partial class ZoneWorld
         _henna = henna ?? HennaCatalog.LoadDefault();
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
-        _combatRandom = combatRandom ?? Random.Shared;
+        _combatRandom = Streams(combatRandom, RandomPurpose.Combat);
         _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight();
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
-        _spawnRandom = spawnRandom ?? Random.Shared;
-        _dropRandom = dropRandom ?? spawnRandom ?? Random.Shared;
+        _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);
+        _dropRandom = Streams(dropRandom ?? spawnRandom, RandomPurpose.Drop);
         _accounts = accounts;
         _persist = new ZoneCharacterPersist(accounts);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
@@ -218,18 +223,18 @@ public sealed partial class ZoneWorld
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
-        _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
         _includeEnabledMaps = includeEnabledMaps;
-        _quests = new QuestMachine(_game.Quests, _game.Items);
+        _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
+            "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
         _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
-        _siege = new SiegeBoard(_clock().ToUnixTimeMilliseconds(), _siegeSettings);
+        _siege = new SiegeBoard(NowUnixMs(), _siegeSettings);
         _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
@@ -239,13 +244,15 @@ public sealed partial class ZoneWorld
         _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
         _weights = weights ?? ItemWeights.LoadDefault();
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
-        _serviceRandom = serviceRandom ?? Random.Shared;
+        _serviceRandom = Streams(serviceRandom, RandomPurpose.Service);
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
-        _deathRandom = deathRandom ?? Random.Shared;
+        _deathRandom = Streams(deathRandom, RandomPurpose.Death);
+        _questRandom = Streams(null, RandomPurpose.Quest);
+        SoulCrystalRandom = Streams(null, RandomPurpose.SoulCrystal);
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
@@ -264,7 +271,9 @@ public sealed partial class ZoneWorld
         LoadClans();
         LoadSiege();
         InitManor(manor, manorRandom);
-        _fishingRandom = fishingRandom ?? Random.Shared;
+        _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
+        LotteryRandom = GlobalStream(RandomPurpose.Lottery);
+        MammonRandom = GlobalStream(RandomPurpose.Mammon);
         SpawnCastleDoors();
     }
 

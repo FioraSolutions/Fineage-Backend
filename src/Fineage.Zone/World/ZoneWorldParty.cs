@@ -267,7 +267,7 @@ public sealed partial class ZoneWorld
     internal Task RunPartyTickForTest()
     {
         lock (_gate)
-            TickParty(_clock().ToUnixTimeMilliseconds());
+            TickParty(NowUnixMs());
         return Task.CompletedTask;
     }
 

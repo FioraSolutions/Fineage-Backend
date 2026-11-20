@@ -51,6 +51,7 @@ public sealed class MetricsSnapshot
     public int PlayersOnline { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
     public long TickOverruns { get; init; }
+    public long TicksSkipped { get; init; }
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
@@ -154,6 +155,9 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_tick_skipped_total", "Simulation ticks a late step jumped over");
+        sb.Append("# TYPE fineage_tick_skipped_total counter\n");
+        sb.Append("fineage_tick_skipped_total ").Append(snapshot.TicksSkipped.ToString(CultureInfo.InvariantCulture)).Append('\n');
         AppendStages(sb, snapshot.Stages);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");

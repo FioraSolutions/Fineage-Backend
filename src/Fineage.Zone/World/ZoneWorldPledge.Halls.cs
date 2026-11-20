@@ -138,7 +138,7 @@ public sealed partial class ZoneWorld
 
     string? CancelHallBid(ZoneSession session, ZoneClan clan, int hallId)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (!HasPriv(clan, session.ObjectId, PledgeProtocol.PrivHallAuction))
             return NotAuthorized(session);
         if (!Halls(now).TryGetValue(hallId, out var hall))
@@ -205,7 +205,7 @@ public sealed partial class ZoneWorld
     {
         if (_halls == null && _accounts == null)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool changed = false;
         foreach (var hall in Halls(now).Values)
         {
@@ -240,7 +240,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             return Halls(now).TryGetValue(hallId, out var h)
                 ? (h.OwnerClanId, h.Bids.Count, h.Bids.Count == 0 ? 0 : h.Bids.Max(b => b.Amount))
                 : null;

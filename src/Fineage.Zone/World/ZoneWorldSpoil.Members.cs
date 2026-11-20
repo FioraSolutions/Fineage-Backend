@@ -173,6 +173,6 @@ public sealed partial class ZoneWorld
     internal void DecayForTest()
     {
         lock (_gate)
-            TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
+            TickCorpseDecay(NowUnixMs());
     }
 }

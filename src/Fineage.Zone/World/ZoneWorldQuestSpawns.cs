@@ -24,7 +24,7 @@ public sealed partial class ZoneWorld
 
     void TrackQuestSpawn(ZoneEntity entity, ZoneEntity owner, QuestSummon? summon)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int seconds = summon is { DespawnSec: > 0 } ? summon.DespawnSec : DefaultQuestDespawnSeconds;
         entity.QuestSpawn = new QuestSpawnState
         {
@@ -213,7 +213,7 @@ public sealed partial class ZoneWorld
     internal void TickQuestSpawnsForTest(long? now = null)
     {
         lock (_gate)
-            TickQuestSpawns(now ?? _clock().ToUnixTimeMilliseconds());
+            TickQuestSpawns(now ?? NowUnixMs());
     }
 
     /// <summary>Test hook: kill credit as a dying NPC gives it (owned spawns included).</summary>

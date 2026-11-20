@@ -117,7 +117,7 @@ public sealed partial class ZoneWorld
         string tail = command.Length > "OlympiadNoble ".Length ? command["OlympiadNoble ".Length..].Trim() : "";
         if (!int.TryParse(tail, out int val))
             return "bad_request";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         switch (val)
         {
             case 1:
@@ -235,7 +235,7 @@ public sealed partial class ZoneWorld
         RefreshPledgeClass(player);
         if (player.Session == null)
             return;
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
         var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
