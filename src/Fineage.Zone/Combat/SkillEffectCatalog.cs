@@ -129,7 +129,10 @@ public sealed class SkillEffectCatalog
             if (n.Equals("Heal", StringComparison.OrdinalIgnoreCase) ||
                 n.Equals("HealPercent", StringComparison.OrdinalIgnoreCase) ||
                 n.Equals("CpHeal", StringComparison.OrdinalIgnoreCase) ||
-                n.Equals("ManaHeal", StringComparison.OrdinalIgnoreCase))
+                n.Equals("CpHealPercent", StringComparison.OrdinalIgnoreCase) ||
+                n.Equals("ManaHeal", StringComparison.OrdinalIgnoreCase) ||
+                n.Equals("ManaHealPercent", StringComparison.OrdinalIgnoreCase) ||
+                n.Equals("ManaHealByLevel", StringComparison.OrdinalIgnoreCase))
                 return true;
         }
         return false;

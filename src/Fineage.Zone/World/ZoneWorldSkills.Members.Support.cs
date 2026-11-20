@@ -43,14 +43,13 @@ public sealed partial class ZoneWorld
             !InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
-        ConsumeSkillMp(player, template, levelData.MpConsume);
-        if (template.ReuseDelayMsAt(level) > 0)
-            player.SkillReuseUntilMs[request.SkillId] = now + template.ReuseDelayMsAt(level);
-
-        if (levelData.Power <= 0)
+        // Validate the amount before paying MP or starting the reuse timer: the old order put Braveheart (440 CpHeal)
+        // on its 120 s cooldown and then threw "heal power missing", so the skill greyed out and did nothing.
+        if (!HasRecoveryAmount(template, levelData, level))
             throw new InvalidOperationException(
                 $"skill {request.SkillId} lv{level} heal power missing — refuse invented heal amount");
-        int heal = levelData.Power;
+
+        ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
@@ -62,18 +61,9 @@ public sealed partial class ZoneWorld
         // Mobius onMagicFinalizer: a heal / resurrection is not isBad() → no attack stance.
         EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
-        // Mobius Heal effect at hitTime: HP rises when the cast completes, not when it starts.
-        ScheduleEffect(player, target, template, level, now, hitMs, (t, _) =>
-        {
-            if (heal > 0 && t.MaxHp > 0)
-                t.CurHp = Math.Min(t.MaxHp, t.CurHp + HealedAmount(t, heal));
-            FanoutVitals(t, new StatusUpdateMsg
-            {
-                ObjectId = t.ObjectId,
-                AttributeIds = [InterludeStatus.CurHp, InterludeStatus.MaxHp],
-                Values = [t.CurHp, t.MaxHp]
-            });
-        });
+        // Mobius instant effects land at hitTime: the bar rises when the cast completes, not when it starts.
+        ScheduleEffect(player, target, template, level, now, hitMs,
+            (t, _) => ApplyRecoveryEffects(player, t, template, levelData, level));
         return null;
     }
 

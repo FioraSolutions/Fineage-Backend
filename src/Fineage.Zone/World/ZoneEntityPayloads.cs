@@ -249,6 +249,7 @@ sealed class ZonePlayerStatusPayload
     public int WeightPenaltyLevel { get; set; }
     public double RegenCarryHp { get; set; }
     public double RegenCarryMp { get; set; }
+    public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
     public HashSet<int> AutoShots { get; } = [];
