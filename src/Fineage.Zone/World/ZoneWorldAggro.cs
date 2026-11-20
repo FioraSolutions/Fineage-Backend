@@ -139,11 +139,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>
-    internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to)
+    internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to) => CanSeePoint(from, to.X, to.Y, to.Z);
+
+    bool CanSeePoint(ZoneEntity from, int x, int y, int z)
     {
-        if (Doors.FirstBlocking(from.X, from.Y, from.Z, to.X, to.Y, to.Z, out _, out _, out _) != null)
+        if (Doors.FirstBlocking(from.X, from.Y, from.Z, x, y, z, out _, out _, out _) != null)
             return false;
-        return _geo.CanSeeTarget(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
+        return _geo.CanSeeTarget(from.X, from.Y, from.Z, x, y, z);
     }
 
     public const int SysMsgCannotSeeTarget = 181;
@@ -157,49 +159,6 @@ public sealed partial class ZoneWorld
 
     static bool IsGuard(ZoneEntity npc) =>
         string.Equals(npc.NpcType, "Guard", StringComparison.Ordinal);
-
-    void TickAggression(long now)
-    {
-        // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
-        var players = Players();
-        if (players.Count == 0 || _byId.CountOf(ActiveSets.Thinking) == 0)
-            return;
-        foreach (int id in Active(ActiveSets.Thinking))
-        {
-            if (!_byId.TryGetValue(id, out var npc))
-                continue;
-            // Mobius AttackableAI.autoAttackCondition: a Guard (attackable=false in the datapack) only auto-aggroes
-            // players carrying karma, inside its template aggro range and line of sight.
-            bool guard = IsGuard(npc);
-            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
-                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs ||
-                IsTreasureBox(npc.NpcId))
-                continue;
-            // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
-            if (npc.GlobalAggro < 0)
-                continue;
-            npc.NextAggroScanMs = now + AggroScanIntervalMs;
-            foreach (var p in players)
-            {
-                if (p.Dead || p.CurHp <= 0 || p.Session == null || p.FakeDeath || !SameInstance(npc.ObjectId, p.ObjectId))
-                    continue;
-                if (guard && p.Karma <= 0)
-                    continue;
-                // Mobius VarkaKetra.onNpcHate: Ketra / Varka monsters leave their allies alone.
-                if (Fineage.Game.Quests.QuestMachine.IsAlliedWith(npc.NpcId, p.Inventory))
-                    continue;
-                long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
-                if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)
-                    continue;
-                // Mobius isAggressiveTowards → me.isAggressive() && GeoEngine.canSeeTarget(me, target).
-                if (!CanSeeTarget(npc, p))
-                    continue;
-                ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={npc.AggroRange}");
-                AddHate(npc, p);
-                break;
-            }
-        }
-    }
 
     /// <summary>Mobius clan help: idle same-clan mobs within clanHelpRange of <paramref name="caller"/> attack <paramref name="target"/>.</summary>
     void CallClanHelp(ZoneEntity caller, ZoneEntity target, long now)

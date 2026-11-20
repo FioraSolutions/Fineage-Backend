@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
     IRegionStage _regenPlayersStage;
     IRegionStage _regenNpcsStage;
     IRegionStage _abnormalsStage;
+    IRegionStage _aggressionStage;
 
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
@@ -76,8 +77,13 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Per-region streams for <paramref name="purpose"/>, or one injected generator for every region.</summary>
-    IRegionRandom Streams(Random? injected, RandomPurpose purpose) =>
-        injected is null ? new SeededRegionRandom(_simulationSeed, purpose) : new SharedRegionRandom(injected);
+    IRegionRandom Streams(Random? injected, RandomPurpose purpose)
+    {
+        if (injected is null)
+            return new SeededRegionRandom(_simulationSeed, purpose);
+        _sharedStreams.Add(purpose);
+        return new SharedRegionRandom(injected);
+    }
 
     /// <summary>The stream of a global system (fishing, manor, lottery, mammon) until it becomes its own actor.</summary>
     Random GlobalStream(RandomPurpose purpose) => new SimulationRandom(SimulationRandom.StreamSeed(_simulationSeed, purpose));
@@ -86,21 +92,25 @@ public sealed partial class ZoneWorld
     Random Rng(IRegionRandom streams, ZoneEntity actor) => streams.For(_byId.OwnerOf(actor).Region);
 
     [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_byId), nameof(_simulationObserver),
-        nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
-    void InitSimulation(IRegionPartition partition, ISimulationObserver observer)
+        nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage),
+        nameof(_aggressionStage), nameof(_borders))]
+    void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
         _regions = partition;
         _byId = new RegionDirectory<ZoneEntity>(partition);
         _simulationObserver = observer;
-        _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id));
-        _regenNpcsStage = new RegionStage("regen.npcs", CollectRegenNpcs, (_, id) => RegenNpc(id));
-        _abnormalsStage = new RegionStage("abnormals", CollectAbnormals, (tick, id) => TickEntityAbnormals(id, tick.NowUnixMs));
+        _borders = new BorderSnapshots<ZonePresence>(partition, BorderReach);
+        _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id), parallel: true);
+        _regenNpcsStage = new RegionStage("regen.npcs", CollectRegenNpcs, (_, id) => RegenNpc(id), parallel: true);
+        _abnormalsStage = new RegionStage("abnormals", CollectAbnormals, (tick, id) => TickEntityAbnormals(id, tick.NowUnixMs),
+            parallel: true);
+        _aggressionStage = new AggressionStage(this);
 
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
-        // Region bodies still fan out through world-wide Players() scans and party state, so regions run one after
-        // another under _gate until that state is region-owned.
-        var ticks = new RegionTickScheduler(_simulationClock, SequentialRegionExecutor.Instance, observer);
+        // Every region body runs in a RegionBodyScope, so the executor cannot change the outcome; it only decides
+        // whether the stages that allow it spread their regions over worker threads.
+        var ticks = new RegionTickScheduler(_simulationClock, executor, observer, new RegionScopes(this));
 
         // Phase 0: player commands submitted since the last step.
         ticks.AddWorldStage(CommandsStage, ApplyCommands);
@@ -121,7 +131,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("pending-pickups", tick => TickPendingPickups(tick.NowUnixMs));
         ticks.AddWorldStage("pending-talks", tick => TickPendingTalks(tick.NowUnixMs));
         ticks.AddWorldStage("fear", tick => TickFear(tick.NowUnixMs));
-        ticks.AddWorldStage("aggression", tick => TickAggression(tick.NowUnixMs));
+        ticks.AddRegionStage(_aggressionStage);
         ticks.AddWorldStage("leash", tick => TickLeash(tick.NowUnixMs));
         ticks.AddWorldStage("mob-attacks", tick => TickMobAttacks(tick.NowUnixMs));
         ticks.AddWorldStage("summons", tick => TickSummons(tick.NowUnixMs));

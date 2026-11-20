@@ -1,5 +1,14 @@
 namespace Fineage.Game.Quests;
 
+/// <summary>The Ketra / Varka alliance marks a player holds, as a value a snapshot can carry.</summary>
+[Flags]
+public enum FactionAlliance : byte
+{
+    None = 0,
+    Ketra = 1,
+    Varka = 2
+}
+
 /// <summary>
 /// Ketra Orc / Varka Silenos alliance rules (Mobius <c>ai/others/VarkaKetra</c> behaviour): the alliance mark of a side
 /// keeps that side's monsters passive, and killing one of them costs a mark level and drops the side's quests.
@@ -39,6 +48,18 @@ public sealed partial class QuestMachine
     /// <summary>Mobius <c>onNpcHate</c>: a Ketra / Varka monster does not aggro a player allied with its side.</summary>
     public static bool IsAlliedWith(int npcId, PlayerInventory? inventory) =>
         inventory != null && MarksOf(npcId) is { } marks && HoldsAny(inventory, marks);
+
+    /// <summary>The sides whose marks <paramref name="inventory"/> holds.</summary>
+    public static FactionAlliance AllianceOf(PlayerInventory? inventory) =>
+        inventory == null
+            ? FactionAlliance.None
+            : (HoldsAny(inventory, KetraMarks) ? FactionAlliance.Ketra : FactionAlliance.None) |
+              (HoldsAny(inventory, VarkaMarks) ? FactionAlliance.Varka : FactionAlliance.None);
+
+    /// <summary><see cref="IsAlliedWith(int, PlayerInventory?)"/> for a player known by its <see cref="AllianceOf"/>.</summary>
+    public static bool IsAlliedWith(int npcId, FactionAlliance alliance) =>
+        (KetraMobs.Contains(npcId) && alliance.HasFlag(FactionAlliance.Ketra)) ||
+        (VarkaMobs.Contains(npcId) && alliance.HasFlag(FactionAlliance.Varka));
 
     /// <summary>
     /// The player helped kill a monster of the side they are allied with: the mark drops one level (level 1 is lost)

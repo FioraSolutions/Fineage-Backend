@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone;
 
@@ -40,6 +41,30 @@ public static class ZoneSimulationSettings
             throw new InvalidOperationException($"FINEAGE_ZONE_SEED='{text}' must be an unsigned 64-bit decimal integer.");
         return seed;
     }
+
+    public const int MaxRegionWorkers = 256;
+
+    /// <summary>
+    /// Worker threads of the stages that allow parallel regions: <c>FINEAGE_ZONE_REGION_WORKERS</c>. 0, the default,
+    /// runs every region on the scheduler thread one after another; the result is the same either way.
+    /// </summary>
+    public static int RegionWorkers => ParseRegionWorkers(Environment.GetEnvironmentVariable("FINEAGE_ZONE_REGION_WORKERS"));
+
+    internal static int ParseRegionWorkers(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return 0;
+        if (!int.TryParse(text.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out int workers) || workers > MaxRegionWorkers)
+            throw new InvalidOperationException(
+                $"FINEAGE_ZONE_REGION_WORKERS='{text}' must be an integer from 0 (sequential) to {MaxRegionWorkers}.");
+        return workers;
+    }
+
+    public static IRegionExecutor RegionExecutor(int workers) =>
+        workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);
+
+    /// <summary>The region executor as one banner token: <c>sequential</c> or <c>parallel:N</c>.</summary>
+    public static string DescribeRegionExecutor(int workers) => workers == 0 ? "sequential" : $"parallel:{workers}";
 
     static int ReadInt(string name, int fallback, int min, int max)
     {

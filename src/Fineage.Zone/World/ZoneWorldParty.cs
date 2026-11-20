@@ -118,7 +118,7 @@ public sealed partial class ZoneWorld
     void FanPartyVitals(ZoneEntity subject)
     {
         if (subject.Kind == ZoneEntityKind.Player && _partyByPlayer.ContainsKey(subject.ObjectId))
-            _partyVitalsDirty.Add(subject.ObjectId);
+            AtBarrier(() => _partyVitalsDirty.Add(subject.ObjectId));
     }
 
     /// <summary>Mobius PartySpelled: a member's effect list to the other members (apply / remove / expire).</summary>

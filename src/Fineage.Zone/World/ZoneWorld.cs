@@ -193,11 +193,13 @@ public sealed partial class ZoneWorld
         Random? fishingRandom = null,
         IRegionPartition? regions = null,
         ISimulationObserver? simulationObserver = null,
-        ulong? simulationSeed = null)
+        ulong? simulationSeed = null,
+        IRegionExecutor? regionExecutor = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
-        InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver());
+        InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
+            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
@@ -256,6 +258,7 @@ public sealed partial class ZoneWorld
         _enchantRandom = Streams(enchantRandom, RandomPurpose.Enchant);
         _respawnRandom = Streams(null, RandomPurpose.Respawn);
         SoulCrystalRandom = Streams(null, RandomPurpose.SoulCrystal);
+        RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
