@@ -74,7 +74,10 @@ public sealed partial class ZoneWorld
         return entity.Running ? ZoneRegen.Posture.Running : ZoneRegen.Posture.Walking;
     }
 
-    /// <summary>Per-tick CP this player regenerates right now (Mobius <c>calcCpRegen</c>).</summary>
+    /// <summary>
+    /// Per-tick CP this player regenerates right now (Mobius <c>calcCpRegen</c>), fed through the same folds
+    /// <see cref="TickRegen"/> uses. Tests read the real rate instead of hard-coding it.
+    /// </summary>
     internal double CpRegenRate(ZoneEntity player)
     {
         var (conBonus, _) = RegenStatBonuses(player);
