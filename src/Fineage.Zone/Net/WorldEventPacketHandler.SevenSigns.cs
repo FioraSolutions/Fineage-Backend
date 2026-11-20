@@ -20,7 +20,7 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
-        string? error = await _world.TrySevenSignsStatusAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new SevenSignsStatusCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "SevenSigns status failed.", ct).ConfigureAwait(false);
         // The record and the sky go out as fanout, so the reply body is empty on purpose.
@@ -40,17 +40,18 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeSevenSignsActionRequest(envelope.Payload);
-        string? error = await _world.TrySevenSignsActionAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SevenSignsActionRequestMsg
-            {
-                Action = request.Action,
-                Cabal = request.Cabal,
-                Seal = request.Seal,
-                BlueStones = request.BlueStones,
-                GreenStones = request.GreenStones,
-                RedStones = request.RedStones
-            },
+            new SevenSignsActionCommand(
+                new SevenSignsActionRequestMsg
+                {
+                    Action = request.Action,
+                    Cabal = request.Cabal,
+                    Seal = request.Seal,
+                    BlueStones = request.BlueStones,
+                    GreenStones = request.GreenStones,
+                    RedStones = request.RedStones
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "SevenSigns action was rejected.", ct).ConfigureAwait(false);
@@ -70,9 +71,9 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeDungeonEnterRequest(envelope.Payload);
-        string? error = await _world.TryDungeonAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new DungeonEnterRequestMsg { DungeonId = request.DungeonId, Action = request.Action },
+            new DungeonCommand(new DungeonEnterRequestMsg { DungeonId = request.DungeonId, Action = request.Action }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Dungeon request was rejected.", ct).ConfigureAwait(false);

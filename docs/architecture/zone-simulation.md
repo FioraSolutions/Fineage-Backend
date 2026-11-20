@@ -1,8 +1,8 @@
 # Zone simulation architecture
 
-Status: **steps 1–5 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
-same scheduler, the reverse watcher index, the per-step fan-out outbox, and tick-derived time with seeded per-region
-random streams, a command log and replay); steps 6 and later are proposals.
+Status: **steps 1–6 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
+same scheduler, the reverse watcher index, the per-step fan-out outbox, tick-derived time with seeded per-region
+random streams, a command log and replay, and command ingress for player input); steps 7 and later are proposals.
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
@@ -61,11 +61,11 @@ flowchart LR
 | B4 | Simulation loop died silently on any exception | `SimulationLoopAsync` had no catch; the task was never observed | One throw in any of 13 systems stopped regen, spawns, sieges and olympiad for the rest of the process. **Fixed in step 1** (per-stage isolation, logged with stage/region/tick). |
 | B5 | Missed ticks were invisible | `PeriodicTimer` coalesces missed periods | Overload showed up as slower regen, not as a signal. **Fixed in step 1** (`fineage.tick.overruns`, warning naming the slowest stages). |
 | B6 | Wall clock read per subsystem, hash-order iteration | `_clock()` called once per `Tick*`; `HashSet`/`Dictionary` iteration order in ticks | The same inputs do not reproduce the same run, so there is no replay testing. **Step 1** samples time once per step and orders region work deterministically for the migrated stages. **Step 5** derives stage time from the tick and logs commands for replay (section 4). |
-| B7 | Shared, unseeded randomness | `Random.Shared` defaults for combat, spawn, drop, death, service (`World/ZoneWorld.cs:203-262`) | Not reproducible; one shared stream cannot be split across parallel regions. **Step 5** replaces them with seeded streams per (purpose, region) (section 3.2). |
+| B7 | Shared, unseeded randomness | `Random.Shared` defaults for combat, spawn, drop, death, service (`World/ZoneWorld.cs:203-262`) | Not reproducible; one shared stream cannot be split across parallel regions. **Step 5** replaces them with seeded streams per (purpose, region) (section 3.2); **step 6** does the same for enchant, olympiad matchmaking and town respawn points. |
 | B8 | Fan-out is per event and per watcher | `NetWorldEventPublisher.FanoutStatusUpdate` encodes, then `NetPresenceHub.TrySend` takes the hub lock per watcher (`Net/NetPresenceHub.cs:51,80`) | N small frames per tick per watcher, lock traffic proportional to watchers × events, no coalescing of superseded StatusUpdates. |
 | B9 | Knownlist diff fan-out awaits inside the request path | `NetKnownlistFanout.FanDiffAsync` awaits `SendAsync` per spawn/despawn (`Net/NetKnownlistFanout.cs`) | A slow client slows its own handler; spawn bursts (teleport into Giran) are serial. |
 | B10 | Economy persisted as snapshots | `ZoneCharacterPersist.ReplaceItems` / `ReplaceWarehouse` (`World/ZoneCharacterPersist.cs:59-63`), deferred by `WithDeferredInventoryPersist` (`World/ZoneWorld.Members.Persist.cs:129`); trade writes two bags (`World/ZoneWorldTrade.More.cs:106`) | No record of *why* an item moved, no idempotency, and a crash between the two bag writes duplicates or loses items. Nothing to audit or reconcile against. |
-| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. |
+| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; moving it into the region-owned entity follows with step 7. |
 
 L2J has the same shape plus per-object scheduled tasks; Fineage already replaced those with active sets
 (`World/ZoneWorldActiveSets.cs`), which is the right base for regions: only entities with work are visited.
@@ -122,11 +122,11 @@ flowchart TB
 - **Interest radius ≤ region size.** Visibility and AoE never reach beyond the 8 neighbours, which bounds every
   cross-region interaction to neighbour messages and border snapshots.
 - **Region-local RNG.** Each region draws from its own stream per purpose (`RandomPurpose`: combat, spawn, drop,
-  death, service, quest, soul crystal), seeded by `(worldSeed, purpose, RegionId)` and advanced only by draws made
+  death, service, quest, soul crystal, enchant, town respawn), seeded by `(worldSeed, purpose, RegionId)` and advanced only by draws made
   for that region (`SeededRegionRandom`, `Simulation/RegionRandom.cs`). A rule draws from the region of the entity
   that acts: the attacker for hits and skill effects, the target for a debuff landing on it, the corpse for drops,
-  the killer for quest rolls. Purposes keep one system's new draw from shifting another's sequence. Global systems
-  (fishing, manor, lottery, mammon) draw from one seeded stream each. The generator is xoshiro256** owned in
+  the killer for quest rolls, the enchanter for enchant rolls. Purposes keep one system's new draw from shifting another's
+  sequence. Global systems (fishing, manor, lottery, mammon, olympiad matchmaking) draw from one seeded stream each. The generator is xoshiro256** owned in
   `Simulation/SimulationRandom.cs`, so a seed rolls the same values on every runtime version. The world seed comes
   from `FINEAGE_ZONE_SEED` (fresh when unset, logged at startup).
 
@@ -166,7 +166,13 @@ sequenceDiagram
   phase 0 of *t+1*, ordered by `(sourceRegion, sequence)`, so arrival order between threads cannot change results.
 - **I/O threads never touch simulation state.** Handlers decode, validate shape, and enqueue a command for the
   owning region. Reads that need world state (enter-world projection) become request messages answered at the next
-  tick.
+  tick. Since step 6 every gameplay handler submits a `ZoneCommand` (`World/ZoneCommands*.cs`) through
+  `ZoneWorld.ExecuteAsync` into `ZoneCommandIngress`; the `commands` world stage, first at period 1, applies them in
+  submission order (phase 0). The handler awaits the outcome, which completes only after the applying step's
+  persistence flush and fan-out drain, so a reply never overtakes the frames or writes it caused. A submission
+  cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
+  tick it stopped at. Still outside commands until step 12: enter and leave (session lifecycle), shortcut bar edits (UI
+  state the simulation never reads) and read-only snapshot builders.
 - **Global actors** run on the scheduler thread as world stages (cheap) or on their own single-threaded loop when
   they do I/O; they talk to regions only by message.
 - **Persistence and the ledger** run outside the tick. Regions hand them immutable records and get results back
@@ -347,8 +353,10 @@ external settlement backend can consume the committed feed without the simulatio
    (step 9). Inside a step the clock is pinned for the scheduler thread, so every rule a stage reaches reads the tick
    time; parallel region bodies use the `TickContext` they are given. The loop sleeps until the next tick is due. A
    late step jumps to the tick the wall clock is in and reports the skipped ticks (a stage whose period was crossed
-   runs once); a step while the wall clock is behind still advances one tick. Commands run at their own wall sample,
-   pinned for the command, so a deadline they set is honoured on the first tick at or after it.
+   runs once); a step while the wall clock is behind still advances one tick. Commands run inside the step that
+   drains them, so they read its tick time and, for calendar rules (clan deadlines, teleport fee hours), its wall
+   sample: `SimulationClock.Pin` pins both, and world code reads them through `NowUnixMs`/`WallNow`, never the live
+   clock. Outside a step (enter, leave, snapshots) both read the wall clock.
 2. **Ordered iteration.** Region work runs in ascending `RegionId`, entities in ascending object id
    (`RegionWorkCollector.Drain`), never in hash order. Inbound messages are sorted by `(source, sequence)`.
 3. **Seeded randomness** per region and purpose (section 3.2), never `Random.Shared` in rules. Outcomes of
@@ -358,16 +366,15 @@ external settlement backend can consume the committed feed without the simulatio
 5. **Verification.** `RegionSimulationDeterminismTests` checks that identical worlds produce identical state *and*
    fan-out sequences, and that outcomes do not depend on the partition (map tiles, 500-unit cells, one cell).
    `RegionTickSchedulerTests` checks that parallel and sequential executors reach identical region-local state.
-   Player input goes through `ZoneWorld.ExecuteAsync(session, command)` (`World/ZoneCommands.cs`: move, stop, attack,
-   skill use, select and cancel target). When a world records (`SimulationLog`), every step and command is appended in
+   Player input goes through `ZoneWorld.ExecuteAsync(session, command)` (`World/ZoneCommands*.cs`). When a world records (`SimulationLog`), every step and command is appended in
    gate order with its tick, wall sample, actor and outcome; `ReplayAsync` runs the log on a world built the same way
-   (same content, seed and starting tick) and fails at the first entry whose tick or outcome differs.
+   (same content, seed and starting tick) by submitting each command entry through the same ingress and applying it
+   in the next step entry, and fails at the first entry whose tick or outcome differs.
    `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
    pins the generator to reference values.
 
-   Not yet covered by seeded streams: boss respawn windows and olympiad matchmaking (global actors, step 9), and
-   enchant rolls (`IEnchantRandom`, a handler path until step 6). Handlers that are not commands yet read the wall
-   clock unpinned until step 6 routes them through command ingress.
+   Not yet covered: boss respawn windows (seeded with the boss actor, step 9), and the seven signs and boss schedules,
+   which keep their own clocks until they become actors (step 9).
 
 ---
 
@@ -411,7 +418,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | 3 | Reverse knownlist index ("watchers of X") kept in sync with knownlist changes; replace `Players()` scans in `FanoutVitals`, `FanoutAbnormal`, `ActorAudience`, `ReleaseThink` (B2, B3). | Same audiences, measurably cheaper. |
 | 4 | Per-tick outbox: systems emit presence events, flushed after the step outside `_gate` in gate order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
 | **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
-| 6 | Command ingress: movement, attack and skill-use handlers enqueue commands drained in phase 0 instead of locking (B11); other handlers follow in small batches. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
+| **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | 7 | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. |
 | 8 | Border snapshots and cross-region messages (damage, abnormal apply, aggro help). Enable `ParallelRegionExecutor` for regen and abnormals behind a setting, then movement and AI after a soak. | Parallel ticks; determinism tests and replay gate each enablement. |
 | 9 | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls. | Same schedules. |
@@ -427,7 +434,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | Risk | Mitigation |
 |---|---|
 | Hidden ordering dependencies between systems (one tick reading another's writes) | Stage order is explicit and tested (`Full_step_runs_every_stage_in_the_legacy_loop_order…`); each moved system keeps its slot until proven independent. |
-| One tick of extra latency for cross-region effects and commands | Bounded to 200 ms; border snapshots keep visibility smooth; measured per PR. |
+| One tick of extra latency for cross-region effects and commands | Bounded to 200 ms; border snapshots keep visibility smooth; measured per PR. A connection awaits each command's reply, so one client's commands stay ordered but cost a tick each. |
 | Hot spots (Giran, sieges) concentrate load in one region | Partition by load (split tiles), not by special cases; per-region timing metric drives it. |
 | Determinism regressions from new code (hash iteration, `Random.Shared`, wall clock) | Determinism and partition-independence tests per migrated stage; replay test from PR 5; analyzers or review checklist for banned APIs in region code. |
 | A replay only reproduces a run built the same way | The log header carries seed, step and start tick and replay refuses a mismatch; content (catalogs, spawns, persisted state) must match too, so replays are a test and diagnostic tool, not a backup. |

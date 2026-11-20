@@ -76,11 +76,13 @@ public sealed class MovementPacketHandler
             return;
 
         var vp = NetCodec.DecodeValidatePosition(envelope.Payload);
-        if (!_world.ValidateClientPosition(zoneSession, vp.X, vp.Y, vp.Z, out int dxy, out int dz))
+        string? drift = await _world.ExecuteAsync(zoneSession, new ValidatePositionCommand(vp.X, vp.Y, vp.Z), ct)
+            .ConfigureAwait(false);
+        if (drift == null)
             return;
 
         Console.WriteLine(
-            $"[zone] ValidatePosition drift obj={zoneSession.ObjectId} dxy={dxy} dz={dz} client={vp.X},{vp.Y},{vp.Z} server={zoneSession.X},{zoneSession.Y},{zoneSession.Z} -> PositionCorrection");
+            $"[zone] ValidatePosition {drift} obj={zoneSession.ObjectId} client={vp.X},{vp.Y},{vp.Z} server={zoneSession.X},{zoneSession.Y},{zoneSession.Z} -> PositionCorrection");
         await conn.SendAsync(
             NetOpcode.PositionCorrection,
             NetCodec.EncodePositionCorrection(new PositionCorrectionMsg

@@ -137,7 +137,8 @@ public sealed partial class ZoneWorld
                 : InventoryMessages.ChangeRow(InventoryChange.Modify, scroll)
         };
 
-        var roll = EnchantRules.Roll(target.Template, oldLevel, definition, _enchantRates, _enchantRandom);
+        var roll = EnchantRules.Roll(
+            target.Template, oldLevel, definition, _enchantRates, new StreamEnchantRandom(Rng(_enchantRandom, player)));
         int resultCode;
         int reportedLevel;
         int crystalId = 0;

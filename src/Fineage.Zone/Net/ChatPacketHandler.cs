@@ -10,16 +10,13 @@ namespace Fineage.Zone.Net;
 public sealed class ChatPacketHandler
 {
     readonly ZoneWorld _world;
-    readonly Func<DateTimeOffset> _clock;
     readonly Func<NetConnection, string, string, CancellationToken, Task> _reject;
 
     public ChatPacketHandler(
         ZoneWorld world,
-        Func<DateTimeOffset> clock,
         Func<NetConnection, string, string, CancellationToken, Task> reject)
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _reject = reject ?? throw new ArgumentNullException(nameof(reject));
     }
 
@@ -37,8 +34,9 @@ public sealed class ChatPacketHandler
         }
 
         var say = NetCodec.DecodeSay(envelope.Payload);
-        string? error = await _world.TrySayAsync(
-            zoneSession, say.Text, say.ChatType, _clock(), ct, say.Target).ConfigureAwait(false);
+        string? error = await _world
+            .ExecuteAsync(zoneSession, new SayCommand(say.Text, say.ChatType, say.Target), ct)
+            .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Say failed.", ct).ConfigureAwait(false);
     }

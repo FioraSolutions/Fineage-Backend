@@ -39,7 +39,7 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeBossStatusRequest(envelope.Payload);
-        string? error = await _world.TryBossStatusAsync(zoneSession, request.NpcId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new BossStatusCommand(request.NpcId), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Boss status failed.", ct).ConfigureAwait(false);
         // The rows themselves go out as BossStatus fanout, so the reply body is empty on purpose.
@@ -66,9 +66,9 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeAdminBossSchedule(envelope.Payload);
-        string? error = await _world.TryAdminBossAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action },
+            new AdminBossCommand(new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);

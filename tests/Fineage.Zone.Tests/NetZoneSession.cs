@@ -59,6 +59,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
         var serve = Task.Run(
             () => server.RunAsync("127.0.0.1", 0, zone.HandleAsync, cts.Token, maxConnections: 8, inboxCapacity: 64),
             cts.Token);
+        // The world's clock is driven by the test, so no simulation loop drains handler commands: pump them.
+        _ = world.PumpCommandsAsync(cts.Token);
 
         int port = 0;
         for (int i = 0; i < 200 && port == 0; i++)

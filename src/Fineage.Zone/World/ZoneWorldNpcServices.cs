@@ -176,7 +176,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var when = _clock();
+        var when = WallNow();
         var rows = new TeleportLocationMsg[list.Locations.Count];
         var html = new System.Text.StringBuilder();
         html.Append("<html><body>%npcname%:<br>");
@@ -262,7 +262,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, _clock(), player.SubClassActive);
+        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, WallNow(), player.SubClassActive);
         var changes = new List<InventoryUpdateEntryMsg>();
         if (fee > 0 && !Take(player.Inventory, loc.FeeItemId, fee, changes))
         {

@@ -35,9 +35,9 @@ public sealed class FriendPacketHandler
         }
 
         var req = NetCodec.DecodeFriendInvite(envelope.Payload);
-        string? error = await _world.TryFriendInviteAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new FriendInviteMsg { Name = req.Name ?? "" },
+            new FriendInviteCommand(new FriendInviteMsg { Name = req.Name ?? "" }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Friend invite failed.", ct).ConfigureAwait(false);
@@ -57,9 +57,9 @@ public sealed class FriendPacketHandler
         }
 
         var req = NetCodec.DecodeFriendAnswer(envelope.Payload);
-        string? error = await _world.TryFriendAnswerAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new FriendAnswerMsg { Response = req.Response },
+            new FriendAnswerCommand(new FriendAnswerMsg { Response = req.Response }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Friend answer failed.", ct).ConfigureAwait(false);
@@ -74,7 +74,7 @@ public sealed class FriendPacketHandler
             return;
         }
 
-        string? error = await _world.TryFriendListAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new FriendListCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Friend list failed.", ct).ConfigureAwait(false);
     }
@@ -93,9 +93,9 @@ public sealed class FriendPacketHandler
         }
 
         var req = NetCodec.DecodeFriendDelete(envelope.Payload);
-        string? error = await _world.TryFriendDeleteAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new FriendDeleteMsg { Name = req.Name ?? "" },
+            new FriendDeleteCommand(new FriendDeleteMsg { Name = req.Name ?? "" }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Friend delete failed.", ct).ConfigureAwait(false);
@@ -115,9 +115,9 @@ public sealed class FriendPacketHandler
         }
 
         var req = NetCodec.DecodeBlockRequest(envelope.Payload);
-        string? error = await _world.TryBlockRequestAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new BlockRequestMsg { Type = req.Type, Name = req.Name ?? "" },
+            new BlockRequestCommand(new BlockRequestMsg { Type = req.Type, Name = req.Name ?? "" }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Block request failed.", ct).ConfigureAwait(false);

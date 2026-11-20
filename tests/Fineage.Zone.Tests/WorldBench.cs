@@ -24,7 +24,7 @@ internal sealed class WorldBench
         Random? deathRandom = null,
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.ItemWeights? weights = null,
-        Fineage.Game.IEnchantRandom? enchantRandom = null,
+        Random? enchantRandom = null,
         bool? expertisePenalty = null,
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? mapId = null,
@@ -46,7 +46,8 @@ internal sealed class WorldBench
         Random? fishingRandom = null,
         Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null,
         bool includeEnabledMaps = false,
-        Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null)
+        Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null,
+        ulong? simulationSeed = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
@@ -82,7 +83,8 @@ internal sealed class WorldBench
             manorRandom: manorRandom,
             fishingRandom: fishingRandom,
             includeEnabledMaps: includeEnabledMaps,
-            gmTeleports: gmTeleports);
+            gmTeleports: gmTeleports,
+            simulationSeed: simulationSeed);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

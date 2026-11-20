@@ -37,8 +37,10 @@ public sealed class WarehousePacketHandler
         var lines = (req.Lines ?? [])
             .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
             .ToArray();
-        string? error = await _world.TryWarehouseDepositAsync(
-            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new WarehouseDepositCommand(req.NpcObjectId, lines),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Warehouse deposit failed.", ct).ConfigureAwait(false);
     }
@@ -60,8 +62,10 @@ public sealed class WarehousePacketHandler
         var lines = (req.Lines ?? [])
             .Select(l => new Fineage.Game.Services.WarehouseLine(l.ObjectId, l.Count))
             .ToArray();
-        string? error = await _world.TryWarehouseWithdrawAsync(
-            zoneSession, req.NpcObjectId, lines, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new WarehouseWithdrawCommand(req.NpcObjectId, lines),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Warehouse withdraw failed.", ct).ConfigureAwait(false);
     }
