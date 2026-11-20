@@ -102,17 +102,17 @@ public sealed partial class QuestMachine
 
                     break;
                 case AddVarOp add:
-                {
-                    if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
                     {
-                        failure = Fail(QuestFailure.State, "That quest cannot be updated.", quest.Id, "");
-                        return false;
-                    }
+                        if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
+                        {
+                            failure = Fail(QuestFailure.State, "That quest cannot be updated.", quest.Id, "");
+                            return false;
+                        }
 
-                    long now = plan.Vars.TryGetValue(add.Key, out var raw) && long.TryParse(raw, out long parsed) ? parsed : 0;
-                    plan.Vars[add.Key] = Math.Clamp(now + add.Delta, int.MinValue, int.MaxValue).ToString();
-                    break;
-                }
+                        long now = plan.Vars.TryGetValue(add.Key, out var raw) && long.TryParse(raw, out long parsed) ? parsed : 0;
+                        plan.Vars[add.Key] = Math.Clamp(now + add.Delta, int.MinValue, int.MaxValue).ToString();
+                        break;
+                    }
                 case UnsetVarOp unset:
                     if (!plan.Present || plan.Delete || plan.Phase == QuestPhase.Completed)
                     {
@@ -194,85 +194,85 @@ public sealed partial class QuestMachine
                     plan.Lines.Add(Line(QuestNotice.Completed, $"{quest.Name} is complete.", quest.Name));
                     break;
                 case DropItemOp drop:
-                {
-                    if (!Started(plan))
-                        break;
-                    int have = inventory.CountOf(drop.ItemId) + plan.Delta.GetValueOrDefault(drop.ItemId);
-                    if (drop.Limit > 0 && have >= drop.Limit)
-                        break;
-                    if (_random() >= drop.Chance)
-                        break;
-                    int add = drop.Limit > 0 ? Math.Min(drop.Count, drop.Limit - have) : drop.Count;
-                    if (!AddDelta(inventory, plan, drop.ItemId, add))
-                        break;
-                    if (drop.Limit > 0 && have + add >= drop.Limit)
                     {
-                        plan.Sounds.Add(QuestSounds.Middle);
-                        if (drop.CondAtLimit is int atLimit)
-                            plan.Vars[QuestProgress.CondVar] = atLimit.ToString();
-                    }
-                    else
-                    {
-                        plan.Sounds.Add(QuestSounds.ItemGet);
-                    }
+                        if (!Started(plan))
+                            break;
+                        int have = inventory.CountOf(drop.ItemId) + plan.Delta.GetValueOrDefault(drop.ItemId);
+                        if (drop.Limit > 0 && have >= drop.Limit)
+                            break;
+                        if (_random() >= drop.Chance)
+                            break;
+                        int add = drop.Limit > 0 ? Math.Min(drop.Count, drop.Limit - have) : drop.Count;
+                        if (!AddDelta(inventory, plan, drop.ItemId, add))
+                            break;
+                        if (drop.Limit > 0 && have + add >= drop.Limit)
+                        {
+                            plan.Sounds.Add(QuestSounds.Middle);
+                            if (drop.CondAtLimit is int atLimit)
+                                plan.Vars[QuestProgress.CondVar] = atLimit.ToString();
+                        }
+                        else
+                        {
+                            plan.Sounds.Add(QuestSounds.ItemGet);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case SellItemsOp sell:
-                {
-                    long pay = 0;
-                    int total = 0;
-                    foreach (var (itemId, adena) in sell.Items)
                     {
-                        int have = inventory.CountOf(itemId) + plan.Delta.GetValueOrDefault(itemId);
-                        if (have <= 0)
-                            continue;
-                        AddDelta(inventory, plan, itemId, -have);
-                        total += have;
-                        pay += (long)have * adena;
-                    }
+                        long pay = 0;
+                        int total = 0;
+                        foreach (var (itemId, adena) in sell.Items)
+                        {
+                            int have = inventory.CountOf(itemId) + plan.Delta.GetValueOrDefault(itemId);
+                            if (have <= 0)
+                                continue;
+                            AddDelta(inventory, plan, itemId, -have);
+                            total += have;
+                            pay += (long)have * adena;
+                        }
 
-                    if (total == 0)
-                    {
-                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
-                        return false;
-                    }
+                        if (total == 0)
+                        {
+                            failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                            return false;
+                        }
 
-                    if (total >= sell.BonusMin && sell.BonusAdena > 0)
-                        pay += sell.BonusAdena;
-                    int payInt = (int)Math.Min(int.MaxValue, pay);
-                    if (payInt > 0 && AddDelta(inventory, plan, QuestCatalog.AdenaItemId, payInt))
-                        plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {payInt} Adena.", payInt.ToString()));
-                    break;
-                }
+                        if (total >= sell.BonusMin && sell.BonusAdena > 0)
+                            pay += sell.BonusAdena;
+                        int payInt = (int)Math.Min(int.MaxValue, pay);
+                        if (payInt > 0 && AddDelta(inventory, plan, QuestCatalog.AdenaItemId, payInt))
+                            plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {payInt} Adena.", payInt.ToString()));
+                        break;
+                    }
                 case ExchangeAllOp exchange:
-                {
-                    int handed = inventory.CountOf(exchange.ItemId) + plan.Delta.GetValueOrDefault(exchange.ItemId);
-                    if (handed <= 0)
                     {
-                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
-                        return false;
-                    }
+                        int handed = inventory.CountOf(exchange.ItemId) + plan.Delta.GetValueOrDefault(exchange.ItemId);
+                        if (handed <= 0)
+                        {
+                            failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                            return false;
+                        }
 
-                    AddDelta(inventory, plan, exchange.ItemId, -handed);
-                    int reward = handed * exchange.Per;
-                    if (!AddDelta(inventory, plan, exchange.RewardItemId, reward))
-                    {
-                        failure = Fail(QuestFailure.BadRequest, "That reward does not fit in the bag.", quest.Id, "");
-                        return false;
-                    }
+                        AddDelta(inventory, plan, exchange.ItemId, -handed);
+                        int reward = handed * exchange.Per;
+                        if (!AddDelta(inventory, plan, exchange.RewardItemId, reward))
+                        {
+                            failure = Fail(QuestFailure.BadRequest, "That reward does not fit in the bag.", quest.Id, "");
+                            return false;
+                        }
 
-                    string rewardName = _items.Get(exchange.RewardItemId).Name;
-                    plan.Sounds.Add(QuestSounds.ItemGet);
-                    plan.Lines.Add(Line(QuestNotice.ItemEarned, $"You have earned {rewardName} ({reward}).", rewardName, reward.ToString()));
-                    if (exchange.BonusAdena > 0 && handed >= exchange.BonusMin)
-                    {
-                        AddDelta(inventory, plan, QuestCatalog.AdenaItemId, exchange.BonusAdena);
-                        plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {exchange.BonusAdena} Adena.", exchange.BonusAdena.ToString()));
-                    }
+                        string rewardName = _items.Get(exchange.RewardItemId).Name;
+                        plan.Sounds.Add(QuestSounds.ItemGet);
+                        plan.Lines.Add(Line(QuestNotice.ItemEarned, $"You have earned {rewardName} ({reward}).", rewardName, reward.ToString()));
+                        if (exchange.BonusAdena > 0 && handed >= exchange.BonusMin)
+                        {
+                            AddDelta(inventory, plan, QuestCatalog.AdenaItemId, exchange.BonusAdena);
+                            plan.Lines.Add(Line(QuestNotice.Adena, $"You have obtained {exchange.BonusAdena} Adena.", exchange.BonusAdena.ToString()));
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case SoundOp sound:
                     plan.Sounds.Add(sound.Name);
                     break;
@@ -307,46 +307,46 @@ public sealed partial class QuestMachine
                     plan.Extras.Despawn = true;
                     break;
                 case PickRandomOp pick:
-                {
-                    var pool = (plan.Vars.GetValueOrDefault(pick.Pool) ?? "")
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                    if (pool.Count == 0)
                     {
-                        plan.Vars.Remove(pick.Target);
+                        var pool = (plan.Vars.GetValueOrDefault(pick.Pool) ?? "")
+                            .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                        if (pool.Count == 0)
+                        {
+                            plan.Vars.Remove(pick.Target);
+                            break;
+                        }
+
+                        int index = Math.Min(pool.Count - 1, (int)(_random() * pool.Count));
+                        plan.Vars[pick.Target] = pool[index];
+                        pool.RemoveAt(index);
+                        plan.Vars[pick.Pool] = string.Join(' ', pool);
                         break;
                     }
-
-                    int index = Math.Min(pool.Count - 1, (int)(_random() * pool.Count));
-                    plan.Vars[pick.Target] = pool[index];
-                    pool.RemoveAt(index);
-                    plan.Vars[pick.Pool] = string.Join(' ', pool);
-                    break;
-                }
                 case RememberItemOp remember:
-                {
-                    var held = inventory.Items.FirstOrDefault(i =>
-                        remember.Items.Contains(i.ItemId) && i.EnchantLevel >= remember.MinEnchant);
-                    if (held == null)
                     {
-                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
-                        return false;
-                    }
+                        var held = inventory.Items.FirstOrDefault(i =>
+                            remember.Items.Contains(i.ItemId) && i.EnchantLevel >= remember.MinEnchant);
+                        if (held == null)
+                        {
+                            failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                            return false;
+                        }
 
-                    plan.Vars[remember.Key] = held.ObjectId.ToString();
-                    break;
-                }
+                        plan.Vars[remember.Key] = held.ObjectId.ToString();
+                        break;
+                    }
                 case ExchangeVarItemOp swap:
-                {
-                    int oid = plan.Vars.TryGetValue(swap.Key, out var rawOid) && int.TryParse(rawOid, out int parsedOid) ? parsedOid : 0;
-                    if (inventory.Find(oid) is not { } held || !swap.Items.Contains(held.ItemId))
                     {
-                        failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
-                        return false;
-                    }
+                        int oid = plan.Vars.TryGetValue(swap.Key, out var rawOid) && int.TryParse(rawOid, out int parsedOid) ? parsedOid : 0;
+                        if (inventory.Find(oid) is not { } held || !swap.Items.Contains(held.ItemId))
+                        {
+                            failure = Fail(QuestFailure.Item, "You do not have the required item.", quest.Id, "");
+                            return false;
+                        }
 
-                    plan.Exchanges.Add((oid, held.ItemId + swap.Offset));
-                    break;
-                }
+                        plan.Exchanges.Add((oid, held.ItemId + swap.Offset));
+                        break;
+                    }
             }
         }
 
