@@ -310,8 +310,12 @@ public sealed partial class ZoneWorld
                     TargetObjectId = player.ObjectId,
                     Damage = sDamage,
                     Flags = sFlags,
-                    AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                    TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                    AttackerX = npc.X,
+                    AttackerY = npc.Y,
+                    AttackerZ = npc.Z,
+                    TargetX = player.X,
+                    TargetY = player.Y,
+                    TargetZ = player.Z
                 });
                 _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
                 continue;
@@ -343,8 +347,12 @@ public sealed partial class ZoneWorld
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
                 Flags = flags,
-                AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                AttackerX = npc.X,
+                AttackerY = npc.Y,
+                AttackerZ = npc.Z,
+                TargetX = player.X,
+                TargetY = player.Y,
+                TargetZ = player.Z
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);
