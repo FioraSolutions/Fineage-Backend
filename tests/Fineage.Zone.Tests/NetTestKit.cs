@@ -52,7 +52,7 @@ internal sealed class NetTestKit
 {
     public const int ElfX = 46045, ElfY = 41251, ElfZ = -3440;
     public MemoryAccountStore Store { get; }
-    public GameData Game { get; } = GameData.LoadDefault();
+    public GameData Game { get; } = TestCatalogs.Game;
     public ZoneWorld World { get; }
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;

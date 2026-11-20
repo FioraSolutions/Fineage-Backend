@@ -48,7 +48,7 @@ internal sealed class WorldBench
         bool includeEnabledMaps = false,
         Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null)
     {
-        Game = game ?? GameData.LoadDefault();
+        Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
         World = new ZoneWorld(

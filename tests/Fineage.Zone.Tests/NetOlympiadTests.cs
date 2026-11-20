@@ -132,7 +132,7 @@ public sealed class NetOlympiadTests
     }
 
     [Fact]
-    public void Status_codec_round_trips_every_field()
+    public void Olympiad_status_codec_round_trips_every_field()
     {
         var message = new OlympiadStatusNetMsg
         {

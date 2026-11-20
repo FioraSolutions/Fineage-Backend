@@ -78,7 +78,7 @@ public static class LoginAcceptance
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var serverTask = Task.Run(async () =>
         {
@@ -91,6 +91,7 @@ public static class LoginAcceptance
             }
             finally
             {
+                await cts.CancelAsync().ConfigureAwait(false);
                 try { await read.ConfigureAwait(false); } catch { /* shutdown */ }
             }
         });
@@ -143,12 +144,14 @@ public static class LoginAcceptance
             }
             finally
             {
+                await cts.CancelAsync().ConfigureAwait(false);
                 try { await read.ConfigureAwait(false); } catch { /* shutdown */ }
             }
         }
         finally
         {
-            cts.Cancel();
+            if (!cts.IsCancellationRequested)
+                await cts.CancelAsync().ConfigureAwait(false);
             listener.Stop();
             try { await serverTask.ConfigureAwait(false); } catch { /* shutdown */ }
         }

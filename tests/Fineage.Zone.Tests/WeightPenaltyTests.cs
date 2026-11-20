@@ -71,11 +71,7 @@ public sealed class WeightPenaltyMathTests
         Assert.Equal(0, WeightPenalty.Level(999_999, 0));
         Assert.Equal(0, WeightPenalty.Level(999_999, -1));
         Assert.Equal(0L, WeightPenalty.WeightPercent(999_999, 0));
-    }
 
-    [Fact]
-    public void IsOverloaded_is_strictly_more_than_the_limit()
-    {
         // Player.java:2004 setOverloaded(getCurrentLoad() > maxLoad) — equality is not "overloaded".
         Assert.False(WeightPenalty.IsOverloaded(Limit, Limit));
         Assert.True(WeightPenalty.IsOverloaded(Limit + 1, Limit));
@@ -94,6 +90,12 @@ public sealed class WeightPenaltyMathTests
         Assert.Equal(176_640, WeightPenalty.BaseMaxLoad(1.28, 2.0));
         Assert.Equal(88_322, WeightPenalty.BaseMaxLoad(1.28, 1.00003)); // 88322.64 floored
         Assert.Equal(0, WeightPenalty.BaseMaxLoad(0));
+
+        Assert.Equal(4270, WeightPenalty.SkillId);
+        Assert.Equal(4, WeightPenalty.MaxLevel);
+        Assert.Equal(1, WeightPenalty.DefaultAltWeightLimit);
+        Assert.Equal(WeightPenalty.BaseMaxLoad(1.28), Fineage.Game.Services.WarehouseRules.MaxLoad(1.28));
+        Assert.Equal(69_000, Fineage.Game.Services.WarehouseRules.BaseMaxLoad);
     }
 
     [Fact]
@@ -101,18 +103,6 @@ public sealed class WeightPenaltyMathTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => WeightPenalty.BaseMaxLoad(-1));
         Assert.Throws<ArgumentOutOfRangeException>(() => WeightPenalty.BaseMaxLoad(1, -1));
-    }
-
-    [Fact]
-    public void Skill_ids_and_constants_match_the_mobius_data()
-    {
-        Assert.Equal(4270, WeightPenalty.SkillId);
-        Assert.Equal(4, WeightPenalty.MaxLevel);
-        Assert.Equal(1, WeightPenalty.DefaultAltWeightLimit);
-
-        // WarehouseRules/ShopTrade used to own their own 69000 literal; they now delegate here.
-        Assert.Equal(WeightPenalty.BaseMaxLoad(1.28), Fineage.Game.Services.WarehouseRules.MaxLoad(1.28));
-        Assert.Equal(69_000, Fineage.Game.Services.WarehouseRules.BaseMaxLoad);
     }
 
     [Theory]
@@ -275,8 +265,12 @@ public sealed class WeightPenaltySkillTests
         var (kit, _, _, _) = await SetupAsync();
         var npc = new ZoneEntity
         {
-            ObjectId = 90_010, Kind = ZoneEntityKind.Npc, NpcId = 20001, Name = "Wolf",
-            RunSpeed = 120f, Dex = 30
+            ObjectId = 90_010,
+            Kind = ZoneEntityKind.Npc,
+            NpcId = 20001,
+            Name = "Wolf",
+            RunSpeed = 120f,
+            Dex = 30
         };
         Assert.False(kit.World.RefreshWeightPenalty(npc));
         Assert.Equal(0, npc.WeightPenaltyLevel);
@@ -603,8 +597,15 @@ public sealed class WeightPenaltyWorldTests
     {
         var msg = new EtcStatusUpdateNetMsg
         {
-            EntityValue = 77, EntityGeneration = 3, Charges = 5, WeightPenalty = 4,
-            ChatBlocked = true, DangerArea = true, GradePenalty = true, CharmOfCourage = true, DeathPenalty = 7
+            EntityValue = 77,
+            EntityGeneration = 3,
+            Charges = 5,
+            WeightPenalty = 4,
+            ChatBlocked = true,
+            DangerArea = true,
+            GradePenalty = true,
+            CharmOfCourage = true,
+            DeathPenalty = 7
         };
         var back = NetCodec.DecodeEtcStatusUpdate(NetCodec.EncodeEtcStatusUpdate(msg));
         Assert.Equal(msg.EntityValue, back.EntityValue);
