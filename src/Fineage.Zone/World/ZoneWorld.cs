@@ -40,6 +40,7 @@ public sealed partial class ZoneWorld
     readonly IEnchantRandom _enchantRandom;
     readonly EnchantRates _enchantRates;
     readonly QuestMachine _quests;
+    readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsEngine _sevenSigns;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
@@ -221,6 +222,7 @@ public sealed partial class ZoneWorld
         _enchantRates.Validate();
         _includeEnabledMaps = includeEnabledMaps;
         _quests = new QuestMachine(_game.Quests, _game.Items);
+        _questGeometry = QuestJournalGeometry.LoadDefault();
         _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());

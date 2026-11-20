@@ -4,6 +4,12 @@
   "repeatable": false,
   "abortable": true,
   "questItems": [],
+  "journalRewards": [
+    { "kind": "item", "itemId": 736, "count": 1 },
+    { "kind": "adena", "count": 25 },
+    { "kind": "exp", "count": 50 },
+    { "kind": "sp", "count": 5 }
+  ],
   "dialogs": [
     {
       "npcId": 30006,

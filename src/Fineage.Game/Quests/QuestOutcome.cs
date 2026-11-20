@@ -64,6 +64,7 @@ public sealed class QuestOutcome
     /// <summary>Mobius SocialAction id broadcast for the player, 0 none.</summary>
     public int Social { get; init; }
     public QuestExtras Extras { get; init; } = QuestExtras.None;
+    public IReadOnlyList<TutorialUiOp> TutorialUi { get; init; } = [];
 
     public bool Ok => Failure == QuestFailure.None;
 }

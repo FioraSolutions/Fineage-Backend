@@ -24,6 +24,8 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     public int MaxActive => _catalog.MaxActive;
 
+    public QuestDefinition? QuestDef(int questId) => _catalog.Find(questId);
+
     public QuestOutcome FirstTalk(QuestJournal journal, PlayerInventory inventory, int npcId, string npcName, QuestActor? actor = null)
     {
         foreach (var quest in _catalog.Quests)
@@ -308,12 +310,20 @@ public sealed partial class QuestMachine : IQuestKillHook
             }
         }
 
+        var rewardSets = new List<QuestJournalRewardSet>();
+        foreach (var row in active)
+        {
+            if (_catalog.Find(row.QuestId)?.JournalRewards is { Count: > 0 } rewards)
+                rewardSets.Add(new QuestJournalRewardSet(row.QuestId, rewards));
+        }
+
         return new QuestListSnapshot
         {
             Active = active.ToArray(),
             CompletedMask = mask,
             CompletedQuestIds = completed.ToArray(),
-            MaxActive = _catalog.MaxActive
+            MaxActive = _catalog.MaxActive,
+            RewardSets = rewardSets.ToArray()
         };
     }
 

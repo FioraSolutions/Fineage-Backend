@@ -65,6 +65,17 @@ public sealed record ExchangeAllOp(int ItemId, int RewardItemId, int Per, int Bo
 
 public sealed record SoundOp(string Name) : QuestOp;
 
+/// <summary>Mobius <c>TutorialShowHtml</c> / question mark / client event hooks.</summary>
+public sealed record TutorialUiOp(TutorialUiWireKind Kind, string Html, int EventId, bool On) : QuestOp;
+
+public enum TutorialUiWireKind : byte
+{
+    ShowHtml = 1,
+    CloseHtml = 2,
+    QuestionMark = 3,
+    EnableClientEvent = 4,
+}
+
 /// <summary>
 /// Mobius <c>addSpawn(npcId, npc, randomOffset, despawnDelay, isSummonSpawn)</c> from a quest event.
 /// Zone materializes the NPC near the talking NPC and adds hate toward the player.
@@ -227,4 +238,13 @@ public sealed record QuestDefinition(
     bool Repeatable,
     bool Abortable,
     IReadOnlyList<int> QuestItems,
-    IReadOnlyList<QuestDialog> Dialogs);
+    IReadOnlyList<QuestDialog> Dialogs,
+    IReadOnlyDictionary<int, IReadOnlyList<QuestOp>> CondClientFx = null!,
+    IReadOnlyList<QuestJournalReward> JournalRewards = null!)
+{
+    public IReadOnlyDictionary<int, IReadOnlyList<QuestOp>> CondClientFx { get; init; } =
+        CondClientFx ?? new Dictionary<int, IReadOnlyList<QuestOp>>();
+
+    public IReadOnlyList<QuestJournalReward> JournalRewards { get; init; } =
+        JournalRewards ?? Array.Empty<QuestJournalReward>();
+}

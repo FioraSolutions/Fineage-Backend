@@ -434,8 +434,18 @@ public sealed partial class ZoneWorld
                 FanoutNetHtml(session, npcEntity, outcome.Html);
         }
 
+        ApplyTutorialUiOutcome(session, outcome.TutorialUi);
+
         if (outcome.JournalChanged)
+        {
+            if (outcome.QuestId > 0)
+            {
+                var row = player.Quests.Find(outcome.QuestId);
+                if (row != null)
+                    EmitCondClientFx(session, player, outcome.QuestId, row.Cond, playSounds: true);
+            }
             QueueList(session);
+        }
 
         // Mobius addLevel runs after the exp/sp that caused it, so the level packets follow the quest reward lines.
         if (levelled)

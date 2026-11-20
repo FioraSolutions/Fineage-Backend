@@ -159,7 +159,18 @@ public sealed class NetPresenceHubTests
             ],
             CompletedMask = new byte[128],
             CompletedQuestIds = [1, 2],
-            MaxActive = 25
+            MaxActive = 25,
+            RewardSets =
+            [
+                new QuestJournalRewardSetNet
+                {
+                    QuestId = 201,
+                    Rows =
+                    [
+                        new QuestJournalRewardNet { Kind = 2, Count = 50, Label = "Experience" }
+                    ]
+                }
+            ]
         };
         list.CompletedMask[0] = 0x03;
         var again = NetCodec.DecodeQuestList(NetCodec.EncodeQuestList(list));
@@ -169,6 +180,9 @@ public sealed class NetPresenceHubTests
         Assert.Equal(0x03, again.CompletedMask[0]);
         Assert.Equal(new[] { 1, 2 }, again.CompletedQuestIds);
         Assert.Equal(25, again.MaxActive);
+        var reward = Assert.Single(again.RewardSets);
+        Assert.Equal(201, reward.QuestId);
+        Assert.Equal(50, Assert.Single(reward.Rows).Count);
         Assert.Equal(201, NetCodec.DecodeRequestQuestAbort(NetCodec.EncodeRequestQuestAbort(
             new RequestQuestAbortNetMsg { QuestId = 201 })).QuestId);
         Assert.Empty(NetCodec.EncodeRequestQuestList());
