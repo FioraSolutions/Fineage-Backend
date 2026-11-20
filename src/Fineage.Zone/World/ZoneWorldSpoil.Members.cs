@@ -95,11 +95,11 @@ public sealed partial class ZoneWorld
             long travelMs = ApproachTarget(player, target, SkillCastReach(template.CastRange, player, target));
             if (travelMs < 0)
                 return SkillProtocol.Range;
-            session.AutoAttackTargetId = 0;
+            player.Intent.AutoAttackTargetId = 0;
             session.SelectedTargetId = targetId;
-            session.PendingCastSkillId = request.SkillId;
-            session.PendingCastTargetId = targetId;
-            session.PendingCastAtUnixMs = now + travelMs;
+            player.Intent.PendingCastSkillId = request.SkillId;
+            player.Intent.PendingCastTargetId = targetId;
+            player.Intent.PendingCastAtUnixMs = now + travelMs;
             return null;
         }
 

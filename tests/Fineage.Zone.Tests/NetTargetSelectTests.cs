@@ -148,7 +148,7 @@ public sealed class NetTargetSelectTests
         string? error = await kit.World.TryCharacterActionAsync(session, ActionProtocol.Attack, 0, default);
 
         Assert.Equal("attack", error);
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
 
         Assert.Equal(0, session.SelectedTargetId);
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         var unselected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)));
         Assert.Equal(MobId, (int)unselected[1]!);
 
@@ -182,11 +182,11 @@ public sealed class NetTargetSelectTests
         var (kit, session, player, rec) = await SetupAsync();
 
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
-        session.AutoAttackTargetId = MobId;
+        player.Intent.AutoAttackTargetId = MobId;
 
         Assert.Null(await kit.World.TryCancelTargetAsync(session, default));
 
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
     }
 
     /// <summary>

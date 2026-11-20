@@ -61,7 +61,7 @@ public sealed class NetMeleeApproachTests
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
 
         // Halfway: the client is mid-run; ValidatePosition at its interpolated spot is NOT corrected.
-        long eta = session.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
+        long eta = player.Intent.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
         Assert.True(eta > 500, $"eta {eta}ms for {Distance}u");
         kit.Now = kit.Now.AddMilliseconds(eta / 2);
         int midX = startX + (player.MoveDestX - startX) / 2;

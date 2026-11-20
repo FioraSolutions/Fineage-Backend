@@ -72,11 +72,11 @@ public sealed class NetCastMoveTests
 
         Assert.Null(await Move(kit, session, player, -300));
         Assert.False(player.MoveActive);
-        Assert.NotNull(session.QueuedMove);
+        Assert.NotNull(player.Intent.QueuedMove);
 
         kit.AdvanceToTickCovering(castEnd);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
-        Assert.Null(session.QueuedMove);
+        Assert.Null(player.Intent.QueuedMove);
         Assert.True(player.MoveActive);
     }
 
@@ -88,8 +88,8 @@ public sealed class NetCastMoveTests
         long castEnd = player.CastingUntilMs;
         player.SkillReuseUntilMs.Clear();
         Assert.Null(await Cast(kit, session));
-        Assert.Equal(WindStrike, session.PendingCastSkillId);
-        Assert.Equal(castEnd, session.PendingCastAtUnixMs);
+        Assert.Equal(WindStrike, player.Intent.PendingCastSkillId);
+        Assert.Equal(castEnd, player.Intent.PendingCastAtUnixMs);
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public sealed class NetCastMoveTests
         Assert.Null(await kit.World.TryCharacterActionAsync(
             session, ActionProtocol.SitStand, 0, CancellationToken.None));
         Assert.False(player.Sitting);
-        Assert.True(session.SitOnArrive);
+        Assert.True(player.Intent.SitOnArrive);
 
         kit.Now = kit.Now.AddSeconds(5);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);

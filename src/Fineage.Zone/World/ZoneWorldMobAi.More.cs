@@ -51,8 +51,6 @@ public sealed partial class ZoneWorld
     {
         long now = NowUnixMs();
         actor.FearFleeAtUnixMs = now + FearStepMs;
-        if (actor.Session is { } session)
-            session.FearFleeAtUnixMs = actor.FearFleeAtUnixMs;
         if (actor.Dead || actor.Sitting || IsImmobilized(actor))
             return;
 
@@ -78,8 +76,8 @@ public sealed partial class ZoneWorld
 
         if (actor.Session is not { } live)
             return;
-        live.AutoAttackTargetId = 0;
-        live.ClearApproach();
+        actor.Intent.AutoAttackTargetId = 0;
+        actor.Intent.ClearApproach();
         StartTimedMove(actor, live, new MoveToMsg
         {
             ObjectId = actor.ObjectId,

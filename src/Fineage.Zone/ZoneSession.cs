@@ -33,54 +33,6 @@ public sealed class ZoneSession
     /// <summary>Lottery numbers picked on the ticket seller's button page (Mobius <c>Player.getLoto</c>), 0 = empty.</summary>
     public int[] LotoPicks { get; } = new int[5];
 
-    /// <summary>Interlude-style auto attack: target kept swinging at until it dies or the player stops.</summary>
-    public int AutoAttackTargetId { get; set; }
-    public long NextAutoAttackUnixMs { get; set; }
-
-    /// <summary>
-    /// Mobius AI_INTENTION_ATTACK + moveToPawn in flight: sticky approach. While now &lt; ApproachArriveUnixMs the
-    /// pawn is running from (ApproachOriginX/Y) to (ApproachDestX/Y) toward target last seen at ApproachTargetX/Y.
-    /// </summary>
-    public int ApproachTargetId { get; set; }
-    public long ApproachArriveUnixMs { get; set; }
-    public int ApproachOriginX { get; set; }
-    public int ApproachOriginY { get; set; }
-    public int ApproachDestX { get; set; }
-    public int ApproachDestY { get; set; }
-    public int ApproachTargetX { get; set; }
-    public int ApproachTargetY { get; set; }
-
-    public void ClearApproach()
-    {
-        ApproachTargetId = 0;
-        ApproachArriveUnixMs = 0;
-        PendingTalkNpcId = 0;
-        PendingTalkAtUnixMs = 0;
-    }
-
-    /// <summary>Mobius AI_INTENTION_PICK_UP after moveToPawn: ground item to pick up once the run arrives.</summary>
-    public int PendingPickupId { get; set; }
-    public long PendingPickupAtUnixMs { get; set; }
-
-    /// <summary>Mobius AI_INTENTION_INTERACT after moveToPawn: NPC to talk to once the run arrives.</summary>
-    public int PendingTalkNpcId { get; set; }
-    public long PendingTalkAtUnixMs { get; set; }
-
-    /// <summary>Next Mobius Fear <c>onActionTime</c> (5 × EffectTickRatio 666 ms). 0 until fear lands.</summary>
-    public long FearFleeAtUnixMs { get; set; }
-
-    /// <summary>Mobius AI_INTENTION_CAST after moveToPawn: skill to fire once the server-driven approach arrives.</summary>
-    public int PendingCastSkillId { get; set; }
-    public int PendingCastTargetId { get; set; }
-    public bool PendingCastCtrlPressed { get; set; }
-    public long PendingCastAtUnixMs { get; set; }
-
-    /// <summary>Mobius saveNextIntention(MOVE_TO): move order received mid-cast, run when the cast ends.</summary>
-    public Fineage.Protocol.MoveToMsg? QueuedMove { get; set; }
-
-    /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
-    public bool SitOnArrive { get; set; }
-
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
@@ -123,16 +75,6 @@ public sealed class ZoneSession
         InWorld = false;
         SelectedTargetId = 0;
         TrainerNpcId = 0;
-        AutoAttackTargetId = 0;
-        NextAutoAttackUnixMs = 0;
-        PendingCastSkillId = 0;
-        PendingCastTargetId = 0;
-        PendingCastCtrlPressed = false;
-        PendingCastAtUnixMs = 0;
-        QueuedMove = null;
-        SitOnArrive = false;
-        ClearApproach();
-        FearFleeAtUnixMs = 0;
         LastChatUnixMs = 0;
         LastHeroVoiceUnixMs = 0;
     }

@@ -91,7 +91,7 @@ public sealed class NetSkillTests
         Assert.Null(await bench.World.TryMoveAsync(actor.Session, caster.X + 10, caster.Y, caster.Z,
             CancellationToken.None));
         // Net clients are not refused: the intention parks on the session and runs once the cast completes.
-        Assert.NotNull(actor.Session.QueuedMove);
+        Assert.NotNull(actor.Player.Intent.QueuedMove);
         Assert.Equal(beforeMoveX, caster.X);
 
         // Nothing has been damaged on key press, only after the hit timer runs.

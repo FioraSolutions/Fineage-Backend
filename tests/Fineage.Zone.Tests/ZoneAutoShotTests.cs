@@ -130,7 +130,7 @@ public sealed class ZoneAutoShotTests
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse))); // glow waits for onHitTimer
 
         // Stop the auto loop so the next swing cannot consume the recharge in the same tick.
-        session.AutoAttackTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
         kit.Now = kit.Now.AddSeconds(2);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.True(player.SoulshotCharged); // onHitTimer recharge

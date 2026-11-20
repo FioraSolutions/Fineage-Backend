@@ -120,10 +120,10 @@ public sealed partial class ZoneWorld
         AbortCast(entity, "teleport", notify: false);
         if (heading is int face)
             entity.Heading = face;
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        entity.Intent.PendingPickupId = 0;
+        entity.Intent.PendingPickupAtUnixMs = 0;
+        entity.Intent.AutoAttackTargetId = 0;
+        entity.Intent.ClearApproach();
         // A running path must not keep ticking from the old cell after the snap.
         SetMoveActive(entity, false);
         entity.MovePath.Clear();

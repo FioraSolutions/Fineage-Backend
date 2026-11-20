@@ -24,9 +24,9 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = 0;
         if (player.Session is { } session)
         {
-            session.PendingCastSkillId = 0;
-            session.PendingCastTargetId = 0;
-            session.PendingCastAtUnixMs = 0;
+            player.Intent.PendingCastSkillId = 0;
+            player.Intent.PendingCastTargetId = 0;
+            player.Intent.PendingCastAtUnixMs = 0;
             if (notify)
                 Notice(session, CastRules.CastingInterruptedMessage, "Your casting has been interrupted.");
         }

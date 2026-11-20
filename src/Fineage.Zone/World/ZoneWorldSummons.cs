@@ -291,8 +291,8 @@ public sealed partial class ZoneWorld
             }
             if (player.Session.SelectedTargetId == id)
                 player.Session.SelectedTargetId = 0;
-            if (player.Session.AutoAttackTargetId == id)
-                player.Session.AutoAttackTargetId = 0;
+            if (player.Intent.AutoAttackTargetId == id)
+                player.Intent.AutoAttackTargetId = 0;
         }
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
@@ -318,8 +318,8 @@ public sealed partial class ZoneWorld
         var watchers = KnownWatchers(summon.ObjectId);
         foreach (int w in watchers)
         {
-            if (_byId.TryGetValue(w, out var p) && p.Session is { } ws && ws.AutoAttackTargetId == summon.ObjectId)
-                ws.AutoAttackTargetId = 0;
+            if (_byId.TryGetValue(w, out var p) && p.Session is { } ws && p.Intent.AutoAttackTargetId == summon.ObjectId)
+                p.Intent.AutoAttackTargetId = 0;
         }
         if (watchers.Count > 0)
             NetBridge?.FanoutDie(watchers, summon.ObjectId, killer == null ? 0 : CreditOf(killer).ObjectId);

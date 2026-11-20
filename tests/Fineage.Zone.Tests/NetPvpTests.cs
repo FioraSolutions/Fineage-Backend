@@ -123,7 +123,7 @@ public sealed class NetPvpTests
         int hp = player.CurHp;
 
         Assert.Equal("attack", await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Equal(hp, player.CurHp);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
     }
@@ -139,7 +139,7 @@ public sealed class NetPvpTests
         await SwingUntilAsync(kit, session, other.ObjectId, () => otherPlayer.Dead);
 
         Assert.True(otherPlayer.Dead, $"victim HP={otherPlayer.CurHp} should have died");
-        Assert.Equal(0, other.AutoAttackTargetId);
+        Assert.Equal(0, otherPlayer.Intent.AutoAttackTargetId);
     }
 
     /// <summary>The last HP/MaxHP pair the zone sent for <paramref name="objectId"/>.</summary>

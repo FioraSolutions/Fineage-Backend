@@ -57,7 +57,7 @@ public sealed class NetBowArrowTests
 
         Assert.True(RanOutOfArrows(rec));
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Null(player.Inventory!.GetEquipped(PaperdollSlot.LHand));
     }
 
@@ -85,18 +85,18 @@ public sealed class NetBowArrowTests
         Assert.Equal(2, arrow!.Count);
 
         // Free the attack timer between swings (Mobius Pspd / bow reuse).
-        session.NextAutoAttackUnixMs = 0;
+        player.Intent.NextAutoAttackUnixMs = 0;
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.Equal(1, player.Inventory.GetEquipped(PaperdollSlot.LHand)?.Count);
 
-        session.NextAutoAttackUnixMs = 0;
+        player.Intent.NextAutoAttackUnixMs = 0;
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
         // The last arrow destroys the stack and frees the hand: ItemList is re-sent, the next shot is refused.
         Assert.Null(player.Inventory.GetEquipped(PaperdollSlot.LHand));
         Assert.DoesNotContain(player.Inventory.Items, i => i.ItemId == WoodenArrow);
 
-        session.NextAutoAttackUnixMs = 0;
+        player.Intent.NextAutoAttackUnixMs = 0;
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.True(RanOutOfArrows(rec));
     }

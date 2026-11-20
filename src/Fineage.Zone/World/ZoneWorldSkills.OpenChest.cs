@@ -116,11 +116,11 @@ public sealed partial class ZoneWorld
             long travelMs = ApproachTarget(player, target, reach);
             if (travelMs < 0)
                 return SkillProtocol.Range;
-            session.AutoAttackTargetId = 0;
+            player.Intent.AutoAttackTargetId = 0;
             session.SelectedTargetId = targetId;
-            session.PendingCastSkillId = request.SkillId;
-            session.PendingCastTargetId = targetId;
-            session.PendingCastAtUnixMs = now + travelMs;
+            player.Intent.PendingCastSkillId = request.SkillId;
+            player.Intent.PendingCastTargetId = targetId;
+            player.Intent.PendingCastAtUnixMs = now + travelMs;
             return null;
         }
 
@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
         if (ConsumeItemBlocked(session, player, levelData))
             return null;
 
-        session.AutoAttackTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
         ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)

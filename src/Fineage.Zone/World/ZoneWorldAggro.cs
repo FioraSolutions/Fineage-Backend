@@ -152,8 +152,11 @@ public sealed partial class ZoneWorld
 
     void CannotSeeTarget(ZoneSession session)
     {
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        if (_byId.TryGetValue(session.ObjectId, out var player))
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+        }
         ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.");
     }
 

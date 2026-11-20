@@ -42,8 +42,10 @@ public sealed class ZoneApproachPathTests
     {
         var e = new ZoneEntity
         {
-            X = 0, Y = 0,
-            MoveDestX = 100, MoveDestY = 0,
+            X = 0,
+            Y = 0,
+            MoveDestX = 100,
+            MoveDestY = 0,
             MoveActive = true
         };
         e.MovePath.Enqueue((200, 0, 0));
@@ -73,7 +75,7 @@ public sealed class ZoneApproachPathTests
 
         Assert.True(player.MoveActive);
         Assert.True(player.MovePath.Count > 0, "straight line hits the wall — FindPath must queue detour waypoints");
-        long eta = session.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
+        long eta = player.Intent.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
         Assert.True(eta >= straightMs,
             $"path ETA {eta}ms should be at least straight {straightMs}ms (detour is longer)");
         // First leg is a geo waypoint, not the ideal stop behind the wall.

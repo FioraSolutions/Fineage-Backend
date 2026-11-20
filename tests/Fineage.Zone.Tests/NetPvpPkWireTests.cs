@@ -97,7 +97,7 @@ public sealed class NetPvpPkWireTests
         await a.DrainAsync();
         await rig.AdvanceAsync(1000);
         // Stop swinging, so nothing refreshes the timer.
-        a.Entity.Session!.AutoAttackTargetId = 0;
+        a.Entity.Intent.AutoAttackTargetId = 0;
         Assert.True(a.Entity.PvpFlagged);
         await w.DrainAsync();
 
@@ -182,13 +182,13 @@ public sealed class NetPvpPkWireTests
         await SendAttackAsync(a, b, forced: false);
         await a.DrainAsync();
         await rig.AdvanceAsync(2000);
-        Assert.Equal(0, a.Entity.Session!.AutoAttackTargetId);
+        Assert.Equal(0, a.Entity.Intent.AutoAttackTargetId);
         Assert.Equal(100_000, b.Entity.CurHp);
 
         await SendAttackAsync(a, b, forced: true);
         await a.DrainAsync();
         await rig.AdvanceAsync(200);
-        Assert.Equal(b.ObjectId, a.Entity.Session!.AutoAttackTargetId);
+        Assert.Equal(b.ObjectId, a.Entity.Intent.AutoAttackTargetId);
     }
 
     [Fact]

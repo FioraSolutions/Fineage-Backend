@@ -25,13 +25,13 @@ public sealed partial class ZoneWorld
 
         lock (_gate)
         {
-            if (!_byId.TryGetValue(session.ObjectId, out _))
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return Task.FromResult<string?>("world");
 
             int previous = session.SelectedTargetId;
             session.SelectedTargetId = 0;
-            session.AutoAttackTargetId = 0;
-            session.ClearApproach();
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
             NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
         }
 
@@ -51,19 +51,27 @@ public sealed partial class ZoneWorld
         long approachMs = 0;
         lock (_gate)
         {
-            int previous = session.AutoAttackTargetId;
-            long now0 = NowUnixMs();
-            int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
-            bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
-                session.NextAutoAttackUnixMs > now0;
-            // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
-            if (error == null && !alreadySwinging && approachMs >= 0)
+            if (!_byId.TryGetValue(session.ObjectId, out var player))
             {
-                session.AutoAttackTargetId = session.SelectedTargetId;
-                // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
-                session.NextAutoAttackUnixMs = NowUnixMs() +
-                    (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
+                error = "world";
+            }
+            else
+            {
+                var intent = player.Intent;
+                int previous = intent.AutoAttackTargetId;
+                long now0 = NowUnixMs();
+                int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
+                bool alreadySwinging = previous > 0 && previous == requested && intent.ApproachTargetId == 0 &&
+                    intent.NextAutoAttackUnixMs > now0;
+                // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
+                error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
+                if (error == null && !alreadySwinging && approachMs >= 0)
+                {
+                    intent.AutoAttackTargetId = session.SelectedTargetId;
+                    // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
+                    intent.NextAutoAttackUnixMs = NowUnixMs() +
+                        (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
+                }
             }
         }
         return Task.FromResult<string?>(error);
@@ -333,8 +341,8 @@ public sealed partial class ZoneWorld
             return null;
         }
         // A new attack replaces AI_INTENTION_INTERACT.
-        session.PendingTalkNpcId = 0;
-        session.PendingTalkAtUnixMs = 0;
+        player.Intent.PendingTalkNpcId = 0;
+        player.Intent.PendingTalkAtUnixMs = 0;
         if (player.CastingUntilMs > NowUnixMs())
             return null; // Mobius: auto-attack waits while casting
 
@@ -401,7 +409,7 @@ public sealed partial class ZoneWorld
             // Mobius stopMove before doAttack: in reach -> stop the run and swing from here (no slide past the target).
             StopForAttack(player, session);
         }
-        session.ClearApproach();
+        player.Intent.ClearApproach();
         // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.
         if (!CanSeeTarget(player, target))
         {

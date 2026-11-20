@@ -45,7 +45,7 @@ public sealed partial class ZoneWorld
         if (!TryEnsureHostileSkillRange(session, player, target, request, template, now, out var rangeError))
             return rangeError;
 
-        session.AutoAttackTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
         // Mobius Creature.doCast / Skill.checkCondition: target out of sight → SysMsg 181, no cast.
         if (!CanSeeTarget(player, target))
         {
@@ -148,13 +148,13 @@ public sealed partial class ZoneWorld
             error = SkillProtocol.Range;
             return false;
         }
-        session.AutoAttackTargetId = 0;
-        session.PendingTalkNpcId = 0;
-        session.PendingTalkAtUnixMs = 0;
+        player.Intent.AutoAttackTargetId = 0;
+        player.Intent.PendingTalkNpcId = 0;
+        player.Intent.PendingTalkAtUnixMs = 0;
         session.SelectedTargetId = target.ObjectId;
-        session.PendingCastSkillId = request.SkillId;
-        session.PendingCastTargetId = target.ObjectId;
-        session.PendingCastAtUnixMs = now + travelMs;
+        player.Intent.PendingCastSkillId = request.SkillId;
+        player.Intent.PendingCastTargetId = target.ObjectId;
+        player.Intent.PendingCastAtUnixMs = now + travelMs;
         return false;
     }
 

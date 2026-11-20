@@ -57,7 +57,7 @@ public sealed partial class ZoneWorld
             if (player.MoveActive && player.Session != null)
             {
                 // Mobius RequestActionUse case 0: moving → NextAction(EVT_ARRIVED) sit on arrival.
-                player.Session.SitOnArrive = true;
+                player.Intent.SitOnArrive = true;
                 return null;
             }
         }
@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
         // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
         player.Sitting = true;
         if (player.Session != null)
-            player.Session.SitOnArrive = false;
+            player.Intent.SitOnArrive = false;
         FanoutWaitType(player, ActionProtocol.WaitSitting);
     }
 
@@ -201,7 +201,7 @@ public sealed partial class ZoneWorld
         if (player.Sitting || player.MoveActive || IsCasting(player, now) ||
             player.PrivateStoreType != PrivateStoreProtocol.TypeNone ||
             _tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId) ||
-            player.Session is { AutoAttackTargetId: > 0 })
+            player.Intent.AutoAttackTargetId > 0)
             return ActionProtocol.Blocked;
 
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.

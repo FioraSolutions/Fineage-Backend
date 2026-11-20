@@ -67,20 +67,20 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.AutoAttackTargetId <= 0)
+            if (session == null || player.Intent.AutoAttackTargetId <= 0)
                 continue;
             AdvanceMove(player, now); // Net timed approach: measure reach from where the pawn really is now
-            int targetId = session.AutoAttackTargetId;
+            int targetId = player.Intent.AutoAttackTargetId;
             if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
             {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                player.Intent.AutoAttackTargetId = 0;
+                player.Intent.ClearApproach();
                 continue;
             }
             if (!VisibleTo(player.ObjectId, targetId))
             {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                player.Intent.AutoAttackTargetId = 0;
+                player.Intent.ClearApproach();
                 continue;
             }
             if (target.MoveActive)
@@ -90,15 +90,15 @@ public sealed partial class ZoneWorld
                 SiegeFriendRefused(session, player, target) ||
                 PeacePlayableRefused(session, player, target, notify: false))
             {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                player.Intent.AutoAttackTargetId = 0;
+                player.Intent.ClearApproach();
                 continue;
             }
 
             // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
-            if (session.ApproachTargetId == targetId && now < session.ApproachArriveUnixMs)
+            if (player.Intent.ApproachTargetId == targetId && now < player.Intent.ApproachArriveUnixMs)
             {
-                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, session.ApproachTargetX, session.ApproachTargetY,
+                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY,
                     ZoneCombat.ApproachRepathDistance);
                 bool stuckShort = !player.MoveActive
                     && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
@@ -107,17 +107,17 @@ public sealed partial class ZoneWorld
                     long re = ApproachTarget(player, target, PlayerReach(player, target));
                     if (re < 0)
                     {
-                        session.AutoAttackTargetId = 0;
-                        session.ClearApproach();
+                        player.Intent.AutoAttackTargetId = 0;
+                        player.Intent.ClearApproach();
                         SendActionFailed(player);
                         continue;
                     }
-                    session.NextAutoAttackUnixMs = now + re;
+                    player.Intent.NextAutoAttackUnixMs = now + re;
                 }
                 continue;
             }
 
-            if (now < session.NextAutoAttackUnixMs)
+            if (now < player.Intent.NextAutoAttackUnixMs)
                 continue;
             if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
             {
@@ -125,18 +125,18 @@ public sealed partial class ZoneWorld
                 long ms = ApproachTarget(player, target, PlayerReach(player, target));
                 if (ms < 0)
                 {
-                    session.AutoAttackTargetId = 0;
-                    session.ClearApproach();
+                    player.Intent.AutoAttackTargetId = 0;
+                    player.Intent.ClearApproach();
                     SendActionFailed(player);
                     continue;
                 }
-                session.NextAutoAttackUnixMs = now + ms;
+                player.Intent.NextAutoAttackUnixMs = now + ms;
                 continue;
             }
-            session.ClearApproach();
-            session.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
+            player.Intent.ClearApproach();
+            player.Intent.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
             if (TryAttack(session, targetId) != null)
-                session.AutoAttackTargetId = 0;
+                player.Intent.AutoAttackTargetId = 0;
         }
     }
 

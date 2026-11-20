@@ -194,7 +194,7 @@ public sealed partial class ZoneWorld
         }
 
         if (target.Session != null)
-            target.Session.AutoAttackTargetId = 0;
+            target.Intent.AutoAttackTargetId = 0;
         ApplyPlayerDeath(target, attacker.ObjectId);
     }
 

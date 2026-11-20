@@ -201,7 +201,7 @@ public sealed partial class ZoneWorld
                 SetAggroTarget(npc, MostHated(npc));
             }
             if (target.Session != null)
-                target.Session.AutoAttackTargetId = 0;
+                target.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, npc.ObjectId);
         }
     }

@@ -275,7 +275,7 @@ public sealed class NetSummonTests
 
         // The victim hits back at the summon: that is a hit on the (now flagged) owner.
         Assert.Null(await bench.World.TryAttackAsync(owner.Session, kat.ObjectId, Ct)); // own summon: refused quietly
-        Assert.Equal(0, owner.Session.AutoAttackTargetId);
+        Assert.Equal(0, owner.Player.Intent.AutoAttackTargetId);
     }
 
     [Fact]
