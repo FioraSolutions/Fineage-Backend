@@ -18,7 +18,7 @@ Living SoT for Backend epic [#353](https://github.com/FioraSolutions/Fineage-Bac
 | Priority | Work | Notes |
 |----------|------|--------|
 | Opportunistic | Residual hub file-splits only if a primary still balloons | Prefer small PRs; no behavior change |
-| Later | Simulation actor / retire global `_gate` | Measured; pairs with Fineage #116 — not current default work |
+| Later | Simulation actor / retire global `_gate` | Plan and step 1 (region tick scheduler): [`architecture/zone-simulation.md`](architecture/zone-simulation.md); pairs with Fineage #116 |
 | Out of scope | Gateway / TLS / Redis / multi-zone / 20k | Fineage #112–#114 |
 
 ## Agent rules
