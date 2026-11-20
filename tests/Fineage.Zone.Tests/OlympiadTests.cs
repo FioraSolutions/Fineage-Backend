@@ -11,6 +11,7 @@ public class OlympiadTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
     static readonly long EveningMs = Evening.ToUnixTimeMilliseconds();
+    static Random Matchmaking => new(7);
 
     [Fact]
     public void Schedule_opens_at_18_and_the_month_ends_at_noon_on_the_first()
@@ -149,11 +150,11 @@ public class OlympiadTests
         }
 
         Assert.Equal(0, board.LiveMatchCount);
-        board.Advance(EveningMs, Online);
+        board.Advance(EveningMs, Online, Matchmaking);
         Assert.Equal(0, board.LiveMatchCount);
         Assert.True(board.GrantNoblesse(14));
         Assert.Null(board.Register(Noble(14, "C14"), true, EveningMs).Error);
-        board.Advance(EveningMs + 31_000, Online);
+        board.Advance(EveningMs + 31_000, Online, Matchmaking);
         Assert.Equal(2, board.LiveMatchCount);
         Assert.Equal(1, board.ClassedWaiting(0));
     }
@@ -174,7 +175,7 @@ public class OlympiadTests
             Assert.Null(board.Register(Noble(id, "K" + id), classed: true, EveningMs).Error);
         }
 
-        board.Advance(EveningMs, Online);
+        board.Advance(EveningMs, Online, Matchmaking);
         Assert.Equal(4 + 2, board.LiveMatchCount);
         Assert.Equal(1, board.NonClassedWaiting);
         Assert.Equal(1, board.ClassedWaiting(0));
@@ -189,7 +190,7 @@ public class OlympiadTests
         Assert.True(board.GrantNoblesse(2));
         Assert.Null(board.Register(Noble(1, "Ann"), true, EveningMs).Error);
         Assert.Null(board.Register(Noble(2, "Bea"), true, EveningMs).Error);
-        board.Advance(EveningMs, Online);
+        board.Advance(EveningMs, Online, Matchmaking);
         int match = board.MatchIdFor(1);
         Assert.True(match > 0);
 
@@ -205,9 +206,9 @@ public class OlympiadTests
 
         Assert.Null(board.Register(Noble(1, "Ann"), true, EveningMs).Error);
         Assert.Null(board.Register(Noble(2, "Bea"), true, EveningMs).Error);
-        board.Advance(EveningMs + 31_000, Online);
+        board.Advance(EveningMs + 31_000, Online, Matchmaking);
         long fight = EveningMs + 31_000 + 70_000;
-        board.Advance(fight, Online);
+        board.Advance(fight, Online, Matchmaking);
         var win = board.Report(board.MatchIdFor(1), 1, fight);
         Assert.Null(win.Error);
         Assert.Equal(16, board.PointsOf(1));
@@ -217,7 +218,7 @@ public class OlympiadTests
         Assert.Equal(1, win.Grants[0].CharacterId);
 
         Assert.NotEqual(0, board.MatchIdFor(1));
-        board.Advance(fight + OlympiadProtocol.ReturnCountdownMillis, Online);
+        board.Advance(fight + OlympiadProtocol.ReturnCountdownMillis, Online, Matchmaking);
         Assert.Equal(0, board.MatchIdFor(1));
     }
 
@@ -230,8 +231,8 @@ public class OlympiadTests
         Assert.True(board.GrantNoblesse(2));
         Assert.Null(board.Register(Noble(1, "Ann"), true, EveningMs).Error);
         Assert.Null(board.Register(Noble(2, "Bea"), true, EveningMs).Error);
-        board.Advance(EveningMs, Standing);
-        board.Advance(EveningMs + 5_000, Standing);
+        board.Advance(EveningMs, Standing, Matchmaking);
+        board.Advance(EveningMs + 5_000, Standing, Matchmaking);
         var crash = board.Disconnect(2, EveningMs + 5_000, Standing);
         Assert.Equal(24, board.PointsOf(1));
         Assert.Equal(12, board.PointsOf(2));
@@ -242,9 +243,9 @@ public class OlympiadTests
         Assert.Null(board.Register(Noble(1, "Ann"), false, EveningMs + 60_000).Error);
         Assert.Null(board.Register(Noble(2, "Bea"), false, EveningMs + 60_000).Error);
         long start = EveningMs + 90_000;
-        board.Advance(start, Standing);
+        board.Advance(start, Standing, Matchmaking);
         long timeout = start + 5_000 + 5_000 + 60_000 + 10_000;
-        var step = board.Advance(timeout, Standing);
+        var step = board.Advance(timeout, Standing, Matchmaking);
         Assert.Equal(OlympiadProtocol.OutcomeTie, Assert.Single(step.Results).Outcome);
         Assert.Equal(20, board.PointsOf(1));
         Assert.Equal(10, board.PointsOf(2));
@@ -269,7 +270,7 @@ public class OlympiadTests
         var again = new OlympiadBoard(early, store: new MemoryOlympiadStore());
         Assert.True(again.GrantNoblesse(3));
         Assert.Null(again.Register(Noble(3, "Kai"), true, early.ToUnixTimeMilliseconds()).Error);
-        again.Advance(week, Online);
+        again.Advance(week, Online, Matchmaking);
         Assert.Equal(12, again.PointsOf(3));
         Assert.Equal(OlympiadProtocol.PeriodCompetition, again.View(3, week).Period);
     }

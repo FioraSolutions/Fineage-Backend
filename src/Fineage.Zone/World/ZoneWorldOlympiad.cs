@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            var step = _olympiad.Report(matchId, winnerObjectId, (now ?? _clock()).ToUnixTimeMilliseconds());
+            var step = _olympiad.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
             if (step.Error != null)
                 return step.Error;
             ApplyOlympiad(step);
@@ -45,7 +45,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             long now = NowUnixMs();
-            var step = _olympiad.Advance(now, LookupOlympiad);
+            var step = _olympiad.Advance(now, LookupOlympiad, _olympiadRandom);
             ApplyOlympiad(step);
             if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
                 QueueOlympiadStatus(session, now);
@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
 
     void TickOlympiad()
     {
-        var step = _olympiad.Advance(NowUnixMs(), LookupOlympiad, announce: false);
+        var step = _olympiad.Advance(NowUnixMs(), LookupOlympiad, _olympiadRandom, announce: false);
         ApplyOlympiad(step);
     }
 

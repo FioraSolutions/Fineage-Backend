@@ -54,7 +54,7 @@ public sealed class NetEnchantRulesTests
                 game = GameData.From(new ItemCatalog(templates), data.StarterKits);
             }
 
-            World = new ZoneWorld(game: game, accounts: Store, enchantRandom: new SequenceEnchantRandom(rolls));
+            World = new ZoneWorld(game: game, accounts: Store, enchantRandom: new UnitSamples(rolls));
             var (bridge, rec) = NetBridgeRecorder.Create();
             World.NetBridge = bridge;
             Rec = rec;

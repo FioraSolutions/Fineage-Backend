@@ -48,10 +48,12 @@ public sealed class SeededEnchantRandom : IEnchantRandom
     public double NextUnitInterval() => _random.NextDouble();
 }
 
-/// <summary>Process-wide random. The zone uses this unless a test passes another source.</summary>
-public sealed class SharedEnchantRandom : IEnchantRandom
+/// <summary>Draws from a stream the caller owns. The zone passes the enchanting character's region stream.</summary>
+public sealed class StreamEnchantRandom : IEnchantRandom
 {
-    public static readonly SharedEnchantRandom Instance = new();
+    readonly Random _stream;
 
-    public double NextUnitInterval() => Random.Shared.NextDouble();
+    public StreamEnchantRandom(Random stream) => _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+
+    public double NextUnitInterval() => _stream.NextDouble();
 }

@@ -14,6 +14,9 @@ public enum RandomPurpose
     Manor = 9,
     Lottery = 10,
     Mammon = 11,
+    Enchant = 12,
+    Olympiad = 13,
+    Respawn = 14,
 }
 
 /// <summary>

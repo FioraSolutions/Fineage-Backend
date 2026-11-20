@@ -38,7 +38,8 @@ public sealed partial class ZoneWorld
     readonly IAccountStore? _accounts;
     readonly ZoneCharacterPersist _persist;
     readonly bool _expertisePenalty;
-    readonly IEnchantRandom _enchantRandom;
+    readonly IRegionRandom _enchantRandom;
+    readonly IRegionRandom _respawnRandom;
     readonly EnchantRates _enchantRates;
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
@@ -50,6 +51,7 @@ public sealed partial class ZoneWorld
     readonly NpcHtmlCatalog _html;
     readonly BypassRegistry _bypasses;
     readonly OlympiadBoard _olympiad;
+    readonly Random _olympiadRandom;
     readonly TeleportCatalog _teleports;
     readonly GmTeleportCatalog _gmTeleports;
     readonly NewbieBuffCatalog _newbieBuffs;
@@ -145,7 +147,7 @@ public sealed partial class ZoneWorld
         DropRates? dropRates = null,
         string? activeMapId = null,
         Func<DateTimeOffset>? clock = null,
-        IEnchantRandom? enchantRandom = null,
+        Random? enchantRandom = null,
         EnchantRates? enchantRates = null,
         SevenSignsEngine? sevenSigns = null,
         bool includeEnabledMaps = false,
@@ -158,7 +160,6 @@ public sealed partial class ZoneWorld
         BypassRegistry? bypasses = null,
         OlympiadBoard? olympiad = null,
         OlympiadSettings? olympiadSettings = null,
-        Random? olympiadRandom = null,
         TeleportCatalog? teleports = null,
         GmTeleportCatalog? gmTeleports = null,
         NewbieBuffCatalog? newbieBuffs = null,
@@ -209,7 +210,7 @@ public sealed partial class ZoneWorld
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
         _combatRandom = Streams(combatRandom, RandomPurpose.Combat);
-        _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight();
+        _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight(WallNow());
         _aoi = aoi ?? new SingleCellAoi();
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
@@ -223,7 +224,6 @@ public sealed partial class ZoneWorld
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
-        _enchantRandom = enchantRandom ?? SharedEnchantRandom.Instance;
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
         _includeEnabledMaps = includeEnabledMaps;
@@ -238,7 +238,7 @@ public sealed partial class ZoneWorld
         _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
-        _olympiad = olympiad ?? new OlympiadBoard(_clock(), olympiadSettings ?? OlympiadSettings.FromEnvironment(), random: olympiadRandom);
+        _olympiad = olympiad ?? new OlympiadBoard(WallNow(), olympiadSettings ?? OlympiadSettings.FromEnvironment());
         _teleports = teleports ?? TeleportCatalog.LoadDefault();
         _gmTeleports = gmTeleports ?? GmTeleportCatalog.LoadDefault();
         _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
@@ -252,6 +252,8 @@ public sealed partial class ZoneWorld
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = Streams(deathRandom, RandomPurpose.Death);
         _questRandom = Streams(null, RandomPurpose.Quest);
+        _enchantRandom = Streams(enchantRandom, RandomPurpose.Enchant);
+        _respawnRandom = Streams(null, RandomPurpose.Respawn);
         SoulCrystalRandom = Streams(null, RandomPurpose.SoulCrystal);
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
@@ -274,6 +276,7 @@ public sealed partial class ZoneWorld
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         LotteryRandom = GlobalStream(RandomPurpose.Lottery);
         MammonRandom = GlobalStream(RandomPurpose.Mammon);
+        _olympiadRandom = GlobalStream(RandomPurpose.Olympiad);
         SpawnCastleDoors();
     }
 

@@ -17,6 +17,7 @@ public sealed class NetOlympiadArenaTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
     static readonly long EveningMs = Evening.ToUnixTimeMilliseconds();
+    static Random Matchmaking => new(7);
     const int Duelist = 88, Dreadnought = 89, OlympiadManagerNpc = 31688;
 
     static OlympiadActor Noble(int id, string name, int classId = Duelist) =>
@@ -37,16 +38,16 @@ public sealed class NetOlympiadArenaTests
         board.GrantNoblesse(2);
         Assert.Null(board.Register(Noble(1, "Ann"), true, EveningMs).Error);
         Assert.Null(board.Register(Noble(2, "Bea"), true, EveningMs).Error);
-        board.Advance(EveningMs, Standing);
+        board.Advance(EveningMs, Standing, Matchmaking);
         long fight = EveningMs + 5_000 + OlympiadProtocol.ArenaPauseMillis + OlympiadProtocol.BattleCountdownMillis;
-        board.Advance(EveningMs + 5_000, Standing);
-        board.Advance(EveningMs + 5_000 + OlympiadProtocol.ArenaPauseMillis, Standing);
-        board.Advance(fight, Standing);
+        board.Advance(EveningMs + 5_000, Standing, Matchmaking);
+        board.Advance(EveningMs + 5_000 + OlympiadProtocol.ArenaPauseMillis, Standing, Matchmaking);
+        board.Advance(fight, Standing, Matchmaking);
         Assert.Equal(OlympiadMatchPhase.Fighting, board.MatchState(1)!.Value.Phase);
 
         board.NoteDamage(2, 300);
         board.NoteDamage(1, 100);
-        var step = board.Advance(fight + 10_000, Standing);
+        var step = board.Advance(fight + 10_000, Standing, Matchmaking);
         var result = Assert.Single(step.Results);
         Assert.Equal(2, result.WinnerObjectId);
         Assert.Contains(step.Grants, g => g.CharacterId == 2 && g.ItemId == OlympiadProtocol.RewardItemId);
@@ -85,7 +86,7 @@ public sealed class NetOlympiadArenaTests
         [new OlympiadHeroRow { CharacterId = 77, ClassId = Duelist, Name = "Old", Claimed = true, Count = 1 }]);
         Assert.True(board.IsHero(77));
 
-        var step = board.Advance(EveningMs + 2_000, Standing);
+        var step = board.Advance(EveningMs + 2_000, Standing, Matchmaking);
         Assert.Contains(77, step.RevokedHeroes);
         Assert.False(board.IsHero(77));
         Assert.True(board.IsUnclaimedHero(1));

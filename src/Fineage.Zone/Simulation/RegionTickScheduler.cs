@@ -73,7 +73,7 @@ public sealed class RegionTickScheduler
         if (next > previous + 1)
             _observer.TicksSkipped(tick, next - previous - 1);
 
-        using (Clock.Pin(tick.NowUnixMs))
+        using (Clock.Pin(tick))
         {
             foreach (var stage in _stages)
             {
@@ -133,7 +133,7 @@ public sealed class RegionTickScheduler
         Resume(wallUnixMs);
         var tick = new TickContext(Tick, Clock.TimeOf(Tick), wallUnixMs);
         var failures = new List<StageFailure>();
-        using (Clock.Pin(tick.NowUnixMs))
+        using (Clock.Pin(tick))
         {
             foreach (var entry in entries)
                 failures.AddRange(entry.Run(this, tick));

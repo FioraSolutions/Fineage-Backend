@@ -4,7 +4,7 @@ namespace Fineage.Zone.Olympiad;
 
 public sealed partial class OlympiadBoard
 {
-    void Matchmake(long now, OlympiadStep step, Func<int, OlympiadPresence?>? presence)
+    void Matchmake(long now, OlympiadStep step, Func<int, OlympiadPresence?>? presence, Random random)
     {
         if (_nobles.Count == 0)
         {
@@ -29,7 +29,7 @@ public sealed partial class OlympiadBoard
         {
             if (_busy[stadium])
                 continue;
-            List<int>? picked = readyClasses.Count == 0 ? null : PickClass(readyClasses);
+            List<int>? picked = readyClasses.Count == 0 ? null : PickClass(readyClasses, random);
             bool nonPair = gateNon && _nonClass.Count >= 2;
             if (picked == null && !nonPair)
                 break;
@@ -42,23 +42,23 @@ public sealed partial class OlympiadBoard
             {
                 if (nonPair)
                 {
-                    (one, two) = TakePair(_nonClass);
+                    (one, two) = TakePair(_nonClass, random);
                     classedMatch = false;
                 }
                 else
                 {
-                    (one, two) = TakePair(picked!);
+                    (one, two) = TakePair(picked!, random);
                     classedMatch = true;
                 }
             }
             else if (picked != null)
             {
-                (one, two) = TakePair(picked);
+                (one, two) = TakePair(picked, random);
                 classedMatch = true;
             }
             else
             {
-                (one, two) = TakePair(_nonClass);
+                (one, two) = TakePair(_nonClass, random);
                 classedMatch = false;
             }
 
@@ -83,20 +83,20 @@ public sealed partial class OlympiadBoard
         }
     }
 
-    List<int>? PickClass(List<int> ready)
+    List<int>? PickClass(List<int> ready, Random random)
     {
-        int classId = ready[_random.Next(ready.Count)];
+        int classId = ready[random.Next(ready.Count)];
         if (!_classed.TryGetValue(classId, out var list) || list.Count < 2)
             return null;
         return list;
     }
 
-    (int One, int Two) TakePair(List<int> list)
+    (int One, int Two) TakePair(List<int> list, Random random)
     {
-        int first = _random.Next(list.Count);
+        int first = random.Next(list.Count);
         int one = list[first];
         list.RemoveAt(first);
-        int second = _random.Next(list.Count);
+        int second = random.Next(list.Count);
         int two = list[second];
         list.RemoveAt(second);
         return (one, two);

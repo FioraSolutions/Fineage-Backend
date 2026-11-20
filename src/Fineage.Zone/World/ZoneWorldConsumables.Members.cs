@@ -15,7 +15,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     (int X, int Y, int Z) TownDestination(ZoneEntity player)
     {
-        var point = _mapRegions.TownRespawn(player.X, player.Y);
+        var point = _mapRegions.TownRespawn(player.X, player.Y, Rng(_respawnRandom, player));
         return (point.X, point.Y, point.Z);
     }
 

@@ -324,17 +324,18 @@ public sealed class RegionTickSchedulerTests
     }
 
     [Fact]
-    public void Stage_code_reads_the_pinned_tick_time_and_the_pin_ends_with_the_step()
+    public void Stage_code_reads_the_pinned_tick_time_and_wall_sample_and_the_pin_ends_with_the_step()
     {
         long wall = 1_234;
         var clock = new SimulationClock(100, () => wall);
         var scheduler = new RegionTickScheduler(clock, Cells, SequentialRegionExecutor.Instance, new RecordingObserver());
-        long inside = 0;
+        (long Now, long Wall) inside = default;
         long otherThread = 0;
         scheduler.AddWorldStage("read", _ =>
         {
-            inside = clock.NowUnixMs();
-            var thread = new Thread(() => otherThread = clock.NowUnixMs());
+            wall = 1_390;
+            inside = (clock.NowUnixMs(), clock.WallUnixMs());
+            var thread = new Thread(() => otherThread = clock.WallUnixMs());
             thread.Start();
             thread.Join();
         });
@@ -342,23 +343,24 @@ public sealed class RegionTickSchedulerTests
         wall = 1_377;
         scheduler.Step(wall);
 
-        Assert.Equal(1_300, inside);
-        Assert.Equal(1_377, otherThread);
-        Assert.Equal(1_377, clock.NowUnixMs());
+        Assert.Equal((1_300L, 1_377L), inside);
+        Assert.Equal(1_390, otherThread);
+        Assert.Equal(1_390, clock.NowUnixMs());
+        Assert.Equal(1_390, clock.WallUnixMs());
     }
 
     [Fact]
     public void Pins_nest_and_restore_the_outer_time()
     {
         var clock = new SimulationClock(100, () => 9);
-        using (clock.Pin(1))
+        using (clock.Pin(new TickContext(0, 1, 11)))
         {
-            using (clock.Pin(2))
-                Assert.Equal(2, clock.NowUnixMs());
-            Assert.Equal(1, clock.NowUnixMs());
+            using (clock.Pin(new TickContext(0, 2, 12)))
+                Assert.Equal((2L, 12L), (clock.NowUnixMs(), clock.WallUnixMs()));
+            Assert.Equal((1L, 11L), (clock.NowUnixMs(), clock.WallUnixMs()));
         }
 
-        Assert.Equal(9, clock.NowUnixMs());
+        Assert.Equal((9L, 9L), (clock.NowUnixMs(), clock.WallUnixMs()));
     }
 
     [Theory]

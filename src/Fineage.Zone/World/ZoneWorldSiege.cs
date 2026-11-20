@@ -13,14 +13,14 @@ public sealed partial class ZoneWorld
     public string? CaptureCastle(int clanId, DateTimeOffset? now = null)
     {
         lock (_gate)
-            return CaptureLocked(clanId, 0, (now ?? _clock()).ToUnixTimeMilliseconds());
+            return CaptureLocked(clanId, 0, (now ?? WallNow()).ToUnixTimeMilliseconds());
     }
 
     public SiegeStartKind StartSiege(int castleId, DateTimeOffset? now = null)
     {
         lock (_gate)
         {
-            long ms = (now ?? _clock()).ToUnixTimeMilliseconds();
+            long ms = (now ?? WallNow()).ToUnixTimeMilliseconds();
             return StartSiegeLocked(castleId, ms);
         }
     }
@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            long ms = (now ?? _clock()).ToUnixTimeMilliseconds();
+            long ms = (now ?? WallNow()).ToUnixTimeMilliseconds();
             string? error = _siege.EndSiege(castleId, ms);
             if (error == null)
             {

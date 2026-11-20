@@ -29,6 +29,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     long NowUnixMs() => _simulationClock.NowUnixMs();
 
+    /// <summary>The wall sample of the current step for calendar rules; outside a step the wall clock.</summary>
+    DateTimeOffset WallNow() => DateTimeOffset.FromUnixTimeMilliseconds(_simulationClock.WallUnixMs());
+
     /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
     internal void StepSimulation() => RunUnderGate(wall =>
     {

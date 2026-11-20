@@ -24,7 +24,7 @@ internal sealed class WorldBench
         Random? deathRandom = null,
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.ItemWeights? weights = null,
-        Fineage.Game.IEnchantRandom? enchantRandom = null,
+        Random? enchantRandom = null,
         bool? expertisePenalty = null,
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? mapId = null,

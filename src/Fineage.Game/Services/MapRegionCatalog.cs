@@ -39,8 +39,9 @@ public sealed record MapRegion(
     /// Mobius <c>getSpawnLoc()</c> when <c>RandomRespawnInTownEnabled</c> is on: pick uniformly among
     /// non-chaotic <c>normal</c> points so Scroll of Escape / village restart do not always land on the first row.
     /// </summary>
-    public MapRespawnPoint? RandomNormalSpawn(Random? rng = null)
+    public MapRespawnPoint? RandomNormalSpawn(Random rng)
     {
+        ArgumentNullException.ThrowIfNull(rng);
         List<MapRespawnPoint>? normals = null;
         foreach (var p in RespawnPoints)
         {
@@ -53,7 +54,7 @@ public sealed record MapRegion(
             return null;
         if (normals.Count == 1)
             return normals[0];
-        return normals[(rng ?? Random.Shared).Next(normals.Count)];
+        return normals[rng.Next(normals.Count)];
     }
 
     /// <summary>Chaotic (karma) ring; falls back to the town square like Mobius <c>getChaoticSpawnLoc()</c>.</summary>
@@ -120,7 +121,7 @@ public sealed class MapRegionCatalog
     /// Mobius <c>getTeleToLocation(creature, TOWN)</c> for a character standing at <paramref name="x"/>/<paramref name="y"/>.
     /// Uses a random normal town point (Interlude <c>RandomRespawnInTownEnabled</c>).
     /// </summary>
-    public MapRespawnPoint TownRespawn(int x, int y, Random? rng = null) =>
+    public MapRespawnPoint TownRespawn(int x, int y, Random rng) =>
         (At(x, y) ?? Fallback).RandomNormalSpawn(rng)
         ?? (At(x, y) ?? Fallback).NormalSpawn()
         ?? Fallback.RandomNormalSpawn(rng)
