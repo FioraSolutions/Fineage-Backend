@@ -1,8 +1,9 @@
 # Zone simulation architecture
 
-Status: **steps 1–6 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
+Status: **steps 1–7 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
 same scheduler, the reverse watcher index, the per-step fan-out outbox, tick-derived time with seeded per-region
-random streams, a command log and replay, and command ingress for player input); steps 7 and later are proposals.
+random streams, a command log and replay, command ingress for player input, and region containers with in-process
+handoff); steps 8 and later are proposals.
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
@@ -65,7 +66,7 @@ flowchart LR
 | B8 | Fan-out is per event and per watcher | `NetWorldEventPublisher.FanoutStatusUpdate` encodes, then `NetPresenceHub.TrySend` takes the hub lock per watcher (`Net/NetPresenceHub.cs:51,80`) | N small frames per tick per watcher, lock traffic proportional to watchers × events, no coalescing of superseded StatusUpdates. |
 | B9 | Knownlist diff fan-out awaits inside the request path | `NetKnownlistFanout.FanDiffAsync` awaits `SendAsync` per spawn/despawn (`Net/NetKnownlistFanout.cs`) | A slow client slows its own handler; spawn bursts (teleport into Giran) are serial. |
 | B10 | Economy persisted as snapshots | `ZoneCharacterPersist.ReplaceItems` / `ReplaceWarehouse` (`World/ZoneCharacterPersist.cs:59-63`), deferred by `WithDeferredInventoryPersist` (`World/ZoneWorld.Members.Persist.cs:129`); trade writes two bags (`World/ZoneWorldTrade.More.cs:106`) | No record of *why* an item moved, no idempotency, and a crash between the two bag writes duplicates or loses items. Nothing to audit or reconcile against. |
-| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; moving it into the region-owned entity follows with step 7. |
+| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; moving it into the region-owned entity follows with step 8, when regions stop sharing the gate. |
 
 L2J has the same shape plus per-object scheduled tasks; Fineage already replaced those with active sets
 (`World/ZoneWorldActiveSets.cs`), which is the right base for regions: only entities with work are visited.
@@ -119,6 +120,13 @@ flowchart TB
   memberships (`moving`, `thinking`, `aiBusy`, `pendingHit`, `decaying`, `needRegen`, `withAbnormals`), its
   knownlist and a region-local AOI index (the current `GridAoi` cell of 3 000 units fits a 32 768 tile 11×11).
   Player session intent (B11) moves into the player entity and is written only by the owning region, from commands.
+  Since step 7 `RegionDirectory<T>` (`Simulation/RegionDirectory.cs`) holds every world entity: each one is owned
+  by exactly one `RegionContainer`, routed by id to `(RegionId, epoch)`, and carries its active-set memberships,
+  which the owning region indexes for its stages (`Snapshot` and `Collect` go region by region, ids ascending). An
+  entity can join a set before it is placed; removal clears its memberships. Ownership changes only at the handoff
+  barrier (section 3.5), so an entity a few hundred units past a tile edge is still owned, and its rolls drawn, by
+  the region it came from. The knownlist, the AOI index and session intent are still world-wide; they move with
+  step 8.
 - **Interest radius ≤ region size.** Visibility and AoE never reach beyond the 8 neighbours, which bounds every
   cross-region interaction to neighbour messages and border snapshots.
 - **Region-local RNG.** Each region draws from its own stream per purpose (`RandomPurpose`: combat, spawn, drop,
@@ -182,6 +190,15 @@ sequenceDiagram
 
 **Entity crossing a border (handoff).** The owner detects the crossing after movement, with hysteresis (a few
 hundred units past the boundary) so pacing along an edge does not ping-pong.
+
+In process (step 7): every position or instance write reaches the AOI (`Enter`/`Move`), and `RelocationTrackingAoi`
+marks the entity as a handoff candidate. The `handoff` world stage, registered last at period 1, is the end-of-tick
+barrier: it walks the candidates in ascending id order and moves each one whose owner no longer holds its position
+(`IRegionPartition.Holds`: the cell widened by `MapTileHandoffMargin`, 300 units; another instance is never held)
+to the region of its position, memberships included, raising the epoch. Transfers are reported to
+`ISimulationObserver.EntitiesHandedOff` (`fineage.region.handoffs`). A position written outside a step is
+handed off at the end of the next one. The serialized transfer, ghosts and
+route updates below come with separate hosts (step 13).
 
 ```mermaid
 sequenceDiagram
@@ -401,8 +418,9 @@ Implemented in step 1 (OTEL and `/metrics`):
 | `fineage.tick.stage.failures{stage}` | Stage or region bodies that threw (also logged with stage, scope, tick and the exception) |
 | `fineage.tick.overruns` | Steps longer than the fixed step (also logged with the three slowest stages) |
 | `fineage.tick.skipped` | Ticks a late step jumped over (step 5; also logged). Tick time running ahead of the wall clock by a step or more is logged when it starts and ends. |
+| `fineage.region.handoffs` | Entities moved to another region at the end-of-tick barrier (step 7) |
 
-Planned with later PRs: `region.tick.ms{region}`, `region.entities`, `region.inbox.depth`, handoffs/s and
+Planned with later PRs: `region.tick.ms{region}`, `region.entities`, `region.inbox.depth`, handoff
 latency, outbox frames and bytes per tick, fan-out lag, ledger transaction latency and rejections by kind.
 
 ---
@@ -419,7 +437,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | 4 | Per-tick outbox: systems emit presence events, flushed after the step outside `_gate` in gate order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
 | **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
 | **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
-| 7 | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. |
+| **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
 | 8 | Border snapshots and cross-region messages (damage, abnormal apply, aggro help). Enable `ParallelRegionExecutor` for regen and abnormals behind a setting, then movement and AI after a soak. | Parallel ticks; determinism tests and replay gate each enablement. |
 | 9 | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls. | Same schedules. |
 | 10 | Social actors: party, clan, chat, friends. | Same. |
@@ -438,6 +456,6 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | Hot spots (Giran, sieges) concentrate load in one region | Partition by load (split tiles), not by special cases; per-region timing metric drives it. |
 | Determinism regressions from new code (hash iteration, `Random.Shared`, wall clock) | Determinism and partition-independence tests per migrated stage; replay test from PR 5; analyzers or review checklist for banned APIs in region code. |
 | A replay only reproduces a run built the same way | The log header carries seed, step and start tick and replay refuses a mismatch; content (catalogs, spawns, persisted state) must match too, so replays are a test and diagnostic tool, not a backup. |
-| Handoff bugs (lost or duplicated entities, misrouted commands) | Epoch-stamped routing, ghost forwarding, invariant check "every entity has exactly one owner" each tick in debug builds, soak tests walking bots across borders. |
+| Handoff bugs (lost or duplicated entities, misrouted commands) | Epoch-stamped routing, ghost forwarding, the invariant check `RegionDirectory.Verify` (exactly one owner, owner holds the position, set memberships and counts agree) run by the tests that walk players across tile borders; soak tests with bots once regions run in parallel. |
 | Ledger becomes a latency bottleneck or a single point of failure | In-memory projection plus batched journal appends; holds keep gameplay responsive; journal on the existing Postgres first, partitioned by world shard later. |
 | Migration stalls halfway, with two models living side by side | Every PR is complete on its own and removes the old path it replaces; the plan is ordered so each step pays off without the next. |
