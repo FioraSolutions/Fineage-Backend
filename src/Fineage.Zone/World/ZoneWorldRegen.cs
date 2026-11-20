@@ -78,6 +78,16 @@ public sealed partial class ZoneWorld
     /// Per-tick HP/MP this player regenerates right now, fed through the same folds <see cref="TickRegen"/> uses.
     /// Tests read the real rate instead of hard-coding it, so a formula change cannot leave them stale.
     /// </summary>
+    /// <summary>Per-tick CP this player regenerates right now (Mobius <c>calcCpRegen</c>).</summary>
+    internal double CpRegenRate(ZoneEntity player)
+    {
+        var (conBonus, _) = RegenStatBonuses(player);
+        return CpRegenRate(player, PlayerStatMods(player), RegenPosture(player), conBonus);
+    }
+
+    static double CpRegenRate(ZoneEntity player, CombatStatMods mods, ZoneRegen.Posture posture, double conBonus) =>
+        mods.Apply(CombatStat.RegCp, ZoneRegen.CpInit(player.Level, conBonus)) * ZoneRegen.PostureMultiplier(posture);
+
     internal (double Hp, double Mp) RegenRate(ZoneEntity player)
     {
         var mods = PlayerStatMods(player);
@@ -94,7 +104,8 @@ public sealed partial class ZoneWorld
         {
             if (entity.Dead)
                 continue;
-            if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp)
+            // Mobius PlayerStatus.doRegeneration regenerates CP in the same tick as HP/MP.
+            if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp && entity.CurCp >= entity.MaxCp)
                 continue;
             // Mobius Formulas.calcHpRegen/calcMpRegen: (calcStat(REGENERATE_HP_RATE, max(1, init), …) * multiplier).
             // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
@@ -108,6 +119,7 @@ public sealed partial class ZoneWorld
             double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
                 ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture)
                 : 0d);
+            double cpRate = entity.CurCp < entity.MaxCp ? CpRegenRate(entity, mods, posture, conBonus) : 0d;
 
             // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the
             // fractional remainder is carried per entity instead of being truncated away every tick.
@@ -115,19 +127,26 @@ public sealed partial class ZoneWorld
             // carry drift negative and flip into healing on a later tick.
             entity.RegenCarryHp += Math.Max(0d, hpRate);
             entity.RegenCarryMp += Math.Max(0d, mpRate);
+            entity.RegenCarryCp += Math.Max(0d, cpRate);
             int hpGain = (int)Math.Floor(entity.RegenCarryHp);
             int mpGain = (int)Math.Floor(entity.RegenCarryMp);
+            int cpGain = (int)Math.Floor(entity.RegenCarryCp);
             entity.RegenCarryHp -= hpGain;
             entity.RegenCarryMp -= mpGain;
-            if (hpGain == 0 && mpGain == 0)
+            entity.RegenCarryCp -= cpGain;
+            if (hpGain == 0 && mpGain == 0 && cpGain == 0)
                 continue;
 
             if (hpGain > 0)
                 entity.CurHp = Math.Min(entity.MaxHp, entity.CurHp + hpGain);
             if (mpGain > 0)
                 entity.CurMp = Math.Min(entity.MaxMp, entity.CurMp + mpGain);
+            if (cpGain > 0)
+                entity.CurCp = Math.Min(entity.MaxCp, entity.CurCp + cpGain);
             if (entity.CurHp >= entity.MaxHp)
                 entity.RegenCarryHp = 0;
+            if (entity.CurCp >= entity.MaxCp)
+                entity.RegenCarryCp = 0;
             if (entity.CurMp >= entity.MaxMp)
                 entity.RegenCarryMp = 0;
 

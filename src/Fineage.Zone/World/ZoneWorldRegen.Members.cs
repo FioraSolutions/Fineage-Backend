@@ -98,9 +98,11 @@ public sealed partial class ZoneWorld
             InterludeStatus.CurHp,
             InterludeStatus.MaxHp,
             InterludeStatus.CurMp,
-            InterludeStatus.MaxMp
+            InterludeStatus.MaxMp,
+            InterludeStatus.CurCp,
+            InterludeStatus.MaxCp
         ],
-        Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp]
+        Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp, entity.CurCp, entity.MaxCp]
     };
 
     (int hp, int maxHp, int mp, int maxMp, int cp, int maxCp, int level, int race, int sex) LoadVitals(

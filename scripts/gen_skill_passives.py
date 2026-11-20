@@ -7,7 +7,7 @@ defenceTraits / attackTraits so jewelry resists (Queen Ant, Antharas, Zaken, Orf
 """
 import glob, json, sys, xml.etree.ElementTree as ET
 STATS = {"runSpd","pAtk","pDef","mAtk","mDef","pAtkSpd","mAtkSpd","accCombat","rEvas","critRate",
-         "regHp","regMp","weightLimit","weightPenalty","mCritRate","mCritPower","critDmg","critDmgAdd","blowRate","pSkillEvas"}
+         "regHp","regMp","regCp","weightLimit","weightPenalty","mCritRate","mCritPower","critDmg","critDmgAdd","blowRate","pSkillEvas"}
 OPS = {"add":"add","sub":"sub","mul":"mul","set":"set"}
 
 def kinds_of(node):

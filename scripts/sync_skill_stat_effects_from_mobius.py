@@ -28,7 +28,7 @@ TREES = ROOT / "data/skill-trees.json"
 # Must stay in lock-step with SkillStatEffectCatalog.StatNames.
 STAT_NAMES = {
     "pAtk", "pDef", "mAtk", "mDef", "pAtkSpd", "mAtkSpd", "accCombat", "rEvas", "critRate",
-    "runSpd", "regHp", "regMp", "weightLimit", "weightPenalty", "mCritRate", "mCritPower",
+    "runSpd", "regHp", "regMp", "regCp", "weightLimit", "weightPenalty", "mCritRate", "mCritPower",
     "critDmg", "critDmgAdd", "blowRate", "pSkillEvas", "critRatePos", "critDmgPos",
     "maxHp", "maxMp", "maxCp", "healEffect", "pReuse", "mReuse", "dReuse", "sDef", "rShld",
     "reflectDam", "reflectSkillPhysic", "reflectSkillMagic", "vengeancePdam", "vengeanceMdam",
