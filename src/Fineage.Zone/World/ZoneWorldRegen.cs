@@ -17,7 +17,6 @@ public sealed partial class ZoneWorld
         if (_simulation != null)
             return;
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
-        _combatLoop = Task.Run(() => CombatLoopAsync(shutdown));
     }
 
     async Task SimulationLoopAsync(CancellationToken ct)
@@ -28,8 +27,17 @@ public sealed partial class ZoneWorld
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
                 long started = Stopwatch.GetTimestamp();
-                lock (_gate)
-                    _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+                try
+                {
+                    RunUnderGate(_simulationTicks.Step);
+                }
+                catch (Exception ex)
+                {
+                    // Stage bodies are isolated by the scheduler; what reaches here is the deferred Postgres flush or an observer fault.
+                    // Movement, combat and regen all live on this loop, so one bad save must not end it.
+                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step"));
+                    ZoneLog.Warn($"simulation step tick={_simulationTicks.Tick} failed outside stage isolation: {ex}");
+                }
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }

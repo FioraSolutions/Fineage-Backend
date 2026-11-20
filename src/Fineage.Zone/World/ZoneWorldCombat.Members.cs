@@ -52,78 +52,18 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    Task? _combatLoop;
-
-    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses, aggro/leash).</summary>
+    /// <summary>
+    /// One combat cadence on demand (tests): the every-step stages the live loop runs, at the current tick, without
+    /// advancing the clock, so slow stages keep their phase.
+    /// </summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
-        // Pending pickups / corpse loot may dirty inventories — keep Postgres off _gate (B8).
-        WithDeferredInventoryPersist(() =>
-        {
-            long now = _clock().ToUnixTimeMilliseconds();
-            TickPlayerMovement(now);
-            TickArenaZones();
-            TickNpcMovement(now);
-            TickRandomWalk(now);
-            TickPendingHits(now);
-            TickMeleeHits(now);
-            TickPvpFlags(now);
-            TickAutoAttacks();
-            TickPendingCasts(now);
-            TickQueuedMoves(now);
-            TickTradeRange();
-            TickParty(now);
-            TickPendingPickups(now);
-            TickPendingTalks(now);
-            TickFear(now);
-            // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
-            // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
-            TickAggression(now);
-            TickLeash(now);
-            TickMobAttacks(now);
-            TickSummons(now);
-            TickCubics(now);
-            TickDuels(now);
-            TickCorpseDecay(now);
-            TickAttackStance(now);
-            TickGroundExpiry(now);
-            return 0;
-        });
+        RunUnderGate(now => _simulationTicks.RunPeriod(1, now));
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
-    async Task CombatLoopAsync(CancellationToken ct)
+    void TickAutoAttacks(long now)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackTickMs));
-        try
-        {
-            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-            {
-                try
-                {
-                    await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    // A Postgres failure while flushing a bag used to fault this task.
-                    // Movement, hits, mob AI and knownlist refresh all live here, so one
-                    // bad save stopped combat for the rest of the process.
-                    ZoneLog.Warn($"combat tick failed: {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
-    void TickAutoAttacks()
-    {
-        long now = _clock().ToUnixTimeMilliseconds();
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
