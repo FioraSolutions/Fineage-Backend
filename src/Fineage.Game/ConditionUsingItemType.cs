@@ -63,4 +63,34 @@ public static class ConditionUsingItemType
         }
         return false;
     }
+
+    /// <summary>
+    /// Mobius <c>&lt;using slot="lrhand"/&gt;</c> (Two-handed Weapon Mastery, Rage/Frenzy two-hand branch).
+    /// The equipped right-hand weapon's body slot must match one of <paramref name="slots"/>.
+    /// </summary>
+    public static bool MatchesSlot(PlayerInventory? inventory, ReadOnlySpan<string> slots)
+    {
+        if (inventory == null || slots.IsEmpty)
+            return false;
+        return MatchesSlot(inventory.GetEquipped(PaperdollSlot.RHand)?.Template, slots);
+    }
+
+    public static bool MatchesSlot(ItemTemplate? weapon, ReadOnlySpan<string> slots)
+    {
+        if (weapon == null || slots.IsEmpty)
+            return false;
+        foreach (var slot in slots)
+        {
+            var want = slot.ToLowerInvariant() switch
+            {
+                "lrhand" => BodySlot.LrHand,
+                "rhand" => BodySlot.RightHand,
+                "lhand" => BodySlot.LeftHand,
+                _ => BodySlot.None
+            };
+            if (want != BodySlot.None && weapon.BodySlot == want)
+                return true;
+        }
+        return false;
+    }
 }

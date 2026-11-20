@@ -15,7 +15,8 @@ public readonly record struct PlayerCombatStats(
     double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
     int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1,
     double DarkRes = 0d, double HolyRes = 0d, double FireRes = 0d, double WaterRes = 0d,
-    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double DamageZoneVuln = 0d);
+    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double DamageZoneVuln = 0d,
+    double HolyPower = 0d, double FirePower = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -84,7 +85,9 @@ public sealed partial class ZoneWorld
             EarthRes: mods.Apply(CombatStat.EarthRes, 0d),
             // Mobius TRANSFER_DAMAGE_PERCENT (transDam): percent of incoming damage sent to the servitor.
             TransDam: mods.Apply(CombatStat.TransDam, 0d),
-            DamageZoneVuln: mods.Apply(CombatStat.DamageZoneVuln, 0d));
+            DamageZoneVuln: mods.Apply(CombatStat.DamageZoneVuln, 0d),
+            HolyPower: mods.Apply(CombatStat.HolyPower, 0d),
+            FirePower: mods.Apply(CombatStat.FirePower, 0d));
     }
 
     /// <summary>Template + henna + bonus table (shared by combat, regen, weight, move speed).</summary>
@@ -146,7 +149,8 @@ public sealed partial class ZoneWorld
             return null;
         // Buff funcs can carry their own <using kind> gate (Focus Chance / Focus Power need a dagger; Rapid Shot a bow).
         var mods = SkillStatEffects.Collect(_statEffects, player.Abnormals,
-            wearing: kinds => ConditionUsingItemType.Matches(player.Inventory, kinds));
+            wearing: kinds => ConditionUsingItemType.Matches(player.Inventory, kinds),
+            wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots));
         return ReferenceEquals(mods, CombatStatMods.None) ? null : mods;
     }
 
@@ -161,7 +165,8 @@ public sealed partial class ZoneWorld
                 mods,
                 resting: player.Sitting,
                 hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp,
-                moving: player.MoveActive);
+                moving: player.MoveActive,
+                wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots));
     }
 
     /// <summary>

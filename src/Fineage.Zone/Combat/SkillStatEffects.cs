@@ -16,23 +16,27 @@ public static class SkillStatEffects
         SkillStatEffectCatalog catalog,
         IEnumerable<ZoneAbnormalEntry> abnormals,
         SkillPosition position = SkillPosition.None,
-        Func<string[], bool>? wearing = null) =>
+        Func<string[], bool>? wearing = null,
+        Func<string[], bool>? wearingSlot = null) =>
         catalog.Collect(
             abnormals.Select(a => new SkillStatSource(a.Id, a.SkillLevel, a.Value)),
             static id => ZoneLog.Warn($"skill-stat-effects missing skillId={id} — abnormal has no combat mods"),
             position,
-            wearing);
+            wearing,
+            wearingSlot);
 
     /// <summary>Only the <c>&lt;player front|behind&gt;</c> funcs, for the side a swing is rolled from.</summary>
     public static CombatStatMods CollectPositional(
         SkillStatEffectCatalog catalog,
         IEnumerable<ZoneAbnormalEntry> abnormals,
         SkillPosition position,
-        Func<string[], bool>? wearing = null) =>
+        Func<string[], bool>? wearing = null,
+        Func<string[], bool>? wearingSlot = null) =>
         position == SkillPosition.None
             ? CombatStatMods.None
             : catalog.CollectPositional(
                 abnormals.Select(a => new SkillStatSource(a.Id, a.SkillLevel, a.Value)),
                 position,
-                wearing);
+                wearing,
+                wearingSlot);
 }

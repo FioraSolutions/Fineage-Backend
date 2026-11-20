@@ -44,7 +44,7 @@ public sealed class SkillStatEffectCatalog
         ["pAtkRange"] = CombatStat.PAtkRange,
         ["breath"] = CombatStat.Breath, ["fall"] = CombatStat.Fall,
         ["cancelVuln"] = CombatStat.CancelVuln, ["debuffVuln"] = CombatStat.DebuffVuln,
-        ["holyPower"] = CombatStat.HolyPower, ["darkRes"] = CombatStat.DarkRes,
+        ["holyPower"] = CombatStat.HolyPower, ["firePower"] = CombatStat.FirePower, ["darkRes"] = CombatStat.DarkRes,
         ["holyRes"] = CombatStat.HolyRes, ["fireRes"] = CombatStat.FireRes,
         ["waterRes"] = CombatStat.WaterRes, ["windRes"] = CombatStat.WindRes,
         ["earthRes"] = CombatStat.EarthRes, ["transDam"] = CombatStat.TransDam,
@@ -78,6 +78,7 @@ public sealed class SkillStatEffectCatalog
         Action<int>? onMissing = null,
         SkillPosition position = SkillPosition.None,
         Func<string[], bool>? wearing = null,
+        Func<string[], bool>? wearingSlot = null,
         double hpPercent = 100d)
     {
         CombatStatMods? mods = null;
@@ -98,7 +99,7 @@ public sealed class SkillStatEffectCatalog
                 if (f.Position != SkillPosition.None && f.Position != position)
                     continue;
                 // Mobius skill-level <cond><using kind> (Focus Chance / Focus Power require a dagger in hand).
-                if (UsingGateFails(f, wearing))
+                if (UsingGateFails(f, wearing, wearingSlot))
                     continue;
                 if (f.HpBelowPercent is int maxHpPct && hpPercent > maxHpPct)
                     continue;
@@ -109,13 +110,17 @@ public sealed class SkillStatEffectCatalog
     }
 
 
-    static bool UsingGateFails(SkillStatFunc f, Func<string[], bool>? wearing)
+    static bool UsingGateFails(SkillStatFunc f, Func<string[], bool>? wearing, Func<string[], bool>? wearingSlot = null)
     {
-        if (wearing == null)
+        // No inventory context (unit tests that omit wearing) — leave kind/slot gates off.
+        if (wearing == null && wearingSlot == null)
             return false;
-        if (f.Using != null && !wearing(f.Using))
+        if (f.Using != null && (wearing == null || !wearing(f.Using)))
             return true;
-        if (f.NotUsing != null && wearing(f.NotUsing))
+        if (f.NotUsing != null && wearing != null && wearing(f.NotUsing))
+            return true;
+        // Fail closed when a slot gate is present but the caller gave inventory kinds without a slot checker.
+        if (f.UsingSlot != null && (wearingSlot == null || !wearingSlot(f.UsingSlot)))
             return true;
         return false;
     }
@@ -133,7 +138,8 @@ public sealed class SkillStatEffectCatalog
         CombatStatMods? mods = null,
         bool resting = false,
         double hpPercent = 100d,
-        bool moving = false)
+        bool moving = false,
+        Func<string[], bool>? wearingSlot = null)
     {
         foreach (var (skillId, level) in known)
         {
@@ -141,7 +147,7 @@ public sealed class SkillStatEffectCatalog
                 continue;
             foreach (var f in effect.Funcs)
             {
-                if (UsingGateFails(f, wearing))
+                if (UsingGateFails(f, wearing, wearingSlot))
                     continue;
                 if (f.Resting && !resting)
                     continue;
@@ -166,7 +172,8 @@ public sealed class SkillStatEffectCatalog
     public CombatStatMods CollectPositional(
         IEnumerable<SkillStatSource> sources,
         SkillPosition position,
-        Func<string[], bool>? wearing = null)
+        Func<string[], bool>? wearing = null,
+        Func<string[], bool>? wearingSlot = null)
     {
         if (position == SkillPosition.None)
             return CombatStatMods.None;
@@ -182,7 +189,7 @@ public sealed class SkillStatEffectCatalog
             {
                 if (f.Position == SkillPosition.None || f.Position != position)
                     continue;
-                if (UsingGateFails(f, wearing))
+                if (UsingGateFails(f, wearing, wearingSlot))
                     continue;
                 mods ??= new CombatStatMods();
                 mods.Add(f, level);
@@ -238,7 +245,10 @@ public sealed class SkillStatEffectCatalog
                 string[]? notUsing = e.TryGetProperty("notUsing", out var nu)
                     ? nu.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
                     : null;
-                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing, notUsing));
+                string[]? usingSlot = e.TryGetProperty("usingSlot", out var us)
+                    ? us.EnumerateArray().Select(k => (k.GetString() ?? "").ToLowerInvariant()).ToArray()
+                    : null;
+                funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing, notUsing, usingSlot));
             }
             if (funcs.Count > 0)
             {
