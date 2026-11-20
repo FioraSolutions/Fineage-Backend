@@ -118,10 +118,14 @@ public sealed class NetPvpTests
     [Fact]
     public async Task You_cannot_attack_yourself()
     {
-        var (kit, session, player, _, _, _) = await SetupAsync();
+        var (kit, session, player, _, _, rec) = await SetupAsync();
         player.PvpFlagged = true;
+        int hp = player.CurHp;
 
-        Assert.NotNull(await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
+        Assert.Equal("attack", await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
+        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(hp, player.CurHp);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
     }
 
     [Fact]

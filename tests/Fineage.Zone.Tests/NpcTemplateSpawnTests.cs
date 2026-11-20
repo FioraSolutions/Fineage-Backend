@@ -19,7 +19,7 @@ public sealed class NpcTemplateSpawnTests
     [Fact]
     public void Templates_load_and_every_spawn_references_one()
     {
-        var templates = NpcCatalog.LoadDefault();
+        var templates = TestCatalogs.Npcs;
         Assert.Equal(MobiusTemplateCount, templates.ById.Count);
 
         var lector = templates.Get(30001);
@@ -46,7 +46,7 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal(50f, gremlin.RunSpeed);
         Assert.Equal(20f, gremlin.WalkSpeed);
 
-        var spawns = SpawnCatalog.LoadDefault();
+        var spawns = TestCatalogs.Spawns;
         var seen = new HashSet<int>();
         foreach (var map in spawns.Maps.Values)
         {
@@ -65,7 +65,7 @@ public sealed class NpcTemplateSpawnTests
     [Fact]
     public void Cedric_gremlin_rows_keep_their_inline_stats()
     {
-        var rows = SpawnCatalog.LoadDefault().GetMap(SpawnCatalog.DefaultMapId).Npcs;
+        var rows = TestCatalogs.Spawns.GetMap(SpawnCatalog.DefaultMapId).Npcs;
         Assert.Equal([50001, 50002, 50003], rows.Select(row => row.ObjectId).ToArray());
         Assert.All(rows, row =>
         {
@@ -82,7 +82,7 @@ public sealed class NpcTemplateSpawnTests
     [Fact]
     public void Talking_Island_village_matches_Mobius_and_towns_are_enabled()
     {
-        var spawns = SpawnCatalog.LoadDefault();
+        var spawns = TestCatalogs.Spawns;
         var village = spawns.GetMap(SpawnCatalog.TalkingIslandVillageMapId);
         Assert.True(village.Enabled);
         Assert.Equal(TalkingIslandNpcCount, village.Npcs.Count);
@@ -171,28 +171,19 @@ public sealed class NpcTemplateSpawnTests
     public void CreateWorld_defaults_to_all_enabled_maps()
     {
         var baseline = new ZoneWorld().NpcObjectIds;
-        var hosted = ZoneAoiSettings.CreateWorld();
-        Assert.Equal(new ZoneWorld(includeEnabledMaps: true).NpcObjectIds, hosted.NpcObjectIds);
-        Assert.True(hosted.NpcObjectIds.Count > baseline.Count);
-        Assert.Contains(60013, hosted.NpcObjectIds);
-    }
-
-    [Fact]
-    public void Enabled_maps_include_the_Talking_Island_village()
-    {
-        var baseline = new ZoneWorld().NpcObjectIds;
-        var world = new ZoneWorld(includeEnabledMaps: true);
-        int extra = SpawnCatalog.LoadDefault().Maps.Values
+        var enabled = new ZoneWorld(includeEnabledMaps: true);
+        int extra = TestCatalogs.Spawns.Maps.Values
             .Where(map => map.Enabled && map.MapId != SpawnCatalog.SmokeMapId)
             .Sum(map => map.Npcs.Count);
         Assert.True(extra > TalkingIslandNpcCount);
-        Assert.Equal(baseline.Count + extra, world.NpcObjectIds.Count);
-        foreach (int id in baseline)
-            Assert.Contains(id, world.NpcObjectIds);
-        Assert.Contains(60013, world.NpcObjectIds);
 
         var hosted = ZoneAoiSettings.CreateWorld();
-        Assert.Equal(world.NpcObjectIds, hosted.NpcObjectIds);
+        Assert.Equal(enabled.NpcObjectIds, hosted.NpcObjectIds);
+        Assert.True(hosted.NpcObjectIds.Count > baseline.Count);
+        Assert.Equal(baseline.Count + extra, enabled.NpcObjectIds.Count);
+        foreach (int id in baseline)
+            Assert.Contains(id, enabled.NpcObjectIds);
+        Assert.Contains(60013, enabled.NpcObjectIds);
     }
 
     [Fact]

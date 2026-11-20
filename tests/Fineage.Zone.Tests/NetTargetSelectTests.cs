@@ -144,9 +144,11 @@ public sealed class NetTargetSelectTests
         var (kit, session, player, rec) = await SetupAsync();
 
         // Action 2 with nothing selected is the same "no target" answer as AttackRequest.
+        Assert.Equal(0, session.SelectedTargetId);
         string? error = await kit.World.TryCharacterActionAsync(session, ActionProtocol.Attack, 0, default);
 
-        Assert.NotNull(error);
+        Assert.Equal("attack", error);
+        Assert.Equal(0, session.AutoAttackTargetId);
     }
 
     /// <summary>

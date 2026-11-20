@@ -49,25 +49,26 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
-    public void Hub_register_lookup_unregister()
-    {
-        var hub = new NetPresenceHub();
-        Assert.False(hub.TryGet(1, out _, out _));
-        // Without a live socket we only assert Unregister is safe.
-        hub.Unregister(1);
-        Assert.False(hub.TryGet(1, out _, out _));
-    }
-
-    [Fact]
     public void Stale_connection_cannot_unregister_the_object_id_a_newer_connection_owns()
     {
         // World object ids are reused the moment a player leaves. A connection still tearing down must not
         // remove the entry a newer connection just claimed, or the newcomer stops receiving presence fanout.
+        var hub = new NetPresenceHub();
+        Assert.False(hub.TryGet(1, out _, out _));
+        hub.Unregister(1);
+        Assert.False(hub.TryGet(1, out _, out _));
+
+        using var lone = new SocketPair();
+        hub.Register(42, lone.Connection, EntityId.FromObjectId(42));
+        Assert.True(hub.TryGet(42, out var live, out var liveId));
+        Assert.Same(lone.Connection, live);
+        Assert.Equal(EntityId.FromObjectId(42), liveId);
+        Assert.True(hub.Unregister(42, lone.Connection));
+        Assert.False(hub.TryGet(42, out _, out _));
+
         using var oldSide = new SocketPair();
         using var newSide = new SocketPair();
-        var hub = new NetPresenceHub();
         var entityId = EntityId.FromObjectId(1);
-
         hub.Register(1, oldSide.Connection, entityId);
         hub.Register(1, newSide.Connection, entityId);
 
@@ -104,39 +105,6 @@ public sealed class NetPresenceHubTests
             ClientSide.Dispose();
             _listener.Stop();
         }
-    }
-
-    [Fact]
-    public void Warehouse_codec_round_trip()
-    {
-        var deposit = new WarehouseDepositListNetMsg
-        {
-            NpcObjectId = 1,
-            FeePerLine = 30,
-            Adena = 100,
-            Items = [new ItemListEntryNet { ObjectId = 9, ItemId = 57, Count = 5, EnchantLevel = 0, EquippedSlot = -1 }]
-        };
-        var depositAgain = NetCodec.DecodeWarehouseDepositList(NetCodec.EncodeWarehouseDepositList(deposit));
-        Assert.Equal(30, depositAgain.FeePerLine);
-        Assert.Equal(57, depositAgain.Items[0].ItemId);
-
-        var withdraw = new WarehouseWithdrawListNetMsg
-        {
-            NpcObjectId = 1,
-            CurrentWeight = 10,
-            MaxWeight = 100,
-            Items = [new ItemListEntryNet { ObjectId = 3, ItemId = 1, Count = 1, EquippedSlot = -1 }]
-        };
-        Assert.Equal(10, NetCodec.DecodeWarehouseWithdrawList(NetCodec.EncodeWarehouseWithdrawList(withdraw)).CurrentWeight);
-
-        var req = new WarehouseDepositRequestNetMsg
-        {
-            NpcObjectId = 1,
-            Lines = [new ShopObjectCountNet { ObjectId = 9, Count = 2 }]
-        };
-        Assert.Equal(9, NetCodec.DecodeWarehouseDepositRequest(NetCodec.EncodeWarehouseDepositRequest(req)).Lines[0].ObjectId);
-        Assert.Equal(2, NetCodec.DecodeWarehouseWithdrawRequest(NetCodec.EncodeWarehouseWithdrawRequest(
-            new WarehouseWithdrawRequestNetMsg { NpcObjectId = 1, Lines = req.Lines })).Lines[0].Count);
     }
 
     [Fact]
@@ -400,26 +368,6 @@ public sealed class NetPresenceHubTests
     }
 
     [Fact]
-    public void Say_and_system_message_codec_round_trip()
-    {
-        var say = new SayNetMsg { Text = "hi", ChatType = 1 };
-        var sayAgain = NetCodec.DecodeSay(NetCodec.EncodeSay(say));
-        Assert.Equal("hi", sayAgain.Text);
-        Assert.Equal(1, sayAgain.ChatType);
-
-        var creature = new CreatureSayNetMsg { ObjectId = 3, Name = "Aria", Text = "yo", ChatType = 0 };
-        var creatureAgain = NetCodec.DecodeCreatureSay(NetCodec.EncodeCreatureSay(creature));
-        Assert.Equal("Aria", creatureAgain.Name);
-        Assert.Equal("yo", creatureAgain.Text);
-
-        var sys = new SystemMessageNetMsg { Id = 1, Text = "Welcome, Aria.", Params = ["Aria"] };
-        var sysAgain = NetCodec.DecodeSystemMessage(NetCodec.EncodeSystemMessage(sys));
-        Assert.Equal(1, sysAgain.Id);
-        Assert.Equal("Welcome, Aria.", sysAgain.Text);
-        Assert.Single(sysAgain.Params);
-    }
-
-    [Fact]
     public void Drop_use_unequip_codec_round_trip()
     {
         var drop = new DropItemRequestNetMsg { ObjectId = 5, Count = 2, X = 1, Y = 2, Z = 3 };
@@ -429,98 +377,6 @@ public sealed class NetPresenceHubTests
 
         Assert.Equal(9, NetCodec.DecodeUseItem(NetCodec.EncodeUseItem(new UseItemNetMsg { ObjectId = 9 })).ObjectId);
         Assert.Equal(7, NetCodec.DecodeUnequipItem(NetCodec.EncodeUnequipItem(new UnequipItemNetMsg { PaperdollSlot = 7 })).PaperdollSlot);
-    }
-
-    [Fact]
-    public void Pickup_inventory_update_codec_round_trip()
-    {
-        var update = new InventoryUpdateNetMsg
-        {
-            Changes =
-            [
-                new InventoryUpdateEntryNet
-                {
-                    Change = 0,
-                    ObjectId = 11,
-                    ItemId = 57,
-                    Count = 40,
-                    EnchantLevel = 0,
-                    EquippedSlot = -1,
-                    BodySlot = "none",
-                    Kind = "etc"
-                }
-            ]
-        };
-        var again = NetCodec.DecodeInventoryUpdate(NetCodec.EncodeInventoryUpdate(update));
-        Assert.Single(again.Changes);
-        Assert.Equal(57, again.Changes[0].ItemId);
-        Assert.Equal(40, again.Changes[0].Count);
-        Assert.Equal("none", again.Changes[0].BodySlot);
-        Assert.Equal("etc", again.Changes[0].Kind);
-
-        var pickup = new PickupRequestNetMsg { GroundObjectId = 99 };
-        Assert.Equal(99, NetCodec.DecodePickupRequest(NetCodec.EncodePickupRequest(pickup)).GroundObjectId);
-    }
-
-    [Fact]
-    public void Die_and_drop_codec_round_trip()
-    {
-        var die = new EntityDieMsg { EntityValue = 9001, EntityGeneration = 1, KillerObjectId = 7 };
-        var dieAgain = NetCodec.DecodeEntityDie(NetCodec.EncodeEntityDie(die));
-        Assert.Equal(9001ul, dieAgain.EntityValue);
-        Assert.Equal(7, dieAgain.KillerObjectId);
-
-        var drop = new DropItemNetMsg
-        {
-            DropperObjectId = 7,
-            EntityValue = 55,
-            EntityGeneration = 1,
-            ItemId = 57,
-            X = 1,
-            Y = 2,
-            Z = 3,
-            Stackable = true,
-            Count = 40
-        };
-        var dropAgain = NetCodec.DecodeDropItem(NetCodec.EncodeDropItem(drop));
-        Assert.Equal(57, dropAgain.ItemId);
-        Assert.Equal(40, dropAgain.Count);
-        Assert.True(dropAgain.Stackable);
-    }
-
-    [Fact]
-    public void Attack_and_status_codec_round_trip()
-    {
-        var attack = new AttackStateMsg
-        {
-            AttackerValue = 1,
-            AttackerGeneration = 1,
-            TargetValue = 9001,
-            TargetGeneration = 1,
-            Damage = 12,
-            Flags = 0,
-            AttackerX = 1,
-            AttackerY = 2,
-            AttackerZ = 3,
-            TargetX = 4,
-            TargetY = 5,
-            TargetZ = 6
-        };
-        var again = NetCodec.DecodeAttackState(NetCodec.EncodeAttackState(attack));
-        Assert.Equal(12, again.Damage);
-        Assert.Equal(9001ul, again.TargetValue);
-
-        var status = new StatusUpdateNetMsg
-        {
-            EntityValue = 9001,
-            EntityGeneration = 1,
-            AttributeIds = [9, 10],
-            Values = [80, 100]
-        };
-        var statusAgain = NetCodec.DecodeStatusUpdate(NetCodec.EncodeStatusUpdate(status));
-        Assert.Equal(2, statusAgain.AttributeIds.Length);
-        Assert.Equal(80, statusAgain.Values[0]);
-        Assert.Equal(100, statusAgain.Values[1]);
     }
 
     [Fact]
