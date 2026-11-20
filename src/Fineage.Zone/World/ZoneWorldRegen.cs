@@ -4,6 +4,7 @@ using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -21,30 +22,14 @@ public sealed partial class ZoneWorld
 
     async Task SimulationLoopAsync(CancellationToken ct)
     {
-        int delayMs = ZoneSimulationSettings.TickMilliseconds;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(delayMs));
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_simulationTicks.StepMilliseconds));
         try
         {
             while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
                 long started = Stopwatch.GetTimestamp();
                 lock (_gate)
-                {
-                    TickRegen();
-                    TickSpawns();
-                    TickAbnormals();
-                    TickBosses();
-                    CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
-                    TickHallAuctions(_clock().ToUnixTimeMilliseconds());
-                    TickSieges(_clock().ToUnixTimeMilliseconds());
-                    TickManor(_clock().ToUnixTimeMilliseconds());
-                    TickFishing(_clock().ToUnixTimeMilliseconds());
-                    TickLottery(_clock().ToUnixTimeMilliseconds());
-                    TickSevenSigns();
-                    TickMammon(_clock().ToUnixTimeMilliseconds());
-                    TickOlympiad();
-                }
-                await Task.CompletedTask.ConfigureAwait(false);
+                    _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
@@ -53,11 +38,15 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same body the loop runs.</summary>
+    /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same stages the loop runs.</summary>
     internal async Task RunRegenTickAsync(CancellationToken ct)
     {
         lock (_gate)
-            TickRegen();
+        {
+            long now = _clock().ToUnixTimeMilliseconds();
+            _simulationTicks.RunNow(_regenPlayersStage, now);
+            _simulationTicks.RunNow(_regenNpcsStage, now);
+        }
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
@@ -101,62 +90,63 @@ public sealed partial class ZoneWorld
             mods.Apply(CombatStat.RegMp, ZoneRegen.MpPerTick(player.Level, menBonus, posture)));
     }
 
-    void TickRegen()
+    void CollectRegenPlayers(TickContext tick, RegionWorkCollector work)
     {
         foreach (var entity in Players())
-        {
-            if (entity.Dead)
-                continue;
-            // Mobius PlayerStatus.doRegeneration regenerates CP in the same tick as HP/MP.
-            if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp && entity.CurCp >= entity.MaxCp)
-                continue;
-            // Mobius Formulas.calcHpRegen/calcMpRegen: (calcStat(REGENERATE_HP_RATE, max(1, init), …) * multiplier).
-            // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
-            // (Fast HP Recovery, Mana Recovery, Vital Force, …) raise it, through the same pipeline as everything else.
-            var mods = PlayerStatMods(entity);
-            var posture = RegenPosture(entity);
-            var (conBonus, menBonus) = RegenStatBonuses(entity);
-            double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
-                ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture)
-                : 0d);
-            double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
-                ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture)
-                : 0d);
-            double cpRate = entity.CurCp < entity.MaxCp ? CpRegenRate(entity, mods, posture, conBonus) : 0d;
+            work.Add(entity.ObjectId, entity.InstanceId, entity.X, entity.Y);
+    }
 
-            // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the
-            // fractional remainder is carried per entity instead of being truncated away every tick.
-            // A negative folded rate (a debuff subtracting more than the base) is floored at 0 rather than letting the
-            // carry drift negative and flip into healing on a later tick.
-            entity.RegenCarryHp += Math.Max(0d, hpRate);
-            entity.RegenCarryMp += Math.Max(0d, mpRate);
-            entity.RegenCarryCp += Math.Max(0d, cpRate);
-            int hpGain = (int)Math.Floor(entity.RegenCarryHp);
-            int mpGain = (int)Math.Floor(entity.RegenCarryMp);
-            int cpGain = (int)Math.Floor(entity.RegenCarryCp);
-            entity.RegenCarryHp -= hpGain;
-            entity.RegenCarryMp -= mpGain;
-            entity.RegenCarryCp -= cpGain;
-            if (hpGain == 0 && mpGain == 0 && cpGain == 0)
-                continue;
+    void RegenPlayer(int objectId)
+    {
+        if (!_byId.TryGetValue(objectId, out var entity) || entity.Dead)
+            return;
+        // Mobius PlayerStatus.doRegeneration regenerates CP in the same tick as HP/MP.
+        if (entity.CurHp >= entity.MaxHp && entity.CurMp >= entity.MaxMp && entity.CurCp >= entity.MaxCp)
+            return;
+        // Mobius Formulas.calcHpRegen/calcMpRegen: (calcStat(REGENERATE_HP_RATE, max(1, init), …) * multiplier).
+        // Folding the stat means Weight Penalty 4270's regHp/regMp ×0.5 halves the rate, and the regen masteries
+        // (Fast HP Recovery, Mana Recovery, Vital Force, …) raise it, through the same pipeline as everything else.
+        var mods = PlayerStatMods(entity);
+        var posture = RegenPosture(entity);
+        var (conBonus, menBonus) = RegenStatBonuses(entity);
+        double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
+            ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture)
+            : 0d);
+        double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
+            ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture)
+            : 0d);
+        double cpRate = entity.CurCp < entity.MaxCp ? CpRegenRate(entity, mods, posture, conBonus) : 0d;
 
-            if (hpGain > 0)
-                entity.CurHp = Math.Min(entity.MaxHp, entity.CurHp + hpGain);
-            if (mpGain > 0)
-                entity.CurMp = Math.Min(entity.MaxMp, entity.CurMp + mpGain);
-            if (cpGain > 0)
-                entity.CurCp = Math.Min(entity.MaxCp, entity.CurCp + cpGain);
-            if (entity.CurHp >= entity.MaxHp)
-                entity.RegenCarryHp = 0;
-            if (entity.CurCp >= entity.MaxCp)
-                entity.RegenCarryCp = 0;
-            if (entity.CurMp >= entity.MaxMp)
-                entity.RegenCarryMp = 0;
+        // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the
+        // fractional remainder is carried per entity instead of being truncated away every tick.
+        // A negative folded rate (a debuff subtracting more than the base) is floored at 0 rather than letting the
+        // carry drift negative and flip into healing on a later tick.
+        entity.RegenCarryHp += Math.Max(0d, hpRate);
+        entity.RegenCarryMp += Math.Max(0d, mpRate);
+        entity.RegenCarryCp += Math.Max(0d, cpRate);
+        int hpGain = (int)Math.Floor(entity.RegenCarryHp);
+        int mpGain = (int)Math.Floor(entity.RegenCarryMp);
+        int cpGain = (int)Math.Floor(entity.RegenCarryCp);
+        entity.RegenCarryHp -= hpGain;
+        entity.RegenCarryMp -= mpGain;
+        entity.RegenCarryCp -= cpGain;
+        if (hpGain == 0 && mpGain == 0 && cpGain == 0)
+            return;
 
-            FanoutVitals(entity, PlayerVitalsStatus(entity));
-        }
+        if (hpGain > 0)
+            entity.CurHp = Math.Min(entity.MaxHp, entity.CurHp + hpGain);
+        if (mpGain > 0)
+            entity.CurMp = Math.Min(entity.MaxMp, entity.CurMp + mpGain);
+        if (cpGain > 0)
+            entity.CurCp = Math.Min(entity.MaxCp, entity.CurCp + cpGain);
+        if (entity.CurHp >= entity.MaxHp)
+            entity.RegenCarryHp = 0;
+        if (entity.CurCp >= entity.MaxCp)
+            entity.RegenCarryCp = 0;
+        if (entity.CurMp >= entity.MaxMp)
+            entity.RegenCarryMp = 0;
 
-        TickNpcRegen();
+        FanoutVitals(entity, PlayerVitalsStatus(entity));
     }
 
 }

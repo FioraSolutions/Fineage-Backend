@@ -4,6 +4,7 @@ using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -26,46 +27,56 @@ public sealed partial class ZoneWorld
     /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
     /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
     /// </summary>
-    void TickNpcRegen()
+    void CollectRegenNpcs(TickContext tick, RegionWorkCollector work)
     {
         if (!_npcRegen || _needRegen.Count == 0)
             return;
         foreach (int id in _needRegen.ToArray())
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+            if (!_byId.TryGetValue(id, out var entity))
             {
                 _needRegen.Remove(id);
                 continue;
             }
-            if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
-            {
-                SyncNeedRegen(npc);
-                continue;
-            }
-
-            // DoT (poison/bleed) must outpace NPC regen or StatusUpdate HP looks stuck at full.
-            bool hasDot = npc.Abnormals.Any(a => _skillDots.TryGet(a.Id, out _));
-            npc.RegenCarryHp += !hasDot && npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
-            npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
-            int hpGain = (int)Math.Floor(npc.RegenCarryHp);
-            int mpGain = (int)Math.Floor(npc.RegenCarryMp);
-            npc.RegenCarryHp -= hpGain;
-            npc.RegenCarryMp -= mpGain;
-            if (hpGain == 0 && mpGain == 0)
-                continue;
-
-            if (hpGain > 0)
-                npc.CurHp = Math.Min(npc.MaxHp, npc.CurHp + hpGain);
-            if (mpGain > 0)
-                npc.CurMp = Math.Min(npc.MaxMp, npc.CurMp + mpGain);
-            if (npc.CurHp >= npc.MaxHp)
-                npc.RegenCarryHp = 0;
-            if (npc.CurMp >= npc.MaxMp)
-                npc.RegenCarryMp = 0;
-
-            SyncNeedRegen(npc);
-            FanoutVitals(npc, StatusFor(npc));
+            work.Add(id, entity.InstanceId, entity.X, entity.Y);
         }
+    }
+
+    void RegenNpc(int id)
+    {
+        if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+        {
+            _needRegen.Remove(id);
+            return;
+        }
+        if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
+        {
+            SyncNeedRegen(npc);
+            return;
+        }
+
+        // DoT (poison/bleed) must outpace NPC regen or StatusUpdate HP looks stuck at full.
+        bool hasDot = npc.Abnormals.Any(a => _skillDots.TryGet(a.Id, out _));
+        npc.RegenCarryHp += !hasDot && npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
+        npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
+        int hpGain = (int)Math.Floor(npc.RegenCarryHp);
+        int mpGain = (int)Math.Floor(npc.RegenCarryMp);
+        npc.RegenCarryHp -= hpGain;
+        npc.RegenCarryMp -= mpGain;
+        if (hpGain == 0 && mpGain == 0)
+            return;
+
+        if (hpGain > 0)
+            npc.CurHp = Math.Min(npc.MaxHp, npc.CurHp + hpGain);
+        if (mpGain > 0)
+            npc.CurMp = Math.Min(npc.MaxMp, npc.CurMp + mpGain);
+        if (npc.CurHp >= npc.MaxHp)
+            npc.RegenCarryHp = 0;
+        if (npc.CurMp >= npc.MaxMp)
+            npc.RegenCarryMp = 0;
+
+        SyncNeedRegen(npc);
+        FanoutVitals(npc, StatusFor(npc));
     }
 
     void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status)
@@ -80,7 +91,8 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
                 continue;
-            netWatchers ??= [];            netWatchers.Add(watcher.ObjectId);
+            netWatchers ??= [];
+            netWatchers.Add(watcher.ObjectId);
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
