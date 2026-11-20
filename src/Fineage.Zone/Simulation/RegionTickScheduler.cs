@@ -67,6 +67,24 @@ public sealed class RegionTickScheduler
     }
 
     /// <summary>
+    /// Advances the clock and runs only period-1 stages (the 200 ms combat cadence). Slower simulation stages are
+    /// skipped so tests can step combat without firing regen and the other 3 s systems.
+    /// </summary>
+    public void StepCombat(long nowUnixMs)
+    {
+        long started = Stopwatch.GetTimestamp();
+        var tick = new TickContext(++Tick, nowUnixMs);
+        foreach (var stage in _stages)
+        {
+            if (stage.PeriodTicks != 1)
+                continue;
+            Report(stage.Run(this, tick));
+        }
+
+        _observer.StepCompleted(tick, Stopwatch.GetElapsedTime(started), TimeSpan.FromMilliseconds(StepMilliseconds));
+    }
+
+    /// <summary>
     /// Runs one registered region stage now, at the current tick, without advancing the clock (test and admin hooks).
     /// Failures are reported like in <see cref="Step"/> and then rethrown so the caller sees them.
     /// </summary>

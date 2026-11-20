@@ -73,6 +73,21 @@ public sealed class RegionTickSchedulerTests
     }
 
     [Fact]
+    public void StepCombat_runs_only_period_one_stages()
+    {
+        var ran = new List<string>();
+        var scheduler = Scheduler(SequentialRegionExecutor.Instance);
+        scheduler.AddWorldStage("fast", tick => ran.Add($"fast@{tick.Tick}"));
+        scheduler.AddWorldStage("slow", tick => ran.Add($"slow@{tick.Tick}"), periodTicks: 3);
+
+        scheduler.StepCombat(0);
+        scheduler.StepCombat(0);
+
+        Assert.Equal(["fast@1", "fast@2"], ran);
+        Assert.Equal(2, scheduler.Tick);
+    }
+
+    [Fact]
     public void Parallel_regions_finish_before_the_next_stage_starts()
     {
         int finished = 0;

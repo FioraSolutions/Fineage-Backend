@@ -17,7 +17,6 @@ public sealed partial class ZoneWorld
         if (_simulation != null)
             return;
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
-        _combatLoop = Task.Run(() => CombatLoopAsync(shutdown));
     }
 
     async Task SimulationLoopAsync(CancellationToken ct)
@@ -29,7 +28,13 @@ public sealed partial class ZoneWorld
             {
                 long started = Stopwatch.GetTimestamp();
                 lock (_gate)
-                    _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+                {
+                    WithDeferredInventoryPersist(() =>
+                    {
+                        _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+                        return 0;
+                    });
+                }
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }

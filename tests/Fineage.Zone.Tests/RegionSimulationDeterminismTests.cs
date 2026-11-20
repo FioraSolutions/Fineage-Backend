@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -7,9 +8,8 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// Regen and abnormal/DoT ticks run as per-region stages of the <see cref="RegionTickScheduler"/>. The outcome must
-/// not depend on how the world is cut into regions, and two identical worlds must produce identical state and the
-/// identical fanout sequence.
+/// Combat, regen and abnormal/DoT ticks share one <see cref="RegionTickScheduler"/>. Outcomes must not depend on the
+/// region partition, and identical worlds must produce identical state and fanout sequence.
 /// </summary>
 public sealed class RegionSimulationDeterminismTests
 {
@@ -17,13 +17,28 @@ public sealed class RegionSimulationDeterminismTests
     const int MobCount = 6;
     const int MobSpacing = 7_000;
     const int BleedSkillId = 96;
-    const int Steps = 12;
+    const int CombatSteps = 20;
+    const int RegenSteps = 12;
+
+    static readonly string[] LegacyCombatOrder =
+    [
+        "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
+        "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
+        "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
+        "ground-expiry"
+    ];
+
+    static readonly string[] LegacySimulationOrder =
+    [
+        "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "clan.dissolutions", "clan.hall-auctions",
+        "sieges", "manor", "fishing", "lottery", "seven-signs", "mammon", "olympiad"
+    ];
 
     [Fact]
     public async Task Identical_worlds_produce_identical_state_and_fanout_sequence()
     {
-        var first = await RunAsync(GridRegionPartition.MapTiles);
-        var second = await RunAsync(GridRegionPartition.MapTiles);
+        var first = await RunRegenAsync(GridRegionPartition.MapTiles);
+        var second = await RunRegenAsync(GridRegionPartition.MapTiles);
 
         Assert.Equal(first.State, second.State);
         Assert.Equal(first.Fanout, second.Fanout);
@@ -33,14 +48,37 @@ public sealed class RegionSimulationDeterminismTests
     [Fact]
     public async Task Regen_and_dot_outcome_does_not_depend_on_the_region_partition()
     {
-        var tiles = await RunAsync(GridRegionPartition.MapTiles);
-        var fine = await RunAsync(new GridRegionPartition(500));
-        var whole = await RunAsync(new GridRegionPartition(1 << 30));
+        var tiles = await RunRegenAsync(GridRegionPartition.MapTiles);
+        var fine = await RunRegenAsync(new GridRegionPartition(500));
+        var whole = await RunRegenAsync(new GridRegionPartition(1 << 30));
 
         Assert.Equal(tiles.State, fine.State);
         Assert.Equal(tiles.State, whole.State);
         Assert.Equal(Sorted(tiles.Fanout), Sorted(fine.Fanout));
         Assert.Equal(Sorted(tiles.Fanout), Sorted(whole.Fanout));
+    }
+
+    [Fact]
+    public async Task Combat_outcome_does_not_depend_on_the_region_partition()
+    {
+        var tiles = await RunCombatAsync(GridRegionPartition.MapTiles);
+        var fine = await RunCombatAsync(new GridRegionPartition(500));
+        var whole = await RunCombatAsync(new GridRegionPartition(1 << 30));
+
+        Assert.Equal(tiles.State, fine.State);
+        Assert.Equal(tiles.State, whole.State);
+        Assert.Equal(Sorted(tiles.Fanout), Sorted(fine.Fanout));
+        Assert.Equal(Sorted(tiles.Fanout), Sorted(whole.Fanout));
+    }
+
+    [Fact]
+    public async Task Identical_worlds_produce_identical_combat_state_and_fanout_sequence()
+    {
+        var first = await RunCombatAsync(GridRegionPartition.MapTiles);
+        var second = await RunCombatAsync(GridRegionPartition.MapTiles);
+
+        Assert.Equal(first.State, second.State);
+        Assert.Equal(first.Fanout, second.Fanout);
     }
 
     [Fact]
@@ -60,53 +98,108 @@ public sealed class RegionSimulationDeterminismTests
     }
 
     [Fact]
-    public async Task Full_step_runs_every_stage_in_the_legacy_loop_order_without_failures()
+    public void Combat_step_runs_every_combat_stage_in_the_legacy_loop_order_without_failures()
     {
         var observer = new StageObserver();
-        var (kit, _, _) = await SetupAsync(GridRegionPartition.MapTiles, observer);
+        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
 
-        kit.World.StepSimulation();
+        kit.World.StepCombat();
 
-        string[] legacyOrder =
-        [
-            "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "clan.dissolutions", "clan.hall-auctions",
-            "sieges", "manor", "fishing", "lottery", "seven-signs", "mammon", "olympiad"
-        ];
-        Assert.Equal(legacyOrder, kit.World.SimulationTicks.StageNames);
-        Assert.Equal(legacyOrder, observer.Completed);
+        Assert.Equal(LegacyCombatOrder, kit.World.SimulationTicks.StageNames.Take(LegacyCombatOrder.Length));
+        Assert.Equal(LegacyCombatOrder, observer.Completed);
         Assert.Empty(observer.Failures);
         Assert.Equal(1, kit.World.SimulationTicks.Tick);
     }
 
-    static async Task<(List<string> State, List<string> Fanout)> RunAsync(IRegionPartition partition)
+    [Fact]
+    public void Slow_simulation_stages_run_in_the_legacy_loop_order_on_period_ticks()
+    {
+        var observer = new StageObserver();
+        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
+
+        int slow = ZoneSimulationSettings.SlowPeriodTicks;
+        for (int i = 0; i < slow - 1; i++)
+            kit.World.StepCombat();
+
+        kit.World.StepSimulation();
+
+        var slowCompleted = observer.Completed.Where(LegacySimulationOrder.Contains).ToList();
+        Assert.Equal(LegacySimulationOrder, slowCompleted);
+        Assert.Empty(observer.Failures);
+        Assert.Equal(slow, kit.World.SimulationTicks.Tick);
+    }
+
+    [Fact]
+    public void Full_step_advances_both_cadences_and_logs_all_stages_that_ran()
+    {
+        var observer = new StageObserver();
+        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
+
+        int slow = ZoneSimulationSettings.SlowPeriodTicks;
+        for (int i = 0; i < slow - 1; i++)
+            kit.World.StepCombat();
+
+        kit.World.StepSimulation();
+
+        var expected = new List<string>();
+        for (int i = 0; i < slow - 1; i++)
+            expected.AddRange(LegacyCombatOrder);
+        expected.AddRange(LegacyCombatOrder);
+        expected.AddRange(LegacySimulationOrder);
+        Assert.Equal(expected, observer.Completed);
+        Assert.Empty(observer.Failures);
+        Assert.Equal(slow, kit.World.SimulationTicks.Tick);
+    }
+
+    static async Task<(List<string> State, List<string> Fanout)> RunRegenAsync(IRegionPartition partition)
     {
         var (kit, recorder, tracked) = await SetupAsync(partition, new StageObserver());
-        for (int step = 0; step < Steps; step++)
+        for (int step = 0; step < RegenSteps; step++)
         {
-            kit.Now = kit.Now.AddMilliseconds(Fineage.Zone.Combat.ZoneRegen.DefaultTickMs);
+            kit.Now = kit.Now.AddMilliseconds(ZoneRegen.DefaultTickMs);
             await kit.World.RunRegenTickAsync(CancellationToken.None);
             await kit.World.RunAbnormalTickAsync(CancellationToken.None);
         }
 
+        return (CaptureState(kit, tracked), CaptureFanout(recorder));
+    }
+
+    static async Task<(List<string> State, List<string> Fanout)> RunCombatAsync(IRegionPartition partition)
+    {
+        var (kit, recorder, tracked) = await SetupAsync(partition, new StageObserver());
+        for (int step = 0; step < CombatSteps; step++)
+        {
+            kit.Now = kit.Now.AddMilliseconds(ZoneCombat.AutoAttackTickMs);
+            await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
+        }
+
+        return (CaptureState(kit, tracked), CaptureFanout(recorder));
+    }
+
+    static List<string> CaptureState(NetTestKit kit, int[] tracked)
+    {
         var state = new List<string>();
         foreach (int id in tracked)
         {
             Assert.True(kit.World.TryGetEntityById(id, out var e));
             string abnormals = string.Join(",", e.Abnormals.Select(a => $"{a.Id}:{a.ExpiresAtUnixMs}:{a.NextDotAtUnixMs}"));
-            state.Add($"{id} hp={e.CurHp} mp={e.CurMp} cp={e.CurCp} " +
+            state.Add($"{id} hp={e.CurHp} mp={e.CurMp} cp={e.CurCp} x={e.X} y={e.Y} move={e.MoveActive} " +
                       $"carry={e.RegenCarryHp:R}/{e.RegenCarryMp:R}/{e.RegenCarryCp:R} ab=[{abnormals}]");
         }
 
-        List<string> fanout;
+        return state;
+    }
+
+    static List<string> CaptureFanout(NetBridgeRecorder recorder)
+    {
         lock (recorder.Calls)
-            fanout = recorder.Calls.Select(Describe).ToList();
-        return (state, fanout);
+            return recorder.Calls.Select(Describe).ToList();
     }
 
     static async Task<(NetTestKit Kit, NetBridgeRecorder Recorder, int[] Tracked)> SetupAsync(
         IRegionPartition partition, ISimulationObserver observer)
     {
-        var kit = new NetTestKit(Map(), "determinism", regions: partition, simulationObserver: observer);
+        var kit = new NetTestKit(Map(), "determinism", regions: partition, simulationObserver: observer, spawnRandom: new Random(1));
         var (_, west) = await kit.EnterAsync();
         var (_, east) = await kit.EnterAsync(x: NetTestKit.ElfX + 21_000);
         var (bridge, recorder) = NetBridgeRecorder.Create();
@@ -147,7 +240,7 @@ public sealed class RegionSimulationDeterminismTests
             ["determinism"] = new("determinism", true,
                 Enumerable.Range(0, MobCount).Select(i =>
                     new SpawnNpcDefinition(FirstMobId + i, 97000 + i, "Gremlin", NetTestKit.ElfX + 30 + i * MobSpacing,
-                        NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 400, 1f, 1f, 60, 0, "", "Monster",
+                        NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 400, 1f, 1f, 60, 0, "", "Folk",
                         Level: 1 + i, HpRegen: 2.5 + i * 0.35, MpRegen: 1.2 + i * 0.15, MaxMp: 100,
                         AttackRange: 40, AttackSpeed: 253, Aggressive: false, AggroRange: 0, ClanHelpRange: 0, Clans: []))
                     .ToList())

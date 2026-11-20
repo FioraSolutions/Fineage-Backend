@@ -49,6 +49,7 @@ internal sealed class NetTestKit
         Fineage.Zone.Interest.IAoi? aoi = null,
         Random? deathRandom = null,
         Random? combatRandom = null,
+        Random? spawnRandom = null,
         Random? dropRandom = null,
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.DeathDropRules? deathDrop = null,
@@ -60,7 +61,8 @@ internal sealed class NetTestKit
         Store = store ?? MemoryAccountStore.InMemory();
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
-            combatRandom: combatRandom, dropRandom: dropRandom, regions: regions, simulationObserver: simulationObserver);
+            combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
+            simulationObserver: simulationObserver);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>
