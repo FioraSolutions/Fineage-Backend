@@ -1,5 +1,6 @@
 using Fineage.Zone.Geo;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Accounts;
 using Fineage.Protocol;
@@ -195,7 +196,8 @@ public sealed partial class ZoneWorld
         IRegionPartition? regions = null,
         ISimulationObserver? simulationObserver = null,
         ulong? simulationSeed = null,
-        IRegionExecutor? regionExecutor = null)
+        IRegionExecutor? regionExecutor = null,
+        ILedgerJournal? ledgerJournal = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -255,6 +257,7 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
+        _ledger = new EconomyLedger(ledgerJournal ?? new MemoryLedgerJournal());
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = Streams(deathRandom, RandomPurpose.Death);

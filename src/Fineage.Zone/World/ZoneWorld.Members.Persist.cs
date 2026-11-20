@@ -108,6 +108,7 @@ public sealed partial class ZoneWorld
     /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set. Call outside <c>_gate</c>.</summary>
     void FlushDirtyInventories()
     {
+        _ledger.Flush();
         if (_dirtyInventories.Count > 0)
         {
             foreach (var (_, pair) in _dirtyInventories)

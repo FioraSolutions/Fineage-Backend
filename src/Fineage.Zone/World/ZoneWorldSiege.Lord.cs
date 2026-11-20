@@ -306,31 +306,56 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius <c>Castle.addToTreasury</c>: shop tax lands in the castle treasury. Goddard and Schuttgart pay Rune's rate
     /// to Rune, the southern castles pay Aden's rate to Aden (when that castle has an owner); Aden and Rune keep all.
+    /// Returns what each treasury actually gained, which the treasury cap can make less than the share.
     /// </summary>
-    void CreditCastleTax(int castleId, long amount)
+    List<(int CastleId, long Amount)> CreditCastleTax(int castleId, long amount)
     {
+        var credited = new List<(int CastleId, long Amount)>();
         if (castleId <= 0 || amount <= 0)
-            return;
+            return credited;
         var castle = _siege.Board.Find(castleId);
         if (castle == null || castle.OwnerClanId <= 0)
-            return;
-        int overlordId = castleId switch
-        {
-            AdenCastleId or RuneCastleId => 0,
-            GoddardCastleId or SchuttgartCastleId => RuneCastleId,
-            _ => AdenCastleId
-        };
+            return credited;
+        int overlordId = OverlordOf(castleId);
         if (overlordId > 0 && _siege.Board.Find(overlordId) is { OwnerClanId: > 0 } overlord)
         {
             long cut = (long)(amount * (overlord.TaxPercent / 100d));
+            long before = overlord.Treasury;
             if (cut > 0 && _siege.Board.AddTreasury(overlordId, cut))
+            {
                 amount -= cut;
+                credited.Add((overlordId, overlord.Treasury - before));
+            }
         }
 
         if (amount > 0)
+        {
+            long before = castle.Treasury;
             _siege.Board.AddTreasury(castleId, amount);
+            credited.Add((castleId, castle.Treasury - before));
+        }
+
         PersistSiege();
+        return credited;
     }
+
+    /// <summary>The castles whose treasury a tax at <paramref name="castleId"/> can reach, the castle first.</summary>
+    IEnumerable<int> TaxedTreasuries(int castleId)
+    {
+        if (castleId <= 0 || _siege.Board.Find(castleId) == null)
+            yield break;
+        yield return castleId;
+        int overlordId = OverlordOf(castleId);
+        if (overlordId > 0 && _siege.Board.Find(overlordId) != null)
+            yield return overlordId;
+    }
+
+    static int OverlordOf(int castleId) => castleId switch
+    {
+        AdenCastleId or RuneCastleId => 0,
+        GoddardCastleId or SchuttgartCastleId => RuneCastleId,
+        _ => AdenCastleId
+    };
 
     /// <summary>Test hook: castle as the board holds it.</summary>
     internal CastleSiege? CastleForTests(int castleId)
