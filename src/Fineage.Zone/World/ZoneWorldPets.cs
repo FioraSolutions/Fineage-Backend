@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Services;
@@ -747,11 +748,13 @@ public sealed partial class ZoneWorld
             return;
         }
         int count = ground.GroundCount;
-        if (def.Stackable || count <= 1)
-            pet.Inventory.Add(def.Id, count);
-        else
-            pet.Inventory.AddPieces(def.Id, count);
+        var bag = LedgerAccount.Pet(pet.ControlObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Pickup, owner.ObjectId, ground.ObjectId);
+        ObserveLedger(move, bag);
+        PostOffGround(move, ground);
+        move.Post(bag, def.Id, count, PiecesOf(AddGroundStack(pet.Inventory, ground)));
         RemoveGroundItem(ground);
+        move.Commit(LedgerHoldingsOf);
         if (def.Id == WarehouseRules.AdenaItemId)
             SelfLine(session, SysMsgPetPickedUpAdena, $"Your pet picked up {count} adena.", count.ToString());
         else if (count > 1)

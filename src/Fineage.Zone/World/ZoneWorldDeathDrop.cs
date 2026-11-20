@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Protocol;
@@ -51,6 +52,9 @@ public sealed partial class ZoneWorld
                 watchers.Add(other);
         }
 
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.DeathDrop, player.ObjectId, killerObjectId);
+        ObserveLedger(move, bag);
         var invChanges = new List<InventoryUpdateEntryMsg>();
         bool gearChanged = false;
         bool droppedWeapon = false;
@@ -72,7 +76,7 @@ public sealed partial class ZoneWorld
             invChanges.Add(InventoryMessages.RemoveRow(item, -1));
             player.Inventory.Remove(item);
 
-            SpawnGroundStack(
+            var ground = SpawnGroundStack(
                 itemId,
                 count,
                 player.X,
@@ -80,10 +84,15 @@ public sealed partial class ZoneWorld
                 player.Z,
                 player.InstanceId,
                 watchers,
-                dropperObjectId: player.ObjectId);
+                dropperObjectId: player.ObjectId,
+                piece: item.Template.Stackable ? null : item);
+            if (ground != null)
+                PostOntoGround(move, bag, ground);
             ZoneLog.Info($"die-drop object={player.ObjectId} item={itemId} count={count} karma={player.Karma} pk={player.PkKills}");
         }
 
+        if (move.HasPostings)
+            move.Commit(LedgerHoldingsOf);
         if (droppedWeapon)
         {
             player.SoulshotCharged = false;

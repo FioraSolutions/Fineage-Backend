@@ -1,3 +1,5 @@
+using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -80,8 +82,14 @@ public sealed partial class ZoneWorld
         if (item.Count < count)
             return "bad_request";
 
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Destroy, player.ObjectId, 0);
+        ObserveLedger(move, bag);
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
+        move.Post(bag, item.ItemId, -count, PiecesOf([item]));
+        move.Post(LedgerAccount.Of(SystemAccount.Destroyed), item.ItemId, count);
+        move.Commit(LedgerHoldingsOf);
 
         var invUpdate = removedEntirely
             ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
@@ -132,6 +140,9 @@ public sealed partial class ZoneWorld
         }
 
         int itemId = item.ItemId;
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Drop, player.ObjectId, 0);
+        ObserveLedger(move, bag);
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
 
@@ -159,7 +170,7 @@ public sealed partial class ZoneWorld
                 watchers.Add(other);
         }
 
-        SpawnGroundStack(
+        var ground = SpawnGroundStack(
             itemId,
             count,
             dropX,
@@ -167,7 +178,11 @@ public sealed partial class ZoneWorld
             dropZ,
             player.InstanceId,
             watchers,
-            dropperObjectId: player.ObjectId);
+            dropperObjectId: player.ObjectId,
+            piece: item.Template.Stackable ? null : item);
+        if (ground != null)
+            PostOntoGround(move, bag, ground);
+        move.Commit(LedgerHoldingsOf);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");
         return null;
     }
@@ -203,18 +218,31 @@ public sealed partial class ZoneWorld
         int dropperId = killer?.ObjectId ?? 0;
         int ownerId = killer?.Session != null ? killer.ObjectId : 0;
         long now = NowUnixMs();
+        if (rolls.Count == 0)
+            return;
 
+        var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
+        var source = LedgerAccount.Of(SystemAccount.DropSource);
         foreach (var stack in rolls)
         {
             int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
+            var ground = SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
                 ownerObjectId: ownerId,
                 expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
+            if (ground != null)
+                PostOntoGround(move, source, ground);
         }
+
+        if (move.HasPostings)
+            move.Commit(LedgerHoldingsOf);
     }
 
-    void SpawnGroundStack(
+    /// <summary>
+    /// Places one stack on the ground and returns it, or null when there is nothing to place (no count, unknown item).
+    /// <paramref name="piece"/> is a piece leaving a bag: the stack takes over its object id and enchant.
+    /// </summary>
+    ZoneEntity? SpawnGroundStack(
         int itemId,
         int count,
         int x,
@@ -224,17 +252,20 @@ public sealed partial class ZoneWorld
         IReadOnlyList<ZoneEntity> watchers,
         int dropperObjectId = 0,
         int ownerObjectId = 0,
-        long expireAtMs = 0)
+        long expireAtMs = 0,
+        ItemInstance? piece = null)
     {
         if (count <= 0)
-            return;
+            return null;
         if (!_game.Items.TryGet(itemId, out var template))
         {
             ZoneLog.Info($"drop skip unknown item={itemId}");
-            return;
+            return null;
         }
 
-        int objectId = _itemIds.Next();
+        if (piece != null && (template.Stackable || count != 1 || piece.ItemId != itemId))
+            throw new ArgumentException($"item {piece.ObjectId} is not one piece of {itemId}", nameof(piece));
+        int objectId = piece?.ObjectId ?? _itemIds.Next();
         var ground = new ZoneEntity
         {
             ObjectId = objectId,
@@ -246,6 +277,7 @@ public sealed partial class ZoneWorld
             GroundItemId = itemId,
             GroundCount = count,
             GroundStackable = template.Stackable,
+            GroundEnchant = piece?.EnchantLevel ?? 0,
             GroundOwnerId = ownerObjectId,
             GroundProtectUntilMs = ownerObjectId != 0 ? NowUnixMs() + DropProtectMs : 0,
             GroundExpireAtMs = expireAtMs
@@ -284,6 +316,7 @@ public sealed partial class ZoneWorld
         }
 
         ZoneLog.Info($"drop object={objectId} item={itemId} count={count} dropper={dropperObjectId} @ {x},{y},{z}");
+        return ground;
     }
 
     void RemoveGroundItem(ZoneEntity ground)

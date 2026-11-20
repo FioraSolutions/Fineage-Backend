@@ -240,6 +240,23 @@ public sealed class EconomyLedgerTests
         Assert.Equal(new LedgerTxId(12, 1), ids.Next(11));
     }
 
+    [Fact]
+    public void An_emptied_account_is_forgotten_and_reads_as_empty()
+    {
+        var ledger = new EconomyLedger(new MemoryLedgerJournal(), 100);
+        var stack = LedgerAccount.Ground(700001);
+        var source = LedgerAccount.Of(SystemAccount.DropSource);
+        Assert.True(ledger.Submit(Tx(1, 0, Post(source, Sword, -1), Post(stack, Sword, 1, 700001))).Ok);
+        Assert.Equal(2, ledger.AccountCount);
+
+        Assert.True(ledger.Submit(Tx(2, 0, Post(stack, Sword, -1, 700001), Post(AliceBag, Sword, 1, 700001))).Ok);
+
+        Assert.Equal(2, ledger.AccountCount);
+        Assert.True(ledger.HoldingsOf(stack).IsEmpty);
+        Assert.Equal(AliceBag, ledger.OwnerOf(700001));
+        Assert.Equal("world:700001/ground", stack.ToString());
+    }
+
     static LedgerTransaction Tx(long tick, int sequence, params LedgerPosting[] postings) =>
         new(new LedgerTxId(tick, sequence), LedgerTxKind.ShopBuy, Alice, 30001, tick * 200, postings);
 

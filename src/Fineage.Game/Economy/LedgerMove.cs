@@ -79,6 +79,8 @@ public sealed class LedgerMove
             throw new LedgerReconciliationException($"adjustment {adjustment.Id} for {account} rejected: {result.Rejection}");
     }
 
+    public bool HasPostings => _postings.Count > 0;
+
     public void Post(LedgerAccount account, int itemId, long amount, IReadOnlyList<int>? instanceIds = null)
     {
         if (amount == 0)

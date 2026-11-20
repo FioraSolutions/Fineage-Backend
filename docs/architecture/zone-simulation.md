@@ -432,6 +432,15 @@ and one refused for weight or bag slots, records nothing. Offered items stay in 
 so a hold would contradict the state; holds in trade escrow come with trades between hosts, where settling takes
 more than one step.
 
+Each ground stack is its own account (step 11c), the world's `ground` container keyed by the stack's object id, so
+the journal names where a stack came from and who took it. Monster loot comes from the `DropSource` system account
+(`Loot`); a player's drop and death drop come from the bag (`Drop`, `DeathDrop`); a pickup goes into the bag or the
+pet's inventory (`Pickup`, the pet keyed by its control item). Expired stacks (`Expire`), herbs used on pickup, the
+remainder of a party adena split and items destroyed from the bag (`Destroy`) go to the `Destroyed` sink. A
+non-stackable stack of one is a piece: it keeps the item's object id and enchant from the bag it fell from to the
+bag that takes it. Stacks still on the ground at shutdown stay on their accounts in the journal; the ground is not
+saved. Ledger moves are numbered on the scheduler thread, and starting one from a region body throws.
+
 ---
 
 ## 4. Determinism
@@ -464,6 +473,7 @@ more than one step.
    pins the generator to reference values. `GlobalActorTests` replays a boss kill, its seeded respawn window and the
    respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
    commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
+   `GroundLedgerTests` follows a piece through the ground and checks loot, expiry, party adena and destroy postings.
 
 ---
 
@@ -515,7 +525,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
 | **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |
 | **11b (done)** | Trade between players as one `TradeSettle`; holds in trade escrow wait for trades between hosts. | Same outcomes, except that a traded non-stackable piece keeps its object id instead of getting a new one. A trade whose postings disagree with the bags fails the confirmation. |
-| 11c | Pickup and drop through the ground account. | Same outcomes. |
+| **11c (done)** | Ground stacks as ledger accounts: loot, drop, death drop, pickup (party and pet included), expiry, herbs, destroy. | Same outcomes, except that a dropped piece keeps its object id and enchant on the ground and in the bag that picks it up (before, the enchant was lost and the piece got a new id), and a non-stackable loot stack of one keeps its ground object id when picked up. |
 | 11d | Warehouse and clan warehouse deposits and withdrawals. | Same outcomes. |
 | 11e | Private store sales through store escrow. | Same outcomes. |
 | 11f | Quest rewards and crafting. Mail joins the ledger when the game has it. | Same outcomes; every owner change is on the journal. The snapshot writes stay until the reconciliation has run clean. |

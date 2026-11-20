@@ -4,14 +4,23 @@ public enum LedgerOwnerKind : byte
 {
     System = 0,
     Character = 1,
-    Castle = 2
+    Castle = 2,
+
+    /// <summary>The world itself: what lies on the ground.</summary>
+    World = 3,
+
+    /// <summary>A pet, by the object id of its control item, which outlives every summoning.</summary>
+    Pet = 4
 }
 
 public enum LedgerContainer : byte
 {
     System = 0,
     Inventory = 1,
-    Treasury = 2
+    Treasury = 2,
+
+    /// <summary>One stack on the ground, by its object id.</summary>
+    Ground = 3
 }
 
 /// <summary>Sources and sinks. Their balances may go negative: a negative balance is what they minted.</summary>
@@ -23,7 +32,13 @@ public enum SystemAccount
     /// Counterpart of <see cref="LedgerTxKind.Adjustment"/>: value that reached or left an account through a move the
     /// ledger does not record yet. Its postings are the audit trail of the moves still to migrate.
     /// </summary>
-    Untracked = 2
+    Untracked = 2,
+
+    /// <summary>Monster loot comes from here.</summary>
+    DropSource = 3,
+
+    /// <summary>Items destroyed from a bag, ground stacks that expired, herbs used on pickup, party adena remainders.</summary>
+    Destroyed = 4
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -37,6 +52,12 @@ public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, 
 
     public static LedgerAccount Treasury(int castleId) =>
         new(LedgerOwnerKind.Castle, castleId, LedgerContainer.Treasury);
+
+    public static LedgerAccount Ground(int groundObjectId) =>
+        new(LedgerOwnerKind.World, groundObjectId, LedgerContainer.Ground);
+
+    public static LedgerAccount Pet(int controlObjectId) =>
+        new(LedgerOwnerKind.Pet, controlObjectId, LedgerContainer.Inventory);
 
     public bool IsSystem => Owner == LedgerOwnerKind.System;
 
@@ -60,7 +81,25 @@ public enum LedgerTxKind
     ShopBuy = 2,
     ShopSell = 3,
     ShopExchange = 4,
-    TradeSettle = 5
+    TradeSettle = 5,
+
+    /// <summary>Monster loot onto the ground: <c>CausedBy</c> the killer, <c>Reference</c> the npc id.</summary>
+    Loot = 6,
+
+    /// <summary>A player drops from the bag onto the ground.</summary>
+    Drop = 7,
+
+    /// <summary>A player's items fall on death: <c>Reference</c> is the killer.</summary>
+    DeathDrop = 8,
+
+    /// <summary>A ground stack is taken: <c>Reference</c> is the stack's object id.</summary>
+    Pickup = 9,
+
+    /// <summary>A player destroys an item from the bag.</summary>
+    Destroy = 10,
+
+    /// <summary>A ground stack expires: <c>Reference</c> is the stack's object id.</summary>
+    Expire = 11
 }
 
 /// <summary>

@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -67,11 +68,14 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            var before = _byId.Keys.ToHashSet();
             long now = NowUnixMs();
-            SpawnGroundStack(itemId, count, player.X, player.Y, player.Z, 0, [player],
-                expireAtMs: now + (IsHerb(itemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
-            return _byId.Keys.First(id => !before.Contains(id));
+            var move = BeginLedgerMove(LedgerTxKind.Loot, 0, 0);
+            var ground = SpawnGroundStack(itemId, count, player.X, player.Y, player.Z, 0, [player],
+                expireAtMs: now + (IsHerb(itemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs))
+                ?? throw new ArgumentException($"item {itemId} cannot be placed", nameof(itemId));
+            PostOntoGround(move, LedgerAccount.Of(SystemAccount.DropSource), ground);
+            move.Commit(LedgerHoldingsOf);
+            return ground.ObjectId;
         }
     }
 

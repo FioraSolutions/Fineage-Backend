@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -22,19 +23,29 @@ public sealed partial class ZoneWorld
         }
 
         int adena = ground.GroundCount;
+        var move = BeginLedgerMove(LedgerTxKind.Pickup, picker.ObjectId, ground.ObjectId);
+        PostOffGround(move, ground);
         RemoveGroundItem(ground);
+        var receivers = new List<(ZoneEntity Member, int Amount)>();
         if (inRange.Count == 0)
+            receivers.Add((picker, adena));
+        else if (PartyLootRules.AdenaShare(adena, inRange.Count) is var share and > 0)
+            receivers.AddRange(inRange.Select(m => (m, share)));
+
+        long received = 0;
+        foreach (var (member, amount) in receivers)
         {
-            if (picker.Inventory != null && picker.Session != null)
-                GrantInventoryStack(picker, WarehouseRules.AdenaItemId, adena, notifyObtained: true);
-            return;
+            if (member.Inventory == null || member.Session == null)
+                continue;
+            var bag = LedgerAccount.Inventory(member.ObjectId);
+            ObserveLedger(move, bag);
+            GrantInventoryStack(member, WarehouseRules.AdenaItemId, amount, notifyObtained: true);
+            move.Post(bag, WarehouseRules.AdenaItemId, amount);
+            received += amount;
         }
 
-        int share = PartyLootRules.AdenaShare(adena, inRange.Count);
-        if (share <= 0)
-            return;
-        foreach (var m in inRange)
-            GrantInventoryStack(m, WarehouseRules.AdenaItemId, share, notifyObtained: true);
+        move.Post(LedgerAccount.Of(SystemAccount.Destroyed), WarehouseRules.AdenaItemId, adena - received);
+        move.Commit(LedgerHoldingsOf);
     }
 
     bool CanReceiveGround(int objectId, ZoneEntity ground)
@@ -57,23 +68,22 @@ public sealed partial class ZoneWorld
         // Stack merge must be a Modify (Mobius InventoryUpdate addModifiedItem): the client ignores an Add
         // for an objectId it already holds, so the picked-up count only showed after relog.
         bool merged = stackable && looter.Inventory.FindByItemId(itemId) != null;
-        InventoryUpdateMsg invUpdate;
-        if (stackable || count <= 1)
+        var bag = LedgerAccount.Inventory(looter.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Pickup, looter.ObjectId, ground.ObjectId);
+        ObserveLedger(move, bag);
+        PostOffGround(move, ground);
+        var added = AddGroundStack(looter.Inventory, ground);
+        move.Post(bag, itemId, count, PiecesOf(added));
+        var invUpdate = new InventoryUpdateMsg
         {
-            var added = looter.Inventory.Add(itemId, count);
-            invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
-        }
-        else
-        {
-            var pieces = looter.Inventory.AddPieces(itemId, count);
-            invUpdate = new InventoryUpdateMsg
-            {
-                Changes = pieces.Select(p => InventoryMessages.Update(InventoryChange.Add, p).Changes[0]).ToArray()
-            };
-        }
+            Changes = added
+                .Select(row => InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, row).Changes[0])
+                .ToArray()
+        };
 
         NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
         RemoveGroundItem(ground);
+        move.Commit(LedgerHoldingsOf);
         SaveInventory(looter.Session, looter.Inventory);
         NotifyObtained(looter.Session, itemId, count);
     }
