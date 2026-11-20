@@ -182,6 +182,28 @@ public class OlympiadTests
     }
 
     [Fact]
+    public void Matchmaking_pairs_follow_the_stream_the_caller_passes()
+    {
+        static string Pairs(int seed)
+        {
+            var board = new OlympiadBoard(Evening, new OlympiadSettings { NonClassedMin = 2 });
+            for (int id = 1; id <= 8; id++)
+            {
+                Assert.True(board.GrantNoblesse(id));
+                Assert.Null(board.Register(Noble(id, "N" + id, classId: id), classed: false, EveningMs).Error);
+            }
+
+            board.Advance(EveningMs, Online, new Random(seed));
+            Assert.Equal(4, board.LiveMatchCount);
+            return string.Join(" ", Enumerable.Range(1, 8).GroupBy(board.MatchIdFor).OrderBy(g => g.Key)
+                .Select(g => string.Join("-", g.Order())));
+        }
+
+        Assert.Equal(Pairs(3), Pairs(3));
+        Assert.True(Enumerable.Range(1, 8).Select(Pairs).Distinct().Count() > 1);
+    }
+
+    [Fact]
     public void Leave_before_the_port_defaults_and_a_report_pays_the_gate_pass()
     {
         var settings = new OlympiadSettings { ClassedMin = 2, WaitSeconds = 5, BattleMillis = 10_000 };
