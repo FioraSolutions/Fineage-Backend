@@ -1,9 +1,10 @@
 # Zone simulation architecture
 
-Status: **steps 1–7 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
+Status: **steps 1–8 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
 same scheduler, the reverse watcher index, the per-step fan-out outbox, tick-derived time with seeded per-region
-random streams, a command log and replay, command ingress for player input, and region containers with in-process
-handoff); steps 8 and later are proposals.
+random streams, a command log and replay, command ingress for player input, region containers with in-process
+handoff, and region bodies isolated by scopes, border snapshots and region messages, with regen and abnormals able
+to run on worker threads behind `FINEAGE_ZONE_REGION_WORKERS`, off by default); steps 9 and later are proposals.
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
@@ -66,7 +67,7 @@ flowchart LR
 | B8 | Fan-out is per event and per watcher | `NetWorldEventPublisher.FanoutStatusUpdate` encodes, then `NetPresenceHub.TrySend` takes the hub lock per watcher (`Net/NetPresenceHub.cs:51,80`) | N small frames per tick per watcher, lock traffic proportional to watchers × events, no coalescing of superseded StatusUpdates. |
 | B9 | Knownlist diff fan-out awaits inside the request path | `NetKnownlistFanout.FanDiffAsync` awaits `SendAsync` per spawn/despawn (`Net/NetKnownlistFanout.cs`) | A slow client slows its own handler; spawn bursts (teleport into Giran) are serial. |
 | B10 | Economy persisted as snapshots | `ZoneCharacterPersist.ReplaceItems` / `ReplaceWarehouse` (`World/ZoneCharacterPersist.cs:59-63`), deferred by `WithDeferredInventoryPersist` (`World/ZoneWorld.Members.Persist.cs:129`); trade writes two bags (`World/ZoneWorldTrade.More.cs:106`) | No record of *why* an item moved, no idempotency, and a crash between the two bag writes duplicates or loses items. Nothing to audit or reconcile against. |
-| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; moving it into the region-owned entity follows with step 8, when regions stop sharing the gate. |
+| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; **step 8** moved it into `PlayerIntent` on the player entity (`ZoneEntity.Intent`), so the region that owns the player is its only writer. |
 
 L2J has the same shape plus per-object scheduled tasks; Fineage already replaced those with active sets
 (`World/ZoneWorldActiveSets.cs`), which is the right base for regions: only entities with work are visited.
@@ -125,8 +126,13 @@ flowchart TB
   which the owning region indexes for its stages (`Snapshot` and `Collect` go region by region, ids ascending). An
   entity can join a set before it is placed; removal clears its memberships. Ownership changes only at the handoff
   barrier (section 3.5), so an entity a few hundred units past a tile edge is still owned, and its rolls drawn, by
-  the region it came from. The knownlist, the AOI index and session intent are still world-wide; they move with
-  step 8.
+  the region it came from. Since step 8 each container also indexes its entities by `CellSize` cell (3 000 units,
+  the `GridAoi` cell), kept current on every relocation and checked by `Verify`; region bodies query it through
+  `OwnedNear` (their own entities, ids ascending) and the scheduler thread through `InCells`. Session intent lives on
+  the player entity (`PlayerIntent`) and the knownlist already did (`ZoneEntity.Knownlist`). The world `GridAoi`
+  still drives knownlist diffs, since it also places ground items and quest anchors that are not region members, and
+  the reverse watcher index stays world-wide; both are written only by world stages, so region bodies read them
+  safely. They become region-local when movement runs in regions.
 - **Interest radius ≤ region size.** Visibility and AoE never reach beyond the 8 neighbours, which bounds every
   cross-region interaction to neighbour messages and border snapshots.
 - **Region-local RNG.** Each region draws from its own stream per purpose (`RandomPurpose`: combat, spawn, drop,
@@ -181,6 +187,18 @@ sequenceDiagram
   cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
   tick it stopped at. Still outside commands until step 12: enter and leave (session lifecycle), shortcut bar edits (UI
   state the simulation never reads) and read-only snapshot builders.
+- **Region bodies (step 8).** Every region body runs in an `IRegionScope` (`Simulation/IRegionScope.cs`) that the
+  scheduler commits in ascending region order after the stage barrier, whichever executor ran the bodies. The world's
+  scope (`World/ZoneWorldRegionBodies.cs`) records the body's fan-out into a batch of its own
+  (`WorldFanoutSequencer.RecordRegion`, absorbed into the step's batch with the same coalescing), defers world
+  bookkeeping (`AtBarrier`, the party vitals queue) and collects region messages. Inside a body `RegionDirectory`
+  throws on placement, removal, relocation, handoff, world-wide counts and listings, and set changes of entities
+  another region owns, so a race becomes a concrete error in both executors. A stage opts into worker threads with
+  `IRegionStage.Parallel`; regen (players, NPCs) and abnormals do. `FINEAGE_ZONE_REGION_WORKERS` picks the executor:
+  0 (default) runs regions one after another on the scheduler thread, N spreads opted-in stages over N workers; the
+  startup banner prints `regions=sequential|parallel:N`. A parallel executor refuses an injected `Random`
+  (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take
+  `_gate`: the scheduler thread holds it while it waits at the barrier.
 - **Global actors** run on the scheduler thread as world stages (cheap) or on their own single-threaded loop when
   they do I/O; they talk to regions only by message.
 - **Persistence and the ledger** run outside the tick. Regions hand them immutable records and get results back
@@ -227,6 +245,18 @@ snapshot (one tick of latency, deterministic) for knownlist, targeting and AoE c
 foreign entity are never applied directly; they become a `DamageRequest` / `ApplyAbnormal` message carrying the
 attacker snapshot needed by the formula, resolved by the owner at *t+1*. One extra tick (200 ms) is inside L2's
 existing hit delay.
+
+In process (step 8): the `handoff` stage publishes `BorderSnapshots<ZonePresence>` (`Simulation/BorderSnapshots.cs`)
+right after moving owners, so each entity appears in exactly one region's snapshot: every entity not
+`IRegionPartition.IsInterior` by 6 000 units, as an immutable record (position, instance, kind, aggro eligibility,
+karma, faction alliance). `NeighboursNear` serves the other regions' records within a radius and refuses one above
+reach minus the handoff margin (5 700), which covers the widest aggro range in the data (4 296, tested). The
+`aggression` stage is a region stage built on it: each due NPC tries its own region's players live and the
+neighbours' from the snapshot, in ascending id order, and asks for the hate with a `HateMessage`. Region messages
+(`ZoneRegionMessage`) are applied on the scheduler thread when the stage commits, in (source region, sequence) order,
+so a decision lands in the same step as before; a message for an entity that left is logged and dropped. The
+cross-host form delivers them at *t+1*. Damage and abnormal-apply messages come with the stages that send them
+(combat, casts), which are still world stages.
 
 **Party, clan, chat, friends.** Social actors keyed by party / clan id. Regions push member deltas (vitals,
 position) to them once per tick in a batch; the actors fan out to members through gateway routing, independent of
@@ -438,7 +468,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
 | **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
-| 8 | Border snapshots and cross-region messages (damage, abnormal apply, aggro help). Enable `ParallelRegionExecutor` for regen and abnormals behind a setting, then movement and AI after a soak. | Parallel ticks; determinism tests and replay gate each enablement. |
+| **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
 | 9 | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls. | Same schedules. |
 | 10 | Social actors: party, clan, chat, friends. | Same. |
 | 11a–f | Ledger: journal + `IEconomyLedger` in-process, then one movement kind per PR: shop buy/sell, trade, pickup/drop, warehouse, private store, mail, quest rewards, crafting. Each runs alongside the snapshot writes with a reconciliation check until removed. | Same outcomes; every move is now auditable. |
@@ -457,5 +487,6 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | Determinism regressions from new code (hash iteration, `Random.Shared`, wall clock) | Determinism and partition-independence tests per migrated stage; replay test from PR 5; analyzers or review checklist for banned APIs in region code. |
 | A replay only reproduces a run built the same way | The log header carries seed, step and start tick and replay refuses a mismatch; content (catalogs, spawns, persisted state) must match too, so replays are a test and diagnostic tool, not a backup. |
 | Handoff bugs (lost or duplicated entities, misrouted commands) | Epoch-stamped routing, ghost forwarding, the invariant check `RegionDirectory.Verify` (exactly one owner, owner holds the position, set memberships and counts agree) run by the tests that walk players across tile borders; soak tests with bots once regions run in parallel. |
+| A region body reaches shared state once its stage runs on workers | Parallel is opt-in per stage and off by default; scopes make fan-out, bookkeeping and messages barrier-ordered; the directory guards turn cross-region writes into errors; the parallel world tests compare state and every frame with the sequential run and a replay. A new call from a parallel body must be region-owned, read-only during region stages, or go through `AtBarrier` / a region message. |
 | Ledger becomes a latency bottleneck or a single point of failure | In-memory projection plus batched journal appends; holds keep gameplay responsive; journal on the existing Postgres first, partitioned by world shard later. |
 | Migration stalls halfway, with two models living side by side | Every PR is complete on its own and removes the old path it replaces; the plan is ordered so each step pays off without the next. |
