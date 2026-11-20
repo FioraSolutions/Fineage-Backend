@@ -48,7 +48,7 @@ public sealed class SkillStatEffectCatalog
         ["holyRes"] = CombatStat.HolyRes, ["fireRes"] = CombatStat.FireRes,
         ["waterRes"] = CombatStat.WaterRes, ["windRes"] = CombatStat.WindRes,
         ["earthRes"] = CombatStat.EarthRes, ["transDam"] = CombatStat.TransDam,
-        ["cancel"] = CombatStat.Cancel
+        ["cancel"] = CombatStat.Cancel, ["damageZoneVuln"] = CombatStat.DamageZoneVuln
     };
 
     static readonly Dictionary<string, SkillPosition> PositionNames = new(StringComparer.OrdinalIgnoreCase)

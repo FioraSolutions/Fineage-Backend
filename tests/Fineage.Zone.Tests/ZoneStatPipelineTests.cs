@@ -77,6 +77,13 @@ public sealed class ZoneStatPipelineTests
         Assert.True(stats.TryGet(1262, out var transfer));
         Assert.Equal(CombatStat.TransDam, transfer.Funcs[0].Stat);
         Assert.Equal(50, transfer.Funcs[0].ValueAt(5));
+        Assert.True(passives.TryGet(294, out var sense));
+        Assert.Equal(CombatStat.Accuracy, sense.Funcs[0].Stat);
+        Assert.Equal(3, sense.Funcs[0].ValueAt(1));
+        Assert.True(stats.TryGet(311, out var protection));
+        Assert.Equal(CombatStat.DamageZoneVuln, protection.Funcs[0].Stat);
+        Assert.Equal('s', protection.Funcs[0].Op);
+        Assert.Equal(30, protection.Funcs[0].ValueAt(1));
     }
 
     [Fact]
