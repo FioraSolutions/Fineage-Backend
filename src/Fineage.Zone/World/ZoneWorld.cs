@@ -16,6 +16,7 @@ using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Zone.Lottery;
 using Fineage.Game.Services;
 using Fineage.Zone.Simulation;
 
@@ -43,15 +44,14 @@ public sealed partial class ZoneWorld
     readonly EnchantRates _enchantRates;
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
-    readonly SevenSignsEngine _sevenSigns;
+    readonly SevenSignsActor _sevenSigns;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
     readonly SiegeSettings _siegeSettings;
-    readonly SiegeBoard _siege;
+    readonly SiegeActor _siege;
     readonly NpcHtmlCatalog _html;
     readonly BypassRegistry _bypasses;
-    readonly OlympiadBoard _olympiad;
-    readonly Random _olympiadRandom;
+    readonly OlympiadActor _olympiad;
     readonly TeleportCatalog _teleports;
     readonly GmTeleportCatalog _gmTeleports;
     readonly NewbieBuffCatalog _newbieBuffs;
@@ -233,15 +233,17 @@ public sealed partial class ZoneWorld
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
-        _sevenSigns = sevenSigns ?? new SevenSignsEngine(new SystemGameClock());
+        _sevenSigns = new SevenSignsActor(sevenSigns ?? new SevenSignsEngine(WallNow()));
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
-        _siege = new SiegeBoard(NowUnixMs(), _siegeSettings);
-        _bosses = bosses ?? BossSchedule.LoadDefault(_clock, bossRandom);
+        _siege = new SiegeActor(new SiegeBoard(NowUnixMs(), _siegeSettings));
+        _bosses = new BossActor(bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds()),
+            bossRandom ?? GlobalStream(RandomPurpose.Boss));
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
-        _olympiad = olympiad ?? new OlympiadBoard(WallNow(), olympiadSettings ?? OlympiadSettings.FromEnvironment());
+        _olympiad = new OlympiadActor(olympiad ?? new OlympiadBoard(WallNow(), olympiadSettings ?? OlympiadSettings.FromEnvironment()),
+            LookupOlympiad, GlobalStream(RandomPurpose.Olympiad));
         _teleports = teleports ?? TeleportCatalog.LoadDefault();
         _gmTeleports = gmTeleports ?? GmTeleportCatalog.LoadDefault();
         _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
@@ -278,9 +280,8 @@ public sealed partial class ZoneWorld
         LoadSiege();
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
-        LotteryRandom = GlobalStream(RandomPurpose.Lottery);
-        MammonRandom = GlobalStream(RandomPurpose.Mammon);
-        _olympiadRandom = GlobalStream(RandomPurpose.Olympiad);
+        _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
+        _mammon = new MammonActor(_sevenSigns, GlobalStream(RandomPurpose.Mammon));
         SpawnCastleDoors();
     }
 
@@ -288,7 +289,7 @@ public sealed partial class ZoneWorld
     public BypassRegistry Bypasses => _bypasses;
 
     /// <summary>Castle row for shop tax. Tests set <see cref="Siege.CastleSiege.OwnerClanId"/> and tax on the result.</summary>
-    internal CastleSiege? FindCastle(int castleId) => _siege.Find(castleId);
+    internal CastleSiege? FindCastle(int castleId) => _siege.Board.Find(castleId);
 
     public IReadOnlyList<int> NpcObjectIds
     {

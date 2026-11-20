@@ -48,8 +48,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
         var clan = ClanOf(player.ObjectId);
-        int castleId = c.CastleId > 0 ? c.CastleId : clan != null ? _siege.CastleOwnedBy(clan.Id) : 0;
-        var castle = castleId > 0 ? _siege.Find(castleId) : null;
+        int castleId = c.CastleId > 0 ? c.CastleId : clan != null ? _siege.Board.CastleOwnedBy(clan.Id) : 0;
+        var castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         if (castle == null)
             return SiegeProtocol.Castle;
         if (c.Kind == CastleCommandKind.Info)
@@ -155,7 +155,7 @@ public sealed partial class ZoneWorld
             return busy;
         if (percent < 0 || percent > SiegeProtocol.MaxTaxPercent)
             return SiegeProtocol.Tax;
-        _siege.SetTax(castle.Id, percent);
+        _siege.Board.SetTax(castle.Id, percent);
         PersistSiege();
         ZoneLog.Info($"[castle] {castle.Name} tax={percent}% by {player.ObjectId}");
         return null;
@@ -175,7 +175,7 @@ public sealed partial class ZoneWorld
         if (inventory == null || amount <= 0 || amount > castle.Treasury ||
             (long)inventory.CountOf(PledgeProtocol.AdenaItemId) + amount > int.MaxValue)
             return SiegeProtocol.Adena;
-        if (!_siege.AddTreasury(castle.Id, -amount))
+        if (!_siege.Board.AddTreasury(castle.Id, -amount))
             return SiegeProtocol.Adena;
         GiveItem(session, inventory, PledgeProtocol.AdenaItemId, (int)amount);
         PersistSiege();
@@ -195,7 +195,7 @@ public sealed partial class ZoneWorld
         var changes = new List<InventoryUpdateEntryMsg>();
         if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)amount, changes))
             return SiegeProtocol.Adena;
-        _siege.AddTreasury(castle.Id, amount);
+        _siege.Board.AddTreasury(castle.Id, amount);
         FanInventory(session, Collapse(changes));
         SaveInventory(session, inventory);
         PersistSiege();
@@ -310,7 +310,7 @@ public sealed partial class ZoneWorld
     {
         if (castleId <= 0 || amount <= 0)
             return;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (castle == null || castle.OwnerClanId <= 0)
             return;
         int overlordId = castleId switch
@@ -319,15 +319,15 @@ public sealed partial class ZoneWorld
             GoddardCastleId or SchuttgartCastleId => RuneCastleId,
             _ => AdenCastleId
         };
-        if (overlordId > 0 && _siege.Find(overlordId) is { OwnerClanId: > 0 } overlord)
+        if (overlordId > 0 && _siege.Board.Find(overlordId) is { OwnerClanId: > 0 } overlord)
         {
             long cut = (long)(amount * (overlord.TaxPercent / 100d));
-            if (cut > 0 && _siege.AddTreasury(overlordId, cut))
+            if (cut > 0 && _siege.Board.AddTreasury(overlordId, cut))
                 amount -= cut;
         }
 
         if (amount > 0)
-            _siege.AddTreasury(castleId, amount);
+            _siege.Board.AddTreasury(castleId, amount);
         PersistSiege();
     }
 
@@ -335,6 +335,6 @@ public sealed partial class ZoneWorld
     internal CastleSiege? CastleForTests(int castleId)
     {
         lock (_gate)
-            return _siege.Find(castleId);
+            return _siege.Board.Find(castleId);
     }
 }

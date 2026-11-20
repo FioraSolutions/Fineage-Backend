@@ -55,29 +55,29 @@ public sealed class BossScheduleTests
     {
         var clock = new FakeClock(new DateTimeOffset(2026, 10, 28, 12, 0, 0, TimeSpan.Zero));
         var random = new BoundRandom(high: false);
-        var schedule = Schedule(clock, random, raidEnabled: true, grandEnabled: false);
+        var schedule = Schedule(clock, raidEnabled: true, grandEnabled: false);
 
-        Assert.True(schedule.OnBossKilled(RaidId));
+        Assert.True(schedule.OnBossKilled(RaidId, clock.Now.ToUnixTimeMilliseconds(), random));
         var raid = View(schedule, RaidId);
         Assert.Equal(BossLifeStatus.Dead, raid.Status);
         Assert.Equal(clock.Now.ToUnixTimeMilliseconds() + 43_200_000L, raid.RespawnUnixMs);
         Assert.Equal(100, raid.CurrentHp);
 
         random.High = true;
-        Assert.True(schedule.OnBossKilled(GrandId));
+        Assert.True(schedule.OnBossKilled(GrandId, clock.Now.ToUnixTimeMilliseconds(), random));
         var grand = View(schedule, GrandId);
         Assert.Equal(BossLifeStatus.Dead, grand.Status);
         Assert.Equal(clock.Now.ToUnixTimeMilliseconds() + 158_400_000L, grand.RespawnUnixMs);
-        Assert.False(schedule.OnBossKilled(999999));
+        Assert.False(schedule.OnBossKilled(999999, clock.Now.ToUnixTimeMilliseconds(), random));
     }
 
     [Fact]
     public void Raid_multiplier_scales_the_window_before_the_roll()
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch);
-        var schedule = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: false, raidMin: 2, raidMax: 2);
+        var schedule = Schedule(clock, raidEnabled: true, grandEnabled: false, raidMin: 2, raidMax: 2);
 
-        Assert.True(schedule.OnBossKilled(RaidId));
+        Assert.True(schedule.OnBossKilled(RaidId, clock.Now.ToUnixTimeMilliseconds(), new BoundRandom(high: false)));
         Assert.Equal(86_400_000L, View(schedule, RaidId).RespawnUnixMs);
     }
 
@@ -86,18 +86,18 @@ public sealed class BossScheduleTests
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch.AddHours(1));
         var store = new MemoryBossStore();
-        var first = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: true, store);
-        Assert.True(first.OnBossKilled(RaidId));
+        var first = Schedule(clock, raidEnabled: true, grandEnabled: true, store);
+        Assert.True(first.OnBossKilled(RaidId, clock.Now.ToUnixTimeMilliseconds(), new BoundRandom(high: false)));
         long due = View(first, RaidId).RespawnUnixMs;
 
         clock.Advance(TimeSpan.FromMilliseconds(43_200_000 - 1));
-        var waiting = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: true, store);
+        var waiting = Schedule(clock, raidEnabled: true, grandEnabled: true, store);
         Assert.Equal(BossLifeStatus.Dead, View(waiting, RaidId).Status);
         Assert.DoesNotContain(waiting.StartupOrders(), order => order.NpcId == RaidId);
 
         clock.Advance(TimeSpan.FromMilliseconds(2));
         Assert.True(clock.Now.ToUnixTimeMilliseconds() > due);
-        var spawned = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: true, store);
+        var spawned = Schedule(clock, raidEnabled: true, grandEnabled: true, store);
         Assert.Equal(BossLifeStatus.Alive, View(spawned, RaidId).Status);
         Assert.Equal(0, View(spawned, RaidId).RespawnUnixMs);
         Assert.Contains(spawned.StartupOrders(), order => order.NpcId == RaidId && order.CurrentHp == 100);
@@ -107,11 +107,11 @@ public sealed class BossScheduleTests
     public void Due_disabled_boss_becomes_alive_without_a_spawn_order()
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch);
-        var schedule = Schedule(clock, new BoundRandom(high: false), raidEnabled: false, grandEnabled: false);
-        Assert.True(schedule.OnBossKilled(RaidId));
+        var schedule = Schedule(clock, raidEnabled: false, grandEnabled: false);
+        Assert.True(schedule.OnBossKilled(RaidId, clock.Now.ToUnixTimeMilliseconds(), new BoundRandom(high: false)));
         clock.Advance(TimeSpan.FromMilliseconds(43_200_000));
 
-        var due = schedule.CollectDue();
+        var due = schedule.CollectDue(clock.Now.ToUnixTimeMilliseconds());
         Assert.Empty(due);
         Assert.Equal(BossLifeStatus.Alive, View(schedule, RaidId).Status);
         Assert.Equal(0, View(schedule, RaidId).RespawnUnixMs);
@@ -122,13 +122,13 @@ public sealed class BossScheduleTests
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch.AddDays(1));
         var store = new MemoryBossStore();
-        var schedule = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: false, store);
-        Assert.True(schedule.OnBossKilled(ZeroId));
+        var schedule = Schedule(clock, raidEnabled: true, grandEnabled: false, store);
+        Assert.True(schedule.OnBossKilled(ZeroId, clock.Now.ToUnixTimeMilliseconds(), new BoundRandom(high: false)));
         clock.Advance(TimeSpan.FromDays(3));
-        Assert.Empty(schedule.CollectDue());
+        Assert.Empty(schedule.CollectDue(clock.Now.ToUnixTimeMilliseconds()));
         Assert.Equal(BossLifeStatus.Dead, View(schedule, ZeroId).Status);
 
-        var restarted = Schedule(clock, new BoundRandom(high: false), raidEnabled: true, grandEnabled: false, store);
+        var restarted = Schedule(clock, raidEnabled: true, grandEnabled: false, store);
         Assert.Equal(BossLifeStatus.Alive, View(restarted, ZeroId).Status);
         Assert.Contains(restarted.StartupOrders(), order => order.NpcId == ZeroId);
     }
@@ -138,12 +138,12 @@ public sealed class BossScheduleTests
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch);
         var store = new MemoryBossStore();
-        var schedule = Schedule(clock, new BoundRandom(high: true), raidEnabled: true, grandEnabled: true, store);
+        var schedule = Schedule(clock, raidEnabled: true, grandEnabled: true, store);
         Assert.True(schedule.TryNoteVitals(RaidId, 12, 0));
         Assert.Equal(12, View(schedule, RaidId).CurrentHp);
         Assert.Equal(40, View(schedule, RaidId).CurrentMp);
 
-        var restored = Schedule(clock, new BoundRandom(high: true), raidEnabled: true, grandEnabled: true, store);
+        var restored = Schedule(clock, raidEnabled: true, grandEnabled: true, store);
         Assert.Equal(12, View(restored, RaidId).CurrentHp);
         Assert.Equal(40, View(restored, RaidId).CurrentMp);
         Assert.Contains(restored.StartupOrders(), order => order.NpcId == RaidId && order.CurrentHp == 12 && order.CurrentMp == 40);
@@ -151,15 +151,13 @@ public sealed class BossScheduleTests
         var waiting = new BossSchedule(
             BossCatalog.From([GrandBoss(GrandId, 81001, enabled: true, BossLifeStatus.Waiting)]),
             new MemoryBossStore(),
-            () => clock.Now,
-            new BoundRandom(high: false));
+            clock.Now.ToUnixTimeMilliseconds());
         Assert.Empty(waiting.StartupOrders());
 
         var fighting = new BossSchedule(
             BossCatalog.From([GrandBoss(GrandId, 81001, enabled: true, BossLifeStatus.Fighting)]),
             new MemoryBossStore(),
-            () => clock.Now,
-            new BoundRandom(high: false));
+            clock.Now.ToUnixTimeMilliseconds());
         Assert.Contains(fighting.StartupOrders(), order => order.NpcId == GrandId);
     }
 
@@ -167,8 +165,8 @@ public sealed class BossScheduleTests
     public void Force_spawn_clears_a_dead_boss()
     {
         var clock = new FakeClock(DateTimeOffset.UnixEpoch);
-        var schedule = Schedule(clock, new BoundRandom(high: false), raidEnabled: false, grandEnabled: false);
-        Assert.True(schedule.OnBossKilled(RaidId));
+        var schedule = Schedule(clock, raidEnabled: false, grandEnabled: false);
+        Assert.True(schedule.OnBossKilled(RaidId, clock.Now.ToUnixTimeMilliseconds(), new BoundRandom(high: false)));
         Assert.True(schedule.TryForceSpawn(RaidId, out var order));
         Assert.True(order.IgnoreEnabled);
         Assert.Equal(BossLifeStatus.Alive, View(schedule, RaidId).Status);
@@ -222,7 +220,6 @@ public sealed class BossScheduleTests
 
     static BossSchedule Schedule(
         FakeClock clock,
-        IBossRandom random,
         bool raidEnabled,
         bool grandEnabled,
         IBossStore? store = null,
@@ -236,8 +233,7 @@ public sealed class BossScheduleTests
                 GrandBoss(GrandId, 80003, grandEnabled, BossLifeStatus.Alive)
             ]),
             store ?? new MemoryBossStore(),
-            () => clock.Now,
-            random,
+            clock.Now.ToUnixTimeMilliseconds(),
             raidMin,
             raidMax);
 

@@ -120,7 +120,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         // Mobius: an Olympiad registration is withdrawn first.
-        _olympiad.Unregister(ActorFor(player), now);
+        _olympiad.Board.Unregister(ActorFor(player), now);
         if (player.Inventory != null && player.Inventory.Items.Count >= InventoryLimit(player) * 0.9)
         {
             Notice(session, SubclassInventoryMessageId, "A sub-class cannot be created or changed because you have exceeded your inventory limit.");

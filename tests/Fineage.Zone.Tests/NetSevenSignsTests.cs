@@ -21,7 +21,7 @@ public sealed class NetSevenSignsTests
     public async Task Status_join_and_contribution_follow_the_record()
     {
         var clock = new MutableGameClock(Recruiting);
-        var engine = new SevenSignsEngine(clock);
+        var engine = new SevenSignsEngine(clock.UtcNow);
         var bench = new WorldBench(clock: () => clock.UtcNow, sevenSigns: engine);
         // Class 1 is the first fighter profession; the base archetype (0) has no class level and is refused.
         BenchPlayer player = await bench.EnterAsync("ssq", "Priest", classId: 1);
@@ -84,7 +84,7 @@ public sealed class NetSevenSignsTests
     public async Task An_unknown_action_is_a_bad_request()
     {
         var clock = new MutableGameClock(Recruiting);
-        var engine = new SevenSignsEngine(clock);
+        var engine = new SevenSignsEngine(clock.UtcNow);
         var bench = new WorldBench(clock: () => clock.UtcNow, sevenSigns: engine);
         // Class 1 is the first fighter profession; the base archetype (0) has no class level and is refused.
         BenchPlayer player = await bench.EnterAsync("ssq", "Priest", classId: 1);

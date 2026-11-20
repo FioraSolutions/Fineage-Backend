@@ -391,7 +391,7 @@ public class OlympiadTests
         return session;
     }
 
-    static OlympiadActor Noble(int id, string name, int classId = 0) =>
+    static OlympiadEntrant Noble(int id, string name, int classId = 0) =>
         new(id, name, classId, classId, 0, OlympiadProtocol.InventoryLimit, false);
 
     static OlympiadPresence? Online(int id) =>

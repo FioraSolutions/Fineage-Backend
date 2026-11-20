@@ -34,23 +34,6 @@ public enum SevenSignsStrifeRole
     Vanquished = 2
 }
 
-public interface IGameClock
-{
-    DateTimeOffset UtcNow { get; }
-}
-
-public sealed class SystemGameClock : IGameClock
-{
-    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
-}
-
-public sealed class MutableGameClock : IGameClock
-{
-    public MutableGameClock(DateTimeOffset utcNow) => UtcNow = utcNow;
-
-    public DateTimeOffset UtcNow { get; set; }
-}
-
 /// <summary>
 /// Festival of Darkness lifecycle. Score changes go through <see cref="SevenSignsEngine.AddFestivalScore"/>.
 /// The festival instance, rooms, and rewards are out of scope.

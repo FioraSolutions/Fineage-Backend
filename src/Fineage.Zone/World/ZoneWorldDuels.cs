@@ -287,7 +287,7 @@ public sealed partial class ZoneWorld
             return (2019, $"{n} cannot duel because {n}'s HP or MP is below 50%.");
         if (p.DuelId != 0)
             return (2022, $"{n} cannot duel because {n} is already engaged in a duel.");
-        if (_olympiadArena.Contains(p.ObjectId) || _olympiad.MatchState(p.ObjectId) != null)
+        if (_olympiadArena.Contains(p.ObjectId) || _olympiad.Board.MatchState(p.ObjectId) != null)
             return (2024, $"{n} cannot duel because {n} is participating in the Olympiad.");
         if (p.Karma > 0 || HasCursedWeapon(p.Inventory))
             return (2023, $"{n} cannot duel because {n} is in a chaotic state.");

@@ -75,7 +75,7 @@ public sealed partial class ZoneWorld
     {
         foreach (int castleId in loc.CastleIds)
         {
-            var castle = _siege.Find(castleId);
+            var castle = _siege.Board.Find(castleId);
             if (castle is { InProgress: true })
                 return true;
         }

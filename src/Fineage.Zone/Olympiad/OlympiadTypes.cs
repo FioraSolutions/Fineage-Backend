@@ -12,7 +12,7 @@ public enum OlympiadMatchPhase
     Done = 5
 }
 
-public readonly record struct OlympiadActor(
+public readonly record struct OlympiadEntrant(
     int CharacterId,
     string Name,
     int ClassId,

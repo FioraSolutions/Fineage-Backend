@@ -262,5 +262,5 @@ public sealed partial class ZoneWorld
 public sealed partial class ZoneWorld
 {
     /// <summary>Mobius <c>SiegeManager.checkIsRegistered</c> over every castle.</summary>
-    bool ClanInSiege(int clanId) => _siege.ExportClans().Any(r => r.ClanId == clanId);
+    bool ClanInSiege(int clanId) => _siege.Board.ExportClans().Any(r => r.ClanId == clanId);
 }

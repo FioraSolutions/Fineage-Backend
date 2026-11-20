@@ -4,7 +4,7 @@ namespace Fineage.Zone.Siege;
 
 public sealed partial class SiegeBoard
 {
-    public string? Register(SiegeActor actor, SiegeClanInfo? clan, int castleId, bool asAttacker, long nowUnixMs)
+    public string? Register(SiegeRequester actor, SiegeClanInfo? clan, int castleId, bool asAttacker, long nowUnixMs)
     {
         Refresh(nowUnixMs);
         var castle = Find(castleId);
@@ -19,7 +19,7 @@ public sealed partial class SiegeBoard
         return null;
     }
 
-    public string? Unregister(SiegeActor actor, SiegeClanInfo? clan, int castleId, long nowUnixMs)
+    public string? Unregister(SiegeRequester actor, SiegeClanInfo? clan, int castleId, long nowUnixMs)
     {
         Refresh(nowUnixMs);
         var castle = Find(castleId);
@@ -41,7 +41,7 @@ public sealed partial class SiegeBoard
     }
 
     /// <summary>Mobius <c>RequestConfirmSiegeWaitingList</c>. <paramref name="approved"/> 1 accepts. Any other value refuses.</summary>
-    public string? AnswerDefender(SiegeActor actor, SiegeClanInfo? clan, int castleId, int targetClanId, int approved, long nowUnixMs)
+    public string? AnswerDefender(SiegeRequester actor, SiegeClanInfo? clan, int castleId, int targetClanId, int approved, long nowUnixMs)
     {
         Refresh(nowUnixMs);
         var castle = Find(castleId);

@@ -20,7 +20,7 @@ public sealed class NetOlympiadArenaTests
     static Random Matchmaking => new(7);
     const int Duelist = 88, Dreadnought = 89, OlympiadManagerNpc = 31688;
 
-    static OlympiadActor Noble(int id, string name, int classId = Duelist) =>
+    static OlympiadEntrant Noble(int id, string name, int classId = Duelist) =>
         new(id, name, classId, classId, 0, OlympiadProtocol.InventoryLimit, false);
 
     static OlympiadPresence? Standing(int id) =>

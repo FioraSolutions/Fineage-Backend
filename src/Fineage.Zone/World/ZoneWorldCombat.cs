@@ -259,7 +259,7 @@ public sealed partial class ZoneWorld
         int castleId = SiegeAreas.CastleAt(x, y, z);
         if (castleId <= 0)
             return 0;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         return castle != null && castle.InProgress ? castleId : 0;
     }
 
@@ -282,7 +282,7 @@ public sealed partial class ZoneWorld
         int other = SiegeSide(target.ClanId, castleId);
         if (state == 0 || other == 0 || state != other)
             return false;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (castle != null && state == SiegeProtocol.Attacker && castle.OwnerClanId > 0)
             return false;
         ShotNotice(session, SysMsgSiegeFriend,
@@ -295,7 +295,7 @@ public sealed partial class ZoneWorld
     {
         if (clanId <= 0)
             return 0;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (castle == null || !castle.InProgress)
             return 0;
         if (castle.OwnerClanId == clanId)

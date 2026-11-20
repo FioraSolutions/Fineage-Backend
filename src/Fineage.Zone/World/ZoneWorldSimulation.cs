@@ -1,4 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using Fineage.Zone.Bosses;
+using Fineage.Zone.Clan;
+using Fineage.Zone.Lottery;
+using Fineage.Zone.Manor;
+using Fineage.Zone.Olympiad;
+using Fineage.Zone.SevenSigns;
+using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -76,6 +83,19 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>
+    /// Runs <paramref name="body"/> at the tick the wall clock is in, pinned like a step: test and admin hooks that run
+    /// one actor outside the loop.
+    /// </summary>
+    T AtHookTick<T>(Func<TickContext, T> body)
+    {
+        long wall = _simulationClock.WallUnixMs();
+        _simulationTicks.Resume(wall);
+        var tick = new TickContext(_simulationTicks.Tick, _simulationClock.TimeOf(_simulationTicks.Tick), wall);
+        using (_simulationClock.Pin(tick))
+            return body(tick);
+    }
+
     /// <summary>Per-region streams for <paramref name="purpose"/>, or one injected generator for every region.</summary>
     IRegionRandom Streams(Random? injected, RandomPurpose purpose)
     {
@@ -85,7 +105,7 @@ public sealed partial class ZoneWorld
         return new SharedRegionRandom(injected);
     }
 
-    /// <summary>The stream of a global system (fishing, manor, lottery, mammon) until it becomes its own actor.</summary>
+    /// <summary>The stream of one global system: the actor's own (bosses, lottery, mammon, olympiad, manor) or fishing's.</summary>
     Random GlobalStream(RandomPurpose purpose) => new SimulationRandom(SimulationRandom.StreamSeed(_simulationSeed, purpose));
 
     /// <summary>The stream a roll made by <paramref name="actor"/> draws from: the one of the region that owns it.</summary>
@@ -147,16 +167,16 @@ public sealed partial class ZoneWorld
         ticks.AddRegionStage(_regenNpcsStage, slow);
         ticks.AddWorldStage("spawns", _ => TickSpawns(), slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
-        ticks.AddWorldStage("bosses", _ => TickBosses(), slow);
+        ticks.AddWorldStage(BossActor.StageName, tick => SpawnBosses(_bosses.Step(tick)), slow);
         ticks.AddWorldStage("clan.dissolutions", tick => CompleteDueDissolutions(tick.WallUnixMs), slow);
-        ticks.AddWorldStage("clan.hall-auctions", tick => TickHallAuctions(tick.WallUnixMs), slow);
-        ticks.AddWorldStage("sieges", tick => TickSieges(tick.WallUnixMs), slow);
-        ticks.AddWorldStage("manor", tick => TickManor(tick.WallUnixMs), slow);
+        ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
+        ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);
+        ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);
         ticks.AddWorldStage("fishing", tick => TickFishing(tick.NowUnixMs), slow);
-        ticks.AddWorldStage("lottery", tick => TickLottery(tick.WallUnixMs), slow);
-        ticks.AddWorldStage("seven-signs", _ => TickSevenSigns(), slow);
-        ticks.AddWorldStage("mammon", tick => TickMammon(tick.WallUnixMs), slow);
-        ticks.AddWorldStage("olympiad", _ => TickOlympiad(), slow);
+        ticks.AddWorldStage(LotteryActor.StageName, tick => AnnounceLottery(_lottery.Step(tick)), slow);
+        ticks.AddWorldStage(SevenSignsActor.StageName, tick => ApplySevenSignsPeriods(_sevenSigns.Step(tick)), slow);
+        ticks.AddWorldStage(MammonActor.StageName, tick => PlaceMammons(_mammon.Step(tick)), slow);
+        ticks.AddWorldStage(OlympiadActor.StageName, tick => ApplyOlympiad(_olympiad.Step(tick)), slow);
 
         // End-of-tick barrier: owners change only here, after every stage of the step has run.
         ticks.AddWorldStage(HandoffStage, HandOff);

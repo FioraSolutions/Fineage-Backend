@@ -60,9 +60,9 @@ public sealed partial class ZoneWorld
         {
             case 1:
                 {
-                    var matches = _olympiad.MatchesByStadium();
+                    var matches = _olympiad.Board.MatchesByStadium();
                     string html = OlympiadPage("olympiad_observe1.htm") ?? "";
-                    for (int i = 0; i < _olympiad.Stadiums.Count; i++)
+                    for (int i = 0; i < _olympiad.Board.Stadiums.Count; i++)
                         html = html.Replace($"%title{i + 1}%", matches.TryGetValue(i, out var m) ? m.Title : "Initial State", StringComparison.Ordinal);
                     SendHtml(session, player, npc, html);
                     return null;
@@ -71,7 +71,7 @@ public sealed partial class ZoneWorld
                 {
                     if (!PlayerClasses.TryGet(arg, out var cls) || cls == null || cls.ClassLevel != 3)
                         return "bad_request";
-                    var names = _olympiad.ClassLeaders(arg);
+                    var names = _olympiad.Board.ClassLeaders(arg);
                     string html = OlympiadPage("olympiad_ranking.htm") ?? "";
                     for (int i = 1; i <= 10; i++)
                     {
@@ -87,7 +87,7 @@ public sealed partial class ZoneWorld
             case 4:
                 {
                     // Net has no ExHeroList: the current heroes go out as a page.
-                    var rows = _olympiad.Heroes().Where(h => h.Claimed).ToList();
+                    var rows = _olympiad.Board.Heroes().Where(h => h.Claimed).ToList();
                     string body = rows.Count == 0
                         ? "There is no Hero in this era yet.<br>"
                         : string.Concat(rows.Select(h => $"{ClassName(h.ClassId)}: {h.Name}<br>"));
@@ -121,27 +121,27 @@ public sealed partial class ZoneWorld
         switch (val)
         {
             case 1:
-                ApplyOlympiad(_olympiad.Unregister(ActorFor(player), now));
+                ApplyOlympiad(_olympiad.Board.Unregister(ActorFor(player), now));
                 return null;
             case 2:
                 {
                     string html = (OlympiadPage("noble_registered.htm") ?? "")
-                        .Replace("%listClassed%", _olympiad.RegistrationCount(classed: true).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal)
+                        .Replace("%listClassed%", _olympiad.Board.RegistrationCount(classed: true).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal)
                         .Replace("%listNonClassedTeam%", "0", StringComparison.Ordinal)
-                        .Replace("%listNonClassed%", _olympiad.RegistrationCount(classed: false).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
+                        .Replace("%listNonClassed%", _olympiad.Board.RegistrationCount(classed: false).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
                     SendHtml(session, player, npc, html);
                     return null;
                 }
             case 3:
                 SendHtml(session, player, npc, (OlympiadPage("noble_points1.htm") ?? "")
-                    .Replace("%points%", _olympiad.PointsOf(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
+                    .Replace("%points%", _olympiad.Board.PointsOf(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
                 return null;
             case 4:
             case 5:
-                ApplyOlympiad(_olympiad.Register(ActorFor(player), classed: val == 5, now));
+                ApplyOlympiad(_olympiad.Board.Register(ActorFor(player), classed: val == 5, now));
                 return null;
             case 6:
-                SendHtml(session, player, npc, OlympiadPage(_olympiad.UnclaimedPasses(player.ObjectId) > 0 ? "noble_settle.htm" : "noble_nopoints.htm") ?? "");
+                SendHtml(session, player, npc, OlympiadPage(_olympiad.Board.UnclaimedPasses(player.ObjectId) > 0 ? "noble_settle.htm" : "noble_nopoints.htm") ?? "");
                 return null;
             case 7:
             case 8:
@@ -150,14 +150,14 @@ public sealed partial class ZoneWorld
                 return null;
             case 9:
                 SendHtml(session, player, npc, (OlympiadPage("noble_points2.htm") ?? "")
-                    .Replace("%points%", _olympiad.LastPeriodPoints(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
+                    .Replace("%points%", _olympiad.Board.LastPeriodPoints(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
                 return null;
             case 10:
                 {
-                    int passes = _olympiad.TakePasses(player.ObjectId);
-                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Settings.RewardItemId, out _))
+                    int passes = _olympiad.Board.TakePasses(player.ObjectId);
+                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Board.Settings.RewardItemId, out _))
                     {
-                        GiveItem(session, player.Inventory, _olympiad.Settings.RewardItemId, passes);
+                        GiveItem(session, player.Inventory, _olympiad.Board.Settings.RewardItemId, passes);
                         SaveInventory(session, player.Inventory);
                     }
                     return null;
@@ -174,12 +174,12 @@ public sealed partial class ZoneWorld
         switch (scriptEvent)
         {
             case "HeroClaim":
-                SendHtml(session, player, npc, Monument(_olympiad.IsHero(player.ObjectId)
+                SendHtml(session, player, npc, Monument(_olympiad.Board.IsHero(player.ObjectId)
                     ? "already_hero_status.htm"
-                    : _olympiad.IsUnclaimedHero(player.ObjectId) ? "receive_hero.htm" : "no_hero_status.htm") ?? "");
+                    : _olympiad.Board.IsUnclaimedHero(player.ObjectId) ? "receive_hero.htm" : "no_hero_status.htm") ?? "");
                 return null;
             case "HeroReceive":
-                if (!_olympiad.ClaimHero(player.ObjectId))
+                if (!_olympiad.Board.ClaimHero(player.ObjectId))
                     return null;
                 SetHero(player, true);
                 NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, OlympiadProtocol.HeroSocialAction);

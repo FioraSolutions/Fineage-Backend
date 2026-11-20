@@ -8,7 +8,7 @@ public sealed partial class BossSchedule
             SaveLocked();
     }
 
-    void Restore()
+    void Restore(long now)
     {
         var snapshot = _store.Load();
         var saved = new Dictionary<int, BossScheduleRow>(snapshot.Bosses.Count);
@@ -20,7 +20,6 @@ public sealed partial class BossSchedule
                 throw new InvalidDataException($"Boss {row.NpcId} has status {row.Status}.");
         }
 
-        long now = NowMs();
         bool changed = false;
         foreach (var definition in Catalog.Bosses)
         {
@@ -61,7 +60,7 @@ public sealed partial class BossSchedule
             SaveLocked();
     }
 
-    long Roll(BossDefinition definition)
+    long Roll(BossDefinition definition, IBossRandom random)
     {
         if (!definition.HasRespawnWindow)
             return 0;
@@ -81,7 +80,7 @@ public sealed partial class BossSchedule
 
         if (min == 0 && max == 0)
             return 0;
-        return _random.NextInclusive(min, max);
+        return random.NextInclusive(min, max);
     }
 
     bool IsArmed(BossDefinition definition)
@@ -143,8 +142,6 @@ public sealed partial class BossSchedule
 
         _store.Save(snapshot);
     }
-
-    long NowMs() => _clock().ToUnixTimeMilliseconds();
 
     static void NormalizeVitals(BossState state, BossDefinition definition)
     {

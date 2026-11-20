@@ -15,69 +15,63 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    ManorBoard _manor = null!;
+    ManorActor _manor = null!;
     Random _manorRandom = null!;
 
-    internal ManorBoard Manor => _manor;
+    internal ManorBoard Manor => _manor.Board;
 
     void InitManor(ManorSettings? settings, Random? random)
     {
         _manorRandom = random ?? GlobalStream(RandomPurpose.Manor);
-        _manor = new ManorBoard(ManorData.Default, settings ?? ManorSettings.FromEnvironment());
+        _manor = new ManorActor(new ManorBoard(ManorData.Default, settings ?? ManorSettings.FromEnvironment()));
         if (_accounts != null)
-            _manor.Import(_accounts.ListManorProduction(), _accounts.ListManorProcure());
-        if (_manor.Settings.Enabled)
+            _manor.Board.Import(_accounts.ListManorProduction(), _accounts.ListManorProcure());
+        if (_manor.Board.Settings.Enabled)
         {
             long now = NowUnixMs();
-            _manor.Mode = ManorRules.ModeAt(now, _manor.Settings.UtcOffsetMinutes);
-            _manor.NextChangeMs = ManorRules.NextChange(_manor.Mode, now, _manor.Settings.UtcOffsetMinutes);
+            _manor.Board.Mode = ManorRules.ModeAt(now, _manor.Board.Settings.UtcOffsetMinutes);
+            _manor.Board.NextChangeMs = ManorRules.NextChange(_manor.Board.Mode, now, _manor.Board.Settings.UtcOffsetMinutes);
         }
     }
 
     bool PersistManor() =>
-        _accounts == null || _accounts.SaveManor(_manor.ExportProduction(), _manor.ExportProcure());
+        _accounts == null || _accounts.SaveManor(_manor.Board.ExportProduction(), _manor.Board.ExportProcure());
 
-    void TickManor(long now)
+    /// <summary>Mobius <c>CastleManorManager.changeMode</c>: what a mode change does to every castle's manor.</summary>
+    int ApplyManorModes(IReadOnlyList<ManorModeChange> changes)
     {
-        if (_manor.Disabled || _manor.NextChangeMs <= 0 || now < _manor.NextChangeMs)
-            return;
-        ChangeManorMode(now);
+        foreach (var change in changes)
+            ApplyManorMode(change);
+        return changes.Count;
     }
 
-    /// <summary>Mobius <c>CastleManorManager.changeMode</c>.</summary>
-    void ChangeManorMode(long now)
+    void ApplyManorMode(ManorModeChange change)
     {
-        switch (_manor.Mode)
+        switch (change.To)
         {
-            case ManorProtocol.ModeApproved:
-                _manor.Mode = ManorProtocol.ModeMaintenance;
-                foreach (var castle in _siege.Castles)
+            case ManorProtocol.ModeMaintenance:
+                foreach (var castle in _siege.Board.Castles)
                     CloseManorPeriod(castle);
                 PersistManor();
                 PersistSiege();
                 break;
-            case ManorProtocol.ModeMaintenance:
-                _manor.Mode = ManorProtocol.ModeModifiable;
-                foreach (var castle in _siege.Castles)
+            case ManorProtocol.ModeModifiable:
+                foreach (var castle in _siege.Board.Castles)
                 {
                     if (castle.OwnerClanId > 0 && _clans.TryGetValue(castle.OwnerClanId, out var owner))
                         LeaderLine(owner, ManorProtocol.ManorUpdated, "The manor information has been updated.");
                 }
 
                 break;
-            case ManorProtocol.ModeModifiable:
-                _manor.Mode = ManorProtocol.ModeApproved;
-                foreach (var castle in _siege.Castles)
+            case ManorProtocol.ModeApproved:
+                foreach (var castle in _siege.Board.Castles)
                     ApproveManorPeriod(castle);
                 PersistManor();
                 PersistSiege();
                 break;
-            default:
-                return;
         }
 
-        _manor.NextChangeMs = ManorRules.NextChange(_manor.Mode, now, _manor.Settings.UtcOffsetMinutes);
-        ZoneLog.Info($"[manor] mode={_manor.Mode} next={_manor.NextChangeMs}");
+        ZoneLog.Info($"[manor] mode={_manor.Board.Mode} next={_manor.Board.NextChangeMs}");
     }
 
     void LeaderLine(ZoneClan clan, int id, string text)
@@ -98,11 +92,11 @@ public sealed partial class ZoneWorld
         int castleId = castle.Id;
         var warehouse = ClanWarehouseOf(owner);
         bool warehouseChanged = false;
-        foreach (var crop in _manor.Procure(castleId, next: false))
+        foreach (var crop in _manor.Board.Procure(castleId, next: false))
         {
             if (crop.StartAmount <= 0)
                 continue;
-            if (crop.StartAmount != crop.Amount && _manor.Data.SeedByCrop(crop.CropId) is { } seed && warehouse != null)
+            if (crop.StartAmount != crop.Amount && _manor.Board.Data.SeedByCrop(crop.CropId) is { } seed && warehouse != null)
             {
                 int matured = (int)((crop.StartAmount - crop.Amount) * ManorProtocol.MatureShare);
                 if (matured < 1 && _manorRandom.Next(99) < 90)
@@ -115,25 +109,25 @@ public sealed partial class ZoneWorld
             }
 
             if (crop.Amount > 0)
-                _siege.AddTreasury(castleId, crop.Amount * crop.Price);
+                _siege.Board.AddTreasury(castleId, crop.Amount * crop.Price);
         }
 
         if (warehouseChanged)
             SaveClan(owner);
 
-        _manor.SetProduction(castleId, false, _manor.Production(castleId, next: true));
-        _manor.SetProcure(castleId, false, _manor.Procure(castleId, next: true));
-        if (castle.Treasury < _manor.ManorCost(castleId, next: false))
+        _manor.Board.SetProduction(castleId, false, _manor.Board.Production(castleId, next: true));
+        _manor.Board.SetProcure(castleId, false, _manor.Board.Procure(castleId, next: true));
+        if (castle.Treasury < _manor.Board.ManorCost(castleId, next: false))
         {
-            _manor.SetProduction(castleId, true, []);
-            _manor.SetProcure(castleId, true, []);
+            _manor.Board.SetProduction(castleId, true, []);
+            _manor.Board.SetProcure(castleId, true, []);
         }
         else
         {
-            _manor.SetProduction(castleId, true,
-                _manor.Production(castleId, false).Select(p => new ManorProduct(p.SeedId, p.StartAmount, p.Price, p.StartAmount)).ToList());
-            _manor.SetProcure(castleId, true,
-                _manor.Procure(castleId, false).Select(p => new ManorProcure(p.CropId, p.StartAmount, p.RewardType, p.StartAmount, p.Price)).ToList());
+            _manor.Board.SetProduction(castleId, true,
+                _manor.Board.Production(castleId, false).Select(p => new ManorProduct(p.SeedId, p.StartAmount, p.Price, p.StartAmount)).ToList());
+            _manor.Board.SetProcure(castleId, true,
+                _manor.Board.Procure(castleId, false).Select(p => new ManorProcure(p.CropId, p.StartAmount, p.RewardType, p.StartAmount, p.Price)).ToList());
         }
     }
 
@@ -148,34 +142,34 @@ public sealed partial class ZoneWorld
         int castleId = castle.Id;
         var warehouse = ClanWarehouseOf(owner);
         int slots = 0;
-        foreach (var crop in _manor.Procure(castleId, next: true))
+        foreach (var crop in _manor.Board.Procure(castleId, next: true))
         {
-            if (crop.StartAmount > 0 && _manor.Data.SeedByCrop(crop.CropId) is { } seed && warehouse?.FindByItemId(seed.MatureId) == null)
+            if (crop.StartAmount > 0 && _manor.Board.Data.SeedByCrop(crop.CropId) is { } seed && warehouse?.FindByItemId(seed.MatureId) == null)
                 slots++;
         }
 
-        long cost = _manor.ManorCost(castleId, next: true);
+        long cost = _manor.Board.ManorCost(castleId, next: true);
         bool room = warehouse == null || warehouse.Items.Count + slots <= PledgeProtocol.ClanWarehouseSlots;
         // Fineage: Mobius drops the period only when both checks fail (&&); either one failing would overdraw the
         // treasury or lose the crops, so either one stops the manor here.
         if (!room || castle.Treasury < cost)
         {
-            _manor.SetProduction(castleId, true, []);
-            _manor.SetProcure(castleId, true, []);
+            _manor.Board.SetProduction(castleId, true, []);
+            _manor.Board.SetProcure(castleId, true, []);
             LeaderLine(owner, ManorProtocol.ManorNotOperating, "The amount is not sufficient and so the manor is not in operation.");
             return;
         }
 
         if (cost > 0)
-            _siege.AddTreasury(castleId, -cost);
+            _siege.Board.AddTreasury(castleId, -cost);
     }
 
     /// <summary>Mobius <c>Castle.updateOwnerInDB(null)</c> → <c>resetManorData</c>: an ownerless castle has no manor.</summary>
     void ResetManorIfOwnerless(int castleId)
     {
-        if (castleId <= 0 || _siege.Find(castleId) is not { OwnerClanId: 0 })
+        if (castleId <= 0 || _siege.Board.Find(castleId) is not { OwnerClanId: 0 })
             return;
-        _manor.Reset(castleId);
+        _manor.Board.Reset(castleId);
         PersistManor();
     }
 
@@ -192,14 +186,14 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
-        if (_manor.Disabled)
+        if (_manor.Board.Disabled)
             return ManorProtocol.Disabled;
         int castleId = c.CastleId;
         if (c.Kind != ManorCommandKind.DefaultInfo && c.Kind != ManorCommandKind.SellList && c.Kind != ManorCommandKind.SellCrops &&
-            _siege.Find(castleId) == null)
+            _siege.Board.Find(castleId) == null)
             return ManorProtocol.Castle;
         if (c.Kind is ManorCommandKind.BuyList or ManorCommandKind.BuySeeds or ManorCommandKind.SellList or ManorCommandKind.SellCrops
-            && _manor.UnderMaintenance)
+            && _manor.Board.UnderMaintenance)
         {
             SelfLine(session, ManorProtocol.UnderMaintenance, "The manor system is currently under maintenance.");
             return ManorProtocol.Maintenance;
@@ -232,13 +226,13 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(npcObjectId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 return 0;
-            int managed = _manor.Data.ManagerCastle(npc.NpcId);
+            int managed = _manor.Board.Data.ManagerCastle(npc.NpcId);
             if (managed <= 0 || !ZoneCombat.Within(player.X, player.Y, npc.X, npc.Y, NpcInteractionRange))
                 return 0;
             return managed;
         }
 
-        bool spawned = _byId.Values.Any(e => e.Kind == ZoneEntityKind.Npc && _manor.Data.ManagerCastle(e.NpcId) == castleId);
+        bool spawned = _byId.Values.Any(e => e.Kind == ZoneEntityKind.Npc && _manor.Board.Data.ManagerCastle(e.NpcId) == castleId);
         return spawned ? 0 : castleId;
     }
 
@@ -247,8 +241,8 @@ public sealed partial class ZoneWorld
         View = view,
         CastleId = castleId,
         Next = next,
-        Mode = _manor.Mode,
-        NextChangeUnixMs = _manor.NextChangeMs
+        Mode = _manor.Board.Mode,
+        NextChangeUnixMs = _manor.Board.NextChangeMs
     };
 
     void SendManor(ZoneSession session, ManorInfoNetMsg info) => NetBridge?.FanoutManorInfo([session.ObjectId], info);
@@ -261,7 +255,7 @@ public sealed partial class ZoneWorld
         Reward1 = s.Reward1,
         Reward2 = s.Reward2,
         Alternative = s.Alternative,
-        Limit = _manor.SeedLimit(s),
+        Limit = _manor.Board.SeedLimit(s),
         ReferencePrice = s.SeedPrice,
         MinPrice = s.SeedMinPrice,
         MaxPrice = s.SeedMaxPrice,
@@ -279,7 +273,7 @@ public sealed partial class ZoneWorld
         Level = s.Level,
         Reward1 = s.Reward1,
         Reward2 = s.Reward2,
-        Limit = _manor.CropLimit(s),
+        Limit = _manor.Board.CropLimit(s),
         ReferencePrice = s.CropPrice,
         MinPrice = s.CropMinPrice,
         MaxPrice = s.CropMaxPrice,
@@ -297,8 +291,8 @@ public sealed partial class ZoneWorld
     string? SendSeedInfo(ZoneSession session, int castleId, bool next, int view)
     {
         var info = ManorHeader(view, castleId, next);
-        info.Seeds = _manor.Production(castleId, next)
-            .Select(p => _manor.Data.Seed(p.SeedId) is { } s ? SeedRow(s, p) : null)
+        info.Seeds = _manor.Board.Production(castleId, next)
+            .Select(p => _manor.Board.Data.Seed(p.SeedId) is { } s ? SeedRow(s, p) : null)
             .Where(r => r != null).Select(r => r!).ToArray();
         SendManor(session, info);
         return null;
@@ -308,8 +302,8 @@ public sealed partial class ZoneWorld
     string? SendCropInfo(ZoneSession session, int castleId, bool next, int view)
     {
         var info = ManorHeader(view, castleId, next);
-        info.Crops = _manor.Procure(castleId, next)
-            .Select(p => _manor.Data.SeedByCrop(p.CropId, castleId) is { } s ? CropRow(s, castleId, p) : null)
+        info.Crops = _manor.Board.Procure(castleId, next)
+            .Select(p => _manor.Board.Data.SeedByCrop(p.CropId, castleId) is { } s ? CropRow(s, castleId, p) : null)
             .Where(r => r != null).Select(r => r!).ToArray();
         SendManor(session, info);
         return null;
@@ -319,7 +313,7 @@ public sealed partial class ZoneWorld
     string? SendDefaultInfo(ZoneSession session)
     {
         var info = ManorHeader(ManorCommandKind.DefaultInfo, 0, false);
-        info.Crops = _manor.Data.Crops().Select(s => CropRow(s, 0, null)).ToArray();
+        info.Crops = _manor.Board.Data.Crops().Select(s => CropRow(s, 0, null)).ToArray();
         SendManor(session, info);
         return null;
     }
@@ -332,15 +326,15 @@ public sealed partial class ZoneWorld
             return ManorProtocol.Manager;
         if (managed != c.CastleId)
         {
-            string name = _siege.Find(managed)?.Name ?? "";
+            string name = _siege.Board.Find(managed)?.Name ?? "";
             SelfLine(session, ManorProtocol.OnlyThisManorSeeds, $"Here you can buy only seeds of {name} Manor.", name);
             return ManorProtocol.Manager;
         }
 
         var info = ManorHeader(ManorCommandKind.BuyList, c.CastleId, false);
         info.Adena = player.Inventory?.CountOf(PledgeProtocol.AdenaItemId) ?? 0;
-        info.Seeds = _manor.Production(c.CastleId, false).Where(p => p.Amount > 0 && p.Price > 0)
-            .Select(p => _manor.Data.Seed(p.SeedId) is { } s ? SeedRow(s, p) : null)
+        info.Seeds = _manor.Board.Production(c.CastleId, false).Where(p => p.Amount > 0 && p.Price > 0)
+            .Select(p => _manor.Board.Data.Seed(p.SeedId) is { } s ? SeedRow(s, p) : null)
             .Where(r => r != null).Select(r => r!).ToArray();
         SendManor(session, info);
         return null;
@@ -398,7 +392,7 @@ public sealed partial class ZoneWorld
         var order = new List<(ManorProduct Product, long Count)>();
         foreach (var row in c.Rows)
         {
-            var product = _manor.Product(c.CastleId, row.ItemId, next: false);
+            var product = _manor.Board.Product(c.CastleId, row.ItemId, next: false);
             if (product == null || product.Price <= 0 || row.Count <= 0 || product.Amount < row.Count ||
                 order.Any(o => o.Product.SeedId == row.ItemId) || int.MaxValue / row.Count < product.Price)
                 return ManorProtocol.Product;
@@ -429,7 +423,7 @@ public sealed partial class ZoneWorld
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, inventory);
-        _siege.AddTreasury(c.CastleId, total);
+        _siege.Board.AddTreasury(c.CastleId, total);
         SelfLine(session, ManorProtocol.AdenaDisappeared, $"{total} adena disappeared.", total.ToString());
         PersistManor();
         PersistSiege();
@@ -452,12 +446,12 @@ public sealed partial class ZoneWorld
         var info = ManorHeader(ManorCommandKind.SellList, managed, false);
         info.Adena = inventory.CountOf(PledgeProtocol.AdenaItemId);
         var rows = new List<ManorCropNet>();
-        foreach (var item in inventory.Items.Where(i => !i.IsEquipped && _manor.Data.IsCrop(i.ItemId)))
+        foreach (var item in inventory.Items.Where(i => !i.IsEquipped && _manor.Board.Data.IsCrop(i.ItemId)))
         {
-            foreach (var castle in _siege.Castles)
+            foreach (var castle in _siege.Board.Castles)
             {
-                var procure = _manor.CropProcure(castle.Id, item.ItemId, next: false);
-                if (procure == null || procure.Amount <= 0 || _manor.Data.SeedByCrop(item.ItemId, castle.Id) is not { } seed)
+                var procure = _manor.Board.CropProcure(castle.Id, item.ItemId, next: false);
+                if (procure == null || procure.Amount <= 0 || _manor.Board.Data.SeedByCrop(item.ItemId, castle.Id) is not { } seed)
                     continue;
                 var row = CropRow(seed, castle.Id, procure);
                 row.InventoryObjectId = item.ObjectId;
@@ -490,8 +484,8 @@ public sealed partial class ZoneWorld
             var item = inventory.Find(row.ObjectId);
             if (item == null || item.ItemId != row.ItemId || row.Count <= 0 || item.Count < row.Count || item.IsEquipped)
                 return ManorProtocol.Product;
-            var procure = _manor.CropProcure(row.ManorId, row.ItemId, next: false);
-            var seed = _manor.Data.SeedByCrop(row.ItemId, row.ManorId);
+            var procure = _manor.Board.CropProcure(row.ManorId, row.ItemId, next: false);
+            var seed = _manor.Board.Data.SeedByCrop(row.ItemId, row.ManorId);
             if (procure == null || seed == null || procure.Amount < row.Count)
                 return ManorProtocol.Product;
             plan.Add((row, procure, seed.Reward(procure.RewardType)));
@@ -552,7 +546,7 @@ public sealed partial class ZoneWorld
     string? LordRights(ZoneSession session, ZoneEntity player, int castleId)
     {
         var clan = ClanOf(player.ObjectId);
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (clan == null || castle == null || castle.OwnerClanId != clan.Id ||
             (clan.LeaderId != player.ObjectId && !HasPriv(clan, player.ObjectId, PledgeProtocol.PrivCastleManor)))
             return Rights(session);
@@ -567,14 +561,14 @@ public sealed partial class ZoneWorld
         if (LordRights(session, player, castleId) is { } denied)
             return denied;
         var info = ManorHeader(seeds ? ManorCommandKind.SeedSetting : ManorCommandKind.CropSetting, castleId, true);
-        info.Treasury = _siege.Find(castleId)!.Treasury;
-        info.ManorCost = _manor.ManorCost(castleId, next: true);
-        var castleSeeds = _manor.Data.SeedsFor(castleId).ToList();
+        info.Treasury = _siege.Board.Find(castleId)!.Treasury;
+        info.ManorCost = _manor.Board.ManorCost(castleId, next: true);
+        var castleSeeds = _manor.Board.Data.SeedsFor(castleId).ToList();
         if (seeds)
-            info.Seeds = castleSeeds.Select(s => SeedRow(s, _manor.Product(castleId, s.SeedId, true), _manor.Product(castleId, s.SeedId, false))).ToArray();
+            info.Seeds = castleSeeds.Select(s => SeedRow(s, _manor.Board.Product(castleId, s.SeedId, true), _manor.Board.Product(castleId, s.SeedId, false))).ToArray();
         else
             info.Crops = castleSeeds.GroupBy(s => s.CropId).Select(g => g.First())
-                .Select(s => CropRow(s, castleId, _manor.CropProcure(castleId, s.CropId, true), _manor.CropProcure(castleId, s.CropId, false)))
+                .Select(s => CropRow(s, castleId, _manor.Board.CropProcure(castleId, s.CropId, true), _manor.Board.CropProcure(castleId, s.CropId, false)))
                 .ToArray();
         SendManor(session, info);
         return null;
@@ -583,7 +577,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius RequestSetSeed: only while editable; rows over the limit or outside 60%–1000% of the reference are dropped.</summary>
     string? SetNextSeeds(ZoneSession session, ZoneEntity player, int castleId, ManorRowNet[] rows)
     {
-        if (!_manor.Modifiable)
+        if (!_manor.Board.Modifiable)
             return ManorProtocol.Period;
         if (LordRights(session, player, castleId) is { } denied)
             return denied;
@@ -592,14 +586,14 @@ public sealed partial class ZoneWorld
         {
             if (row.ItemId < 1 || row.Count < 0 || row.Price < 0)
                 return "bad_request";
-            var seed = _manor.Data.Seed(row.ItemId);
+            var seed = _manor.Board.Data.Seed(row.ItemId);
             if (row.Count == 0 || seed == null || seed.CastleId != castleId || list.Any(p => p.SeedId == row.ItemId))
                 continue;
-            if (row.Count <= _manor.SeedLimit(seed) && row.Price >= seed.SeedMinPrice && row.Price <= seed.SeedMaxPrice)
+            if (row.Count <= _manor.Board.SeedLimit(seed) && row.Price >= seed.SeedMinPrice && row.Price <= seed.SeedMaxPrice)
                 list.Add(new ManorProduct(row.ItemId, row.Count, row.Price, row.Count));
         }
 
-        _manor.SetProduction(castleId, true, list);
+        _manor.Board.SetProduction(castleId, true, list);
         PersistManor();
         return LordPage(session, player, castleId, seeds: true);
     }
@@ -607,7 +601,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius RequestSetCrop: like seeds, with the reward type 1 / 2 kept per row.</summary>
     string? SetNextCrops(ZoneSession session, ZoneEntity player, int castleId, ManorRowNet[] rows)
     {
-        if (!_manor.Modifiable)
+        if (!_manor.Board.Modifiable)
             return ManorProtocol.Period;
         if (LordRights(session, player, castleId) is { } denied)
             return denied;
@@ -616,14 +610,14 @@ public sealed partial class ZoneWorld
         {
             if (row.ItemId < 1 || row.Count < 0 || row.Price < 0)
                 return "bad_request";
-            var seed = _manor.Data.SeedByCrop(row.ItemId, castleId);
+            var seed = _manor.Board.Data.SeedByCrop(row.ItemId, castleId);
             if (row.Count == 0 || seed == null || list.Any(p => p.CropId == row.ItemId))
                 continue;
-            if (row.Count <= _manor.CropLimit(seed) && row.Price >= seed.CropMinPrice && row.Price <= seed.CropMaxPrice)
+            if (row.Count <= _manor.Board.CropLimit(seed) && row.Price >= seed.CropMinPrice && row.Price <= seed.CropMaxPrice)
                 list.Add(new ManorProcure(row.ItemId, row.Count, row.RewardType == 2 ? 2 : 1, row.Count, row.Price));
         }
 
-        _manor.SetProcure(castleId, true, list);
+        _manor.Board.SetProcure(castleId, true, list);
         PersistManor();
         return LordPage(session, player, castleId, seeds: false);
     }
@@ -632,12 +626,15 @@ public sealed partial class ZoneWorld
     internal void ChangeManorModeForTests()
     {
         lock (_gate)
-            ChangeManorMode(NowUnixMs());
+        {
+            if (_manor.Advance(NowUnixMs()) is { } change)
+                ApplyManorMode(change);
+        }
     }
 
     internal void TickManorForTests()
     {
         lock (_gate)
-            TickManor(NowUnixMs());
+            AtHookTick(tick => ApplyManorModes(_manor.Step(tick)));
     }
 }

@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
         var bounds = ZoneMapFilter.BoundsList;
         foreach (var data in CastleTable.All)
         {
-            var castle = _siege.Find(data.Id);
+            var castle = _siege.Board.Find(data.Id);
             foreach (var door in data.Doors)
             {
                 // The gate stands where the geo door is (Doors.xml); a world without the door table has no gates.
@@ -79,7 +79,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void RespawnCastleDoors(int castleId, bool weak)
     {
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         foreach (var (doorId, objectId) in _castleDoors)
         {
             if (!_byId.TryGetValue(objectId, out var door) || door.SiegeNpc is not { } info || info.CastleId != castleId)
@@ -130,7 +130,7 @@ public sealed partial class ZoneWorld
     DoorStatusNetMsg DoorStatusOf(ZoneEntity door)
     {
         var info = door.SiegeNpc!;
-        var castle = _siege.Find(info.CastleId);
+        var castle = _siege.Board.Find(info.CastleId);
         return new DoorStatusNetMsg
         {
             ObjectId = door.ObjectId,
@@ -171,7 +171,7 @@ public sealed partial class ZoneWorld
         var info = target.SiegeNpc;
         if (info == null)
             return false;
-        var castle = _siege.Find(info.CastleId);
+        var castle = _siege.Board.Find(info.CastleId);
         bool inProgress = castle?.InProgress == true;
         int side = attacker.Kind == ZoneEntityKind.Player ? SiegeSide(SiegeClanOf(attacker), info.CastleId) : 0;
         if (info.Role == SiegeNpcRole.Guard)
@@ -263,7 +263,7 @@ public sealed partial class ZoneWorld
         if (player.Dead || clan == null || clan.LeaderId != player.ObjectId)
             return SiegeProtocol.Leader;
         int castleId = CastleAtEntity(player);
-        castle = castleId > 0 ? _siege.Find(castleId) : null;
+        castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         if (castle == null || !castle.InProgress || SiegeSide(clan.Id, castle.Id) != SiegeProtocol.StateAttacker)
         {
             if (session != null)
@@ -326,7 +326,7 @@ public sealed partial class ZoneWorld
         if (player.Dead || clan == null)
             return SiegeProtocol.Clan;
         int castleId = CastleAtEntity(player);
-        castle = castleId > 0 ? _siege.Find(castleId) : null;
+        castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         bool ok = castle != null && castle.InProgress && SiegeSide(clan.Id, castle.Id) == SiegeProtocol.StateAttacker &&
                   clan.LeaderId == player.ObjectId &&
                   !(_siegeRun.TryGetValue(castle.Id, out var run) && run.Flags.ContainsKey(clan.Id));
@@ -436,7 +436,7 @@ public sealed partial class ZoneWorld
         }
 
         if (castleId == 0)
-            castleId = _siege.CastleOwnedBy(clanId);
+            castleId = _siege.Board.CastleOwnedBy(clanId);
         if (castleId == 0 || CastleTable.Find(castleId) is not { OwnerRestart.Count: > 0 } data)
             return null;
         var p = data.OwnerRestart[RndBound(player, data.OwnerRestart.Count)];

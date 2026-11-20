@@ -39,14 +39,14 @@ public sealed partial class ZoneWorld
     void SyncOlympiadNoblesse(ZoneEntity entity)
     {
         // Block G2: a claimed hero of the current era is a hero again on every login (Mobius Hero.isHero).
-        if (_olympiad.IsHero(entity.ObjectId))
+        if (_olympiad.Board.IsHero(entity.ObjectId))
             entity.Hero = true;
         if (entity.Noble)
         {
-            if (!_olympiad.IsNoble(entity.ObjectId))
-                _olympiad.GrantNoblesse(entity.ObjectId);
+            if (!_olympiad.Board.IsNoble(entity.ObjectId))
+                _olympiad.Board.GrantNoblesse(entity.ObjectId);
         }
-        else if (_olympiad.IsNoble(entity.ObjectId))
+        else if (_olympiad.Board.IsNoble(entity.ObjectId))
             entity.Noble = true; // granted by the Olympiad admin path before G1 persisted the flag
     }
 
@@ -62,7 +62,7 @@ public sealed partial class ZoneWorld
             return true;
         player.Noble = noble;
         if (noble)
-            _olympiad.GrantNoblesse(player.ObjectId);
+            _olympiad.Board.GrantNoblesse(player.ObjectId);
         RefreshKnownSkills(player);
         RefreshPledgeClass(player);
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));

@@ -138,7 +138,8 @@ public sealed class LotteryBoard
     readonly Dictionary<int, LotteryTicket> _tickets = [];
     readonly Dictionary<int, LotteryDraw> _draws = [];
 
-    public LotteryBoard(LotterySettings? settings = null, ILotteryStore? store = null, long? nowUnixMs = null)
+    /// <summary>A store without a running lottery opens one whose draw is the first after <paramref name="loadedAtUnixMs"/>.</summary>
+    public LotteryBoard(long loadedAtUnixMs, LotterySettings? settings = null, ILotteryStore? store = null)
     {
         _settings = settings ?? LotterySettings.Mobius;
         _store = store ?? new MemoryLotteryStore();
@@ -150,15 +151,15 @@ public sealed class LotteryBoard
         if (_s.EndUnixMs == 0)
         {
             _s.Prize = _settings.InitialPrize;
-            _s.EndUnixMs = NextDraw(nowUnixMs ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            _s.EndUnixMs = NextDraw(loadedAtUnixMs);
             Save();
         }
     }
 
-    public static LotteryBoard OpenInStateDirectory(string stateDirectory, LotterySettings? settings = null, long? nowUnixMs = null)
+    public static LotteryBoard OpenInStateDirectory(string stateDirectory, long loadedAtUnixMs, LotterySettings? settings = null)
     {
         string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "lottery.json");
-        return new LotteryBoard(settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path), nowUnixMs);
+        return new LotteryBoard(loadedAtUnixMs, settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path));
     }
 
     public LotterySettings Settings => _settings;
@@ -315,8 +316,16 @@ public sealed class LotteryBoard
         long p3 = c3 > 0 ? (long)((jackpot - prize4) * _settings.Rate3 / c3) : 0;
         var draw = new LotteryDraw
         {
-            Number = _s.Number, Mask = mask, Jackpot = jackpot, Prize1 = p1, Prize2 = p2, Prize3 = p3,
-            Winners1 = c1, Winners2 = c2, Winners3 = c3, Winners4 = c4
+            Number = _s.Number,
+            Mask = mask,
+            Jackpot = jackpot,
+            Prize1 = p1,
+            Prize2 = p2,
+            Prize3 = p3,
+            Winners1 = c1,
+            Winners2 = c2,
+            Winners3 = c3,
+            Winners4 = c4
         };
         _s.Draws.Add(draw);
         _draws[draw.Number] = draw;

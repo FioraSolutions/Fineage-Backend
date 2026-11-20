@@ -18,36 +18,39 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius ships the lottery pages for 30991 only; every seller uses them.</summary>
     const int LotteryPageNpc = 30991;
 
-    LotteryBoard? _lottery;
+    readonly LotteryActor _lottery;
 
-    internal LotteryBoard Lottery => _lottery ??= new LotteryBoard(nowUnixMs: NowUnixMs());
+    internal LotteryBoard Lottery => _lottery.Board;
 
-    internal Random LotteryRandom { get; set; }
+    internal Random LotteryRandom
+    {
+        get => _lottery.Random;
+        set => _lottery.Random = value;
+    }
 
     /// <summary>Swap in the persisted board (host: <c>lottery.json</c> in the state directory).</summary>
     public void UseLottery(LotteryBoard board)
     {
         lock (_gate)
-            _lottery = board ?? throw new ArgumentNullException(nameof(board));
+            _lottery.Use(board);
     }
 
-    void TickLottery(long now)
+    int AnnounceLottery(IReadOnlyList<LotteryNotice> notices)
     {
-        var notices = new List<LotteryNotice>();
-        Lottery.Tick(now, LotteryRandom, notices);
         if (notices.Count == 0)
-            return;
+            return 0;
         var live = Players().Where(p => p.Session != null).Select(p => p.ObjectId).ToArray();
         if (live.Length == 0)
-            return;
+            return notices.Count;
         foreach (var n in notices)
             NetBridge?.FanoutSystemMessage(live, new SystemMessageMsg { Id = n.MessageId, Params = n.Params, Text = n.Text });
+        return notices.Count;
     }
 
     internal void TickLotteryForTests()
     {
         lock (_gate)
-            TickLottery(NowUnixMs());
+            AtHookTick(tick => AnnounceLottery(_lottery.Step(tick)));
     }
 
     /// <summary>Test: one <c>Loto N</c> bypass against a lottery seller (spawned or a stand-in).</summary>

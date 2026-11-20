@@ -86,21 +86,21 @@ public sealed class SevenSignsEngineTests
     {
         var clock = new MutableGameClock(Start);
         var festival = new RecordingFestival();
-        var engine = new SevenSignsEngine(clock, festival: festival);
+        var engine = new SevenSignsEngine(clock.UtcNow, festival: festival);
         var notices = new List<SevenSignsNotice>();
 
         Assert.Equal(SevenSignsPeriod.Recruiting, engine.Period);
         Assert.False(engine.TryAdvance(Start.AddMinutes(14), notices));
 
         clock.UtcNow = Start.AddMinutes(15);
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         Assert.Equal(SevenSignsPeriod.Competition, engine.Period);
         Assert.Equal(1, festival.Started);
         Assert.Contains(notices, notice => notice.Id == SevenSignsProtocol.PeriodCompetitionMessage);
 
         notices.Clear();
         clock.UtcNow = Start.AddDays(7);
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         Assert.Equal(SevenSignsPeriod.Results, engine.Period);
         Assert.Equal(SevenSignsCabal.None, festival.EndedWith);
         Assert.Contains(notices, notice => notice.Id == SevenSignsProtocol.PeriodResultsMessage);
@@ -108,14 +108,14 @@ public sealed class SevenSignsEngineTests
 
         notices.Clear();
         clock.UtcNow = Start.AddDays(7).AddMinutes(15);
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         Assert.Equal(SevenSignsPeriod.SealValidation, engine.Period);
         Assert.Contains(notices, notice => notice.Id == SevenSignsProtocol.PeriodValidationMessage);
         Assert.Equal(SevenSignsProtocol.SkyNormal, engine.SkyState());
 
         notices.Clear();
         clock.UtcNow = Start.AddDays(14);
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         Assert.Equal(SevenSignsPeriod.Recruiting, engine.Period);
         Assert.Equal(2, engine.Cycle);
         Assert.Equal(1, festival.Resets);
@@ -132,7 +132,7 @@ public sealed class SevenSignsEngineTests
         {
             OnEnded = engine => engine.AddFestivalScore(SevenSignsCabal.Dusk, 600)
         };
-        var engine = new SevenSignsEngine(clock, festival: festival);
+        var engine = new SevenSignsEngine(clock.UtcNow, festival: festival);
         festival.Engine = engine;
         var notices = new List<SevenSignsNotice>();
         EnterCompetition(engine, clock, notices);
@@ -143,7 +143,7 @@ public sealed class SevenSignsEngineTests
 
         notices.Clear();
         clock.UtcNow = engine.NextChange;
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         Assert.Contains(notices, notice => notice.Id == SevenSignsProtocol.DawnWonMessage);
         Assert.Equal(SevenSignsCabal.Dawn, (SevenSignsCabal)engine.StatusFor(1).PreviousWinner);
         Assert.Equal(SevenSignsCabal.Dusk, (SevenSignsCabal)engine.StatusFor(1).WinningCabal);
@@ -181,7 +181,7 @@ public sealed class SevenSignsEngineTests
 
         Assert.Equal(SevenSignsProtocol.ClassTooLow, engine.TryJoin(1, 0, false, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
         Assert.Equal(SevenSignsProtocol.CastleBlocked, engine.TryJoin(2, 1, true, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
-        Assert.Equal(SevenSignsProtocol.PeriodClosed, new SevenSignsEngine(new MutableGameClock(Start)).TryJoin(3, 1, false, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
+        Assert.Equal(SevenSignsProtocol.PeriodClosed, new SevenSignsEngine(Start).TryJoin(3, 1, false, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
 
         Assert.Null(engine.TryJoin(4, 2, true, SevenSignsCabal.Dawn, SevenSignsSeal.Avarice, Pay, notices));
         Assert.Equal(50_000, adena);
@@ -220,7 +220,7 @@ public sealed class SevenSignsEngineTests
     public void Seal_choices_at_35_and_10_percent_set_owners_and_validation_effects()
     {
         var clock = new MutableGameClock(Start);
-        var engine = new SevenSignsEngine(clock);
+        var engine = new SevenSignsEngine(clock.UtcNow);
         var notices = new List<SevenSignsNotice>();
         EnterCompetition(engine, clock, notices);
 
@@ -232,14 +232,14 @@ public sealed class SevenSignsEngineTests
 
         notices.Clear();
         clock.UtcNow = engine.NextChange;
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         var status = engine.StatusFor(1);
         Assert.Equal(SevenSignsCabal.Dawn, (SevenSignsCabal)status.AvariceOwner);
         Assert.Equal(SevenSignsCabal.None, (SevenSignsCabal)status.GnosisOwner);
         Assert.Contains(notices, notice => notice.Id == SevenSignsProtocol.AvariceDawnMessage);
 
         clock.UtcNow = engine.NextChange;
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         var effects = engine.Effects();
         Assert.True(effects.SealValidation);
         Assert.True(effects.MammonMerchant);
@@ -256,16 +256,16 @@ public sealed class SevenSignsEngineTests
     public void Strife_owned_by_dawn_blocks_dusk_summons_and_raises_gate_defense_during_validation()
     {
         var clock = new MutableGameClock(Start);
-        var engine = new SevenSignsEngine(clock);
+        var engine = new SevenSignsEngine(clock.UtcNow);
         var notices = new List<SevenSignsNotice>();
         EnterCompetition(engine, clock, notices);
         for (int i = 0; i < 10; i++)
             Assert.Null(engine.TryJoin(i + 1, 1, false, SevenSignsCabal.Dawn, SevenSignsSeal.Strife, null, notices));
         Assert.Null(engine.TryContribute(1, 1, 0, 0));
         clock.UtcNow = engine.NextChange;
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
         clock.UtcNow = engine.NextChange;
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
 
         var effects = engine.Effects();
         Assert.Equal(SevenSignsCabal.Dawn, effects.StrifeOwner);
@@ -286,17 +286,17 @@ public sealed class SevenSignsEngineTests
         {
             var clock = new MutableGameClock(Start);
             var store = new JsonSevenSignsStore(path);
-            var engine = new SevenSignsEngine(clock, new SevenSignsOptions { LazyUpdate = true }, store);
+            var engine = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, store);
             var notices = new List<SevenSignsNotice>();
             EnterCompetition(engine, clock, notices);
             Assert.Null(engine.TryJoin(42, 1, false, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
             Assert.Null(engine.TryContribute(42, 2, 0, 0));
-            var beforeSave = new SevenSignsEngine(clock, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
+            var beforeSave = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
             Assert.Equal(SevenSignsPeriod.Competition, beforeSave.Period);
             Assert.Equal(SevenSignsCabal.None, (SevenSignsCabal)beforeSave.PlayerCabal(42));
             engine.Save();
 
-            var loaded = new SevenSignsEngine(clock, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
+            var loaded = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
             Assert.Equal(SevenSignsPeriod.Competition, loaded.Period);
             Assert.Equal(SevenSignsCabal.Dusk, (SevenSignsCabal)loaded.PlayerCabal(42));
             Assert.Equal(SevenSignsSeal.Gnosis, (SevenSignsSeal)loaded.PlayerSeal(42));
@@ -314,7 +314,7 @@ public sealed class SevenSignsEngineTests
     static SevenSignsEngine CompetitionEngine()
     {
         var clock = new MutableGameClock(Start);
-        var engine = new SevenSignsEngine(clock);
+        var engine = new SevenSignsEngine(clock.UtcNow);
         EnterCompetition(engine, clock, []);
         return engine;
     }
@@ -322,7 +322,7 @@ public sealed class SevenSignsEngineTests
     static void EnterCompetition(SevenSignsEngine engine, MutableGameClock clock, List<SevenSignsNotice> notices)
     {
         clock.UtcNow = Start.AddMinutes(15);
-        Assert.True(engine.AdvanceDue(notices));
+        Assert.True(engine.TryAdvance(clock.UtcNow, notices));
     }
 
     sealed class RecordingFestival : ISevenSignsFestivalHook

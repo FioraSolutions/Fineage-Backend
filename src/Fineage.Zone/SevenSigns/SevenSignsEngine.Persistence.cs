@@ -108,7 +108,7 @@ public sealed partial class SevenSignsEngine
         return row;
     }
 
-    void Load(SevenSignsSnapshot snapshot)
+    void Load(SevenSignsSnapshot snapshot, DateTimeOffset loadedAt)
     {
         _cycle = snapshot.Cycle < 1 ? 1 : snapshot.Cycle;
         _period = Enum.IsDefined(typeof(SevenSignsPeriod), snapshot.Period)
@@ -142,7 +142,7 @@ public sealed partial class SevenSignsEngine
 
         _nextChange = snapshot.NextChangeUnixMs > 0
             ? DateTimeOffset.FromUnixTimeMilliseconds(snapshot.NextChangeUnixMs)
-            : SevenSignsSchedule.Next(_period, _clock.UtcNow, _options);
+            : SevenSignsSchedule.Next(_period, loadedAt, _options);
     }
 
     void Persist(bool force)

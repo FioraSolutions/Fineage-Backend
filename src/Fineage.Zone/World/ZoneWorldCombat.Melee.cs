@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
         ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
-            _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
+            _olympiad.Board.NoteDamage(attacker.ObjectId, hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
@@ -144,6 +144,7 @@ public sealed partial class ZoneWorld
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
+        NoteBossDeath(npc);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;

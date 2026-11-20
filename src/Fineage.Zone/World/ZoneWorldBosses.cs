@@ -5,7 +5,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    readonly BossSchedule _bosses;
+    readonly BossActor _bosses;
 
     void BootstrapBosses()
     {
@@ -25,13 +25,13 @@ public sealed partial class ZoneWorld
             }
         }
 
-        foreach (var order in _bosses.StartupOrders())
+        foreach (var order in _bosses.Schedule.StartupOrders())
             MaterializeBoss(order);
     }
 
-    void TickBosses()
+    void SpawnBosses(IReadOnlyList<BossSpawnOrder> due)
     {
-        foreach (var order in _bosses.CollectDue())
+        foreach (var order in due)
         {
             if (!MaterializeBoss(order))
                 continue;
@@ -41,9 +41,20 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Combat calls this after a boss dies. It records the Mobius respawn window and,
-    /// when the boss is still in the world, removes it. Safe to call when combat already despawned the NPC.
-    /// Do not call it while holding the world gate; it takes that gate itself.
+    /// A scheduled boss died in combat: the boss actor rolls its respawn window from now when it next steps. Deferred
+    /// to the barrier inside a region body.
+    /// </summary>
+    void NoteBossDeath(ZoneEntity npc)
+    {
+        if (!_bosses.Catalog.TryGet(npc.NpcId, out var definition) || definition.ObjectId != npc.ObjectId)
+            return;
+        var kill = new BossKill(npc.NpcId, NowUnixMs());
+        AtBarrier(() => _bosses.Kill(kill));
+    }
+
+    /// <summary>
+    /// Admin and test hook: marks the boss dead now, opening its respawn window, and, when the boss
+    /// is still in the world, removes it. Do not call it while holding the world gate; it takes that gate itself.
     /// </summary>
     public bool OnBossKilled(int npcId)
     {
@@ -85,14 +96,18 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    /// <summary>Test hook: run the boss respawn tick without the simulation loop.</summary>
+    /// <summary>Test hook: run the boss actor's stage now, without the simulation loop.</summary>
     internal void AdvanceBossesForTests()
     {
         lock (_gate)
-            TickBosses();
+            AtHookTick(tick =>
+            {
+                SpawnBosses(_bosses.Step(tick));
+                return 0;
+            });
     }
 
-    internal void SaveBosses() => _bosses.Save();
+    internal void SaveBosses() => _bosses.Schedule.Save();
 
     internal (int Hp, int Mp) BossVitalsForTests(int npcId)
     {
@@ -107,16 +122,12 @@ public sealed partial class ZoneWorld
 
     bool KillBossLocked(int npcId)
     {
-        if (!_bosses.OnBossKilled(npcId))
+        if (!_bosses.Catalog.TryGet(npcId, out var definition))
             return false;
 
-        if (_bosses.Catalog.TryGet(npcId, out var definition)
-            && _byId.TryGetValue(definition.ObjectId, out var entity)
-            && entity.Kind == ZoneEntityKind.Npc)
-        {
+        _bosses.Kill(new BossKill(npcId, NowUnixMs()));
+        if (_byId.TryGetValue(definition.ObjectId, out var entity) && entity.Kind == ZoneEntityKind.Npc)
             DespawnNpc(entity);
-        }
-
         return true;
     }
 
@@ -128,7 +139,7 @@ public sealed partial class ZoneWorld
         if (request.Action != BossProtocol.ActionForceSpawn)
             return "bad_request";
 
-        if (!_bosses.TryForceSpawn(request.NpcId, out var order))
+        if (!_bosses.Schedule.TryForceSpawn(request.NpcId, out var order))
             return BossProtocol.UnknownBoss;
 
         if (MaterializeBoss(order) && _byId.TryGetValue(order.ObjectId, out var npc))
@@ -140,7 +151,7 @@ public sealed partial class ZoneWorld
     {
         if (npcId == 0)
         {
-            var views = _bosses.Views();
+            var views = _bosses.Schedule.Views();
             var entries = new BossStatusEntryMsg[views.Count];
             for (int i = 0; i < views.Count; i++)
                 entries[i] = Entry(views[i]);
@@ -148,7 +159,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (!_bosses.TryView(npcId, out var view))
+        if (!_bosses.Schedule.TryView(npcId, out var view))
         {
             message = null;
             return BossProtocol.UnknownBoss;

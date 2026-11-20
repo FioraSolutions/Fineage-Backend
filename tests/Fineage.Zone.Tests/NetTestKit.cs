@@ -83,13 +83,15 @@ internal sealed class NetTestKit
         Fineage.Zone.Simulation.IRegionPartition? regions = null,
         Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
         ulong? simulationSeed = null,
-        Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null)
+        Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
+        Fineage.Zone.Bosses.BossSchedule? bosses = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
-            simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: regionExecutor);
+            simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: regionExecutor,
+            bosses: bosses);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>
