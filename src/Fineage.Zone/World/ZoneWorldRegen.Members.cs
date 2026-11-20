@@ -10,11 +10,6 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>
-    /// Mobius <c>NPCStatus.doRegeneration</c>: a wounded NPC heals
-    /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
-    /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
-    /// </summary>
-    /// <summary>
     /// Mobius <c>BaseStat.CON.calcBonus</c> / <c>MEN.calcBonus</c> for this player's class, read from
     /// <c>data/stat-bonuses.json</c>, including henna.
     /// </summary>
@@ -26,6 +21,11 @@ public sealed partial class ZoneWorld
         return (attrs.ConBonus, attrs.MenBonus);
     }
 
+    /// <summary>
+    /// Mobius <c>NPCStatus.doRegeneration</c>: a wounded NPC heals
+    /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
+    /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
+    /// </summary>
     void TickNpcRegen()
     {
         if (!_npcRegen || _needRegen.Count == 0)
