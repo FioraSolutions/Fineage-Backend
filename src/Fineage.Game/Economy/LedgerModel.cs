@@ -118,7 +118,8 @@ public enum LedgerRejection
     InstanceMismatch,
     InstanceNotOwned,
     InstanceTaken,
-    Conflict
+    Conflict,
+    Stale
 }
 
 public readonly record struct LedgerResult(LedgerTxId Id, LedgerOutcome Outcome, LedgerRejection Rejection, long Position)

@@ -11,22 +11,29 @@ public interface IEconomyLedger
 
 /// <summary>
 /// The auditable economy ledger, in process: double-entry postings that sum to zero per item, balances and piece
-/// ownership projected from the journal, and an idempotency index by <see cref="LedgerTxId"/>. Starting replays the
-/// journal and refuses one whose hash chain or postings do not hold.
+/// ownership projected from the journal, and an idempotency index by <see cref="LedgerTxId"/> over the last
+/// <c>idempotencyTicks</c> ticks; an id older than that is refused as stale, so a late retry can never post twice.
+/// Starting replays the journal and refuses one whose hash chain or postings do not hold.
 /// </summary>
 public sealed class EconomyLedger : IEconomyLedger
 {
     readonly object _sync = new();
     readonly ILedgerJournal _journal;
+    readonly long _idempotencyTicks;
     readonly Dictionary<LedgerTxId, LedgerEntry> _byId = [];
+    readonly Queue<LedgerEntry> _recent = new();
     readonly Dictionary<LedgerAccount, LedgerHoldings> _balances = [];
     readonly Dictionary<int, LedgerAccount> _owners = [];
     string _head = LedgerChain.Genesis;
     long _position;
+    long _latestTick = long.MinValue;
 
-    public EconomyLedger(ILedgerJournal journal)
+    public EconomyLedger(ILedgerJournal journal, long idempotencyTicks)
     {
         _journal = journal ?? throw new ArgumentNullException(nameof(journal));
+        if (idempotencyTicks <= 0)
+            throw new ArgumentOutOfRangeException(nameof(idempotencyTicks), idempotencyTicks, "The idempotency window must be positive.");
+        _idempotencyTicks = idempotencyTicks;
         var entries = journal.ReadAll();
         if (LedgerChain.FirstBroken(entries) is { } broken)
             throw new InvalidOperationException($"economy ledger journal is broken at position {broken}");
@@ -36,7 +43,7 @@ public sealed class EconomyLedger : IEconomyLedger
             if (rejection != LedgerRejection.None)
                 throw new InvalidOperationException(
                     $"economy ledger journal entry {entry.Position} ({entry.Transaction.Id}) does not replay: {rejection}");
-            _byId.Add(entry.Transaction.Id, entry);
+            Remember(entry);
             _head = entry.Hash;
             _position = entry.Position;
         }
@@ -78,13 +85,16 @@ public sealed class EconomyLedger : IEconomyLedger
                     : LedgerResult.Reject(tx.Id, LedgerRejection.Conflict);
             }
 
+            if (_latestTick != long.MinValue && tx.Id.Tick < _latestTick - _idempotencyTicks)
+                return LedgerResult.Reject(tx.Id, LedgerRejection.Stale);
+
             var rejection = Apply(tx);
             if (rejection != LedgerRejection.None)
                 return LedgerResult.Reject(tx.Id, rejection);
 
             var entry = new LedgerEntry(_position + 1, tx, LedgerChain.Hash(_head, tx));
             _journal.Append(entry);
-            _byId.Add(tx.Id, entry);
+            Remember(entry);
             _position = entry.Position;
             _head = entry.Hash;
             return new LedgerResult(tx.Id, LedgerOutcome.Committed, LedgerRejection.None, entry.Position);
@@ -104,6 +114,7 @@ public sealed class EconomyLedger : IEconomyLedger
             return _owners.TryGetValue(instanceId, out var owner) ? owner : null;
     }
 
+    /// <summary>The entry committed under <paramref name="id"/> while it is inside the idempotency window.</summary>
     public LedgerEntry? Find(LedgerTxId id)
     {
         lock (_sync)
@@ -112,6 +123,15 @@ public sealed class EconomyLedger : IEconomyLedger
 
     /// <summary>Writes buffered entries to durable storage. Call outside the step.</summary>
     public void Flush() => _journal.Flush();
+
+    void Remember(LedgerEntry entry)
+    {
+        _byId.Add(entry.Transaction.Id, entry);
+        _recent.Enqueue(entry);
+        _latestTick = Math.Max(_latestTick, entry.Transaction.Id.Tick);
+        while (_recent.Peek().Transaction.Id.Tick < _latestTick - _idempotencyTicks)
+            _byId.Remove(_recent.Dequeue().Transaction.Id);
+    }
 
     LedgerRejection Apply(LedgerTransaction tx)
     {

@@ -257,7 +257,8 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
-        _ledger = new EconomyLedger(ledgerJournal ?? new MemoryLedgerJournal());
+        _ledger = new EconomyLedger(ledgerJournal ?? new MemoryLedgerJournal(),
+            LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = Streams(deathRandom, RandomPurpose.Death);

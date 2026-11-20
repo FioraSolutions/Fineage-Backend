@@ -406,6 +406,26 @@ Audit: every posting names its transaction, kind, cause and tick; item instances
 Reconciliation compares projections with the journal. The settlement gateway is a narrow, neutral adapter, so an
 external settlement backend can consume the committed feed without the simulation knowing it exists.
 
+**In process (step 11a).** `EconomyLedger` (`Fineage.Game/Economy`) validates and projects transactions: postings
+sum to zero per item; character and castle accounts never go negative; a non-stackable piece has one owner and
+moves by instance id. A repeated `TxId` returns the stored result, a different transaction under it is a conflict,
+and an id older than the idempotency window (one hour of ticks) is refused as stale, so the index stays bounded.
+`TxId` is `(tick, sequence)` from `LedgerTxSequence`. Moves run on the scheduler thread for now; region-originated
+moves will add the region when region bodies post them. The journal is hash-chained (`LedgerChain`).
+`PostgresLedgerJournal` (`economy_ledger`, migration 016) buffers appends and writes them in the step's persistence
+flush, outside the gate. Starting replays it and refuses a broken chain.
+
+Inventories and treasuries still decide each move and are still saved as snapshots. A migrated move is recorded
+beside them with `LedgerMove`:
+- *Observe* each account before changing it. When the journal does not explain what the account holds (value
+  that moved through a kind not migrated yet), an `Adjustment` against the `Untracked` system account brings it in
+  line, so the untracked residue is itself on the journal.
+- *Commit* the move, then compare every observed account with the live state. A rejection or a mismatch throws
+  `LedgerReconciliationException` and fails the command; it is never corrected.
+
+Shop buy, sell and multisell (`ZoneWorldLedger.cs`) post against the `NpcShop` system account. Castle tax goes from
+the shop to each treasury in the amount it actually received (the overlord's cut, the treasury cap).
+
 ---
 
 ## 4. Determinism
@@ -436,7 +456,8 @@ external settlement backend can consume the committed feed without the simulatio
    in the next step entry, and fails at the first entry whose tick or outcome differs.
    `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
    pins the generator to reference values. `GlobalActorTests` replays a boss kill, its seeded respawn window and the
-   respawn, and checks that actors read the step's time and refuse region bodies.
+   respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
+   commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included.
 
 ---
 
@@ -486,7 +507,12 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
 | **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
 | **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
-| 11a–f | Ledger: journal + `IEconomyLedger` in-process, then one movement kind per PR: shop buy/sell, trade, pickup/drop, warehouse, private store, mail, quest rewards, crafting. Each runs alongside the snapshot writes with a reconciliation check until removed. | Same outcomes; every move is now auditable. |
+| **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |
+| 11b | Trade between players, with holds in trade escrow (`HoldAsync` / `CommitAsync` / `ReleaseAsync`). | Same outcomes. |
+| 11c | Pickup and drop through the ground account. | Same outcomes. |
+| 11d | Warehouse and clan warehouse deposits and withdrawals. | Same outcomes. |
+| 11e | Private store sales through store escrow. | Same outcomes. |
+| 11f | Quest rewards and crafting. Mail joins the ledger when the game has it. | Same outcomes; every owner change is on the journal. The snapshot writes stay until the reconciliation has run clean. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
 | 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |
 

@@ -3,7 +3,10 @@ namespace Fineage.Game.Economy;
 /// <summary>Thrown when the ledger and the state it mirrors disagree about a move.</summary>
 public sealed class LedgerReconciliationException(string message) : InvalidOperationException(message);
 
-/// <summary>Hands out <see cref="LedgerTxId"/>s in order within each tick.</summary>
+/// <summary>
+/// Hands out <see cref="LedgerTxId"/>s in order within each tick. Ids never go back: a move made while the clock
+/// reads an earlier tick than the last move (a wall clock stepped back outside the simulation) keeps the last tick.
+/// </summary>
 public sealed class LedgerTxSequence
 {
     long _tick = long.MinValue;
@@ -11,13 +14,13 @@ public sealed class LedgerTxSequence
 
     public LedgerTxId Next(long tick)
     {
-        if (tick != _tick)
+        if (tick > _tick)
         {
             _tick = tick;
             _next = 0;
         }
 
-        return new LedgerTxId(tick, _next++);
+        return new LedgerTxId(_tick, _next++);
     }
 }
 

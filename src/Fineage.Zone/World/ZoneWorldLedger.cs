@@ -11,6 +11,9 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    /// <summary>How long a transaction id stays in the ledger's idempotency index.</summary>
+    const long LedgerIdempotencyMilliseconds = 60 * 60 * 1000;
+
     readonly EconomyLedger _ledger;
     readonly LedgerTxSequence _ledgerIds = new();
 

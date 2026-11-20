@@ -86,13 +86,15 @@ internal sealed class WorldBench
             fishingRandom: fishingRandom,
             includeEnabledMaps: includeEnabledMaps,
             gmTeleports: gmTeleports,
-            simulationSeed: simulationSeed);
+            simulationSeed: simulationSeed,
+            ledgerJournal: Ledger);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
 
     public GameData Game { get; }
     public MemoryAccountStore Store { get; }
+    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; } = new();
     public ZoneWorld World { get; }
     public IWorldEventPublisher Bridge { get; }
     public NetBridgeRecorder Rec { get; }
