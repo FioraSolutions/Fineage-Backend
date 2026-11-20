@@ -51,6 +51,10 @@ public sealed partial class ZoneWorld
         catch (OperationCanceledException)
         {
         }
+        finally
+        {
+            _ingress.Close($"the zone simulation stopped at tick {_simulationTicks.Tick}");
+        }
     }
 
     /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same stages the loop runs.</summary>

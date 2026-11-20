@@ -105,6 +105,17 @@ public sealed class RegionTickScheduler
     }
 
     /// <summary>
+    /// Runs the registered stage named <paramref name="name"/> now, after <see cref="Resume"/>, at the resulting tick
+    /// (hooks for one world stage). Failures are reported and rethrown.
+    /// </summary>
+    public void RunNow(string name, long wallUnixMs)
+    {
+        var entry = _stages.FirstOrDefault(s => s.Name == name)
+            ?? throw new InvalidOperationException($"Simulation stage '{name}' is not registered on this scheduler.");
+        RunHook([entry], $"Stage '{name}'", wallUnixMs);
+    }
+
+    /// <summary>
     /// Runs every stage registered with <paramref name="periodTicks"/>, in registration order, after
     /// <see cref="Resume"/>, at the resulting tick (test and admin hooks for one cadence). Failures are reported and
     /// rethrown.

@@ -90,26 +90,32 @@ public sealed class SimulationReplayTests
     }
 
     [Fact]
-    public async Task Command_entries_carry_the_tick_wall_sample_actor_and_outcome()
+    public async Task Commands_wait_for_the_next_step_and_are_logged_with_its_tick_before_it()
     {
         var (kit, session, _, _) = await SetupAsync(seed: 1);
         var log = kit.World.RecordSimulation();
         long startTick = kit.World.SimulationTicks.Tick;
+
+        var rejected = kit.World.ExecuteAsync(session, new SkillUseCommand(UnknownSkill, FirstMobId, false), CancellationToken.None);
+        var accepted = kit.World.ExecuteAsync(session, new SelectTargetCommand(FirstMobId), CancellationToken.None);
+        Assert.False(rejected.IsCompleted);
+        Assert.Equal(0, session.SelectedTargetId);
+
         kit.Now = kit.Now.AddMilliseconds(250);
         kit.World.StepSimulation();
 
-        Assert.NotNull(await kit.World.ExecuteAsync(session, new SkillUseCommand(UnknownSkill, FirstMobId, false), CancellationToken.None));
-        Assert.Null(await kit.World.ExecuteAsync(session, new SelectTargetCommand(FirstMobId), CancellationToken.None));
-
+        Assert.NotNull(await rejected);
+        Assert.Null(await accepted);
+        Assert.Equal(FirstMobId, session.SelectedTargetId);
         long wall = kit.Now.ToUnixTimeMilliseconds();
         var entries = log.Entries;
-        Assert.Equal(new StepLogEntry(0, startTick + 1, wall), entries[0]);
-        var rejected = Assert.IsType<CommandLogEntry>(entries[1]);
-        Assert.Equal((1L, startTick + 1, wall, session.ObjectId, "skill-use"),
-            (rejected.Sequence, rejected.Tick, rejected.WallUnixMs, rejected.ActorObjectId, rejected.Command.Name));
-        Assert.Equal(new SkillUseCommand(UnknownSkill, FirstMobId, false), rejected.Command);
-        Assert.NotEqual("ok", rejected.Outcome);
-        Assert.Equal("ok", Assert.IsType<CommandLogEntry>(entries[2]).Outcome);
+        var first = Assert.IsType<CommandLogEntry>(entries[0]);
+        Assert.Equal((0L, startTick + 1, wall, session.ObjectId, "skill-use"),
+            (first.Sequence, first.Tick, first.WallUnixMs, first.ActorObjectId, first.Command.Name));
+        Assert.Equal(new SkillUseCommand(UnknownSkill, FirstMobId, false), first.Command);
+        Assert.NotEqual("ok", first.Outcome);
+        Assert.Equal("ok", Assert.IsType<CommandLogEntry>(entries[1]).Outcome);
+        Assert.Equal(new StepLogEntry(2, startTick + 1, wall), entries[2]);
     }
 
     sealed record Recording(SimulationLog Log, List<string> State, List<string> Fanout);
@@ -133,14 +139,16 @@ public sealed class SimulationReplayTests
         {
             for (int i = 0; i < WallAdvances.Length; i++)
             {
+                var replies = new List<Task<string?>>();
                 if (round == 0 && script.TryGetValue(i, out var commands))
                 {
                     foreach (var command in commands)
-                        await kit.World.ExecuteAsync(session, command, CancellationToken.None);
+                        replies.Add(kit.World.ExecuteAsync(session, command, CancellationToken.None));
                 }
 
                 kit.Now = kit.Now.AddMilliseconds(WallAdvances[i]);
                 kit.World.StepSimulation();
+                await Task.WhenAll(replies);
             }
         }
 

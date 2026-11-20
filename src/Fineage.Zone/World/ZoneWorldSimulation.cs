@@ -24,8 +24,8 @@ public sealed partial class ZoneWorld
     public ulong SimulationSeed => _simulationSeed;
 
     /// <summary>
-    /// Simulation time for rules: the tick time inside a step, the command's time sample inside a command, otherwise
-    /// (handlers not yet routed through commands) the wall clock.
+    /// Simulation time for rules: the tick time inside a step (commands included); outside one (session enter and
+    /// leave, read-only snapshots) the wall clock.
     /// </summary>
     long NowUnixMs() => _simulationClock.NowUnixMs();
 
@@ -39,10 +39,12 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Runs <paramref name="body"/> under <c>_gate</c> with one wall sample. Its fan-out is recorded into one batch that
     /// is sealed before the lock is released and sent after it; inventory/warehouse Postgres writes the stages dirtied
-    /// are flushed after the lock too.
+    /// are flushed after the lock too. Commands it applied are answered last.
     /// </summary>
     void RunUnderGate(Action<long> body)
     {
+        bool outermost = _fanout.Recording == null;
+        IReadOnlyList<ZoneCommandIngress.Applied> answered = [];
         try
         {
             WithDeferredInventoryPersist(() =>
@@ -55,6 +57,8 @@ public sealed partial class ZoneWorld
                 finally
                 {
                     _fanout.Seal();
+                    if (outermost)
+                        answered = _ingress.TakeApplied();
                 }
 
                 return 0;
@@ -63,6 +67,7 @@ public sealed partial class ZoneWorld
         finally
         {
             _fanout.Drain();
+            ZoneCommandIngress.Complete(answered);
         }
     }
 
@@ -91,6 +96,9 @@ public sealed partial class ZoneWorld
         // Region bodies still fan out through world-wide Players() scans and party state, so regions run one after
         // another under _gate until that state is region-owned.
         var ticks = new RegionTickScheduler(_simulationClock, partition, SequentialRegionExecutor.Instance, observer);
+
+        // Phase 0: player commands submitted since the last step.
+        ticks.AddWorldStage(CommandsStage, ApplyCommands);
 
         // Every step: the former 200 ms combat loop, in its original order.
         ticks.AddWorldStage("movement.player", tick => TickPlayerMovement(tick.NowUnixMs));
