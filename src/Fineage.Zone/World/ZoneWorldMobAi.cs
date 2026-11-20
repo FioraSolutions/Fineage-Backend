@@ -14,26 +14,35 @@ public sealed partial class ZoneWorld
     {
         WithDeferredInventoryPersist(() =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
-            TickPlayerMovement(now);
-            TickNpcMovement(now);
-            TickRandomWalk(now);
-            TickPendingHits(now);
-            TickMeleeHits(now);
-            TickAggression(now);
-            TickLeash(now);
-            TickMobAttacks(now);
-            TickSummons(now);
-            TickCubics(now);
-            TickDuels(now);
-            TickCorpseDecay(now);
-            TickQuestSpawns(now);
-            TickSignets(now);
-            TickSkillChannels(now);
-            TickAttackStance(now);
-            return 0;
+            BeginTickOutbox();
+            try
+            {
+                long now = _clock().ToUnixTimeMilliseconds();
+                TickPlayerMovement(now);
+                TickNpcMovement(now);
+                TickRandomWalk(now);
+                TickPendingHits(now);
+                TickMeleeHits(now);
+                TickAggression(now);
+                TickLeash(now);
+                TickMobAttacks(now);
+                TickSummons(now);
+                TickCubics(now);
+                TickDuels(now);
+                TickCorpseDecay(now);
+                TickQuestSpawns(now);
+                TickSignets(now);
+                TickSkillChannels(now);
+                TickAttackStance(now);
+                return 0;
+            }
+            finally
+            {
+                EndTickOutboxRecording();
+            }
         });
 
+        FlushTickOutbox();
         return Task.CompletedTask;
     }
 

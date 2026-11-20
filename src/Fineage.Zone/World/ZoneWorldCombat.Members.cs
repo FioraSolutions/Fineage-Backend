@@ -60,35 +60,44 @@ public sealed partial class ZoneWorld
         // Pending pickups / corpse loot may dirty inventories — keep Postgres off _gate (B8).
         WithDeferredInventoryPersist(() =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
-            TickPlayerMovement(now);
-            TickArenaZones();
-            TickNpcMovement(now);
-            TickRandomWalk(now);
-            TickPendingHits(now);
-            TickMeleeHits(now);
-            TickPvpFlags(now);
-            TickAutoAttacks();
-            TickPendingCasts(now);
-            TickQueuedMoves(now);
-            TickTradeRange();
-            TickParty(now);
-            TickPendingPickups(now);
-            TickPendingTalks(now);
-            TickFear(now);
-            // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
-            // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
-            TickAggression(now);
-            TickLeash(now);
-            TickMobAttacks(now);
-            TickSummons(now);
-            TickCubics(now);
-            TickDuels(now);
-            TickCorpseDecay(now);
-            TickAttackStance(now);
-            TickGroundExpiry(now);
-            return 0;
+            BeginTickOutbox();
+            try
+            {
+                long now = _clock().ToUnixTimeMilliseconds();
+                TickPlayerMovement(now);
+                TickArenaZones();
+                TickNpcMovement(now);
+                TickRandomWalk(now);
+                TickPendingHits(now);
+                TickMeleeHits(now);
+                TickPvpFlags(now);
+                TickAutoAttacks();
+                TickPendingCasts(now);
+                TickQueuedMoves(now);
+                TickTradeRange();
+                TickParty(now);
+                TickPendingPickups(now);
+                TickPendingTalks(now);
+                TickFear(now);
+                // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
+                // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
+                TickAggression(now);
+                TickLeash(now);
+                TickMobAttacks(now);
+                TickSummons(now);
+                TickCubics(now);
+                TickDuels(now);
+                TickCorpseDecay(now);
+                TickAttackStance(now);
+                TickGroundExpiry(now);
+                return 0;
+            }
+            finally
+            {
+                EndTickOutboxRecording();
+            }
         });
+        FlushTickOutbox();
         await Task.CompletedTask.ConfigureAwait(false);
     }
 

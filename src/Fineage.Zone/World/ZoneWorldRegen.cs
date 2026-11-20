@@ -29,7 +29,19 @@ public sealed partial class ZoneWorld
             {
                 long started = Stopwatch.GetTimestamp();
                 lock (_gate)
-                    _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+                {
+                    BeginTickOutbox();
+                    try
+                    {
+                        _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+                    }
+                    finally
+                    {
+                        EndTickOutboxRecording();
+                    }
+                }
+
+                FlushTickOutbox();
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
@@ -43,10 +55,20 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            long now = _clock().ToUnixTimeMilliseconds();
-            _simulationTicks.RunNow(_regenPlayersStage, now);
-            _simulationTicks.RunNow(_regenNpcsStage, now);
+            BeginTickOutbox();
+            try
+            {
+                long now = _clock().ToUnixTimeMilliseconds();
+                _simulationTicks.RunNow(_regenPlayersStage, now);
+                _simulationTicks.RunNow(_regenNpcsStage, now);
+            }
+            finally
+            {
+                EndTickOutboxRecording();
+            }
         }
+
+        FlushTickOutbox();
         await Task.CompletedTask.ConfigureAwait(false);
     }
 

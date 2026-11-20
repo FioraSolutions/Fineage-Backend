@@ -1,6 +1,6 @@
 # Zone simulation architecture
 
-Status: **proposal + step 1 landed** (region tick scheduler, regen and abnormal/DoT ticks as per-region stages).
+Status: **steps 1–4 landed in dev** (region tick scheduler through per-tick presence outbox with replaceable coalescing).
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.

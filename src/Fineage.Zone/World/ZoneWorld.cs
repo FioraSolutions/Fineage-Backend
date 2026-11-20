@@ -318,9 +318,18 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
-    /// Set by the Net host when it owns the zone session.
+    /// Set by the Net host when it owns the zone session. Sim ticks enqueue here and flush after <c>_gate</c>
+    /// (zone-simulation.md migration step 4).
     /// </summary>
-    internal IWorldEventPublisher? NetBridge { get; set; }
+    internal IWorldEventPublisher? NetBridge
+    {
+        get => _netBridgeOutbox ?? _netBridgeInner;
+        set
+        {
+            _netBridgeInner = value;
+            _netBridgeOutbox = value == null ? null : new OutboxingWorldEventPublisher(value, _tickOutbox);
+        }
+    }
 
     /// <summary>
     /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).

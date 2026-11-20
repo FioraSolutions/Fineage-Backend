@@ -21,7 +21,19 @@ public sealed partial class ZoneWorld
     internal void StepSimulation()
     {
         lock (_gate)
-            _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+        {
+            BeginTickOutbox();
+            try
+            {
+                _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
+            }
+            finally
+            {
+                EndTickOutboxRecording();
+            }
+        }
+
+        FlushTickOutbox();
     }
 
     [MemberNotNull(nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
