@@ -13389,6 +13389,166 @@
       "weight": 120
     },
     {
+      "id": 1518,
+      "name": "Amulet: Flame Chant",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1519,
+      "name": "Amulet: Pa'agrio's Gift",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1520,
+      "name": "Amulet: Pa'agrio's Blessing",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 10,
+      "weight": 120
+    },
+    {
+      "id": 1521,
+      "name": "Amulet: Chant of Fire",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1522,
+      "name": "Amulet: Chant of Battle",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 500,
+      "weight": 120
+    },
+    {
+      "id": 1523,
+      "name": "Amulet: Chant of Shielding",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1524,
+      "name": "Amulet: Soul Shield",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 100,
+      "weight": 120
+    },
+    {
+      "id": 1525,
+      "name": "Amulet: Life Drain",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 100,
+      "weight": 120
+    },
+    {
+      "id": 1526,
+      "name": "Amulet: Fear",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 500,
+      "weight": 120
+    },
+    {
+      "id": 1527,
+      "name": "Amulet: Venom",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 100,
+      "weight": 120
+    },
+    {
+      "id": 1528,
+      "name": "Amulet: Seal of Chaos",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1800,
+      "weight": 120
+    },
+    {
+      "id": 1529,
+      "name": "Amulet: Dreaming Spirit",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 100,
+      "weight": 120
+    },
+    {
+      "id": 1530,
+      "name": "Amulet: Seal of Slow",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 2450,
+      "weight": 120
+    },
+    {
+      "id": 1531,
+      "name": "Amulet: Chill Flame",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 100,
+      "weight": 120
+    },
+    {
+      "id": 1532,
+      "name": "Amulet: Blaze Quake",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1533,
+      "name": "Amulet: Aura Sink",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1534,
+      "name": "Amulet: Madness",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1535,
+      "name": "Amulet: Frost Flame",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
+      "id": 1536,
+      "name": "Amulet: Seal of Binding",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 1250,
+      "weight": 120
+    },
+    {
+      "id": 1537,
+      "name": "Amulet: Seal of Poison",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
+    },
+    {
       "id": 1538,
       "name": "Blessed Scroll of Escape",
       "icon": "icon.etc_scroll_of_return_i01",
@@ -16177,6 +16337,14 @@
       "price": 2550,
       "weight": 10,
       "stackable": true
+    },
+    {
+      "id": 1856,
+      "name": "Amulet: Chant of Life",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 800,
+      "weight": 120
     },
     {
       "id": 1864,
@@ -35228,6 +35396,14 @@
       "stackable": true,
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 4600,
+      "weight": 120
+    },
+    {
+      "id": 3943,
+      "name": "Amulet: Pa'agrio's Heart",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 3850,
       "weight": 120
     },
     {
@@ -76293,6 +76469,22 @@
       "weight": 120
     },
     {
+      "id": 8885,
+      "name": "Amulet: Magnus' Chant",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 30000,
+      "weight": 120
+    },
+    {
+      "id": 8886,
+      "name": "Amulet: Victories of Pa'agrio",
+      "kind": "etc",
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 30000,
+      "weight": 120
+    },
+    {
       "id": 8887,
       "name": "Amulet: Pa'agrio's Emblem",
       "kind": "etc",
@@ -76351,6 +76543,14 @@
       "name": "Ancient Tactical Manual: Symbol of Noise",
       "kind": "etc",
       "stackable": true,
+      "icon": "icon.etc_spell_books_assistance_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8894,
+      "name": "Ancient Tactical Manual: Symbol of Resistance",
+      "kind": "etc",
       "icon": "icon.etc_spell_books_assistance_i00",
       "price": 40000,
       "weight": 120
@@ -76457,6 +76657,14 @@
       "name": "Ancient Spellbook: Miracle",
       "kind": "etc",
       "stackable": true,
+      "icon": "icon.etc_spell_books_element_i00",
+      "price": 40000,
+      "weight": 120
+    },
+    {
+      "id": 8907,
+      "name": "Ancient Spellbook: Flames of Invincibility",
+      "kind": "etc",
       "icon": "icon.etc_spell_books_element_i00",
       "price": 40000,
       "weight": 120
