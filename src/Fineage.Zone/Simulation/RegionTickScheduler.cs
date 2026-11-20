@@ -7,9 +7,10 @@ namespace Fineage.Zone.Simulation;
 /// ran late, to the tick the wall clock is in, reporting the skipped ones) and runs every due stage in registration
 /// order, with a barrier between stages. A stage with period <c>p</c> is due when the step crosses a multiple of
 /// <c>p</c>, so skipped ticks coalesce into one run instead of losing it. A world stage runs once; a region stage
-/// collects its entities into regions and runs each region through the <see cref="IRegionExecutor"/> in ascending
-/// <see cref="RegionId"/> order. A throwing stage or region is reported to the <see cref="ISimulationObserver"/> and the
-/// rest of the step still runs. Not thread-safe: one caller drives the clock.
+/// collects its entities into regions and runs each region in its <see cref="IRegionScope"/>, through the parallel
+/// executor when the stage allows it and one after another in ascending <see cref="RegionId"/> order otherwise; the
+/// scopes are committed in ascending order after the barrier. A throwing stage or region is reported to the
+/// <see cref="ISimulationObserver"/> and the rest of the step still runs. Not thread-safe: one caller drives the clock.
 /// </summary>
 public sealed class RegionTickScheduler
 {
@@ -18,18 +19,26 @@ public sealed class RegionTickScheduler
     readonly RegionWorkCollector _collector = new();
     readonly IRegionExecutor _executor;
     readonly ISimulationObserver _observer;
+    readonly IRegionScopes _scopes;
 
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
+    /// <param name="executor">Runs the regions of stages that allow it (<see cref="IRegionStage.Parallel"/>).</param>
+    /// <param name="scopes">Opens the scope each region body runs in; <see cref="DirectRegionScopes"/> when omitted.</param>
     public RegionTickScheduler(
         SimulationClock clock,
         IRegionExecutor executor,
-        ISimulationObserver observer)
+        ISimulationObserver observer,
+        IRegionScopes? scopes = null)
     {
         Clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _executor = executor ?? throw new ArgumentNullException(nameof(executor));
         _observer = observer ?? throw new ArgumentNullException(nameof(observer));
+        _scopes = scopes ?? DirectRegionScopes.Instance;
         Tick = clock.TickAt(clock.WallUnixMs());
     }
+
+    /// <summary>The executor of stages that allow parallel regions.</summary>
+    public IRegionExecutor Executor => _executor;
 
     public SimulationClock Clock { get; }
 
@@ -209,13 +218,29 @@ public sealed class RegionTickScheduler
             }
 
             var work = owner._collector.Drain();
+            var scopes = new IRegionScope[work.Count];
+            try
+            {
+                for (int i = 0; i < work.Count; i++)
+                    scopes[i] = owner._scopes.Open(Name, tick, work[i].Region);
+            }
+            catch (Exception ex)
+            {
+                owner._observer.StageCompleted(Name, tick, 0, 0, Stopwatch.GetElapsedTime(started));
+                return [new StageFailure(Name, tick.Tick, "scopes", ex)];
+            }
+
             // One slot per region keeps the failure order deterministic under the parallel executor.
             var errors = new Exception?[work.Count];
-            owner._executor.Run(work.Count, i =>
+            var executor = Stage.Parallel ? owner._executor : SequentialRegionExecutor.Instance;
+            executor.Run(work.Count, i =>
             {
                 try
                 {
-                    Stage.RunRegion(tick, work[i].Region, work[i].ObjectIds);
+                    // The pin is per thread: a worker reads the step's time like the scheduler thread does.
+                    using (owner.Clock.Pin(tick))
+                    using (scopes[i].Enter())
+                        Stage.RunRegion(tick, work[i].Region, work[i].ObjectIds);
                 }
                 catch (Exception ex)
                 {
@@ -230,6 +255,14 @@ public sealed class RegionTickScheduler
                 entities += work[i].ObjectIds.Count;
                 if (errors[i] is { } error)
                     failures.Add(new StageFailure(Name, tick.Tick, work[i].Region.ToString(), error));
+                try
+                {
+                    scopes[i].Commit();
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(new StageFailure(Name, tick.Tick, $"{work[i].Region} commit", ex));
+                }
             }
 
             owner._observer.StageCompleted(Name, tick, work.Count, entities, Stopwatch.GetElapsedTime(started));
