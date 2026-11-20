@@ -61,6 +61,20 @@ public sealed class QuestJournalEntryMsg
 }
 
 /// <summary>Opcode <see cref="MsgType.QuestList"/> (1061).</summary>
+public sealed class QuestJournalRewardMsg
+{
+    public byte Kind { get; set; }
+    public int ItemId { get; set; }
+    public long Count { get; set; }
+    public string Label { get; set; } = "";
+}
+
+public sealed class QuestJournalRewardSetMsg
+{
+    public int QuestId { get; set; }
+    public QuestJournalRewardMsg[] Rows { get; set; } = [];
+}
+
 public sealed class QuestListMsg
 {
     public QuestJournalEntryMsg[] Active { get; set; } = [];
@@ -68,6 +82,7 @@ public sealed class QuestListMsg
     public byte[] CompletedMask { get; set; } = [];
     public int[] CompletedQuestIds { get; set; } = [];
     public int MaxActive { get; set; }
+    public QuestJournalRewardSetMsg[] RewardSets { get; set; } = [];
 }
 
 /// <summary>Opcode <see cref="MsgType.QuestDialog"/> (1062).</summary>

@@ -32,12 +32,25 @@ sealed partial class NetWorldEventPublisher
             };
         }
 
+        var rewardSets = (list.RewardSets ?? []).Select(set => new QuestJournalRewardSetNet
+        {
+            QuestId = set.QuestId,
+            Rows = (set.Rows ?? []).Select(r => new QuestJournalRewardNet
+            {
+                Kind = r.Kind,
+                ItemId = r.ItemId,
+                Count = r.Count,
+                Label = r.Label ?? ""
+            }).ToArray()
+        }).ToArray();
+
         return new QuestListNetMsg
         {
             Active = active,
             CompletedMask = list.CompletedMask ?? [],
             CompletedQuestIds = list.CompletedQuestIds ?? [],
-            MaxActive = list.MaxActive
+            MaxActive = list.MaxActive,
+            RewardSets = rewardSets
         };
     }
 

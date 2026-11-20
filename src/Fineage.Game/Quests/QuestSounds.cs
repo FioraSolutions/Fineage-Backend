@@ -1,3 +1,5 @@
+using System;
+
 namespace Fineage.Game.Quests;
 
 /// <summary>Client sound names for the quest lifecycle. Played by the engine, not copied from a script.</summary>
@@ -9,5 +11,7 @@ public static class QuestSounds
     public const string ItemGet = "ItemSound.quest_itemget";
     public const string GiveUp = "ItemSound.quest_giveup";
 
-    public static bool Known(string? name) => name is Accept or Middle or Finish or ItemGet or GiveUp;
+    public static bool Known(string? name) =>
+        name is Accept or Middle or Finish or ItemGet or GiveUp
+        || (!string.IsNullOrWhiteSpace(name) && name.StartsWith("tutorial_voice", StringComparison.Ordinal));
 }

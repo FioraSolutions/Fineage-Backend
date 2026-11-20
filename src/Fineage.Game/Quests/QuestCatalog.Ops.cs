@@ -27,6 +27,7 @@ public sealed partial class QuestCatalog
             "exchange_all" => ReadExchange(op, items, where, questId),
             "sell_items" => ReadSell(op, items, where, questId),
             "sound" => ReadSound(op, where, questId),
+            "tutorial_ui" => ReadTutorialUi(op, where, questId),
             "spawn_npc" => ReadSpawn(op, where, questId),
             "set_noble" => new SetNobleOp(),
             "summon" => ReadSummon(op, where, questId),
@@ -210,6 +211,24 @@ public sealed partial class QuestCatalog
         if (!QuestSounds.Known(name))
             throw new InvalidDataException($"{where} quest {questId} sound '{name}' is unknown.");
         return new SoundOp(name);
+    }
+
+    static TutorialUiOp ReadTutorialUi(OpDto op, string where, int questId)
+    {
+        string kind = (op.Kind ?? "").Trim().ToLowerInvariant();
+        TutorialUiWireKind wire = kind switch
+        {
+            "show_html" => TutorialUiWireKind.ShowHtml,
+            "close_html" => TutorialUiWireKind.CloseHtml,
+            "question_mark" => TutorialUiWireKind.QuestionMark,
+            "client_event" => TutorialUiWireKind.EnableClientEvent,
+            _ => throw new InvalidDataException($"{where} quest {questId} tutorial_ui kind '{op.Kind}' is unknown.")
+        };
+        if (wire == TutorialUiWireKind.ShowHtml && string.IsNullOrWhiteSpace(op.Html))
+            throw new InvalidDataException($"{where} quest {questId} tutorial_ui show_html needs html.");
+        if (wire == TutorialUiWireKind.EnableClientEvent && op.EventId is not > 0)
+            throw new InvalidDataException($"{where} quest {questId} tutorial_ui client_event needs eventId.");
+        return new TutorialUiOp(wire, op.Html ?? "", op.EventId, op.On);
     }
 
     static QuestHook ParseHook(string? text, string where, int questId) => (text ?? "").Trim().ToLowerInvariant() switch

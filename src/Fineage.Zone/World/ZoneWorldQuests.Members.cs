@@ -106,7 +106,8 @@ public sealed partial class ZoneWorld
                 Active = active,
                 CompletedMask = list.CompletedMask ?? [],
                 CompletedQuestIds = list.CompletedQuestIds ?? [],
-                MaxActive = list.MaxActive
+                MaxActive = list.MaxActive,
+                RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
             };
             NetBridge.FanoutQuestList([session.ObjectId], questList);
             FanoutQuestClientFx(session, player);
@@ -136,7 +137,7 @@ public sealed partial class ZoneWorld
             if (row.Phase == QuestPhase.Started)
             {
                 tracked = row;
-                break;
+                EmitCondClientFx(session, player, row.QuestId, row.Cond, playSounds: false);
             }
         }
 
@@ -190,10 +191,23 @@ public sealed partial class ZoneWorld
                 }).ToArray(),
                 CompletedMask = list.CompletedMask ?? [],
                 CompletedQuestIds = list.CompletedQuestIds ?? [],
-                MaxActive = list.MaxActive
+                MaxActive = list.MaxActive,
+                RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
             };
         }
     }
+
+    static QuestJournalRewardSetMsg ToRewardSetMsg(QuestJournalRewardSet set) => new()
+    {
+        QuestId = set.QuestId,
+        Rows = set.Rows.Select(r => new QuestJournalRewardMsg
+        {
+            Kind = (byte)r.Kind,
+            ItemId = r.ItemId,
+            Count = r.Count,
+            Label = r.Label
+        }).ToArray()
+    };
 
     void LoadQuestProgress(ZoneSession session, ZoneEntity entity, CharacterRecord? stored = null)
     {
