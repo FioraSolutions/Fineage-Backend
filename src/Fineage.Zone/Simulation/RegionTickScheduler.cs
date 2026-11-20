@@ -21,6 +21,11 @@ public sealed class RegionTickScheduler
     readonly ISimulationObserver _observer;
     readonly IRegionScopes _scopes;
 
+    [ThreadStatic] static RegionId? t_body;
+
+    /// <summary>The region whose body runs on this thread, or null outside region bodies.</summary>
+    public static RegionId? CurrentBody => t_body;
+
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
     /// <param name="executor">Runs the regions of stages that allow it (<see cref="IRegionStage.Parallel"/>).</param>
     /// <param name="scopes">Opens the scope each region body runs in; <see cref="DirectRegionScopes"/> when omitted.</param>
@@ -235,6 +240,8 @@ public sealed class RegionTickScheduler
             var executor = Stage.Parallel ? owner._executor : SequentialRegionExecutor.Instance;
             executor.Run(work.Count, i =>
             {
+                var outer = t_body;
+                t_body = work[i].Region;
                 try
                 {
                     // The pin is per thread: a worker reads the step's time like the scheduler thread does.
@@ -245,6 +252,10 @@ public sealed class RegionTickScheduler
                 catch (Exception ex)
                 {
                     errors[i] = ex;
+                }
+                finally
+                {
+                    t_body = outer;
                 }
             });
 

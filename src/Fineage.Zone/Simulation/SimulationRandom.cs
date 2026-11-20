@@ -17,6 +17,7 @@ public enum RandomPurpose
     Enchant = 12,
     Olympiad = 13,
     Respawn = 14,
+    Boss = 15,
 }
 
 /// <summary>
