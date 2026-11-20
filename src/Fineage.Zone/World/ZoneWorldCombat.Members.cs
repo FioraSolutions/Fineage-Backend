@@ -52,10 +52,13 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    /// <summary>One combat cadence step (tests): same period-1 stages the live loop runs each step.</summary>
+    /// <summary>
+    /// One combat cadence on demand (tests): the every-step stages the live loop runs, at the current tick, without
+    /// advancing the clock, so slow stages keep their phase.
+    /// </summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
-        StepCombat();
+        RunUnderGate(now => _simulationTicks.RunPeriod(1, now));
         await Task.CompletedTask.ConfigureAwait(false);
     }
 

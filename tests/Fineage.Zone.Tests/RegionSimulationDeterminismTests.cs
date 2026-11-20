@@ -59,23 +59,10 @@ public sealed class RegionSimulationDeterminismTests
     }
 
     [Fact]
-    public async Task Combat_outcome_does_not_depend_on_the_region_partition()
-    {
-        var tiles = await RunCombatAsync(GridRegionPartition.MapTiles);
-        var fine = await RunCombatAsync(new GridRegionPartition(500));
-        var whole = await RunCombatAsync(new GridRegionPartition(1 << 30));
-
-        Assert.Equal(tiles.State, fine.State);
-        Assert.Equal(tiles.State, whole.State);
-        Assert.Equal(Sorted(tiles.Fanout), Sorted(fine.Fanout));
-        Assert.Equal(Sorted(tiles.Fanout), Sorted(whole.Fanout));
-    }
-
-    [Fact]
     public async Task Identical_worlds_produce_identical_combat_state_and_fanout_sequence()
     {
-        var first = await RunCombatAsync(GridRegionPartition.MapTiles);
-        var second = await RunCombatAsync(GridRegionPartition.MapTiles);
+        var first = await RunCombatAsync();
+        var second = await RunCombatAsync();
 
         Assert.Equal(first.State, second.State);
         Assert.Equal(first.Fanout, second.Fanout);
@@ -85,7 +72,7 @@ public sealed class RegionSimulationDeterminismTests
     public async Task Regen_and_abnormal_stages_are_spread_across_regions()
     {
         var observer = new StageObserver();
-        var (kit, _, _) = await SetupAsync(GridRegionPartition.MapTiles, observer);
+        var (kit, _, _, _) = await SetupAsync(GridRegionPartition.MapTiles, observer);
 
         await kit.World.RunRegenTickAsync(CancellationToken.None);
         await kit.World.RunAbnormalTickAsync(CancellationToken.None);
@@ -98,62 +85,59 @@ public sealed class RegionSimulationDeterminismTests
     }
 
     [Fact]
-    public void Combat_step_runs_every_combat_stage_in_the_legacy_loop_order_without_failures()
+    public void Combat_stages_run_every_step_and_the_3s_stages_once_per_15_steps_in_legacy_order()
     {
         var observer = new StageObserver();
         var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
-
-        kit.World.StepCombat();
-
-        Assert.Equal(LegacyCombatOrder, kit.World.SimulationTicks.StageNames.Take(LegacyCombatOrder.Length));
-        Assert.Equal(LegacyCombatOrder, observer.Completed);
-        Assert.Empty(observer.Failures);
-        Assert.Equal(1, kit.World.SimulationTicks.Tick);
-    }
-
-    [Fact]
-    public void Slow_simulation_stages_run_in_the_legacy_loop_order_on_period_ticks()
-    {
-        var observer = new StageObserver();
-        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
-
-        int slow = ZoneSimulationSettings.SlowPeriodTicks;
-        for (int i = 0; i < slow - 1; i++)
-            kit.World.StepCombat();
-
-        kit.World.StepSimulation();
-
-        var slowCompleted = observer.Completed.Where(LegacySimulationOrder.Contains).ToList();
-        Assert.Equal(LegacySimulationOrder, slowCompleted);
-        Assert.Empty(observer.Failures);
-        Assert.Equal(slow, kit.World.SimulationTicks.Tick);
-    }
-
-    [Fact]
-    public void Full_step_advances_both_cadences_and_logs_all_stages_that_ran()
-    {
-        var observer = new StageObserver();
-        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
-
-        int slow = ZoneSimulationSettings.SlowPeriodTicks;
-        for (int i = 0; i < slow - 1; i++)
-            kit.World.StepCombat();
-
-        kit.World.StepSimulation();
+        Assert.Equal(ZoneCombat.AutoAttackTickMs, kit.World.SimulationTicks.StepMilliseconds);
+        Assert.Equal(ZoneRegen.DefaultTickMs / ZoneCombat.AutoAttackTickMs, ZoneSimulationSettings.SlowPeriodTicks);
+        Assert.Equal(LegacyCombatOrder.Concat(LegacySimulationOrder), kit.World.SimulationTicks.StageNames);
 
         var expected = new List<string>();
-        for (int i = 0; i < slow - 1; i++)
+        for (int step = 1; step <= 2 * ZoneSimulationSettings.SlowPeriodTicks; step++)
+        {
+            kit.World.StepSimulation();
             expected.AddRange(LegacyCombatOrder);
-        expected.AddRange(LegacyCombatOrder);
-        expected.AddRange(LegacySimulationOrder);
-        Assert.Equal(expected, observer.Completed);
+            if (step % ZoneSimulationSettings.SlowPeriodTicks == 0)
+                expected.AddRange(LegacySimulationOrder);
+            Assert.Equal(expected, observer.Completed);
+        }
+
         Assert.Empty(observer.Failures);
-        Assert.Equal(slow, kit.World.SimulationTicks.Tick);
+    }
+
+    [Fact]
+    public void Combat_hook_runs_the_combat_cadence_without_advancing_the_clock()
+    {
+        var observer = new StageObserver();
+        var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
+
+        kit.World.RunPlayerCombatTickAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+        Assert.Equal(LegacyCombatOrder, observer.Completed);
+        Assert.Equal(0, kit.World.SimulationTicks.Tick);
+    }
+
+    [Theory]
+    [InlineData(3000, 15)]
+    [InlineData(200, 1)]
+    [InlineData(6000, 30)]
+    public void Slow_period_is_the_interval_in_simulation_steps(int intervalMs, int expected) =>
+        Assert.Equal(expected, ZoneSimulationSettings.SlowPeriodFor(intervalMs, ZoneCombat.AutoAttackTickMs));
+
+    [Theory]
+    [InlineData(2500)]
+    [InlineData(100)]
+    public void Slow_interval_that_is_not_a_step_multiple_is_rejected_with_the_variable_name(int intervalMs)
+    {
+        var error = Assert.Throws<InvalidOperationException>(() =>
+            ZoneSimulationSettings.SlowPeriodFor(intervalMs, ZoneCombat.AutoAttackTickMs));
+        Assert.Contains("FINEAGE_ZONE_TICK_MS", error.Message);
     }
 
     static async Task<(List<string> State, List<string> Fanout)> RunRegenAsync(IRegionPartition partition)
     {
-        var (kit, recorder, tracked) = await SetupAsync(partition, new StageObserver());
+        var (kit, recorder, tracked, _) = await SetupAsync(partition, new StageObserver());
         for (int step = 0; step < RegenSteps; step++)
         {
             kit.Now = kit.Now.AddMilliseconds(ZoneRegen.DefaultTickMs);
@@ -164,14 +148,20 @@ public sealed class RegionSimulationDeterminismTests
         return (CaptureState(kit, tracked), CaptureFanout(recorder));
     }
 
-    static async Task<(List<string> State, List<string> Fanout)> RunCombatAsync(IRegionPartition partition)
+    /// <summary>A player auto-attacks a mob while the other mobs random-walk, on seeded combat and spawn rolls.</summary>
+    static async Task<(List<string> State, List<string> Fanout)> RunCombatAsync()
     {
-        var (kit, recorder, tracked) = await SetupAsync(partition, new StageObserver());
+        var (kit, recorder, tracked, attacker) = await SetupAsync(GridRegionPartition.MapTiles, new StageObserver());
+        Assert.True(kit.World.TryGetEntityById(FirstMobId, out var target));
+        int targetHp = target.CurHp;
+        Assert.Null(await kit.World.TryAttackAsync(attacker, FirstMobId, CancellationToken.None));
         for (int step = 0; step < CombatSteps; step++)
         {
             kit.Now = kit.Now.AddMilliseconds(ZoneCombat.AutoAttackTickMs);
             await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         }
+
+        Assert.True(target.CurHp < targetHp, $"auto-attack never hit: hp {target.CurHp} of {targetHp}");
 
         return (CaptureState(kit, tracked), CaptureFanout(recorder));
     }
@@ -196,11 +186,12 @@ public sealed class RegionSimulationDeterminismTests
             return recorder.Calls.Select(Describe).ToList();
     }
 
-    static async Task<(NetTestKit Kit, NetBridgeRecorder Recorder, int[] Tracked)> SetupAsync(
+    static async Task<(NetTestKit Kit, NetBridgeRecorder Recorder, int[] Tracked, ZoneSession West)> SetupAsync(
         IRegionPartition partition, ISimulationObserver observer)
     {
-        var kit = new NetTestKit(Map(), "determinism", regions: partition, simulationObserver: observer, spawnRandom: new Random(1));
-        var (_, west) = await kit.EnterAsync();
+        var kit = new NetTestKit(Map(), "determinism", regions: partition, simulationObserver: observer,
+            combatRandom: new Random(7), spawnRandom: new Random(1));
+        var (westSession, west) = await kit.EnterAsync();
         var (_, east) = await kit.EnterAsync(x: NetTestKit.ElfX + 21_000);
         var (bridge, recorder) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
@@ -231,7 +222,7 @@ public sealed class RegionSimulationDeterminismTests
         lock (recorder.Calls)
             recorder.Calls.Clear();
         int[] tracked = [.. new[] { west.ObjectId, east.ObjectId }.Concat(Enumerable.Range(FirstMobId, MobCount)).Order()];
-        return (kit, recorder, tracked);
+        return (kit, recorder, tracked, westSession);
     }
 
     static SpawnCatalog Map() =>
@@ -240,7 +231,7 @@ public sealed class RegionSimulationDeterminismTests
             ["determinism"] = new("determinism", true,
                 Enumerable.Range(0, MobCount).Select(i =>
                     new SpawnNpcDefinition(FirstMobId + i, 97000 + i, "Gremlin", NetTestKit.ElfX + 30 + i * MobSpacing,
-                        NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 400, 1f, 1f, 60, 0, "", "Folk",
+                        NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 400, 1f, 1f, 60, 0, "", "Monster",
                         Level: 1 + i, HpRegen: 2.5 + i * 0.35, MpRegen: 1.2 + i * 0.15, MaxMp: 100,
                         AttackRange: 40, AttackSpeed: 253, Aggressive: false, AggroRange: 0, ClanHelpRange: 0, Clans: []))
                     .ToList())

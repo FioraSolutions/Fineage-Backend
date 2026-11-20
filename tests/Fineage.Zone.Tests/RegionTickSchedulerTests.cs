@@ -73,18 +73,23 @@ public sealed class RegionTickSchedulerTests
     }
 
     [Fact]
-    public void StepCombat_runs_only_period_one_stages()
+    public void RunPeriod_runs_only_that_cadence_at_the_current_tick_and_rethrows_failures()
     {
         var ran = new List<string>();
-        var scheduler = Scheduler(SequentialRegionExecutor.Instance);
-        scheduler.AddWorldStage("fast", tick => ran.Add($"fast@{tick.Tick}"));
+        var observer = new RecordingObserver();
+        var scheduler = new RegionTickScheduler(100, Cells, SequentialRegionExecutor.Instance, observer);
+        scheduler.AddWorldStage("fast", tick => ran.Add($"fast@{tick.Tick}:{tick.NowUnixMs}"));
         scheduler.AddWorldStage("slow", tick => ran.Add($"slow@{tick.Tick}"), periodTicks: 3);
+        scheduler.AddWorldStage("fast.boom", _ => throw new InvalidOperationException("boom"));
+        scheduler.Step(1);
 
-        scheduler.StepCombat(0);
-        scheduler.StepCombat(0);
+        var error = Assert.Throws<AggregateException>(() => scheduler.RunPeriod(1, 42));
 
-        Assert.Equal(["fast@1", "fast@2"], ran);
-        Assert.Equal(2, scheduler.Tick);
+        Assert.Equal(["fast@1:1", "fast@1:42"], ran);
+        Assert.Equal(1, scheduler.Tick);
+        Assert.Contains("fast.boom", error.Message);
+        Assert.Equal(["fast.boom", "fast.boom"], observer.Failures.Select(f => f.Stage));
+        Assert.Throws<InvalidOperationException>(() => scheduler.RunPeriod(7, 0));
     }
 
     [Fact]

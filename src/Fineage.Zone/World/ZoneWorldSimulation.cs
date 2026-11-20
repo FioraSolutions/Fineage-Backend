@@ -18,24 +18,18 @@ public sealed partial class ZoneWorld
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
     /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
-    internal void StepSimulation()
-    {
-        lock (_gate)
-            _simulationTicks.Step(_clock().ToUnixTimeMilliseconds());
-    }
+    internal void StepSimulation() => RunUnderGate(_simulationTicks.Step);
 
-    /// <summary>One combat-only step on demand (tests); skips simulation stages slower than the base step.</summary>
-    internal void StepCombat()
-    {
-        lock (_gate)
+    /// <summary>
+    /// Runs <paramref name="body"/> under <c>_gate</c> with one time sample; inventory/warehouse Postgres writes the
+    /// stages dirtied are flushed after the lock is released.
+    /// </summary>
+    void RunUnderGate(Action<long> body) =>
+        WithDeferredInventoryPersist(() =>
         {
-            WithDeferredInventoryPersist(() =>
-            {
-                _simulationTicks.StepCombat(_clock().ToUnixTimeMilliseconds());
-                return 0;
-            });
-        }
-    }
+            body(_clock().ToUnixTimeMilliseconds());
+            return 0;
+        });
 
     [MemberNotNull(nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer)
@@ -48,9 +42,9 @@ public sealed partial class ZoneWorld
         // Region bodies still fan out through world-wide Players() scans and party state, so regions run one after
         // another under _gate until that state is region-owned.
         var ticks = new RegionTickScheduler(
-            ZoneSimulationSettings.TickMilliseconds, partition, SequentialRegionExecutor.Instance, observer);
+            ZoneSimulationSettings.StepMilliseconds, partition, SequentialRegionExecutor.Instance, observer);
 
-        // Combat loop (<c>CombatLoopAsync</c>), 200 ms cadence — world stages in legacy order.
+        // Every step: the former 200 ms combat loop, in its original order.
         ticks.AddWorldStage("movement.player", tick => TickPlayerMovement(tick.NowUnixMs));
         ticks.AddWorldStage("arena", _ => TickArenaZones());
         ticks.AddWorldStage("movement.npc", tick => TickNpcMovement(tick.NowUnixMs));
@@ -76,7 +70,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
 
-        // Simulation loop, 3 s cadence at period slow.
+        // Every slow period: the former 3 s loop, in its original order.
         ticks.AddRegionStage(_regenPlayersStage, slow);
         ticks.AddRegionStage(_regenNpcsStage, slow);
         ticks.AddWorldStage("spawns", _ => TickSpawns(), slow);
