@@ -169,19 +169,9 @@ public sealed partial class ZoneWorld
         if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
             SelfUserInfo(target);
         target.HasStatAbnormal = statful;
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, target) || watcher.Knownlist.Contains(target.ObjectId);
-            if (!cares)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(target);
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
             NetBridge.FanoutAbnormalStatusUpdate(netWatchers, update);
         FanPartySpelled(target);
     }

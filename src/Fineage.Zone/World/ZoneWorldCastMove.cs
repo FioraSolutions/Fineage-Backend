@@ -58,7 +58,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(player);
+        var watchers = KnownNetPlayersOf(player);
         watchers.Remove(player.ObjectId);
         if (watchers.Count == 0)
             return;

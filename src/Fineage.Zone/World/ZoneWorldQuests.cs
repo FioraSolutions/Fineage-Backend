@@ -386,7 +386,7 @@ public sealed partial class ZoneWorld
         if (outcome.Noble)
             SetNoble(player, true);
         if (outcome.Social > 0)
-            NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, outcome.Social);
+            NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, outcome.Social);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
             var invUpdate = new InventoryUpdateMsg

@@ -143,14 +143,14 @@ public sealed partial class ZoneWorld
                 page = Page("SubClass.htm");
                 break;
             case 1:
-            {
-                var available = subs.Count >= MaxSubclasses ? [] : AvailableSubclasses(player, npc);
-                page = available.Count == 0
-                    ? Page("SubClass_Fail.htm")
-                    : Page("SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
-                        $"<a action=\"bypass npc_%objectId%_Subclass 4 {id}\" msg=\"1268;{ClassName(id)}\">{ClassName(id)}</a><br>"));
-                break;
-            }
+                {
+                    var available = subs.Count >= MaxSubclasses ? [] : AvailableSubclasses(player, npc);
+                    page = available.Count == 0
+                        ? Page("SubClass_Fail.htm")
+                        : Page("SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
+                            $"<a action=\"bypass npc_%objectId%_Subclass 4 {id}\" msg=\"1268;{ClassName(id)}\">{ClassName(id)}</a><br>"));
+                    break;
+                }
             case 2:
                 if (subs.Count == 0)
                 {
@@ -199,20 +199,20 @@ public sealed partial class ZoneWorld
                 Notice(session, SubclassTransferMessageId, "The transfer of sub class has been completed.");
                 return null; // Mobius: no page after a plain switch.
             case 6:
-            {
-                if (one < 1 || one > MaxSubclasses)
-                    return "bad_request";
-                var available = AvailableSubclasses(player, npc);
-                if (available.Count == 0)
                 {
-                    Plain(session, "There are no sub classes available at this time.");
-                    return null;
+                    if (one < 1 || one > MaxSubclasses)
+                        return "bad_request";
+                    var available = AvailableSubclasses(player, npc);
+                    if (available.Count == 0)
+                    {
+                        Plain(session, "There are no sub classes available at this time.");
+                        return null;
+                    }
+                    page = Page(one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
+                        ?.Replace("%list%", ClassLinks(available, id =>
+                            $"<a action=\"bypass npc_%objectId%_Subclass 7 {one} {id}\" msg=\"1445;\">{ClassName(id)}</a><br>"));
+                    break;
                 }
-                page = Page(one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
-                    ?.Replace("%list%", ClassLinks(available, id =>
-                        $"<a action=\"bypass npc_%objectId%_Subclass 7 {one} {id}\" msg=\"1445;\">{ClassName(id)}</a><br>"));
-                break;
-            }
             case 7:
                 if (one < 1 || subs.All(s => s.Index != one) || !IsValidNewSubclass(player, npc, two, replacingIndex: one))
                     return "bad_request";
@@ -447,7 +447,7 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, now));
         NetBridge?.FanoutShortcutInit([player.ObjectId], BuildShortcutInit(session));
         SelfUserInfo(player);
-        var watchers = NetWatchersOf(player);
+        var watchers = KnownNetPlayersOf(player);
         var peers = watchers.Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);

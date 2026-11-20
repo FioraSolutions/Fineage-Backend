@@ -209,15 +209,7 @@ public sealed partial class ZoneWorld
     void ApplyHeadingTurn(ZoneEntity entity, int heading)
     {
         entity.Heading = heading;
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session != null && watcher.Knownlist.Contains(entity.ObjectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(watcher.ObjectId);
-            }
-        }
+        var netWatchers = NetWatchersOfPeers(entity);
         if (netWatchers is { Count: > 0 } && NetBridge != null)
             NetBridge.FanoutPositionCorrection(netWatchers, entity.ObjectId, entity.X, entity.Y, entity.Z, heading);
     }

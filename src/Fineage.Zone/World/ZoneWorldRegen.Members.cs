@@ -84,18 +84,9 @@ public sealed partial class ZoneWorld
         SyncNeedRegen(subject);
         if (subject.DuelId != 0)
             SendDuelUserInfo(subject);
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(subject);
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
         {
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }

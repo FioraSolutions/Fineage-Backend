@@ -260,6 +260,7 @@ public sealed partial class ZoneWorld
             if (watcher.Session == null)
                 continue;
             watcher.Knownlist.Add(objectId);
+            TrackWatcher(watcher.ObjectId, objectId);
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
@@ -290,16 +291,16 @@ public sealed partial class ZoneWorld
         _byId.Remove(objectId);
 
         List<int>? netWatchers = null;
-        foreach (var player in Players())
+        ForEachWatchingPlayer(objectId, player =>
         {
-            if (player.Session == null)
-                continue;
             if (player.Knownlist.Remove(objectId))
             {
+                UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }
-        }
+        });
+        DropWatcherIndex(objectId);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {

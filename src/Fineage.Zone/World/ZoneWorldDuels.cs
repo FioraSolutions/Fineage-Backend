@@ -461,7 +461,7 @@ public sealed partial class ZoneWorld
                     DuelStopFighting(m);
             foreach (int id in duel.TeamOf(duel.WinnerTeam == 1 ? (byte)2 : (byte)1))
                 if (_byId.TryGetValue(id, out var m))
-                    NetBridge?.FanoutSocialAction(NetWatchersOf(m), m.ObjectId, 7);
+                    NetBridge?.FanoutSocialAction(KnownNetPlayersOf(m), m.ObjectId, 7);
             foreach (int id in duel.TeamOf(duel.WinnerTeam))
                 if (_byId.TryGetValue(id, out var m) && m.DuelState != DuelFighterState.Dead)
                     m.DuelState = DuelFighterState.Winner;

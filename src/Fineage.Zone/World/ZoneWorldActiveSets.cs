@@ -128,11 +128,8 @@ public sealed partial class ZoneWorld
             return;
         if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondDouble(npc))
             return;
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(npc.ObjectId))
-                return;
-        }
+        if (AnyLivePlayerWatching(npc.ObjectId))
+            return;
 
         _thinking.Remove(npc.ObjectId);
     }
