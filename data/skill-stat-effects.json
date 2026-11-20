@@ -1043,6 +1043,20 @@
    ]
   },
   {
+   "skillId": 277,
+   "name": "Dance of Light",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 279,
    "name": "Lightning Strike",
    "levels": 5,
@@ -1290,6 +1304,20 @@
    ]
   },
   {
+   "skillId": 307,
+   "name": "Dance of Aqua Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 308,
    "name": "Song of Storm Guard",
    "levels": 1,
@@ -1297,6 +1325,48 @@
     {
      "stat": "windRes",
      "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 309,
+   "name": "Dance of Earth Guard",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      30.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 310,
+   "name": "Dance of the Vampire",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      8.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 311,
+   "name": "Dance of Protection",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "damageZoneVuln",
+     "op": "sub",
      "values": [
       30.0
      ]
@@ -2862,6 +2932,20 @@
    ]
   },
   {
+   "skillId": 447,
+   "name": "Counterattack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "vengeancePdam",
+     "op": "add",
+     "values": [
+      100.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 451,
    "name": "Sonic Move",
    "levels": 2,
@@ -3325,6 +3409,53 @@
    ]
   },
   {
+   "skillId": 1074,
+   "name": "Surrender To Wind",
+   "levels": 14,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1077,
    "name": "Focus",
    "levels": 3,
@@ -3738,6 +3869,22 @@
       0.8,
       0.8,
       0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1189,
+   "name": "Resist Wind",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
      ]
     }
    ]
@@ -4192,6 +4339,23 @@
    ]
   },
   {
+   "skillId": 1268,
+   "name": "Vampiric Rage",
+   "levels": 4,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      6.0,
+      7.0,
+      8.0,
+      9.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1269,
    "name": "Curse Disease",
    "levels": 9,
@@ -4261,6 +4425,20 @@
    "effects": [
     {
      "stat": "runSpd",
+     "op": "mul",
+     "values": [
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1291,
+   "name": "Demon Wind",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "healEffect",
      "op": "mul",
      "values": [
       0.5
@@ -5329,6 +5507,35 @@
    ]
   },
   {
+   "skillId": 1385,
+   "name": "Mass Surrender to Wind",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      30.0,
+      30.0,
+      30.0,
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      15.0,
+      15.0,
+      15.0,
+      15.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 1386,
    "name": "Arcane Disruption",
    "levels": 10,
@@ -5411,6 +5618,22 @@
       1.05,
       1.1,
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1392,
+   "name": "Holy Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      15.0,
+      23.0,
+      30.0
      ]
     }
    ]

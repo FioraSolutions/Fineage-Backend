@@ -60,7 +60,8 @@ public enum CombatStat
     WindRes,       // windRes
     EarthRes,      // earthRes
     TransDam,      // transDam (Transfer Pain: percent of incoming damage sent to the servitor)
-    Cancel         // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
+    Cancel,        // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
+    DamageZoneVuln // damageZoneVuln (Dance of Protection)
 }
 
 /// <summary>

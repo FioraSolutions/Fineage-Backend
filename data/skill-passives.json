@@ -2419,6 +2419,20 @@
    ]
   },
   {
+   "skillId": 294,
+   "name": "Shadow Sense",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "accCombat",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 316,
    "name": "Aegis",
    "levels": 1,
