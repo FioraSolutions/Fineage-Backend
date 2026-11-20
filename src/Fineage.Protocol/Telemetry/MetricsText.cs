@@ -39,10 +39,19 @@ public sealed class EndpointMetrics
     public HistogramMetrics Handler { get; init; } = new();
 }
 
+public sealed class StageMetrics
+{
+    public required string Stage { get; init; }
+    public HistogramMetrics Duration { get; init; } = new();
+    public long Failures { get; init; }
+}
+
 public sealed class MetricsSnapshot
 {
     public int PlayersOnline { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
+    public long TickOverruns { get; init; }
+    public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
 
@@ -142,6 +151,10 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_ms", "Zone simulation tick duration");
         sb.Append("# TYPE fineage_tick_ms histogram\n");
         AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick);
+        AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
+        sb.Append("# TYPE fineage_tick_overruns_total counter\n");
+        sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendStages(sb, snapshot.Stages);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");
         sb.Append("fineage_zone_online ").Append(snapshot.PlayersOnline.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -181,6 +194,21 @@ public static class MetricsText
             string labels = "endpoint=\"" + Escape(endpoint.Endpoint) + "\"";
             AppendHistogramSamples(sb, name, labels, endpoint.Handler);
         }
+    }
+
+    static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)
+    {
+        if (stages.Count == 0)
+            return;
+        AppendHelp(sb, "fineage_tick_stage_ms", "Zone simulation stage duration");
+        sb.Append("# TYPE fineage_tick_stage_ms histogram\n");
+        foreach (StageMetrics stage in stages)
+            AppendHistogramSamples(sb, "fineage_tick_stage_ms", "stage=\"" + Escape(stage.Stage) + "\"", stage.Duration);
+        AppendHelp(sb, "fineage_tick_stage_failures_total", "Simulation stage or region bodies that threw");
+        sb.Append("# TYPE fineage_tick_stage_failures_total counter\n");
+        foreach (StageMetrics stage in stages)
+            sb.Append("fineage_tick_stage_failures_total{stage=\"").Append(Escape(stage.Stage)).Append("\"} ")
+                .Append(stage.Failures.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
     static void AppendHistogramSamples(StringBuilder sb, string name, string labels, HistogramMetrics histogram)

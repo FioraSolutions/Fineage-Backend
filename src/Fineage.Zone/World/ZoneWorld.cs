@@ -181,8 +181,13 @@ public sealed partial class ZoneWorld
         ItemEquipSkillCatalog? equipSkills = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
-        Random? fishingRandom = null)
+        Random? fishingRandom = null,
+        Fineage.Zone.Simulation.IRegionPartition? regions = null,
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null)
     {
+        InitSimulation(
+            regions ?? Fineage.Zone.Simulation.GridRegionPartition.MapTiles,
+            simulationObserver ?? new Fineage.Zone.Simulation.ZoneSimulationObserver());
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();

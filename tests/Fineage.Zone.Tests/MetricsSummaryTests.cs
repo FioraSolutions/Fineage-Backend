@@ -181,6 +181,31 @@ public sealed class MetricsCollectorTests
         Assert.True(snapshot.Tick.Count >= 1);
         Assert.True(snapshot.Tick.Sum >= 7.25);
     }
+
+    [Fact]
+    public void Collector_reads_stage_durations_failures_and_overruns()
+    {
+        string stage = "stage" + Guid.NewGuid().ToString("N");
+        var tag = new KeyValuePair<string, object?>("stage", stage);
+        using var collector = new MetricsCollector();
+        long overrunsBefore = collector.Snapshot().TickOverruns;
+
+        FineageTelemetry.StageMilliseconds.Record(3.5, tag);
+        FineageTelemetry.StageFailures.Add(2, tag);
+        FineageTelemetry.TickOverruns.Add(1);
+
+        MetricsSnapshot snapshot = collector.Snapshot();
+        StageMetrics row = Assert.Single(snapshot.Stages, s => s.Stage == stage);
+        Assert.Equal(1, row.Duration.Count);
+        Assert.Equal(3.5, row.Duration.Sum, 3);
+        Assert.Equal(2, row.Failures);
+        Assert.True(snapshot.TickOverruns >= overrunsBefore + 1);
+
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains($"fineage_tick_stage_ms_count{{stage=\"{stage}\"}} 1\n", text);
+        Assert.Contains($"fineage_tick_stage_failures_total{{stage=\"{stage}\"}} 2\n", text);
+        Assert.Contains("# TYPE fineage_tick_overruns_total counter\n", text);
+    }
 }
 
 public sealed class PrometheusEndpointTests

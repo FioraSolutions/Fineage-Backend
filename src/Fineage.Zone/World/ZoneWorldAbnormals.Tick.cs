@@ -1,16 +1,14 @@
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    void TickAbnormals()
+    void CollectAbnormals(TickContext tick, RegionWorkCollector work)
     {
-        if (_withAbnormals.Count == 0)
-            return;
-        long now = _clock().ToUnixTimeMilliseconds();
         foreach (int id in _withAbnormals.ToArray())
         {
             if (!_byId.TryGetValue(id, out var entity))
@@ -18,21 +16,26 @@ public sealed partial class ZoneWorld
                 _withAbnormals.Remove(id);
                 continue;
             }
-            if (entity.Abnormals.Count == 0)
-            {
-                _withAbnormals.Remove(id);
-                continue;
-            }
-
-            TickDotDamage(entity, now);
-            TickToggleDrain(entity, now);
-
-            if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
-                continue;
-            if (entity.Abnormals.Count == 0)
-                _withAbnormals.Remove(id);
-            FanoutAbnormal(entity);
+            work.Add(id, entity.InstanceId, entity.X, entity.Y);
         }
+    }
+
+    void TickEntityAbnormals(int id, long now)
+    {
+        if (!_byId.TryGetValue(id, out var entity) || entity.Abnormals.Count == 0)
+        {
+            _withAbnormals.Remove(id);
+            return;
+        }
+
+        TickDotDamage(entity, now);
+        TickToggleDrain(entity, now);
+
+        if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
+            return;
+        if (entity.Abnormals.Count == 0)
+            _withAbnormals.Remove(id);
+        FanoutAbnormal(entity);
     }
 
     /// <summary>
@@ -128,7 +131,7 @@ public sealed partial class ZoneWorld
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
         lock (_gate)
-            TickAbnormals();
+            _simulationTicks.RunNow(_abnormalsStage, _clock().ToUnixTimeMilliseconds());
         return Task.CompletedTask;
     }
 
