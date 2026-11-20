@@ -129,6 +129,13 @@ sealed partial class ZoneEntity
         set => EnsureStatus().RegenCarryMp = value;
     }
 
+    /// <summary>Fractional CP regen carried between ticks (Mobius <c>calcCpRegen</c> is a double).</summary>
+    public double RegenCarryCp
+    {
+        get => Status?.RegenCarryCp ?? 0;
+        set => EnsureStatus().RegenCarryCp = value;
+    }
+
     public Dictionary<string, List<long>> ElementSeedUntilMs => EnsureStatus().ElementSeedUntilMs;
 
     public long ChannelUntilMs
