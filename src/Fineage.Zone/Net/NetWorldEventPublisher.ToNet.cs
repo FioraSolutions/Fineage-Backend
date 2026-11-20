@@ -90,25 +90,31 @@ sealed partial class NetWorldEventPublisher
         };
     }
 
-    void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
+    void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
+        ((IWorldEventPublisher)this).PrepareCharInfo(watcherObjectIds, objectId)();
+
+    Action IWorldEventPublisher.PrepareCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
+        var frames = new PreparedFrames(_presence);
         if (watcherObjectIds.Count == 0 || !_world.TryGetEntityById(objectId, out var entity) ||
             entity.Kind != ZoneEntityKind.Player)
-            return;
+            return frames.Send;
         var id = _ids.AllocateOrGet(objectId);
         var payload = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, id, _playerSpawnPAtkSpd(entity)));
         // A re-sent CharInfo rebuilds the remote pawn; keep it sitting / running instead of snapping to idle.
         var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(entity, id, _world);
         foreach (int watcher in watcherObjectIds)
         {
-            _presence.TrySendCritical(watcher, NetOpcode.EntitySpawn, payload);
+            frames.Critical(watcher, NetOpcode.EntitySpawn, payload);
             if (watcher == objectId)
                 continue;
             foreach (var (opcode, frame) in followUps)
-                _presence.TrySendCritical(watcher, opcode, frame);
+                frames.Critical(watcher, opcode, frame);
             if (_world.TryGetEntityById(watcher, out var viewer) && _world.SpawnRelationFrame(entity, viewer) is { } relation)
-                _presence.TrySendCritical(watcher, NetOpcode.RelationChanged, relation);
+                frames.Critical(watcher, NetOpcode.RelationChanged, relation);
         }
+
+        return frames.Send;
     }
 
     void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack)
@@ -159,7 +165,13 @@ sealed partial class NetWorldEventPublisher
     {
         var payload = NetCodec.EncodePlaySound(new PlaySoundNetMsg
         {
-            Type = type, File = file, ObjectId = objectId, X = x, Y = y, Z = z, DelayMs = delayMs
+            Type = type,
+            File = file,
+            ObjectId = objectId,
+            X = x,
+            Y = y,
+            Z = z,
+            DelayMs = delayMs
         });
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.PlaySound, payload);

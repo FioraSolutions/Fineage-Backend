@@ -1,6 +1,7 @@
 # Zone simulation architecture
 
-Status: **proposal + step 1 landed** (region tick scheduler, regen and abnormal/DoT ticks as per-region stages).
+Status: **steps 1–4 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
+same scheduler, the reverse watcher index, and the per-step fan-out outbox); steps 5 and later are proposals.
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
@@ -213,9 +214,16 @@ actors with their own state and mailbox. They act on the world through messages
   encoded bytes.
 - After the tick the sealed outbox goes to fan-out workers. Audiences come from the region AOI index (a reverse
   knownlist "who watches X" maintained with knownlist changes), replacing B2's scans.
-- **Coalescing per tick:** last write wins per `(subject, kind)` for replaceable state (StatusUpdate, MoveState,
-  ChangeMoveType, AbnormalStatusUpdate). Ordered must-deliver events (Attack, MagicSkillUse, Die, spawn and despawn)
-  keep emission order.
+- **Coalescing per tick:** last write wins per `(kind, subject, audience)` for replaceable state (StatusUpdate,
+  MoveState, ChangeMoveType, AbnormalStatusUpdate). StatusUpdate carries a subset of attributes, so a superseded
+  write's other attributes are merged into the latest. The surviving write takes the position of the last one;
+  ordered must-deliver events (Attack, MagicSkillUse, Die, spawn and despawn) keep emission order around it.
+- **Sealed and gate-ordered (step 4):** a step records into a batch under `_gate` and seals it before unlocking.
+  Payload inputs are captured then: watcher lists are copied, and the two calls whose encoding reads world state
+  (knownlist diff, CharInfo) are built by `IWorldEventPublisher.Prepare*`. One send lock drains sealed batches
+  before any send made outside a step, so handler traffic never overtakes an earlier step. Sends never take
+  `_gate`. A failed send is logged with its exception, counted as `fineage.tick.stage.failures{stage="fanout"}`, and
+  the rest of the batch still goes out.
 - **Encode once per event, batch per connection:** one frame group per connection per tick, written with one
   channel write. That replaces the per-frame `NetPresenceHub` lock (B8); the hub's id→connection map becomes a
   per-tick read-only snapshot.
@@ -375,7 +383,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **1 (this)** | `RegionTickScheduler`, `GridRegionPartition`, executors, observer and metrics. The 3 s loop body becomes a scheduler step: regen (players, NPCs) and abnormals/DoT/toggles as region stages, the other systems as world stages in the original order. Sequential executor under `_gate`. | Identical per-entity rules. Intra-tick order is now deterministic (region, id) instead of hash order; a throwing system is logged and isolated instead of killing the loop. |
 | 2 | Fold the 200 ms combat loop into the same scheduler: base step 200 ms, sim stages at period 15, one loop, one time sample per step. Its 24 `Tick*` become stages (world stages first). | Same cadences. |
 | 3 | Reverse knownlist index ("watchers of X") kept in sync with knownlist changes; replace `Players()` scans in `FanoutVitals`, `FanoutAbnormal`, `ActorAudience`, `ReleaseThink` (B2, B3). | Same audiences, measurably cheaper. |
-| 4 | Per-tick outbox: systems emit presence events, flushed after the step outside `_gate`, coalescing replaceable updates per subject (B8). | Fewer redundant frames; same final client state. |
+| 4 | Per-tick outbox: systems emit presence events, flushed after the step outside `_gate` in gate order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
 | 5 | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. |
 | 6 | Command ingress: movement, attack and skill-use handlers enqueue commands drained in phase 0 instead of locking (B11); other handlers follow in small batches. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | 7 | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. |

@@ -49,12 +49,11 @@ public sealed partial class ZoneWorld
     /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same stages the loop runs.</summary>
     internal async Task RunRegenTickAsync(CancellationToken ct)
     {
-        lock (_gate)
+        RunUnderGate(now =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
             _simulationTicks.RunNow(_regenPlayersStage, now);
             _simulationTicks.RunNow(_regenNpcsStage, now);
-        }
+        });
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
