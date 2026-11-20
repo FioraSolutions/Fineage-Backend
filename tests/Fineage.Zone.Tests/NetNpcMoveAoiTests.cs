@@ -13,7 +13,7 @@ public sealed class NetNpcMoveAoiTests
         npc.MoveDestX = x; npc.MoveDestY = y; npc.MoveDestZ = npc.Z;
         kit.World.SetMoveActive(npc, true);
         npc.MoveLastTickMs = kit.Now.ToUnixTimeMilliseconds();
-        kit.Now = kit.Now.AddMilliseconds(100);
+        kit.Now = kit.Now.AddMilliseconds(ZoneSimulationSettings.StepMilliseconds);
     }
 
     static bool Diff(NetBridgeRecorder rec, int self, int id, bool added) =>

@@ -10,6 +10,7 @@ public sealed partial class QuestMachine
         QuestDefinition quest,
         IReadOnlyList<QuestOp> ops,
         Plan plan,
+        Func<double> roll,
         out QuestOutcome failure)
     {
         failure = new QuestOutcome();
@@ -200,7 +201,7 @@ public sealed partial class QuestMachine
                         int have = inventory.CountOf(drop.ItemId) + plan.Delta.GetValueOrDefault(drop.ItemId);
                         if (drop.Limit > 0 && have >= drop.Limit)
                             break;
-                        if (_random() >= drop.Chance)
+                        if (roll() >= drop.Chance)
                             break;
                         int add = drop.Limit > 0 ? Math.Min(drop.Count, drop.Limit - have) : drop.Count;
                         if (!AddDelta(inventory, plan, drop.ItemId, add))
@@ -316,7 +317,7 @@ public sealed partial class QuestMachine
                             break;
                         }
 
-                        int index = Math.Min(pool.Count - 1, (int)(_random() * pool.Count));
+                        int index = Math.Min(pool.Count - 1, (int)(roll() * pool.Count));
                         plan.Vars[pick.Target] = pool[index];
                         pool.RemoveAt(index);
                         plan.Vars[pick.Pool] = string.Join(' ', pool);

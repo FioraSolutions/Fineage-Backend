@@ -120,7 +120,7 @@ public sealed partial class ZoneWorld
             return;
 
         // Mobius Rnd.get(1, 100) <= chance: an inclusive 1..chance roll out of 100.
-        int roll = _deathRandom.Next(1, 101);
+        int roll = Rng(_deathRandom, player).Next(1, 101);
         if (roll > chance)
             return;
 
@@ -234,7 +234,7 @@ public sealed partial class ZoneWorld
         });
         if (deleveled)
             NetBridge.FanoutSkillList(self,
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
     }
 
     /// <summary>

@@ -59,7 +59,7 @@ public sealed partial class ZoneWorld
             OriginZ = session.Z
         };
 
-        if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+        if (entity.CastingUntilMs > NowUnixMs())
         {
             // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
             session.QueuedMove = move;

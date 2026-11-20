@@ -83,7 +83,7 @@ public sealed partial class ZoneWorld
             int magicLevel = combat.MagicLevelAt(level);
             if (magicLevel <= 0)
                 magicLevel = player.Level;
-            var (damage, outcome) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, mDef, power,
+            var (damage, outcome) = ZoneCombat.RollMagicDamage(Rng(_combatRandom, player), mAtk, mDef, power,
                 player.Level, magicLevel, target.Level, ps.MCritRate, magicCritDmg: ps.MagicCritDmg);
             if (player.Session != null)
                 MagicOutcomeNotice(player.Session, target, combat, outcome);
@@ -97,7 +97,7 @@ public sealed partial class ZoneWorld
         // Mobius calcPhysicalSkillEvasion on PhysicalAttack / FatalBlow / Backstab / EnergyAttack.
         double targetEvas = (target.Kind == ZoneEntityKind.Player ? PlayerStatMods(target) : StatMods(target))
             .Apply(CombatStat.PSkillEvasion, 0d);
-        if (ZoneCombat.RollPhysicalSkillEvasion(_combatRandom, targetEvas))
+        if (ZoneCombat.RollPhysicalSkillEvasion(Rng(_combatRandom, player), targetEvas))
         {
             if (player.Session != null)
                 ShotNotice(player.Session, SysMsgSkillDodged, $"{target.Name} dodges the attack.");
@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
         if (combat.Kind == SkillDamageKind.Blow && combat.Blow is { } blow)
             return RollBlow(player, target, combat, level, blow, ps, ss);
         double pDef = NpcPDef(target);
-        var shield = ZoneCombat.RollShield(_combatRandom,
+        var shield = ZoneCombat.RollShield(Rng(_combatRandom, player),
             ShieldRateInArc(target, player, NpcShieldRate(target), 0),
             ps.Weapon == Fineage.Game.WeaponType.Bow);
         if (shield == ZoneCombat.ShieldResult.Perfect)
@@ -114,7 +114,7 @@ public sealed partial class ZoneWorld
         if (shield == ZoneCombat.ShieldResult.Block)
             pDef += target.ShieldDef;
         double str = EffectiveAttributes(player).StrBonus;
-        bool crit = ZoneCombat.RollSkillCrit(_combatRandom, combat.BaseCritRate, str);
+        bool crit = ZoneCombat.RollSkillCrit(Rng(_combatRandom, player), combat.BaseCritRate, str);
         if (crit && player.Session != null)
             ShotNotice(player.Session, SysMsgCriticalHit, "Critical hit!");
         var defenceTraits = target.Kind == ZoneEntityKind.Npc ? target.DefenceTraits : null;
@@ -142,7 +142,7 @@ public sealed partial class ZoneWorld
         double str = attrs.StrBonus;
         // Backstab.calcSuccess: !isInFrontOf; both: calcBlowSuccess (+ BLOW_RATE fold).
         if ((blow == BlowEffect.Backstab && front) ||
-            !ZoneCombat.RollBlowSuccess(_combatRandom, combat.BlowChance, dex, front, behind, ps.BlowRate))
+            !ZoneCombat.RollBlowSuccess(Rng(_combatRandom, player), combat.BlowChance, dex, front, behind, ps.BlowRate))
         {
             ZoneLog.Info($"[skill] blow {combat.SkillId} failed front={front} behind={behind}");
             return 0;
@@ -156,12 +156,12 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * ZoneCombat.BlowPositionalCritDamage(positional.Apply(CombatStat.CritDmgPos, 1d));
-        var (damage, outcome) = ZoneCombat.RollBlowDamage(_combatRandom, blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
+        var (damage, outcome) = ZoneCombat.RollBlowDamage(Rng(_combatRandom, player), blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
             front, behind, ps.RandomDamage, combat.BaseCritRate, str, ShieldRateInArc(target, player, NpcShieldRate(target), 0), target.ShieldDef, critDamageMod,
             ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits), ps.CritDmgAdd);
         int hpAfter = Math.Max(0, target.CurHp - damage);
         bool lethalable = target.NpcType is not ("RaidBoss" or "GrandBoss");
-        var (extra, lethal) = ZoneCombat.RollLethal(_combatRandom, combat.FullLethal, combat.HalfLethal,
+        var (extra, lethal) = ZoneCombat.RollLethal(Rng(_combatRandom, player), combat.FullLethal, combat.HalfLethal,
             combat.MagicLevelAt(level), target.Level, hpAfter, lethalable);
         if (player.Session != null)
         {

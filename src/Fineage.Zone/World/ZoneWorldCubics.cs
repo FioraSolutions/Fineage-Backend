@@ -255,9 +255,9 @@ public sealed partial class ZoneWorld
         }
         if (CubicCapped(owner, cubic))
             return;
-        if (_combatRandom.Next(100) >= cubic.Chance)
+        if (Rng(_combatRandom, owner).Next(100) >= cubic.Chance)
             return;
-        var pick = PickCubicSkill(cubic);
+        var pick = PickCubicSkill(owner, cubic);
         if (pick != null && TryCubicSkill(owner, cubic, pick, now))
             cubic.Count++;
     }
@@ -273,17 +273,18 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    CubicSkillRef? PickCubicSkill(CubicState cubic)
+    CubicSkillRef? PickCubicSkill(ZoneEntity owner, CubicState cubic)
     {
         var skills = cubic.Template.Skills.Where(static s => !s.Priority).ToList();
         if (skills.Count == 0)
             return null;
+        var rng = Rng(_combatRandom, owner);
         switch (cubic.Template.Selection.ToUpperInvariant())
         {
             case "ORDERED":
                 foreach (var s in skills)
                 {
-                    if (s.TriggerRate >= 100 || _combatRandom.Next(100) < s.TriggerRate)
+                    if (s.TriggerRate >= 100 || rng.Next(100) < s.TriggerRate)
                         return s;
                 }
                 return null;
@@ -292,7 +293,7 @@ public sealed partial class ZoneWorld
                     int total = skills.Where(static s => s.TriggerRate > 0).Sum(static s => s.TriggerRate);
                     if (total > 0)
                     {
-                        int roll = _combatRandom.Next(total);
+                        int roll = rng.Next(total);
                         foreach (var s in skills.Where(static s => s.TriggerRate > 0))
                         {
                             roll -= s.TriggerRate;
@@ -300,10 +301,10 @@ public sealed partial class ZoneWorld
                                 return s;
                         }
                     }
-                    return skills[_combatRandom.Next(skills.Count)];
+                    return skills[rng.Next(skills.Count)];
                 }
             default:
-                return skills[_combatRandom.Next(skills.Count)];
+                return skills[rng.Next(skills.Count)];
         }
     }
 
@@ -414,7 +415,7 @@ public sealed partial class ZoneWorld
                 break;
             case "aggro":
                 // Mobius TargetMeProbability: the monster turns on the cubic's owner.
-                if (target.Kind == ZoneEntityKind.Npc && target.Summon == null && _combatRandom.Next(100) < action.AggroChance)
+                if (target.Kind == ZoneEntityKind.Npc && target.Summon == null && Rng(_combatRandom, owner).Next(100) < action.AggroChance)
                 {
                     AddHate(target, owner, DamageHate(Math.Max(1, (int)cubic.Power), target.Level));
                     SetAggroTarget(target, owner.ObjectId);
@@ -577,7 +578,7 @@ public sealed partial class ZoneWorld
     internal void TickCubicsForTest()
     {
         lock (_gate)
-            TickCubics(_clock().ToUnixTimeMilliseconds());
+            TickCubics(NowUnixMs());
     }
 
     internal bool SummonCubicForTest(ZoneEntity player, int skillId, int level, bool givenByOther = false)
@@ -585,7 +586,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             var skill = Cubics.SummonSkill(skillId) ?? throw new ArgumentException($"no cubic skill {skillId}");
-            return SummonCubic(player, skill, level, givenByOther, _clock().ToUnixTimeMilliseconds());
+            return SummonCubic(player, skill, level, givenByOther, NowUnixMs());
         }
     }
 

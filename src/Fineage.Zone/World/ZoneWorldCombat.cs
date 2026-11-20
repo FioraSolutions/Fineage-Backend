@@ -52,7 +52,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             int previous = session.AutoAttackTargetId;
-            long now0 = _clock().ToUnixTimeMilliseconds();
+            long now0 = NowUnixMs();
             int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
             bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
                 session.NextAutoAttackUnixMs > now0;
@@ -62,7 +62,7 @@ public sealed partial class ZoneWorld
             {
                 session.AutoAttackTargetId = session.SelectedTargetId;
                 // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
-                session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() +
+                session.NextAutoAttackUnixMs = NowUnixMs() +
                     (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
             }
         }
@@ -335,7 +335,7 @@ public sealed partial class ZoneWorld
         // A new attack replaces AI_INTENTION_INTERACT.
         session.PendingTalkNpcId = 0;
         session.PendingTalkAtUnixMs = 0;
-        if (player.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+        if (player.CastingUntilMs > NowUnixMs())
             return null; // Mobius: auto-attack waits while casting
 
         int targetId = requestedTargetId > 0 ? requestedTargetId : session.SelectedTargetId;
@@ -368,7 +368,7 @@ public sealed partial class ZoneWorld
         }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
-        long nowMove = _clock().ToUnixTimeMilliseconds();
+        long nowMove = NowUnixMs();
         AdvanceMove(player, nowMove);
         if (target.MoveActive)
             AdvanceMove(target, nowMove);
@@ -467,7 +467,7 @@ public sealed partial class ZoneWorld
             QueueAttackerDamageLine(player, target, damage2, flags2);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player);
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
         long due = now + (dual ? atk / 4 : atk / 2);

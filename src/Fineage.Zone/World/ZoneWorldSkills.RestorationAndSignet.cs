@@ -299,10 +299,11 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            return SpawnSignet(owner, npcId, owner.X, owner.Y, owner.Z, _clock().ToUnixTimeMilliseconds());
+            return SpawnSignet(owner, npcId, owner.X, owner.Y, owner.Z, NowUnixMs());
         }
     }
 
     /// <summary>Mobius <c>EffectPoint</c> aura: who the signet buffs is everyone inside the skill's affectRange.</summary>
     internal int SignetAffectRangeForTests(int npcId) =>
-        _npcAiSupport.Get(npcId)?.Buff is { Count: > 0 } buff ? buff[0].AffectRange : 0;}
+        _npcAiSupport.Get(npcId)?.Buff is { Count: > 0 } buff ? buff[0].AffectRange : 0;
+}

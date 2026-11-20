@@ -48,7 +48,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void StartFearFlee(ZoneEntity actor, ZoneEntity? from, bool alongHeading)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         actor.FearFleeAtUnixMs = now + FearStepMs;
         if (actor.Session is { } session)
             session.FearFleeAtUnixMs = actor.FearFleeAtUnixMs;

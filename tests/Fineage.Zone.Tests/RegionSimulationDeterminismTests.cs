@@ -112,10 +112,12 @@ public sealed class RegionSimulationDeterminismTests
         var observer = new StageObserver();
         var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
 
+        long before = kit.World.SimulationTicks.Tick;
+
         kit.World.RunPlayerCombatTickAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         Assert.Equal(LegacyCombatOrder, observer.Completed);
-        Assert.Equal(0, kit.World.SimulationTicks.Tick);
+        Assert.Equal(before, kit.World.SimulationTicks.Tick);
     }
 
     [Theory]
@@ -264,6 +266,10 @@ public sealed class RegionSimulationDeterminismTests
         }
 
         public void StageFailed(StageFailure failure) => Failures.Add(failure);
+
+        public void TicksSkipped(TickContext tick, long skipped)
+        {
+        }
 
         public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget)
         {

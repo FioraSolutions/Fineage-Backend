@@ -53,7 +53,7 @@ public sealed partial class ZoneWorld
     readonly MammonSlot _mammonMerchant = new();
     readonly MammonSlot _mammonBlacksmith = new();
 
-    internal Random MammonRandom { get; set; } = Random.Shared;
+    internal Random MammonRandom { get; set; }
 
     internal ZoneEntity? MammonMerchantForTests => _mammonMerchant.ObjectId != 0 ? _byId.GetValueOrDefault(_mammonMerchant.ObjectId) : null;
     internal ZoneEntity? MammonBlacksmithForTests => _mammonBlacksmith.ObjectId != 0 ? _byId.GetValueOrDefault(_mammonBlacksmith.ObjectId) : null;
@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
     internal void TickMammonForTests()
     {
         lock (_gate)
-            TickMammon(_clock().ToUnixTimeMilliseconds());
+            TickMammon(NowUnixMs());
     }
 
     void TickMammon(long now)

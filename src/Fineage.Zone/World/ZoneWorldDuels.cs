@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         switch (msg.Kind)
         {
             case DuelCommandKind.Request:
@@ -707,7 +707,7 @@ public sealed partial class ZoneWorld
     internal void RunDuelTickForTest()
     {
         lock (_gate)
-            TickDuels(_clock().ToUnixTimeMilliseconds());
+            TickDuels(NowUnixMs());
     }
 
     internal int DuelCountForTest
@@ -722,7 +722,7 @@ public sealed partial class ZoneWorld
     internal void SkillDamagePlayerForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
         lock (_gate)
-            ApplySkillDamageToPlayer(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+            ApplySkillDamageToPlayer(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CubicTargetForTest(ZoneEntity owner)

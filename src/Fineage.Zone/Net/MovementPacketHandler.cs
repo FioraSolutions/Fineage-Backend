@@ -41,8 +41,8 @@ public sealed class MovementPacketHandler
         var move = NetCodec.DecodeMoveInput(envelope.Payload);
         var before = _world.SnapshotKnownIds(zoneSession);
 
-        string? error = await _world.TryMoveAsync(
-            zoneSession, move.DestX, move.DestY, move.DestZ, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession, new MoveCommand(move.DestX, move.DestY, move.DestZ), ct).ConfigureAwait(false);
         if (error != null)
         {
             await conn.SendAsync(
@@ -106,7 +106,7 @@ public sealed class MovementPacketHandler
         if (!zoneSession.Bound || !zoneSession.InWorld)
             return;
 
-        _world.StopMove(zoneSession);
+        await _world.ExecuteAsync(zoneSession, new StopMoveCommand(), ct).ConfigureAwait(false);
         await conn.SendAsync(
             NetOpcode.PositionCorrection,
             NetCodec.EncodePositionCorrection(new PositionCorrectionMsg

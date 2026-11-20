@@ -6,11 +6,14 @@ using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Rewards;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
+    readonly IRegionRandom _questRandom;
+
     public Task<string?> TryQuestListAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
@@ -115,7 +118,7 @@ public sealed partial class ZoneWorld
             // Bypass links stay a hard range check (Npc.onBypassFeedback requires canInteract).
             if (!allowApproach || eventName != null)
                 return "range";
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             if (player.CastingUntilMs > now || player.Sitting)
                 return null;
             session.AutoAttackTargetId = 0;
@@ -194,7 +197,8 @@ public sealed partial class ZoneWorld
         new(player.Race, player.Level, player.ClassId, player.SubClassActive)
         {
             PetControlObjectId = PetControlObjectIdOf(player),
-            ByPet = byPet
+            ByPet = byPet,
+            Roll = Rng(_questRandom, player).NextDouble
         };
 
     /// <summary>
@@ -302,7 +306,7 @@ public sealed partial class ZoneWorld
 
             if (eligible.Count == 0)
                 continue;
-            var winner = eligible[Random.Shared.Next(eligible.Count)];
+            var winner = eligible[Rng(_questRandom, killer).Next(eligible.Count)];
             PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc);
         }
     }
@@ -457,7 +461,7 @@ public sealed partial class ZoneWorld
         // Mobius teleToLocation from a quest step (Possessor of a Precious Soul 4 → Lady of the Lake).
         if (outcome.Teleport is { } to)
         {
-            var (x, y) = Offset(to.X, to.Y);
+            var (x, y) = Offset(player, to.X, to.Y);
             if (Loaded(x, y))
                 Relocate(player, x, y, to.Z);
             else

@@ -113,7 +113,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsVillageMasterNpc(npc))
             return "bad_request";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.CastingUntilMs > now)
         {
             Notice(session, SubclassCastingMessageId, "Sub classes may not be created or changed while a skill is in use.");
@@ -443,7 +443,7 @@ public sealed partial class ZoneWorld
         FanoutNetMoveType(player);
         FanoutMoveType(player);
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, now));
         NetBridge?.FanoutShortcutInit([player.ObjectId], BuildShortcutInit(session));
         SelfUserInfo(player);

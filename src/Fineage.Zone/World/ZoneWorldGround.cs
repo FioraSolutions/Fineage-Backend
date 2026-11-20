@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
         if (player.Dead)
             return InventoryProtocol.Dead;
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (!CanPickupProtected(player, ground, now))
         {
             // Mobius DropProtection.tryPickUp false -> FAILED_TO_PICKUP_S1, no run-in.
@@ -211,7 +211,7 @@ public sealed partial class ZoneWorld
                 pickupParty.MemberIds,
                 id => CanReceiveGround(id, ground),
                 ref last,
-                _combatRandom);
+                Rng(_combatRandom, player));
             pickupParty.ItemLastLoot = last;
             if (!_byId.TryGetValue(looterId, out var looter)
                 || looter.Kind != ZoneEntityKind.Player

@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
         if (EnchantSessionRules.RequestError(scroll != null, scroll?.Template.Scroll != null) is { } requestError)
             return requestError;
         // Mobius EnchantScrolls.onItemUse: not while casting, and one scroll at a time.
-        if (IsCasting(player, _clock().ToUnixTimeMilliseconds()))
+        if (IsCasting(player, NowUnixMs()))
             return EnchantProtocol.Casting;
         if (player.ActiveEnchantObjectId != 0 && player.ActiveEnchantObjectId != scroll!.ObjectId &&
             player.Inventory.Find(player.ActiveEnchantObjectId) != null)

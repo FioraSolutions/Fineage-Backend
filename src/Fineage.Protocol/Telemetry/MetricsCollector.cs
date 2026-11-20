@@ -10,6 +10,7 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _tick = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     long _tickOverruns;
+    long _ticksSkipped;
     int _online;
 
     public MetricsCollector()
@@ -43,6 +44,7 @@ public sealed class MetricsCollector : IDisposable
                 PlayersOnline = _online,
                 Tick = _tick.Freeze(),
                 TickOverruns = _tickOverruns,
+                TicksSkipped = _ticksSkipped,
                 Stages = _stages
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
@@ -92,6 +94,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.tick.overruns":
                     _tickOverruns += value;
+                    break;
+                case "fineage.tick.skipped":
+                    _ticksSkipped += value;
                     break;
                 case "fineage.tick.stage.failures":
                     Stage(StageOf(tags)).Failures += value;

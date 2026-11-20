@@ -94,7 +94,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var (x, y) = Offset(loc.X, loc.Y);
+        var (x, y) = Offset(player, loc.X, loc.Y);
         if (!Loaded(x, y))
         {
             Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
@@ -159,7 +159,7 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
 
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
 
         // Mobius broadcastUserInfo: peers see the new class.

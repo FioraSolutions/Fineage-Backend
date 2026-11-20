@@ -49,13 +49,13 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    bool EffectChanceFails(SkillEffectCatalog.Effect effect)
+    bool EffectChanceFails(ZoneEntity caster, SkillEffectCatalog.Effect effect)
     {
         int chance = effect.Chance;
         // Missing chance (0) means Mobius default 100 — the roll is skipped.
         if (chance <= 0 || chance >= 100)
             return false;
-        return _combatRandom.Next(100) >= chance;
+        return Rng(_combatRandom, caster).Next(100) >= chance;
     }
 
     static bool IsAuraTarget(SkillDefinition template) =>
@@ -144,7 +144,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void ApplyGetAgro(ZoneEntity caster, ZoneEntity target, SkillEffectCatalog.Effect effect, long now)
     {
-        if (EffectChanceFails(effect))
+        if (EffectChanceFails(caster, effect))
             return;
         if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
         {
@@ -207,7 +207,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius TargetMe: lock an attackable (or playable, when PvP allows) onto the caster.</summary>
     internal void ApplyTargetMe(ZoneEntity caster, ZoneEntity target, SkillEffectCatalog.Effect effect)
     {
-        if (EffectChanceFails(effect))
+        if (EffectChanceFails(caster, effect))
             return;
         if (target.Kind == ZoneEntityKind.Npc && target.Attackable && target.CurHp > 0)
         {
@@ -257,7 +257,7 @@ public sealed partial class ZoneWorld
             magicLevel = caster.Level;
         bool lethalable = target.Kind != ZoneEntityKind.Npc || target.NpcType is not ("RaidBoss" or "GrandBoss");
         int hp = Math.Max(0, target.CurHp);
-        var (extra, outcome) = ZoneCombat.RollLethal(_combatRandom, full, half, magicLevel, target.Level, hp, lethalable);
+        var (extra, outcome) = ZoneCombat.RollLethal(Rng(_combatRandom, caster), full, half, magicLevel, target.Level, hp, lethalable);
         if (outcome == ZoneCombat.LethalOutcome.None)
             return;
         if (target.Kind == ZoneEntityKind.Player)
@@ -292,7 +292,7 @@ public sealed partial class ZoneWorld
         if (target.Kind != ZoneEntityKind.Npc || !target.Attackable || target.Dead)
             return;
         int power = (int)effect.Power;
-        if (power > 0 && _combatRandom.Next(100) > power)
+        if (power > 0 && Rng(_combatRandom, caster).Next(100) > power)
             return;
         MaybeBreakCast(target, 1);
         int timeSec = effect.ReadExtraInt("time");
@@ -571,7 +571,7 @@ public sealed partial class ZoneWorld
             return;
         if (target.NpcType is "RaidBoss" or "GrandBoss" || target.RaidMinion)
             return;
-        if (EffectChanceFails(effect))
+        if (EffectChanceFails(caster, effect))
             return;
         int timeSec = effect.ReadExtraInt("abnormalTime");
         if (timeSec <= 0)
@@ -610,7 +610,7 @@ public sealed partial class ZoneWorld
         }
         if (candidates.Count == 0)
             return;
-        var pick = candidates[_combatRandom.Next(candidates.Count)];
+        var pick = candidates[Rng(_combatRandom, target).Next(candidates.Count)];
         if (target.Kind == ZoneEntityKind.Npc && target.Attackable)
         {
             AddHate(target, pick, hate: 10_000, allowNpcAttacker: true);

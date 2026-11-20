@@ -196,7 +196,7 @@ public sealed partial class ZoneWorld
             return PledgeProtocol.NotAtWar;
         }
         // Mobius RequestStopPledgeWar: refused while any member is in combat (1677).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var member in OnlineMembers(clan))
         {
             if (_byId.TryGetValue(member.ObjectId, out var e) && Clan.ClanRules.IsInCombat(e.CombatUntilUnixMs, now))

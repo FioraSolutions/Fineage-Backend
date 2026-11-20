@@ -25,7 +25,7 @@ public sealed partial class ZoneWorld
 
     string? StartTimedMove(ZoneEntity entity, ZoneSession session, MoveToMsg move)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(entity, now);
 
         int destX = move.DestX, destY = move.DestY, destZ;
@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
     /// <summary>Stop in place (StopMove / attack / cast). Returns current server position.</summary>
     internal void StopTimedMove(ZoneEntity entity)
     {
-        AdvanceMove(entity, _clock().ToUnixTimeMilliseconds());
+        AdvanceMove(entity, NowUnixMs());
         SetMoveActive(entity, false);
         entity.MovePath.Clear();
         entity.MoveSegmentDirty = false;
@@ -102,7 +102,7 @@ public sealed partial class ZoneWorld
         {
             if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
             {
-                AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
+                AdvanceMove(e, NowUnixMs());
                 bool wasMoving = e.MoveActive;
                 StopTimedMove(e);
                 SyncSession(e, session);
@@ -137,7 +137,7 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
                 return false;
-            AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
+            AdvanceMove(e, NowUnixMs());
             bool geo = _geo.HasGeo(e.X, e.Y);
             if (geo)
                 e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
@@ -181,8 +181,12 @@ public sealed partial class ZoneWorld
                     var ack = new MoveToMsg
                     {
                         ObjectId = e.ObjectId,
-                        DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
-                        OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
+                        DestX = e.MoveDestX,
+                        DestY = e.MoveDestY,
+                        DestZ = e.MoveDestZ,
+                        OriginX = e.X,
+                        OriginY = e.Y,
+                        OriginZ = e.Z
                     };
                     // Keep approach sync on the current leg so client mid-path reports are not treated as cancel.
                     if (e.Session is { ApproachTargetId: > 0 } session)

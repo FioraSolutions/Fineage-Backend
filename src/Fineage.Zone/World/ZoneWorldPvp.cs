@@ -273,7 +273,7 @@ public sealed partial class ZoneWorld
     internal void UpdatePvPStatusForTest(ZoneEntity attacker, ZoneEntity target)
     {
         lock (_gate)
-            UpdatePvPStatus(attacker, target, _clock().ToUnixTimeMilliseconds());
+            UpdatePvPStatus(attacker, target, NowUnixMs());
     }
 
     /// <summary>Test hook: run kill karma/PK rules.</summary>

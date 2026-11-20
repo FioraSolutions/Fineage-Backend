@@ -117,7 +117,7 @@ public sealed partial class ZoneWorld
         int max = dispel.Max;
         ScheduleEffect(player, target, template, level, now, hitMs, (t, _) =>
         {
-            int removed = ApplyDispelByCategory(t, slot, rate, max, cancelMl);
+            int removed = ApplyDispelByCategory(player, t, slot, rate, max, cancelMl);
             if (removed > 0)
                 FanoutAbnormal(t);
             if (t.Kind == ZoneEntityKind.Npc)
@@ -212,7 +212,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius calcCancelEffects for buff/debuff categories on a live target.</summary>
-    int ApplyDispelByCategory(ZoneEntity target, string slot, int rate, int max, int cancelMagicLevel)
+    int ApplyDispelByCategory(ZoneEntity caster, ZoneEntity target, string slot, int rate, int max, int cancelMagicLevel)
     {
         bool wantBuff = slot.Equals("buff", StringComparison.OrdinalIgnoreCase);
         return ZoneAbnormals.DispelByCategory(
@@ -230,7 +230,7 @@ public sealed partial class ZoneWorld
                 int buffMl = 0;
                 if (skill != null && skill.TryLevelData(Math.Max(1, entry.SkillLevel), out var ld))
                     buffMl = ld.MagicLevel;
-                return ZoneCombat.RollCancelSuccess(_combatRandom, rate, cancelMagicLevel, buffMl);
+                return ZoneCombat.RollCancelSuccess(Rng(_combatRandom, caster), rate, cancelMagicLevel, buffMl);
             },
             max);
     }

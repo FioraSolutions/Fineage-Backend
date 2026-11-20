@@ -15,7 +15,7 @@ public sealed class RegionTickSchedulerTests
         var scheduler = Scheduler(SequentialRegionExecutor.Instance);
         scheduler.AddRegionStage(stage);
 
-        scheduler.Step(nowUnixMs: 1_000);
+        scheduler.Step(wallUnixMs: 100);
 
         Assert.Equal(
             [
@@ -77,7 +77,7 @@ public sealed class RegionTickSchedulerTests
     {
         var ran = new List<string>();
         var observer = new RecordingObserver();
-        var scheduler = new RegionTickScheduler(100, Cells, SequentialRegionExecutor.Instance, observer);
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
         scheduler.AddWorldStage("fast", tick => ran.Add($"fast@{tick.Tick}:{tick.NowUnixMs}"));
         scheduler.AddWorldStage("slow", tick => ran.Add($"slow@{tick.Tick}"), periodTicks: 3);
         scheduler.AddWorldStage("fast.boom", _ => throw new InvalidOperationException("boom"));
@@ -85,7 +85,7 @@ public sealed class RegionTickSchedulerTests
 
         var error = Assert.Throws<AggregateException>(() => scheduler.RunPeriod(1, 42));
 
-        Assert.Equal(["fast@1:1", "fast@1:42"], ran);
+        Assert.Equal(["fast@1:100", "fast@1:100"], ran);
         Assert.Equal(1, scheduler.Tick);
         Assert.Contains("fast.boom", error.Message);
         Assert.Equal(["fast.boom", "fast.boom"], observer.Failures.Select(f => f.Stage));
@@ -136,7 +136,7 @@ public sealed class RegionTickSchedulerTests
         var observer = new RecordingObserver();
         var visited = new List<int>();
         bool laterStageRan = false;
-        var scheduler = new RegionTickScheduler(100, Cells, SequentialRegionExecutor.Instance, observer);
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
         scheduler.AddRegionStage(new RegionStage("fragile",
             (_, work) =>
             {
@@ -168,7 +168,7 @@ public sealed class RegionTickSchedulerTests
     public void A_failing_world_stage_or_collect_is_reported_with_its_scope()
     {
         var observer = new RecordingObserver();
-        var scheduler = new RegionTickScheduler(100, Cells, SequentialRegionExecutor.Instance, observer);
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
         scheduler.AddWorldStage("global", _ => throw new InvalidOperationException("global down"));
         scheduler.AddRegionStage(new RegionStage("gather",
             (_, work) =>
@@ -192,7 +192,7 @@ public sealed class RegionTickSchedulerTests
         var stage = new RegionStage("hook",
             (_, work) => work.Add(1, 0, 0, 0),
             (_, _) => throw new InvalidOperationException("hook down"));
-        var scheduler = new RegionTickScheduler(100, Cells, SequentialRegionExecutor.Instance, observer);
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
         scheduler.AddRegionStage(stage);
 
         var error = Assert.Throws<AggregateException>(() => scheduler.RunNow(stage, 0));
@@ -220,7 +220,7 @@ public sealed class RegionTickSchedulerTests
 
         Assert.Throws<InvalidOperationException>(() => scheduler.AddRegionStage(RecordingStage.At("once", [])));
         Assert.Throws<ArgumentOutOfRangeException>(() => scheduler.AddWorldStage("never", _ => { }, periodTicks: 0));
-        Assert.Throws<ArgumentOutOfRangeException>(() => new RegionTickScheduler(0, Cells, SequentialRegionExecutor.Instance, new RecordingObserver()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new SimulationClock(0, () => 0));
         Assert.Throws<ArgumentOutOfRangeException>(() => new ParallelRegionExecutor(0));
     }
 
@@ -228,7 +228,7 @@ public sealed class RegionTickSchedulerTests
     public void Observer_sees_each_stage_and_the_step_budget()
     {
         var observer = new RecordingObserver();
-        var scheduler = new RegionTickScheduler(250, Cells, SequentialRegionExecutor.Instance, observer);
+        var scheduler = new RegionTickScheduler(Clock(250), Cells, SequentialRegionExecutor.Instance, observer);
         scheduler.AddRegionStage(RecordingStage.At("visit", [(1, 0, 0), (2, 5_000, 0), (3, 5_001, 0)]));
         scheduler.AddWorldStage("global", _ => { });
 
@@ -240,8 +240,141 @@ public sealed class RegionTickSchedulerTests
         Assert.Equal(TimeSpan.FromMilliseconds(250), step.Budget);
     }
 
+    [Fact]
+    public void Ticks_count_steps_since_the_epoch_and_stage_time_is_the_tick_time_not_the_wall_sample()
+    {
+        var seen = new List<TickContext>();
+        var scheduler = new RegionTickScheduler(Clock(200, wallUnixMs: 1_000_150), Cells, SequentialRegionExecutor.Instance,
+            new RecordingObserver());
+        scheduler.AddWorldStage("seen", seen.Add);
+
+        Assert.Equal(5_000, scheduler.Tick);
+        Assert.Equal(50, scheduler.MillisecondsUntilNextTick(1_000_150));
+        scheduler.Step(1_000_230);
+
+        Assert.Equal(new TickContext(5_001, 1_000_200, 1_000_230), Assert.Single(seen));
+    }
+
+    [Fact]
+    public void A_late_step_jumps_to_the_wall_tick_reports_the_skip_and_runs_a_crossed_period_once()
+    {
+        var observer = new RecordingObserver();
+        var fast = new List<long>();
+        var slow = new List<long>();
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
+        scheduler.AddWorldStage("fast", tick => fast.Add(tick.Tick));
+        scheduler.AddWorldStage("slow", tick => slow.Add(tick.Tick), periodTicks: 5);
+
+        scheduler.Step(100);
+        scheduler.Step(1_250);
+        scheduler.Step(1_260);
+
+        Assert.Equal([1L, 12L, 13L], fast);
+        Assert.Equal([12L], slow);
+        Assert.Equal([(12L, 10L)], observer.Skipped);
+    }
+
+    [Fact]
+    public void A_step_while_the_wall_clock_is_behind_still_advances_exactly_one_tick()
+    {
+        var observer = new RecordingObserver();
+        var scheduler = new RegionTickScheduler(Clock(100, wallUnixMs: 1_000), Cells, SequentialRegionExecutor.Instance, observer);
+        scheduler.AddWorldStage("noop", _ => { });
+
+        scheduler.Step(500);
+        scheduler.Step(500);
+
+        Assert.Equal(12, scheduler.Tick);
+        Assert.Equal([(11L, 1_100L, 500L), (12L, 1_200L, 500L)], observer.Steps.Select(s => (s.Tick.Tick, s.Tick.NowUnixMs, s.Tick.WallUnixMs)));
+        Assert.Empty(observer.Skipped);
+        Assert.Equal(100, scheduler.MillisecondsUntilNextTick(500));
+        Assert.Equal(0, scheduler.MillisecondsUntilNextTick(9_999));
+    }
+
+    [Fact]
+    public void Resume_moves_only_forward_and_runs_nothing()
+    {
+        var observer = new RecordingObserver();
+        int ran = 0;
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
+        scheduler.AddWorldStage("count", _ => ran++);
+
+        scheduler.Resume(5_050);
+        scheduler.Resume(1_000);
+
+        Assert.Equal(50, scheduler.Tick);
+        Assert.Equal(0, ran);
+        Assert.Empty(observer.Skipped);
+        Assert.Empty(observer.Steps);
+    }
+
+    [Fact]
+    public void Hooks_resume_to_the_wall_tick_and_run_at_its_time_without_a_skip_report()
+    {
+        var observer = new RecordingObserver();
+        var seen = new List<TickContext>();
+        var scheduler = new RegionTickScheduler(Clock(100), Cells, SequentialRegionExecutor.Instance, observer);
+        scheduler.AddWorldStage("seen", seen.Add);
+
+        scheduler.RunPeriod(1, 730);
+
+        Assert.Equal(new TickContext(7, 700, 730), Assert.Single(seen));
+        Assert.Equal(7, scheduler.Tick);
+        Assert.Empty(observer.Skipped);
+    }
+
+    [Fact]
+    public void Stage_code_reads_the_pinned_tick_time_and_the_pin_ends_with_the_step()
+    {
+        long wall = 1_234;
+        var clock = new SimulationClock(100, () => wall);
+        var scheduler = new RegionTickScheduler(clock, Cells, SequentialRegionExecutor.Instance, new RecordingObserver());
+        long inside = 0;
+        long otherThread = 0;
+        scheduler.AddWorldStage("read", _ =>
+        {
+            inside = clock.NowUnixMs();
+            var thread = new Thread(() => otherThread = clock.NowUnixMs());
+            thread.Start();
+            thread.Join();
+        });
+
+        wall = 1_377;
+        scheduler.Step(wall);
+
+        Assert.Equal(1_300, inside);
+        Assert.Equal(1_377, otherThread);
+        Assert.Equal(1_377, clock.NowUnixMs());
+    }
+
+    [Fact]
+    public void Pins_nest_and_restore_the_outer_time()
+    {
+        var clock = new SimulationClock(100, () => 9);
+        using (clock.Pin(1))
+        {
+            using (clock.Pin(2))
+                Assert.Equal(2, clock.NowUnixMs());
+            Assert.Equal(1, clock.NowUnixMs());
+        }
+
+        Assert.Equal(9, clock.NowUnixMs());
+    }
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(199, 0)]
+    [InlineData(200, 1)]
+    [InlineData(-1, -1)]
+    [InlineData(-200, -1)]
+    [InlineData(-201, -2)]
+    public void TickAt_floors_also_before_the_epoch(long unixMs, long tick) =>
+        Assert.Equal(tick, new SimulationClock(200, () => 0).TickAt(unixMs));
+
     static RegionTickScheduler Scheduler(IRegionExecutor executor) =>
-        new(100, Cells, executor, new RecordingObserver());
+        new(Clock(100), Cells, executor, new RecordingObserver());
+
+    static SimulationClock Clock(int stepMs, long wallUnixMs = 0) => new(stepMs, () => wallUnixMs);
 
     static List<long> RunLocalSimulation(IRegionExecutor executor)
     {
@@ -314,11 +447,14 @@ public sealed class RegionTickSchedulerTests
         public List<StageFailure> Failures { get; } = [];
         public List<(string Stage, int Regions, int Entities)> Stages { get; } = [];
         public List<(TickContext Tick, TimeSpan Budget)> Steps { get; } = [];
+        public List<(long Tick, long Skipped)> Skipped { get; } = [];
 
         public void StageCompleted(string stage, TickContext tick, int regions, int entities, TimeSpan elapsed) =>
             Stages.Add((stage, regions, entities));
 
         public void StageFailed(StageFailure failure) => Failures.Add(failure);
+
+        public void TicksSkipped(TickContext tick, long skipped) => Skipped.Add((tick.Tick, skipped));
 
         public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget) => Steps.Add((tick, budget));
     }

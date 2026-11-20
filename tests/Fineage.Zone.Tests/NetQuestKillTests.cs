@@ -1,6 +1,7 @@
 using Fineage.Game.Quests;
 using Fineage.Net.Contract;
 using Fineage.Zone.Net;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -161,7 +162,7 @@ public sealed class NetSoulCrystalTests
     {
         var kit = new NetTestKit();
         var (_, hero) = await kit.EnterAsync();
-        kit.World.SoulCrystalRandom = _ => 0;
+        kit.World.SoulCrystalRandom = new SharedRegionRandom(new ZeroRandom());
         Start350(hero);
         hero.Inventory!.Add(4629);
         var orc = Mob(20583, 1000);
@@ -177,7 +178,7 @@ public sealed class NetSoulCrystalTests
     {
         var kit = new NetTestKit();
         var (_, hero) = await kit.EnterAsync();
-        kit.World.SoulCrystalRandom = _ => 0;
+        kit.World.SoulCrystalRandom = new SharedRegionRandom(new ZeroRandom());
         Start350(hero);
         hero.Inventory!.Add(4629);
         kit.World.SoulKillForTest(hero, Mob(20583, 1000));
@@ -192,7 +193,7 @@ public sealed class NetSoulCrystalTests
     {
         var kit = new NetTestKit();
         var (_, hero) = await kit.EnterAsync();
-        kit.World.SoulCrystalRandom = _ => 0;
+        kit.World.SoulCrystalRandom = new SharedRegionRandom(new ZeroRandom());
         hero.Inventory!.Add(4629);
         var orc = Mob(20583, 1000);
         orc.CurHp = 100;
@@ -216,7 +217,7 @@ public sealed class NetSoulCrystalTests
         var (_, mate) = await kit.EnterAsync();
         mate.X = killer.X + 200; mate.Y = killer.Y; mate.Z = killer.Z;
         kit.World.JoinPartyForTest(killer, mate);
-        kit.World.SoulCrystalRandom = _ => 0;
+        kit.World.SoulCrystalRandom = new SharedRegionRandom(new ZeroRandom());
         foreach (var p in new[] { killer, mate })
         {
             Start350(p);
@@ -226,5 +227,13 @@ public sealed class NetSoulCrystalTests
         kit.World.SoulKillForTest(killer, Mob(29020, 100000));
         Assert.Equal(1, killer.Inventory!.CountOf(5577));
         Assert.Equal(1, mate.Inventory!.CountOf(5577));
+    }
+
+    sealed class ZeroRandom : Random
+    {
+        public override int Next(int maxValue) => 0;
+        public override int Next(int minValue, int maxValue) => minValue;
+        public override int Next() => 0;
+        public override double NextDouble() => 0;
     }
 }

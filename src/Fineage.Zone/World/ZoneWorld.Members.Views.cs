@@ -163,7 +163,7 @@ public sealed partial class ZoneWorld
 
         // The client only learns the new book from a SkillList, exactly as a level up sends it.
         NetBridge?.FanoutSkillList([session.ObjectId],
-            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         return true;
     }
 

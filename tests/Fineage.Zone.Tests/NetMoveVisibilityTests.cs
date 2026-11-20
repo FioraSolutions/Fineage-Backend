@@ -67,7 +67,7 @@ public sealed class NetMoveVisibilityTests
 
         await a.MoveAsync(X0 + 1500, Y0);
         await b.NextMoveOfAsync(a);
-        await rig.AdvanceAsync(500);
+        await rig.AdvanceAsync(400);
         int midX = a.Entity.X;
         Assert.True(midX > X0 + 20);
 
@@ -95,7 +95,7 @@ public sealed class NetMoveVisibilityTests
 
         await a.MoveAsync(X0 + 1500, Y0);
         await b.NextMoveOfAsync(a);
-        await rig.AdvanceAsync(300);
+        await rig.AdvanceAsync(400);
 
         await a.ActionAsync(ActionProtocol.WalkRun);
         var gait = NetCodec.DecodeChangeMoveType((await b.Net.ExpectAsync(NetOpcode.ChangeMoveType, timeout.Token)).Payload);

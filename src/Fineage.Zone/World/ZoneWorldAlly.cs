@@ -31,7 +31,7 @@ public sealed partial class ZoneWorld
     internal string? CreateAllyForTest(ZoneSession session, string name)
     {
         lock (_gate)
-            return CreateAlly(session, ClanOf(session.ObjectId), name, _clock().ToUnixTimeMilliseconds());
+            return CreateAlly(session, ClanOf(session.ObjectId), name, NowUnixMs());
     }
 
     IEnumerable<ZoneClan> AllyClans(int allyId) =>

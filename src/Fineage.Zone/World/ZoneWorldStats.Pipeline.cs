@@ -21,7 +21,7 @@ public sealed partial class ZoneWorld
             return reuse;
         var attrs = EffectiveAttributes(player);
         return ZoneCombat.RollSkillMastery(
-            _combatRandom, ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus)
+            Rng(_combatRandom, player), ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus)
             ? 100
             : reuse;
     }

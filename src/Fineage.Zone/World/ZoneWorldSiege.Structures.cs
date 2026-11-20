@@ -439,7 +439,7 @@ public sealed partial class ZoneWorld
             castleId = _siege.CastleOwnedBy(clanId);
         if (castleId == 0 || CastleTable.Find(castleId) is not { OwnerRestart.Count: > 0 } data)
             return null;
-        var p = data.OwnerRestart[RndBound(data.OwnerRestart.Count)];
+        var p = data.OwnerRestart[RndBound(player, data.OwnerRestart.Count)];
         return (p.X, p.Y, p.Z);
     }
 
@@ -487,7 +487,7 @@ public sealed partial class ZoneWorld
     internal bool SiegeHitForTests(ZoneEntity attacker, ZoneEntity target, int damage)
     {
         lock (_gate)
-            return SiegeNpcHit(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+            return SiegeNpcHit(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CastleDoorForTests(int doorId)

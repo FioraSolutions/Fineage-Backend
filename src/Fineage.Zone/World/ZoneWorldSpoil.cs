@@ -68,7 +68,7 @@ public sealed partial class ZoneWorld
         var msg = _spoilRules.Messages;
         bool alive = target.Kind == ZoneEntityKind.Npc && target.Attackable && target.CurHp > 0 && !target.Dead;
         var refusal = Fineage.Game.Services.SpoilRules.Spoil(alive, target.SpoilerObjectId != 0,
-            () => forced || ZoneCombat.RollMagicSuccess(_combatRandom, target.Level, _spoilRules.MagicLevel(skillId, level)));
+            () => forced || ZoneCombat.RollMagicSuccess(Rng(_combatRandom, player), target.Level, _spoilRules.MagicLevel(skillId, level)));
         switch (refusal)
         {
             case Fineage.Game.Services.SpoilRefusal.InvalidTarget:
@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
     bool ApplySweep(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
         var msg = _spoilRules.Messages;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool corpse = target.Kind == ZoneEntityKind.Npc && target.Attackable && target.CurHp <= 0 && target.DecayAtMs > 0;
         var refusal = _spoilRules.Sweep(corpse, target.SpoilerObjectId, player.ObjectId,
             SameParty(player.ObjectId, target.SpoilerObjectId), target.DecayAtMs - now);
@@ -158,7 +158,7 @@ public sealed partial class ZoneWorld
                     party.MemberIds,
                     id => CanReceiveOne(id, stack.ItemId, stack.Count, target),
                     ref last,
-                    _combatRandom);
+                    Rng(_combatRandom, player));
                 party.ItemLastLoot = last;
                 if (_byId.TryGetValue(looterId, out var entity) && entity.Kind == ZoneEntityKind.Player && entity.Inventory != null)
                     looter = entity;

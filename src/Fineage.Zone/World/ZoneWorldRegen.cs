@@ -19,17 +19,24 @@ public sealed partial class ZoneWorld
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
     }
 
+    /// <summary>
+    /// The live clock: starts at the current tick (the world may have been built a while ago), then wakes on each tick
+    /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart.
+    /// </summary>
     async Task SimulationLoopAsync(CancellationToken ct)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_simulationTicks.StepMilliseconds));
+        lock (_gate)
+            _simulationTicks.Resume(_simulationClock.WallUnixMs());
         try
         {
-            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+            while (true)
             {
+                long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
+                await Task.Delay(TimeSpan.FromMilliseconds(wait), ct).ConfigureAwait(false);
                 long started = Stopwatch.GetTimestamp();
                 try
                 {
-                    RunUnderGate(_simulationTicks.Step);
+                    StepSimulation();
                 }
                 catch (Exception ex)
                 {

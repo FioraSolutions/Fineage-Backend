@@ -630,7 +630,7 @@ public sealed partial class ZoneWorld
             return "world";
         if (SummonOf(owner) is not { Summon: { } st } s)
             return null; // Mobius RequestActionUse with no summon: ActionFailed only.
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool dead = s.Dead || s.CurHp <= 0;
         if (dead && msg.Kind != SummonCommandKind.Unsummon)
             return null;
@@ -802,7 +802,7 @@ public sealed partial class ZoneWorld
     internal void TickSummonsForTest()
     {
         lock (_gate)
-            TickSummons(_clock().ToUnixTimeMilliseconds());
+            TickSummons(NowUnixMs());
     }
 
     internal ZoneEntity? SpawnServitorForTest(ZoneEntity owner, int skillId, int level)
@@ -810,7 +810,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             var skill = _summonSkills.Find(skillId) ?? throw new ArgumentException($"no summon skill {skillId}");
-            return SpawnServitor(owner, skill, skill.At(level)!, level, _clock().ToUnixTimeMilliseconds());
+            return SpawnServitor(owner, skill, skill.At(level)!, level, NowUnixMs());
         }
     }
 }

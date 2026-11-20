@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
             if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
                 return;
 
-            player.ItemReuseUntilMs[item.ItemId] = _clock().ToUnixTimeMilliseconds() + Math.Max(0, reuseDelayMs);
+            player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
             NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
                     removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
             Relocate(player, x, y, z);

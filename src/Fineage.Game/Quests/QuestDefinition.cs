@@ -230,6 +230,12 @@ public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, 
 
     /// <summary>Attack hook: the landed hit came from the player's pet.</summary>
     public bool ByPet { get; init; }
+
+    /// <summary>
+    /// Uniform [0, 1) draws for this actor's random branches, drops and picks (the zone passes the acting character's
+    /// region stream). Unset uses the machine's own source.
+    /// </summary>
+    public Func<double>? Roll { get; init; }
 }
 
 public sealed record QuestDefinition(

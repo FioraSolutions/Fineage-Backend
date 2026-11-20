@@ -185,10 +185,10 @@ public sealed partial class ZoneWorld
         int delaySeconds = slot.Definition.RespawnDelaySeconds;
         int jitter = slot.Definition.RespawnRandomSeconds;
         if (jitter > 0)
-            delaySeconds += _spawnRandom.Next(0, jitter + 1);
+            delaySeconds += _spawnRandom.For(_regions.RegionOf(0, slot.Definition.X, slot.Definition.Y)).Next(0, jitter + 1);
 
         ClearSpawnDue(slot);
-        var at = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        var at = DateTimeOffset.FromUnixTimeMilliseconds(NowUnixMs()).AddSeconds(Math.Max(1, delaySeconds));
         slot.RespawnAt = at;
         _spawnDue.Add((at.ToUnixTimeMilliseconds(), objectId));
     }
@@ -203,7 +203,7 @@ public sealed partial class ZoneWorld
 
     void TickSpawns()
     {
-        long nowMs = _clock().ToUnixTimeMilliseconds();
+        long nowMs = NowUnixMs();
         while (_spawnDue.Count > 0)
         {
             var first = _spawnDue.Min;
@@ -267,7 +267,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
+            TickCorpseDecay(NowUnixMs());
             TickSpawns();
         }
     }

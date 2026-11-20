@@ -15,7 +15,7 @@ public sealed partial class ZoneWorld
     /// <summary>Drop the in-flight skill: no hit, casting window closed, queued cast cleared. Returns whether something was cast.</summary>
     bool AbortCast(ZoneEntity player, string reason, bool notify)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool casting = player.PendingHit != null || player.CastingUntilMs > now;
         if (!casting)
             return false;
@@ -47,18 +47,18 @@ public sealed partial class ZoneWorld
         bool interruptible = hit.Combat != null ? CastRules.Interruptible(hit.Combat.Magic) : CastRules.Interruptible(hit.MagicType);
         if (!interruptible)
             return;
-        if (_clock().ToUnixTimeMilliseconds() >= hit.DueUnixMs)
+        if (NowUnixMs() >= hit.DueUnixMs)
             return;
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
             men = EffectiveAttributes(player, t).MenBonus;
         // Mobius calcStat(ATTACK_CANCEL, init): Concentration etc. sub/add the cancel stat before the 1..99 clamp.
-        if (CastRules.RollAttackBreak(_combatRandom, damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
+        if (CastRules.RollAttackBreak(Rng(_combatRandom, player), damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
             AbortCast(player, "hit", notify: true);
     }
 
     internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", notify: false); }
-    internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds()); }
+    internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, NowUnixMs()); }
 
     /// <summary>Test hook: hand damage to a player from an attacker (Mobius onCreatureDamageReceived path).</summary>
     internal void RunDamageTriggersForTest(ZoneEntity owner, ZoneEntity attacker, int damage) =>
@@ -134,7 +134,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             if (_byId.TryGetValue(session.ObjectId, out var player))
-                ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds());
+                ResolvePendingHit(player, NowUnixMs());
         }
 
         return Task.CompletedTask;

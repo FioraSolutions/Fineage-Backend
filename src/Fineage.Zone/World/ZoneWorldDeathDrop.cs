@@ -38,7 +38,7 @@ public sealed partial class ZoneWorld
                 item.Template.Kind == ItemKind.Weapon));
         }
 
-        var toDrop = _deathDrop.SelectDrops(candidates, r, _deathRandom);
+        var toDrop = _deathDrop.SelectDrops(candidates, r, Rng(_deathRandom, player));
         if (toDrop.Count == 0)
             return;
 

@@ -30,7 +30,7 @@ public sealed partial class ZoneWorld
         if (targetId != session.ObjectId && !VisibleTo(session.ObjectId, targetId))
             return "target";
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (remove)
         {
             if (effectId <= 0)

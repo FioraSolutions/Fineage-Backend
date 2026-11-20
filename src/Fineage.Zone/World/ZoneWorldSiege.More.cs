@@ -16,7 +16,7 @@ public sealed partial class ZoneWorld
 
         var saved = _accounts.ListCastles();
         if (saved.Count > 0)
-            _siege.Restore(saved, _accounts.ListSiegeClans(), _clock().ToUnixTimeMilliseconds());
+            _siege.Restore(saved, _accounts.ListSiegeClans(), NowUnixMs());
         else
             AdoptClanOwners();
         ApplyBoardOwnersToClans();

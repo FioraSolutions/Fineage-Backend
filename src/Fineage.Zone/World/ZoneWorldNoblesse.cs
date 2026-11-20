@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
             _olympiad.GrantNoblesse(player.ObjectId);
         RefreshKnownSkills(player);
         RefreshPledgeClass(player);
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
         var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)

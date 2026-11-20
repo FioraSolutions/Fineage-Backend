@@ -99,7 +99,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Dead)
             return InventoryProtocol.Dead;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (ClanRules.IsInCombat(player.CombatUntilUnixMs, now) || IsCasting(player, now))
             return PrivateStoreProtocol.Combat;
         if (_tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId))

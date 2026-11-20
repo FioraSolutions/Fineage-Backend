@@ -116,7 +116,7 @@ public sealed partial class ZoneWorld
         int dropX = useCoords ? x : player.X;
         int dropY = useCoords ? y : player.Y;
         int dropZ = useCoords ? z : player.Z;
-        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        AdvanceMove(player, NowUnixMs());
         if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
         {
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
@@ -187,24 +187,24 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
+        var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
         int killerLevel = killer?.Level ?? victimLevel;
-        var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates, victimLevel, killerLevel, raid);
+        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid);
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
         if (rolls.Count == 0)
             ZoneLog.Info($"drop empty npc={npcId}");
 
-        int instanceId = killer?.InstanceId
-            ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
         int dropperId = killer?.ObjectId ?? 0;
         int ownerId = killer?.Session != null ? killer.ObjectId : 0;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
 
         foreach (var stack in rolls)
         {
-            int dx = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            int dy = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
                 ownerObjectId: ownerId,
                 expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
@@ -244,7 +244,7 @@ public sealed partial class ZoneWorld
             GroundCount = count,
             GroundStackable = template.Stackable,
             GroundOwnerId = ownerObjectId,
-            GroundProtectUntilMs = ownerObjectId != 0 ? _clock().ToUnixTimeMilliseconds() + DropProtectMs : 0,
+            GroundProtectUntilMs = ownerObjectId != 0 ? NowUnixMs() + DropProtectMs : 0,
             GroundExpireAtMs = expireAtMs
         };
         _byId[objectId] = ground;

@@ -175,7 +175,7 @@ public sealed partial class ZoneWorld
         }
         _halls = null;
 
-        CompleteDueDissolutions(_clock().ToUnixTimeMilliseconds());
+        CompleteDueDissolutions(NowUnixMs());
     }
 
     /// <summary>Test hook: reread clan rows the store gained after boot (siege registration reads this cache).</summary>

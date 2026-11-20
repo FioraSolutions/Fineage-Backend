@@ -23,8 +23,9 @@ public sealed partial class ZoneWorld
         foreach (int npcId in npcIds)
         {
             // Mobius randomOffset around the talking NPC (~40–80 units).
-            double angle = _spawnRandom.NextDouble() * Math.PI * 2;
-            int dist = 40 + _spawnRandom.Next(0, 41);
+            var spawnRng = Rng(_spawnRandom, player);
+            double angle = spawnRng.NextDouble() * Math.PI * 2;
+            int dist = 40 + spawnRng.Next(0, 41);
             int x = anchor.X + (int)(Math.Cos(angle) * dist);
             int y = anchor.Y + (int)(Math.Sin(angle) * dist);
             SpawnQuestNpc(player, npcId, x, y, anchor.Z, anchor.InstanceId, anchor.Heading);
