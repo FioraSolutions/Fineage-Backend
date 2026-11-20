@@ -321,9 +321,17 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
-    /// Set by the Net host when it owns the zone session.
+    /// Set by the Net host when it owns the zone session. Reads return the <see cref="OutboxingWorldEventPublisher"/>
+    /// over it, so simulation steps batch their fan-out (zone-simulation.md §3.6).
     /// </summary>
-    internal IWorldEventPublisher? NetBridge { get; set; }
+    internal IWorldEventPublisher? NetBridge
+    {
+        get => _netBridge;
+        set => _netBridge = value == null ? null : new OutboxingWorldEventPublisher(value, _fanout);
+    }
+
+    IWorldEventPublisher? _netBridge;
+    readonly WorldFanoutSequencer _fanout = new();
 
     /// <summary>
     /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).

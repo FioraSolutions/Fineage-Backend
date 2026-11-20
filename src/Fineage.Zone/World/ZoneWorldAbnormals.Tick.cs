@@ -130,8 +130,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
-        lock (_gate)
-            _simulationTicks.RunNow(_abnormalsStage, _clock().ToUnixTimeMilliseconds());
+        RunUnderGate(now => _simulationTicks.RunNow(_abnormalsStage, now));
         return Task.CompletedTask;
     }
 
