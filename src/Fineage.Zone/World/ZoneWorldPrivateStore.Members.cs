@@ -154,7 +154,7 @@ public sealed partial class ZoneWorld
             StoreType = player.PrivateStoreType,
             Message = player.PrivateStoreMessage
         };
-        NetBridge?.FanoutPrivateStoreInfo(NetWatchersOf(player), msg);
+        NetBridge?.FanoutPrivateStoreInfo(KnownNetPlayersOf(player), msg);
     }
 
     void SendPrivateStoreListSell(ZoneEntity visitor, ZoneEntity store)

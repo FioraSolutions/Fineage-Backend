@@ -226,17 +226,16 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        List<ZoneEntity>? players = null;
         foreach (var e in Players())
-            NoteStance(e, now, ref players);
+            NoteStance(e, now);
         foreach (int id in _aiBusy)
         {
             if (_byId.TryGetValue(id, out var npc))
-                NoteStance(npc, now, ref players);
+                NoteStance(npc, now);
         }
     }
 
-    void NoteStance(ZoneEntity e, long now, ref List<ZoneEntity>? players)
+    void NoteStance(ZoneEntity e, long now)
     {
         bool inStance = e.Kind switch
         {
@@ -247,14 +246,7 @@ public sealed partial class ZoneWorld
         if (inStance == e.StanceShown)
             return;
         e.StanceShown = inStance;
-        // Self + every player that knows the entity (NPC knownlists are not tracked).
-        players ??= Players();
-        var watchers = new List<int>();
-        foreach (var w in players)
-        {
-            if (w.Session != null && (ReferenceEquals(w, e) || w.Knownlist.Contains(e.ObjectId)))
-                watchers.Add(w.ObjectId);
-        }
+        var watchers = NetWatchersOf(e);
         if (watchers.Count > 0)
             NetBridge!.FanoutAttackStance(watchers, e.ObjectId, inStance);
     }

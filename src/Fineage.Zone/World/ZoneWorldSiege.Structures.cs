@@ -156,12 +156,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && (player.Knownlist.Contains(door.ObjectId) || ReferenceEquals(player, also)))
-                watchers.Add(player.ObjectId);
-        }
+        var watchers = NetWatchersOfDoor(door, also);
 
         if (watchers.Count > 0)
             NetBridge.FanoutDoorStatus(watchers, DoorStatusOf(door));
@@ -231,12 +226,7 @@ public sealed partial class ZoneWorld
     {
         door.Dead = true;
         SetGeoDoorOpen(door.SiegeNpc!.DoorId, true);
-        var watchers = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && (player.Knownlist.Contains(door.ObjectId) || ReferenceEquals(player, attacker)))
-                watchers.Add(player.ObjectId);
-        }
+        var watchers = NetWatchersOfDoor(door, attacker);
 
         if (watchers.Count > 0 && NetBridge != null)
         {

@@ -14,35 +14,26 @@ public sealed partial class ZoneWorld
     {
         WithDeferredInventoryPersist(() =>
         {
-            BeginTickOutbox();
-            try
-            {
-                long now = _clock().ToUnixTimeMilliseconds();
-                TickPlayerMovement(now);
-                TickNpcMovement(now);
-                TickRandomWalk(now);
-                TickPendingHits(now);
-                TickMeleeHits(now);
-                TickAggression(now);
-                TickLeash(now);
-                TickMobAttacks(now);
-                TickSummons(now);
-                TickCubics(now);
-                TickDuels(now);
-                TickCorpseDecay(now);
-                TickQuestSpawns(now);
-                TickSignets(now);
-                TickSkillChannels(now);
-                TickAttackStance(now);
-                return 0;
-            }
-            finally
-            {
-                EndTickOutboxRecording();
-            }
+            long now = _clock().ToUnixTimeMilliseconds();
+            TickPlayerMovement(now);
+            TickNpcMovement(now);
+            TickRandomWalk(now);
+            TickPendingHits(now);
+            TickMeleeHits(now);
+            TickAggression(now);
+            TickLeash(now);
+            TickMobAttacks(now);
+            TickSummons(now);
+            TickCubics(now);
+            TickDuels(now);
+            TickCorpseDecay(now);
+            TickQuestSpawns(now);
+            TickSignets(now);
+            TickSkillChannels(now);
+            TickAttackStance(now);
+            return 0;
         });
 
-        FlushTickOutbox();
         return Task.CompletedTask;
     }
 
@@ -310,12 +301,8 @@ public sealed partial class ZoneWorld
                     TargetObjectId = player.ObjectId,
                     Damage = sDamage,
                     Flags = sFlags,
-                    AttackerX = npc.X,
-                    AttackerY = npc.Y,
-                    AttackerZ = npc.Z,
-                    TargetX = player.X,
-                    TargetY = player.Y,
-                    TargetZ = player.Z
+                    AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
+                    TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
                 });
                 _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
                 continue;
@@ -347,12 +334,8 @@ public sealed partial class ZoneWorld
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
                 Flags = flags,
-                AttackerX = npc.X,
-                AttackerY = npc.Y,
-                AttackerZ = npc.Z,
-                TargetX = player.X,
-                TargetY = player.Y,
-                TargetZ = player.Z
+                AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
+                TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);

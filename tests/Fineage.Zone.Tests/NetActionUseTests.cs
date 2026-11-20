@@ -12,18 +12,19 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class NetActionUseTests
 {
-    static (NetTestKit Kit, NetBridgeRecorder Rec) KitWithBridge()
+    static async Task<NetTestKit> KitWithBridgeAsync()
     {
         var kit = new NetTestKit();
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        return (kit, rec);
+        return kit;
     }
 
     [Fact]
     public async Task Sit_fans_ChangeWaitType_to_self()
     {
-        var (kit, rec) = KitWithBridge();
+        var kit = await KitWithBridgeAsync();
+        var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default));
@@ -40,7 +41,8 @@ public sealed class NetActionUseTests
     [Fact]
     public async Task Stand_again_toggles_back_and_keeps_the_position()
     {
-        var (kit, rec) = KitWithBridge();
+        var kit = await KitWithBridgeAsync();
+        var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
         await kit.World.TryCharacterActionAsync(session, ActionProtocol.SitStand, 0, default);
@@ -59,7 +61,8 @@ public sealed class NetActionUseTests
     [Fact]
     public async Task Social_gesture_fans_SocialAction()
     {
-        var (kit, rec) = KitWithBridge();
+        var kit = await KitWithBridgeAsync();
+        var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
 
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.SocialVictory, 0, default));
@@ -72,7 +75,8 @@ public sealed class NetActionUseTests
     [Fact]
     public async Task Walk_run_toggle_fans_ChangeMoveType_to_self_and_peers()
     {
-        var (kit, rec) = KitWithBridge();
+        var kit = await KitWithBridgeAsync();
+        var rec = (NetBridgeRecorder)(object)kit.World.NetBridge!;
         var (session, elf) = await kit.EnterAsync();
         Assert.True(elf.Running);
 

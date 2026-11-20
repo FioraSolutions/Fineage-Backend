@@ -59,41 +59,41 @@ public sealed partial class ZoneWorld
         switch (val)
         {
             case 1:
-            {
-                var matches = _olympiad.MatchesByStadium();
-                string html = OlympiadPage("olympiad_observe1.htm") ?? "";
-                for (int i = 0; i < _olympiad.Stadiums.Count; i++)
-                    html = html.Replace($"%title{i + 1}%", matches.TryGetValue(i, out var m) ? m.Title : "Initial State", StringComparison.Ordinal);
-                SendHtml(session, player, npc, html);
-                return null;
-            }
-            case 2:
-            {
-                if (!PlayerClasses.TryGet(arg, out var cls) || cls == null || cls.ClassLevel != 3)
-                    return "bad_request";
-                var names = _olympiad.ClassLeaders(arg);
-                string html = OlympiadPage("olympiad_ranking.htm") ?? "";
-                for (int i = 1; i <= 10; i++)
                 {
-                    bool has = i <= names.Count;
-                    html = html.Replace($"%place{i}%", has ? i.ToString(CultureInfo.InvariantCulture) : "", StringComparison.Ordinal)
-                        .Replace($"%rank{i}%", has ? names[i - 1] : "", StringComparison.Ordinal);
+                    var matches = _olympiad.MatchesByStadium();
+                    string html = OlympiadPage("olympiad_observe1.htm") ?? "";
+                    for (int i = 0; i < _olympiad.Stadiums.Count; i++)
+                        html = html.Replace($"%title{i + 1}%", matches.TryGetValue(i, out var m) ? m.Title : "Initial State", StringComparison.Ordinal);
+                    SendHtml(session, player, npc, html);
+                    return null;
                 }
-                SendHtml(session, player, npc, html);
-                return null;
-            }
+            case 2:
+                {
+                    if (!PlayerClasses.TryGet(arg, out var cls) || cls == null || cls.ClassLevel != 3)
+                        return "bad_request";
+                    var names = _olympiad.ClassLeaders(arg);
+                    string html = OlympiadPage("olympiad_ranking.htm") ?? "";
+                    for (int i = 1; i <= 10; i++)
+                    {
+                        bool has = i <= names.Count;
+                        html = html.Replace($"%place{i}%", has ? i.ToString(CultureInfo.InvariantCulture) : "", StringComparison.Ordinal)
+                            .Replace($"%rank{i}%", has ? names[i - 1] : "", StringComparison.Ordinal);
+                    }
+                    SendHtml(session, player, npc, html);
+                    return null;
+                }
             case 3:
                 return BeginOlympiadObserve(session, player, arg);
             case 4:
-            {
-                // Net has no ExHeroList: the current heroes go out as a page.
-                var rows = _olympiad.Heroes().Where(h => h.Claimed).ToList();
-                string body = rows.Count == 0
-                    ? "There is no Hero in this era yet.<br>"
-                    : string.Concat(rows.Select(h => $"{ClassName(h.ClassId)}: {h.Name}<br>"));
-                SendHtml(session, player, npc, $"<html><body>{npc.Name}:<br>{body}</body></html>");
-                return null;
-            }
+                {
+                    // Net has no ExHeroList: the current heroes go out as a page.
+                    var rows = _olympiad.Heroes().Where(h => h.Claimed).ToList();
+                    string body = rows.Count == 0
+                        ? "There is no Hero in this era yet.<br>"
+                        : string.Concat(rows.Select(h => $"{ClassName(h.ClassId)}: {h.Name}<br>"));
+                    SendHtml(session, player, npc, $"<html><body>{npc.Name}:<br>{body}</body></html>");
+                    return null;
+                }
             default:
                 return "bad_request";
         }
@@ -124,14 +124,14 @@ public sealed partial class ZoneWorld
                 ApplyOlympiad(_olympiad.Unregister(ActorFor(player), now));
                 return null;
             case 2:
-            {
-                string html = (OlympiadPage("noble_registered.htm") ?? "")
-                    .Replace("%listClassed%", _olympiad.RegistrationCount(classed: true).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal)
-                    .Replace("%listNonClassedTeam%", "0", StringComparison.Ordinal)
-                    .Replace("%listNonClassed%", _olympiad.RegistrationCount(classed: false).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
-                SendHtml(session, player, npc, html);
-                return null;
-            }
+                {
+                    string html = (OlympiadPage("noble_registered.htm") ?? "")
+                        .Replace("%listClassed%", _olympiad.RegistrationCount(classed: true).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal)
+                        .Replace("%listNonClassedTeam%", "0", StringComparison.Ordinal)
+                        .Replace("%listNonClassed%", _olympiad.RegistrationCount(classed: false).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
+                    SendHtml(session, player, npc, html);
+                    return null;
+                }
             case 3:
                 SendHtml(session, player, npc, (OlympiadPage("noble_points1.htm") ?? "")
                     .Replace("%points%", _olympiad.PointsOf(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
@@ -153,15 +153,15 @@ public sealed partial class ZoneWorld
                     .Replace("%points%", _olympiad.LastPeriodPoints(player.ObjectId).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
                 return null;
             case 10:
-            {
-                int passes = _olympiad.TakePasses(player.ObjectId);
-                if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Settings.RewardItemId, out _))
                 {
-                    GiveItem(session, player.Inventory, _olympiad.Settings.RewardItemId, passes);
-                    SaveInventory(session, player.Inventory);
+                    int passes = _olympiad.TakePasses(player.ObjectId);
+                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Settings.RewardItemId, out _))
+                    {
+                        GiveItem(session, player.Inventory, _olympiad.Settings.RewardItemId, passes);
+                        SaveInventory(session, player.Inventory);
+                    }
+                    return null;
                 }
-                return null;
-            }
             default:
                 return "bad_request";
         }
@@ -182,7 +182,7 @@ public sealed partial class ZoneWorld
                 if (!_olympiad.ClaimHero(player.ObjectId))
                     return null;
                 SetHero(player, true);
-                NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, OlympiadProtocol.HeroSocialAction);
+                NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, OlympiadProtocol.HeroSocialAction);
                 return null;
             case "HeroWeapon":
                 if (!player.Hero)
@@ -237,7 +237,7 @@ public sealed partial class ZoneWorld
             return;
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
         SelfUserInfo(player);
-        var peers = NetWatchersOf(player).Where(id => id != player.ObjectId).ToList();
+        var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);
     }

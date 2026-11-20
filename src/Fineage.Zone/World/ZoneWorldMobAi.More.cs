@@ -156,15 +156,7 @@ public sealed partial class ZoneWorld
 
     void BroadcastNpcMove(ZoneEntity npc, int destX, int destY, int destZ)
     {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session != null && watcher.Knownlist.Contains(npc.ObjectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(watcher.ObjectId);
-            }
-        }
+        var netWatchers = NetWatchersOfPeers(npc);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {

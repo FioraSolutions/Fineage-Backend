@@ -207,7 +207,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        NetBridge.FanoutSocialAction(NetWatchersOf(actor), actor.ObjectId, actionId);
+        NetBridge.FanoutSocialAction(KnownNetPlayersOf(actor), actor.ObjectId, actionId);
     }
 
     /// <summary>

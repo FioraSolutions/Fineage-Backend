@@ -52,87 +52,18 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    Task? _combatLoop;
-
-    /// <summary>One live combat-loop tick (movement, hits, player auto-attack / approach, casts, mobs, corpses, aggro/leash).</summary>
+    /// <summary>
+    /// One combat cadence on demand (tests): the every-step stages the live loop runs, at the current tick, without
+    /// advancing the clock, so slow stages keep their phase.
+    /// </summary>
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
-        // Pending pickups / corpse loot may dirty inventories — keep Postgres off _gate (B8).
-        WithDeferredInventoryPersist(() =>
-        {
-            BeginTickOutbox();
-            try
-            {
-                long now = _clock().ToUnixTimeMilliseconds();
-                TickPlayerMovement(now);
-                TickArenaZones();
-                TickNpcMovement(now);
-                TickRandomWalk(now);
-                TickPendingHits(now);
-                TickMeleeHits(now);
-                TickPvpFlags(now);
-                TickAutoAttacks();
-                TickPendingCasts(now);
-                TickQueuedMoves(now);
-                TickTradeRange();
-                TickParty(now);
-                TickPendingPickups(now);
-                TickPendingTalks(now);
-                TickFear(now);
-                // Proactive AI used to live only on RunCombatTickAsync (tests). Without these,
-                // aggressive mobs never aggro or leash on the live CombatLoopAsync path.
-                TickAggression(now);
-                TickLeash(now);
-                TickMobAttacks(now);
-                TickSummons(now);
-                TickCubics(now);
-                TickDuels(now);
-                TickCorpseDecay(now);
-                TickAttackStance(now);
-                TickGroundExpiry(now);
-                return 0;
-            }
-            finally
-            {
-                EndTickOutboxRecording();
-            }
-        });
-        FlushTickOutbox();
+        RunUnderGate(now => _simulationTicks.RunPeriod(1, now));
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
-    async Task CombatLoopAsync(CancellationToken ct)
+    void TickAutoAttacks(long now)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ZoneCombat.AutoAttackTickMs));
-        try
-        {
-            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-            {
-                try
-                {
-                    await RunPlayerCombatTickAsync(ct).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    // A Postgres failure while flushing a bag used to fault this task.
-                    // Movement, hits, mob AI and knownlist refresh all live here, so one
-                    // bad save stopped combat for the rest of the process.
-                    ZoneLog.Warn($"combat tick failed: {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
-    void TickAutoAttacks()
-    {
-        long now = _clock().ToUnixTimeMilliseconds();
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
@@ -263,23 +194,7 @@ public sealed partial class ZoneWorld
     /// MagicSkillCanceled): the actor itself plus every player whose knownlist holds the actor. A player target is
     /// always included (it is necessarily in the actor's AOI when the packet is legal).
     /// </summary>
-    List<int>? ActorAudience(ZoneEntity actor, ZoneEntity? target = null)
-    {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, actor) ||
-                         (target != null && ReferenceEquals(watcher, target)) ||
-                         watcher.Knownlist.Contains(actor.ObjectId);
-            if (!cares)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-        return netWatchers;
-    }
+    List<int>? ActorAudience(ZoneEntity actor, ZoneEntity? target = null) => ActorNetWatchers(actor, target);
 
     void FanoutAttack(ZoneEntity attacker, ZoneEntity target, AttackMsg attack)
     {

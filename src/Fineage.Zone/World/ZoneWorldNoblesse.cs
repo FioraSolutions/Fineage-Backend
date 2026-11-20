@@ -67,7 +67,7 @@ public sealed partial class ZoneWorld
         RefreshPledgeClass(player);
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
         SelfUserInfo(player);
-        var peers = NetWatchersOf(player).Where(id => id != player.ObjectId).ToList();
+        var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);
         SaveClassState(session, player);

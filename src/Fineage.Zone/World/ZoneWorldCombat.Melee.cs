@@ -149,12 +149,7 @@ public sealed partial class ZoneWorld
         int y = npc.Y;
         int z = npc.Z;
 
-        var watchers = new List<ZoneEntity>();
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(objectId))
-                watchers.Add(player);
-        }
+        var watchers = WatchingPlayers(objectId);
 
         // Mobius Creature.doDie -> stopAllEffects(): a corpse carries no debuffs. Clearing them before the Die packet
         // also empties the watchers' abnormal bar, so the client's stun/sleep pose no longer holds the pawn on the
@@ -232,6 +227,7 @@ public sealed partial class ZoneWorld
         ForgetActiveSets(objectId);
         ScheduleRespawn(objectId);
 
+        // Every player, not only watchers: a target selected before the NPC left view must be cleared too.
         List<int>? netWatchers = null;
         foreach (var player in Players())
         {
@@ -239,6 +235,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (player.Knownlist.Remove(objectId))
             {
+                UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }

@@ -50,6 +50,7 @@ public sealed partial class ZoneWorld
     readonly BypassRegistry _bypasses;
     readonly OlympiadBoard _olympiad;
     readonly TeleportCatalog _teleports;
+    readonly GmTeleportCatalog _gmTeleports;
     readonly NewbieBuffCatalog _newbieBuffs;
     readonly ItemWeights _weights;
     /// <summary>Mobius <c>handler="ItemSkills"</c> items: what a potion or scroll actually does (data/item-skills.json).</summary>
@@ -155,6 +156,7 @@ public sealed partial class ZoneWorld
         OlympiadSettings? olympiadSettings = null,
         Random? olympiadRandom = null,
         TeleportCatalog? teleports = null,
+        GmTeleportCatalog? gmTeleports = null,
         NewbieBuffCatalog? newbieBuffs = null,
         ItemWeights? weights = null,
         int? teleportOffset = null,
@@ -233,6 +235,7 @@ public sealed partial class ZoneWorld
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
         _olympiad = olympiad ?? new OlympiadBoard(_clock(), olympiadSettings ?? OlympiadSettings.FromEnvironment(), random: olympiadRandom);
         _teleports = teleports ?? TeleportCatalog.LoadDefault();
+        _gmTeleports = gmTeleports ?? GmTeleportCatalog.LoadDefault();
         _newbieBuffs = newbieBuffs ?? NewbieBuffCatalog.LoadDefault();
         _weights = weights ?? ItemWeights.LoadDefault();
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
@@ -318,18 +321,9 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
-    /// Set by the Net host when it owns the zone session. Sim ticks enqueue here and flush after <c>_gate</c>
-    /// (zone-simulation.md migration step 4).
+    /// Set by the Net host when it owns the zone session.
     /// </summary>
-    internal IWorldEventPublisher? NetBridge
-    {
-        get => _netBridgeOutbox ?? _netBridgeInner;
-        set
-        {
-            _netBridgeInner = value;
-            _netBridgeOutbox = value == null ? null : new OutboxingWorldEventPublisher(value, _tickOutbox);
-        }
-    }
+    internal IWorldEventPublisher? NetBridge { get; set; }
 
     /// <summary>
     /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).

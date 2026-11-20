@@ -1,0 +1,123 @@
+{
+  "towns": [
+    {
+      "keys": ["talking_island", "ti", "talking"],
+      "name": "Talking Island Village",
+      "x": -84141,
+      "y": 244623,
+      "z": -3729
+    },
+    {
+      "keys": ["elven", "elf"],
+      "name": "Elven Village",
+      "x": 46890,
+      "y": 51531,
+      "z": -2976
+    },
+    {
+      "keys": ["dark_elven", "darkelf", "de", "dark"],
+      "name": "Dark Elf Village",
+      "x": 9716,
+      "y": 15502,
+      "z": -4500
+    },
+    {
+      "keys": ["orc"],
+      "name": "Orc Village",
+      "x": -45186,
+      "y": -112459,
+      "z": -236
+    },
+    {
+      "keys": ["dwarven", "dwarf"],
+      "name": "Dwarven Village",
+      "x": 115120,
+      "y": -178112,
+      "z": -916
+    },
+    {
+      "keys": ["gludin"],
+      "name": "The Village of Gludin",
+      "x": -80749,
+      "y": 149834,
+      "z": -3043
+    },
+    {
+      "keys": ["gludio"],
+      "name": "The Town of Gludio",
+      "x": -12787,
+      "y": 122779,
+      "z": -3114
+    },
+    {
+      "keys": ["dion"],
+      "name": "The Town of Dion",
+      "x": 15671,
+      "y": 142994,
+      "z": -2704
+    },
+    {
+      "keys": ["giran"],
+      "name": "The Town of Giran",
+      "x": 83336,
+      "y": 147972,
+      "z": -3404
+    },
+    {
+      "keys": ["oren"],
+      "name": "Town of Oren",
+      "x": 83011,
+      "y": 53207,
+      "z": -1470
+    },
+    {
+      "keys": ["aden"],
+      "name": "Town of Aden",
+      "x": 146705,
+      "y": 25840,
+      "z": -2000
+    },
+    {
+      "keys": ["heine"],
+      "name": "Heine",
+      "x": 111455,
+      "y": 219400,
+      "z": -3546
+    },
+    {
+      "keys": ["hunters", "hunter"],
+      "name": "Hunters Village",
+      "x": 117110,
+      "y": 76883,
+      "z": -2670
+    },
+    {
+      "keys": ["goddard"],
+      "name": "Town of Goddard",
+      "x": 148024,
+      "y": -55281,
+      "z": -2728
+    },
+    {
+      "keys": ["rune"],
+      "name": "Rune Township",
+      "x": 43835,
+      "y": -47749,
+      "z": -792
+    },
+    {
+      "keys": ["schuttgart"],
+      "name": "Town of Schuttgart",
+      "x": 87478,
+      "y": -142297,
+      "z": -1352
+    },
+    {
+      "keys": ["floran"],
+      "name": "Entrance to Floran Village",
+      "x": 17430,
+      "y": 170103,
+      "z": -3506
+    }
+  ]
+}

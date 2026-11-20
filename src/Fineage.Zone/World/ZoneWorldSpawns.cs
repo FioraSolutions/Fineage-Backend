@@ -228,6 +228,12 @@ public sealed partial class ZoneWorld
         }
     }
 
+    internal void FanoutNewNpcForTests(ZoneEntity npc)
+    {
+        lock (_gate)
+            FanoutNewNpc(npc);
+    }
+
     void FanoutNewNpc(ZoneEntity npc)
     {
         foreach (var player in Players())
@@ -238,6 +244,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
+            TrackWatcher(player.ObjectId, npc.ObjectId);
             // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
             // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
             // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.

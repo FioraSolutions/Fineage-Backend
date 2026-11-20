@@ -135,7 +135,7 @@ public sealed partial class ZoneWorld
         if (player.MoveActive && NetBridge != null)
         {
             // Remote Net pawns re-target the remaining leg with the new gait.
-            NetBridge.FanoutMoveState(NetWatchersOf(player), player.ObjectId,
+            NetBridge.FanoutMoveState(KnownNetPlayersOf(player), player.ObjectId,
                 player.X, player.Y, player.Z,
                 player.MoveDestX, player.MoveDestY, player.MoveDestZ, player.Running);
         }
@@ -205,7 +205,7 @@ public sealed partial class ZoneWorld
             return ActionProtocol.Blocked;
 
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
-        NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, actionId);
+        NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, actionId);
 
         return null;
     }
@@ -222,13 +222,16 @@ public sealed partial class ZoneWorld
             _ => waitType.ToString()
         };
         ZoneLog.Info($"[wait-type] obj={player.ObjectId} type={label} x={player.X} y={player.Y} z={player.Z}");
-        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
+        NetBridge?.FanoutChangeWaitType(KnownNetPlayersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 
     void FanoutMoveType(ZoneEntity player) => FanoutNetMoveType(player);
 
-    /// <summary>Self (players) + knownlist players: the Net ChangeMoveType audience.</summary>
-    List<int> NetWatchersOf(ZoneEntity actor)
+    /// <summary>
+    /// Self (players) + live players in the actor's own knownlist. Equals <see cref="NetWatchersOf"/> for a player
+    /// actor (player knownlists are symmetric); an NPC actor keeps no knownlist, so its audience is empty.
+    /// </summary>
+    List<int> KnownNetPlayersOf(ZoneEntity actor)
     {
         var list = new List<int>();
         if (actor.Session != null)
@@ -250,7 +253,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(actor);
+        var watchers = KnownNetPlayersOf(actor);
         if (watchers.Count == 0)
             return;
         float run = actor.InWater ? actor.SwimRunSpeed : actor.RunSpeed;

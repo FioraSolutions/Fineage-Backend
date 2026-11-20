@@ -75,11 +75,31 @@ public sealed class RegionTickScheduler
         ArgumentNullException.ThrowIfNull(stage);
         var entry = _stages.OfType<PerRegionStage>().FirstOrDefault(s => ReferenceEquals(s.Stage, stage))
             ?? throw new InvalidOperationException($"Region stage '{stage.Name}' is not registered on this scheduler.");
-        var failures = entry.Run(this, new TickContext(Tick, nowUnixMs));
+        RunHook([entry], $"Region stage '{stage.Name}'", nowUnixMs);
+    }
+
+    /// <summary>
+    /// Runs every stage registered with <paramref name="periodTicks"/>, in registration order, at the current tick
+    /// without advancing the clock (test and admin hooks for one cadence). Failures are reported and rethrown.
+    /// </summary>
+    public void RunPeriod(int periodTicks, long nowUnixMs)
+    {
+        var entries = _stages.Where(s => s.PeriodTicks == periodTicks).ToList();
+        if (entries.Count == 0)
+            throw new InvalidOperationException($"No simulation stage is registered with period {periodTicks}.");
+        RunHook(entries, $"Period-{periodTicks} stages", nowUnixMs);
+    }
+
+    void RunHook(IReadOnlyList<ScheduledStage> entries, string what, long nowUnixMs)
+    {
+        var tick = new TickContext(Tick, nowUnixMs);
+        var failures = new List<StageFailure>();
+        foreach (var entry in entries)
+            failures.AddRange(entry.Run(this, tick));
         Report(failures);
         if (failures.Count > 0)
             throw new AggregateException(
-                $"Region stage '{stage.Name}' failed in {failures.Count} scope(s): {string.Join("; ", failures)}",
+                $"{what} failed in {failures.Count} scope(s): {string.Join("; ", failures)}",
                 failures.Select(f => f.Error));
     }
 
