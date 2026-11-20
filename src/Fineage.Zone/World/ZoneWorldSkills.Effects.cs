@@ -224,7 +224,7 @@ public sealed partial class ZoneWorld
         if (attacker.Session == null || victim.Dead)
             return;
         attacker.Session.SelectedTargetId = victim.ObjectId;
-        attacker.Session.AutoAttackTargetId = victim.ObjectId;
+        attacker.Intent.AutoAttackTargetId = victim.ObjectId;
     }
 
     bool SamePartyOrClan(ZoneEntity a, ZoneEntity b) =>
@@ -623,7 +623,7 @@ public sealed partial class ZoneWorld
         }
         else if (target.Session is { } session)
         {
-            session.AutoAttackTargetId = pick.ObjectId;
+            target.Intent.AutoAttackTargetId = pick.ObjectId;
             session.SelectedTargetId = pick.ObjectId;
         }
     }

@@ -315,10 +315,10 @@ public sealed partial class ZoneWorld
             if (entity.Session is { } session)
             {
                 int previous = session.SelectedTargetId;
-                int autoAttack = session.AutoAttackTargetId;
+                int autoAttack = entity.Intent.AutoAttackTargetId;
                 session.SelectedTargetId = 0;
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                entity.Intent.AutoAttackTargetId = 0;
+                entity.Intent.ClearApproach();
                 if (previous > 0)
                     NetBridge?.FanoutTargetUnselected([entity.ObjectId], previous);
                 abortAttack = autoAttack > 0;

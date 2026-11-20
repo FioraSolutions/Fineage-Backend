@@ -11,20 +11,50 @@ namespace Fineage.Zone.World;
 /// </summary>
 internal sealed class WorldFanoutSequencer
 {
+    [ThreadStatic] static RegionRecording? t_region;
+
     readonly object _sendLock = new();
     readonly Queue<WorldFanoutBatch> _sealed = new();
     WorldFanoutBatch? _recording;
     int _recordingThread;
     int _depth;
 
-    /// <summary>The open batch when the calling thread is inside a recorded step, otherwise null.</summary>
+    /// <summary>
+    /// The open batch when the calling thread is inside a recorded step, otherwise null. Inside a region body that is
+    /// the region's own batch (<see cref="RecordRegion"/>), on whichever thread the body runs.
+    /// </summary>
     public WorldFanoutBatch? Recording
     {
         get
         {
+            if (t_region is { } region && ReferenceEquals(region.Owner, this))
+                return region.Batch;
             var batch = Volatile.Read(ref _recording);
             return batch != null && _recordingThread == Environment.CurrentManagedThreadId ? batch : null;
         }
+    }
+
+    /// <summary>
+    /// For the duration of a region body on the calling thread: fan-out records into <paramref name="batch"/>, which
+    /// the scheduler thread folds into the step's batch at the barrier (<see cref="AbsorbRegion"/>).
+    /// </summary>
+    public IDisposable RecordRegion(WorldFanoutBatch batch)
+    {
+        if (t_region != null)
+            throw new InvalidOperationException("a region body is already recording fan-out on this thread");
+        var recording = new RegionRecording(this, batch);
+        t_region = recording;
+        return recording;
+    }
+
+    /// <summary>On the scheduler thread at the barrier: appends a region's fan-out to the step's batch.</summary>
+    public void AbsorbRegion(WorldFanoutBatch region)
+    {
+        if (region.Count == 0)
+            return;
+        var step = Recording ??
+                   throw new InvalidOperationException("region fan-out committed outside a recorded step; region stages run under RunUnderGate");
+        step.Absorb(region);
     }
 
     /// <summary>Under <c>_gate</c>. Nested steps join the outer batch.</summary>
@@ -66,6 +96,20 @@ internal sealed class WorldFanoutSequencer
         {
             DrainLocked();
             send();
+        }
+    }
+
+    sealed class RegionRecording(WorldFanoutSequencer owner, WorldFanoutBatch batch) : IDisposable
+    {
+        public WorldFanoutSequencer Owner { get; } = owner;
+
+        public WorldFanoutBatch Batch { get; } = batch;
+
+        public void Dispose()
+        {
+            if (!ReferenceEquals(t_region, this))
+                throw new InvalidOperationException("region fan-out recording closed out of order");
+            t_region = null;
         }
     }
 

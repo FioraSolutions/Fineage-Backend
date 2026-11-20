@@ -278,7 +278,7 @@ public sealed partial class ZoneWorld
             return null;
 
         npc.HomeSet = false;
-        // Mobius EffectPoint: setInvul(true) and attackable=false, so TickAggression never picks it up.
+        // Mobius EffectPoint: setInvul(true) and attackable=false, so the aggression scan never picks it up.
         SetAggroTarget(npc, 0);
         if (NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
         {

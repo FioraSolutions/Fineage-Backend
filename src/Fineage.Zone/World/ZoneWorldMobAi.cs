@@ -20,7 +20,7 @@ public sealed partial class ZoneWorld
             TickRandomWalk(now);
             TickPendingHits(now);
             TickMeleeHits(now);
-            TickAggression(now);
+            _simulationTicks.RunNow(_aggressionStage, now);
             TickLeash(now);
             TickMobAttacks(now);
             TickSummons(now);
@@ -194,7 +194,7 @@ public sealed partial class ZoneWorld
         }
 
         if (target.Session != null)
-            target.Session.AutoAttackTargetId = 0;
+            target.Intent.AutoAttackTargetId = 0;
         ApplyPlayerDeath(target, attacker.ObjectId);
     }
 

@@ -190,12 +190,12 @@ public sealed partial class ZoneWorld
                         OriginZ = e.Z
                     };
                     // Keep approach sync on the current leg so client mid-path reports are not treated as cancel.
-                    if (e.Session is { ApproachTargetId: > 0 } session)
+                    if (e.Session != null && e.Intent.ApproachTargetId > 0)
                     {
-                        session.ApproachOriginX = e.X;
-                        session.ApproachOriginY = e.Y;
-                        session.ApproachDestX = e.MoveDestX;
-                        session.ApproachDestY = e.MoveDestY;
+                        e.Intent.ApproachOriginX = e.X;
+                        e.Intent.ApproachOriginY = e.Y;
+                        e.Intent.ApproachDestX = e.MoveDestX;
+                        e.Intent.ApproachDestY = e.MoveDestY;
                     }
                     RefreshMovingKnownlist(e, ack);
                     continue;

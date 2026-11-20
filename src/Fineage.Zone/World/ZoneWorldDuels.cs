@@ -477,8 +477,8 @@ public sealed partial class ZoneWorld
         AbortCast(m, "duel", notify: false);
         if (m.Session != null)
         {
-            m.Session.AutoAttackTargetId = 0;
-            m.Session.ClearApproach();
+            m.Intent.AutoAttackTargetId = 0;
+            m.Intent.ClearApproach();
         }
     }
 
@@ -631,8 +631,8 @@ public sealed partial class ZoneWorld
         DuelStopFighting(player);
         foreach (var other in Players())
         {
-            if (other.Session is { } s && s.AutoAttackTargetId == player.ObjectId)
-                s.AutoAttackTargetId = 0;
+            if (other.Session != null && other.Intent.AutoAttackTargetId == player.ObjectId)
+                other.Intent.AutoAttackTargetId = 0;
         }
         FanoutVitals(player, PlayerVitalsStatus(player));
         ZoneLog.Info($"duel knockout object={player.ObjectId} duel={player.DuelId}");

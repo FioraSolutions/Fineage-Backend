@@ -108,7 +108,7 @@ public sealed partial class ZoneWorld
             if (target.CurHp <= 0)
             {
                 if (target.Session != null)
-                    target.Session.AutoAttackTargetId = 0;
+                    target.Intent.AutoAttackTargetId = 0;
                 ApplyPlayerDeath(target, npc.ObjectId);
             }
         }
@@ -306,8 +306,8 @@ public sealed partial class ZoneWorld
         {
             if (target.Session is { } session)
             {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                target.Intent.AutoAttackTargetId = 0;
+                target.Intent.ClearApproach();
             }
             if (!slot.Equals("SLEEP", StringComparison.OrdinalIgnoreCase))
                 AbortCast(target, "control", notify: false);

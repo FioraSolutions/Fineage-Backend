@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
         var transfers = _byId.Handoff();
         if (transfers.Count > 0)
             _simulationObserver.EntitiesHandedOff(tick, transfers);
+        PublishBorders(tick);
     }
 
     /// <summary>Test and diagnostics: the region that owns <paramref name="objectId"/> and the epoch of that route.</summary>

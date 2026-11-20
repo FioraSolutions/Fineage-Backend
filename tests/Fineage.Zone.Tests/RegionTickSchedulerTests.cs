@@ -109,7 +109,8 @@ public sealed class RegionTickSchedulerTests
             {
                 Thread.SpinWait(2_000);
                 Interlocked.Increment(ref finished);
-            }));
+            },
+            parallel: true));
         scheduler.AddWorldStage("after", _ => seenByNext = Volatile.Read(ref finished));
 
         scheduler.Step(0);
@@ -394,6 +395,8 @@ public sealed class RegionTickSchedulerTests
     sealed class LocalStage(long[] state, int regions, int perRegion) : IRegionStage
     {
         public string Name => "local";
+
+        public bool Parallel => true;
 
         public void Collect(TickContext tick, RegionWorkCollector work)
         {

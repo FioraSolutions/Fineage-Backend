@@ -11,6 +11,21 @@ public interface IRegionPartition
     /// region widened by the handoff hysteresis, so pacing along an edge does not hand the entity back and forth.
     /// </summary>
     bool Holds(RegionId region, int instanceId, int x, int y);
+
+    /// <summary>How far past its edge a region keeps owning an entity (<see cref="Holds"/>).</summary>
+    int HandoffMargin { get; }
+
+    /// <summary>
+    /// The regions that can own an entity inside the box (same instance, held area meeting it), in ascending order:
+    /// where a spatial query looks.
+    /// </summary>
+    IReadOnlyList<RegionId> RegionsOverlapping(int instanceId, int minX, int minY, int maxX, int maxY);
+
+    /// <summary>
+    /// Whether the position lies in <paramref name="region"/>'s own cell at least <paramref name="depth"/> units from
+    /// every edge, so no neighbour's query of that reach can see it.
+    /// </summary>
+    bool IsInterior(RegionId region, int instanceId, int x, int y, int depth);
 }
 
 /// <summary>
@@ -60,6 +75,31 @@ public sealed class GridRegionPartition : IRegionPartition
         long minY = (long)(region.Y - _offsetY) * CellSize - HandoffMargin;
         long span = CellSize + 2L * HandoffMargin;
         return x >= minX && x < minX + span && y >= minY && y < minY + span;
+    }
+
+    public IReadOnlyList<RegionId> RegionsOverlapping(int instanceId, int minX, int minY, int maxX, int maxY)
+    {
+        if (maxX < minX || maxY < minY)
+            throw new ArgumentException($"Empty box {minX},{minY}..{maxX},{maxY}.");
+        int fromX = FloorDiv(minX - HandoffMargin, CellSize), toX = FloorDiv(maxX + HandoffMargin, CellSize);
+        int fromY = FloorDiv(minY - HandoffMargin, CellSize), toY = FloorDiv(maxY + HandoffMargin, CellSize);
+        var regions = new List<RegionId>((toX - fromX + 1) * (toY - fromY + 1));
+        for (int x = fromX; x <= toX; x++)
+        {
+            for (int y = fromY; y <= toY; y++)
+                regions.Add(new RegionId(instanceId, x + _offsetX, y + _offsetY));
+        }
+
+        return regions;
+    }
+
+    public bool IsInterior(RegionId region, int instanceId, int x, int y, int depth)
+    {
+        if (region.InstanceId != instanceId)
+            return false;
+        long minX = (long)(region.X - _offsetX) * CellSize;
+        long minY = (long)(region.Y - _offsetY) * CellSize;
+        return x >= minX + depth && x < minX + CellSize - depth && y >= minY + depth && y < minY + CellSize - depth;
     }
 
     static int FloorDiv(int value, int divisor)

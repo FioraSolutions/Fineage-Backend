@@ -227,7 +227,7 @@ public sealed class NpcHtmlTests
 
         // Mobius NpcAction: out of canInteract starts AI_INTENTION_INTERACT instead of refusing.
         Assert.Null(await actor.Talk(MerchantObjectId));
-        Assert.Equal(MerchantObjectId, actor.Session.PendingTalkNpcId);
+        Assert.Equal(MerchantObjectId, actor.Player.Intent.PendingTalkNpcId);
         Assert.Equal("range", await actor.BypassAsync(MerchantObjectId, "Buy 1"));
         Assert.Empty(Bench(bench, FanoutHtml));
     }

@@ -62,10 +62,10 @@ public sealed partial class ZoneWorld
         if (entity.CastingUntilMs > NowUnixMs())
         {
             // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
-            session.QueuedMove = move;
+            entity.Intent.QueuedMove = move;
             return null;
         }
-        session.QueuedMove = null;
+        entity.Intent.QueuedMove = null;
         // Sanity clamp for a single client move request, not a region gate: a click can be far away
         // (click-to-move across a village) and the same code runs for every spawn map.
         if (!WithinMoveRequest(entity.X, entity.Y, move.DestX, move.DestY))
@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
         }
         CancelAttackIntentionOnMove(session, move);
         // Mobius NextAction(EVT_ARRIVED, MOVE_TO, sitDown): a fresh move order cancels the pending sit.
-        session.SitOnArrive = false;
+        entity.Intent.SitOnArrive = false;
         if (NetBridge != null)
             return StartTimedMove(entity, session, move);
 
@@ -140,8 +140,8 @@ public sealed partial class ZoneWorld
     }
 
     static bool CombatPinned(ZoneEntity a, ZoneEntity b) =>
-        (a.Session != null && (a.Session.AutoAttackTargetId == b.ObjectId || a.Session.SelectedTargetId == b.ObjectId)) ||
-        (b.Session != null && (b.Session.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
+        (a.Session != null && (a.Intent.AutoAttackTargetId == b.ObjectId || a.Session.SelectedTargetId == b.ObjectId)) ||
+        (b.Session != null && (b.Intent.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
         a.AggroTargetId == b.ObjectId || b.AggroTargetId == a.ObjectId;
 
     void LinkSeen(ZoneEntity self, int otherId)

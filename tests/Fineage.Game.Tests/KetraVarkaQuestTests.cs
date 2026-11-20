@@ -185,4 +185,18 @@ public sealed class KetraVarkaQuestTests
         Assert.Empty(m.BreakAlliance(new QuestJournal(), bag, 21350));
         Assert.Equal(1, bag.CountOf(7213));
     }
+
+    [Fact]
+    public void Alliance_value_decides_like_the_inventory_it_was_taken_from()
+    {
+        foreach (var bag in new[] { Bag(), Bag((7213, 1)), Bag((7224, 1)), Bag((7211, 1), (7221, 1)), Bag((7233, 5)) })
+        {
+            var alliance = QuestMachine.AllianceOf(bag);
+            foreach (int npcId in new[] { 21324, 25306, 21350, 25316, 20001 })
+                Assert.Equal(QuestMachine.IsAlliedWith(npcId, bag), QuestMachine.IsAlliedWith(npcId, alliance));
+        }
+
+        Assert.Equal(FactionAlliance.Ketra | FactionAlliance.Varka, QuestMachine.AllianceOf(Bag((7211, 1), (7221, 1))));
+        Assert.Equal(FactionAlliance.None, QuestMachine.AllianceOf(null));
+    }
 }

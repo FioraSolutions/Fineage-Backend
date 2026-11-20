@@ -52,6 +52,9 @@ sealed partial class ZoneEntity : IRegionMember
     public int Z { get; set; }
     /// <summary>Facing 0..65535 (Mobius heading); updated while moving and when swinging at a target.</summary>
     public int Heading { get; set; }
+    /// <summary>What a player has asked for and the simulation carries out (auto attack, approach, pending actions); written only from commands and stages.</summary>
+    public PlayerIntent Intent { get; } = new();
+
     /// <summary>Next Mobius Fear onActionTime. Shared by players and mobs so a mob flees the caster, not its hate target.</summary>
     public long FearFleeAtUnixMs { get; set; }
     /// <summary>Mobius <c>ArenaZone</c> membership already announced (enter/leave combat zone).</summary>

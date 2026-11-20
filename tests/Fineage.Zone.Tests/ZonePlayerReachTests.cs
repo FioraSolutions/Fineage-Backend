@@ -60,8 +60,8 @@ public sealed class ZonePlayerReachTests
         Assert.True(player.MoveActive, "a dagger cannot start a swing at an archer standing 200 away");
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
 
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        player.Intent.AutoAttackTargetId = 0;
+        player.Intent.ClearApproach();
         rec.Calls.Clear();
 
         // Mid-chase melee mob: dest is the player, body still 200 away. Reach must stay the player's.

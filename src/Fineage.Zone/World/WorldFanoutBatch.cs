@@ -20,27 +20,55 @@ internal sealed class WorldFanoutBatch
     readonly List<Entry?> _entries = [];
     readonly Dictionary<ReplaceKey, int> _replaceable = [];
 
-    public int Count => _entries.Count - Coalesced;
+    int _superseded;
 
+    public int Count => _entries.Count - _superseded;
+
+    /// <summary>Writes superseded so far, including those superseded inside absorbed region batches.</summary>
     public int Coalesced { get; private set; }
 
-    public void AddOrdered(string name, Action send) => _entries.Add(new Entry(name, send, null));
+    public void AddOrdered(string name, Action send) => _entries.Add(new Entry(name, send, null, null));
 
     /// <param name="merge">Folds the superseded payload into the new one (StatusUpdate keeps attributes the new write omits).</param>
     public void AddReplaceable<T>(
         PresenceCoalesceKind kind, int subjectId, int[] audience, T payload, Func<T, T, T> merge, Func<T, Action> bind)
-        where T : class
+        where T : class =>
+        AddReplaceable(payload, new Replace(new ReplaceKey(kind, subjectId, new AudienceKey(audience)),
+            (older, newer) => merge((T)older, (T)newer), latest => bind((T)latest)));
+
+    /// <summary>
+    /// Appends a region's batch as if its writes had been made here in order: ordered sends keep their position and
+    /// replaceable writes coalesce with this batch's. The merges are associative, so the result does not depend on
+    /// whether a region recorded on its own first.
+    /// </summary>
+    public void Absorb(WorldFanoutBatch region)
     {
-        var key = new ReplaceKey(kind, subjectId, new AudienceKey(audience));
+        foreach (var entry in region._entries)
+        {
+            if (entry == null)
+                continue;
+            if (entry.Replace is { } replace)
+                AddReplaceable(entry.Payload!, replace);
+            else
+                _entries.Add(entry);
+        }
+
+        Coalesced += region.Coalesced;
+    }
+
+    void AddReplaceable(object payload, Replace replace)
+    {
+        var key = replace.Key;
         if (_replaceable.TryGetValue(key, out int previous))
         {
-            payload = merge((T)_entries[previous]!.Payload!, payload);
+            payload = replace.Merge(_entries[previous]!.Payload!, payload);
             _entries[previous] = null;
+            _superseded++;
             Coalesced++;
         }
 
         _replaceable[key] = _entries.Count;
-        _entries.Add(new Entry($"{kind} subject={subjectId}", bind(payload), payload));
+        _entries.Add(new Entry($"{key.Kind} subject={key.SubjectId}", replace.Bind(payload), payload, replace));
     }
 
     public IEnumerable<(string Name, Action Send)> Sends()
@@ -52,7 +80,9 @@ internal sealed class WorldFanoutBatch
         }
     }
 
-    sealed record Entry(string Name, Action Send, object? Payload);
+    sealed record Entry(string Name, Action Send, object? Payload, Replace? Replace);
+
+    sealed record Replace(ReplaceKey Key, Func<object, object, object> Merge, Func<object, Action> Bind);
 
     readonly record struct ReplaceKey(PresenceCoalesceKind Kind, int SubjectId, AudienceKey Audience);
 

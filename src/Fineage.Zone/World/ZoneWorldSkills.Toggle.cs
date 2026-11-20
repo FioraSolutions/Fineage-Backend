@@ -216,8 +216,8 @@ public sealed partial class ZoneWorld
         player.PendingHit = null;
         if (player.Session != null)
         {
-            player.Session.AutoAttackTargetId = 0;
-            player.Session.ClearApproach();
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
         }
         // Mobius Creature.startFakeDeath: abortAttack() / abortCast() / stopMove(null) before the wait type goes out.
         AdvanceMove(player, now);

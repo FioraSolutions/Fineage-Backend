@@ -121,22 +121,22 @@ public sealed partial class ZoneWorld
             long now = NowUnixMs();
             if (player.CastingUntilMs > now || player.Sitting)
                 return null;
-            session.AutoAttackTargetId = 0;
-            session.PendingCastSkillId = 0;
-            session.PendingCastAtUnixMs = 0;
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.PendingCastSkillId = 0;
+            player.Intent.PendingCastAtUnixMs = 0;
             long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
             if (ms < 0)
                 return "range";
             if (ms > 0)
             {
-                session.PendingTalkNpcId = npc.ObjectId;
-                session.PendingTalkAtUnixMs = now + ms;
+                player.Intent.PendingTalkNpcId = npc.ObjectId;
+                player.Intent.PendingTalkAtUnixMs = now + ms;
                 return null;
             }
         }
 
-        session.PendingTalkNpcId = 0;
-        session.PendingTalkAtUnixMs = 0;
+        player.Intent.PendingTalkNpcId = 0;
+        player.Intent.PendingTalkAtUnixMs = 0;
         // Mobius NpcAction sends MoveToPawn(player, npc, 100) before the chat window so the NPC faces the talker.
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
 
@@ -166,11 +166,11 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.PendingTalkNpcId <= 0 || now < session.PendingTalkAtUnixMs)
+            if (session == null || player.Intent.PendingTalkNpcId <= 0 || now < player.Intent.PendingTalkAtUnixMs)
                 continue;
-            int npcId = session.PendingTalkNpcId;
-            session.PendingTalkNpcId = 0;
-            session.PendingTalkAtUnixMs = 0;
+            int npcId = player.Intent.PendingTalkNpcId;
+            player.Intent.PendingTalkNpcId = 0;
+            player.Intent.PendingTalkAtUnixMs = 0;
             if (!_byId.TryGetValue(npcId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 continue;
             if (!InTalkRange(player, npc))
@@ -178,8 +178,8 @@ public sealed partial class ZoneWorld
                 long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
                 if (ms > 0)
                 {
-                    session.PendingTalkNpcId = npcId;
-                    session.PendingTalkAtUnixMs = now + ms;
+                    player.Intent.PendingTalkNpcId = npcId;
+                    player.Intent.PendingTalkAtUnixMs = now + ms;
                     continue;
                 }
                 if (ms < 0)

@@ -98,7 +98,7 @@ public sealed partial class ZoneWorld
         if (attacker.Kind == ZoneEntityKind.Player)
         {
             if (attacker.Session != null)
-                attacker.Session.AutoAttackTargetId = 0;
+                attacker.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(attacker, target.ObjectId);
         }
         else if (attacker.Kind == ZoneEntityKind.Npc && attacker.Summon == null)

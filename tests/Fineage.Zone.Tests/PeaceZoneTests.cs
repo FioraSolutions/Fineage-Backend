@@ -41,7 +41,7 @@ public sealed class PeaceZoneTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Equal(500, victim.CurHp);
         // Mobius doAttack in a peace zone is ActionFailed with no system message. SysMsg 85 is for bad skills.
         Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
@@ -54,6 +54,6 @@ public sealed class PeaceZoneTests
         victim.Y = other.Y = 0;
         victim.Z = other.Z = 0;
         Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
-        Assert.Equal(other.ObjectId, session.AutoAttackTargetId);
+        Assert.Equal(other.ObjectId, player.Intent.AutoAttackTargetId);
     }
 }

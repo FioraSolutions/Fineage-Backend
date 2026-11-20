@@ -96,7 +96,7 @@ public sealed partial class ZoneWorld
                 attacker.Summon.TargetId = 0;
             }
             if (target.Session != null)
-                target.Session.AutoAttackTargetId = 0;
+                target.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, attacker.ObjectId);
         }
     }
@@ -173,7 +173,7 @@ public sealed partial class ZoneWorld
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
             if (watcher.Session.SelectedTargetId == objectId)
-                watcher.Session.AutoAttackTargetId = 0;
+                watcher.Intent.AutoAttackTargetId = 0;
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)

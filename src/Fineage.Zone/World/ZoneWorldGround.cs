@@ -153,8 +153,8 @@ public sealed partial class ZoneWorld
                                 && !IsHerb(ground.GroundItemId);
         if (!partyDistributes && !HasRoomForGroundItem(player, ground))
         {
-            session.PendingPickupId = 0;
-            session.PendingPickupAtUnixMs = 0;
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
             ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
             return "slots";
         }
@@ -168,8 +168,8 @@ public sealed partial class ZoneWorld
             }
 
             // Mobius AI_INTENTION_PICK_UP: run to the item (moveToPawn), pick it up on arrival.
-            session.AutoAttackTargetId = 0;
-            session.PendingCastSkillId = 0;
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.PendingCastSkillId = 0;
             long ms = ApproachTarget(player, ground, ZoneCombat.PickupReach);
             if (ms < 0)
             {
@@ -178,15 +178,15 @@ public sealed partial class ZoneWorld
             }
             if (ms > 0)
             {
-                session.PendingPickupId = groundObjectId;
-                session.PendingPickupAtUnixMs = now + ms;
+                player.Intent.PendingPickupId = groundObjectId;
+                player.Intent.PendingPickupAtUnixMs = now + ms;
                 return null;
             }
         }
 
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
-        session.ClearApproach();
+        player.Intent.PendingPickupId = 0;
+        player.Intent.PendingPickupAtUnixMs = 0;
+        player.Intent.ClearApproach();
 
         if (IsHerb(ground.GroundItemId))
         {
@@ -219,8 +219,8 @@ public sealed partial class ZoneWorld
                 || looter.Session == null
                 || !CanReceiveGround(looterId, ground))
             {
-                session.PendingPickupId = 0;
-                session.PendingPickupAtUnixMs = 0;
+                player.Intent.PendingPickupId = 0;
+                player.Intent.PendingPickupAtUnixMs = 0;
                 ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
                 return "slots";
             }

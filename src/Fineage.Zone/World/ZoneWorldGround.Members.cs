@@ -34,8 +34,11 @@ public sealed partial class ZoneWorld
 
     void PickupFailed(ZoneSession session, ZoneEntity ground)
     {
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
+        if (_byId.TryGetValue(session.ObjectId, out var player))
+        {
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
+        }
         string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
         ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.");
     }
@@ -45,11 +48,11 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.PendingPickupId <= 0 || now < session.PendingPickupAtUnixMs)
+            if (session == null || player.Intent.PendingPickupId <= 0 || now < player.Intent.PendingPickupAtUnixMs)
                 continue;
-            int id = session.PendingPickupId;
-            session.PendingPickupId = 0;
-            session.PendingPickupAtUnixMs = 0;
+            int id = player.Intent.PendingPickupId;
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
             // Item may be gone (someone else took it) — that is a silent no-op like Mobius.
             if (_byId.TryGetValue(id, out var g) && g.Kind == ZoneEntityKind.GroundItem)
                 TryPickup(session, id, allowApproach: false);
