@@ -5662,7 +5662,7 @@
    "mpInitialConsume": [
     0
    ],
-   "hitTimeMs": 1700,
+   "hitTimeMs": 1800,
    "coolTimeMs": 100,
    "reuseDelayMs": 10000,
    "castRange": 40,

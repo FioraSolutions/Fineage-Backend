@@ -15772,6 +15772,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BLUNT"
       ]
     },
     {
@@ -27677,7 +27680,8 @@
         -611,
         -635,
         -655
-      ]
+      ],
+      "affectRange": 200
     },
     {
       "skillId": 303,
@@ -32914,7 +32918,14 @@
           "itemConsumeCount": 1
         }
       ],
-      "magicType": 2
+      "magicType": 2,
+      "playerConditions": [
+        {
+          "type": "activeEffectIdLvl",
+          "skillId": 5104,
+          "level": 2
+        }
+      ]
     },
     {
       "skillId": 458,
@@ -56152,42 +56163,42 @@
           "mpConsume": 0,
           "power": 18,
           "abnormalLevel": 1,
-          "magicLevel": 28
+          "magicLevel": 30
         },
         {
           "level": 4,
           "mpConsume": 0,
           "power": 24,
           "abnormalLevel": 1,
-          "magicLevel": 36
+          "magicLevel": 40
         },
         {
           "level": 5,
           "mpConsume": 0,
           "power": 30,
           "abnormalLevel": 1,
-          "magicLevel": 43
+          "magicLevel": 50
         },
         {
           "level": 6,
           "mpConsume": 0,
           "power": 36,
           "abnormalLevel": 1,
-          "magicLevel": 49
+          "magicLevel": 60
         },
         {
           "level": 7,
           "mpConsume": 0,
           "power": 42,
           "abnormalLevel": 1,
-          "magicLevel": 55
+          "magicLevel": 70
         },
         {
           "level": 8,
           "mpConsume": 0,
           "power": 48,
           "abnormalLevel": 1,
-          "magicLevel": 62
+          "magicLevel": 80
         }
       ]
     },
