@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Game.Skills;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -89,7 +90,7 @@ public sealed partial class ZoneWorld
         }
 
         if (entity.Abnormals.Count > 0)
-            _withAbnormals.Add(entity.ObjectId);
+            _byId.Join(entity, ActiveSets.WithAbnormals);
         RefreshRunSpeed(entity);
     }
 }

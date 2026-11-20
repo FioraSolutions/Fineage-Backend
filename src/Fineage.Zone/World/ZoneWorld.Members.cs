@@ -212,7 +212,6 @@ public sealed partial class ZoneWorld
         DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
-        ForgetActiveSets(session.ObjectId);
         foreach (int id in seen)
         {
             if (_byId.TryGetValue(id, out var other))

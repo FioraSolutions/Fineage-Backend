@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -309,7 +310,7 @@ public sealed partial class ZoneWorld
             Slot = "TURN_FLEE",
             ExpiresAtUnixMs = until
         });
-        _withAbnormals.Add(target.ObjectId);
+        _byId.Join(target, ActiveSets.WithAbnormals);
         FanoutAbnormal(target);
     }
 
@@ -588,7 +589,7 @@ public sealed partial class ZoneWorld
             Slot = "CONFUSED",
             ExpiresAtUnixMs = until
         });
-        _withAbnormals.Add(target.ObjectId);
+        _byId.Join(target, ActiveSets.WithAbnormals);
         FanoutAbnormal(target);
 
         int range = 2000;

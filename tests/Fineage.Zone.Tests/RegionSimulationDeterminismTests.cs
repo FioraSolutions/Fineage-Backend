@@ -34,6 +34,9 @@ public sealed class RegionSimulationDeterminismTests
         "sieges", "manor", "fishing", "lottery", "seven-signs", "mammon", "olympiad"
     ];
 
+    /// <summary>The end-of-tick barrier, after every stage of the step.</summary>
+    const string Handoff = "handoff";
+
     [Fact]
     public async Task Identical_worlds_produce_identical_state_and_fanout_sequence()
     {
@@ -91,7 +94,7 @@ public sealed class RegionSimulationDeterminismTests
         var kit = new NetTestKit(Map(), "determinism", regions: GridRegionPartition.MapTiles, simulationObserver: observer);
         Assert.Equal(ZoneCombat.AutoAttackTickMs, kit.World.SimulationTicks.StepMilliseconds);
         Assert.Equal(ZoneRegen.DefaultTickMs / ZoneCombat.AutoAttackTickMs, ZoneSimulationSettings.SlowPeriodTicks);
-        Assert.Equal(LegacyCombatOrder.Concat(LegacySimulationOrder), kit.World.SimulationTicks.StageNames);
+        Assert.Equal([.. LegacyCombatOrder, .. LegacySimulationOrder, Handoff], kit.World.SimulationTicks.StageNames);
 
         var expected = new List<string>();
         for (int step = 1; step <= 2 * ZoneSimulationSettings.SlowPeriodTicks; step++)
@@ -100,6 +103,7 @@ public sealed class RegionSimulationDeterminismTests
             expected.AddRange(LegacyCombatOrder);
             if (step % ZoneSimulationSettings.SlowPeriodTicks == 0)
                 expected.AddRange(LegacySimulationOrder);
+            expected.Add(Handoff);
             Assert.Equal(expected, observer.Completed);
         }
 
@@ -116,7 +120,7 @@ public sealed class RegionSimulationDeterminismTests
 
         kit.World.RunPlayerCombatTickAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-        Assert.Equal(LegacyCombatOrder, observer.Completed);
+        Assert.Equal([.. LegacyCombatOrder, Handoff], observer.Completed);
         Assert.Equal(before, kit.World.SimulationTicks.Tick);
     }
 
@@ -267,9 +271,13 @@ public sealed class RegionSimulationDeterminismTests
 
         public void StageFailed(StageFailure failure) => Failures.Add(failure);
 
+        public List<RegionTransfer> Handoffs { get; } = [];
+
         public void TicksSkipped(TickContext tick, long skipped)
         {
         }
+
+        public void EntitiesHandedOff(TickContext tick, IReadOnlyList<RegionTransfer> transfers) => Handoffs.AddRange(transfers);
 
         public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget)
         {

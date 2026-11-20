@@ -1,6 +1,7 @@
 using Fineage.Game.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -172,13 +173,15 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius DecayTaskManager: corpse stays (death animation) then DeleteObject + respawn timer.</summary>
     void TickCorpseDecay(long now)
     {
-        if (_decaying.Count == 0)
+        if (_byId.CountOf(ActiveSets.Decaying) == 0)
             return;
-        foreach (int id in _decaying.ToArray())
+        foreach (int id in Active(ActiveSets.Decaying))
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.DecayAtMs <= 0)
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
+            if (npc.Kind != ZoneEntityKind.Npc || npc.DecayAtMs <= 0)
             {
-                _decaying.Remove(id);
+                _byId.Leave(npc, ActiveSets.Decaying);
                 continue;
             }
             if (npc.DecayAtMs > now)

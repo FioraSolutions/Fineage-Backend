@@ -111,7 +111,7 @@ public sealed partial class ZoneWorld
     void CollectRegenPlayers(TickContext tick, RegionWorkCollector work)
     {
         foreach (var entity in Players())
-            work.Add(entity.ObjectId, entity.InstanceId, entity.X, entity.Y);
+            work.Add(_byId.OwnerOf(entity).Region, entity.ObjectId);
     }
 
     void RegenPlayer(int objectId)

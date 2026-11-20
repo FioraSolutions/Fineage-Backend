@@ -13,6 +13,7 @@ public sealed partial class ZoneWorld
     readonly ulong _simulationSeed;
     SimulationClock _simulationClock;
     IRegionPartition _regions;
+    ISimulationObserver _simulationObserver;
     RegionTickScheduler _simulationTicks;
     IRegionStage _regenPlayersStage;
     IRegionStage _regenNpcsStage;
@@ -81,16 +82,17 @@ public sealed partial class ZoneWorld
     /// <summary>The stream of a global system (fishing, manor, lottery, mammon) until it becomes its own actor.</summary>
     Random GlobalStream(RandomPurpose purpose) => new SimulationRandom(SimulationRandom.StreamSeed(_simulationSeed, purpose));
 
-    /// <summary>The stream a roll made by <paramref name="actor"/> draws from: the one of the region it stands in.</summary>
-    Random Rng(IRegionRandom streams, ZoneEntity actor) =>
-        streams.For(_regions.RegionOf(actor.InstanceId, actor.X, actor.Y));
+    /// <summary>The stream a roll made by <paramref name="actor"/> draws from: the one of the region that owns it.</summary>
+    Random Rng(IRegionRandom streams, ZoneEntity actor) => streams.For(_byId.OwnerOf(actor).Region);
 
-    [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_simulationTicks), nameof(_regenPlayersStage),
-        nameof(_regenNpcsStage), nameof(_abnormalsStage))]
+    [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_byId), nameof(_simulationObserver),
+        nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer)
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
         _regions = partition;
+        _byId = new RegionDirectory<ZoneEntity>(partition);
+        _simulationObserver = observer;
         _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id));
         _regenNpcsStage = new RegionStage("regen.npcs", CollectRegenNpcs, (_, id) => RegenNpc(id));
         _abnormalsStage = new RegionStage("abnormals", CollectAbnormals, (tick, id) => TickEntityAbnormals(id, tick.NowUnixMs));
@@ -98,7 +100,7 @@ public sealed partial class ZoneWorld
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
         // Region bodies still fan out through world-wide Players() scans and party state, so regions run one after
         // another under _gate until that state is region-owned.
-        var ticks = new RegionTickScheduler(_simulationClock, partition, SequentialRegionExecutor.Instance, observer);
+        var ticks = new RegionTickScheduler(_simulationClock, SequentialRegionExecutor.Instance, observer);
 
         // Phase 0: player commands submitted since the last step.
         ticks.AddWorldStage(CommandsStage, ApplyCommands);
@@ -145,6 +147,9 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("seven-signs", _ => TickSevenSigns(), slow);
         ticks.AddWorldStage("mammon", tick => TickMammon(tick.WallUnixMs), slow);
         ticks.AddWorldStage("olympiad", _ => TickOlympiad(), slow);
+
+        // End-of-tick barrier: owners change only here, after every stage of the step has run.
+        ticks.AddWorldStage(HandoffStage, HandOff);
         _simulationTicks = ticks;
     }
 }

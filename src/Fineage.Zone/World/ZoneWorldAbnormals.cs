@@ -1,6 +1,7 @@
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -45,7 +46,7 @@ public sealed partial class ZoneWorld
             template.AbnormalType))
             return true;
         if (target.Abnormals.Count > 0)
-            _withAbnormals.Add(target.ObjectId);
+            _byId.Join(target, ActiveSets.WithAbnormals);
         FanoutAbnormal(target);
         ApplyControlFromSlot(target, template.AbnormalType, attacker);
         ApplyElementSeedsFromSkill(template, target, nowUnixMs);
@@ -148,7 +149,7 @@ public sealed partial class ZoneWorld
     {
         ZoneAbnormals.Apply(target.Abnormals, effectId, value, durationSeconds, nowUnixMs);
         if (target.Abnormals.Count > 0)
-            _withAbnormals.Add(target.ObjectId);
+            _byId.Join(target, ActiveSets.WithAbnormals);
         FanoutAbnormal(target);
     }
 }

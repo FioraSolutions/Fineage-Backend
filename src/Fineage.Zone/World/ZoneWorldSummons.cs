@@ -277,7 +277,6 @@ public sealed partial class ZoneWorld
         SetPendingHit(summon, null);
         _aoi.Leave(id);
         _byId.Remove(id);
-        ForgetActiveSets(id);
 
         // Every player, not only watchers: a target or auto-attack set before the summon left view must be cleared.
         List<int>? watchers = null;

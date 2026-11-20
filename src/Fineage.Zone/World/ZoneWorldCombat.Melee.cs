@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -157,7 +158,7 @@ public sealed partial class ZoneWorld
         if (npc.Abnormals.Count > 0)
         {
             npc.Abnormals.Clear();
-            _withAbnormals.Remove(objectId);
+            _byId.Leave(npc, ActiveSets.WithAbnormals);
             FanoutAbnormal(npc);
         }
 
@@ -224,7 +225,6 @@ public sealed partial class ZoneWorld
         npc.Chasing = false;
         SetAggroTarget(npc, 0);
         npc.LastAiTickMs = 0;
-        ForgetActiveSets(objectId);
         ScheduleRespawn(objectId);
 
         // Every player, not only watchers: a target selected before the NPC left view must be cleared too.

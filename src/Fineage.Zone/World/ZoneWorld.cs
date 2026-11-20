@@ -96,7 +96,8 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.DeathDropRules _deathDrop;
     /// <summary>Mobius <c>Rnd.get</c> for the Death Penalty roll (separate from the damage rolls).</summary>
     readonly IRegionRandom _deathRandom;
-    readonly Dictionary<int, ZoneEntity> _byId = [];
+    /// <summary>Every entity in the world by object id, each owned by one region (<see cref="RegionDirectory{T}"/>).</summary>
+    RegionDirectory<ZoneEntity> _byId;
     readonly DropCatalog _dropCatalog;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
@@ -211,7 +212,7 @@ public sealed partial class ZoneWorld
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
         _combatRandom = Streams(combatRandom, RandomPurpose.Combat);
         _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight(WallNow());
-        _aoi = aoi ?? new SingleCellAoi();
+        _aoi = new RelocationTrackingAoi(aoi ?? new SingleCellAoi(), _byId.Relocated);
         _game = game ?? GameData.LoadDefault();
         _itemIds = itemIds ?? new ItemObjectIdAllocator();
         _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);

@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -37,13 +38,15 @@ public sealed partial class ZoneWorld
 
     void TickPendingHits(long now)
     {
-        if (_pendingHit.Count == 0)
+        if (_byId.CountOf(ActiveSets.PendingHit) == 0)
             return;
-        foreach (int id in _pendingHit.ToArray())
+        foreach (int id in Active(ActiveSets.PendingHit))
         {
-            if (!_byId.TryGetValue(id, out var entity) || entity.PendingHit == null)
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
+            if (entity.PendingHit == null)
             {
-                _pendingHit.Remove(id);
+                _byId.Leave(entity, ActiveSets.PendingHit);
                 continue;
             }
             if (entity.PendingHit.DueUnixMs > now)
@@ -205,9 +208,9 @@ public sealed partial class ZoneWorld
 
     void TickMobAttacks(long now)
     {
-        if (_aiBusy.Count == 0)
+        if (_byId.CountOf(ActiveSets.AiBusy) == 0)
             return;
-        foreach (int id in _aiBusy.ToArray())
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null ||
                 IsTreasureBox(npc.NpcId))
