@@ -148,6 +148,7 @@ public sealed class CarryLimitTests
         Assert.Equal(1, left.Inventory.CountOf(Harvester));
         Assert.Equal(0, right.Inventory!.CountOf(Harvester));
         Assert.Empty(InvRows(rec));
+        Assert.Empty(kit.Ledger.Entries);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)),
             args => ((Fineage.Protocol.TradeFinishedMsg)args[1]!).Response == 0);
     }
@@ -168,6 +169,7 @@ public sealed class CarryLimitTests
         Assert.Equal(0, right.Inventory!.CountOf(Harvester));
         Assert.Equal(WarehouseRules.InventorySlots(right.Race), right.Inventory.Items.Count);
         Assert.Empty(InvRows(rec));
+        Assert.Empty(kit.Ledger.Entries);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTradeFinished)),
             args => ((Fineage.Protocol.TradeFinishedMsg)args[1]!).Response == 0);
     }

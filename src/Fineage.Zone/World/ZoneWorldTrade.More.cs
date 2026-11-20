@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Trade;
@@ -134,10 +135,23 @@ public sealed partial class ZoneWorld
         var requestorChanges = new List<InventoryUpdateEntryMsg>();
         var partnerChanges = new List<InventoryUpdateEntryMsg>();
 
+        LedgerMove? move = null;
+        if (session.RequestorOffers.Count + session.PartnerOffers.Count > 0)
+        {
+            move = BeginLedgerMove(LedgerTxKind.TradeSettle, requestor.ObjectId, partner.ObjectId);
+            ObserveLedger(move, LedgerAccount.Inventory(requestor.ObjectId));
+            ObserveLedger(move, LedgerAccount.Inventory(partner.ObjectId));
+            foreach (var row in session.RequestorOffers)
+                PostTradeRow(move, requestor, partner, row);
+            foreach (var row in session.PartnerOffers)
+                PostTradeRow(move, partner, requestor, row);
+        }
+
         foreach (var row in session.RequestorOffers)
             TransferOfferRow(requestor.Inventory, partner.Inventory, row, requestorChanges, partnerChanges);
         foreach (var row in session.PartnerOffers)
             TransferOfferRow(partner.Inventory, requestor.Inventory, row, partnerChanges, requestorChanges);
+        move?.Commit(LedgerHoldingsOf);
 
         SaveInventory(requestor.Session, requestor.Inventory);
         SaveInventory(partner.Session, partner.Inventory);

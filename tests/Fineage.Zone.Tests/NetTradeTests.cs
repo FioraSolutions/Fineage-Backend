@@ -76,8 +76,10 @@ public sealed class NetTradeTests
         Assert.Null(await kit.World.TryTradeDoneAsync(buyer, new TradeDoneRequestMsg { Response = 1 }, default));
         Assert.Equal(1, Assert.IsType<Fineage.Protocol.TradeFinishedMsg>(
             Last(rec, nameof(IWorldEventPublisher.FanoutTradeFinished))).Response);
-        Assert.DoesNotContain(buyerEntity.Inventory!.Items, item => item.ObjectId == offered.ObjectId);
-        Assert.Contains(buyerEntity.Inventory.Items, item => item.ItemId == offered.ItemId);
+        // The piece itself changes hands (Mobius TradeList.doExchange), object id included.
+        Assert.False(offered.Template.Stackable);
+        Assert.DoesNotContain(sellerEntity.Inventory!.Items, item => item.ObjectId == offered.ObjectId);
+        Assert.Contains(buyerEntity.Inventory!.Items, item => item.ObjectId == offered.ObjectId && item.ItemId == offered.ItemId);
     }
 
     [Fact]
