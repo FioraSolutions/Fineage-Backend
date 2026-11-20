@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Security.Cryptography;
 using Fineage.Zone.Combat;
 
 namespace Fineage.Zone;
@@ -22,6 +24,21 @@ public static class ZoneSimulationSettings
             throw new InvalidOperationException(
                 $"FINEAGE_ZONE_TICK_MS={intervalMs} must be a positive multiple of the {stepMs} ms simulation step.");
         return intervalMs / stepMs;
+    }
+
+    /// <summary>
+    /// Seed of the simulation's random streams: <c>FINEAGE_ZONE_SEED</c> (an unsigned 64-bit integer) to reproduce a
+    /// recorded run, otherwise a fresh cryptographic seed per world so live rolls stay unpredictable.
+    /// </summary>
+    public static ulong WorldSeed() => ParseSeed(Environment.GetEnvironmentVariable("FINEAGE_ZONE_SEED"));
+
+    internal static ulong ParseSeed(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        if (!ulong.TryParse(text.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out ulong seed))
+            throw new InvalidOperationException($"FINEAGE_ZONE_SEED='{text}' must be an unsigned 64-bit decimal integer.");
+        return seed;
     }
 
     static int ReadInt(string name, int fallback, int min, int max)
