@@ -1,5 +1,10 @@
 namespace Fineage.Zone.World;
 
+/// <summary>
+/// What a player is in the middle of doing (B11 in <c>docs/architecture/zone-simulation.md</c>): auto attack, approach,
+/// pending pickup / talk / cast, queued move. It lives on the player entity, so the region that owns the player is
+/// the only writer, from commands and its own stages.
+/// </summary>
 public sealed class PlayerIntent
 {
     /// <summary>Interlude-style auto attack: target kept swinging at until it dies or the player stops.</summary>
