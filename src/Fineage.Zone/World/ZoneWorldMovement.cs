@@ -2,6 +2,7 @@ using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Movement;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -163,9 +164,9 @@ public sealed partial class ZoneWorld
 
     void TickPlayerMovement(long now)
     {
-        if (_moving.Count == 0)
+        if (_byId.CountOf(ActiveSets.Moving) == 0)
             return;
-        foreach (int id in _moving.ToArray())
+        foreach (int id in Active(ActiveSets.Moving))
         {
             if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Player)
                 continue;

@@ -29,24 +29,17 @@ public sealed partial class ZoneWorld
     /// </summary>
     void CollectRegenNpcs(TickContext tick, RegionWorkCollector work)
     {
-        if (!_npcRegen || _needRegen.Count == 0)
-            return;
-        foreach (int id in _needRegen.ToArray())
-        {
-            if (!_byId.TryGetValue(id, out var entity))
-            {
-                _needRegen.Remove(id);
-                continue;
-            }
-            work.Add(id, entity.InstanceId, entity.X, entity.Y);
-        }
+        if (_npcRegen)
+            _byId.Collect(ActiveSets.NeedRegen, work);
     }
 
     void RegenNpc(int id)
     {
-        if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
+        if (!_byId.TryGetValue(id, out var npc))
+            return;
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
         {
-            _needRegen.Remove(id);
+            _byId.Leave(npc, ActiveSets.NeedRegen);
             return;
         }
         if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)

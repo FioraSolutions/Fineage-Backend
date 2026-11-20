@@ -9,22 +9,16 @@ public sealed partial class ZoneWorld
 {
     void CollectAbnormals(TickContext tick, RegionWorkCollector work)
     {
-        foreach (int id in _withAbnormals.ToArray())
-        {
-            if (!_byId.TryGetValue(id, out var entity))
-            {
-                _withAbnormals.Remove(id);
-                continue;
-            }
-            work.Add(id, entity.InstanceId, entity.X, entity.Y);
-        }
+        _byId.Collect(ActiveSets.WithAbnormals, work);
     }
 
     void TickEntityAbnormals(int id, long now)
     {
-        if (!_byId.TryGetValue(id, out var entity) || entity.Abnormals.Count == 0)
+        if (!_byId.TryGetValue(id, out var entity))
+            return;
+        if (entity.Abnormals.Count == 0)
         {
-            _withAbnormals.Remove(id);
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
             return;
         }
 
@@ -34,7 +28,7 @@ public sealed partial class ZoneWorld
         if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
             return;
         if (entity.Abnormals.Count == 0)
-            _withAbnormals.Remove(id);
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
         FanoutAbnormal(entity);
     }
 
@@ -65,7 +59,7 @@ public sealed partial class ZoneWorld
             DeactivateToggle(entity.Session, entity, entry.Id, _game.Skills.Find(entry.Id), "tick", sendAbort: !notified);
         }
         if (entity.Abnormals.Count == 0)
-            _withAbnormals.Remove(entity.ObjectId);
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
     }
 
     /// <summary>Mobius effect <c>ticks</c> in ms for a toggle's MP drain (0 when the skill has no ticking drain).</summary>

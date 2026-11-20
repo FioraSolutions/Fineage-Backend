@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -120,18 +121,15 @@ public sealed partial class ZoneWorld
         _nextWanderScanMs = now + 1000;
         int drift = ZoneNpcSettings.MaxDriftRange;
         long driftSq = (long)drift * drift;
-        if (_thinking.Count == 0)
+        if (_byId.CountOf(ActiveSets.Thinking) == 0)
             return;
-        foreach (int id in _thinking.ToArray())
+        foreach (int id in Active(ActiveSets.Thinking))
         {
             if (!_byId.TryGetValue(id, out var npc))
-            {
-                _thinking.Remove(id);
                 continue;
-            }
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
             {
-                _thinking.Remove(id);
+                _byId.Leave(npc, ActiveSets.Thinking);
                 continue;
             }
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
@@ -293,7 +291,7 @@ public sealed partial class ZoneWorld
                 _byId.Add(objectId, entity);
                 _aoi.Enter(objectId, x, y);
                 master.MinionIds.Add(objectId);
-                _thinking.Add(objectId);
+                _byId.Join(entity, ActiveSets.Thinking);
                 FanoutNewNpc(entity);
                 SpawnPrivates(entity);
             }
@@ -324,9 +322,9 @@ public sealed partial class ZoneWorld
         int raidRange = ZoneNpcSettings.AggroDistanceCheckRaidRange;
         bool raids = ZoneNpcSettings.AggroDistanceCheckRaids;
         bool restoreLife = ZoneNpcSettings.AggroDistanceCheckRestoreLife;
-        if (_aiBusy.Count == 0)
+        if (_byId.CountOf(ActiveSets.AiBusy) == 0)
             return;
-        foreach (int id in _aiBusy.ToArray())
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc ||
                 npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
@@ -372,9 +370,9 @@ public sealed partial class ZoneWorld
     /// <summary>Advance every moving NPC at walk/run speed; announce new path legs and the final stop.</summary>
     void TickNpcMovement(long now)
     {
-        if (_moving.Count == 0)
+        if (_byId.CountOf(ActiveSets.Moving) == 0)
             return;
-        foreach (int id in _moving.ToArray())
+        foreach (int id in Active(ActiveSets.Moving))
         {
             if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Npc || !e.MoveActive)
                 continue;

@@ -1,4 +1,5 @@
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -161,9 +162,9 @@ public sealed partial class ZoneWorld
     {
         // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
         var players = Players();
-        if (players.Count == 0 || _thinking.Count == 0)
+        if (players.Count == 0 || _byId.CountOf(ActiveSets.Thinking) == 0)
             return;
-        foreach (int id in _thinking.ToArray())
+        foreach (int id in Active(ActiveSets.Thinking))
         {
             if (!_byId.TryGetValue(id, out var npc))
                 continue;
@@ -228,7 +229,7 @@ public sealed partial class ZoneWorld
             return;
         foreach (var e in Players())
             NoteStance(e, now);
-        foreach (int id in _aiBusy)
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (_byId.TryGetValue(id, out var npc))
                 NoteStance(npc, now);

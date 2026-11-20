@@ -17,12 +17,24 @@ using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Game.Services;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
-sealed partial class ZoneEntity
+sealed partial class ZoneEntity : IRegionMember
 {
+    ActiveSets _activeSets;
+
     public int ObjectId { get; init; }
+
+    /// <summary>The scheduling sets this entity is in; the owning region indexes them.</summary>
+    public ActiveSets ActiveSets => _activeSets;
+
+    ActiveSets IRegionMember.ActiveSets
+    {
+        get => _activeSets;
+        set => _activeSets = value;
+    }
     public ZoneEntityKind Kind { get; init; }
     public string Name { get; init; } = "";
     public string Title { get; set; } = "";

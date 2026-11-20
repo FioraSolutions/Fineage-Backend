@@ -28,7 +28,9 @@ public sealed class ZoneStatPipelineTests
             CurMp = 200,
             Heading = 0
         };
-        return (new ZoneWorld(), player, bag);
+        var world = new ZoneWorld();
+        world.PlaceForTests(player);
+        return (world, player, bag);
     }
 
     [Fact]

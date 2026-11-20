@@ -19,6 +19,9 @@ public interface ISimulationObserver
     /// <summary>The step to <paramref name="tick"/> jumped over <paramref name="skipped"/> ticks because it ran late.</summary>
     void TicksSkipped(TickContext tick, long skipped);
 
+    /// <summary>Owner changes made at the end of the step to <paramref name="tick"/>, in ascending object id order.</summary>
+    void EntitiesHandedOff(TickContext tick, IReadOnlyList<RegionTransfer> transfers);
+
     void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget);
 }
 
@@ -54,6 +57,9 @@ sealed class ZoneSimulationObserver : ISimulationObserver
         ZoneLog.Warn(
             $"simulation skipped {skipped} tick(s) before tick {tick.Tick}: the step ran {tick.WallUnixMs - tick.NowUnixMs} ms into its interval; their stages run once now");
     }
+
+    public void EntitiesHandedOff(TickContext tick, IReadOnlyList<RegionTransfer> transfers) =>
+        FineageTelemetry.RegionHandoffs.Add(transfers.Count);
 
     public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget)
     {

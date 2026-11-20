@@ -15,19 +15,17 @@ public sealed class RegionTickScheduler
 {
     readonly List<ScheduledStage> _stages = [];
     readonly HashSet<string> _names = new(StringComparer.Ordinal);
-    readonly RegionWorkCollector _collector;
+    readonly RegionWorkCollector _collector = new();
     readonly IRegionExecutor _executor;
     readonly ISimulationObserver _observer;
 
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
     public RegionTickScheduler(
         SimulationClock clock,
-        IRegionPartition partition,
         IRegionExecutor executor,
         ISimulationObserver observer)
     {
         Clock = clock ?? throw new ArgumentNullException(nameof(clock));
-        _collector = new RegionWorkCollector(partition);
         _executor = executor ?? throw new ArgumentNullException(nameof(executor));
         _observer = observer ?? throw new ArgumentNullException(nameof(observer));
         Tick = clock.TickAt(clock.WallUnixMs());
