@@ -27,6 +27,15 @@ interface IWorldEventPublisher
     /// </summary>
     void FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed);
 
+    /// <summary>
+    /// <see cref="FanoutKnownlistDiff"/> in two halves: the frames are built from world state now (caller holds the
+    /// ZoneWorld gate) and the returned send touches no world state, so it can run after the gate is released.
+    /// </summary>
+    Action PrepareKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed);
+
+    /// <summary><see cref="FanoutCharInfo"/> in two halves, like <see cref="PrepareKnownlistDiff"/>.</summary>
+    Action PrepareCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);
+
     /// <summary>Mobius ChangeMoveType (gait + effective speeds) for <paramref name="moverObjectId"/>. Called under the ZoneWorld gate.</summary>
     void FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater);
 

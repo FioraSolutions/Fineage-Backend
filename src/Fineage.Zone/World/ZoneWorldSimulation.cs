@@ -21,15 +21,34 @@ public sealed partial class ZoneWorld
     internal void StepSimulation() => RunUnderGate(_simulationTicks.Step);
 
     /// <summary>
-    /// Runs <paramref name="body"/> under <c>_gate</c> with one time sample; inventory/warehouse Postgres writes the
-    /// stages dirtied are flushed after the lock is released.
+    /// Runs <paramref name="body"/> under <c>_gate</c> with one time sample. Its fan-out is recorded into one batch that
+    /// is sealed before the lock is released and sent after it; inventory/warehouse Postgres writes the stages dirtied
+    /// are flushed after the lock too.
     /// </summary>
-    void RunUnderGate(Action<long> body) =>
-        WithDeferredInventoryPersist(() =>
+    void RunUnderGate(Action<long> body)
+    {
+        try
         {
-            body(_clock().ToUnixTimeMilliseconds());
-            return 0;
-        });
+            WithDeferredInventoryPersist(() =>
+            {
+                _fanout.Begin();
+                try
+                {
+                    body(_clock().ToUnixTimeMilliseconds());
+                }
+                finally
+                {
+                    _fanout.Seal();
+                }
+
+                return 0;
+            });
+        }
+        finally
+        {
+            _fanout.Drain();
+        }
+    }
 
     [MemberNotNull(nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer)

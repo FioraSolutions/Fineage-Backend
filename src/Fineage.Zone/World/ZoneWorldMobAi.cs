@@ -12,9 +12,8 @@ public sealed partial class ZoneWorld
 {
     internal Task RunCombatTickAsync(CancellationToken ct)
     {
-        WithDeferredInventoryPersist(() =>
+        RunUnderGate(now =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
             TickNpcMovement(now);
             TickRandomWalk(now);
@@ -31,7 +30,6 @@ public sealed partial class ZoneWorld
             TickSignets(now);
             TickSkillChannels(now);
             TickAttackStance(now);
-            return 0;
         });
 
         return Task.CompletedTask;
@@ -301,8 +299,12 @@ public sealed partial class ZoneWorld
                     TargetObjectId = player.ObjectId,
                     Damage = sDamage,
                     Flags = sFlags,
-                    AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                    TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                    AttackerX = npc.X,
+                    AttackerY = npc.Y,
+                    AttackerZ = npc.Z,
+                    TargetX = player.X,
+                    TargetY = player.Y,
+                    TargetZ = player.Z
                 });
                 _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
                 continue;
@@ -334,8 +336,12 @@ public sealed partial class ZoneWorld
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
                 Flags = flags,
-                AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                AttackerX = npc.X,
+                AttackerY = npc.Y,
+                AttackerZ = npc.Z,
+                TargetX = player.X,
+                TargetY = player.Y,
+                TargetZ = player.Z
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);

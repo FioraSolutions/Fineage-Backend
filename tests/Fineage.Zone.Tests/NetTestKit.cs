@@ -14,9 +14,24 @@ public class NetBridgeRecorder : DispatchProxy
 
     protected override object? Invoke(MethodInfo? method, object?[]? args)
     {
-        lock (Calls)
-            Calls.Add((method?.Name ?? "", args ?? []));
+        string name = method?.Name ?? "";
+        args ??= [];
+        // Prepare* returns the deferred half of the matching Fanout*; record that call when it is sent.
+        if (method?.ReturnType == typeof(Action))
+        {
+            string sent = "Fanout" + name["Prepare".Length..];
+            object?[] captured = args;
+            return (Action)(() => Record(sent, captured));
+        }
+
+        Record(name, args);
         return method?.ReturnType == typeof(bool) ? false : null;
+    }
+
+    void Record(string method, object?[] args)
+    {
+        lock (Calls)
+            Calls.Add((method, args));
     }
 
     public List<object?[]> Of(string method)
