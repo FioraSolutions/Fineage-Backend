@@ -8,6 +8,8 @@ public sealed class MetricsCollector : IDisposable
     readonly object _gate = new();
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
+    readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
+    long _tickOverruns;
     int _online;
 
     public MetricsCollector()
@@ -40,6 +42,11 @@ public sealed class MetricsCollector : IDisposable
             {
                 PlayersOnline = _online,
                 Tick = _tick.Freeze(),
+                TickOverruns = _tickOverruns,
+                Stages = _stages
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .Select(pair => pair.Value.Freeze(pair.Key))
+                    .ToList(),
                 Endpoints = endpoints
             };
         }
@@ -83,6 +90,12 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.packets.errored":
                     Row(endpoint).PacketsErrored += value;
                     break;
+                case "fineage.tick.overruns":
+                    _tickOverruns += value;
+                    break;
+                case "fineage.tick.stage.failures":
+                    Stage(StageOf(tags)).Failures += value;
+                    break;
             }
         }
     }
@@ -109,8 +122,33 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.tick.ms":
                     _tick.Record(value);
                     break;
+                case "fineage.tick.stage.ms":
+                    Stage(StageOf(tags)).Duration.Record(value);
+                    break;
             }
         }
+    }
+
+    MutableStage Stage(string stage)
+    {
+        if (!_stages.TryGetValue(stage, out MutableStage? row))
+        {
+            row = new MutableStage();
+            _stages.Add(stage, row);
+        }
+
+        return row;
+    }
+
+    static string StageOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        foreach (KeyValuePair<string, object?> tag in tags)
+        {
+            if (tag.Key == "stage" && tag.Value is string value)
+                return value;
+        }
+
+        return "";
     }
 
     MutableEndpoint Row(string endpoint)
@@ -163,6 +201,19 @@ public sealed class MetricsCollector : IDisposable
             ConnectionsRejected = ConnectionsRejected,
             OutboundDropped = OutboundDropped,
             Handler = Handler.Freeze()
+        };
+    }
+
+    sealed class MutableStage
+    {
+        public long Failures;
+        public DurationHistogram Duration { get; } = new();
+
+        public StageMetrics Freeze(string stage) => new()
+        {
+            Stage = stage,
+            Duration = Duration.Freeze(),
+            Failures = Failures
         };
     }
 

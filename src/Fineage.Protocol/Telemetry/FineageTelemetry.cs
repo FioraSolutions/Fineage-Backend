@@ -49,6 +49,18 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> StageMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
+
+    public static readonly Histogram<int> StageRegions =
+        Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
+
+    public static readonly Counter<long> StageFailures =
+        Meter.CreateCounter<long>("fineage.tick.stage.failures", description: "Simulation stage or region bodies that threw (tag stage)");
+
+    public static readonly Counter<long> TickOverruns =
+        Meter.CreateCounter<long>("fineage.tick.overruns", description: "Simulation steps that took longer than the fixed step");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,
