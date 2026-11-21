@@ -170,12 +170,17 @@ public sealed class SkillStatEffectCatalog
         bool resting = false,
         double hpPercent = 100d,
         bool moving = false,
-        Func<string[], bool>? wearingSlot = null)
+        Func<string[], bool>? wearingSlot = null,
+        Action<int>? onMissing = null)
     {
         foreach (var (skillId, level) in known.OrderBy(static p => p.Key))
         {
             if (!_byId.TryGetValue(skillId, out var effect))
+            {
+                if (onMissing != null && MissingStatWarned.TryAdd(skillId, 0))
+                    onMissing(skillId);
                 continue;
+            }
             foreach (var f in effect.Funcs)
             {
                 if (UsingGateFails(f, wearing, wearingSlot))

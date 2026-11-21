@@ -8,7 +8,7 @@ namespace Fineage.Zone.World;
 /// <summary>
 /// Mobius cast interruption: Formulas.calcAtkBreak on damage taken (magic/static skills only), abortCast at launch when the
 /// target is gone / escaped / out of sight, and teleToLocation aborting the cast and queued actions.
-/// No MagicSkillCanceled exists on the Net contract yet, so the client only gets SysMsg 27 on a hit break.
+/// <see cref="IWorldEventPublisher.FanoutMagicSkillCanceled"/> (Interlude 0x03AD) reaches everyone who saw the cast start.
 /// </summary>
 public sealed partial class ZoneWorld
 {
