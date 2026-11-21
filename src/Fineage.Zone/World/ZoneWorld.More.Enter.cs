@@ -50,7 +50,10 @@ public sealed partial class ZoneWorld
 
         var entered = await OnSimulationAsync(session, "enter", () =>
         {
-            if (!TryEnter(session, stored, out int known, out int x, out int y, out int z, out var evicted))
+            CharacterRecord? enterStored = stored;
+            if (!TryPrepareSameSessionReenter(session, ref enterStored))
+                return null;
+            if (!TryEnter(session, enterStored, out int known, out int x, out int y, out int z, out var evicted))
                 return null;
             CountOnlinePlayers();
             if (!TryGetLivePlayer(session, out var player))
@@ -139,14 +142,6 @@ public sealed partial class ZoneWorld
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
             return false;
 
-        // Same-session re-enter: detach without flushing (avoid double write), then rebuild
-        // from the preloaded CharacterRecord so durable edits while InWorld (death penalty,
-        // etc.) still apply — Reattach alone would keep a stale in-memory snapshot.
-        if (session.InWorld)
-        {
-            if (!TryDetachPlayer(session, capturePersist: false, out _, out _))
-                return false;
-        }
         else if (_byId.TryGetValue(session.ObjectId, out var current) &&
                  current.Session != null &&
                  !ReferenceEquals(current.Session, session) &&
