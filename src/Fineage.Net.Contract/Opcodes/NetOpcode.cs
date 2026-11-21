@@ -398,6 +398,20 @@ namespace Fineage.Net.Contract
         public const ushort EnchantSkillList = 0x03DF;
         /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
+        /// <summary>Client → zone: Mobius <c>RequestExAskJoinMPCC</c> (target player name).</summary>
+        public const ushort CommandChannelAskRequest = 0x03E1;
+        /// <summary>Client → zone: Mobius <c>RequestExAcceptJoinMPCC</c> (1 accept, 0 decline).</summary>
+        public const ushort CommandChannelAcceptRequest = 0x03E2;
+        /// <summary>Client → zone: Mobius <c>RequestExOustFromMPCC</c> (party leader name to oust).</summary>
+        public const ushort CommandChannelOustRequest = 0x03E3;
+        /// <summary>Zone → client: Mobius <c>ExAskJoinMPCC</c>.</summary>
+        public const ushort CommandChannelAskJoin = 0x03E4;
+        /// <summary>Zone → client: Mobius <c>ExOpenMPCC</c>.</summary>
+        public const ushort CommandChannelOpen = 0x03E5;
+        /// <summary>Zone → client: Mobius <c>ExCloseMPCC</c>.</summary>
+        public const ushort CommandChannelClose = 0x03E6;
+        /// <summary>Zone → client: Mobius <c>ExMultiPartyCommandChannelInfo</c>.</summary>
+        public const ushort CommandChannelInfo = 0x03E7;
         /// <summary>
         /// Zone → client: Mobius <c>AgitDecoInfo</c>.
         /// <c>ServerPackets.AGIT_DECO_INFO(0xF7)</c>,
