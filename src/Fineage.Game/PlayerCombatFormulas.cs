@@ -109,6 +109,19 @@ public static class PlayerPassiveSources
         return map;
     }
 
+    /// <summary>
+    /// Known, clan and gear skill maps merged with higher level wins, enumerated in ascending skill id order so passive
+    /// folding and wire lists do not depend on dictionary insert order.
+    /// </summary>
+    public static IEnumerable<KeyValuePair<int, int>> EnumerateOrdered(
+        IReadOnlyDictionary<int, int> knownSkills,
+        IReadOnlyDictionary<int, int> clanSkills,
+        IReadOnlyDictionary<int, int>? gearSkills = null)
+    {
+        foreach (var pair in Merge(knownSkills, clanSkills, gearSkills).OrderBy(static p => p.Key))
+            yield return pair;
+    }
+
     public static void MergeInto(Dictionary<int, int> target, IReadOnlyDictionary<int, int> source)
     {
         foreach (var (id, level) in source)

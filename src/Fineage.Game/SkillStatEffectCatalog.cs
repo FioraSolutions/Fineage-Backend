@@ -141,7 +141,7 @@ public sealed class SkillStatEffectCatalog
         bool moving = false,
         Func<string[], bool>? wearingSlot = null)
     {
-        foreach (var (skillId, level) in known)
+        foreach (var (skillId, level) in known.OrderBy(static p => p.Key))
         {
             if (!_byId.TryGetValue(skillId, out var effect))
                 continue;

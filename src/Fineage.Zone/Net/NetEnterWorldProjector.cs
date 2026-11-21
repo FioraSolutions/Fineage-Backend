@@ -228,9 +228,8 @@ static class NetEnterWorldProjector
     /// </summary>
     internal static SkillListMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
-        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
-        var rows = new List<SkillListEntryMsg>(skills.Count);
-        foreach (var pair in skills.OrderBy(p => p.Key))
+        var rows = new List<SkillListEntryMsg>();
+        foreach (var pair in PlayerPassiveSources.EnumerateOrdered(entity.KnownSkills, entity.ClanSkills, entity.GearSkills))
         {
             int reuse = 0;
             if (entity.SkillReuseUntilMs.TryGetValue(pair.Key, out long until) && until > nowUnixMs)
