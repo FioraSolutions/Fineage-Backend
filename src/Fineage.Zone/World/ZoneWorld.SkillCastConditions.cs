@@ -105,7 +105,7 @@ public sealed partial class ZoneWorld
         }
         public override int HpPercent => player.MaxHp <= 0 ? 0 : (int)(player.CurHp * 100 / player.MaxHp);
         public override int MpPercent => player.MaxMp <= 0 ? 0 : (int)(player.CurMp * 100 / player.MaxMp);
-        public override int SoulCharges => 0;
+        public override int SoulCharges => player.ForceCharges;
         public override int Level => player.Level;
         public override int Sex => player.Sex;
         public override string RaceName => player.Race switch
