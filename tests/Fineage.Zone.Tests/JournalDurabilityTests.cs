@@ -26,9 +26,20 @@ public sealed class JournalDurabilityTests
         var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 1);
         var bench = new WorldBench(ledgerJournal: journal);
         using var metrics = new MetricsCollector();
-        await bench.EnterAsync(items: [new StoredItem(57, 10, -1)]);
-        bench.World.TryFlushLedger();
+        var player = await bench.EnterAsync(items: [new StoredItem(57, 10, -1)]);
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var shop = LedgerAccount.Of(SystemAccount.NpcShop);
+        Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
+            new LedgerTxId(1, 0),
+            LedgerTxKind.Adjustment,
+            0,
+            0,
+            0,
+            [new LedgerPosting(shop, 57, -1), new LedgerPosting(bag, 57, 1)])).Ok);
+        Assert.False(bench.World.TryFlushLedger());
         Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
+        Assert.True(journal.PendingFlushCount > 0);
+        Assert.True(bench.World.TryFlushLedger());
         Assert.Equal(0, journal.PendingFlushCount);
     }
 
