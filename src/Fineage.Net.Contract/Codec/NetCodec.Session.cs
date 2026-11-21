@@ -64,17 +64,23 @@ namespace Fineage.Net.Contract
             w.WriteString(m.Account);
             w.WriteString(m.Password);
             w.WriteByte(m.RegisterIfMissing ? (byte)1 : (byte)0);
+            // Optional tail. Older peers stop after the register flag and ignore these bytes.
+            if (m.Language != null)
+                w.WriteString(m.Language);
         });
 
         public static AuthMsg DecodeAuth(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new AuthMsg
+            var msg = new AuthMsg
             {
                 Account = r.ReadString(),
                 Password = r.ReadString(),
                 RegisterIfMissing = r.ReadByte() != 0
             };
+            if (r.Remaining > 0)
+                msg.Language = r.ReadString();
+            return msg;
         }
 
         public static byte[] EncodeAuthResult(AuthResultMsg m) => Write(w =>
@@ -298,7 +304,19 @@ namespace Fineage.Net.Contract
             };
         }
 
-        public static byte[] EncodeEnterWorld(EnterWorldMsg _) => Array.Empty<byte>();
-        public static EnterWorldMsg DecodeEnterWorld(ReadOnlySpan<byte> _) => new();
+        public static byte[] EncodeEnterWorld(EnterWorldMsg m)
+        {
+            if (m.Language == null)
+                return Array.Empty<byte>();
+            return Write(w => w.WriteString(m.Language));
+        }
+
+        public static EnterWorldMsg DecodeEnterWorld(ReadOnlySpan<byte> p)
+        {
+            if (p.Length == 0)
+                return new EnterWorldMsg();
+            var r = new Reader(p);
+            return new EnterWorldMsg { Language = r.ReadString() };
+        }
     }
 }

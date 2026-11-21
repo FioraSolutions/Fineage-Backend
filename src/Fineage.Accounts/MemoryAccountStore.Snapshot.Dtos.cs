@@ -33,6 +33,8 @@ public sealed partial class MemoryAccountStore
         public string PasswordHash { get; set; } = "";
         public string PasswordSalt { get; set; } = "";
         public int Iterations { get; set; }
+        /// <summary>Player language tag. Missing on older snapshots, which means English.</summary>
+        public string Language { get; set; } = Fineage.Game.L10n.PlayerLocale.Default;
         public List<CharacterDto> Characters { get; set; } = [];
     }
 

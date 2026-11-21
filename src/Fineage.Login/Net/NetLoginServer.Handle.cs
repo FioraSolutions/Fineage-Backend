@@ -105,6 +105,9 @@ public sealed partial class NetLoginServer
         else
             result = _service.Login(auth.Account, auth.Password);
 
+        if (result.Ok && result.Value != null)
+            _service.RememberLanguage(result.Value, auth.Language);
+
         await conn.SendAsync(
             NetOpcode.AuthResult,
             NetCodec.EncodeAuthResult(new AuthResultMsg

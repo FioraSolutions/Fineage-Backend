@@ -46,6 +46,15 @@ docker compose up -d postgres
 dotnet run --project src/Fineage.Login -- backfill-normalized
 ```
 
+## Player language
+
+`Auth` and `EnterWorld` carry an optional language tag. The tail is absent on older clients, which stay on the account's stored language (`en` until one is stored). The string is the usual uint16 length plus UTF-8. See `docs/localization.md` for the folder layout and the Unity client table.
+
+| Packet | When the tail is present |
+|--------|--------------------------|
+| `Auth` `0x0201` | After `registerIfMissing`. Stored on `accounts.language`. Omitted: leave the stored tag unchanged. |
+| `EnterWorld` `0x0303` | The whole payload (empty today). Stored on the account and copied onto the zone session. Omitted: use the stored tag. |
+
 ## Lobby roster (CharSelect)
 
 `CharacterRoster` / `CreateResult` carry a **Mobius CharSelectionInfo-shaped** summary (same fields as V2 `CharacterSummaryMsg` keys used by the lobby UI):

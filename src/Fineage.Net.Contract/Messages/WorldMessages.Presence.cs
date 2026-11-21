@@ -17,6 +17,11 @@ namespace Fineage.Net.Contract
 
     public sealed class EnterWorldMsg
     {
+        /// <summary>
+        /// Player language tag. Null when the payload is empty (older clients): the zone keeps the
+        /// language stored on the account at login, which defaults to <c>en</c>.
+        /// </summary>
+        public string? Language { get; set; }
     }
 
     public enum EntityKindNet : byte
