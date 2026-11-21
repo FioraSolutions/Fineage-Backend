@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Zone.CursedWeapons;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
 
@@ -147,8 +148,7 @@ public sealed partial class ZoneWorld
         player.Race == OlympiadProtocol.DwarfRace ? OlympiadProtocol.DwarfInventoryLimit : OlympiadProtocol.InventoryLimit;
 
     static bool HasCursedWeapon(PlayerInventory? inventory) =>
-        inventory != null &&
-        (inventory.CountOf(OlympiadProtocol.Zariche) > 0 || inventory.CountOf(OlympiadProtocol.Akamanah) > 0);
+        CursedWeaponsState.InventoryHasCursedWeapon(inventory);
 
     void CollectVisible(ZoneEntity self, HashSet<int> into)
     {
