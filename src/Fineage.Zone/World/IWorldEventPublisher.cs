@@ -198,6 +198,10 @@ interface IWorldEventPublisher
 
     /// <summary>Pet inventory to its owner (Mobius PetItemList). Called on the simulation thread.</summary>
     void FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory);
+
+    void FanoutRide(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RideNetMsg ride);
+
+    void FanoutPlayerActionState(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PlayerActionStateNetMsg state);
     /// <summary>Duel ask / ready / start / end (Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
     void FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel);
     /// <summary>An opponent's bars during a duel (Mobius ExDuelUpdateUserInfo).</summary>

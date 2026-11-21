@@ -34,13 +34,13 @@ public sealed partial class ZoneWorld
         {
             if (InArenaOnly(player))
                 return;
-            ApplyDeathExpLoss(player);
+            ApplyDeathExpLoss(player, killer);
             if (player.Karma > 0 && !InPvpArea(player))
                 RollDeathPenalty(player, killer);
             return;
         }
 
-        ApplyDeathExpLoss(player);
+        ApplyDeathExpLoss(player, killer);
         RollDeathPenalty(player, killer);
     }
 
@@ -49,7 +49,7 @@ public sealed partial class ZoneWorld
     /// taken from, so the loss follows the level table and not the absolute exp. The exp never goes below the start
     /// of the level, and <c>PlayableStat.removeExp</c> delevels when the bar underflows.
     /// </summary>
-    void ApplyDeathExpLoss(ZoneEntity player)
+    void ApplyDeathExpLoss(ZoneEntity player, ZoneEntity? killer = null)
     {
         if (player.Session == null)
             return;
@@ -67,6 +67,8 @@ public sealed partial class ZoneWorld
             return;
 
         long lost = _deathRules.ExpLost(player.Level, levelBarEnd - levelBarStart);
+        if (killer != null)
+            lost = (long)Math.Round(lost * ClanWarDeathExpShare(player, killer));
         if (lost <= 0)
             return;
 

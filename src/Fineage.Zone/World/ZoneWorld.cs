@@ -240,7 +240,9 @@ public sealed partial class ZoneWorld
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeActor(new SiegeBoard(NowUnixMs(), _siegeSettings));
-        _bosses = new BossActor(bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds()),
+        var bossPolicy = new MapFilteredBossSpawnPolicy(includeEnabledMaps);
+        _bosses = new BossActor(
+            bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds(), spawnPolicy: bossPolicy),
             bossRandom ?? GlobalStream(RandomPurpose.Boss));
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);

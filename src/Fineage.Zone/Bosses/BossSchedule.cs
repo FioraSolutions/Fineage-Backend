@@ -6,6 +6,7 @@ public sealed partial class BossSchedule
     public const double DefaultRaidMaxRespawnMultiplier = 1.0;
 
     readonly IBossStore _store;
+    readonly IBossSpawnPolicy _spawnPolicy;
     readonly double _raidMinMultiplier;
     readonly double _raidMaxMultiplier;
     readonly object _gate = new();
@@ -21,10 +22,12 @@ public sealed partial class BossSchedule
         IBossStore store,
         long loadedAtUnixMs,
         double raidMinRespawnMultiplier = DefaultRaidMinRespawnMultiplier,
-        double raidMaxRespawnMultiplier = DefaultRaidMaxRespawnMultiplier)
+        double raidMaxRespawnMultiplier = DefaultRaidMaxRespawnMultiplier,
+        IBossSpawnPolicy? spawnPolicy = null)
     {
         Catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         _store = store ?? throw new ArgumentNullException(nameof(store));
+        _spawnPolicy = spawnPolicy ?? DatapackBossSpawnPolicy.Instance;
         _raidMinMultiplier = RequireMultiplier(raidMinRespawnMultiplier, nameof(raidMinRespawnMultiplier));
         _raidMaxMultiplier = RequireMultiplier(raidMaxRespawnMultiplier, nameof(raidMaxRespawnMultiplier));
         _states = new Dictionary<int, BossState>(catalog.Bosses.Count);
@@ -33,14 +36,17 @@ public sealed partial class BossSchedule
 
     public BossCatalog Catalog { get; }
 
-    public static BossSchedule LoadDefault(long loadedAtUnixMs, IBossStore? store = null) =>
-        new(BossCatalog.LoadDefault(), store ?? new MemoryBossStore(), loadedAtUnixMs);
+    public static BossSchedule LoadDefault(
+        long loadedAtUnixMs,
+        IBossStore? store = null,
+        IBossSpawnPolicy? spawnPolicy = null) =>
+        new(BossCatalog.LoadDefault(), store ?? new MemoryBossStore(), loadedAtUnixMs, spawnPolicy: spawnPolicy);
 
     /// <summary>
     /// Opens the respawn schedule in <paramref name="stateDirectory"/> unless <c>FINEAGE_BOSS_STORE</c>
     /// names an explicit file.
     /// </summary>
-    public static BossSchedule OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt)
+    public static BossSchedule OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt, IBossSpawnPolicy? spawnPolicy = null)
     {
         string? configured = Environment.GetEnvironmentVariable("FINEAGE_BOSS_STORE");
         string path = string.IsNullOrWhiteSpace(configured)
@@ -51,8 +57,11 @@ public sealed partial class BossSchedule
             new JsonBossStore(path),
             loadedAt.ToUnixTimeMilliseconds(),
             ReadMultiplier("FINEAGE_RAID_MIN_RESPAWN_MULTIPLIER", DefaultRaidMinRespawnMultiplier),
-            ReadMultiplier("FINEAGE_RAID_MAX_RESPAWN_MULTIPLIER", DefaultRaidMaxRespawnMultiplier));
+            ReadMultiplier("FINEAGE_RAID_MAX_RESPAWN_MULTIPLIER", DefaultRaidMaxRespawnMultiplier),
+            spawnPolicy);
     }
+
+    public bool ShouldSpawn(BossDefinition definition) => _spawnPolicy.ShouldSpawn(definition);
 
     /// <summary>
     /// Marks the boss dead at <paramref name="killedAtUnixMs"/>, stores max HP/MP for the next life, and rolls the
@@ -122,8 +131,8 @@ public sealed partial class BossSchedule
     public IReadOnlyList<BossSpawnOrder> StartupOrders()
     {
         lock (_gate)
-            return OrdersWhere(static (definition, state) =>
-                definition.Enabled && state.Status is BossLifeStatus.Alive or BossLifeStatus.Fighting);
+            return OrdersWhere((definition, state) =>
+                ShouldSpawn(definition) && state.Status is BossLifeStatus.Alive or BossLifeStatus.Fighting);
     }
 
     /// <summary>
@@ -149,7 +158,7 @@ public sealed partial class BossSchedule
                 state.Scheduled = false;
                 NormalizeVitals(state, definition);
                 changed = true;
-                if (definition.Enabled)
+                if (ShouldSpawn(definition))
                     spawned.Add(Order(definition, state, ignoreEnabled: false));
             }
 

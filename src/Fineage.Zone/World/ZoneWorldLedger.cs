@@ -41,9 +41,11 @@ public sealed partial class ZoneWorld
     LedgerHoldings LedgerHoldingsOf(LedgerAccount account) => account switch
     {
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Inventory } =>
-            HoldingsOf(_byId.TryGetValue(account.OwnerId, out var player) && player.Inventory != null
-                ? player.Inventory
-                : throw new InvalidOperationException($"{account} has no inventory in the world")),
+            _byId.TryGetValue(account.OwnerId, out var player) && player.Inventory != null
+                ? HoldingsOf(player.Inventory)
+                : _accounts?.FindByCharacterId(account.OwnerId) is { Items: { } stored }
+                    ? HoldingsFromStored(stored)
+                    : throw new InvalidOperationException($"{account} has no inventory in the world or store"),
         { Owner: LedgerOwnerKind.Castle, Container: LedgerContainer.Treasury } =>
             new LedgerHoldings().Add(ShopTrade.AdenaItemId, _siege.Board.Find(account.OwnerId)?.Treasury
                 ?? throw new InvalidOperationException($"{account} is not a castle")),
@@ -64,6 +66,21 @@ public sealed partial class ZoneWorld
                 ?? throw new InvalidOperationException($"{account} is not a summoned pet")),
         _ => throw new InvalidOperationException($"{account} has no state in the zone")
     };
+
+    static LedgerHoldings HoldingsFromStored(IReadOnlyList<StoredItem> items)
+    {
+        var holdings = new LedgerHoldings();
+        foreach (var row in items)
+        {
+            if (row.Count <= 0)
+                continue;
+            if (row.Count == 1 && row.ObjectId > 0)
+                holdings.AddPiece(row.ItemId, row.ObjectId);
+            else
+                holdings.Add(row.ItemId, row.Count);
+        }
+        return holdings;
+    }
 
     static LedgerHoldings HoldingsOf(PlayerInventory inventory)
     {

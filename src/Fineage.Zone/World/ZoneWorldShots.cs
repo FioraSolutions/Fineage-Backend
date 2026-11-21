@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 
@@ -90,7 +91,20 @@ public sealed partial class ZoneWorld
                 return false;
         }
 
-        if (!player.Inventory.TryConsume(shot.ItemId, need, out var stack, out bool removed) || stack == null)
+        ItemInstance? stack = null;
+        bool removed = false;
+        bool charged = false;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                charged = player.Inventory.TryConsume(shot.ItemId, need, out stack, out removed) && stack != null;
+                return shot.ItemId;
+            },
+            id => id);
+        if (!charged || stack == null)
         {
             // Race with concurrent consume: treat as not enough.
             ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,

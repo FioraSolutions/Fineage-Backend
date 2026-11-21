@@ -80,6 +80,7 @@ public sealed class BypassRegistry
         registry.Register(new LotoBypassHandler());
         registry.Register(new SevenSignsBypassHandler());
         registry.Register(new SubclassBypassHandler());
+        registry.Register(new WyvernRideBypassHandler());
         return registry;
     }
 

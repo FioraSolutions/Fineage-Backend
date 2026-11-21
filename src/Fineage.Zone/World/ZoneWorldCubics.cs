@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = player.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !Take(inventory, row.ItemId, row.ItemCount, changes))
+                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
                 {
                     SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
                     return;
@@ -151,6 +151,26 @@ public sealed partial class ZoneWorld
         var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);
+    }
+
+    /// <summary>Mobius <c>Player.stopCubicsByOthers</c> on Olympiad arena entry.</summary>
+    void StopCubicsByOthers(ZoneEntity player)
+    {
+        if (!player.HasCubics)
+            return;
+        bool removed = false;
+        for (int i = player.Cubics.Count - 1; i >= 0; i--)
+        {
+            if (!player.Cubics[i].GivenByOther)
+                continue;
+            StopCubicAction(player.Cubics[i]);
+            player.Cubics.RemoveAt(i);
+            removed = true;
+        }
+        if (!player.HasCubics)
+            _withCubics.Remove(player.ObjectId);
+        if (removed)
+            BroadcastCubics(player);
     }
 
     /// <summary>Mobius <c>Player.removeCubic</c> for every cubic (death, logout).</summary>

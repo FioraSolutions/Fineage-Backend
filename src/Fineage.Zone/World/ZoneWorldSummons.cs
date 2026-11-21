@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = player.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !Take(inventory, row.ItemId, row.ItemCount, changes))
+                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
                 {
                     SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
                     return;
@@ -297,7 +297,11 @@ public sealed partial class ZoneWorld
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
         if (owner?.Session != null)
+        {
             NetBridge?.FanoutSummonGone([owner.ObjectId], new SummonGoneNetMsg { ObjectId = id, Kind = st.Kind, Reason = reason });
+            if (st.Kind == SummonKindNet.Pet)
+                SendPlayerActionState(owner);
+        }
         ZoneLog.Info($"summon gone object={id} owner={st.OwnerObjectId} reason={reason}");
     }
 
@@ -352,6 +356,26 @@ public sealed partial class ZoneWorld
             RemoveSummon(summon, 4);
         }
         player.SummonObjectId = 0;
+    }
+
+    /// <summary>Mobius <c>OlympiadGame.removals</c>: pets leave; servitors stay but lose buffs and orders.</summary>
+    void PrepareOlympiadSummons(ZoneEntity player)
+    {
+        if (SummonOf(player) is not { Summon: { } st } summon)
+            return;
+        if (st.Pet != null)
+        {
+            UnsummonOnLeave(player);
+            return;
+        }
+        st.TargetId = 0;
+        st.PendingSkillId = 0;
+        st.MoveOrder = false;
+        st.Following = false;
+        SetMoveActive(summon, false);
+        summon.MovePath.Clear();
+        summon.Abnormals.Clear();
+        summon.CombatUntilUnixMs = 0;
     }
 
     /// <summary>Mobius <c>Player.teleToLocation</c> takes the summon along.</summary>
@@ -451,7 +475,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = owner.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory != null && Take(inventory, st.UpkeepItemId, st.UpkeepCount, changes))
+                if (inventory != null && RecordConsume(owner, st.UpkeepItemId, st.UpkeepItemId, st.UpkeepCount, changes))
                 {
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);

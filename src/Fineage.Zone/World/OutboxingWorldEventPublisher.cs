@@ -403,6 +403,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutSummonGone), () => inner.FanoutSummonGone(watcherObjectIdsCopy, gone));
     }
 
+    void IWorldEventPublisher.FanoutRide(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RideNetMsg ride)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutRide), () => inner.FanoutRide(watcherObjectIdsCopy, ride));
+    }
+
+    void IWorldEventPublisher.FanoutPlayerActionState(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PlayerActionStateNetMsg state)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutPlayerActionState), () => inner.FanoutPlayerActionState(watcherObjectIdsCopy, state));
+    }
+
     void IWorldEventPublisher.FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];

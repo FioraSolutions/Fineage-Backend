@@ -29,6 +29,9 @@ public static class ActionProtocol
     /// <summary>Next hostile target in knownlist (Interlude short-range next target).</summary>
     public const int NextTarget = 4;
 
+    /// <summary>Mount / dismount the summoned strider or wyvern (Mobius 38).</summary>
+    public const int RideMount = MountProtocol.RideAction;
+
     /// <summary>Social: Greeting.</summary>
     public const int SocialGreeting = 12;
 

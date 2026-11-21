@@ -101,6 +101,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal static float MoveSpeedOf(ZoneEntity e)
     {
+        if (e.Mount != null)
+            return e.Running ? e.Mount.RunSpeed : e.Mount.WalkSpeed;
         float speed;
         if (e.InWater)
             speed = e.Running ? e.SwimRunSpeed : e.SwimWalkSpeed;

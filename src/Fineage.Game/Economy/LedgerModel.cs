@@ -76,7 +76,16 @@ public enum SystemAccount
     Olympiad = 13,
 
     /// <summary>Fishing and other non-combat gathering.</summary>
-    Gathering = 14
+    Gathering = 14,
+
+    /// <summary>Character creation starter kits.</summary>
+    StarterKit = 15,
+
+    /// <summary>GM or admin item grants into a player's bag.</summary>
+    GmGrants = 16,
+
+    /// <summary>Potions, shots, arrows, skill costs and other item consumption.</summary>
+    Consumed = 17
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -248,7 +257,16 @@ public enum LedgerTxKind
     HennaRemove = 42,
 
     /// <summary>Class transfer proof items: <c>Reference</c> is new class id.</summary>
-    ClassChange = 43
+    ClassChange = 43,
+
+    /// <summary>Starter kit granted on first enter: <c>Reference</c> is class id.</summary>
+    StarterKit = 44,
+
+    /// <summary>Admin grant into the bag: <c>Reference</c> is item id.</summary>
+    GmGrant = 45,
+
+    /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
+    Consume = 46
 }
 
 /// <summary>
