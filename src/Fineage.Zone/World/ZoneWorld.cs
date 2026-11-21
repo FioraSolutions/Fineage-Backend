@@ -300,6 +300,7 @@ public sealed partial class ZoneWorld
             NoLanding = SharedNoLanding.Value;
         }
         BootstrapSpawns();
+        BootstrapBoats();
         BootstrapBosses();
         BootstrapQuestNpcs();
         LoadClans();

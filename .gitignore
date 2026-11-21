@@ -32,6 +32,8 @@ data/*
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/walking-routes.json
+!data/boats.json
 !data/gm-teleports.json
 !data/newbie-buffs.json
 !data/item-weights.json
