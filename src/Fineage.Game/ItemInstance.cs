@@ -22,6 +22,12 @@ public sealed class ItemInstance
     /// <summary>Enchant level. 0 is an unenchanted piece. Stacks stay at 0.</summary>
     public int EnchantLevel { get; internal set; }
 
+    /// <summary>Mobius custom type 1 (monster race ticket lane, lottery serial, …).</summary>
+    public int CustomType1 { get; internal set; }
+
+    /// <summary>Mobius custom type 2 (monster race ticket bet / 100 adena).</summary>
+    public int CustomType2 { get; internal set; }
+
     /// <summary>Paperdoll slot while worn. Null while the item is only in the bag.</summary>
     public PaperdollSlot? EquippedSlot { get; internal set; }
 

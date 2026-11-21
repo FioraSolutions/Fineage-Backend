@@ -38061,6 +38061,14 @@
       "weight": 20
     },
     {
+      "id": 4443,
+      "name": "Monster Race Ticket - Single",
+      "kind": "etc",
+      "icon": "icon.etc_ticket_i00",
+      "price": 10,
+      "weight": 20
+    },
+    {
       "id": 4445,
       "name": "Dye of STR (Str+1 Con-3)",
       "kind": "etc",

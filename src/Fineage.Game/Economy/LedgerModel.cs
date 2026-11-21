@@ -88,7 +88,10 @@ public enum SystemAccount
     GmGrants = 16,
 
     /// <summary>Potions, shots, arrows, skill costs and other item consumption.</summary>
-    Consumed = 17
+    Consumed = 17,
+
+    /// <summary>Monster race ticket sales and payouts.</summary>
+    MonsterRace = 18
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -278,7 +281,13 @@ public enum LedgerTxKind
     FreightDeposit = 47,
 
     /// <summary>Freight into the bag at any warehouse keeper: <c>Reference</c> is the keeper's npc id.</summary>
-    FreightWithdraw = 48
+    FreightWithdraw = 48,
+
+    /// <summary>Monster race ticket purchase: <c>Reference</c> is race number.</summary>
+    MonsterRaceBet = 49,
+
+    /// <summary>Monster race ticket payout: <c>Reference</c> is ticket object id.</summary>
+    MonsterRacePayout = 50
 }
 
 /// <summary>

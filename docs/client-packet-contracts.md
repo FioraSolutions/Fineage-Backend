@@ -9,7 +9,7 @@ Reference for **blocked or not-yet-emitted** Interlude S2C/C2S layouts the retai
 ## Monster Derby (Monster Race Track)
 
 **Server feature:** `MonsterRaceManager`, `DerbyTrackZone`, Race Manager NPC (`30995`), ticket item, lane bets via HTML bypass.  
-**Fineage today:** `data/spawns/others_monster_race_track_npcs.json` only — no cycle, bets, or `MonRaceInfo`.
+**Fineage today:** `MonsterRaceBoard` / `MonsterRaceActor`, Race Manager HTML (30995), ticket item 4443, `MonRaceInfo` Net opcode `0x03CA` (Interlude body `0xDD`). Config: `data/monster-race.json`.
 
 ### `MonRaceInfo` — S2C `0xDD`
 

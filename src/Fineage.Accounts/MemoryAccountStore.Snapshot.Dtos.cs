@@ -203,5 +203,7 @@ public sealed partial class MemoryAccountStore
         public int EquippedSlot { get; set; } = -1;
         public int EnchantLevel { get; set; }
         public int ObjectId { get; set; }
+        public int CustomType1 { get; set; }
+        public int CustomType2 { get; set; }
     }
 }

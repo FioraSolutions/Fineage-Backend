@@ -4,7 +4,14 @@ namespace Fineage.Game;
 
 public sealed partial class PlayerInventory
 {
-    public readonly record struct StoredRow(int ObjectId, int ItemId, int Count, int EnchantLevel, int EquippedSlot);
+    public readonly record struct StoredRow(
+        int ObjectId,
+        int ItemId,
+        int Count,
+        int EnchantLevel,
+        int EquippedSlot,
+        int CustomType1 = 0,
+        int CustomType2 = 0);
 
     /// <summary>Replaces every row from a stored snapshot (shop ledger refusal rollback).</summary>
     public void ReplaceFromStored(IReadOnlyList<StoredRow> items)
@@ -17,8 +24,8 @@ public sealed partial class PlayerInventory
             if (!_catalog.TryGet(row.ItemId, out _))
                 continue;
             ItemInstance instance = row.ObjectId > 0
-                ? AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel)
-                : Add(row.ItemId, row.Count, row.EnchantLevel);
+                ? AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2)
+                : Add(row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2);
             if (row.EquippedSlot >= 0 && instance.Template.Equippable)
                 Equip(instance);
         }
@@ -190,7 +197,7 @@ public sealed partial class PlayerInventory
     /// Other templates become <paramref name="count"/> separate pieces.
     /// Returns the merged stack, or the first piece when several were created.
     /// </summary>
-    public ItemInstance Add(int itemId, int count = 1, int enchantLevel = 0)
+    public ItemInstance Add(int itemId, int count = 1, int enchantLevel = 0, int customType1 = 0, int customType2 = 0)
     {
         if (count < 1)
             throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be at least 1.");
@@ -199,8 +206,8 @@ public sealed partial class PlayerInventory
         var template = _catalog.Get(itemId);
         if (template.Stackable)
         {
-            if (enchantLevel != 0)
-                throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
+            if (enchantLevel != 0 || customType1 != 0 || customType2 != 0)
+                throw new InvalidOperationException($"Stackable item {itemId} cannot carry enchant or custom types.");
             var existing = FindByItemId(itemId);
             if (existing != null)
             {
@@ -213,7 +220,7 @@ public sealed partial class PlayerInventory
             return stack;
         }
 
-        var first = Create(template, 1, enchantLevel);
+        var first = Create(template, 1, enchantLevel, customType1, customType2);
         _items.Add(first);
         for (var i = 1; i < count; i++)
             _items.Add(Create(template, 1, enchantLevel));
@@ -224,7 +231,7 @@ public sealed partial class PlayerInventory
     /// Restores a persisted stack/piece with a durable <paramref name="objectId"/>.
     /// Stackable rows with a known id do not merge into another stack.
     /// </summary>
-    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0)
+    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0, int customType1 = 0, int customType2 = 0)
     {
         if (objectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(objectId), objectId, "Object id must be positive.");
@@ -239,7 +246,12 @@ public sealed partial class PlayerInventory
             throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
 
         _ids.Observe(objectId);
-        var item = new ItemInstance(objectId, template, count) { EnchantLevel = enchantLevel };
+        var item = new ItemInstance(objectId, template, count)
+        {
+            EnchantLevel = enchantLevel,
+            CustomType1 = customType1,
+            CustomType2 = customType2
+        };
         _items.Add(item);
         return item;
     }

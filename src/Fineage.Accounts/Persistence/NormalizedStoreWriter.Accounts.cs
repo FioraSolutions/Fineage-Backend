@@ -346,8 +346,8 @@ static partial class NormalizedStoreWriter
         cmd.Transaction = tx;
         cmd.CommandText =
             """
-            INSERT INTO character_items (object_id, character_id, item_id, count, enchant_level, loc, loc_data)
-            VALUES (@oid, @cid, @itemId, @count, @enchant, @loc, @locData)
+            INSERT INTO character_items (object_id, character_id, item_id, count, enchant_level, loc, loc_data, custom_type1, custom_type2)
+            VALUES (@oid, @cid, @itemId, @count, @enchant, @loc, @locData, @custom1, @custom2)
             """;
         cmd.Parameters.AddWithValue("oid", (long)item.ObjectId);
         cmd.Parameters.AddWithValue("cid", characterId);
@@ -356,6 +356,8 @@ static partial class NormalizedStoreWriter
         cmd.Parameters.AddWithValue("enchant", item.EnchantLevel);
         cmd.Parameters.AddWithValue("loc", loc);
         cmd.Parameters.AddWithValue("locData", locData);
+        cmd.Parameters.AddWithValue("custom1", item.CustomType1);
+        cmd.Parameters.AddWithValue("custom2", item.CustomType2);
         cmd.ExecuteNonQuery();
     }
 
@@ -371,7 +373,9 @@ static partial class NormalizedStoreWriter
                 ReadInt(item, "count", 1),
                 ReadInt(item, "equippedSlot", -1),
                 ReadInt(item, "enchantLevel", 0),
-                ReadInt(item, "objectId", 0)));
+                ReadInt(item, "objectId", 0),
+                ReadInt(item, "customType1", 0),
+                ReadInt(item, "customType2", 0)));
         }
 
         return rows;

@@ -33,6 +33,12 @@ public sealed class ZoneSession
     /// <summary>Lottery numbers picked on the ticket seller's button page (Mobius <c>Player.getLoto</c>), 0 = empty.</summary>
     public int[] LotoPicks { get; } = new int[5];
 
+    /// <summary>Mobius <c>Player.getRaceTicket(0)</c>: selected lane 1–8, 0 unset.</summary>
+    public int RaceTicketLane { get; set; }
+
+    /// <summary>Mobius <c>Player.getRaceTicket(1)</c>: ticket price tier 1–8, 0 unset.</summary>
+    public int RaceTicketPriceIndex { get; set; }
+
     /// <summary>Unix milliseconds of the last accepted say. 0 means this session has not spoken.</summary>
     public long LastChatUnixMs { get; set; }
 
@@ -75,6 +81,8 @@ public sealed class ZoneSession
         InWorld = false;
         SelectedTargetId = 0;
         TrainerNpcId = 0;
+        RaceTicketLane = 0;
+        RaceTicketPriceIndex = 0;
         LastChatUnixMs = 0;
         LastHeroVoiceUnixMs = 0;
     }

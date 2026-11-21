@@ -1,5 +1,6 @@
 using Fineage.Game;
 using Fineage.Login;
+using Fineage.Protocol;
 using Npgsql;
 using Xunit;
 using Fineage.Accounts;
@@ -206,6 +207,38 @@ public class PostgresNormalizedStoreTests
         var rows = reopened.FindById(account, characterId)!.Shortcuts!;
         Assert.Equal(2, rows.Count);
         Assert.Contains(rows, s => s.WorldSlot == 14 && s.Type == StoredShortcut.TypeAction);
+    }
+
+    [Fact]
+    public void Item_custom_types_roundtrip_through_postgres_inventory()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgct" + suffix;
+        int characterId;
+        using (var store = PostgresAccountStore.Open(url))
+        {
+            var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+            Assert.True(service.Register(account, "secret1").Ok);
+            var created = service.CreateHuman(account, "Ct" + suffix, HumanClasses.Fighter);
+            Assert.True(created.Ok, created.Message);
+            characterId = created.Value!.Id;
+            Assert.True(store.TryReplaceItems(account, characterId,
+            [
+                new StoredItem(MonsterRaceProtocol.TicketItemId, 1, -1, EnchantLevel: 15, ObjectId: 880_100, CustomType1: 4,
+                    CustomType2: 100)
+            ]));
+        }
+
+        using var reopened = PostgresAccountStore.Open(url);
+        var ticket = Assert.Single(reopened.FindById(account, characterId)!.Items!);
+        Assert.Equal(MonsterRaceProtocol.TicketItemId, ticket.ItemId);
+        Assert.Equal(4, ticket.CustomType1);
+        Assert.Equal(100, ticket.CustomType2);
+        Assert.Equal(15, ticket.EnchantLevel);
     }
 
     [Fact]
