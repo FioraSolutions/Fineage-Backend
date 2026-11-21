@@ -220,7 +220,7 @@ public sealed partial class ZoneWorld
         _aoi = new RelocationTrackingAoi(aoi ?? new SingleCellAoi(), _byId.Relocated);
         _game = game ?? GameData.LoadDefault();
         _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);
-        _dropRandom = Streams(dropRandom ?? spawnRandom, RandomPurpose.Drop);
+        _dropRandom = Streams(dropRandom, RandomPurpose.Drop);
         _accounts = accounts;
         _persist = new ZoneCharacterPersist(accounts);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
