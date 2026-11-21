@@ -90,6 +90,8 @@ public sealed partial class ZoneWorld
                 return LearnTrainerSkill(session, player, npc, reply.ServiceId);
             case NpcServiceIntent.WyvernRide:
                 return TryWyvernRideFromManager(session, player, npc);
+            case NpcServiceIntent.PetEvolve:
+                return ApplyPetEvolve(session, player, npc, reply.ServiceId);
             default:
                 return "bad_request";
         }

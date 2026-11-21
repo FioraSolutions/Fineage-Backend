@@ -123,4 +123,7 @@ public static class NpcServiceIntent
 
     /// <summary>Mobius <c>WyvernManagerInstance</c> <c>RideWyvern</c>: rent wyvern for castle lord with B crystals.</summary>
     public const string WyvernRide = "wyvern-ride";
+
+    /// <summary>Clan hall doorman <c>evolve N</c> (Mobius <c>PetManager.doEvolve</c>).</summary>
+    public const string PetEvolve = "pet-evolve";
 }
