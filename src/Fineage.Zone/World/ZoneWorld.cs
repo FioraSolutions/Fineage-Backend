@@ -125,6 +125,7 @@ public sealed partial class ZoneWorld
     /// <summary>Every entity in the world by object id, each owned by one region (<see cref="RegionDirectory{T}"/>).</summary>
     RegionDirectory<ZoneEntity> _byId;
     readonly DropCatalog _dropCatalog;
+    readonly EventDropCatalog _eventDropCatalog;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
@@ -171,6 +172,7 @@ public sealed partial class ZoneWorld
         bool? expertisePenalty = null,
         SpawnCatalog? spawnCatalog = null,
         DropCatalog? dropCatalog = null,
+        EventDropCatalog? eventDropCatalog = null,
         ZoneRates? rates = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
@@ -260,6 +262,7 @@ public sealed partial class ZoneWorld
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
+        _eventDropCatalog = eventDropCatalog ?? EventDropCatalog.LoadDefault();
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
@@ -358,6 +361,7 @@ public sealed partial class ZoneWorld
             Swamp = SharedSwamp.Value;
             Damage = SharedDamage.Value;
             NoLanding = SharedNoLanding.Value;
+            MotherTree = SharedMotherTree.Value;
         }
         BootstrapSpawns();
         BootstrapBoats();

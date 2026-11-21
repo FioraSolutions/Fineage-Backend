@@ -633,6 +633,10 @@ public sealed class WeightPenaltyRegenTests
         var kit = new NetTestKit();
         var (session, player) = await kit.EnterAsync(classId: 18);
         Assert.NotNull(session);
+        // Elven Village spawn sits in a mother-tree zone; regen tests isolate weight-penalty math from that flat bonus.
+        player.X = 120_000;
+        player.Y = 120_000;
+        player.Z = -3000;
         WeightPenaltyWorldTests.StripToPaperdoll(player);
         Assert.True(kit.World.RefreshWeightPenalty(player));
         Assert.Equal(0, player.WeightPenaltyLevel);

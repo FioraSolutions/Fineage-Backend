@@ -188,6 +188,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("duels", tick => TickDuels(tick.NowUnixMs));
         ticks.AddWorldStage("corpse-decay", tick => TickCorpseDecay(tick.NowUnixMs));
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
+        ticks.AddWorldStage("force-charge-decay", tick => TickForceChargeDecay(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
         ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
         ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
