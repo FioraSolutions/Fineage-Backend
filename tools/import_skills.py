@@ -166,15 +166,28 @@ def load_skill_trees(trees_root: Path) -> list[dict]:
             for skill in node:
                 if local(skill.tag) != "skill":
                     continue
-                entries.append(
-                    {
-                        "skillId": int(skill.attrib["skillId"]),
-                        "level": int(skill.attrib["skillLevel"]),
-                        "getLevel": int(skill.attrib.get("getLevel", "1")),
-                        "autoGet": skill.attrib.get("autoGet", "false").lower() == "true",
-                        "learnedByNpc": skill.attrib.get("learnedByNpc", "false").lower() == "true",
-                    }
-                )
+                entry: dict = {
+                    "skillId": int(skill.attrib["skillId"]),
+                    "level": int(skill.attrib["skillLevel"]),
+                    "getLevel": int(skill.attrib.get("getLevel", "1")),
+                    "autoGet": skill.attrib.get("autoGet", "false").lower() == "true",
+                    "learnedByNpc": skill.attrib.get("learnedByNpc", "false").lower() == "true",
+                }
+                sp = skill.attrib.get("levelUpSp")
+                if sp and sp.isdigit():
+                    entry["levelUpSp"] = int(sp)
+                items: list[dict] = []
+                for child in skill:
+                    if local(child.tag) == "item" and child.attrib.get("id", "").isdigit():
+                        items.append(
+                            {
+                                "itemId": int(child.attrib["id"]),
+                                "count": int(child.attrib.get("count", "1") or 1),
+                            }
+                        )
+                if items:
+                    entry["requiredItems"] = items
+                entries.append(entry)
             trees.append({"classId": class_id, "skills": entries})
     return trees
 
@@ -196,6 +209,19 @@ def main() -> None:
         for entry in tree["skills"]:
             referenced.add(entry["skillId"])
 
+    repo = Path(__file__).resolve().parents[1]
+    npc_ai = repo / "data" / "npc-ai-support.json"
+    if npc_ai.is_file():
+        support = json.loads(npc_ai.read_text())
+        for npc in support.get("npcs") or []:
+            for scope in ("heal", "buff", "debuff", "immobilize", "silence", "suicide"):
+                for row in npc.get(scope) or []:
+                    sid = row.get("id")
+                    if isinstance(sid, int) and sid > 0:
+                        referenced.add(sid)
+                    elif isinstance(sid, str) and sid.isdigit():
+                        referenced.add(int(sid))
+
     # Noble and hero trees have no classId (Mobius nobleSkillTree.xml / heroSkillTree.xml); their templates are still
     # needed because the zone grants them on noblesse (Block G1) and hero status (Block G2).
     for special in ("nobleSkillTree.xml", "heroSkillTree.xml"):
@@ -211,7 +237,6 @@ def main() -> None:
 
     selected = [templates[sid] for sid in sorted(referenced)]
 
-    repo = Path(__file__).resolve().parents[1]
     data = repo / "data"
     data.mkdir(exist_ok=True)
 
