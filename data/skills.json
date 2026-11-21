@@ -317,7 +317,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 2,
@@ -580,7 +583,11 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 4,
@@ -892,7 +899,10 @@
             "charges": 3
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 6,
@@ -1221,7 +1231,12 @@
             "charges": 2
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 7,
@@ -1534,7 +1549,12 @@
             "charges": 2
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 8,
@@ -1613,7 +1633,12 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 9,
@@ -1986,7 +2011,12 @@
             "charges": 2
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL",
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 10,
@@ -2199,7 +2229,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 12,
@@ -2334,7 +2367,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 13,
@@ -3017,7 +3053,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 17,
@@ -3389,7 +3428,10 @@
             "charges": 1
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 18,
@@ -4022,7 +4064,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 21,
@@ -4420,7 +4465,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 25,
@@ -5299,7 +5347,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 30,
@@ -5617,7 +5668,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 33,
@@ -6062,7 +6116,10 @@
             "charges": 1
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 36,
@@ -6380,7 +6437,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 42,
@@ -7006,7 +7066,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 49,
@@ -7338,7 +7401,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 51,
@@ -7774,7 +7840,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 56,
@@ -7988,7 +8057,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 58,
@@ -9599,7 +9671,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 77,
@@ -9746,7 +9821,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 82,
@@ -9818,7 +9896,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 84,
@@ -9872,7 +9953,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 86,
@@ -10449,7 +10533,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 94,
@@ -10679,7 +10766,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 96,
@@ -10757,7 +10847,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 97,
@@ -11123,7 +11216,10 @@
         "kinds": [
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 101,
@@ -11473,7 +11569,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 102,
@@ -12211,7 +12310,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 110,
@@ -12839,7 +12941,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 121,
@@ -15051,7 +15156,14 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "BOW",
+        "DUALFIST",
+        "SWORD",
+        "BLUNT",
+        "POLE"
+      ]
     },
     {
       "skillId": 181,
@@ -15397,7 +15509,11 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 191,
@@ -18381,7 +18497,12 @@
           "DAGGER",
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "DAGGER",
+        "DUAL"
+      ]
     },
     {
       "skillId": 225,
@@ -21158,7 +21279,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 246,
@@ -23109,7 +23233,11 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 256,
@@ -24281,7 +24409,10 @@
         "kinds": [
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 261,
@@ -24488,7 +24619,10 @@
             "charges": 4
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 262,
@@ -25119,7 +25253,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 264,
@@ -25341,7 +25478,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 272,
@@ -25374,7 +25514,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 273,
@@ -25407,7 +25550,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 274,
@@ -25440,7 +25586,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 275,
@@ -25473,7 +25622,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 276,
@@ -25506,7 +25658,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 277,
@@ -25539,7 +25694,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 278,
@@ -26000,7 +26158,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 281,
@@ -26326,7 +26487,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 282,
@@ -26357,7 +26521,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 283,
@@ -26796,7 +26963,10 @@
             "charges": 2
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 285,
@@ -27503,7 +27673,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 293,
@@ -27788,7 +27961,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 299,
@@ -28139,7 +28315,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 308,
@@ -28199,7 +28378,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 310,
@@ -28232,7 +28414,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 311,
@@ -28265,7 +28450,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 312,
@@ -28525,7 +28713,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 314,
@@ -28675,7 +28866,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 315,
@@ -28837,7 +29031,11 @@
             ]
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 316,
@@ -28919,7 +29117,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 318,
@@ -29073,7 +29274,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 321,
@@ -29177,7 +29381,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 322,
@@ -29680,7 +29887,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 344,
@@ -29711,7 +29921,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 345,
@@ -29741,7 +29954,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 346,
@@ -29771,7 +29987,10 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 347,
@@ -29801,7 +30020,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 348,
@@ -29831,7 +30053,10 @@
         "kinds": [
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "BLUNT"
+      ]
     },
     {
       "skillId": 349,
@@ -29889,7 +30114,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 351,
@@ -29920,7 +30148,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 352,
@@ -29958,7 +30189,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 353,
@@ -29996,7 +30230,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 354,
@@ -30032,7 +30269,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 355,
@@ -30063,7 +30303,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 356,
@@ -30095,7 +30338,11 @@
           "DAGGER",
           "DUALDAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 357,
@@ -30127,7 +30374,11 @@
           "DAGGER",
           "DUALDAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 358,
@@ -30166,7 +30417,11 @@
           "DAGGER",
           "DUALDAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER",
+        "DUALDAGGER"
+      ]
     },
     {
       "skillId": 359,
@@ -30254,7 +30509,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 362,
@@ -30293,7 +30551,11 @@
           "BLUNT",
           "SWORD"
         ]
-      }
+      },
+      "usingKinds": [
+        "BLUNT",
+        "SWORD"
+      ]
     },
     {
       "skillId": 363,
@@ -30380,7 +30642,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 366,
@@ -30414,7 +30679,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 367,
@@ -30451,7 +30719,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 368,
@@ -30483,7 +30754,10 @@
         "kinds": [
           "SHIELD"
         ]
-      }
+      },
+      "usingKinds": [
+        "SHIELD"
+      ]
     },
     {
       "skillId": 369,
@@ -30515,7 +30789,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 400,
@@ -30624,7 +30901,11 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 401,
@@ -30733,7 +31014,11 @@
           "SWORD",
           "BLUNT"
         ]
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 402,
@@ -31169,7 +31454,13 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "POLE",
+        "DUALFIST",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 407,
@@ -31379,7 +31670,10 @@
         "kinds": [
           "DUAL"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 409,
@@ -31483,7 +31777,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 410,
@@ -31530,7 +31827,10 @@
         "kinds": [
           "DAGGER"
         ]
-      }
+      },
+      "usingKinds": [
+        "DAGGER"
+      ]
     },
     {
       "skillId": 411,
@@ -31762,7 +32062,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 414,
@@ -31849,7 +32152,10 @@
         "kinds": [
           "BOW"
         ]
-      }
+      },
+      "usingKinds": [
+        "BOW"
+      ]
     },
     {
       "skillId": 415,
@@ -32225,7 +32531,13 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT",
+        "POLE",
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 421,
@@ -32288,7 +32600,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 422,
@@ -32431,7 +32746,11 @@
         "kinds": [
           "DUALFIST"
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST",
+        "FIST"
+      ]
     },
     {
       "skillId": 426,
@@ -32867,7 +33186,10 @@
             "charges": 5
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 443,
@@ -32910,7 +33232,10 @@
             "charges": 4
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 445,
@@ -33243,7 +33568,10 @@
             ]
           }
         ]
-      }
+      },
+      "usingKinds": [
+        "DUAL"
+      ]
     },
     {
       "skillId": 452,
@@ -33312,7 +33640,10 @@
         "kinds": [
           "POLE"
         ]
-      }
+      },
+      "usingKinds": [
+        "POLE"
+      ]
     },
     {
       "skillId": 453,
@@ -60132,7 +60463,10 @@
         "kinds": [
           "FISHINGROD"
         ]
-      }
+      },
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1313,
@@ -60342,7 +60676,10 @@
         "kinds": [
           "FISHINGROD"
         ]
-      }
+      },
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1314,
@@ -60552,7 +60889,10 @@
         "kinds": [
           "FISHINGROD"
         ]
-      }
+      },
+      "usingKinds": [
+        "FISHINGROD"
+      ]
     },
     {
       "skillId": 1315,
