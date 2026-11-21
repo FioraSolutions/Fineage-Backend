@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 
@@ -28,15 +29,21 @@ public sealed partial class ZoneWorld
         if (GearRules.GrantError(itemId, count, MaxGrantCount, _game.Items.TryGet(itemId, out _)) is { } grantError)
             return grantError;
 
-        var added = player.Inventory.Add(itemId, count);
-        // Same reasoning as GiveItem: the Net client would otherwise never learn the row appeared.
-        NetBridge?.FanoutInventoryUpdate(
-            [session.ObjectId],
-            InventoryMessages.Update(InventoryChange.Add, added));
-        // Grant is the one add path that does not call SaveInventory (the bag is persisted on leave), so the overload
-        // recompute has to be explicit here — otherwise a grant that crosses 50% leaves the pawn unpenalised.
-        RefreshWeightPenaltyAfterInventoryChange(session);
-        ZoneLog.Info($"grant object={session.ObjectId} item={itemId} count={count}");
+        RecordBagChange(
+            player,
+            LedgerTxKind.GmGrant,
+            GmGrantSource,
+            () =>
+            {
+                var added = player.Inventory.Add(itemId, count);
+                NetBridge?.FanoutInventoryUpdate(
+                    [session.ObjectId],
+                    InventoryMessages.Update(InventoryChange.Add, added));
+                RefreshWeightPenaltyAfterInventoryChange(session);
+                ZoneLog.Info($"grant object={session.ObjectId} item={itemId} count={count}");
+                return count;
+            },
+            _ => itemId);
         return null;
     }
 }
