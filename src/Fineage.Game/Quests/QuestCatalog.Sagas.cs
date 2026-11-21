@@ -312,15 +312,12 @@ public sealed partial class QuestCatalog
             DespawnSec = 60,
             Owned = true,
             Say = text[7],
-<<<<<<< HEAD
             ScheduledSays =
             [
                 new ScheduledSayDto { DelayMs = 500, Text = text[7] },
                 new ScheduledSayDto { DelayMs = 2000, Text = text[8] },
                 new ScheduledSayDto { DelayMs = 12000, Text = text[9] }
             ],
-=======
->>>>>>> a1083eef (feat(zone): clan hall manager functions, leases, and regen bonuses)
             GoneVars = new() { ["Quest0"] = "0" }
         });
         fight.VarBelow = new() { ["Quest0"] = 1 };
