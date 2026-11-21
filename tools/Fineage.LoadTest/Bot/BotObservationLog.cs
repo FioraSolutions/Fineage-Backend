@@ -73,110 +73,110 @@ public sealed class BotObservationLog
             switch (opcode)
             {
                 case NetOpcode.EntitySpawn:
-                {
-                    var s = NetCodec.DecodeEntitySpawn(payload);
-                    int oid = (int)s.EntityValue;
-                    _byValue[s.EntityValue] = new TrackedEntity
                     {
-                        ObjectId = oid,
-                        EntityGeneration = s.EntityGeneration,
-                        Kind = s.Kind,
-                        Name = s.Name,
-                        Attackable = s.Attackable,
-                        Alive = !s.Dead,
-                        X = s.X,
-                        Y = s.Y,
-                        Z = s.Z,
-                        MaxHp = s.MaxHp,
-                        CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
-                        LastSpawnOrdinal = ++_spawnOrdinal,
-                        LastDespawnOrdinal = 0,
-                        SpawnCount = (_byValue.GetValueOrDefault(s.EntityValue)?.SpawnCount ?? 0) + 1,
-                        Despawned = false
-                    };
-                    break;
-                }
-                case NetOpcode.EntityDespawn:
-                {
-                    var d = NetCodec.DecodeEntityDespawn(payload);
-                    if (_byValue.TryGetValue(d.EntityValue, out var e))
-                    {
-                        e.Despawned = true;
-                        e.LastDespawnOrdinal = ++_spawnOrdinal;
-                        _byValue[d.EntityValue] = e;
-                    }
-
-                    break;
-                }
-                case NetOpcode.MoveState:
-                {
-                    var m = NetCodec.DecodeMoveState(payload);
-                    ulong key = m.EntityValue;
-                    int oid = (int)m.EntityValue;
-                    if (_byValue.TryGetValue(key, out var e))
-                    {
-                        e.X = m.DestX;
-                        e.Y = m.DestY;
-                        e.Z = m.DestZ;
-                        e.Despawned = false;
-                        _byValue[key] = e;
-                    }
-                    else
-                    {
-                        _byValue[key] = new TrackedEntity
+                        var s = NetCodec.DecodeEntitySpawn(payload);
+                        int oid = (int)s.EntityValue;
+                        _byValue[s.EntityValue] = new TrackedEntity
                         {
                             ObjectId = oid,
-                            EntityGeneration = m.EntityGeneration,
-                            X = m.DestX,
-                            Y = m.DestY,
-                            Z = m.DestZ
+                            EntityGeneration = s.EntityGeneration,
+                            Kind = s.Kind,
+                            Name = s.Name,
+                            Attackable = s.Attackable,
+                            Alive = !s.Dead,
+                            X = s.X,
+                            Y = s.Y,
+                            Z = s.Z,
+                            MaxHp = s.MaxHp,
+                            CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
+                            LastSpawnOrdinal = ++_spawnOrdinal,
+                            LastDespawnOrdinal = 0,
+                            SpawnCount = (_byValue.GetValueOrDefault(s.EntityValue)?.SpawnCount ?? 0) + 1,
+                            Despawned = false
                         };
+                        break;
                     }
-
-                    break;
-                }
-                case NetOpcode.StatusUpdate:
-                {
-                    var st = NetCodec.DecodeStatusUpdate(payload);
-                    ulong key = st.EntityValue;
-                    if (_byValue.TryGetValue(key, out var e))
+                case NetOpcode.EntityDespawn:
                     {
-                        for (int i = 0; i < st.AttributeIds.Length && i < st.Values.Length; i++)
+                        var d = NetCodec.DecodeEntityDespawn(payload);
+                        if (_byValue.TryGetValue(d.EntityValue, out var e))
                         {
-                            if (st.AttributeIds[i] == InterludeStatus.CurHp)
-                                e.CurHp = st.Values[i];
-                            else if (st.AttributeIds[i] == InterludeStatus.MaxHp)
-                                e.MaxHp = st.Values[i];
+                            e.Despawned = true;
+                            e.LastDespawnOrdinal = ++_spawnOrdinal;
+                            _byValue[d.EntityValue] = e;
                         }
 
-                        _byValue[key] = e;
+                        break;
                     }
-
-                    break;
-                }
-                case NetOpcode.AttackState:
-                {
-                    var a = NetCodec.DecodeAttackState(payload);
-                    ClosePendingCombat(at, a.AttackerValue);
-                    break;
-                }
-                case NetOpcode.MagicSkillUse:
-                {
-                    var c = NetCodec.DecodeMagicSkillUse(payload);
-                    ClosePendingCombat(at, (ulong)(uint)c.CasterObjectId);
-                    break;
-                }
-                case NetOpcode.SocialAction:
-                {
-                    var sa = NetCodec.DecodeSocialAction(payload);
-                    if (_byValue.TryGetValue(sa.EntityValue, out var e))
+                case NetOpcode.MoveState:
                     {
-                        e.LastSocialAction = sa.ActionId;
-                        _byValue[sa.EntityValue] = e;
-                    }
+                        var m = NetCodec.DecodeMoveState(payload);
+                        ulong key = m.EntityValue;
+                        int oid = (int)m.EntityValue;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = m.DestX;
+                            e.Y = m.DestY;
+                            e.Z = m.DestZ;
+                            e.Despawned = false;
+                            _byValue[key] = e;
+                        }
+                        else
+                        {
+                            _byValue[key] = new TrackedEntity
+                            {
+                                ObjectId = oid,
+                                EntityGeneration = m.EntityGeneration,
+                                X = m.DestX,
+                                Y = m.DestY,
+                                Z = m.DestZ
+                            };
+                        }
 
-                    break;
-                }
+                        break;
+                    }
+                case NetOpcode.StatusUpdate:
+                    {
+                        var st = NetCodec.DecodeStatusUpdate(payload);
+                        ulong key = st.EntityValue;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            for (int i = 0; i < st.AttributeIds.Length && i < st.Values.Length; i++)
+                            {
+                                if (st.AttributeIds[i] == InterludeStatus.CurHp)
+                                    e.CurHp = st.Values[i];
+                                else if (st.AttributeIds[i] == InterludeStatus.MaxHp)
+                                    e.MaxHp = st.Values[i];
+                            }
+
+                            _byValue[key] = e;
+                        }
+
+                        break;
+                    }
+                case NetOpcode.AttackState:
+                    {
+                        var a = NetCodec.DecodeAttackState(payload);
+                        ClosePendingCombat(at, a.AttackerValue);
+                        break;
+                    }
+                case NetOpcode.MagicSkillUse:
+                    {
+                        var c = NetCodec.DecodeMagicSkillUse(payload);
+                        ClosePendingCombat(at, (ulong)(uint)c.CasterObjectId);
+                        break;
+                    }
+                case NetOpcode.SocialAction:
+                    {
+                        var sa = NetCodec.DecodeSocialAction(payload);
+                        if (_byValue.TryGetValue(sa.EntityValue, out var e))
+                        {
+                            e.LastSocialAction = sa.ActionId;
+                            _byValue[sa.EntityValue] = e;
+                        }
+
+                        break;
+                    }
             }
         }
 

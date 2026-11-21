@@ -203,27 +203,27 @@ public sealed class FineageBotClient : IAsyncDisposable
                         }), ct);
                     break;
                 case "attack":
-                {
-                    int target = _observation.VisibleNpcObjectId();
-                    if (target == 0)
-                        target = _observation.VisibleNpcObjectId();
-                    if (target > 0)
                     {
-                        await ZoneWriteAsync(NetOpcode.SelectTarget,
-                            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-                        await SendTrackedAsync(NetOpcode.AttackRequest,
-                            NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }), ct);
-                    }
+                        int target = _observation.VisibleNpcObjectId();
+                        if (target == 0)
+                            target = _observation.VisibleNpcObjectId();
+                        if (target > 0)
+                        {
+                            await ZoneWriteAsync(NetOpcode.SelectTarget,
+                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
+                            await SendTrackedAsync(NetOpcode.AttackRequest,
+                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }), ct);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case "skill":
-                {
-                    int target = _observation.VisibleNpcObjectId();
-                    await SendTrackedAsync(NetOpcode.UseSkill,
-                        NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }), ct);
-                    break;
-                }
+                    {
+                        int target = _observation.VisibleNpcObjectId();
+                        await SendTrackedAsync(NetOpcode.UseSkill,
+                            NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }), ct);
+                        break;
+                    }
                 case "say":
                     await ZoneWriteAsync(NetOpcode.Say,
                         NetCodec.EncodeSay(new SayNetMsg { Text = $"load {BotId}", ChatType = 0 }), ct);
@@ -245,26 +245,26 @@ public sealed class FineageBotClient : IAsyncDisposable
                         NetCodec.EncodeTradeRequest(new TradeRequestNetMsg { TargetObjectId = SelfObjectId + 2 }), ct);
                     break;
                 case "pvp":
-                {
-                    int? peer = VisiblePlayerObjectId() ?? _peers.PickPeerObjectId(BotId, _rng);
-                    if (peer is > 0)
                     {
-                        await ZoneWriteAsync(NetOpcode.SelectTarget,
-                            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = peer.Value }), ct);
-                        await SendTrackedAsync(NetOpcode.AttackRequest,
-                            NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = peer.Value, Forced = true }), ct);
-                    }
+                        int? peer = VisiblePlayerObjectId() ?? _peers.PickPeerObjectId(BotId, _rng);
+                        if (peer is > 0)
+                        {
+                            await ZoneWriteAsync(NetOpcode.SelectTarget,
+                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = peer.Value }), ct);
+                            await SendTrackedAsync(NetOpcode.AttackRequest,
+                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = peer.Value, Forced = true }), ct);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case "party":
-                {
-                    int? peer = _peers.PickPeerObjectId(BotId, _rng);
-                    if (peer is > 0)
-                        await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
-                            NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = peer.Value }), ct);
-                    break;
-                }
+                    {
+                        int? peer = _peers.PickPeerObjectId(BotId, _rng);
+                        if (peer is > 0)
+                            await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
+                                NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = peer.Value }), ct);
+                        break;
+                    }
                 case "relog":
                     await RelogAsync(fleet, ct);
                     break;
