@@ -60,13 +60,6 @@ public sealed partial class ZoneWorld
         return RequestAsync(session, new ZoneRequest<T>(command.Name, tick => around(() => ApplyLogged(session, command, tick))), ct);
     }
 
-    /// <summary>Test hook: runs <paramref name="body"/> as the world's owner, after any step running on another thread.</summary>
-    internal T OnStepForTest<T>(Func<T> body)
-    {
-        using (_affinity.Step())
-            return body();
-    }
-
     async Task<T> RequestAsync<T>(ZoneSession session, ZoneRequest<T> request, CancellationToken ct)
     {
         await _ingress.Submit(session, request, ct).ConfigureAwait(false);

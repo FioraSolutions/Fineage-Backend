@@ -100,7 +100,7 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
     /// <summary>The live entity, read as a step: the command pump owns the world while the test runs.</summary>
     public ZoneEntity EntityOf(int objectId)
     {
-        var entity = World.OnStepForTest(() => World.TryGetEntityById(objectId, out var found) ? found : null);
+        var entity = World.RunStepForTest(() => World.TryGetEntityById(objectId, out var found) ? found : null);
         Assert.True(entity != null, $"entity {objectId} not in world");
         return entity;
     }

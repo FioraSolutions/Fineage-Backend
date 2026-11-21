@@ -49,6 +49,23 @@ public sealed partial class ZoneWorld
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
     });
 
+    /// <summary>Test hook: one full scheduler step with fan-out and persistence, same as <see cref="StepSimulation"/>.</summary>
+    internal void RunStepForTest() => StepSimulation();
+
+    /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
+    internal void RunStepForTest(Action body)
+    {
+        using (_affinity.Step())
+            body();
+    }
+
+    /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
+    internal T RunStepForTest<T>(Func<T> body)
+    {
+        using (_affinity.Step())
+            return body();
+    }
+
     /// <summary>
     /// Runs <paramref name="body"/> as a step with one wall sample, on the calling thread, which owns the world until
     /// the step is over (<see cref="WorldAffinity"/>). Its fan-out is recorded into one batch, sealed when the body
