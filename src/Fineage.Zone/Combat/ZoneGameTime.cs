@@ -17,7 +17,8 @@ public sealed class ZoneGameTime
     /// <summary>Mobius starts the clock at local calendar midnight of the process start day.</summary>
     public static ZoneGameTime FromLocalMidnight(DateTimeOffset? now = null)
     {
-        var local = (now ?? DateTimeOffset.Now).ToOffset(DateTimeOffset.Now.Offset);
+        var anchor = now ?? DateTimeOffset.Now;
+        var local = anchor.ToOffset(anchor.Offset);
         var midnight = new DateTimeOffset(local.Year, local.Month, local.Day, 0, 0, 0, local.Offset);
         return new ZoneGameTime(midnight.ToUnixTimeMilliseconds());
     }
