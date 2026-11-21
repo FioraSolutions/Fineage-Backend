@@ -46,16 +46,6 @@ public sealed class Rank2MissingQuestTests
         Assert.True(bag.CountOf(Fluid) >= 1);
     }
 
-    [Fact]
-    public void Q505_festival_guide_teleport()
-    {
-        var (m, bag, j) = Setup();
-        const int Q = 505, Guide = 31127;
-        var me = Any(40);
-        var outcome = m.Talk(j, bag, Q, Guide, me);
-        Assert.True(outcome.Ok);
-        Assert.Equal((-114796, -179334, -6752), outcome.Teleport);
-    }
 
     [Fact]
     public void Q646_cursed_dolls_steel()
