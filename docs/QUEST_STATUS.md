@@ -29,14 +29,14 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 8 | An Adventure Begins | 3+ | story / newbie | implemented | hand-ported |
 | 9 | Into the City of Humans | 3+ | story / newbie | implemented | hand-ported |
 | 10 | Into the World | 3+ | story / newbie | implemented | hand-ported |
-| 11 | Secret Meeting With Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | auto-port |
-| 12 | Secret Meeting With Varka Silenos | 74+ | Ketra/Varka alliance | implemented | auto-port |
-| 13 | Parcel Delivery | 74+ | story / newbie | implemented | auto-port |
-| 14 | Whereabouts of the Archaeologist | 74+ | story / newbie | implemented | auto-port |
-| 15 | Sweet Whispers | 60+ | story / newbie | implemented | auto-port |
-| 16 | The Coming Darkness | 62+ | repeatable | implemented | auto-port |
-| 17 | Light and Darkness | 61+ | repeatable | implemented | auto-port |
-| 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | auto-port |
+| 11 | Secret Meeting With Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | hand-ported |
+| 12 | Secret Meeting With Varka Silenos | 74+ | Ketra/Varka alliance | implemented | hand-ported |
+| 13 | Parcel Delivery | 74+ | story / newbie | implemented | hand-ported |
+| 14 | Whereabouts of the Archaeologist | 74+ | story / newbie | implemented | hand-ported |
+| 15 | Sweet Whispers | 60+ | story / newbie | implemented | hand-ported |
+| 16 | The Coming Darkness | 62+ | repeatable | implemented | hand-ported |
+| 17 | Light and Darkness | 61+ | repeatable | implemented | hand-ported |
+| 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | hand-ported |
 | 19 | Go to the Pastureland! | 63+ | story / newbie | implemented | hand-ported |
 | 20 | Bring Up With Love | 65+ | story / newbie | implemented | auto-port |
 | 21 | Hidden Truth | 63+ | story / newbie | stub | 54 dialog(s), no start; timers; auto-port |
