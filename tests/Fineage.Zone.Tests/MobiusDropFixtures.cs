@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Interest;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Tests;
@@ -17,5 +18,6 @@ static class MobiusDropFixtures
                 aoi,
                 spawnRandom: new Random(MobiusDropTestSeed.DefaultSeed),
                 dropRandom: new Random(MobiusDropTestSeed.DefaultSeed),
-                accounts: accounts);
+                accounts: accounts,
+                ledgerJournal: new MemoryLedgerJournal());
 }

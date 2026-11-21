@@ -5,6 +5,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -295,7 +296,8 @@ public sealed class NetManorTests
         Assert.Equal(new ManorProductionSave(Gludio, 5018, 50, 50, 20, true), saved);
 
         // A fresh world on the same store reads the rows back.
-        var again = new ZoneWorld(new RangeAoi(1_000), bench.Game, accounts: bench.Store, clock: bench.Now, manor: ManorSettings.Mobius);
+        var again = new ZoneWorld(new RangeAoi(1_000), bench.Game, accounts: bench.Store, clock: bench.Now, manor: ManorSettings.Mobius,
+        ledgerJournal: new MemoryLedgerJournal());
         Assert.Equal(50, again.Manor.Product(Gludio, 5018, next: true)!.StartAmount);
 
         // Approved period: no edits.

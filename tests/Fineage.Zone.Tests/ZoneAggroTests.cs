@@ -3,6 +3,7 @@ using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -41,7 +42,8 @@ public sealed class ZoneAggroTests
         async Task<(ZoneWorld, ZoneEntity)> Enter(SpawnCatalog spawns)
         {
             var ticket = login.Play("aggro", "pass1234", created.Value!.Name, HumanClasses.Fighter);
-            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "aggro");
+            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "aggro",
+            ledgerJournal: new MemoryLedgerJournal());
             var session = new ZoneSession();
             session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
             Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
@@ -105,7 +107,8 @@ public sealed class ZoneAggroTests
             SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { ["fresh"] = new("fresh", true, npcs) });
 
         var ticket = login.Play("fresh", "pass1234", created.Value!.Name, HumanClasses.Fighter);
-        var probeWorld = new ZoneWorld(accounts: store, spawnCatalog: Map(), activeMapId: "fresh");
+        var probeWorld = new ZoneWorld(accounts: store, spawnCatalog: Map(), activeMapId: "fresh",
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await probeWorld.TryEnterAsync(session, CancellationToken.None));
@@ -116,7 +119,8 @@ public sealed class ZoneAggroTests
             true, 80, 80f, 40f, 30, 0, NpcType: "Monster", Level: 1, Aggressive: true, AggroRange: 400);
         var catalog = Map(mob);
         var ticket2 = login.Play("fresh", "pass1234", created.Value.Name, HumanClasses.Fighter);
-        var world2 = new ZoneWorld(accounts: store, spawnCatalog: catalog, activeMapId: "fresh");
+        var world2 = new ZoneWorld(accounts: store, spawnCatalog: catalog, activeMapId: "fresh",
+        ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket2.Value!.CharacterId, ticket2.Value.Account, ticket2.Value.CharacterName, ticket2.Value.ClassId);
         Assert.True(await world2.TryEnterAsync(session2, CancellationToken.None));

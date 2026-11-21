@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -54,7 +55,8 @@ public sealed class NetEnchantRulesTests
                 game = GameData.From(new ItemCatalog(templates), data.StarterKits);
             }
 
-            World = new ZoneWorld(game: game, accounts: Store, enchantRandom: new UnitSamples(rolls));
+            World = new ZoneWorld(game: game, accounts: Store, enchantRandom: new UnitSamples(rolls),
+            ledgerJournal: new MemoryLedgerJournal());
             var (bridge, rec) = NetBridgeRecorder.Create();
             World.NetBridge = bridge;
             Rec = rec;

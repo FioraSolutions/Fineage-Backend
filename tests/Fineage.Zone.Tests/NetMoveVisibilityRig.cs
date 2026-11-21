@@ -4,6 +4,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -51,7 +52,8 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
             [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, true, [])
         });
         var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty,
-            activeMapId: mapId ?? SpawnCatalog.DefaultMapId);
+            activeMapId: mapId ?? SpawnCatalog.DefaultMapId,
+            ledgerJournal: new MemoryLedgerJournal());
         var host = await NetZoneHost.StartAsync(world, store, clock: Clock);
         long step = ZoneSimulationSettings.StepMilliseconds;
         // Stages run at tick time; starting on a tick boundary keeps AdvanceAsync's whole-step totals exact.

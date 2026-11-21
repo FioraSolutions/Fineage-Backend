@@ -2,6 +2,7 @@ using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -311,7 +312,8 @@ public class OlympiadTests
         var world = new ZoneWorld(
             accounts: store,
             clock: () => now,
-            olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 5, BattleMillis = 60_000 });
+            olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 5, BattleMillis = 60_000 },
+            ledgerJournal: new MemoryLedgerJournal());
         var left = await Enter(world, "ann", ann);
         var right = await Enter(world, "bea", bea);
         Assert.True(world.GrantNoblesse(ann.Id));
@@ -365,7 +367,8 @@ public class OlympiadTests
         Assert.NotNull(ann);
         Assert.NotNull(bea);
         DateTimeOffset now = Evening;
-        var world = new ZoneWorld(accounts: store, clock: () => now, olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 120 });
+        var world = new ZoneWorld(accounts: store, clock: () => now, olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 120 },
+        ledgerJournal: new MemoryLedgerJournal());
         var left = await Enter(world, "ann", ann);
         var right = await Enter(world, "bea", bea);
         int stayX = right.X;

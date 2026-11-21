@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -45,7 +46,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
     {
         tokens ??= new HandoffTokens(HandoffTokens.DefaultSecret);
         store ??= MemoryAccountStore.InMemory();
-        world ??= new ZoneWorld(accounts: store);
+        world ??= new ZoneWorld(accounts: store,
+        ledgerJournal: new MemoryLedgerJournal());
         var cts = new CancellationTokenSource();
         var zone = new NetZoneServer(
             tokens,

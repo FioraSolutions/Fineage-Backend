@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -14,7 +15,8 @@ public sealed class CharacterPresenceTests
         var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
-        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(1));
+        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(1),
+        ledgerJournal: new MemoryLedgerJournal());
 
         var session = new ZoneSession();
         session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
@@ -47,7 +49,8 @@ public sealed class CharacterPresenceTests
         var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
-        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(2));
+        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(2),
+        ledgerJournal: new MemoryLedgerJournal());
 
         var first = new ZoneSession();
         var second = new ZoneSession();
