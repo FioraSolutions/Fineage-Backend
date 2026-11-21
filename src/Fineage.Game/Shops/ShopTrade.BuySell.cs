@@ -88,12 +88,14 @@ public static partial class ShopTrade
         }
 
         var result = new ShopMutation { CastleTax = Math.Min(castleTax, subtotal) };
-        PayAdena(inventory, (int)subtotal, result.Touches);
+        PayAdena(inventory, (int)subtotal, result);
         foreach (var step in plan)
         {
             bool existed = inventory.FindByItemId(step.Product.ItemId) != null;
-            foreach (var piece in inventory.AddPieces(step.Product.ItemId, step.Count))
+            var pieces = inventory.AddPieces(step.Product.ItemId, step.Count);
+            foreach (var piece in pieces)
                 Remember(result.Touches, piece, existed && piece.Template.Stackable);
+            result.Gained.Add(Transfer(step.Product.ItemId, step.Count, pieces));
         }
 
         return result;
@@ -140,9 +142,10 @@ public static partial class ShopTrade
             if (!inventory.TryReduce(item, count, out bool removed))
                 return ShopMutation.Fail(ShopDeny.NotTradable);
             result.Touches.Add(new ShopTouch(removed ? ShopTouchKind.Remove : ShopTouchKind.Modify, item));
+            result.Lost.Add(Transfer(item.ItemId, count, [item]));
         }
 
-        GainAdena(inventory, (int)total, result.Touches);
+        GainAdena(inventory, (int)total, result);
         return result;
     }
 }

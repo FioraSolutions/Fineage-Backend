@@ -66,6 +66,9 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
         }
     }
 
+    /// <summary>The economy ledger journal in the same database.</summary>
+    public PostgresLedgerJournal OpenLedgerJournal() => new(_dataSource);
+
     public void Dispose() => _dataSource.Dispose();
 
     static void ApplyMigrations(NpgsqlDataSource dataSource)

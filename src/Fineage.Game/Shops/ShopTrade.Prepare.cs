@@ -103,23 +103,28 @@ public static partial class ShopTrade
         return result;
     }
 
-    static void PayAdena(PlayerInventory inventory, int amount, List<ShopTouch> touches)
+    static void PayAdena(PlayerInventory inventory, int amount, ShopMutation result)
     {
         if (amount < 1)
             return;
         if (!inventory.TryConsume(AdenaItemId, amount, out var stack, out bool removed) || stack == null)
             throw new InvalidOperationException("Adena check passed but the bag could not pay.");
-        touches.Add(new ShopTouch(removed ? ShopTouchKind.Remove : ShopTouchKind.Modify, stack));
+        result.Touches.Add(new ShopTouch(removed ? ShopTouchKind.Remove : ShopTouchKind.Modify, stack));
+        result.Lost.Add(new ShopTransfer(AdenaItemId, amount, []));
     }
 
-    static void GainAdena(PlayerInventory inventory, int amount, List<ShopTouch> touches)
+    static void GainAdena(PlayerInventory inventory, int amount, ShopMutation result)
     {
         if (amount < 1)
             return;
         bool existed = inventory.FindByItemId(AdenaItemId) != null;
         var stack = inventory.Add(AdenaItemId, amount);
-        touches.Add(new ShopTouch(existed ? ShopTouchKind.Modify : ShopTouchKind.Add, stack));
+        result.Touches.Add(new ShopTouch(existed ? ShopTouchKind.Modify : ShopTouchKind.Add, stack));
+        result.Gained.Add(new ShopTransfer(AdenaItemId, amount, []));
     }
+
+    static ShopTransfer Transfer(int itemId, long count, IReadOnlyList<ItemInstance> pieces) =>
+        new(itemId, count, pieces.Count > 0 && !pieces[0].Template.Stackable ? pieces.Select(piece => piece.ObjectId).ToList() : []);
 
     static void Remember(List<ShopTouch> touches, ItemInstance item, bool modify)
     {

@@ -53,7 +53,7 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
 string stateDir = Arg(args, "--state-dir")
     ?? Environment.GetEnvironmentVariable("FINEAGE_STATE_DIR")
     ?? Path.Combine("data");
-IAccountStore accounts;
+PostgresAccountStore accounts;
 try
 {
     accounts = AccountStoreFactory.Open(Arg(args, "--database"));
@@ -80,7 +80,8 @@ var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNo
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
 bool includeEnabledMaps = !ZoneMapFilter.IsExplicitlyOff(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
+    ledgerJournal: accounts.OpenLedgerJournal());
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;

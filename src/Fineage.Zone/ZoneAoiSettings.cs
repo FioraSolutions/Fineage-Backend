@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game.Economy;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Olympiad;
@@ -44,7 +45,8 @@ public static class ZoneAoiSettings
         SevenSignsEngine? sevenSigns = null,
         bool includeEnabledMaps = true,
         BossSchedule? bosses = null,
-        OlympiadBoard? olympiad = null)
+        OlympiadBoard? olympiad = null,
+        ILedgerJournal? ledgerJournal = null)
     {
         if (aoi != null)
         {
@@ -54,7 +56,8 @@ public static class ZoneAoiSettings
                 sevenSigns: sevenSigns,
                 includeEnabledMaps: includeEnabledMaps,
                 bosses: bosses,
-                olympiad: olympiad);
+                olympiad: olympiad,
+                ledgerJournal: ledgerJournal);
         }
 
         int cell = AoiCellSize;
@@ -66,13 +69,14 @@ public static class ZoneAoiSettings
                 sevenSigns: sevenSigns,
                 includeEnabledMaps: includeEnabledMaps,
                 bosses: bosses,
-                olympiad: olympiad);
+                olympiad: olympiad,
+                ledgerJournal: ledgerJournal);
         }
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

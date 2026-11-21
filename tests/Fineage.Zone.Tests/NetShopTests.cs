@@ -17,14 +17,14 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class NetShopTests
 {
-    const int MerchantObjectId = 61000;
-    const int MerchantNpcId = 30001;
-    const int Adena = 57;
-    const int Sword = 100;
-    const int Potion = 200;
+    internal const int MerchantObjectId = 61000;
+    internal const int MerchantNpcId = 30001;
+    internal const int Adena = 57;
+    internal const int Sword = 100;
+    internal const int Potion = 200;
     const int Stone = 300;
     const int Anvil = 400;
-    const int Blade = 500;
+    internal const int Blade = 500;
 
     [Fact]
     public async Task Buy_sell_and_multisell_move_adena_and_send_inventory_updates()
@@ -213,9 +213,9 @@ public sealed class NetShopTests
         Assert.Equal(1500, LastBalance(bench.Rec).Adena);
     }
 
-    static WorldBench Flat(MutableClock clock, GameData game, string mapId = "shop_flat") =>
+    internal static WorldBench Flat(MutableClock clock, GameData game, string mapId = "shop_flat", ulong? seed = null) =>
         new(game, clock: () => clock.Now, spawns: MerchantSpawns(mapId), mapId: mapId,
-            buyLists: BuyLists(), multisells: MultiLists());
+            buyLists: BuyLists(), multisells: MultiLists(), simulationSeed: seed);
 
     static WorldBench Limited(MutableClock clock) =>
         new(GameData.From(Catalog(), new StarterKits([])),
@@ -229,7 +229,7 @@ public sealed class NetShopTests
         Spawns.Merchant(MerchantObjectId, MerchantNpcId, mapId: mapId);
 
     /// <summary>The fighter's starter kit, so <see cref="WorldBench.EnterAsync"/> builds the bag from it.</summary>
-    static GameData Kit(params (int ItemId, int Count)[] rows) =>
+    internal static GameData Kit(params (int ItemId, int Count)[] rows) =>
         GameData.From(Catalog(), new StarterKits(
         [
             new StarterKit(HumanClasses.Fighter,
@@ -279,10 +279,10 @@ public sealed class NetShopTests
     static Fineage.Protocol.BuyListMsg LastBuyList(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.BuyListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutBuyList)).Last()[1]);
 
-    static Fineage.Protocol.SellListMsg LastSellList(NetBridgeRecorder rec) =>
+    internal static Fineage.Protocol.SellListMsg LastSellList(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.SellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSellList)).Last()[1]);
 
-    static Fineage.Protocol.MultiSellListMsg LastMultiSell(NetBridgeRecorder rec) =>
+    internal static Fineage.Protocol.MultiSellListMsg LastMultiSell(NetBridgeRecorder rec) =>
         Assert.IsType<Fineage.Protocol.MultiSellListMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]);
 
     static Fineage.Protocol.ShopBalanceMsg LastBalance(NetBridgeRecorder rec) =>
@@ -291,7 +291,7 @@ public sealed class NetShopTests
     static InventoryUpdateMsg LastInventory(NetBridgeRecorder rec) =>
         Assert.IsType<InventoryUpdateMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
 
-    static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
+    internal static SystemMessageMsg LastSystemMessage(NetBridgeRecorder rec) =>
         Assert.IsType<SystemMessageMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     static void NoInventoryUpdate(NetBridgeRecorder rec) =>
