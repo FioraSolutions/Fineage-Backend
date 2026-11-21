@@ -4,6 +4,7 @@ using Fineage.Game.Skills;
 using Fineage.Game.Shops;
 using Fineage.Game.Wedding;
 using Fineage.Protocol;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.Wedding;
 
 namespace Fineage.Zone.World;
@@ -213,8 +214,15 @@ public sealed partial class ZoneWorld
         bool siege = SiegeBlocksPartnerTeleport(activeChar);
         if (WeddingRules.GoToLoveSelfError(
                 _weddingSettings, activeChar, activeChar.Married, activeChar.PartnerId, combat, cursed,
-                jailed: false, olympiad: PlayerInOlympiad(activeChar), duel: activeChar.DuelId != 0, observer: false,
-                siege, festival: false, dimensionalRift: false, noSummonZone: false, grandBossZone: false)
+                jailed: PlayerZoneChecks.IsPlayerJailed(this, activeChar.ObjectId),
+                olympiad: PlayerInOlympiad(activeChar),
+                duel: activeChar.DuelId != 0,
+                observer: PlayerZoneChecks.IsOlympiadObserver(this, activeChar.ObjectId),
+                siege,
+                festival: PlayerZoneChecks.IsInFestivalArena(this, activeChar.ObjectId),
+                dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, activeChar.ObjectId),
+                noSummonZone: false,
+                grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, activeChar.ObjectId))
             is { } selfErr)
             return SendWeddingLine(activeChar, selfErr);
 
@@ -225,9 +233,17 @@ public sealed partial class ZoneWorld
 
         bool partnerCursed = HasCursedWeaponForWedding(partner.Inventory);
         if (WeddingRules.GoToLovePartnerError(
-                partner, partnerCursed, jailed: false, olympiad: PlayerInOlympiad(partner),
-                duel: partner.DuelId != 0, observer: false, SiegeBlocksPartnerTeleport(partner),
-                festival: false, dimensionalRift: false, noSummonZone: false, grandBossZone: false, offline: false)
+                partner, partnerCursed,
+                jailed: PlayerZoneChecks.IsPlayerJailed(this, partner.ObjectId),
+                olympiad: PlayerInOlympiad(partner),
+                duel: partner.DuelId != 0,
+                observer: PlayerZoneChecks.IsOlympiadObserver(this, partner.ObjectId),
+                siegeInProgress: SiegeBlocksPartnerTeleport(partner),
+                festival: PlayerZoneChecks.IsInFestivalArena(this, partner.ObjectId),
+                dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, partner.ObjectId),
+                noSummonZone: false,
+                grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, partner.ObjectId),
+                offline: false)
             is { } partnerErr)
             return SendWeddingLine(activeChar, partnerErr);
 

@@ -1,6 +1,7 @@
 using Fineage.Game.Shops;
 using Fineage.Game.Wedding;
 using Fineage.Protocol;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.Wedding;
 using Fineage.Zone.World;
 using Xunit;
@@ -137,6 +138,25 @@ public sealed class WeddingTests
         kit.World.WeddingNpcBypassForTests(sb, pb, npc, "accept");
         pa.CombatUntilUnixMs = kit.Now.ToUnixTimeMilliseconds() + 60_000;
         AddAdena(pb, settings.TeleportPrice);
+        Assert.Null(await kit.World.TryWeddingVoicedAsync(sa, WeddingProtocol.GoToLove, default));
+        Assert.Equal(0, pa.Intent.WeddingTeleportPartnerId);
+    }
+
+    [Fact]
+    public async Task Go_to_love_blocked_in_festival_arena()
+    {
+        var kit = new NetTestKit();
+        var (_, sa, pa, sb, pb) = EngagedPair(kit);
+        var npc = WeddingNpc(kit, pa);
+        var settings = kit.World.WeddingSettingsForTests;
+        WearFormal(kit, pa);
+        WearFormal(kit, pb);
+        AddAdena(pa, settings.WeddingPrice);
+        AddAdena(pb, settings.WeddingPrice);
+        kit.World.WeddingNpcBypassForTests(sa, pa, npc, "ask");
+        kit.World.WeddingNpcBypassForTests(sb, pb, npc, "accept");
+        PlayerZoneChecks.RegisterFestivalParticipation(kit.World, pa.ObjectId, inside: true);
+        AddAdena(pa, settings.TeleportPrice);
         Assert.Null(await kit.World.TryWeddingVoicedAsync(sa, WeddingProtocol.GoToLove, default));
         Assert.Equal(0, pa.Intent.WeddingTeleportPartnerId);
     }
