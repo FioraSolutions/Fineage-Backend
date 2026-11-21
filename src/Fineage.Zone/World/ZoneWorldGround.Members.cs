@@ -78,6 +78,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
+        if (item.IsAugmented)
+        {
+            ShotNotice(session, SysMsgAugmentedCannotDiscard, "The augmented item cannot be discarded.");
+            return "augmented";
+        }
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items cannot be destroyed either
         if (item.Count < count)
@@ -119,6 +124,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
+        if (item.IsAugmented)
+        {
+            ShotNotice(session, SysMsgAugmentedCannotDiscard, "The augmented item cannot be discarded.");
+            return "augmented";
+        }
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items are not dropable
         if (item.Count < count)
