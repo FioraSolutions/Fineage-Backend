@@ -4,6 +4,7 @@ using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -232,10 +233,25 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
         var source = LedgerAccount.Of(SystemAccount.DropSource);
         var planned = new List<(DropStack Stack, int Dx, int Dy, int GroundId)>();
+        var autoLoot = new List<(ZoneEntity Looter, DropStack Stack)>();
+        ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
         foreach (var stack in rolls)
         {
             if (!_game.Items.TryGet(stack.ItemId, out var template))
                 continue;
+            bool herb = IsHerb(stack.ItemId);
+            if (autoLooter != null
+                && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
+                && HasRoomForLootStack(autoLooter, stack.ItemId, stack.Count, template.Stackable))
+            {
+                var bag = LedgerAccount.Inventory(autoLooter.ObjectId);
+                ObserveLedger(move, bag);
+                move.Post(source, stack.ItemId, -stack.Count);
+                move.Post(bag, stack.ItemId, stack.Count);
+                autoLoot.Add((autoLooter, stack));
+                continue;
+            }
+
             int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             int groundId = _itemIds.Next();
@@ -253,6 +269,9 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        foreach (var (looter, stack) in autoLoot)
+            GrantInventoryStack(looter, stack.ItemId, stack.Count, notifyObtained: true);
+
         foreach (var (stack, dx, dy, groundId) in planned)
         {
             SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
@@ -263,6 +282,29 @@ public sealed partial class ZoneWorld
 
         move.Commit(LedgerHoldingsOf);
     }
+
+    ZoneEntity? AutoLootRecipient(ZoneEntity? killer, int lootOwnerObjectId)
+    {
+        if (killer?.Session == null || killer.Inventory == null)
+            return null;
+        if (lootOwnerObjectId != 0
+            && lootOwnerObjectId != killer.ObjectId
+            && _byId.TryGetValue(lootOwnerObjectId, out var owner)
+            && owner.Session != null
+            && owner.Inventory != null)
+            return owner;
+        return killer;
+    }
+
+    bool HasRoomForLootStack(ZoneEntity player, int itemId, int count, bool stackable) =>
+        player.Inventory != null
+        && GroundRules.HasRoomForGroundItem(
+            IsHerb(itemId),
+            player.Inventory.Items.Count,
+            player.Race,
+            stackable,
+            player.Inventory.FindByItemId(itemId) != null,
+            count);
 
     /// <summary>
     /// Places one stack on the ground and returns it, or null when there is nothing to place (no count, unknown item).

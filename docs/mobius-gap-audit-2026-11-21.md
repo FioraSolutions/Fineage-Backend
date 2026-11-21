@@ -321,25 +321,25 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
-| 2 | Quest coverage | #709, #717, (batch 3 open) | partial — +collects Q262/303/313/320; Q634/635/255 blocked | No |
-| 3 | Item augmentation | — | pending | Yes (refine UI) |
-| 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
-| 5 | Auto-loot | — | pending | No |
-| 6 | Seven Signs Festival | — | pending | No |
-| 7 | Dimensional rift | — | pending | No |
+| 2 | Quest coverage | #709, #717, #718 | partial — +12 quests; Q634/635 blocked (rift); Q255→Q998; ~90 partial remain | No |
+| 3 | Item augmentation | — | blocked | Yes (refine UI + `AugmentationData`) |
+| 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
+| 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
+| 6 | Seven Signs Festival | — | blocked | No (instances) |
+| 7 | Dimensional rift | — | blocked | No (unblocks Q634/635) |
 | 8 | Siege mercenaries | — | pending | No |
 | 9 | Siege golem (noble) | — | pending | No |
-| 10 | Skill enchant (+skills) | — | pending | Yes (ExEnchantSkill) |
+| 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
 | 11 | Day/night spawns | — | pending | No |
 | 12 | Clan hall siege | — | pending | No |
 | 13 | Baby pet / evolution | — | pending | No |
-| 14 | Guard / town AI | — | pending | No |
+| 14 | Guard / town AI | — | partial (existing AI) | No |
 | 15 | Zone types (swamp/damage/NL) | — | pending | No |
 | 16 | Boats + walking NPCs | — | pending | No |
-| 17 | Saga quest fidelity | — | pending | No |
-| 18 | GM / punishment tooling | — | pending | No |
+| 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
+| 18 | GM / punishment tooling | — | partial | No |
 | 19 | Compound skill conditions | — | pending | No |
-| 20 | Freight warehouse | — | pending | No |
+| 20 | Freight warehouse | — | blocked | No (no account freight store) |
 
 ---
 

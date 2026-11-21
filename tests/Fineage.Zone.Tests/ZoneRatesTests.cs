@@ -15,6 +15,9 @@ public sealed class ZoneRatesTests
         Assert.Equal(1, rates.RateAdena);
         Assert.Equal(1, rates.DeathDropChanceMultiplier);
         Assert.Equal(1, rates.SpoilDropChanceMultiplier);
+        Assert.False(rates.AutoLoot);
+        Assert.False(rates.AutoLootRaids);
+        Assert.False(rates.AutoLootHerbs);
     }
 
     [Fact]
