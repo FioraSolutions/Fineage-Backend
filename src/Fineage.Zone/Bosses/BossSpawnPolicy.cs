@@ -10,12 +10,16 @@ public interface IBossSpawnPolicy
     bool ShouldSpawn(BossDefinition definition);
 }
 
-/// <summary>Only bosses with <c>enabled: true</c> in <c>raidbosses.json</c>.</summary>
+/// <summary>
+/// Smoke hosts: <c>enabled: true</c> rows that are also on the Mobius world spawn list
+/// (coordinates + respawn window).
+/// </summary>
 public sealed class DatapackBossSpawnPolicy : IBossSpawnPolicy
 {
     public static readonly DatapackBossSpawnPolicy Instance = new();
 
-    public bool ShouldSpawn(BossDefinition definition) => definition.Enabled;
+    public bool ShouldSpawn(BossDefinition definition) =>
+        definition.Enabled && definition.IsWorldScheduledSpawn;
 }
 
 /// <summary>
@@ -26,6 +30,9 @@ public sealed class MapFilteredBossSpawnPolicy(bool includeEnabledMaps) : IBossS
 {
     public bool ShouldSpawn(BossDefinition definition)
     {
+        if (!definition.IsWorldScheduledSpawn)
+            return false;
+
         if (!includeEnabledMaps)
         {
             if (!definition.Enabled)
@@ -34,10 +41,9 @@ public sealed class MapFilteredBossSpawnPolicy(bool includeEnabledMaps) : IBossS
             return bounds.Count > 0 && ZoneMapFilter.Contains(bounds, definition.X, definition.Y);
         }
 
-        if (!definition.HasRespawnWindow && definition is { X: 0, Y: 0, Z: 0 })
-            return false;
         if (definition.Enabled)
             return true;
-        return ZoneMapFilter.Contains(ZoneMapFilter.BoundsList, definition.X, definition.Y);
+        var regional = ZoneMapFilter.BoundsList;
+        return regional.Count > 0 && ZoneMapFilter.Contains(regional, definition.X, definition.Y);
     }
 }
