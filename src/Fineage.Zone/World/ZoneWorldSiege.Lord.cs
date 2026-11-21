@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Net.Contract;
@@ -308,23 +309,68 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>Mobius <c>Castle.removeOwner</c> / <c>CastleManager.removeCirclet</c>: online members lose the circlet (and the lord the crown).</summary>
+    /// <summary>Mobius <c>Castle.removeOwner</c> / <c>CastleManager.removeCirclet</c>: every clan member loses the circlet (lord also loses the crown).</summary>
     void RemoveCirclets(ZoneClan clan, int castleId)
     {
         int circlet = castleId > 0 && castleId < SiegeProtocol.CircletItemIds.Length ? SiegeProtocol.CircletItemIds[castleId] : 0;
-        foreach (var session in OnlineMembers(clan))
+        foreach (var roster in clan.Members)
         {
-            if (!_byId.TryGetValue(session.ObjectId, out var member) || member.Inventory is not { } inventory)
+            if (_byId.TryGetValue(roster.CharacterId, out var member) && member.Session is not null && member.Inventory is { } inventory)
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (circlet > 0 && inventory.CountOf(circlet) > 0)
+                    Take(inventory, circlet, inventory.CountOf(circlet), changes);
+                if (member.ObjectId == clan.LeaderId && inventory.CountOf(SiegeProtocol.LordsCrownItemId) > 0)
+                    Take(inventory, SiegeProtocol.LordsCrownItemId, inventory.CountOf(SiegeProtocol.LordsCrownItemId), changes);
+                if (changes.Count == 0)
+                    continue;
+                FanInventory(member.Session, Collapse(changes));
+                SaveInventory(member.Session, inventory);
                 continue;
-            var changes = new List<InventoryUpdateEntryMsg>();
-            if (circlet > 0 && inventory.CountOf(circlet) > 0)
-                Take(inventory, circlet, inventory.CountOf(circlet), changes);
-            if (member.ObjectId == clan.LeaderId && inventory.CountOf(SiegeProtocol.LordsCrownItemId) > 0)
-                Take(inventory, SiegeProtocol.LordsCrownItemId, inventory.CountOf(SiegeProtocol.LordsCrownItemId), changes);
-            if (changes.Count == 0)
+            }
+            RemoveStoredCastleRegalia(clan, roster, circlet, castleId);
+        }
+    }
+
+    void RemoveStoredCastleRegalia(ZoneClan clan, ZoneClanMember roster, int circletId, int castleId)
+    {
+        if (_accounts?.FindById(roster.Account, roster.CharacterId) is not { Items: { } items })
+            return;
+        var kept = new List<StoredItem>();
+        bool changed = false;
+        foreach (var row in items)
+        {
+            if (circletId > 0 && row.ItemId == circletId)
+            {
+                changed = true;
                 continue;
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory);
+            }
+            if (roster.CharacterId == clan.LeaderId && row.ItemId == SiegeProtocol.LordsCrownItemId)
+            {
+                changed = true;
+                continue;
+            }
+            kept.Add(row);
+        }
+        if (!changed)
+            return;
+        var before = HoldingsFromStored(items);
+        var after = HoldingsFromStored(kept);
+        var bag = LedgerAccount.Inventory(roster.CharacterId);
+        var move = BeginLedgerMove(LedgerTxKind.Destroy, roster.CharacterId, castleId);
+        move.Observe(bag, before);
+        PostChange(move, bag, before, after, LedgerAccount.Of(SystemAccount.Destroyed));
+        _accounts.TryReplaceItems(roster.Account, roster.CharacterId, kept);
+        move.Commit(LedgerHoldingsOf);
+    }
+
+    /// <summary>Test hook for circlet removal (Mobius <c>CastleManager.removeCirclet</c>).</summary>
+    internal void RemoveCircletsForTest(int clanId, int castleId)
+    {
+        using (_affinity.Step())
+        {
+            if (_clan.TryGet(clanId, out var clan))
+                RemoveCirclets(clan, castleId);
         }
     }
 
