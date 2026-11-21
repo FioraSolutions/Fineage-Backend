@@ -61,6 +61,8 @@ public sealed partial class ZoneWorld
             return;
         if (CursedWeaponsManager.NpcExcludedFromDrop(npc.NpcType))
             return;
+        if (IsTreasureBox(npc.NpcId) || IsChestNpc(npc))
+            return;
         if (killer?.Session == null)
             return;
 
