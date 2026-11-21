@@ -89,6 +89,8 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Clan wars | ✅ | — | `ClanWar.java` | `ZoneWorldPledge.Wars` | — |
 | Alliance | ✅ | — | `Alliance.java` | `ZoneWorldAlly` | — |
 | Clan hall auction | ✅ | — | `ClanHallAuctionManager` | `ClanHallAuctionActor` | — |
+| Clan hall functions | 🟡 | `AgitDecoInfo` fan-out TBD; item-creation multisell depth | `ClanHallManager` | `ZoneWorldPledge.HallFunctions`, `ClanHallManagerBypassHandler`, `HallFunctionActor` | — |
+| Clan hall escape / restart | ✅ | SOE 1829/5858 + death action 5 | `MapRegionData` CLANHALL | `ClanHallSpawnCatalog`, `TryUseEscapeClanHall`, `ReviveToClanHall` | — |
 | **Clan hall siege** | ❌ | CH siege cycles | `CHSiegeManager.java` | Auction only | M |
 | Freight WH | ❌ | Account freight deposit | `Warehouse.java` freight type | Stub bypass | S |
 

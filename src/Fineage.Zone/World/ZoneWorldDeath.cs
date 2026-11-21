@@ -56,6 +56,16 @@ public sealed partial class ZoneWorld
             ClearReviveOffer(player);
             return null;
         }
+        if (action == DeathProtocol.ReviveToClanHall)
+        {
+            var dest = ClanHallDestination(player);
+            if (dest is not { } hp)
+                return DeathProtocol.NoClanHall;
+            ClearReviveOffer(player);
+            ReviveAtVillage(player, hp.X, hp.Y, hp.Z);
+            ZoneLog.Info($"revive object={player.ObjectId} action={action} -> {hp.X},{hp.Y},{hp.Z}");
+            return null;
+        }
         if (action == DeathProtocol.ReviveToCastle || action == DeathProtocol.ReviveToSiegeHq)
         {
             // Mobius RequestRestartPoint cases 2 / 3: castle (defender in a siege, or the owner clan) and siege HQ.

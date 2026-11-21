@@ -46,6 +46,8 @@ public sealed partial class ZoneWorld
         // Scroll of Escape / Blessed SOE: cast gesture + hitTime teleport (skills 2013 / 2036 are not in skills.json).
         if (use!.Effects is [{ Kind: "escapeTown" } escape])
             return TryUseEscapeTown(session, player, item, escape, use.ReuseDelayMs, now);
+        if (use!.Effects is [{ Kind: "escapeClanHall" } escapeHall])
+            return TryUseEscapeClanHall(session, player, item, escapeHall, use.ReuseDelayMs, now);
 
         // Effects are resolved first so an unsupported one leaves the stack untouched instead of eating the potion.
         bool vitals = false, abnormals = false, moved = false, penaltyCleared = false;

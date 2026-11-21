@@ -125,12 +125,13 @@ namespace Fineage.Net.Contract
         public int KillerObjectId { get; set; }
         /// <summary>
         /// Optional tail (Mobius <c>Die</c> restart buttons, dead player only): bit0 to castle, bit1 to siege
-        /// headquarters. Absent on older frames and on NPC deaths = 0.
+        /// headquarters, bit2 to clan hall. Absent on older frames and on NPC deaths = 0.
         /// </summary>
         public int RestartFlags { get; set; }
 
         public const int RestartCastle = 1;
         public const int RestartSiegeHq = 2;
+        public const int RestartClanHall = 4;
     }
 
     public sealed class UseSkillNetMsg
@@ -162,6 +163,8 @@ namespace Fineage.Net.Contract
         public const int ReviveToCastle = 3;
         /// <summary>Restart at the clan's siege headquarters. Matches <c>DeathProtocol.ReviveToSiegeHq</c>.</summary>
         public const int ReviveToSiegeHq = 4;
+        /// <summary>Restart inside the clan's owned clan hall. Matches <c>DeathProtocol.ReviveToClanHall</c>.</summary>
+        public const int ReviveToClanHall = 5;
 
         public int Action { get; set; }
     }
