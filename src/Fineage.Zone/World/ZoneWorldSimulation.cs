@@ -185,7 +185,11 @@ public sealed partial class ZoneWorld
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.
         ticks.AddRegionStage(_regenPlayersStage, slow);
         ticks.AddRegionStage(_regenNpcsStage, slow);
-        ticks.AddWorldStage("spawns", _ => TickSpawns(), slow);
+        ticks.AddWorldStage("spawns", _ =>
+        {
+            TickDayNightSpawns();
+            TickSpawns();
+        }, slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
         ticks.AddWorldStage(BossActor.StageName, tick => SpawnBosses(_bosses.Step(tick)), slow);
         ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
