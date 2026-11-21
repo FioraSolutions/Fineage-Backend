@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Fishing;
@@ -461,9 +462,19 @@ public sealed partial class ZoneWorld
             {
                 SelfLine(session, FishingProtocol.CaughtSomething, "You caught something!");
                 var inventory = player.Inventory!;
-                GiveItem(session, inventory, line.Fish.ItemId, 1);
-                string name = _game.Items.TryGet(line.Fish.ItemId, out var t) ? t.Name : line.Fish.ItemId.ToString();
-                SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+                int fishId = line.Fish.ItemId;
+                RecordBagChange(
+                    player,
+                    LedgerTxKind.FishingReward,
+                    LedgerAccount.Of(SystemAccount.Gathering),
+                    () =>
+                    {
+                        GiveItem(session, inventory, fishId, 1);
+                        string name = _game.Items.TryGet(fishId, out var t) ? t.Name : fishId.ToString();
+                        SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+                        return true;
+                    },
+                    _ => fishId);
             }
         }
 

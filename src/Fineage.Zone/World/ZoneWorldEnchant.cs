@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 
@@ -128,7 +129,18 @@ public sealed partial class ZoneWorld
         int oldLevel = target.EnchantLevel;
         string targetName = target.Template.Name;
         int scrollSlot = SlotOf(scroll);
+        int scrollId = scroll.ItemId;
+        int resultCode = 0;
+        int reportedLevel = 0;
+        int crystalId = 0;
+        int crystalCount = 0;
 
+        RecordPlayerBagChange(
+            player,
+            LedgerTxKind.Enchant,
+            LedgerAccount.Of(SystemAccount.Destroyed),
+            () =>
+            {
         int scrollLeft = inventory.TakeOne(scroll);
         var changes = new List<InventoryUpdateEntryMsg>
         {
@@ -139,10 +151,8 @@ public sealed partial class ZoneWorld
 
         var roll = EnchantRules.Roll(
             target.Template, oldLevel, definition, _enchantRates, new StreamEnchantRandom(Rng(_enchantRandom, player)));
-        int resultCode;
-        int reportedLevel;
-        int crystalId = 0;
-        int crystalCount = 0;
+        crystalId = 0;
+        crystalCount = 0;
         var lines = new List<SystemMessageMsg>();
 
         if (roll.Success)
@@ -261,11 +271,16 @@ public sealed partial class ZoneWorld
                 NetBridge.FanoutCharInfo(netPeers, player.ObjectId);
         }
 
-        if (resultCode == EnchantProtocol.ResultSuccess && target.EnchantLevel != oldLevel &&
-            EnchantProtocol.Announced(target.Template.Kind == ItemKind.Weapon, target.EnchantLevel))
-            AnnounceEnchant(player, target);
-
         SaveInventory(session, inventory);
+                return true;
+            },
+            _ => scrollId);
+
+        if (resultCode == EnchantProtocol.ResultSuccess && inventory.Find(target.ObjectId) is { } enchanted &&
+            enchanted.EnchantLevel != oldLevel &&
+            EnchantProtocol.Announced(enchanted.Template.Kind == ItemKind.Weapon, enchanted.EnchantLevel))
+            AnnounceEnchant(player, enchanted);
+
         ZoneLog.Info(
             $"enchant object={session.ObjectId} result={resultCode} item={target.ItemId} {oldLevel}->{reportedLevel} crystals={crystalCount}");
         return null;

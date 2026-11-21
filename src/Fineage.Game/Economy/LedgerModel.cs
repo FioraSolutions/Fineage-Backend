@@ -73,7 +73,10 @@ public enum SystemAccount
     SevenSigns = 12,
 
     /// <summary>Olympiad gate passes and noble grants.</summary>
-    Olympiad = 13
+    Olympiad = 13,
+
+    /// <summary>Fishing and other non-combat gathering.</summary>
+    Gathering = 14
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -206,7 +209,22 @@ public enum LedgerTxKind
     SevenSignsExchange = 29,
 
     /// <summary>Olympiad noble gate passes or board grants: <c>Reference</c> is item id.</summary>
-    OlympiadGrant = 30
+    OlympiadGrant = 30,
+
+    /// <summary>A fish or other gather reward: <c>Reference</c> is item id.</summary>
+    FishingReward = 31,
+
+    /// <summary>Spoil sweep loot into a bag: <c>Reference</c> is the npc template id.</summary>
+    SweepLoot = 32,
+
+    /// <summary>Enchant scroll used and item changed or crystallized: <c>Reference</c> is scroll item id.</summary>
+    Enchant = 33,
+
+    /// <summary>Pet food consumed from the pet's bag.</summary>
+    PetFeed = 34,
+
+    /// <summary>Items moved between owner inventory and pet inventory: <c>Reference</c> is control item id.</summary>
+    PetItemTransfer = 35
 }
 
 /// <summary>

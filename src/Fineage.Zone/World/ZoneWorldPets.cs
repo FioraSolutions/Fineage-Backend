@@ -448,7 +448,7 @@ public sealed partial class ZoneWorld
                 SelfLine(refusal, SysMsgPetCannotUseItem, "This pet cannot use this item.");
             return false;
         }
-        pet.Inventory.TakeOne(food);
+        RecordPetBagChange(owner, pet, LedgerTxKind.PetFeed, food.ItemId, () => pet.Inventory.TakeOne(food));
         pet.Fed = Math.Min(pet.Template.At(s.Level).MaxMeal, pet.Fed + kind.Feed);
         var cast = new MagicSkillUseMsg { CasterObjectId = s.ObjectId, TargetObjectId = s.ObjectId, SkillId = 2048, SkillLevel = 1 };
         if (NetBridge != null && KnownWatchers(s.ObjectId) is { Count: > 0 } watchers)
@@ -684,9 +684,13 @@ public sealed partial class ZoneWorld
         }
         if (!PetBagFits(pet, item, count, session))
             return;
-        var changes = new List<InventoryUpdateEntryMsg>();
-        MovePetItem(owner.Inventory, pet.Inventory, item, count, changes, new List<InventoryUpdateEntryMsg>());
-        FanInventory(session, Collapse(changes));
+        if (!CommitPetOwnerTransfer(owner, pet, owner.Inventory, pet.Inventory, item, count, () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                MovePetItem(owner.Inventory, pet.Inventory, item, count, changes, new List<InventoryUpdateEntryMsg>());
+                FanInventory(session, Collapse(changes));
+            }))
+            return;
         SaveInventory(session, owner.Inventory);
         StorePet(owner, s);
         SendPetInventory(owner, s);
@@ -698,9 +702,13 @@ public sealed partial class ZoneWorld
     {
         if (count <= 0 || owner.Inventory == null || pet.Inventory.Find(objectId) is not { } item || count > item.Count)
             return;
-        var changes = new List<InventoryUpdateEntryMsg>();
-        MovePetItem(pet.Inventory, owner.Inventory, item, count, null, changes);
-        FanInventory(session, Collapse(changes));
+        if (!CommitPetOwnerTransfer(owner, pet, pet.Inventory, owner.Inventory, item, count, () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                MovePetItem(pet.Inventory, owner.Inventory, item, count, null, changes);
+                FanInventory(session, Collapse(changes));
+            }))
+            return;
         SaveInventory(session, owner.Inventory);
         StorePet(owner, s);
         SendPetInventory(owner, s);

@@ -141,7 +141,7 @@ public sealed partial class ZoneWorld
         {
             if (stack.ItemId == WarehouseRules.AdenaItemId && party != null)
             {
-                DistributeSweepAdena(party, player, target, stack.Count, touchInventories);
+                DistributeSweepAdena(party, player, target, stack.Count, touchInventories, target.NpcId);
                 continue;
             }
 
@@ -162,7 +162,7 @@ public sealed partial class ZoneWorld
                     looter = entity;
             }
 
-            GrantSweepStack(looter, stack.ItemId, stack.Count, touchInventories);
+            GrantSweepStack(looter, stack.ItemId, stack.Count, touchInventories, target.NpcId);
         }
 
         foreach (int objectId in touchInventories)
