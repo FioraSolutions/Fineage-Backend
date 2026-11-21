@@ -28,6 +28,7 @@
     <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data/skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data/skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-transfer-trees.json" Link="data/skill-transfer-trees.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-effects.json" Link="data/skill-effects.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-effect-coverage.json" Link="data/skill-effect-coverage.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />

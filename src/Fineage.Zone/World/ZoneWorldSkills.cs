@@ -107,6 +107,15 @@ public sealed partial class ZoneWorld
                 }
                 return LearnPledgeSkill(session, player, skillId, level);
             }
+            if (skillType == AcquireSkillTypeTransfer)
+            {
+                if (informing)
+                {
+                    PublishTransferSkillInfo(session, player, skillId, level);
+                    return null;
+                }
+                return LearnTransferSkill(session, player, skillId, level);
+            }
             if (informing)
             {
                 PublishAcquireSkillInfo(session, player, skillId, level, skillType);

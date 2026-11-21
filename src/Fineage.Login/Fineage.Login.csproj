@@ -25,5 +25,6 @@
     <Content Include="..\..\data\quests\**\*.*" Link="data\quests\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data\skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data\skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-transfer-trees.json" Link="data\skill-transfer-trees.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
