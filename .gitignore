@@ -20,6 +20,8 @@ data/*
 !data/stat-bonuses.json
 !data/quests/
 !data/quests/**
+!data/mobius-quest-dialogs/
+!data/mobius-quest-dialogs/**
 !data/skills.json
 !data/skill-combat.json
 !data/skill-stat-effects.json
