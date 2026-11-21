@@ -41,13 +41,14 @@ public sealed class MovementPacketHandler
         }
 
         var move = NetCodec.DecodeMoveInput(envelope.Payload);
-        var plan = await _world.ExecuteAroundAsync(zoneSession, new MoveCommand(move.DestX, move.DestY, move.DestZ), apply =>
+        var command = new MoveCommand(move.DestX, move.DestY, move.DestZ);
+        var plan = await _world.ExecuteAroundAsync(zoneSession, command, apply =>
         {
             var before = _world.SnapshotKnownIds(zoneSession);
             string? error = apply();
             // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
             var frames = error == null ? _knownlist.PlanDiff(zoneSession, self, before, _world.SnapshotKnownIds(zoneSession)) : [];
-            return new MovePlan(error, zoneSession.X, zoneSession.Y, zoneSession.Z, frames);
+            return new MovePlan(error, command.ResultX, command.ResultY, command.ResultZ, frames);
         }, ct).ConfigureAwait(false);
         if (plan.Error != null)
         {
