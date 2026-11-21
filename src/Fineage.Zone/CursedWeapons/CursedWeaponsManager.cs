@@ -90,7 +90,7 @@ public sealed class CursedWeaponsManager
         }
     }
 
-  public bool NeedsSimulationTick(long nowUnixMs)
+    public bool NeedsSimulationTick(long nowUnixMs)
     {
         lock (_gate)
         {
