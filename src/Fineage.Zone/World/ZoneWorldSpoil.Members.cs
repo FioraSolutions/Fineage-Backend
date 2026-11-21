@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
         return carried + incoming <= MaxLoadOf(m);
     }
 
-    /// <summary>Skill 254 / 42 through the normal SkillUse path: MP, reuse, MagicSkillUse fan-out, then the spoil/sweep effect.</summary>
+    /// <summary>Skill 254 / 302 (area) / 42 through the normal SkillUse path: MP, reuse, MagicSkillUse fan-out, then spoil/sweep.</summary>
     string? TrySkillUseSpoilOrSweep(ZoneSession session, ZoneEntity player, SkillUseIntent request, SkillDefinition template,
         SkillLevelData levelData, int level, long now, bool sweep)
     {
@@ -98,6 +98,8 @@ public sealed partial class ZoneWorld
             Notice(session, _spoilRules.Messages.InvalidTarget, "Invalid target.");
             return null;
         }
+
+        bool areaSpoil = !sweep && template.TargetType.Equals("AREA", StringComparison.OrdinalIgnoreCase);
 
         if (!InSkillCastRange(player, target, template.CastRange))
         {
@@ -123,10 +125,21 @@ public sealed partial class ZoneWorld
                 return null;
             }
 
-            if (target.SpoilerObjectId != 0)
+            if (!areaSpoil && target.SpoilerObjectId != 0)
             {
                 Notice(session, _spoilRules.Messages.AlreadySpoiled, "It has already been spoiled.");
                 return null;
+            }
+
+            if (areaSpoil)
+            {
+                bool anyVictim = HostileAffectTargets(player, target, template)
+                    .Any(v => v.Kind == ZoneEntityKind.Npc && v.Attackable && v.CurHp > 0 && !v.Dead);
+                if (!anyVictim)
+                {
+                    Notice(session, _spoilRules.Messages.InvalidTarget, "Invalid target.");
+                    return null;
+                }
             }
         }
         else if (!ApplySweep(session, player, target))
@@ -146,9 +159,24 @@ public sealed partial class ZoneWorld
         if (!sweep)
         {
             int skillId = request.SkillId;
-            // Mobius Spoil effect (instant, physical skill: not interrupted by hits) at hitTime 1.8 s.
-            ScheduleEffect(player, target, template, level, now, hitMs,
-                (t, _) => ApplySpoil(session, player, t, forced: false, skillId, level));
+            // Mobius Spoil effect (instant, physical skill: not interrupted by hits) at hitTime.
+            if (areaSpoil)
+            {
+                ScheduleEffect(player, target, template, level, now, hitMs, (primary, _) =>
+                {
+                    foreach (var victim in HostileAffectTargets(player, primary, template))
+                    {
+                        if (victim.Kind != ZoneEntityKind.Npc || !victim.Attackable || victim.Dead || victim.CurHp <= 0)
+                            continue;
+                        ApplySpoil(session, player, victim, forced: false, skillId, level);
+                    }
+                });
+            }
+            else
+            {
+                ScheduleEffect(player, target, template, level, now, hitMs,
+                    (t, _) => ApplySpoil(session, player, t, forced: false, skillId, level));
+            }
         }
         return null;
     }
