@@ -113,6 +113,20 @@ public sealed class EconomyLedger : IEconomyLedger
         }
     }
 
+    /// <summary>Ground stack accounts that still hold journal value.</summary>
+    public IReadOnlyList<LedgerAccount> NonEmptyGroundAccounts()
+    {
+        lock (_sync)
+        {
+            return _balances
+                .Where(pair => pair.Key is { Owner: LedgerOwnerKind.World, Container: LedgerContainer.Ground }
+                                && !pair.Value.IsEmpty)
+                .Select(pair => pair.Key)
+                .OrderBy(account => account.OwnerId)
+                .ToList();
+        }
+    }
+
     /// <summary>A copy of what <paramref name="account"/> holds by the journal.</summary>
     public LedgerHoldings HoldingsOf(LedgerAccount account)
     {
