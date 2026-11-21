@@ -15,14 +15,14 @@ public sealed class NetSkillConditionPipelineTests
     const int CursedBone = 1458;
     const int SonicBlaster = 6;
     const int SonicFocus = 8;
-    const int MobObjectId = 90_001;
+    const int MobObjectId = 9_300_080; // spawn row object id (first ctor arg)
 
     static SpawnCatalog ForceMap() =>
         SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["pipe"] = new("pipe", true,
             [
-                new SpawnNpcDefinition(9_300_080, MobObjectId, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
+                new SpawnNpcDefinition(MobObjectId, 90_001, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
                     0, true, 50_000, 1f, 1f, 60, 0, "", "Monster", Level: 1, Aggressive: false)
             ])
         });
