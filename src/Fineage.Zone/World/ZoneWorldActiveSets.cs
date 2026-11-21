@@ -11,9 +11,23 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>Test/diagnostics: sizes of the Mobius-style active registries.</summary>
-    internal (int Moving, int AiBusy, int PendingHit, int Decaying, int NeedRegen, int WithAbnormals) ActiveSetCounts =>
-        (_byId.CountOf(ActiveSets.Moving), _byId.CountOf(ActiveSets.AiBusy), _byId.CountOf(ActiveSets.PendingHit),
-            _byId.CountOf(ActiveSets.Decaying), _byId.CountOf(ActiveSets.NeedRegen), _byId.CountOf(ActiveSets.WithAbnormals));
+    internal (int Moving, int Thinking, int AiBusy, int PendingHit, int Decaying, int NeedRegen, int WithAbnormals) ActiveSetCounts =>
+        (_byId.CountOf(ActiveSets.Moving), _byId.CountOf(ActiveSets.Thinking), _byId.CountOf(ActiveSets.AiBusy),
+            _byId.CountOf(ActiveSets.PendingHit), _byId.CountOf(ActiveSets.Decaying), _byId.CountOf(ActiveSets.NeedRegen),
+            _byId.CountOf(ActiveSets.WithAbnormals));
+
+    /// <summary>Counts included in simulation overrun warnings.</summary>
+    internal (int TotalNpcs, int ThinkingNpcs, int PlayerRegions) TickNpcDiagnostics()
+    {
+        int npcs = 0;
+        foreach (var entity in _byId.Values)
+        {
+            if (entity.Kind == ZoneEntityKind.Npc)
+                npcs++;
+        }
+
+        return (npcs, _byId.CountOf(ActiveSets.Thinking), _playerActiveRegions.Count);
+    }
 
     /// <summary>Members of <paramref name="set"/> by owning region, then object id; safe to mutate the set while iterating.</summary>
     int[] Active(ActiveSets set) => _byId.Snapshot(set);
@@ -91,6 +105,14 @@ public sealed partial class ZoneWorld
             return;
         if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
             return;
+        var region = _byId.OwnerOf(npc).Region;
+        if (!IsPlayerRegionActive(region) && !AnyLivePlayerWatching(npc.ObjectId) && !DriftedBeyondDouble(npc))
+            return;
+        long now = NowUnixMs();
+        if (AnyLivePlayerWatching(npc.ObjectId))
+            npc.NextThinkMs = now;
+        else if (npc.NextThinkMs <= now)
+            ScheduleNextThink(npc, now);
         _byId.Join(npc, ActiveSets.Thinking);
         SpawnPrivates(npc);
     }

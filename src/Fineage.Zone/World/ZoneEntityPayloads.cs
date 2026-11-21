@@ -333,6 +333,16 @@ sealed class ZoneNpcAggroPayload
     public int ChaseDestY { get; set; }
     public bool Chasing { get; set; }
     public long LastAiTickMs { get; set; }
+    /// <summary>Mobius <c>AttackableThinkTaskManager</c> next <c>thinkActive</c> at this unix ms.</summary>
+    public long NextThinkMs { get; set; }
+    /// <summary>Last geo <c>getValidLocation</c> for idle wander, keyed to <see cref="WanderGeoFromX"/>/<see cref="WanderGeoFromY"/>.</summary>
+    public int WanderGeoFromX { get; set; }
+    public int WanderGeoFromY { get; set; }
+    public int WanderWantX { get; set; }
+    public int WanderWantY { get; set; }
+    public int WanderGeoDestX { get; set; }
+    public int WanderGeoDestY { get; set; }
+    public int WanderGeoDestZ { get; set; }
     public bool HomeSet { get; set; }
     public int HomeX { get; set; }
     public int HomeY { get; set; }

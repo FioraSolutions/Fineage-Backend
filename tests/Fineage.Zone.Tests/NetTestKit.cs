@@ -92,8 +92,10 @@ internal sealed class NetTestKit
         ZoneRates? rates = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
-        IRegionExecutor resolvedExecutor =
-            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
+        IRegionExecutor resolvedExecutor = regionExecutor ??
+            (combatRandom != null || dropRandom != null || spawnRandom != null
+                ? SequentialRegionExecutor.Instance
+                : ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,

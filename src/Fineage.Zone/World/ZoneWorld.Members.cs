@@ -217,6 +217,7 @@ public sealed partial class ZoneWorld
             if (_byId.TryGetValue(id, out var other))
                 ReleaseThink(other);
         }
+        RefreshPlayerActiveRegions();
         session.InWorld = false;
         _chat.Left(session.ObjectId);
 
