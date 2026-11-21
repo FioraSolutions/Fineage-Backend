@@ -35,6 +35,8 @@ public sealed partial class ZoneWorld
 
     void TickCursedWeapons(long nowUnixMs)
     {
+        if (!_cursedWeapons.NeedsSimulationTick(nowUnixMs))
+            return;
         foreach (var runtime in _cursedWeapons.All)
         {
             if (!runtime.IsActive || runtime.EndTimeUnixMs <= nowUnixMs)
@@ -366,7 +368,8 @@ public sealed partial class ZoneWorld
             break;
         }
 
-        FanoutCursedWeaponStateTo([player.ObjectId]);
+        if (_cursedWeapons.HasClientVisibleState())
+            FanoutCursedWeaponStateTo([player.ObjectId]);
     }
 
     void PersistCursedWeapons() => _accounts?.SaveCursedWeapons(_cursedWeapons.ExportSaves());

@@ -90,6 +90,36 @@ public sealed class CursedWeaponsManager
         }
     }
 
+  public bool NeedsSimulationTick(long nowUnixMs)
+    {
+        lock (_gate)
+        {
+            foreach (var runtime in _byItemId.Values)
+            {
+                if (runtime.IsActive)
+                    return true;
+                if (runtime.EndTimeUnixMs > 0 && runtime.EndTimeUnixMs <= nowUnixMs)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool HasClientVisibleState()
+    {
+        lock (_gate)
+        {
+            foreach (var runtime in _byItemId.Values)
+            {
+                if (runtime.IsActive)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     public CursedWeaponRecord ToSave(CursedWeaponRuntime runtime) => new()
     {
         ItemId = runtime.Definition.ItemId,
