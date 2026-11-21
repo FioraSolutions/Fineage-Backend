@@ -162,11 +162,13 @@ public sealed class NetCubicTests
     [Fact]
     public void Offensive_cubic_debuffs_include_owner_m_atk_in_land_rolls()
     {
+        // Action skill ids from data/cubics.json: Binding cubic 6 → 4164, Viper cubic 4 → 4052, Storm cubic 1 → 4049.
+        const int BindingAction = 4164, ViperAction = 4052, StormAction = 4049;
         var (bench, _) = Open();
         // Mobius cubic *action* skill ids from data/cubics.json actions[], not SummonCubic ids.
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(4164)); // Binding paralyze
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(4052)); // Viper poison
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(4049)); // Storm cubic DD
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormAction));
     }
 
     [Fact]
