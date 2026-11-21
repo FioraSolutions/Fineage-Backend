@@ -13,6 +13,7 @@ Mobius reference (L2J_Mobius_CT_0_Interlude):
   dist/game/data/zones/swamp.xml       (SwampZone NPoly + move_bonus)
   dist/game/data/zones/damage.xml      (DamageZone NPoly + dmgHPSec / reuse / …)
   dist/game/data/zones/no_landing.xml  (NoLandingZone NPoly + dismountDelay)
+  dist/game/data/zones/elven_mother_tree.xml (MotherTreeZone NPoly + HpRegenBonus / MpRegenBonus)
 
 Usage:
   python3 tools/import_doors_water.py /path/to/mobius/data [out_dir=data]
@@ -199,6 +200,24 @@ def damage(data: Path) -> list[dict]:
     return out
 
 
+def mother_tree(data: Path) -> list[dict]:
+    rows = npoly_zones(data, "elven_mother_tree.xml", "MotherTreeZone")
+    out = []
+    for r in rows:
+        out.append({
+            "name": r["name"],
+            "minZ": r["minZ"],
+            "maxZ": r["maxZ"],
+            "nodes": r["nodes"],
+            "hpRegenBonus": int(r.get("HpRegenBonus", r.get("hpRegenBonus", "0"))),
+            "mpRegenBonus": int(r.get("MpRegenBonus", r.get("mpRegenBonus", "0"))),
+            "affectedRace": int(r.get("affectedRace", "-1")),
+            **({"enterMsgId": int(r["enterMsgId"])} if "enterMsgId" in r else {}),
+            **({"leaveMsgId": int(r["leaveMsgId"])} if "leaveMsgId" in r else {}),
+        })
+    return out
+
+
 def no_landing(data: Path) -> list[dict]:
     rows = npoly_zones(data, "no_landing.xml", "NoLandingZone")
     for r in rows:
@@ -229,7 +248,7 @@ def main() -> None:
     data = Path(sys.argv[1])
     out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
     d, w, p, a, s = doors(data), water(data), peace(data), arenas(data), sieges(data)
-    sw, dmg, nl = swamp(data), damage(data), no_landing(data)
+    sw, dmg, nl, mt = swamp(data), damage(data), no_landing(data), mother_tree(data)
     (out_dir / "doors.json").write_text(json.dumps(d, separators=(",", ":"), ensure_ascii=False, indent=None).replace("},{", "},\n{") + "\n")
     (out_dir / "water-zones.json").write_text(json.dumps(w, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "peace-zones.json").write_text(json.dumps(p, separators=(",", ":")).replace("},{", "},\n{") + "\n")
@@ -238,7 +257,8 @@ def main() -> None:
     (out_dir / "swamp-zones.json").write_text(json.dumps(sw, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "damage-zones.json").write_text(json.dumps(dmg, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "no-landing-zones.json").write_text(json.dumps(nl, separators=(",", ":")).replace("},{", "},\n{") + "\n")
-    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)} siege={len(s)} swamp={len(sw)} damage={len(dmg)} noLanding={len(nl)}")
+    (out_dir / "mother-tree-zones.json").write_text(json.dumps(mt, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)} siege={len(s)} swamp={len(sw)} damage={len(dmg)} noLanding={len(nl)} motherTree={len(mt)}")
 
 
 if __name__ == "__main__":

@@ -316,8 +316,10 @@ public enum LedgerTxKind
     /// <summary>Life stone refine: consumes stone/gems; <c>Reference</c> is life stone item id.</summary>
     Augment = 56,
 
+    FishingChampionshipPrize = 57,
+
     /// <summary>Trainer skill enchant SP/EXP fee: <c>Reference</c> is skill id.</summary>
-    TrainerSkillEnchant = 57
+    TrainerSkillEnchant = 58
 }
 
 /// <summary>

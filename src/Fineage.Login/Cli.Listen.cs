@@ -1,4 +1,5 @@
 using System.Net;
+using Fineage.Game.Punishment;
 using Fineage.Login.Net;
 using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
@@ -40,11 +41,13 @@ public static partial class Cli
             return false;
         }
 
+        var accountBans = AccountBanGate.FromEnvironment(message => error.WriteLine("[LOGIN] " + message));
         var service = new LoginService(
             accounts,
             handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
-            create: CharacterCreateOptions.FromEnvironment());
+            create: CharacterCreateOptions.FromEnvironment(),
+            accountBans: accountBans);
         LoginHttpHost? http = null;
         string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
         int maxConnections = LoginNetSettings.MaxConnections;
@@ -61,6 +64,9 @@ public static partial class Cli
         // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
         var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
         var netTcp = new NetTcpServer { Endpoint = "login" };
+        if (accountBans.StorePath is { } punishmentsPath)
+            output.WriteLine($"[LOGIN] account login bans from {punishmentsPath}");
+
         output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
         Task netTask = netTcp.RunAsync(
             host,
