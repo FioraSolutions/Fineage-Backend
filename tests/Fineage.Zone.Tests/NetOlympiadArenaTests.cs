@@ -459,6 +459,7 @@ public sealed class NetOlympiadArenaTests
         board = new OlympiadBoard(when, new OlympiadSettings(), store);
         bench = new WorldBench(clock: () => when, olympiad: board);
         incumbent = await bench.EnterAsync("oldhero", "OldHero");
+        monument = bench.World.SpawnFolkForTests(31690, incumbent.Player.X + 20, incumbent.Player.Y, incumbent.Player.Z);
         Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroReceive"));
         Assert.True(incumbent.Player.Hero);
 
