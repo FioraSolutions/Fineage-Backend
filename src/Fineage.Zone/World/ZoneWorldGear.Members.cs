@@ -21,6 +21,9 @@ public sealed partial class ZoneWorld
         RefreshGearSkills(player);
         RefreshPlayerMaxima(player, fanout: true);
         RefreshRunSpeedAndFanout(player);
+        // Mobius broadcastUserInfo(self): paperdoll + live P.Atk/M.Atk/speeds, not only vitals.
+        if (NetBridge != null)
+            SelfUserInfo(player);
         var invUpdate = InventoryMessages.Modify(changed);
         // UserInfo (paperdoll + CurrWeight/MaxWeight) is sent from SaveInventory →
         // RefreshWeightPenaltyAfterInventoryChange, which every equip/unequip path calls next.

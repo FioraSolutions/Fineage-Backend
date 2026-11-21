@@ -166,7 +166,8 @@ public sealed partial class ZoneWorld
                 resting: player.Sitting,
                 hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp,
                 moving: player.MoveActive,
-                wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots));
+                wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots),
+                onMissing: id => ZoneLog.Warn($"skill-passives missing skillId={id} — passive has no combat mods"));
     }
 
     /// <summary>
@@ -192,8 +193,39 @@ public sealed partial class ZoneWorld
         var gear = player.GearSkills;
         gear.Clear();
         _equipSkills.CollectEquipped(player.Inventory, gear);
+        WarnMissingEquipSkillStats(player);
         CollectArmorSetSkills(player, gear);
         Augmentation.AugmentationStatMods.CollectGearSkills(player.Inventory, _augmentation, gear);
+    }
+
+    /// <summary>
+    /// Mobius <c>item_skill</c> rows must resolve to <c>skill-passives.json</c> funcs (or
+    /// <c>skill-stat-effects.json</c> for active buffs). Log once per equipped item/skill with no data.
+    /// </summary>
+    void WarnMissingEquipSkillStats(ZoneEntity player)
+    {
+        if (player.Inventory == null)
+            return;
+        foreach (PaperdollSlot slot in Enum.GetValues<PaperdollSlot>())
+        {
+            var item = player.Inventory.GetEquipped(slot);
+            if (item == null || !_equipSkills.TryGet(item.ItemId, out var skills))
+                continue;
+            foreach (var skill in skills)
+            {
+                if (skill.Id <= 0)
+                    continue;
+                if (_passives.TryGet(skill.Id, out var passive) && passive.Funcs.Count > 0)
+                    continue;
+                if (_statEffects.TryGet(skill.Id, out var active) && active.Funcs.Count > 0)
+                    continue;
+                var key = (item.ItemId, skill.Id);
+                if (!player.ReportedMissingEquipSkills.Add(key))
+                    continue;
+                ZoneLog.Warn(
+                    $"item-equip-skill missing stat funcs itemId={item.ItemId} skillId={skill.Id} level={skill.Level}");
+            }
+        }
     }
 
     void CollectArmorSetSkills(ZoneEntity player, Dictionary<int, int> target)
