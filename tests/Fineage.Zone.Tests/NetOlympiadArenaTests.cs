@@ -395,7 +395,7 @@ public sealed class NetOlympiadArenaTests
         var snap = store.Load();
         snap.Cycle = 5;
         snap.Period = OlympiadProtocol.PeriodCompetition;
-        snap.OlympiadEndUnixMs = when.ToUnixTimeMilliseconds();
+        snap.OlympiadEndUnixMs = when.AddHours(1).ToUnixTimeMilliseconds();
         snap.Heroes =
         [
             new OlympiadHeroRow
