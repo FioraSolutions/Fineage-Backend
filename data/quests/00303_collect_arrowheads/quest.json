@@ -25,7 +25,7 @@
       "npcId": 30029,
       "hook": "event",
       "when": "absent",
-      "event": "30029-04",
+      "event": "30029-03",
       "minLevel": 10,
       "ops": [
         {
@@ -39,7 +39,7 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30029-event-30029-04-002.htm"
+      "htmlFile": "30029-event-30029-03-002.htm"
     },
     {
       "npcId": 30029,
@@ -57,6 +57,11 @@
         "963": 10
       },
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 963,
+          "count": 10
+        },
         {
           "op": "give_adena",
           "count": 1000
