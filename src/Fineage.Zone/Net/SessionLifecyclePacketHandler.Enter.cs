@@ -118,15 +118,9 @@ sealed partial class SessionLifecyclePacketHandler
                 Self(NetOpcode.RelationChanged, relation);
         }
 
-        var selfRemote = NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
-        foreach (var peer in known)
-        {
-            if (peer.Kind != ZoneEntityKind.Player)
-                continue;
-            frames.Add(new NetFrame(peer.ObjectId, NetOpcode.EntitySpawn, selfRemote));
-            if (_world.SpawnRelationFrame(entity, peer) is { } relation)
-                frames.Add(new NetFrame(peer.ObjectId, NetOpcode.RelationChanged, relation));
-        }
+        var selfRemote = NetCodec.EncodeEntitySpawn(
+            NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
+        NetEnterSpawnRecord.AppendPeerSpawns(frames, entity, self, selfRemote, known, _world);
 
         return frames;
     }

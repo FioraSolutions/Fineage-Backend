@@ -35,7 +35,7 @@ sealed class NetKnownlistFanout
     {
         var frames = new List<NetFrame>();
         // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
-        foreach (int id in after)
+        foreach (int id in after.OrderBy(static x => x))
         {
             if (before.Contains(id))
                 continue;
@@ -85,7 +85,7 @@ sealed class NetKnownlistFanout
             EntityValue = self.Value,
             EntityGeneration = self.Generation
         });
-        foreach (int id in before)
+        foreach (int id in before.OrderBy(static x => x))
         {
             if (after.Contains(id))
                 continue;
