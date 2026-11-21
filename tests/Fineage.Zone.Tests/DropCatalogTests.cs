@@ -59,6 +59,15 @@ public sealed class DropRollerTests
         Assert.InRange(gapped, 8, 40);
         Assert.Equal(10, DropRoller.LevelGapChance(10, 40, adena: true));
         Assert.Equal(100, DropRoller.LevelGapChance(10, 10, adena: false));
+
+    }
+
+    [Fact]
+    public void Raid_death_ignores_level_gap()
+    {
+        var definition = Adena(chance: 100);
+        for (int seed = 0; seed < 100; seed++)
+            Assert.NotEmpty(DropRoller.RollDeath(definition, new Random(seed), victimLevel: 10, killerLevel: 40, raid: true));
     }
 
     [Fact]

@@ -16,6 +16,9 @@ out = ROOT / "data/drops"
 ids = set()
 for spawn in (ROOT / "data/spawns").glob("*.json"):
     ids |= {int(x) for x in re.findall(r'"npcId"\s*:\s*(\d+)', spawn.read_text())}
+bosses = ROOT / "data/raidbosses.json"
+if bosses.is_file():
+    ids |= {int(x) for x in re.findall(r'"npcId"\s*:\s*(\d+)', bosses.read_text())}
 
 hand = set()
 for p in out.glob("*.json"):

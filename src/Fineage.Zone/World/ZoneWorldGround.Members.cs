@@ -200,7 +200,8 @@ public sealed partial class ZoneWorld
         IReadOnlyList<ZoneEntity> watchers,
         int victimLevel = 0,
         bool raid = false,
-        bool seeded = false)
+        bool seeded = false,
+        int lootOwnerObjectId = 0)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
         {
@@ -219,7 +220,11 @@ public sealed partial class ZoneWorld
             ZoneLog.Info($"drop empty npc={npcId}");
 
         int dropperId = killer?.ObjectId ?? 0;
-        int ownerId = killer?.Session != null ? killer.ObjectId : 0;
+        int ownerId = lootOwnerObjectId != 0
+            ? lootOwnerObjectId
+            : killer?.Session != null
+                ? killer.ObjectId
+                : 0;
         long now = NowUnixMs();
         if (rolls.Count == 0)
             return;
