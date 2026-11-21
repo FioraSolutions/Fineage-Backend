@@ -23,7 +23,7 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 3. Bow: arrows consumption + Mobius bow reuse timing (`1500*345/Pspd`).
 4. Skills outside `skill-combat.json` still use legacy `power + 10` stub; compound skill conditions skipped.
 5. NPC SS / spiritshot stock+chance done (#257 / #259); MagicSkillUse SS glow (2154) and raid-boss materialize shot stock still open.
-6. Wire: `MagicSkillCanceled` packet (client cast-bar cancel); peace-zone / `RelationChanged` for PvP (#271 core done).
+6. Wire: Unity client handler for `MagicSkillCanceled` `0x03AD` (zone emits on abort); clan war `RelationChanged` on declare/stop — PvP-flag-only relation polish open (#807).
 7. Pets / summons — matrix #17 (largest remaining combat feature).
 8. Spoil Festival 302 / Sweeper Festival 444 (AoE) not wired.
 
@@ -158,7 +158,7 @@ Rules: `Fineage.Game.Combat.CastRules`; Zone: `ZoneWorldCastInterrupt.cs` + `Res
 - **Break on hit** (Mobius `Formulas.calcAtkBreak`, `AltGameCancelByHit=Cast`): a player hit by a mob melee swing while a **magic** attack skill is in flight rolls `15 + √(13·dmg) − (MEN bonus·100 − 100)`, clamped 1–99 %. On break: no hit, casting window cleared, queued cast dropped, SysMsg 27 "Your casting has been interrupted.". Physical skills (Power Strike…) are never broken (`breakCast` is magic/static only).
 - **Abort at launch** (`onMagicLaunchedTimer`): at hitTime the target must still exist and be alive, be within the skill's **effectRange** (now in `skill-combat.json`, 314 skills via `scripts/gen_skill_effect_range.py`; castRange fallback) and be in line of sight. Otherwise the cast aborts silently: no damage, `mpConsume` not spent (only `mpInitialConsume` was), reuse stays.
 - **Teleport** (`Relocate`, used by gatekeepers / dungeons / travel token): aborts the cast and clears queued cast, pickup, auto-attack and approach (Mobius `teleToLocation`).
-- Client gap: the Net contract has no `MagicSkillCanceled`, so the client's cast bar/animation runs out on its own; only SysMsg 27 tells the player. Adding the packet needs a client change (deferred).
+- Zone emits `MagicSkillCanceled` `0x03AD` to caster + watchers on every `AbortCast` (hit-break, target gone, teleport…). The Unity client still needs a decoder/handler for the cast bar (#807).
 - Stubs / deferred: stun/sleep/paralyze interrupts via control abnormals (`AbortCast` is the hook; NPC immobilize/silence landed in #259), legacy non-`skill-combat` attack skills aren't interruptible, full channeling, magicLvl/land-rate polish, buffs on magic crit.
 
 ## Buff / debuff / heal / Spoil at hitTime
