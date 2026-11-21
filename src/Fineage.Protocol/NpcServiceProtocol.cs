@@ -107,6 +107,8 @@ public static class NpcServiceIntent
     public const string TerritoryStatus = "territory-status";
     /// <summary>Fisherman <c>FishSkillList</c>: the fishing guild skill window.</summary>
     public const string FishSkillList = "fish-skill-list";
+    public const string FishingChampionship = "fishing-championship";
+    public const string FishingChampionshipClaim = "fishing-championship-claim";
     /// <summary>Lottery seller <c>Loto N</c> (service id = N).</summary>
     public const string Loto = "loto";
     /// <summary>Race Manager bypass command (Mobius <c>BuyTicket</c>, <c>ShowOdds</c>, …).</summary>

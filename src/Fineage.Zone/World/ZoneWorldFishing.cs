@@ -482,6 +482,7 @@ public sealed partial class ZoneWorld
                         GiveItem(session, inventory, fishId, 1);
                         string name = _game.Items.TryGet(fishId, out var t) ? t.Name : fishId.ToString();
                         SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+                        RecordFishingChampionshipCatch(player, line.LureId);
                         return true;
                     },
                     _ => fishId);
