@@ -117,6 +117,22 @@ public sealed partial class ZoneWorld
             work.Add(_byId.OwnerOf(entity).Region, entity.ObjectId);
     }
 
+    /// <summary>Mobius <c>Formulas.calcHpRegen</c> / <c>calcMpRegen</c> flat mother-tree add-ons after rate × multiplier.</summary>
+    internal (double Hp, double Mp) MotherTreeRegenBonusForTest(ZoneEntity player) =>
+        MotherTreeRegenBonus(player);
+
+    (double Hp, double Mp) MotherTreeRegenBonus(ZoneEntity player)
+    {
+        if (MotherTree.Count == 0)
+            return (0, 0);
+        var zone = MotherTree.At(player.X, player.Y, player.Z);
+        if (zone == null)
+            return (0, 0);
+        if (zone.AffectedRace >= 0 && player.Race != zone.AffectedRace)
+            return (0, 0);
+        return (zone.HpRegenBonus, zone.MpRegenBonus);
+    }
+
     void RegenPlayer(int objectId)
     {
         if (!_byId.TryGetValue(objectId, out var entity) || entity.Dead)
@@ -131,12 +147,17 @@ public sealed partial class ZoneWorld
         var posture = RegenPosture(entity);
         var (conBonus, menBonus) = RegenStatBonuses(entity);
         var (hallHp, hallMp) = HallRegenBonus(entity);
+        var (mtHp, mtMp) = MotherTreeRegenBonus(entity);
         double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
             ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture) * hallHp
             : 0d);
         double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
             ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture) * hallMp
             : 0d);
+        if (mtHp > 0)
+            hpRate += mtHp;
+        if (mtMp > 0)
+            mpRate += mtMp;
         double cpRate = entity.CurCp < entity.MaxCp ? CpRegenRate(entity, mods, posture, conBonus) : 0d;
 
         // Mobius keeps HP/MP as doubles, so a halved rate still accumulates. Vitals here are ints, so the

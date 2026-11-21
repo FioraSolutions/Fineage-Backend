@@ -357,6 +357,7 @@ public sealed partial class ZoneWorld
             Swamp = SharedSwamp.Value;
             Damage = SharedDamage.Value;
             NoLanding = SharedNoLanding.Value;
+            MotherTree = SharedMotherTree.Value;
         }
         BootstrapSpawns();
         BootstrapBoats();
