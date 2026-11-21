@@ -163,6 +163,8 @@ public sealed class NetCubicTests
     [Fact]
     public void Offensive_cubic_debuffs_include_owner_m_atk_in_land_rolls()
     {
+        // Action skill ids from data/cubics.json: Binding cubic 6 → 4164, Viper cubic 4 → 4052, Storm cubic 1 → 4049.
+        const int BindingAction = 4164, ViperAction = 4052, StormAction = 4049;
         var (bench, _) = Open();
         Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingCubicAction));
         Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperCubicAction));
