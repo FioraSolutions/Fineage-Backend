@@ -20,11 +20,11 @@ public sealed class Lizard25to34QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 298, Praga = 30333, Rohmer = 30344, Report = 7182, Gem = 7183, Red = 7184;
         var me = Any(25);
-        Assert.True(m.AdvEvent(j, bag, Q, Praga, "30333-03", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Praga, "30333-1", me).Ok);
         Assert.Equal(1, bag.CountOf(Report));
         Assert.Equal(1, j.Find(Q)!.Cond);
 
-        Assert.True(m.AdvEvent(j, bag, Q, Rohmer, "30344-04", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Rohmer, "30344-4", me).Ok);
         Assert.Equal(0, bag.CountOf(Report));
         Assert.Equal(2, j.Find(Q)!.Cond);
 
@@ -38,7 +38,7 @@ public sealed class Lizard25to34QuestTests
         Assert.True(m.Talk(j, bag, Q, Rohmer, me).Ok);
         Assert.Equal(3, j.Find(Q)!.Cond);
 
-        var done = m.AdvEvent(j, bag, Q, Rohmer, "30344-06", me);
+        var done = m.AdvEvent(j, bag, Q, Rohmer, "30344-4", me);
         Assert.True(done.Ok);
         Assert.Equal(42000, done.Sp);
         Assert.Null(j.Find(Q));

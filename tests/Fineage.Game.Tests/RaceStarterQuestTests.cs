@@ -46,7 +46,7 @@ public sealed class RaceStarterQuestTests
         Assert.Equal(5, j.Find(Q)!.Cond);
         Assert.Equal(1, bag.CountOf(Handle));
 
-        var done = m.AdvEvent(j, bag, Q, Altran, "30283-07", me);
+        var done = m.AdvEvent(j, bag, Q, Altran, "30283-06", me);
         Assert.True(done.Ok);
         Assert.Equal(QuestPhase.Completed, j.Find(Q)!.Phase);
         Assert.Equal(1, bag.CountOf(Sword));

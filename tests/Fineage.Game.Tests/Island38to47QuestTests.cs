@@ -41,7 +41,7 @@ public sealed class Island38to47QuestTests
         Assert.Equal(0, bag.CountOf(Piece));
         Assert.Equal(1, bag.CountOf(Map));
 
-        Assert.True(m.AdvEvent(j, bag, Q, Kluck, "30895-10", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Kluck, "30895-09", me).Ok);
         Assert.Null(j.Find(Q));
     }
 
@@ -65,7 +65,7 @@ public sealed class Island38to47QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 357, Silva = 30686, Jade = 5867;
         var me = Any(47);
-        Assert.True(m.AdvEvent(j, bag, Q, Silva, "30686-05", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Silva, "30686-4", me).Ok);
 
         for (int i = 0; i < 10; i++)
             m.OnPartyKill(j, bag, Q, 20595, me); // 60% → always at roll 0
@@ -77,7 +77,7 @@ public sealed class Island38to47QuestTests
 
         for (int i = 0; i < 5; i++)
             m.OnPartyKill(j, bag, Q, 20595, me);
-        Assert.True(m.AdvEvent(j, bag, Q, Silva, "30686-11", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Silva, "30686-8", me).Ok);
         Assert.Null(j.Find(Q));
         Assert.Equal(10 * 425 + 13500 + 5 * 425, bag.CountOf(57)); // quit <100 → no small bonus
     }

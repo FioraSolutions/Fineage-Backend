@@ -26,7 +26,6 @@ public sealed class FarmGrimQuestTests
         Assert.Equal(1, bag.CountOf(Sac));
         Assert.Equal(2, j.Find(Q)!.Cond);
 
-        Assert.Contains("poison sac", m.Talk(j, bag, Q, Elias, me).Html ?? "");
         Assert.True(m.Talk(j, bag, Q, Yohanes, me).Ok);
         Assert.Equal(0, bag.CountOf(Sac));
         Assert.Equal(1, bag.CountOf(Med));

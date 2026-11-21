@@ -20,7 +20,7 @@ public sealed class HairFang36to48QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 366, Dieter = 30111, Hair = 5874;
         var me = Any(48);
-        Assert.True(m.AdvEvent(j, bag, Q, Dieter, "30111-02", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Dieter, "30111-2", me).Ok);
 
         for (int i = 0; i < 5; i++)
             m.OnPartyKill(j, bag, Q, 20986, me);
@@ -30,7 +30,7 @@ public sealed class HairFang36to48QuestTests
         Assert.Equal(0, bag.CountOf(Hair));
         Assert.Equal(5 * 500 + 29000, bag.CountOf(57));
 
-        Assert.True(m.AdvEvent(j, bag, Q, Dieter, "30111-05", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Dieter, "30111-6", me).Ok);
         Assert.Null(j.Find(Q));
     }
 
