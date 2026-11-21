@@ -157,7 +157,11 @@ public sealed partial class ZoneWorld
         if (!PlayerClasses.TryGet(e.ClassId, out var template) || template == null)
             return 0;
         try { return template.ModifiedCp(Math.Max(1, e.Level)); }
-        catch (ArgumentOutOfRangeException) { return template.MaxCp; }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            ZoneLog.Warn($"party CP formula out of range for class {e.ClassId} level {e.Level}: {ex.Message}; using max CP");
+            return template.MaxCp;
+        }
     }
 
     /// <summary>Party bars (coalesced) and PartyMemberPosition (periodic) the party actor produced this step.</summary>
