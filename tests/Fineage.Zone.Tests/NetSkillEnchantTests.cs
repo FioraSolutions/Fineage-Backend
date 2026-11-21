@@ -47,13 +47,13 @@ public sealed class NetSkillEnchantTests
         var (kit, session, _, rec, env) = await SetupAsync();
         using (env)
         {
-        Assert.Null(kit.World.EnchantSkillForTest(session, skillId: 1, skillLevel: 101, informing: true));
-        var info = Assert.IsType<EnchantSkillInfoMsg>(
-            Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantSkillInfo)))[1]);
-        Assert.Equal(1, info.SkillId);
-        Assert.Equal(101, info.Level);
-        Assert.Equal(306_000, info.SpCost);
-        Assert.True(info.Rate > 0);
+            Assert.Null(kit.World.EnchantSkillForTest(session, skillId: 1, skillLevel: 101, informing: true));
+            var info = Assert.IsType<EnchantSkillInfoMsg>(
+                Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutEnchantSkillInfo)))[1]);
+            Assert.Equal(1, info.SkillId);
+            Assert.Equal(101, info.Level);
+            Assert.Equal(306_000, info.SpCost);
+            Assert.True(info.Rate > 0);
         }
     }
 
@@ -63,19 +63,19 @@ public sealed class NetSkillEnchantTests
         var (kit, session, player, rec, env) = await SetupAsync();
         using (env)
         {
-        player.KnownSkills[1] = 101;
-        player.LearnedSkills[1] = 101;
-        long spBefore = player.Sp;
-        var route = kit.Game.SkillEnchants.Find(1, 102)!;
+            player.KnownSkills[1] = 101;
+            player.LearnedSkills[1] = 101;
+            long spBefore = player.Sp;
+            var route = kit.Game.SkillEnchants.Find(1, 102)!;
 
-        Assert.Null(kit.World.EnchantSkillForTest(session, skillId: 1, skillLevel: 102, informing: false));
+            Assert.Null(kit.World.EnchantSkillForTest(session, skillId: 1, skillLevel: 102, informing: false));
 
-        Assert.Equal(spBefore - route.Sp, player.Sp);
-        Assert.Equal(102, player.KnownSkills[1]);
-        Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)));
-        var progress = LedgerAccount.Progress(player.ObjectId);
-        Assert.Equal(player.Sp, kit.World.LedgerForTests.HoldingsOf(progress).CountOf(LedgerResourceIds.Sp));
-        Assert.Contains(kit.Ledger.Entries, e => e.Transaction.Kind == LedgerTxKind.TrainerSkillEnchant);
+            Assert.Equal(spBefore - route.Sp, player.Sp);
+            Assert.Equal(102, player.KnownSkills[1]);
+            Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutSkillList)));
+            var progress = LedgerAccount.Progress(player.ObjectId);
+            Assert.Equal(player.Sp, kit.World.LedgerForTests.HoldingsOf(progress).CountOf(LedgerResourceIds.Sp));
+            Assert.Contains(kit.Ledger.Entries, e => e.Transaction.Kind == LedgerTxKind.TrainerSkillEnchant);
         }
     }
 
@@ -84,7 +84,9 @@ public sealed class NetSkillEnchantTests
     {
         var (kit, session, _, _, env) = await SetupAsync();
         using (env)
+        {
             Assert.Equal("bad_request", kit.World.EnchantSkillForTest(session, skillId: 99_999, skillLevel: 101, informing: false));
+        }
     }
 
     [Fact]
