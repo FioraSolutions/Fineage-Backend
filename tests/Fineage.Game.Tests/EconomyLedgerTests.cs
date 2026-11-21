@@ -58,6 +58,21 @@ public sealed class EconomyLedgerTests
     }
 
     [Fact]
+    public void Check_validates_without_appending_or_changing_balances()
+    {
+        var journal = new MemoryLedgerJournal();
+        var ledger = new EconomyLedger(journal, 100);
+        Assert.True(ledger.Submit(Tx(1, 0, Post(Shop, Sword, -1), Post(AliceBag, Sword, 1, 501))).Ok);
+        int entries = journal.Entries.Count;
+        var before = ledger.HoldingsOf(AliceBag);
+
+        Assert.Equal(LedgerRejection.InstanceTaken,
+            ledger.Check(Tx(2, 0, Post(Shop, Sword, -1), Post(BobBag, Sword, 1, 501))));
+        Assert.Equal(entries, journal.Entries.Count);
+        Assert.True(ledger.HoldingsOf(AliceBag).SameAs(before));
+    }
+
+    [Fact]
     public void Pieces_have_one_owner_and_move_by_instance_id()
     {
         var ledger = new EconomyLedger(new MemoryLedgerJournal(), 100);

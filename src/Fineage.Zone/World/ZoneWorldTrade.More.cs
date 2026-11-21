@@ -147,6 +147,14 @@ public sealed partial class ZoneWorld
                 PostTradeRow(move, partner, requestor, row);
         }
 
+        if (move != null && move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn(
+                $"trade settlement refused between {requestor.ObjectId} and {partner.ObjectId}: ledger rejected the postings");
+            CancelTradeSession(session);
+            return false;
+        }
+
         foreach (var row in session.RequestorOffers)
             TransferOfferRow(requestor.Inventory, partner.Inventory, row, requestorChanges, partnerChanges);
         foreach (var row in session.PartnerOffers)

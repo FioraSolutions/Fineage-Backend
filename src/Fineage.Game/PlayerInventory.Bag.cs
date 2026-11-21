@@ -4,6 +4,26 @@ namespace Fineage.Game;
 
 public sealed partial class PlayerInventory
 {
+    public readonly record struct StoredRow(int ObjectId, int ItemId, int Count, int EnchantLevel, int EquippedSlot);
+
+    /// <summary>Replaces every row from a stored snapshot (shop ledger refusal rollback).</summary>
+    public void ReplaceFromStored(IReadOnlyList<StoredRow> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        Array.Clear(_equipped);
+        _items.Clear();
+        foreach (var row in items)
+        {
+            if (!_catalog.TryGet(row.ItemId, out _))
+                continue;
+            ItemInstance instance = row.ObjectId > 0
+                ? AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel)
+                : Add(row.ItemId, row.Count, row.EnchantLevel);
+            if (row.EquippedSlot >= 0 && instance.Template.Equippable)
+                Equip(instance);
+        }
+    }
+
     public IReadOnlyList<ItemInstance> AddPieces(int itemId, int count, int enchantLevel = 0)
     {
         if (count < 1)

@@ -42,6 +42,7 @@ public sealed class LedgerMove
     readonly int _reference;
     readonly List<LedgerAccount> _observed = [];
     readonly List<LedgerPosting> _postings = [];
+    LedgerTransaction? _checkedTransaction;
 
     public LedgerMove(
         EconomyLedger ledger,
@@ -88,6 +89,35 @@ public sealed class LedgerMove
         _postings.Add(new LedgerPosting(account, itemId, amount, instanceIds ?? []));
     }
 
+    /// <summary>Validates postings against the journal without mutating world inventories.</summary>
+    public LedgerRejection CheckCommit()
+    {
+        if (!HasPostings)
+            return LedgerRejection.None;
+        foreach (var posting in _postings)
+        {
+            if (!posting.Account.IsSystem && !_observed.Contains(posting.Account))
+                throw new InvalidOperationException($"{_kind} posts to {posting.Account} without observing it first");
+        }
+
+        _checkedTransaction = new LedgerTransaction(_nextId(), _kind, _causedBy, _reference, _wallUnixMs, Compact(_postings));
+        return _ledger.Check(_checkedTransaction);
+    }
+
+    /// <summary>Validates, then applies when <paramref name="after"/> matches. Call <see cref="CheckCommit"/> first when world state must not change on rejection.</summary>
+    public bool TryCommit(Func<LedgerAccount, LedgerHoldings> after, out LedgerRejection rejection)
+    {
+        rejection = CheckCommit();
+        if (rejection != LedgerRejection.None)
+        {
+            _checkedTransaction = null;
+            return false;
+        }
+
+        Commit(after);
+        return true;
+    }
+
     /// <summary>Submits the move, then checks each observed account against <paramref name="after"/>.</summary>
     public LedgerResult Commit(Func<LedgerAccount, LedgerHoldings> after)
     {
@@ -98,7 +128,8 @@ public sealed class LedgerMove
                 throw new InvalidOperationException($"{_kind} posts to {posting.Account} without observing it first");
         }
 
-        var tx = new LedgerTransaction(_nextId(), _kind, _causedBy, _reference, _wallUnixMs, Compact(_postings));
+        var tx = _checkedTransaction ?? new LedgerTransaction(_nextId(), _kind, _causedBy, _reference, _wallUnixMs, Compact(_postings));
+        _checkedTransaction = null;
         var result = _ledger.Submit(tx);
         if (!result.Ok)
             throw new LedgerReconciliationException($"{_kind} {tx.Id} rejected: {result.Rejection}");

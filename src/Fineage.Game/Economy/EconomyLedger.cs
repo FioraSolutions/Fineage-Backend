@@ -39,7 +39,7 @@ public sealed class EconomyLedger : IEconomyLedger
             throw new InvalidOperationException($"economy ledger journal is broken at position {broken}");
         foreach (var entry in entries)
         {
-            var rejection = Apply(entry.Transaction);
+            var rejection = TryApply(entry.Transaction, mutate: true);
             if (rejection != LedgerRejection.None)
                 throw new InvalidOperationException(
                     $"economy ledger journal entry {entry.Position} ({entry.Transaction.Id}) does not replay: {rejection}");
@@ -88,7 +88,7 @@ public sealed class EconomyLedger : IEconomyLedger
             if (_latestTick != long.MinValue && tx.Id.Tick < _latestTick - _idempotencyTicks)
                 return LedgerResult.Reject(tx.Id, LedgerRejection.Stale);
 
-            var rejection = Apply(tx);
+            var rejection = TryApply(tx, mutate: true);
             if (rejection != LedgerRejection.None)
                 return LedgerResult.Reject(tx.Id, rejection);
 
@@ -153,6 +153,18 @@ public sealed class EconomyLedger : IEconomyLedger
     /// <summary>Writes buffered entries to durable storage. Call outside the step.</summary>
     public void Flush() => _journal.Flush();
 
+    /// <summary>Validates <paramref name="tx"/> against current balances without journaling it.</summary>
+    public LedgerRejection Check(LedgerTransaction tx)
+    {
+        ArgumentNullException.ThrowIfNull(tx);
+        lock (_sync)
+        {
+            if (_latestTick != long.MinValue && tx.Id.Tick < _latestTick - _idempotencyTicks)
+                return LedgerRejection.Stale;
+            return TryApply(tx, mutate: false);
+        }
+    }
+
     void Remember(LedgerEntry entry)
     {
         _byId.Add(entry.Transaction.Id, entry);
@@ -162,7 +174,7 @@ public sealed class EconomyLedger : IEconomyLedger
             _byId.Remove(_recent.Dequeue().Transaction.Id);
     }
 
-    LedgerRejection Apply(LedgerTransaction tx)
+    LedgerRejection TryApply(LedgerTransaction tx, bool mutate)
     {
         if (tx.Postings.Count == 0)
             return LedgerRejection.Empty;
@@ -264,6 +276,9 @@ public sealed class EconomyLedger : IEconomyLedger
                 claimed[instance] = posting.Account;
             }
         }
+
+        if (!mutate)
+            return LedgerRejection.None;
 
         foreach (var (account, holdings) in working)
         {

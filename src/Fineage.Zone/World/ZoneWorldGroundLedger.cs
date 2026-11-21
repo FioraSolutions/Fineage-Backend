@@ -34,13 +34,21 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Posts a stack that <see cref="SpawnGroundStack"/> just placed as coming from <paramref name="from"/>.</summary>
-    static void PostOntoGround(LedgerMove move, LedgerAccount from, ZoneEntity ground)
+    static void PostOntoGround(LedgerMove move, LedgerAccount from, ZoneEntity ground) =>
+        PostOntoGroundPlanned(move, from, ground.ObjectId, ground.GroundItemId, ground.GroundCount, GroundPieces(ground));
+
+    static void PostOntoGroundPlanned(
+        LedgerMove move,
+        LedgerAccount from,
+        int groundObjectId,
+        int itemId,
+        int count,
+        IReadOnlyList<int> pieces)
     {
-        var account = LedgerAccount.Ground(ground.ObjectId);
+        var account = LedgerAccount.Ground(groundObjectId);
         move.Observe(account, new LedgerHoldings());
-        var pieces = GroundPieces(ground);
-        move.Post(from, ground.GroundItemId, -ground.GroundCount, from.IsSystem ? [] : pieces);
-        move.Post(account, ground.GroundItemId, ground.GroundCount, pieces);
+        move.Post(from, itemId, -count, from.IsSystem ? [] : pieces);
+        move.Post(account, itemId, count, pieces);
     }
 
     /// <summary>Observes a stack before it leaves the ground and posts it out; the caller posts where it went.</summary>

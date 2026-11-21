@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Shops;
@@ -132,6 +133,7 @@ public sealed partial class ZoneWorld
         var liveItems = items!;
 
         Tax(npc, out int baseTax, out int castleTax, out _);
+        var inventoryBackup = CharacterInventory.Rows(player.Inventory!);
         var move = BeginShopMove(LedgerTxKind.ShopBuy, player, npc.NpcId, npc.MerchantCastleId);
         var mutation = ShopTrade.Buy(
             player.Inventory!,
@@ -150,7 +152,9 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        CommitShopMove(move, player, mutation, CreditCastleTax(npc.MerchantCastleId, mutation.CastleTax));
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup,
+                CreditCastleTax(npc.MerchantCastleId, mutation.CastleTax)))
+            return null;
         SendTouches(session, mutation);
         SendComplete(session);
         var buy = BuyList(npc, liveList, baseTax, castleTax);
@@ -169,6 +173,7 @@ public sealed partial class ZoneWorld
             return sellWindow;
         var liveItems = items!;
 
+        var inventoryBackup = CharacterInventory.Rows(player.Inventory!);
         var move = BeginShopMove(LedgerTxKind.ShopSell, player, npc.NpcId, castleId: 0);
         var mutation = ShopTrade.Sell(player.Inventory!, liveItems);
         if (!mutation.Ok)
@@ -177,7 +182,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        CommitShopMove(move, player, mutation, []);
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup, []))
+            return null;
 
         SendTouches(session, mutation);
         SendComplete(session);
@@ -202,6 +208,7 @@ public sealed partial class ZoneWorld
         var liveInventory = player.Inventory!;
         var liveShop = player.Shop!;
 
+        var inventoryBackup = CharacterInventory.Rows(liveInventory);
         var move = BeginShopMove(LedgerTxKind.ShopExchange, player, npc.NpcId, npc.MerchantCastleId);
         var mutation = ShopTrade.Exchange(
             liveInventory,
@@ -218,9 +225,11 @@ public sealed partial class ZoneWorld
 
         // Mobius MultiSellChoose: the entry's tax share goes to the castle treasury.
         Tax(npc, out _, out _, out bool taxedOwner);
-        CommitShopMove(move, player, mutation, taxedOwner && liveEntry.TaxAmount > 0
-            ? CreditCastleTax(npc.MerchantCastleId, (long)liveEntry.TaxAmount * amount)
-            : []);
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup,
+                taxedOwner && liveEntry.TaxAmount > 0
+                    ? CreditCastleTax(npc.MerchantCastleId, (long)liveEntry.TaxAmount * amount)
+                    : []))
+            return null;
 
         SendTouches(session, mutation);
         SendComplete(session);
