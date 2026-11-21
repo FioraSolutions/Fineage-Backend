@@ -5,6 +5,7 @@ using Fineage.Net.Contract;
 using Fineage.Zone.Net;
 using Fineage.Protocol;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -173,9 +174,10 @@ public sealed class NpcTemplateSpawnTests
     {
         var baseline = new ZoneWorld().NpcObjectIds;
         var enabled = new ZoneWorld(includeEnabledMaps: true);
+        bool night = ZoneGameTime.FromLocalMidnight().IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         int extra = TestCatalogs.Spawns.Maps.Values
             .Where(map => map.Enabled && map.MapId != SpawnCatalog.SmokeMapId)
-            .Sum(map => map.Npcs.Count);
+            .Sum(map => map.Npcs.Count(n => SpawnPeriodOfDayParse.IsActive(n.PeriodOfDay, night)));
         Assert.True(extra > TalkingIslandNpcCount);
 
         var hosted = ZoneAoiSettings.CreateWorld();

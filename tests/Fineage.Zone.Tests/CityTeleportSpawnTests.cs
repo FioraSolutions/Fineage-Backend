@@ -1,4 +1,5 @@
 using Fineage.Game.Services;
+using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Spawns;
@@ -79,6 +80,7 @@ public sealed class CityTeleportSpawnTests
         var world = new ZoneWorld(includeEnabledMaps: true);
         var spawned = world.NpcObjectIds.ToHashSet();
         var anchors = new List<(int X, int Y)>();
+        bool night = ZoneGameTime.FromLocalMidnight().IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
         foreach (var map in catalog.Maps.Values)
         {
@@ -86,6 +88,8 @@ public sealed class CityTeleportSpawnTests
                 continue;
             foreach (var npc in map.Npcs)
             {
+                if (!SpawnPeriodOfDayParse.IsActive(npc.PeriodOfDay, night))
+                    continue;
                 Assert.Contains(npc.ObjectId, spawned);
                 anchors.Add((npc.X, npc.Y));
             }
