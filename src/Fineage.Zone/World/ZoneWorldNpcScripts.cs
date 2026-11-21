@@ -24,6 +24,8 @@ public sealed partial class ZoneWorld
             return MonumentOfHeroesBypass(session, player, npc, scriptEvent);
         if (scriptName.Equals("SymbolMaker", StringComparison.OrdinalIgnoreCase))
             return SymbolMakerBypass(session, player, npc, scriptEvent);
+        if (scriptName.Equals("Wedding", StringComparison.OrdinalIgnoreCase))
+            return WeddingNpcBypass(session, player, npc, scriptEvent);
         return VillageMasterBypass(session, player, npc, scriptName, scriptEvent);
     }
 }

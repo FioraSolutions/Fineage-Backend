@@ -10,6 +10,7 @@ data/*
 !data/merc_tickets.json
 !data/siegable-clan-halls.json
 !data/manor.json
+!data/wedding.json
 !data/fishing.json
 !data/monster-race.json
 !data/recipes.json

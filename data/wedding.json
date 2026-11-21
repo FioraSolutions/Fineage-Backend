@@ -1,0 +1,15 @@
+{
+  "allowWedding": true,
+  "managerNpcId": 50007,
+  "formalWearItemId": 6408,
+  "weddingPrice": 250000000,
+  "punishInfidelity": true,
+  "teleportEnabled": true,
+  "teleportPrice": 50000,
+  "teleportDurationSeconds": 60,
+  "allowSameSex": false,
+  "requireFormalWear": true,
+  "divorceCostPercent": 20,
+  "weddingMarchSkillId": 2230,
+  "largeFireworkSkillId": 2025
+}

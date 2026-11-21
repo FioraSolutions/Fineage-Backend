@@ -165,6 +165,24 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().Karma = value;
     }
 
+    public int CoupleId
+    {
+        get => Identity?.CoupleId ?? 0;
+        set => EnsureIdentity().CoupleId = value;
+    }
+
+    public int PartnerId
+    {
+        get => Identity?.PartnerId ?? 0;
+        set => EnsureIdentity().PartnerId = value;
+    }
+
+    public bool Married
+    {
+        get => Identity?.Married ?? false;
+        set => EnsureIdentity().Married = value;
+    }
+
     ZonePlayerIdentityPayload EnsureIdentity() => Identity ??= new ZonePlayerIdentityPayload();
 
 }

@@ -207,6 +207,7 @@ public sealed partial class ZoneWorld
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);
         LoadSocialLists(entity, stored);
+        ApplyWeddingOnEnter(entity);
         RefreshKnownSkills(entity);
         RefreshGearSkills(entity);
         RefreshPlayerMaxima(entity, fanout: false);

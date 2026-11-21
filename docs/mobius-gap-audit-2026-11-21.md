@@ -217,6 +217,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Level / cursed whisper trade | 🟡 | Cursed weapon shout/trade block | `Say2` | Karma + partial curse checks | S |
 | Chat ban | 🟡 | Full `PunishmentManager` | `PunishmentManager.java` | Chat ban field only | M |
 | Silence / message refusal | ✅ | — | block list | `ZoneWorldFriends` | — |
+| Wedding (custom) | 🟡 | Cupid bow N/A in CT_0 script; jail/festival/rift gotolove gates | `mods/events/Wedding`, `CoupleManager` | `ZoneWorldWedding`, `docs/wedding-v2-protocol.md` | S |
 
 ### Items, shots, henna
 

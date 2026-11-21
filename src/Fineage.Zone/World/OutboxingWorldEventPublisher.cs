@@ -602,6 +602,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutFriendInviteAsk), () => inner.FanoutFriendInviteAsk(watcherObjectIdsCopy, ask));
     }
 
+    void IWorldEventPublisher.FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutWeddingEngageAsk), () => inner.FanoutWeddingEngageAsk(watcherObjectIdsCopy, ask));
+    }
+
     void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
