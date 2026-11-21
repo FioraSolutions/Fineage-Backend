@@ -23,6 +23,7 @@ public sealed partial class QuestCatalog
             "give_exp_sp" => ReadExp(op, where, questId),
             "take_item" => ReadTake(op, items, where, questId),
             "complete" => new CompleteOp(),
+            "exit" => new ExitOp(),
             "drop_item" => ReadDrop(op, items, where, questId),
             "exchange_all" => ReadExchange(op, items, where, questId),
             "sell_items" => ReadSell(op, items, where, questId),

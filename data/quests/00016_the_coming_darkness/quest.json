@@ -1,0 +1,313 @@
+{
+  "id": 16,
+  "name": "The Coming Darkness",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7167
+  ],
+  "dialogs": [
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 61,
+      "htmlFile": "31517-talk-000.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 62,
+      "htmlFile": "31517-talk-001.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "absent",
+      "event": "31517-2",
+      "minLevel": 62,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 7167,
+          "count": 5
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31517-event-31517-2-002.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "cond": 6,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 221958,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31517-talk-c6-003.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7167,
+      "htmlFile": "31517-talk-004.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        7167
+      ],
+      "ops": [
+        {
+          "op": "exit"
+        }
+      ],
+      "htmlFile": "31517-talk-005.htm"
+    },
+    {
+      "npcId": 31512,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 7167,
+      "htmlFile": "31512-talk-c1-006.htm"
+    },
+    {
+      "npcId": 31512,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        7167
+      ],
+      "htmlFile": "31512-talk-c1-007.htm"
+    },
+    {
+      "npcId": 31512,
+      "hook": "talk",
+      "when": "started",
+      "minCond": 2,
+      "htmlFile": "31512-talk-008.htm"
+    },
+    {
+      "npcId": 31512,
+      "hook": "event",
+      "when": "started",
+      "event": "31512-1",
+      "cond": 1,
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31512-event-31512-1-c1-009.htm"
+    },
+    {
+      "npcId": 31513,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 7167,
+      "htmlFile": "31513-talk-c2-010.htm"
+    },
+    {
+      "npcId": 31513,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "lacksItems": [
+        7167
+      ],
+      "htmlFile": "31513-talk-c2-011.htm"
+    },
+    {
+      "npcId": 31513,
+      "hook": "talk",
+      "when": "started",
+      "minCond": 3,
+      "htmlFile": "31513-talk-012.htm"
+    },
+    {
+      "npcId": 31513,
+      "hook": "event",
+      "when": "started",
+      "event": "31513-1",
+      "cond": 2,
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "31513-event-31513-1-c2-013.htm"
+    },
+    {
+      "npcId": 31514,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "hasItem": 7167,
+      "htmlFile": "31514-talk-c3-014.htm"
+    },
+    {
+      "npcId": 31514,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "lacksItems": [
+        7167
+      ],
+      "htmlFile": "31514-talk-c3-015.htm"
+    },
+    {
+      "npcId": 31514,
+      "hook": "talk",
+      "when": "started",
+      "minCond": 4,
+      "htmlFile": "31514-talk-016.htm"
+    },
+    {
+      "npcId": 31514,
+      "hook": "event",
+      "when": "started",
+      "event": "31514-1",
+      "cond": 3,
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "31514-event-31514-1-c3-017.htm"
+    },
+    {
+      "npcId": 31515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "hasItem": 7167,
+      "htmlFile": "31515-talk-c4-018.htm"
+    },
+    {
+      "npcId": 31515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "lacksItems": [
+        7167
+      ],
+      "htmlFile": "31515-talk-c4-019.htm"
+    },
+    {
+      "npcId": 31515,
+      "hook": "talk",
+      "when": "started",
+      "minCond": 5,
+      "htmlFile": "31515-talk-020.htm"
+    },
+    {
+      "npcId": 31515,
+      "hook": "event",
+      "when": "started",
+      "event": "31515-1",
+      "cond": 4,
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 5
+        }
+      ],
+      "htmlFile": "31515-event-31515-1-c4-021.htm"
+    },
+    {
+      "npcId": 31516,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "hasItem": 7167,
+      "htmlFile": "31516-talk-c5-022.htm"
+    },
+    {
+      "npcId": 31516,
+      "hook": "talk",
+      "when": "started",
+      "cond": 5,
+      "lacksItems": [
+        7167
+      ],
+      "htmlFile": "31516-talk-c5-023.htm"
+    },
+    {
+      "npcId": 31516,
+      "hook": "talk",
+      "when": "started",
+      "minCond": 6,
+      "htmlFile": "31516-talk-024.htm"
+    },
+    {
+      "npcId": 31516,
+      "hook": "event",
+      "when": "started",
+      "event": "31516-1",
+      "cond": 5,
+      "hasItem": 7167,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7167,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        }
+      ],
+      "htmlFile": "31516-event-31516-1-c5-025.htm"
+    }
+  ]
+}

@@ -7,8 +7,8 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 240 |
-| partial | 94 |
+| implemented | 248 |
+| partial | 86 |
 | stub | 10 |
 | missing | 0 |
 | **total Mobius quests** | **344** |
@@ -29,14 +29,14 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 8 | An Adventure Begins | 3+ | story / newbie | implemented | hand-ported |
 | 9 | Into the City of Humans | 3+ | story / newbie | implemented | hand-ported |
 | 10 | Into the World | 3+ | story / newbie | implemented | hand-ported |
-| 11 | Secret Meeting With Ketra Orcs | 74+ | Ketra/Varka alliance | partial | no talk: 31256,31371; auto-port |
-| 12 | Secret Meeting With Varka Silenos | 74+ | Ketra/Varka alliance | partial | no talk: 31258,31378; auto-port |
-| 13 | Parcel Delivery | 74+ | story / newbie | partial | no talk: 31539; auto-port |
-| 14 | Whereabouts of the Archaeologist | 74+ | story / newbie | partial | no talk: 31538; auto-port |
-| 15 | Sweet Whispers | 60+ | story / newbie | partial | no talk: 31517,31518; auto-port |
-| 16 | The Coming Darkness | 62+ | repeatable | partial | no talk: 31512,31513,31514,31515,31516; auto-port |
-| 17 | Light and Darkness | 61+ | repeatable | partial | no talk: 31508,31509,31510,31511; no completion; auto-port |
-| 18 | Meeting with the Golden Ram | 66+ | story / newbie | partial | no talk: 31315,31555; auto-port |
+| 11 | Secret Meeting With Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 12 | Secret Meeting With Varka Silenos | 74+ | Ketra/Varka alliance | implemented | auto-port |
+| 13 | Parcel Delivery | 74+ | story / newbie | implemented | auto-port |
+| 14 | Whereabouts of the Archaeologist | 74+ | story / newbie | implemented | auto-port |
+| 15 | Sweet Whispers | 60+ | story / newbie | implemented | auto-port |
+| 16 | The Coming Darkness | 62+ | repeatable | implemented | auto-port |
+| 17 | Light and Darkness | 61+ | repeatable | implemented | auto-port |
+| 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | auto-port |
 | 19 | Go to the Pastureland! | 63+ | story / newbie | implemented | hand-ported |
 | 20 | Bring Up With Love | 65+ | story / newbie | implemented | auto-port |
 | 21 | Hidden Truth | 63+ | story / newbie | stub | 54 dialog(s), no start; timers; auto-port |
@@ -126,7 +126,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 124 | Meeting the Elroki | 75+ | story / newbie | implemented | auto-port |
 | 125 | The Name of Evil - 1 | 76+ | story / newbie | partial | no kill: 10/10 mobs; auto-port |
 | 126 | The Name of Evil - 2 | 77+ | story / newbie | implemented | auto-port |
-| 127 | Kamael: A Window to the Future |  | story / newbie | implemented | auto-port |
+| 127 | Kamael: A Window to the Future |  | story / newbie | implemented | hand-ported |
 | 151 | Cure for Fever Disease | 15+ | story / newbie | implemented | hand-ported |
 | 152 | Shards of Golem | 10+ | story / newbie | implemented | hand-ported |
 | 153 | Deliver Goods | 2+ | story / newbie | implemented | hand-ported |
@@ -267,9 +267,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 381 | Let's Become a Royal Member! | 55+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 382 | Kail's Magic Coin | 55+ | one-time | implemented | hand-ported |
 | 383 | Searching for Treasure | 42+ | repeatable | partial | no talk: 31148; auto-port |
-| 384 | Warehouse Keeper's Pastime | 40+ | repeatable | partial | no kill: 2/28 mobs; auto-port |
+| 384 | Warehouse Keeper's Pastime | 40+ | repeatable | partial | no kill: 2/28 mobs; hand-ported |
 | 385 | Yoke of the Past | 20+ | repeatable | implemented | hand-ported |
-| 386 | Stolen Dignity | 58+ | repeatable | implemented | auto-port |
+| 386 | Stolen Dignity | 58+ | repeatable | implemented | hand-ported |
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
 | 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
 | 403 | Path to a Rogue | 19+ | 1st class (Path) | implemented | hand-ported |
@@ -291,7 +291,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 419 | Get a Pet | 15+ | pet | implemented | hand-ported |
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
-| 422 | Repent Your Sins | 20+ | repeatable | partial | no talk: 30300,30597,30612,30718; no kill: 3/4 mobs; auto-port |
+| 422 | Repent Your Sins | 20+ | repeatable | partial | no talk: 30300,30597,30612,30718; no kill: 3/4 mobs; hand-ported |
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | implemented | hand-ported |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
@@ -348,7 +348,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 645 | Ghosts of Batur | 23+ | repeatable | implemented | hand-ported |
 | 646 | Signs of Revolt | 40+ | repeatable | implemented | hand-ported |
 | 647 | Influx of Machines | 46+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
-| 648 | An Ice Merchant's Dream | 53+ | repeatable | partial | no talk: 32023; auto-port |
+| 648 | An Ice Merchant's Dream | 53+ | repeatable | partial | no talk: 32023; hand-ported |
 | 649 | A Looter and a Railroad Man | 30+ | repeatable | partial | no kill: 8/8 mobs; auto-port |
 | 650 | A Broken Dream | 39+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 651 | Runaway Youth | 26+ | repeatable | partial | quest spawns missing; timers; hand-ported |

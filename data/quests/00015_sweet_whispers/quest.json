@@ -1,0 +1,102 @@
+{
+  "id": 15,
+  "name": "Sweet Whispers",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 59,
+      "htmlFile": "31302-talk-000.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 60,
+      "htmlFile": "31302-talk-001.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "event",
+      "when": "absent",
+      "event": "31302-01",
+      "minLevel": 60,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31302-event-31302-01-002.htm"
+    },
+    {
+      "npcId": 31302,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31302-talk-003.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31518-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "event",
+      "when": "started",
+      "event": "31518-01",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31518-event-31518-01-c1-005.htm"
+    },
+    {
+      "npcId": 31518,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31518-talk-c2-006.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31517-talk-c2-007.htm"
+    },
+    {
+      "npcId": 31517,
+      "hook": "event",
+      "when": "started",
+      "event": "31517-01",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "give_exp_sp",
+          "exp": 60217,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31517-event-31517-01-c2-008.htm"
+    }
+  ]
+}

@@ -44,6 +44,10 @@ public sealed partial class QuestCatalog
         public string? Event { get; set; }
         public string? When { get; set; }
         public int? Cond { get; set; }
+        /// <summary>Mobius <c>st.getCond() &gt;= n</c> (0 = no lower bound).</summary>
+        public int MinCond { get; set; }
+        /// <summary>Mobius <c>st.getCond() &lt;= n</c> (0 = no upper bound).</summary>
+        public int MaxCond { get; set; }
         public string? WhenVar { get; set; }
         public string? WhenValue { get; set; }
         public string? Html { get; set; }
