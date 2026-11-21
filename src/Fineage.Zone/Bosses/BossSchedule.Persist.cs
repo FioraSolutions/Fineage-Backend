@@ -124,7 +124,7 @@ public sealed partial class BossSchedule
             definition.MaxMp,
             definition.Enabled);
 
-  /// <summary>Writes in-memory state to the store; caller must hold <see cref="_gate"/>.</summary>
+    /// <summary>Writes in-memory state to the store; caller must hold <see cref="_gate"/>.</summary>
     void PersistSnapshot()
     {
         var snapshot = new BossScheduleSnapshot();
