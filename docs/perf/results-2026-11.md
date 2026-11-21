@@ -28,6 +28,21 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 
 **Fix split across PRs:** Postgres allocator sync (character create), handoff prune throttle, `ss`/`fuser` port cleanup in `scripts/run-local-net.sh`. Re-run JSON: `local-logs/loadtest/siege-after/report.json`.
 
+## P1 (workers=4, 499/500 stuck) — resolution (Nov 21)
+
+**Root cause: bad evidence, not a parallel-executor hang.** The FAIL row came from `local-logs/loadtest/--w/report.json` — a batch artifact written to a bad output path (`--w`) and overwritten by later runs in the same batch, so the "499 stuck" count belongs to a partially-written/overwritten report, not to a single coherent run. Two sampling flaws explain the supporting numbers:
+
+- The metrics sampler only covers `rampUpSeconds + durationSeconds` (~180 s), while a 500-bot siege ramp takes ~10 minutes (each bot waits for the welcome burst plus a 400 ms quiet window; ~1–2 enters/s). `fineage_zone_online ≈ 153` was a mid-ramp sample, not the state at the failure moment.
+- Tick p50/p99 for the "failing" run are identical to the passing rows because they were sampled over the same early-ramp window.
+
+**Reproduction attempts on current `dev` (both PASS, 0 stuck):** `bots-500-siege` with `FINEAGE_ZONE_REGION_WORKERS=4` against a fresh database and against a warm database (all 500 bots already registered): 500/500 in world, 0 disconnects, 0 stuck in both. Managed stack captures taken by a metrics watchdog during the runs show no parked simulation or executor threads. Static review of the parallel path (`ParallelRegionExecutor` participates in its own `Parallel.For`, region bodies isolate exceptions into `StageFailure`, directory/affinity violations throw rather than block, fan-out from the sim thread is non-blocking `TrySend`) found no wait-cycle that could park a step.
+
+**Residual hazards fixed anyway (this is the "fix" half of the P1):**
+
+1. `RegionBodyScope.Enter` could leak a ThreadStatic region-directory body onto a pooled thread when `RecordRegion` threw mid-enter, permanently mis-attributing that thread's later writes. Enter is now exception-safe.
+2. A step that never returns was indistinguishable from a slow one: there was no step watchdog. The zone now tracks in-flight region bodies (stage, region, managed thread, start timestamp) and a step watchdog (`FINEAGE_ZONE_STEP_WATCHDOG_SECONDS`, default 30) logs a concrete error naming the tick, the elapsed time, and every in-flight region body — the exact evidence the original P1 lacked.
+3. Deterministic regression coverage: `RegionParallelStressTests` replays a seeded 180-mob/24-player churn scenario through the sequential and the 4-worker executor and asserts identical world state and identical fan-out, and drives a real simulation loop under concurrent handler-shaped traffic (commands, enters, leaves) asserting no stage failures and a consistent region directory and watcher index.
+
 ### Client RTT (50-bot smoke)
 
 | p50 | p95 | p99 | max |
@@ -39,7 +54,7 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 ### Observations
 
 - **Sequential regions (`FINEAGE_ZONE_REGION_WORKERS=0`)** handled 50–500 bots on this VM with all bots entering the world and no mass disconnects in completed runs.
-- **`FINEAGE_ZONE_REGION_WORKERS=4`** at 500 bots produced **499/500 “stuck”** bots (no actions for 30s) while metrics showed only ~153 players online — consistent with parallel executor soak risk called out in `docs/architecture/zone-simulation.md`. Do not enable parallel workers in production on this evidence.
+- **`FINEAGE_ZONE_REGION_WORKERS=4`** at 500 bots was reported as **499/500 “stuck”** with ~153 online; on re-analysis that report was a mid-ramp, overwritten artifact (see "P1 resolution"). Two full 500-bot workers=4 soaks on current `dev` pass with zero stuck.
 - Prometheus scrapes showed high **packet reject** counts during combat-heavy actions (invalid targets); expected for synthetic `AttackRequest` targets, not necessarily server bugs.
 - **Command ingress queue** peaked at **50** with 50 bots (queued commands awaiting drain).
 
@@ -54,11 +69,28 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 
 **Honest caveat:** Without a classic protocol adapter, we cannot produce apples-to-apples bot RTT or tick tables against Mobius. Fineage numbers above are from the shared bot tool; Mobius remains a documented fetch/build path only for this iteration.
 
+## Zone parallel stages (Nov 22) — movement + AI
+
+**Scheduler / directory (builds on PR #843):** region bodies may call `Relocated` on entities they own; global `GridAoi` updates from movement defer to `RegionBodyScope.Commit` (ascending region order) so parallel stages do not race the shared spatial hash. Knownlist and fan-out side effects from movement defer via `AtBarrier` to the same commit.
+
+**Parallel stages enabled:** `movement.player`, `movement.npc`, `random-walk`, `aggression` (existing parallel: `regen.*`, `abnormals`).
+
+**Idle full-world micro-benchmark** (34k NPCs, no players, 50 samples after warm-up):
+
+| `FINEAGE_ZONE_REGION_WORKERS` | Tick total p99 | `random-walk` p99 | `handoff` p99 |
+| ---: | ---: | ---: | ---: |
+| 0 | 4.38 ms | 0.31 ms | 1.51 ms |
+| 4 | 4.37 ms | 0.23 ms | 1.45 ms |
+
+**Bot matrix (100 / 500 bots, command→fanout p99):** not re-run on this VM (no Docker for Postgres). Reproduce with `./scripts/run-load-test.sh` on an environment that runs `run-local-net.sh`.
+
+**Regression:** `RegionParallelWorldTests`, `RegionParallelStressTests`, and `RegionSimulationDeterminismTests` pass with the parallel movement/AI stages.
+
 ## Prioritized bugs / follow-ups
 
 | P | Issue | Repro |
 | --- | --- | --- |
-| P1 | Parallel region executor (`FINEAGE_ZONE_REGION_WORKERS=4`) at 500 bots: mass stuck clients, low `fineage_zone_online` vs connected sockets | `bots-500-siege.yaml`, `spawnLayout: siege`, workers=4, local postgres |
+| P1 | ~~Parallel region executor (`FINEAGE_ZONE_REGION_WORKERS=4`) at 500 bots: mass stuck clients~~ **Resolved** — overwritten mid-ramp report, not an executor hang; see "P1 resolution" above | not reproducible on current `dev` (2/2 clean 500-bot workers=4 soaks) |
 | P2 | High `packets_rejected` under combat spam (synthetic targets) | 50-bot smoke, attack-weighted scenario |
 | P3 | Load-test RTT percentile helper under-reports p50 when samples are sparse | See `ReportWriter.ClientRtt` — cosmetic report issue |
 

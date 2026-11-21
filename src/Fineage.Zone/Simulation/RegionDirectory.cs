@@ -443,8 +443,16 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     {
         if (!_entities.TryGetValue(objectId, out var entity))
             return;
-        RequireOutsideBody($"relocating entity {objectId}");
         var owner = _owners[objectId];
+        if (CurrentBody is { } body)
+        {
+            if (owner.Region.Id != body)
+                throw new InvalidOperationException(
+                    $"region {body}'s body relocated entity {objectId}, owned by region {owner.Region.Id}");
+        }
+        else
+            RequireOutsideBody($"relocating entity {objectId}");
+
         owner.Region.MoveToCell(objectId, CellKey(entity));
         _relocated.Add(objectId);
         _borderDirty.Add(owner.Region.Id);

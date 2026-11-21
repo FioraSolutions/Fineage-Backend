@@ -22,10 +22,10 @@ public sealed class NetConnection : IAsyncDisposable
     readonly CommandDeduper _deduper = new();
     readonly string _endpoint;
     readonly Task _pump;
-    readonly ConcurrentDictionary<CoalesceEntityKey, PacketEnvelope> _coalescedMove = new();
+    readonly ConcurrentDictionary<CoalesceReplaceableKey, PacketEnvelope> _coalescedReplaceable = new();
     int _closed;
 
-    readonly record struct CoalesceEntityKey(ulong EntityValue, uint EntityGeneration);
+    readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
 
     public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net", int outboundCapacity = DefaultOutboundCapacity)
     {
@@ -153,23 +153,27 @@ public sealed class NetConnection : IAsyncDisposable
     /// straight to the socket after each channel frame so concurrent <see cref="TrySend"/> fillers
     /// cannot starve coalesced moves by re-filling the channel (CI flake on loaded hosts).
     /// </summary>
+    static bool IsReplaceablePresenceOpcode(ushort opcode) =>
+        opcode is NetOpcode.MoveState or NetOpcode.ChangeMoveType
+            or NetOpcode.StatusUpdate or NetOpcode.AbnormalStatusUpdate;
+
     bool TryCoalescedSend(ushort opcode, PacketEnvelope envelope)
     {
-        if (opcode != NetOpcode.MoveState && opcode != NetOpcode.ChangeMoveType)
+        if (!IsReplaceablePresenceOpcode(opcode))
             return false;
 
         if (!TryCoalesceEntityKey(envelope.Payload, out ulong entityValue, out uint generation))
             return false;
 
-        var key = new CoalesceEntityKey(entityValue, generation);
+        var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
 
         if (_outbound.Writer.TryWrite(envelope))
         {
-            _coalescedMove.TryRemove(key, out _);
+            _coalescedReplaceable.TryRemove(key, out _);
             return true;
         }
 
-        _coalescedMove[key] = envelope;
+        _coalescedReplaceable[key] = envelope;
         return true;
     }
 
@@ -192,13 +196,13 @@ public sealed class NetConnection : IAsyncDisposable
     /// </summary>
     void FlushCoalescedOutbound()
     {
-        foreach (KeyValuePair<CoalesceEntityKey, PacketEnvelope> entry in _coalescedMove.ToArray())
+        foreach (KeyValuePair<CoalesceReplaceableKey, PacketEnvelope> entry in _coalescedReplaceable.ToArray())
         {
-            if (!_coalescedMove.TryGetValue(entry.Key, out PacketEnvelope? envelope))
+            if (!_coalescedReplaceable.TryGetValue(entry.Key, out PacketEnvelope? envelope))
                 continue;
             if (!_outbound.Writer.TryWrite(envelope))
                 break;
-            _coalescedMove.TryRemove(entry.Key, out _);
+            _coalescedReplaceable.TryRemove(entry.Key, out _);
         }
     }
 
@@ -208,15 +212,15 @@ public sealed class NetConnection : IAsyncDisposable
     /// </summary>
     async Task WriteCoalescedToStreamAsync()
     {
-        foreach (KeyValuePair<CoalesceEntityKey, PacketEnvelope> entry in _coalescedMove.ToArray())
+        foreach (KeyValuePair<CoalesceReplaceableKey, PacketEnvelope> entry in _coalescedReplaceable.ToArray())
         {
-            if (!_coalescedMove.TryRemove(entry.Key, out PacketEnvelope? envelope))
+            if (!_coalescedReplaceable.TryRemove(entry.Key, out PacketEnvelope? envelope))
                 continue;
             // A newer frame may have landed for the same entity after ToArray; prefer the latest.
-            if (_coalescedMove.TryGetValue(entry.Key, out PacketEnvelope? newer))
+            if (_coalescedReplaceable.TryGetValue(entry.Key, out PacketEnvelope? newer))
             {
                 envelope = newer;
-                _coalescedMove.TryRemove(entry.Key, out _);
+                _coalescedReplaceable.TryRemove(entry.Key, out _);
             }
             await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
             NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);

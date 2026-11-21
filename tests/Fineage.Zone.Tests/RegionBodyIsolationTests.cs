@@ -94,7 +94,9 @@ public sealed class RegionBodyIsolationTests
             Assert.Contains("placing entity 3 inside region 0:0_0's body",
                 Assert.Throws<InvalidOperationException>(() => directory.Add(3, new Member(3, 0, 0))).Message);
             Assert.Throws<InvalidOperationException>(() => directory.Remove(1));
-            Assert.Throws<InvalidOperationException>(() => directory.Relocated(1));
+            theirs.X = 1500;
+            Assert.Contains("owned by region 0:1_0",
+                Assert.Throws<InvalidOperationException>(() => directory.Relocated(2)).Message);
             Assert.Throws<InvalidOperationException>(() => directory.Handoff());
             Assert.Throws<InvalidOperationException>(() => directory.CountOf(ActiveSets.NeedRegen));
             Assert.Throws<InvalidOperationException>(() => directory.Snapshot(ActiveSets.NeedRegen));
@@ -106,6 +108,24 @@ public sealed class RegionBodyIsolationTests
         Assert.Null(directory.CurrentBody);
         directory.Join(theirs, ActiveSets.NeedRegen);
         Assert.Equal(1, directory.CountOf(ActiveSets.NeedRegen));
+        directory.Verify();
+    }
+
+    [Fact]
+    public void A_body_may_relocate_entities_it_owns()
+    {
+        var directory = new RegionDirectory<Member>(Cells, cellSize: 250);
+        var mine = new Member(1, 100, 0);
+        directory.Add(1, mine);
+
+        using (directory.EnterBody(Cell(0)))
+        {
+            mine.X = 600;
+            directory.Relocated(1);
+            Assert.True(directory.TryCellOf(1, out _, out int cx, out _));
+            Assert.Equal(2, cx);
+        }
+
         directory.Verify();
     }
 

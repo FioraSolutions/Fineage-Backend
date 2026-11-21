@@ -31,7 +31,9 @@ Headless bots in `tools/Fineage.LoadTest` speak the **same Net `PacketEnvelope` 
      --region-workers 0
    ```
 
-3. Full matrix helper (local VM only — **never** point at public hosts):
+3. Stress ramp **100 → 1000** mixed bots (`./scripts/run-load-stress.sh`, override `LEVELS="100 300"`). Set `FINEAGE_ZONE_OUTBOUND_QUEUE=512` for soak (default in `run-local-net.sh` for local runs).
+
+4. Full matrix helper (local VM only — **never** point at public hosts):
 
    ```bash
    ./scripts/run-load-test.sh matrix
@@ -39,7 +41,7 @@ Headless bots in `tools/Fineage.LoadTest` speak the **same Net `PacketEnvelope` 
 
    Toggles `FINEAGE_ZONE_REGION_WORKERS` between `0` and `4` per run. Parallel region workers stay **off** in production until soak tests pass; the matrix reports behavior with workers enabled for comparison only.
 
-4. Stop servers:
+5. Stop servers:
 
    ```bash
    ./scripts/run-local-net.sh stop
