@@ -1,82 +1,140 @@
-# Mobius CT0 Interlude ↔ Fineage — live parity matrix
+# Mobius CT_0 Interlude ↔ Fineage — parity matrix
 
-> Updated **2026-11-06** against Backend `main` / `dev` after [#287](https://github.com/FioraSolutions/Fineage-Backend/pull/287) (parity stack through friends / craft / stores / NPC AI / PvP / death-drop / approach geo).  
-> Replaces the stale snapshot in `docs/mobius-parity-audit.md`. Tracker issue [#174](https://github.com/FioraSolutions/Fineage-Backend/issues/174) mirrors this table.  
-> SoT for combat detail: [`combat-parity.md`](combat-parity.md). SoT for wire: [`net-protocol.md`](net-protocol.md).
+> **2026-11-21** — audited against Fineage `dev` @ `0efaa43` and  
+> `.cache/l2j-mobius/L2J_Mobius_CT_0_Interlude` (MobiusDevelopment GitLab, `master`).  
+> Method: source/data diff, not issue trackers. Detail: [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md).  
+> Combat slice checklist: [`combat-parity.md`](combat-parity.md). Quest counts: [`QUEST_STATUS.md`](QUEST_STATUS.md).
 
-Legend: ✅ done · 🟡 partial · ❌ missing · stub = shell only.
+**Legend:** ✅ done · 🟡 partial · ❌ missing · n/a (not in Interlude target or explicitly deferred)
 
-| # | Feature | Area | Status | Notes / next |
-|---|---|---|---|---|
-| 1 | Login / auth / roster / create (5 races) | Auth | ✅ | Net lobby |
-| 2 | Movement, sit/stand, run/walk, target | World | ✅ | |
-| 3 | Geodata collision / pathfinding | World | ✅ | LOS + MoveCheck/FindPath; approach ETA/sticky/path-sync (#273) |
-| 4 | NPC spawns + respawn (loaded maps) | World | 🟡 | Full world when maps enabled; day/night modes → [#292](https://github.com/FioraSolutions/Fineage-Backend/issues/292) |
-| 5 | Melee + hit/miss/crit/shield/ss/position/night | Combat | ✅ | `#256` night |
-| 6 | Skills list/use/reuse + Mobius attack catalog | Combat | 🟡 | Catalog formulas; legacy `power+10` → [#290](https://github.com/FioraSolutions/Fineage-Backend/issues/290) |
-| 7 | Buffs/debuffs / abnormals / weight 4270 / grade 4267 / DP 5076 | Combat | ✅ | |
-| 8 | Magic: mcrit / fail / magicLevel / mCritRate / mCritPower | Combat | ✅ | `#255` |
-| 9 | Phys skill crit / CritDmg / BlowRate / pSkillEvas | Combat | ✅ | `#256` |
-| 10 | Blow / Lethal | Combat | ✅ | |
-| 11 | Spoil / Sweep | Combat | ✅ | `#260` sweep + ground pickup party `distributeItem` |
-| 12 | Mob AI aggro/hate/clan/LOS | Combat | ✅ | |
-| 13 | NPC soulshots / spiritshots | Combat | 🟡 | Melee SS + magic spiritshots; glow → [#291](https://github.com/FioraSolutions/Fineage-Backend/issues/291) |
-| 14 | Weapon trait / NPC defence traits | Combat | ✅ | `#261` weapon + race/type-2 via `AttackTraitBonus` |
-| 15 | NPC cast magic/blow at players | Combat | ✅ | `#259` attack + HEAL/BUFF/DEBUFF/IMMOBILIZE/silence + clan heal + SUICIDE |
-| 16 | PvP flagging / karma persist | Combat | ✅ | `#271` flag on damage, PK/PvP on kill, karma/pk/pvp persist |
-| 17 | Pets / summons | Combat | ❌ | [#288](https://github.com/FioraSolutions/Fineage-Backend/issues/288) |
-| 18 | Death: lost-exp + DP + town respawn | Combat | ✅ | |
-| 19 | Death: player item drop (PK/karma) | Combat | ✅ | `#258` `onDieDropItem` + `data/death-drop.json`; clan-war/PvP-zone exemptions deferred |
-| 20 | Inventory / equip / warehouse private | Economy | ✅ | Clan/freight → [#294](https://github.com/FioraSolutions/Fineage-Backend/issues/294) |
-| 21 | Shops buy/sell/multisell | Economy | ✅ | Wear preview stub |
-| 22 | Player trade | Economy | ✅ | |
-| 23 | Private store / craft | Economy | 🟡 | Server #275–#283 done; client UI → [#296](https://github.com/FioraSolutions/Fineage-Backend/issues/296) |
-| 24 | Enchant | Economy | 🟡 | Backend; client UI partial |
-| 25 | Party invite/leave + exp share | Social | 🟡 | Invite/leave + exp; loot modes on sweep + ground pickup |
-| 26 | Clan basic | Social | 🟡 | Crest/war/ally → [#293](https://github.com/FioraSolutions/Fineage-Backend/issues/293) |
-| 27 | Friends / block | Social | 🟡 | List/block #285 done; friend chat → [#289](https://github.com/FioraSolutions/Fineage-Backend/issues/289) |
-| 28 | NPC HTML + bypass + teleports + newbie buffs | Content | ✅ | |
-| 29 | Quests (engine + elven paths) | Content | 🟡 | Ruins/quest-spawn gaps → [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299) |
-| 30 | Class change 1st (elven paths) | Content | 🟡 | Foundation; playable maps → [#298](https://github.com/FioraSolutions/Fineage-Backend/issues/298) |
-| 31 | Raid / Seven Signs / Siege / Olympiad | Content | 🟡 | Shells; **late** → [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) |
-| 32 | Chat channels beyond say/shout/system | Social | 🟡 | |
+**Size:** S = days-scale slice · M = multi-week subsystem · L = large program
 
-## Landed slices (close the cards)
+| # | System | Status | Size | Notes (gap headline) |
+|---|--------|--------|------|----------------------|
+| **Auth & character** |
+| 1 | Login, roster, Net auth | ✅ | — | `Fineage.Login` |
+| 2 | Character create (5 races, templates) | ✅ | — | `LoginAcceptance` + Mobius class templates import |
+| 3 | Enter world / persist / inventory | ✅ | — | Accounts + `ZoneWorld.Members.Persist` |
+| **World & geo** |
+| 4 | Movement, sit/stand, run/walk, validate | ✅ | — | `ZoneWorldMovement` |
+| 5 | Geodata LOS / MoveCheck / FindPath | 🟡 | M | `GeoEngine` port; no-geo fallback; fence rules skipped (`combat-parity` §12) |
+| 6 | Doors (collision) | 🟡 | S | `DoorTable`; no doorman/siege door timers |
+| 7 | Zones: peace / PvP arena / water | 🟡 | M | `PeaceZones`, `PvpZones`, `WaterZones` — no swamp, damage, no-landing, mother tree (`zones/*.xml`) |
+| 8 | NPC spawns + respawn | 🟡 | L | 189 spawn files; TI-focused; 223/223 RB rows `enabled: false` in `raidbosses.json` |
+| 9 | Day/night spawn swap | ❌ | M | Mobius `DayNightSpawnManager.java` + spawn `night` flags |
+| 10 | Walking NPC routes | ❌ | S | Mobius `WalkingManager.java` |
+| 11 | Boats | ❌ | M | Mobius `BoatManager.java` |
+| **Combat core** |
+| 12 | Melee hit/miss/crit/shield/ss/position/night | ✅ | — | `ZoneCombat`, `combat-parity` slices 5–16 |
+| 13 | Bow + arrows | 🟡 | S | Consumption/reuse timing open (`combat-parity` §3) |
+| 14 | Physical/magic skill damage catalog | ✅ | — | 387 rows `skill-combat.json`; missing row → refuse cast (no `power+10`) |
+| 15 | Blow / lethal | ✅ | — | `ZoneWorldSkills` + gen scripts |
+| 16 | Magic crit / fail / mcrit stats | ✅ | — | Slice 10 |
+| 17 | Buffs/debuffs / abnormals / stat funcs | 🟡 | M | 372 stat-effect skills; passive HP/zone conditions skipped; buffs apply at cast-start not hitTime |
+| 18 | Skill conditions (`using` kinds) | 🟡 | S | 41 skills; compound XML conditions skipped (`gen_skill_conditions.py`) |
+| 19 | Signets (454–460) | 🟡 | S | `ZoneWorldSignets`; EffectPoint TODO |
+| 20 | Cast ↔ movement / queue | 🟡 | M | No damage/stun interrupt; no `MagicSkillCanceled` on target death |
+| 21 | Spoil / sweep single-target | ✅ | — | `ZoneWorldSpoil` |
+| 22 | Spoil/Sweeper Festival (302/444) | ❌ | S | Mobius AoE spoil handlers |
+| 23 | Death exp/SP/karma/DP/town respawn | ✅ | — | `ZoneWorldDeath*` |
+| 24 | PK item drop | ✅ | — | `ZoneWorldDeathDrop` |
+| 25 | PvP flag / karma persist | ✅ | — | `ZoneWorldPvp` |
+| 26 | Weight penalty 4270 / grade 4267 | ✅ | — | `ZoneWorldWeight` |
+| **AI & NPC combat** |
+| 27 | Mob AI aggro/hate/clan/LOS | ✅ | — | `ZoneWorldMobAi`, `ZoneWorldAggro` |
+| 28 | Minion follow + raid minion | ✅ | — | `ZoneWorldNpcMovement` |
+| 29 | NPC soul/spirit shots | 🟡 | S | Stock+chance; SS glow 2154 / boss stock copy open |
+| 30 | NPC cast heal/buff/debuff/AI skills | ✅ | — | `ZoneWorldNpcSkills` |
+| 31 | Guard / village master AI scripts | 🟡 | M | Generic AI only; Mobius `ai/others/*Guard*` scripts not ported |
+| **Drops & economy** |
+| 32 | Droplists (1295 NPC JSON) | 🟡 | M | `DropCatalog`; not every Mobius NPC has a row |
+| 33 | Herbs on ground | ✅ | — | `ZoneWorldHerbs` |
+| 34 | Ground loot + drop protection | ✅ | — | `ZoneWorldGround`, `GroundRules` |
+| 35 | Auto-loot (config + herbs/raid flags) | ❌ | M | Mobius `Attackable.doDie` + `PlayerConfig.AUTO_LOOT*` |
+| 36 | Party loot modes + adena share | ✅ | — | `PartyLootRules`, spoil/ground |
+| 37 | Raid loot owner + curse | ✅ | — | `ZoneWorldRaidLoot`, `ZoneWorldRaidCurse` |
+| 38 | Inventory / equip / private WH | ✅ | — | `ZoneWorldInventory`, `ZoneWorldGear` |
+| 39 | Clan WH / crest / skills / academy | ✅ | — | `ZoneWorldPledge.*` |
+| 40 | Freight warehouse | ❌ | S | Mobius freight; bypass stub `NpcServiceBypass.cs` |
+| 41 | Shops / multisell / buylists | ✅ | — | `ZoneWorldShops` |
+| 42 | Trade / private store / manufacture | ✅ | — | `ZoneWorldTrade`, `ZoneWorldPrivateStore`, `ZoneWorldManufacture` |
+| 43 | Item enchant scrolls | ✅ | — | `ZoneWorldEnchant` |
+| 44 | Item augmentation (life stones) | ❌ | L | Mobius `AugmentationData.java`, `RequestRefine*.java` |
+| 45 | Skill enchant (+) | ❌ | M | Mobius `RequestExEnchantSkill.java` — persistence note only in `AccountModels` |
+| 46 | Craft / recipes / dwarven manufacture | 🟡 | M | `ZoneWorldCraft`; recipe coverage vs Mobius `RecipeController` not 1:1 |
+| 47 | Manor (sow/harvest/tax) | ✅ | — | `ZoneWorldManor*`, `Manor/*` |
+| 48 | Economy ledgers (consume/grant/fee/…) | ✅ | — | `*Ledger.cs` |
+| **Social** |
+| 49 | Party invite/leave/CC | ✅ | — | `ZoneWorldParty` |
+| 50 | Friends / block | ✅ | — | `ZoneWorldFriends` |
+| 51 | Chat say/shout/trade/party/clan/hero | 🟡 | S | `ZoneWorldChat`; GM/alliance broadcast polish |
+| 52 | Chat ban (punishment) | 🟡 | S | `ChatBannedUntilUnixMs`; no jail/ban login |
+| 53 | Duels 1v1 / party | ✅ | — | `ZoneWorldDuels` |
+| 54 | Clan wars | ✅ | — | `ZoneWorldPledge.Wars` |
+| 55 | Alliance | ✅ | — | `ZoneWorldAlly` |
+| **Companions** |
+| 56 | Servitors | ✅ | — | `ZoneWorldSummons` |
+| 57 | Cubics | 🟡 | S | `ZoneWorldCubics`; M.Atk/M.Def on success TODO |
+| 58 | Pets (hunger, exp, resurrect) | 🟡 | M | `ZoneWorldPets`; baby buffs / evolution missing |
+| 59 | Mounts / wyvern | ✅ | — | `ZoneWorldMounts*` |
+| **Progression & services** |
+| 60 | 1st/2nd class (village masters) | 🟡 | M | `ZoneWorldVillageMasters`; Ketra/Varka NPC gaps on quests |
+| 61 | 3rd class sagas (70–100) | 🟡 | M | Saga engine; no helper skill casts / timers |
+| 62 | Subclass | ✅ | — | `ZoneWorldSubclass` |
+| 63 | Noblesse | 🟡 | S | `ZoneWorldNoblesse`; NPC selection bypass stub |
+| 64 | Henna / symbol maker | ✅ | — | `ZoneWorldHenna`, `ZoneWorldSymbolMaker` |
+| 65 | Skill learn / SP | 🟡 | M | Trainer HTML; not every Mobius skill tree edge |
+| 66 | NPC teleports / HTML / bypass | ✅ | — | `ZoneWorldNpcHtml`, `BypassHandlers` |
+| 67 | Warehouse / package / clan WH | 🟡 | S | Clan done; freight missing |
+| **Quests & content** |
+| 68 | Quest engine + packs | 🟡 | L | 213 impl / 93 partial / 31 stub / 7 missing / 344 Mobius (`QUEST_STATUS`) |
+| 69 | NPC quests (non-pack) village master scripts | 🟡 | M | Alliance/clan masters wired; many `ai/others` absent |
+| **PvE endgame** |
+| 70 | Raid/grand boss schedule | 🟡 | L | `ZoneWorldBosses`; world gating disables most spawns |
+| 71 | Seven Signs (engine, stones, catacombs gate) | 🟡 | M | `SevenSigns/*`; **Festival of Darkness** instance ❌ |
+| 72 | Mammon merchants | ✅ | — | `ZoneWorldMammon` |
+| 73 | Dimensional rift | ❌ | L | Mobius `DimensionalRiftManager.java` |
+| 74 | Cursed weapons (Zariche/Akamanah) | ❌ | L | Rules only (`PlayableAttackRules`); Mobius `CursedWeaponsManager.java` |
+| 75 | Lottery (Loto) | ✅ | — | `ZoneWorldLottery` |
+| **Castle & siege** |
+| 76 | Castle siege (towers, guards, HQ flag) | 🟡 | M | `ZoneWorldSiege.*`; flame/control towers present |
+| 77 | Siege mercenary tickets | ❌ | M | Mobius `MercTicketManager.java`, `handlers/items/MercTicket.java` |
+| 78 | Noble siege skills / siege golem summon | ❌ | M | Mobius `ConditionPlayerCanSummonSiegeGolem.java` |
+| 79 | Clan hall **auction** | ✅ | — | `ZoneWorldPledge.Halls`, `ClanHallAuctionActor` |
+| 80 | Clan hall **siege** | ❌ | M | Mobius `CHSiegeManager.java` |
+| 81 | Fortress siege | n/a | — | Interlude Fineage scope: castles only |
+| **Olympiad & hero** |
+| 82 | Olympiad matchmaking / stadium / hero | ✅ | — | `Olympiad/*`, `ZoneWorldOlympiad*` |
+| 83 | Raid boss points (ranking) | ❌ | S | Mobius `RaidBossPointsManager.java` |
+| **Activities** |
+| 84 | Fishing | ✅ | — | `ZoneWorldFishing`, `Fishing/*` |
+| 85 | Fishing championship / quests 27–30 | 🟡 | M | Engine ✅; quest packs stub/partial |
+| 86 | Soul crystals / symbol maker raids | 🟡 | S | `ZoneWorldSoulCrystals` — coverage incomplete |
+| **Items & shots** |
+| 87 | Soul/spirit shots (player + auto) | ✅ | — | `ZoneWorldShots`, slice 9 |
+| 88 | Arrows | 🟡 | S | Partial bow loop |
+| 89 | Consumables (potions, scrolls) | ✅ | — | `ZoneWorldConsumables` |
+| **Meta** |
+| 90 | GM commands / admin panel | 🟡 | L | `ZoneWorldAdmin` (~500 LOC) vs 80+ Mobius `handlers/admin/*` |
+| 91 | Scripted events (drops, TvT, …) | ❌ | M | Mobius `EventDropManager`, `dist/.../events` |
+| 92 | Mail system | n/a | — | Not targeted on Fineage Net |
+| 93 | Community board | ❌ | L | Mobius `communitybbs/*` |
+| 94 | Autoplay voiced command | n/a | — | Mobius optional; client-side on retail |
 
-| Issue | Landed in |
-|-------|-----------|
-| #258 death item drop | `fd53fea` → `#287` |
-| #259 NPC AI skills | `c70feae`…`241a32b` → `#287` |
-| #271 PvP / karma | `d9c20a7` → `#287` |
-| #273 approach FindPath | `a9ac246` → `#287` |
-| #275–#279 private stores | `a405b98`…`0600ab7` → `#287` |
-| #281 self-craft | `573a81b` → `#287` |
-| #283 manufacture | `1aa1186` → `#287` |
-| #285 friends + block | `64dde12` → `#287` |
+## Landed since 2026-11-06 matrix (PRs ~#587–#697)
 
-## Next slices — PvE / leveling first
+Core combat/PvE (earlier #256–#287) plus: full pledge/siege/manor/olympiad stacks, pets/summons/mounts, fishing/lottery/Mammon, Seven Signs periods, raid curse/loot, clan wars, Ketra/Varka and profession quest waves, economy ledgers, expanded `skill-combat` / drops / NPC AI skills.
 
-Order is **character progression and hunt combat**, then polish/social, then clan / siege / oly / alliances last.
+## Prioritized next slices (player impact)
 
-| Priority | Issue | Why |
-|----------|-------|-----|
-| 1 | [#298](https://github.com/FioraSolutions/Fineage-Backend/issues/298) 1st class change playable | Unlocks progression past lvl 20 |
-| 2 | [#299](https://github.com/FioraSolutions/Fineage-Backend/issues/299) elven quests + ruins spawns | Leveling loops |
-| 3 | [#290](https://github.com/FioraSolutions/Fineage-Backend/issues/290) drop `power+10` skill stub | Correct skill damage while hunting |
-| 4 | [#288](https://github.com/FioraSolutions/Fineage-Backend/issues/288) pets / summons | Pet/summoner class PvE |
-| 5 | [#292](https://github.com/FioraSolutions/Fineage-Backend/issues/292) day/night spawn modes | Hunt roster fidelity |
-| 6 | [#296](https://github.com/FioraSolutions/Fineage-Backend/issues/296) client store/craft UI | Gear via craft/stores |
-| 7 | [#291](https://github.com/FioraSolutions/Fineage-Backend/issues/291) NPC SS glow | Cosmetic |
-| 8 | [#289](https://github.com/FioraSolutions/Fineage-Backend/issues/289) friend chat | Social |
-| **Last** | [#294](https://github.com/FioraSolutions/Fineage-Backend/issues/294) clan/freight WH · [#293](https://github.com/FioraSolutions/Fineage-Backend/issues/293) crest/war/ally · [#295](https://github.com/FioraSolutions/Fineage-Backend/issues/295) SS/siege/oly | Endgame social / territory |
+See **Top 20** in [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md). PvE-first ordering: world spawns → quest partials → augmentation → cursed weapons → auto-loot → siege mercs/golem → festival/rift → skill enchant.
 
-Combat polish backlog (not separate matrix rows): see [`combat-parity.md`](combat-parity.md) § Remaining gaps.
-
-## Docs
+## Related docs
 
 | Doc | Role |
 |-----|------|
 | This file | Living feature matrix |
+| `mobius-gap-audit-2026-11-21.md` | 2026-11-21 full audit + Mobius paths |
+| `mobius-parity-audit.md` | **SNAPSHOT 2026-11-03** — historical only |
 | `combat-parity.md` | Combat slice checklist |
-| `elven-village-services.md` | Village content gaps |
-| `mobius-parity-audit.md` | **SNAPSHOT** — do not trust without re-run |
+| `QUEST_STATUS.md` | Per-quest Mobius diff |
