@@ -9,20 +9,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryAdminSpoilAsync(ZoneSession session, AdminSpoilTargetMsg request, CancellationToken ct)
-    {
-        if (!IsLive(session))
-            return Task.FromResult<string?>("world");
-
-        string? error;
-        using (_affinity.Step())
-            error = TryAdminSpoil(session, request.TargetObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
-    }
-
     public Task<string?> TryAdminSweepAsync(ZoneSession session, AdminSweepCorpseMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
@@ -36,18 +22,6 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.SpoilRules _spoilRules = Fineage.Game.Services.SpoilRules.LoadDefault();
 
     internal Fineage.Game.Services.SpoilRules SpoilRules => _spoilRules;
-
-    /// <summary>Admin hook: spoil without the magic roll (debug only, FINEAGE_ZONE_ADMIN).</summary>
-    string? TryAdminSpoil(ZoneSession session, int targetObjectId)
-    {
-        if (!_byId.TryGetValue(session.ObjectId, out var player))
-            return "world";
-        if (targetObjectId <= 0)
-            return "bad_request";
-        if (!_byId.TryGetValue(targetObjectId, out var target) || !VisibleTo(session.ObjectId, targetObjectId))
-            return "target";
-        return ApplySpoil(session, player, target, forced: true, skillId: 254, level: 1) ? null : "target";
-    }
 
     string? TryAdminSweep(ZoneSession session, int targetObjectId)
     {

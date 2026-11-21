@@ -58,7 +58,7 @@ public sealed class GatheringLedgerTests
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
         var mob = kit.World.AttackableForTest()!;
         var (session, player) = await kit.EnterAsync(classId: 54, race: 4, x: mob.X + 10, y: mob.Y, z: mob.Z);
-        Assert.Null(await kit.World.TryAdminSpoilAsync(session, new AdminSpoilTargetMsg { TargetObjectId = mob.ObjectId }, default));
+        Assert.True(kit.World.SpoilForTest(player, mob));
         kit.World.KillForTest(mob, player);
         const int Stem = 1864;
         mob.SweepItems.Clear();

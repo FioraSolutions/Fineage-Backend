@@ -84,7 +84,7 @@ public sealed partial class BossSchedule
             state.CurrentMp = definition.MaxMp;
             state.RespawnUnixMs = killedAtUnixMs + delay;
             state.Scheduled = IsArmed(definition);
-            SaveLocked();
+            PersistSnapshot();
             return true;
         }
     }
@@ -105,7 +105,7 @@ public sealed partial class BossSchedule
             state.RespawnUnixMs = 0;
             state.Scheduled = false;
             NormalizeVitals(state, definition);
-            SaveLocked();
+            PersistSnapshot();
             order = Order(definition, state, ignoreEnabled: true);
             return true;
         }
@@ -123,7 +123,7 @@ public sealed partial class BossSchedule
 
             state.CurrentHp = ClampVital(currentHp, definition.MaxHp);
             state.CurrentMp = ClampVital(currentMp, definition.MaxMp);
-            SaveLocked();
+            PersistSnapshot();
             return true;
         }
     }
@@ -163,7 +163,7 @@ public sealed partial class BossSchedule
             }
 
             if (changed)
-                SaveLocked();
+                PersistSnapshot();
             return spawned;
         }
     }

@@ -153,37 +153,34 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>Test: first live attackable NPC (spoil target).</summary>
-    internal ZoneEntity? AttackableForTest()
+    /// <summary>Test: spoil without the magic roll (replaces the retired admin spoil opcode).</summary>
+    internal bool SpoilForTest(ZoneEntity player, ZoneEntity target)
     {
-        using (_affinity.Step())
-            return _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0);
+        if (player.Session == null)
+            return false;
+        return RunStepForTest(() =>
+            ApplySpoil(player.Session, player, target, forced: true, skillId: 254, level: 1));
     }
+
+    /// <summary>Test: first live attackable NPC (spoil target).</summary>
+    internal ZoneEntity? AttackableForTest() =>
+        RunStepForTest(() => _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0));
 
     /// <summary>Test hook: up to <paramref name="take"/> living attackable NPCs.</summary>
-    internal List<ZoneEntity> AttackablesForTest(int take = 2)
-    {
-        using (_affinity.Step())
-            return _byId.Values
-                .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
-                .Take(take)
-                .ToList();
-    }
+    internal List<ZoneEntity> AttackablesForTest(int take = 2) =>
+        RunStepForTest(() => _byId.Values
+            .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
+            .Take(take)
+            .ToList());
 
     /// <summary>Test: kill an NPC through the normal death path (corpse, drops, spoil roll, decay timer).</summary>
-    internal void KillForTest(ZoneEntity npc, ZoneEntity killer)
-    {
-        using (_affinity.Step())
+    internal void KillForTest(ZoneEntity npc, ZoneEntity killer) =>
+        RunStepForTest(() =>
         {
             npc.CurHp = 0;
             RemoveDeadNpc(npc, killer);
-        }
-    }
+        });
 
     /// <summary>Test: run corpse decay at the kit clock.</summary>
-    internal void DecayForTest()
-    {
-        using (_affinity.Step())
-            TickCorpseDecay(NowUnixMs());
-    }
+    internal void DecayForTest() => RunStepForTest(() => TickCorpseDecay(NowUnixMs()));
 }

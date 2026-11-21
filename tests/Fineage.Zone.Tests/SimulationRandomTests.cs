@@ -42,6 +42,15 @@ public sealed class SimulationRandomTests
     }
 
     [Fact]
+    public void Drop_and_spawn_purpose_streams_diverge_for_the_same_world_seed()
+    {
+        var spawn = new SeededRegionRandom(11, RandomPurpose.Spawn);
+        var drop = new SeededRegionRandom(11, RandomPurpose.Drop);
+        var firstRoll = spawn.For(Elf).Next(10_000);
+        Assert.NotEqual(firstRoll, drop.For(Elf).Next(10_000));
+    }
+
+    [Fact]
     public void A_region_stream_advances_only_by_its_own_draws()
     {
         var alone = new SeededRegionRandom(99, RandomPurpose.Spawn);

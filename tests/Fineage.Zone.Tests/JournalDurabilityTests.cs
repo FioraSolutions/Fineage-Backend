@@ -14,8 +14,10 @@ public sealed class JournalDurabilityTests
         var journal = new RecordingLedgerJournal();
         var bench = new WorldBench(ledgerJournal: journal);
         _ = await bench.EnterAsync(items: [new StoredItem(57, 50, -1)]);
+        journal.StagePendingForTest();
         bench.World.FlushLedgerOnShutdown();
         Assert.Equal(0, journal.PendingFlushCount);
+        Assert.NotEmpty(journal.Flushed);
     }
 
     [Fact]
@@ -33,8 +35,9 @@ public sealed class JournalDurabilityTests
     sealed class RecordingLedgerJournal : MemoryLedgerJournal
     {
         readonly List<LedgerEntry> _pending = [];
+        readonly List<LedgerEntry> _flushed = [];
 
-        public IReadOnlyList<LedgerEntry> Flushed { get; private set; } = [];
+        public IReadOnlyList<LedgerEntry> Flushed => _flushed;
 
         public override void Append(LedgerEntry entry)
         {
@@ -44,12 +47,18 @@ public sealed class JournalDurabilityTests
 
         public override void Flush()
         {
-            Flushed = [.. _pending];
+            _flushed.AddRange(_pending);
             _pending.Clear();
         }
 
         public override int PendingFlushCount => _pending.Count;
+
+        /// <summary>Simulates buffered journal rows not yet written durably (enter alone may not ledger).</summary>
+        internal void StagePendingForTest() => _pending.Add(MakeStagedEntry(_pending.Count + 1));
     }
+
+    static LedgerEntry MakeStagedEntry(long position) =>
+        new(position, new LedgerTransaction(new LedgerTxId(0, 0), LedgerTxKind.Adjustment, 0, 0, 0, []), LedgerChain.Genesis);
 
     sealed class FlakyLedgerJournal(int failuresBeforeSuccess) : MemoryLedgerJournal
     {

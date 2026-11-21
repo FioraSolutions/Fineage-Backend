@@ -26,6 +26,8 @@ public sealed class SimulationReplayTests
         var recorded = await RecordAsync(seed: 20_261_120);
         Assert.Contains(recorded.Log.Entries, e => e is CommandLogEntry { Outcome: "ok" });
         Assert.Contains(recorded.Log.Entries, e => e is CommandLogEntry { Outcome: not "ok" });
+        Assert.True(recorded.Log.Entries.OfType<StepLogEntry>().Count() >= 5,
+            "replay fixture must include multiple steps so drift is observable");
 
         var (kit, _, recorder, tracked) = await SetupAsync(recorded.Log.Header.Seed);
         await kit.World.ReplayAsync(recorded.Log, ms => kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(ms), CancellationToken.None);

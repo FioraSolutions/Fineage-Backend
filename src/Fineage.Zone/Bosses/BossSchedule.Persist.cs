@@ -5,7 +5,7 @@ public sealed partial class BossSchedule
     public void Save()
     {
         lock (_gate)
-            SaveLocked();
+            PersistSnapshot();
     }
 
     void Restore(long now)
@@ -57,7 +57,7 @@ public sealed partial class BossSchedule
         }
 
         if (changed)
-            SaveLocked();
+            PersistSnapshot();
     }
 
     long Roll(BossDefinition definition, IBossRandom random)
@@ -124,7 +124,8 @@ public sealed partial class BossSchedule
             definition.MaxMp,
             definition.Enabled);
 
-    void SaveLocked()
+    /// <summary>Writes in-memory state to the store; caller must hold <see cref="_gate"/>.</summary>
+    void PersistSnapshot()
     {
         var snapshot = new BossScheduleSnapshot();
         foreach (var definition in Catalog.Bosses)

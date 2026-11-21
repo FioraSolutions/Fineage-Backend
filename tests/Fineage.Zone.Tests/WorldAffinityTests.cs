@@ -31,7 +31,7 @@ public sealed class WorldAffinityTests
 
             var log = kit.World.RecordSimulation();
             Assert.Equal(id, await kit.World.OnSimulationAsync(session, "probe", () => Lookup(kit.World, id), CancellationToken.None));
-            Assert.Equal(id, kit.World.OnStepForTest(() => Lookup(kit.World, id)));
+            Assert.Equal(id, kit.World.RunStepForTest(() => Lookup(kit.World, id)));
             Assert.DoesNotContain(log.Entries, e => e is CommandLogEntry);
         }
         finally
