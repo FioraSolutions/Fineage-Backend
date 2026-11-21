@@ -135,6 +135,24 @@ public sealed class FishermanBypassHandler : IBypassHandler
     }
 }
 
+/// <summary>Race Manager <c>BuyTicket</c> / <c>ShowOdds</c> / … (Mobius <c>RaceManager</c>).</summary>
+public sealed class MonsterRaceBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } =
+    [
+        "BuyTicket",
+        "ShowOdds",
+        "ShowInfo",
+        "ShowTickets",
+        "ShowTicket",
+        "CalculateWin",
+        "ViewHistory"
+    ];
+
+    public BypassReply Handle(BypassCall call) =>
+        BypassReply.ServiceCall(NpcServiceIntent.MonsterRace, call.Command.Trim());
+}
+
 /// <summary>Lottery seller <c>Loto N</c> (Mobius <c>Loto</c> bypass): N picks the page, a number or a ticket to claim.</summary>
 public sealed class LotoBypassHandler : IBypassHandler
 {

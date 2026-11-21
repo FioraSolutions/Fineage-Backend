@@ -27,7 +27,7 @@ public sealed partial class ZoneWorld
         list.Add(now + ElementSeedRangeMs);
     }
 
-    int ElementSeedCount(ZoneEntity player, string element, long now)
+    internal int ElementSeedCount(ZoneEntity player, string element, long now)
     {
         if (!player.ElementSeedUntilMs.TryGetValue(element, out var list) || list == null)
             return 0;

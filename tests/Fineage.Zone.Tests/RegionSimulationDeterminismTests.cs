@@ -25,13 +25,13 @@ public sealed class RegionSimulationDeterminismTests
         "commands", "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
         "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
         "wedding-teleport", "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
-        "ground-expiry", "environment.zones"
+        "ground-expiry", "environment.zones", "punishment"
     ];
 
     static readonly string[] LegacySimulationOrder =
     [
         "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "clan.dissolutions", "clan.hall-auctions",
-        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "seven-signs", "mammon", "olympiad"
+        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "mammon", "olympiad"
     ];
 
     /// <summary>The end-of-tick barrier, after every stage of the step.</summary>

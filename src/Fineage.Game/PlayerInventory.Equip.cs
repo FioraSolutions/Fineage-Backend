@@ -158,10 +158,12 @@ public sealed partial class PlayerInventory
     ItemInstance Require(int objectId) =>
         Find(objectId) ?? throw new InvalidOperationException($"Item object {objectId} is not in this inventory.");
 
-    ItemInstance Create(ItemTemplate template, int count, int enchantLevel)
+    ItemInstance Create(ItemTemplate template, int count, int enchantLevel, int customType1 = 0, int customType2 = 0)
     {
         var item = new ItemInstance(_ids.Next(), template, count);
         item.EnchantLevel = enchantLevel;
+        item.CustomType1 = customType1;
+        item.CustomType2 = customType2;
         return item;
     }
 

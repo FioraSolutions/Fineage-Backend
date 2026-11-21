@@ -265,13 +265,6 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Mobius PunishmentType.CHAT_BAN for <paramref name="durationMs"/> (0 lifts it). For GM tools and tests.</summary>
-    internal void SetChatBan(ZoneSession session, long durationMs)
-    {
-        using (_affinity.Step())
-            session.ChatBannedUntilUnixMs = durationMs > 0 ? NowUnixMs() + durationMs : 0;
-    }
-
     static bool HearsLocal(ZoneEntity speaker, ZoneEntity other) =>
         speaker.Knownlist.Contains(other.ObjectId) &&
         SayRules.InLocalRange(speaker.X, speaker.Y, other.X, other.Y);

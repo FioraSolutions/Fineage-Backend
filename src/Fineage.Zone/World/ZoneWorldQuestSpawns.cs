@@ -12,6 +12,8 @@ public sealed class QuestSpawnState
     public bool Strict { get; set; }
     /// <summary>Already on its way out (deleteSpawn / guard): no more hooks, no despawn vars.</summary>
     public bool Leaving { get; set; }
+    public long SpawnedAtMs { get; init; }
+    public int NextScheduledSayIndex { get; set; }
 }
 
 public sealed partial class ZoneWorld
@@ -31,7 +33,8 @@ public sealed partial class ZoneWorld
             OwnerObjectId = owner.ObjectId,
             Summon = summon,
             DespawnAtMs = now + seconds * 1000L,
-            Strict = summon is { DespawnSec: > 0 }
+            Strict = summon is { DespawnSec: > 0 },
+            SpawnedAtMs = now
         };
         _questSpawns.Add(entity.ObjectId);
     }
@@ -126,6 +129,8 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
+            FireScheduledSays(npc, q, now);
+
             if (q.DespawnAtMs > now)
                 continue;
             if (!q.Strict && npc.AggroTargetId != 0)
@@ -161,6 +166,63 @@ public sealed partial class ZoneWorld
     /// Hit on an owned spawn. Mobius Archon of Halisha leaves when anyone else, or the owner in a party, hits it;
     /// the owner's hits run <c>owned</c> attack steps (saga mob[2] hit counter).
     /// </summary>
+    void FireScheduledSays(ZoneEntity npc, QuestSpawnState q, long now)
+    {
+        if (q.Summon?.ScheduledSays is not { Count: > 0 } lines || q.NextScheduledSayIndex >= lines.Count)
+            return;
+        var owner = QuestSpawnOwner(npc);
+        string name = owner?.Name ?? "";
+        while (q.NextScheduledSayIndex < lines.Count)
+        {
+            var line = lines[q.NextScheduledSayIndex];
+            if (q.SpawnedAtMs + line.DelayMs > now)
+                break;
+            NpcSay(npc, line.Text, name);
+            q.NextScheduledSayIndex++;
+        }
+    }
+
+    /// <summary>Mobius saga <c>AbstractSagaQuest.onSkillSee</c>: buff/heal on a solo-guard Archon from a non-owner makes it flee.</summary>
+    internal bool ApplyOwnedSkillSee(ZoneEntity caster, ZoneEntity npc)
+    {
+        if (npc.QuestSpawn is not { Summon.SoloGuard: true } q || q.Leaving)
+            return false;
+        var owner = QuestSpawnOwner(npc);
+        if (owner == null || ReferenceEquals(caster, owner))
+            return false;
+        if (!string.IsNullOrEmpty(q.Summon?.GuardSay))
+            NpcSay(npc, q.Summon.GuardSay, caster.Name);
+        ApplySpawnVars(npc, q.Summon?.GoneVars);
+        LeaveQuietly(npc);
+        return true;
+    }
+
+    /// <summary>Mobius <c>cast(npc, target, 4339, 1)</c> — helper/master and player both play the VFX.</summary>
+    void FanoutSagaCast(ZoneEntity? helper, ZoneEntity player, int skillId, int level)
+    {
+        if (NetBridge == null)
+            return;
+        int hitTime = 6000;
+        void Cast(int casterId, int targetId)
+        {
+            var watchers = NetWatchersOf(player);
+            if (watchers.Count == 0)
+                return;
+            NetBridge.FanoutMagicSkillUse(watchers, new Fineage.Protocol.MagicSkillUseMsg
+            {
+                CasterObjectId = casterId,
+                TargetObjectId = targetId,
+                SkillId = skillId,
+                SkillLevel = level,
+                HitTimeMs = hitTime,
+                ReuseDelayMs = 1
+            });
+        }
+        Cast(player.ObjectId, player.ObjectId);
+        if (helper != null)
+            Cast(helper.ObjectId, helper.ObjectId);
+    }
+
     bool ApplyOwnedAttack(ZoneEntity attacker, ZoneEntity npc)
     {
         if (npc.QuestSpawn is not { Summon: { } summon } q)
@@ -204,6 +266,8 @@ public sealed partial class ZoneWorld
             ApplyQuestSummons(player, extras.Summons);
         if (extras.Despawn && npc?.QuestSpawn != null)
             LeaveQuietly(npc);
+        foreach (var cast in extras.Casts)
+            FanoutSagaCast(npc, player, cast.SkillId, cast.Level);
         if (extras.ClassChange > 0 && player.ClassId != extras.ClassChange)
         {
             var change = new Fineage.Game.Services.ClassChangeOption("quest", extras.ClassChange, player.ClassId, [], 0, "", "", "", "");
@@ -213,6 +277,12 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Test hook: run the quest-spawn despawn timers now.</summary>
+    internal bool ApplyOwnedSkillSeeForTest(ZoneEntity caster, ZoneEntity npc)
+    {
+        using (_affinity.Step())
+            return ApplyOwnedSkillSee(caster, npc);
+    }
+
     internal void TickQuestSpawnsForTest(long? now = null)
     {
         using (_affinity.Step())

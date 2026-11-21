@@ -141,6 +141,13 @@ namespace Fineage.Net.Contract
                 _len += 4;
             }
 
+            public void WriteDouble(double v)
+            {
+                Ensure(8);
+                BinaryPrimitives.WriteInt64LittleEndian(_buf.AsSpan(_len), BitConverter.DoubleToInt64Bits(v));
+                _len += 8;
+            }
+
             public void WriteString(string? s)
             {
                 s ??= "";

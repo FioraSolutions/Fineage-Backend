@@ -307,6 +307,9 @@ public sealed partial class QuestMachine
                 case DespawnOp:
                     plan.Extras.Despawn = true;
                     break;
+                case CastSkillOp cast:
+                    plan.Extras.Casts.Add(cast);
+                    break;
                 case PickRandomOp pick:
                     {
                         var pool = (plan.Vars.GetValueOrDefault(pick.Pool) ?? "")

@@ -18,6 +18,7 @@ public enum RandomPurpose
     Olympiad = 13,
     Respawn = 14,
     Boss = 15,
+    MonsterRace = 16,
 }
 
 /// <summary>

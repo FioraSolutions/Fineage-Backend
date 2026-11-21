@@ -207,7 +207,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Boss points ranking | ❌ | RB ranking NPC | `RaidBossPointsManager` | Not present | S |
 | Boats | ❌ | Gludin↔Talking Island etc. | `BoatManager.java` | Not present | M |
 | Walking NPCs | ❌ | Patrolling merchants | `WalkingManager.java` | Not present | S |
-| **Monster Derby Track** | ❌ | Race cycle, bets, payouts | `MonsterRaceManager.java`, Race Manager NPC | Spawn JSON only (`others_monster_race_track_npcs.json`) | M |
+| **Monster Derby Track** | ✅ | — | `MonsterRaceManager.java`, Race Manager NPC | `MonsterRace/*`, `ZoneWorldMonsterRace`, `data/monster-race.json` | — |
 
 ### Chat & restrictions
 
@@ -338,12 +338,12 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 15 | Zone types (swamp/damage/NL) | #731 | done — imported JSON + movement/sim | No |
 | 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
 | 14 | Guard / town AI | #738 | in review (this agent) — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
-| 17 | Saga quest fidelity | — | **queued** (this agent) | No |
+| 17 | Saga quest fidelity | (this agent) | in progress — helper timers, 4339 cast, archon skill-see | No |
 | 3 | Item augmentation | — | **queued** (this agent, server + packet doc) | Yes |
 | 4 | Cursed weapons | — | **queued** (this agent, server + packet doc) | Yes |
 | 10 | Skill enchant (+skills) | — | **queued** (this agent, server + packet doc) | Yes |
 | 2 | Quest batches | partial PRs | **ongoing** (this agent) | No |
-| 16a | Monster Derby Track | — | **other agent** — do not duplicate | Yes — `MonRaceInfo` `0xDD` |
+| 16a | Monster Derby Track | #736 | done — `MonsterRaceActor`, Race Manager HTML, `MonRaceInfo` `0x03CA` | Yes — `MonRaceInfo` `0xDD` wire in `docs/client-packet-contracts.md` |
 | 18 | GM / punishment tooling | — | **other agent** | No |
 | 19 | Compound skill conditions | — | **other agent** | No |
 | 20 | Freight warehouse | — | **other agent** | No (no account freight persistence) |
@@ -357,7 +357,7 @@ Avoid duplicate PRs on these rows:
 | Owner | Ranks / work |
 |-------|----------------|
 | **This agent (f138 main queue)** | 15 done, **#734** done → **#738** rank 14 → 17 → 3/4/10 + packet doc → quest batches |
-| **Other agents** | 16a Derby, 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
+| **Other agents** | 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
 
 Refresh `origin/dev` before branching; others may land parallel merges.
 

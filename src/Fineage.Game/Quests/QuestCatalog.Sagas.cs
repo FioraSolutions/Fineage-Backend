@@ -199,9 +199,17 @@ public sealed partial class QuestCatalog
         rows.Add(busy);
         rows.Add(Ev(npc[7], "7-1", 8, "7-02.htm", Set("spawned", "1"), new OpDto
         {
-            Op = "summon", NpcId = mob[0], X = s.X[0], Y = s.Y[0], Z = s.Z[0], DespawnSec = 300, Owned = true,
-            Say = text[0], GoneSay = text[1],
-            GoneVars = new() { ["spawned"] = "0" }, DeadVars = new() { ["spawned"] = "0" }
+            Op = "summon",
+            NpcId = mob[0],
+            X = s.X[0],
+            Y = s.Y[0],
+            Z = s.Z[0],
+            DespawnSec = 300,
+            Owned = true,
+            Say = text[0],
+            GoneSay = text[1],
+            GoneVars = new() { ["spawned"] = "0" },
+            DeadVars = new() { ["spawned"] = "0" }
         }));
         var slain = Kill(mob[0], 8, Say(text[12]), Give(it[6]), SetCond(9));
         slain.Owned = "solo";
@@ -244,9 +252,17 @@ public sealed partial class QuestCatalog
             // Mobius giveHalishaMark: 700+ marks raise the Archon of Halisha at the player (once); else 1–4 marks.
             var raise = Kill(minion, 15, Take(it[3], 20), Set("spawned", "1"), new OpDto
             {
-                Op = "summon", NpcId = mob[1], AtPlayer = true, DespawnSec = 600, Owned = true, SoloGuard = true,
-                Say = text[13], GoneSay = text[6], GuardSay = text[5],
-                GoneVars = new() { ["spawned"] = "0" }, DeadVars = new() { ["spawned"] = "0" }
+                Op = "summon",
+                NpcId = mob[1],
+                AtPlayer = true,
+                DespawnSec = 600,
+                Owned = true,
+                SoloGuard = true,
+                Say = text[13],
+                GoneSay = text[6],
+                GuardSay = text[5],
+                GoneVars = new() { ["spawned"] = "0" },
+                DeadVars = new() { ["spawned"] = "0" }
             });
             raise.Party = true;
             raise.AtLeast = new() { [it[3].ToString()] = 700 };
@@ -276,12 +292,33 @@ public sealed partial class QuestCatalog
         rows.Add(Talk(npc[10], 17, "10-01.htm"));
         var fight = Ev(npc[10], "10-1", 17, "10-02.htm", Set("Quest0", "1"), new OpDto
         {
-            Op = "summon", NpcId = mob[2], X = s.X[1], Y = s.Y[1], Z = s.Z[1], DespawnSec = 59, Owned = true,
-            Say = text[14], GoneSay = text[15], GoneVars = new() { ["Quest0"] = "2" }
+            Op = "summon",
+            NpcId = mob[2],
+            X = s.X[1],
+            Y = s.Y[1],
+            Z = s.Z[1],
+            DespawnSec = 59,
+            Owned = true,
+            Say = text[14],
+            GoneSay = text[15],
+            GoneVars = new() { ["Quest0"] = "2" }
         }, new OpDto
         {
-            Op = "summon", NpcId = npc[4], X = s.X[2], Y = s.Y[2], Z = s.Z[2], DespawnSec = 60, Owned = true,
-            Say = text[7], GoneVars = new() { ["Quest0"] = "0" }
+            Op = "summon",
+            NpcId = npc[4],
+            X = s.X[2],
+            Y = s.Y[2],
+            Z = s.Z[2],
+            DespawnSec = 60,
+            Owned = true,
+            Say = text[7],
+            ScheduledSays =
+            [
+                new ScheduledSayDto { DelayMs = 500, Text = text[7] },
+                new ScheduledSayDto { DelayMs = 2000, Text = text[8] },
+                new ScheduledSayDto { DelayMs = 12000, Text = text[9] }
+            ],
+            GoneVars = new() { ["Quest0"] = "0" }
         });
         fight.VarBelow = new() { ["Quest0"] = 1 };
         rows.Add(fight);
@@ -317,8 +354,9 @@ public sealed partial class QuestCatalog
         Helper(1, 0, "4-04.htm");
         Helper(1, 1, "4-06.htm");
         rows.Add(Row(npc[4], "first_talk", "started", 18, "4-08.htm"));
-        rows.Add(Ev(npc[4], "4-1", 17, "4-010.htm"));
-        rows.Add(Ev(npc[4], "4-2", 17, "4-011.htm", Give(it[9]), SetCond(18)));
+        rows.Add(Ev(npc[4], "4-1", 17, "4-010.htm", new OpDto { Op = "cast_skill", ItemId = 4339, Count = 1 }));
+        rows.Add(Ev(npc[4], "4-2", 17, "4-011.htm", new OpDto { Op = "cast_skill", ItemId = 4339, Count = 1 },
+            Give(it[9]), SetCond(18)));
         rows.Add(Ev(npc[4], "4-3", 17, null, Give(it[9]), SetCond(18), Say(text[13]), Set("Quest0", "0"),
             new OpDto { Op = "despawn" }));
 
@@ -327,7 +365,9 @@ public sealed partial class QuestCatalog
         rows.Add(Ev(npc[10], "10-2", 18, "10-06.htm", SetCond(19), Take(it[9])));
         rows.Add(Talk(npc[10], 19, "10-07.htm"));
         rows.Add(Talk(npc[0], 19, "0-06.htm"));
-        var finish = Ev(npc[0], "0-2", 19, "0-07.htm", Reward(takeTicket: true));
+        var finishOps = new List<OpDto> { new() { Op = "cast_skill", ItemId = 4339, Count = 1 } };
+        finishOps.AddRange(Reward(takeTicket: true));
+        var finish = Ev(npc[0], "0-2", 19, "0-07.htm", finishOps.ToArray());
         finish.MinLevel = SagaMinLevel;
         rows.Add(finish);
         rows.Add(Ev(npc[0], "0-2", 19, "0-08.htm", TakeAll(it[10]), SetCond(20)));

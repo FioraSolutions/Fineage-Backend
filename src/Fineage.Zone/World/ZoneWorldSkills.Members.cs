@@ -19,12 +19,6 @@ public sealed partial class ZoneWorld
         int level,
         long now)
     {
-        // Mobius Skill.checkCondition: <using kind=..> fails → SysMsg 113 "<skill> cannot be used due to unsuitable terms."
-        if (_skillCombat.TryGet(request.SkillId, out var cond) && cond.UsingKinds.Length > 0 && !Wearing(player, cond.UsingKinds))
-        {
-            ShotNotice(session, SysMsgUnsuitableTerms, $"{cond.Name} cannot be used due to unsuitable terms.");
-            return null;
-        }
         int targetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
         if (targetId <= 0)
             return SkillProtocol.Target;
@@ -102,6 +96,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
+        if (target.Kind == ZoneEntityKind.Npc && ApplyOwnedSkillSee(player, target))
+            return null;
         // Mobius onMagicFinalizer: a friendly buff (Dash, Might, Wind Walk) is not isBad() → no attack stance.
         EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);
