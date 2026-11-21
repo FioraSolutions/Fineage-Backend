@@ -154,8 +154,8 @@
       "npcId": 32106,
       "hook": "event",
       "when": "started",
-      "event": "32106-13",
-      "htmlFile": "32106-event-32106-13-013.htm"
+      "event": "32106-09",
+      "htmlFile": "32106-event-32106-09-013.htm"
     },
     {
       "npcId": 32117,
@@ -174,15 +174,15 @@
       "npcId": 32117,
       "hook": "event",
       "when": "started",
-      "event": "32117-07",
-      "htmlFile": "32117-event-32117-07-016.htm"
+      "event": "32117-05",
+      "htmlFile": "32117-event-32117-05-016.htm"
     },
     {
       "npcId": 32117,
       "hook": "event",
       "when": "started",
-      "event": "32117-06",
-      "htmlFile": "32117-event-32117-06-017.htm"
+      "event": "32117-05",
+      "htmlFile": "32117-event-32117-05-017.htm"
     },
     {
       "npcId": 32117,

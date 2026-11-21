@@ -78,8 +78,8 @@
       "npcId": 30357,
       "hook": "event",
       "when": "started",
-      "event": "30357-08",
-      "htmlFile": "30357-event-30357-08-005.htm"
+      "event": "30357-07",
+      "htmlFile": "30357-event-30357-07-005.htm"
     },
     {
       "npcId": 30357,

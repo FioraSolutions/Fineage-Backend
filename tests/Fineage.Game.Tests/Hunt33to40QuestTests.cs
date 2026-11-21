@@ -55,7 +55,7 @@ public sealed class Hunt33to40QuestTests
         Assert.Equal(0, bag.CountOf(Leather));
         Assert.Equal(10 * 60 + 3430, bag.CountOf(57));
 
-        Assert.True(m.AdvEvent(j, bag, Q, Enverun, "30892-10", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Enverun, "30892-08", me).Ok);
         Assert.Null(j.Find(Q));
     }
 }

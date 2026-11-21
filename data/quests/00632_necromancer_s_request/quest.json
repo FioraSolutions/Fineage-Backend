@@ -26,7 +26,7 @@
       "npcId": 31522,
       "hook": "event",
       "when": "absent",
-      "event": "31522-104",
+      "event": "31522-03",
       "minLevel": 63,
       "ops": [
         {
@@ -34,31 +34,33 @@
         },
         {
           "op": "start"
-        },
-        {
-          "op": "set_cond",
-          "cond": 1
-        },
-        {
-          "op": "set",
-          "key": "memo",
-          "value": "11"
         }
       ],
-      "htmlFile": "31522-event-31522-104-002.htm"
+      "htmlFile": "31522-event-31522-03-002.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        7542
+      ],
+      "htmlFile": "31522-talk-003.htm"
+    },
+    {
+      "npcId": 31522,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "7542": 200
+      },
+      "htmlFile": "31522-talk-004.htm"
     },
     {
       "npcId": 31522,
       "hook": "event",
       "when": "started",
-      "event": "31522-201",
-      "htmlFile": "31522-event-31522-201-003.htm"
-    },
-    {
-      "npcId": 31522,
-      "hook": "event",
-      "when": "started",
-      "event": "31522-202",
+      "event": "31522-06",
       "atLeast": {
         "7542": 200
       },
@@ -73,61 +75,33 @@
           "count": 120000
         },
         {
-          "op": "set",
-          "key": "memo",
-          "value": "11"
-        },
-        {
           "op": "set_cond",
           "cond": 1
         }
       ],
-      "htmlFile": "31522-event-31522-202-004.htm"
+      "htmlFile": "31522-event-31522-06-005.htm"
     },
     {
       "npcId": 31522,
       "hook": "event",
       "when": "started",
-      "event": "31522-202",
-      "htmlFile": "31522-event-31522-202-005.htm"
+      "event": "31522-06",
+      "lacksItems": [
+        7542
+      ],
+      "htmlFile": "31522-event-31522-06-006.htm"
     },
     {
       "npcId": 31522,
       "hook": "event",
       "when": "started",
-      "event": "31522-204",
+      "event": "31522-08",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "31522-event-31522-204-006.htm"
-    },
-    {
-      "npcId": 31522,
-      "hook": "talk",
-      "when": "started",
-      "atLeast": {
-        "7542": 200
-      },
-      "ops": [
-        {
-          "op": "set",
-          "key": "memo",
-          "value": "12"
-        },
-        {
-          "op": "set_cond",
-          "cond": 2
-        }
-      ],
-      "htmlFile": "31522-talk-007.htm"
-    },
-    {
-      "npcId": 31522,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31522-talk-008.htm"
+      "htmlFile": "31522-event-31522-08-007.htm"
     },
     {
       "npcId": 21547,

@@ -59,17 +59,6 @@
       "npcId": 30008,
       "hook": "event",
       "when": "absent",
-      "event": "30008-09",
-      "races": [
-        0
-      ],
-      "minLevel": 9,
-      "htmlFile": "30008-event-30008-09-004.htm"
-    },
-    {
-      "npcId": 30008,
-      "hook": "event",
-      "when": "absent",
       "event": "30008-04",
       "races": [
         0
@@ -92,7 +81,7 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30008-event-30008-04-005.htm"
+      "htmlFile": "30008-event-30008-04-004.htm"
     },
     {
       "npcId": 30008,
@@ -100,26 +89,14 @@
       "when": "started",
       "cond": 1,
       "hasItem": 796,
-      "htmlFile": "30008-talk-c1-006.htm"
+      "htmlFile": "30008-talk-c1-005.htm"
     },
     {
       "npcId": 30008,
       "hook": "talk",
       "when": "started",
       "cond": 2,
-      "hasAny": [
-        740,
-        741
-      ],
-      "htmlFile": "30008-talk-c2-007.htm"
-    },
-    {
-      "npcId": 30008,
-      "hook": "talk",
-      "when": "started",
-      "cond": 2,
-      "hasItem": 937,
-      "htmlFile": "30008-talk-c2-008.htm"
+      "htmlFile": "30008-talk-c2-006.htm"
     },
     {
       "npcId": 30008,
@@ -130,7 +107,7 @@
         740,
         741
       ],
-      "htmlFile": "30008-talk-c3-009.htm"
+      "htmlFile": "30008-talk-c3-007.htm"
     },
     {
       "npcId": 30008,
@@ -154,7 +131,7 @@
           "cond": 5
         }
       ],
-      "htmlFile": "30008-talk-c4-010.htm"
+      "htmlFile": "30008-talk-c4-008.htm"
     },
     {
       "npcId": 30008,
@@ -162,7 +139,7 @@
       "when": "started",
       "cond": 5,
       "hasItem": 739,
-      "htmlFile": "30008-talk-c5-011.htm"
+      "htmlFile": "30008-talk-c5-009.htm"
     },
     {
       "npcId": 30283,
@@ -170,7 +147,7 @@
       "when": "started",
       "cond": 1,
       "hasItem": 796,
-      "htmlFile": "30283-talk-c1-012.htm"
+      "htmlFile": "30283-talk-c1-010.htm"
     },
     {
       "npcId": 30283,
@@ -195,7 +172,7 @@
           "cond": 2
         }
       ],
-      "htmlFile": "30283-event-30283-02-c1-013.htm"
+      "htmlFile": "30283-event-30283-02-c1-011.htm"
     },
     {
       "npcId": 30283,
@@ -206,7 +183,7 @@
         740,
         741
       ],
-      "htmlFile": "30283-talk-c2-014.htm"
+      "htmlFile": "30283-talk-c2-012.htm"
     },
     {
       "npcId": 30283,
@@ -214,7 +191,7 @@
       "when": "started",
       "cond": 2,
       "hasItem": 937,
-      "htmlFile": "30283-talk-c2-015.htm"
+      "htmlFile": "30283-talk-c2-013.htm"
     },
     {
       "npcId": 30283,
@@ -251,7 +228,7 @@
           "cond": 4
         }
       ],
-      "htmlFile": "30283-talk-c3-016.htm"
+      "htmlFile": "30283-talk-c3-014.htm"
     },
     {
       "npcId": 30283,
@@ -259,7 +236,7 @@
       "when": "started",
       "cond": 4,
       "hasItem": 742,
-      "htmlFile": "30283-talk-c4-017.htm"
+      "htmlFile": "30283-talk-c4-015.htm"
     },
     {
       "npcId": 30283,
@@ -267,13 +244,13 @@
       "when": "started",
       "cond": 5,
       "hasItem": 739,
-      "htmlFile": "30283-talk-c5-018.htm"
+      "htmlFile": "30283-talk-c5-016.htm"
     },
     {
       "npcId": 30283,
       "hook": "event",
       "when": "started",
-      "event": "30283-07",
+      "event": "30283-06",
       "cond": 5,
       "hasItem": 739,
       "ops": [
@@ -325,7 +302,7 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30283-event-30283-07-c5-019.htm"
+      "htmlFile": "30283-event-30283-06-c5-017.htm"
     },
     {
       "npcId": 20361,

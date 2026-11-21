@@ -20,7 +20,7 @@ public sealed class PlunderJewels52to60QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 360, Coleman = 30873, Supply = 5872;
         var me = Any(52);
-        Assert.True(m.AdvEvent(j, bag, Q, Coleman, "30873-04", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Coleman, "30873-2", me).Ok);
 
         for (int i = 0; i < 4; i++)
             m.OnKill(j, bag, 20669, me); // supply only (pieces <5)
@@ -29,7 +29,7 @@ public sealed class PlunderJewels52to60QuestTests
         Assert.Equal(0, bag.CountOf(Supply));
         Assert.Equal(4 * 100 + 6000, bag.CountOf(57));
 
-        Assert.True(m.AdvEvent(j, bag, Q, Coleman, "30873-10", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Coleman, "30873-6", me).Ok);
         Assert.Equal(QuestPhase.Completed, j.Find(Q)!.Phase); // Mobius one-shot
     }
 

@@ -28,13 +28,11 @@ public sealed class CalcHunt12to20QuestTests
         Assert.Equal(1, bag.CountOf(Perfect));
         Assert.Equal(2, j.Find(Q)!.Cond);
         Assert.True(bag.CountOf(Cracked) >= 1);
-        int cracked = bag.CountOf(Cracked);
-
         var done = m.AdvEvent(j, bag, Q, Vlasty, "30145-07", me);
         Assert.True(done.Ok);
         Assert.Equal(17475, done.Exp);
         Assert.Equal(1, bag.CountOf(Gaiters));
-        Assert.Equal(17030 + cracked * 10, bag.CountOf(57));
+        Assert.Equal(17030, bag.CountOf(57));
         Assert.Equal(QuestPhase.Completed, j.Find(Q)!.Phase);
     }
 
@@ -106,7 +104,7 @@ public sealed class CalcHunt12to20QuestTests
         Assert.Equal(1, bag.CountOf(Stolen));
         Assert.Equal(6, j.Find(Q)!.Cond);
 
-        Assert.True(m.AdvEvent(j, bag, Q, Brunon, "30526-10", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Brunon, "30526-09", me).Ok);
         Assert.Equal(1, bag.CountOf(Calc));
         Assert.Null(j.Find(Q));
     }

@@ -58,13 +58,6 @@
     },
     {
       "npcId": 30895,
-      "hook": "event",
-      "when": "started",
-      "event": "30895-09",
-      "htmlFile": "30895-event-30895-09-005.htm"
-    },
-    {
-      "npcId": 30895,
       "hook": "talk",
       "when": "started",
       "hasItem": 5864,
@@ -167,13 +160,20 @@
       "npcId": 30895,
       "hook": "event",
       "when": "started",
-      "event": "30895-10",
+      "event": "30895-09",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30895-event-30895-10-013.htm"
+      "htmlFile": "30895-event-30895-09-013.htm"
+    },
+    {
+      "npcId": 30895,
+      "hook": "event",
+      "when": "started",
+      "event": "30895-09",
+      "htmlFile": "30895-event-30895-09-005.htm"
     },
     {
       "npcId": 20804,
