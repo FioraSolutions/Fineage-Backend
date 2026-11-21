@@ -114,12 +114,37 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
             if (character.Id >= _data.NextCharacterId)
                 _data.NextCharacterId = character.Id + 1;
-            foreach (var item in (character.Items ?? []).Concat(character.Warehouse ?? []))
+            foreach (var item in (character.Items ?? []).Concat(character.Warehouse ?? []).Concat(character.Freight ?? []))
             {
                 if (item.ObjectId >= _data.NextItemObjectId)
                     _data.NextItemObjectId = item.ObjectId + 1;
             }
         }
+    }
+
+    /// <summary>Raises in-memory allocation counters to match durable SQL (<c>store_meta</c> / max ids).</summary>
+    public void SyncAllocationCounters(int nextCharacterId, int nextClanId, long nextItemObjectId)
+    {
+        lock (_gate)
+        {
+            if (nextCharacterId > _data.NextCharacterId)
+                _data.NextCharacterId = nextCharacterId;
+            if (nextClanId > _data.NextClanId)
+                _data.NextClanId = nextClanId;
+            int itemNext = nextItemObjectId < PlayerInventory.FirstObjectId
+                ? PlayerInventory.FirstObjectId
+                : nextItemObjectId > int.MaxValue
+                    ? int.MaxValue
+                    : (int)nextItemObjectId;
+            if (itemNext > _data.NextItemObjectId)
+                _data.NextItemObjectId = itemNext;
+        }
+    }
+
+    public (int NextCharacterId, int NextClanId, int NextItemObjectId) AllocationCounters()
+    {
+        lock (_gate)
+            return (_data.NextCharacterId, _data.NextClanId, _data.NextItemObjectId);
     }
 
     static CharacterDto ToDto(CharacterRecord character) =>
@@ -161,7 +186,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 Count = item.Count,
                 EquippedSlot = item.EquippedSlot,
                 EnchantLevel = item.EnchantLevel,
-                ObjectId = item.ObjectId
+                ObjectId = item.ObjectId,
+                CustomType1 = item.CustomType1,
+                CustomType2 = item.CustomType2
             }).ToList(),
             Warehouse = character.Warehouse?.Select(item => new StoredItemDto
             {
@@ -169,7 +196,19 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 Count = item.Count,
                 EquippedSlot = -1,
                 EnchantLevel = item.EnchantLevel,
-                ObjectId = item.ObjectId
+                ObjectId = item.ObjectId,
+                CustomType1 = item.CustomType1,
+                CustomType2 = item.CustomType2
+            }).ToList(),
+            Freight = character.Freight?.Select(item => new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = -1,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = item.ObjectId,
+                CustomType1 = item.CustomType1,
+                CustomType2 = item.CustomType2
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),

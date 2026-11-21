@@ -51,4 +51,8 @@ public sealed class PlayerIntent
 
     /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
     public bool SitOnArrive { get; set; }
+
+    /// <summary>Mobius Wedding <c>goToLove</c> SoE cast before teleport.</summary>
+    public int WeddingTeleportPartnerId { get; set; }
+    public long WeddingTeleportAtUnixMs { get; set; }
 }

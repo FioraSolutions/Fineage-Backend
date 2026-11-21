@@ -14,6 +14,7 @@ namespace Fineage.Net.Contract
             w.WriteByte(m.Attackable ? (byte)1 : (byte)0);
             w.WriteByte(m.Wall ? (byte)1 : (byte)0);
             w.WriteInt32(m.CastleId);
+            w.WriteInt32(m.HallId);
             w.WriteInt32(m.UpgradeRatio);
         });
 
@@ -30,6 +31,7 @@ namespace Fineage.Net.Contract
                 Attackable = r.ReadByte() != 0,
                 Wall = r.ReadByte() != 0,
                 CastleId = r.ReadInt32(),
+                HallId = r.ReadInt32(),
                 UpgradeRatio = r.ReadInt32()
             };
         }

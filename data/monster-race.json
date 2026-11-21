@@ -1,0 +1,41 @@
+{
+  "comment": "Mobius CT_0 Interlude MonsterRaceManager + DerbyTrackZone broadcast regions (peace rows dion_monster_race1..8). Timings: 1 s tick, countdown 0..1140 per cycle, wrap when > 1200.",
+  "enabled": true,
+  "runnerNpcIds": [31003, 31004, 31005, 31006, 31007, 31008, 31009, 31010, 31011, 31012, 31013, 31014, 31015, 31016, 31017, 31018, 31019, 31020, 31021, 31022, 31023, 31024, 31025, 31026],
+  "ticketPrices": [100, 500, 1000, 5000, 10000, 20000, 50000, 100000],
+  "ticketItemId": 4443,
+  "adenaItemId": 57,
+  "raceManagerNpcId": 30995,
+  "cycleSeconds": 1200,
+  "countdownWrapAbove": 1200,
+  "minOdd": 1.25,
+  "oddsPoolShare": 0.7,
+  "loserPayoutRate": 0.01,
+  "track": {
+    "originX": 14107,
+    "originYBase": 181875,
+    "laneSpacing": 58,
+    "originZ": -3566,
+    "endX": 12080,
+    "runSpeedByte": 120
+  },
+  "packetCodes": [
+    [-1, 0],
+    [0, 15322],
+    [13765, -1]
+  ],
+  "broadcastPeaceZones": [
+    "dion_monster_race1",
+    "dion_monster_race2",
+    "dion_monster_race3",
+    "dion_monster_race4",
+    "dion_monster_race5",
+    "dion_monster_race6",
+    "dion_monster_race7",
+    "dion_monster_race8"
+  ],
+  "sounds": {
+    "raceMusic": "S_Race",
+    "raceStart": "ItemSound2.race_start"
+  }
+}

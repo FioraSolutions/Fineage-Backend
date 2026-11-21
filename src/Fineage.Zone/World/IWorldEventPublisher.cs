@@ -118,6 +118,10 @@ interface IWorldEventPublisher
 
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list);
 
+    void FanoutPackageToList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageToListMsg list);
+
+    void FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageSendableListMsg list);
+
     /// <summary>Mobius QuestList journal to the owner. Called on the simulation thread.</summary>
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list);
 
@@ -233,6 +237,9 @@ interface IWorldEventPublisher
     /// <summary>Interlude PlaySound (quest jingles): sent to the listed players only.</summary>
     void FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs);
 
+    /// <summary>Interlude MonRaceInfo (0xDD) to derby track watchers.</summary>
+    void FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet);
+
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 
     void FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result);
@@ -267,6 +274,8 @@ interface IWorldEventPublisher
     void FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopItemInfoMsg info);
 
     void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendInviteAskMsg ask);
+
+    void FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask);
 
     void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list);
 

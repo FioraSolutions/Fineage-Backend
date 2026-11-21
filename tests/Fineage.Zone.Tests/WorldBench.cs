@@ -6,6 +6,7 @@ using Fineage.Zone;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -41,8 +42,11 @@ internal sealed class WorldBench
         Fineage.Zone.Siege.SiegeSettings? siege = null,
         Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null,
         Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null,
+        Fineage.Zone.SevenSigns.SevenSignsFestivalRuntime? festivalRuntime = null,
         Fineage.Zone.Dungeons.DungeonCatalog? dungeons = null,
         Fineage.Zone.Dungeons.DungeonAccessOptions? dungeonAccess = null,
+        Fineage.Zone.DimensionalRift.DimensionalRiftCatalog? dimensionalRift = null,
+        Fineage.Zone.DimensionalRift.DimensionalRiftSettings? dimensionalRiftSettings = null,
         Random? combatRandom = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
@@ -53,7 +57,8 @@ internal sealed class WorldBench
         ulong? simulationSeed = null,
         Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
         Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
-        Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null)
+        Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
+        PunishmentManager? punishments = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
@@ -86,8 +91,11 @@ internal sealed class WorldBench
             olympiadSettings: olympiadSettings,
             olympiad: olympiad,
             sevenSigns: sevenSigns,
+            festivalRuntime: festivalRuntime,
             dungeons: dungeons,
             dungeonAccess: dungeonAccess,
+            dimensionalRift: dimensionalRift,
+            dimensionalRiftSettings: dimensionalRiftSettings,
             combatRandom: combatRandom,
             manor: manor,
             manorRandom: manorRandom,
@@ -97,7 +105,8 @@ internal sealed class WorldBench
             simulationSeed: simulationSeed,
             regionExecutor: resolvedExecutor,
             simulationObserver: simulationObserver,
-            ledgerJournal: Ledger);
+            ledgerJournal: Ledger,
+            punishments: punishments);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

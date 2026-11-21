@@ -111,7 +111,7 @@ public sealed partial class ZoneWorld
         {
             foreach (var row in data.Doors)
             {
-                _castleDoors.TryGetValue(row.Id, out int objectId);
+                _liveDoors.TryGetValue(row.Id, out int objectId);
                 _byId.TryGetValue(objectId, out var door);
                 doors.Add(new CastleDoorNet
                 {
@@ -252,7 +252,7 @@ public sealed partial class ZoneWorld
                 FanInventory(session, Collapse(changes));
                 SaveInventory(session, inventory);
                 castle.DoorUpgrades[doorId] = ratio;
-                if (_castleDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
+                if (_liveDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
                 {
                     door.MaxHp = door.SiegeNpc!.BaseHp * ratio;
                     door.CurHp = door.MaxHp;
@@ -302,7 +302,7 @@ public sealed partial class ZoneWorld
         if (SiegeBusy(session, castle) is { } busy)
             return busy;
         if (CastleTable.Find(castle.Id)?.Doors.FirstOrDefault(d => d.Id == doorId) is not { Wall: false } ||
-            !_castleDoors.TryGetValue(doorId, out int objectId) || !_byId.TryGetValue(objectId, out var door) || door.Dead)
+            !_liveDoors.TryGetValue(doorId, out int objectId) || !_byId.TryGetValue(objectId, out var door) || door.Dead)
             return SiegeProtocol.Door;
         SetGeoDoorOpen(doorId, open);
         FanoutDoorStatus(door);

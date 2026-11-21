@@ -18,9 +18,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import questio
 
-QROOT = ROOT / ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/scripts/quests"
-if not QROOT.is_dir():
-    QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
+QROOT = questio.mobius_quest_root()
 
 cond = lambda c: {"op": "set_cond", "cond": c}
 START = [{"op": "create"}, {"op": "start"}]
@@ -61,13 +59,7 @@ def html_loader(script: str, qid: int):
         return text
 
     def html(name: str) -> str:
-        candidates = [src / name] if re.search(r"\.html?$", name, re.I) else [
-            src / f"{name}{ext}" for ext in ("", ".htm", ".html")
-        ]
-        for p in candidates:
-            if p.exists():
-                return rewrite(p.read_text(encoding="utf-8").strip())
-        raise SystemExit(f"{script}: missing html {name}")
+        return questio.mobius_quest_html(QROOT, script, qid, name)
 
     def d(npc, hook, page, when="started", ops=None, event=None, raw=None, **gates):
         row = {"npcId": npc, "hook": hook, "when": when}

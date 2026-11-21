@@ -22,6 +22,8 @@ public sealed partial class MemoryAccountStore
         public List<ManorProductionSave> ManorProduction { get; set; } = [];
         public List<ManorProcureSave> ManorProcure { get; set; } = [];
         public List<StoredPet> Pets { get; set; } = [];
+        public List<WeddingCoupleRecord> WeddingCouples { get; set; } = [];
+        public int NextWeddingCoupleId { get; set; } = 1;
     }
 
     sealed class AccountDto
@@ -68,6 +70,7 @@ public sealed partial class MemoryAccountStore
         public List<StoredQuestDto>? Quests { get; set; }
         public List<StoredItemDto>? Items { get; set; }
         public List<StoredItemDto>? Warehouse { get; set; }
+        public List<StoredItemDto>? Freight { get; set; }
         public bool Newbie { get; set; } = true;
         public List<StoredShortcutDto>? Shortcuts { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }
@@ -202,5 +205,7 @@ public sealed partial class MemoryAccountStore
         public int EquippedSlot { get; set; } = -1;
         public int EnchantLevel { get; set; }
         public int ObjectId { get; set; }
+        public int CustomType1 { get; set; }
+        public int CustomType2 { get; set; }
     }
 }

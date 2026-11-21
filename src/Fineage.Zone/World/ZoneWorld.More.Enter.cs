@@ -133,6 +133,9 @@ public sealed partial class ZoneWorld
         pendingUnlink = null;
         if (session.ObjectId <= 0)
             return false;
+        long enterNow = NowUnixMs();
+        if (PunishmentBlocksEnter(session, enterNow))
+            return false;
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
             return false;
 
@@ -204,6 +207,7 @@ public sealed partial class ZoneWorld
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);
         LoadSocialLists(entity, stored);
+        ApplyWeddingOnEnter(entity);
         RefreshKnownSkills(entity);
         RefreshGearSkills(entity);
         RefreshPlayerMaxima(entity, fanout: false);
@@ -221,6 +225,7 @@ public sealed partial class ZoneWorld
         LoadShortcuts(entity, stored);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
+        EnsureFreightLoaded(entity, stored);
         _byId[entity.ObjectId] = entity;
         if (applyStarterKit)
             ApplyStarterKitLedger(entity);
@@ -251,6 +256,8 @@ public sealed partial class ZoneWorld
 
         AnnounceClanEnter(entity);
         FriendPlayerEnteredWorld(entity);
+        RiftSanitizeLogin(entity);
+        SyncPunishmentsOnEnter(session, entity, enterNow);
         known = entity.Knownlist.Count;
         return true;
     }

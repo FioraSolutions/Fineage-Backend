@@ -96,6 +96,11 @@ public sealed partial class PostgresAccountStore
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
             NormalizedStoreWriter.UpsertCharacterRecord(conn, tx, created);
+            var (nextCharacterId, nextClanId, nextItemObjectId) = _inner.AllocationCounters();
+            NormalizedStoreMeta.WriteAllocationCounters(
+                conn,
+                tx,
+                new NormalizedStoreMeta.AllocationCounters(nextCharacterId, nextClanId, nextItemObjectId));
             tx.Commit();
         }
 
@@ -122,6 +127,17 @@ public sealed partial class PostgresAccountStore
                     ?? throw new InvalidOperationException($"Character {characterId} missing after warehouse replace.");
                 EnsureCharacterRow(conn, record);
                 NormalizedStoreWriter.ReplaceWarehouseOnly(conn, characterId, record.Warehouse ?? []);
+            });
+
+    public bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items) =>
+        RunSilent(
+            () => _inner.TryReplaceFreight(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after freight replace.");
+                EnsureCharacterRow(conn, record);
+                NormalizedStoreWriter.ReplaceFreightOnly(conn, characterId, record.Freight ?? []);
             });
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
@@ -240,6 +256,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.PurgeWeddingCouplesForCharacter(conn, tx, characterId);
                 NormalizedStoreWriter.DeleteCharacter(conn, tx, characterId);
                 tx.Commit();
             });

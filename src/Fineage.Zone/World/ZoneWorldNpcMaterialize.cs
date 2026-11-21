@@ -37,6 +37,7 @@ public sealed partial class ZoneWorld
             Z = def.Z,
             Heading = def.Heading,
             NpcId = def.NpcId,
+            CreatureRace = NpcMaterializeCatalog.ById.TryGetValue(def.NpcId, out var raceRow) ? raceRow.Race : "",
             Attackable = def.Attackable,
             MaxHp = def.MaxHp,
             CurHp = Math.Clamp(curHp, 1, Math.Max(1, def.MaxHp)),
@@ -97,6 +98,7 @@ public sealed partial class ZoneWorld
         };
         _byId.Add(entity.ObjectId, entity);
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+        AttachWalkingRoute(entity);
     }
 
     /// <summary>

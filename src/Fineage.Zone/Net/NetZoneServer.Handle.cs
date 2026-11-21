@@ -161,6 +161,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.WarehouseWithdrawRequest:
                             await _warehouse.OnWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.PackageSendableListRequest:
+                            await _freight.OnSendableListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PackageSendRequest:
+                            await _freight.OnSendAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.RequestQuestList:
                             await _quests.OnListAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
@@ -289,6 +295,9 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.FriendAnswer:
                             await _friends.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.WeddingEngageAnswer:
+                            await _wedding.OnEngageAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.FriendListRequest:
                             await _friends.OnListRequestAsync(conn, zoneSession, ct).ConfigureAwait(false);

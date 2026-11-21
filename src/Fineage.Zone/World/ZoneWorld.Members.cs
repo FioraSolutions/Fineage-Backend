@@ -243,6 +243,7 @@ public sealed partial class ZoneWorld
         if (entity.Inventory != null)
             _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, entity.Inventory);
         SaveWarehouse(session, entity);
+        SaveFreight(session, entity);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
         SaveEffects(session, entity);

@@ -62,7 +62,7 @@ public sealed class SkillCatalog
             if (row.LevelData == null || row.LevelData.Count == 0)
                 throw new InvalidDataException($"{where} skill {row.SkillId} has no levelData.");
 
-            var levels = new SkillLevelData[row.LevelData.Count];            for (int i = 0; i < row.LevelData.Count; i++)
+            var levels = new SkillLevelData[row.LevelData.Count]; for (int i = 0; i < row.LevelData.Count; i++)
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;
@@ -114,6 +114,9 @@ public sealed class SkillCatalog
                 BasicProperty = (row.BasicProperty ?? "").Trim().ToUpperInvariant(),
                 EffectPoints = row.EffectPoint is { Count: > 0 } ep ? ep : [],
                 UsingKinds = (row.UsingKinds ?? []).Where(k => !string.IsNullOrWhiteSpace(k)).Select(k => k.Trim().ToUpperInvariant()).ToArray(),
+                CastCondition = row.CastCondition is { ValueKind: JsonValueKind.Object } cc
+                    ? SkillCastCondition.Parse(cc)
+                    : null,
                 PlayerConditions = ReadPlayerConditions(row),
                 ChannelingTickMs = row.ChannelingTickInterval > 0 ? row.ChannelingTickInterval * 1000 : 0,
                 MpPerChanneling = Math.Max(0, row.MpPerChanneling),
@@ -172,6 +175,7 @@ public sealed class SkillCatalog
         public List<int>? EffectPoint { get; set; }
         /// <summary>Mobius <c>&lt;cond msgId="113"&gt;&lt;using kind=".."/&gt;</c> weapon gate.</summary>
         public List<string>? UsingKinds { get; set; }
+        public JsonElement CastCondition { get; set; }
         public int ChannelingTickInterval { get; set; }
         public int MpPerChanneling { get; set; }
         public int ChannelingSkillId { get; set; }

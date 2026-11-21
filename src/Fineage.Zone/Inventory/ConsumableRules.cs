@@ -18,11 +18,16 @@ public static class ConsumableRules
                 ? InventoryReuse
                 : null;
 
+    public const string EscapeNoClanHall = "escape_no_clan_hall";
+
     public static string? EscapeTownError(bool dead, bool casting) =>
         dead ? InventoryProtocol.Dead : casting ? "busy" : null;
 
-    /// <summary>Mobius SOE hit times: blessed (2036) is near-instant; normal SOE is 20s.</summary>
-    public static int EscapeHitTimeMs(int skillId) => skillId == 2036 ? 200 : 20_000;
+    public static string? EscapeClanHallError(bool dead, bool casting, bool hasHall) =>
+        dead ? InventoryProtocol.Dead : casting ? "busy" : !hasHall ? EscapeNoClanHall : null;
+
+    /// <summary>Mobius SOE hit times: blessed (2036 / 2177) is near-instant; normal SOE is 20s.</summary>
+    public static int EscapeHitTimeMs(int skillId) => skillId is 2036 or 2177 ? 200 : 20_000;
 
     public static int PercentHeal(int current, int max, int percent)
     {

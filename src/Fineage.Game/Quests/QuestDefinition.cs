@@ -99,6 +99,9 @@ public sealed record SocialOp(int Action) : QuestOp;
 /// Mobius <c>addSpawn</c> + a per-spawn quest timer (sagas): an NPC owned by the quest player, optionally at the
 /// player's feet, that despawns after <see cref="DespawnSec"/> and writes vars back into the owner's quest row.
 /// </summary>
+/// <summary>Mobius saga <c>startQuestTimer</c> chat line after <paramref name="DelayMs"/> from spawn.</summary>
+public sealed record QuestScheduledSay(int DelayMs, string Text);
+
 public sealed record QuestSummon(
     int NpcId,
     int? X,
@@ -114,7 +117,8 @@ public sealed record QuestSummon(
     string? GoneSay,
     string? GuardSay,
     IReadOnlyDictionary<string, string>? GoneVars,
-    IReadOnlyDictionary<string, string>? DeadVars)
+    IReadOnlyDictionary<string, string>? DeadVars,
+    IReadOnlyList<QuestScheduledSay>? ScheduledSays = null)
 {
     /// <summary>Quest whose row the vars go into; filled when the step runs.</summary>
     public int QuestId { get; init; }
@@ -130,6 +134,9 @@ public sealed record ChangeClassOp(int ClassId) : QuestOp;
 
 /// <summary>Mobius <c>deleteSpawn(npc)</c> on the dialog / attacked NPC, without its despawn vars.</summary>
 public sealed record DespawnOp : QuestOp;
+
+/// <summary>Mobius saga helper <c>cast(npc, player, skillId, level)</c> — visual <c>MagicSkillUse</c> only.</summary>
+public sealed record CastSkillOp(int SkillId, int Level) : QuestOp;
 
 /// <summary>Mobius Q419 quiz: take one random space-separated token out of <c>Pool</c> into <c>Target</c>.</summary>
 public sealed record PickRandomOp(string Pool, string Target) : QuestOp;
@@ -150,15 +157,17 @@ public sealed class QuestExtras
 
     public List<QuestSummon> Summons { get; } = [];
     public List<string> Says { get; } = [];
+    public List<CastSkillOp> Casts { get; } = [];
     public int ClassChange { get; set; }
     public bool Despawn { get; set; }
 
-    public bool Empty => Summons.Count == 0 && Says.Count == 0 && ClassChange == 0 && !Despawn;
+    public bool Empty => Summons.Count == 0 && Says.Count == 0 && Casts.Count == 0 && ClassChange == 0 && !Despawn;
 
     public void MergeFrom(QuestExtras other)
     {
         Summons.AddRange(other.Summons);
         Says.AddRange(other.Says);
+        Casts.AddRange(other.Casts);
         if (other.ClassChange != 0)
             ClassChange = other.ClassChange;
         Despawn |= other.Despawn;
@@ -216,7 +225,10 @@ public sealed record QuestDialog(
     int SumMax = -1,
     /// <summary>An item whose object id is stored in this var is still in the bag.</summary>
     string? HoldsVarItem = null,
-    QuestHtmlByVar? HtmlByVar = null);
+    QuestHtmlByVar? HtmlByVar = null,
+    bool? InRiftPeace = null,
+    bool? InRift = null,
+    int MaxStarted = 0);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
@@ -230,6 +242,15 @@ public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, 
 
     /// <summary>Attack hook: the landed hit came from the player's pet.</summary>
     public bool ByPet { get; init; }
+
+    /// <summary>Mobius dimensional rift waiting room (type 0 room 0).</summary>
+    public bool? InRiftPeace { get; init; }
+
+    /// <summary>Mobius <c>checkIfInRiftZone</c> outer band (type 0 room 1).</summary>
+    public bool? InRift { get; init; }
+
+    /// <summary>Active started quest rows (Mobius <c>getAllActiveQuests().size()</c>).</summary>
+    public int StartedQuestCount { get; init; }
 
     /// <summary>
     /// Uniform [0, 1) draws for this actor's random branches, drops and picks (the zone passes the acting character's

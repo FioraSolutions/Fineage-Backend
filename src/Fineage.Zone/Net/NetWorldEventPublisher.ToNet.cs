@@ -231,4 +231,11 @@ sealed partial class NetWorldEventPublisher
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.EntityDespawn, payload);
     }
+
+    void IWorldEventPublisher.FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, MonRaceInfoNetMsg packet)
+    {
+        var payload = NetCodec.EncodeMonRaceInfo(packet);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.MonRaceInfo, payload);
+    }
 }

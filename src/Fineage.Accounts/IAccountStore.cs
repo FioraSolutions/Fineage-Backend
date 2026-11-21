@@ -48,6 +48,9 @@ public interface IAccountStore
     /// <summary>Replaces the private warehouse. An empty list is an empty warehouse.</summary>
     bool TryReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items);
 
+    /// <summary>Replaces freight packages stored for this character.</summary>
+    bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items);
+
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
 
@@ -182,4 +185,16 @@ public interface IAccountStore
 
     /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
     bool TrySetCharacterTitle(string account, int characterId, string title);
+
+    /// <summary>Next couple id this store will assign (Mobius <c>CoupleManager</c> sequence).</summary>
+    int NextWeddingCoupleId { get; }
+
+    /// <summary>All couples (Mobius <c>mods_wedding</c>).</summary>
+    IReadOnlyList<WeddingCoupleRecord> ListWeddingCouples();
+
+    /// <summary>Replaces the couple table and next id (Mobius <c>CoupleManager</c> persistence).</summary>
+    bool SaveWeddingCouples(IReadOnlyList<WeddingCoupleRecord> couples, int nextCoupleId);
+
+    /// <summary>Removes couples that reference a deleted character (Mobius <c>GameClient</c> cleanup).</summary>
+    bool PurgeWeddingCouplesForCharacter(int characterId);
 }

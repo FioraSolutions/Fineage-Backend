@@ -83,6 +83,15 @@ public sealed partial class QuestCatalog
         public int SumMax { get; set; } = -1;
         public string? HoldsVarItem { get; set; }
         public HtmlByVarDto? HtmlByVar { get; set; }
+        public bool? InRiftPeace { get; set; }
+        public bool? InRift { get; set; }
+        public int MaxStarted { get; set; }
+    }
+
+    sealed class ScheduledSayDto
+    {
+        public int DelayMs { get; set; }
+        public string? Text { get; set; }
     }
 
     sealed class OpDto
@@ -124,6 +133,7 @@ public sealed partial class QuestCatalog
         public string? GuardSay { get; set; }
         public Dictionary<string, string>? GoneVars { get; set; }
         public Dictionary<string, string>? DeadVars { get; set; }
+        public List<ScheduledSayDto>? ScheduledSays { get; set; }
         public string? Kind { get; set; }
         public string? Html { get; set; }
         public int EventId { get; set; }

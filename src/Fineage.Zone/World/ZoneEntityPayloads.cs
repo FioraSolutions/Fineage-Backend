@@ -147,6 +147,19 @@ sealed class ZonePlayerIdentityPayload
     public int Karma { get; set; }
     public int ClanId { get; set; }
     public bool Newbie { get; set; } = true;
+
+    /// <summary>Mobius wedding: <c>_coupleId</c> / <c>_partnerId</c> / <c>_married</c>.</summary>
+    public int CoupleId { get; set; }
+    public int PartnerId { get; set; }
+    public bool Married { get; set; }
+}
+
+/// <summary>Transient wedding ceremony / engage UI state (Mobius marry request flags).</summary>
+sealed class ZoneWeddingSessionPayload
+{
+    public int EngageInviterId { get; set; }
+    public bool MarryRequest { get; set; }
+    public bool MarryAccepted { get; set; }
 }
 
 /// <summary>Shared HP/MP/XP/sitting/death fields composed off <see cref="ZoneEntity"/> (#353).</summary>
@@ -197,6 +210,10 @@ sealed class ZoneEntityMovePayload
     public float? LiveSwimWalkSpeed { get; set; }
     public bool Running { get; set; } = true;
     public bool InWater { get; set; }
+    public bool InSwamp { get; set; }
+    public double SwampMoveBonus { get; set; } = 1d;
+    public long DamageZoneNextAtMs { get; set; }
+    public long NoLandingDismountAtMs { get; set; }
     public bool MoveActive { get; set; }
     public int MoveDestX { get; set; }
     public int MoveDestY { get; set; }

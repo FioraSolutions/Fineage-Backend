@@ -11,6 +11,58 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 QUESTS_DIR = ROOT / "data" / "quests"
 META_PATH = QUESTS_DIR / "_meta.json"
 
+MOBIUS_CT0_CACHE = ROOT / ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude"
+VENDORED_MOBIUS_QUEST_DIALOGS = ROOT / "data/mobius-quest-dialogs/scripts/quests"
+MOBIUS_QUEST_ROOT_CANDIDATES = (
+    MOBIUS_CT0_CACHE / "dist/game/data/scripts/quests",
+    VENDORED_MOBIUS_QUEST_DIALOGS,
+    ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests",
+    ROOT / "ref/mobius-ct0-interlude/data/scripts/quests",
+)
+
+
+def mobius_quest_source_root() -> pathlib.Path:
+    """Live Mobius CT0 tree (cache) used by scripts/import_mobius_quest_html.py."""
+    dist = MOBIUS_CT0_CACHE / "dist/game/data/scripts/quests"
+    if dist.is_dir():
+        return dist
+    ref = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
+    if ref.is_dir():
+        return ref
+    raise SystemExit(
+        "Mobius CT0 quest scripts not found under .cache/l2j-mobius/L2J_Mobius_CT_0_Interlude "
+        "or ref/mobius-ct0-interlude — cannot import quest HTML."
+    )
+
+
+def mobius_quest_html(qroot: pathlib.Path, script: str, qid: int, name: str) -> str:
+    """Load one Mobius quest dialog and rewrite Quest bypass links for Fineage."""
+    src = qroot / script
+    if re.search(r"\.html?$", name, re.I):
+        candidates = [src / name]
+    else:
+        candidates = [src / f"{name}{ext}" for ext in ("", ".htm", ".html")]
+    for path in candidates:
+        if path.is_file():
+            text = path.read_text(encoding="utf-8").strip()
+            return re.sub(
+                rf"bypass -h Quest {re.escape(script)} ([A-Za-z0-9_\-]+)(?:\.html?)?",
+                lambda m: f"quest_event:{qid}:{m.group(1)}",
+                text,
+            )
+    raise SystemExit(f"{script}: missing html {name}")
+
+
+def mobius_quest_root() -> pathlib.Path:
+    """Root of Mobius quest script folders (for generator html_loader)."""
+    for path in MOBIUS_QUEST_ROOT_CANDIDATES:
+        if path.is_dir():
+            return path
+    raise SystemExit(
+        "Quest dialog source missing. Run: python3 scripts/import_mobius_quest_html.py "
+        "(requires Mobius CT0 under .cache/l2j-mobius/L2J_Mobius_CT_0_Interlude)."
+    )
+
 
 def slugify(name: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "_", (name or "quest").lower()).strip("_")

@@ -55,6 +55,10 @@ public sealed partial class ZoneWorld
             HoldingsOf(_byId.TryGetValue(account.OwnerId, out var owner) && owner.Warehouse != null
                 ? owner.Warehouse
                 : throw new InvalidOperationException($"{account} has no warehouse in the world")),
+        { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Freight } freightAccount =>
+            _byId.TryGetValue(freightAccount.OwnerId, out var freightOwner) && freightOwner.Freight != null
+                ? HoldingsOf(freightOwner.Freight)
+                : HoldingsFromStored(_accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight ?? []),
         { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
             HoldingsOf(_clan.TryGet(account.OwnerId, out var clan)
                 ? ClanWarehouseOf(clan)!

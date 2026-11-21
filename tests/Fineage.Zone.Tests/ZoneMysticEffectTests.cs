@@ -1,5 +1,6 @@
 using Fineage.Zone.Combat;
 using Fineage.Zone.Geo;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
 using Xunit;
@@ -48,7 +49,8 @@ public sealed class ZoneMysticEffectTests
         var kit = new NetTestKit(SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["mystic"] = new("mystic", true, npcs)
-        }), "mystic", geo: GeoEngine.Empty, combatRandom: new AlwaysRoll());
+        }), "mystic", geo: GeoEngine.Empty, combatRandom: new AlwaysRoll(),
+            simulationSeed: 55, regionExecutor: SequentialRegionExecutor.Instance);
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         return (kit, rec);

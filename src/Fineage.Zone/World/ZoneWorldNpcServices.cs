@@ -63,6 +63,10 @@ public sealed partial class ZoneWorld
                 return OpenDeposit(session, player, npc);
             case NpcServiceIntent.Withdraw:
                 return OpenWithdraw(session, player, npc);
+            case NpcServiceIntent.PackageDeposit:
+                return OpenPackageDeposit(session, player, npc);
+            case NpcServiceIntent.PackageWithdraw:
+                return OpenPackageWithdraw(session, player, npc);
             case NpcServiceIntent.SupportMagic:
                 return ApplySupportMagic(session, npc.ObjectId, html: true);
             case NpcServiceIntent.SupportBlessing:
@@ -73,6 +77,8 @@ public sealed partial class ZoneWorld
                 return ShowTerritoryStatus(session, player, npc);
             case NpcServiceIntent.Loto:
                 return ShowLoto(session, player, npc, Math.Max(0, reply.ServiceId));
+            case NpcServiceIntent.MonsterRace:
+                return MonsterRaceBypass(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.NoblesSelect:
                 SendNoblesPage(session, player, npc, player.Noble);
                 return null;
@@ -92,6 +98,12 @@ public sealed partial class ZoneWorld
                 return TryWyvernRideFromManager(session, player, npc);
             case NpcServiceIntent.PetEvolve:
                 return ApplyPetEvolve(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.DimensionalRift:
+                return ApplyDimensionalRift(session, player, npc, reply);
+            case NpcServiceIntent.DoormanOpen:
+                return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: true);
+            case NpcServiceIntent.DoormanClose:
+                return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: false);
             default:
                 return "bad_request";
         }

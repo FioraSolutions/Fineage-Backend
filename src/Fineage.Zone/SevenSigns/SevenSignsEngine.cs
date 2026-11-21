@@ -58,12 +58,13 @@ public sealed partial class SevenSignsEngine
     }
 
     /// <summary>Opens <c>seven-signs.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
-    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt)
+    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt, ISevenSignsFestivalHook? festival = null)
     {
         string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "seven-signs.json");
         return new SevenSignsEngine(
             loadedAt,
             SevenSignsOptions.FromEnvironment(),
-            new JsonSevenSignsStore(path));
+            new JsonSevenSignsStore(path),
+            festival);
     }
 }

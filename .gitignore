@@ -10,7 +10,9 @@ data/*
 !data/merc_tickets.json
 !data/siegable-clan-halls.json
 !data/manor.json
+!data/wedding.json
 !data/fishing.json
+!data/monster-race.json
 !data/recipes.json
 !data/starter-kits.json
 !data/classes.json
@@ -18,6 +20,8 @@ data/*
 !data/stat-bonuses.json
 !data/quests/
 !data/quests/**
+!data/mobius-quest-dialogs/
+!data/mobius-quest-dialogs/**
 !data/skills.json
 !data/skill-combat.json
 !data/skill-stat-effects.json
@@ -29,9 +33,13 @@ data/*
 !data/henna.json
 !data/npcs.json
 !data/dungeons.json
+!data/dimensional-rift.json
+!data/seven-signs-festival.json
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/walking-routes.json
+!data/boats.json
 !data/gm-teleports.json
 !data/newbie-buffs.json
 !data/item-weights.json
@@ -47,8 +55,12 @@ data/*
 !data/doors.json
 !data/water-zones.json
 !data/peace-zones.json
+!data/jail-zone.json
 !data/pvp-zones.json
 !data/siege-zones.json
+!data/swamp-zones.json
+!data/damage-zones.json
+!data/no-landing-zones.json
 !data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
@@ -76,6 +88,7 @@ publish/
 !data/xp-percent-lost.json
 !data/item-skills.json
 !data/map-regions.json
+!data/clan-hall-spawns.json
 !data/death-drop.json
 !data/npc-ai-support.json
 !data/npc-minions.json

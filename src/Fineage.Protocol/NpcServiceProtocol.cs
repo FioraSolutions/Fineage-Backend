@@ -109,6 +109,8 @@ public static class NpcServiceIntent
     public const string FishSkillList = "fish-skill-list";
     /// <summary>Lottery seller <c>Loto N</c> (service id = N).</summary>
     public const string Loto = "loto";
+    /// <summary>Race Manager bypass command (Mobius <c>BuyTicket</c>, <c>ShowOdds</c>, …).</summary>
+    public const string MonsterRace = "monster-race";
     /// <summary>Black Marketeer of Mammon <c>SevenSigns 7 N</c>: N Ancient Adena for N adena (service id = N, −1 invalid).</summary>
     public const string AncientAdenaToAdena = "ancient-adena-to-adena";
 
@@ -126,4 +128,16 @@ public static class NpcServiceIntent
 
     /// <summary>Clan hall doorman <c>evolve N</c> (Mobius <c>PetManager.doEvolve</c>).</summary>
     public const string PetEvolve = "pet-evolve";
+
+    /// <summary>Freight keeper <c>package_deposit</c> / <c>DepositF</c>: open account character list for shipping.</summary>
+    public const string PackageDeposit = "package-deposit";
+
+    /// <summary>Freight keeper <c>package_withdraw</c> / <c>WithdrawF</c>: open freight pickup window.</summary>
+    public const string PackageWithdraw = "package-withdraw";
+
+    /// <summary>Mobius <c>EnterRift</c> / <c>ChangeRiftRoom</c> / <c>ExitRift</c> (Seven Signs rift HTML).</summary>
+    public const string DimensionalRift = "dimensional-rift";
+
+    public const string DoormanOpen = "doorman-open";
+    public const string DoormanClose = "doorman-close";
 }

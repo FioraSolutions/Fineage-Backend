@@ -89,6 +89,19 @@ public sealed partial class QuestMachine : IQuestKillHook
         return Commit(journal, inventory, quest, plan, "abort", "");
     }
 
+    /// <summary>Mobius script hooks that create and start a quest without dialog (dimensional rift entry → Q635).</summary>
+    public QuestOutcome AutoStart(QuestJournal journal, PlayerInventory inventory, int questId)
+    {
+        if (_catalog.Find(questId) is not { } quest)
+            return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "auto_start");
+        if (journal.Find(questId)?.Phase == QuestPhase.Started)
+            return new QuestOutcome { QuestId = questId };
+        var plan = new Plan(journal.Find(questId));
+        if (!TryOps(journal, inventory, quest, [new CreateOp(), new StartOp()], plan, () => 0, out var failure))
+            return failure;
+        return Commit(journal, inventory, quest, plan, "auto_start", "");
+    }
+
     public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId) => OnKill(journal, inventory, npcId, null);
 
     public QuestOutcome OnKill(QuestJournal journal, PlayerInventory inventory, int npcId, QuestActor? actor) =>

@@ -26,7 +26,14 @@ public sealed record AccountCredential(string AccountName, string PasswordHash, 
 /// <see cref="ObjectId"/> is the durable Mobius-style instance id; 0 means allocate on next persist/load.
 /// Null <c>Items</c> on a character means the kit was never granted.
 /// </summary>
-public sealed record StoredItem(int ItemId, int Count, int EquippedSlot, int EnchantLevel = 0, int ObjectId = 0);
+public sealed record StoredItem(
+    int ItemId,
+    int Count,
+    int EquippedSlot,
+    int EnchantLevel = 0,
+    int ObjectId = 0,
+    int CustomType1 = 0,
+    int CustomType2 = 0);
 
 /// <summary>
 /// One Mobius <c>character_shortcuts</c> row. <see cref="Slot"/> is 0..11 on <see cref="Page"/> 0..9.
@@ -120,6 +127,7 @@ public sealed record CharacterRecord(
     long Exp = 0,
     IReadOnlyList<QuestSaveRow>? Quests = null,
     IReadOnlyList<StoredItem>? Warehouse = null,
+    IReadOnlyList<StoredItem>? Freight = null,
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
     IReadOnlyList<StoredSkill>? LearnedSkills = null,

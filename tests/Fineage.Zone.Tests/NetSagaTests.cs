@@ -112,6 +112,20 @@ public sealed class NetSagaTests
     }
 
     [Fact]
+    public async Task Buff_on_solo_guard_archon_from_a_stranger_makes_it_leave()
+    {
+        var bench = new WorldBench();
+        var p = await bench.EnterAsync(classId: Gladiator, level: 76, items: [new StoredItem(Marks, 700, -1)]);
+        var other = await bench.EnterAsync(classId: Gladiator, level: 76, clearRecorder: false);
+        Seed(p, 15);
+        bench.World.QuestKillForTest(p.Player, 21646);
+        var archon = bench.World.FindNpcTemplateForTest(Archon)!;
+        Assert.True(bench.World.ApplyOwnedSkillSeeForTest(other.Player, archon));
+        bench.World.TickQuestSpawnsForTest();
+        Assert.Equal(0, bench.World.CountNpcTemplateForTest(Archon));
+    }
+
+    [Fact]
     public async Task Plain_quest_spawns_leave_after_ten_quiet_minutes()
     {
         var bench = new WorldBench();

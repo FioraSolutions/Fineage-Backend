@@ -1,10 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Lottery;
+using Fineage.Zone.MonsterRace;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
@@ -170,6 +173,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(PartyActor.StageName, TickParty);
         ticks.AddWorldStage("pending-pickups", tick => TickPendingPickups(tick.NowUnixMs));
         ticks.AddWorldStage("pending-talks", tick => TickPendingTalks(tick.NowUnixMs));
+        ticks.AddWorldStage("wedding-teleport", tick => TickPendingWeddingTeleports(tick.NowUnixMs));
         ticks.AddWorldStage("fear", tick => TickFear(tick.NowUnixMs));
         ticks.AddRegionStage(_aggressionStage);
         ticks.AddWorldStage("leash", tick => TickLeash(tick.NowUnixMs));
@@ -180,6 +184,9 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("corpse-decay", tick => TickCorpseDecay(tick.NowUnixMs));
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
+        ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
+        ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
+        ticks.AddWorldStage("door-auto-close", tick => TickDoorAutoClose(tick.WallUnixMs));
 
         // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.
@@ -192,6 +199,7 @@ public sealed partial class ZoneWorld
         }, slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
         ticks.AddWorldStage(BossActor.StageName, tick => SpawnBosses(_bosses.Step(tick)), slow);
+        ticks.AddWorldStage(DimensionalRiftActor.StageName, TickDimensionalRift, slow);
         ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
         ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
         ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);
@@ -199,7 +207,9 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);
         ticks.AddWorldStage("fishing", tick => TickFishing(tick.NowUnixMs), slow);
         ticks.AddWorldStage(LotteryActor.StageName, tick => AnnounceLottery(_lottery.Step(tick)), slow);
+        ticks.AddWorldStage(MonsterRaceActor.StageName, tick => AnnounceMonsterRace(_monsterRace.Step(tick)), slow);
         ticks.AddWorldStage(SevenSignsActor.StageName, tick => ApplySevenSignsPeriods(_sevenSigns.Step(tick)), slow);
+        ticks.AddWorldStage(SevenSignsFestivalActor.StageName, TickSevenSignsFestival, slow);
         ticks.AddWorldStage(MammonActor.StageName, tick => PlaceMammons(_mammon.Step(tick)), slow);
         ticks.AddWorldStage(OlympiadActor.StageName, tick => ApplyOlympiad(_olympiad.Step(tick)), slow);
 

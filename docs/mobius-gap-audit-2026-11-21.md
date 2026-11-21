@@ -55,7 +55,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Monster aggro/hate/LOS | ✅ | — | `AttackableAI` | `ZoneWorldMobAi` | — |
 | Raid minion | ✅ | — | `Monster.setLeader` | `ZoneWorldNpcMovement` | — |
 | Healer/buffer NPC AI | ✅ | — | `NpcAI` + scripts | `ZoneWorldNpcSkills` | — |
-| City guards / karma checks | 🟡 | Guards attack PK, protect children | `ai/others/Guard`, `SiegeGuard` | Generic `Monster` AI only | M |
+| City guards / karma checks | 🟡 | Guards attack PK; scan aggressive mobs when enabled; ally hate on hit | `ai/others/Guard`, `SiegeGuard` | Karma scan in `ScanAggression`; `CallGuardHelp`; `GuardTownAiTests` | M |
 | Event / quest NPC AI | 🟡 | Hundreds of `dist/.../ai/**` | Script AI | Quest pack + limited scripts | L |
 | Minion raid buff on follow | 🟡 | 1/30 clan buff roll close | `AttackableAI` | Follow only | S |
 
@@ -89,6 +89,8 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Clan wars | ✅ | — | `ClanWar.java` | `ZoneWorldPledge.Wars` | — |
 | Alliance | ✅ | — | `Alliance.java` | `ZoneWorldAlly` | — |
 | Clan hall auction | ✅ | — | `ClanHallAuctionManager` | `ClanHallAuctionActor` | — |
+| Clan hall functions | 🟡 | `AgitDecoInfo` fan-out TBD; item-creation multisell depth | `ClanHallManager` | `ZoneWorldPledge.HallFunctions`, `ClanHallManagerBypassHandler`, `HallFunctionActor` | — |
+| Clan hall escape / restart | ✅ | SOE 1829/5858 + death action 5 | `MapRegionData` CLANHALL | `ClanHallSpawnCatalog`, `TryUseEscapeClanHall`, `ReviveToClanHall` | — |
 | **Clan hall siege** | ❌ | CH siege cycles | `CHSiegeManager.java` | Auction only | M |
 | Freight WH | ❌ | Account freight deposit | `Warehouse.java` freight type | Stub bypass | S |
 
@@ -101,7 +103,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Siege guards / spawn disable | 🟡 | Guard hire, respawn link to towers | `SiegeGuardManager` | Towers ✅; hire flags `isHired=0` data | M |
 | **Mercenary tickets** | ❌ | Buy/deploy castle mercs | `MercTicketManager.java` | No matches in `src/` | M |
 | **Siege golem** | ❌ | Noble skill summon golem in siege | `ConditionPlayerCanSummonSiegeGolem` | `ZoneWorldSummons` generic only | M |
-| Door open on siege | 🟡 | Door timers during siege | `Castle.java` | Static door JSON | S |
+| Door open on siege | 🟢 | — | `Door.java` `OPEN_BY_TIME` | Live Net doors + siege/CH respawn + doorman + cyclic `openTime`/`closeTime` tick | — |
 
 ### Manor, castles, taxes
 
@@ -125,7 +127,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Periods / seal votes / stones | ✅ | — | `SevenSigns.java` | `SevenSignsEngine` | — |
 | Catacomb/necropolis **entry** | 🟡 | Full gate NPC + validation kick | `DimensionalRift` gates | Teleport + cabal checks | S |
 | **Festival of Darkness** | ❌ | Instance rooms, scores, rewards | `SevenSignsFestival` | `ISevenSignsFestivalHook` only | L |
-| **Dimensional rift** | ❌ | Rift rooms, jumps, rewards | `DimensionalRiftManager.java` | No manager | L |
+| **Dimensional rift** | ✅ | Rift rooms, jumps, rewards | `DimensionalRiftManager.java` | `ZoneWorldDimensionalRift` | L |
 | Mammon spawn | ✅ | — | `SignsPriest` / Mammon | `ZoneWorldMammon` | — |
 
 ### Cursed weapons
@@ -181,8 +183,8 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Servitor | ✅ | — | `Servitor.java` | `ZoneWorldSummons` | — |
 | Cubics | 🟡 | Offensive cubic uses M.Atk | `Cubic.java` | TODO in `ZoneWorldCubics` | S |
 | Pet hunger/exp/res | ✅ | — | `Pet.java` | `ZoneWorldPets` | — |
-| **Baby pet buffs** | ❌ | Auto-cast buffs when fed | `BabyPet` AI | Templates in `npcs.json`, no logic | M |
-| **Pet evolution** | ❌ | Wolf → strider etc. | `pet` data evolve | Not in `ZoneWorldPets` | M |
+| **Baby pet buffs** | ✅ | Auto-cast buffs when fed | `BabyPet` AI | `ZoneWorldPets` + skill-effects | — |
+| **Pet evolution** | ✅ | Wolf → strider, multisell hatchling | `PetManager.doEvolve` | `ZoneWorldPets.Evolve` + bypass | — |
 | Wyvern / strider | ✅ | — | `Ride` | `ZoneWorldMounts` | — |
 
 ### Zones & environment
@@ -191,9 +193,9 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 |--------|--------|-----|--------|---------|------|
 | Peace / PvP arena | ✅ | — | `zones/peace.xml`, arena | `PeaceZones`, `PvpZones` | — |
 | Water (swim speed) | ✅ | — | `WaterZone` | `WaterZones` | — |
-| **Swamp** (speed) | ❌ | `SwampZone` | `mobius-data/zones/swamp.xml` | Not loaded | S |
-| **Damage** zones | ❌ | Periodic damage | `DamageZone` | Not loaded | M |
-| **No landing** (wyvern) | ❌ | Fly restriction | `NoLandingZone` | Mount gates partial only | S |
+| **Swamp** (speed) | ✅ | `SwampZone` move_bonus | `mobius-data/zones/swamp.xml` | `SwampZones` + speed fold | — |
+| **Damage** zones | ✅ | Periodic HP/MP | `DamageZone` | `DamageZones` + sim tick | — |
+| **No landing** (wyvern) | ✅ | Wyvern dismount timer | `NoLandingZone` | `NoLandingZones` + mount hook | — |
 | **Mother tree** (elven regen) | ❌ | HP/MP bonus zone | `MotherTreeZone` | Not loaded | S |
 | Day/night spawns | ❌ | Swap spawn groups at game hour | `DayNightSpawnManager.java` | Not present | M |
 
@@ -207,6 +209,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Boss points ranking | ❌ | RB ranking NPC | `RaidBossPointsManager` | Not present | S |
 | Boats | ❌ | Gludin↔Talking Island etc. | `BoatManager.java` | Not present | M |
 | Walking NPCs | ❌ | Patrolling merchants | `WalkingManager.java` | Not present | S |
+| **Monster Derby Track** | ✅ | — | `MonsterRaceManager.java`, Race Manager NPC | `MonsterRace/*`, `ZoneWorldMonsterRace`, `data/monster-race.json` | — |
 
 ### Chat & restrictions
 
@@ -216,6 +219,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Level / cursed whisper trade | 🟡 | Cursed weapon shout/trade block | `Say2` | Karma + partial curse checks | S |
 | Chat ban | 🟡 | Full `PunishmentManager` | `PunishmentManager.java` | Chat ban field only | M |
 | Silence / message refusal | ✅ | — | block list | `ZoneWorldFriends` | — |
+| Wedding (custom) | 🟡 | Cupid bow N/A in CT_0 script; jail/festival/rift gotolove gates | `mods/events/Wedding`, `CoupleManager` | `ZoneWorldWedding`, `docs/wedding-v2-protocol.md` | S |
 
 ### Items, shots, henna
 
@@ -255,7 +259,7 @@ Fineage adds structured ledgers (`ConsumeLedger`, `GrantLedger`, …) beyond Mob
 
 ### Wire / protocol
 
-Documented in `docs/net-protocol.md`. Residual gaps: `MagicSkillCanceled`, full `RelationChanged` polish, auto-shot slot highlight (`combat-parity`).
+Documented in `docs/net-protocol.md`. **Blocked-feature wire layouts** (boats, derby): `docs/client-packet-contracts.md`. Residual gaps: `MagicSkillCanceled`, full `RelationChanged` polish, auto-shot slot highlight (`combat-parity`).
 
 ---
 
@@ -271,7 +275,7 @@ Documented in `docs/net-protocol.md`. Residual gaps: `MagicSkillCanceled`, full 
 
 Fineage-only: Q256, Q998.
 
-Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Batch 2: Q50–Q53 bait + Q27–Q30 chest chain — `scripts/gen_quests_rank2_fishing.py` (bait prerequisite chain not JSON-gated). Still blocked on dimensional rift: Q634, Q635; Q255 skipped (Fineage Q998).
+Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Batch 2: Q50–Q53 bait + Q27–Q30 chest chain — `scripts/gen_quests_rank2_fishing.py` (bait prerequisite chain not JSON-gated). Q634/Q635 ship with dimensional rift (#7); Q255 skipped (Fineage Q998).
 
 ---
 
@@ -301,7 +305,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 4 | Cursed weapons | ❌ | No acquire/drop cycle | `CursedWeaponsManager.java` | L |
 | 5 | Auto-loot | ❌ | All drops to ground | `Attackable.java` + `PlayerConfig` | M |
 | 6 | Seven Signs Festival | ❌ | No instance / rewards | `SevenSignsFestival` | L |
-| 7 | Dimensional rift | ❌ | No rift instances | `DimensionalRiftManager.java` | L |
+| 7 | Dimensional rift | ✅ | Instances + Q634/Q635 | `DimensionalRiftManager.java` | L |
 | 8 | Siege mercenaries | ❌ | No ticket deploy | `MercTicketManager.java` | M |
 | 9 | Siege golem (noble) | ❌ | No summon siege golem | `ConditionPlayerCanSummonSiegeGolem` | M |
 | 10 | Skill enchant (+skills) | ❌ | No ExEnchantSkill | `RequestExEnchantSkill.java` | M |
@@ -322,24 +326,39 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
 | 2 | Quest coverage | #709, #717, #718, #720 | partial — +16 hand-ported; Q634/635 blocked (rift); Q255→Q998; ~86 partial remain | No |
-| 3 | Item augmentation | — | blocked | Yes (refine UI + server `AugmentationData`) |
-| 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
+| 3 | Item augmentation | #745 | server gates + packet doc (`FINEAGE_ALLOW_AUGMENTATION`); refine UI/data TBD | Yes |
+| 4 | Cursed weapons | #745 | server gates + packet doc (`CursedWeaponsState`); full cycle TBD | Yes |
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
 | 6 | Seven Signs Festival | — | blocked | No (instances) |
-| 7 | Dimensional rift | — | blocked | No (unblocks Q634/635) |
+| 7 | Dimensional rift | — | done | No |
 | 8 | Siege mercenaries | #722 | done | No |
 | 9 | Siege golem (noble) | #722 | done | No |
-| 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
+| 10 | Skill enchant (+skills) | #745 | server gates + packet doc (`FINEAGE_ALLOW_SKILL_ENCHANT`); trainer flow TBD | Yes |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
-| 13 | Baby pet / evolution | #726 | done — BabyPet heal after spice; collar npc swap (Q421) | No |
-| 14 | Guard / town AI | — | partial (base guard AI) | No |
-| 15 | Zone types (swamp/damage/NL) | — | pending | No |
-| 16 | Boats + walking NPCs | — | pending | No |
-| 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
-| 18 | GM / punishment tooling | — | partial | No |
-| 19 | Compound skill conditions | — | pending | No |
-| 20 | Freight warehouse | — | blocked | No (no account freight persistence) |
+| 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
+| 15 | Zone types (swamp/damage/NL) | #731 | done — imported JSON + movement/sim | No |
+| 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
+| 14 | Guard / town AI | #738 | done — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
+| 17 | Saga quest fidelity | #742 | done — helper timers, 4339 cast, archon skill-see | No |
+| 2 | Quest batches | #709, #717, #718, #720 | partial — `import_mobius_quest_html.py` + vendored dialogs; further gens may need script/html name fixes | No |
+| 16a | Monster Derby Track | #736 | done — `MonsterRaceActor`, Race Manager HTML, `MonRaceInfo` `0x03CA` | Yes — `MonRaceInfo` `0xDD` wire in `docs/client-packet-contracts.md` |
+| 18 | GM / punishment tooling | — | **other agent** | No |
+| 19 | Compound skill conditions | — | **other agent** | No |
+| 20 | Freight warehouse | — | **other agent** | No (no account freight persistence) |
+| 6 | Seven Signs Festival | — | **other agent** | No (instances) |
+| 7 | Dimensional rift | — | **other agent** | No (unblocks Q634/635) |
+
+### Parallel ownership (2026-11-21)
+
+Avoid duplicate PRs on these rows:
+
+| Owner | Ranks / work |
+|-------|----------------|
+| **This agent (f138 main queue)** | 14–17, 3/4/10 (#738, #742, #745) merged; quest gens blocked on HTML import |
+| **Other agents** | 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
+
+Refresh `origin/dev` before branching; others may land parallel merges.
 
 ---
 

@@ -120,10 +120,13 @@ def flatten(sk, skill_id, level, item_name):
             }[name], power=param_int(sk, params, level))
         elif name == "Escape":
             kind = params.get("escapeType", "TOWN")
-            if kind != "TOWN":
+            if kind == "TOWN":
+                row.update(kind="escapeTown")
+            elif kind == "CLANHALL":
+                row.update(kind="escapeClanHall")
+            else:
                 print(f"skip {item_name}: escape type {kind} (skill {skill_id})", file=sys.stderr)
                 continue
-            row.update(kind="escapeTown")
         elif name == "Teleport":
             coords = []
             for axis in ("x", "y", "z"):
@@ -188,7 +191,7 @@ doc = {
     "reference": (
         "L2J Mobius CT0 Interlude: stats/items handler ItemSkills + item_skill, resolved against stats/skills "
         "(including skills/custom). Effects are flattened to what the zone executes: buff, healOverTime, heal, "
-        "manaHeal, escapeTown, teleport, dispel, restoration, recovery. Mobius UseItem consumes one item on success."
+        "manaHeal, escapeTown, escapeClanHall, teleport, dispel, restoration, recovery. Mobius UseItem consumes one item on success."
     ),
     "items": sorted(out, key=lambda r: r["itemId"]),
 }

@@ -16,7 +16,9 @@ public static class CharacterInventory
                 item.Count,
                 item.EquippedSlot is { } slot ? (int)slot : -1,
                 item.EnchantLevel,
-                item.ObjectId);
+                item.ObjectId,
+                item.CustomType1,
+                item.CustomType2);
         }
 
         return rows;
@@ -36,7 +38,9 @@ public static class CharacterInventory
                 item.ItemId,
                 item.Count,
                 item.EnchantLevel,
-                item.EquippedSlot);
+                item.EquippedSlot,
+                item.CustomType1,
+                item.CustomType2);
         }
 
         inventory.ReplaceFromStored(rows);
@@ -55,7 +59,7 @@ public static class CharacterInventory
             if (!catalog.TryGet(row.ItemId, out _))
                 continue;
             ItemInstance instance = row.ObjectId > 0
-                ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel)
+                ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2)
                 : inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
             if (row.EquippedSlot >= 0 && instance.Template.Equippable)
                 inventory.Equip(instance);

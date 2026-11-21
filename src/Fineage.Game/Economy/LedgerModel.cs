@@ -28,7 +28,10 @@ public enum LedgerContainer : byte
     /// A private or clan warehouse. Warehouse stacks have no durable piece id yet, so the ledger holds them as a
     /// count per item: a piece deposited leaves its instance id behind and a piece withdrawn gets a new one.
     /// </summary>
-    Warehouse = 4
+    Warehouse = 4,
+
+    /// <summary>Freight packages addressed to this character (Mobius <c>ItemLocation.FREIGHT</c>).</summary>
+    Freight = 5
 }
 
 /// <summary>Sources and sinks. Their balances may go negative: a negative balance is what they minted.</summary>
@@ -85,7 +88,10 @@ public enum SystemAccount
     GmGrants = 16,
 
     /// <summary>Potions, shots, arrows, skill costs and other item consumption.</summary>
-    Consumed = 17
+    Consumed = 17,
+
+    /// <summary>Monster race ticket sales and payouts.</summary>
+    MonsterRace = 18
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -111,6 +117,9 @@ public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, 
 
     public static LedgerAccount ClanWarehouse(int clanId) =>
         new(LedgerOwnerKind.Clan, clanId, LedgerContainer.Warehouse);
+
+    public static LedgerAccount Freight(int characterId) =>
+        new(LedgerOwnerKind.Character, characterId, LedgerContainer.Freight);
 
     public bool IsSystem => Owner == LedgerOwnerKind.System;
 
@@ -266,7 +275,28 @@ public enum LedgerTxKind
     GmGrant = 45,
 
     /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
-    Consume = 46
+    Consume = 46,
+
+    /// <summary>Bag into another character's freight on the same account: <c>Reference</c> is the recipient's character id.</summary>
+    FreightDeposit = 47,
+
+    /// <summary>Freight into the bag at any warehouse keeper: <c>Reference</c> is the keeper's npc id.</summary>
+    FreightWithdraw = 48,
+
+    /// <summary>Monster race ticket purchase: <c>Reference</c> is race number.</summary>
+    MonsterRaceBet = 49,
+
+    /// <summary>Monster race ticket payout: <c>Reference</c> is ticket object id.</summary>
+    MonsterRacePayout = 50,
+
+    /// <summary>Wedding ceremony fee at Andromeda: <c>Reference</c> is couple id.</summary>
+    WeddingCeremonyFee = 51,
+
+    /// <summary><c>.gotolove</c> teleport fee: <c>Reference</c> is partner object id.</summary>
+    WeddingTeleportFee = 52,
+
+    /// <summary>Married divorce adena transfer: payer inventory → partner inventory.</summary>
+    WeddingDivorcePenalty = 53
 }
 
 /// <summary>

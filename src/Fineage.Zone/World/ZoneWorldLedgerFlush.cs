@@ -8,7 +8,7 @@ public sealed partial class ZoneWorld
     /// <summary>Journal first, then inventory and warehouse snapshots (<see cref="FlushDirtyInventories"/>).</summary>
     public void FlushLedgerOnShutdown()
     {
-        if (_dirtyInventories.Count > 0 || _dirtyWarehouses.Count > 0)
+        if (_dirtyInventories.Count > 0 || _dirtyWarehouses.Count > 0 || _dirtyFreight.Count > 0)
             FlushDirtyInventories();
         else
             TryFlushLedger();

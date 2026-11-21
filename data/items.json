@@ -38061,6 +38061,14 @@
       "weight": 20
     },
     {
+      "id": 4443,
+      "name": "Monster Race Ticket - Single",
+      "kind": "etc",
+      "icon": "icon.etc_ticket_i00",
+      "price": 10,
+      "weight": 20
+    },
+    {
       "id": 4445,
       "name": "Dye of STR (Str+1 Con-3)",
       "kind": "etc",
@@ -52717,6 +52725,16 @@
       "price": 10000,
       "weight": 0,
       "stackable": true
+    },
+    {
+      "id": 5901,
+      "name": "Blood Offering",
+      "kind": "etc",
+      "icon": "icon.etc_magic_coin_blood_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
     },
     {
       "id": 5902,

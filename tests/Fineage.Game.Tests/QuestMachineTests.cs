@@ -266,7 +266,7 @@ public sealed class QuestMachineTests
         return (new QuestMachine(catalog, items), new PlayerInventory(items));
     }
 
-    static string Sample(int maxActive) 
+    static string Sample(int maxActive)
     {
         var quests = new System.Text.StringBuilder();
         quests.Append("{\"maxActive\":").Append(maxActive).Append(",\"quests\":[");

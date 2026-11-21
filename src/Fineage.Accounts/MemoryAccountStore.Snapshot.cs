@@ -60,7 +60,9 @@ public sealed partial class MemoryAccountStore
                 Count = item.Count,
                 EquippedSlot = item.EquippedSlot,
                 EnchantLevel = item.EnchantLevel,
-                ObjectId = objectId
+                ObjectId = objectId,
+                CustomType1 = item.CustomType1,
+                CustomType2 = item.CustomType2
             });
         }
 
@@ -92,6 +94,8 @@ public sealed partial class MemoryAccountStore
                     taken.Add(id);
                 foreach (int id in ObjectIdSet(character.Warehouse))
                     taken.Add(id);
+                foreach (int id in ObjectIdSet(character.Freight))
+                    taken.Add(id);
             }
         }
 
@@ -121,6 +125,7 @@ public sealed partial class MemoryAccountStore
             {
                 next = AssignMissingIds(character.Items, next, taken);
                 next = AssignMissingIds(character.Warehouse, next, taken);
+                next = AssignMissingIds(character.Freight, next, taken);
             }
         }
 
@@ -159,7 +164,9 @@ public sealed partial class MemoryAccountStore
             character.Level,
             character.Items == null
                 ? null
-                : character.Items.Select(item => new StoredItem(item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel, item.ObjectId)).ToArray(),
+                : character.Items.Select(item => new StoredItem(
+                    item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel, item.ObjectId,
+                    item.CustomType1, item.CustomType2)).ToArray(),
             character.HairStyle,
             character.HairColor,
             character.Face,
@@ -189,7 +196,14 @@ public sealed partial class MemoryAccountStore
                     (quest.Vars ?? []).Select(variable => new QuestSaveVar(variable.Key, variable.Value)).ToArray())).ToArray(),
             character.Warehouse == null
                 ? null
-                : character.Warehouse.Select(item => new StoredItem(item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId)).ToArray(),
+                : character.Warehouse.Select(item => new StoredItem(
+                    item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId,
+                    item.CustomType1, item.CustomType2)).ToArray(),
+            character.Freight == null
+                ? null
+                : character.Freight.Select(item => new StoredItem(
+                    item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId,
+                    item.CustomType1, item.CustomType2)).ToArray(),
             character.Newbie,
             character.Shortcuts == null
                 ? null

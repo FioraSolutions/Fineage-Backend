@@ -55,6 +55,26 @@ public sealed partial class ZoneWorld
         npc.NextMobAttackMs = NowUnixMs() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
+    /// <summary>Mobius <c>Guard.addDamage</c>: nearby guards within 500 add hate 10 on the attacker.</summary>
+    void CallGuardHelp(ZoneEntity guard, ZoneEntity attacker)
+    {
+        if (!IsGuard(guard) || guard.CurHp <= 0)
+            return;
+        var credit = CreditOf(attacker);
+        if (credit.Kind != ZoneEntityKind.Player && credit.Summon == null)
+            return;
+        const int range = 500;
+        const long helpHate = 10;
+        foreach (int id in _aoi.GetVisible(guard.ObjectId))
+        {
+            if (!_byId.TryGetValue(id, out var other) || ReferenceEquals(other, guard) || other.CurHp <= 0 || !IsGuard(other))
+                continue;
+            if (!ZoneCombat.Within(guard.X, guard.Y, other.X, other.Y, range))
+                continue;
+            Post(new HateMessage(other.ObjectId, credit.ObjectId, helpHate));
+        }
+    }
+
     /// <summary>
     /// Hate list only, no AI wake. Mobius <c>addDamageHate</c> on a skill hit writes aggro without
     /// <c>notifyActionAttacked</c> (which is what actually sets intention ATTACK). Used for skills

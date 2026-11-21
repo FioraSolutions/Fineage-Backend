@@ -39,7 +39,7 @@ public sealed class TeleportBypassHandler : IBypassHandler
     static string TeleportRulesNormal() => "NORMAL";
 }
 
-/// <summary>Private warehouse windows. Clan and freight stay stubbed.</summary>
+/// <summary>Private warehouse windows.</summary>
 public sealed class WarehouseBypassHandler : IBypassHandler
 {
     public IReadOnlyList<string> Commands { get; } = ["DepositP", "WithdrawP"];
@@ -51,6 +51,25 @@ public sealed class WarehouseBypassHandler : IBypassHandler
             return BypassReply.ServiceCall(NpcServiceIntent.Deposit);
         if (token.Equals("WithdrawP", StringComparison.OrdinalIgnoreCase))
             return BypassReply.ServiceCall(NpcServiceIntent.Withdraw);
+        return BypassReply.Fail("bad_request");
+    }
+}
+
+/// <summary>Freight warehouse (Mobius <c>handlers/bypass/npc/Freight</c>).</summary>
+public sealed class FreightBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } =
+        ["package_deposit", "package_withdraw", "DepositF", "WithdrawF"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var token = BypassCommands.Token(call.Command);
+        if (token.Equals("package_deposit", StringComparison.OrdinalIgnoreCase) ||
+            token.Equals("DepositF", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.PackageDeposit);
+        if (token.Equals("package_withdraw", StringComparison.OrdinalIgnoreCase) ||
+            token.Equals("WithdrawF", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.PackageWithdraw);
         return BypassReply.Fail("bad_request");
     }
 }
@@ -114,6 +133,24 @@ public sealed class FishermanBypassHandler : IBypassHandler
         var page = NpcHtmlPaths.ReadLink(_html, call.NpcType, "Link fisherman/fishing_championship.htm");
         return page.RejectedPath ? BypassReply.Fail("bad_request") : BypassReply.Page(page.Html);
     }
+}
+
+/// <summary>Race Manager <c>BuyTicket</c> / <c>ShowOdds</c> / … (Mobius <c>RaceManager</c>).</summary>
+public sealed class MonsterRaceBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } =
+    [
+        "BuyTicket",
+        "ShowOdds",
+        "ShowInfo",
+        "ShowTickets",
+        "ShowTicket",
+        "CalculateWin",
+        "ViewHistory"
+    ];
+
+    public BypassReply Handle(BypassCall call) =>
+        BypassReply.ServiceCall(NpcServiceIntent.MonsterRace, call.Command.Trim());
 }
 
 /// <summary>Lottery seller <c>Loto N</c> (Mobius <c>Loto</c> bypass): N picks the page, a number or a ticket to claim.</summary>

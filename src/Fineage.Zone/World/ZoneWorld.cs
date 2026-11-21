@@ -15,12 +15,17 @@ using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
+using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.Lottery;
+using Fineage.Zone.MonsterRace;
 using Fineage.Game.Services;
+using Fineage.Game.Wedding;
+using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -48,8 +53,16 @@ public sealed partial class ZoneWorld
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
+    readonly SevenSignsFestivalCatalog _festivalCatalog;
+    readonly SevenSignsFestivalRuntime _festivalRuntime;
+    readonly SevenSignsFestivalActor _festivalActor;
+    int _nextFestivalInstanceId;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
+    readonly DimensionalRiftCatalog _dimensionalRift;
+    readonly DimensionalRiftSettings _dimensionalRiftSettings;
+    readonly DimensionalRiftActor _dimensionalRiftActor;
+    readonly Random _riftRandom;
     readonly SiegeSettings _siegeSettings;
     readonly SiegeActor _siege;
     readonly ChSiegeActor _chSiege;
@@ -64,6 +77,8 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
+    /// <summary>Mobius clan hall owner restart points (<c>data/clan-hall-spawns.json</c>).</summary>
+    readonly Fineage.Game.Services.ClanHallSpawnCatalog _clanHallSpawns;
     readonly int _teleportOffset;
     readonly IRegionRandom _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
@@ -116,6 +131,7 @@ public sealed partial class ZoneWorld
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
+    readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
     readonly bool _npcRegen;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
@@ -155,9 +171,12 @@ public sealed partial class ZoneWorld
         Random? enchantRandom = null,
         EnchantRates? enchantRates = null,
         SevenSignsEngine? sevenSigns = null,
+        SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
+        DimensionalRiftCatalog? dimensionalRift = null,
+        DimensionalRiftSettings? dimensionalRiftSettings = null,
         SiegeSettings? siege = null,
         BossSchedule? bosses = null,
         Random? bossRandom = null,
@@ -188,6 +207,7 @@ public sealed partial class ZoneWorld
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
         Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
+        Fineage.Game.Services.ClanHallSpawnCatalog? clanHallSpawns = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
         ArmorSetCatalog? armorSets = null,
@@ -199,7 +219,8 @@ public sealed partial class ZoneWorld
         ISimulationObserver? simulationObserver = null,
         ulong? simulationSeed = null,
         IRegionExecutor? regionExecutor = null,
-        ILedgerJournal? ledgerJournal = null)
+        ILedgerJournal? ledgerJournal = null,
+        PunishmentManager? punishments = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -237,9 +258,22 @@ public sealed partial class ZoneWorld
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
-        _sevenSigns = new SevenSignsActor(sevenSigns ?? new SevenSignsEngine(WallNow()));
+        _festivalCatalog = festivalRuntime?.Board.Catalog ?? SevenSignsFestivalCatalog.LoadDefault();
+        _festivalRuntime = festivalRuntime ?? new SevenSignsFestivalRuntime(_festivalCatalog);
+        SevenSignsEngine ssEngine = sevenSigns ?? new SevenSignsEngine(WallNow(), festival: _festivalRuntime);
+        _festivalRuntime.BindEngine(ssEngine);
+        _sevenSigns = new SevenSignsActor(ssEngine);
+        _festivalActor = new SevenSignsFestivalActor(_festivalRuntime.Board);
+        _nextFestivalInstanceId = FestivalInstanceBase;
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
+        _dimensionalRiftSettings = dimensionalRiftSettings ?? DimensionalRiftSettings.Default;
+        _dimensionalRift = dimensionalRift ?? DimensionalRiftCatalog.LoadDefault();
+        _riftRandom = GlobalStream(RandomPurpose.Service);
+        _dimensionalRiftActor = new DimensionalRiftActor(
+            new DimensionalRiftBoard(_dimensionalRift),
+            _dimensionalRiftSettings,
+            _riftRandom);
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeActor(new SiegeBoard(NowUnixMs(), _siegeSettings));
         _chSiege = new ChSiegeActor(new ChSiegeBoard(SiegableHallCatalog.Default.All), ChSiegeSettings.Default);
@@ -286,6 +320,7 @@ public sealed partial class ZoneWorld
         RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
+        _clanHallSpawns = clanHallSpawns ?? Fineage.Game.Services.ClanHallSpawnCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
         if (geo == null)
         {
@@ -295,8 +330,12 @@ public sealed partial class ZoneWorld
             Peace = SharedPeace.Value;
             Pvp = SharedPvp.Value;
             SiegeAreas = SharedSiegeZones.Value;
+            Swamp = SharedSwamp.Value;
+            Damage = SharedDamage.Value;
+            NoLanding = SharedNoLanding.Value;
         }
         BootstrapSpawns();
+        BootstrapBoats();
         BootstrapBosses();
         BootstrapQuestNpcs();
         LoadClans();
@@ -306,8 +345,21 @@ public sealed partial class ZoneWorld
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
+        _monsterRaceSettings = MonsterRaceSettings.Mobius;
+        _monsterRaceBroadcast = _monsterRaceSettings.ResolveBroadcastZones(Peace);
+        _monsterRace = new MonsterRaceActor(
+            new MonsterRaceBoard(
+                WallNow().ToUnixTimeMilliseconds(),
+                _game.Items,
+                Npcs.NpcCatalog.LoadDefault(),
+                () => _itemIds.Next(),
+                _monsterRaceSettings),
+            GlobalStream(RandomPurpose.MonsterRace));
         _mammon = new MammonActor(_sevenSigns, GlobalStream(RandomPurpose.Mammon));
+        _weddingSettings = WeddingSettings.LoadDefault();
+        _wedding = new WeddingActor(accounts?.ListWeddingCouples(), accounts?.NextWeddingCoupleId ?? 1);
         SpawnCastleDoors();
+        InitPunishment(punishments);
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

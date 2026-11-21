@@ -13,6 +13,7 @@ public sealed partial class ZoneWorld
             return "party";
         }
 
+        RiftOnPartyLeave(objectId);
         _party.Remove(party, objectId);
         DuelOnPartyRemove(objectId);
 

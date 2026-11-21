@@ -36,6 +36,8 @@ sealed partial class ZoneEntity : IRegionMember
         set => _activeSets = value;
     }
     public ZoneEntityKind Kind { get; init; }
+    /// <summary>Mobius template <c>race</c> (UNDEAD, HUMANOID, …). NPCs only.</summary>
+    public string CreatureRace { get; init; } = "";
     public string Name { get; init; } = "";
     public string Title { get; set; } = "";
     /// <summary>NPC template payload; null until first template access (#353 composition).</summary>
@@ -65,6 +67,8 @@ sealed partial class ZoneEntity : IRegionMember
     public bool QuestAttackSpawned { get; set; }
     /// <summary>Set on NPCs a quest step raised: owner, despawn timer, saga summon data.</summary>
     public QuestSpawnState? QuestSpawn { get; set; }
+    /// <summary>Dimensional rift room mob: which party instance owns this spawn.</summary>
+    public int RiftPartyId { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

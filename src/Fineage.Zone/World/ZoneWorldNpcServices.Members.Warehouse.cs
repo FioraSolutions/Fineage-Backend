@@ -28,7 +28,9 @@ public sealed partial class ZoneWorld
             FeePerLine = WarehouseRules.DepositFeePerLine,
             SlotsUsed = ActiveWarehouse(player)?.SlotCount ?? 0,
             SlotsMax = ActiveWarehouseSlots(player),
-            WarehouseType = player.ClanWarehouseOpen ? PledgeProtocol.WarehouseTypeClan : PledgeProtocol.WarehouseTypePrivate,
+            WarehouseType = player.ClanWarehouseOpen
+                ? PledgeProtocol.WarehouseTypeClan
+                : PledgeProtocol.WarehouseTypePrivate,
             Adena = player.Inventory?.CountOf(WarehouseRules.AdenaItemId) ?? 0,
             Items = items.ToArray()
         };
@@ -50,7 +52,11 @@ public sealed partial class ZoneWorld
             NpcObjectId = npc.ObjectId,
             SlotsUsed = ActiveWarehouse(player)?.SlotCount ?? 0,
             SlotsMax = ActiveWarehouseSlots(player),
-            WarehouseType = player.ClanWarehouseOpen ? PledgeProtocol.WarehouseTypeClan : PledgeProtocol.WarehouseTypePrivate,
+            WarehouseType = player.FreightWithdrawOpen
+                ? PledgeProtocol.WarehouseTypeFreight
+                : player.ClanWarehouseOpen
+                    ? PledgeProtocol.WarehouseTypeClan
+                    : PledgeProtocol.WarehouseTypePrivate,
             InventorySlotsUsed = player.Inventory?.Items.Count ?? 0,
             InventorySlotsMax = WarehouseRules.InventorySlots(player.Race),
             CurrentWeight = player.Inventory == null ? 0 : _weights.Load(player.Inventory.Items.Select(item => (item.ItemId, item.Count))),

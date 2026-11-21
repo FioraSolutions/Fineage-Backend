@@ -44,7 +44,9 @@ Kill paths: NPC final blow, player combat, and **`AdminKillPlayer` (53)** when `
 | `dead` | Action blocked while dead (move, attack, equip, …) |
 | `revive_not_dead` | Revive while alive |
 | `death_already` | Admin kill when already dead |
-| `revive_unsupported` | Non-village restart (castle, clan hall, …) — out of scope |
+| `revive_unsupported` | Unknown restart action |
+| `revive_no_clanhall` | Clan-hall restart with no owned hideout |
+| `revive_no_castle` / `revive_no_hq` | Castle or siege-HQ restart not available |
 
 ## Out of scope (#139)
 

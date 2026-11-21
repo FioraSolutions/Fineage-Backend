@@ -235,6 +235,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutWarehouseWithdrawList), () => inner.FanoutWarehouseWithdrawList(watcherObjectIdsCopy, list));
     }
 
+    void IWorldEventPublisher.FanoutPackageToList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageToListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutPackageToList), () => inner.FanoutPackageToList(watcherObjectIdsCopy, list));
+    }
+
+    void IWorldEventPublisher.FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageSendableListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutPackageSendableList), () => inner.FanoutPackageSendableList(watcherObjectIdsCopy, list));
+    }
+
     void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
@@ -500,6 +512,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutPlaySound), () => inner.FanoutPlaySound(watcherObjectIdsCopy, type, file, objectId, x, y, z, delayMs));
     }
 
+    void IWorldEventPublisher.FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutMonRaceInfo), () => inner.FanoutMonRaceInfo(watcherObjectIdsCopy, packet));
+    }
+
     void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
@@ -582,6 +600,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         Emit(nameof(IWorldEventPublisher.FanoutFriendInviteAsk), () => inner.FanoutFriendInviteAsk(watcherObjectIdsCopy, ask));
+    }
+
+    void IWorldEventPublisher.FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutWeddingEngageAsk), () => inner.FanoutWeddingEngageAsk(watcherObjectIdsCopy, ask));
     }
 
     void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list)

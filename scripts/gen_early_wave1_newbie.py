@@ -20,9 +20,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import questio
-QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
-if not QROOT.is_dir():
-    QROOT = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
+QROOT = questio.mobius_quest_root()
 
 IDS = (1, 2, 4, 5, 6, 7, 8, 9, 10, 153, 155, 166, 168)
 
@@ -37,16 +35,7 @@ def html_loader(script: str, qid: int):
     src = QROOT / script
 
     def html(name: str) -> str:
-        for ext in ("", ".htm", ".html"):
-            p = src / (name + ext)
-            if p.exists():
-                text = p.read_text(encoding="utf-8").strip()
-                return re.sub(
-                    rf"bypass -h Quest {re.escape(script)} ([A-Za-z0-9_\-]+)(?:\.html?)?",
-                    lambda m: f"quest_event:{qid}:{m.group(1)}",
-                    text,
-                )
-        raise SystemExit(f"{script}: missing html {name}")
+        return questio.mobius_quest_html(QROOT, script, qid, name)
 
     def d(npc, hook, page, when="started", ops=None, event=None, raw=None, **gates):
         row = {"npcId": npc, "hook": hook, "when": when}

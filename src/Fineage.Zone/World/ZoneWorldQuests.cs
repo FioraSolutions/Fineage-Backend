@@ -141,6 +141,9 @@ public sealed partial class ZoneWorld
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
 
         // Mobius NewbieHelper onFirstTalk — before guide HTML / other quest hooks.
+        if (eventName == null && npc.NpcId == _weddingSettings.ManagerNpcId && _weddingSettings.AllowWedding)
+            return WeddingNpcTalk(session, player, npc);
+
         if (eventName == null)
             TryNewbieHelperGift(session, player, npc);
 
@@ -198,6 +201,9 @@ public sealed partial class ZoneWorld
         {
             PetControlObjectId = PetControlObjectIdOf(player),
             ByPet = byPet,
+            InRiftPeace = IsInDimensionalRiftPeace(player.X, player.Y, player.Z),
+            InRift = IsInDimensionalRift(player.X, player.Y, player.Z),
+            StartedQuestCount = player.Quests.StartedCount,
             Roll = Rng(_questRandom, player).NextDouble
         };
 

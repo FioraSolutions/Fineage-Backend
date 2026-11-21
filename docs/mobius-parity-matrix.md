@@ -67,6 +67,7 @@
 | **Social** |
 | 49 | Party invite/leave/CC | ✅ | — | `ZoneWorldParty` |
 | 50 | Friends / block | ✅ | — | `ZoneWorldFriends` |
+| 50a | Wedding (engage, ceremony, divorce, teleport) | 🟡 | S | `ZoneWorldWedding`, NPC 50007; V2 engage ask/answer packets; some `gotolove` zone gates stubbed |
 | 51 | Chat say/shout/trade/party/clan/hero | 🟡 | S | `ZoneWorldChat`; GM/alliance broadcast polish |
 | 52 | Chat ban (punishment) | 🟡 | S | `ChatBannedUntilUnixMs`; no jail/ban login |
 | 53 | Duels 1v1 / party | ✅ | — | `ZoneWorldDuels` |
@@ -93,7 +94,7 @@
 | 70 | Raid/grand boss schedule | 🟡 | L | `ZoneWorldBosses`; world gating disables most spawns |
 | 71 | Seven Signs (engine, stones, catacombs gate) | 🟡 | M | `SevenSigns/*`; **Festival of Darkness** instance ❌ |
 | 72 | Mammon merchants | ✅ | — | `ZoneWorldMammon` |
-| 73 | Dimensional rift | ❌ | L | Mobius `DimensionalRiftManager.java` |
+| 73 | Dimensional rift | ✅ | L | `DimensionalRiftCatalog` + `ZoneWorldDimensionalRift` |
 | 74 | Cursed weapons (Zariche/Akamanah) | ❌ | L | Rules only (`PlayableAttackRules`); Mobius `CursedWeaponsManager.java` |
 | 75 | Lottery (Loto) | ✅ | — | `ZoneWorldLottery` |
 | **Castle & siege** |

@@ -116,6 +116,8 @@ public sealed partial class ZoneWorld
 
     void TickRandomWalk(long now)
     {
+        TickWalkingRoutes(now);
+        TickBoats(now);
         if (now < _nextWanderScanMs)
             return;
         _nextWanderScanMs = now + 1000;
@@ -132,6 +134,8 @@ public sealed partial class ZoneWorld
                 _byId.Leave(npc, ActiveSets.Thinking);
                 continue;
             }
+            if (npc.WalkingRouteName != null || npc.IsBoat)
+                continue;
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
                 continue;
             // One step of _globalAggro toward 0 per think (AttackableAI.thinkActive).

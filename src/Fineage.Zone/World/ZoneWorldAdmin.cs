@@ -111,6 +111,12 @@ public sealed partial class ZoneWorld
             return AdminSpawn(session, player, npcId, count);
         }
 
+        if (IsAdminPunishmentVerb(verb))
+            return TryAdminPunishment(session, player, verb, args);
+
+        if (IsAdminFestivalVerb(verb))
+            return TryAdminFestival(session, player, verb, args);
+
         // Unknown admin_* — show shop hub rather than hard-failing HTML clicks we have not wired yet.
         ZoneLog.Info($"admin unknown object={player.ObjectId} cmd={command}");
         return SendAdminHtml(session, player, AdminGmShopPage);

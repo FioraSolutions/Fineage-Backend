@@ -19,6 +19,7 @@ public sealed partial class MemoryAccountStore
                 return false;
             row.Characters.Remove(character);
             _data.Pets.RemoveAll(p => p.OwnerCharacterId == characterId);
+            _data.WeddingCouples.RemoveAll(c => c.Player1Id == characterId || c.Player2Id == characterId);
             Save();
             return true;
         }
