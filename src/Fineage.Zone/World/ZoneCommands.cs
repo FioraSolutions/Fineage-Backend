@@ -52,8 +52,18 @@ public abstract record ZoneCommand : ISimulationCommand
 
 public sealed record MoveCommand(int DestX, int DestY, int DestZ) : ZoneCommand
 {
-    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
-        Completed(world.TryMoveAsync(session, DestX, DestY, DestZ, CancellationToken.None));
+    internal int ResultX { get; private set; }
+    internal int ResultY { get; private set; }
+    internal int ResultZ { get; private set; }
+
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick)
+    {
+        string? error = Completed(world.TryMoveAsync(session, DestX, DestY, DestZ, CancellationToken.None));
+        ResultX = session.X;
+        ResultY = session.Y;
+        ResultZ = session.Z;
+        return error;
+    }
 }
 
 public sealed record StopMoveCommand : ZoneCommand
