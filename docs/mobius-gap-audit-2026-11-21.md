@@ -331,7 +331,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 9 | Siege golem (noble) | #722 | done | No |
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
-| 12 | Clan hall siege | — | pending | No |
+| 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
 | 13 | Baby pet / evolution | — | pending | No |
 | 14 | Guard / town AI | — | partial (base guard AI) | No |
 | 15 | Zone types (swamp/damage/NL) | — | pending | No |
