@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace Fineage.Zone.Tests;
 
 /// <summary>
