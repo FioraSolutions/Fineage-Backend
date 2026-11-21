@@ -89,14 +89,15 @@ internal sealed class NetTestKit
         ulong? simulationSeed = null,
         Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
         Fineage.Zone.Bosses.BossSchedule? bosses = null,
-        ZoneRates? rates = null)
+        ZoneRates? rates = null,
+        Func<DateTimeOffset>? clock = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         IRegionExecutor resolvedExecutor = regionExecutor ??
             (combatRandom != null || dropRandom != null || spawnRandom != null
                 ? SequentialRegionExecutor.Instance
                 : ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
-        World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
+        World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: clock ?? (() => Now), spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
             simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,

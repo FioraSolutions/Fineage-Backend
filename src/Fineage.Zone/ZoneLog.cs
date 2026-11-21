@@ -12,6 +12,9 @@ static class ZoneLog
     public static void Warn(string message) =>
         FineageLogging.Write(Category, "Warning", "log", ("message", message));
 
+    public static void Error(string message) =>
+        FineageLogging.Write(Category, "Error", "log", ("message", message));
+
     public static void Connect(int sessionId, string remote) =>
         FineageLogging.Write(Category, "Information", "Connect",
             ("session", sessionId),

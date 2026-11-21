@@ -89,6 +89,7 @@ public sealed partial class ZoneWorld
         if (player.Session != null && _party.InParty(player.ObjectId))
             TryPartyLeave(player.ObjectId);
         player.Abnormals.Clear();
+        ClearForceCharges(player);
         player.ActiveEnchantObjectId = 0;
         // Mobius: shots discharged, auto shots off, restricted gear off, short reuses ready.
         player.SoulshotCharged = false;
