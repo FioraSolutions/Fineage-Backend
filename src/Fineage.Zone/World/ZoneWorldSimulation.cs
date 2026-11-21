@@ -103,8 +103,25 @@ public sealed partial class ZoneWorld
         finally
         {
             _fanout.Drain();
-            ZoneCommandIngress.Complete(answered);
+            if (answered.Count > 0)
+                ZoneCommandIngress.Complete(answered);
         }
+    }
+
+    /// <summary>
+    /// After the <c>commands</c> stage: seal and send the fan-out those commands caused, flush any inventory they
+    /// dirtied, and complete their handler replies so the rest of the step does not block on combat and regen. Must run
+    /// only inside a <see cref="RunStep"/> body while a fan-out batch is recording.
+    /// </summary>
+    void ReleaseAppliedCommandReplies()
+    {
+        FlushDirtyInventories();
+        _fanout.Seal();
+        _fanout.Drain();
+        var applied = _ingress.TakeApplied();
+        if (applied.Count > 0)
+            ZoneCommandIngress.Complete(applied);
+        _fanout.Begin();
     }
 
     /// <summary>

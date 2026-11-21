@@ -61,6 +61,16 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
+    public async Task A_handler_reply_is_not_blocked_on_stages_after_commands()
+    {
+        var (kit, session, peer, _) = await SetupAsync();
+        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+        Assert.False(reply.IsCompleted);
+        kit.World.StepSimulation();
+        Assert.True(reply.IsCompleted);
+    }
+
+    [Fact]
     public async Task A_reply_arrives_after_the_fanout_of_the_step_that_applied_it()
     {
         var (kit, session, peer, recorder) = await SetupAsync();
@@ -78,7 +88,7 @@ public sealed class ZoneCommandIngressTests
 
         Assert.Null(await reply);
         Assert.True(afterStep > before, "selecting a target fans out to the player");
-        Assert.Equal(afterStep, seenByReply);
+        Assert.InRange(seenByReply, before + 1, afterStep);
     }
 
     [Fact]
