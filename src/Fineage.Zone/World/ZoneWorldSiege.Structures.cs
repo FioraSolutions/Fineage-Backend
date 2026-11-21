@@ -22,6 +22,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius Doors.xml id → live door entity object id (castle gates, clan hall gates, siegable hall gates).</summary>
     readonly Dictionary<int, int> _liveDoors = [];
     readonly Dictionary<int, long> _doorAutoCloseAtMs = [];
+    readonly Dictionary<int, long> _doorCycleNextMs = [];
     bool _ownDoorTable;
 
     const int DefaultAgitDoorHp = 158_250;
@@ -76,7 +77,77 @@ public sealed partial class ZoneWorld
         }
 
         SpawnClanHallDoors();
+        SpawnCyclicDoors();
+        InitDoorCycles();
     }
+
+    /// <summary>Mobius <c>TimerOpen</c>: dungeon / instance doors that are not siege gates but still need a Net door for clients.</summary>
+    void SpawnCyclicDoors()
+    {
+        var castleDoorIds = new HashSet<int>();
+        foreach (var row in CastleTable.All)
+        {
+            foreach (var door in row.Doors)
+                castleDoorIds.Add(door.Id);
+        }
+
+        var bounds = ZoneMapFilter.BoundsList;
+        foreach (var geo in Doors.All)
+        {
+            if (!geo.OpenByTime || geo.OpenTimeSec <= 0 || geo.CloseTimeSec <= 0)
+                continue;
+            if (geo.ClanHallId > 0 || castleDoorIds.Contains(geo.Id) || _liveDoors.ContainsKey(geo.Id))
+                continue;
+            int x = geo.X, y = geo.Y, z = geo.Z;
+            if (!ZoneMapFilter.Contains(bounds, x, y))
+                continue;
+            int objectId = AllocateQuestNpcObjectId();
+            var entity = new ZoneEntity
+            {
+                ObjectId = objectId,
+                Kind = ZoneEntityKind.Npc,
+                NpcId = 0,
+                Name = geo.Name,
+                NpcType = "Door",
+                X = x,
+                Y = y,
+                Z = z,
+                Level = 1,
+                Attackable = false,
+                MaxHp = 1,
+                CurHp = 1,
+                SiegeNpc = new SiegeNpcInfo
+                {
+                    Role = SiegeNpcRole.Door,
+                    CastleId = 0,
+                    HallId = 0,
+                    DoorId = geo.Id,
+                    Wall = geo.Wall,
+                    BaseHp = 1
+                }
+            };
+            _byId.Add(objectId, entity);
+            _aoi.Enter(objectId, x, y);
+            _liveDoors[geo.Id] = objectId;
+        }
+    }
+
+    void InitDoorCycles()
+    {
+        long now = NowUnixMs();
+        foreach (var geo in Doors.All)
+        {
+            if (!IsCyclicDoor(geo))
+                continue;
+            int phaseMs = (geo.Open ? geo.OpenTimeSec : geo.CloseTimeSec) * 1000;
+            if (phaseMs <= 0)
+                continue;
+            _doorCycleNextMs[geo.Id] = now + phaseMs;
+        }
+    }
+
+    static bool IsCyclicDoor(DoorInstance geo) =>
+        geo.OpenTimeSec > 0 && geo.CloseTimeSec > 0;
 
     /// <summary>Mobius <c>DoorData</c>: every agit gate gets a Net static object; siegeable halls reuse the same pipeline.</summary>
     void SpawnClanHallDoors()
@@ -163,10 +234,17 @@ public sealed partial class ZoneWorld
         }
 
         geo.Open = open;
-        if (open && geo.CloseTimeSec > 0)
+        bool cyclic = IsCyclicDoor(geo);
+        if (open && geo.CloseTimeSec > 0 && !cyclic)
             _doorAutoCloseAtMs[doorId] = NowUnixMs() + geo.CloseTimeSec * 1000L;
         else
             _doorAutoCloseAtMs.Remove(doorId);
+        if (cyclic)
+        {
+            int phaseMs = (open ? geo.OpenTimeSec : geo.CloseTimeSec) * 1000;
+            if (phaseMs > 0)
+                _doorCycleNextMs[doorId] = NowUnixMs() + phaseMs;
+        }
     }
 
     static DoorInstance CopyDoorInstance(DoorInstance d) => new()

@@ -93,4 +93,36 @@ public sealed class LiveDoorTests
         bench.World.TickDoorAutoCloseForTests(bench.Now().ToUnixTimeMilliseconds() + 2500);
         Assert.False(bench.World.GeoDoorOpenForTests(HallDoorId));
     }
+
+    const int CyclicDoorId = 21240001;
+
+    static DoorTable CyclicDoorTable() => new([
+        new DoorInstance
+        {
+            Id = CyclicDoorId,
+            Name = "Devil_001",
+            X = 42000,
+            Y = 208377,
+            Z = -3666,
+            Nodes = [(41864, 208294), (41868, 208287), (42006, 208377), (42002, 208383)],
+            MinZ = -3785,
+            MaxZ = -3540,
+            Open = false,
+            OpenTimeSec = 2,
+            CloseTimeSec = 2
+        }
+    ]);
+
+    [Fact]
+    public void Cyclic_door_toggles_on_open_and_close_time()
+    {
+        var bench = new WorldBench(mapId: "gludin");
+        bench.World.LoadCastleDoorsForTests(CyclicDoorTable());
+        Assert.False(bench.World.GeoDoorOpenForTests(CyclicDoorId));
+        long now = bench.Now().ToUnixTimeMilliseconds();
+        bench.World.TickDoorAutoCloseForTests(now + 2100);
+        Assert.True(bench.World.GeoDoorOpenForTests(CyclicDoorId));
+        bench.World.TickDoorAutoCloseForTests(now + 4200);
+        Assert.False(bench.World.GeoDoorOpenForTests(CyclicDoorId));
+    }
 }

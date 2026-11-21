@@ -55,15 +55,32 @@ public sealed partial class ZoneWorld
 
     void TickDoorAutoClose(long now)
     {
-        if (_doorAutoCloseAtMs.Count == 0)
+        if (_doorAutoCloseAtMs.Count > 0)
+        {
+            foreach (var (doorId, when) in _doorAutoCloseAtMs.ToArray())
+            {
+                if (now < when)
+                    continue;
+                _doorAutoCloseAtMs.Remove(doorId);
+                if (Doors.Get(doorId)?.Open == true)
+                    TrySetDoorOpen(doorId, false);
+            }
+        }
+
+        if (_doorCycleNextMs.Count == 0)
             return;
-        foreach (var (doorId, when) in _doorAutoCloseAtMs.ToArray())
+        foreach (var (doorId, when) in _doorCycleNextMs.ToArray())
         {
             if (now < when)
                 continue;
-            _doorAutoCloseAtMs.Remove(doorId);
-            if (Doors.Get(doorId)?.Open == true)
-                TrySetDoorOpen(doorId, false);
+            var geo = Doors.Get(doorId);
+            if (geo == null || !IsCyclicDoor(geo))
+            {
+                _doorCycleNextMs.Remove(doorId);
+                continue;
+            }
+
+            TrySetDoorOpen(doorId, !geo.Open);
         }
     }
 
