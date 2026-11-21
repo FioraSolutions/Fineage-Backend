@@ -3,6 +3,7 @@ using Fineage.Login.Net;
 using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
 using Fineage.Accounts;
+using Fineage.Game.Economy;
 
 namespace Fineage.Login;
 
@@ -40,11 +41,21 @@ public static partial class Cli
             return false;
         }
 
+        EconomyLedger? ledger = null;
+        LedgerTxSequence? ledgerIds = null;
+        if (accounts is PostgresAccountStore postgres)
+        {
+            ledger = new EconomyLedger(postgres.OpenLedgerJournal(), StarterKitLedger.IdempotencyWallMilliseconds);
+            ledgerIds = new LedgerTxSequence();
+        }
+
         var service = new LoginService(
             accounts,
             handoff.Tokens,
             deleteAfterDays: CharacterRules.DeleteAfterDays,
-            create: CharacterCreateOptions.FromEnvironment());
+            create: CharacterCreateOptions.FromEnvironment(),
+            ledger: ledger,
+            ledgerIds: ledgerIds);
         LoginHttpHost? http = null;
         string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
         int maxConnections = LoginNetSettings.MaxConnections;

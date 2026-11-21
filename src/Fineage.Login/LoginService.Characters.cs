@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 
 namespace Fineage.Login;
@@ -44,7 +45,7 @@ public sealed partial class LoginService
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
 
         var inventory = _game.CreateStarterInventory(classId, _store.NextItemObjectId);
-        long adena = Math.Max(0, _create.StartingAdena);
+        long adena = Math.Max(0, _create.StartingAdena ?? _game.StarterKits.MobiusStartingAdena);
         if (adena > 0)
             inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);
         var kit = CharacterInventory.Rows(inventory);
@@ -79,7 +80,10 @@ public sealed partial class LoginService
             maxCharacters: _create.CharMaxNumber);
         return status switch
         {
-            CreateCharacterStatus.Ok when created != null => LoginResult<CharacterRecord>.Success(created),
+            CreateCharacterStatus.Ok when created != null =>
+                RecordStarterKitLedger(created.Id, classId, inventory) is { } ledgerError
+                    ? LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, ledgerError)
+                    : LoginResult<CharacterRecord>.Success(created),
             CreateCharacterStatus.NameTaken => LoginResult<CharacterRecord>.Fail(LobbyProtocol.NameTaken, "That character name is already used."),
             CreateCharacterStatus.TooMany => LoginResult<CharacterRecord>.Fail(
                 LobbyProtocol.CharacterLimit,
@@ -89,6 +93,25 @@ public sealed partial class LoginService
             CreateCharacterStatus.AccountMissing => LoginResult<CharacterRecord>.Fail("auth_required", "Login required."),
             _ => LoginResult<CharacterRecord>.Fail(LobbyProtocol.InvalidName, "Character name must be letters or digits.")
         };
+    }
+
+    /// <summary>Null on success; otherwise a create failure message (ledger reconciliation is not a silent fallback).</summary>
+    string? RecordStarterKitLedger(int characterId, int classId, PlayerInventory inventory)
+    {
+        if (_ledger == null || _ledgerIds == null || inventory.Items.Count == 0)
+            return null;
+        try
+        {
+            var result = StarterKitLedger.RecordCreateGrant(_ledger, _ledgerIds, characterId, classId, inventory, _clock().ToUnixTimeMilliseconds());
+            if (!result.Ok)
+                return $"Starter kit ledger grant rejected: {result.Rejection}.";
+        }
+        catch (LedgerReconciliationException ex)
+        {
+            return ex.Message;
+        }
+
+        return null;
     }
 
     string? ClassifyName(string? name)

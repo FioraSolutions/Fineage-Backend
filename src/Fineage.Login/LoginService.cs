@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 
 namespace Fineage.Login;
@@ -18,6 +19,8 @@ public sealed partial class LoginService
     readonly IReadOnlySet<int> _allowedClasses;
     readonly IReadOnlySet<int> _allowedRaces;
     readonly AuthAttemptLimiter _authAttempts;
+    readonly EconomyLedger? _ledger;
+    readonly LedgerTxSequence? _ledgerIds;
 
     public LoginService(
         IAccountStore store,
@@ -27,7 +30,9 @@ public sealed partial class LoginService
         int? deleteAfterDays = null,
         CharacterCreateOptions? create = null,
         Action<string>? warn = null,
-        AuthAttemptLimiter? authAttempts = null)
+        AuthAttemptLimiter? authAttempts = null,
+        EconomyLedger? ledger = null,
+        LedgerTxSequence? ledgerIds = null)
     {
         _store = store;
         _tokens = tokens;
@@ -42,6 +47,10 @@ public sealed partial class LoginService
         _allowedClasses = _create.AllowedClasses ?? _classes.BaseClassIdSet;
         _allowedRaces = _create.AllowedRaces ?? _classes.BaseRaceSet;
         _authAttempts = authAttempts ?? new AuthAttemptLimiter(clock: _clock);
+        if (ledger != null ^ ledgerIds != null)
+            throw new ArgumentException("Login ledger requires both EconomyLedger and LedgerTxSequence.");
+        _ledger = ledger;
+        _ledgerIds = ledgerIds;
         _classes.EnsureCreatable(_allowedClasses);
         foreach (int race in _allowedRaces)
         {

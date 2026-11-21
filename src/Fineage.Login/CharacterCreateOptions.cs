@@ -52,7 +52,8 @@ public sealed class CharacterCreateOptions
     /// <summary>Null allows every base class. A set may only name base classes.</summary>
     public IReadOnlySet<int>? AllowedClasses { get; init; }
 
-    public long StartingAdena { get; init; }
+    /// <summary>Null uses <see cref="Game.StarterKits.MobiusStartingAdena"/> from <c>data/starter-kits.json</c>.</summary>
+    public long? StartingAdena { get; init; }
 
     public int StartingLevel { get; init; } = 1;
 
@@ -68,7 +69,7 @@ public sealed class CharacterCreateOptions
             NameTemplate = ReadTemplate(Environment.GetEnvironmentVariable("FINEAGE_CNAME_TEMPLATE")),
             AllowedRaces = ReadIdSet("FINEAGE_ALLOWED_RACES", LegacyHumanRaces),
             AllowedClasses = ReadIdSet("FINEAGE_ALLOWED_CLASSES", LegacyHumanClasses),
-            StartingAdena = ReadLong("FINEAGE_STARTING_ADENA", 0),
+            StartingAdena = ReadOptionalLong("FINEAGE_STARTING_ADENA"),
             StartingLevel = ReadInt("FINEAGE_STARTING_LEVEL", 1, 1, 80),
             StartingSp = ReadInt("FINEAGE_STARTING_SP", 0, 0, int.MaxValue)
         };
@@ -159,6 +160,14 @@ public sealed class CharacterCreateOptions
         string? text = Environment.GetEnvironmentVariable(name);
         if (string.IsNullOrWhiteSpace(text) || !long.TryParse(text, out long value) || value < 0)
             return fallback;
+        return value;
+    }
+
+    static long? ReadOptionalLong(string name)
+    {
+        string? text = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(text) || !long.TryParse(text, out long value) || value < 0)
+            return null;
         return value;
     }
 }

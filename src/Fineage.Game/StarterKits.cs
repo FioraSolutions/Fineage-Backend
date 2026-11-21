@@ -23,9 +23,12 @@ public sealed class StarterKits
 {
     readonly Dictionary<int, StarterKit> _byClass;
 
-    public StarterKits(IEnumerable<StarterKit> kits)
+    public StarterKits(IEnumerable<StarterKit> kits, long mobiusStartingAdena = 0)
     {
         ArgumentNullException.ThrowIfNull(kits);
+        if (mobiusStartingAdena < 0)
+            throw new ArgumentOutOfRangeException(nameof(mobiusStartingAdena));
+        MobiusStartingAdena = mobiusStartingAdena;
         var list = new List<StarterKit>();
         var map = new Dictionary<int, StarterKit>();
         foreach (var kit in kits)
@@ -39,6 +42,9 @@ public sealed class StarterKits
         _byClass = map;
         All = list;
     }
+
+    /// <summary>Mobius CT0 <c>Player.ini StartingAdena</c> when <c>FINEAGE_STARTING_ADENA</c> is unset.</summary>
+    public long MobiusStartingAdena { get; }
 
     public IReadOnlyList<StarterKit> All { get; }
 

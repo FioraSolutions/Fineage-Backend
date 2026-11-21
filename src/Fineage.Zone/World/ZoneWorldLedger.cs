@@ -42,7 +42,7 @@ public sealed partial class ZoneWorld
     {
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Inventory } =>
             _byId.TryGetValue(account.OwnerId, out var player) && player.Inventory != null
-                ? HoldingsOf(player.Inventory)
+                ? LedgerInventoryChange.HoldingsFrom(player.Inventory)
                 : _accounts?.FindByCharacterId(account.OwnerId) is { Items: { } stored }
                     ? HoldingsFromStored(stored)
                     : throw new InvalidOperationException($"{account} has no inventory in the world or store"),
@@ -81,21 +81,6 @@ public sealed partial class ZoneWorld
             else
                 holdings.Add(row.ItemId, row.Count);
         }
-        return holdings;
-    }
-
-    static LedgerHoldings HoldingsOf(PlayerInventory inventory)
-    {
-        var holdings = new LedgerHoldings();
-        foreach (var item in inventory.Items)
-        {
-            if (item.Template.Stackable)
-                holdings.Add(item.ItemId, item.Count);
-            else if (item.Count == 1)
-                holdings.AddPiece(item.ItemId, item.ObjectId);
-            else
-                throw new InvalidOperationException($"non-stackable item {item.ObjectId} has count {item.Count}");
-        }
 
         return holdings;
     }
@@ -109,39 +94,6 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Posts everything <paramref name="account"/> gained and lost between two observations, with the system account
-    /// <paramref name="counterpart"/> on the other side of every change: pieces by instance id, the rest by count.
-    /// </summary>
-    internal static void PostChange(
-        LedgerMove move, LedgerAccount account, LedgerHoldings before, LedgerHoldings after, LedgerAccount counterpart)
-    {
-        if (!counterpart.IsSystem)
-            throw new ArgumentException("the counterpart of a change takes no pieces, so it must be a system account", nameof(counterpart));
-        var pieces = new Dictionary<int, long>();
-        void Pieces(LedgerHoldings from, LedgerHoldings without, int sign)
-        {
-            foreach (var group in from.Instances
-                         .Where(piece => !without.Instances.TryGetValue(piece.Key, out int item) || item != piece.Value)
-                         .GroupBy(piece => piece.Value, piece => piece.Key))
-            {
-                var ids = group.Order().ToList();
-                move.Post(account, group.Key, sign * ids.Count, ids);
-                move.Post(counterpart, group.Key, -sign * ids.Count);
-                pieces[group.Key] = pieces.GetValueOrDefault(group.Key) + sign * ids.Count;
-            }
-        }
-
-        Pieces(before, after, -1);
-        Pieces(after, before, 1);
-        foreach (int item in before.Counts.Keys.Union(after.Counts.Keys).Order())
-        {
-            long rest = after.CountOf(item) - before.CountOf(item) - pieces.GetValueOrDefault(item);
-            move.Post(account, item, rest);
-            move.Post(counterpart, item, -rest);
-        }
-    }
-
-    /// <summary>
     /// Runs <paramref name="change"/>, which may change <paramref name="player"/>'s bag only, and records what it
     /// gained and lost against <paramref name="counterpart"/>. Nothing is recorded when the bag is unchanged.
     /// </summary>
@@ -151,14 +103,14 @@ public sealed partial class ZoneWorld
         if (player.Inventory == null)
             return change();
         var bag = LedgerAccount.Inventory(player.ObjectId);
-        var before = HoldingsOf(player.Inventory);
+        var before = LedgerInventoryChange.HoldingsFrom(player.Inventory);
         var result = change();
-        var after = HoldingsOf(player.Inventory);
+        var after = LedgerInventoryChange.HoldingsFrom(player.Inventory);
         if (after.SameAs(before))
             return result;
         var move = BeginLedgerMove(kind, player.ObjectId, reference(result));
         move.Observe(bag, before);
-        PostChange(move, bag, before, after, counterpart);
+        LedgerInventoryChange.PostChange(move, bag, before, after, counterpart);
         move.Commit(LedgerHoldingsOf);
         return result;
     }
