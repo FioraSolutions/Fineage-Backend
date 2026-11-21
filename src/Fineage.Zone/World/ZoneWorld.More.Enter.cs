@@ -249,6 +249,8 @@ public sealed partial class ZoneWorld
                 TrackThink(other);
         }
 
+        RefreshPlayerActiveRegions();
+
         AnnounceClanEnter(entity);
         FriendPlayerEnteredWorld(entity);
         RiftSanitizeLogin(entity);

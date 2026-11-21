@@ -43,7 +43,14 @@ public sealed partial class ZoneWorld
             };
             _byId.Add(objectId, entity);
             _aoi.Enter(objectId, entity.X, entity.Y);
-            _boatRuntime[def.Id] = new BoatRuntime { LegIndex = 0, PointIndex = 0, DockIndex = 0, Phase = BoatPhase.Leg };
+            _boatRuntime[def.Id] = new BoatRuntime
+            {
+                ObjectId = objectId,
+                LegIndex = 0,
+                PointIndex = 0,
+                DockIndex = 0,
+                Phase = BoatPhase.Leg
+            };
             FanoutNewNpc(entity);
             ZoneLog.Info($"[boat] spawned id={def.Id} obj={objectId} at {def.SpawnX},{def.SpawnY}");
         }
@@ -53,13 +60,13 @@ public sealed partial class ZoneWorld
     {
         if (!BoatSettings.Enabled)
             return;
-        foreach (var (defId, rt) in _boatRuntime)
+        foreach (var (_, rt) in _boatRuntime)
         {
-            if (!TryBoatEntity(defId, out var boat) || boat.MoveActive)
+            if (!_byId.TryGetValue(rt.ObjectId, out var boat) || !boat.IsBoat || boat.MoveActive)
                 continue;
             if (rt.WaitUntilMs > now)
                 continue;
-            if (BoatCatalog.Get(defId) is not { } def)
+            if (BoatCatalog.Get(boat.BoatDefinitionId) is not { } def)
                 continue;
 
             switch (rt.Phase)
@@ -111,20 +118,6 @@ public sealed partial class ZoneWorld
         }
     }
 
-    bool TryBoatEntity(int defId, out ZoneEntity boat)
-    {
-        foreach (var e in _byId.Values)
-        {
-            if (e.IsBoat && e.BoatDefinitionId == defId)
-            {
-                boat = e;
-                return true;
-            }
-        }
-        boat = null!;
-        return false;
-    }
-
     void FanoutBoatDeparture(ZoneEntity boat, BoatPathPoint dest)
     {
         // Mobius VehicleDeparture: encoded in client-packet-contracts.md; move state is the Fineage Net path today.
@@ -149,6 +142,7 @@ enum BoatPhase : byte
 
 sealed class BoatRuntime
 {
+    public int ObjectId;
     public BoatPhase Phase;
     public int LegIndex;
     public int PointIndex;

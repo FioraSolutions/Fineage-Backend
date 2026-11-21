@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
         {
             TickPlayerMovement(now);
             TickNpcMovement(now);
-            TickRandomWalk(now);
+            RunNpcThinkTick(now);
             TickPendingHits(now);
             TickMeleeHits(now);
             _simulationTicks.RunNow(_aggressionStage, now);

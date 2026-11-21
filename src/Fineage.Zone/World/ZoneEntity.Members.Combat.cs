@@ -119,6 +119,40 @@ sealed partial class ZoneEntity
         set => EnsureAggro().LastAiTickMs = value;
     }
 
+    /// <summary>Mobius <c>AttackableThinkTaskManager</c> next <c>thinkActive</c> at this unix ms.</summary>
+    public long NextThinkMs
+    {
+        get => Aggro?.NextThinkMs ?? 0;
+        set => EnsureAggro().NextThinkMs = value;
+    }
+
+    internal void SetWanderGeoCache(int fromX, int fromY, int wantX, int wantY, int destX, int destY, int destZ)
+    {
+        var aggro = EnsureAggro();
+        aggro.WanderGeoFromX = fromX;
+        aggro.WanderGeoFromY = fromY;
+        aggro.WanderWantX = wantX;
+        aggro.WanderWantY = wantY;
+        aggro.WanderGeoDestX = destX;
+        aggro.WanderGeoDestY = destY;
+        aggro.WanderGeoDestZ = destZ;
+    }
+
+    internal bool TryWanderGeoCache(int fromX, int fromY, int wantX, int wantY, out int destX, out int destY, out int destZ)
+    {
+        if (Aggro is { WanderGeoFromX: var fx, WanderGeoFromY: var fy, WanderWantX: var wx, WanderWantY: var wy }
+            && fx == fromX && fy == fromY && wx == wantX && wy == wantY)
+        {
+            destX = Aggro.WanderGeoDestX;
+            destY = Aggro.WanderGeoDestY;
+            destZ = Aggro.WanderGeoDestZ;
+            return true;
+        }
+
+        destX = destY = destZ = 0;
+        return false;
+    }
+
     /// <summary>Mobius <c>AttackableAI._globalAggro</c>. Starts at -10; think steps it toward 0.</summary>
     public int GlobalAggro
     {

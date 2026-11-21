@@ -35,6 +35,10 @@ sealed class ZoneSimulationObserver : ISimulationObserver
     const int SlowestStagesLogged = 3;
     readonly List<(string Stage, double Ms)> _stepStages = [];
     bool _wallBehind;
+    Func<(int TotalNpcs, int ThinkingNpcs, int PlayerRegions)>? _npcCounts;
+
+    internal void BindNpcDiagnostics(Func<(int TotalNpcs, int ThinkingNpcs, int PlayerRegions)> provider) =>
+        _npcCounts = provider ?? throw new ArgumentNullException(nameof(provider));
 
     public void StageCompleted(string stage, TickContext tick, int regions, int entities, TimeSpan elapsed)
     {
@@ -70,8 +74,15 @@ sealed class ZoneSimulationObserver : ISimulationObserver
                 .OrderByDescending(s => s.Ms)
                 .Take(SlowestStagesLogged)
                 .Select(s => $"{s.Stage}={s.Ms:F1}ms"));
+            string counts = "";
+            if (_npcCounts != null)
+            {
+                var (total, thinking, regions) = _npcCounts();
+                counts = $"; npcs total={total} thinking={thinking} playerRegions={regions}";
+            }
+
             ZoneLog.Warn(
-                $"simulation tick {tick.Tick} took {elapsed.TotalMilliseconds:F1} ms, over its {budget.TotalMilliseconds:F0} ms step; slowest: {slowest}");
+                $"simulation tick {tick.Tick} took {elapsed.TotalMilliseconds:F1} ms, over its {budget.TotalMilliseconds:F0} ms step; slowest: {slowest}{counts}");
         }
 
         bool wallBehind = tick.NowUnixMs - tick.WallUnixMs >= budget.TotalMilliseconds;
