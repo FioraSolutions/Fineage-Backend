@@ -25,8 +25,10 @@ public interface IHandoffStore
 /// </summary>
 public sealed class MemoryHandoffStore : IHandoffStore
 {
+    const int PruneInterval = 64;
     readonly HandoffTokens _tokens;
     readonly ConcurrentDictionary<string, long> _consumed = new(StringComparer.Ordinal);
+    int _consumeCount;
 
     public MemoryHandoffStore(HandoffTokens tokens) =>
         _tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
@@ -51,7 +53,8 @@ public sealed class MemoryHandoffStore : IHandoffStore
         if (!_consumed.TryAdd(token, claims.ExpiresUnixSeconds))
             return HandoffTokens.ValidateStatus.Invalid;
 
-        PruneExpired(now);
+        if (Interlocked.Increment(ref _consumeCount) % PruneInterval == 0)
+            PruneExpired(now);
         return HandoffTokens.ValidateStatus.Ok;
     }
 
