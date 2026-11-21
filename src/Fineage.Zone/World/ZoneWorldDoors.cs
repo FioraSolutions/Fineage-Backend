@@ -200,6 +200,7 @@ public sealed partial class ZoneWorld
             {
                 clan.D.HallId = hallId;
                 SaveClan(clan);
+                SyncHallRegenForClan(clan);
             }
         }
     }

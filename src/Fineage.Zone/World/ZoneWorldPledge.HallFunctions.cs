@@ -66,7 +66,14 @@ public sealed partial class ZoneWorld
         }
 
         if (changed)
+        {
             SaveHalls();
+            foreach (var hall in halls.Values.Where(h => h.OwnerClanId > 0))
+            {
+                if (_clan.TryGet(hall.OwnerClanId, out var clan))
+                    SyncHallRegenForClan(clan);
+            }
+        }
     }
 
     bool TryRenewHallLease(ClanHallSave hall, long now)
@@ -253,6 +260,7 @@ public sealed partial class ZoneWorld
                 hall.Functions.Remove(existing);
             SyncHallDeco(hall);
             SaveHalls();
+            SyncHallRegenForClan(clan);
             return null;
         }
 
@@ -274,6 +282,7 @@ public sealed partial class ZoneWorld
         existing.EndUnixMs = now + ratioMs;
         SyncHallDeco(hall);
         SaveHalls();
+        SyncHallRegenForClan(clan);
         SelfLine(session, 0, "The clan hall function has been activated.");
         return null;
     }
@@ -350,27 +359,38 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-    (double HpMult, double MpMult) HallRegenBonus(ZoneEntity player)
+  void SyncHallRegenForClan(ZoneClan clan)
+  {
+    double hp = 1d;
+    double mp = 1d;
+    long now = NowUnixMs();
+    if (clan.D.HallId > 0 &&
+        Halls(now).TryGetValue(clan.D.HallId, out var hall) &&
+        hall.OwnerClanId == clan.Id)
     {
-        var clan = ClanOf(player.ObjectId);
-        if (clan == null || clan.D.HallId <= 0)
-            return (1d, 1d);
-        if (!PlayerInsideHallArea(clan.D.HallId, player.X, player.Y))
-            return (1d, 1d);
-        long now = NowUnixMs();
-        if (!Halls(now).TryGetValue(clan.D.HallId, out var hall) || hall.OwnerClanId != clan.Id)
-            return (1d, 1d);
-
-        double hp = 1d;
-        double mp = 1d;
-        var hpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreHp);
-        if (hpFn is { Level: > 0 })
-            hp += hpFn.Level / 100d;
-        var mpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreMp);
-        if (mpFn is { Level: > 0 })
-            mp += mpFn.Level / 100d;
-        return (hp, mp);
+      var hpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreHp);
+      if (hpFn is { Level: > 0 })
+        hp += hpFn.Level / 100d;
+      var mpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreMp);
+      if (mpFn is { Level: > 0 })
+        mp += mpFn.Level / 100d;
     }
+
+    foreach (int id in OnlineIds(clan))
+    {
+      if (!_byId.TryGetValue(id, out var player))
+        continue;
+      player.HallRegenHpMult = hp;
+      player.HallRegenMpMult = mp;
+    }
+  }
+
+  (double HpMult, double MpMult) HallRegenBonus(ZoneEntity player)
+  {
+    if (player.HideoutId <= 0 || !PlayerInsideHallArea(player.HideoutId, player.X, player.Y))
+      return (1d, 1d);
+    return (player.HallRegenHpMult, player.HallRegenMpMult);
+  }
 
     internal string? HallFunctionCommandForTest(ZoneSession session, ZoneEntity player, ZoneEntity npc, string command)
     {
