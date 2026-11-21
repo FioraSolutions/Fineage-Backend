@@ -47,7 +47,11 @@ public sealed class BossCombatStatsTests
             }),
             mapId: "empty",
             bosses: schedule,
+<<<<<<< HEAD
             combatRandom: new UnitSamples(0.5, 0.5, 0.5, 0.5, 0.5, 0.5));
+=======
+            combatRandom: new Random(7));
+>>>>>>> e37fb8eb (Fix flaky BossCombatStatsTests with seeded combat RNG)
         var world = bench.World;
 
         Assert.True(world.TryGetEntityById(ObjectId, out var boss));
