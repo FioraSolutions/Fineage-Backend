@@ -9,6 +9,10 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
+    readonly Dictionary<string, DurationHistogram> _commandApply = new(StringComparer.Ordinal);
+    readonly Dictionary<string, DurationHistogram> _movePhases = new(StringComparer.Ordinal);
+    readonly Dictionary<string, DurationHistogram> _releasePhases = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _commandsDeferred = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _ticksSkipped;
     long _regionHandoffs;
@@ -59,6 +63,18 @@ public sealed class MetricsCollector : IDisposable
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
                     .ToList(),
+                CommandApply = _commandApply
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value.Freeze(), StringComparer.Ordinal),
+                MoveApplyPhases = _movePhases
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value.Freeze(), StringComparer.Ordinal),
+                CommandReleasePhases = _releasePhases
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value.Freeze(), StringComparer.Ordinal),
+                CommandsDeferred = _commandsDeferred
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 Endpoints = endpoints
             };
         }
@@ -120,6 +136,9 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.ledger.flush_failures":
                     _ledgerFlushFailures += value;
                     break;
+                case "fineage.command.deferred":
+                    _commandsDeferred[ReasonOf(tags)] = _commandsDeferred.GetValueOrDefault(ReasonOf(tags)) + value;
+                    break;
             }
         }
     }
@@ -159,6 +178,15 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.tick.stage.ms":
                     Stage(StageOf(tags)).Duration.Record(value);
                     break;
+                case "fineage.command.apply.ms":
+                    Labeled(_commandApply, TagOf(tags, "command")).Record(value);
+                    break;
+                case "fineage.command.move_phase.ms":
+                    Labeled(_movePhases, TagOf(tags, "phase")).Record(value);
+                    break;
+                case "fineage.command.release_phase.ms":
+                    Labeled(_releasePhases, TagOf(tags, "phase")).Record(value);
+                    break;
             }
         }
     }
@@ -173,6 +201,30 @@ public sealed class MetricsCollector : IDisposable
 
         return row;
     }
+
+    static DurationHistogram Labeled(Dictionary<string, DurationHistogram> into, string label)
+    {
+        if (!into.TryGetValue(label, out DurationHistogram? row))
+        {
+            row = new DurationHistogram();
+            into[label] = row;
+        }
+
+        return row;
+    }
+
+    static string TagOf(ReadOnlySpan<KeyValuePair<string, object?>> tags, string key)
+    {
+        foreach (KeyValuePair<string, object?> tag in tags)
+        {
+            if (tag.Key == key && tag.Value is string value)
+                return value;
+        }
+
+        return "";
+    }
+
+    static string ReasonOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => TagOf(tags, "reason");
 
     static string StageOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
     {

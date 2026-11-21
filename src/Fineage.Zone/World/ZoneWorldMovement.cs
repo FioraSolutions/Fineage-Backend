@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
@@ -33,26 +34,34 @@ public sealed partial class ZoneWorld
         int destX = move.DestX, destY = move.DestY, destZ;
         entity.MovePath.Clear();
         entity.MoveSegmentDirty = false;
+        long geoStarted = Stopwatch.GetTimestamp();
         if (_geo.HasGeo(entity.X, entity.Y))
         {
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
             (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
-            if (blocked && _geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
+            if (blocked)
             {
-                // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
-                ZoneLog.Info($"[geo] path obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY} nodes={path.Count} {string.Join(' ', path.Select(p => $"{p.X},{p.Y},{p.Z}"))}");
-                (destX, destY, destZ) = path[0];
-                for (int i = 1; i < path.Count; i++)
-                    entity.MovePath.Enqueue(path[i]);
+                long pathStarted = Stopwatch.GetTimestamp();
+                if (_geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
+                {
+                    // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
+                    ZoneLog.Info($"[geo] path obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY} nodes={path.Count} {string.Join(' ', path.Select(p => $"{p.X},{p.Y},{p.Z}"))}");
+                    (destX, destY, destZ) = path[0];
+                    for (int i = 1; i < path.Count; i++)
+                        entity.MovePath.Enqueue(path[i]);
+                }
+                else if (blocked)
+                    ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
+                CommandApplyTiming.RecordMovePhase("geo_find_path", CommandApplyTiming.ElapsedMs(pathStarted));
             }
-            else if (blocked)
-                ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
         }
         else
         {
             destZ = SanitizeDestZ(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ);
         }
+
+        CommandApplyTiming.RecordMovePhase("geo", CommandApplyTiming.ElapsedMs(geoStarted));
 
         if (ClipDoors(entity, ref destX, ref destY, ref destZ))
             entity.MovePath.Clear();
@@ -72,6 +81,7 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
+        long aoiStarted = Stopwatch.GetTimestamp();
         if (NetBridge is { } bridge && ack != null && _aoi is GridAoi grid &&
             grid.AtCell(entity.ObjectId, destX, destY))
         {
@@ -87,9 +97,13 @@ public sealed partial class ZoneWorld
                 ack.OriginX, ack.OriginY, ack.OriginZ,
                 ack.DestX, ack.DestY, ack.DestZ,
                 entity.Running);
+            CommandApplyTiming.RecordMovePhase("fanout_same_cell", CommandApplyTiming.ElapsedMs(aoiStarted));
         }
         else
+        {
             ReconcileKnownlist(entity, ack, _knownlistDiffActive ? _knownlistDiffAfter : null);
+            CommandApplyTiming.RecordMovePhase("reconcile_knownlist", CommandApplyTiming.ElapsedMs(aoiStarted));
+        }
         entity.AoiRefreshX = curX;
         entity.AoiRefreshY = curY;
 

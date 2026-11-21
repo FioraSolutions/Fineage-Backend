@@ -18,6 +18,9 @@ public sealed class PrometheusSample
     public long PacketsRejected { get; init; }
     public long PacketsErrored { get; init; }
     public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> CommandApplyP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> MovePhaseP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> CommandReleaseP99Ms { get; init; } = new(StringComparer.Ordinal);
     public long OutboundDropped { get; init; }
     public long BytesOut { get; init; }
     public long BytesIn { get; init; }
@@ -57,6 +60,9 @@ public static class PrometheusParser
             PacketsRejected = ParseCounterSum(text, "fineage_packets_rejected_total"),
             PacketsErrored = ParseCounterSum(text, "fineage_packets_errored_total"),
             TickStageP99Ms = ParseStageP99(text),
+            CommandApplyP99Ms = ParseLabeledP99(text, "fineage_command_apply_ms", "command"),
+            MovePhaseP99Ms = ParseLabeledP99(text, "fineage_command_move_phase_ms", "phase"),
+            CommandReleaseP99Ms = ParseLabeledP99(text, "fineage_command_release_phase_ms", "phase"),
             OutboundDropped = ParseCounterSum(text, "fineage_outbound_dropped_total"),
             BytesOut = ParseCounterSum(text, "fineage_bytes_out_total"),
             BytesIn = ParseCounterSum(text, "fineage_bytes_in_total"),
@@ -65,13 +71,14 @@ public static class PrometheusParser
         };
     }
 
-    static Dictionary<string, double> ParseStageP99(string text)
+    static Dictionary<string, double> ParseLabeledP99(string text, string metric, string labelKey) =>
+        ParseLabeledP99(text, metric, labelKey, $"{metric}_bucket\\{{{labelKey}=\"([^\"]+)\",le=\"([^\"]+)\"\\}}\\s+(\\d+)");
+
+    static Dictionary<string, double> ParseLabeledP99(string text, string metric, string labelKey, string bucketPattern)
     {
         var stages = new Dictionary<string, List<(SortedDictionary<double, long> Buckets, long Count)>>
             (StringComparer.Ordinal);
-        foreach (Match match in Regex.Matches(text,
-                     @"fineage_tick_stage_ms_bucket\{stage=""([^""]+)"",le=""([^""]+)""\}\s+(\d+)",
-                     RegexOptions.Multiline))
+        foreach (Match match in Regex.Matches(text, bucketPattern, RegexOptions.Multiline))
         {
             string stage = match.Groups[1].Value;
             double le = match.Groups[2].Value == "+Inf"
@@ -89,8 +96,8 @@ public static class PrometheusParser
             list[0].Buckets[le] = cum;
         }
 
-        foreach (Match match in Regex.Matches(text,
-                     @"fineage_tick_stage_ms_count\{stage=""([^""]+)""\}\s+(\d+)", RegexOptions.Multiline))
+        foreach (Match match in Regex.Matches(text, $@"{Regex.Escape(metric)}_count\\{{{labelKey}=""([^""]+)""\}}\\s+(\\d+)",
+                     RegexOptions.Multiline))
         {
             string stage = match.Groups[1].Value;
             long count = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
@@ -114,6 +121,10 @@ public static class PrometheusParser
 
         return result;
     }
+
+    static Dictionary<string, double> ParseStageP99(string text) =>
+        ParseLabeledP99(text, "fineage_tick_stage_ms", "stage",
+            @"fineage_tick_stage_ms_bucket\{stage=""([^""]+)"",le=""([^""]+)""\}\s+(\d+)");
 
     static double Quantile(SortedDictionary<double, long> cumulative, long count, double q)
     {

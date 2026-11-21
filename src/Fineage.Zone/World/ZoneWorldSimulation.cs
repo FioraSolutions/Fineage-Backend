@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.DimensionalRift;
@@ -115,9 +116,15 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ReleaseAppliedCommandReplies()
     {
+        long flushStarted = Stopwatch.GetTimestamp();
         FlushDirtyInventories();
+        CommandApplyTiming.RecordReleasePhase("flush_inventory", CommandApplyTiming.ElapsedMs(flushStarted));
+
         _fanout.Seal();
+        long drainStarted = Stopwatch.GetTimestamp();
         _fanout.Drain();
+        CommandApplyTiming.RecordReleasePhase("fanout_drain", CommandApplyTiming.ElapsedMs(drainStarted));
+
         var applied = _ingress.TakeApplied();
         if (applied.Count > 0)
             ZoneCommandIngress.Complete(applied);

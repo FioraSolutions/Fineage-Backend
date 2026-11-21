@@ -48,6 +48,9 @@ public sealed class PrometheusAggregate
     public int ZoneOnlineMax { get; init; }
     public long OutboundDropped { get; init; }
     public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> MovePhaseP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> CommandApplyP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> CommandReleaseP99Ms { get; init; } = new(StringComparer.Ordinal);
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
 
@@ -70,7 +73,10 @@ public sealed class PrometheusAggregate
             PacketsErrored = samples.Max(s => s.PacketsErrored),
             ZoneOnlineMax = samples.Max(s => s.ZoneOnline),
             OutboundDropped = samples.Max(s => s.OutboundDropped),
-            TickStageP99Ms = MergeStageP99(samples),
+            TickStageP99Ms = MergeStageP99(samples, s => s.TickStageP99Ms),
+            MovePhaseP99Ms = MergeStageP99(samples, s => s.MovePhaseP99Ms),
+            CommandApplyP99Ms = MergeStageP99(samples, s => s.CommandApplyP99Ms),
+            CommandReleaseP99Ms = MergeStageP99(samples, s => s.CommandReleaseP99Ms),
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples)
         };
@@ -85,12 +91,13 @@ public sealed class PrometheusAggregate
         return bytes / (double)online;
     }
 
-    static Dictionary<string, double> MergeStageP99(IReadOnlyList<PrometheusSample> samples)
+    static Dictionary<string, double> MergeStageP99(
+        IReadOnlyList<PrometheusSample> samples, Func<PrometheusSample, Dictionary<string, double>> selector)
     {
         var merged = new Dictionary<string, double>(StringComparer.Ordinal);
         foreach (var sample in samples)
         {
-            foreach (var (stage, p99) in sample.TickStageP99Ms)
+            foreach (var (stage, p99) in selector(sample))
                 merged[stage] = Math.Max(merged.GetValueOrDefault(stage), p99);
         }
 
@@ -159,6 +166,30 @@ public static class ReportWriter
                 sb.AppendLine("### Tick stage p99 (ms)");
                 foreach (var (stage, ms) in r.Server.TickStageP99Ms.OrderByDescending(kv => kv.Value).Take(12))
                     sb.AppendLine($"- `{stage}`: {ms:0.0}");
+            }
+
+            if (r.Server.CommandApplyP99Ms.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("### Command apply p99 (ms)");
+                foreach (var (cmd, ms) in r.Server.CommandApplyP99Ms.OrderByDescending(kv => kv.Value).Take(12))
+                    sb.AppendLine($"- `{cmd}`: {ms:0.0}");
+            }
+
+            if (r.Server.MovePhaseP99Ms.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("### Move apply phase p99 (ms)");
+                foreach (var (phase, ms) in r.Server.MovePhaseP99Ms.OrderByDescending(kv => kv.Value))
+                    sb.AppendLine($"- `{phase}`: {ms:0.0}");
+            }
+
+            if (r.Server.CommandReleaseP99Ms.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("### Command release phase p99 (ms)");
+                foreach (var (phase, ms) in r.Server.CommandReleaseP99Ms.OrderByDescending(kv => kv.Value))
+                    sb.AppendLine($"- `{phase}`: {ms:0.0}");
             }
         }
 

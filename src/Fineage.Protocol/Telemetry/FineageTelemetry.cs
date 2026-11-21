@@ -52,6 +52,20 @@ public static class FineageTelemetry
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
 
+    public static readonly Histogram<double> CommandApplyMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.apply.ms", unit: "ms", description: "Single command Apply duration (tag command)");
+
+    public static readonly Histogram<double> MoveApplyPhaseMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.move_phase.ms", unit: "ms",
+            description: "Move command sub-phase wall time (tag phase)");
+
+    public static readonly Histogram<double> CommandReleasePhaseMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.release_phase.ms", unit: "ms",
+            description: "Post-commands release sub-phase (tag phase)");
+
+    public static readonly Counter<long> CommandsDeferred =
+        Meter.CreateCounter<long>("fineage.command.deferred", description: "Commands re-queued before apply (tag reason)");
+
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
 

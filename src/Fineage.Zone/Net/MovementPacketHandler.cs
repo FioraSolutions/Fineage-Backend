@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.World;
@@ -49,9 +50,13 @@ public sealed class MovementPacketHandler
             {
                 string? error = apply();
                 // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
-                var frames = error == null
-                    ? _knownlist.PlanDiff(zoneSession, self, _world.KnownlistDiffBefore, _world.KnownlistDiffAfter)
-                    : [];
+                List<NetFrame> frames = [];
+                if (error == null)
+                {
+                    long planStarted = Stopwatch.GetTimestamp();
+                    frames = _knownlist.PlanDiff(zoneSession, self, _world.KnownlistDiffBefore, _world.KnownlistDiffAfter);
+                    CommandApplyTiming.RecordMovePhase("plan_diff", CommandApplyTiming.ElapsedMs(planStarted));
+                }
                 return new MovePlan(error, command.ResultX, command.ResultY, command.ResultZ, frames);
             }
             finally

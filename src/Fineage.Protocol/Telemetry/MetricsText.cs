@@ -58,6 +58,14 @@ public sealed class MetricsSnapshot
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
+    public IReadOnlyDictionary<string, HistogramMetrics> CommandApply { get; init; } =
+        new Dictionary<string, HistogramMetrics>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, HistogramMetrics> MoveApplyPhases { get; init; } =
+        new Dictionary<string, HistogramMetrics>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, HistogramMetrics> CommandReleasePhases { get; init; } =
+        new Dictionary<string, HistogramMetrics>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> CommandsDeferred { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
 
@@ -181,6 +189,17 @@ public static class MetricsText
         }
 
         AppendStages(sb, snapshot.Stages);
+        AppendLabeledHistograms(sb, "fineage_command_apply_ms", "command", "Zone command apply duration", snapshot.CommandApply);
+        AppendLabeledHistograms(sb, "fineage_command_move_phase_ms", "phase", "Move command sub-phase duration", snapshot.MoveApplyPhases);
+        AppendLabeledHistograms(sb, "fineage_command_release_phase_ms", "phase", "Commands release sub-phase duration", snapshot.CommandReleasePhases);
+        if (snapshot.CommandsDeferred.Count > 0)
+        {
+            AppendHelp(sb, "fineage_command_deferred_total", "Commands re-queued before apply");
+            sb.Append("# TYPE fineage_command_deferred_total counter\n");
+            foreach (var (reason, count) in snapshot.CommandsDeferred)
+                sb.Append("fineage_command_deferred_total{reason=\"").Append(Escape(reason)).Append("\"} ")
+                    .Append(count.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        }
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");
         sb.Append("fineage_zone_online ").Append(snapshot.PlayersOnline.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -223,6 +242,17 @@ public static class MetricsText
             string labels = "endpoint=\"" + Escape(endpoint.Endpoint) + "\"";
             AppendHistogramSamples(sb, name, labels, endpoint.Handler);
         }
+    }
+
+    static void AppendLabeledHistograms(
+        StringBuilder sb, string name, string labelKey, string help, IReadOnlyDictionary<string, HistogramMetrics> series)
+    {
+        if (series.Count == 0)
+            return;
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" histogram\n");
+        foreach (var (label, histogram) in series)
+            AppendHistogramSamples(sb, name, labelKey + "=\"" + Escape(label) + "\"", histogram);
     }
 
     static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)

@@ -57,6 +57,7 @@ public sealed partial class ZoneWorld
 
                 string? error = null;
                 Exception? failure = null;
+                long applyStarted = Stopwatch.GetTimestamp();
                 try
                 {
                     error = submission.Command.Apply(this, submission.Session, tick);
@@ -73,13 +74,18 @@ public sealed partial class ZoneWorld
                         failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
                 _ingress.Record(submission, error, failure);
                 applied = true;
+                CommandApplyTiming.RecordCommand(submission.Command.Name, CommandApplyTiming.ElapsedMs(applyStarted));
             }
 
             if (index < batch.Count)
                 deferred.AddRange(batch.Skip(index));
 
             if (deferred.Count > 0)
+            {
                 _ingress.PutBackFront(deferred);
+                string reason = wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline ? "wall_budget" : "partial_batch";
+                FineageTelemetry.CommandsDeferred.Add(deferred.Count, new KeyValuePair<string, object?>("reason", reason));
+            }
 
             if (applied)
                 ReleaseAppliedCommandReplies();
