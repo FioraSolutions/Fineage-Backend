@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Simulation;
 using Fineage.Zone;
@@ -28,16 +29,28 @@ public sealed partial class ZoneWorld
     /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
     void ApplyCommands(TickContext tick)
     {
-        int budget = ZoneSimulationSettings.CommandsPerTick;
+        int countBudget = ZoneSimulationSettings.CommandsPerTick;
+        int wallBudgetMs = ZoneSimulationSettings.CommandsStageBudgetMs;
+        long wallDeadline = wallBudgetMs > 0
+            ? Stopwatch.GetTimestamp() + (long)((Stopwatch.Frequency * (double)wallBudgetMs) / 1000d)
+            : 0;
+
         while (true)
         {
-            var batch = _ingress.TakeQueued(budget);
+            var batch = _ingress.TakeQueued(countBudget);
             if (batch.Count == 0)
                 break;
 
             bool applied = false;
-            foreach (var submission in batch)
+            var deferred = new List<ZoneCommandIngress.Submission>();
+            int index = 0;
+            for (; index < batch.Count; index++)
             {
+                if (wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline)
+                    break;
+
+                var submission = batch[index];
+
                 // Cancelled by its connection before this tick: it never happened.
                 if (submission.Reply.Task.IsCompleted)
                     continue;
@@ -62,10 +75,19 @@ public sealed partial class ZoneWorld
                 applied = true;
             }
 
+            if (index < batch.Count)
+                deferred.AddRange(batch.Skip(index));
+
+            if (deferred.Count > 0)
+                _ingress.PutBackFront(deferred);
+
             if (applied)
                 ReleaseAppliedCommandReplies();
 
-            if (budget <= 0 || _ingress.QueuedDepth == 0)
+            if (wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline)
+                break;
+
+            if (countBudget <= 0 || _ingress.QueuedDepth == 0)
                 break;
         }
     }

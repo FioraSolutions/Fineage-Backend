@@ -121,6 +121,19 @@ internal sealed class ZoneCommandIngress
         }
     }
 
+    /// <summary>Put unapplied submissions back at the front of the queue, in list order.</summary>
+    public void PutBackFront(IReadOnlyList<Submission> submissions)
+    {
+        if (submissions.Count == 0)
+            return;
+        lock (_lock)
+        {
+            _queued.InsertRange(0, submissions);
+            if (_submitted.CurrentCount == 0)
+                _submitted.Release();
+        }
+    }
+
     /// <summary>
     /// Refuses further submissions and fails the ones still queued with <paramref name="reason"/>, so no handler
     /// waits on a simulation that stopped.

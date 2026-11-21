@@ -102,3 +102,4 @@ publish/
 !data/armor-sets.json
 !data/item-equip-skills.json
 __pycache__/
+wt-load
