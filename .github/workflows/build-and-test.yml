@@ -24,3 +24,19 @@ jobs:
 
       - name: Test
         run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity normal
+
+  zone-parallel-regions:
+    name: zone-parallel-regions
+    runs-on: ubuntu-latest
+    env:
+      FINEAGE_ZONE_REGION_WORKERS: '4'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Zone parallel region tests
+        run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter FullyQualifiedName~RegionParallelWorldTests
