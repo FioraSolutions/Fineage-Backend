@@ -91,7 +91,10 @@ public enum SystemAccount
     Consumed = 17,
 
     /// <summary>Monster race ticket sales and payouts.</summary>
-    MonsterRace = 18
+    MonsterRace = 18,
+
+    /// <summary>Clan hall function leases and hall rent.</summary>
+    ClanHall = 19
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -277,6 +280,7 @@ public enum LedgerTxKind
     /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
     Consume = 46,
 
+<<<<<<< HEAD
     /// <summary>Bag into another character's freight on the same account: <c>Reference</c> is the recipient's character id.</summary>
     FreightDeposit = 47,
 
@@ -296,7 +300,13 @@ public enum LedgerTxKind
     WeddingTeleportFee = 52,
 
     /// <summary>Married divorce adena transfer: payer inventory → partner inventory.</summary>
-    WeddingDivorcePenalty = 53
+    WeddingDivorcePenalty = 53,
+
+    /// <summary>Clan hall function lease: <c>Reference</c> is function type.</summary>
+    ClanHallFunction = 54,
+
+    /// <summary>Auctionable hall rent: <c>Reference</c> is hall id.</summary>
+    ClanHallLease = 55
 }
 
 /// <summary>

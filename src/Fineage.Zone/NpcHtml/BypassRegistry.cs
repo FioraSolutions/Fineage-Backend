@@ -80,6 +80,7 @@ public sealed class BypassRegistry
         registry.Register(new PetEvolveBypassHandler());
         registry.Register(new RiftBypassHandler());
         registry.Register(new DoormanBypassHandler());
+        registry.Register(new ClanHallManagerBypassHandler());
         return registry;
     }
 

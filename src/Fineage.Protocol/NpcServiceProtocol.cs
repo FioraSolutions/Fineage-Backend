@@ -140,4 +140,9 @@ public static class NpcServiceIntent
 
     public const string DoormanOpen = "doorman-open";
     public const string DoormanClose = "doorman-close";
+    public const string HallLease = "hall-lease";
+    public const string HallFunction = "hall-function";
+    public const string HallSupport = "hall-support";
+    public const string HallTeleport = "hall-teleport";
+    public const string HallDeco = "hall-deco";
 }

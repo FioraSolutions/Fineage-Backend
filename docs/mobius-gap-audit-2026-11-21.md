@@ -89,6 +89,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Clan wars | ✅ | — | `ClanWar.java` | `ZoneWorldPledge.Wars` | — |
 | Alliance | ✅ | — | `Alliance.java` | `ZoneWorldAlly` | — |
 | Clan hall auction | ✅ | — | `ClanHallAuctionManager` | `ClanHallAuctionActor` | — |
+| Clan hall functions | 🟡 | `AgitDecoInfo` fan-out TBD | `ClanHallManager` | `ZoneWorldPledge.HallFunctions`, `HallFunctionActor` | — |
 | **Clan hall siege** | ❌ | CH siege cycles | `CHSiegeManager.java` | Auction only | M |
 | Freight WH | ❌ | Account freight deposit | `Warehouse.java` freight type | Stub bypass | S |
 

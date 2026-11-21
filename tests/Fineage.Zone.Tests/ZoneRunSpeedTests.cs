@@ -196,8 +196,14 @@ public sealed class ZoneRunSpeedTests
         // so Formulas never registers FuncMoveSpeed (Formulas.java:206 is players/summons only).
         var boss = new ZoneEntity
         {
-            ObjectId = 90_001, Kind = ZoneEntityKind.Npc, NpcId = 29019, Name = "Valakas",
-            RunSpeed = 300f, WalkSpeed = 180f, Dex = 30, Level = 80
+            ObjectId = 90_001,
+            Kind = ZoneEntityKind.Npc,
+            NpcId = 29019,
+            Name = "Valakas",
+            RunSpeed = 300f,
+            WalkSpeed = 180f,
+            Dex = 30,
+            Level = 80
         };
         kit.World.RefreshRunSpeed(boss);
         Assert.Equal(300f, boss.RunSpeed, 3);

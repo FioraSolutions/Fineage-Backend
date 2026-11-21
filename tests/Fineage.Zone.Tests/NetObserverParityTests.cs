@@ -193,9 +193,9 @@ public sealed class NetObserverParityTests
         var a = await rig.JoinAsync(X, Y, Z);
         var west = await rig.JoinAsync(X - 1600, Y, Z);
         var east = await rig.JoinAsync(X + 2300, Y, Z);
-        Assert.False(west.Entity.Knownlist.Contains(MobId));
-        Assert.False(east.Entity.Knownlist.Contains(a.ObjectId));
-        Assert.True(east.Entity.Knownlist.Contains(MobId));
+        Assert.DoesNotContain(MobId, west.Entity.Knownlist);
+        Assert.DoesNotContain(a.ObjectId, east.Entity.Knownlist);
+        Assert.Contains(MobId, east.Entity.Knownlist);
         a.Entity.KnownSkills[WindStrike] = 1;
         a.Entity.MaxMp = a.Entity.CurMp = 10_000;
         foreach (var p in new[] { a, west, east })

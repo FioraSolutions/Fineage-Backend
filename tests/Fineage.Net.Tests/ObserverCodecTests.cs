@@ -11,8 +11,18 @@ public sealed class ObserverCodecTests
 {
     static AttackStateMsg Swing() => new()
     {
-        AttackerValue = 7, AttackerGeneration = 1, TargetValue = 9, TargetGeneration = 1,
-        Damage = 120, Flags = 0x20, AttackerX = 1, AttackerY = 2, AttackerZ = 3, TargetX = 4, TargetY = 5, TargetZ = 6
+        AttackerValue = 7,
+        AttackerGeneration = 1,
+        TargetValue = 9,
+        TargetGeneration = 1,
+        Damage = 120,
+        Flags = 0x20,
+        AttackerX = 1,
+        AttackerY = 2,
+        AttackerZ = 3,
+        TargetX = 4,
+        TargetY = 5,
+        TargetZ = 6
     };
 
     [Fact]
@@ -43,7 +53,10 @@ public sealed class ObserverCodecTests
     {
         var launched = NetCodec.DecodeMagicSkillLaunched(NetCodec.EncodeMagicSkillLaunched(new MagicSkillLaunchedNetMsg
         {
-            CasterObjectId = 11, SkillId = 1177, SkillLevel = 3, TargetObjectIds = [21, 22]
+            CasterObjectId = 11,
+            SkillId = 1177,
+            SkillLevel = 3,
+            TargetObjectIds = [21, 22]
         }));
         Assert.Equal(11, launched.CasterObjectId);
         Assert.Equal(1177, launched.SkillId);
@@ -54,7 +67,13 @@ public sealed class ObserverCodecTests
 
         var sound = NetCodec.DecodePlaySound(NetCodec.EncodePlaySound(new PlaySoundNetMsg
         {
-            Type = 0, File = "ItemSound.quest_accept", ObjectId = 0, X = 1, Y = 2, Z = 3, DelayMs = 0
+            Type = 0,
+            File = "ItemSound.quest_accept",
+            ObjectId = 0,
+            X = 1,
+            Y = 2,
+            Z = 3,
+            DelayMs = 0
         }));
         Assert.Equal(0, sound.Type);
         Assert.Equal("ItemSound.quest_accept", sound.File);

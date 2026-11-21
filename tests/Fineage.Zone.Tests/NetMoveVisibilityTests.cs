@@ -79,7 +79,7 @@ public sealed class NetMoveVisibilityTests
         // Arrival is extrapolated by the client: no extra frame until the next order.
         await rig.AdvanceAsync(10_000, 250);
         Assert.Equal((X0, Y0 + 800), (a.Entity.X, a.Entity.Y));
-        Assert.Empty(About(await b.DrainAsync(), a).Where(f => f.Opcode == NetOpcode.MoveState));
+        Assert.DoesNotContain(About(await b.DrainAsync(), a), f => f.Opcode == NetOpcode.MoveState);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public sealed class NetMoveVisibilityTests
         var seen = NetCodec.DecodeChangeWaitType((await walker.Net.ExpectAsync(NetOpcode.ChangeWaitType, timeout.Token)).Payload);
         Assert.Equal(b.EntityValue, seen.EntityValue);
         Assert.Equal(ActionProtocol.WaitSitting, seen.WaitType);
-        Assert.Empty(About(await a.DrainAsync(), b).Where(f => f.Opcode == NetOpcode.MoveState));
+        Assert.DoesNotContain(About(await a.DrainAsync(), b), f => f.Opcode == NetOpcode.MoveState);
     }
 
     [Fact]

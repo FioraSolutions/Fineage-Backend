@@ -70,6 +70,17 @@ public sealed class ClanHallSave
     public long AuctionEndUnixMs { get; set; }
     public long StartingBid { get; set; }
     public List<ClanHallBidSave> Bids { get; set; } = [];
+    public List<ClanHallFunctionSave> Functions { get; set; } = [];
+    public int DecoFront { get; set; }
+    public int DecoCurtains { get; set; }
+}
+
+public sealed class ClanHallFunctionSave
+{
+    public int Type { get; set; }
+    public int Level { get; set; }
+    public int Lease { get; set; }
+    public long EndUnixMs { get; set; }
 }
 
 public sealed class ClanHallBidSave

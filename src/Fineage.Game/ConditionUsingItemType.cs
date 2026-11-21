@@ -45,18 +45,18 @@ public static class ConditionUsingItemType
                         break;
                     var wt = weapon.WeaponType;
                     if (kind switch
-                        {
-                            "SWORD" => wt == WeaponType.Sword,
-                            "BLUNT" => wt == WeaponType.Blunt,
-                            "DAGGER" or "DUALDAGGER" => wt == WeaponType.Dagger,
-                            "BOW" => wt == WeaponType.Bow,
-                            "POLE" => wt == WeaponType.Pole,
-                            "DUAL" => wt == WeaponType.Dual,
-                            "FIST" or "DUALFIST" => wt == WeaponType.Fist,
-                            "FISHINGROD" => wt == WeaponType.FishingRod,
-                            "ETC" => wt == WeaponType.Etc,
-                            _ => false
-                        })
+                    {
+                        "SWORD" => wt == WeaponType.Sword,
+                        "BLUNT" => wt == WeaponType.Blunt,
+                        "DAGGER" or "DUALDAGGER" => wt == WeaponType.Dagger,
+                        "BOW" => wt == WeaponType.Bow,
+                        "POLE" => wt == WeaponType.Pole,
+                        "DUAL" => wt == WeaponType.Dual,
+                        "FIST" or "DUALFIST" => wt == WeaponType.Fist,
+                        "FISHINGROD" => wt == WeaponType.FishingRod,
+                        "ETC" => wt == WeaponType.Etc,
+                        _ => false
+                    })
                         return true;
                     break;
             }

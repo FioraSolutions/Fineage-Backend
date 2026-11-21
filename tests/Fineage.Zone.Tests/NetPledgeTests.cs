@@ -115,7 +115,10 @@ public sealed class NetPledgeTests
         var (officer, officerE) = clan.Members[0];
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
         {
-            Kind = PledgeCommandKind.ReorganizeMember, Name = officerE.Name, IntArg1 = PledgeProtocol.Royal1, Text = guardE.Name
+            Kind = PledgeCommandKind.ReorganizeMember,
+            Name = officerE.Name,
+            IntArg1 = PledgeProtocol.Royal1,
+            Text = guardE.Name
         }));
         Assert.Equal(PledgeProtocol.Royal1, kit.World.PledgeTypeOfForTest(officerE.ObjectId));
         Assert.Equal(PledgeProtocol.Main, kit.World.PledgeTypeOfForTest(guardE.ObjectId));
@@ -125,11 +128,11 @@ public sealed class NetPledgeTests
         Assert.Equal(ClanProtocol.Leader, await kit.World.TryClanInviteAsync(officer,
             new ClanInviteRequestMsg { TargetObjectId = recruitE.ObjectId }, kit.Now, default));
         Assert.Equal(PledgeProtocol.Denied, await Cmd(kit, officer, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 3, IntArg2 = PledgeProtocol.PrivInviteMember }));
+        { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 3, IntArg2 = PledgeProtocol.PrivInviteMember }));
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 3, IntArg2 = PledgeProtocol.PrivInviteMember }));
+        { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 3, IntArg2 = PledgeProtocol.PrivInviteMember }));
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetMemberPowerGrade, Name = officerE.Name, IntArg1 = 3 }));
+        { Kind = PledgeCommandKind.SetMemberPowerGrade, Name = officerE.Name, IntArg1 = 3 }));
         Assert.Equal(3, officerE.PowerGrade);
         Assert.Equal(PledgeProtocol.PrivInviteMember, officerE.ClanPrivileges);
         Assert.Null(await kit.World.TryClanInviteAsync(officer,
@@ -137,7 +140,7 @@ public sealed class NetPledgeTests
 
         // Academy rank can only hold warehouse + doors.
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 9, IntArg2 = PledgeProtocol.PrivAll }));
+        { Kind = PledgeCommandKind.SetRankPrivileges, IntArg1 = 9, IntArg2 = PledgeProtocol.PrivAll }));
         Assert.Equal(PledgeProtocol.PrivAcademyMask, kit.World.ClanDetailsForTest(clan.ClanId)!.RankPrivileges[9]);
     }
 
@@ -181,7 +184,7 @@ public sealed class NetPledgeTests
         Assert.Equal(crestId, clan.Members[0].E.ClanCrestId);
 
         Assert.Null(await Cmd(kit, clan.Members[0].S, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.RequestCrest, IntArg1 = crestId, IntArg2 = PledgeProtocol.CrestKindPledge }));
+        { Kind = PledgeCommandKind.RequestCrest, IntArg1 = crestId, IntArg2 = PledgeProtocol.CrestKindPledge }));
         var sent = Assert.IsType<CrestDataNetMsg>(rec.Of(nameof(IWorldEventPublisher.FanoutCrestData)).Last()[1]);
         Assert.Equal((crestId, 200, (byte)7), (sent.CrestId, sent.Data.Length, sent.Data[0]));
 
@@ -257,14 +260,14 @@ public sealed class NetPledgeTests
         kit.World.AddClanWarehouseItemForTest(b.ClanId, PledgeProtocol.AdenaItemId, 100_000_000);
 
         Assert.Equal(PledgeProtocol.BadArgument, await Cmd(kit, a.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid - 1 }));
+        { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid - 1 }));
         Assert.Null(await Cmd(kit, a.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid }));
+        { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid }));
         Assert.Equal(100_000_000 - (int)hall.StartingBid, kit.World.ClanWarehouseForTest(a.ClanId)[PledgeProtocol.AdenaItemId]);
         Assert.Equal(PledgeProtocol.BadArgument, await Cmd(kit, b.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid }));
+        { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid }));
         Assert.Null(await Cmd(kit, b.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid + 1_000 }));
+        { Kind = PledgeCommandKind.HallBid, IntArg1 = hall.Id, Amount = hall.StartingBid + 1_000 }));
 
         kit.World.EndHallAuctionsForTest(kit.Now.ToUnixTimeMilliseconds());
         Assert.Equal(b.ClanId, kit.World.HallForTest(hall.Id)!.Value.Owner);
@@ -284,7 +287,7 @@ public sealed class NetPledgeTests
         var clan = await ClanAsync(kit, "Keep", members: 1, level: 3);
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.SetCrest, Blob = [1, 2, 3] }));
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetMemberPowerGrade, Name = clan.Members[0].E.Name, IntArg1 = 4 }));
+        { Kind = PledgeCommandKind.SetMemberPowerGrade, Name = clan.Members[0].E.Name, IntArg1 = 4 }));
         int crestId = clan.LeaderEntity.ClanCrestId;
 
         var again = new NetTestKit(store: kit.Store);
@@ -303,14 +306,14 @@ public sealed class NetPledgeTests
         var (_, kidE) = await JoinAsync(kit, clan.Leader, clan.LeaderEntity, PledgeProtocol.Academy, level: 10);
         var mentorE = clan.Members[0].E;
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = mentorE.Name, IntArg1 = 1 }));
+        { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = mentorE.Name, IntArg1 = 1 }));
         var d = kit.World.ClanDetailsForTest(clan.ClanId)!;
         Assert.Equal((mentorE.ObjectId, kidE.ObjectId), (d.Members[kidE.ObjectId].SponsorId, d.Members[mentorE.ObjectId].ApprenticeId));
         Assert.Contains(1755, Lines(rec, kidE.ObjectId));
         Assert.Equal(PledgeProtocol.Conditions, await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = clan.LeaderEntity.Name, IntArg1 = 1 }));
+        { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = clan.LeaderEntity.Name, IntArg1 = 1 }));
         Assert.Null(await Cmd(kit, clan.Leader, new PledgeCommandNetMsg
-            { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = mentorE.Name, IntArg1 = 0 }));
+        { Kind = PledgeCommandKind.SetSponsor, Name = kidE.Name, Text = mentorE.Name, IntArg1 = 0 }));
         Assert.Equal(0, kit.World.ClanDetailsForTest(clan.ClanId)!.Members[kidE.ObjectId].SponsorId);
     }
 

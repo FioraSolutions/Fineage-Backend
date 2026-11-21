@@ -219,8 +219,14 @@ public sealed partial class OlympiadBoard
         snap.Heroes = _heroes.Values.OrderBy(h => h.ClassId).Select(Copy).ToList();
         snap.LastPeriod = _lastPeriod.Select(row => new OlympiadNobleRow
         {
-            CharacterId = row.CharacterId, ClassId = row.ClassId, Name = row.Name, Points = row.Points,
-            Done = row.Done, Won = row.Won, Lost = row.Lost, Drawn = row.Drawn
+            CharacterId = row.CharacterId,
+            ClassId = row.ClassId,
+            Name = row.Name,
+            Points = row.Points,
+            Done = row.Done,
+            Won = row.Won,
+            Lost = row.Lost,
+            Drawn = row.Drawn
         }).ToList();
         snap.Passes = _passes.OrderBy(p => p.Key).Select(p => new OlympiadPassRow { CharacterId = p.Key, Passes = p.Value }).ToList();
     }

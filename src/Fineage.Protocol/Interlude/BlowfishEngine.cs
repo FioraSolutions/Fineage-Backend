@@ -4,16 +4,16 @@
 
 namespace Fineage.Protocol.Interlude;
 
-    /// <summary>
-    /// Summary description for Blowfish.
-    /// </summary>
-    public class BlowfishEngine
-    {
-        private static uint[] KP = {0x243F6A88, 0x85A308D3, 0x13198A2E, 0x03707344, 0xA4093822,
+/// <summary>
+/// Summary description for Blowfish.
+/// </summary>
+public class BlowfishEngine
+{
+    private static uint[] KP = {0x243F6A88, 0x85A308D3, 0x13198A2E, 0x03707344, 0xA4093822,
                                         0x299F31D0, 0x082EFA98, 0xEC4E6C89, 0x452821E6, 0x38D01377,
                                         0xBE5466CF, 0x34E90C6C, 0xC0AC29B7, 0xC97C50DD, 0x3F84D5B5,
                                         0xB5470917, 0x9216D5D9, 0x8979FB1B};
-        private static uint[] KS0 = {0xD1310BA6, 0x98DFB5AC, 0x2FFD72DB, 0xD01ADFB7, 0xB8E1AFED,
+    private static uint[] KS0 = {0xD1310BA6, 0x98DFB5AC, 0x2FFD72DB, 0xD01ADFB7, 0xB8E1AFED,
                                         0x6A267E96, 0xBA7C9045, 0xF12C7F99, 0x24A19947, 0xB3916CF7,
                                         0x0801F2E2, 0x858EFC16, 0x636920D8, 0x71574E69, 0xA458FEA3,
                                         0xF4933D7E, 0x0D95748F, 0x728EB658, 0x718BCD58, 0x82154AEE,
@@ -65,7 +65,7 @@ namespace Fineage.Protocol.Interlude;
                                         0x571BE91F, 0xF296EC6B, 0x2A0DD915, 0xB6636521, 0xE7B9F9B6,
                                         0xFF34052E, 0xC5855664, 0x53B02D5D, 0xA99F8FA1, 0x08BA4799,
                                         0x6E85076A};
-        private static uint[] KS1 = {0x4B7A70E9, 0xB5B32944, 0xDB75092E, 0xC4192623, 0xAD6EA6B0,
+    private static uint[] KS1 = {0x4B7A70E9, 0xB5B32944, 0xDB75092E, 0xC4192623, 0xAD6EA6B0,
                                         0x49A7DF7D, 0x9CEE60B8, 0x8FEDB266, 0xECAA8C71, 0x699A17FF,
                                         0x5664526C, 0xC2B19EE1, 0x193602A5, 0x75094C29, 0xA0591340,
                                         0xE4183A3E, 0x3F54989A, 0x5B429D65, 0x6B8FE4D6, 0x99F73FD6,
@@ -117,7 +117,7 @@ namespace Fineage.Protocol.Interlude;
                                         0x105588CD, 0x675FDA79, 0xE3674340, 0xC5C43465, 0x713E38D8,
                                         0x3D28F89E, 0xF16DFF20, 0x153E21E7, 0x8FB03D4A, 0xE6E39F2B,
                                         0xDB83ADF7};
-        private static uint[] KS2 = {0xE93D5A68, 0x948140F7, 0xF64C261C, 0x94692934, 0x411520F7,
+    private static uint[] KS2 = {0xE93D5A68, 0x948140F7, 0xF64C261C, 0x94692934, 0x411520F7,
                                         0x7602D4F7, 0xBCF46B2E, 0xD4A20068, 0xD4082471, 0x3320F46A,
                                         0x43B7D4B7, 0x500061AF, 0x1E39F62E, 0x97244546, 0x14214F74,
                                         0xBF8B8840, 0x4D95FC1D, 0x96B591AF, 0x70F4DDD3, 0x66A02F45,
@@ -169,7 +169,7 @@ namespace Fineage.Protocol.Interlude;
                                         0xB161E6F8, 0xA28514D9, 0x6C51133C, 0x6FD5C7E7, 0x56E14EC4,
                                         0x362ABFCE, 0xDDC6C837, 0xD79A3234, 0x92638212, 0x670EFA8E,
                                         0x406000E0};
-        private static uint[] KS3 = {0x3A39CE37, 0xD3FAF5CF, 0xABC27737, 0x5AC52D1B, 0x5CB0679E,
+    private static uint[] KS3 = {0x3A39CE37, 0xD3FAF5CF, 0xABC27737, 0x5AC52D1B, 0x5CB0679E,
                                         0x4FA33742, 0xD3822740, 0x99BC9BBE, 0xD5118E9D, 0xBF0F7315,
                                         0xD62D1C7E, 0xC700C47B, 0xB78C1B6B, 0x21A19045, 0xB26EB1BE,
                                         0x6A366EB4, 0x5748AB2F, 0xBC946E79, 0xC6A376D2, 0x6549C2C8,
@@ -221,210 +221,112 @@ namespace Fineage.Protocol.Interlude;
                                         0x02FB8A8C, 0x01C36AE4, 0xD6EBE1F9, 0x90D4F869, 0xA65CDEA0,
                                         0x3F09252D, 0xC208E69F, 0xB74E6132, 0xCE77E25B, 0x578FDFE3,
                                         0x3AC372E6};
-        //====================================
-        // Useful constants
-        //====================================
-        private static int ROUNDS = 16;
-        private static int BLOCK_SIZE = 8; // bytes = 64 bits
-        private static int SBOX_SK = 256;
-        private static int P_SZ = ROUNDS + 2;
-        private uint[] S0, S1, S2, S3; // the s-boxes
-        private uint[] P; // the p-array
-        private bool encrypting = false;
-        private byte[] workingKey = null;
+    //====================================
+    // Useful constants
+    //====================================
+    private static int ROUNDS = 16;
+    private static int BLOCK_SIZE = 8; // bytes = 64 bits
+    private static int SBOX_SK = 256;
+    private static int P_SZ = ROUNDS + 2;
+    private uint[] S0, S1, S2, S3; // the s-boxes
+    private uint[] P; // the p-array
+    private bool encrypting = false;
+    private byte[] workingKey = null;
 
-        public BlowfishEngine()
+    public BlowfishEngine()
+    {
+        S0 = new uint[SBOX_SK];
+        S1 = new uint[SBOX_SK];
+        S2 = new uint[SBOX_SK];
+        S3 = new uint[SBOX_SK];
+        P = new uint[P_SZ];
+    }
+
+    /**
+    * initialise a Blowfish cipher.
+    * 
+    * @param encryption
+    *            whether or not we are for encryption.
+    * @param key
+    *            the key used to set up the cipher.
+    * @exception IllegalArgumentException
+    *                if the params argument is inappropriate.
+    */
+    public void init(bool pEncrypting, byte[] key)
+    {
+        this.encrypting = pEncrypting;
+        this.workingKey = key;
+        setKey(this.workingKey);
+        return;
+    }
+
+    public String getAlgorithmName()
+    {
+        return "Blowfish";
+    }
+
+    public void processBigBlock(byte[] in_b, uint inOff, byte[] out_b, uint outOff, int len)
+    {
+        for (uint i = 0; i < len; i += 8)
         {
-            S0 = new uint[SBOX_SK];
-            S1 = new uint[SBOX_SK];
-            S2 = new uint[SBOX_SK];
-            S3 = new uint[SBOX_SK];
-            P = new uint[P_SZ];
+            processBlock(in_b, inOff + i, out_b, outOff + i);
         }
+    }
 
-        /**
-		* initialise a Blowfish cipher.
-		* 
-		* @param encryption
-		*            whether or not we are for encryption.
-		* @param key
-		*            the key used to set up the cipher.
-		* @exception IllegalArgumentException
-		*                if the params argument is inappropriate.
-		*/
-        public void init(bool pEncrypting, byte[] key)
+    public int processBlock(byte[] in_b, uint inOff, byte[] out_b, uint outOff)
+    {
+        if (workingKey == null)
         {
-            this.encrypting = pEncrypting;
-            this.workingKey = key;
-            setKey(this.workingKey);
-            return;
+            // Debug.LogError("Blowfish not initialised");
+            //throw new IllegalStateException("Blowfish not initialised");
         }
-
-        public String getAlgorithmName()
+        if ((inOff + BLOCK_SIZE) > in_b.Length)
         {
-            return "Blowfish";
+            // Debug.LogError("input buffer too short");
+            //throw new IOException("input buffer too short");
         }
-
-        public void processBigBlock(byte[] in_b, uint inOff, byte[] out_b, uint outOff, int len)
+        if ((outOff + BLOCK_SIZE) > out_b.Length)
         {
-            for (uint i = 0; i < len; i += 8)
-            {
-                processBlock(in_b, inOff + i, out_b, outOff + i);
-            }
+            // Debug.LogError("output buffer too short");
+            //throw new IOException("output buffer too short");
         }
-
-        public int processBlock(byte[] in_b, uint inOff, byte[] out_b, uint outOff)
+        if (encrypting)
         {
-            if (workingKey == null)
-            {
-                // Debug.LogError("Blowfish not initialised");
-                //throw new IllegalStateException("Blowfish not initialised");
-            }
-            if ((inOff + BLOCK_SIZE) > in_b.Length)
-            {
-                // Debug.LogError("input buffer too short");
-                //throw new IOException("input buffer too short");
-            }
-            if ((outOff + BLOCK_SIZE) > out_b.Length)
-            {
-                // Debug.LogError("output buffer too short");
-                //throw new IOException("output buffer too short");
-            }
-            if (encrypting)
-            {
-                encryptBlock(in_b, inOff, out_b, outOff);
-            }
-            else
-            {
-                decryptBlock(in_b, inOff, out_b, outOff);
-            }
-            return BLOCK_SIZE;
+            encryptBlock(in_b, inOff, out_b, outOff);
         }
-
-        public void reset()
+        else
         {
+            decryptBlock(in_b, inOff, out_b, outOff);
         }
+        return BLOCK_SIZE;
+    }
 
-        public int getBlockSize()
-        {
-            return BLOCK_SIZE;
-        }
+    public void reset()
+    {
+    }
 
-        //==================================
-        // Private Implementation
-        //==================================
-        private uint F(uint x)
-        {
-            //return (((S0[(x >>> 24)] + S1[(x >>> 16) & 0xff]) ^ S2[(x >>> 8) & 0xff]) + S3[x & 0xff]);
-            return ((S0[x >> 24] + S1[(x >> 16) & 0xff]) ^ S2[(x >> 8) & 0xff]) + S3[x & 0xff];
-        }
+    public int getBlockSize()
+    {
+        return BLOCK_SIZE;
+    }
 
-        /**
-		* apply the encryption cycle to each value pair in the table.
-		*/
-        private void processTable(uint xl, uint xr, uint[] table)
-        {
-            int size = table.Length;
-            for (int s = 0; s < size; s += 2)
-            {
-                xl ^= P[0];
-                for (int i = 1; i < ROUNDS; i += 2)
-                {
-                    xr ^= F(xl) ^ P[i];
-                    xl ^= F(xr) ^ P[i + 1];
-                }
-                xr ^= P[ROUNDS + 1];
-                table[s] = xr;
-                table[s + 1] = xl;
-                xr = xl; // end of cycle swap
-                xl = table[s];
-            }
-        }
+    //==================================
+    // Private Implementation
+    //==================================
+    private uint F(uint x)
+    {
+        //return (((S0[(x >>> 24)] + S1[(x >>> 16) & 0xff]) ^ S2[(x >>> 8) & 0xff]) + S3[x & 0xff]);
+        return ((S0[x >> 24] + S1[(x >> 16) & 0xff]) ^ S2[(x >> 8) & 0xff]) + S3[x & 0xff];
+    }
 
-        private void setKey(byte[] key)
+    /**
+    * apply the encryption cycle to each value pair in the table.
+    */
+    private void processTable(uint xl, uint xr, uint[] table)
+    {
+        int size = table.Length;
+        for (int s = 0; s < size; s += 2)
         {
-            /*
-			* - comments are from _Applied Crypto_, Schneier, p338 please be
-			* careful comparing the two, AC numbers the arrays from 1, the
-			* enclosed code from 0.
-			* 
-			* (1) Initialise the S-boxes and the P-array, with a fixed string This
-			* string contains the hexadecimal digits of pi (3.141...)
-			*/
-            for (uint i = 0; i < SBOX_SK; i++)
-            {
-                S0[i] = KS0[i];
-                S1[i] = KS1[i];
-                S2[i] = KS2[i];
-                S3[i] = KS3[i];
-            }
-            for (uint i = 0; i < P_SZ; i++)
-            {
-                P[i] = KP[i];
-            }
-            /*
-			System.arraycopy(KS0, 0, S0, 0, SBOX_SK);
-			System.arraycopy(KS1, 0, S1, 0, SBOX_SK);
-			System.arraycopy(KS2, 0, S2, 0, SBOX_SK);
-			System.arraycopy(KS3, 0, S3, 0, SBOX_SK);
-			System.arraycopy(KP, 0, P, 0, P_SZ);
-			*/
-            /*
-			* (2) Now, XOR P[0] with the first 32 bits of the key, XOR P[1] with
-			* the second 32-bits of the key, and so on for all bits of the key (up
-			* to P[17]). Repeatedly cycle through the key bits until the entire
-			* P-array has been XOR-ed with the key bits
-			*/
-            int keyLength = key.Length;
-            int keyIndex = 0;
-            for (int i = 0; i < P_SZ; i++)
-            {
-                // get the 32 bits of the key, in 4 * 8 bit chunks
-                uint data = 0x0000000;
-                for (int j = 0; j < 4; j++)
-                {
-                    // create a 32 bit block
-                    data = (data << 8) | (uint)(key[keyIndex++] & 0xff);
-                    // wrap when we get to the end of the key
-                    if (keyIndex >= keyLength)
-                    {
-                        keyIndex = 0;
-                    }
-                }
-                // XOR the newly created 32 bit chunk onto the P-array
-                P[i] ^= data;
-            }
-            /*
-			* (3) Encrypt the all-zero string with the Blowfish algorithm, using
-			* the subkeys described in (1) and (2)
-			* 
-			* (4) Replace P1 and P2 with the output of step (3)
-			* 
-			* (5) Encrypt the output of step(3) using the Blowfish algorithm, with
-			* the modified subkeys.
-			* 
-			* (6) Replace P3 and P4 with the output of step (5)
-			* 
-			* (7) Continue the process, replacing all elements of the P-array and
-			* then all four S-boxes in order, with the output of the continuously
-			* changing Blowfish algorithm
-			*/
-            processTable(0, 0, P);
-            processTable(P[P_SZ - 2], P[P_SZ - 1], S0);
-            processTable(S0[SBOX_SK - 2], S0[SBOX_SK - 1], S1);
-            processTable(S1[SBOX_SK - 2], S1[SBOX_SK - 1], S2);
-            processTable(S2[SBOX_SK - 2], S2[SBOX_SK - 1], S3);
-        }
-
-        /**
-		* Encrypt the given input starting at the given offset and place the
-		* result in the provided buffer starting at the given offset. The input
-		* will be an exact multiple of our blocksize.
-		*/
-        private void encryptBlock(byte[] src, uint srcIndex, byte[] dst, uint dstIndex)
-        {
-            uint xl = BytesTo32bits(src, srcIndex);
-            uint xr = BytesTo32bits(src, srcIndex + 4);
             xl ^= P[0];
             for (int i = 1; i < ROUNDS; i += 2)
             {
@@ -432,40 +334,138 @@ namespace Fineage.Protocol.Interlude;
                 xl ^= F(xr) ^ P[i + 1];
             }
             xr ^= P[ROUNDS + 1];
-            Bits32ToBytes(xr, dst, dstIndex);
-            Bits32ToBytes(xl, dst, dstIndex + 4);
+            table[s] = xr;
+            table[s + 1] = xl;
+            xr = xl; // end of cycle swap
+            xl = table[s];
         }
+    }
 
-        /**
-		* Decrypt the given input starting at the given offset and place the
-		* result in the provided buffer starting at the given offset. The input
-		* will be an exact multiple of our blocksize.
-		*/
-        private void decryptBlock(byte[] src, uint srcIndex, byte[] dst, uint dstIndex)
+    private void setKey(byte[] key)
+    {
+        /*
+        * - comments are from _Applied Crypto_, Schneier, p338 please be
+        * careful comparing the two, AC numbers the arrays from 1, the
+        * enclosed code from 0.
+        * 
+        * (1) Initialise the S-boxes and the P-array, with a fixed string This
+        * string contains the hexadecimal digits of pi (3.141...)
+        */
+        for (uint i = 0; i < SBOX_SK; i++)
         {
-            uint xl = BytesTo32bits(src, srcIndex);
-            uint xr = BytesTo32bits(src, srcIndex + 4);
-            xl ^= P[ROUNDS + 1];
-            for (int i = ROUNDS; i > 0; i -= 2)
+            S0[i] = KS0[i];
+            S1[i] = KS1[i];
+            S2[i] = KS2[i];
+            S3[i] = KS3[i];
+        }
+        for (uint i = 0; i < P_SZ; i++)
+        {
+            P[i] = KP[i];
+        }
+        /*
+        System.arraycopy(KS0, 0, S0, 0, SBOX_SK);
+        System.arraycopy(KS1, 0, S1, 0, SBOX_SK);
+        System.arraycopy(KS2, 0, S2, 0, SBOX_SK);
+        System.arraycopy(KS3, 0, S3, 0, SBOX_SK);
+        System.arraycopy(KP, 0, P, 0, P_SZ);
+        */
+        /*
+        * (2) Now, XOR P[0] with the first 32 bits of the key, XOR P[1] with
+        * the second 32-bits of the key, and so on for all bits of the key (up
+        * to P[17]). Repeatedly cycle through the key bits until the entire
+        * P-array has been XOR-ed with the key bits
+        */
+        int keyLength = key.Length;
+        int keyIndex = 0;
+        for (int i = 0; i < P_SZ; i++)
+        {
+            // get the 32 bits of the key, in 4 * 8 bit chunks
+            uint data = 0x0000000;
+            for (int j = 0; j < 4; j++)
             {
-                xr ^= F(xl) ^ P[i];
-                xl ^= F(xr) ^ P[i - 1];
+                // create a 32 bit block
+                data = (data << 8) | (uint)(key[keyIndex++] & 0xff);
+                // wrap when we get to the end of the key
+                if (keyIndex >= keyLength)
+                {
+                    keyIndex = 0;
+                }
             }
-            xr ^= P[0];
-            Bits32ToBytes(xr, dst, dstIndex);
-            Bits32ToBytes(xl, dst, dstIndex + 4);
+            // XOR the newly created 32 bit chunk onto the P-array
+            P[i] ^= data;
         }
+        /*
+        * (3) Encrypt the all-zero string with the Blowfish algorithm, using
+        * the subkeys described in (1) and (2)
+        * 
+        * (4) Replace P1 and P2 with the output of step (3)
+        * 
+        * (5) Encrypt the output of step(3) using the Blowfish algorithm, with
+        * the modified subkeys.
+        * 
+        * (6) Replace P3 and P4 with the output of step (5)
+        * 
+        * (7) Continue the process, replacing all elements of the P-array and
+        * then all four S-boxes in order, with the output of the continuously
+        * changing Blowfish algorithm
+        */
+        processTable(0, 0, P);
+        processTable(P[P_SZ - 2], P[P_SZ - 1], S0);
+        processTable(S0[SBOX_SK - 2], S0[SBOX_SK - 1], S1);
+        processTable(S1[SBOX_SK - 2], S1[SBOX_SK - 1], S2);
+        processTable(S2[SBOX_SK - 2], S2[SBOX_SK - 1], S3);
+    }
 
-        private uint BytesTo32bits(byte[] b, uint i)
+    /**
+    * Encrypt the given input starting at the given offset and place the
+    * result in the provided buffer starting at the given offset. The input
+    * will be an exact multiple of our blocksize.
+    */
+    private void encryptBlock(byte[] src, uint srcIndex, byte[] dst, uint dstIndex)
+    {
+        uint xl = BytesTo32bits(src, srcIndex);
+        uint xr = BytesTo32bits(src, srcIndex + 4);
+        xl ^= P[0];
+        for (int i = 1; i < ROUNDS; i += 2)
         {
-            return (uint)(((b[i + 3] & 0xff) << 24) | ((b[i + 2] & 0xff) << 16) | ((b[i + 1] & 0xff) << 8) | (b[i] & 0xff));
+            xr ^= F(xl) ^ P[i];
+            xl ^= F(xr) ^ P[i + 1];
         }
+        xr ^= P[ROUNDS + 1];
+        Bits32ToBytes(xr, dst, dstIndex);
+        Bits32ToBytes(xl, dst, dstIndex + 4);
+    }
 
-        private void Bits32ToBytes(uint in_b, byte[] b, uint offset)
+    /**
+    * Decrypt the given input starting at the given offset and place the
+    * result in the provided buffer starting at the given offset. The input
+    * will be an exact multiple of our blocksize.
+    */
+    private void decryptBlock(byte[] src, uint srcIndex, byte[] dst, uint dstIndex)
+    {
+        uint xl = BytesTo32bits(src, srcIndex);
+        uint xr = BytesTo32bits(src, srcIndex + 4);
+        xl ^= P[ROUNDS + 1];
+        for (int i = ROUNDS; i > 0; i -= 2)
         {
-            b[offset] = (byte)in_b;
-            b[offset + 1] = (byte)(in_b >> 8);
-            b[offset + 2] = (byte)(in_b >> 16);
-            b[offset + 3] = (byte)(in_b >> 24);
+            xr ^= F(xl) ^ P[i];
+            xl ^= F(xr) ^ P[i - 1];
         }
-    }//end of class
+        xr ^= P[0];
+        Bits32ToBytes(xr, dst, dstIndex);
+        Bits32ToBytes(xl, dst, dstIndex + 4);
+    }
+
+    private uint BytesTo32bits(byte[] b, uint i)
+    {
+        return (uint)(((b[i + 3] & 0xff) << 24) | ((b[i + 2] & 0xff) << 16) | ((b[i + 1] & 0xff) << 8) | (b[i] & 0xff));
+    }
+
+    private void Bits32ToBytes(uint in_b, byte[] b, uint offset)
+    {
+        b[offset] = (byte)in_b;
+        b[offset + 1] = (byte)(in_b >> 8);
+        b[offset + 2] = (byte)(in_b >> 16);
+        b[offset + 3] = (byte)(in_b >> 24);
+    }
+}//end of class
