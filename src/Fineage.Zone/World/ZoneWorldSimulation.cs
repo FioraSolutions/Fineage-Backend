@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
+using Fineage.Zone.Fishing;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
 using Fineage.Zone.Manor;
@@ -187,6 +188,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("duels", tick => TickDuels(tick.NowUnixMs));
         ticks.AddWorldStage("corpse-decay", tick => TickCorpseDecay(tick.NowUnixMs));
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
+        ticks.AddWorldStage("force-charge-decay", tick => TickForceChargeDecay(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
         ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
         ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
@@ -213,6 +215,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);
         ticks.AddWorldStage("fishing", tick => TickFishing(tick.NowUnixMs), slow);
         ticks.AddWorldStage(LotteryActor.StageName, tick => AnnounceLottery(_lottery.Step(tick)), slow);
+        ticks.AddWorldStage(FishingChampionshipActor.StageName, tick => _fishingChampionship.Step(tick), slow);
         ticks.AddWorldStage(MonsterRaceActor.StageName, tick => AnnounceMonsterRace(_monsterRace.Step(tick)), slow);
         ticks.AddWorldStage(SevenSignsActor.StageName, tick => ApplySevenSignsPeriods(_sevenSigns.Step(tick)), slow);
         ticks.AddWorldStage(SevenSignsFestivalActor.StageName, TickSevenSignsFestival, slow);

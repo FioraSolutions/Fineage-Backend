@@ -130,4 +130,19 @@ public sealed class NetForceChargeTests
             .Last();
         Assert.Equal(1, status.Charges);
     }
+
+    [Fact]
+    public async Task Force_charges_decay_after_ten_minutes_idle()
+    {
+        var (kit, session, player, _) = await GladiatorSetupAsync();
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicFocus, player.ObjectId, CancellationToken.None));
+        ResolveCast(kit, player);
+        Assert.Equal(1, player.ForceCharges);
+        Assert.True(player.ForceChargeResetAtUnixMs > 0);
+
+        kit.AdvanceToTickCovering(player.ForceChargeResetAtUnixMs + 1);
+        kit.World.StepSimulation();
+        Assert.Equal(0, player.ForceCharges);
+        Assert.Equal(0, player.ForceChargeResetAtUnixMs);
+    }
 }

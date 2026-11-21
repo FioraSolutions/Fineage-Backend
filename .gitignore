@@ -27,6 +27,7 @@ data/*
 !data/skill-stat-effects.json
 !data/skill-passives.json
 !data/skill-effects.json
+!data/skill-effect-coverage.json
 !data/skill-persist-flags.json
 !data/skill-dots.json
 !data/skill-trees.json
@@ -67,6 +68,7 @@ data/*
 !data/swamp-zones.json
 !data/damage-zones.json
 !data/no-landing-zones.json
+!data/mother-tree-zones.json
 !data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/

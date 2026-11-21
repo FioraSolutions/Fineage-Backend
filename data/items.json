@@ -71026,6 +71026,150 @@
       "spiritshots": 1
     },
     {
+      "id": 8158,
+      "name": "Skull of the Dead: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8159,
+      "name": "Skull of the Dead: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8160,
+      "name": "Skull of the Dead: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8161,
+      "name": "Dragon's Heart: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8162,
+      "name": "Dragon's Heart: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8163,
+      "name": "Dragon's Heart: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8164,
+      "name": "Egg of Earth: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8165,
+      "name": "Egg of Earth: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8166,
+      "name": "Egg of Earth: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8167,
+      "name": "False Nucleus of Life: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8168,
+      "name": "False Nucleus of Life: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8169,
+      "name": "False Nucleus of Life: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8170,
+      "name": "Angel's Soul: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8171,
+      "name": "Angel's Soul: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8172,
+      "name": "Angel's Soul: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8176,
+      "name": "Destruction Tombstone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_f_i00",
+      "price": 10000,
+      "weight": 0
+    },
+    {
       "id": 8177,
       "name": "Raid Challenger's Circlet",
       "kind": "armor",

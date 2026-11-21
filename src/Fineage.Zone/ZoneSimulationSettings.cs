@@ -42,6 +42,14 @@ public static class ZoneSimulationSettings
         return seed;
     }
 
+    /// <summary>
+    /// A step that runs longer than this is reported by the simulation loop watchdog with the region bodies still
+    /// in flight (<c>FINEAGE_ZONE_STEP_WATCHDOG_SECONDS</c>, default 30; the report repeats while the step lasts).
+    /// A finished step, however late, is already covered by the overrun warning; the watchdog is for steps that
+    /// never return at all.
+    /// </summary>
+    public static int StepWatchdogSeconds => ReadInt("FINEAGE_ZONE_STEP_WATCHDOG_SECONDS", 30, min: 1, max: 3600);
+
     public const int MaxRegionWorkers = 256;
 
     /// <summary>
