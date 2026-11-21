@@ -18,13 +18,20 @@ public sealed class DoorInstance
     public int MaxX { get; init; }
     public int MinY { get; init; }
     public int MaxY { get; init; }
+    public int ClanHallId { get; init; }
+    public bool Wall { get; init; }
+    /// <summary>Mobius open_time (seconds): cyclic open duration when <see cref="OpenByTime"/> is set.</summary>
+    public int OpenTimeSec { get; init; }
+    /// <summary>Mobius close_time (seconds): auto-close after a manual open, or closed dwell in a cycle.</summary>
+    public int CloseTimeSec { get; init; }
+    public bool OpenByTime => OpenTimeSec > 0 || CloseTimeSec > 0;
 }
 
 /// <summary>
 /// Mobius <c>DoorData</c> (movement part only): doors from <c>data/doors.json</c> (converted from Doors.xml by
 /// <c>tools/import_doors_water.py</c>). A closed door blocks a move segment that crosses its footprint within its Z span
-/// (Mobius <c>checkIfDoorsBetween</c>, called from <c>GeoEngine.canMoveToTarget</c>). Open/close is server state only:
-/// there is no Net door entity, doorman/siege/timer opening yet — doors keep their datapack default status.
+/// (Mobius <c>checkIfDoorsBetween</c>, called from <c>GeoEngine.canMoveToTarget</c>). Open/close is live server state
+/// synced through Net door entities (<c>ZoneWorld.SetGeoDoorOpen</c>).
 /// </summary>
 public sealed class DoorTable
 {
@@ -44,6 +51,9 @@ public sealed class DoorTable
     public int Count => _doors.Count;
     public IReadOnlyList<DoorInstance> All => _doors;
     public DoorInstance? Get(int id) => _byId.TryGetValue(id, out var d) ? d : null;
+
+    public IEnumerable<DoorInstance> ForClanHall(int hallId) =>
+        hallId <= 0 ? [] : _doors.Where(d => d.ClanHallId == hallId);
 
     public static DoorTable LoadDefault()
     {
@@ -78,7 +88,11 @@ public sealed class DoorTable
                     MinX = nodes.Min(n => n.Item1),
                     MaxX = nodes.Max(n => n.Item1),
                     MinY = nodes.Min(n => n.Item2),
-                    MaxY = nodes.Max(n => n.Item2)
+                    MaxY = nodes.Max(n => n.Item2),
+                    ClanHallId = r.TryGetProperty("clanHallId", out var ch) ? ch.GetInt32() : 0,
+                    Wall = r.TryGetProperty("wall", out var w) && w.GetBoolean(),
+                    OpenTimeSec = r.TryGetProperty("openTime", out var ot) ? ot.GetInt32() : 0,
+                    CloseTimeSec = r.TryGetProperty("closeTime", out var ct) ? ct.GetInt32() : 0
                 });
             }
 

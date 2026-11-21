@@ -52,7 +52,10 @@ public sealed partial class ZoneWorld
         if (start.Kind == ChSiegeStartKind.Cancelled)
             Broadcast(SiegeLines.SiegeCancelled(start.Name));
         else if (start.Kind == ChSiegeStartKind.Started)
+        {
             Broadcast(SiegeLines.SiegeStarted(start.Name));
+            RespawnHallDoors(start.HallId, weak: false);
+        }
         PersistChSiege();
     }
 
@@ -81,6 +84,7 @@ public sealed partial class ZoneWorld
             Broadcast(SiegeLines.Draw(end.Name));
         PersistChSiege();
         SyncClanHallOwnership();
+        RespawnHallDoors(end.HallId, weak: false);
     }
 
     /// <summary>Test / script hook when a hall mission succeeds (flag capture, etc.).</summary>

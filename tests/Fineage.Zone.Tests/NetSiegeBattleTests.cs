@@ -245,22 +245,41 @@ public sealed class NetSiegeBattleTests
     {
         var door = NetCodec.DecodeDoorStatus(NetCodec.EncodeDoorStatus(new DoorStatusNetMsg
         {
-            ObjectId = 5, DoorId = OuterGate, Open = true, CurHp = 10, MaxHp = 20, Attackable = true, Wall = false,
-            CastleId = 1, UpgradeRatio = 3
+            ObjectId = 5,
+            DoorId = OuterGate,
+            Open = true,
+            CurHp = 10,
+            MaxHp = 20,
+            Attackable = true,
+            Wall = false,
+            CastleId = 1,
+            HallId = 0,
+            UpgradeRatio = 3
         }));
-        Assert.Equal((5, OuterGate, true, 10, 20, true, false, 1, 3),
-            (door.ObjectId, door.DoorId, door.Open, door.CurHp, door.MaxHp, door.Attackable, door.Wall, door.CastleId, door.UpgradeRatio));
+        Assert.Equal((5, OuterGate, true, 10, 20, true, false, 1, 0, 3),
+            (door.ObjectId, door.DoorId, door.Open, door.CurHp, door.MaxHp, door.Attackable, door.Wall, door.CastleId, door.HallId, door.UpgradeRatio));
 
         var cmd = NetCodec.DecodeCastleCommand(NetCodec.EncodeCastleCommand(new CastleCommandNetMsg
         {
-            Kind = CastleCommandKind.UpgradeDoor, CastleId = 2, IntArg1 = 7, IntArg2 = 5, Amount = 1L << 40
+            Kind = CastleCommandKind.UpgradeDoor,
+            CastleId = 2,
+            IntArg1 = 7,
+            IntArg2 = 5,
+            Amount = 1L << 40
         }));
         Assert.Equal((CastleCommandKind.UpgradeDoor, 2, 7, 5, 1L << 40), (cmd.Kind, cmd.CastleId, cmd.IntArg1, cmd.IntArg2, cmd.Amount));
 
         var info = NetCodec.DecodeCastleInfo(NetCodec.EncodeCastleInfo(new CastleInfoNetMsg
         {
-            CastleId = 3, Name = "Giran", OwnerClanId = 9, OwnerClanName = "C", TaxPercent = 12, MaxTaxPercent = 15,
-            Treasury = 1L << 33, SiegeUnixMs = 77, InProgress = true,
+            CastleId = 3,
+            Name = "Giran",
+            OwnerClanId = 9,
+            OwnerClanName = "C",
+            TaxPercent = 12,
+            MaxTaxPercent = 15,
+            Treasury = 1L << 33,
+            SiegeUnixMs = 77,
+            InProgress = true,
             Doors = [new CastleDoorNet { DoorId = 1, UpgradeType = 3, UpgradeRatio = 5, CurHp = 4, MaxHp = 8, Open = true }]
         }));
         Assert.Equal((3, "Giran", 9, "C", 12, 15, 1L << 33, 77L, true),
@@ -278,7 +297,10 @@ public sealed class NetSiegeBattleTests
         Assert.Equal(0, NetCodec.DecodeEntityDie(legacy).RestartFlags);
         byte[] tailed = NetCodec.EncodeEntityDie(new EntityDieMsg
         {
-            EntityValue = 9, EntityGeneration = 1, KillerObjectId = 3, RestartFlags = EntityDieMsg.RestartCastle | EntityDieMsg.RestartSiegeHq
+            EntityValue = 9,
+            EntityGeneration = 1,
+            KillerObjectId = 3,
+            RestartFlags = EntityDieMsg.RestartCastle | EntityDieMsg.RestartSiegeHq
         });
         Assert.Equal(legacy.Length + 1, tailed.Length);
         Assert.Equal(3, NetCodec.DecodeEntityDie(tailed).RestartFlags);
@@ -367,6 +389,10 @@ public sealed class NetSiegeBattleTests
         bench.World.TryCastleCommandAsync(p.Session,
             NetCodec.DecodeCastleCommand(NetCodec.EncodeCastleCommand(new CastleCommandNetMsg
             {
-                Kind = kind, CastleId = Gludio, IntArg1 = a1, IntArg2 = a2, Amount = amount
+                Kind = kind,
+                CastleId = Gludio,
+                IntArg1 = a1,
+                IntArg2 = a2,
+                Amount = amount
             })), bench.Now(), Ct);
 }

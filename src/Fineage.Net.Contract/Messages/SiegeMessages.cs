@@ -74,6 +74,8 @@ namespace Fineage.Net.Contract
         public bool Attackable { get; set; }
         public bool Wall { get; set; }
         public int CastleId { get; set; }
+        /// <summary>Clan hall id when this row is an agit gate (<see cref="CastleId"/> is 0).</summary>
+        public int HallId { get; set; }
         /// <summary>Chamberlain upgrade (Mobius <c>getUpgradeHpRatio</c>): 1 none, 2 / 3 / 5 HP multiplier.</summary>
         public int UpgradeRatio { get; set; } = 1;
     }

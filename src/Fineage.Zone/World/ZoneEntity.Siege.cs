@@ -16,6 +16,8 @@ sealed class SiegeNpcInfo
 {
     public required SiegeNpcRole Role { get; init; }
     public required int CastleId { get; init; }
+    /// <summary>Clan hall id for agit gates (castle doors use <see cref="CastleId"/> only).</summary>
+    public int HallId { get; init; }
     /// <summary>Mobius Doors.xml id (doors only).</summary>
     public int DoorId { get; init; }
     public bool Wall { get; init; }

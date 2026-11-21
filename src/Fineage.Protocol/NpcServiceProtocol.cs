@@ -137,4 +137,7 @@ public static class NpcServiceIntent
 
     /// <summary>Mobius <c>EnterRift</c> / <c>ChangeRiftRoom</c> / <c>ExitRift</c> (Seven Signs rift HTML).</summary>
     public const string DimensionalRift = "dimensional-rift";
+
+    public const string DoormanOpen = "doorman-open";
+    public const string DoormanClose = "doorman-close";
 }
