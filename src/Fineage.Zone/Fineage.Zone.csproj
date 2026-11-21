@@ -53,6 +53,7 @@
     <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\admin-characters.json" Link="data\admin-characters.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\jail-zone.json" Link="data\jail-zone.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\mother-tree-zones.json" Link="data\mother-tree-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
