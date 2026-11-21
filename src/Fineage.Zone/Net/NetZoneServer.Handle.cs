@@ -161,6 +161,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.WarehouseWithdrawRequest:
                             await _warehouse.OnWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.PackageSendableListRequest:
+                            await _freight.OnSendableListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.PackageSendRequest:
+                            await _freight.OnSendAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.RequestQuestList:
                             await _quests.OnListAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;

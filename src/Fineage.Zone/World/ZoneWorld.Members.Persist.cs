@@ -113,16 +113,28 @@ public sealed partial class ZoneWorld
             _dirtyInventories.Clear();
         }
 
-        if (_dirtyWarehouses.Count == 0)
+        if (_dirtyWarehouses.Count > 0)
+        {
+            foreach (var player in _dirtyWarehouses.Values)
+            {
+                if (player.Session == null)
+                    continue;
+                ReplaceWarehouseNow(player.Session, player);
+            }
+
+            _dirtyWarehouses.Clear();
+        }
+
+        if (_dirtyFreight.Count == 0)
             return;
-        foreach (var player in _dirtyWarehouses.Values)
+        foreach (var player in _dirtyFreight.Values)
         {
             if (player.Session == null)
                 continue;
-            ReplaceWarehouseNow(player.Session, player);
+            ReplaceFreightNow(player.Session, player);
         }
 
-        _dirtyWarehouses.Clear();
+        _dirtyFreight.Clear();
     }
 
     /// <summary>

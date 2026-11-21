@@ -137,7 +137,8 @@ public sealed class NpcHtmlTests
         Assert.Contains("Wear is not implemented yet.", registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).Html, StringComparison.Ordinal);
         Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
         Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
-        Assert.Contains("Warehouse is not implemented yet.", registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Html, StringComparison.Ordinal);
+        Assert.Equal(NpcServiceIntent.PackageDeposit, registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Service);
+        Assert.Equal(NpcServiceIntent.PackageWithdraw, registry.Find("package_withdraw")!.Handle(call with { Command = "package_withdraw" }).Service);
         Assert.Equal(NpcServiceIntent.SupportMagic, registry.Find("SupportMagic")!.Handle(call with { Command = "SupportMagic" }).Service);
         Assert.Equal(NpcServiceIntent.GiveBlessing, registry.Find("GiveBlessing")!.Handle(call with { Command = "GiveBlessing" }).Service);
         Assert.IsType<TerritoryBypassHandler>(registry.Find("TerritoryStatus"));

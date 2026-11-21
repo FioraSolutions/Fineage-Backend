@@ -125,6 +125,22 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        CharacterInventory.Validate(items);
+        lock (_gate)
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            var release = ObjectIdSet(character.Freight);
+            character.Freight = CopyItemsAssigningIds(items, release);
+            Save();
+            return true;
+        }
+    }
+
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)
     {
         lock (_gate)

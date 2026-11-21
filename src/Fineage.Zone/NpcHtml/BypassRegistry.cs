@@ -68,12 +68,7 @@ public sealed class BypassRegistry
         registry.Register(new NoblesSelectBypassHandler());
         registry.Register(new OlympiadBypassHandler());
         registry.Register(new WarehouseBypassHandler());
-        registry.Register(new StubBypassHandler(
-            "Warehouse",
-            "DepositF",
-            "WithdrawF",
-            "package_deposit",
-            "package_withdraw"));
+        registry.Register(new FreightBypassHandler());
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
         registry.Register(new FishermanBypassHandler(html));

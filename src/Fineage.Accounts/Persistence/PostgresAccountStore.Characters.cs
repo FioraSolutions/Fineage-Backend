@@ -129,6 +129,17 @@ public sealed partial class PostgresAccountStore
                 NormalizedStoreWriter.ReplaceWarehouseOnly(conn, characterId, record.Warehouse ?? []);
             });
 
+    public bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items) =>
+        RunSilent(
+            () => _inner.TryReplaceFreight(account, characterId, items),
+            conn =>
+            {
+                var record = _inner.FindById(account, characterId)
+                    ?? throw new InvalidOperationException($"Character {characterId} missing after freight replace.");
+                EnsureCharacterRow(conn, record);
+                NormalizedStoreWriter.ReplaceFreightOnly(conn, characterId, record.Freight ?? []);
+            });
+
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
         RunSilent(
             () => _inner.TrySavePresence(account, characterId, x, y, z, lastAccess),

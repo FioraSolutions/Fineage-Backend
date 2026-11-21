@@ -110,6 +110,51 @@ Boat run state (depart/arrive).
 
 ---
 
+## Freight warehouse (account packages)
+
+**Server feature:** Mobius `PlayerFreight`, `RequestPackageSend` / `RequestPackageSendableItemList`, bypass `package_deposit` / `package_withdraw`.  
+**Fineage Net opcodes:** `PackageToList` `0x03C6`, `PackageSendableList` `0x03C7`, `PackageSendRequest` `0x03C8`, `PackageSendableListRequest` `0x03C9` (Mobius Interlude wire: S2C `0xC2` / `0xC3`, C2S `0x9F` / `0x9E`).
+
+### `PackageToList` — S2C Mobius `0xC2` / Fineage `0x03C6`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `count` | int32 | Account characters excluding the sender |
+| ×`count` | | |
+| → `objectId` | int32 | Recipient character object id |
+| → `name` | string | Character name |
+
+### `PackageSendableList` — S2C Mobius `0xC3` / Fineage `0x03C7`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `recipientObjectId` | int32 | Selected alt on the account |
+| `adena` | int32 | Sender's current adena |
+| `itemCount` | int32 | Sendable bag rows |
+| ×`itemCount` | | Mobius uses `AbstractItemPacket` layout; Fineage Net uses `ItemListEntryNet` (same as warehouse deposit list) |
+
+### `RequestPackageSend` — C2S Mobius `0x9F` / Fineage `PackageSendRequest` `0x03C8`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `recipientObjectId` | int32 | Must belong to sender's account (not self) |
+| `count` | int32 | Lines to ship |
+| ×`count` | | |
+| → `objectId` | int32 | Bag object id |
+| → `count` | int32 | Stack count |
+
+Fee: `count × ALT_FREIGHT_PRICE` (default **1000** adena per line) to `SystemAccount.Fees`. Capacity: **200** freight slots (`MaximumFreightSlots`).
+
+### `RequestPackageSendableItemList` — C2S Mobius `0x9E` / Fineage `0x03C9`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `recipientObjectId` | int32 | Selected recipient before the send UI |
+
+Withdraw uses existing `WarehouseWithdrawList` / `WarehouseWithdrawRequest` with `warehouseType = 4` (`FREIGHT`).
+
+---
+
 ## Implementation queue (audit)
 
 | Order | Item | Server PR target | Client packets |
