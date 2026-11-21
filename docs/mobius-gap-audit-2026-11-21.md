@@ -322,7 +322,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
 | 2 | Quest coverage | #709, #717, #718 | partial — +12 quests; Q634/635 blocked (rift); Q255→Q998; ~90 partial remain | No |
-| 3 | Item augmentation | — | blocked | Yes (refine UI + `AugmentationData`) |
+| 3 | Item augmentation | — | blocked | Yes (refine UI + server `AugmentationData`) |
 | 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
 | 6 | Seven Signs Festival | — | blocked | No (instances) |
@@ -333,13 +333,13 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 11 | Day/night spawns | — | pending | No |
 | 12 | Clan hall siege | — | pending | No |
 | 13 | Baby pet / evolution | — | pending | No |
-| 14 | Guard / town AI | — | partial (existing AI) | No |
+| 14 | Guard / town AI | — | partial (base guard AI) | No |
 | 15 | Zone types (swamp/damage/NL) | — | pending | No |
 | 16 | Boats + walking NPCs | — | pending | No |
 | 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
 | 18 | GM / punishment tooling | — | partial | No |
 | 19 | Compound skill conditions | — | pending | No |
-| 20 | Freight warehouse | — | blocked | No (no account freight store) |
+| 20 | Freight warehouse | — | blocked | No (no account freight persistence) |
 
 ---
 
