@@ -14,6 +14,8 @@ public sealed partial class ZoneWorld
     readonly ZoneCommandIngress _ingress = new();
     SimulationLog? _commandLog;
 
+    internal int SubmissionWakeCountForTest => _ingress.WakeSignalCountForTest;
+
     /// <summary>
     /// Submits <paramref name="command"/> for <paramref name="session"/>. It is applied in phase 0 of the next step at
     /// the tick time; the task completes with its rejection reason (or null) once that step's fan-out was sent.
