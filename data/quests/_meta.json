@@ -1,5 +1,5 @@
 {
   "maxActive": 25,
   "talkRange": 250,
-  "reference": "Mobius CT_0 batch1 via scripts/gen_quests_stubs_batch1.py"
+  "reference": "Mobius CT_0 batch2 via scripts/gen_quests_stubs_batch2.py"
 }

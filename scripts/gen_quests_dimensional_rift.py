@@ -55,7 +55,14 @@ def main() -> None:
                 {"npcId": npc, "hook": "talk", "when": "absent", "minLevel": 20, "html": h634("01")},
                 {"npcId": npc, "hook": "talk", "when": "absent", "maxLevel": 19, "html": h634("01a")},
                 {"npcId": npc, "hook": "talk", "when": "started", "html": h634("03")},
-                {"npcId": npc, "hook": "event", "event": "02", "when": "created", "html": h634("02"), "ops": [{"op": "start"}]},
+                {
+                    "npcId": npc,
+                    "hook": "event",
+                    "event": "02",
+                    "when": "absent",
+                    "html": h634("02"),
+                    "ops": [{"op": "create"}, {"op": "start"}],
+                },
                 {"npcId": npc, "hook": "event", "event": "05", "when": "started", "html": h634("05"), "ops": [{"op": "complete"}]},
             ]
         )
@@ -113,7 +120,7 @@ def main() -> None:
                     "minLevel": 20,
                     "maxStarted": 23,
                     "hasItems": [FRAGMENT],
-                    "ops": [{"op": "create"}, {"op": "set", "key": "id", "value": str(gate_id)}],
+                    "ops": [{"op": "create"}, {"op": "start"}, {"op": "set", "key": "id", "value": str(gate_id)}],
                     "html": h635("4"),
                 },
                 {

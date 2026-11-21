@@ -1,0 +1,155 @@
+{
+  "id": 109,
+  "name": "In Search of the Nest",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    8083
+  ],
+  "dialogs": [
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 65,
+      "htmlFile": "31553-talk-000.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 66,
+      "lacksItems": [
+        7246,
+        7247
+      ],
+      "htmlFile": "31553-talk-001.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 66,
+      "hasAny": [
+        7246,
+        7247
+      ],
+      "htmlFile": "31553-talk-002.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "absent",
+      "event": "31553-01",
+      "minLevel": 66,
+      "hasAny": [
+        7246,
+        7247
+      ],
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31553-event-31553-01-003.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31553-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "event",
+      "when": "started",
+      "event": "31553-03",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        },
+        {
+          "op": "take_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31553-event-31553-03-c1-005.htm"
+    },
+    {
+      "npcId": 31553,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 8083,
+      "htmlFile": "31553-talk-c2-006.htm"
+    },
+    {
+      "npcId": 32015,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32015-talk-c1-007.htm"
+    },
+    {
+      "npcId": 32015,
+      "hook": "event",
+      "when": "started",
+      "event": "32015-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "give_item",
+          "itemId": 8083,
+          "count": 1
+        }
+      ],
+      "htmlFile": "32015-event-32015-02-c1-008.htm"
+    },
+    {
+      "npcId": 32015,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "32015-talk-c2-009.htm"
+    },
+    {
+      "npcId": 31554,
+      "hook": "talk",
+      "when": "started",
+      "cond": 3,
+      "htmlFile": "31554-talk-c3-010.htm"
+    },
+    {
+      "npcId": 31554,
+      "hook": "event",
+      "when": "started",
+      "event": "31554-02",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "give_adena",
+          "count": 5168
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31554-event-31554-02-c3-011.htm"
+    }
+  ]
+}
