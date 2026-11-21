@@ -332,7 +332,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
-| 13 | Baby pet / evolution | — | pending | No |
+| 13 | Baby pet / evolution | #726 | done — BabyPet heal after spice; collar npc swap (Q421) | No |
 | 14 | Guard / town AI | — | partial (base guard AI) | No |
 | 15 | Zone types (swamp/damage/NL) | — | pending | No |
 | 16 | Boats + walking NPCs | — | pending | No |
