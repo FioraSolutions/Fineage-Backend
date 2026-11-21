@@ -46,7 +46,8 @@ public sealed class BossCombatStatsTests
                 ["empty"] = new("empty", true, [])
             }),
             mapId: "empty",
-            bosses: schedule);
+            bosses: schedule,
+            combatRandom: new UnitSamples(0.5, 0.5, 0.5, 0.5, 0.5, 0.5));
         var world = bench.World;
 
         Assert.True(world.TryGetEntityById(ObjectId, out var boss));
