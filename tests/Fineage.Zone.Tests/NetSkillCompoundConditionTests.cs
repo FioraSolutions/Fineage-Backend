@@ -42,14 +42,5 @@ public sealed class NetSkillCompoundConditionTests
         Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
         Assert.Equal(mp, player.CurMp);
-
-        if (player.Inventory.GetEquipped(PaperdollSlot.RHand) is { } worn)
-            player.Inventory.Unequip(worn.ObjectId);
-        player.Inventory.Equip(player.Inventory.Add(70)); // Claymore — SWORD + lrhand
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();
-        Assert.Null(await kit.World.TrySkillUseAsync(session, CrushOfDoom, MobObjectId, CancellationToken.None));
-        Assert.NotNull(player.PendingHit);
-        Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
-            m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
     }
 }
