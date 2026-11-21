@@ -7,7 +7,7 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 224 |
+| implemented | 226 |
 | partial | 90 |
 | stub | 27 |
 | missing | 1 |
