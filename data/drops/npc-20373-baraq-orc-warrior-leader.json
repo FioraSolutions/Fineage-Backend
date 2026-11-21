@@ -39,20 +39,20 @@
         "items": [
           {
             "itemId": 1799,
-            "min": 2,
-            "max": 3,
+            "min": 1,
+            "max": 1,
             "chance": 33.0581
           },
           {
             "itemId": 1864,
-            "min": 3,
-            "max": 4,
+            "min": 1,
+            "max": 1,
             "chance": 44.6279
           },
           {
             "itemId": 1869,
             "min": 1,
-            "max": 2,
+            "max": 1,
             "chance": 22.314
           }
         ]
@@ -70,13 +70,13 @@
       {
         "itemId": 1869,
         "min": 1,
-        "max": 2,
+        "max": 1,
         "chance": 16.7982
       },
       {
         "itemId": 1871,
         "min": 1,
-        "max": 2,
+        "max": 1,
         "chance": 16.7982
       }
     ]

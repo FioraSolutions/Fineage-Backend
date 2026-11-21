@@ -65,6 +65,46 @@ public sealed class NetDungeonTests
     }
 
     [Fact]
+    public async Task Wrong_cabal_during_seal_validation_is_refused_at_the_gate()
+    {
+        var clock = new MutableGameClock(Start);
+        var bench = World(clock, DungeonCatalog.LoadDefault());
+        BenchPlayer dawn = await bench.EnterAsync("gate", "Dawn", classId: 1);
+        BenchPlayer dusk = await bench.EnterAsync("gate2", "Dusk", classId: 1);
+        await AdvanceAsync(bench, clock);
+
+        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, SevenSignsProtocol.RedSealStoneId, 2, CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(
+            dusk.Session, Join(SevenSignsCabal.Dusk, SevenSignsSeal.Avarice), CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(dusk.Session, new SevenSignsActionRequestMsg
+        {
+            Action = SevenSignsProtocol.ActionContribute,
+            RedStones = 2
+        }, CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(
+            dawn.Session, Join(SevenSignsCabal.Dawn, SevenSignsSeal.Strife), CancellationToken.None));
+
+        await AdvanceAsync(bench, clock);
+        await AdvanceAsync(bench, clock);
+        Assert.Equal(SevenSignsPeriod.SealValidation, bench.World.SevenSigns.Period);
+
+        int dawnX = dawn.Session.X;
+        bench.Rec.Calls.Clear();
+        Assert.Equal(
+            DungeonProtocol.Dusk,
+            await dawn.World.TryDungeonAsync(dawn.Session, Enter(1), CancellationToken.None));
+        Assert.Equal(dawnX, dawn.Session.X);
+        var refusalIds = bench.Rec.Of("FanoutSystemMessage")
+            .Select(c => ((SystemMessageMsg)c[1]!).Id)
+            .ToList();
+        Assert.Contains(DungeonProtocol.DuskOnlyMessage, refusalIds);
+        Assert.Contains(DungeonProtocol.GateRefusedMessage, refusalIds);
+
+        Assert.Null(await dusk.World.TryDungeonAsync(dusk.Session, Enter(1), CancellationToken.None));
+        Assert.Equal(1, bench.World.PlayerDungeonId(dusk.ObjectId));
+    }
+
+    [Fact]
     public async Task Validation_kicks_the_losing_cabal_and_leaves_the_seal_owner()
     {
         var clock = new MutableGameClock(Start);

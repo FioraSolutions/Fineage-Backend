@@ -94,6 +94,10 @@ public sealed partial class ZoneWorld
                 return TryAugmentOpenCancel(session);
             case NpcServiceIntent.FishSkillList:
                 return ShowFishingSkills(session, player, npc);
+            case NpcServiceIntent.FishingChampionship:
+                return ShowFishingChampionship(session, player, npc, claim: false);
+            case NpcServiceIntent.FishingChampionshipClaim:
+                return ShowFishingChampionship(session, player, npc, claim: true);
             case NpcServiceIntent.SkillList:
                 return ShowTrainerSkills(session, player, npc);
             case NpcServiceIntent.LearnSkill:

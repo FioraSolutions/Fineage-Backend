@@ -21,6 +21,7 @@ using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
 using Fineage.Zone.Punishment;
+using Fineage.Zone.Fishing;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
 using Fineage.Game.Services;
@@ -360,6 +361,7 @@ public sealed partial class ZoneWorld
             Swamp = SharedSwamp.Value;
             Damage = SharedDamage.Value;
             NoLanding = SharedNoLanding.Value;
+            MotherTree = SharedMotherTree.Value;
         }
         BootstrapSpawns();
         BootstrapBoats();
@@ -372,6 +374,7 @@ public sealed partial class ZoneWorld
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
+        _fishingChampionship = new FishingChampionshipActor(new FishingChampionshipBoard(WallNow().ToUnixTimeMilliseconds()));
         _monsterRaceSettings = MonsterRaceSettings.Mobius;
         _monsterRaceBroadcast = _monsterRaceSettings.ResolveBroadcastZones(Peace);
         _monsterRace = new MonsterRaceActor(

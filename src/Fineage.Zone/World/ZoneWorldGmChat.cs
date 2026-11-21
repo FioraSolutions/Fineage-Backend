@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
     const string GotoUsage = "Usage: //goto characterName";
     const string RecallUsage = "Usage: //recall characterName";
     const string TownUsage = "Usage: //town name (see //towns)";
+    const string KickUsage = "Usage: //kick characterName";
 
     static readonly GmChatCommand[] GmChatCommands =
     [
@@ -25,6 +26,7 @@ public sealed partial class ZoneWorld
         new("loc", [], GmCmdLoc),
         new("town", [], GmCmdTown),
         new("towns", [], GmCmdTowns),
+        new("kick", [], GmCmdKick),
     ];
 
     readonly Dictionary<string, GmChatCommand> _gmChatByVerb = BuildGmChatIndex();
@@ -88,6 +90,13 @@ public sealed partial class ZoneWorld
 
     static string? GmCmdTowns(ZoneWorld world, ZoneEntity player, ZoneSession session, string args) =>
         world.GmListTowns(session);
+
+    static string? GmCmdKick(ZoneWorld world, ZoneEntity player, ZoneSession session, string args)
+    {
+        if (string.IsNullOrWhiteSpace(args))
+            return KickUsage;
+        return world.AdminKick(session, player, args);
+    }
 
     string? GmTeleportCoords(ZoneEntity player, string args)
     {
