@@ -1,3 +1,6 @@
+using Fineage.Protocol;
+using Fineage.Zone.Net;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -9,6 +12,8 @@ public sealed class ClassChangeTests
     public async Task Elven_mystic_with_eternity_diamond_becomes_elven_wizard()
     {
         var kit = new NetTestKit();
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
         var (session, elf) = await kit.EnterAsync(classId: 25);
         elf.Level = 20;
         elf.Inventory!.Add(1230, 1);
@@ -21,6 +26,9 @@ public sealed class ClassChangeTests
         Assert.Equal(15, elf.Inventory.CountOf(8869));
         Assert.Equal(26, kit.Store.FindById(session.Account, session.ObjectId)!.ClassId);
         Assert.Equal(kit.Game.Classes!.Get(26).ModifiedHp(20), elf.MaxHp);
+        Assert.Contains(
+            rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)),
+            c => Assert.IsType<MagicSkillUseMsg>(c[1]).SkillId == ZoneWorld.ClassChangeAnimationSkillId);
     }
 
     [Fact]
