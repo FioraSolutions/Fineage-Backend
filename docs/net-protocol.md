@@ -230,7 +230,7 @@ Data: `data/castles.json` (written by `tools/import_castles.py` from Mobius Sieg
 | Taxes | Buy: castle share (price × tax%) to the merchant's castle treasury; multisell: entry tax × amount. Goddard / Schuttgart pay Rune's rate to Rune, the other castles pay Aden's rate to Aden, when that castle has an owner. |
 | Message ids | Registration replies 140–144 and the five pre-castle announcements 145–149 keep their legacy ids; everything newer uses Mobius `SystemMessageId` ids (Mobius equivalents of 145–149: 293, 711, 712, 846, 285). |
 
-Not yet: mercenaries, flame tower traps, siege golems (walls), castle functions / residential skills, noble / castle siege skills (326, 844, 845), circlet removal for offline members, manor (Block E2).
+Not yet: mercenaries, flame tower traps, siege golems (walls), castle functions / residential skills, noble / castle siege skills (326, 844, 845), manor (Block E2). Offline circlet/crown strip on ownership loss is implemented (`RemoveCirclets`).
 
 ## Shortcuts (hotbar, Mobius ShortCuts)
 
