@@ -115,7 +115,7 @@ public sealed class NetMoveVisibilityTests
     [Fact]
     public async Task Outsider_sees_nothing_then_the_runner_spawns_moving_on_entry_and_despawns_on_exit()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(90));
+        using var timeout = Timeout(60);
         await using var rig = await StartAsync(timeout.Token);
         var a = await rig.JoinAsync(X0, Y0);
         var c = await rig.JoinAsync(X0 + 3000, Y0);
@@ -128,8 +128,8 @@ public sealed class NetMoveVisibilityTests
         Assert.Empty(About(await c.DrainAsync(100), a));
 
         // ~125u/s: about 8 s to come within range; the AOI refresh runs every AoiRefreshDistance of travel.
-        for (int i = 0; i < 24 && a.Entity.X < X0 + 1000 + ZoneWorld.AoiRefreshDistance; i++)
-            await rig.AdvanceAsync(2000, 2000);
+        for (int i = 0; i < 200 && a.Entity.X < X0 + 1000 + ZoneWorld.AoiRefreshDistance; i++)
+            await rig.AdvanceAsync(200, 200);
         var spawn = await c.NextSpawnOfAsync(a);
         Assert.False(spawn.IsSelf);
         Assert.InRange(spawn.X, X0 + 1000, X0 + 1000 + ZoneWorld.AoiRefreshDistance + 200);
@@ -139,10 +139,10 @@ public sealed class NetMoveVisibilityTests
         await a.NextSpawnOfAsync(c);
 
         // Leave again: past range + forget slack, C drops the pawn.
-        await rig.AdvanceAsync(10_000, 2000);
+        await rig.AdvanceAsync(10_000, 250);
         await a.MoveAsync(X0 - 1000, Y0);
         await a.NextMoveOfAsync(a);   // order processed before the clock moves
-        await rig.AdvanceAsync(40_000, 2000);
+        await rig.AdvanceAsync(40_000, 250);
         await c.NextDespawnOfAsync(a);
         await a.NextDespawnOfAsync(c);
     }
