@@ -287,7 +287,9 @@ public sealed partial class ZoneWorld
             .Replace("%lane%", lane.ToString(CultureInfo.InvariantCulture))
             .Replace("%bet%", bet.ToString(CultureInfo.InvariantCulture))
             .Replace("%firstLane%", (info.FirstLane + 1).ToString(CultureInfo.InvariantCulture))
-            .Replace("%odd%", winner ? info.WinnerOdd.ToString("0.00", CultureInfo.InvariantCulture) : "0.01")
+            .Replace("%odd%", winner
+                ? info.WinnerOdd.ToString("0.00", CultureInfo.InvariantCulture)
+                : _monsterRaceSettings.LoserPayoutRate.ToString("0.00", CultureInfo.InvariantCulture))
             .Replace("%ticketObjectId%", objectId.ToString(CultureInfo.InvariantCulture));
         SendHtml(session, player, npc, html);
         return null;
@@ -306,7 +308,7 @@ public sealed partial class ZoneWorld
 
         int bet = ticket.CustomType2 * 100;
         bool winner = ticket.CustomType1 == info.FirstLane + 1;
-        int payout = MonsterRaceLogic.PayoutAmount(bet, info.WinnerOdd, winner);
+        int payout = MonsterRaceLogic.PayoutAmount(bet, info.WinnerOdd, winner, _monsterRaceSettings.LoserPayoutRate);
 
         return RecordBagChange(
             player,

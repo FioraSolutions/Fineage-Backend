@@ -16,7 +16,7 @@ public sealed class MonsterRaceSettings
     public int CountdownWrapAbove { get; init; } = 1200;
     public double MinOdd { get; init; } = 1.25;
     public double OddsPoolShare { get; init; } = 0.7;
-    public double LoserPayoutRate { get; init; } = 0.01;
+    public double LoserPayoutRate { get; init; }
     public MonsterRaceTrack Track { get; init; } = new();
     public int[][] PacketCodes { get; init; } =
     [
@@ -85,6 +85,8 @@ public sealed class MonsterRaceSettings
             throw new InvalidDataException($"{path}: ticketPrices must list 8 amounts.");
         if (dto.PacketCodes is not { Length: 3 })
             throw new InvalidDataException($"{path}: packetCodes must have 3 rows.");
+        if (dto.LoserPayoutRate <= 0 || double.IsNaN(dto.LoserPayoutRate) || double.IsInfinity(dto.LoserPayoutRate))
+            throw new InvalidDataException($"{path}: loserPayoutRate must be a positive finite number.");
     }
 
     public PeaceZone[] ResolveBroadcastZones(PeaceZones peace)
@@ -115,7 +117,7 @@ public sealed class MonsterRaceSettings
         public int CountdownWrapAbove { get; set; } = 1200;
         public double MinOdd { get; set; } = 1.25;
         public double OddsPoolShare { get; set; } = 0.7;
-        public double LoserPayoutRate { get; set; } = 0.01;
+        public double LoserPayoutRate { get; set; }
         public MonsterRaceTrack? Track { get; set; }
         public int[][]? PacketCodes { get; set; }
         public string[]? BroadcastPeaceZones { get; set; }

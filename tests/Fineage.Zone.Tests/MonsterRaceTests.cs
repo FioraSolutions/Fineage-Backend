@@ -27,8 +27,9 @@ public sealed class MonsterRaceTests
     [Fact]
     public void Payout_winner_uses_race_odd_loser_gets_one_percent()
     {
-        Assert.Equal(500, MonsterRaceLogic.PayoutAmount(100, 5.0, true));
-        Assert.Equal(1, MonsterRaceLogic.PayoutAmount(100, 5.0, false));
+        Assert.Equal(500, MonsterRaceLogic.PayoutAmount(100, 5.0, true, 0.01));
+        Assert.Equal(1, MonsterRaceLogic.PayoutAmount(100, 5.0, false, 0.01));
+        Assert.Equal(2, MonsterRaceLogic.PayoutAmount(100, 5.0, false, 0.02));
     }
 
     [Fact]

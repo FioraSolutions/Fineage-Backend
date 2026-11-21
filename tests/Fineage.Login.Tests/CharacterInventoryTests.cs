@@ -1,4 +1,6 @@
+using Fineage.Game;
 using Fineage.Login;
+using Fineage.Protocol;
 using Xunit;
 using Fineage.Accounts;
 
@@ -65,5 +67,47 @@ public class CharacterInventoryTests
         Assert.Contains(saved.Items, item => item.ItemId == 1101 && item.EquippedSlot == 10);
         Assert.Contains(saved.Items, item => item.ItemId == 1104 && item.EquippedSlot == 11);
         Assert.Contains(saved.Items, item => item.ItemId == 4627 && item.EquippedSlot == -1);
+    }
+
+    [Fact]
+    public void Item_custom_types_roundtrip_through_memory_snapshot()
+    {
+        var store = MemoryAccountStore.InMemory();
+        var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register("alice", "secret1").Ok);
+        var created = service.Play("alice", "secret1", "Racer", HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        int cid = created.Value!.CharacterId;
+        Assert.True(store.TryReplaceItems("alice", cid,
+        [
+            new StoredItem(MonsterRaceProtocol.TicketItemId, 1, -1, EnchantLevel: 42, ObjectId: 900_001, CustomType1: 3,
+                CustomType2: 10)
+        ]));
+
+        var reopened = MemoryAccountStore.FromSnapshot(store.ExportSnapshot());
+        var ticket = Assert.Single(reopened.FindById("alice", cid)!.Items!);
+        Assert.Equal(MonsterRaceProtocol.TicketItemId, ticket.ItemId);
+        Assert.Equal(3, ticket.CustomType1);
+        Assert.Equal(10, ticket.CustomType2);
+        Assert.Equal(42, ticket.EnchantLevel);
+    }
+
+    [Fact]
+    public void Item_custom_types_roundtrip_through_restore_inventory()
+    {
+        var catalog = GameData.LoadDefault().Items;
+        var ids = new ItemObjectIdAllocator(100_000);
+        var rows = new[]
+        {
+            new StoredItem(MonsterRaceProtocol.TicketItemId, 1, -1, EnchantLevel: 7, ObjectId: 100_001, CustomType1: 2,
+                CustomType2: 50)
+        };
+        var inv = CharacterInventory.Restore(catalog, ids, rows);
+        var ticket = Assert.Single(inv.Items);
+        Assert.Equal(2, ticket.CustomType1);
+        Assert.Equal(50, ticket.CustomType2);
+        var saved = Assert.Single(CharacterInventory.Rows(inv));
+        Assert.Equal(2, saved.CustomType1);
+        Assert.Equal(50, saved.CustomType2);
     }
 }

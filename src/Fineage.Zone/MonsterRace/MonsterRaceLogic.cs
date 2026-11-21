@@ -54,8 +54,8 @@ public static class MonsterRaceLogic
         return (speeds, firstPlace, secondPlace);
     }
 
-    public static int PayoutAmount(int betAdena, double oddRate, bool winner) =>
-        (int)(betAdena * (winner ? oddRate : 0.01));
+    public static int PayoutAmount(int betAdena, double oddRate, bool winner, double loserPayoutRate) =>
+        (int)(betAdena * (winner ? oddRate : loserPayoutRate));
 
     /// <summary>Seconds elapsed within the Mobius cycle (countdown 0 at cycle start).</summary>
     public static int CountdownAt(long cycleStartUnixMs, long nowUnixMs, int wrapAbove)
