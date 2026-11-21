@@ -53,7 +53,11 @@ public sealed class NetManorTests
         bench.World.TryManorCommandAsync(p.Session,
             NetCodec.DecodeManorCommand(NetCodec.EncodeManorCommand(new ManorCommandNetMsg
             {
-                Kind = kind, CastleId = castleId, NpcObjectId = Manager(bench, p), Next = next, Rows = rows
+                Kind = kind,
+                CastleId = castleId,
+                NpcObjectId = Manager(bench, p),
+                Next = next,
+                Rows = rows
             })), Ct);
 
     /// <summary>Stand next to the Gludio manor manager when the world spawned one; its object id, else 0.</summary>
@@ -188,7 +192,10 @@ public sealed class NetManorTests
         int adena = farmer.Inventory.CountOf(57);
         Assert.Null(await Cmd(bench, farmer, ManorCommandKind.SellCrops, rows: new ManorRowNet
         {
-            ObjectId = crop.InventoryObjectId, ItemId = DarkCoda, ManorId = Gludio, Count = 3
+            ObjectId = crop.InventoryObjectId,
+            ItemId = DarkCoda,
+            ManorId = Gludio,
+            Count = 3
         }));
         Assert.Equal(15, farmer.Inventory.CountOf(Stem));
         Assert.Equal(1, farmer.Inventory.CountOf(DarkCoda));
@@ -338,7 +345,9 @@ public sealed class NetManorTests
 
         string? error = await bench.World.TryManorCommandAsync(seller.Session, new ManorCommandNetMsg
         {
-            Kind = ManorCommandKind.SellCrops, CastleId = 2, NpcObjectId = npcObject,
+            Kind = ManorCommandKind.SellCrops,
+            CastleId = 2,
+            NpcObjectId = npcObject,
             Rows = [new ManorRowNet { ObjectId = seller.Slot(DarkCoda), ItemId = DarkCoda, ManorId = Gludio, Count = 2 }]
         }, Ct);
         Assert.Null(error);
@@ -418,7 +427,10 @@ public sealed class NetManorTests
     {
         var cmd = NetCodec.DecodeManorCommand(NetCodec.EncodeManorCommand(new ManorCommandNetMsg
         {
-            Kind = ManorCommandKind.SellCrops, CastleId = 3, NpcObjectId = 77, Next = true,
+            Kind = ManorCommandKind.SellCrops,
+            CastleId = 3,
+            NpcObjectId = 77,
+            Next = true,
             Rows = [new ManorRowNet { ItemId = 5073, ObjectId = 9, ManorId = 2, Count = 1L << 33, Price = 5, RewardType = 2 }]
         }));
         Assert.Equal((ManorCommandKind.SellCrops, 3, 77, true), (cmd.Kind, cmd.CastleId, cmd.NpcObjectId, cmd.Next));
@@ -427,7 +439,14 @@ public sealed class NetManorTests
 
         var info = NetCodec.DecodeManorInfo(NetCodec.EncodeManorInfo(new ManorInfoNetMsg
         {
-            View = 9, CastleId = 1, Next = true, Mode = 1, NextChangeUnixMs = 5, Treasury = 6, ManorCost = 7, Adena = 8,
+            View = 9,
+            CastleId = 1,
+            Next = true,
+            Mode = 1,
+            NextChangeUnixMs = 5,
+            Treasury = 6,
+            ManorCost = 7,
+            Adena = 8,
             Seeds = [new ManorSeedNet { SeedId = 1, CropId = 2, Level = 3, Reward1 = 4, Reward2 = 5, Alternative = true, Limit = 6, ReferencePrice = 7, MinPrice = 8, MaxPrice = 9, Amount = 10, StartAmount = 11, Price = 12, CurrentStartAmount = 13, CurrentPrice = 14 }],
             Crops = [new ManorCropNet { CropId = 1, SeedId = 2, Level = 3, Reward1 = 4, Reward2 = 5, Limit = 6, ReferencePrice = 7, MinPrice = 8, MaxPrice = 9, ManorId = 10, Amount = 11, StartAmount = 12, Price = 13, RewardType = 2, InventoryObjectId = 15, InventoryCount = 16, CurrentStartAmount = 17, CurrentPrice = 18, CurrentRewardType = 1 }]
         }));

@@ -19,6 +19,6 @@ public sealed class RequiredLedgerJournalTests
     public void World_without_accounts_still_defaults_memory_journal_for_unit_tests()
     {
         var world = new ZoneWorld();
-        Assert.Equal(0, world.LedgerForTests.Head);
+        Assert.Equal(LedgerChain.Genesis, world.LedgerForTests.Head);
     }
 }
