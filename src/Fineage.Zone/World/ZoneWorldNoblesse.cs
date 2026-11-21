@@ -1,3 +1,6 @@
+using Fineage.Game.Economy;
+using Fineage.Game.Quests;
+using Fineage.Game.Shops;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -80,6 +83,102 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
             return _byId.TryGetValue(objectId, out var player) && SetNoble(player, noble);
+    }
+
+    static bool IsVillageMaster(ZoneEntity npc) =>
+        npc.NpcType != null && npc.NpcType.StartsWith("VillageMaster", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Interlude retail-style <c>RequestNobless</c>: Q247 at the lake gate (cond 2+), subclass 75+, pay certification, then
+    /// <see cref="SetNoble"/> and complete the quest (Lady path stays quest-only in Mobius CT0).
+    /// </summary>
+    string? RequestNoblessBypass(ZoneSession session, ZoneEntity player, ZoneEntity npc)
+    {
+        if (!IsVillageMaster(npc))
+            return "bad_request";
+        if (player.Noble)
+        {
+            SendHtml(session, player, npc,
+                "<html><body>%npcname%:<br>You are already a Noblesse.</body></html>");
+            return null;
+        }
+
+        var gate = player.Quests.Find(NoblesseGrant.GateQuestId);
+        if (gate is not { Phase: QuestPhase.Started } || gate.Cond < NoblesseGrant.GateReadyCond)
+        {
+            SendHtml(session, player, npc,
+                "<html><body>%npcname%:<br>Complete the Noblesse gate quest before I can certify you.</body></html>");
+            return null;
+        }
+
+        if (!player.SubClassActive || player.Level < SubclassMinLevel)
+        {
+            SendHtml(session, player, npc,
+                "<html><body>%npcname%:<br>Only a subclass at level 75 or above may become Noblesse.</body></html>");
+            return null;
+        }
+
+        var quest = _game.Quests.Find(NoblesseGrant.GateQuestId);
+        if (!NoblesseGrant.TryReadVillageMasterCosts(quest, out var costs))
+            return "bad_request";
+
+        var inventory = player.Inventory!;
+        if (player.Sp < costs.Sp)
+        {
+            Notice(session, 278, "You do not have enough SP to learn this skill.");
+            return null;
+        }
+
+        if (inventory.CountOf(ShopTrade.AdenaItemId) < costs.Adena)
+        {
+            Notice(session, IncorrectItemCountMessageId, "Incorrect item count.");
+            return null;
+        }
+
+        if (!RecordBagChange(
+                player,
+                LedgerTxKind.QuestReward,
+                LedgerAccount.Of(SystemAccount.Quests),
+                () =>
+                {
+                    var touches = new List<BagTouch>();
+                    if (!inventory.TryTake(ShopTrade.AdenaItemId, costs.Adena, touches))
+                        return false;
+                    var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
+                    foreach (var piece in inventory.AddPieces(costs.TiaraItemId, 1))
+                        touches.Add(new BagTouch(before.Contains(piece.ObjectId) ? BagTouchKind.Modify : BagTouchKind.Add, piece));
+                    if (touches.Count > 0)
+                    {
+                        var invUpdate = new InventoryUpdateMsg
+                        {
+                            Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
+                        };
+                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+                        SaveInventory(session, inventory);
+                    }
+
+                    return true;
+                },
+                _ => NoblesseGrant.GateQuestId))
+            return "bad_request";
+
+        player.Sp -= costs.Sp;
+        _persist.SaveProgress(session.Account, session.ObjectId, player.Level, player.Exp, player.Sp, player.MaxHp, player.CurHp,
+            player.MaxMp, player.CurMp, player.MaxCp, player.CurCp);
+        if (costs.RewardExp > 0)
+            ApplyExpSp(player, costs.RewardExp, 0);
+
+        if (!SetNoble(player, true))
+            return "bad_request";
+
+        gate.Phase = QuestPhase.Completed;
+        gate.ClearVars();
+        SaveQuestProgress(session, player);
+        Notice(session, (int)QuestNotice.Completed, $"{quest!.Name} is complete.");
+        NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, 3);
+        SendHtml(session, player, npc,
+            "<html><body>%npcname%:<br>Congratulations. You are now a Noblesse.</body></html>");
+        return null;
     }
 
     void SendNoblesPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, bool noble)
