@@ -56,12 +56,9 @@ public sealed class PostgresLedgerJournalTests
                 Assert.Equal(LedgerOutcome.Duplicate, ledger.Submit(stored[2].Transaction).Outcome);
             }
 
-            Execute(url, "UPDATE economy_ledger SET postings = jsonb_set(postings, '{1,amount}', '400') WHERE position = 1");
-            using (var tampered = PostgresAccountStore.Open(url))
-            {
-                var error = Assert.Throws<InvalidOperationException>(() => new EconomyLedger(tampered.OpenLedgerJournal(), 100));
-                Assert.Contains("broken at position 1", error.Message);
-            }
+            var appendOnly = Assert.Throws<PostgresException>(() =>
+                Execute(url, "UPDATE economy_ledger SET postings = jsonb_set(postings, '{1,amount}', '400') WHERE position = 1"));
+            Assert.Contains("append-only", appendOnly.MessageText, StringComparison.OrdinalIgnoreCase);
         }
         finally
         {
