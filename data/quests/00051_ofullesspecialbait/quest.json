@@ -11,31 +11,22 @@
       "npcId": 31572,
       "hook": "talk",
       "when": "absent",
+      "minLevel": 36,
       "htmlFile": "31572-talk-000.htm"
     },
     {
       "npcId": 31572,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 35,
       "htmlFile": "31572-talk-001.htm"
-    },
-    {
-      "npcId": 31572,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31572-talk-002.htm"
-    },
-    {
-      "npcId": 31572,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31572-talk-003.htm"
     },
     {
       "npcId": 31572,
       "hook": "event",
       "when": "absent",
       "event": "31572-03",
+      "minLevel": 36,
       "ops": [
         {
           "op": "create"
@@ -48,14 +39,40 @@
           "cond": 1
         }
       ],
-      "htmlFile": "31572-event-31572-03-004.htm"
+      "htmlFile": "31572-event-31572-03-002.htm"
+    },
+    {
+      "npcId": 31572,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31572-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31572,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "7622": 100
+      },
+      "htmlFile": "31572-talk-c2-004.htm"
     },
     {
       "npcId": 31572,
       "hook": "event",
-      "when": "absent",
+      "when": "started",
       "event": "31572-07",
+      "cond": 2,
+      "atLeast": {
+        "7622": 100
+      },
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7622,
+          "count": 100
+        },
         {
           "op": "give_item",
           "itemId": 7611,
@@ -65,7 +82,25 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31572-event-31572-07-005.htm"
+      "htmlFile": "31572-event-31572-07-c2-005.htm"
+    },
+    {
+      "npcId": 20552,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7622,
+          "count": 1,
+          "chance": 0.33,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }

@@ -271,7 +271,7 @@ Documented in `docs/net-protocol.md`. Residual gaps: `MagicSkillCanceled`, full 
 
 Fineage-only: Q256, Q998.
 
-Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Still blocked on dimensional rift: Q634, Q635; Q255 skipped (Fineage Q998).
+Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Batch 2: Q50–Q53 bait + Q27–Q30 chest chain — `scripts/gen_quests_rank2_fishing.py` (bait prerequisite chain not JSON-gated). Still blocked on dimensional rift: Q634, Q635; Q255 skipped (Fineage Q998).
 
 ---
 
@@ -321,7 +321,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
-| 2 | Quest coverage | #709 | partial — Q385/426/505/646; Q634/635/255 still missing | No |
+| 2 | Quest coverage | #709, (batch 2 open) | partial — +Q50–53/Q27–30 fishing; Q634/635/255 still missing | No |
 | 3 | Item augmentation | — | pending | Yes (refine UI) |
 | 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | — | pending | No |

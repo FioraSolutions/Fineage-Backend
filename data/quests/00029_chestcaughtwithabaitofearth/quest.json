@@ -10,36 +10,61 @@
     {
       "npcId": 31574,
       "hook": "talk",
-      "when": "started",
-      "cond": 1,
-      "hasItem": 6507,
-      "htmlFile": "31574-talk-c1-000.htm"
+      "when": "absent",
+      "minLevel": 48,
+      "htmlFile": "31574-talk-000.htm"
     },
     {
       "npcId": 31574,
       "hook": "talk",
-      "when": "started",
-      "cond": 2,
-      "htmlFile": "31574-talk-c2-001.htm"
-    },
-    {
-      "npcId": 31574,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31574-talk-002.htm"
+      "when": "absent",
+      "maxLevel": 47,
+      "htmlFile": "31574-talk-001.htm"
     },
     {
       "npcId": 31574,
       "hook": "event",
       "when": "absent",
       "event": "31574-04",
-      "htmlFile": "31574-event-31574-04-003.htm"
+      "minLevel": 48,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31574-event-31574-04-002.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        6507
+      ],
+      "htmlFile": "31574-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31574,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 6507,
+      "htmlFile": "31574-talk-c1-004.htm"
     },
     {
       "npcId": 31574,
       "hook": "event",
-      "when": "absent",
-      "event": "31574-08",
+      "when": "started",
+      "event": "31574-07",
+      "cond": 1,
       "hasItem": 6507,
       "ops": [
         {
@@ -51,24 +76,45 @@
           "op": "give_item",
           "itemId": 7627,
           "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
         }
       ],
-      "htmlFile": "31574-event-31574-08-004.htm"
+      "htmlFile": "31574-event-31574-07-c1-005.htm"
     },
     {
-      "npcId": 31574,
+      "npcId": 30909,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 7627,
+      "htmlFile": "30909-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30909,
       "hook": "event",
-      "when": "absent",
-      "event": "30909-03",
+      "when": "started",
+      "event": "30909-02",
+      "cond": 2,
       "hasItem": 7627,
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7627,
+          "count": 1
+        },
         {
           "op": "give_item",
           "itemId": 2455,
           "count": 1
+        },
+        {
+          "op": "complete"
         }
       ],
-      "htmlFile": "31574-event-30909-03-005.htm"
+      "htmlFile": "30909-event-30909-02-c2-007.htm"
     }
   ]
 }

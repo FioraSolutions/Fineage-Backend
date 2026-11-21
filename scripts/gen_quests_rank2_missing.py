@@ -339,6 +339,7 @@ def main() -> None:
     for q in (q385(), q426(), q505(), q646()):
         questio.upsert_quest(q)
         print(f"upserted {q['id']} {q['name']} dialogs={len(q['dialogs'])}")
+    questio.ensure_meta(max_active=25, talk_range=250)
 
 
 if __name__ == "__main__":

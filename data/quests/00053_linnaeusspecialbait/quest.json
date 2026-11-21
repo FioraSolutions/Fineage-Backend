@@ -11,31 +11,22 @@
       "npcId": 31577,
       "hook": "talk",
       "when": "absent",
+      "minLevel": 60,
       "htmlFile": "31577-talk-000.htm"
     },
     {
       "npcId": 31577,
       "hook": "talk",
       "when": "absent",
+      "maxLevel": 59,
       "htmlFile": "31577-talk-001.htm"
-    },
-    {
-      "npcId": 31577,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31577-talk-002.htm"
-    },
-    {
-      "npcId": 31577,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31577-talk-003.htm"
     },
     {
       "npcId": 31577,
       "hook": "event",
       "when": "absent",
-      "event": "31577-1",
+      "event": "31577-03",
+      "minLevel": 60,
       "ops": [
         {
           "op": "create"
@@ -48,14 +39,40 @@
           "cond": 1
         }
       ],
-      "htmlFile": "31577-event-31577-1-004.htm"
+      "htmlFile": "31577-event-31577-03-002.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31577-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31577,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "atLeast": {
+        "7624": 100
+      },
+      "htmlFile": "31577-talk-c2-004.htm"
     },
     {
       "npcId": 31577,
       "hook": "event",
-      "when": "absent",
-      "event": "31577-3",
+      "when": "started",
+      "event": "31577-07",
+      "cond": 2,
+      "atLeast": {
+        "7624": 100
+      },
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7624,
+          "count": 100
+        },
         {
           "op": "give_item",
           "itemId": 7613,
@@ -65,7 +82,25 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31577-event-31577-3-005.htm"
+      "htmlFile": "31577-event-31577-07-c2-005.htm"
+    },
+    {
+      "npcId": 20670,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7624,
+          "count": 1,
+          "chance": 0.33,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }
