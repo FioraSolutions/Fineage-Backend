@@ -262,7 +262,12 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
-        var journal = ledgerJournal ?? new MemoryLedgerJournal();
+        ILedgerJournal journal = ledgerJournal
+            ?? (accounts != null
+                ? throw new InvalidOperationException(
+                    "ILedgerJournal is required when IAccountStore is configured. Production hosts pass " +
+                    "accounts.OpenLedgerJournal(); tests must pass new MemoryLedgerJournal().")
+                : new MemoryLedgerJournal());
         _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);

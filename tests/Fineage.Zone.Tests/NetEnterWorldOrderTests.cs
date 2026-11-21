@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -27,7 +28,8 @@ public sealed class NetEnterWorldOrderTests
         var ticket = login.Play("wireorder", "pass1234", "Orderly", HumanClasses.Fighter);
         Assert.True(ticket.Ok && ticket.Value != null);
 
-        var world = new ZoneWorld(accounts: store);
+        var world = new ZoneWorld(accounts: store,
+        ledgerJournal: new MemoryLedgerJournal());
         var zone = new NetZoneServer(tokens, world);
         var server = new NetTcpServer();
         var host = Task.Run(

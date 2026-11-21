@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -98,7 +99,10 @@ public sealed class NetZoneBoundaryTests
         {
             var cts = new CancellationTokenSource();
             var store = MemoryAccountStore.InMemory();
-            var zone = new NetZoneServer(new HandoffTokens(HandoffTokens.DefaultSecret), new ZoneWorld(accounts: store), store);
+            var zone = new NetZoneServer(
+                new HandoffTokens(HandoffTokens.DefaultSecret),
+                new ZoneWorld(accounts: store, ledgerJournal: new MemoryLedgerJournal()),
+                store);
             var server = new NetTcpServer();
             var serve = Task.Run(
                 () => server.RunAsync("127.0.0.1", 0, zone.HandleAsync, cts.Token, maxConnections: 4, inboxCapacity: 64),

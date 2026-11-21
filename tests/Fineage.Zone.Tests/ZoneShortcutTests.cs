@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Login;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -11,7 +12,8 @@ public sealed class ZoneShortcutTests
 {
     static async Task<(ZoneWorld World, ZoneSession Session, ZoneEntity Player)> Enter(MemoryAccountStore store, int characterId, string account, string name)
     {
-        var world = new ZoneWorld(accounts: store);
+        var world = new ZoneWorld(accounts: store,
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(characterId, account, name, HumanClasses.Fighter);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));

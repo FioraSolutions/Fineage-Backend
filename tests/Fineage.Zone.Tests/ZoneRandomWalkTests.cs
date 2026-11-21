@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -33,7 +34,8 @@ public sealed class ZoneRandomWalkTests
         async Task<(ZoneWorld World, ZoneEntity Player)> Enter(SpawnCatalog spawns)
         {
             var ticket = login.Play("walk", "pass1234", created.Value!.Name, HumanClasses.Fighter);
-            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "walk", combatRandom: new MobiusWalkRoll());
+            var world = new ZoneWorld(accounts: store, spawnCatalog: spawns, activeMapId: "walk", combatRandom: new MobiusWalkRoll(),
+            ledgerJournal: new MemoryLedgerJournal());
             var session = new ZoneSession();
             session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
             Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
@@ -78,7 +80,8 @@ public sealed class ZoneRandomWalkTests
         var probe = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["far"] = new("far", true, [])
-        }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi());
+        }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi(),
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await probe.TryEnterAsync(session, CancellationToken.None));
@@ -91,7 +94,8 @@ public sealed class ZoneRandomWalkTests
         var world = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["far"] = new("far", true, [mob])
-        }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi(), combatRandom: new MobiusWalkRoll());
+        }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi(), combatRandom: new MobiusWalkRoll(),
+        ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));
@@ -113,7 +117,8 @@ public sealed class ZoneRandomWalkTests
         var probe = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["min"] = new("min", true, [])
-        }), activeMapId: "min");
+        }), activeMapId: "min",
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await probe.TryEnterAsync(session, CancellationToken.None));
@@ -126,7 +131,8 @@ public sealed class ZoneRandomWalkTests
         var world = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["min"] = new("min", true, [leader, minion])
-        }), activeMapId: "min");
+        }), activeMapId: "min",
+        ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));
@@ -154,7 +160,8 @@ public sealed class ZoneRandomWalkTests
         var probe = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["tout"] = new("tout", true, [])
-        }), activeMapId: "tout");
+        }), activeMapId: "tout",
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await probe.TryEnterAsync(session, CancellationToken.None));
@@ -166,7 +173,8 @@ public sealed class ZoneRandomWalkTests
         var world = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["tout"] = new("tout", true, [mob])
-        }), activeMapId: "tout");
+        }), activeMapId: "tout",
+        ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));

@@ -3,6 +3,7 @@ using Fineage.Net.Host;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone;
@@ -41,7 +42,8 @@ sealed class ZoneHost : IAsyncDisposable
             accounts: accounts,
             includeEnabledMaps: false,
             activeMapId: SpawnCatalog.SmokeMapId,
-            geo: Geo.GeoEngine.Empty);
+            geo: Geo.GeoEngine.Empty,
+            ledgerJournal: new MemoryLedgerJournal());
         created.StartSimulation(cts.Token);
         var server = new NetTcpServer();
         var netZone = new NetZoneServer(tokens, created, accounts);
