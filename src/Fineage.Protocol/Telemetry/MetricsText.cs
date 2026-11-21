@@ -180,6 +180,12 @@ public static class MetricsText
             }
         }
 
+        AppendHelp(sb, "fineage_ledger_flush_failures_total", "Auditable economy ledger flush failures");
+        sb.Append("# TYPE fineage_ledger_flush_failures_total counter\n");
+        sb.Append("fineage_ledger_flush_failures_total ")
+            .Append(snapshot.LedgerFlushFailures.ToString(CultureInfo.InvariantCulture))
+            .Append('\n');
+
         AppendStages(sb, snapshot.Stages);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");

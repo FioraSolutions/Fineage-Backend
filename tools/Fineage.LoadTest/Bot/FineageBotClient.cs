@@ -9,26 +9,34 @@ namespace Fineage.LoadTest.Bot;
 
 public sealed class FineageBotClient : IAsyncDisposable
 {
-    readonly TcpClient _login = new();
-    readonly TcpClient? _zone;
+    TcpClient _login = new();
+    TcpClient _zone = new();
     NetworkStream? _loginStream;
     NetworkStream? _zoneStream;
     uint _loginSeq;
     uint _zoneSeq;
     readonly Random _rng;
     HandoffMsg? _handoff;
-    ulong _selfEntity;
     readonly BotStats _stats;
+    readonly BotObservationLog _observation;
+    readonly BotPeerDirectory _peers;
+    Task? _receiveTask;
+    CancellationTokenSource _receiveCts = new();
+    int _spawnX;
+    int _spawnY;
+    int _spawnZ;
 
-    public FineageBotClient(LoadScenario scenario, int botId, BotStats stats)
+    public FineageBotClient(LoadScenario scenario, int botId, BotStats stats, BotPeerDirectory peers)
     {
+        _peers = peers;
         _rng = new Random(botId * 7919 + 17);
         _stats = stats;
         BotId = botId;
         Scenario = scenario;
         Account = $"{scenario.AccountPrefix}{botId:D5}";
         CharacterName = $"Bot{botId:D4}";
-        _zone = new TcpClient();
+        (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
+        _observation = new BotObservationLog(botId);
     }
 
     public int BotId { get; }
@@ -36,6 +44,10 @@ public sealed class FineageBotClient : IAsyncDisposable
     public string Account { get; }
     public string CharacterName { get; }
     public BotStats Stats => _stats;
+    public BotObservationLog ObservationLog => _observation;
+    public int SelfObjectId => (int)_selfEntity;
+
+    ulong _selfEntity;
 
     public async Task ConnectAndEnterAsync(CancellationToken ct)
     {
@@ -43,7 +55,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         _loginStream = _login.GetStream();
         await LoginHandshakeAsync(ct);
 
-        await _zone!.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
+        await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
         _zoneStream = _zone.GetStream();
 
         await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
@@ -57,6 +69,33 @@ public sealed class FineageBotClient : IAsyncDisposable
 
         await EnterWorldAsync(ct);
         _stats.InWorld = true;
+        if (_selfEntity != 0)
+            _peers.Register(BotId, SelfObjectId);
+        _receiveTask = Task.Run(() => ReceiveLoopAsync(_receiveCts.Token), CancellationToken.None);
+    }
+
+    async Task ReceiveLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                var (opcode, payload) = await ZoneReadFrameAsync(ct);
+                _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
+                if (opcode == NetOpcode.Reject)
+                    _stats.LastError = NetCodec.DecodeReject(payload).Code;
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                _stats.LastError = ex.Message;
+                _stats.Disconnected = true;
+                break;
+            }
+        }
     }
 
     async Task LoginHandshakeAsync(CancellationToken ct)
@@ -82,7 +121,6 @@ public sealed class FineageBotClient : IAsyncDisposable
         var rosterPayload = await LoginReadUntilAsync(NetOpcode.CharacterRoster, ct);
         var roster = NetCodec.DecodeCharacterRoster(rosterPayload);
 
-        int characterId;
         if (roster.Characters.Length == 0)
         {
             await LoginExchangeAsync(NetOpcode.CreateCharacter,
@@ -101,10 +139,9 @@ public sealed class FineageBotClient : IAsyncDisposable
 
         var pick = roster.Characters.FirstOrDefault(c => c.Name == CharacterName)
             ?? roster.Characters[0];
-        characterId = pick.CharacterId;
 
         var handoffPayload = await LoginExchangePayloadAsync(NetOpcode.SelectCharacter,
-            NetCodec.EncodeSelectCharacter(new SelectCharacterMsg { CharacterId = characterId }),
+            NetCodec.EncodeSelectCharacter(new SelectCharacterMsg { CharacterId = pick.CharacterId }),
             NetOpcode.Handoff, ct);
         _handoff = NetCodec.DecodeHandoff(handoffPayload);
     }
@@ -129,6 +166,7 @@ public sealed class FineageBotClient : IAsyncDisposable
                 return;
             }
 
+            _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
             if (opcode == NetOpcode.Reject)
                 throw new InvalidOperationException(NetCodec.DecodeReject(payload).Code);
             if (opcode == NetOpcode.SystemMessage)
@@ -142,7 +180,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         }
     }
 
-    public async Task RunBehaviorTickAsync(CancellationToken ct)
+    public async Task RunBehaviorTickAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
     {
         if (_zoneStream == null || _stats.Disconnected)
             return;
@@ -156,26 +194,47 @@ public sealed class FineageBotClient : IAsyncDisposable
                 case "move":
                     int dx = _rng.Next(-400, 400);
                     int dy = _rng.Next(-400, 400);
-                    await ZoneWriteAsync(NetOpcode.MoveInput,
+                    await SendTrackedAsync(NetOpcode.MoveInput,
                         NetCodec.EncodeMoveInput(new MoveInputMsg
                         {
-                            DestX = Scenario.SpawnX + dx,
-                            DestY = Scenario.SpawnY + dy,
-                            DestZ = Scenario.SpawnZ
+                            DestX = _spawnX + dx,
+                            DestY = _spawnY + dy,
+                            DestZ = _spawnZ
                         }), ct);
                     break;
                 case "attack":
-                    await ZoneWriteAsync(NetOpcode.AttackRequest,
-                        NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = (int)(_selfEntity + 1) }), ct);
-                    break;
+                    {
+                        int target = _observation.VisibleNpcObjectId();
+                        if (target == 0)
+                            target = _observation.VisibleNpcObjectId();
+                        if (target > 0)
+                        {
+                            await ZoneWriteAsync(NetOpcode.SelectTarget,
+                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
+                            await SendTrackedAsync(NetOpcode.AttackRequest,
+                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }), ct);
+                        }
+
+                        break;
+                    }
                 case "skill":
-                    await ZoneExchangeAsync(NetOpcode.UseSkill,
-                        NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, CtrlPressed = false }),
-                        NetOpcode.Reject, ct, optionalResponse: true);
-                    break;
+                    {
+                        int target = _observation.VisibleNpcObjectId();
+                        await SendTrackedAsync(NetOpcode.UseSkill,
+                            NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }), ct);
+                        break;
+                    }
                 case "say":
                     await ZoneWriteAsync(NetOpcode.Say,
                         NetCodec.EncodeSay(new SayNetMsg { Text = $"load {BotId}", ChatType = 0 }), ct);
+                    break;
+                case "sit":
+                    await ZoneWriteAsync(NetOpcode.RequestActionUse,
+                        NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 0 }), ct);
+                    break;
+                case "social":
+                    await ZoneWriteAsync(NetOpcode.RequestActionUse,
+                        NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 12 + _rng.Next(0, 3) }), ct);
                     break;
                 case "pickup":
                     await ZoneWriteAsync(NetOpcode.PickupRequest,
@@ -183,21 +242,40 @@ public sealed class FineageBotClient : IAsyncDisposable
                     break;
                 case "trade":
                     await ZoneWriteAsync(NetOpcode.TradeRequest,
-                        NetCodec.EncodeTradeRequest(new TradeRequestNetMsg { TargetObjectId = (int)_selfEntity + 2 }), ct);
+                        NetCodec.EncodeTradeRequest(new TradeRequestNetMsg { TargetObjectId = SelfObjectId + 2 }), ct);
                     break;
+                case "pvp":
+                    {
+                        int? peer = VisiblePlayerObjectId() ?? _peers.PickPeerObjectId(BotId, _rng);
+                        if (peer is > 0)
+                        {
+                            await ZoneWriteAsync(NetOpcode.SelectTarget,
+                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = peer.Value }), ct);
+                            await SendTrackedAsync(NetOpcode.AttackRequest,
+                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = peer.Value, Forced = true }), ct);
+                        }
+
+                        break;
+                    }
                 case "party":
-                    await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
-                        NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = (int)_selfEntity + 3 }), ct);
+                    {
+                        int? peer = _peers.PickPeerObjectId(BotId, _rng);
+                        if (peer is > 0)
+                            await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
+                                NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = peer.Value }), ct);
+                        break;
+                    }
+                case "relog":
+                    await RelogAsync(fleet, ct);
                     break;
                 case "teleport":
-                    await ZoneExchangeAsync(NetOpcode.TeleportToLocation,
+                    await ZoneWriteAsync(NetOpcode.TeleportToLocation,
                         NetCodec.EncodeTeleportToLocation(new TeleportToLocationNetMsg
                         {
-                            X = Scenario.SpawnX,
-                            Y = Scenario.SpawnY,
-                            Z = Scenario.SpawnZ
-                        }),
-                        NetOpcode.Reject, ct, optionalResponse: true);
+                            X = _spawnX,
+                            Y = _spawnY,
+                            Z = _spawnZ
+                        }), ct);
                     break;
             }
 
@@ -212,6 +290,96 @@ public sealed class FineageBotClient : IAsyncDisposable
             _stats.LastError = ex.Message;
             _stats.Disconnected = true;
         }
+    }
+
+    async Task SendTrackedAsync(ushort opcode, byte[] payload, CancellationToken ct)
+    {
+        _observation.RecordCommandSent(opcode, DateTimeOffset.UtcNow);
+        await ZoneWriteAsync(opcode, payload, ct);
+    }
+
+    int? VisiblePlayerObjectId()
+    {
+        var tracker = _observation.Tracker;
+        foreach (var ent in tracker.Entities.Values)
+        {
+            if (ent.Despawned || ent.Kind != EntityKindNet.Player || ent.ObjectId == SelfObjectId)
+                continue;
+            return ent.ObjectId;
+        }
+
+        return null;
+    }
+
+    async Task RelogAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
+    {
+        _stats.RelogsAttempted++;
+        _peers.Unregister(BotId);
+        await StopReceiveLoopAsync();
+        TearDownConnections();
+
+        _login = new TcpClient();
+        _zone = new TcpClient();
+        _loginSeq = 0;
+        _zoneSeq = 0;
+        _selfEntity = 0;
+        _receiveCts = new CancellationTokenSource();
+        _stats.Disconnected = false;
+
+        await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
+        _loginStream = _login.GetStream();
+        await LoginHandshakeAsync(ct);
+        await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
+        _zoneStream = _zone.GetStream();
+        await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
+        await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
+        await ZoneExchangeAsync(
+            NetOpcode.ZoneAuth,
+            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
+            NetOpcode.ZoneAuthResult,
+            ct);
+        await EnterWorldAsync(ct);
+        _stats.InWorld = true;
+        if (_selfEntity != 0)
+            _peers.Register(BotId, SelfObjectId);
+        _receiveTask = Task.Run(() => ReceiveLoopAsync(_receiveCts.Token), CancellationToken.None);
+        Interlocked.Increment(ref _stats.RelogsSucceeded);
+    }
+
+    async Task StopReceiveLoopAsync()
+    {
+        try
+        {
+            await _receiveCts.CancelAsync();
+        }
+        catch
+        {
+            /* ignore */
+        }
+
+        if (_receiveTask != null)
+        {
+            try
+            {
+                await _receiveTask.WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch
+            {
+                /* ignore */
+            }
+        }
+
+        _receiveCts.Dispose();
+    }
+
+    void TearDownConnections()
+    {
+        try { _zoneStream?.Dispose(); } catch { /* ignore */ }
+        try { _loginStream?.Dispose(); } catch { /* ignore */ }
+        try { _zone.Dispose(); } catch { /* ignore */ }
+        try { _login.Dispose(); } catch { /* ignore */ }
+        _zoneStream = null;
+        _loginStream = null;
     }
 
     string PickAction()
@@ -240,27 +408,13 @@ public sealed class FineageBotClient : IAsyncDisposable
         return await LoginReadUntilAsync(expect, ct);
     }
 
-    async Task ZoneExchangeAsync(ushort send, byte[] payload, ushort expect, CancellationToken ct, bool optionalResponse = false)
+    async Task ZoneExchangeAsync(ushort send, byte[] payload, ushort expect, CancellationToken ct)
     {
         var sw = Stopwatch.StartNew();
         await ZoneWriteAsync(send, payload, ct);
-        if (optionalResponse)
-        {
-            try
-            {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                cts.CancelAfter(TimeSpan.FromMilliseconds(800));
-                await ZoneReadFrameAsync(cts.Token);
-            }
-            catch { /* fire-and-forget friendly */ }
-        }
-        else
-        {
-            ushort opcode = (await ZoneReadFrameAsync(ct)).opcode;
-            if (opcode != expect && opcode != NetOpcode.Reject)
-                throw new InvalidOperationException($"expected 0x{expect:X4}");
-        }
-
+        ushort opcode = (await ZoneReadFrameAsync(ct)).opcode;
+        if (opcode != expect && opcode != NetOpcode.Reject)
+            throw new InvalidOperationException($"expected 0x{expect:X4}");
         sw.Stop();
         _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
     }
@@ -323,12 +477,10 @@ public sealed class FineageBotClient : IAsyncDisposable
         return (env.Opcode, env.Payload);
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        try { _zoneStream?.Dispose(); } catch { /* ignore */ }
-        try { _loginStream?.Dispose(); } catch { /* ignore */ }
-        try { _zone?.Dispose(); } catch { /* ignore */ }
-        try { _login.Dispose(); } catch { /* ignore */ }
-        return ValueTask.CompletedTask;
+        _peers.Unregister(BotId);
+        await StopReceiveLoopAsync();
+        TearDownConnections();
     }
 }
