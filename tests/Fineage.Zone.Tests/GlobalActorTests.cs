@@ -15,7 +15,7 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class GlobalActorTests
 {
-    const int BossNpcId = 25_019;
+    const int BossNpcId = 25_001;
     const int BossObjectId = 9_700_001;
     static readonly (long Min, long Max) Window = BossCatalog.RaidWindow(1200, 600);
 
@@ -222,11 +222,9 @@ public sealed class GlobalActorTests
     {
         var schedule = new BossSchedule(BossCatalog.From([Boss()]), new MemoryBossStore(), 1_800_000_000_000);
         var kit = new NetTestKit(Map(), "actors", regions: GridRegionPartition.MapTiles, simulationSeed: seed, bosses: schedule);
-        var (session, _) = await kit.EnterAsync();
-        // Boss rows carry no combat stats yet; give the pawn a Gremlin's so melee can kill it.
+        var (session, _) = await kit.EnterAsync(level: 45);
         Assert.True(kit.World.TryGetEntityById(BossObjectId, out var boss));
-        boss.PDef = ZoneCombat.GremlinPDef;
-        boss.MDef = ZoneCombat.GremlinPDef;
+        Assert.True(boss.PDef > 0, "raid boss pawn needs template PDef from the shared materialize path");
         var (bridge, recorder) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         lock (recorder.Calls)
@@ -260,6 +258,6 @@ public sealed class GlobalActorTests
 
     static BossDefinition Boss() =>
         new(BossNpcId, BossKind.Raid, true, BossObjectId, "Greyclaw Kutus", "Raid Boss", "RaidBoss",
-            NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 1, 40, 170, 50, Window.Min, Window.Max,
+            NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 1, 232, 170, 50, Window.Min, Window.Max,
             BossLifeStatus.Alive);
 }
