@@ -1,30 +1,72 @@
 #!/usr/bin/env python3
-"""Add Mobius CT_0_Interlude weapon/armor `using` skill conditions to data/skill-combat.json as `usingKinds`.
-Only plain <conditions><using kind=".."/></conditions> blocks are taken (no and/or/not trees).
-Usage: gen_skill_conditions.py <mobius skills xml dir>"""
-import json, re, sys, pathlib
+"""Sync Mobius cast <conditions> trees into data/skill-combat.json as `castCondition`.
 
-src = pathlib.Path(sys.argv[1])
-xml = re.sub(r"<!--.*?-->", "", "".join(p.read_text() for p in sorted(src.glob("*.xml"))), flags=re.S)
-bodies = {int(m.group(1)): m.group(0) for m in re.finditer(r'<skill id="(\d+)".*?</skill>', xml, re.S)}
-path = pathlib.Path(__file__).resolve().parent.parent / "data" / "skill-combat.json"
-data = json.loads(path.read_text())
-n = skipped = 0
-for s in data["skills"]:
-    s.pop("usingKinds", None)
-    body = bodies.get(s["skillId"])
-    if not body:
-        continue
-    c = re.search(r"<conditions[^>]*>(.*?)</conditions>", body, re.S)
-    if not c:
-        continue
-    inner = c.group(1).strip()
-    m = re.fullmatch(r'<using kind="([A-Z_ ,]+)"\s*/>', inner)
-    if not m:
-        if "<using" in inner:
-            skipped += 1
-        continue
-    s["usingKinds"] = [k.strip() for k in m.group(1).split(",") if k.strip()]
-    n += 1
-path.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
-print(f"usingKinds on {n} skills; {skipped} compound conditions skipped")
+Full and/or/not trees (no flat usingKinds skip). Copies from data/skills.json when present
+(same canonical trees as runtime SkillCastConditionEvaluator).
+
+Usage: gen_skill_conditions.py <mobius skills xml dir>
+"""
+from __future__ import annotations
+
+import json
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+from mobius_condition_parse import conditions_tree_from_skill
+
+ROOT = Path(__file__).resolve().parent.parent
+SKILLS_JSON = ROOT / "data" / "skills.json"
+COMBAT_JSON = ROOT / "data" / "skill-combat.json"
+
+
+def load_skill_bodies(src: Path) -> dict[int, ET.Element]:
+    bodies: dict[int, ET.Element] = {}
+    for path in sorted(src.glob("*.xml")):
+        root = ET.parse(path).getroot()
+        for node in root.findall("skill"):
+            bodies[int(node.get("id"))] = node
+    return bodies
+
+
+def main() -> None:
+    src = Path(sys.argv[1])
+    combat = json.loads(COMBAT_JSON.read_text())
+    skills_by_id = {
+        s["skillId"]: s.get("castCondition")
+        for s in json.loads(SKILLS_JSON.read_text()).get("skills", [])
+    }
+    bodies = load_skill_bodies(src)
+
+    imported = compound = from_catalog = skipped = 0
+    for row in combat["skills"]:
+        row.pop("usingKinds", None)
+        row.pop("castCondition", None)
+        sid = row["skillId"]
+        tree = skills_by_id.get(sid)
+        if tree:
+            from_catalog += 1
+        else:
+            skill = bodies.get(sid)
+            if skill is not None:
+                tree = conditions_tree_from_skill(skill)
+        if not tree:
+            continue
+        row["castCondition"] = tree
+        imported += 1
+        if tree.get("op") in ("and", "or", "not"):
+            compound += 1
+        elif tree.get("op") == "using" and tree.get("kinds"):
+            pass
+        else:
+            skipped += 0
+
+    COMBAT_JSON.write_text(json.dumps(combat, indent=1, ensure_ascii=False) + "\n")
+    print(
+        f"castCondition on {imported} combat skills ({compound} compound; "
+        f"{from_catalog} from skills.json) → {COMBAT_JSON.name}"
+    )
+
+
+if __name__ == "__main__":
+    main()

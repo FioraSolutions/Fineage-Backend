@@ -1,5 +1,5 @@
 {
-  "source": "/agent/repos/Fineage-Backend/.cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/stats/skills",
+  "source": ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/stats/skills",
   "rows": [
     {
       "conditionType": "op:player",

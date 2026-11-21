@@ -102,6 +102,7 @@ public sealed partial class ZoneWorld
 
         public override void LogUnsupported(string message) =>
             ZoneLog.Warn($"skill={skillId} lv={skillLevel} {message}");
+        public override int SkillLevel => skillLevel;
         public override bool UsingKinds(string[] kinds) => ConditionUsingItemType.Matches(player.Inventory, kinds);
         public override bool UsingSlot(string[] slots) => ConditionUsingItemType.MatchesSlot(player.Inventory, slots);
         public override int InventoryUsedSlots => player.Inventory?.Items.Count ?? 0;

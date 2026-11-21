@@ -9,7 +9,8 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    int ChargeCostOf(SkillDefinition template) => SkillCastConditionCharges.Required(template.CastCondition);
+    int ChargeCostOf(SkillDefinition template, ZoneEntity player, int skillId) =>
+        SkillCastConditionCharges.Required(template.CastCondition, player.KnownSkills.GetValueOrDefault(skillId, 1));
 
     void SpendChargesAtCastStart(ZoneEntity player, int amount)
     {
@@ -23,7 +24,7 @@ public sealed partial class ZoneWorld
         SkillDefinition template,
         SkillLevelData levelData)
     {
-        int charge = ChargeCostOf(template);
+        int charge = ChargeCostOf(template, player, hit.SkillId);
         if (charge > 0)
             SpendChargesAtCastStart(player, charge);
         return hit with

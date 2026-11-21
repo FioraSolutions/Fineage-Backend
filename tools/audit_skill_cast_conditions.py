@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # Keep in sync with SkillCastConditionEvaluator.cs (+ castCondition import in gen_skill_cast_conditions.py).
 IMPLEMENTED_OPS = frozenset({"and", "or", "not", "using", "player", "target", "game"})
 IMPLEMENTED_PLAYER = frozenset({
-    "invsize", "weight", "hp", "mp", "cp", "charges", "level", "levelrange", "sex", "races",
+    "invsize", "weight", "hp", "mp", "cp", "charges", "chargesbylevel", "level", "levelrange", "sex", "races",
     "elementseeds", "elementseed", "elementseedcount", "activeeffectid", "activeeffectlevel",
     "activeskillid", "activeskilllevel", "insidezoneid", "cansweep", "cansummon", "cansummonsiegegolem",
     "cancreatebase", "cantakecastle", "canescape", "canresurrect", "callpc", "siegezone", "isridingstrider",

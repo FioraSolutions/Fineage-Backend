@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fineage.Game.Skills;
 using Fineage.Zone.Combat;
 using Xunit;
 
@@ -47,6 +48,7 @@ public sealed class SkillCombatParityTests
         Assert.NotEmpty(snapshot);
 
         var catalog = SkillCombatCatalog.LoadDefault();
+        var defs = SkillCatalog.LoadDefault();
         var mismatches = new List<string>();
 
         foreach (var row in snapshot)
@@ -72,9 +74,12 @@ public sealed class SkillCombatParityTests
             if (row.EffectRange is int effect && got.EffectRange != effect)
                 mismatches.Add($"{row.SkillId} effectRange {got.EffectRange} != {effect}");
 
-            var wantKinds = row.UsingKinds ?? [];
-            if (!got.UsingKinds.SequenceEqual(wantKinds))
-                mismatches.Add($"{row.SkillId} usingKinds [{string.Join(",", got.UsingKinds)}] != [{string.Join(",", wantKinds)}]");
+            if (!defs.TryGet(row.SkillId, out var def) || def.CastCondition == null)
+            {
+                var wantKinds = row.UsingKinds ?? [];
+                if (!got.UsingKinds.SequenceEqual(wantKinds))
+                    mismatches.Add($"{row.SkillId} usingKinds [{string.Join(",", got.UsingKinds)}] != [{string.Join(",", wantKinds)}]");
+            }
 
             CompareDoubles(mismatches, row.SkillId, "power", got.Power, row.Power);
             CompareInts(mismatches, row.SkillId, "mpConsume", got.MpConsume, row.MpConsume);

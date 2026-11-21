@@ -15,6 +15,8 @@ public sealed class SkillCastConditionTests
         public int LoadPct = 50;
         public string TargetRaceName = "";
         public override void LogUnsupported(string message) { }
+        public int SkillLevelValue { get; set; } = 1;
+        public override int SkillLevel => SkillLevelValue;
         public override bool UsingKinds(string[] kinds) => Kinds != null && kinds.Any(k => Kinds.Contains(k));
         public override bool UsingSlot(string[] slots) => false;
         public override int InventoryUsedSlots => Used;
@@ -23,7 +25,8 @@ public sealed class SkillCastConditionTests
         public int HpPercentValue { get; set; } = 100;
         public override int HpPercent => HpPercentValue;
         public override int MpPercent => 100;
-        public override int SoulCharges => 0;
+        public int SoulChargesValue { get; set; }
+        public override int SoulCharges => SoulChargesValue;
         public override int Level => 20;
         public override int Sex => 0;
         public override string RaceName => "HUMAN";
@@ -97,6 +100,38 @@ public sealed class SkillCastConditionTests
         Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
         ctx.HpPercentValue = 25;
         Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
+    }
+
+    [Fact]
+    public void Charges_by_level_uses_skill_level_index()
+    {
+        var json = """{"op":"player","chargesByLevel":[2,3]}""";
+        var cond = SkillCastCondition.Parse(JsonDocument.Parse(json).RootElement);
+        var ctx = new TestCtx { SkillLevelValue = 1, SoulChargesValue = 2 };
+        Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
+        ctx.SoulChargesValue = 1;
+        Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
+        ctx.SkillLevelValue = 2;
+        ctx.SoulChargesValue = 2;
+        Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
+        ctx.SoulChargesValue = 3;
+        Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
+    }
+
+    [Fact]
+    public void Or_accepts_either_branch()
+    {
+        var json = """
+        {"op":"or","items":[
+          {"op":"using","kinds":["BOW"]},
+          {"op":"using","kinds":["DAGGER"]}
+        ]}
+        """;
+        var cond = SkillCastCondition.Parse(JsonDocument.Parse(json).RootElement);
+        var ctx = new TestCtx { Kinds = ["DAGGER"] };
+        Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
+        ctx.Kinds = ["SWORD"];
+        Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
     }
 
     [Fact]

@@ -9,7 +9,9 @@
 | Area | Status |
 |------|--------|
 | Cast `<conditions>` tree (and/or/not, using, player, target, game) | All **37** attribute kinds used in Interlude XML are implemented in the shared evaluator |
-| Legacy `usingKinds` on skills without `castCondition` | 39 skills; still gated via `Wearing()` when no `castCondition` tree is present |
+| **`data/skills.json` `castCondition` import** (`gen_skill_cast_conditions.py`) | **189** skills imported (**29** compound AND/OR/NOT); **0** unsupported kinds in Interlude XML |
+| **`data/skill-combat.json`** (`gen_skill_conditions.py`, full trees) | **69** combat rows with `castCondition` (**16** compound); flat `usingKinds` import removed |
+| Legacy `usingKinds` on passive mastery (no Mobius `<conditions>`) | **39** skills; still gated via `Wearing()` when no `castCondition` tree is present |
 | Force / sonic `player charges` + `FocusEnergy` + `EtcStatusUpdate.charges` | Shared spend at **cast start** (`ArmCastResources`); refusal leaves charges intact |
 | `itemConsumeId` / `itemConsumeCount` | Pre-check SysMsg **351** on every `TrySkillUse`; consume at **hit time** via `LaunchConsumeItems` on `PendingSkillHit` |
 | HP cast gate (`player hp`) | Evaluator + tests (Guts 139) |
