@@ -358,6 +358,26 @@ public sealed partial class ZoneWorld
         player.SummonObjectId = 0;
     }
 
+    /// <summary>Mobius <c>OlympiadGame.removals</c>: pets leave; servitors stay but lose buffs and orders.</summary>
+    void PrepareOlympiadSummons(ZoneEntity player)
+    {
+        if (SummonOf(player) is not { Summon: { } st } summon)
+            return;
+        if (st.Pet != null)
+        {
+            UnsummonOnLeave(player);
+            return;
+        }
+        st.TargetId = 0;
+        st.PendingSkillId = 0;
+        st.MoveOrder = false;
+        st.Following = false;
+        SetMoveActive(summon, false);
+        summon.MovePath.Clear();
+        summon.Abnormals.Clear();
+        summon.CombatUntilUnixMs = 0;
+    }
+
     /// <summary>Mobius <c>Player.teleToLocation</c> takes the summon along.</summary>
     void SummonFollowTeleport(ZoneEntity owner)
     {

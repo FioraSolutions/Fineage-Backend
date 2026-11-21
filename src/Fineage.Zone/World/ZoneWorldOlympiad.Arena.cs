@@ -83,6 +83,8 @@ public sealed partial class ZoneWorld
         if (!_olympiadArena.Add(player.ObjectId))
             return;
         EndOlympiadObserve(player);
+        PrepareOlympiadSummons(player);
+        StopCubicsByOthers(player);
         AbortCast(player, "olympiad", notify: false);
         if (player.Session != null && _party.InParty(player.ObjectId))
             TryPartyLeave(player.ObjectId);

@@ -206,6 +206,22 @@ public sealed class NetOlympiadArenaTests
     }
 
     [Fact]
+    public async Task Arena_drops_cubics_granted_by_others()
+    {
+        const int LifeSkill = 67, StormSkill = 10, CubicMastery = 143;
+        var (bench, one, _, _, at) = await Fight();
+        one.Player.KnownSkills[CubicMastery] = 2;
+        Assert.True(bench.World.SummonCubicForTest(one.Player, LifeSkill, 1, givenByOther: false));
+        Assert.True(bench.World.SummonCubicForTest(one.Player, StormSkill, 1, givenByOther: true));
+        Assert.Equal(2, one.Player.Cubics.Count);
+
+        await at(Evening.AddSeconds(66));
+        Assert.True(bench.World.InOlympiadArena(one.ObjectId));
+        Assert.Single(one.Player.Cubics);
+        Assert.DoesNotContain(one.Player.Cubics, cubic => cubic.GivenByOther);
+    }
+
+    [Fact]
     public async Task Observer_watches_a_stadium_untouchable_and_goes_back_where_they_stood()
     {
         var (bench, one, two, match, at) = await Fight();
