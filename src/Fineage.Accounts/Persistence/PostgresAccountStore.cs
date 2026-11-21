@@ -45,6 +45,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
             else
                 store.SyncAllocationCountersFromDatabase();
             store.HydrateWeddingFromNormalized();
+            store.HydrateCursedWeaponsFromNormalized();
             return store;
         }
         catch

@@ -109,6 +109,8 @@ public sealed partial class ZoneWorld
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
+        if (item.IsEquipped)
+            OnCursedWeaponEquipped(session, player, item);
         ZoneLog.Info($"gear object={session.ObjectId} use={objectId} equipped={item.IsEquipped}");
         return null;
     }

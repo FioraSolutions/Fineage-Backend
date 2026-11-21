@@ -191,6 +191,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
         ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
         ticks.AddWorldStage("door-auto-close", tick => TickDoorAutoClose(tick.WallUnixMs));
+        ticks.AddWorldStage("cursed-weapons", tick => TickCursedWeapons(tick.NowUnixMs));
 
         // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.

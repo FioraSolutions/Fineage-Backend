@@ -174,7 +174,7 @@ public sealed partial class ZoneWorld
     /// KnownSkills + ClanSkills + GearSkills (equip SA / complete sets). Higher level wins.
     /// </summary>
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
-        PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills);
+        PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills, player.CursedSkills);
 
     /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
     internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)

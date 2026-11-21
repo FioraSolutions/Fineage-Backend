@@ -206,4 +206,10 @@ public interface IAccountStore
 
     /// <summary>Removes couples that reference a deleted character (Mobius <c>GameClient</c> cleanup).</summary>
     bool PurgeWeddingCouplesForCharacter(int characterId);
+
+    /// <summary>Mobius <c>cursed_weapons</c> table: active Zariche / Akamanah blades.</summary>
+    IReadOnlyList<CursedWeaponRecord> ListCursedWeapons();
+
+    /// <summary>Replaces persisted cursed weapon rows (one row per blade id).</summary>
+    bool SaveCursedWeapons(IReadOnlyList<CursedWeaponRecord> rows);
 }

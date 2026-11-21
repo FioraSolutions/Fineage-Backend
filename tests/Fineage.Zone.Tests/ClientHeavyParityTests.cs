@@ -11,10 +11,7 @@ public sealed class ClientHeavyParityTests
     [Fact]
     public void Client_heavy_features_default_off()
     {
-        using var _ = EnvScope.Unset(
-            ClientHeavyFeatures.CursedWeaponsVariable,
-            ClientHeavyFeatures.SkillEnchantVariable);
-        Assert.False(ClientHeavyFeatures.CursedWeaponsEnabled);
+        using var _ = EnvScope.Unset(ClientHeavyFeatures.SkillEnchantVariable);
         Assert.False(ClientHeavyFeatures.SkillEnchantEnabled);
         Assert.True(AugmentationRules.CanRefine);
         Assert.Equal(AugmentationCatalog.LoadDefault().IsLoaded, AugmentationRules.CanRefine);
@@ -30,23 +27,16 @@ public sealed class ClientHeavyParityTests
     }
 
     [Fact]
-    public void Cursed_weapons_state_ignores_mark_when_disabled()
+    public void Cursed_weapons_manager_tracks_activation()
     {
-        using var _ = EnvScope.Unset(ClientHeavyFeatures.CursedWeaponsVariable);
-        var state = new CursedWeaponsState();
-        Assert.False(state.TryMarkOwned(8190, 1));
-        Assert.Empty(state.ActivatedItemIds);
-    }
-
-    [Fact]
-    public void Cursed_weapons_state_tracks_activation_when_enabled()
-    {
-        using var env = EnvScope.Set(ClientHeavyFeatures.CursedWeaponsVariable, "true");
-        var state = new CursedWeaponsState();
-        Assert.True(state.TryMarkOwned(8190, 42));
-        Assert.True(state.IsActivated(8190));
-        Assert.Contains(8190, state.ActivatedItemIds);
-        state.ClearForTest();
+        var catalog = CursedWeaponsCatalog.From([
+            new CursedWeaponDefinition(8190, "Zariche", 3603, 301, 50, 1, 300, 3, 10)
+        ]);
+        var manager = new CursedWeaponsManager(catalog);
+        Assert.True(manager.TryMarkOwnedForTest(8190, 42, endTimeUnixMs: 9_999_999));
+        Assert.Contains(8190, manager.ActiveItemIds());
+        manager.ClearForTest();
+        Assert.Empty(manager.ActiveItemIds());
     }
 
     [Fact]

@@ -6,10 +6,8 @@ namespace Fineage.Zone.Parity;
 /// </summary>
 public static class ClientHeavyFeatures
 {
-    public const string CursedWeaponsVariable = "FINEAGE_ALLOW_CURSED_WEAPONS";
     public const string SkillEnchantVariable = "FINEAGE_ALLOW_SKILL_ENCHANT";
 
-    public static bool CursedWeaponsEnabled => ReadBool(CursedWeaponsVariable, defaultValue: false);
     public static bool SkillEnchantEnabled => ReadBool(SkillEnchantVariable, defaultValue: false);
 
     static bool ReadBool(string variable, bool defaultValue)

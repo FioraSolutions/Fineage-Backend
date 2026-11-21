@@ -177,6 +177,24 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().Karma = value;
     }
 
+    public int SavedKarmaBeforeCurse
+    {
+        get => Identity?.SavedKarmaBeforeCurse ?? 0;
+        set => EnsureIdentity().SavedKarmaBeforeCurse = value;
+    }
+
+    public int SavedPkKillsBeforeCurse
+    {
+        get => Identity?.SavedPkKillsBeforeCurse ?? 0;
+        set => EnsureIdentity().SavedPkKillsBeforeCurse = value;
+    }
+
+    public int CursedWeaponItemId
+    {
+        get => Identity?.CursedWeaponItemId ?? 0;
+        set => EnsureIdentity().CursedWeaponItemId = value;
+    }
+
     public int CoupleId
     {
         get => Identity?.CoupleId ?? 0;

@@ -27,6 +27,7 @@ using Fineage.Game.Services;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
+using Fineage.Zone.CursedWeapons;
 
 namespace Fineage.Zone.World;
 
@@ -291,6 +292,17 @@ public sealed partial class ZoneWorld
         _bosses = new BossActor(
             bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds(), spawnPolicy: bossPolicy),
             bossRandom ?? GlobalStream(RandomPurpose.Boss));
+        IReadOnlyList<Fineage.Accounts.CursedWeaponRecord>? curseRows = null;
+        try
+        {
+            curseRows = accounts?.ListCursedWeapons();
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Warn($"cursed weapons restore skipped: {ex.Message}");
+        }
+
+        _cursedWeapons = new CursedWeaponsManager(CursedWeaponsCatalog.LoadDefault(), curseRows);
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _l10n = localization ?? LoadLocalization();
         _pages = new LocalizedHtml(_l10n, _html);

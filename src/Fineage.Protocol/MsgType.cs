@@ -300,6 +300,10 @@ public enum MsgType : ushort
     NewbieBuffResult = 1108,
     /// <summary>Blessing of Protection result.</summary>
     BlessingResult = 1109,
+    /// <summary>Cursed blade ids in the world (<see cref="CursedWeaponProtocol.ListOpcode"/>).</summary>
+    CursedWeaponList = 1102,
+    /// <summary>Cursed blade map pins (<see cref="CursedWeaponProtocol.LocationOpcode"/>).</summary>
+    CursedWeaponLocation = 1103,
 
     // Login S → C. Canonical lobby set; see LobbyProtocol.
     RegisterOk = 1020,
