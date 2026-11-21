@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Accounts;
 using Fineage.Protocol;
@@ -263,8 +264,7 @@ public sealed partial class ZoneWorld
         }
 
         int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, WallNow(), player.SubClassActive);
-        var changes = new List<InventoryUpdateEntryMsg>();
-        if (fee > 0 && !Take(player.Inventory, loc.FeeItemId, fee, changes))
+        if (fee > 0 && player.Inventory.CountOf(loc.FeeItemId) < fee)
         {
             bool adena = loc.FeeItemId == WarehouseRules.AdenaItemId;
             Notice(
@@ -276,15 +276,29 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (changes.Count > 0)
-        {
-            // The fare is a bag change like any other, and Net clients only see it through the bridge.
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, player.Inventory);
-        }
+        int locationIdRef = locationId;
+        RecordBagChange(
+            player,
+            LedgerTxKind.TeleportFee,
+            Fees,
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (fee > 0)
+                {
+                    Take(player.Inventory, loc.FeeItemId, fee, changes);
+                    if (changes.Count > 0)
+                    {
+                        FanInventory(session, Collapse(changes));
+                        SaveInventory(session, player.Inventory);
+                    }
+                }
 
-        Relocate(player, x, y, loc.Z);
-        Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText);
+                Relocate(player, x, y, loc.Z);
+                Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText);
+                return true;
+            },
+            _ => locationIdRef);
         return null;
     }
 

@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
 using Fineage.Zone.NpcHtml;
@@ -146,20 +147,37 @@ public sealed partial class ZoneWorld
             return PledgeProtocol.Conditions;
         }
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        if (cost.Adena > 0 && !Take(inventory!, PledgeProtocol.AdenaItemId, (int)cost.Adena, changes))
+        if (inventory == null)
             return PledgeProtocol.Conditions;
-        if (cost.ItemId > 0 && !Take(inventory!, cost.ItemId, 1, changes))
+        if (cost.Adena > 0 && inventory.CountOf(PledgeProtocol.AdenaItemId) < cost.Adena)
             return PledgeProtocol.Conditions;
+        if (cost.ItemId > 0 && inventory.CountOf(cost.ItemId) < 1)
+            return PledgeProtocol.Conditions;
+        int newLevel = clan.Level + 1;
+        RecordBagChange(
+            player,
+            LedgerTxKind.ClanLevelUp,
+            Fees,
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (cost.Adena > 0)
+                    Take(inventory, PledgeProtocol.AdenaItemId, (int)cost.Adena, changes);
+                if (cost.ItemId > 0)
+                    Take(inventory, cost.ItemId, 1, changes);
+                if (changes.Count > 0)
+                {
+                    FanInventory(session, Collapse(changes));
+                    SaveInventory(session, inventory);
+                }
+
+                return true;
+            },
+            _ => newLevel);
         if (cost.Sp > 0)
         {
             player.Sp -= cost.Sp;
             _persist.SaveProgress(session.Account, session.ObjectId, player.Level, player.Exp, player.Sp, player.MaxHp, player.CurHp, player.MaxMp, player.CurMp, player.MaxCp, player.CurCp);
-        }
-        if (changes.Count > 0)
-        {
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory!);
         }
         if (cost.Reputation > 0)
         {
