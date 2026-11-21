@@ -143,23 +143,24 @@ public sealed partial class ZoneWorld
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var move = BeginLedgerMove(LedgerTxKind.Drop, player.ObjectId, 0);
         ObserveLedger(move, bag);
+        IReadOnlyList<int> pieces = item.Template.Stackable ? [] : [item.ObjectId];
+        int groundId = item.Template.Stackable ? _itemIds.Next() : item.ObjectId;
+        PostOntoGroundPlanned(move, bag, groundId, itemId, count, pieces);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"drop refused for object {session.ObjectId}: ledger rejected instance {groundId}");
+            return "ledger";
+        }
+
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
 
-        InventoryUpdateMsg invUpdate;
-        if (removedEntirely)
-        {
-            invUpdate = new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] };
-        }
-        else
-        {
-            invUpdate = InventoryMessages.Update(InventoryChange.Modify, item);
-        }
+        InventoryUpdateMsg invUpdate = removedEntirely
+            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
+            : InventoryMessages.Update(InventoryChange.Modify, item);
 
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
-
-        SaveInventory(session, player.Inventory);
 
         var watchers = new List<ZoneEntity> { player };
         foreach (var other in Players())
@@ -179,10 +180,12 @@ public sealed partial class ZoneWorld
             player.InstanceId,
             watchers,
             dropperObjectId: player.ObjectId,
-            piece: item.Template.Stackable ? null : item);
-        if (ground != null)
-            PostOntoGround(move, bag, ground);
+            piece: item.Template.Stackable ? null : item,
+            reserveObjectId: item.Template.Stackable ? groundId : null);
+        if (ground == null)
+            return "bad_request";
         move.Commit(LedgerHoldingsOf);
+        SaveInventory(session, player.Inventory);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");
         return null;
     }
@@ -223,19 +226,37 @@ public sealed partial class ZoneWorld
 
         var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
         var source = LedgerAccount.Of(SystemAccount.DropSource);
+        var planned = new List<(DropStack Stack, int Dx, int Dy, int GroundId)>();
         foreach (var stack in rolls)
         {
+            if (!_game.Items.TryGet(stack.ItemId, out var template))
+                continue;
             int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
             int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            var ground = SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
-                ownerObjectId: ownerId,
-                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
-            if (ground != null)
-                PostOntoGround(move, source, ground);
+            int groundId = _itemIds.Next();
+            IReadOnlyList<int> pieces = template.Stackable ? [] : [groundId];
+            PostOntoGroundPlanned(move, source, groundId, stack.ItemId, stack.Count, pieces);
+            planned.Add((stack, dx, dy, groundId));
         }
 
-        if (move.HasPostings)
-            move.Commit(LedgerHoldingsOf);
+        if (!move.HasPostings)
+            return;
+
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"loot refused for npc {npcId}: ledger rejected ground postings");
+            return;
+        }
+
+        foreach (var (stack, dx, dy, groundId) in planned)
+        {
+            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
+                ownerObjectId: ownerId,
+                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs),
+                reserveObjectId: groundId);
+        }
+
+        move.Commit(LedgerHoldingsOf);
     }
 
     /// <summary>
@@ -253,7 +274,8 @@ public sealed partial class ZoneWorld
         int dropperObjectId = 0,
         int ownerObjectId = 0,
         long expireAtMs = 0,
-        ItemInstance? piece = null)
+        ItemInstance? piece = null,
+        int? reserveObjectId = null)
     {
         if (count <= 0)
             return null;
@@ -265,7 +287,7 @@ public sealed partial class ZoneWorld
 
         if (piece != null && (template.Stackable || count != 1 || piece.ItemId != itemId))
             throw new ArgumentException($"item {piece.ObjectId} is not one piece of {itemId}", nameof(piece));
-        int objectId = piece?.ObjectId ?? _itemIds.Next();
+        int objectId = reserveObjectId ?? piece?.ObjectId ?? _itemIds.Next();
         var ground = new ZoneEntity
         {
             ObjectId = objectId,

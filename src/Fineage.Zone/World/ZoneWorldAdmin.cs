@@ -166,6 +166,7 @@ public sealed partial class ZoneWorld
 
         if (paid.Count > 0)
         {
+            var inventoryBackup = Fineage.Accounts.CharacterInventory.Rows(player.Inventory!);
             var move = BeginShopMove(LedgerTxKind.ShopBuy, player, npcId: 0, castleId: 0);
             var mutation = Fineage.Game.Shops.ShopTrade.Buy(
                 player.Inventory!,
@@ -184,7 +185,8 @@ public sealed partial class ZoneWorld
                 return null;
             }
 
-            CommitShopMove(move, player, mutation, []);
+            if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup, []))
+                return null;
             SendTouches(session, mutation);
         }
 

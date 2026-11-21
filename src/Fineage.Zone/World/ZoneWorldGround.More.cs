@@ -72,8 +72,14 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(LedgerTxKind.Pickup, looter.ObjectId, ground.ObjectId);
         ObserveLedger(move, bag);
         PostOffGround(move, ground);
+        move.Post(bag, itemId, count, GroundPieces(ground));
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"pickup refused for object {looter.ObjectId} ground {ground.ObjectId}: ledger rejected the postings");
+            return;
+        }
+
         var added = AddGroundStack(looter.Inventory, ground);
-        move.Post(bag, itemId, count, PiecesOf(added));
         var invUpdate = new InventoryUpdateMsg
         {
             Changes = added

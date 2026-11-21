@@ -1,3 +1,4 @@
+using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Quests;
@@ -162,7 +163,7 @@ public sealed partial class ZoneWorld
     /// The NPC shop is the counterparty of everything the player gained or gave; castle tax leaves the shop for the
     /// treasuries it was credited to.
     /// </summary>
-    void CommitShopMove(LedgerMove move, ZoneEntity player, ShopMutation mutation, IReadOnlyList<(int CastleId, long Amount)> taxes)
+    void PostShopMove(LedgerMove move, ZoneEntity player, ShopMutation mutation, IReadOnlyList<(int CastleId, long Amount)> taxes)
     {
         var buyer = LedgerAccount.Inventory(player.ObjectId);
         var shop = LedgerAccount.Of(SystemAccount.NpcShop);
@@ -183,7 +184,26 @@ public sealed partial class ZoneWorld
             move.Post(shop, ShopTrade.AdenaItemId, -amount);
             move.Post(LedgerAccount.Treasury(castle), ShopTrade.AdenaItemId, amount);
         }
+    }
+
+    bool TryCommitShopMove(
+        LedgerMove move,
+        ZoneEntity player,
+        ZoneSession session,
+        ShopMutation mutation,
+        IReadOnlyList<StoredItem> inventoryBackup,
+        IReadOnlyList<(int CastleId, long Amount)> taxes)
+    {
+        PostShopMove(move, player, mutation, taxes);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"shop move refused for object {player.ObjectId}: ledger rejected the postings");
+            CharacterInventory.Replace(player.Inventory!, inventoryBackup);
+            SendDeny(session, ShopMutation.Fail(ShopDeny.NotTradable));
+            return false;
+        }
 
         move.Commit(LedgerHoldingsOf);
+        return true;
     }
 }

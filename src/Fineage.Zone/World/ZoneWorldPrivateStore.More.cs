@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.Trade;
@@ -107,14 +108,21 @@ public sealed partial class ZoneWorld
         var sellerChanges = new List<InventoryUpdateEntryMsg>();
         var move = BeginStoreSale(buyer, store);
 
+        PostStoreAdena(move, buyer, store, cost);
+        foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
+            PostTradeRow(move, store, buyer, row);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"private store sale refused between {buyer.ObjectId} and {store.ObjectId}: ledger rejected the postings");
+            return PrivateStoreProtocol.Closed;
+        }
+
         // Take adena from buyer → seller.
         if (!TransferAdena(buyer.Inventory, store.Inventory, (int)cost, buyerChanges, sellerChanges))
             return PrivateStoreProtocol.Adena;
-        PostStoreAdena(move, buyer, store, cost);
 
         foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
         {
-            PostTradeRow(move, store, buyer, row);
             TransferOfferRow(store.Inventory, buyer.Inventory, row, sellerChanges, buyerChanges);
             listing.Count -= row.Count;
             if (listing.Count <= 0)

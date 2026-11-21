@@ -22,6 +22,26 @@ public static class CharacterInventory
         return rows;
     }
 
+    public static void Replace(PlayerInventory inventory, IReadOnlyList<StoredItem> items)
+    {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(items);
+        Validate(items);
+        var rows = new PlayerInventory.StoredRow[items.Count];
+        for (int i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
+            rows[i] = new PlayerInventory.StoredRow(
+                item.ObjectId,
+                item.ItemId,
+                item.Count,
+                item.EnchantLevel,
+                item.EquippedSlot);
+        }
+
+        inventory.ReplaceFromStored(rows);
+    }
+
     public static PlayerInventory Restore(ItemCatalog catalog, ItemObjectIdAllocator ids, IReadOnlyList<StoredItem> items)
     {
         ArgumentNullException.ThrowIfNull(catalog);
