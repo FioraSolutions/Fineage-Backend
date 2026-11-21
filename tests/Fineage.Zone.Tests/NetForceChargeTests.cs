@@ -3,6 +3,7 @@ using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Net;
+using System.Linq;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
 using Xunit;
@@ -50,6 +51,28 @@ public sealed class NetForceChargeTests
     {
         kit.Now = kit.Now.AddSeconds(10);
         kit.World.ResolvePendingHitForTest(player);
+    }
+
+    [Fact]
+    public async Task Gladiator_skill_list_includes_learned_passives()
+    {
+        var (kit, _, player, _) = await GladiatorSetupAsync();
+        var msg = NetEnterWorldProjector.BuildSkills(player, kit.Now.ToUnixTimeMilliseconds());
+        Assert.True(msg.Skills.Length >= 10);
+
+        var game = TestCatalogs.Game;
+        bool listHasPassive = msg.Skills.Any(e =>
+        {
+            var template = game.Skills.Find(e.SkillId);
+            return template is { Passive: true };
+        });
+        bool bookHasPassive = player.KnownSkills.Keys.Any(id =>
+        {
+            var template = game.Skills.Find(id);
+            return template is { Passive: true };
+        });
+        Assert.True(bookHasPassive);
+        Assert.True(listHasPassive);
     }
 
     [Fact]
