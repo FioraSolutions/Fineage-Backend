@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
 
@@ -188,28 +189,25 @@ public sealed partial class ZoneWorld
         if (_byId.ContainsKey(definition.ObjectId))
             return false;
 
-        var entity = new ZoneEntity
+        if (!NpcMaterializeCatalog.ById.TryGetValue(definition.NpcId, out var template))
         {
-            ObjectId = definition.ObjectId,
-            Kind = ZoneEntityKind.Npc,
-            Name = definition.Name,
-            Title = definition.Title,
-            NpcType = definition.NpcType,
-            X = definition.X,
-            Y = definition.Y,
-            Z = definition.Z,
-            Heading = definition.Heading,
-            NpcId = definition.NpcId,
-            Attackable = definition.Attackable,
-            MaxHp = definition.MaxHp,
-            CurHp = order.CurrentHp,
-            MaxMp = definition.MaxMp,
-            CurMp = order.CurrentMp,
-            RunSpeed = definition.RunSpeed,
-            WalkSpeed = definition.WalkSpeed
-        };
-        _byId.Add(entity.ObjectId, entity);
-        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+            throw new InvalidOperationException(
+                $"Boss npcId={definition.NpcId} object={definition.ObjectId} has no npc template in npcs.json");
+        }
+
+        var row = SpawnCatalog.FromTemplate(
+            definition.ObjectId,
+            template,
+            definition.X,
+            definition.Y,
+            definition.Z,
+            definition.Heading,
+            name: definition.Name,
+            maxHp: definition.MaxHp,
+            attackable: definition.Attackable,
+            runSpeed: definition.RunSpeed,
+            walkSpeed: definition.WalkSpeed);
+        MaterializeNpc(row, mapId: null, order.CurrentHp, order.CurrentMp);
         return true;
     }
 }
