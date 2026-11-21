@@ -127,7 +127,17 @@ public sealed partial class ZoneWorld
         }
 
         int lureId = lure.ItemId;
-        int left = inventory.TakeOne(lure);
+        int left = 0;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                left = inventory.TakeOne(lure);
+                return lureId;
+            },
+            id => id);
         NetBridge?.FanoutInventoryUpdate([player.ObjectId],
             InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, lure));
         SaveInventory(session, inventory);

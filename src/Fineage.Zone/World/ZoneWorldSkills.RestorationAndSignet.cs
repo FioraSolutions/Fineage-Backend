@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -43,7 +44,7 @@ public sealed partial class ZoneWorld
         if (inventory == null)
             return false;
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (!Take(inventory, levelData.ItemConsumeId, levelData.ItemConsumeCount, changes))
+        if (!RecordConsume(player, levelData.ItemConsumeId, levelData.ItemConsumeId, levelData.ItemConsumeCount, changes))
         {
             SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
             return false;

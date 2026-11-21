@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = player.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !Take(inventory, row.ItemId, row.ItemCount, changes))
+                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
                 {
                     SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
                     return;
@@ -451,7 +451,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = owner.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory != null && Take(inventory, st.UpkeepItemId, st.UpkeepCount, changes))
+                if (inventory != null && RecordConsume(owner, st.UpkeepItemId, st.UpkeepItemId, st.UpkeepCount, changes))
                 {
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);

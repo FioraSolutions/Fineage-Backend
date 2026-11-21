@@ -82,7 +82,10 @@ public enum SystemAccount
     StarterKit = 15,
 
     /// <summary>GM or admin item grants into a player's bag.</summary>
-    GmGrants = 16
+    GmGrants = 16,
+
+    /// <summary>Potions, shots, arrows, skill costs and other item consumption.</summary>
+    Consumed = 17
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -260,7 +263,10 @@ public enum LedgerTxKind
     StarterKit = 44,
 
     /// <summary>Admin grant into the bag: <c>Reference</c> is item id.</summary>
-    GmGrant = 45
+    GmGrant = 45,
+
+    /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
+    Consume = 46
 }
 
 /// <summary>

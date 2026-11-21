@@ -39,7 +39,9 @@ public sealed partial class ZoneWorld
         bool resolved = _game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe);
         if (CraftRules.LearnScrollError(resolved, resolved && player.KnownRecipes.Contains(recipe!.Id)) is { } learnError)
             return learnError;
-        if (!player.Inventory!.TryRemoveFromStack(item, 1, out bool removedEntirely))
+        if (player.Inventory == null)
+            return InventoryProtocol.Blocked;
+        if (!RecordConsumeOne(player, item, recipe.Id, out bool removedEntirely))
             return InventoryProtocol.Blocked;
 
         player.KnownRecipes.Add(recipe.Id);
