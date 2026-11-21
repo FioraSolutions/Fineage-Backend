@@ -2,6 +2,7 @@ using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Movement;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -25,7 +26,7 @@ public sealed partial class ZoneWorld
 
     string? StartTimedMove(ZoneEntity entity, ZoneSession session, MoveToMsg move)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(entity, now);
 
         int destX = move.DestX, destY = move.DestY, destZ;
@@ -89,7 +90,7 @@ public sealed partial class ZoneWorld
     /// <summary>Stop in place (StopMove / attack / cast). Returns current server position.</summary>
     internal void StopTimedMove(ZoneEntity entity)
     {
-        AdvanceMove(entity, _clock().ToUnixTimeMilliseconds());
+        AdvanceMove(entity, NowUnixMs());
         SetMoveActive(entity, false);
         entity.MovePath.Clear();
         entity.MoveSegmentDirty = false;
@@ -98,19 +99,16 @@ public sealed partial class ZoneWorld
     /// <summary>Net StopMove: halt at the server's interpolated position so the correction is truthful.</summary>
     internal void StopMove(ZoneSession session)
     {
-        lock (_gate)
+        if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
         {
-            if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
-            {
-                AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
-                bool wasMoving = e.MoveActive;
-                StopTimedMove(e);
-                SyncSession(e, session);
-                // Mobius StopMove is broadcast: peers would otherwise keep running the pawn to the old destination.
-                // An idle StopMove (client spam) fans nothing.
-                if (wasMoving)
-                    FanoutStopInPlace(e);
-            }
+            AdvanceMove(e, NowUnixMs());
+            bool wasMoving = e.MoveActive;
+            StopTimedMove(e);
+            SyncSession(e, session);
+            // Mobius StopMove is broadcast: peers would otherwise keep running the pawn to the old destination.
+            // An idle StopMove (client spam) fans nothing.
+            if (wasMoving)
+                FanoutStopInPlace(e);
         }
     }
 
@@ -133,25 +131,22 @@ public sealed partial class ZoneWorld
     {
         dxy = 0;
         dz = 0;
-        lock (_gate)
+        if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
+            return false;
+        AdvanceMove(e, NowUnixMs());
+        bool geo = _geo.HasGeo(e.X, e.Y);
+        if (geo)
+            e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+        SyncSession(e, session);
+        double dx = clientX - e.X, dy = clientY - e.Y;
+        dxy = (int)Math.Sqrt(dx * dx + dy * dy);
+        dz = Math.Abs(clientZ - e.Z);
+        double allowXy = ValidateMaxXyDrift;
+        if (e.MoveActive)
         {
-            if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
-                return false;
-            AdvanceMove(e, _clock().ToUnixTimeMilliseconds());
-            bool geo = _geo.HasGeo(e.X, e.Y);
-            if (geo)
-                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
-            SyncSession(e, session);
-            double dx = clientX - e.X, dy = clientY - e.Y;
-            dxy = (int)Math.Sqrt(dx * dx + dy * dy);
-            dz = Math.Abs(clientZ - e.Z);
-            double allowXy = ValidateMaxXyDrift;
-            if (e.MoveActive)
-            {
-                allowXy += MoveSpeedOf(e) * ValidateLagSeconds;
-            }
-            return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
+            allowXy += MoveSpeedOf(e) * ValidateLagSeconds;
         }
+        return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
     }
 
     /// <summary>
@@ -163,9 +158,9 @@ public sealed partial class ZoneWorld
 
     void TickPlayerMovement(long now)
     {
-        if (_moving.Count == 0)
+        if (_byId.CountOf(ActiveSets.Moving) == 0)
             return;
-        foreach (int id in _moving.ToArray())
+        foreach (int id in Active(ActiveSets.Moving))
         {
             if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Player)
                 continue;
@@ -181,16 +176,20 @@ public sealed partial class ZoneWorld
                     var ack = new MoveToMsg
                     {
                         ObjectId = e.ObjectId,
-                        DestX = e.MoveDestX, DestY = e.MoveDestY, DestZ = e.MoveDestZ,
-                        OriginX = e.X, OriginY = e.Y, OriginZ = e.Z
+                        DestX = e.MoveDestX,
+                        DestY = e.MoveDestY,
+                        DestZ = e.MoveDestZ,
+                        OriginX = e.X,
+                        OriginY = e.Y,
+                        OriginZ = e.Z
                     };
                     // Keep approach sync on the current leg so client mid-path reports are not treated as cancel.
-                    if (e.Session is { ApproachTargetId: > 0 } session)
+                    if (e.Session != null && e.Intent.ApproachTargetId > 0)
                     {
-                        session.ApproachOriginX = e.X;
-                        session.ApproachOriginY = e.Y;
-                        session.ApproachDestX = e.MoveDestX;
-                        session.ApproachDestY = e.MoveDestY;
+                        e.Intent.ApproachOriginX = e.X;
+                        e.Intent.ApproachOriginY = e.Y;
+                        e.Intent.ApproachDestX = e.MoveDestX;
+                        e.Intent.ApproachDestY = e.MoveDestY;
                     }
                     RefreshMovingKnownlist(e, ack);
                     continue;

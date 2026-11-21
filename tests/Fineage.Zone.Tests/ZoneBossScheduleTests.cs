@@ -14,8 +14,7 @@ public sealed class ZoneBossScheduleTests
         var schedule = new BossSchedule(
             BossCatalog.From([Boss(enabled: true)]),
             new MemoryBossStore(),
-            () => clock.Now,
-            new MinRandom());
+            clock.Now.ToUnixTimeMilliseconds());
         Assert.True(schedule.TryNoteVitals(25001, 15, 9));
 
         var world = World(clock, schedule);
@@ -43,8 +42,7 @@ public sealed class ZoneBossScheduleTests
         var schedule = new BossSchedule(
             BossCatalog.From([Boss(enabled: false)]),
             new MemoryBossStore(),
-            () => clock.Now,
-            new MinRandom());
+            clock.Now.ToUnixTimeMilliseconds());
         var world = World(clock, schedule);
         Assert.DoesNotContain(80001, world.NpcObjectIds);
 
@@ -73,7 +71,8 @@ public sealed class ZoneBossScheduleTests
                     [new SpawnNpcDefinition(50001, 20001, "Gremlin", 1, 2, 3, 0, true, 96, 80, 40, 60, 0)])
             }),
             clock: () => clock.Now,
-            bosses: schedule);
+            bosses: schedule,
+            bossRandom: new MinRandom());
 
     static BossDefinition Boss(bool enabled)
     {
@@ -107,8 +106,8 @@ public sealed class ZoneBossScheduleTests
         public void Advance(TimeSpan delta) => Now += delta;
     }
 
-    sealed class MinRandom : IBossRandom
+    sealed class MinRandom : Random
     {
-        public long NextInclusive(long minInclusive, long maxInclusive) => minInclusive;
+        public override int Next(int maxValue) => 0;
     }
 }

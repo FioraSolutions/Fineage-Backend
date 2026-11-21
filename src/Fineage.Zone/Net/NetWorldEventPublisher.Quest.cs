@@ -32,12 +32,46 @@ sealed partial class NetWorldEventPublisher
             };
         }
 
+        var rewardSets = (list.RewardSets ?? []).Select(set => new QuestJournalRewardSetNet
+        {
+            QuestId = set.QuestId,
+            Rows = (set.Rows ?? []).Select(r => new QuestJournalRewardNet
+            {
+                Kind = r.Kind,
+                ItemId = r.ItemId,
+                Count = r.Count,
+                Label = r.Label ?? ""
+            }).ToArray()
+        }).ToArray();
+
         return new QuestListNetMsg
         {
             Active = active,
             CompletedMask = list.CompletedMask ?? [],
             CompletedQuestIds = list.CompletedQuestIds ?? [],
-            MaxActive = list.MaxActive
+            MaxActive = list.MaxActive,
+            RewardSets = rewardSets
         };
+    }
+
+    void IWorldEventPublisher.FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, QuestDirectionNetMsg msg)
+    {
+        var payload = NetCodec.EncodeQuestDirection(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.QuestDirection, payload);
+    }
+
+    void IWorldEventPublisher.FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, QuestNpcMarksNetMsg msg)
+    {
+        var payload = NetCodec.EncodeQuestNpcMarks(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.QuestNpcMarks, payload);
+    }
+
+    void IWorldEventPublisher.FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, TutorialUiNetMsg msg)
+    {
+        var payload = NetCodec.EncodeTutorialUi(msg);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.TutorialUi, payload);
     }
 }

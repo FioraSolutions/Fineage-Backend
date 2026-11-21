@@ -35,7 +35,7 @@ public sealed class NpcTalkPacketHandler
         }
 
         var talk = NetCodec.DecodeNpcTalk(envelope.Payload);
-        string? error = await _world.TryNpcTalkAsync(zoneSession, talk.NpcObjectId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new NpcTalkCommand(talk.NpcObjectId), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "NpcTalk failed.", ct).ConfigureAwait(false);
     }

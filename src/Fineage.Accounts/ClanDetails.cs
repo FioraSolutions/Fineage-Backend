@@ -26,6 +26,8 @@ public sealed class ClanDetails
     public Dictionary<int, int> RankPrivileges { get; set; } = [];
     /// <summary>Clans this clan declared war on (Mobius <c>clan_wars.clan1 = this</c>).</summary>
     public List<int> WarTargets { get; set; } = [];
+    /// <summary>Enemy clan id → unix ms when a new declaration is allowed again (Mobius post-war penalty, five days).</summary>
+    public Dictionary<int, long> WarCooldownUntilUnixMs { get; set; } = [];
     public Dictionary<int, ClanMemberDetails> Members { get; set; } = [];
     public List<ClanItemSave> Warehouse { get; set; } = [];
 
@@ -77,3 +79,14 @@ public sealed class ClanHallBidSave
     public long Amount { get; set; }
     public long TimeUnixMs { get; set; }
 }
+
+/// <summary>Mobius <c>siegable_clanhall</c> + <c>clanhall_siege_attackers</c>.</summary>
+public sealed record SiegableClanHallSave(
+    int Id,
+    int OwnerClanId,
+    long NextSiegeUnixMs,
+    bool RegistrationClosed,
+    bool InProgress,
+    long EndsUnixMs,
+    IReadOnlyList<int>? Attackers = null,
+    int PendingWinnerClanId = 0);

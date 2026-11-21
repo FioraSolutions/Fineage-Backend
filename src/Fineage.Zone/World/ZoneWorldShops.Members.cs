@@ -64,7 +64,7 @@ public sealed partial class ZoneWorld
         owned = false;
         if (npc.MerchantCastleId <= 0)
             return;
-        var castle = _siege.Find(npc.MerchantCastleId);
+        var castle = _siege.Board.Find(npc.MerchantCastleId);
         if (castle == null || castle.OwnerClanId <= 0)
             return;
         owned = true;
@@ -73,7 +73,7 @@ public sealed partial class ZoneWorld
 
     BuyListMsg BuyList(ZoneEntity npc, BuyListDefinition list, int baseTax, int castleTax)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var items = new BuyListItemMsg[list.Products.Count];
         for (int i = 0; i < items.Length; i++)
         {

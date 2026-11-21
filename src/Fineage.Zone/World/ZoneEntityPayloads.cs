@@ -35,6 +35,7 @@ sealed class ZoneGroundItemPayload
     public int ItemId { get; set; }
     public int Count { get; set; } = 1;
     public bool Stackable { get; set; }
+    public int Enchant { get; set; }
     public int OwnerId { get; set; }
     public long ProtectUntilMs { get; set; }
     public long ExpireAtMs { get; set; }
@@ -148,14 +149,6 @@ sealed class ZonePlayerIdentityPayload
     public bool Newbie { get; set; } = true;
 }
 
-/// <summary>Player friend/block social fields composed off <see cref="ZoneEntity"/> (#353).</summary>
-sealed class ZonePlayerSocialPayload
-{
-    public Dictionary<int, string> Friends { get; } = [];
-    public Dictionary<int, string> Blocked { get; } = [];
-    public bool BlockAll { get; set; }
-}
-
 /// <summary>Shared HP/MP/XP/sitting/death fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneEntityVitalsPayload
 {
@@ -249,6 +242,7 @@ sealed class ZonePlayerStatusPayload
     public int WeightPenaltyLevel { get; set; }
     public double RegenCarryHp { get; set; }
     public double RegenCarryMp { get; set; }
+    public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
     public HashSet<int> AutoShots { get; } = [];

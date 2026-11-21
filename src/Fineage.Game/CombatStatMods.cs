@@ -62,7 +62,8 @@ public enum CombatStat
     EarthRes,      // earthRes
     TransDam,      // transDam (Transfer Pain: percent of incoming damage sent to the servitor)
     Cancel,        // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
-    DamageZoneVuln // damageZoneVuln (Dance of Protection)
+    DamageZoneVuln, // damageZoneVuln (Dance of Protection)
+    RegCp          // regCp (Mobius REGENERATE_CP_RATE: Clan Morale, Apella sets, Grade Penalty)
 }
 
 /// <summary>

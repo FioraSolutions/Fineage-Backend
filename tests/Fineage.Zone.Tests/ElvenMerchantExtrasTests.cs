@@ -13,9 +13,10 @@ public sealed class ElvenMerchantExtrasTests
     public void Merchant_page_commands_all_have_handlers()
     {
         var reg = BypassRegistry.CreateDefault(NpcHtmlCatalog.LoadDefault());
-        Assert.IsType<TerritoryBypassHandler>(reg.Find("TerritoryStatus"));
+        var territory = Assert.IsType<TerritoryBypassHandler>(reg.Find("TerritoryStatus"));
         Assert.IsType<ShopBypassHandler>(reg.Find("exc_multisell 003"));
         Assert.NotNull(reg.Find("Wear 3014700"));
+        Assert.Contains("TerritoryStatus", territory.Commands);
     }
 
     [Fact]

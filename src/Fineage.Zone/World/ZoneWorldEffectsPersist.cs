@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Game.Skills;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -14,7 +15,7 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind != ZoneEntityKind.Player)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var rows = new List<StoredEffect>();
         var storedSkillIds = new HashSet<int>();
 
@@ -63,7 +64,7 @@ public sealed partial class ZoneWorld
     {
         if (entity.Kind != ZoneEntityKind.Player || stored?.Effects == null || stored.Effects.Count == 0)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var e in stored.Effects)
         {
             if (e == null || !e.IsValid)
@@ -89,7 +90,7 @@ public sealed partial class ZoneWorld
         }
 
         if (entity.Abnormals.Count > 0)
-            _withAbnormals.Add(entity.ObjectId);
+            _byId.Join(entity, ActiveSets.WithAbnormals);
         RefreshRunSpeed(entity);
     }
 }

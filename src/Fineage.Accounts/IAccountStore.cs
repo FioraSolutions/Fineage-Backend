@@ -4,6 +4,9 @@ namespace Fineage.Accounts;
 
 public interface IAccountStore
 {
+    /// <summary>Next item instance id this store will assign (Mobius character_items sequence).</summary>
+    int NextItemObjectId { get; }
+
     bool AccountExists(string account);
 
     AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email);
@@ -163,6 +166,10 @@ public interface IAccountStore
     IReadOnlyList<ClanHallSave> ListClanHalls();
 
     bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls);
+
+    IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls();
+
+    bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls);
 
     /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
     StoredPet? FindPet(int controlObjectId);

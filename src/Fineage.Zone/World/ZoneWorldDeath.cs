@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -9,9 +10,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryRevive(session, action);
+        string? error = TryRevive(session, action);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -20,16 +19,8 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryAdminKillPlayerAsync(ZoneSession session, CancellationToken ct)
     {
-        if (!IsLive(session))
-            return Task.FromResult<string?>("world");
-
-        string? error;
-        lock (_gate)
-            error = TryAdminKillPlayer(session);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        using (_affinity.Step())
+            return Task.FromResult(IsLive(session) ? TryAdminKillPlayer(session) : "world");
     }
 
     string? TryAdminKillPlayer(ZoneSession session)
@@ -42,6 +33,13 @@ public sealed partial class ZoneWorld
         ApplyPlayerDeath(player, killerObjectId: 0);
         ZoneLog.Info($"death object={player.ObjectId} admin_kill");
         return null;
+    }
+
+    /// <summary>Test hook: full player death pipeline with a killer object id.</summary>
+    internal void ApplyPlayerDeathForTest(ZoneEntity player, int killerObjectId)
+    {
+        using (_affinity.Step())
+            ApplyPlayerDeath(player, killerObjectId);
     }
 
     string? TryRevive(ZoneSession session, int action)
@@ -93,18 +91,19 @@ public sealed partial class ZoneWorld
             return;
 
         EndFishing(player, win: false);
+        ClearMount(player);
         player.Dead = true;
         player.CurHp = 0;
         ClosePrivateStore(player.ObjectId, standUp: false);
         // A dead player cannot finish an exchange: close the window on both sides, drop pending asks.
         TradePlayerLeftWorld(player.ObjectId);
         if (player.Session != null)
-            player.Session.SitOnArrive = false;
+            player.Intent.SitOnArrive = false;
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
         player.Abnormals.Clear();
-        _withAbnormals.Remove(player.ObjectId);
+        _byId.Leave(player, ActiveSets.WithAbnormals);
         // Mobius Creature.doDie -> getEffectList().stopAllEffects() then updateEffectIcons: the corpse's abnormal bar
         // empties for every watcher, so a stunned/slept victim still plays its death animation and revives clean.
         FanoutAbnormal(player);
@@ -250,19 +249,9 @@ public sealed partial class ZoneWorld
             Values = [0, dead.MaxHp]
         };
 
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (!ReferenceEquals(watcher, dead) && !watcher.Knownlist.Contains(dead.ObjectId))
-                continue;
+        var netWatchers = NetWatchersOf(dead);
 
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
-
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
         {
             NetBridge.FanoutDie(netWatchers, dead.ObjectId, killerObjectId, RestartFlagsFor(dead));
             NetBridge.FanoutStatusUpdate(netWatchers, status);
@@ -271,19 +260,7 @@ public sealed partial class ZoneWorld
 
     void FanoutRevive(ZoneEntity actor)
     {
-        List<int>? netWatchers = null;
-        if (actor.Session != null)
-            netWatchers = [actor.ObjectId];
-
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, actor))
-                continue;
-            if (!watcher.Knownlist.Contains(actor.ObjectId))
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOfRevive(actor);
 
         if (netWatchers is { Count: > 0 })
         {

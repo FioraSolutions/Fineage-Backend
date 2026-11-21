@@ -26,7 +26,7 @@
       "npcId": 30350,
       "hook": "event",
       "when": "absent",
-      "event": "30350-03",
+      "event": "30350-04",
       "minLevel": 15,
       "ops": [
         {
@@ -45,7 +45,7 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30350-event-30350-03-002.htm"
+      "htmlFile": "30350-event-30350-04-002.htm"
     },
     {
       "npcId": 30350,
@@ -110,8 +110,13 @@
       "hasItem": 1076,
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 1076,
+          "count": 1
+        },
+        {
           "op": "give_adena",
-          "count": 15000
+          "count": 3000
         },
         {
           "op": "complete"
@@ -143,6 +148,11 @@
       "cond": 2,
       "hasItem": 1106,
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1106,
+          "count": 1
+        },
         {
           "op": "give_adena",
           "count": 20000

@@ -1,0 +1,588 @@
+# Zone simulation architecture
+
+Status: **steps 1–12 implemented** (single `RegionTickScheduler` step at 200 ms with slow stages at period 15;
+region containers and handoff; region bodies with optional `ParallelRegionExecutor` behind
+`FINEAGE_ZONE_REGION_WORKERS`; command ingress and replay; global and social actors; economy ledger on critical
+moves with Postgres append-only journal; `WorldAffinity` replaces `ZoneWorld._gate`). **Step 13+** (`IRegionHost` over
+a transport) is planned.
+Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
+fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
+of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
+
+Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region hosts over a transport").
+
+---
+
+## 1. Summary
+
+| | Implemented (step 12) | Target (step 13+) |
+|---|---|---|
+| Ownership | `RegionDirectory` + per-region containers; handoff at the end-of-tick barrier | Same abstraction behind `IRegionHost`; gateways route by owner |
+| Concurrency | `WorldAffinity`: one thread owns a step; region stages may use workers (off by default) | Parallel region workers as default on hot tiles; no world-wide lock |
+| Clock | One `RegionTickScheduler` (200 ms); slow stages at period 15; one time sample per step | Unchanged |
+| Cross-entity effects | Region bodies own their entities; border snapshots and region messages | Transport-delivered messages between hosts |
+| Global systems | `GlobalActor` (bosses, sieges, olympiad, lottery, …) on the scheduler thread | Same actors; optional remote mailboxes |
+| Fan-out | Per-step outbox via `OutboxingWorldEventPublisher`; watcher index trims full scans | Fully coalesced batched frames per connection |
+| Economy | Double-entry ledger + hash-chained journal on shop, trade, ground, warehouse, and more; bags still persisted | All value moves on the journal; bags are projections only |
+| Scale-out | One process, one world | Multi-process region hosts |
+
+---
+
+## 2. Current state
+
+### 2.1 What runs where
+
+One loop drives the world: `SimulationLoopAsync` (`World/ZoneWorldRegen.cs`) wakes on each fixed step, calls
+`StepSimulation`, and the thread running that step owns the world (`WorldAffinity`). Packet handlers submit commands
+and requests to `ZoneCommandIngress`; they do not touch world state directly.
+
+```mermaid
+flowchart LR
+    subgraph IO["Net I/O (thread pool, one task per connection)"]
+        C1[NetConnection read loop] --> H1[NetZoneServer.HandleAsync<br/>*PacketHandler]
+    end
+    subgraph SIM["Simulation (dedicated loop)"]
+        S[SimulationLoopAsync<br/>RegionTickScheduler<br/>200 ms step, period-15 slow stages]
+    end
+    ING[ZoneCommandIngress]
+    AFF[WorldAffinity<br/>step owner thread]
+    W[(ZoneWorld state<br/>regions, active sets,<br/>knownlists, AOI, sessions)]
+    H1 -->|commands / requests| ING
+    S --> AFF --> W
+    ING -->|applied in commands stage| AFF
+    W -->|outbox per step| P[OutboxingWorldEventPublisher] --> HUB[NetPresenceHub] --> OUT[NetConnection]
+```
+
+### 2.2 Concrete bottlenecks
+
+| # | Bottleneck | Where | Effect |
+|---|---|---|---|
+| B1 | One lock for the whole world | `ZoneWorld._gate` (`World/ZoneWorld.cs:98`), ~200 `lock (_gate)` sites in `World/`, entered by every packet handler through `ZoneWorld` methods | The zone runs on one core at a time. A 200 ms combat tick, a 3 s sim tick and every packet handler queue behind each other; handler latency grows with tick cost. **Fixed in step 12** (the thread running a step owns the world, `WorldAffinity`; handlers submit commands and requests). |
+| B2 | Audience by full player scan | `Players()` (`World/ZoneWorld.Members.Views.cs:50`) allocates a list by scanning every entity; 48 `foreach … in Players()` call sites, e.g. `FanoutVitals` (`World/ZoneWorldRegen.Members.cs:82`), `FanoutAbnormal` (`World/ZoneWorldAbnormals.Tick.cs:158`), `ActorAudience` (`World/ZoneWorldCombat.Members.cs:257`), `ReleaseThink` (`World/ZoneWorldActiveSets.cs:125`) | Every vitals/abnormal/attack fan-out costs O(players), so a tick costs O(subjects × players). 2 000 wounded entities × 3 000 players is 6 M knownlist probes per regen tick, all under B1. |
+| B3 | Per-tick list copies of the population | `TickAutoAttacks` copies `Players().ToList()` every 200 ms (`World/ZoneWorldCombat.Members.cs:124`); regen/abnormal ticks `ToArray()` the active sets | Steady allocation at 5 Hz feeds GC pauses, which stall the lock holder. |
+| B4 | Simulation loop died silently on any exception | `SimulationLoopAsync` had no catch; the task was never observed | One throw in any of 13 systems stopped regen, spawns, sieges and olympiad for the rest of the process. **Fixed in step 1** (per-stage isolation, logged with stage/region/tick). |
+| B5 | Missed ticks were invisible | `PeriodicTimer` coalesces missed periods | Overload showed up as slower regen, not as a signal. **Fixed in step 1** (`fineage.tick.overruns`, warning naming the slowest stages). |
+| B6 | Wall clock read per subsystem, hash-order iteration | `_clock()` called once per `Tick*`; `HashSet`/`Dictionary` iteration order in ticks | The same inputs do not reproduce the same run, so there is no replay testing. **Step 1** samples time once per step and orders region work deterministically for the migrated stages. **Step 5** derives stage time from the tick and logs commands for replay (section 4). |
+| B7 | Shared, unseeded randomness | `Random.Shared` defaults for combat, spawn, drop, death, service (`World/ZoneWorld.cs:203-262`) | Not reproducible; one shared stream cannot be split across parallel regions. **Step 5** replaces them with seeded streams per (purpose, region) (section 3.2); **step 6** does the same for enchant, olympiad matchmaking and town respawn points. |
+| B8 | Fan-out is per event and per watcher | `NetWorldEventPublisher.FanoutStatusUpdate` encodes, then `NetPresenceHub.TrySend` takes the hub lock per watcher (`Net/NetPresenceHub.cs:51,80`) | N small frames per tick per watcher, lock traffic proportional to watchers × events, no coalescing of superseded StatusUpdates. |
+| B9 | Knownlist diff fan-out awaits inside the request path | `NetKnownlistFanout.FanDiffAsync` awaits `SendAsync` per spawn/despawn (`Net/NetKnownlistFanout.cs`) | A slow client slows its own handler; spawn bursts (teleport into Giran) are serial. |
+| B10 | Economy persisted as snapshots | `ZoneCharacterPersist.ReplaceItems` / `ReplaceWarehouse` (`World/ZoneCharacterPersist.cs:59-63`), deferred by `WithDeferredInventoryPersist` (`World/ZoneWorld.Members.Persist.cs:129`); trade writes two bags (`World/ZoneWorldTrade.More.cs:106`) | No record of *why* an item moved, no idempotency, and a crash between the two bag writes duplicates or loses items. Nothing to audit or reconcile against. |
+| B11 | Session intent state mutated from two sides | `ZoneSession` (`AutoAttackTargetId`, approach, pending cast/pickup/talk) written by handlers and by the combat tick | Correct only because of B1; blocks any move off the lock. **Step 6** writes it only from commands applied inside the step; **step 8** moved it into `PlayerIntent` on the player entity (`ZoneEntity.Intent`), so the region that owns the player is its only writer. |
+
+L2J has the same shape plus per-object scheduled tasks; Fineage already replaced those with active sets
+(`World/ZoneWorldActiveSets.cs`), which is the right base for regions: only entities with work are visited.
+
+---
+
+## 3. Target design
+
+### 3.1 Overview
+
+```mermaid
+flowchart TB
+    subgraph EDGE["Gateways (stateless, geo-distributed later)"]
+        GW1[Gateway] & GW2[Gateway]
+    end
+    subgraph ZONE["Zone process (one game server today)"]
+        ING[Ingress router<br/>EntityId → owner region]
+        subgraph RH["IRegionHost (local)"]
+            R1[Region 21_19<br/>inbox · state · outbox]
+            R2[Region 22_22<br/>inbox · state · outbox]
+            R3[Region i7:22_22<br/>instance]
+        end
+        SCHED[RegionTickScheduler<br/>fixed step, stage barrier]
+        subgraph ACT["Global actors"]
+            OLY[Olympiad] & SIE[Sieges] & SS[Seven Signs] & LOT[Lottery] & BOSS[Boss schedule] & SOC[Party / Clan / Chat]
+        end
+        FAN[Fan-out workers<br/>batch per connection per tick]
+        LED[Economy ledger service]
+    end
+    DB[(Journal + projections)]
+    SETTLE[[External settlement adapter<br/>optional, later]]
+
+    GW1 & GW2 --> ING --> R1 & R2 & R3
+    SCHED -. drives .-> RH
+    R1 <-->|messages / handoff| R2
+    R1 & R2 & R3 <-->|messages| ACT
+    R1 & R2 & R3 -->|tick outbox| FAN --> GW1 & GW2
+    R1 & R2 & R3 -->|transactions| LED --> DB
+    ACT -->|transactions| LED
+    LED -.->|committed feed| SETTLE
+```
+
+### 3.2 Regions
+
+- **Identity.** `RegionId(InstanceId, X, Y)` (`src/Fineage.Zone/Simulation/RegionId.cs`). The default partition
+  is the Interlude map tile, 32 768 units with geodata offsets, so a region id reads like its geodata file
+  (Giran `22_22`). Instances (dungeons, olympiad arenas) are separate regions on the same tile. The partition is
+  pluggable (`IRegionPartition`), so hot tiles (Giran, a castle during siege) can later be split into quadrants
+  without touching systems.
+- **Ownership.** A region owns the entities whose position lies in it: the entity record, its active-set
+  memberships (`moving`, `thinking`, `aiBusy`, `pendingHit`, `decaying`, `needRegen`, `withAbnormals`), its
+  knownlist and a region-local AOI index (the current `GridAoi` cell of 3 000 units fits a 32 768 tile 11×11).
+  Player session intent (B11) moves into the player entity and is written only by the owning region, from commands.
+  Since step 7 `RegionDirectory<T>` (`Simulation/RegionDirectory.cs`) holds every world entity: each one is owned
+  by exactly one `RegionContainer`, routed by id to `(RegionId, epoch)`, and carries its active-set memberships,
+  which the owning region indexes for its stages (`Snapshot` and `Collect` go region by region, ids ascending). An
+  entity can join a set before it is placed; removal clears its memberships. Ownership changes only at the handoff
+  barrier (section 3.5), so an entity a few hundred units past a tile edge is still owned, and its rolls drawn, by
+  the region it came from. Since step 8 each container also indexes its entities by `CellSize` cell (3 000 units,
+  the `GridAoi` cell), kept current on every relocation and checked by `Verify`; region bodies query it through
+  `OwnedNear` (their own entities, ids ascending) and the scheduler thread through `InCells`. Session intent lives on
+  the player entity (`PlayerIntent`) and the knownlist already did (`ZoneEntity.Knownlist`). The world `GridAoi`
+  still drives knownlist diffs, since it also places ground items and quest anchors that are not region members, and
+  the reverse watcher index stays world-wide; both are written only by world stages, so region bodies read them
+  safely. They become region-local when movement runs in regions.
+- **Interest radius ≤ region size.** Visibility and AoE never reach beyond the 8 neighbours, which bounds every
+  cross-region interaction to neighbour messages and border snapshots.
+- **Region-local RNG.** Each region draws from its own stream per purpose (`RandomPurpose`: combat, spawn, drop,
+  death, service, quest, soul crystal, enchant, town respawn), seeded by `(worldSeed, purpose, RegionId)` and advanced only by draws made
+  for that region (`SeededRegionRandom`, `Simulation/RegionRandom.cs`). A rule draws from the region of the entity
+  that acts: the attacker for hits and skill effects, the target for a debuff landing on it, the corpse for drops,
+  the killer for quest rolls, the enchanter for enchant rolls. Purposes keep one system's new draw from shifting another's
+  sequence. Global systems (fishing, manor, lottery, mammon, olympiad matchmaking) draw from one seeded stream each. The generator is xoshiro256** owned in
+  `Simulation/SimulationRandom.cs`, so a seed rolls the same values on every runtime version. The world seed comes
+  from `FINEAGE_ZONE_SEED` (fresh when unset, logged at startup).
+
+### 3.3 Tick pipeline
+
+One fixed step (target 200 ms, the current combat cadence). Every stage declares a period in ticks; today's 3 s
+systems become period 15. Within a step, stages run in a fixed order with a barrier between them; within a region
+stage, regions run in parallel, each single-threaded.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S as Scheduler (tick t)
+    participant R as Region (×N, parallel)
+    participant A as Global actors
+    participant F as Fan-out
+    S->>R: 0 drain inbox (commands, messages, handoffs from t-1), sorted by (source, seq)
+    S->>R: 1 intents and AI think (period 1)
+    S->>R: 2 movement and AOI update
+    S->>R: 3 action resolution: attacks, casts, hits due at t
+    S->>R: 4 effects: regen (period 15), abnormals / DoT / toggles
+    S->>R: 5 lifecycle: death, drops, corpse decay, spawns, despawns
+    S->>R: 6 border exchange: publish snapshot, emit cross-region messages
+    S->>A: actors step (own periods), reply by message for t+1
+    R-->>F: 7 sealed outbox(t), immutable
+    Note over F: encode and batch per connection<br/>while the next tick runs
+```
+
+### 3.4 Threading model
+
+- **Simulation workers.** A fixed pool, one per core minus I/O headroom, runs region bodies through
+  `IRegionExecutor` (`ParallelRegionExecutor` today wraps `Parallel.For` with a bounded degree). The scheduler
+  thread runs collect steps and world stages and waits at each stage barrier.
+- **Inside a region:** one thread at a time, plain collections, no locks. A region body may read and write only
+  its own state, read the previous tick's neighbour snapshots, and append to its own outbox or outgoing mailboxes.
+- **Between regions:** multi-producer single-consumer mailboxes. Messages posted during tick *t* are consumed in
+  phase 0 of *t+1*, ordered by `(sourceRegion, sequence)`, so arrival order between threads cannot change results.
+- **I/O threads never touch simulation state.** Handlers decode, validate shape, and enqueue a command for the
+  owning region. Reads that need world state (enter-world projection) become request messages answered at the next
+  tick. Since step 6 every gameplay handler submits a `ZoneCommand` (`World/ZoneCommands*.cs`) through
+  `ZoneWorld.ExecuteAsync` into `ZoneCommandIngress`; the `commands` world stage, first at period 1, applies them in
+  submission order (phase 0). The handler awaits the outcome, which completes only after the applying step's
+  persistence flush and fan-out drain, so a reply never overtakes the frames or writes it caused. A submission
+  cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
+  tick it stopped at.
+- **One owner (step 12).** `ZoneWorld._gate` is gone. Once the simulation loop or a command pump drives the world,
+  only the thread running a step touches it (`World/WorldAffinity.cs`), and the region bodies that step runs;
+  `RegionDirectory` checks it on every access and throws "… off the simulation thread" for anyone else, so a missed
+  handler is an error, not a race. Work that is not player input goes through the same ingress as a `ZoneRequest`
+  (`World/ZoneRequests.cs`), applied in submission order with the commands around it and neither logged nor
+  replayed: enter and leave (the database load and save stay on the caller), shortcut bar edits, and the read-only
+  projections handlers send (`OnSimulationAsync`). A handler that needs state before and after its command (the
+  knownlist diff of a move) uses `ExecuteAroundAsync`: the command is applied and logged as usual and the
+  projection reads around it in the same step. Frames built there (`Net/NetFrame.cs`) are sent from the I/O thread.
+  A world nothing drives (tests, tools) runs these bodies on the caller. Steps from more than one thread (a pump and
+  a test or admin hook) take turns; handlers never do.
+- **Region bodies (step 8).** Every region body runs in an `IRegionScope` (`Simulation/IRegionScope.cs`) that the
+  scheduler commits in ascending region order after the stage barrier, whichever executor ran the bodies. The world's
+  scope (`World/ZoneWorldRegionBodies.cs`) records the body's fan-out into a batch of its own
+  (`WorldFanoutSequencer.RecordRegion`, absorbed into the step's batch with the same coalescing), defers world
+  bookkeeping (`AtBarrier`, the party vitals queue) and collects region messages. Inside a body `RegionDirectory`
+  throws on placement, removal, relocation, handoff, world-wide counts and listings, and set changes of entities
+  another region owns, so a race becomes a concrete error in both executors. A stage opts into worker threads with
+  `IRegionStage.Parallel`; regen (players, NPCs) and abnormals do. `FINEAGE_ZONE_REGION_WORKERS` picks the executor:
+  0 (default) runs regions one after another on the scheduler thread, N spreads opted-in stages over N workers; the
+  startup banner prints `regions=sequential|parallel:N`. A parallel executor refuses an injected `Random`
+  (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take a
+  world turn (`WorldAffinity.Step` throws there): the scheduler thread holds it while it waits at the barrier.
+- **Global actors** run on the scheduler thread as world stages (cheap) or on their own single-threaded loop when
+  they do I/O; they talk to regions only by message. In process (step 9) each one is a `GlobalActor<TEffect>`
+  (`Simulation/GlobalActor.cs`) that owns its state and holds no clock: its stage calls `Step(tick)`, which runs the
+  actor's schedule at the tick time (`ActorTime.Simulation`: boss respawns, olympiad) or at the step's wall sample
+  (`ActorTime.Calendar`: seven signs, sieges, manor, lottery, mammon, hall auctions) and returns effects that the world
+  applies after the actor returned (spawns, notices, castle and arena changes). Rolls draw from the actor's own stream
+  (`RandomPurpose.Boss`, `Lottery`, `Mammon`, `Olympiad`). Commands reach the actor's state through a guarded
+  accessor (`Board`, `Engine`, `Schedule`) at the step's time. Region bodies never reach an actor: the accessors
+  and `Step` throw when `RegionTickScheduler.CurrentBody` is set, and a body that has news for one (a boss died to a
+  DoT) defers it with `AtBarrier`, which runs on the scheduler thread in region order. Stage names and their order
+  are unchanged. The social actors (step 10, §3.5) use the same guard; chat and friends have no schedule and derive
+  from the untyped `GlobalActor`, so they are request-only.
+- **Persistence and the ledger** run outside the tick. Regions hand them immutable records and get results back
+  as messages.
+
+### 3.5 Cross-region interactions
+
+**Entity crossing a border (handoff).** The owner detects the crossing after movement, with hysteresis (a few
+hundred units past the boundary) so pacing along an edge does not ping-pong.
+
+In process (step 7): every position or instance write reaches the AOI (`Enter`/`Move`), and `RelocationTrackingAoi`
+marks the entity as a handoff candidate. The `handoff` world stage, registered last at period 1, is the end-of-tick
+barrier: it walks the candidates in ascending id order and moves each one whose owner no longer holds its position
+(`IRegionPartition.Holds`: the cell widened by `MapTileHandoffMargin`, 300 units; another instance is never held)
+to the region of its position, memberships included, raising the epoch. Transfers are reported to
+`ISimulationObserver.EntitiesHandedOff` (`fineage.region.handoffs`). A position written outside a step is
+handed off at the end of the next one. The serialized transfer, ghosts and
+route updates below come with separate hosts (step 13).
+
+```mermaid
+sequenceDiagram
+    participant A as Region A (owner)
+    participant D as RegionDirectory
+    participant B as Region B
+    participant G as Gateway / ingress
+    A->>A: tick t, phase 2: position past boundary + hysteresis
+    A->>B: EntityTransfer{entityId, generation, epoch+1, state, pendingCommands}
+    A->>A: keep a read-only ghost, forward late commands to B
+    B->>B: tick t+1, phase 0: install entity, join active sets and AOI
+    B->>D: Owner(entityId) = B @ epoch+1
+    D-->>G: RouteUpdate(entityId → B, epoch+1)
+    B-->>A: TransferAck(entityId, epoch+1)
+    A->>A: drop ghost
+```
+
+Rules: the epoch rises on every transfer; commands and messages carry the epoch they were routed with; a region
+that no longer owns the entity forwards to the directory's owner instead of dropping it, and logs a misroute when
+the epoch is older than the current one by more than one. Transfer state is the serialized entity, its abnormals with
+absolute expiry ticks, and in-flight intents (pending cast or hit).
+
+**Visibility and AoE near borders.** At the end of each tick a region publishes a border snapshot: the entities
+within the interest radius of each edge, as immutable presence records. Neighbours read the previous tick's
+snapshot (one tick of latency, deterministic) for knownlist, targeting and AoE candidate selection. Effects on a
+foreign entity are never applied directly; they become a `DamageRequest` / `ApplyAbnormal` message carrying the
+attacker snapshot needed by the formula, resolved by the owner at *t+1*. One extra tick (200 ms) is inside L2's
+existing hit delay.
+
+In process (step 8): the `handoff` stage publishes `BorderSnapshots<ZonePresence>` (`Simulation/BorderSnapshots.cs`)
+right after moving owners, so each entity appears in exactly one region's snapshot: every entity not
+`IRegionPartition.IsInterior` by 6 000 units, as an immutable record (position, instance, kind, aggro eligibility,
+karma, faction alliance). `NeighboursNear` serves the other regions' records within a radius and refuses one above
+reach minus the handoff margin (5 700), which covers the widest aggro range in the data (4 296, tested). The
+`aggression` stage is a region stage built on it: each due NPC tries its own region's players live and the
+neighbours' from the snapshot, in ascending id order, and asks for the hate with a `HateMessage`. Region messages
+(`ZoneRegionMessage`) are applied on the scheduler thread when the stage commits, in (source region, sequence) order,
+so a decision lands in the same step as before; a message for an entity that left is logged and dropped. The
+cross-host form delivers them at *t+1*. Damage and abnormal-apply messages come with the stages that send them
+(combat, casts), which are still world stages.
+
+**Party, clan, chat, friends.** Social actors keyed by party / clan id. Regions push member deltas (vitals,
+position) to them once per tick in a batch; the actors fan out to members through gateway routing, independent of
+which region or process a member is in. Chat channels with a range (say, shout) resolve the audience from region
+AOI; global channels (trade, hero, clan) go through the social actor.
+
+In process (step 10): `PartyActor`, `ClanActor`, `FriendsActor` and `ChatActor` own parties and party invites,
+clans, members, penalties and clan invites, the friend and block lists of online players, and the online roster by
+id and name. Entities keep only their party and clan ids. The `party` stage steps `PartyActor` at tick time: it
+sends the queued member bars (every 300 ms) and positions (every 3 s) to online mates, parties in ascending id
+order. The `clan.dissolutions` stage steps `ClanActor` at the wall sample and destroys due clans in ascending id
+order. Region bodies queue vitals and buff-icon changes for the party with `AtBarrier`. Whispers, hero, announce
+and clan chat resolve their audience from the roster and the clan actor, not by scanning players.
+
+**Global systems** (olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan hall auctions) become
+actors with their own state and mailbox. They act on the world through messages
+(`SpawnNpc(region, template, at)`, `Teleport(entity, to)`, `SetZoneFlag(area, flag)`) and receive events
+(`BossKilled`, `PlayerEnteredArena`).
+
+### 3.6 Network fan-out
+
+- During the tick, systems append presence events to the region outbox: subject, kind and payload inputs, not
+  encoded bytes.
+- After the tick the sealed outbox goes to fan-out workers. Audiences come from the region AOI index (a reverse
+  knownlist "who watches X" maintained with knownlist changes), replacing B2's scans.
+- **Coalescing per tick:** last write wins per `(kind, subject, audience)` for replaceable state (StatusUpdate,
+  MoveState, ChangeMoveType, AbnormalStatusUpdate). StatusUpdate carries a subset of attributes, so a superseded
+  write's other attributes are merged into the latest. The surviving write takes the position of the last one;
+  ordered must-deliver events (Attack, MagicSkillUse, Die, spawn and despawn) keep emission order around it.
+- **Sealed and step-ordered (step 4):** a step records into a batch and seals it when its body returns.
+  Payload inputs are captured then: watcher lists are copied, and the two calls whose encoding reads world state
+  (knownlist diff, CharInfo) are built by `IWorldEventPublisher.Prepare*`. One send lock drains sealed batches
+  before any send made outside a step, so handler traffic never overtakes an earlier step. Sends never take
+  a world turn. A failed send is logged with its exception, counted as `fineage.tick.stage.failures{stage="fanout"}`, and
+  the rest of the batch still goes out.
+- **Encode once per event, batch per connection:** one frame group per connection per tick, written with one
+  channel write. That replaces the per-frame `NetPresenceHub` lock (B8); the hub's id→connection map becomes a
+  per-tick read-only snapshot.
+- The simulation never awaits a socket. `NetConnection` keeps its bounded outbound queue and drop counters, and
+  coalesced MoveState already exists there.
+
+### 3.7 Scale-out seams (defined now, built later)
+
+```mermaid
+flowchart LR
+    subgraph Edge
+        GWa[Gateway EU] --- GWb[Gateway NA]
+    end
+    subgraph Server["Game server (world shard)"]
+        DIR[(RegionDirectory<br/>region → host, entity → region@epoch)]
+        H1[IRegionHost proc 1<br/>tiles 16..21]
+        H2[IRegionHost proc 2<br/>tiles 22..26 + instances]
+        ACTS[Global + social actors]
+        LEDG[Ledger]
+    end
+    GWa & GWb -->|commands by EntityId| DIR
+    GWa & GWb <-->|multiplexed streams| H1 & H2
+    H1 <-->|handoff + border snapshots| H2
+    H1 & H2 <--> ACTS
+    H1 & H2 --> LEDG
+```
+
+| Seam | Contract | In-process now | Distributed later |
+|---|---|---|---|
+| `IRegionHost` | `Step(tick)`, `Post(RegionMessage)`, `Accept(EntityTransfer)`, `SealOutbox(tick)` | Regions on `RegionTickScheduler` | One host per process; ticks aligned by a tick broadcast from a coordinator |
+| `IRegionDirectory` | `OwnerOf(RegionId)`, `OwnerOf(EntityId) → (RegionId, epoch)`, change feed | Dictionary | Replicated table with change stream |
+| Handoff protocol | `EntityTransfer`, `TransferAck`, `RouteUpdate`, versioned like `Fineage.Net.Contract` | Object passing | Same messages, serialized |
+| Gateway ↔ zone | Upstream: `(EntityId, epoch, command)`. Downstream: per-connection frame batches per tick | Current `NetZoneServer` acts as gateway and zone | Gateways terminate client TCP and auth (handoff tokens) and route by directory; zone hosts stream batches back |
+
+Sizing: 12 k concurrent players worldwide is a few world shards of 3–5 k each. A shard starts as one process
+using all cores via parallel regions; it splits by tile ranges to more processes only when one box saturates. Hot
+spots split by partition, not by special cases.
+
+### 3.8 Economy ledger
+
+Every movement of currency or items between owners goes through one service, the **economy ledger**: append-only,
+double-entry, idempotent, auditable. Inventories, warehouses and stores become projections of the ledger.
+
+**Model**
+
+- *Account* = `(OwnerKind, OwnerId, Container)`. Owner kinds: character, clan, system. Containers: inventory,
+  warehouse, clan warehouse, freight/mail escrow, trade escrow, private-store escrow, ground (world-held drop).
+  System accounts are sources and sinks: NPC shop, drop source, quest reward, tax, fees, destruction.
+- *Asset* = adena or item template; non-stackable items also carry instance ids (enchant level travels with the
+  instance).
+- *Transaction* = `TxId` (idempotency key), `Kind` (ShopBuy, ShopSell, TradeSettle, Pickup, Drop, WarehouseDeposit,
+  WarehouseWithdraw, StoreSale, MailSend, MailClaim, QuestReward, CraftConsume, CraftProduce, Destroy, …),
+  postings `(account, asset, ±amount, instanceIds)` that sum to zero per asset, `CausedBy`, `RegionId`, `Tick`,
+  wall time. Moves that do not change owner (equip, stack split, reorder) are not transactions.
+- `TxId` is deterministic: `(regionId, tick, sequence)` for simulation-originated moves, or `(characterId, client
+  request sequence)` for commands, so retries after a timeout or handoff replay to the same id. Tick numbers count
+  fixed steps since the Unix epoch (section 4), so they never repeat across restarts and a TxId stays unique.
+
+**Interface (sketch)**
+
+```csharp
+public interface IEconomyLedger
+{
+    // Validates balances and holds, appends atomically, returns the stored result; a repeated TxId returns the
+    // original result without a second posting.
+    ValueTask<LedgerResult> SubmitAsync(LedgerTransaction tx, CancellationToken ct);
+
+    // Two-phase for moves spanning regions or processes (trade between players in different regions, mail):
+    // a hold moves value into escrow, then commit or release settles it.
+    ValueTask<LedgerResult> HoldAsync(LedgerHold hold, CancellationToken ct);
+    ValueTask<LedgerResult> CommitAsync(HoldId hold, TxId settlement, CancellationToken ct);
+    ValueTask<LedgerResult> ReleaseAsync(HoldId hold, CancellationToken ct);
+}
+
+public interface ILedgerJournal          // append-only storage (Postgres table with unique TxId, hash-chained segments)
+public interface ILedgerProjection       // balances / inventories by account, rebuilt from the journal
+public interface ISettlementGateway      // outbound feed of committed transactions by cursor; inbound confirmations
+```
+
+**Placement relative to regions.** The ledger is a service outside regions, behind a mailbox. A region keeps a
+projected inventory for gameplay checks (weight, slots, "has 1 000 adena") and a pending-hold marker; it submits
+the transaction and applies the result when the reply arrives in a later tick's phase 0. A rejection
+(insufficient funds, a lost race with another hold) is a normal result shown to the player. It is never silently
+corrected.
+
+```mermaid
+sequenceDiagram
+    participant P1 as Region (seller)
+    participant P2 as Region (buyer)
+    participant L as Economy ledger
+    P1->>L: Hold(seller items → trade escrow, tx=T1)
+    P2->>L: Hold(buyer adena → trade escrow, tx=T2)
+    L-->>P1: held
+    L-->>P2: held
+    P1->>L: Commit settlement T3 (escrow → buyer items, escrow → seller adena)
+    L-->>P1: committed T3 (journal append, projection update)
+    L-->>P2: committed T3
+    Note over L: retrying T1..T3 returns the stored results
+```
+
+Audit: every posting names its transaction, kind, cause and tick; item instances can be traced end to end.
+Reconciliation compares projections with the journal. The settlement gateway is a narrow, neutral adapter, so an
+external settlement backend can consume the committed feed without the simulation knowing it exists.
+
+**In process (step 11a).** `EconomyLedger` (`Fineage.Game/Economy`) validates and projects transactions: postings
+sum to zero per item; character and castle accounts never go negative; a non-stackable piece has one owner and
+moves by instance id. A repeated `TxId` returns the stored result, a different transaction under it is a conflict,
+and an id older than the idempotency window (one hour of ticks) is refused as stale, so the index stays bounded.
+`TxId` is `(tick, sequence)` from `LedgerTxSequence`. Moves run on the scheduler thread for now; region-originated
+moves will add the region when region bodies post them. The journal is hash-chained (`LedgerChain`).
+`PostgresLedgerJournal` (`economy_ledger`, migration 016) buffers appends and writes them in the step's persistence
+flush. **Order:** journal `Flush` first, then inventory and warehouse snapshot rows (`FlushDirtyInventories`), so
+recovery always reconciles against an appended journal. Failed flushes re-queue the batch, log a warning, and count
+`fineage.ledger.flush_failures`; production shutdown calls `FlushLedgerOnShutdown` after the net loop stops.
+Starting replays it and refuses a broken chain.
+
+Inventories and treasuries still decide each move and are still saved as snapshots. A migrated move is recorded
+beside them with `LedgerMove`:
+- *Observe* each account before changing it. When the journal does not explain what the account holds (value
+  that moved through a kind not migrated yet), an `Adjustment` against the `Untracked` system account brings it in
+  line, so the untracked residue is itself on the journal.
+- *Commit* the move, then compare every observed account with the live state. A rejection or a mismatch throws
+  `LedgerReconciliationException` and fails the command; it is never corrected.
+
+Shop buy, sell and multisell (`ZoneWorldLedger.cs`) post against the `NpcShop` system account. Castle tax goes from
+the shop to each treasury in the amount it actually received (the overlord's cut, the treasury cap).
+
+A confirmed trade (step 11b) is one `TradeSettle` between the two bags: `CausedBy` is the requestor, `Reference` the
+partner. A traded piece keeps its object id, so the ledger follows it from one owner to the next. An empty trade,
+and one refused for weight or bag slots, records nothing. Offered items stay in the giver's bag until both confirm,
+so a hold would contradict the state; holds in trade escrow come with trades between hosts, where settling takes
+more than one step.
+
+Each ground stack is its own account (step 11c), the world's `ground` container keyed by the stack's object id, so
+the journal names where a stack came from and who took it. Monster loot comes from the `DropSource` system account
+(`Loot`); a player's drop and death drop come from the bag (`Drop`, `DeathDrop`); a pickup goes into the bag or the
+pet's inventory (`Pickup`, the pet keyed by its control item). Expired stacks (`Expire`), herbs used on pickup, the
+remainder of a party adena split and items destroyed from the bag (`Destroy`) go to the `Destroyed` sink. A
+non-stackable stack of one is a piece: it keeps the item's object id and enchant from the bag it fell from to the
+bag that takes it. Stacks still on the ground at shutdown stay on their accounts in the journal; the ground is not
+saved. Ledger moves are numbered on the scheduler thread, and starting one from a region body throws.
+
+Deposits and withdrawals (step 11d) move between the bag and the private warehouse (`character/warehouse`) or the
+clan warehouse (`clan/warehouse`); the deposit fee goes to the `Fees` system account. Warehouse stacks have no
+durable piece id (their ids are local to the warehouse and the store re-keys them on save), so a warehouse holds a
+count per item: a deposited piece leaves the ledger's instance tracking and a withdrawn one starts a new id. Durable
+item identity needs the zone's item id allocator seeded from the store: today the allocator starts at the first id
+on every boot, and the store re-keys colliding ids when it saves. Clan hall rent, auction refunds and matured crops still write
+the clan warehouse outside the ledger; the next observation records them as adjustments.
+
+A sale at a private store (step 11e), sell or buy store, is one `StoreSale` between the visitor's bag and the
+owner's: `CausedBy` is the visitor, `Reference` the owner, and pieces keep their ids as in a trade. Listed items stay
+in the owner's bag until sold, so, as with trade holds, store escrow waits for stores visited from another host.
+
+Quest steps and crafting (step 11f) are recorded from the bag's change: the bag is read before the step and after
+it, and what it gained and lost is posted against a system account (`PostChange`), pieces by instance id. A quest
+step that moves items, including the newbie helper's kit, is one `QuestReward` against `Quests` (`Reference` is the
+quest id); a step that moves nothing records nothing. A craft is one `Craft` against `Crafting` (`Reference` is the
+recipe id): materials in and, when the roll succeeds, the product out. At a manufacture shop the customer's fee goes
+through `Crafting` to the maker in the same move. Items used up by use (potions, shots, arrows, recipe scrolls) are
+not a ledger kind; the next observation records them as adjustments. Mail joins the ledger when the game has it.
+
+---
+
+## 4. Determinism
+
+1. **Fixed step.** A step is a tick number: tick `t` is the `t`-th step since the Unix epoch and happens at
+   `t × step` (`Simulation/SimulationClock.cs`), so tick numbers mean the same instant on every host and never repeat
+   across restarts. Stages run at `TickContext.NowUnixMs`, the tick time; the wall sample travels as
+   `TickContext.WallUnixMs` and is used only for calendar schedules (clan dissolution deadlines, hall auctions,
+   sieges, manor, lottery, seven signs, mammon); no system keeps a clock of its own (step 9). Inside a step the clock is pinned for the scheduler thread, so every rule a stage reaches reads the tick
+   time; parallel region bodies use the `TickContext` they are given. The loop sleeps until the next tick is due. A
+   late step jumps to the tick the wall clock is in and reports the skipped ticks (a stage whose period was crossed
+   runs once); a step while the wall clock is behind still advances one tick. Commands run inside the step that
+   drains them, so they read its tick time and, for calendar rules (clan deadlines, teleport fee hours), its wall
+   sample: `SimulationClock.Pin` pins both, and world code reads them through `NowUnixMs`/`WallNow`, never the live
+   clock. Enter, leave and handler projections are requests applied by a step, so they read its time too; only a world
+   nothing drives (tests, tools) is touched outside a step, at the wall clock.
+2. **Ordered iteration.** Region work runs in ascending `RegionId`, entities in ascending object id
+   (`RegionWorkCollector.Drain`), never in hash order. Inbound messages are sorted by `(source, sequence)`.
+3. **Seeded randomness** per region and purpose (section 3.2), never `Random.Shared` in rules. Outcomes of
+   non-random stages do not depend on the partition; stages that draw do, by design, because a different partition
+   assigns entities to different streams.
+4. **Isolation.** Region bodies touch only region-owned state; cross-region effects are messages consumed next tick.
+5. **Verification.** `RegionSimulationDeterminismTests` checks that identical worlds produce identical state *and*
+   fan-out sequences, and that outcomes do not depend on the partition (map tiles, 500-unit cells, one cell).
+   `RegionTickSchedulerTests` checks that parallel and sequential executors reach identical region-local state.
+   Player input goes through `ZoneWorld.ExecuteAsync(session, command)` (`World/ZoneCommands*.cs`). When a world records (`SimulationLog`), every step and command is appended in
+   the order the simulation applied it, with its tick, wall sample, actor and outcome; `ReplayAsync` runs the log on a world built the same way
+   (same content, seed and starting tick) by submitting each command entry through the same ingress and applying it
+   in the next step entry, and fails at the first entry whose tick or outcome differs.
+   `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
+   pins the generator to reference values. `GlobalActorTests` replays a boss kill, its seeded respawn window and the
+   respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
+   commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
+   `GroundLedgerTests` follows a piece through the ground and checks loot, expiry, party adena and destroy postings.
+   `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals; `NetPrivateStoreTests` checks the
+   postings of a sale at sell and buy stores. `BagChangeLedgerTests` checks the before/after postings; the quest,
+   newbie helper, craft and manufacture tests check their `QuestReward` and `Craft` moves.
+   `WorldAffinityTests` checks that a driven world refuses touches off the simulation thread, that requests are
+   served on it unlogged, and that a command applied around a projection is logged once.
+
+---
+
+## 5. Tick budget and metrics
+
+Targets, to be validated against production metrics before parallelism is enabled:
+
+| Item | Target |
+|---|---|
+| Step | 200 ms (5 Hz). Regen and other 3 s systems run at period 15. |
+| Step wall time (all stages, p99) | ≤ 100 ms, half the step, leaving headroom for GC and bursts |
+| Single region body (p99) | ≤ 10 ms; a region that keeps exceeding this gets split by partition |
+| Commands | ≤ 1 tick from receipt to effect (p99) |
+| Handoff | ≤ 2 ticks to the new owner |
+| Fan-out | sealed outbox to socket write ≤ 50 ms (p99) |
+
+Implemented in step 1 (OTEL and `/metrics`):
+
+| Metric | Meaning |
+|---|---|
+| `fineage.tick.ms` | Whole simulation step including lock wait (existing) |
+| `fineage.tick.stage.ms{stage}` | Duration per stage |
+| `fineage.tick.stage.regions{stage}` | Regions a stage ran in |
+| `fineage.tick.stage.failures{stage}` | Stage or region bodies that threw (also logged with stage, scope, tick and the exception) |
+| `fineage.tick.overruns` | Steps longer than the fixed step (also logged with the three slowest stages) |
+| `fineage.tick.skipped` | Ticks a late step jumped over (step 5; also logged). Tick time running ahead of the wall clock by a step or more is logged when it starts and ends. |
+| `fineage.region.handoffs` | Entities moved to another region at the end-of-tick barrier (step 7) |
+
+Planned with later PRs: `region.tick.ms{region}`, `region.entities`, `region.inbox.depth`, handoff
+latency, outbox frames and bytes per tick, fan-out lag, ledger transaction latency and rejections by kind.
+
+---
+
+## 6. Migration plan
+
+Each PR keeps the server playable and the test suite green; behaviour changes are called out per PR.
+
+| PR | Change | Behaviour |
+|---|---|---|
+| **1 (this)** | `RegionTickScheduler`, `GridRegionPartition`, executors, observer and metrics. The 3 s loop body becomes a scheduler step: regen (players, NPCs) and abnormals/DoT/toggles as region stages, the other systems as world stages in the original order. Sequential executor under `_gate` (removed in step 12). | Identical per-entity rules. Intra-tick order is now deterministic (region, id) instead of hash order; a throwing system is logged and isolated instead of killing the loop. |
+| 2 | Fold the 200 ms combat loop into the same scheduler: base step 200 ms, sim stages at period 15, one loop, one time sample per step. Its 24 `Tick*` become stages (world stages first). | Same cadences. |
+| 3 | Reverse knownlist index ("watchers of X") kept in sync with knownlist changes; replace `Players()` scans in `FanoutVitals`, `FanoutAbnormal`, `ActorAudience`, `ReleaseThink` (B2, B3). | Same audiences, measurably cheaper. |
+| 4 | Per-tick outbox: systems emit presence events, flushed after the step in step order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
+| **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
+| **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
+| **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
+| **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
+| **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
+| **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
+| **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |
+| **11b (done)** | Trade between players as one `TradeSettle`; holds in trade escrow wait for trades between hosts. | Same outcomes, except that a traded non-stackable piece keeps its object id instead of getting a new one. A trade whose postings disagree with the bags fails the confirmation. |
+| **11c (done)** | Ground stacks as ledger accounts: loot, drop, death drop, pickup (party and pet included), expiry, herbs, destroy. | Same outcomes, except that a dropped piece keeps its object id and enchant on the ground and in the bag that picks it up (before, the enchant was lost and the piece got a new id), and a non-stackable loot stack of one keeps its ground object id when picked up. |
+| **11d (done)** | Private and clan warehouse deposits and withdrawals, deposit fee to `Fees`. | Same outcomes. |
+| **11e (done)** | Private store sales (sell, package and buy stores) as one `StoreSale`; store escrow waits for stores visited from another host. | Same outcomes. A sale whose postings disagree with the bags fails the command. |
+| **11f (done)** | Quest rewards and crafting (self and manufacture) recorded from the bag's change; mail joins the ledger when the game has it. | Same outcomes; every owner change except use is on the journal. The snapshot writes stay until the reconciliation has run clean. |
+| **12 (done)** | Remove `_gate`: enter, leave, shortcut edits and handler projections go through the ingress as unlogged requests; the move knownlist diff is planned around its command; `WorldAffinity` makes every other touch of a driven world throw. Actors keep their internal locks for readers off the simulation thread (status pages, stores). | Enter, leave, shortcut edits and the projections handlers send cost up to one tick (≤ 200 ms), like commands. The quest client effects of an enter go out after the enter burst; a leaver's despawn goes to others after the leave. |
+| 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |
+
+---
+
+## 7. Risks
+
+| Risk | Mitigation |
+|---|---|
+| Hidden ordering dependencies between systems (one tick reading another's writes) | Stage order is explicit and tested (`Full_step_runs_every_stage_in_the_legacy_loop_order…`); each moved system keeps its slot until proven independent. |
+| One tick of extra latency for cross-region effects and commands | Bounded to 200 ms; border snapshots keep visibility smooth; measured per PR. A connection awaits each command's reply, so one client's commands stay ordered but cost a tick each. |
+| Hot spots (Giran, sieges) concentrate load in one region | Partition by load (split tiles), not by special cases; per-region timing metric drives it. |
+| Determinism regressions from new code (hash iteration, `Random.Shared`, wall clock) | Determinism and partition-independence tests per migrated stage; replay test from PR 5; analyzers or review checklist for banned APIs in region code. |
+| A replay only reproduces a run built the same way | The log header carries seed, step and start tick and replay refuses a mismatch; content (catalogs, spawns, persisted state) must match too, so replays are a test and diagnostic tool, not a backup. |
+| Handoff bugs (lost or duplicated entities, misrouted commands) | Epoch-stamped routing, ghost forwarding, the invariant check `RegionDirectory.Verify` (exactly one owner, owner holds the position, set memberships and counts agree) run by the tests that walk players across tile borders; soak tests with bots once regions run in parallel. |
+| A region body reaches shared state once its stage runs on workers | Parallel is opt-in per stage and off by default; scopes make fan-out, bookkeeping and messages barrier-ordered; the directory guards turn cross-region writes into errors; the parallel world tests compare state and every frame with the sequential run and a replay. A new call from a parallel body must be region-owned, read-only during region stages, or go through `AtBarrier` / a region message. |
+| Ledger becomes a latency bottleneck or a single point of failure | In-memory projection plus batched journal appends; holds keep gameplay responsive; journal on the existing Postgres first, partitioned by world shard later. |
+| Migration stalls halfway, with two models living side by side | Every PR is complete on its own and removes the old path it replaces; the plan is ordered so each step pays off without the next. |

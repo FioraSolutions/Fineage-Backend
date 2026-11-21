@@ -56,6 +56,19 @@ public static class ZoneRegen
         3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0
     ];
 
+    // Mobius players/templates/**/*.xml <cpRegen> per level: identical in all 89 class templates.
+    static readonly double[] BaseCpRegen =
+    [
+        2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+        2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5,
+        3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5,
+        4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5,
+        5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5,
+        6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5,
+        7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5,
+        8.5, 8.5, 8.5, 8.5, 8.5, 8.5, 8.5, 8.5, 8.5, 8.5
+    ];
+
     /// <summary>How the creature is postured this tick. Mirrors the Mobius <c>isSitting</c> / <c>isMoving</c> / <c>isRunning</c> order.</summary>
     public enum Posture
     {
@@ -102,6 +115,16 @@ public static class ZoneRegen
         double init = BaseMpRate(level) * LevelMod(level) * menBonus;
         return Math.Max(1d, init) * PostureMultiplier(posture);
     }
+
+    /// <summary>Base <c>cpRegen</c> row for the level, before the level mod, CON bonus and posture.</summary>
+    public static double BaseCpRate(int level) => BaseCpRegen[Index(level)];
+
+    /// <summary>
+    /// Mobius <c>calcCpRegen</c> init term: template row × level mod × CON bonus, <c>max(1, …)</c>. Mobius folds
+    /// <c>REGENERATE_CP_RATE</c> on this and only then multiplies by the posture (see <see cref="PostureMultiplier"/>).
+    /// </summary>
+    public static double CpInit(int level, double conBonus) =>
+        Math.Max(1d, BaseCpRate(level) * LevelMod(level) * conBonus);
 
     static int Index(int level) => Math.Clamp(level, 1, BaseHpRegen.Length) - 1;
 }

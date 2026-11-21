@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
 
@@ -6,7 +7,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public OlympiadBoard Olympiad => _olympiad;
+    public OlympiadBoard Olympiad => _olympiad.Board;
 
     /// <summary>
     /// Combat hook. <paramref name="winnerObjectId"/> 0 is a draw (the HP-less tie).
@@ -15,26 +16,26 @@ public sealed partial class ZoneWorld
     /// </summary>
     public string? ReportOlympiadResult(int matchId, int winnerObjectId, DateTimeOffset? now = null)
     {
-        lock (_gate)
-        {
-            var step = _olympiad.Report(matchId, winnerObjectId, (now ?? _clock()).ToUnixTimeMilliseconds());
-            if (step.Error != null)
-                return step.Error;
-            ApplyOlympiad(step);
-            return null;
-        }
+        var step = _olympiad.Board.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
+        if (step.Error != null)
+            return step.Error;
+        ApplyOlympiad(step);
+        return null;
     }
 
     public bool GrantNoblesse(int characterId)
     {
-        lock (_gate)
-            return _olympiad.GrantNoblesse(characterId);
+        return _olympiad.Board.GrantNoblesse(characterId);
     }
 
     public Task AdvanceOlympiadAsync(CancellationToken ct = default)
     {
-        lock (_gate)
-            TickOlympiad();
+        using (_affinity.Step())
+            AtHookTick(tick =>
+            {
+                ApplyOlympiad(_olympiad.Step(tick));
+                return 0;
+            });
         return Task.CompletedTask;
     }
 
@@ -42,14 +43,11 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        lock (_gate)
-        {
-            long now = _clock().ToUnixTimeMilliseconds();
-            var step = _olympiad.Advance(now, LookupOlympiad);
-            ApplyOlympiad(step);
-            if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
-                QueueOlympiadStatus(session, now);
-        }
+        long now = NowUnixMs();
+        var step = _olympiad.Advance(now);
+        ApplyOlympiad(step);
+        if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
+            QueueOlympiadStatus(session, now);
 
         return Task.FromResult<string?>(null);
     }
@@ -63,7 +61,7 @@ public sealed partial class ZoneWorld
         return RunOlympiadAsync(now =>
         {
             var player = _byId[session.ObjectId];
-            return _olympiad.Register(ActorFor(player), request.Classed == 1, now);
+            return _olympiad.Board.Register(ActorFor(player), request.Classed == 1, now);
         });
     }
 
@@ -71,40 +69,37 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        return RunOlympiadAsync(now => _olympiad.Unregister(ActorFor(_byId[session.ObjectId]), now));
+        return RunOlympiadAsync(now => _olympiad.Board.Unregister(ActorFor(_byId[session.ObjectId]), now));
     }
 
     public Task<string?> TryOlympiadLeaveAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        lock (_gate)
-        {
-            // Mobius RequestOlympiadObserverEnd: the same leave request ends an observation.
-            if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
-                return Task.FromResult<string?>(null);
-        }
-        return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now, LookupOlympiad));
+        // Mobius RequestOlympiadObserverEnd: the same leave request ends an observation.
+        if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
+            return Task.FromResult<string?>(null);
+        return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now));
     }
 
     public Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        // Rewards may SaveInventory → flush after unlock (B8).
+        // Rewards may SaveInventory → flush after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
-            var step = _olympiad.Report(matchId, winnerObjectId, _clock().ToUnixTimeMilliseconds());
+            var step = _olympiad.Board.Report(matchId, winnerObjectId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
             return step.Error;
         }));
     }
 
-    void TickOlympiad()
+    void ApplyOlympiad(IReadOnlyList<OlympiadStep> steps)
     {
-        var step = _olympiad.Advance(_clock().ToUnixTimeMilliseconds(), LookupOlympiad, announce: false);
-        ApplyOlympiad(step);
+        foreach (var step in steps)
+            ApplyOlympiad(step);
     }
 
     void NoteOlympiadDisconnect(ZoneEntity entity)
@@ -113,7 +108,7 @@ public sealed partial class ZoneWorld
             return;
         _olympiadArena.Remove(entity.ObjectId);
         _olympiadObservers.Remove(entity.ObjectId);
-        var step = _olympiad.Disconnect(entity.ObjectId, _clock().ToUnixTimeMilliseconds(), LookupOlympiad);
+        var step = _olympiad.Disconnect(entity.ObjectId, NowUnixMs());
         ApplyOlympiad(step);
     }
 
@@ -121,7 +116,7 @@ public sealed partial class ZoneWorld
     {
         string? error = WithDeferredInventoryPersist(() =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             var step = action(now);
             ApplyOlympiad(step);
             return step.Error;
@@ -132,7 +127,7 @@ public sealed partial class ZoneWorld
 
     void ApplyOlympiad(OlympiadStep step)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var notice in step.Notices)
             QueueNotice(notice);
         foreach (var move in step.Moves)
@@ -188,11 +183,20 @@ public sealed partial class ZoneWorld
             return;
         if (!_game.Items.TryGet(grant.ItemId, out _))
             return;
-        var added = entity.Inventory.Add(grant.ItemId, grant.Count);
-        var update = InventoryMessages.Update(InventoryChange.Add, added);
-        // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
-        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
-        SaveInventory(entity.Session, entity.Inventory);
+        RecordBagChange(
+            entity,
+            LedgerTxKind.OlympiadGrant,
+            LedgerAccount.Of(SystemAccount.Olympiad),
+            () =>
+            {
+                var added = entity.Inventory.Add(grant.ItemId, grant.Count);
+                var update = InventoryMessages.Update(InventoryChange.Add, added);
+                // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
+                NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
+                SaveInventory(entity.Session, entity.Inventory);
+                return true;
+            },
+            _ => grant.ItemId);
     }
 
     void QueueNotice(OlympiadNotice notice)

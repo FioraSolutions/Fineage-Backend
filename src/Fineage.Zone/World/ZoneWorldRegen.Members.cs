@@ -4,16 +4,12 @@ using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>
-    /// Mobius <c>NPCStatus.doRegeneration</c>: a wounded NPC heals
-    /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
-    /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
-    /// </summary>
     /// <summary>
     /// Mobius <c>BaseStat.CON.calcBonus</c> / <c>MEN.calcBonus</c> for this player's class, read from
     /// <c>data/stat-bonuses.json</c>, including henna.
@@ -26,46 +22,54 @@ public sealed partial class ZoneWorld
         return (attrs.ConBonus, attrs.MenBonus);
     }
 
-    void TickNpcRegen()
+    /// <summary>
+    /// Mobius <c>NPCStatus.doRegeneration</c>: a wounded NPC heals
+    /// <c>max(1, hpRegen)</c> HP / <c>max(1, mpRegen)</c> MP per 3 s tick, capped at the maximums. Without it a
+    /// mob that survived a fight stayed wounded forever until it died (audit <c>D30</c>).
+    /// </summary>
+    void CollectRegenNpcs(TickContext tick, RegionWorkCollector work)
     {
-        if (!_npcRegen || _needRegen.Count == 0)
+        if (_npcRegen)
+            _byId.Collect(ActiveSets.NeedRegen, work);
+    }
+
+    void RegenNpc(int id)
+    {
+        if (!_byId.TryGetValue(id, out var npc))
             return;
-        foreach (int id in _needRegen.ToArray())
+        if (npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.Dead || npc.CurHp <= 0)
-            {
-                _needRegen.Remove(id);
-                continue;
-            }
-            if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
-            {
-                SyncNeedRegen(npc);
-                continue;
-            }
-
-            // DoT (poison/bleed) must outpace NPC regen or StatusUpdate HP looks stuck at full.
-            bool hasDot = npc.Abnormals.Any(a => _skillDots.TryGet(a.Id, out _));
-            npc.RegenCarryHp += !hasDot && npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
-            npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
-            int hpGain = (int)Math.Floor(npc.RegenCarryHp);
-            int mpGain = (int)Math.Floor(npc.RegenCarryMp);
-            npc.RegenCarryHp -= hpGain;
-            npc.RegenCarryMp -= mpGain;
-            if (hpGain == 0 && mpGain == 0)
-                continue;
-
-            if (hpGain > 0)
-                npc.CurHp = Math.Min(npc.MaxHp, npc.CurHp + hpGain);
-            if (mpGain > 0)
-                npc.CurMp = Math.Min(npc.MaxMp, npc.CurMp + mpGain);
-            if (npc.CurHp >= npc.MaxHp)
-                npc.RegenCarryHp = 0;
-            if (npc.CurMp >= npc.MaxMp)
-                npc.RegenCarryMp = 0;
-
-            SyncNeedRegen(npc);
-            FanoutVitals(npc, StatusFor(npc));
+            _byId.Leave(npc, ActiveSets.NeedRegen);
+            return;
         }
+        if (npc.CurHp >= npc.MaxHp && npc.CurMp >= npc.MaxMp)
+        {
+            SyncNeedRegen(npc);
+            return;
+        }
+
+        // DoT (poison/bleed) must outpace NPC regen or StatusUpdate HP looks stuck at full.
+        bool hasDot = npc.Abnormals.Any(a => _skillDots.TryGet(a.Id, out _));
+        npc.RegenCarryHp += !hasDot && npc.CurHp < npc.MaxHp ? Math.Max(1d, npc.HpRegen) : 0d;
+        npc.RegenCarryMp += npc.CurMp < npc.MaxMp ? Math.Max(1d, npc.MpRegen) : 0d;
+        int hpGain = (int)Math.Floor(npc.RegenCarryHp);
+        int mpGain = (int)Math.Floor(npc.RegenCarryMp);
+        npc.RegenCarryHp -= hpGain;
+        npc.RegenCarryMp -= mpGain;
+        if (hpGain == 0 && mpGain == 0)
+            return;
+
+        if (hpGain > 0)
+            npc.CurHp = Math.Min(npc.MaxHp, npc.CurHp + hpGain);
+        if (mpGain > 0)
+            npc.CurMp = Math.Min(npc.MaxMp, npc.CurMp + mpGain);
+        if (npc.CurHp >= npc.MaxHp)
+            npc.RegenCarryHp = 0;
+        if (npc.CurMp >= npc.MaxMp)
+            npc.RegenCarryMp = 0;
+
+        SyncNeedRegen(npc);
+        FanoutVitals(npc, StatusFor(npc));
     }
 
     void FanoutVitals(ZoneEntity subject, StatusUpdateMsg status)
@@ -73,17 +77,9 @@ public sealed partial class ZoneWorld
         SyncNeedRegen(subject);
         if (subject.DuelId != 0)
             SendDuelUserInfo(subject);
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            if (!ReferenceEquals(watcher, subject) && !watcher.Knownlist.Contains(subject.ObjectId))
-                continue;
-            netWatchers ??= [];            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(subject);
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
         {
             NetBridge.FanoutStatusUpdate(netWatchers, status);
         }
@@ -98,9 +94,11 @@ public sealed partial class ZoneWorld
             InterludeStatus.CurHp,
             InterludeStatus.MaxHp,
             InterludeStatus.CurMp,
-            InterludeStatus.MaxMp
+            InterludeStatus.MaxMp,
+            InterludeStatus.CurCp,
+            InterludeStatus.MaxCp
         ],
-        Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp]
+        Values = [entity.CurHp, entity.MaxHp, entity.CurMp, entity.MaxMp, entity.CurCp, entity.MaxCp]
     };
 
     (int hp, int maxHp, int mp, int maxMp, int cp, int maxCp, int level, int race, int sex) LoadVitals(

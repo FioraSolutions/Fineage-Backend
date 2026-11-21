@@ -9,7 +9,7 @@ public sealed partial class ZoneWorld
 {
     BuyListMsg AdminBuyListMsg(Fineage.Game.Shops.BuyListDefinition list)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var items = new BuyListItemMsg[list.Products.Count];
         for (int i = 0; i < items.Length; i++)
         {
@@ -87,7 +87,7 @@ public sealed partial class ZoneWorld
             {
                 NetBridge.FanoutSkillList(
                     [player.ObjectId],
-                    Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                    Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
             }
         }
 
@@ -127,7 +127,7 @@ public sealed partial class ZoneWorld
         FanoutMoveType(player);
         NetBridge?.FanoutSkillList(
             [player.ObjectId],
-            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
 
         List<int>? netPeers = null;
@@ -185,7 +185,7 @@ public sealed partial class ZoneWorld
         if (skillIds == null || skillIds.Length == 0)
             return "bad_request";
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int applied = 0;
         foreach (int skillId in skillIds)
         {

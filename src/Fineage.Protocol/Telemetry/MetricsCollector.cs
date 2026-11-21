@@ -8,7 +8,14 @@ public sealed class MetricsCollector : IDisposable
     readonly object _gate = new();
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
+    readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
+    long _tickOverruns;
+    long _ticksSkipped;
+    long _regionHandoffs;
+    readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
+    long _ledgerFlushFailures;
     int _online;
+    int _commandIngressQueued;
 
     public MetricsCollector()
     {
@@ -39,7 +46,19 @@ public sealed class MetricsCollector : IDisposable
             return new MetricsSnapshot
             {
                 PlayersOnline = _online,
+                CommandIngressQueued = _commandIngressQueued,
                 Tick = _tick.Freeze(),
+                TickOverruns = _tickOverruns,
+                TicksSkipped = _ticksSkipped,
+                RegionHandoffs = _regionHandoffs,
+                LedgerAdjustments = _ledgerAdjustments
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
+                LedgerFlushFailures = _ledgerFlushFailures,
+                Stages = _stages
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .Select(pair => pair.Value.Freeze(pair.Key))
+                    .ToList(),
                 Endpoints = endpoints
             };
         }
@@ -83,16 +102,44 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.packets.errored":
                     Row(endpoint).PacketsErrored += value;
                     break;
+                case "fineage.tick.overruns":
+                    _tickOverruns += value;
+                    break;
+                case "fineage.tick.skipped":
+                    _ticksSkipped += value;
+                    break;
+                case "fineage.region.handoffs":
+                    _regionHandoffs += value;
+                    break;
+                case "fineage.tick.stage.failures":
+                    Stage(StageOf(tags)).Failures += value;
+                    break;
+                case "fineage.ledger.adjustments":
+                    _ledgerAdjustments[MoveKindOf(tags)] = _ledgerAdjustments.GetValueOrDefault(MoveKindOf(tags)) + value;
+                    break;
+                case "fineage.ledger.flush_failures":
+                    _ledgerFlushFailures += value;
+                    break;
             }
         }
     }
 
     void OnInt(Instrument instrument, int value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (!IsOurs(instrument) || instrument.Name != "fineage.zone.online")
+        if (!IsOurs(instrument))
             return;
         lock (_gate)
-            _online = value;
+        {
+            switch (instrument.Name)
+            {
+                case "fineage.zone.online":
+                    _online = value;
+                    break;
+                case "fineage.command.ingress.queued":
+                    _commandIngressQueued = value;
+                    break;
+            }
+        }
     }
 
     void OnDouble(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
@@ -109,8 +156,44 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.tick.ms":
                     _tick.Record(value);
                     break;
+                case "fineage.tick.stage.ms":
+                    Stage(StageOf(tags)).Duration.Record(value);
+                    break;
             }
         }
+    }
+
+    MutableStage Stage(string stage)
+    {
+        if (!_stages.TryGetValue(stage, out MutableStage? row))
+        {
+            row = new MutableStage();
+            _stages.Add(stage, row);
+        }
+
+        return row;
+    }
+
+    static string StageOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        foreach (KeyValuePair<string, object?> tag in tags)
+        {
+            if (tag.Key == "stage" && tag.Value is string value)
+                return value;
+        }
+
+        return "";
+    }
+
+    static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        foreach (KeyValuePair<string, object?> tag in tags)
+        {
+            if (tag.Key == "move_kind" && tag.Value is string value)
+                return value;
+        }
+
+        return "";
     }
 
     MutableEndpoint Row(string endpoint)
@@ -163,6 +246,19 @@ public sealed class MetricsCollector : IDisposable
             ConnectionsRejected = ConnectionsRejected,
             OutboundDropped = OutboundDropped,
             Handler = Handler.Freeze()
+        };
+    }
+
+    sealed class MutableStage
+    {
+        public long Failures;
+        public DurationHistogram Duration { get; } = new();
+
+        public StageMetrics Freeze(string stage) => new()
+        {
+            Stage = stage,
+            Duration = Duration.Freeze(),
+            Failures = Failures
         };
     }
 

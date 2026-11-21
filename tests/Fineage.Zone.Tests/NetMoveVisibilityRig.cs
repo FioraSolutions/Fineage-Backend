@@ -4,6 +4,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -51,9 +52,12 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
             [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, true, [])
         });
         var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty,
-            activeMapId: mapId ?? SpawnCatalog.DefaultMapId);
+            activeMapId: mapId ?? SpawnCatalog.DefaultMapId,
+            ledgerJournal: new MemoryLedgerJournal());
         var host = await NetZoneHost.StartAsync(world, store, clock: Clock);
-        rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
+        long step = ZoneSimulationSettings.StepMilliseconds;
+        // Stages run at tick time; starting on a tick boundary keeps AdvanceAsync's whole-step totals exact.
+        rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / step * step };
         return rig;
     }
 
@@ -93,20 +97,21 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
         await Host.DisposeAsync();
     }
 
+    /// <summary>The live entity, read as a step: the command pump owns the world while the test runs.</summary>
+    public ZoneEntity EntityOf(int objectId)
+    {
+        var entity = World.RunStepForTest(() => World.TryGetEntityById(objectId, out var found) ? found : null);
+        Assert.True(entity != null, $"entity {objectId} not in world");
+        return entity;
+    }
+
     internal sealed class Player(NetMoveVisibilityRig rig, NetZoneSession session, ulong entityValue)
     {
         public NetZoneSession Net { get; } = session;
         public ulong EntityValue { get; } = entityValue;
         public int ObjectId => (int)EntityValue;
 
-        public ZoneEntity Entity
-        {
-            get
-            {
-                Assert.True(rig.World.TryGetEntityById(ObjectId, out var e), $"entity {ObjectId} not in world");
-                return e;
-            }
-        }
+        public ZoneEntity Entity => rig.EntityOf(ObjectId);
 
         public Task MoveAsync(int x, int y, int z = Z0) =>
             Net.SendAsync(NetOpcode.MoveInput, NetCodec.EncodeMoveInput(new MoveInputMsg { DestX = x, DestY = y, DestZ = z }), rig.Ct);

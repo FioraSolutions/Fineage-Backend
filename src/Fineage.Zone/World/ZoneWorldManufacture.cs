@@ -37,7 +37,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeShopMakeItem(session, request)));
     }
 
@@ -169,6 +169,7 @@ public sealed partial class ZoneWorld
         var customerChanges = new List<InventoryUpdateEntryMsg>();
         var makerChanges = new List<InventoryUpdateEntryMsg>();
 
+        var move = BeginCraft(customer, maker, recipe.Id, out var bagBefore);
         // Mobius: fee first, then materials, then success roll (fee kept on fail).
         if (fee > 0 && !TransferAdena(customer.Inventory, makerInventory, (int)fee, customerChanges, makerChanges))
             return CraftProtocol.Adena;
@@ -203,7 +204,7 @@ public sealed partial class ZoneWorld
             });
         }
 
-        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, Rng(_spawnRandom, maker).Next(100));
         int result = success ? 0 : 1;
         if (success)
         {
@@ -214,6 +215,7 @@ public sealed partial class ZoneWorld
             customerChanges.Add(InventoryMessages.ChangeRow(change, made));
         }
 
+        FinishCraft(move, customer, bagBefore, maker, fee);
         SaveInventory(session, customer.Inventory);
         if (maker.Session != null)
             SaveInventory(maker.Session, makerInventory);

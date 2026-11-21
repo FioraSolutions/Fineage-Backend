@@ -15,7 +15,7 @@ public sealed partial class ZoneWorld
     /// <summary>Drop the in-flight skill: no hit, casting window closed, queued cast cleared. Returns whether something was cast.</summary>
     bool AbortCast(ZoneEntity player, string reason, bool notify)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool casting = player.PendingHit != null || player.CastingUntilMs > now;
         if (!casting)
             return false;
@@ -24,9 +24,9 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = 0;
         if (player.Session is { } session)
         {
-            session.PendingCastSkillId = 0;
-            session.PendingCastTargetId = 0;
-            session.PendingCastAtUnixMs = 0;
+            player.Intent.PendingCastSkillId = 0;
+            player.Intent.PendingCastTargetId = 0;
+            player.Intent.PendingCastAtUnixMs = 0;
             if (notify)
                 Notice(session, CastRules.CastingInterruptedMessage, "Your casting has been interrupted.");
         }
@@ -47,23 +47,23 @@ public sealed partial class ZoneWorld
         bool interruptible = hit.Combat != null ? CastRules.Interruptible(hit.Combat.Magic) : CastRules.Interruptible(hit.MagicType);
         if (!interruptible)
             return;
-        if (_clock().ToUnixTimeMilliseconds() >= hit.DueUnixMs)
+        if (NowUnixMs() >= hit.DueUnixMs)
             return;
         double men = 1;
         if (PlayerClasses.TryGet(player.ClassId, out var t) && t != null)
             men = EffectiveAttributes(player, t).MenBonus;
         // Mobius calcStat(ATTACK_CANCEL, init): Concentration etc. sub/add the cancel stat before the 1..99 clamp.
-        if (CastRules.RollAttackBreak(_combatRandom, damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
+        if (CastRules.RollAttackBreak(Rng(_combatRandom, player), damage, men, init => PlayerStatMods(player).Apply(CombatStat.Cancel, init)))
             AbortCast(player, "hit", notify: true);
     }
 
-    internal bool AbortCastForTest(ZoneEntity player) { lock (_gate) return AbortCast(player, "test", notify: false); }
-    internal void ResolvePendingHitForTest(ZoneEntity player) { lock (_gate) ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds()); }
+    internal bool AbortCastForTest(ZoneEntity player) { using (_affinity.Step()) return AbortCast(player, "test", notify: false); }
+    internal void ResolvePendingHitForTest(ZoneEntity player) { using (_affinity.Step()) ResolvePendingHit(player, NowUnixMs()); }
 
     /// <summary>Test hook: hand damage to a player from an attacker (Mobius onCreatureDamageReceived path).</summary>
     internal void RunDamageTriggersForTest(ZoneEntity owner, ZoneEntity attacker, int damage) =>
         RunDamageTriggers(owner, attacker, damage);
-    internal void HitPlayerForTest(ZoneEntity player, int damage) { lock (_gate) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } }
+    internal void HitPlayerForTest(ZoneEntity player, int damage) { using (_affinity.Step()) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } }
 
     /// <summary>Effect run at hitTime for a non-damage skill (Mobius onMagicHitTimer → callSkill).</summary>
     delegate void DeferredEffect(ZoneEntity target, long now);
@@ -131,10 +131,10 @@ public sealed partial class ZoneWorld
     /// <summary>Test: land the caster's in-flight skill now (as if hitTime passed) and flush the caster's frames.</summary>
     internal Task CompleteCastForTestAsync(ZoneSession session)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_byId.TryGetValue(session.ObjectId, out var player))
-                ResolvePendingHit(player, _clock().ToUnixTimeMilliseconds());
+                ResolvePendingHit(player, NowUnixMs());
         }
 
         return Task.CompletedTask;

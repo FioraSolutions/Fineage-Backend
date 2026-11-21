@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Protocol;
@@ -8,8 +9,8 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>
-    /// Drop selected inventory rows at the corpse. Clan-war and PvP-zone exemptions are not modelled yet
-    /// (no war / PVP zone data). Adena, quest items, and <c>death-drop.json</c> non-droppable ids are skipped.
+    /// Drop selected inventory rows at the corpse. No drops in a PVP arena/siege zone or between clans at mutual war.
+    /// Adena, quest items, and <c>death-drop.json</c> non-droppable ids are skipped.
     /// </summary>
     void OnDieDropItem(ZoneEntity player, int killerObjectId)
     {
@@ -20,6 +21,8 @@ public sealed partial class ZoneWorld
         bool killerIsNpc = killer is { Kind: ZoneEntityKind.Npc };
         // Mobius onDieDropItem: nothing drops when a player kills you inside a PVP zone (arena / siege).
         if (killer is { Kind: ZoneEntityKind.Player } && InPvpArea(player))
+            return;
+        if (killer is { Kind: ZoneEntityKind.Player } && AtMutualWar(killer, player))
             return;
         var rates = _deathDrop.RatesFor(player.Karma, player.PkKills, killerIsNpc, player.Level);
         if (rates is not { } r)
@@ -38,7 +41,7 @@ public sealed partial class ZoneWorld
                 item.Template.Kind == ItemKind.Weapon));
         }
 
-        var toDrop = _deathDrop.SelectDrops(candidates, r, _deathRandom);
+        var toDrop = _deathDrop.SelectDrops(candidates, r, Rng(_deathRandom, player));
         if (toDrop.Count == 0)
             return;
 
@@ -51,6 +54,9 @@ public sealed partial class ZoneWorld
                 watchers.Add(other);
         }
 
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.DeathDrop, player.ObjectId, killerObjectId);
+        ObserveLedger(move, bag);
         var invChanges = new List<InventoryUpdateEntryMsg>();
         bool gearChanged = false;
         bool droppedWeapon = false;
@@ -72,7 +78,7 @@ public sealed partial class ZoneWorld
             invChanges.Add(InventoryMessages.RemoveRow(item, -1));
             player.Inventory.Remove(item);
 
-            SpawnGroundStack(
+            var ground = SpawnGroundStack(
                 itemId,
                 count,
                 player.X,
@@ -80,10 +86,15 @@ public sealed partial class ZoneWorld
                 player.Z,
                 player.InstanceId,
                 watchers,
-                dropperObjectId: player.ObjectId);
+                dropperObjectId: player.ObjectId,
+                piece: item.Template.Stackable ? null : item);
+            if (ground != null)
+                PostOntoGround(move, bag, ground);
             ZoneLog.Info($"die-drop object={player.ObjectId} item={itemId} count={count} karma={player.Karma} pk={player.PkKills}");
         }
 
+        if (move.HasPostings)
+            move.Commit(LedgerHoldingsOf);
         if (droppedWeapon)
         {
             player.SoulshotCharged = false;
@@ -116,14 +127,14 @@ public sealed partial class ZoneWorld
     /// <summary>Count of live ground stacks (death loot / bag drops).</summary>
     internal int GroundItemCountForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values.Count(e => e.Kind == ZoneEntityKind.GroundItem);
     }
 
     /// <summary>ObjectId of the first live ground stack (test helper).</summary>
     internal int FindGroundObjectIdForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             foreach (var e in _byId.Values)
             {

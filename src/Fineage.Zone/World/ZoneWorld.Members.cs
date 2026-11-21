@@ -59,13 +59,13 @@ public sealed partial class ZoneWorld
             OriginZ = session.Z
         };
 
-        if (entity.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+        if (entity.CastingUntilMs > NowUnixMs())
         {
             // Mobius PlayerAI.onIntentionMoveTo: casting → ActionFailed + saveNextIntention(MOVE_TO); runs after the cast.
-            session.QueuedMove = move;
+            entity.Intent.QueuedMove = move;
             return null;
         }
-        session.QueuedMove = null;
+        entity.Intent.QueuedMove = null;
         // Sanity clamp for a single client move request, not a region gate: a click can be far away
         // (click-to-move across a village) and the same code runs for every spawn map.
         if (!WithinMoveRequest(entity.X, entity.Y, move.DestX, move.DestY))
@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
         }
         CancelAttackIntentionOnMove(session, move);
         // Mobius NextAction(EVT_ARRIVED, MOVE_TO, sitDown): a fresh move order cancels the pending sit.
-        session.SitOnArrive = false;
+        entity.Intent.SitOnArrive = false;
         if (NetBridge != null)
             return StartTimedMove(entity, session, move);
 
@@ -140,8 +140,8 @@ public sealed partial class ZoneWorld
     }
 
     static bool CombatPinned(ZoneEntity a, ZoneEntity b) =>
-        (a.Session != null && (a.Session.AutoAttackTargetId == b.ObjectId || a.Session.SelectedTargetId == b.ObjectId)) ||
-        (b.Session != null && (b.Session.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
+        (a.Session != null && (a.Intent.AutoAttackTargetId == b.ObjectId || a.Session.SelectedTargetId == b.ObjectId)) ||
+        (b.Session != null && (b.Intent.AutoAttackTargetId == a.ObjectId || b.Session.SelectedTargetId == a.ObjectId)) ||
         a.AggroTargetId == b.ObjectId || b.AggroTargetId == a.ObjectId;
 
     void LinkSeen(ZoneEntity self, int otherId)
@@ -150,8 +150,12 @@ public sealed partial class ZoneWorld
             return;
 
         self.Knownlist.Add(otherId);
+        TrackWatcher(self.ObjectId, otherId);
         if (other.Session != null)
+        {
             other.Knownlist.Add(self.ObjectId);
+            TrackWatcher(other.ObjectId, self.ObjectId);
+        }
         else
             TrackThink(other);
     }
@@ -161,9 +165,10 @@ public sealed partial class ZoneWorld
         if (self.Session == null)
             return;
 
-        self.Knownlist.Remove(otherId);
-        if (_byId.TryGetValue(otherId, out var other))
-            other.Knownlist.Remove(self.ObjectId);
+        if (self.Knownlist.Remove(otherId))
+            UntrackWatcher(self.ObjectId, otherId);
+        if (_byId.TryGetValue(otherId, out var other) && other.Knownlist.Remove(self.ObjectId))
+            UntrackWatcher(other.ObjectId, self.ObjectId);
     }
 
     /// <returns>False when nothing was detached (stale session / object id).</returns>
@@ -192,7 +197,8 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var other))
                 continue;
-            other.Knownlist.Remove(session.ObjectId);
+            if (other.Knownlist.Remove(session.ObjectId))
+                UntrackWatcher(other.ObjectId, session.ObjectId);
         }
 
         NoteOlympiadDisconnect(entity);
@@ -200,16 +206,19 @@ public sealed partial class ZoneWorld
         RemoveAllCubics(entity, broadcast: false);
         DuelOnLeave(entity);
 
+        foreach (int id in entity.Knownlist)
+            UntrackWatcher(session.ObjectId, id);
         entity.Knownlist.Clear();
+        DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
-        ForgetActiveSets(session.ObjectId);
         foreach (int id in seen)
         {
             if (_byId.TryGetValue(id, out var other))
                 ReleaseThink(other);
         }
         session.InWorld = false;
+        _chat.Left(session.ObjectId);
 
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
@@ -226,7 +235,7 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    /// <summary>Inventory / warehouse / vitals / quests / presence — must run outside <c>_gate</c>.</summary>
+    /// <summary>Inventory / warehouse / vitals / quests / presence — runs after the leave, from its snapshot.</summary>
     void PersistUnlinkSnapshot(UnlinkPersistSnapshot snapshot)
     {
         var session = snapshot.Session;

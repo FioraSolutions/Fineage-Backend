@@ -1,23 +1,26 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Rewards;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
+    readonly IRegionRandom _questRandom;
+
     public Task<string?> TryQuestListAsync(ZoneSession session, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            QueueList(session);
+        QueueList(session);
         return Task.FromResult<string?>(null);
     }
 
@@ -28,12 +31,12 @@ public sealed partial class ZoneWorld
         if (questId <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        // Abort may strip quest items → SaveInventory after unlock (B8).
+        // Abort may strip quest items → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             if (!TryPlayer(session, out var player))
                 return "world";
-            var outcome = _quests.Abort(player.Quests, player.Inventory!, questId);
+            var outcome = RecordQuest(player, () => _quests.Abort(player.Quests, player.Inventory!, questId));
             if (outcome.Ok || outcome.Lines.Count > 0)
                 Publish(session, player, outcome, npcObjectId: 0, npcId: 0);
             return outcome.Ok ? null : FailureCode(outcome.Failure);
@@ -115,25 +118,25 @@ public sealed partial class ZoneWorld
             // Bypass links stay a hard range check (Npc.onBypassFeedback requires canInteract).
             if (!allowApproach || eventName != null)
                 return "range";
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             if (player.CastingUntilMs > now || player.Sitting)
                 return null;
-            session.AutoAttackTargetId = 0;
-            session.PendingCastSkillId = 0;
-            session.PendingCastAtUnixMs = 0;
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.PendingCastSkillId = 0;
+            player.Intent.PendingCastAtUnixMs = 0;
             long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
             if (ms < 0)
                 return "range";
             if (ms > 0)
             {
-                session.PendingTalkNpcId = npc.ObjectId;
-                session.PendingTalkAtUnixMs = now + ms;
+                player.Intent.PendingTalkNpcId = npc.ObjectId;
+                player.Intent.PendingTalkAtUnixMs = now + ms;
                 return null;
             }
         }
 
-        session.PendingTalkNpcId = 0;
-        session.PendingTalkAtUnixMs = 0;
+        player.Intent.PendingTalkNpcId = 0;
+        player.Intent.PendingTalkAtUnixMs = 0;
         // Mobius NpcAction sends MoveToPawn(player, npc, 100) before the chat window so the NPC faces the talker.
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
 
@@ -141,11 +144,11 @@ public sealed partial class ZoneWorld
         if (eventName == null)
             TryNewbieHelperGift(session, player, npc);
 
-        outcome = eventName == null
+        outcome = RecordQuest(player, () => eventName == null
             ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name, QuestActorOf(player))
             : eventName.Length == 0
                 ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId, QuestActorOf(player))
-                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player));
+                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player)));
         if (IsNpcPage(outcome))
         {
             SendNpcPage(session, player, npc, 0);
@@ -163,11 +166,11 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.PendingTalkNpcId <= 0 || now < session.PendingTalkAtUnixMs)
+            if (session == null || player.Intent.PendingTalkNpcId <= 0 || now < player.Intent.PendingTalkAtUnixMs)
                 continue;
-            int npcId = session.PendingTalkNpcId;
-            session.PendingTalkNpcId = 0;
-            session.PendingTalkAtUnixMs = 0;
+            int npcId = player.Intent.PendingTalkNpcId;
+            player.Intent.PendingTalkNpcId = 0;
+            player.Intent.PendingTalkAtUnixMs = 0;
             if (!_byId.TryGetValue(npcId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 continue;
             if (!InTalkRange(player, npc))
@@ -175,8 +178,8 @@ public sealed partial class ZoneWorld
                 long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
                 if (ms > 0)
                 {
-                    session.PendingTalkNpcId = npcId;
-                    session.PendingTalkAtUnixMs = now + ms;
+                    player.Intent.PendingTalkNpcId = npcId;
+                    player.Intent.PendingTalkAtUnixMs = now + ms;
                     continue;
                 }
                 if (ms < 0)
@@ -194,7 +197,8 @@ public sealed partial class ZoneWorld
         new(player.Race, player.Level, player.ClassId, player.SubClassActive)
         {
             PetControlObjectId = PetControlObjectIdOf(player),
-            ByPet = byPet
+            ByPet = byPet,
+            Roll = Rng(_questRandom, player).NextDouble
         };
 
     /// <summary>
@@ -203,14 +207,14 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void QuestKillForTest(ZoneEntity killer, int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 });
     }
 
     /// <summary>Test hook: run the exp/sp → level-up pipeline the way a kill reward does.</summary>
     internal void GrantExpForTest(ZoneEntity killer, long exp, int sp)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!ApplyExpSp(killer, exp, sp))
                 return;
@@ -222,7 +226,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the kill-reward split exactly like a dying mob does (reads <see cref="ZoneEntity.DamageBy"/>).</summary>
     internal void GrantKillRewardForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             GrantKillReward(killer, npc);
     }
 
@@ -235,7 +239,8 @@ public sealed partial class ZoneWorld
             return;
         if (npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
             return;
-        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet));
+        var outcome = RecordQuest(attacker,
+            () => _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet)));
         if (outcome.Ok && outcome.Spawns.Count > 0)
             npc.QuestAttackSpawned = true;
         PublishKill(attacker, outcome, npc);
@@ -244,7 +249,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>
     internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyQuestAttack(attacker, npc, byPet);
     }
 
@@ -263,7 +268,10 @@ public sealed partial class ZoneWorld
             long dx = member.X - (long)npc.X, dy = member.Y - (long)npc.Y;
             if (npc.ObjectId != 0 && dx * dx + dy * dy > (long)AlliancePenaltyRange * AlliancePenaltyRange)
                 continue;
-            foreach (var outcome in _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId))
+            var outcomes = RecordBagChange(member, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests),
+                () => _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId).ToList(),
+                list => list.Count == 1 ? list[0].QuestId : 0);
+            foreach (var outcome in outcomes)
                 PublishKill(member, outcome, npc);
         }
     }
@@ -275,7 +283,7 @@ public sealed partial class ZoneWorld
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
         ApplyAllianceBetrayal(killer, npc);
-        var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
+        var outcome = RecordQuest(killer, () => _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer)));
         PublishKill(killer, outcome, npc);
 
         // Mobius executeForEachPlayer: party members near the corpse share raid-head style steps.
@@ -285,7 +293,8 @@ public sealed partial class ZoneWorld
             {
                 if (member == killer || member.Inventory == null || member.Dead || member.Session == null)
                     continue;
-                PublishKill(member, _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member)), npc);
+                PublishKill(member, RecordQuest(member,
+                    () => _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member))), npc);
             }
         }
 
@@ -302,8 +311,9 @@ public sealed partial class ZoneWorld
 
             if (eligible.Count == 0)
                 continue;
-            var winner = eligible[Random.Shared.Next(eligible.Count)];
-            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc);
+            var winner = eligible[Rng(_questRandom, killer).Next(eligible.Count)];
+            PublishKill(winner, RecordQuest(winner,
+                () => _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner))), npc);
         }
     }
 
@@ -313,7 +323,7 @@ public sealed partial class ZoneWorld
     IEnumerable<ZoneEntity> QuestPartyCandidates(ZoneEntity killer)
     {
         yield return killer;
-        if (!_partyByPlayer.TryGetValue(killer.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(killer.ObjectId) is not { } party)
             yield break;
         foreach (int id in party.MemberIds)
         {
@@ -340,20 +350,11 @@ public sealed partial class ZoneWorld
 
     internal void JoinPartyForTest(Fineage.Game.Services.PartyDistributionType distribution, params ZoneEntity[] members)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            var party = new ZoneParty
-            {
-                PartyId = _nextPartyId++,
-                LeaderObjectId = members[0].ObjectId,
-                ItemDistribution = (int)distribution
-            };
-            _parties[party.PartyId] = party;
-            foreach (var m in members)
-            {
-                party.MemberIds.Add(m.ObjectId);
-                _partyByPlayer[m.ObjectId] = party.PartyId;
-            }
+            var party = _party.Create(members[0].ObjectId, (int)distribution);
+            foreach (var m in members.Skip(1))
+                _party.Join(party, m.ObjectId);
         }
     }
 
@@ -386,7 +387,7 @@ public sealed partial class ZoneWorld
         if (outcome.Noble)
             SetNoble(player, true);
         if (outcome.Social > 0)
-            NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, outcome.Social);
+            NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, outcome.Social);
         if (outcome.Items.Count > 0 && player.Inventory != null)
         {
             var invUpdate = new InventoryUpdateMsg
@@ -434,8 +435,18 @@ public sealed partial class ZoneWorld
                 FanoutNetHtml(session, npcEntity, outcome.Html);
         }
 
+        ApplyTutorialUiOutcome(session, outcome.TutorialUi);
+
         if (outcome.JournalChanged)
+        {
+            if (outcome.QuestId > 0)
+            {
+                var row = player.Quests.Find(outcome.QuestId);
+                if (row != null)
+                    EmitCondClientFx(session, player, outcome.QuestId, row.Cond, playSounds: true);
+            }
             QueueList(session);
+        }
 
         // Mobius addLevel runs after the exp/sp that caused it, so the level packets follow the quest reward lines.
         if (levelled)
@@ -447,7 +458,7 @@ public sealed partial class ZoneWorld
         // Mobius teleToLocation from a quest step (Possessor of a Precious Soul 4 → Lady of the Lake).
         if (outcome.Teleport is { } to)
         {
-            var (x, y) = Offset(to.X, to.Y);
+            var (x, y) = Offset(player, to.X, to.Y);
             if (Loaded(x, y))
                 Relocate(player, x, y, to.Z);
             else

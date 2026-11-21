@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Accounts;
 using Fineage.Protocol;
@@ -13,7 +14,7 @@ public sealed partial class ZoneWorld
     public Task<string?> TryTeleportSelectAsync(
         ZoneSession session, int npcObjectId, string? listName, int locationId, CancellationToken ct)
     {
-        // Teleport fee may SaveInventory → flush after unlock (B8).
+        // Teleport fee may SaveInventory → flush after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => TeleportTo(session, npcObjectId, listName ?? "", locationId, html: false)));
     }
@@ -21,7 +22,7 @@ public sealed partial class ZoneWorld
     public Task<string?> TryWarehouseDepositAsync(
         ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => DepositPrivate(session, npcObjectId, lines, html: false)));
     }
@@ -87,6 +88,10 @@ public sealed partial class ZoneWorld
                 return ShowTrainerSkills(session, player, npc);
             case NpcServiceIntent.LearnSkill:
                 return LearnTrainerSkill(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.WyvernRide:
+                return TryWyvernRideFromManager(session, player, npc);
+            case NpcServiceIntent.PetEvolve:
+                return ApplyPetEvolve(session, player, npc, reply.ServiceId);
             default:
                 return "bad_request";
         }
@@ -95,14 +100,16 @@ public sealed partial class ZoneWorld
     /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
     internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";
             var npc = _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.NpcId == npcId)
                 ?? new ZoneEntity
                 {
-                    Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0,
+                    Kind = ZoneEntityKind.Npc,
+                    NpcId = npcId,
+                    ObjectId = 0,
                     MerchantCastleId = Fineage.Zone.Shops.MerchantTowns.For(mapId).CastleId,
                     MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
                 };
@@ -120,13 +127,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var castle = _siege.Find(npc.MerchantCastleId);
+        var castle = _siege.Board.Find(npc.MerchantCastleId);
         bool owned = castle != null && castle.OwnerClanId > 0;
         string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
         if (!_html.TryGet(file, out var html))
             html = "<html><body>%castlename%</body></html>";
         string clanName = "", leaderName = "";
-        if (owned && _clans.TryGetValue(castle!.OwnerClanId, out var clan))
+        if (owned && _clan.TryGet(castle!.OwnerClanId, out var clan))
         {
             clanName = clan.Name;
             leaderName = clan.Members.FirstOrDefault(m => m.CharacterId == clan.LeaderId)?.Name ?? "";
@@ -174,7 +181,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var when = _clock();
+        var when = WallNow();
         var rows = new TeleportLocationMsg[list.Locations.Count];
         var html = new System.Text.StringBuilder();
         html.Append("<html><body>%npcname%:<br>");
@@ -251,7 +258,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var (x, y) = Offset(loc.X, loc.Y);
+        var (x, y) = Offset(player, loc.X, loc.Y);
         if (!Loaded(x, y))
         {
             Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
@@ -260,9 +267,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, _clock(), player.SubClassActive);
-        var changes = new List<InventoryUpdateEntryMsg>();
-        if (fee > 0 && !Take(player.Inventory, loc.FeeItemId, fee, changes))
+        int fee = TeleportRules.Quote(list.Type, player.Level, loc.FeeCount, WallNow(), player.SubClassActive);
+        if (fee > 0 && player.Inventory.CountOf(loc.FeeItemId) < fee)
         {
             bool adena = loc.FeeItemId == WarehouseRules.AdenaItemId;
             Notice(
@@ -274,15 +280,29 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (changes.Count > 0)
-        {
-            // The fare is a bag change like any other, and Net clients only see it through the bridge.
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, player.Inventory);
-        }
+        int locationIdRef = locationId;
+        RecordBagChange(
+            player,
+            LedgerTxKind.TeleportFee,
+            Fees,
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (fee > 0)
+                {
+                    Take(player.Inventory, loc.FeeItemId, fee, changes);
+                    if (changes.Count > 0)
+                    {
+                        FanInventory(session, Collapse(changes));
+                        SaveInventory(session, player.Inventory);
+                    }
+                }
 
-        Relocate(player, x, y, loc.Z);
-        Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText);
+                Relocate(player, x, y, loc.Z);
+                Notice(session, NpcServiceProtocol.Teleported, NpcServiceProtocol.TeleportedText);
+                return true;
+            },
+            _ => locationIdRef);
         return null;
     }
 

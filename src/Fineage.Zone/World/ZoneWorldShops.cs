@@ -1,4 +1,6 @@
+using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.Shops;
@@ -12,7 +14,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => Buy(session, npcObjectId, listId, items)));
     }
@@ -40,9 +42,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = Preview(session, npcObjectId);
+        string? error = Preview(session, npcObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -133,6 +133,8 @@ public sealed partial class ZoneWorld
         var liveItems = items!;
 
         Tax(npc, out int baseTax, out int castleTax, out _);
+        var inventoryBackup = CharacterInventory.Rows(player.Inventory!);
+        var move = BeginShopMove(LedgerTxKind.ShopBuy, player, npc.NpcId, npc.MerchantCastleId);
         var mutation = ShopTrade.Buy(
             player.Inventory!,
             _game.Items,
@@ -143,14 +145,16 @@ public sealed partial class ZoneWorld
             MaxLoadOf(player),
             ShopTrade.SlotLimit(player.Race),
             _shopStock,
-            _clock().ToUnixTimeMilliseconds());
+            NowUnixMs());
         if (!mutation.Ok)
         {
             SendDeny(session, mutation);
             return null;
         }
 
-        CreditCastleTax(npc.MerchantCastleId, mutation.CastleTax);
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup,
+                CreditCastleTax(npc.MerchantCastleId, mutation.CastleTax)))
+            return null;
         SendTouches(session, mutation);
         SendComplete(session);
         var buy = BuyList(npc, liveList, baseTax, castleTax);
@@ -169,12 +173,17 @@ public sealed partial class ZoneWorld
             return sellWindow;
         var liveItems = items!;
 
+        var inventoryBackup = CharacterInventory.Rows(player.Inventory!);
+        var move = BeginShopMove(LedgerTxKind.ShopSell, player, npc.NpcId, castleId: 0);
         var mutation = ShopTrade.Sell(player.Inventory!, liveItems);
         if (!mutation.Ok)
         {
             SendDeny(session, mutation);
             return null;
         }
+
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup, []))
+            return null;
 
         SendTouches(session, mutation);
         SendComplete(session);
@@ -199,6 +208,8 @@ public sealed partial class ZoneWorld
         var liveInventory = player.Inventory!;
         var liveShop = player.Shop!;
 
+        var inventoryBackup = CharacterInventory.Rows(liveInventory);
+        var move = BeginShopMove(LedgerTxKind.ShopExchange, player, npc.NpcId, npc.MerchantCastleId);
         var mutation = ShopTrade.Exchange(
             liveInventory,
             _game.Items,
@@ -214,8 +225,11 @@ public sealed partial class ZoneWorld
 
         // Mobius MultiSellChoose: the entry's tax share goes to the castle treasury.
         Tax(npc, out _, out _, out bool taxedOwner);
-        if (taxedOwner && liveEntry.TaxAmount > 0)
-            CreditCastleTax(npc.MerchantCastleId, (long)liveEntry.TaxAmount * amount);
+        if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup,
+                taxedOwner && liveEntry.TaxAmount > 0
+                    ? CreditCastleTax(npc.MerchantCastleId, (long)liveEntry.TaxAmount * amount)
+                    : []))
+            return null;
 
         SendTouches(session, mutation);
         SendComplete(session);

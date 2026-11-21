@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Clan;
 using Fineage.Zone.NpcHtml;
@@ -78,7 +79,7 @@ public sealed partial class ZoneWorld
         string command = parts[0].ToLowerInvariant();
         string arg1 = parts.Length > 1 ? parts[1] : "";
         string arg2 = parts.Length > 2 ? parts[2] : "";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var clan = ClanOf(session.ObjectId);
         error = command switch
         {
@@ -146,20 +147,37 @@ public sealed partial class ZoneWorld
             return PledgeProtocol.Conditions;
         }
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        if (cost.Adena > 0 && !Take(inventory!, PledgeProtocol.AdenaItemId, (int)cost.Adena, changes))
+        if (inventory == null)
             return PledgeProtocol.Conditions;
-        if (cost.ItemId > 0 && !Take(inventory!, cost.ItemId, 1, changes))
+        if (cost.Adena > 0 && inventory.CountOf(PledgeProtocol.AdenaItemId) < cost.Adena)
             return PledgeProtocol.Conditions;
+        if (cost.ItemId > 0 && inventory.CountOf(cost.ItemId) < 1)
+            return PledgeProtocol.Conditions;
+        int newLevel = clan.Level + 1;
+        RecordBagChange(
+            player,
+            LedgerTxKind.ClanLevelUp,
+            Fees,
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (cost.Adena > 0)
+                    Take(inventory, PledgeProtocol.AdenaItemId, (int)cost.Adena, changes);
+                if (cost.ItemId > 0)
+                    Take(inventory, cost.ItemId, 1, changes);
+                if (changes.Count > 0)
+                {
+                    FanInventory(session, Collapse(changes));
+                    SaveInventory(session, inventory);
+                }
+
+                return true;
+            },
+            _ => newLevel);
         if (cost.Sp > 0)
         {
             player.Sp -= cost.Sp;
             _persist.SaveProgress(session.Account, session.ObjectId, player.Level, player.Exp, player.Sp, player.MaxHp, player.CurHp, player.MaxMp, player.CurMp, player.MaxCp, player.CurCp);
-        }
-        if (changes.Count > 0)
-        {
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory!);
         }
         if (cost.Reputation > 0)
         {
@@ -313,9 +331,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the start-of-server delegation step without reloading the world.</summary>
     internal bool ApplyLeaderDelegationForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || clan.D.NewLeaderId == 0)
+            if (!_clan.TryGet(clanId, out var clan) || clan.D.NewLeaderId == 0)
                 return false;
             ApplyLeaderDelegation(clan);
             BroadcastClan(clan, charInfo: true);
@@ -339,7 +357,7 @@ public sealed partial class ZoneWorld
     }
 
     bool UnitNameTaken(string name) =>
-        _clans.Values.Any(c => c.D.SubPledges.Any(sp => string.Equals(sp.Name, name, StringComparison.OrdinalIgnoreCase)));
+        _clan.All.Any(c => c.D.SubPledges.Any(sp => string.Equals(sp.Name, name, StringComparison.OrdinalIgnoreCase)));
 
     /// <summary>Mobius <c>VillageMaster.createSubPledge</c> + <c>Clan.createSubPledge</c>.</summary>
     string? CreateSubUnit(ZoneSession session, ZoneClan clan, string name, string leaderName, int family, int minLevel)

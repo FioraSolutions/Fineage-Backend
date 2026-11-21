@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.SevenSigns;
@@ -8,13 +9,13 @@ public sealed partial class ZoneWorld
 {
     public int PlayerDungeonId(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.TryGetValue(objectId, out var entity) ? entity.DungeonId : 0;
     }
 
     public Task<string?> TryDungeonAsync(ZoneSession session, DungeonEnterRequestMsg request, CancellationToken ct)
     {
-        // Enter fee / key consume → SaveInventory after unlock (B8).
+        // Enter fee / key consume → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => ApplyDungeon(session, request)));
     }
 
@@ -38,9 +39,9 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        _dungeonAccess.Observe(_sevenSigns);
+        _dungeonAccess.Observe(_sevenSigns.Engine);
         var character = new DungeonCharacter(
-            (SevenSignsCabal)_sevenSigns.PlayerCabal(session.ObjectId),
+            (SevenSignsCabal)_sevenSigns.Engine.PlayerCabal(session.ObjectId),
             player.Dead,
             itemId => player.Inventory.FindByItemId(itemId)?.Count ?? 0);
         var code = _dungeonAccess.CanEnter(character, site.Id);
@@ -50,40 +51,51 @@ public sealed partial class ZoneWorld
             return DungeonAccess.ToWire(code);
         }
 
-        if (site.FeeCount > 0)
+        int dungeonId = site.Id;
+        if (site.FeeCount > 0 && player.Inventory!.CountOf(site.FeeItemId) < site.FeeCount)
         {
-            var changes = new List<InventoryUpdateEntryMsg>();
-            if (!Take(player.Inventory, site.FeeItemId, site.FeeCount, changes))
-            {
-                QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id));
-                return DungeonProtocol.Fee;
-            }
-
-            if (changes.Count > 0)
-            {
-                var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
-                SaveInventory(session, player.Inventory);
-            }
+            QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id));
+            return DungeonProtocol.Fee;
         }
 
-        Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
-        player.DungeonId = site.Id;
-        var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
-        NetBridge?.FanoutDungeonEntered([session.ObjectId], inside);
+        RecordBagChange(
+            player,
+            LedgerTxKind.DungeonEntryFee,
+            Fees,
+            () =>
+            {
+                if (site.FeeCount > 0)
+                {
+                    var changes = new List<InventoryUpdateEntryMsg>();
+                    Take(player.Inventory!, site.FeeItemId, site.FeeCount, changes);
+                    if (changes.Count > 0)
+                    {
+                        var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
+                        SaveInventory(session, player.Inventory);
+                    }
+                }
+
+                Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
+                player.DungeonId = site.Id;
+                var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
+                NetBridge?.FanoutDungeonEntered([session.ObjectId], inside);
+                return true;
+            },
+            _ => dungeonId);
         return null;
     }
 
     void EvictDungeonLosers()
     {
-        _dungeonAccess.Observe(_sevenSigns);
-        var period = _sevenSigns.Period;
+        _dungeonAccess.Observe(_sevenSigns.Engine);
+        var period = _sevenSigns.Engine.Period;
         var notice = DungeonAccess.KickNotice(period);
         foreach (var player in Players())
         {
             if (player.DungeonId == 0 || player.Session == null)
                 continue;
-            var cabal = (SevenSignsCabal)_sevenSigns.PlayerCabal(player.ObjectId);
+            var cabal = (SevenSignsCabal)_sevenSigns.Engine.PlayerCabal(player.ObjectId);
             if (_dungeonAccess.MayRemain(cabal, player.DungeonId))
                 continue;
             if (!_dungeons.TryGet(player.DungeonId, out var site))
@@ -120,10 +132,10 @@ public sealed partial class ZoneWorld
         AbortCast(entity, "teleport", notify: false);
         if (heading is int face)
             entity.Heading = face;
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        entity.Intent.PendingPickupId = 0;
+        entity.Intent.PendingPickupAtUnixMs = 0;
+        entity.Intent.AutoAttackTargetId = 0;
+        entity.Intent.ClearApproach();
         // A running path must not keep ticking from the old cell after the snap.
         SetMoveActive(entity, false);
         entity.MovePath.Clear();

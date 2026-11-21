@@ -210,9 +210,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: set a clan's reputation (persisted, broadcast).</summary>
     internal bool SetClanReputationForTest(int clanId, int reputation)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             ChangeReputation(clan, reputation - clan.D.Reputation);
             return true;
@@ -222,9 +222,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: set a clan's level directly (persisted, broadcast).</summary>
     internal bool SetClanLevelForTest(int clanId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             clan.Level = level;
             SaveClan(clan);
@@ -236,25 +236,25 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the live clan details (copy).</summary>
     internal ClanDetails? ClanDetailsForTest(int clanId)
     {
-        lock (_gate)
-            return _clans.TryGetValue(clanId, out var clan) ? clan.D.Clone() : null;
+        using (_affinity.Step())
+            return _clan.TryGet(clanId, out var clan) ? clan.D.Clone() : null;
     }
 
     internal (int Level, int LeaderId, int CrestId, int MemberCount)? ClanSummaryForTest(int clanId)
     {
-        lock (_gate)
-            return _clans.TryGetValue(clanId, out var c) ? (c.Level, c.LeaderId, c.CrestId, c.Members.Count) : null;
+        using (_affinity.Step())
+            return _clan.TryGet(clanId, out var c) ? (c.Level, c.LeaderId, c.CrestId, c.Members.Count) : null;
     }
 
     internal int ClanIdOfForTest(int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return ClanIdFor(characterId);
     }
 
     internal int PledgeTypeOfForTest(int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return ClanOf(characterId) is { } c ? MemberOf(c, characterId)?.PledgeType ?? 0 : 0;
     }
 }
@@ -262,5 +262,5 @@ public sealed partial class ZoneWorld
 public sealed partial class ZoneWorld
 {
     /// <summary>Mobius <c>SiegeManager.checkIsRegistered</c> over every castle.</summary>
-    bool ClanInSiege(int clanId) => _siege.ExportClans().Any(r => r.ClanId == clanId);
+    bool ClanInSiege(int clanId) => _siege.Board.ExportClans().Any(r => r.ClanId == clanId);
 }

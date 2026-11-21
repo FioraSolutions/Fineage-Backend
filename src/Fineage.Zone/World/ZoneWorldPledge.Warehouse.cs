@@ -1,6 +1,8 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -29,6 +31,12 @@ public sealed partial class ZoneWorld
         var clan = ClanOf(player.ObjectId);
         return clan == null ? null : ClanWarehouseOf(clan);
     }
+
+    /// <summary>The ledger account of the warehouse the open window points at.</summary>
+    LedgerAccount ActiveWarehouseAccount(ZoneEntity player) => player.ClanWarehouseOpen
+        ? LedgerAccount.ClanWarehouse(ClanOf(player.ObjectId)?.Id
+            ?? throw new InvalidOperationException($"player {player.ObjectId} has a clan warehouse open without a clan"))
+        : LedgerAccount.Warehouse(player.ObjectId);
 
     int ActiveWarehouseSlots(ZoneEntity player) =>
         player.ClanWarehouseOpen ? PledgeProtocol.ClanWarehouseSlots : WarehouseRules.WarehouseSlots(player.Race);
@@ -113,12 +121,19 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>Test hook: the clan warehouse's stack object ids.</summary>
+    internal List<int> ClanWarehouseStacksForTest(int clanId)
+    {
+        using (_affinity.Step())
+            return _clan.TryGet(clanId, out var clan) ? ClanWarehouseOf(clan)!.Items.Select(i => i.ObjectId).ToList() : [];
+    }
+
     /// <summary>Test hook: the clan warehouse rows (item id → count).</summary>
     internal Dictionary<int, int> ClanWarehouseForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return [];
             return ClanWarehouseOf(clan)!.Items.GroupBy(i => i.ItemId).ToDictionary(g => g.Key, g => g.Sum(i => i.Count));
         }

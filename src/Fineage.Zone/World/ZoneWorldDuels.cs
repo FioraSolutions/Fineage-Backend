@@ -79,9 +79,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = TryDuelCommand(session, msg);
+        string? error = TryDuelCommand(session, msg);
         return Task.FromResult(error);
     }
 
@@ -89,7 +87,7 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
             return "world";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         switch (msg.Kind)
         {
             case DuelCommandKind.Request:
@@ -138,19 +136,19 @@ public sealed partial class ZoneWorld
 
         if (party)
         {
-            if (!_partyByPlayer.TryGetValue(player.ObjectId, out int pa) || !_parties.TryGetValue(pa, out var myParty) ||
+            if (_party.Of(player.ObjectId) is not { } myParty ||
                 myParty.LeaderObjectId != player.ObjectId)
             {
                 SelfLine(session, DuelSysCannotRequest, "You are unable to request a duel at this time.");
                 return;
             }
-            if (!_partyByPlayer.TryGetValue(target.ObjectId, out int pb) || !_parties.TryGetValue(pb, out var theirParty))
+            if (_party.Of(target.ObjectId) is not { } theirParty)
             {
                 SelfLine(session, DuelSysTargetNoParty,
                     "Since the person you challenged is not currently in a party, they cannot duel against your party.");
                 return;
             }
-            if (pa == pb)
+            if (ReferenceEquals(myParty, theirParty))
             {
                 SelfLine(session, DuelSysCannotRequest, "You are unable to request a duel at this time.");
                 return;
@@ -226,7 +224,7 @@ public sealed partial class ZoneWorld
         // Re-check everybody: the world moved on during the ask (Mobius DuelManager.addDuel).
         var teamA = party ? PartyMembersOf(requester) : [requester];
         var teamB = party ? PartyMembersOf(player) : [player];
-        if (party && (!_partyByPlayer.TryGetValue(requester.ObjectId, out int pa) || !_partyByPlayer.TryGetValue(player.ObjectId, out int pb) || pa == pb))
+        if (party && (!_party.InParty(requester.ObjectId) || !_party.InParty(player.ObjectId) || _party.SameParty(requester.ObjectId, player.ObjectId)))
             return;
         foreach (var m in teamA.Concat(teamB))
         {
@@ -287,7 +285,7 @@ public sealed partial class ZoneWorld
             return (2019, $"{n} cannot duel because {n}'s HP or MP is below 50%.");
         if (p.DuelId != 0)
             return (2022, $"{n} cannot duel because {n} is already engaged in a duel.");
-        if (_olympiadArena.Contains(p.ObjectId) || _olympiad.MatchState(p.ObjectId) != null)
+        if (_olympiadArena.Contains(p.ObjectId) || _olympiad.Board.MatchState(p.ObjectId) != null)
             return (2024, $"{n} cannot duel because {n} is participating in the Olympiad.");
         if (p.Karma > 0 || HasCursedWeapon(p.Inventory))
             return (2023, $"{n} cannot duel because {n} is in a chaotic state.");
@@ -461,7 +459,7 @@ public sealed partial class ZoneWorld
                     DuelStopFighting(m);
             foreach (int id in duel.TeamOf(duel.WinnerTeam == 1 ? (byte)2 : (byte)1))
                 if (_byId.TryGetValue(id, out var m))
-                    NetBridge?.FanoutSocialAction(NetWatchersOf(m), m.ObjectId, 7);
+                    NetBridge?.FanoutSocialAction(KnownNetPlayersOf(m), m.ObjectId, 7);
             foreach (int id in duel.TeamOf(duel.WinnerTeam))
                 if (_byId.TryGetValue(id, out var m) && m.DuelState != DuelFighterState.Dead)
                     m.DuelState = DuelFighterState.Winner;
@@ -477,8 +475,8 @@ public sealed partial class ZoneWorld
         AbortCast(m, "duel", notify: false);
         if (m.Session != null)
         {
-            m.Session.AutoAttackTargetId = 0;
-            m.Session.ClearApproach();
+            m.Intent.AutoAttackTargetId = 0;
+            m.Intent.ClearApproach();
         }
     }
 
@@ -631,8 +629,8 @@ public sealed partial class ZoneWorld
         DuelStopFighting(player);
         foreach (var other in Players())
         {
-            if (other.Session is { } s && s.AutoAttackTargetId == player.ObjectId)
-                s.AutoAttackTargetId = 0;
+            if (other.Session != null && other.Intent.AutoAttackTargetId == player.ObjectId)
+                other.Intent.AutoAttackTargetId = 0;
         }
         FanoutVitals(player, PlayerVitalsStatus(player));
         ZoneLog.Info($"duel knockout object={player.ObjectId} duel={player.DuelId}");
@@ -706,13 +704,13 @@ public sealed partial class ZoneWorld
 
     internal void RunDuelTickForTest()
     {
-        lock (_gate)
-            TickDuels(_clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            TickDuels(NowUnixMs());
     }
 
     internal int DuelCountForTest
     {
-        get { lock (_gate) return _duels.Count; }
+        get { using (_affinity.Step()) return _duels.Count; }
     }
 }
 
@@ -721,19 +719,19 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: a skill hit of <paramref name="damage"/> from <paramref name="attacker"/> on a player.</summary>
     internal void SkillDamagePlayerForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
-            ApplySkillDamageToPlayer(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            ApplySkillDamageToPlayer(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CubicTargetForTest(ZoneEntity owner)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return CubicTarget(owner);
     }
 
     internal bool DuelTargetRefusedForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return DuelTargetRefused(attacker, target);
     }
 }

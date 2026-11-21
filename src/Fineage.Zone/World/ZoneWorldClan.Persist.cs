@@ -11,7 +11,7 @@ public sealed partial class ZoneWorld
     {
         if (_accounts == null)
         {
-            clan.Id = _nextClanId++;
+            clan.Id = _clan.AllocateId();
             return true;
         }
 
@@ -169,18 +169,15 @@ public sealed partial class ZoneWorld
     {
         status = null!;
         members = null!;
-        lock (_gate)
-        {
-            if (_clans.Count == 0)
-                return false;
-            var clan = ClanOf(session.ObjectId);
-            if (clan == null)
-                return false;
+        if (_clan.Count == 0)
+            return false;
+        var clan = ClanOf(session.ObjectId);
+        if (clan == null)
+            return false;
 
-            status = StatusOf(clan);
-            members = MembersOf(clan);
-            return true;
-        }
+        status = StatusOf(clan);
+        members = MembersOf(clan);
+        return true;
     }
 
     void SyncClanStanding(ZoneEntity entity)
@@ -205,7 +202,7 @@ public sealed partial class ZoneWorld
         RefreshClanSkills(entity, clan);
         if (SyncSiegeSkills(entity, clan) && entity.Session is { InWorld: true } && NetBridge != null)
             NetBridge.FanoutSkillList([entity.ObjectId],
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(entity, NowUnixMs()));
     }
 
     /// <summary>
@@ -263,9 +260,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test/admin hook: put a skill on the clan book, persist it, and refresh every online member.</summary>
     internal bool TrySetClanSkillForTest(int clanId, int skillId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || skillId <= 0)
+            if (!_clan.TryGet(clanId, out var clan) || skillId <= 0)
                 return false;
             if (level <= 0)
                 clan.Skills.Remove(skillId);

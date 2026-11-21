@@ -1,4 +1,5 @@
 using Fineage.Game.Services;
+using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Spawns;
@@ -55,7 +56,7 @@ public sealed class CityTeleportSpawnTests
     ];
 
     [Fact]
-    public void Town_and_village_maps_are_enabled_and_the_road_stays_off()
+    public void Town_and_village_maps_and_ti_road_are_enabled_in_the_datapack()
     {
         var catalog = SpawnCatalog.LoadDefault();
         Assert.True(catalog.GetMap(SpawnCatalog.DefaultMapId).Enabled);
@@ -67,7 +68,7 @@ public sealed class CityTeleportSpawnTests
             Assert.NotEmpty(map.Npcs);
         }
 
-        Assert.False(catalog.GetMap("ti_village_road").Enabled);
+        Assert.True(catalog.GetMap("ti_village_road").Enabled);
     }
 
     [Fact]
@@ -79,6 +80,7 @@ public sealed class CityTeleportSpawnTests
         var world = new ZoneWorld(includeEnabledMaps: true);
         var spawned = world.NpcObjectIds.ToHashSet();
         var anchors = new List<(int X, int Y)>();
+        bool night = ZoneGameTime.FromLocalMidnight().IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
         foreach (var map in catalog.Maps.Values)
         {
@@ -86,6 +88,8 @@ public sealed class CityTeleportSpawnTests
                 continue;
             foreach (var npc in map.Npcs)
             {
+                if (!SpawnPeriodOfDayParse.IsActive(npc.PeriodOfDay, night))
+                    continue;
                 Assert.Contains(npc.ObjectId, spawned);
                 anchors.Add((npc.X, npc.Y));
             }

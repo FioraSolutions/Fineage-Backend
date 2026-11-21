@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -120,18 +121,15 @@ public sealed partial class ZoneWorld
         _nextWanderScanMs = now + 1000;
         int drift = ZoneNpcSettings.MaxDriftRange;
         long driftSq = (long)drift * drift;
-        if (_thinking.Count == 0)
+        if (_byId.CountOf(ActiveSets.Thinking) == 0)
             return;
-        foreach (int id in _thinking.ToArray())
+        foreach (int id in Active(ActiveSets.Thinking))
         {
             if (!_byId.TryGetValue(id, out var npc))
-            {
-                _thinking.Remove(id);
                 continue;
-            }
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
             {
-                _thinking.Remove(id);
+                _byId.Leave(npc, ActiveSets.Thinking);
                 continue;
             }
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
@@ -159,7 +157,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (TryFollowLeader(npc, now))
                 continue;
-            if (RndBound(RandomWalkRate) != 0)
+            if (RndBound(npc, RandomWalkRate) != 0)
                 continue;
             // Same 1/30 roll: idle BUFF before the step (AttackableAI.java:691).
             if (TryNpcSelfBuffSkill(npc, now))
@@ -171,8 +169,8 @@ public sealed partial class ZoneWorld
             // isInsideRadius2D is strict: distSq < radius^2.
             if (homeDistSq < driftSq)
             {
-                int deltaX = RndBound(drift * 2);
-                int deltaY = RndInclusive(deltaX, drift * 2);
+                int deltaX = RndBound(npc, drift * 2);
+                int deltaY = RndInclusive(npc, deltaX, drift * 2);
                 deltaY = (int)Math.Sqrt((double)deltaY * deltaY - (double)deltaX * deltaX);
                 x1 = deltaX + npc.HomeX - drift;
                 y1 = deltaY + npc.HomeY - drift;
@@ -216,8 +214,8 @@ public sealed partial class ZoneWorld
         long dy = npc.Y - (long)leader.Y;
         if (dx * dx + dy * dy > (long)offset * offset)
         {
-            int x1 = RndInclusive(minRadius * 2, offset * 2);
-            int y1 = RndInclusive(x1, offset * 2);
+            int x1 = RndInclusive(npc, minRadius * 2, offset * 2);
+            int y1 = RndInclusive(npc, x1, offset * 2);
             y1 = (int)Math.Sqrt((double)y1 * y1 - (double)x1 * x1);
             int lx = x1 > offset + minRadius ? leader.X + x1 - offset : leader.X - x1 + minRadius;
             int ly = y1 > offset + minRadius ? leader.Y + y1 - offset : leader.Y - y1 + minRadius;
@@ -225,7 +223,7 @@ public sealed partial class ZoneWorld
             return true;
         }
 
-        if (RndBound(RandomWalkRate) == 0)
+        if (RndBound(npc, RandomWalkRate) == 0)
             TryNpcSelfBuffSkill(npc, now);
         return true;
     }
@@ -249,8 +247,8 @@ public sealed partial class ZoneWorld
             for (int n = 0; n < row.Count; n++)
             {
                 int objectId = AllocateQuestNpcObjectId();
-                int x = master.X + RndBound(80) - 40;
-                int y = master.Y + RndBound(80) - 40;
+                int x = master.X + RndBound(master, 80) - 40;
+                int y = master.Y + RndBound(master, 80) - 40;
                 var entity = new ZoneEntity
                 {
                     ObjectId = objectId,
@@ -293,7 +291,7 @@ public sealed partial class ZoneWorld
                 _byId.Add(objectId, entity);
                 _aoi.Enter(objectId, x, y);
                 master.MinionIds.Add(objectId);
-                _thinking.Add(objectId);
+                _byId.Join(entity, ActiveSets.Thinking);
                 FanoutNewNpc(entity);
                 SpawnPrivates(entity);
             }
@@ -301,11 +299,11 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius <c>Rnd.get(bound)</c>: 0 inclusive, bound exclusive.</summary>
-    int RndBound(int bound) => bound <= 0 ? 0 : _combatRandom.Next(bound);
+    int RndBound(ZoneEntity npc, int bound) => bound <= 0 ? 0 : Rng(_combatRandom, npc).Next(bound);
 
     /// <summary>Mobius <c>Rnd.get(origin, bound)</c>: both ends inclusive.</summary>
-    int RndInclusive(int origin, int bound) =>
-        origin >= bound ? origin : _combatRandom.Next(origin, bound + 1);
+    int RndInclusive(ZoneEntity npc, int origin, int bound) =>
+        origin >= bound ? origin : Rng(_combatRandom, npc).Next(origin, bound + 1);
 
     /// <summary>
     /// Mobius <c>AttackableAI.thinkAttack</c> distance leash (<c>AttackableAI.java:740</c>): a monster dragged further
@@ -324,9 +322,9 @@ public sealed partial class ZoneWorld
         int raidRange = ZoneNpcSettings.AggroDistanceCheckRaidRange;
         bool raids = ZoneNpcSettings.AggroDistanceCheckRaids;
         bool restoreLife = ZoneNpcSettings.AggroDistanceCheckRestoreLife;
-        if (_aiBusy.Count == 0)
+        if (_byId.CountOf(ActiveSets.AiBusy) == 0)
             return;
-        foreach (int id in _aiBusy.ToArray())
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc ||
                 npc.CurHp <= 0 || npc.AggroTargetId <= 0 || !npc.HomeSet)
@@ -361,7 +359,7 @@ public sealed partial class ZoneWorld
             FanoutVitals(npc, StatusFor(npc));
         }
         ZoneLog.Info($"[aggro] leash reset npc={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY} restore={restoreLife}");
-        ReturnHome(npc, _clock().ToUnixTimeMilliseconds());
+        ReturnHome(npc, NowUnixMs());
         return true;
     }
 
@@ -372,9 +370,9 @@ public sealed partial class ZoneWorld
     /// <summary>Advance every moving NPC at walk/run speed; announce new path legs and the final stop.</summary>
     void TickNpcMovement(long now)
     {
-        if (_moving.Count == 0)
+        if (_byId.CountOf(ActiveSets.Moving) == 0)
             return;
-        foreach (int id in _moving.ToArray())
+        foreach (int id in Active(ActiveSets.Moving))
         {
             if (!_byId.TryGetValue(id, out var e) || e.Kind != ZoneEntityKind.Npc || !e.MoveActive)
                 continue;
@@ -425,6 +423,7 @@ public sealed partial class ZoneWorld
                 if (!VisibleTo(player.ObjectId, npc.ObjectId))
                     continue;
                 player.Knownlist.Add(npc.ObjectId);
+                TrackWatcher(player.ObjectId, npc.ObjectId);
                 TrackThink(npc);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
                 ZoneLog.Info($"[aoi] npc enter npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
@@ -433,6 +432,7 @@ public sealed partial class ZoneWorld
                      (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
             {
                 player.Knownlist.Remove(npc.ObjectId);
+                UntrackWatcher(player.ObjectId, npc.ObjectId);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [], [npc.ObjectId]);
                 ReleaseThink(npc);
                 ZoneLog.Info($"[aoi] npc leave npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");

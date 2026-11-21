@@ -32718,6 +32718,15 @@
       "weight": 60
     },
     {
+      "id": 3470,
+      "name": "Gold Bar",
+      "kind": "etc",
+      "icon": "icon.etc_lump_yellow_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 3471,
       "name": "Cybellin's Dagger",
       "kind": "etc",
@@ -52710,6 +52719,16 @@
       "stackable": true
     },
     {
+      "id": 5902,
+      "name": "Scroll of Ancient Magic",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_of_enchant_weapon_i01",
+      "price": 0,
+      "weight": 0,
+      "quest": true
+    },
+    {
       "id": 5903,
       "name": "Ancient Ash Urn",
       "kind": "etc",
@@ -52814,8 +52833,7 @@
       "icon": "icon.etc_kyles_silver_basilisk_i00",
       "price": 1000,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 5962,
@@ -52824,8 +52842,7 @@
       "icon": "icon.etc_kyles_gold_golem_i00",
       "price": 1000,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 5963,
@@ -52834,8 +52851,7 @@
       "icon": "icon.etc_kyles_blood_dragon_i00",
       "price": 1000,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 5964,
@@ -52845,6 +52861,15 @@
       "price": 100,
       "weight": 0,
       "stackable": true
+    },
+    {
+      "id": 5965,
+      "name": "Blank Scroll",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_scroll_gray_i00",
+      "price": 500,
+      "weight": 0
     },
     {
       "id": 6002,
@@ -54112,7 +54137,8 @@
       "icon": "icon.etc_paper_black_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 6400,
@@ -54121,7 +54147,8 @@
       "icon": "icon.etc_paper_red_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 6401,
@@ -54130,7 +54157,8 @@
       "icon": "icon.etc_paper_red_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 6402,
@@ -54139,7 +54167,8 @@
       "icon": "icon.etc_paper_red_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 6408,
@@ -56967,33 +56996,6 @@
       "weight": 0
     },
     {
-      "id": 3470,
-      "name": "Gold Bar",
-      "kind": "etc",
-      "icon": "icon.etc_lump_yellow_i00",
-      "stackable": true,
-      "price": 0,
-      "weight": 0
-    },
-    {
-      "id": 9142,
-      "name": "Apiga",
-      "kind": "etc",
-      "icon": "icon.etc_coin_of_fair_i00",
-      "stackable": true,
-      "price": 0,
-      "weight": 0
-    },
-    {
-      "id": 9143,
-      "name": "Golden Apiga",
-      "kind": "etc",
-      "icon": "icon.etc_coin_of_fair_i00",
-      "stackable": true,
-      "price": 0,
-      "weight": 0
-    },
-    {
       "id": 6674,
       "name": "Sealed Imperial Crusader Breastplate",
       "kind": "armor",
@@ -59472,8 +59474,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7083,
@@ -59482,8 +59483,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7084,
@@ -59492,8 +59492,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7085,
@@ -59502,8 +59501,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7086,
@@ -59512,8 +59510,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7087,
@@ -59522,8 +59519,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7088,
@@ -59532,8 +59528,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7089,
@@ -59542,8 +59537,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7090,
@@ -59552,8 +59546,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7091,
@@ -59562,8 +59555,7 @@
       "icon": "icon.etc_scroll_white_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7092,
@@ -59572,8 +59564,7 @@
       "icon": "icon.etc_scroll_white_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7093,
@@ -59582,8 +59573,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7094,
@@ -59592,8 +59582,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7095,
@@ -59602,8 +59591,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7096,
@@ -59612,8 +59600,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7097,
@@ -59622,8 +59609,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7098,
@@ -59632,8 +59618,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7099,
@@ -59642,8 +59627,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7100,
@@ -59652,8 +59636,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7101,
@@ -59662,8 +59645,7 @@
       "icon": "icon.etc_spellbook_blue_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7102,
@@ -59672,8 +59654,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7103,
@@ -59682,8 +59663,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7104,
@@ -59692,8 +59672,7 @@
       "icon": "icon.etc_spellbook_gray_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7105,
@@ -59702,8 +59681,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7106,
@@ -59712,8 +59690,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7107,
@@ -59722,8 +59699,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7108,
@@ -59732,8 +59708,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7109,
@@ -59742,8 +59717,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7110,
@@ -59752,8 +59726,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7111,
@@ -59762,8 +59735,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7112,
@@ -59772,8 +59744,7 @@
       "icon": "icon.etc_magic_book_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true,
-      "quest": true
+      "stackable": true
     },
     {
       "id": 7113,
@@ -60289,7 +60260,8 @@
       "icon": "icon.etc_ginseng_red_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 7167,
@@ -60358,7 +60330,8 @@
       "icon": "icon.etc_feather_white_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 7174,
@@ -60377,7 +60350,8 @@
       "icon": "icon.etc_claw_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 7176,
@@ -60406,7 +60380,8 @@
       "icon": "icon.etc_totem_necklace_black_i00",
       "stackable": true,
       "price": 0,
-      "weight": 0
+      "weight": 0,
+      "quest": true
     },
     {
       "id": 7179,
@@ -69521,7 +69496,8 @@
       "icon": "icon.etc_fang_red_i00",
       "price": 0,
       "weight": 0,
-      "stackable": true
+      "stackable": true,
+      "quest": true
     },
     {
       "id": 8086,
@@ -69531,6 +69507,16 @@
       "price": 0,
       "weight": 0,
       "stackable": true,
+      "quest": true
+    },
+    {
+      "id": 8087,
+      "name": "Cursed Doll",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_totem_red_i00",
+      "price": 0,
+      "weight": 0,
       "quest": true
     },
     {
@@ -76982,6 +76968,24 @@
       "price": 0,
       "weight": 10,
       "bodySlot": "hairall"
+    },
+    {
+      "id": 9142,
+      "name": "Apiga",
+      "kind": "etc",
+      "icon": "icon.etc_coin_of_fair_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 9143,
+      "name": "Golden Apiga",
+      "kind": "etc",
+      "icon": "icon.etc_coin_of_fair_i00",
+      "stackable": true,
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 9145,

@@ -3,6 +3,7 @@ using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Inventory;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -18,7 +19,8 @@ public sealed class ZoneAutoShotTests
         Assert.True(login.Register("shots", "pass1234").Ok);
         var created = login.CreateHuman("shots", "Shooter", HumanClasses.Fighter);
         var ticket = login.Play("shots", "pass1234", created.Value!.Name, HumanClasses.Fighter);
-        var world = new ZoneWorld(accounts: store);
+        var world = new ZoneWorld(accounts: store,
+        ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
@@ -130,7 +132,7 @@ public sealed class ZoneAutoShotTests
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse))); // glow waits for onHitTimer
 
         // Stop the auto loop so the next swing cannot consume the recharge in the same tick.
-        session.AutoAttackTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
         kit.Now = kit.Now.AddSeconds(2);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.True(player.SoulshotCharged); // onHitTimer recharge

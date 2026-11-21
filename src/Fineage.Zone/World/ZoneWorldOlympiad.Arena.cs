@@ -13,6 +13,9 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     readonly HashSet<int> _olympiadArena = [];
+    readonly int _olympiadEnchantLimit;
+    readonly bool _olympiadDisableBlessedSpiritshots;
+    readonly IReadOnlySet<int> _olympiadRestrictedItems;
     const int OlympiadEquipItemMessage = 1507, OlympiadUseItemMessage = 1508;
     /// <summary>Mobius removals: every skill whose reuse delay is at most 15 minutes is ready again on entry.</summary>
     const long OlympiadReuseResetMaxMs = 900_000;
@@ -22,7 +25,7 @@ public sealed partial class ZoneWorld
     /// be equipped or used inside an arena. Unequipping is always allowed.
     /// </summary>
     bool OlympiadRestrictedItem(int itemId) =>
-        IsHeroItem(itemId) || _olympiad.Settings.RestrictedItems.Contains(itemId);
+        IsHeroItem(itemId) || _olympiadRestrictedItems.Contains(itemId);
 
     string? OlympiadItemRefused(ZoneEntity player, ItemInstance item)
     {
@@ -69,7 +72,7 @@ public sealed partial class ZoneWorld
 
     internal bool OlympiadTargetRefusedForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return OlympiadTargetRefused(attacker, target);
     }
 
@@ -80,8 +83,10 @@ public sealed partial class ZoneWorld
         if (!_olympiadArena.Add(player.ObjectId))
             return;
         EndOlympiadObserve(player);
+        PrepareOlympiadSummons(player);
+        StopCubicsByOthers(player);
         AbortCast(player, "olympiad", notify: false);
-        if (player.Session != null && _partyByPlayer.ContainsKey(player.ObjectId))
+        if (player.Session != null && _party.InParty(player.ObjectId))
             TryPartyLeave(player.ObjectId);
         player.Abnormals.Clear();
         player.ActiveEnchantObjectId = 0;
@@ -103,7 +108,7 @@ public sealed partial class ZoneWorld
         RefreshRunSpeed(player);
         if (player.Session != null)
         {
-            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
             NetBridge?.FanoutAbnormalStatusUpdate([player.ObjectId], AbnormalFor(player));
         }
     }
@@ -121,7 +126,7 @@ public sealed partial class ZoneWorld
         if (wasDown)
             FanoutRevive(player);
         if (player.Session != null)
-            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
     }
 
     void FillBars(ZoneEntity player)
@@ -143,7 +148,7 @@ public sealed partial class ZoneWorld
     {
         if (!_olympiadArena.Contains(player.ObjectId))
             return false;
-        var state = _olympiad.MatchState(player.ObjectId);
+        var state = _olympiad.Board.MatchState(player.ObjectId);
         player.Dead = true;
         player.CurHp = 0;
         player.Running = false;
@@ -153,7 +158,7 @@ public sealed partial class ZoneWorld
         FanoutPlayerDeath(player, killerObjectId);
         if (state is { Phase: OlympiadMatchPhase.Fighting } s)
         {
-            var step = _olympiad.Report(s.MatchId, s.OpponentId, _clock().ToUnixTimeMilliseconds());
+            var step = _olympiad.Board.Report(s.MatchId, s.OpponentId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
         }
@@ -175,18 +180,18 @@ public sealed partial class ZoneWorld
             return false;
         if (!attackerIn || !targetIn)
             return true;
-        var state = _olympiad.MatchState(attacker.ObjectId);
+        var state = _olympiad.Board.MatchState(attacker.ObjectId);
         return state is not { Phase: OlympiadMatchPhase.Fighting } s || s.OpponentId != target.ObjectId;
     }
 
     /// <summary>Mobius <c>Olympiad 3_N</c> / <c>addSpectator</c>: watch a stadium from inside its instance.</summary>
     string? BeginOlympiadObserve(ZoneSession session, ZoneEntity player, int stadiumId)
     {
-        if (stadiumId < 0 || stadiumId >= _olympiad.Stadiums.Count)
+        if (stadiumId < 0 || stadiumId >= _olympiad.Board.Stadiums.Count)
             return "bad_request";
-        if (_olympiadArena.Contains(player.ObjectId) || _olympiad.MatchState(player.ObjectId) != null)
+        if (_olympiadArena.Contains(player.ObjectId) || _olympiad.Board.MatchState(player.ObjectId) != null)
             return OlympiadProtocol.Selected;
-        var site = _olympiad.Stadiums[stadiumId];
+        var site = _olympiad.Board.Stadiums[stadiumId];
         if (!_olympiadObservers.ContainsKey(player.ObjectId))
             _olympiadObservers[player.ObjectId] = (player.X, player.Y, player.Z, player.InstanceId);
         Relocate(player, site.X, site.Y, site.Z, site.ZoneId, persist: false);

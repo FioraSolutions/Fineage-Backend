@@ -58,6 +58,11 @@
       },
       "ops": [
         {
+          "op": "take_item",
+          "itemId": 707,
+          "count": 10
+        },
+        {
           "op": "give_adena",
           "count": 3000
         },

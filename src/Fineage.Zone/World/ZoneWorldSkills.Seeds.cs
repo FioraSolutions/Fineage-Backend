@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
     {
         if (template.PlayerConditions.Count == 0)
             return true;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var cond in template.PlayerConditions)
         {
             if (!PlayerConditionMet(player, cond, now))
@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
         }
         if (candidates.Count == 0)
             return;
-        var pick = candidates[_combatRandom.Next(candidates.Count)];
+        var pick = candidates[Rng(_combatRandom, target).Next(candidates.Count)];
         AddHate(target, pick, hate: 10_000, allowNpcAttacker: true);
         if (!target.Running)
         {
@@ -143,8 +143,8 @@ public sealed partial class ZoneWorld
     }
 
     internal void AddElementSeedForTest(ZoneEntity player, string element) =>
-        AddElementSeed(player, element, _clock().ToUnixTimeMilliseconds());
+        AddElementSeed(player, element, NowUnixMs());
 
     internal int ElementSeedCountForTest(ZoneEntity player, string element) =>
-        ElementSeedCount(player, element, _clock().ToUnixTimeMilliseconds());
+        ElementSeedCount(player, element, NowUnixMs());
 }

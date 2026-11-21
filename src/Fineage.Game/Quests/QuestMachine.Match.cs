@@ -299,5 +299,6 @@ public sealed partial class QuestMachine
         public QuestExtras Extras { get; } = new();
         public long Exp;
         public int Sp;
+        public List<TutorialUiOp> TutorialUi { get; } = [];
     }
 }

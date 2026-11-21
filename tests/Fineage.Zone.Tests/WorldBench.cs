@@ -2,7 +2,9 @@ using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Zone;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
@@ -24,7 +26,7 @@ internal sealed class WorldBench
         Random? deathRandom = null,
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.ItemWeights? weights = null,
-        Fineage.Game.IEnchantRandom? enchantRandom = null,
+        Random? enchantRandom = null,
         bool? expertisePenalty = null,
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
         string? mapId = null,
@@ -35,6 +37,7 @@ internal sealed class WorldBench
         Fineage.Game.Services.TeleportCatalog? teleports = null,
         int? teleportOffset = null,
         Fineage.Zone.Bosses.BossSchedule? bosses = null,
+        Random? bossRandom = null,
         Fineage.Zone.Siege.SiegeSettings? siege = null,
         Fineage.Zone.Olympiad.OlympiadSettings? olympiadSettings = null,
         Fineage.Zone.SevenSigns.SevenSignsEngine? sevenSigns = null,
@@ -44,11 +47,20 @@ internal sealed class WorldBench
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
         Random? fishingRandom = null,
-        Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null)
+        Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null,
+        bool includeEnabledMaps = false,
+        Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null,
+        ulong? simulationSeed = null,
+        Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
+        Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null)
     {
-        Game = game ?? GameData.LoadDefault();
+        Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
+        Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
+        IRegionExecutor resolvedExecutor =
+            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
             Game,
@@ -69,6 +81,7 @@ internal sealed class WorldBench
             teleports: teleports,
             teleportOffset: teleportOffset,
             bosses: bosses,
+            bossRandom: bossRandom,
             siege: siege,
             olympiadSettings: olympiadSettings,
             olympiad: olympiad,
@@ -78,13 +91,20 @@ internal sealed class WorldBench
             combatRandom: combatRandom,
             manor: manor,
             manorRandom: manorRandom,
-            fishingRandom: fishingRandom);
+            fishingRandom: fishingRandom,
+            includeEnabledMaps: includeEnabledMaps,
+            gmTeleports: gmTeleports,
+            simulationSeed: simulationSeed,
+            regionExecutor: resolvedExecutor,
+            simulationObserver: simulationObserver,
+            ledgerJournal: Ledger);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }
 
     public GameData Game { get; }
     public MemoryAccountStore Store { get; }
+    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; }
     public ZoneWorld World { get; }
     public IWorldEventPublisher Bridge { get; }
     public NetBridgeRecorder Rec { get; }

@@ -218,16 +218,7 @@ public sealed partial class ZoneWorld
             SelfUserInfo(player);
         if (NetBridge == null)
             return;
-        List<int>? watchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, player))
-                continue;
-            if (!watcher.Knownlist.Contains(player.ObjectId))
-                continue;
-            watchers ??= [];
-            watchers.Add(watcher.ObjectId);
-        }
+        var watchers = NetWatchersOfCharInfo(player);
         if (watchers is { Count: > 0 })
             NetBridge.FanoutCharInfo(watchers, player.ObjectId);
     }
@@ -281,14 +272,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: apply PvP status as if <paramref name="attacker"/> damaged <paramref name="target"/>.</summary>
     internal void UpdatePvPStatusForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
-            UpdatePvPStatus(attacker, target, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            UpdatePvPStatus(attacker, target, NowUnixMs());
     }
 
     /// <summary>Test hook: run kill karma/PK rules.</summary>
     internal void OnKillUpdatePvPKarmaForTest(ZoneEntity killer, ZoneEntity victim)
     {
-        lock (_gate)
+        using (_affinity.Step())
             OnKillUpdatePvPKarma(killer, victim, victim.PvpFlagged);
     }
 }

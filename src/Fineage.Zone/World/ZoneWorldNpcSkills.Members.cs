@@ -71,8 +71,9 @@ public sealed partial class ZoneWorld
             return false;
         int min = Math.Clamp(npc.MinSkillChance, 0, 100);
         int max = Math.Clamp(Math.Max(min, npc.MaxSkillChance), 0, 100);
-        int threshold = min >= max ? min : min + _combatRandom.Next(max - min + 1);
-        if (_combatRandom.Next(100) >= threshold)
+        var rng = Rng(_combatRandom, npc);
+        int threshold = min >= max ? min : min + rng.Next(max - min + 1);
+        if (rng.Next(100) >= threshold)
             return false;
 
         var candidates = new List<(NpcAiSkill Skill, SkillCombatData Combat)>(npc.AiSkills.Count);
@@ -91,7 +92,7 @@ public sealed partial class ZoneWorld
         if (candidates.Count == 0)
             return false;
 
-        var pick = candidates[_combatRandom.Next(candidates.Count)];
+        var pick = candidates[rng.Next(candidates.Count)];
         return CastNpcAttackSkill(npc, player, pick.Skill, pick.Combat, now);
     }
 
@@ -200,7 +201,7 @@ public sealed partial class ZoneWorld
                 SetAggroTarget(npc, MostHated(npc));
             }
             if (target.Session != null)
-                target.Session.AutoAttackTargetId = 0;
+                target.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, npc.ObjectId);
         }
     }
@@ -231,7 +232,7 @@ public sealed partial class ZoneWorld
             if (magicLevel <= 0)
                 magicLevel = npc.Level;
             // NPC mCritRate table not imported — use unarmed base 10‰ (Mobius default).
-            var (damage, _) = ZoneCombat.RollMagicDamage(_combatRandom, mAtk, targetMDef, power,
+            var (damage, _) = ZoneCombat.RollMagicDamage(Rng(_combatRandom, npc), mAtk, targetMDef, power,
                 npc.Level, magicLevel, player.Level, mCritRate: 10);
             return damage;
         }
@@ -247,7 +248,7 @@ public sealed partial class ZoneWorld
     {
         if (npc.NpcSpiritShotLeft <= 0 || npc.NpcSpiritShotChance <= 0)
             return false;
-        if (_combatRandom.Next(100) >= npc.NpcSpiritShotChance)
+        if (Rng(_combatRandom, npc).Next(100) >= npc.NpcSpiritShotChance)
             return false;
         npc.NpcSpiritShotLeft--;
         return true;
@@ -273,7 +274,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: force a support cast (heal/buff/debuff) ignoring AI chance gates.</summary>
     internal bool CastNpcSupportForTest(ZoneEntity npc, ZoneEntity target, NpcAiSupportSkill skill, string kind)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var k = kind.ToLowerInvariant() switch
             {
@@ -284,16 +285,16 @@ public sealed partial class ZoneWorld
                 "silence" => NpcSupportKind.Silence,
                 _ => throw new ArgumentOutOfRangeException(nameof(kind))
             };
-            return CastNpcSupportSkill(npc, target, skill, k, _clock().ToUnixTimeMilliseconds());
+            return CastNpcSupportSkill(npc, target, skill, k, NowUnixMs());
         }
     }
 
     /// <summary>Test hook: force Death Bomb (AoE + self-die) ignoring HP%/chance gates.</summary>
     internal bool CastNpcSuicideForTest(ZoneEntity npc, ZoneEntity hateTarget, NpcAiSupportSkill skill)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            return CastNpcSuicideSkill(npc, hateTarget, skill, _clock().ToUnixTimeMilliseconds());
+            return CastNpcSuicideSkill(npc, hateTarget, skill, NowUnixMs());
         }
     }
 }

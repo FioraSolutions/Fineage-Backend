@@ -35,15 +35,17 @@ public sealed class ShortcutActionPacketHandler
         // next-target (MyTargetSelected), panel Attack (AttackRequest) and the three social
         // gestures (SocialAction); the rest of Mobius' action table is still V2-only.
         if (use.ActionId is not (ActionProtocol.SitStand or ActionProtocol.WalkRun
-            or ActionProtocol.Attack or ActionProtocol.NextTarget)
+            or ActionProtocol.Attack or ActionProtocol.NextTarget or ActionProtocol.RideMount)
             && !ActionProtocol.IsPanelSocial(use.ActionId))
         {
             await _reject(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);
             return;
         }
 
-        string? actionError = await _world.TryCharacterActionAsync(
-            zoneSession, use.ActionId, targetObjectId: 0, ct).ConfigureAwait(false);
+        string? actionError = await _world.ExecuteAsync(
+            zoneSession,
+            new CharacterActionCommand(use.ActionId, 0),
+            ct).ConfigureAwait(false);
         if (actionError != null)
             await _reject(conn, actionError, "Action failed.", ct).ConfigureAwait(false);
     }
@@ -58,7 +60,10 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var auto = NetCodec.DecodeAutoSoulShot(envelope.Payload);
-        string? autoError = await _world.TryAutoSoulShotAsync(zoneSession, auto.ItemId, auto.Enabled, ct).ConfigureAwait(false);
+        string? autoError = await _world.ExecuteAsync(
+            zoneSession,
+            new AutoSoulShotCommand(auto.ItemId, auto.Enabled),
+            ct).ConfigureAwait(false);
         if (autoError != null)
             await _reject(conn, autoError, "Auto shot failed.", ct).ConfigureAwait(false);
     }
@@ -73,7 +78,8 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var reg = NetCodec.DecodeShortCut(envelope.Payload);
-        var regReply = _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level);
+        var regReply = await _world.OnSimulationAsync(zoneSession, "shortcut-register",
+            () => _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level), ct).ConfigureAwait(false);
         await SendShortcutReplyAsync(conn, regReply, envelope.RequestSequence, ct).ConfigureAwait(false);
     }
 
@@ -87,7 +93,8 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var del = NetCodec.DecodeShortCutDel(envelope.Payload);
-        var delReply = _world.DeleteShortcut(zoneSession, del.Slot);
+        var delReply = await _world.OnSimulationAsync(zoneSession, "shortcut-delete",
+            () => _world.DeleteShortcut(zoneSession, del.Slot), ct).ConfigureAwait(false);
         await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
     }
 

@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
@@ -68,25 +69,22 @@ public sealed partial class ZoneWorld
 
         var sellerChanges = new List<InventoryUpdateEntryMsg>();
         var storeChanges = new List<InventoryUpdateEntryMsg>();
+        var move = BeginStoreSale(seller, store);
 
         if (!TransferAdena(store.Inventory, seller.Inventory, (int)payout, storeChanges, sellerChanges))
             return PrivateStoreProtocol.Adena;
+        PostStoreAdena(move, store, seller, payout);
 
-        foreach (var (listing, stock, count) in transfers)
+        foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
         {
-            TransferOfferRow(seller.Inventory, store.Inventory,
-                new TradeOfferRow
-                {
-                    InventoryObjectId = stock.ObjectId,
-                    ItemId = stock.ItemId,
-                    Count = count,
-                    EnchantLevel = stock.EnchantLevel
-                },
-                sellerChanges, storeChanges);
-            listing.Count -= count;
+            PostTradeRow(move, seller, store, row);
+            TransferOfferRow(seller.Inventory, store.Inventory, row, sellerChanges, storeChanges);
+            listing.Count -= row.Count;
             if (listing.Count <= 0)
                 store.PrivateBuyList.Remove(listing);
         }
+
+        move.Commit(LedgerHoldingsOf);
 
         if (store.Session != null)
             SaveInventory(store.Session, store.Inventory);
@@ -112,6 +110,24 @@ public sealed partial class ZoneWorld
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// One sale between the visitor's bag and the store owner's. Listed items stay in the owner's bag until sold, so
+    /// there is nothing to escrow in process; holds in store escrow come with stores visited from another host.
+    /// </summary>
+    LedgerMove BeginStoreSale(ZoneEntity visitor, ZoneEntity store)
+    {
+        var move = BeginLedgerMove(LedgerTxKind.StoreSale, visitor.ObjectId, store.ObjectId);
+        ObserveLedger(move, LedgerAccount.Inventory(visitor.ObjectId));
+        ObserveLedger(move, LedgerAccount.Inventory(store.ObjectId));
+        return move;
+    }
+
+    static void PostStoreAdena(LedgerMove move, ZoneEntity payer, ZoneEntity payee, long amount)
+    {
+        move.Post(LedgerAccount.Inventory(payer.ObjectId), ShopTrade.AdenaItemId, -amount);
+        move.Post(LedgerAccount.Inventory(payee.ObjectId), ShopTrade.AdenaItemId, amount);
     }
 
     void ClosePrivateStore(int objectId, bool standUp)
@@ -154,7 +170,7 @@ public sealed partial class ZoneWorld
             StoreType = player.PrivateStoreType,
             Message = player.PrivateStoreMessage
         };
-        NetBridge?.FanoutPrivateStoreInfo(NetWatchersOf(player), msg);
+        NetBridge?.FanoutPrivateStoreInfo(KnownNetPlayersOf(player), msg);
     }
 
     void SendPrivateStoreListSell(ZoneEntity visitor, ZoneEntity store)

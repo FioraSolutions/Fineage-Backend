@@ -90,6 +90,8 @@ namespace Fineage.Net.Contract
         /// <summary>Skills the summon can be told to use (Mobius PetSkillData / NPC skill list).</summary>
         public int[] SkillIds { get; set; } = System.Array.Empty<int>();
         public bool Dead { get; set; }
+        /// <summary>Pets: Mobius <c>Pet.isMountable()</c> — client shows Ride (action 38) while the pet is out.</summary>
+        public bool Mountable { get; set; }
     }
 
     /// <summary>Zone → owner: the summon left (Mobius <c>PetDelete</c>). <see cref="Reason"/>: 0 dismissed, 1 lifetime, 2 upkeep, 3 died, 4 owner left.</summary>

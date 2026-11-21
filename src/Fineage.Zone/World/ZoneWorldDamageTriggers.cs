@@ -39,7 +39,7 @@ public sealed partial class ZoneWorld
                 if (attacker.Level < effect.MinAttackerLevel || attacker.Level > effect.MaxAttackerLevel)
                     continue;
                 int chance = effect.Chance > 0 ? effect.Chance : 100;
-                if (chance < 100 && _combatRandom.Next(100) >= chance)
+                if (chance < 100 && Rng(_combatRandom, owner).Next(100) >= chance)
                     continue;
 
                 // Only ONE-target triggers check that the attacker is still aiming at the owner (Mirage is ONE).
@@ -83,7 +83,7 @@ public sealed partial class ZoneWorld
     void CastDamageTrigger(ZoneEntity owner, ZoneEntity attacker, int skillId, int level)
     {
         var template = _game.Skills.Find(skillId);
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         ZoneLog.Info($"[trigger] {skillId} lv{level} owner={owner.ObjectId} attacker={attacker.ObjectId}");
         FanoutSkillLaunched(owner, skillId, level, attacker);
 
@@ -126,7 +126,7 @@ public sealed partial class ZoneWorld
         if (caster == null || target == null || skillId <= 0)
             return;
         if (now <= 0)
-            now = _clock().ToUnixTimeMilliseconds();
+            now = NowUnixMs();
         var template = _game.Skills.Find(skillId);
         foreach (var effect in EffectsOf(skillId))
         {
@@ -177,7 +177,7 @@ public sealed partial class ZoneWorld
                     if (!string.IsNullOrEmpty(effect.Slot) && effect.Rate > 0)
                     {
                         int ml = template != null && template.TryLevelData(level, out var ld) ? ld.MagicLevel : caster.Level;
-                        ApplyDispelByCategory(target, effect.Slot, effect.Rate, Math.Max(1, effect.Max), ml);
+                        ApplyDispelByCategory(caster, target, effect.Slot, effect.Rate, Math.Max(1, effect.Max), ml);
                     }
                     break;
             }
@@ -191,7 +191,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void BluffTurnBack(ZoneEntity caster, ZoneEntity target, int chance)
     {
-        if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
+        if (chance > 0 && chance < 100 && Rng(_combatRandom, caster).Next(100) >= chance)
             return;
         if (target.NpcId == 35062 || target.NpcType is "RaidBoss" or "GrandBoss" || target.RaidMinion)
             return;
@@ -209,15 +209,7 @@ public sealed partial class ZoneWorld
     void ApplyHeadingTurn(ZoneEntity entity, int heading)
     {
         entity.Heading = heading;
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session != null && watcher.Knownlist.Contains(entity.ObjectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(watcher.ObjectId);
-            }
-        }
+        var netWatchers = NetWatchersOfPeers(entity);
         if (netWatchers is { Count: > 0 } && NetBridge != null)
             NetBridge.FanoutPositionCorrection(netWatchers, entity.ObjectId, entity.X, entity.Y, entity.Z, heading);
     }
@@ -233,7 +225,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void DeleteHateOf(ZoneEntity caster, ZoneEntity target, int chance)
     {
-        if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
+        if (chance > 0 && chance < 100 && Rng(_combatRandom, caster).Next(100) >= chance)
             return;
         if (target.Kind != ZoneEntityKind.Npc || !target.Attackable)
             return;
@@ -280,7 +272,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void RandomizeHate(ZoneEntity caster, ZoneEntity target, int chance)
     {
-        if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
+        if (chance > 0 && chance < 100 && Rng(_combatRandom, caster).Next(100) >= chance)
             return;
         if (target.Kind != ZoneEntityKind.Npc || !target.Attackable)
             return;
@@ -296,7 +288,7 @@ public sealed partial class ZoneWorld
         if (others.Count == 0)
             return;
 
-        int picked = others[_combatRandom.Next(others.Count)];
+        int picked = others[Rng(_combatRandom, caster).Next(others.Count)];
         long hate = target.HateList.GetValueOrDefault(caster.ObjectId);
         target.HateList.Remove(caster.ObjectId);
         if (hate > 0)
@@ -314,7 +306,7 @@ public sealed partial class ZoneWorld
     {
         if (IsRaidForEffects(entity))
             return;
-        if (chance > 0 && chance < 100 && _combatRandom.Next(100) >= chance)
+        if (chance > 0 && chance < 100 && Rng(_combatRandom, entity).Next(100) >= chance)
             return;
 
         bool abortAttack = false;
@@ -323,10 +315,10 @@ public sealed partial class ZoneWorld
             if (entity.Session is { } session)
             {
                 int previous = session.SelectedTargetId;
-                int autoAttack = session.AutoAttackTargetId;
+                int autoAttack = entity.Intent.AutoAttackTargetId;
                 session.SelectedTargetId = 0;
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                entity.Intent.AutoAttackTargetId = 0;
+                entity.Intent.ClearApproach();
                 if (previous > 0)
                     NetBridge?.FanoutTargetUnselected([entity.ObjectId], previous);
                 abortAttack = autoAttack > 0;

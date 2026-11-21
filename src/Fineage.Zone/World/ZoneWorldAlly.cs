@@ -23,19 +23,19 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the alliance of a clan (id, name, crest, penalty type).</summary>
     internal (int AllyId, string? Name, int CrestId, int PenaltyType) AllyOfForTest(int clanId)
     {
-        lock (_gate)
-            return _clans.TryGetValue(clanId, out var c) ? (c.D.AllyId, c.D.AllyName, c.D.AllyCrestId, c.D.AllyPenaltyType) : default;
+        using (_affinity.Step())
+            return _clan.TryGet(clanId, out var c) ? (c.D.AllyId, c.D.AllyName, c.D.AllyCrestId, c.D.AllyPenaltyType) : default;
     }
 
     /// <summary>Test hook: village master <c>create_ally</c>.</summary>
     internal string? CreateAllyForTest(ZoneSession session, string name)
     {
-        lock (_gate)
-            return CreateAlly(session, ClanOf(session.ObjectId), name, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            return CreateAlly(session, ClanOf(session.ObjectId), name, NowUnixMs());
     }
 
     IEnumerable<ZoneClan> AllyClans(int allyId) =>
-        allyId == 0 ? [] : _clans.Values.Where(c => c.D.AllyId == allyId).OrderBy(c => c.Id);
+        allyId == 0 ? [] : _clan.All.Where(c => c.D.AllyId == allyId).OrderBy(c => c.Id);
 
     int[] AllyOnlineIds(int allyId) => AllyClans(allyId).SelectMany(OnlineIds).ToArray();
 
@@ -125,7 +125,7 @@ public sealed partial class ZoneWorld
             SelfLine(session, 507, "Incorrect length for an alliance name.");
             return ClanProtocol.NameLength;
         }
-        if (_clans.Values.Any(other => string.Equals(other.D.AllyName, name, StringComparison.OrdinalIgnoreCase)))
+        if (_clan.All.Any(other => string.Equals(other.D.AllyName, name, StringComparison.OrdinalIgnoreCase)))
         {
             SelfLine(session, 508, "This alliance name already exists.");
             return ClanProtocol.NameTaken;
@@ -243,7 +243,7 @@ public sealed partial class ZoneWorld
         if (!_pendingAllyInvites.Remove(session.ObjectId, out var pending) || pending.ExpiresUnixMs <= now)
             return ClanProtocol.Invite;
         var requestor = Online(pending.InviterObjectId);
-        if (requestor == null || !_clans.TryGetValue(pending.AllyId, out var leaderClan) || ClanOf(requestor.ObjectId) != leaderClan)
+        if (requestor == null || !_clan.TryGet(pending.AllyId, out var leaderClan) || ClanOf(requestor.ObjectId) != leaderClan)
             return ClanProtocol.Invite;
         if (!accept)
         {
@@ -318,7 +318,7 @@ public sealed partial class ZoneWorld
         }
         var clan = string.IsNullOrWhiteSpace(clanName)
             ? null
-            : _clans.Values.FirstOrDefault(c => string.Equals(c.Name, clanName.Trim(), StringComparison.OrdinalIgnoreCase));
+            : _clan.All.FirstOrDefault(c => string.Equals(c.Name, clanName.Trim(), StringComparison.OrdinalIgnoreCase));
         if (clan == null)
         {
             SelfLine(session, 474, "That clan does not exist.");

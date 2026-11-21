@@ -1,14 +1,16 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    void DistributeSweepAdena(ZoneParty party, ZoneEntity sweeper, ZoneEntity corpse, int adena, HashSet<int> touched)
+    void DistributeSweepAdena(ZoneParty party, ZoneEntity sweeper, ZoneEntity corpse, int adena, HashSet<int> touched, int npcId)
     {
         var inRange = new List<ZoneEntity>();
         foreach (int id in party.MemberIds)
@@ -21,7 +23,7 @@ public sealed partial class ZoneWorld
         }
         if (inRange.Count == 0)
         {
-            GrantSweepStack(sweeper, WarehouseRules.AdenaItemId, adena, touched);
+            GrantSweepStack(sweeper, WarehouseRules.AdenaItemId, adena, touched, npcId);
             return;
         }
 
@@ -29,17 +31,26 @@ public sealed partial class ZoneWorld
         if (share <= 0)
             return;
         foreach (var m in inRange)
-            GrantSweepStack(m, WarehouseRules.AdenaItemId, share, touched);
+            GrantSweepStack(m, WarehouseRules.AdenaItemId, share, touched, npcId);
     }
 
-    void GrantSweepStack(ZoneEntity looter, int itemId, int count, HashSet<int> touched)
+    void GrantSweepStack(ZoneEntity looter, int itemId, int count, HashSet<int> touched, int npcId)
     {
         if (looter.Inventory == null || looter.Session == null || count <= 0)
             return;
-        var added = looter.Inventory.Add(itemId, count);
-        var update = InventoryMessages.Update(InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
-        touched.Add(looter.ObjectId);
+        RecordBagChange(
+            looter,
+            LedgerTxKind.SweepLoot,
+            LedgerAccount.Of(SystemAccount.DropSource),
+            () =>
+            {
+                var added = looter.Inventory.Add(itemId, count);
+                var update = InventoryMessages.Update(InventoryChange.Add, added);
+                NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
+                touched.Add(looter.ObjectId);
+                return true;
+            },
+            _ => npcId);
     }
 
     bool CanReceiveSweep(ZoneEntity player, List<Fineage.Zone.Drops.DropStack> stacks)
@@ -95,11 +106,11 @@ public sealed partial class ZoneWorld
             long travelMs = ApproachTarget(player, target, SkillCastReach(template.CastRange, player, target));
             if (travelMs < 0)
                 return SkillProtocol.Range;
-            session.AutoAttackTargetId = 0;
+            player.Intent.AutoAttackTargetId = 0;
             session.SelectedTargetId = targetId;
-            session.PendingCastSkillId = request.SkillId;
-            session.PendingCastTargetId = targetId;
-            session.PendingCastAtUnixMs = now + travelMs;
+            player.Intent.PendingCastSkillId = request.SkillId;
+            player.Intent.PendingCastTargetId = targetId;
+            player.Intent.PendingCastAtUnixMs = now + travelMs;
             return null;
         }
 
@@ -142,37 +153,34 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>Test: first live attackable NPC (spoil target).</summary>
-    internal ZoneEntity? AttackableForTest()
+    /// <summary>Test: spoil without the magic roll (replaces the retired admin spoil opcode).</summary>
+    internal bool SpoilForTest(ZoneEntity player, ZoneEntity target)
     {
-        lock (_gate)
-            return _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0);
+        if (player.Session == null)
+            return false;
+        return RunStepForTest(() =>
+            ApplySpoil(player.Session, player, target, forced: true, skillId: 254, level: 1));
     }
+
+    /// <summary>Test: first live attackable NPC (spoil target).</summary>
+    internal ZoneEntity? AttackableForTest() =>
+        RunStepForTest(() => _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0));
 
     /// <summary>Test hook: up to <paramref name="take"/> living attackable NPCs.</summary>
-    internal List<ZoneEntity> AttackablesForTest(int take = 2)
-    {
-        lock (_gate)
-            return _byId.Values
-                .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
-                .Take(take)
-                .ToList();
-    }
+    internal List<ZoneEntity> AttackablesForTest(int take = 2) =>
+        RunStepForTest(() => _byId.Values
+            .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
+            .Take(take)
+            .ToList());
 
     /// <summary>Test: kill an NPC through the normal death path (corpse, drops, spoil roll, decay timer).</summary>
-    internal void KillForTest(ZoneEntity npc, ZoneEntity killer)
-    {
-        lock (_gate)
+    internal void KillForTest(ZoneEntity npc, ZoneEntity killer) =>
+        RunStepForTest(() =>
         {
             npc.CurHp = 0;
             RemoveDeadNpc(npc, killer);
-        }
-    }
+        });
 
     /// <summary>Test: run corpse decay at the kit clock.</summary>
-    internal void DecayForTest()
-    {
-        lock (_gate)
-            TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
-    }
+    internal void DecayForTest() => RunStepForTest(() => TickCorpseDecay(NowUnixMs()));
 }

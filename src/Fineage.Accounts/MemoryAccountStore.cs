@@ -43,6 +43,15 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public static MemoryAccountStore InMemory() => new();
 
+    public int NextItemObjectId
+    {
+        get
+        {
+            lock (_gate)
+                return _data.NextItemObjectId;
+        }
+    }
+
     /// <summary>In-memory store seeded from a versioned snapshot JSON (the <c>store_snapshot</c> payload).</summary>
     public static MemoryAccountStore FromSnapshot(string json)
     {

@@ -1,6 +1,7 @@
 using Fineage.Game.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -48,10 +49,8 @@ public sealed partial class ZoneWorld
     /// </summary>
     void StartFearFlee(ZoneEntity actor, ZoneEntity? from, bool alongHeading)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         actor.FearFleeAtUnixMs = now + FearStepMs;
-        if (actor.Session is { } session)
-            session.FearFleeAtUnixMs = actor.FearFleeAtUnixMs;
         if (actor.Dead || actor.Sitting || IsImmobilized(actor))
             return;
 
@@ -77,8 +76,8 @@ public sealed partial class ZoneWorld
 
         if (actor.Session is not { } live)
             return;
-        live.AutoAttackTargetId = 0;
-        live.ClearApproach();
+        actor.Intent.AutoAttackTargetId = 0;
+        actor.Intent.ClearApproach();
         StartTimedMove(actor, live, new MoveToMsg
         {
             ObjectId = actor.ObjectId,
@@ -156,15 +155,7 @@ public sealed partial class ZoneWorld
 
     void BroadcastNpcMove(ZoneEntity npc, int destX, int destY, int destZ)
     {
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session != null && watcher.Knownlist.Contains(npc.ObjectId))
-            {
-                netWatchers ??= [];
-                netWatchers.Add(watcher.ObjectId);
-            }
-        }
+        var netWatchers = NetWatchersOfPeers(npc);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
@@ -180,13 +171,15 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius DecayTaskManager: corpse stays (death animation) then DeleteObject + respawn timer.</summary>
     void TickCorpseDecay(long now)
     {
-        if (_decaying.Count == 0)
+        if (_byId.CountOf(ActiveSets.Decaying) == 0)
             return;
-        foreach (int id in _decaying.ToArray())
+        foreach (int id in Active(ActiveSets.Decaying))
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.DecayAtMs <= 0)
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
+            if (npc.Kind != ZoneEntityKind.Npc || npc.DecayAtMs <= 0)
             {
-                _decaying.Remove(id);
+                _byId.Leave(npc, ActiveSets.Decaying);
                 continue;
             }
             if (npc.DecayAtMs > now)

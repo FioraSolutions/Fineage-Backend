@@ -6,6 +6,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -105,7 +106,8 @@ public sealed class NetTeleportFanoutTests
             spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition> { [SpawnCatalog.DefaultMapId] = map }),
             accounts: store,
             teleports: FreeTeleports(destinationX),
-            teleportOffset: 0);
+            teleportOffset: 0,
+            ledgerJournal: new MemoryLedgerJournal());
 
         var session = new ZoneSession();
         session.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);

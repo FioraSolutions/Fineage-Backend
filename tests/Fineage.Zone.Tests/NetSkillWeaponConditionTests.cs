@@ -61,7 +61,7 @@ public sealed class NetSkillWeaponConditionTests
         bag.Equip(bag.Add(10)); // Dagger
         Assert.Null(await kit.World.TrySkillUseAsync(session, MortalBlow, MobId, CancellationToken.None));
         Assert.False(Unsuitable(rec));
-        Assert.True(player.PendingHit != null || session.PendingCastSkillId == MortalBlow);
+        Assert.True(player.PendingHit != null || player.Intent.PendingCastSkillId == MortalBlow);
     }
 
     const int FocusChance = 356;

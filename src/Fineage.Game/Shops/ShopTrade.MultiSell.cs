@@ -136,8 +136,11 @@ public static partial class ShopTrade
         foreach (var ingredient in entry.Ingredients)
         {
             long count = (long)ingredient.Count * amount;
-            if (count > int.MaxValue || !inventory.TryTakeUnequipped(ingredient.ItemId, (int)count, ingredient.Enchant, result.Taken))
+            var taken = new List<ItemInstance>();
+            if (count > int.MaxValue || !inventory.TryTakeUnequipped(ingredient.ItemId, (int)count, ingredient.Enchant, taken))
                 return ShopMutation.Fail(ShopDeny.Ingredients, ingredient.Count * amount, ingredient.ItemId.ToString());
+            result.Taken.AddRange(taken);
+            result.Lost.Add(Transfer(ingredient.ItemId, count, taken));
         }
 
         foreach (var taken in result.Taken)
@@ -150,8 +153,10 @@ public static partial class ShopTrade
             int count = checked(product.Count * amount);
             bool existed = inventory.FindByItemId(product.ItemId) != null;
             int enchant = template.Stackable ? 0 : product.Enchant;
-            foreach (var piece in inventory.AddPieces(product.ItemId, count, enchant))
+            var pieces = inventory.AddPieces(product.ItemId, count, enchant);
+            foreach (var piece in pieces)
                 Remember(result.Touches, piece, existed && template.Stackable);
+            result.Gained.Add(Transfer(product.ItemId, count, pieces));
         }
 
         return result;

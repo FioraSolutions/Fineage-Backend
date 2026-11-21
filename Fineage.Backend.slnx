@@ -9,6 +9,9 @@
     <Project Path="src/Fineage.Net.Contract/Fineage.Net.Contract.csproj" />
     <Project Path="src/Fineage.Net.Host/Fineage.Net.Host.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Fineage.LoadTest/Fineage.LoadTest.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
     <Project Path="tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj" />

@@ -7,23 +7,17 @@ public sealed partial class ZoneWorld
 {
     string? TryPartyLeave(int objectId)
     {
-        if (!_partyByPlayer.TryGetValue(objectId, out int partyId) ||
-            !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(objectId) is not { } party)
         {
-            _partyByPlayer.Remove(objectId);
+            _party.Unlink(objectId);
             return "party";
         }
 
-        party.MemberIds.Remove(objectId);
-        _partyByPlayer.Remove(objectId);
-        ForgetPartyMemberCaches(objectId);
+        _party.Remove(party, objectId);
         DuelOnPartyRemove(objectId);
 
         if (party.MemberIds.Count == 0)
-        {
-            _parties.Remove(partyId);
             return null;
-        }
 
         if (party.LeaderObjectId == objectId)
             party.LeaderObjectId = party.MemberIds[0];
@@ -31,11 +25,8 @@ public sealed partial class ZoneWorld
         if (party.MemberIds.Count == 1)
         {
             int lastId = party.MemberIds[0];
-            party.MemberIds.RemoveAt(0);
-            _partyByPlayer.Remove(lastId);
-            ForgetPartyMemberCaches(lastId);
+            _party.Remove(party, lastId);
             DuelOnPartyRemove(lastId);
-            _parties.Remove(partyId);
             // Mobius sends an empty list so the last member's window closes.
             FanPartyList([lastId], 0, 0, []);
             return null;
@@ -49,12 +40,11 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(leader))
             return "world";
-        if (!_partyByPlayer.TryGetValue(leader.ObjectId, out int partyId) ||
-            !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(leader.ObjectId) is not { } party)
             return "party";
         if (party.LeaderObjectId != leader.ObjectId)
             return "party_leader";
-        if (!_partyByPlayer.TryGetValue(targetObjectId, out int targetPartyId) || targetPartyId != partyId)
+        if (!_party.SameParty(leader.ObjectId, targetObjectId))
             return "target";
 
         return TryPartyLeave(targetObjectId);

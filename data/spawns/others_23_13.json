@@ -1381,7 +1381,8 @@
       "z": -1528,
       "heading": 3356,
       "respawnDelaySeconds": 60,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "day"
     },
     {
       "objectId": 91965,
@@ -1401,7 +1402,8 @@
       "z": -1528,
       "heading": 23964,
       "respawnDelaySeconds": 60,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91967,

@@ -27,16 +27,15 @@ sealed class NetKnownlistFanout
         _playerSpawnPAtkSpd = playerSpawnPAtkSpd ?? throw new ArgumentNullException(nameof(playerSpawnPAtkSpd));
     }
 
-    public async Task FanDiffAsync(
-        NetConnection conn,
-        ZoneSession zoneSession,
-        EntityId self,
-        HashSet<int> before,
-        HashSet<int> after,
-        CancellationToken ct)
+    /// <summary>
+    /// On the simulation thread: the spawn and despawn frames for a knownlist change from <paramref name="before"/> to
+    /// <paramref name="after"/>, for the mover and the peers that start or stop seeing it.
+    /// </summary>
+    public List<NetFrame> PlanDiff(ZoneSession zoneSession, EntityId self, HashSet<int> before, HashSet<int> after)
     {
+        var frames = new List<NetFrame>();
         // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
-        foreach (int id in after)
+        foreach (int id in after.OrderBy(static x => x))
         {
             if (before.Contains(id))
                 continue;
@@ -46,7 +45,7 @@ sealed class NetKnownlistFanout
             var otherId = _ids.AllocateOrGet(id);
             if (newlySeen.Kind == ZoneEntityKind.GroundItem)
             {
-                await conn.SendAsync(
+                frames.Add(NetFrame.ToSelf(
                     NetOpcode.DropItem,
                     NetCodec.EncodeDropItem(new DropItemNetMsg
                     {
@@ -59,26 +58,25 @@ sealed class NetKnownlistFanout
                         Z = newlySeen.Z,
                         Stackable = newlySeen.GroundStackable,
                         Count = newlySeen.GroundCount
-                    }),
-                    ct: ct).ConfigureAwait(false);
+                    })));
                 continue;
             }
 
             var spawn = NetCodec.EncodeEntitySpawn(
                 NetEnterWorldProjector.BuildPresenceSpawn(newlySeen, otherId, _playerSpawnPAtkSpd(newlySeen)));
-            await conn.SendAsync(NetOpcode.EntitySpawn, spawn, ct: ct).ConfigureAwait(false);
+            frames.Add(NetFrame.ToSelf(NetOpcode.EntitySpawn, spawn));
             // Mobius sendInfo: a pawn already running / sitting must not appear idle-standing.
             foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(newlySeen, otherId, _world))
-                await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
+                frames.Add(NetFrame.ToSelf(opcode, payload));
             if (newlySeen.Kind == ZoneEntityKind.Player &&
                 _world.TryGetLivePlayer(zoneSession, out var selfEntity))
             {
                 var toPeer = NetCodec.EncodeEntitySpawn(
                     NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
-                await _presence.SendAsync(id, NetOpcode.EntitySpawn, toPeer, ct).ConfigureAwait(false);
+                frames.Add(new NetFrame(id, NetOpcode.EntitySpawn, toPeer));
                 // The mover just started this leg: the newly reached peer needs it, not only the stayed watchers.
                 foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world))
-                    await _presence.SendAsync(id, opcode, payload, ct).ConfigureAwait(false);
+                    frames.Add(new NetFrame(id, opcode, payload));
             }
         }
 
@@ -87,21 +85,25 @@ sealed class NetKnownlistFanout
             EntityValue = self.Value,
             EntityGeneration = self.Generation
         });
-        foreach (int id in before)
+        foreach (int id in before.OrderBy(static x => x))
         {
             if (after.Contains(id))
                 continue;
             var forgottenId = _ids.AllocateOrGet(id);
-            await conn.SendAsync(
+            frames.Add(NetFrame.ToSelf(
                 NetOpcode.EntityDespawn,
                 NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
                 {
                     EntityValue = forgottenId.Value,
                     EntityGeneration = forgottenId.Generation
-                }),
-                ct: ct).ConfigureAwait(false);
+                })));
             if (_world.TryGetLivePlayerById(id, out _))
-                await _presence.SendAsync(id, NetOpcode.EntityDespawn, despawnSelf, ct).ConfigureAwait(false);
+                frames.Add(new NetFrame(id, NetOpcode.EntityDespawn, despawnSelf));
         }
+
+        return frames;
     }
+
+    public Task SendAsync(NetConnection conn, IEnumerable<NetFrame> frames, CancellationToken ct) =>
+        NetFrame.SendAsync(conn, _presence, frames, ct);
 }

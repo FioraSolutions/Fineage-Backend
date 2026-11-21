@@ -97,7 +97,7 @@ public sealed class NetPvpPkWireTests
         await a.DrainAsync();
         await rig.AdvanceAsync(1000);
         // Stop swinging, so nothing refreshes the timer.
-        a.Entity.Session!.AutoAttackTargetId = 0;
+        a.Entity.Intent.AutoAttackTargetId = 0;
         Assert.True(a.Entity.PvpFlagged);
         await w.DrainAsync();
 
@@ -174,21 +174,21 @@ public sealed class NetPvpPkWireTests
     {
         var (rig, a, b, _) = await TrioAsync();
         await using var _r = rig;
-        Assert.Null(await rig.World.TryPartyInviteAsync(a.Entity.Session!, b.ObjectId, 0, Ct));
-        Assert.Null(await rig.World.TryPartyAnswerAsync(b.Entity.Session!, a.ObjectId, 1, Ct));
+        Assert.Null(await rig.World.ExecuteAsync(a.Entity.Session!, new PartyInviteCommand(b.ObjectId, 0), Ct));
+        Assert.Null(await rig.World.ExecuteAsync(b.Entity.Session!, new PartyAnswerCommand(a.ObjectId, 1), Ct));
         b.Entity.PvpFlagged = true;
         b.Entity.PvpFlagUntilMs = rig.NowMs + ZoneWorld.PvpNormalTimeMs;
 
         await SendAttackAsync(a, b, forced: false);
         await a.DrainAsync();
         await rig.AdvanceAsync(2000);
-        Assert.Equal(0, a.Entity.Session!.AutoAttackTargetId);
+        Assert.Equal(0, a.Entity.Intent.AutoAttackTargetId);
         Assert.Equal(100_000, b.Entity.CurHp);
 
         await SendAttackAsync(a, b, forced: true);
         await a.DrainAsync();
         await rig.AdvanceAsync(200);
-        Assert.Equal(b.ObjectId, a.Entity.Session!.AutoAttackTargetId);
+        Assert.Equal(b.ObjectId, a.Entity.Intent.AutoAttackTargetId);
     }
 
     [Fact]

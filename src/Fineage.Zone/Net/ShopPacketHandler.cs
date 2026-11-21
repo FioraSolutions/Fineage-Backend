@@ -37,8 +37,10 @@ public sealed class ShopPacketHandler
         var items = (buy.Items ?? [])
             .Select(i => new Fineage.Game.Shops.ShopLine(i.ItemId, i.Count))
             .ToArray();
-        string? error = await _world.TryBuyAsync(
-            zoneSession, buy.NpcObjectId, buy.ListId, items, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new BuyCommand(buy.NpcObjectId, buy.ListId, items),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Buy failed.", ct).ConfigureAwait(false);
     }
@@ -60,8 +62,10 @@ public sealed class ShopPacketHandler
         var items = (sell.Items ?? [])
             .Select(i => new Fineage.Game.Shops.ShopObjectLine(i.ObjectId, i.Count))
             .ToArray();
-        string? error = await _world.TrySellAsync(
-            zoneSession, sell.NpcObjectId, items, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new SellCommand(sell.NpcObjectId, items),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Sell failed.", ct).ConfigureAwait(false);
     }
@@ -80,8 +84,10 @@ public sealed class ShopPacketHandler
         }
 
         var choose = NetCodec.DecodeRequestMultiSellChoose(envelope.Payload);
-        string? error = await _world.TryMultiSellAsync(
-            zoneSession, choose.NpcObjectId, choose.ListId, choose.EntryId, choose.Amount, ct)
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new MultiSellCommand(choose.NpcObjectId, choose.ListId, choose.EntryId, choose.Amount),
+            ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);

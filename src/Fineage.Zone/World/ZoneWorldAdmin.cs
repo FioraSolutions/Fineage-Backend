@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.NpcHtml;
@@ -165,6 +166,8 @@ public sealed partial class ZoneWorld
 
         if (paid.Count > 0)
         {
+            var inventoryBackup = Fineage.Accounts.CharacterInventory.Rows(player.Inventory!);
+            var move = BeginShopMove(LedgerTxKind.ShopBuy, player, npcId: 0, castleId: 0);
             var mutation = Fineage.Game.Shops.ShopTrade.Buy(
                 player.Inventory!,
                 _game.Items,
@@ -175,13 +178,15 @@ public sealed partial class ZoneWorld
                 MaxLoadOf(player),
                 Fineage.Game.Shops.ShopTrade.SlotLimit(player.Race),
                 _shopStock,
-                _clock().ToUnixTimeMilliseconds());
+                NowUnixMs());
             if (!mutation.Ok)
             {
                 SendDeny(session, mutation);
                 return null;
             }
 
+            if (!TryCommitShopMove(move, player, session, mutation, inventoryBackup, []))
+                return null;
             SendTouches(session, mutation);
         }
 

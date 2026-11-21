@@ -62,12 +62,15 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         }
     }
 
-    void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
+    void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed) =>
+        ((IWorldEventPublisher)this).PrepareKnownlistDiff(selfObjectId, added, removed)();
+
+    Action IWorldEventPublisher.PrepareKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
     {
+        var frames = new PreparedFrames(_presence);
         if (!_world.TryGetEntityById(selfObjectId, out var selfEntity))
-            return;
+            return frames.Send;
         var self = _ids.AllocateOrGet(selfObjectId);
-        var ct = CancellationToken.None;
         byte[]? selfSpawn = null;
         List<(ushort Opcode, byte[] Payload)>? selfFollowUps = null;
         foreach (int id in added)
@@ -77,7 +80,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             var otherId = _ids.AllocateOrGet(id);
             if (seen.Kind == ZoneEntityKind.GroundItem)
             {
-                _presence.TrySend(selfObjectId, NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
+                frames.Normal(selfObjectId, NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
                 {
                     DropperObjectId = 0,
                     EntityValue = otherId.Value,
@@ -92,27 +95,27 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
                 continue;
             }
 
-            _presence.TrySendCritical(selfObjectId, NetOpcode.EntitySpawn,
+            frames.Critical(selfObjectId, NetOpcode.EntitySpawn,
                 NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, _playerSpawnPAtkSpd(seen))));
             // Same ordered (critical) lane as the spawn, so the state never overtakes the pawn it describes.
             foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId, _world))
-                _presence.TrySendCritical(selfObjectId, opcode, payload);
+                frames.Critical(selfObjectId, opcode, payload);
             if (_world.SpawnRelationFrame(seen, selfEntity) is { } seenRelation)
-                _presence.TrySendCritical(selfObjectId, NetOpcode.RelationChanged, seenRelation);
+                frames.Critical(selfObjectId, NetOpcode.RelationChanged, seenRelation);
             if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
             {
                 selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
-                _presence.TrySendCritical(id, NetOpcode.EntitySpawn, selfSpawn);
+                frames.Critical(id, NetOpcode.EntitySpawn, selfSpawn);
                 selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world);
                 foreach (var (opcode, payload) in selfFollowUps)
-                    _presence.TrySendCritical(id, opcode, payload);
+                    frames.Critical(id, opcode, payload);
                 if (_world.SpawnRelationFrame(selfEntity, seen) is { } selfRelation)
-                    _presence.TrySendCritical(id, NetOpcode.RelationChanged, selfRelation);
+                    frames.Critical(id, NetOpcode.RelationChanged, selfRelation);
             }
         }
 
         if (removed.Count == 0)
-            return;
+            return frames.Send;
         var despawnSelf = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
         {
             EntityValue = self.Value,
@@ -121,14 +124,16 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         foreach (int id in removed)
         {
             var forgotten = _ids.AllocateOrGet(id);
-            _presence.TrySendCritical(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+            frames.Critical(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
             {
                 EntityValue = forgotten.Value,
                 EntityGeneration = forgotten.Generation
             }));
             if (_world.TryGetLivePlayerById(id, out _))
-                _presence.TrySendCritical(id, NetOpcode.EntityDespawn, despawnSelf);
+                frames.Critical(id, NetOpcode.EntityDespawn, despawnSelf);
         }
+
+        return frames.Send;
     }
 
     void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)

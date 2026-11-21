@@ -4,7 +4,7 @@ namespace Fineage.Zone.Inventory;
 
 /// <summary>
 /// Pure Mobius consumable prechecks (known skill list / item reuse / escape cast gate).
-/// World owns effect application and consume under the gate.
+/// World owns effect application and consume on the simulation thread.
 /// </summary>
 public static class ConsumableRules
 {

@@ -58,21 +58,21 @@ public sealed class DebuffApplyMatrixTests
         var (session, player) = await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
         long future = kit.Now.ToUnixTimeMilliseconds() + 5_000;
 
-        session.AutoAttackTargetId = 9;
+        player.Intent.AutoAttackTargetId = 9;
         player.CastingUntilMs = future;
         ApplyForced(kit, player, ShieldStun, level: 1);
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Equal(0, player.CastingUntilMs);
 
-        session.AutoAttackTargetId = 9;
+        player.Intent.AutoAttackTargetId = 9;
         player.CastingUntilMs = future;
         ApplyForced(kit, player, Sleep, level: 1);
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Equal(future, player.CastingUntilMs);
 
-        session.AutoAttackTargetId = 9;
+        player.Intent.AutoAttackTargetId = 9;
         ApplyForced(kit, player, DryadRoot, level: 1);
-        Assert.Equal(9, session.AutoAttackTargetId);
+        Assert.Equal(9, player.Intent.AutoAttackTargetId);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public sealed class DebuffApplyMatrixTests
         var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
         var (session, player) = await kit.EnterAsync(classId: 25, x: 0, y: 0, z: 0);
         var caster = new ZoneEntity { X = -100, Y = 0, Z = 0 };
-        session.AutoAttackTargetId = 9;
+        player.Intent.AutoAttackTargetId = 9;
         player.PendingHit = new Fineage.Zone.Combat.PendingSkillHit(1, 10, kit.Now.ToUnixTimeMilliseconds() + 5_000)
         {
             MagicType = 1
@@ -92,7 +92,7 @@ public sealed class DebuffApplyMatrixTests
         Assert.True(template.TryLevelData(1, out var data));
         Assert.True(kit.World.ApplyAbnormalFromSkillForTest(template, data, player, force: true, attacker: caster));
 
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Null(player.PendingHit);
         Assert.Equal(0, player.CastingUntilMs);
         Assert.True(player.MoveDestX > player.X, $"flee X {player.MoveDestX} should pass {player.X}");

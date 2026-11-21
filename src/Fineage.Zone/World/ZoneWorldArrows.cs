@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -60,7 +61,7 @@ public sealed partial class ZoneWorld
         }
         var update = InventoryMessages.Modify([arrow]);
         if (player.Session != null)
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
+            NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
         return arrow;
     }
 
@@ -75,7 +76,17 @@ public sealed partial class ZoneWorld
         if (bag == null || arrow == null || player.Session == null)
             return;
 
-        int left = bag.TakeOne(arrow);
+        int left = 0;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                left = bag.TakeOne(arrow);
+                return arrow.ItemId;
+            },
+            id => id);
         var update = InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, arrow);
         NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
         if (left == 0)
@@ -87,8 +98,11 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius: no arrow for the bow → ActionFailed + SysMsg 112 and the attack intention is dropped.</summary>
     void OutOfArrows(ZoneSession session)
     {
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        if (_byId.TryGetValue(session.ObjectId, out var player))
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+        }
         NetBridge?.FanoutSystemMessage([session.ObjectId], new SystemMessageMsg
         {
             Id = SysMsgRunOutOfArrows,

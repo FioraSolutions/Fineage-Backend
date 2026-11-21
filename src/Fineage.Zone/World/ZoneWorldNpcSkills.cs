@@ -23,14 +23,15 @@ public sealed partial class ZoneWorld
 
         int min = Math.Clamp(npc.MinSkillChance, 0, 100);
         int max = Math.Clamp(Math.Max(min, npc.MaxSkillChance), 0, 100);
-        int threshold = min >= max ? min : min + _combatRandom.Next(max - min + 1);
-        if (_combatRandom.Next(100) >= threshold)
+        var rng = Rng(_combatRandom, npc);
+        int threshold = min >= max ? min : min + rng.Next(max - min + 1);
+        if (rng.Next(100) >= threshold)
             return false;
 
         var ready = ReadySupportSkills(npc, npc.AiSuicideSkills, now);
         if (ready.Count == 0)
             return false;
-        var pick = ready[_combatRandom.Next(ready.Count)];
+        var pick = ready[rng.Next(ready.Count)];
         int range = pick.AffectRange > 0 ? pick.AffectRange : 150;
         if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, range))
             return false;
@@ -91,7 +92,7 @@ public sealed partial class ZoneWorld
             bool spirit = TryNpcSpiritshot(npc);
             double mAtk = Math.Max(1d, npc.MAtk) * ZoneCombat.SpiritshotMAtkMultiplier(spirit ? 1 : 0);
             var (damage, _) = ZoneCombat.RollMagicDamage(
-                _combatRandom, mAtk, Math.Max(1d, ps.MDef), skill.Power,
+                Rng(_combatRandom, npc), mAtk, Math.Max(1d, ps.MDef), skill.Power,
                 npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10);
             if (damage <= 0 || DuelBlocksHit(npc, target))
                 continue;
@@ -107,7 +108,7 @@ public sealed partial class ZoneWorld
             if (target.CurHp <= 0)
             {
                 if (target.Session != null)
-                    target.Session.AutoAttackTargetId = 0;
+                    target.Intent.AutoAttackTargetId = 0;
                 ApplyPlayerDeath(target, npc.ObjectId);
             }
         }
@@ -124,13 +125,14 @@ public sealed partial class ZoneWorld
         var ready = ReadySupportSkills(npc, npc.AiHealSkills, now);
         if (ready.Count == 0)
             return false;
-        var pick = ready[_combatRandom.Next(ready.Count)];
+        var healRng = Rng(_combatRandom, npc);
+        var pick = ready[healRng.Next(ready.Count)];
 
         // Self heal: Rnd(100) < (100 - hp%) / 3
         if (npc.MaxHp > 0 && npc.CurHp < npc.MaxHp)
         {
             double pct = npc.CurHp * 100d / npc.MaxHp;
-            if (_combatRandom.Next(100) < (int)((100d - pct) / 3d))
+            if (healRng.Next(100) < (int)((100d - pct) / 3d))
                 return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Heal, now);
         }
 
@@ -147,7 +149,7 @@ public sealed partial class ZoneWorld
                 || !ZoneCombat.Within(npc.X, npc.Y, other.X, other.Y, healRange))
                 continue;
             double matePct = other.CurHp * 100d / other.MaxHp;
-            if (_combatRandom.Next(100) >= (int)((100d - matePct) / 10d))
+            if (healRng.Next(100) >= (int)((100d - matePct) / 10d))
                 continue;
             if (!CanSeeTarget(npc, other))
                 continue;
@@ -171,7 +173,7 @@ public sealed partial class ZoneWorld
         }
         if (ready.Count == 0)
             return false;
-        var pick = ready[_combatRandom.Next(ready.Count)];
+        var pick = ready[Rng(_combatRandom, npc).Next(ready.Count)];
         return CastNpcSupportSkill(npc, npc, pick, NpcSupportKind.Buff, now);
     }
 
@@ -207,7 +209,8 @@ public sealed partial class ZoneWorld
     {
         if (skills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
             return false;
-        if (_combatRandom.Next(100) >= chancePercent)
+        var controlRng = Rng(_combatRandom, npc);
+        if (controlRng.Next(100) >= chancePercent)
             return false;
 
         var ready = new List<NpcAiSupportSkill>();
@@ -219,7 +222,7 @@ public sealed partial class ZoneWorld
         }
         if (ready.Count == 0)
             return false;
-        var pick = ready[_combatRandom.Next(ready.Count)];
+        var pick = ready[controlRng.Next(ready.Count)];
         return CastNpcSupportSkill(npc, player, pick, kind, now);
     }
 
@@ -245,13 +248,13 @@ public sealed partial class ZoneWorld
     internal static readonly HashSet<string> ImmobilizeSlots = new(StringComparer.OrdinalIgnoreCase)
     {
         // HOLD = Interlude Anchor / Aerial Yoke family when datapack uses that slot name.
-        "SLEEP", "ROOT_MAGICALLY", "ROOT_PHYSICALLY", "STUN", "PARALYZE", "HOLD"
+        "SLEEP", "ROOT_MAGICALLY", "ROOT_PHYSICALLY", "STUN", "PARALYZE", "HOLD", "TURN_STONE"
     };
 
     /// <summary>Slots that also block skill use (root still allows casting).</summary>
     internal static readonly HashSet<string> ActionBlockSlots = new(StringComparer.OrdinalIgnoreCase)
     {
-        "SLEEP", "STUN", "PARALYZE", "HOLD"
+        "SLEEP", "STUN", "PARALYZE", "HOLD", "TURN_STONE"
     };
 
     internal static readonly HashSet<string> SilenceSlots = new(StringComparer.OrdinalIgnoreCase)
@@ -303,8 +306,8 @@ public sealed partial class ZoneWorld
         {
             if (target.Session is { } session)
             {
-                session.AutoAttackTargetId = 0;
-                session.ClearApproach();
+                target.Intent.AutoAttackTargetId = 0;
+                target.Intent.ClearApproach();
             }
             if (!slot.Equals("SLEEP", StringComparison.OrdinalIgnoreCase))
                 AbortCast(target, "control", notify: false);

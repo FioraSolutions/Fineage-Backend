@@ -7,6 +7,8 @@ data/*
 !data/pledge-skills.json
 !data/clan-halls.json
 !data/castles.json
+!data/merc_tickets.json
+!data/siegable-clan-halls.json
 !data/manor.json
 !data/fishing.json
 !data/recipes.json
@@ -30,6 +32,7 @@ data/*
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/gm-teleports.json
 !data/newbie-buffs.json
 !data/item-weights.json
 !data/spawns/
@@ -61,12 +64,14 @@ TestResults/
 # Local run artifacts
 local-data/
 local-logs/
+.cache/
 publish/
 !data/spoil.json
 !data/herbs.json
 !data/soul-crystals.json
 !data/summons.json
 !data/pets.json
+!data/mounts.json
 !data/cubics.json
 !data/xp-percent-lost.json
 !data/item-skills.json

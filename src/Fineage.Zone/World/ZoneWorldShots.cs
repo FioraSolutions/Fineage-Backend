@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 
@@ -56,7 +57,7 @@ public sealed partial class ZoneWorld
             return false;
         bool soul = t.IsSoulshot;
         // Mobius OlympiadDisableBlessedSpiritShots: no blessed spiritshot charge inside an arena (auto use included).
-        if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiad.Settings.DisableBlessedSpiritshots)
+        if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiadDisableBlessedSpiritshots)
         {
             if (!quiet)
                 ShotNotice(session, OlympiadUseItemMessage, "You cannot use that item in a Grand Olympiad Games match.");
@@ -90,7 +91,20 @@ public sealed partial class ZoneWorld
                 return false;
         }
 
-        if (!player.Inventory.TryConsume(shot.ItemId, need, out var stack, out bool removed) || stack == null)
+        ItemInstance? stack = null;
+        bool removed = false;
+        bool charged = false;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                charged = player.Inventory.TryConsume(shot.ItemId, need, out stack, out removed) && stack != null;
+                return shot.ItemId;
+            },
+            id => id);
+        if (!charged || stack == null)
         {
             // Race with concurrent consume: treat as not enough.
             ShotNotice(session, soul ? SysMsgNotEnoughSoulshots : SysMsgNotEnoughSpiritshots,
@@ -119,13 +133,7 @@ public sealed partial class ZoneWorld
             SkillId = skill,
             SkillLevel = 1
         };
-        List<int> netWatchers = [player.ObjectId];
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null || ReferenceEquals(watcher, player) || !watcher.Knownlist.Contains(player.ObjectId))
-                continue;
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(player);
         NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg
         {
             CasterObjectId = player.ObjectId,
@@ -144,7 +152,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius RequestAutoSoulShot (type 1 on / 0 off) for a shot item the player carries.</summary>
     public Task<string?> TryAutoSoulShotAsync(ZoneSession session, int itemId, bool enable, CancellationToken ct)
     {
-        // Charge can consume shot stacks → SaveInventory after unlock (B8).
+        // Charge can consume shot stacks → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryAutoSoulShot(session, itemId, enable)));
     }
 
@@ -203,7 +211,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test seam: fire the soulshot charge as a swing would, then run the auto recharge.</summary>
     internal void DischargeSoulshot(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             player.SoulshotCharged = false;
             RechargeAutoShots(player);

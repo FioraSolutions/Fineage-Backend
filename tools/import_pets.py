@@ -104,11 +104,15 @@ def main():
                     "hpRegen": f("org_hp_regen"), "mpRegen": f("org_mp_regen"),
                 })
             levels.sort(key=lambda r: r["level"])
+            mountable = sets.get("mountable", "false") == "true"
+            mount_kind = int(sets.get("mount_type", "1" if mountable else "0"))
             pets.append({
                 "npcId": npc_id, "itemId": item_id, "index": int(m.group(3)),
                 "summonSkillId": summon_skill, "summonCastMs": cast_ms,
                 "food": food, "hungryLimit": int(sets.get("hungry_limit", 55)), "load": int(sets.get("load", 54510)),
                 "syncLevel": sets.get("sync_level", "false") == "true",
+                "mountable": mountable,
+                "mountKind": mount_kind,
                 "skills": skills, "levels": levels,
             })
     pets.sort(key=lambda r: r["npcId"])

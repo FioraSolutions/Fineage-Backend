@@ -29,13 +29,74 @@ public sealed partial class QuestCatalog
         foreach (var dialog in row.Dialogs ?? [])
             dialogs.Add(ReadDialog(dialog, items, where, row.Id, htmlBaseDir));
 
+        var condFx = ReadCondClientFx(row.CondClientFx, items, where, row.Id);
+        var rewards = ReadJournalRewards(row.JournalRewards, items, where, row.Id);
+
         return new QuestDefinition(
             row.Id,
             row.Name.Trim(),
             row.Repeatable,
             row.Abortable ?? true,
             questItems,
-            dialogs);
+            dialogs,
+            condFx,
+            rewards);
+    }
+
+    static IReadOnlyDictionary<int, IReadOnlyList<QuestOp>> ReadCondClientFx(
+        Dictionary<string, List<OpDto>>? rows, ItemCatalog items, string where, int questId)
+    {
+        if (rows is not { Count: > 0 })
+            return new Dictionary<int, IReadOnlyList<QuestOp>>();
+        var map = new Dictionary<int, IReadOnlyList<QuestOp>>();
+        foreach (var (key, ops) in rows)
+        {
+            if (!int.TryParse(key, out int cond) || cond is < 0 or > 255)
+                throw new InvalidDataException($"{where} quest {questId} condClientFx key '{key}' must be cond 0..255.");
+            var list = new List<QuestOp>();
+            foreach (var op in ops ?? [])
+                list.Add(ReadOp(op, items, where, questId));
+            map[cond] = list;
+        }
+        return map;
+    }
+
+    static IReadOnlyList<QuestJournalReward> ReadJournalRewards(
+        List<JournalRewardDto>? rows, ItemCatalog items, string where, int questId)
+    {
+        if (rows is not { Count: > 0 })
+            return Array.Empty<QuestJournalReward>();
+        var list = new List<QuestJournalReward>(rows.Count);
+        foreach (var row in rows)
+        {
+            string kind = (row.Kind ?? "").Trim().ToLowerInvariant();
+            QuestJournalRewardKind wire = kind switch
+            {
+                "item" => QuestJournalRewardKind.Item,
+                "adena" => QuestJournalRewardKind.Adena,
+                "exp" => QuestJournalRewardKind.Exp,
+                "sp" => QuestJournalRewardKind.Sp,
+                _ => throw new InvalidDataException($"{where} quest {questId} journalRewards kind '{row.Kind}' is unknown.")
+            };
+            ItemTemplate? item = null;
+            if (wire == QuestJournalRewardKind.Item)
+            {
+                if (!items.TryGet(row.ItemId, out item))
+                    throw new InvalidDataException($"{where} quest {questId} journalRewards item {row.ItemId} is unknown.");
+            }
+            string label = row.Label?.Trim() ?? (wire switch
+            {
+                QuestJournalRewardKind.Adena => "Adena",
+                QuestJournalRewardKind.Exp => "Experience",
+                QuestJournalRewardKind.Sp => "SP",
+                QuestJournalRewardKind.Item => item!.Name,
+                _ => ""
+            });
+            if (row.Count < 1 && wire is QuestJournalRewardKind.Item or QuestJournalRewardKind.Adena)
+                throw new InvalidDataException($"{where} quest {questId} journalRewards count must be positive.");
+            list.Add(new QuestJournalReward(wire, row.ItemId, row.Count, label));
+        }
+        return list;
     }
 
     static QuestDialog ReadDialog(DialogDto dialog, ItemCatalog items, string where, int questId, string? htmlBaseDir = null)

@@ -65,7 +65,7 @@ public sealed partial class NetZoneServer
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _enchant = new EnchantPacketHandler(_world, RejectAsync);
-        _clan = new ClanPacketHandler(_world, _clock, RejectAsync);
+        _clan = new ClanPacketHandler(_world, RejectAsync);
         _trade = new TradePacketHandler(_world, RejectAsync);
         _party = new PartyPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
@@ -79,10 +79,10 @@ public sealed partial class NetZoneServer
         _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
         _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
         _recipes = new RecipePacketHandler(_world, RejectAsync);
-        _chat = new ChatPacketHandler(_world, _clock, RejectAsync);
+        _chat = new ChatPacketHandler(_world, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
         _knownlist = new NetKnownlistFanout(_world, _ids, _presence, PlayerSpawnPAtkSpd);
-        _movement = new MovementPacketHandler(_world, RejectAsync, _knownlist.FanDiffAsync);
+        _movement = new MovementPacketHandler(_world, RejectAsync, _knownlist);
         _characterActions = new CharacterActionPacketHandler(_world, RejectAsync);
         _session = new SessionLifecyclePacketHandler(
             _handoff, _world, _ids, _presence, _clock, PlayerSpawnPAtkSpd, RejectAsync);

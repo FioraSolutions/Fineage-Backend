@@ -1,11 +1,12 @@
 using Fineage.Protocol;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    readonly BossSchedule _bosses;
+    readonly BossActor _bosses;
 
     void BootstrapBosses()
     {
@@ -25,13 +26,13 @@ public sealed partial class ZoneWorld
             }
         }
 
-        foreach (var order in _bosses.StartupOrders())
+        foreach (var order in _bosses.Schedule.StartupOrders())
             MaterializeBoss(order);
     }
 
-    void TickBosses()
+    void SpawnBosses(IReadOnlyList<BossSpawnOrder> due)
     {
-        foreach (var order in _bosses.CollectDue())
+        foreach (var order in due)
         {
             if (!MaterializeBoss(order))
                 continue;
@@ -41,15 +42,22 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Combat calls this after a boss dies. It records the Mobius respawn window and,
-    /// when the boss is still in the world, removes it. Safe to call when combat already despawned the NPC.
-    /// Do not call it while holding the world gate; it takes that gate itself.
+    /// A scheduled boss died in combat: the boss actor rolls its respawn window from now when it next steps. Deferred
+    /// to the barrier inside a region body.
     /// </summary>
-    public bool OnBossKilled(int npcId)
+    void NoteBossDeath(ZoneEntity npc)
     {
-        lock (_gate)
-            return KillBossLocked(npcId);
+        if (!_bosses.Catalog.TryGet(npc.NpcId, out var definition) || definition.ObjectId != npc.ObjectId)
+            return;
+        var kill = new BossKill(npc.NpcId, NowUnixMs());
+        AtBarrier(() => _bosses.Kill(kill));
     }
+
+    /// <summary>
+    /// Admin and test hook: marks the boss dead now, opening its respawn window, and, when the boss
+    /// is still in the world, removes it. Must run on the simulation thread or inside a step.
+    /// </summary>
+    public bool OnBossKilled(int npcId) => KillBossNow(npcId);
 
     public Task<string?> TryBossStatusAsync(ZoneSession session, int npcId, CancellationToken ct)
     {
@@ -59,9 +67,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         BossStatusMsg? message;
-        string? error;
-        lock (_gate)
-            error = BuildBossStatus(npcId, out message);
+        string? error = BuildBossStatus(npcId, out message);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -76,27 +82,29 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = ApplyAdminBoss(request);
+        string? error = ApplyAdminBoss(request);
         if (error != null)
             return Task.FromResult<string?>(error);
 
         return Task.FromResult<string?>(null);
     }
 
-    /// <summary>Test hook: run the boss respawn tick without the simulation loop.</summary>
+    /// <summary>Test hook: run the boss actor's stage now, without the simulation loop.</summary>
     internal void AdvanceBossesForTests()
     {
-        lock (_gate)
-            TickBosses();
+        using (_affinity.Step())
+            AtHookTick(tick =>
+            {
+                SpawnBosses(_bosses.Step(tick));
+                return 0;
+            });
     }
 
-    internal void SaveBosses() => _bosses.Save();
+    internal void SaveBosses() => _bosses.Schedule.Save();
 
     internal (int Hp, int Mp) BossVitalsForTests(int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var definition = _bosses.Catalog.Get(npcId);
             if (!_byId.TryGetValue(definition.ObjectId, out var entity))
@@ -105,30 +113,26 @@ public sealed partial class ZoneWorld
         }
     }
 
-    bool KillBossLocked(int npcId)
+    bool KillBossNow(int npcId)
     {
-        if (!_bosses.OnBossKilled(npcId))
+        if (!_bosses.Catalog.TryGet(npcId, out var definition))
             return false;
 
-        if (_bosses.Catalog.TryGet(npcId, out var definition)
-            && _byId.TryGetValue(definition.ObjectId, out var entity)
-            && entity.Kind == ZoneEntityKind.Npc)
-        {
+        _bosses.Kill(new BossKill(npcId, NowUnixMs()));
+        if (_byId.TryGetValue(definition.ObjectId, out var entity) && entity.Kind == ZoneEntityKind.Npc)
             DespawnNpc(entity);
-        }
-
         return true;
     }
 
     string? ApplyAdminBoss(AdminBossScheduleMsg request)
     {
         if (request.Action == BossProtocol.ActionMarkDead)
-            return KillBossLocked(request.NpcId) ? null : BossProtocol.UnknownBoss;
+            return KillBossNow(request.NpcId) ? null : BossProtocol.UnknownBoss;
 
         if (request.Action != BossProtocol.ActionForceSpawn)
             return "bad_request";
 
-        if (!_bosses.TryForceSpawn(request.NpcId, out var order))
+        if (!_bosses.Schedule.TryForceSpawn(request.NpcId, out var order))
             return BossProtocol.UnknownBoss;
 
         if (MaterializeBoss(order) && _byId.TryGetValue(order.ObjectId, out var npc))
@@ -140,7 +144,7 @@ public sealed partial class ZoneWorld
     {
         if (npcId == 0)
         {
-            var views = _bosses.Views();
+            var views = _bosses.Schedule.Views();
             var entries = new BossStatusEntryMsg[views.Count];
             for (int i = 0; i < views.Count; i++)
                 entries[i] = Entry(views[i]);
@@ -148,7 +152,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        if (!_bosses.TryView(npcId, out var view))
+        if (!_bosses.Schedule.TryView(npcId, out var view))
         {
             message = null;
             return BossProtocol.UnknownBoss;
@@ -177,33 +181,30 @@ public sealed partial class ZoneWorld
     {
         if (!_bosses.Catalog.TryGet(order.NpcId, out var definition))
             return false;
-        if (!definition.Enabled && !order.IgnoreEnabled)
+        if (!_bosses.Schedule.ShouldSpawn(definition) && !order.IgnoreEnabled)
             return false;
         if (_byId.ContainsKey(definition.ObjectId))
             return false;
 
-        var entity = new ZoneEntity
+        if (!NpcMaterializeCatalog.ById.TryGetValue(definition.NpcId, out var template))
         {
-            ObjectId = definition.ObjectId,
-            Kind = ZoneEntityKind.Npc,
-            Name = definition.Name,
-            Title = definition.Title,
-            NpcType = definition.NpcType,
-            X = definition.X,
-            Y = definition.Y,
-            Z = definition.Z,
-            Heading = definition.Heading,
-            NpcId = definition.NpcId,
-            Attackable = definition.Attackable,
-            MaxHp = definition.MaxHp,
-            CurHp = order.CurrentHp,
-            MaxMp = definition.MaxMp,
-            CurMp = order.CurrentMp,
-            RunSpeed = definition.RunSpeed,
-            WalkSpeed = definition.WalkSpeed
-        };
-        _byId.Add(entity.ObjectId, entity);
-        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+            throw new InvalidOperationException(
+                $"Boss npcId={definition.NpcId} object={definition.ObjectId} has no npc template in npcs.json");
+        }
+
+        var row = SpawnCatalog.FromTemplate(
+            definition.ObjectId,
+            template,
+            definition.X,
+            definition.Y,
+            definition.Z,
+            definition.Heading,
+            name: definition.Name,
+            maxHp: definition.MaxHp,
+            attackable: definition.Attackable,
+            runSpeed: definition.RunSpeed,
+            walkSpeed: definition.WalkSpeed);
+        MaterializeNpc(row, mapId: null, order.CurrentHp, order.CurrentMp);
         return true;
     }
 }

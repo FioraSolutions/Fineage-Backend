@@ -15,6 +15,7 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     readonly Func<double> _random;
 
+    /// <param name="random">Draws for actors without their own <see cref="QuestActor.Roll"/>.</param>
     public QuestMachine(QuestCatalog catalog, ItemCatalog items, Func<double>? random = null)
     {
         _random = random ?? Random.Shared.NextDouble;
@@ -24,14 +25,16 @@ public sealed partial class QuestMachine : IQuestKillHook
 
     public int MaxActive => _catalog.MaxActive;
 
+    public QuestDefinition? QuestDef(int questId) => _catalog.Find(questId);
+
     public QuestOutcome FirstTalk(QuestJournal journal, PlayerInventory inventory, int npcId, string npcName, QuestActor? actor = null)
     {
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+            var dialog = Find(quest, QuestHook.FirstTalk, npcId, "", journal.Find(quest.Id), actor, inventory, RollOf(actor));
             if (dialog == null)
                 continue;
-            return Apply(journal, inventory, quest, dialog, "first_talk");
+            return Apply(journal, inventory, quest, dialog, "first_talk", RollOf(actor));
         }
 
         return Default(npcId, npcName, journal, actor);
@@ -45,20 +48,20 @@ public sealed partial class QuestMachine : IQuestKillHook
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "talk");
-        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+        var dialog = Find(quest, QuestHook.Talk, npcId, "", journal.Find(quest.Id), actor, inventory, RollOf(actor));
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "talk");
-        return Apply(journal, inventory, quest, dialog, "talk");
+        return Apply(journal, inventory, quest, dialog, "talk", RollOf(actor));
     }
 
     public QuestOutcome AdvEvent(QuestJournal journal, PlayerInventory inventory, int questId, int npcId, string eventName, QuestActor? actor = null)
     {
         if (_catalog.Find(questId) is not { } quest)
             return Fail(QuestFailure.Unknown, "That quest does not exist.", questId, "event", eventName);
-        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor, inventory, _random);
+        var dialog = Find(quest, QuestHook.Event, npcId, eventName, journal.Find(quest.Id), actor, inventory, RollOf(actor));
         if (dialog == null)
             return Fail(QuestFailure.State, "That quest event does not apply.", questId, "event", eventName);
-        return Apply(journal, inventory, quest, dialog, "event");
+        return Apply(journal, inventory, quest, dialog, "event", RollOf(actor));
     }
 
     public QuestOutcome Abort(QuestJournal journal, PlayerInventory inventory, int questId)
@@ -191,10 +194,10 @@ public sealed partial class QuestMachine : IQuestKillHook
         bool changed = false;
         foreach (var quest in _catalog.Quests)
         {
-            var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, _random, ownedMode);
+            var dialog = Find(quest, hook, npcId, "", journal.Find(quest.Id), actor, inventory, RollOf(actor), ownedMode);
             if (dialog == null || dialog.Party || (everyoneOnly && !dialog.Everyone))
                 continue;
-            var outcome = Apply(journal, inventory, quest, dialog, label);
+            var outcome = Apply(journal, inventory, quest, dialog, label, RollOf(actor));
             if (!outcome.Ok)
                 return outcome;
             sounds.AddRange(outcome.Sounds);
@@ -275,10 +278,10 @@ public sealed partial class QuestMachine : IQuestKillHook
         if (!PartyKillApplies(journal, inventory, questId, npcId, actor))
             return new QuestOutcome { Hook = "kill" };
         var quest = _catalog.Find(questId)!;
-        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory, _random);
+        var dialog = Find(quest, QuestHook.Kill, npcId, "", journal.Find(quest.Id), actor, inventory, RollOf(actor));
         if (dialog == null)
             return new QuestOutcome { Hook = "kill" };
-        return Apply(journal, inventory, quest, dialog, "kill");
+        return Apply(journal, inventory, quest, dialog, "kill", RollOf(actor));
     }
 
     public QuestListSnapshot List(QuestJournal journal)
@@ -308,12 +311,20 @@ public sealed partial class QuestMachine : IQuestKillHook
             }
         }
 
+        var rewardSets = new List<QuestJournalRewardSet>();
+        foreach (var row in active)
+        {
+            if (_catalog.Find(row.QuestId)?.JournalRewards is { Count: > 0 } rewards)
+                rewardSets.Add(new QuestJournalRewardSet(row.QuestId, rewards));
+        }
+
         return new QuestListSnapshot
         {
             Active = active.ToArray(),
             CompletedMask = mask,
             CompletedQuestIds = completed.ToArray(),
-            MaxActive = _catalog.MaxActive
+            MaxActive = _catalog.MaxActive,
+            RewardSets = rewardSets.ToArray()
         };
     }
 
@@ -328,10 +339,13 @@ public sealed partial class QuestMachine : IQuestKillHook
         mask[index] |= (byte)(1 << (questId % 8));
     }
 
-    QuestOutcome Apply(QuestJournal journal, PlayerInventory inventory, QuestDefinition quest, QuestDialog dialog, string hook)
+    Func<double> RollOf(QuestActor? actor) => actor?.Roll ?? _random;
+
+    QuestOutcome Apply(QuestJournal journal, PlayerInventory inventory, QuestDefinition quest, QuestDialog dialog, string hook,
+        Func<double> roll)
     {
         var plan = new Plan(journal.Find(quest.Id));
-        if (!TryOps(journal, inventory, quest, dialog.Ops, plan, out var failure))
+        if (!TryOps(journal, inventory, quest, dialog.Ops, plan, roll, out var failure))
             return failure;
         var outcome = Commit(journal, inventory, quest, plan, hook, dialog.Event);
         return new QuestOutcome

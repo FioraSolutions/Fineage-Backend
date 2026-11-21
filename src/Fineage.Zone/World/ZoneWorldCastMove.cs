@@ -22,8 +22,8 @@ public sealed partial class ZoneWorld
         var session = player.Session;
         if (session != null)
         {
-            session.ClearApproach();
-            session.SitOnArrive = false;
+            player.Intent.ClearApproach();
+            player.Intent.SitOnArrive = false;
         }
         if (target.ObjectId != player.ObjectId)
             player.Heading = ZoneCombat.HeadingFrom(player.X, player.Y, target.X, target.Y);
@@ -42,8 +42,8 @@ public sealed partial class ZoneWorld
     {
         if (session != null)
         {
-            session.ClearApproach();
-            session.SitOnArrive = false;
+            player.Intent.ClearApproach();
+            player.Intent.SitOnArrive = false;
         }
         if (!player.MoveActive)
             return;
@@ -58,7 +58,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(player);
+        var watchers = KnownNetPlayersOf(player);
         watchers.Remove(player.ObjectId);
         if (watchers.Count == 0)
             return;
@@ -69,10 +69,10 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius Player.useMagic while isCastingNow(): queue the skill for when the current cast ends.</summary>
     void QueueSkillAfterCast(ZoneSession session, ZoneEntity player, SkillUseIntent request)
     {
-        session.PendingCastSkillId = request.SkillId;
-        session.PendingCastTargetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
-        session.PendingCastCtrlPressed = request.CtrlPressed;
-        session.PendingCastAtUnixMs = player.CastingUntilMs;
+        player.Intent.PendingCastSkillId = request.SkillId;
+        player.Intent.PendingCastTargetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
+        player.Intent.PendingCastCtrlPressed = request.CtrlPressed;
+        player.Intent.PendingCastAtUnixMs = player.CastingUntilMs;
         ZoneLog.Info($"[cast] queued skill={request.SkillId} obj={player.ObjectId} at={player.CastingUntilMs}");
     }
 
@@ -84,16 +84,16 @@ public sealed partial class ZoneWorld
             var session = player.Session;
             if (session == null)
                 continue;
-            if (session.QueuedMove != null && !IsCasting(player, now))
+            if (player.Intent.QueuedMove != null && !IsCasting(player, now))
             {
-                var move = session.QueuedMove;
-                session.QueuedMove = null;
+                var move = player.Intent.QueuedMove;
+                player.Intent.QueuedMove = null;
                 if (!player.Dead)
                     TryMove(session, move.DestX, move.DestY, move.DestZ);
             }
-            if (session.SitOnArrive && !player.MoveActive)
+            if (player.Intent.SitOnArrive && !player.MoveActive)
             {
-                session.SitOnArrive = false;
+                player.Intent.SitOnArrive = false;
                 if (!player.Sitting && !player.Dead)
                     ToggleSitStand(player);
             }

@@ -46,6 +46,19 @@
       "hook": "talk",
       "when": "started",
       "hasItem": 1078,
+      "ops": [
+        {
+          "op": "sell_items",
+          "prices": [
+            {
+              "itemId": 1078,
+              "adena": 40
+            }
+          ],
+          "bonusMin": 10,
+          "bonusAdena": 2988
+        }
+      ],
       "htmlFile": "30361-talk-003.htm"
     },
     {

@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -12,15 +13,14 @@ public sealed partial class ZoneWorld
 {
     internal Task RunCombatTickAsync(CancellationToken ct)
     {
-        WithDeferredInventoryPersist(() =>
+        RunStep(now =>
         {
-            long now = _clock().ToUnixTimeMilliseconds();
             TickPlayerMovement(now);
             TickNpcMovement(now);
             TickRandomWalk(now);
             TickPendingHits(now);
             TickMeleeHits(now);
-            TickAggression(now);
+            _simulationTicks.RunNow(_aggressionStage, now);
             TickLeash(now);
             TickMobAttacks(now);
             TickSummons(now);
@@ -31,7 +31,6 @@ public sealed partial class ZoneWorld
             TickSignets(now);
             TickSkillChannels(now);
             TickAttackStance(now);
-            return 0;
         });
 
         return Task.CompletedTask;
@@ -39,13 +38,15 @@ public sealed partial class ZoneWorld
 
     void TickPendingHits(long now)
     {
-        if (_pendingHit.Count == 0)
+        if (_byId.CountOf(ActiveSets.PendingHit) == 0)
             return;
-        foreach (int id in _pendingHit.ToArray())
+        foreach (int id in Active(ActiveSets.PendingHit))
         {
-            if (!_byId.TryGetValue(id, out var entity) || entity.PendingHit == null)
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
+            if (entity.PendingHit == null)
             {
-                _pendingHit.Remove(id);
+                _byId.Leave(entity, ActiveSets.PendingHit);
                 continue;
             }
             if (entity.PendingHit.DueUnixMs > now)
@@ -132,6 +133,11 @@ public sealed partial class ZoneWorld
         if (TryExplodeTreasureBox(player, target, now))
             return;
         DuelNoteOutsideHit(player, target);
+        bool magicSkill = hit.Combat is { Kind: SkillDamageKind.Magical }
+                          || (hit.Combat != null && _game.Skills.Find(hit.Combat.SkillId) is { MagicType: 1 });
+        if (TryApplyRaidCurse(target, player, magicSkill, now))
+            return;
+
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         if (hit.Combat != null && damage > 0)
@@ -193,7 +199,7 @@ public sealed partial class ZoneWorld
         }
 
         if (target.Session != null)
-            target.Session.AutoAttackTargetId = 0;
+            target.Intent.AutoAttackTargetId = 0;
         ApplyPlayerDeath(target, attacker.ObjectId);
     }
 
@@ -207,9 +213,9 @@ public sealed partial class ZoneWorld
 
     void TickMobAttacks(long now)
     {
-        if (_aiBusy.Count == 0)
+        if (_byId.CountOf(ActiveSets.AiBusy) == 0)
             return;
-        foreach (int id in _aiBusy.ToArray())
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null ||
                 IsTreasureBox(npc.NpcId))
@@ -301,8 +307,12 @@ public sealed partial class ZoneWorld
                     TargetObjectId = player.ObjectId,
                     Damage = sDamage,
                     Flags = sFlags,
-                    AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                    TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                    AttackerX = npc.X,
+                    AttackerY = npc.Y,
+                    AttackerZ = npc.Z,
+                    TargetX = player.X,
+                    TargetY = player.Y,
+                    TargetZ = player.Z
                 });
                 _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
                 continue;
@@ -334,8 +344,12 @@ public sealed partial class ZoneWorld
                 TargetObjectId = player.ObjectId,
                 Damage = damage,
                 Flags = flags,
-                AttackerX = npc.X, AttackerY = npc.Y, AttackerZ = npc.Z,
-                TargetX = player.X, TargetY = player.Y, TargetZ = player.Z
+                AttackerX = npc.X,
+                AttackerY = npc.Y,
+                AttackerZ = npc.Z,
+                TargetX = player.X,
+                TargetY = player.Y,
+                TargetZ = player.Z
             };
             // Swing now; player HP drops at hitTime (Mobius onHitTimer).
             FanoutAttack(npc, player, attack);

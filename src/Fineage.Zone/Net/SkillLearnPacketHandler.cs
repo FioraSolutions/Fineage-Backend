@@ -35,7 +35,10 @@ public sealed class SkillLearnPacketHandler
         }
 
         var (skillId, level, skillType) = NetCodec.DecodeAcquireSkillRequest(envelope.Payload);
-        string? error = await _world.TryAcquireSkillAsync(zoneSession, skillId, level, skillType, informing, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new AcquireSkillCommand(skillId, level, skillType, informing),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, informing ? "Skill info failed." : "Learn failed.", ct).ConfigureAwait(false);
     }

@@ -16,7 +16,7 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
-        string? error = await _world.TryOlympiadStatusAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new OlympiadStatusCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Olympiad status failed.", ct).ConfigureAwait(false);
         // OlympiadStatus goes out as fanout, so the reply body is empty on purpose.
@@ -36,9 +36,9 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeOlympiadRegisterRequest(envelope.Payload);
-        string? error = await _world.TryOlympiadRegisterAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new OlympiadRegisterRequestMsg { Classed = request.Classed },
+            new OlympiadRegisterCommand(new OlympiadRegisterRequestMsg { Classed = request.Classed }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Olympiad registration was rejected.", ct).ConfigureAwait(false);
@@ -53,7 +53,7 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
-        string? error = await _world.TryOlympiadUnregisterAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new OlympiadUnregisterCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Olympiad unregister was rejected.", ct).ConfigureAwait(false);
     }
@@ -67,7 +67,7 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
-        string? error = await _world.TryOlympiadLeaveAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new OlympiadLeaveCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Olympiad leave was rejected.", ct).ConfigureAwait(false);
     }
@@ -92,10 +92,9 @@ public sealed partial class WorldEventPacketHandler
         }
 
         var request = NetCodec.DecodeAdminReportOlympiadResult(envelope.Payload);
-        string? error = await _world.TryAdminReportOlympiadAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            request.MatchId,
-            request.WinnerObjectId,
+            new AdminReportOlympiadCommand(request.MatchId, request.WinnerObjectId),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminReportOlympiadResult was rejected.", ct).ConfigureAwait(false);

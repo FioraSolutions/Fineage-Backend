@@ -1,5 +1,5 @@
 {
- "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/\u2026).",
+ "reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/…).",
  "skills": [
   {
    "skillId": 113,
@@ -5305,6 +5305,22 @@
      ]
     },
     {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0
+     ]
+    },
+    {
      "stat": "mAtk",
      "op": "mul",
      "values": [
@@ -5915,6 +5931,22 @@
      ]
     },
     {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0,
+      20.0
+     ]
+    },
+    {
      "stat": "mAtk",
      "op": "mul",
      "values": [
@@ -6475,6 +6507,22 @@
     },
     {
      "stat": "regMp",
+     "op": "mul",
+     "values": [
+      0.22,
+      0.19,
+      0.16,
+      0.13,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ]
+    },
+    {
+     "stat": "regCp",
      "op": "mul",
      "values": [
       0.22,

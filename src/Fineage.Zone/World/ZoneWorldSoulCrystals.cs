@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -15,7 +16,7 @@ public sealed partial class ZoneWorld
         SoulCrystalRefused = 978;
 
     readonly SoulCrystalCatalog _soulCrystals = SoulCrystalCatalog.LoadDefault();
-    internal Func<int, int> SoulCrystalRandom { get; set; } = static n => Random.Shared.Next(n);
+    internal IRegionRandom SoulCrystalRandom { get; set; } = null!;
 
     /// <summary>Mobius ItemSkills for a soul crystal: the selected monster, then the Soul Crystal cast.</summary>
     string? TryUseSoulCrystal(ZoneSession session, ZoneEntity player, ItemInstance item)
@@ -79,23 +80,24 @@ public sealed partial class ZoneWorld
                 LevelCrystal(member, step, npc);
         }
 
+        var soulRng = Rng(SoulCrystalRandom, killer);
         switch (rule.Mode)
         {
             case SoulAbsorbMode.PartyOneRandom:
-                Roll(party.Count > 1 ? party[SoulCrystalRandom(party.Count)] : killer);
+                Roll(party.Count > 1 ? party[soulRng.Next(party.Count)] : killer);
                 break;
             case SoulAbsorbMode.PartyRandom:
                 if (party.Count > 1)
                 {
                     var pool = new List<ZoneEntity>(party);
-                    while (pool.Count > 0 && SoulCrystalRandom(100) < 33)
+                    while (pool.Count > 0 && soulRng.Next(100) < 33)
                     {
-                        int i = SoulCrystalRandom(pool.Count);
+                        int i = soulRng.Next(pool.Count);
                         Roll(pool[i]);
                         pool.RemoveAt(i);
                     }
                 }
-                else if (SoulCrystalRandom(100) < 33)
+                else if (soulRng.Next(100) < 33)
                     Roll(killer);
                 break;
             case SoulAbsorbMode.FullParty:
@@ -118,7 +120,7 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        if (SoulCrystalRandom(100) > rule.Chance)
+        if (Rng(SoulCrystalRandom, player).Next(100) > rule.Chance)
         {
             Notice(session, SoulCrystalFailed, "The soul crystal was not able to absorb a soul.");
             return;
@@ -138,7 +140,7 @@ public sealed partial class ZoneWorld
     List<ZoneEntity> PartyMembersOf(ZoneEntity player)
     {
         var list = new List<ZoneEntity> { player };
-        if (!_partyByPlayer.TryGetValue(player.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(player.ObjectId) is not { } party)
             return list;
         foreach (int id in party.MemberIds)
         {
@@ -158,14 +160,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the Soul Crystal skill landed on <paramref name="npc"/> from <paramref name="player"/>.</summary>
     internal void SoulAbsorbForTest(ZoneEntity player, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             AbsorbSoul(player, npc);
     }
 
     /// <summary>Test hook: <paramref name="npc"/> died to <paramref name="killer"/> (soul crystal step only).</summary>
     internal void SoulKillForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             LevelSoulCrystals(killer, npc);
     }
 }

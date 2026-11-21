@@ -113,14 +113,14 @@ public sealed partial class ZoneWorld
     {
         if (!IsVillageMasterNpc(npc))
             return "bad_request";
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.CastingUntilMs > now)
         {
             Notice(session, SubclassCastingMessageId, "Sub classes may not be created or changed while a skill is in use.");
             return null;
         }
         // Mobius: an Olympiad registration is withdrawn first.
-        _olympiad.Unregister(ActorFor(player), now);
+        _olympiad.Board.Unregister(ActorFor(player), now);
         if (player.Inventory != null && player.Inventory.Items.Count >= InventoryLimit(player) * 0.9)
         {
             Notice(session, SubclassInventoryMessageId, "A sub-class cannot be created or changed because you have exceeded your inventory limit.");
@@ -143,14 +143,14 @@ public sealed partial class ZoneWorld
                 page = Page("SubClass.htm");
                 break;
             case 1:
-            {
-                var available = subs.Count >= MaxSubclasses ? [] : AvailableSubclasses(player, npc);
-                page = available.Count == 0
-                    ? Page("SubClass_Fail.htm")
-                    : Page("SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
-                        $"<a action=\"bypass npc_%objectId%_Subclass 4 {id}\" msg=\"1268;{ClassName(id)}\">{ClassName(id)}</a><br>"));
-                break;
-            }
+                {
+                    var available = subs.Count >= MaxSubclasses ? [] : AvailableSubclasses(player, npc);
+                    page = available.Count == 0
+                        ? Page("SubClass_Fail.htm")
+                        : Page("SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
+                            $"<a action=\"bypass npc_%objectId%_Subclass 4 {id}\" msg=\"1268;{ClassName(id)}\">{ClassName(id)}</a><br>"));
+                    break;
+                }
             case 2:
                 if (subs.Count == 0)
                 {
@@ -199,20 +199,20 @@ public sealed partial class ZoneWorld
                 Notice(session, SubclassTransferMessageId, "The transfer of sub class has been completed.");
                 return null; // Mobius: no page after a plain switch.
             case 6:
-            {
-                if (one < 1 || one > MaxSubclasses)
-                    return "bad_request";
-                var available = AvailableSubclasses(player, npc);
-                if (available.Count == 0)
                 {
-                    Plain(session, "There are no sub classes available at this time.");
-                    return null;
+                    if (one < 1 || one > MaxSubclasses)
+                        return "bad_request";
+                    var available = AvailableSubclasses(player, npc);
+                    if (available.Count == 0)
+                    {
+                        Plain(session, "There are no sub classes available at this time.");
+                        return null;
+                    }
+                    page = Page(one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
+                        ?.Replace("%list%", ClassLinks(available, id =>
+                            $"<a action=\"bypass npc_%objectId%_Subclass 7 {one} {id}\" msg=\"1445;\">{ClassName(id)}</a><br>"));
+                    break;
                 }
-                page = Page(one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
-                    ?.Replace("%list%", ClassLinks(available, id =>
-                        $"<a action=\"bypass npc_%objectId%_Subclass 7 {one} {id}\" msg=\"1445;\">{ClassName(id)}</a><br>"));
-                break;
-            }
             case 7:
                 if (one < 1 || subs.All(s => s.Index != one) || !IsValidNewSubclass(player, npc, two, replacingIndex: one))
                     return "bad_request";
@@ -443,11 +443,11 @@ public sealed partial class ZoneWorld
         FanoutNetMoveType(player);
         FanoutMoveType(player);
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, now));
         NetBridge?.FanoutShortcutInit([player.ObjectId], BuildShortcutInit(session));
         SelfUserInfo(player);
-        var watchers = NetWatchersOf(player);
+        var watchers = KnownNetPlayersOf(player);
         var peers = watchers.Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);

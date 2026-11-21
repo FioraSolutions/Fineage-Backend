@@ -3,6 +3,7 @@ using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -78,7 +79,8 @@ public sealed class NetZoneGuardTests
         {
             var cts = new CancellationTokenSource();
             var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-            var world = new ZoneWorld(accounts: MemoryAccountStore.InMemory());
+            var world = new ZoneWorld(accounts: MemoryAccountStore.InMemory(),
+            ledgerJournal: new MemoryLedgerJournal());
             var zone = new NetZoneServer(
                 tokens,
                 world,

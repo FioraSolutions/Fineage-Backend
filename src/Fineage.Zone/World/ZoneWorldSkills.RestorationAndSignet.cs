@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -43,7 +44,7 @@ public sealed partial class ZoneWorld
         if (inventory == null)
             return false;
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (!Take(inventory, levelData.ItemConsumeId, levelData.ItemConsumeCount, changes))
+        if (!RecordConsume(player, levelData.ItemConsumeId, levelData.ItemConsumeId, levelData.ItemConsumeCount, changes))
         {
             SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
             return false;
@@ -278,7 +279,7 @@ public sealed partial class ZoneWorld
             return null;
 
         npc.HomeSet = false;
-        // Mobius EffectPoint: setInvul(true) and attackable=false, so TickAggression never picks it up.
+        // Mobius EffectPoint: setInvul(true) and attackable=false, so the aggression scan never picks it up.
         SetAggroTarget(npc, 0);
         if (NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
         {
@@ -297,12 +298,13 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: plant a signet NPC without a cast (despawn timer included).</summary>
     internal ZoneEntity? SpawnSignetForTest(ZoneEntity owner, int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            return SpawnSignet(owner, npcId, owner.X, owner.Y, owner.Z, _clock().ToUnixTimeMilliseconds());
+            return SpawnSignet(owner, npcId, owner.X, owner.Y, owner.Z, NowUnixMs());
         }
     }
 
     /// <summary>Mobius <c>EffectPoint</c> aura: who the signet buffs is everyone inside the skill's affectRange.</summary>
     internal int SignetAffectRangeForTests(int npcId) =>
-        _npcAiSupport.Get(npcId)?.Buff is { Count: > 0 } buff ? buff[0].AffectRange : 0;}
+        _npcAiSupport.Get(npcId)?.Buff is { Count: > 0 } buff ? buff[0].AffectRange : 0;
+}

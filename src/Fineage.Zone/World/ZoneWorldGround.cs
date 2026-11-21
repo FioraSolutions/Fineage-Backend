@@ -1,7 +1,9 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -12,7 +14,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryPickup(session, groundObjectId)));
     }
 
@@ -64,9 +66,7 @@ public sealed partial class ZoneWorld
 
     bool CanPickupProtected(ZoneEntity player, ZoneEntity ground, long now)
     {
-        bool sameParty = _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
-            && _partyByPlayer.TryGetValue(player.ObjectId, out int myParty)
-            && ownerParty == myParty;
+        bool sameParty = _party.SameParty(ground.GroundOwnerId, player.ObjectId);
         return GroundRules.CanPickupProtected(
             ground.GroundOwnerId,
             ground.GroundProtectUntilMs,
@@ -97,7 +97,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
     internal void DropDeathLootForTest(int npcId, int x, int y, int z, ZoneEntity killer)
     {
-        lock (_gate)
+        using (_affinity.Step())
             SpawnDeathDrops(npcId, x, y, z, killer, [killer]);
     }
 
@@ -115,7 +115,11 @@ public sealed partial class ZoneWorld
             if (g.GroundExpireAtMs > 0 && now >= g.GroundExpireAtMs)
             {
                 ZoneLog.Info($"ground expire object={id} item={g.GroundItemId}");
+                var move = BeginLedgerMove(LedgerTxKind.Expire, 0, id);
+                PostOffGround(move, g);
+                move.Post(LedgerAccount.Of(SystemAccount.Destroyed), g.GroundItemId, g.GroundCount);
                 RemoveGroundItem(g);
+                move.Commit(LedgerHoldingsOf);
             }
         }
     }
@@ -133,7 +137,7 @@ public sealed partial class ZoneWorld
         if (player.Dead)
             return InventoryProtocol.Dead;
 
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (!CanPickupProtected(player, ground, now))
         {
             // Mobius DropProtection.tryPickUp false -> FAILED_TO_PICKUP_S1, no run-in.
@@ -145,16 +149,14 @@ public sealed partial class ZoneWorld
         // weight-check a pickup (validateWeight is only on buy / withdraw / trade), so an overloaded character may
         // still loot and simply carries the weight penalty — matching the reference means slots-only here.
         // Party RANDOM/BY_TURN modes check the eventual looter instead of the picker (Party.distributeItem).
-        ZoneParty? pickupParty = null;
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int pickupPartyId))
-            _parties.TryGetValue(pickupPartyId, out pickupParty);
+        ZoneParty? pickupParty = _party.Of(player.ObjectId);
         bool partyDistributes = pickupParty != null
                                 && pickupParty.ItemDistribution != (int)PartyDistributionType.FindersKeepers
                                 && !IsHerb(ground.GroundItemId);
         if (!partyDistributes && !HasRoomForGroundItem(player, ground))
         {
-            session.PendingPickupId = 0;
-            session.PendingPickupAtUnixMs = 0;
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
             ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
             return "slots";
         }
@@ -168,8 +170,8 @@ public sealed partial class ZoneWorld
             }
 
             // Mobius AI_INTENTION_PICK_UP: run to the item (moveToPawn), pick it up on arrival.
-            session.AutoAttackTargetId = 0;
-            session.PendingCastSkillId = 0;
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.PendingCastSkillId = 0;
             long ms = ApproachTarget(player, ground, ZoneCombat.PickupReach);
             if (ms < 0)
             {
@@ -178,19 +180,23 @@ public sealed partial class ZoneWorld
             }
             if (ms > 0)
             {
-                session.PendingPickupId = groundObjectId;
-                session.PendingPickupAtUnixMs = now + ms;
+                player.Intent.PendingPickupId = groundObjectId;
+                player.Intent.PendingPickupAtUnixMs = now + ms;
                 return null;
             }
         }
 
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
-        session.ClearApproach();
+        player.Intent.PendingPickupId = 0;
+        player.Intent.PendingPickupAtUnixMs = 0;
+        player.Intent.ClearApproach();
 
         if (IsHerb(ground.GroundItemId))
         {
+            var move = BeginLedgerMove(LedgerTxKind.Pickup, player.ObjectId, ground.ObjectId);
+            PostOffGround(move, ground);
+            move.Post(LedgerAccount.Of(SystemAccount.Destroyed), ground.GroundItemId, ground.GroundCount);
             UseHerbOnPickup(session, player, ground);
+            move.Commit(LedgerHoldingsOf);
             return null;
         }
 
@@ -211,7 +217,7 @@ public sealed partial class ZoneWorld
                 pickupParty.MemberIds,
                 id => CanReceiveGround(id, ground),
                 ref last,
-                _combatRandom);
+                Rng(_combatRandom, player));
             pickupParty.ItemLastLoot = last;
             if (!_byId.TryGetValue(looterId, out var looter)
                 || looter.Kind != ZoneEntityKind.Player
@@ -219,19 +225,21 @@ public sealed partial class ZoneWorld
                 || looter.Session == null
                 || !CanReceiveGround(looterId, ground))
             {
-                session.PendingPickupId = 0;
-                session.PendingPickupAtUnixMs = 0;
+                player.Intent.PendingPickupId = 0;
+                player.Intent.PendingPickupAtUnixMs = 0;
                 ShotNotice(session, SysMsgInventoryFull, "Your inventory is full.");
                 return "slots";
             }
 
             GrantGroundPickup(looter, ground);
+            OnMercTicketGroundPickup(looter, ground);
             ZoneLog.Info(
                 $"pickup object={session.ObjectId} looter={looter.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=1");
             return null;
         }
 
         GrantGroundPickup(player, ground);
+        OnMercTicketGroundPickup(player, ground);
         ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=0");
         return null;
     }

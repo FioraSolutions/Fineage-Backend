@@ -118,10 +118,14 @@ public sealed class NetPvpTests
     [Fact]
     public async Task You_cannot_attack_yourself()
     {
-        var (kit, session, player, _, _, _) = await SetupAsync();
+        var (kit, session, player, _, _, rec) = await SetupAsync();
         player.PvpFlagged = true;
+        int hp = player.CurHp;
 
-        Assert.NotNull(await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
+        Assert.Equal("attack", await kit.World.TryAttackAsync(session, session.ObjectId, CancellationToken.None));
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
+        Assert.Equal(hp, player.CurHp);
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
     }
 
     [Fact]
@@ -135,7 +139,7 @@ public sealed class NetPvpTests
         await SwingUntilAsync(kit, session, other.ObjectId, () => otherPlayer.Dead);
 
         Assert.True(otherPlayer.Dead, $"victim HP={otherPlayer.CurHp} should have died");
-        Assert.Equal(0, other.AutoAttackTargetId);
+        Assert.Equal(0, otherPlayer.Intent.AutoAttackTargetId);
     }
 
     /// <summary>The last HP/MaxHP pair the zone sent for <paramref name="objectId"/>.</summary>

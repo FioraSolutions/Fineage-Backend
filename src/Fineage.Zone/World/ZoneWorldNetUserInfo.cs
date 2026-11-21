@@ -13,13 +13,10 @@ public sealed partial class ZoneWorld
     /// <summary>Build the UserInfo for a live player (enter path + fanout).</summary>
     internal bool TryBuildNetUserInfo(ZoneSession session, out UserInfoMsg info)
     {
-        lock (_gate)
+        if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
         {
-            if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
-            {
-                info = BuildUserInfo(e);
-                return true;
-            }
+            info = BuildUserInfo(e);
+            return true;
         }
         info = null!;
         return false;

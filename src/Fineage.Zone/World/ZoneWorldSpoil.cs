@@ -3,31 +3,18 @@ using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public Task<string?> TryAdminSpoilAsync(ZoneSession session, AdminSpoilTargetMsg request, CancellationToken ct)
-    {
-        if (!IsLive(session))
-            return Task.FromResult<string?>("world");
-
-        string? error;
-        lock (_gate)
-            error = TryAdminSpoil(session, request.TargetObjectId);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
-    }
-
     public Task<string?> TryAdminSweepAsync(ZoneSession session, AdminSweepCorpseMsg request, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // Sweep grants items → SaveInventory after unlock (B8).
+        // Sweep grants items → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => TryAdminSweep(session, request.TargetObjectId)));
     }
@@ -35,18 +22,6 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.SpoilRules _spoilRules = Fineage.Game.Services.SpoilRules.LoadDefault();
 
     internal Fineage.Game.Services.SpoilRules SpoilRules => _spoilRules;
-
-    /// <summary>Admin hook: spoil without the magic roll (debug only, FINEAGE_ZONE_ADMIN).</summary>
-    string? TryAdminSpoil(ZoneSession session, int targetObjectId)
-    {
-        if (!_byId.TryGetValue(session.ObjectId, out var player))
-            return "world";
-        if (targetObjectId <= 0)
-            return "bad_request";
-        if (!_byId.TryGetValue(targetObjectId, out var target) || !VisibleTo(session.ObjectId, targetObjectId))
-            return "target";
-        return ApplySpoil(session, player, target, forced: true, skillId: 254, level: 1) ? null : "target";
-    }
 
     string? TryAdminSweep(ZoneSession session, int targetObjectId)
     {
@@ -68,7 +43,7 @@ public sealed partial class ZoneWorld
         var msg = _spoilRules.Messages;
         bool alive = target.Kind == ZoneEntityKind.Npc && target.Attackable && target.CurHp > 0 && !target.Dead;
         var refusal = Fineage.Game.Services.SpoilRules.Spoil(alive, target.SpoilerObjectId != 0,
-            () => forced || ZoneCombat.RollMagicSuccess(_combatRandom, target.Level, _spoilRules.MagicLevel(skillId, level)));
+            () => forced || ZoneCombat.RollMagicSuccess(Rng(_combatRandom, player), target.Level, _spoilRules.MagicLevel(skillId, level)));
         switch (refusal)
         {
             case Fineage.Game.Services.SpoilRefusal.InvalidTarget:
@@ -93,8 +68,7 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    bool SameParty(int a, int b) =>
-        _partyByPlayer.TryGetValue(a, out int pa) && _partyByPlayer.TryGetValue(b, out int pb) && pa == pb;
+    bool SameParty(int a, int b) => _party.SameParty(a, b);
 
     /// <summary>
     /// Mobius Sweeper (skill 42) + ConditionPlayerCanSweep + ConsumeBody: spoiled (343), spoiler or party mate (683), corpse not
@@ -103,7 +77,7 @@ public sealed partial class ZoneWorld
     bool ApplySweep(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
         var msg = _spoilRules.Messages;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool corpse = target.Kind == ZoneEntityKind.Npc && target.Attackable && target.CurHp <= 0 && target.DecayAtMs > 0;
         var refusal = _spoilRules.Sweep(corpse, target.SpoilerObjectId, player.ObjectId,
             SameParty(player.ObjectId, target.SpoilerObjectId), target.DecayAtMs - now);
@@ -134,16 +108,14 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        ZoneParty? party = null;
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int partyId))
-            _parties.TryGetValue(partyId, out party);
+        ZoneParty? party = _party.Of(player.ObjectId);
 
         var touchInventories = new HashSet<int>();
         foreach (var stack in target.SweepItems)
         {
             if (stack.ItemId == WarehouseRules.AdenaItemId && party != null)
             {
-                DistributeSweepAdena(party, player, target, stack.Count, touchInventories);
+                DistributeSweepAdena(party, player, target, stack.Count, touchInventories, target.NpcId);
                 continue;
             }
 
@@ -158,13 +130,13 @@ public sealed partial class ZoneWorld
                     party.MemberIds,
                     id => CanReceiveOne(id, stack.ItemId, stack.Count, target),
                     ref last,
-                    _combatRandom);
+                    Rng(_combatRandom, player));
                 party.ItemLastLoot = last;
                 if (_byId.TryGetValue(looterId, out var entity) && entity.Kind == ZoneEntityKind.Player && entity.Inventory != null)
                     looter = entity;
             }
 
-            GrantSweepStack(looter, stack.ItemId, stack.Count, touchInventories);
+            GrantSweepStack(looter, stack.ItemId, stack.Count, touchInventories, target.NpcId);
         }
 
         foreach (int objectId in touchInventories)

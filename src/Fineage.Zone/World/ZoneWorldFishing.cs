@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Fishing;
@@ -48,7 +49,7 @@ sealed class FishingFight
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    Random _fishingRandom = Random.Shared;
+    Random _fishingRandom;
     readonly Dictionary<int, FishingSession> _fishers = [];
 
     /// <summary>Fish, rods, zones and the guild skill tree. Tests swap in a small table.</summary>
@@ -57,7 +58,7 @@ public sealed partial class ZoneWorld
     internal Random FishingRandom
     {
         get => _fishingRandom;
-        set => _fishingRandom = value ?? Random.Shared;
+        set => _fishingRandom = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     internal static bool IsFishingEntity(ZoneEntity entity) => entity.Fishing;
@@ -126,7 +127,17 @@ public sealed partial class ZoneWorld
         }
 
         int lureId = lure.ItemId;
-        int left = inventory.TakeOne(lure);
+        int left = 0;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                left = inventory.TakeOne(lure);
+                return lureId;
+            },
+            id => id);
         NetBridge?.FanoutInventoryUpdate([player.ObjectId],
             InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, lure));
         SaveInventory(session, inventory);
@@ -196,7 +207,12 @@ public sealed partial class ZoneWorld
 
         var line = new FishingSession
         {
-            BaitX = x, BaitY = y, BaitZ = z, LureId = lureId, Fish = fish, Group = group,
+            BaitX = x,
+            BaitY = y,
+            BaitZ = z,
+            LureId = lureId,
+            Fish = fish,
+            Group = group,
             GiveUpMs = now + fish.StartCombatTime * 1000L + FishingProtocol.GiveUpExtraMs,
             NextCheckMs = now + FishingProtocol.FirstCheckMs,
             CheckDelayMs = Math.Max(1000, FishingRules.CheckDelayMs(lureId, fish.GutsCheckTime))
@@ -208,7 +224,12 @@ public sealed partial class ZoneWorld
         player.FishZ = z;
         NetBridge?.FanoutFishing(WatchersOf(player), new FishingEventNetMsg
         {
-            Kind = FishingProtocol.EventStart, FisherObjectId = player.ObjectId, FishGroup = group, X = x, Y = y, Z = z,
+            Kind = FishingProtocol.EventStart,
+            FisherObjectId = player.ObjectId,
+            FishGroup = group,
+            X = x,
+            Y = y,
+            Z = z,
             NightLure = nightLure
         });
         NetBridge?.FanoutPlaySound([player.ObjectId], 1, "SF_P_01", 0, 0, 0, 0, 0);
@@ -284,16 +305,26 @@ public sealed partial class ZoneWorld
 
         var fight = new FishingFight
         {
-            Hp = line.Fish.Hp, MaxHp = line.Fish.Hp, Regen = (int)line.Fish.HpRegen, Time = line.Fish.CombatDuration,
-            Deceptive = deceptive, Upper = upper, LureType = lureType,
+            Hp = line.Fish.Hp,
+            MaxHp = line.Fish.Hp,
+            Regen = (int)line.Fish.HpRegen,
+            Time = line.Fish.CombatDuration,
+            Deceptive = deceptive,
+            Upper = upper,
+            LureType = lureType,
             Mode = _fishingRandom.Next(100) >= 80 ? 1 : 0,
             NextTickMs = now + FishingProtocol.CombatTickMs
         };
         line.Fight = fight;
         NetBridge?.FanoutFishing(WatchersOf(player), new FishingEventNetMsg
         {
-            Kind = FishingProtocol.EventCombat, FisherObjectId = player.ObjectId, Time = fight.Time, Hp = fight.MaxHp,
-            Mode = fight.Mode, LureType = lureType, Deceptive = deceptive
+            Kind = FishingProtocol.EventCombat,
+            FisherObjectId = player.ObjectId,
+            Time = fight.Time,
+            Hp = fight.MaxHp,
+            Mode = fight.Mode,
+            LureType = lureType,
+            Deceptive = deceptive
         });
         NetBridge?.FanoutPlaySound([player.ObjectId], 1, "SF_S_01", 0, 0, 0, 0, 0);
         if (player.Session != null)
@@ -342,8 +373,15 @@ public sealed partial class ZoneWorld
 
     static FishingEventNetMsg HpEvent(ZoneEntity player, FishingFight fight, int goodUse, int penalty) => new()
     {
-        Kind = FishingProtocol.EventHp, FisherObjectId = player.ObjectId, Time = fight.Time, Hp = fight.Hp, Mode = fight.Mode,
-        GoodUse = goodUse, Anim = fight.Anim, Penalty = penalty, Deceptive = fight.Deceptive
+        Kind = FishingProtocol.EventHp,
+        FisherObjectId = player.ObjectId,
+        Time = fight.Time,
+        Hp = fight.Hp,
+        Mode = fight.Mode,
+        GoodUse = goodUse,
+        Anim = fight.Anim,
+        Penalty = penalty,
+        Deceptive = fight.Deceptive
     };
 
     void Pull(ZoneSession session, ZoneEntity player, bool reel, int skillLevel)
@@ -434,9 +472,19 @@ public sealed partial class ZoneWorld
             {
                 SelfLine(session, FishingProtocol.CaughtSomething, "You caught something!");
                 var inventory = player.Inventory!;
-                GiveItem(session, inventory, line.Fish.ItemId, 1);
-                string name = _game.Items.TryGet(line.Fish.ItemId, out var t) ? t.Name : line.Fish.ItemId.ToString();
-                SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+                int fishId = line.Fish.ItemId;
+                RecordBagChange(
+                    player,
+                    LedgerTxKind.FishingReward,
+                    LedgerAccount.Of(SystemAccount.Gathering),
+                    () =>
+                    {
+                        GiveItem(session, inventory, fishId, 1);
+                        string name = _game.Items.TryGet(fishId, out var t) ? t.Name : fishId.ToString();
+                        SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
+                        return true;
+                    },
+                    _ => fishId);
             }
         }
 
@@ -455,7 +503,9 @@ public sealed partial class ZoneWorld
             SelfLine(session, FishingProtocol.BaitLost, "Baits have been lost because the fish got away.");
         NetBridge?.FanoutFishing(WatchersOf(player), new FishingEventNetMsg
         {
-            Kind = FishingProtocol.EventEnd, FisherObjectId = player.ObjectId, Win = win
+            Kind = FishingProtocol.EventEnd,
+            FisherObjectId = player.ObjectId,
+            Win = win
         });
         if (session != null)
             SelfLine(session, FishingProtocol.StopFishing, "You reel your line in and stop fishing.");
@@ -514,7 +564,11 @@ public sealed partial class ZoneWorld
             SkillType = FishingProtocol.AcquireSkillTypeFishing,
             Skills = rows.Select(r => new AcquireSkillEntryMsg
             {
-                SkillId = r.SkillId, NextLevel = r.Level, MaxLevel = r.Level, SpCost = 0, Requirements = 1
+                SkillId = r.SkillId,
+                NextLevel = r.Level,
+                MaxLevel = r.Level,
+                SpCost = 0,
+                Requirements = 1
             }).ToArray()
         });
         return null;
@@ -527,7 +581,10 @@ public sealed partial class ZoneWorld
             return;
         NetBridge.FanoutAcquireSkillInfo([player.ObjectId], new AcquireSkillInfoMsg
         {
-            SkillId = row.SkillId, Level = row.Level, SpCost = 0, SkillType = FishingProtocol.AcquireSkillTypeFishing,
+            SkillId = row.SkillId,
+            Level = row.Level,
+            SpCost = 0,
+            SkillType = FishingProtocol.AcquireSkillTypeFishing,
             Requirements = row.Items.Select(i => new AcquireSkillRequirementMsg { Type = 4, ItemId = i.ItemId, Count = i.Count, Unk = 0 }).ToArray()
         });
     }
@@ -563,7 +620,7 @@ public sealed partial class ZoneWorld
         RefreshKnownSkills(player);
         _persist.ReplaceLearnedSkills(session.Account, session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         string name = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         SelfLine(session, 277, $"You have earned {name}.", name);
         ShowFishingSkills(session, player, npc);
@@ -572,25 +629,25 @@ public sealed partial class ZoneWorld
 
     internal void TickFishingForTests()
     {
-        lock (_gate)
-            TickFishing(_clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            TickFishing(NowUnixMs());
     }
 
     internal (int Hp, int MaxHp, int Mode, int Deceptive, int Time)? FishFightForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _fishers.TryGetValue(objectId, out var l) && l.Fight is { } f ? (f.Hp, f.MaxHp, f.Mode, f.Deceptive, f.Time) : null;
     }
 
     internal (int FishId, int Group, int BaitX, int BaitY, int BaitZ)? FishingLineForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _fishers.TryGetValue(objectId, out var l) ? (l.Fish.FishId, l.Group, l.BaitX, l.BaitY, l.BaitZ) : null;
     }
 
     internal void SetFishModeForTests(int objectId, int mode, int deceptive)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_fishers.TryGetValue(objectId, out var l) && l.Fight is { } f)
             {

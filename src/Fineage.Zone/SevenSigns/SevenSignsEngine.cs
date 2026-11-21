@@ -6,7 +6,6 @@ namespace Fineage.Zone.SevenSigns;
 /// </summary>
 public sealed partial class SevenSignsEngine
 {
-    readonly IGameClock _clock;
     readonly SevenSignsOptions _options;
     readonly ISevenSignsStore _store;
     readonly ISevenSignsFestivalHook? _festival;
@@ -25,17 +24,20 @@ public sealed partial class SevenSignsEngine
     SevenSignsCabal _gnosis = SevenSignsCabal.None;
     SevenSignsCabal _strife = SevenSignsCabal.None;
 
+    /// <summary>
+    /// Restores the saved cycle; a snapshot without a next boundary gets the one after <paramref name="loadedAt"/>.
+    /// The engine holds no clock: <see cref="SevenSignsActor"/> advances it at the step's wall sample.
+    /// </summary>
     public SevenSignsEngine(
-        IGameClock clock,
+        DateTimeOffset loadedAt,
         SevenSignsOptions? options = null,
         ISevenSignsStore? store = null,
         ISevenSignsFestivalHook? festival = null)
     {
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _options = options ?? new SevenSignsOptions();
         _store = store ?? new MemorySevenSignsStore();
         _festival = festival;
-        Load(_store.Load());
+        Load(_store.Load(), loadedAt);
     }
 
     public SevenSignsOptions Options => _options;
@@ -56,11 +58,11 @@ public sealed partial class SevenSignsEngine
     }
 
     /// <summary>Opens <c>seven-signs.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
-    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, IGameClock? clock = null)
+    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt)
     {
         string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "seven-signs.json");
         return new SevenSignsEngine(
-            clock ?? new SystemGameClock(),
+            loadedAt,
             SevenSignsOptions.FromEnvironment(),
             new JsonSevenSignsStore(path));
     }

@@ -12,9 +12,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TrySelectTarget(session, targetObjectId);
+        string? error = TrySelectTarget(session, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -23,17 +21,14 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-        {
-            if (!_byId.TryGetValue(session.ObjectId, out _))
-                return Task.FromResult<string?>("world");
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
+            return Task.FromResult<string?>("world");
 
-            int previous = session.SelectedTargetId;
-            session.SelectedTargetId = 0;
-            session.AutoAttackTargetId = 0;
-            session.ClearApproach();
-            NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
-        }
+        int previous = session.SelectedTargetId;
+        session.SelectedTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
+        player.Intent.ClearApproach();
+        NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
 
         return Task.FromResult<string?>(null);
     }
@@ -49,20 +44,25 @@ public sealed partial class ZoneWorld
 
         string? error;
         long approachMs = 0;
-        lock (_gate)
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
         {
-            int previous = session.AutoAttackTargetId;
-            long now0 = _clock().ToUnixTimeMilliseconds();
+            error = "world";
+        }
+        else
+        {
+            var intent = player.Intent;
+            int previous = intent.AutoAttackTargetId;
+            long now0 = NowUnixMs();
             int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
-            bool alreadySwinging = previous > 0 && previous == requested && session.ApproachTargetId == 0 &&
-                session.NextAutoAttackUnixMs > now0;
+            bool alreadySwinging = previous > 0 && previous == requested && intent.ApproachTargetId == 0 &&
+                intent.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
             error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
-                session.AutoAttackTargetId = session.SelectedTargetId;
+                intent.AutoAttackTargetId = session.SelectedTargetId;
                 // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
-                session.NextAutoAttackUnixMs = _clock().ToUnixTimeMilliseconds() +
+                intent.NextAutoAttackUnixMs = NowUnixMs() +
                     (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
             }
         }
@@ -251,7 +251,7 @@ public sealed partial class ZoneWorld
         int castleId = SiegeAreas.CastleAt(x, y, z);
         if (castleId <= 0)
             return 0;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         return castle != null && castle.InProgress ? castleId : 0;
     }
 
@@ -274,7 +274,7 @@ public sealed partial class ZoneWorld
         int other = SiegeSide(target.ClanId, castleId);
         if (state == 0 || other == 0 || state != other)
             return false;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (castle != null && state == SiegeProtocol.Attacker && castle.OwnerClanId > 0)
             return false;
         ShotNotice(session, SysMsgSiegeFriend,
@@ -287,7 +287,7 @@ public sealed partial class ZoneWorld
     {
         if (clanId <= 0)
             return 0;
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         if (castle == null || !castle.InProgress)
             return 0;
         if (castle.OwnerClanId == clanId)
@@ -326,6 +326,11 @@ public sealed partial class ZoneWorld
             approachMs = -1;
             return null;
         }
+        if (BlocksAttackWhileMounted(player))
+        {
+            approachMs = -1;
+            return null;
+        }
         // Mobius onIntentionAttack: sitting, stunned, sleeping, paralyzed, or physically muted → ActionFailed.
         if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player))
         {
@@ -333,9 +338,9 @@ public sealed partial class ZoneWorld
             return null;
         }
         // A new attack replaces AI_INTENTION_INTERACT.
-        session.PendingTalkNpcId = 0;
-        session.PendingTalkAtUnixMs = 0;
-        if (player.CastingUntilMs > _clock().ToUnixTimeMilliseconds())
+        player.Intent.PendingTalkNpcId = 0;
+        player.Intent.PendingTalkAtUnixMs = 0;
+        if (player.CastingUntilMs > NowUnixMs())
             return null; // Mobius: auto-attack waits while casting
 
         int targetId = requestedTargetId > 0 ? requestedTargetId : session.SelectedTargetId;
@@ -368,7 +373,7 @@ public sealed partial class ZoneWorld
         }
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
-        long nowMove = _clock().ToUnixTimeMilliseconds();
+        long nowMove = NowUnixMs();
         AdvanceMove(player, nowMove);
         if (target.MoveActive)
             AdvanceMove(target, nowMove);
@@ -401,7 +406,7 @@ public sealed partial class ZoneWorld
             // Mobius stopMove before doAttack: in reach -> stop the run and swing from here (no slide past the target).
             StopForAttack(player, session);
         }
-        session.ClearApproach();
+        player.Intent.ClearApproach();
         // Mobius Creature.doAttack: no LOS → SysMsg 181 "Cannot see target.", intention ACTIVE, ActionFailed.
         if (!CanSeeTarget(player, target))
         {
@@ -467,7 +472,7 @@ public sealed partial class ZoneWorld
             QueueAttackerDamageLine(player, target, damage2, flags2);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player);
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
         long due = now + (dual ? atk / 4 : atk / 2);

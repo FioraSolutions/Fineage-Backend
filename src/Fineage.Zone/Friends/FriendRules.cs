@@ -3,7 +3,7 @@ using Fineage.Protocol;
 namespace Fineage.Zone.Friends;
 
 /// <summary>
-/// Pure Mobius friends / block-list checks. World keeps invite state and list mutation under the gate.
+/// Pure Mobius friends / block-list checks. World keeps invite state and list mutation on the simulation thread.
 /// </summary>
 public static class FriendRules
 {

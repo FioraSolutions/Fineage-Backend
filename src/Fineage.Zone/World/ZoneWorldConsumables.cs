@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
     string? TryUseConsumable(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
         bool known = _itemSkills.TryGet(item.ItemId, out var use);
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // Mobius keeps one reuse stamp per item id on the character; a stack shares that timer.
         bool onReuse = known
             && use!.ReuseDelayMs > 0
@@ -143,7 +143,9 @@ public sealed partial class ZoneWorld
         }
 
         // Mobius destroys the item only when the handler's cast lands; a refused use must not eat the stack.
-        if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
+        if (player.Inventory == null)
+            return InventoryProtocol.NotOwned;
+        if (!RecordConsumeOne(player, item, item.ItemId, out bool removedEntirely))
             return InventoryProtocol.NotOwned;
 
         if (hpTotal > 0)

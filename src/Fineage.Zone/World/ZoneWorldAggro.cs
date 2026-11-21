@@ -1,4 +1,5 @@
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -44,14 +45,14 @@ public sealed partial class ZoneWorld
         // Mobius onEvtAttacked: _globalAggro = 0 and the attack timeout restarts (1200 game ticks, 2 min).
         if (npc.GlobalAggro < 0)
             npc.GlobalAggro = 0;
-        npc.AttackTimeoutAtMs = _clock().ToUnixTimeMilliseconds() + AttackTimeoutMs;
+        npc.AttackTimeoutAtMs = NowUnixMs() + AttackTimeoutMs;
         npc.HateList[attacker.ObjectId] = npc.HateList.GetValueOrDefault(attacker.ObjectId) + Math.Max(1, hate);
         int top = MostHated(npc);
         if (top == npc.AggroTargetId || top == 0)
             return;
         SetAggroTarget(npc, top);
         // Mobius: first swing after attack-speed delay, not instantly.
-        npc.NextMobAttackMs = _clock().ToUnixTimeMilliseconds() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+        npc.NextMobAttackMs = NowUnixMs() + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
     }
 
     /// <summary>
@@ -138,67 +139,29 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>
-    internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to)
+    internal bool CanSeeTarget(ZoneEntity from, ZoneEntity to) => CanSeePoint(from, to.X, to.Y, to.Z);
+
+    bool CanSeePoint(ZoneEntity from, int x, int y, int z)
     {
-        if (Doors.FirstBlocking(from.X, from.Y, from.Z, to.X, to.Y, to.Z, out _, out _, out _) != null)
+        if (Doors.FirstBlocking(from.X, from.Y, from.Z, x, y, z, out _, out _, out _) != null)
             return false;
-        return _geo.CanSeeTarget(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
+        return _geo.CanSeeTarget(from.X, from.Y, from.Z, x, y, z);
     }
 
     public const int SysMsgCannotSeeTarget = 181;
 
     void CannotSeeTarget(ZoneSession session)
     {
-        session.AutoAttackTargetId = 0;
-        session.ClearApproach();
+        if (_byId.TryGetValue(session.ObjectId, out var player))
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+        }
         ShotNotice(session, SysMsgCannotSeeTarget, "Cannot see target.");
     }
 
     static bool IsGuard(ZoneEntity npc) =>
         string.Equals(npc.NpcType, "Guard", StringComparison.Ordinal);
-
-    void TickAggression(long now)
-    {
-        // Mobius thinkActive only matters when players exist nearby; empty world → no scan.
-        var players = Players();
-        if (players.Count == 0 || _thinking.Count == 0)
-            return;
-        foreach (int id in _thinking.ToArray())
-        {
-            if (!_byId.TryGetValue(id, out var npc))
-                continue;
-            // Mobius AttackableAI.autoAttackCondition: a Guard (attackable=false in the datapack) only auto-aggroes
-            // players carrying karma, inside its template aggro range and line of sight.
-            bool guard = IsGuard(npc);
-            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
-                npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs ||
-                IsTreasureBox(npc.NpcId))
-                continue;
-            // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
-            if (npc.GlobalAggro < 0)
-                continue;
-            npc.NextAggroScanMs = now + AggroScanIntervalMs;
-            foreach (var p in players)
-            {
-                if (p.Dead || p.CurHp <= 0 || p.Session == null || p.FakeDeath || !SameInstance(npc.ObjectId, p.ObjectId))
-                    continue;
-                if (guard && p.Karma <= 0)
-                    continue;
-                // Mobius VarkaKetra.onNpcHate: Ketra / Varka monsters leave their allies alone.
-                if (Fineage.Game.Quests.QuestMachine.IsAlliedWith(npc.NpcId, p.Inventory))
-                    continue;
-                long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
-                if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)
-                    continue;
-                // Mobius isAggressiveTowards → me.isAggressive() && GeoEngine.canSeeTarget(me, target).
-                if (!CanSeeTarget(npc, p))
-                    continue;
-                ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={npc.AggroRange}");
-                AddHate(npc, p);
-                break;
-            }
-        }
-    }
 
     /// <summary>Mobius clan help: idle same-clan mobs within clanHelpRange of <paramref name="caller"/> attack <paramref name="target"/>.</summary>
     void CallClanHelp(ZoneEntity caller, ZoneEntity target, long now)
@@ -226,17 +189,16 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        List<ZoneEntity>? players = null;
         foreach (var e in Players())
-            NoteStance(e, now, ref players);
-        foreach (int id in _aiBusy)
+            NoteStance(e, now);
+        foreach (int id in Active(ActiveSets.AiBusy))
         {
             if (_byId.TryGetValue(id, out var npc))
-                NoteStance(npc, now, ref players);
+                NoteStance(npc, now);
         }
     }
 
-    void NoteStance(ZoneEntity e, long now, ref List<ZoneEntity>? players)
+    void NoteStance(ZoneEntity e, long now)
     {
         bool inStance = e.Kind switch
         {
@@ -247,14 +209,7 @@ public sealed partial class ZoneWorld
         if (inStance == e.StanceShown)
             return;
         e.StanceShown = inStance;
-        // Self + every player that knows the entity (NPC knownlists are not tracked).
-        players ??= Players();
-        var watchers = new List<int>();
-        foreach (var w in players)
-        {
-            if (w.Session != null && (ReferenceEquals(w, e) || w.Knownlist.Contains(e.ObjectId)))
-                watchers.Add(w.ObjectId);
-        }
+        var watchers = NetWatchersOf(e);
         if (watchers.Count > 0)
             NetBridge!.FanoutAttackStance(watchers, e.ObjectId, inStance);
     }

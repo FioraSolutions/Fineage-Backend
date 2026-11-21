@@ -120,4 +120,10 @@ public static class NpcServiceIntent
 
     /// <summary>Mobius <c>OlympiadManager</c> <c>OlympiadDesc</c> / <c>OlympiadNoble</c> / <c>Olympiad</c> (Block G2).</summary>
     public const string Olympiad = "olympiad";
+
+    /// <summary>Mobius <c>WyvernManagerInstance</c> <c>RideWyvern</c>: rent wyvern for castle lord with B crystals.</summary>
+    public const string WyvernRide = "wyvern-ride";
+
+    /// <summary>Clan hall doorman <c>evolve N</c> (Mobius <c>PetManager.doEvolve</c>).</summary>
+    public const string PetEvolve = "pet-evolve";
 }

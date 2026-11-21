@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Recipes;
 using Fineage.Protocol;
 using Fineage.Zone.Net;
@@ -60,6 +61,15 @@ public sealed class NetCraftTests
         Assert.Equal(0, player.Inventory.CountOf(Stem));
         Assert.Equal(0, player.Inventory.CountOf(IronOre));
         Assert.Equal(500, player.Inventory.CountOf(WoodenArrow));
+
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var crafting = LedgerAccount.Of(SystemAccount.Crafting);
+        var craft = Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.Craft).Transaction;
+        Assert.Equal((player.ObjectId, RecipeListId), (craft.CausedBy, craft.Reference));
+        Assert.Equal(
+            [(bag, WoodenArrow, 500L), (crafting, WoodenArrow, -500L), (bag, Stem, -4L), (crafting, Stem, 4L),
+                (bag, IronOre, -2L), (crafting, IronOre, 2L)],
+            craft.Postings.Select(posting => (posting.Account, posting.ItemId, posting.Amount)));
     }
 
     [Fact]
@@ -74,5 +84,6 @@ public sealed class NetCraftTests
 
         Assert.Equal(CraftProtocol.Materials,
             await kit.World.TryRecipeMakeSelfAsync(session, new RecipeMakeSelfMsg { RecipeId = RecipeListId }, default));
+        Assert.Empty(kit.Ledger.Entries);
     }
 }

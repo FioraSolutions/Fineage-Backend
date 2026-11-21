@@ -1,6 +1,8 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
+using Fineage.Net.Contract;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -66,7 +68,7 @@ public sealed partial class ZoneWorld
             });
             NetBridge.FanoutStatusUpdate(self, status);
             NetBridge.FanoutSkillList(self,
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
             NetBridge.FanoutPlayerStats(self, new Fineage.Protocol.PlayerStatsMsg
             {
                 ObjectId = player.ObjectId,
@@ -100,14 +102,67 @@ public sealed partial class ZoneWorld
         }).ToArray();
         if (NetBridge != null)
         {
-            NetBridge.FanoutQuestList([session.ObjectId], new QuestListMsg
+            var questList = new QuestListMsg
             {
                 Active = active,
                 CompletedMask = list.CompletedMask ?? [],
                 CompletedQuestIds = list.CompletedQuestIds ?? [],
-                MaxActive = list.MaxActive
-            });
+                MaxActive = list.MaxActive,
+                RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
+            };
+            NetBridge.FanoutQuestList([session.ObjectId], questList);
+            FanoutQuestClientFx(session, player);
         }
+    }
+
+    internal void NetQuestClientFx(ZoneSession session)
+    {
+        if (TryPlayer(session, out var player))
+            FanoutQuestClientFx(session, player);
+    }
+
+    void FanoutQuestClientFx(ZoneSession session, ZoneEntity player)
+    {
+        if (NetBridge == null)
+            return;
+
+        var marks = _quests.CollectNpcMarks(player.Quests, new QuestActor(player.Race, player.Level, player.ClassId));
+        NetBridge.FanoutQuestNpcMarks([session.ObjectId], new QuestNpcMarksNetMsg
+        {
+            Marks = marks.Select(m => new QuestNpcMarkNet { NpcId = m.NpcId, Mark = m.Mark }).ToArray()
+        });
+
+        QuestProgress? tracked = null;
+        foreach (var row in player.Quests.All())
+        {
+            if (row.Phase == QuestPhase.Started)
+            {
+                tracked = row;
+                EmitCondClientFx(session, player, row.QuestId, row.Cond, playSounds: false);
+            }
+        }
+
+        if (tracked == null)
+        {
+            NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg { Show = false });
+            return;
+        }
+
+        int step = tracked.JournalWord != 0 ? tracked.JournalWord : tracked.Cond;
+        if (!_questGeometry.TryTarget(tracked.QuestId, step, out int x, out int y, out int z))
+        {
+            NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg { QuestId = tracked.QuestId, Show = false });
+            return;
+        }
+
+        NetBridge.FanoutQuestDirection([session.ObjectId], new QuestDirectionNetMsg
+        {
+            QuestId = tracked.QuestId,
+            Show = true,
+            X = x,
+            Y = y,
+            Z = z
+        });
     }
 
     /// <summary>
@@ -117,30 +172,40 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal QuestListMsg NetQuestList(ZoneSession session)
     {
-        lock (_gate)
-        {
-            if (!TryPlayer(session, out var player))
-                return new QuestListMsg();
+        if (!TryPlayer(session, out var player))
+            return new QuestListMsg();
 
-            var list = _quests.List(player.Quests);
-            return new QuestListMsg
+        var list = _quests.List(player.Quests);
+        return new QuestListMsg
+        {
+            Active = list.Active.Select(entry => new QuestJournalEntryMsg
             {
-                Active = list.Active.Select(entry => new QuestJournalEntryMsg
-                {
-                    QuestId = entry.QuestId,
-                    Name = entry.Name ?? "",
-                    State = entry.State,
-                    Cond = entry.Cond,
-                    ProgressFlags = entry.ProgressFlags,
-                    JournalWord = entry.JournalWord,
-                    Repeatable = entry.Repeatable
-                }).ToArray(),
-                CompletedMask = list.CompletedMask ?? [],
-                CompletedQuestIds = list.CompletedQuestIds ?? [],
-                MaxActive = list.MaxActive
-            };
-        }
+                QuestId = entry.QuestId,
+                Name = entry.Name ?? "",
+                State = entry.State,
+                Cond = entry.Cond,
+                ProgressFlags = entry.ProgressFlags,
+                JournalWord = entry.JournalWord,
+                Repeatable = entry.Repeatable
+            }).ToArray(),
+            CompletedMask = list.CompletedMask ?? [],
+            CompletedQuestIds = list.CompletedQuestIds ?? [],
+            MaxActive = list.MaxActive,
+            RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
+        };
     }
+
+    static QuestJournalRewardSetMsg ToRewardSetMsg(QuestJournalRewardSet set) => new()
+    {
+        QuestId = set.QuestId,
+        Rows = set.Rows.Select(r => new QuestJournalRewardMsg
+        {
+            Kind = (byte)r.Kind,
+            ItemId = r.ItemId,
+            Count = r.Count,
+            Label = r.Label
+        }).ToArray()
+    };
 
     void LoadQuestProgress(ZoneSession session, ZoneEntity entity, CharacterRecord? stored = null)
     {
@@ -187,9 +252,13 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, added));
         }
 
-        Grant(shotId, shotCount);
-        Grant(NewbieHelperGift.TravelToken, NewbieHelperGift.TokenCount);
-        Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
+        RecordBagChange(player, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests), () =>
+        {
+            Grant(shotId, shotCount);
+            Grant(NewbieHelperGift.TravelToken, NewbieHelperGift.TokenCount);
+            Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
+            return NewbieHelperGift.QuestId;
+        }, questId => questId);
 
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
         var update = new InventoryUpdateMsg { Changes = changes.ToArray() };

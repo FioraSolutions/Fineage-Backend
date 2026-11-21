@@ -11,9 +11,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryCharacterAction(session, actionId, targetObjectId);
+        string? error = TryCharacterAction(session, actionId, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -30,6 +28,7 @@ public sealed partial class ZoneWorld
             ActionProtocol.WalkRun => ToggleWalkRun(player),
             ActionProtocol.Attack => TryAttack(session, targetObjectId),
             ActionProtocol.NextTarget => TryNextTarget(session, player),
+            ActionProtocol.RideMount => TryRideAction(session, player),
             _ when ActionProtocol.IsPanelSocial(actionId) => FanoutSocial(player, actionId),
             >= 10 and <= 61 => ActionProtocol.Unsupported,
             _ => ActionProtocol.Unknown
@@ -38,7 +37,7 @@ public sealed partial class ZoneWorld
 
     string? ToggleSitStand(ZoneEntity player)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         // Mobius RequestActionUse case 0 / useSit: a fake-dead pawn is stood up by the sit action
         // (player.stopEffects(FAKE_DEATH)) instead of toggling the seat.
         if (player.FakeDeath)
@@ -57,7 +56,7 @@ public sealed partial class ZoneWorld
             if (player.MoveActive && player.Session != null)
             {
                 // Mobius RequestActionUse case 0: moving → NextAction(EVT_ARRIVED) sit on arrival.
-                player.Session.SitOnArrive = true;
+                player.Intent.SitOnArrive = true;
                 return null;
             }
         }
@@ -80,13 +79,13 @@ public sealed partial class ZoneWorld
     {
         if (player.Sitting)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (checkCast && IsCasting(player, now))
             return;
         // Mobius Player.sitDown keeps the run/walk gait; only ChangeWaitType is broadcast.
         player.Sitting = true;
         if (player.Session != null)
-            player.Session.SitOnArrive = false;
+            player.Intent.SitOnArrive = false;
         FanoutWaitType(player, ActionProtocol.WaitSitting);
     }
 
@@ -127,7 +126,7 @@ public sealed partial class ZoneWorld
             return ActionProtocol.Blocked;
 
         // Settle the in-flight segment at the old speed before switching gait (Mobius setWalking/setRunning).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(player, now);
         player.Running = !player.Running;
         ZoneLog.Info($"[move] obj={player.ObjectId} {(player.Running ? "run" : "walk")} speed={MoveSpeedOf(player)}");
@@ -135,7 +134,7 @@ public sealed partial class ZoneWorld
         if (player.MoveActive && NetBridge != null)
         {
             // Remote Net pawns re-target the remaining leg with the new gait.
-            NetBridge.FanoutMoveState(NetWatchersOf(player), player.ObjectId,
+            NetBridge.FanoutMoveState(KnownNetPlayersOf(player), player.ObjectId,
                 player.X, player.Y, player.Z,
                 player.MoveDestX, player.MoveDestY, player.MoveDestZ, player.Running);
         }
@@ -196,16 +195,16 @@ public sealed partial class ZoneWorld
     {
         // Mobius RequestActionUse.useSocial: no store, no pending/active trade request, not casting,
         // and AI intention IDLE (not sitting / running / attacking).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         AdvanceMove(player, now);
         if (player.Sitting || player.MoveActive || IsCasting(player, now) ||
             player.PrivateStoreType != PrivateStoreProtocol.TypeNone ||
             _tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId) ||
-            player.Session is { AutoAttackTargetId: > 0 })
+            player.Intent.AutoAttackTargetId > 0)
             return ActionProtocol.Blocked;
 
         // Mobius broadcastPacket(new SocialAction(...)): self + everyone holding the actor in view.
-        NetBridge?.FanoutSocialAction(NetWatchersOf(player), player.ObjectId, actionId);
+        NetBridge?.FanoutSocialAction(KnownNetPlayersOf(player), player.ObjectId, actionId);
 
         return null;
     }
@@ -222,13 +221,16 @@ public sealed partial class ZoneWorld
             _ => waitType.ToString()
         };
         ZoneLog.Info($"[wait-type] obj={player.ObjectId} type={label} x={player.X} y={player.Y} z={player.Z}");
-        NetBridge?.FanoutChangeWaitType(NetWatchersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
+        NetBridge?.FanoutChangeWaitType(KnownNetPlayersOf(player), player.ObjectId, waitType, player.X, player.Y, player.Z);
     }
 
     void FanoutMoveType(ZoneEntity player) => FanoutNetMoveType(player);
 
-    /// <summary>Self (players) + knownlist players: the Net ChangeMoveType audience.</summary>
-    List<int> NetWatchersOf(ZoneEntity actor)
+    /// <summary>
+    /// Self (players) + live players in the actor's own knownlist. Equals <see cref="NetWatchersOf"/> for a player
+    /// actor (player knownlists are symmetric); an NPC actor keeps no knownlist, so its audience is empty.
+    /// </summary>
+    List<int> KnownNetPlayersOf(ZoneEntity actor)
     {
         var list = new List<int>();
         if (actor.Session != null)
@@ -250,7 +252,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(actor);
+        var watchers = KnownNetPlayersOf(actor);
         if (watchers.Count == 0)
             return;
         float run = actor.InWater ? actor.SwimRunSpeed : actor.RunSpeed;

@@ -66,6 +66,9 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
         }
     }
 
+    /// <summary>The economy ledger journal in the same database.</summary>
+    public PostgresLedgerJournal OpenLedgerJournal() => new(_dataSource);
+
     public void Dispose() => _dataSource.Dispose();
 
     static void ApplyMigrations(NpgsqlDataSource dataSource)
@@ -145,13 +148,95 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
             withoutComments.AppendLine(line);
         }
 
-        foreach (string part in withoutComments.ToString()
-                     .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        string text = withoutComments.ToString();
+        var current = new StringBuilder();
+        bool inSingleQuote = false;
+        string? dollarTag = null;
+
+        for (int i = 0; i < text.Length; i++)
         {
-            if (part.Length == 0)
+            char c = text[i];
+            if (dollarTag != null)
+            {
+                if (c == '$' && TryReadDollarDelimiter(text, i, out string closeTag, out int closeEnd)
+                    && closeTag == dollarTag)
+                {
+                    current.Append(text, i, closeEnd - i + 1);
+                    i = closeEnd;
+                    dollarTag = null;
+                }
+                else
+                {
+                    current.Append(c);
+                }
+
                 continue;
-            yield return part;
+            }
+
+            if (inSingleQuote)
+            {
+                current.Append(c);
+                if (c == '\'')
+                {
+                    if (i + 1 < text.Length && text[i + 1] == '\'')
+                    {
+                        current.Append(text[++i]);
+                    }
+                    else
+                    {
+                        inSingleQuote = false;
+                    }
+                }
+
+                continue;
+            }
+
+            if (c == '\'')
+            {
+                inSingleQuote = true;
+                current.Append(c);
+            }
+            else if (c == '$' && TryReadDollarDelimiter(text, i, out string openTag, out int openEnd))
+            {
+                dollarTag = openTag;
+                current.Append(text, i, openEnd - i + 1);
+                i = openEnd;
+            }
+            else if (c == ';')
+            {
+                string statement = current.ToString().Trim();
+                if (statement.Length > 0)
+                    yield return statement;
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
         }
+
+        string tail = current.ToString().Trim();
+        if (tail.Length > 0)
+            yield return tail;
+    }
+
+    static bool TryReadDollarDelimiter(string text, int start, out string tag, out int end)
+    {
+        tag = "";
+        end = start;
+        if (start >= text.Length || text[start] != '$')
+            return false;
+
+        int j = start + 1;
+        while (j < text.Length && (char.IsLetterOrDigit(text[j]) || text[j] == '_'))
+            j++;
+
+        if (j >= text.Length || text[j] != '$')
+            return false;
+
+        tag = text.Substring(start + 1, j - start - 1);
+        end = j;
+        return true;
     }
 
     static string FindMigrationsDirectory()

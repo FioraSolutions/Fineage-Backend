@@ -38,6 +38,8 @@ public sealed class CastleSiege
     public long Treasury { get; internal set; }
     /// <summary>Mobius <c>castle_doorupgrade</c>: door id → HP ratio (2 / 3 / 5). Reset when the castle changes hands.</summary>
     public Dictionary<int, int> DoorUpgrades { get; } = [];
+    /// <summary>Mercenary ticket posts (<c>castle_siege_guards</c> isHired = 1).</summary>
+    public List<HiredSiegeGuard> HiredGuards { get; } = [];
     internal List<SiegeRegistration> Registrations { get; } = [];
 }
 
@@ -53,7 +55,7 @@ public sealed class SiegeRegistration
     public int Side { get; set; }
 }
 
-public readonly record struct SiegeActor(int CharacterId);
+public readonly record struct SiegeRequester(int CharacterId);
 
 public sealed class SiegeClanInfo
 {

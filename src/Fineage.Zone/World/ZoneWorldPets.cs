@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Services;
@@ -111,7 +112,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>SummonItems.onItemUse</c> refusals, then the 5 s static cast; the pet appears at hit time.</summary>
     string? TryUseCollar(ZoneSession session, ZoneEntity player, ItemInstance collar, PetTemplate template)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.Dead || now < player.CastingUntilMs || player.PendingHit != null)
             return null;
         if (player.Sitting)
@@ -186,7 +187,19 @@ public sealed partial class ZoneWorld
 
         var stored = LoadPet(collar.ObjectId);
         if (stored != null && stored.NpcId != template.NpcId)
-            stored = null; // a collar of another kind (should not happen): start over
+        {
+            if (stored.OwnerCharacterId != owner.ObjectId)
+                stored = null;
+            else
+            {
+                // Q421 flute → strider bugle: same control object id, new item/npc — keep exp, meal and bag.
+                stored = stored with { NpcId = template.NpcId };
+                if (_persist.Enabled)
+                    _persist.SavePet(stored);
+                else
+                    _petMemory[stored.ControlObjectId] = stored;
+            }
+        }
         var bag = new PlayerInventory(_game.Items, _itemIds);
         foreach (var row in stored?.Items ?? [])
         {
@@ -285,6 +298,7 @@ public sealed partial class ZoneWorld
             StorePet(owner, entity);
         SendSummonInfo(entity);
         SendPetInventory(owner, entity);
+        SendPlayerActionState(owner);
         ZoneLog.Info($"pet spawn owner={owner.ObjectId} collar={collar.ObjectId} npc={npc.NpcId} lv{entity.Level} object={objectId} new={stored == null}");
         return entity;
     }
@@ -358,6 +372,7 @@ public sealed partial class ZoneWorld
 
     void FillPetInfo(SummonInfoNetMsg info, ZoneEntity s, PetState pet)
     {
+        info.Mountable = pet.Template.Mountable;
         info.Exp = pet.Exp;
         info.ExpLevelStart = pet.Template.ExpForLevel(s.Level);
         info.ExpLevelEnd = pet.Template.ExpForLevel(s.Level + 1);
@@ -447,16 +462,59 @@ public sealed partial class ZoneWorld
                 SelfLine(refusal, SysMsgPetCannotUseItem, "This pet cannot use this item.");
             return false;
         }
-        pet.Inventory.TakeOne(food);
+        RecordPetBagChange(owner, pet, LedgerTxKind.PetFeed, food.ItemId, () => pet.Inventory.TakeOne(food));
         pet.Fed = Math.Min(pet.Template.At(s.Level).MaxMeal, pet.Fed + kind.Feed);
         var cast = new MagicSkillUseMsg { CasterObjectId = s.ObjectId, TargetObjectId = s.ObjectId, SkillId = 2048, SkillLevel = 1 };
         if (NetBridge != null && KnownWatchers(s.ObjectId) is { Count: > 0 } watchers)
             NetBridge.FanoutMagicSkillUse(watchers, cast);
+        TryBabyPetBuffAfterFeed(owner, s, pet);
         if (PetHungry(s, pet) && owner.Session is { } session)
             SelfLine(session, SysMsgPetAteStillHungry, "Your pet ate a little, but is still hungry.");
         SendPetInventory(owner, s);
         SendSummonInfo(s);
         return true;
+    }
+
+    static bool IsBabyPet(PetTemplate template) => template.Food.Any(f => f.ItemId == 7582);
+
+    /// <summary>Mobius <c>BabyPet</c>: when well fed after eating baby spice, casts a heal skill on the owner.</summary>
+    void TryBabyPetBuffAfterFeed(ZoneEntity owner, ZoneEntity s, PetState pet)
+    {
+        if (!IsBabyPet(pet.Template) || PetHungry(s, pet))
+            return;
+        var skills = pet.Template.Skills
+            .Where(row => row.MinLevel <= s.Level
+                && _skillEffects.TryGet(row.SkillId, out var fx) && fx.Any(e => e.Name == "Heal"))
+            .Select(row =>
+            {
+                int skillLevel = row.SkillLevel > 0 ? row.SkillLevel
+                    : s.Level > 70 ? 7 + (s.Level - 70) / 5 : Math.Max(1, s.Level / 10);
+                return (row.SkillId, skillLevel);
+            })
+            .ToArray();
+        if (skills.Length == 0)
+            return;
+        var (skillId, skillLevel) = skills[_petRandom.Next(skills.Length)];
+        if (!_skillEffects.TryGet(skillId, out var effects))
+            return;
+        var heal = effects.FirstOrDefault(e => e.Name == "Heal");
+        if (string.IsNullOrEmpty(heal.Name))
+            return;
+        int amount = (int)Math.Round(heal.PowerAt(skillLevel));
+        if (amount <= 0 || owner.CurHp >= owner.MaxHp)
+            return;
+        owner.CurHp = Math.Min(owner.MaxHp, owner.CurHp + amount);
+        FanoutVitals(owner, PlayerVitalsStatus(owner));
+        SyncNeedRegen(owner);
+        var buff = new MagicSkillUseMsg
+        {
+            CasterObjectId = s.ObjectId,
+            TargetObjectId = owner.ObjectId,
+            SkillId = skillId,
+            SkillLevel = skillLevel
+        };
+        if (NetBridge != null && KnownWatchers(s.ObjectId) is { Count: > 0 } watchers)
+            NetBridge.FanoutMagicSkillUse(watchers, buff);
     }
 
     // ---------------------------------------------------------------- exp
@@ -568,7 +626,7 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doRevive: 70 % HP / MP unless the restore was 100 %.
         s.CurHp = Math.Max(1, (int)(s.MaxHp * 0.7));
         s.CurMp = (int)(s.MaxMp * 0.7);
-        pet.NextFeedMs = _clock().ToUnixTimeMilliseconds() + PetFeedTickMs;
+        pet.NextFeedMs = NowUnixMs() + PetFeedTickMs;
         FanoutRevive(s);
         FanoutVitals(s, StatusFor(s));
         SyncNeedRegen(s);
@@ -683,9 +741,13 @@ public sealed partial class ZoneWorld
         }
         if (!PetBagFits(pet, item, count, session))
             return;
-        var changes = new List<InventoryUpdateEntryMsg>();
-        MovePetItem(owner.Inventory, pet.Inventory, item, count, changes, new List<InventoryUpdateEntryMsg>());
-        FanInventory(session, Collapse(changes));
+        if (!CommitPetOwnerTransfer(owner, pet, owner.Inventory, pet.Inventory, item, count, () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                MovePetItem(owner.Inventory, pet.Inventory, item, count, changes, new List<InventoryUpdateEntryMsg>());
+                FanInventory(session, Collapse(changes));
+            }))
+            return;
         SaveInventory(session, owner.Inventory);
         StorePet(owner, s);
         SendPetInventory(owner, s);
@@ -697,9 +759,13 @@ public sealed partial class ZoneWorld
     {
         if (count <= 0 || owner.Inventory == null || pet.Inventory.Find(objectId) is not { } item || count > item.Count)
             return;
-        var changes = new List<InventoryUpdateEntryMsg>();
-        MovePetItem(pet.Inventory, owner.Inventory, item, count, null, changes);
-        FanInventory(session, Collapse(changes));
+        if (!CommitPetOwnerTransfer(owner, pet, pet.Inventory, owner.Inventory, item, count, () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                MovePetItem(pet.Inventory, owner.Inventory, item, count, null, changes);
+                FanInventory(session, Collapse(changes));
+            }))
+            return;
         SaveInventory(session, owner.Inventory);
         StorePet(owner, s);
         SendPetInventory(owner, s);
@@ -747,11 +813,13 @@ public sealed partial class ZoneWorld
             return;
         }
         int count = ground.GroundCount;
-        if (def.Stackable || count <= 1)
-            pet.Inventory.Add(def.Id, count);
-        else
-            pet.Inventory.AddPieces(def.Id, count);
+        var bag = LedgerAccount.Pet(pet.ControlObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Pickup, owner.ObjectId, ground.ObjectId);
+        ObserveLedger(move, bag);
+        PostOffGround(move, ground);
+        move.Post(bag, def.Id, count, PiecesOf(AddGroundStack(pet.Inventory, ground)));
         RemoveGroundItem(ground);
+        move.Commit(LedgerHoldingsOf);
         if (def.Id == WarehouseRules.AdenaItemId)
             SelfLine(session, SysMsgPetPickedUpAdena, $"Your pet picked up {count} adena.", count.ToString());
         else if (count > 1)
@@ -818,7 +886,7 @@ public sealed partial class ZoneWorld
     /// <summary>Blessed Scroll of Resurrection for Pets (Mobius 2179): 15 s static cast on the dead pet, 100 % exp back.</summary>
     string? TryUsePetResurrectScroll(ZoneSession session, ZoneEntity player, ItemInstance scroll)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (player.Dead || now < player.CastingUntilMs)
             return null;
         int targetId = session.SelectedTargetId;
@@ -857,16 +925,16 @@ public sealed partial class ZoneWorld
 
     internal void TickPetFeedForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (PetEntityOf(player) is { } s && OwnerOf(s) is { } owner)
-                TickPetFeed(owner, s, s.Summon!.Pet!, _clock().ToUnixTimeMilliseconds());
+                TickPetFeed(owner, s, s.Summon!.Pet!, NowUnixMs());
         }
     }
 
     internal void AddPetExpForTest(ZoneEntity player, long exp)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (PetEntityOf(player) is { } s && OwnerOf(s) is { } owner)
                 AddPetExp(owner, s, s.Summon!.Pet!, exp);
@@ -875,13 +943,13 @@ public sealed partial class ZoneWorld
 
     internal void KillSummonForTest(ZoneEntity summon)
     {
-        lock (_gate)
-            SummonDied(summon, null, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            SummonDied(summon, null, NowUnixMs());
     }
 
     internal StoredPet? LoadPetForTest(int controlObjectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return LoadPet(controlObjectId);
     }
 }

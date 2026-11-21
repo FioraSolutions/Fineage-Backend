@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
         var bounds = ZoneMapFilter.BoundsList;
         foreach (var data in CastleTable.All)
         {
-            var castle = _siege.Find(data.Id);
+            var castle = _siege.Board.Find(data.Id);
             foreach (var door in data.Doors)
             {
                 // The gate stands where the geo door is (Doors.xml); a world without the door table has no gates.
@@ -79,7 +79,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void RespawnCastleDoors(int castleId, bool weak)
     {
-        var castle = _siege.Find(castleId);
+        var castle = _siege.Board.Find(castleId);
         foreach (var (doorId, objectId) in _castleDoors)
         {
             if (!_byId.TryGetValue(objectId, out var door) || door.SiegeNpc is not { } info || info.CastleId != castleId)
@@ -130,7 +130,7 @@ public sealed partial class ZoneWorld
     DoorStatusNetMsg DoorStatusOf(ZoneEntity door)
     {
         var info = door.SiegeNpc!;
-        var castle = _siege.Find(info.CastleId);
+        var castle = _siege.Board.Find(info.CastleId);
         return new DoorStatusNetMsg
         {
             ObjectId = door.ObjectId,
@@ -148,20 +148,14 @@ public sealed partial class ZoneWorld
     /// <summary>Follow-up frame for a door that just entered a client's view (see NetEnterWorldProjector).</summary>
     internal byte[]? DoorStatusFrame(ZoneEntity entity)
     {
-        lock (_gate)
-            return entity.SiegeNpc is { Role: SiegeNpcRole.Door } ? NetCodec.EncodeDoorStatus(DoorStatusOf(entity)) : null;
+        return entity.SiegeNpc is { Role: SiegeNpcRole.Door } ? NetCodec.EncodeDoorStatus(DoorStatusOf(entity)) : null;
     }
 
     void FanoutDoorStatus(ZoneEntity door, ZoneEntity? also = null)
     {
         if (NetBridge == null)
             return;
-        var watchers = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && (player.Knownlist.Contains(door.ObjectId) || ReferenceEquals(player, also)))
-                watchers.Add(player.ObjectId);
-        }
+        var watchers = NetWatchersOfDoor(door, also);
 
         if (watchers.Count > 0)
             NetBridge.FanoutDoorStatus(watchers, DoorStatusOf(door));
@@ -176,7 +170,7 @@ public sealed partial class ZoneWorld
         var info = target.SiegeNpc;
         if (info == null)
             return false;
-        var castle = _siege.Find(info.CastleId);
+        var castle = _siege.Board.Find(info.CastleId);
         bool inProgress = castle?.InProgress == true;
         int side = attacker.Kind == ZoneEntityKind.Player ? SiegeSide(SiegeClanOf(attacker), info.CastleId) : 0;
         if (info.Role == SiegeNpcRole.Guard)
@@ -215,7 +209,7 @@ public sealed partial class ZoneWorld
             return true;
         }
 
-        if (info.Role == SiegeNpcRole.Flag && now - info.LastAttackNoticeMs >= 30_000 && _clans.TryGetValue(info.FlagClanId, out var flagClan))
+        if (info.Role == SiegeNpcRole.Flag && now - info.LastAttackNoticeMs >= 30_000 && _clan.TryGet(info.FlagClanId, out var flagClan))
         {
             info.LastAttackNoticeMs = now;
             ClanLine(OnlineIds(flagClan), SiegeProtocol.BaseAttacked, "Your base is being attacked.");
@@ -231,12 +225,7 @@ public sealed partial class ZoneWorld
     {
         door.Dead = true;
         SetGeoDoorOpen(door.SiegeNpc!.DoorId, true);
-        var watchers = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && (player.Knownlist.Contains(door.ObjectId) || ReferenceEquals(player, attacker)))
-                watchers.Add(player.ObjectId);
-        }
+        var watchers = NetWatchersOfDoor(door, attacker);
 
         if (watchers.Count > 0 && NetBridge != null)
         {
@@ -273,7 +262,7 @@ public sealed partial class ZoneWorld
         if (player.Dead || clan == null || clan.LeaderId != player.ObjectId)
             return SiegeProtocol.Leader;
         int castleId = CastleAtEntity(player);
-        castle = castleId > 0 ? _siege.Find(castleId) : null;
+        castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         if (castle == null || !castle.InProgress || SiegeSide(clan.Id, castle.Id) != SiegeProtocol.StateAttacker)
         {
             if (session != null)
@@ -336,7 +325,7 @@ public sealed partial class ZoneWorld
         if (player.Dead || clan == null)
             return SiegeProtocol.Clan;
         int castleId = CastleAtEntity(player);
-        castle = castleId > 0 ? _siege.Find(castleId) : null;
+        castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         bool ok = castle != null && castle.InProgress && SiegeSide(clan.Id, castle.Id) == SiegeProtocol.StateAttacker &&
                   clan.LeaderId == player.ObjectId &&
                   !(_siegeRun.TryGetValue(castle.Id, out var run) && run.Flags.ContainsKey(clan.Id));
@@ -382,7 +371,7 @@ public sealed partial class ZoneWorld
 
             FanInventory(session, Collapse(changes));
             SaveInventory(session, inventory);
-            string title = _clans.TryGetValue(SiegeClanOf(player), out var clan) ? clan.Name : "";
+            string title = _clan.TryGet(SiegeClanOf(player), out var clan) ? clan.Name : "";
             var flag = SpawnSiegeNpc(SiegeProtocol.HeadquartersNpcId, player.X, player.Y, player.Z, player.Heading,
                 new SiegeNpcInfo { Role = SiegeNpcRole.Flag, CastleId = castle.Id, FlagClanId = SiegeClanOf(player) }, title);
             if (flag != null && _siegeRun.TryGetValue(castle.Id, out var run))
@@ -446,10 +435,10 @@ public sealed partial class ZoneWorld
         }
 
         if (castleId == 0)
-            castleId = _siege.CastleOwnedBy(clanId);
+            castleId = _siege.Board.CastleOwnedBy(clanId);
         if (castleId == 0 || CastleTable.Find(castleId) is not { OwnerRestart.Count: > 0 } data)
             return null;
-        var p = data.OwnerRestart[RndBound(data.OwnerRestart.Count)];
+        var p = data.OwnerRestart[RndBound(player, data.OwnerRestart.Count)];
         return (p.X, p.Y, p.Z);
     }
 
@@ -469,7 +458,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: place the holy artifact of <paramref name="castleId"/> next to the given point.</summary>
     internal ZoneEntity SpawnArtifactForTests(int castleId, int x, int y, int z)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             int npcId = CastleTable.Find(castleId)!.ArtifactNpcIds[0];
             var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
@@ -485,7 +474,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: worlds with injected geo start without doors; give them a door table and spawn the gates.</summary>
     internal void LoadCastleDoorsForTests(DoorTable table)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             Doors = table;
             _ownDoorTable = false;
@@ -496,19 +485,19 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: one landed hit of <paramref name="damage"/> through the siege structure gate.</summary>
     internal bool SiegeHitForTests(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
-            return SiegeNpcHit(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            return SiegeNpcHit(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CastleDoorForTests(int doorId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _castleDoors.TryGetValue(doorId, out int id) && _byId.TryGetValue(id, out var door) ? door : null;
     }
 
     internal bool GeoDoorOpenForTests(int doorId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return Doors.Get(doorId)?.Open == true;
     }
 }

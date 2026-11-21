@@ -65,6 +65,8 @@ public sealed partial class ZoneWorld
         var row = skill.At(level);
         if (row == null)
             return "skill";
+        if (request.SkillId == SummonSiegeGolemSkillId && !CanSummonSiegeGolem(session, player))
+            return null;
         if (SummonOf(player) != null)
         {
             SelfLine(session, SysMsgAlreadyHavePet, "You already have a pet.");
@@ -103,7 +105,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = player.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !Take(inventory, row.ItemId, row.ItemCount, changes))
+                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
                 {
                     SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
                     return;
@@ -255,16 +257,7 @@ public sealed partial class ZoneWorld
         NetBridge.FanoutSummonInfo([owner.ObjectId], BuildSummonInfo(summon));
     }
 
-    List<int> KnownWatchers(int objectId)
-    {
-        var list = new List<int>();
-        foreach (var player in Players())
-        {
-            if (player.Session != null && player.Knownlist.Contains(objectId))
-                list.Add(player.ObjectId);
-        }
-        return list;
-    }
+    List<int> KnownWatchers(int objectId) => CopyNetWatcherIds(objectId);
 
     // ---------------------------------------------------------------- removal / death
 
@@ -286,24 +279,31 @@ public sealed partial class ZoneWorld
         SetPendingHit(summon, null);
         _aoi.Leave(id);
         _byId.Remove(id);
-        ForgetActiveSets(id);
 
+        // Every player, not only watchers: a target or auto-attack set before the summon left view must be cleared.
         List<int>? watchers = null;
         foreach (var player in Players())
         {
             if (player.Session == null)
                 continue;
             if (player.Knownlist.Remove(id))
+            {
+                UntrackWatcher(player.ObjectId, id);
                 (watchers ??= []).Add(player.ObjectId);
+            }
             if (player.Session.SelectedTargetId == id)
                 player.Session.SelectedTargetId = 0;
-            if (player.Session.AutoAttackTargetId == id)
-                player.Session.AutoAttackTargetId = 0;
+            if (player.Intent.AutoAttackTargetId == id)
+                player.Intent.AutoAttackTargetId = 0;
         }
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
         if (owner?.Session != null)
+        {
             NetBridge?.FanoutSummonGone([owner.ObjectId], new SummonGoneNetMsg { ObjectId = id, Kind = st.Kind, Reason = reason });
+            if (st.Kind == SummonKindNet.Pet)
+                SendPlayerActionState(owner);
+        }
         ZoneLog.Info($"summon gone object={id} owner={st.OwnerObjectId} reason={reason}");
     }
 
@@ -324,8 +324,8 @@ public sealed partial class ZoneWorld
         var watchers = KnownWatchers(summon.ObjectId);
         foreach (int w in watchers)
         {
-            if (_byId.TryGetValue(w, out var p) && p.Session is { } ws && ws.AutoAttackTargetId == summon.ObjectId)
-                ws.AutoAttackTargetId = 0;
+            if (_byId.TryGetValue(w, out var p) && p.Session is { } ws && p.Intent.AutoAttackTargetId == summon.ObjectId)
+                p.Intent.AutoAttackTargetId = 0;
         }
         if (watchers.Count > 0)
             NetBridge?.FanoutDie(watchers, summon.ObjectId, killer == null ? 0 : CreditOf(killer).ObjectId);
@@ -358,6 +358,26 @@ public sealed partial class ZoneWorld
             RemoveSummon(summon, 4);
         }
         player.SummonObjectId = 0;
+    }
+
+    /// <summary>Mobius <c>OlympiadGame.removals</c>: pets leave; servitors stay but lose buffs and orders.</summary>
+    void PrepareOlympiadSummons(ZoneEntity player)
+    {
+        if (SummonOf(player) is not { Summon: { } st } summon)
+            return;
+        if (st.Pet != null)
+        {
+            UnsummonOnLeave(player);
+            return;
+        }
+        st.TargetId = 0;
+        st.PendingSkillId = 0;
+        st.MoveOrder = false;
+        st.Following = false;
+        SetMoveActive(summon, false);
+        summon.MovePath.Clear();
+        summon.Abnormals.Clear();
+        summon.CombatUntilUnixMs = 0;
     }
 
     /// <summary>Mobius <c>Player.teleToLocation</c> takes the summon along.</summary>
@@ -457,7 +477,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = owner.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory != null && Take(inventory, st.UpkeepItemId, st.UpkeepCount, changes))
+                if (inventory != null && RecordConsume(owner, st.UpkeepItemId, st.UpkeepItemId, st.UpkeepCount, changes))
                 {
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);
@@ -564,8 +584,12 @@ public sealed partial class ZoneWorld
             TargetObjectId = target.ObjectId,
             Damage = damage,
             Flags = flags,
-            AttackerX = s.X, AttackerY = s.Y, AttackerZ = s.Z,
-            TargetX = target.X, TargetY = target.Y, TargetZ = target.Z
+            AttackerX = s.X,
+            AttackerY = s.Y,
+            AttackerZ = s.Z,
+            TargetX = target.X,
+            TargetY = target.Y,
+            TargetZ = target.Z
         };
         FanoutAttack(s, target, attack);
         _meleeHits.Add(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
@@ -619,9 +643,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = TrySummonCommand(session, msg);
+        string? error = TrySummonCommand(session, msg);
         return Task.FromResult(error);
     }
 
@@ -631,7 +653,7 @@ public sealed partial class ZoneWorld
             return "world";
         if (SummonOf(owner) is not { Summon: { } st } s)
             return null; // Mobius RequestActionUse with no summon: ActionFailed only.
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool dead = s.Dead || s.CurHp <= 0;
         if (dead && msg.Kind != SummonCommandKind.Unsummon)
             return null;
@@ -676,27 +698,27 @@ public sealed partial class ZoneWorld
                 break;
             case SummonCommandKind.Attack:
             case SummonCommandKind.UseSkill:
-            {
-                int targetId = msg.TargetObjectId > 0 ? msg.TargetObjectId : session.SelectedTargetId;
-                if (!_byId.TryGetValue(targetId, out var target) || !SummonTargetAllowed(session, owner, s, target, msg.Forced))
                 {
-                    SelfLine(session, SysMsgSummonWrongTarget, "The target of the summoned monster is wrong.");
-                    return null;
-                }
-                if (msg.Kind == SummonCommandKind.UseSkill)
-                {
-                    if (!st.Skills.Any(k => k.SkillId == msg.SkillId))
+                    int targetId = msg.TargetObjectId > 0 ? msg.TargetObjectId : session.SelectedTargetId;
+                    if (!_byId.TryGetValue(targetId, out var target) || !SummonTargetAllowed(session, owner, s, target, msg.Forced))
+                    {
+                        SelfLine(session, SysMsgSummonWrongTarget, "The target of the summoned monster is wrong.");
                         return null;
-                    st.PendingSkillId = msg.SkillId;
+                    }
+                    if (msg.Kind == SummonCommandKind.UseSkill)
+                    {
+                        if (!st.Skills.Any(k => k.SkillId == msg.SkillId))
+                            return null;
+                        st.PendingSkillId = msg.SkillId;
+                    }
+                    else
+                    {
+                        st.PendingSkillId = 0;
+                    }
+                    st.TargetId = target.ObjectId;
+                    st.MoveOrder = false;
+                    break;
                 }
-                else
-                {
-                    st.PendingSkillId = 0;
-                }
-                st.TargetId = target.ObjectId;
-                st.MoveOrder = false;
-                break;
-            }
             case SummonCommandKind.Unsummon when pet != null:
                 // Mobius RequestActionUse 19.
                 if (dead)
@@ -786,13 +808,13 @@ public sealed partial class ZoneWorld
 
     internal ZoneEntity? SummonOfForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return SummonOf(player);
     }
 
     internal bool TryGetEntityForTest(int objectId, out ZoneEntity? entity)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             bool found = _byId.TryGetValue(objectId, out var e);
             entity = e;
@@ -802,16 +824,16 @@ public sealed partial class ZoneWorld
 
     internal void TickSummonsForTest()
     {
-        lock (_gate)
-            TickSummons(_clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            TickSummons(NowUnixMs());
     }
 
     internal ZoneEntity? SpawnServitorForTest(ZoneEntity owner, int skillId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var skill = _summonSkills.Find(skillId) ?? throw new ArgumentException($"no summon skill {skillId}");
-            return SpawnServitor(owner, skill, skill.At(level)!, level, _clock().ToUnixTimeMilliseconds());
+            return SpawnServitor(owner, skill, skill.At(level)!, level, NowUnixMs());
         }
     }
 }

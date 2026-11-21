@@ -40,7 +40,7 @@ public sealed class NetEnchantAuditTests
     [Fact]
     public async Task Weapon_plus_seven_is_announced_with_a_firework_and_the_glow_reaches_watchers()
     {
-        var bench = new WorldBench(enchantRandom: new SequenceEnchantRandom(0.0));
+        var bench = new WorldBench(enchantRandom: new UnitSamples(0.0));
         var smith = await bench.EnterAsync("smith", "Smith",
             [new StoredItem(Saber, 1, RHand, 6), new StoredItem(NormalD, 1, -1)], clearRecorder: false);
         var watcher = await bench.EnterAsync("watch", "Watcher", x: 46045 + 50, clearRecorder: false);
@@ -73,7 +73,7 @@ public sealed class NetEnchantAuditTests
     [InlineData(Necklace, ArmorD, 6, false)] // armor +7: quiet
     public async Task Only_the_mobius_milestones_are_announced(int itemId, int scrollId, int from, bool announced)
     {
-        var bench = new WorldBench(enchantRandom: new SequenceEnchantRandom(0.0));
+        var bench = new WorldBench(enchantRandom: new UnitSamples(0.0));
         var smith = await bench.EnterAsync("ann", "Annie", [new StoredItem(itemId, 1, -1, from), new StoredItem(scrollId, 1, -1)]);
         int target = smith.Slot(itemId);
         Assert.Null(await EnchantAsync(bench, smith, scrollId, target));
@@ -85,7 +85,7 @@ public sealed class NetEnchantAuditTests
     [Fact]
     public async Task A_second_scroll_waits_for_the_first_and_the_same_scroll_may_be_picked_again()
     {
-        var bench = new WorldBench(enchantRandom: new SequenceEnchantRandom(0.0));
+        var bench = new WorldBench(enchantRandom: new UnitSamples(0.0));
         var smith = await bench.EnterAsync("two", "Twice", [new StoredItem(NormalD, 1, -1), new StoredItem(ArmorD, 1, -1)]);
         int weapon = smith.Slot(NormalD), armor = smith.Slot(ArmorD);
         Assert.Null(await bench.World.TryEnchantRequestAsync(smith.Session, weapon, default));
@@ -99,7 +99,7 @@ public sealed class NetEnchantAuditTests
     [Fact]
     public async Task No_enchanting_from_a_private_store_and_the_scroll_stays()
     {
-        var bench = new WorldBench(enchantRandom: new SequenceEnchantRandom(0.0));
+        var bench = new WorldBench(enchantRandom: new UnitSamples(0.0));
         var smith = await bench.EnterAsync("shop", "Shopper", [new StoredItem(Saber, 1, -1), new StoredItem(NormalD, 1, -1)]);
         Assert.Null(await bench.World.TryEnchantRequestAsync(smith.Session, smith.Slot(NormalD), default));
         smith.Player.PrivateStoreType = PrivateStoreProtocol.TypeSell;
@@ -115,7 +115,7 @@ public sealed class NetEnchantAuditTests
     [Fact]
     public async Task A_wrong_grade_closes_the_window_with_inappropriate_conditions()
     {
-        var bench = new WorldBench(enchantRandom: new SequenceEnchantRandom(0.0));
+        var bench = new WorldBench(enchantRandom: new UnitSamples(0.0));
         var smith = await bench.EnterAsync("grade", "Grader", [new StoredItem(Saber, 1, -1), new StoredItem(NormalC, 1, -1)]);
         Assert.Equal(EnchantProtocol.GradeMismatch, await EnchantAsync(bench, smith, NormalC, smith.Slot(Saber)));
         Assert.Equal(1, smith.Inventory.CountOf(NormalC));

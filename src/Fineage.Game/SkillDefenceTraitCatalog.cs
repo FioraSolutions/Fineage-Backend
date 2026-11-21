@@ -27,7 +27,7 @@ public sealed class SkillDefenceTraitCatalog
     public IReadOnlyDictionary<string, double>? Collect(IReadOnlyDictionary<int, int> known)
     {
         Dictionary<string, double>? traits = null;
-        foreach (var (skillId, level) in known)
+        foreach (var (skillId, level) in known.OrderBy(static p => p.Key))
         {
             if (!_bySkill.TryGetValue(skillId, out var row))
                 continue;

@@ -25,6 +25,9 @@ public readonly record struct ShopObjectLine(int ObjectId, int Count);
 
 public readonly record struct ShopTouch(ShopTouchKind Kind, ItemInstance Item);
 
+/// <summary>Value that reached or left the player in a trade; <see cref="InstanceIds"/> lists non-stackable pieces.</summary>
+public sealed record ShopTransfer(int ItemId, long Count, IReadOnlyList<int> InstanceIds);
+
 public sealed class ShopMutation
 {
     public ShopDeny? Deny { get; private init; }
@@ -32,6 +35,12 @@ public sealed class ShopMutation
     public string MissingName { get; private init; } = "";
     public List<ShopTouch> Touches { get; } = [];
     public List<ItemInstance> Taken { get; } = [];
+
+    /// <summary>What the player received, adena included, as the rule priced it.</summary>
+    public List<ShopTransfer> Gained { get; } = [];
+
+    /// <summary>What the player gave, adena included, as the rule priced it.</summary>
+    public List<ShopTransfer> Lost { get; } = [];
     /// <summary>Castle share of a buy (Mobius <c>RequestBuyItem</c> castle tax), credited to the castle treasury.</summary>
     public long CastleTax { get; set; }
 

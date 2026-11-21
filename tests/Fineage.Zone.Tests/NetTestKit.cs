@@ -1,6 +1,8 @@
 using System.Reflection;
 using Fineage.Game;
 using Fineage.Accounts;
+using Fineage.Zone;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
@@ -14,9 +16,24 @@ public class NetBridgeRecorder : DispatchProxy
 
     protected override object? Invoke(MethodInfo? method, object?[]? args)
     {
-        lock (Calls)
-            Calls.Add((method?.Name ?? "", args ?? []));
+        string name = method?.Name ?? "";
+        args ??= [];
+        // Prepare* returns the deferred half of the matching Fanout*; record that call when it is sent.
+        if (method?.ReturnType == typeof(Action))
+        {
+            string sent = "Fanout" + name["Prepare".Length..];
+            object?[] captured = args;
+            return (Action)(() => Record(sent, captured));
+        }
+
+        Record(name, args);
         return method?.ReturnType == typeof(bool) ? false : null;
+    }
+
+    void Record(string method, object?[] args)
+    {
+        lock (Calls)
+            Calls.Add((method, args));
     }
 
     public List<object?[]> Of(string method)
@@ -37,10 +54,22 @@ internal sealed class NetTestKit
 {
     public const int ElfX = 46045, ElfY = 41251, ElfZ = -3440;
     public MemoryAccountStore Store { get; }
-    public GameData Game { get; } = GameData.LoadDefault();
+    public GameData Game { get; } = TestCatalogs.Game;
     public ZoneWorld World { get; }
+
+    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; } = new();
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
+
+    /// <summary>
+    /// Moves <see cref="Now"/> to the first simulation tick at or after <paramref name="unixMs"/>. Stages run at tick
+    /// time, so that is the tick a deadline at <paramref name="unixMs"/> is honoured on.
+    /// </summary>
+    public void AdvanceToTickCovering(long unixMs)
+    {
+        long step = ZoneSimulationSettings.StepMilliseconds;
+        Now = DateTimeOffset.FromUnixTimeMilliseconds(Math.DivRem(unixMs, step, out long rest) * step + (rest > 0 ? step : 0));
+    }
 
     public NetTestKit(
         Fineage.Zone.Spawns.SpawnCatalog? spawns = null,
@@ -49,16 +78,27 @@ internal sealed class NetTestKit
         Fineage.Zone.Interest.IAoi? aoi = null,
         Random? deathRandom = null,
         Random? combatRandom = null,
+        Random? spawnRandom = null,
         Random? dropRandom = null,
         Fineage.Game.DeathRuleCatalog? deathRules = null,
         Fineage.Game.Services.DeathDropRules? deathDrop = null,
         Fineage.Game.Services.ItemWeights? weights = null,
-        MemoryAccountStore? store = null)
+        MemoryAccountStore? store = null,
+        Fineage.Zone.Simulation.IRegionPartition? regions = null,
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
+        ulong? simulationSeed = null,
+        Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
+        Fineage.Zone.Bosses.BossSchedule? bosses = null,
+        ZoneRates? rates = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
+        IRegionExecutor resolvedExecutor =
+            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
-            combatRandom: combatRandom, dropRandom: dropRandom);
+            combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
+            simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,
+            bosses: bosses, ledgerJournal: Ledger, rates: rates);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

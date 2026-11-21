@@ -152,7 +152,7 @@ public sealed partial class ZoneWorld
     internal bool TrySetPlayerLevelForTests(ZoneSession session, int level)
     {
         ZoneEntity player;
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var entity) || entity.Inventory == null)
                 return false;
@@ -163,13 +163,13 @@ public sealed partial class ZoneWorld
 
         // The client only learns the new book from a SkillList, exactly as a level up sends it.
         NetBridge?.FanoutSkillList([session.ObjectId],
-            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+            Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         return true;
     }
 
     internal NpcInfoMsg NpcInfoByTemplateForTests(int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             ZoneEntity? found = null;
             foreach (var entity in _byId.Values)

@@ -23,77 +23,86 @@ interface IWorldEventPublisher
     /// Knownlist changed for <paramref name="selfObjectId"/> during a sim tick (timed move AOI refresh):
     /// EntitySpawn/DropItem for <paramref name="added"/>, EntityDespawn for <paramref name="removed"/>, both directions for players,
     /// plus MoveState for whichever side is mid-run so the newcomer is seen moving, not standing.
-    /// Called under the ZoneWorld gate.
+    /// Called on the simulation thread.
     /// </summary>
     void FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed);
 
-    /// <summary>Mobius ChangeMoveType (gait + effective speeds) for <paramref name="moverObjectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>
+    /// <see cref="FanoutKnownlistDiff"/> in two halves: the frames are built from world state now (on the simulation
+    /// thread) and the returned send touches no world state, so it can run on another thread.
+    /// </summary>
+    Action PrepareKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed);
+
+    /// <summary><see cref="FanoutCharInfo"/> in two halves, like <see cref="PrepareKnownlistDiff"/>.</summary>
+    Action PrepareCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);
+
+    /// <summary>Mobius ChangeMoveType (gait + effective speeds) for <paramref name="moverObjectId"/>. Called on the simulation thread.</summary>
     void FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater);
 
     /// <summary>
     /// Mobius <c>StopRotation</c> (also the tail of <c>StartRotation</c>): the pawn now faces <paramref name="heading"/>.
     /// Sent as PositionCorrection because the Net contract has no dedicated rotation opcode and the client already
-    /// applies X/Y/Z/heading from it. Called under the ZoneWorld gate.
+    /// applies X/Y/Z/heading from it. Called on the simulation thread.
     /// </summary>
     void FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading);
 
     /// <summary>
     /// Mobius EtcStatusUpdate (weight penalty level, grade-penalty flag, force charges) to the owner.
-    /// Called under the ZoneWorld gate.
+    /// Called on the simulation thread.
     /// </summary>
     void FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status);
 
-    /// <summary>Mobius AutoAttackStart (<paramref name="inStance"/>) / AutoAttackStop for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius AutoAttackStart (<paramref name="inStance"/>) / AutoAttackStop for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance);
 
-    /// <summary>Mobius ExAutoSoulShot: auto use of shot <paramref name="itemId"/> is now on/off. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius ExAutoSoulShot: auto use of shot <paramref name="itemId"/> is now on/off. Called on the simulation thread.</summary>
     void FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled);
 
-    /// <summary>Mobius UserInfo to the owner (status window sheet + own paperdoll). Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius UserInfo to the owner (status window sheet + own paperdoll). Called on the simulation thread.</summary>
     void FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info);
 
-    /// <summary>Mobius CharInfo refresh (paperdoll changed) of player <paramref name="objectId"/> to knownlist players. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius CharInfo refresh (paperdoll changed) of player <paramref name="objectId"/> to knownlist players. Called on the simulation thread.</summary>
     void FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId);
 
     void FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack);
 
-    /// <summary>Mobius StatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius StatusUpdate to watchers. Called on the simulation thread.</summary>
     void FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status);
 
-    /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius Die packet for <paramref name="objectId"/> (killer may be 0). Called on the simulation thread.</summary>
     /// <param name="restartFlags">Optional <see cref="Fineage.Net.Contract.EntityDieMsg"/> restart buttons (castle / siege HQ).</param>
     void FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags = 0);
 
-    /// <summary>Mobius DropItem (ground spawn with dropper FX). Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius DropItem (ground spawn with dropper FX). Called on the simulation thread.</summary>
     void FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop);
 
-    /// <summary>Mobius DeleteObject for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius DeleteObject for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId);
 
-    /// <summary>Mobius InventoryUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius InventoryUpdate to watchers. Called on the simulation thread.</summary>
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update);
 
-    /// <summary>Mobius CreatureSay to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius CreatureSay to watchers. Called on the simulation thread.</summary>
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say);
 
-    /// <summary>Mobius SystemMessage to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius SystemMessage to watchers. Called on the simulation thread.</summary>
     void FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message);
 
-    /// <summary>Mobius MagicSkillUse to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius MagicSkillUse to watchers. Called on the simulation thread.</summary>
     void FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast);
 
-    /// <summary>Mobius Revive for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius Revive for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId);
 
-    /// <summary>Mobius TeleportToLocation for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius TeleportToLocation for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading);
 
     void FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats);
 
-    /// <summary>Mobius AbnormalStatusUpdate to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius AbnormalStatusUpdate to watchers. Called on the simulation thread.</summary>
     void FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update);
 
-    /// <summary>Mobius NpcHtmlMessage to watchers. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius NpcHtmlMessage to watchers. Called on the simulation thread.</summary>
     void FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html);
 
     void FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list);
@@ -102,71 +111,76 @@ interface IWorldEventPublisher
 
     void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list);
 
-    /// <summary>Shop window adena/weight/slots snapshot. Called under the ZoneWorld gate.</summary>
+    /// <summary>Shop window adena/weight/slots snapshot. Called on the simulation thread.</summary>
     void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
 
     void FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list);
 
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list);
 
-    /// <summary>Mobius QuestList journal to the owner. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius QuestList journal to the owner. Called on the simulation thread.</summary>
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list);
 
+    void FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestDirectionNetMsg msg);
+
+    void FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestNpcMarksNetMsg msg);
+
+    void FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.TutorialUiNetMsg msg);
     /// <summary>Full SkillList re-send after a trainer learn (Mobius sends SkillList after RequestAcquireSkill).</summary>
     void FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list);
 
     /// <summary>Full ShortCutInit re-send (Mobius setActiveClass restores the shortcuts of the new class index).</summary>
     void FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init);
 
-    /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z);
 
-    /// <summary>Mobius SocialAction (gesture) for <paramref name="objectId"/>. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius SocialAction (gesture) for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId);
 
     /// <summary>
     /// Mobius <c>MyTargetSelected</c>: the owner's own click answer (nameplate colour for the target window).
-    /// Called under the ZoneWorld gate.
+    /// Called on the simulation thread.
     /// </summary>
     void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint);
 
     /// <summary>
-    /// Mobius <c>TargetUnselected</c>: the selection was dropped. Called under the ZoneWorld gate.
+    /// Mobius <c>TargetUnselected</c>: the selection was dropped. Called on the simulation thread.
     /// </summary>
     void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId);
 
-    /// <summary>Mobius <c>AcquireSkillList</c>: the trainer's learnable rows. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius <c>AcquireSkillList</c>: the trainer's learnable rows. Called on the simulation thread.</summary>
     void FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list);
 
-    /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called on the simulation thread.</summary>
     void FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info);
 
-    /// <summary>Mobius EnchantResult to the enchanter. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius EnchantResult to the enchanter. Called on the simulation thread.</summary>
     void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result);
 
     void FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status);
 
     void FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list);
 
-    /// <summary>Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest reply. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius PledgeCrest / ExPledgeCrestLarge / AllyCrest reply. Called on the simulation thread.</summary>
     void FanoutCrestData(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CrestDataNetMsg crest);
 
-    /// <summary>Mobius PledgeReceiveWarList (both tabs). Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius PledgeReceiveWarList (both tabs). Called on the simulation thread.</summary>
     void FanoutPledgeWarList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeWarListNetMsg wars);
 
-    /// <summary>Mobius RelationChanged: per-viewer relation bits for one player. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius RelationChanged: per-viewer relation bits for one player. Called on the simulation thread.</summary>
     void FanoutRelationChanged(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RelationChangedNetMsg relation);
 
-    /// <summary>Mobius PledgeInfo (clan name/crest lookup by id). Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius PledgeInfo (clan name/crest lookup by id). Called on the simulation thread.</summary>
     void FanoutPledgeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeInfoNetMsg info);
 
-    /// <summary>Mobius AllianceInfo. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius AllianceInfo. Called on the simulation thread.</summary>
     void FanoutAllyInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyInfoNetMsg info);
 
-    /// <summary>Mobius AskJoinAlly. Called under the ZoneWorld gate.</summary>
+    /// <summary>Mobius AskJoinAlly. Called on the simulation thread.</summary>
     void FanoutAllyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyAskJoinNetMsg ask);
 
-    /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called under the ZoneWorld gate.</summary>
+    /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called on the simulation thread.</summary>
     void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
 
     /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
@@ -182,8 +196,12 @@ interface IWorldEventPublisher
     void FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonInfoNetMsg info);
     void FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonGoneNetMsg gone);
 
-    /// <summary>Pet inventory to its owner (Mobius PetItemList). Called under the ZoneWorld gate.</summary>
+    /// <summary>Pet inventory to its owner (Mobius PetItemList). Called on the simulation thread.</summary>
     void FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory);
+
+    void FanoutRide(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RideNetMsg ride);
+
+    void FanoutPlayerActionState(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PlayerActionStateNetMsg state);
     /// <summary>Duel ask / ready / start / end (Mobius ExDuelAskStart / ExDuelReady / ExDuelStart / ExDuelEnd).</summary>
     void FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel);
     /// <summary>An opponent's bars during a duel (Mobius ExDuelUpdateUserInfo).</summary>
@@ -275,7 +293,7 @@ interface IWorldEventPublisher
     void FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result);
 
     /// <summary>The Seven Signs record, also the reply to a status request.</summary>
-    /// <summary>Seven Signs status record. Called under the ZoneWorld gate.</summary>
+    /// <summary>Seven Signs status record. Called on the simulation thread.</summary>
     void FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status);
 
     /// <summary>The sky tint the record implies, so the client can recolour without polling.</summary>

@@ -1,8 +1,11 @@
+using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Siege;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -39,8 +42,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        lock (_gate)
-            return Task.FromResult(TryCastleCommand(session, command, now.ToUnixTimeMilliseconds()));
+        return Task.FromResult(TryCastleCommand(session, command, now.ToUnixTimeMilliseconds()));
     }
 
     string? TryCastleCommand(ZoneSession session, CastleCommandNetMsg c, long now)
@@ -48,8 +50,8 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
         var clan = ClanOf(player.ObjectId);
-        int castleId = c.CastleId > 0 ? c.CastleId : clan != null ? _siege.CastleOwnedBy(clan.Id) : 0;
-        var castle = castleId > 0 ? _siege.Find(castleId) : null;
+        int castleId = c.CastleId > 0 ? c.CastleId : clan != null ? _siege.Board.CastleOwnedBy(clan.Id) : 0;
+        var castle = castleId > 0 ? _siege.Board.Find(castleId) : null;
         if (castle == null)
             return SiegeProtocol.Castle;
         if (c.Kind == CastleCommandKind.Info)
@@ -128,7 +130,7 @@ public sealed partial class ZoneWorld
             CastleId = castle.Id,
             Name = castle.Name,
             OwnerClanId = castle.OwnerClanId,
-            OwnerClanName = _clans.TryGetValue(castle.OwnerClanId, out var oc) ? oc.Name : "",
+            OwnerClanName = _clan.TryGet(castle.OwnerClanId, out var oc) ? oc.Name : "",
             TaxPercent = castle.TaxPercent,
             MaxTaxPercent = SiegeProtocol.MaxTaxPercent,
             Treasury = vault ? castle.Treasury : 0,
@@ -155,7 +157,7 @@ public sealed partial class ZoneWorld
             return busy;
         if (percent < 0 || percent > SiegeProtocol.MaxTaxPercent)
             return SiegeProtocol.Tax;
-        _siege.SetTax(castle.Id, percent);
+        _siege.Board.SetTax(castle.Id, percent);
         PersistSiege();
         ZoneLog.Info($"[castle] {castle.Name} tax={percent}% by {player.ObjectId}");
         return null;
@@ -175,9 +177,14 @@ public sealed partial class ZoneWorld
         if (inventory == null || amount <= 0 || amount > castle.Treasury ||
             (long)inventory.CountOf(PledgeProtocol.AdenaItemId) + amount > int.MaxValue)
             return SiegeProtocol.Adena;
-        if (!_siege.AddTreasury(castle.Id, -amount))
-            return SiegeProtocol.Adena;
-        GiveItem(session, inventory, PledgeProtocol.AdenaItemId, (int)amount);
+        string? refused = RecordTreasuryExchange(session, player, castle, LedgerTxKind.TreasuryWithdraw, amount, () =>
+        {
+            if (!_siege.Board.AddTreasury(castle.Id, -amount))
+                throw new InvalidOperationException("treasury withdraw underflow");
+            GiveItem(session, inventory, PledgeProtocol.AdenaItemId, (int)amount);
+        });
+        if (refused != null)
+            return refused;
         PersistSiege();
         return null;
     }
@@ -193,9 +200,15 @@ public sealed partial class ZoneWorld
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)amount, changes))
-            return SiegeProtocol.Adena;
-        _siege.AddTreasury(castle.Id, amount);
+        string? refused = RecordTreasuryExchange(session, player, castle, LedgerTxKind.TreasuryDeposit, amount, () =>
+        {
+            if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)amount, changes))
+                throw new InvalidOperationException("deposit take failed after ledger check");
+            if (!_siege.Board.AddTreasury(castle.Id, amount))
+                throw new InvalidOperationException("treasury deposit overflow");
+        });
+        if (refused != null)
+            return refused;
         FanInventory(session, Collapse(changes));
         SaveInventory(session, inventory);
         PersistSiege();
@@ -226,22 +239,30 @@ public sealed partial class ZoneWorld
             return SiegeProtocol.UpgradeLevel;
         var inventory = player.Inventory;
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (inventory == null || inventory.CountOf(PledgeProtocol.AdenaItemId) < price ||
-            !Take(inventory, PledgeProtocol.AdenaItemId, (int)price, changes))
+        if (inventory == null || inventory.CountOf(PledgeProtocol.AdenaItemId) < price)
         {
             SelfLine(session, SiegeProtocol.NotEnoughAdena, "You do not have enough adena.");
             return SiegeProtocol.Adena;
         }
 
-        FanInventory(session, Collapse(changes));
-        SaveInventory(session, inventory);
-        castle.DoorUpgrades[doorId] = ratio;
-        if (_castleDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
+        if (!RecordCastleUpgrade(player, doorId, price, () =>
+            {
+                if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)price, changes))
+                    throw new InvalidOperationException("castle upgrade take failed after ledger check");
+                FanInventory(session, Collapse(changes));
+                SaveInventory(session, inventory);
+                castle.DoorUpgrades[doorId] = ratio;
+                if (_castleDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
+                {
+                    door.MaxHp = door.SiegeNpc!.BaseHp * ratio;
+                    door.CurHp = door.MaxHp;
+                    FanoutVitals(door, StatusFor(door));
+                    FanoutDoorStatus(door);
+                }
+            }))
         {
-            door.MaxHp = door.SiegeNpc!.BaseHp * ratio;
-            door.CurHp = door.MaxHp;
-            FanoutVitals(door, StatusFor(door));
-            FanoutDoorStatus(door);
+            SelfLine(session, SiegeProtocol.NotEnoughAdena, "You do not have enough adena.");
+            return SiegeProtocol.Adena;
         }
 
         PersistSiege();
@@ -259,10 +280,18 @@ public sealed partial class ZoneWorld
             return SiegeProtocol.Inventory;
         if (inventory.CountOf(itemId) > 0)
             return SiegeProtocol.HasItem;
-        if (_game.Items.TryGet(itemId, out _))
-            GiveItem(session, inventory, itemId, 1);
-        else
+        if (!_game.Items.TryGet(itemId, out _))
             return SiegeProtocol.Inventory;
+        RecordBagChange(
+            player,
+            LedgerTxKind.CastleGrant,
+            LedgerAccount.Of(SystemAccount.CastleGrants),
+            () =>
+            {
+                GiveItem(session, inventory, itemId, 1);
+                return 0;
+            },
+            _ => castle.Id);
         return null;
     }
 
@@ -280,23 +309,68 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    /// <summary>Mobius <c>Castle.removeOwner</c> / <c>CastleManager.removeCirclet</c>: online members lose the circlet (and the lord the crown).</summary>
+    /// <summary>Mobius <c>Castle.removeOwner</c> / <c>CastleManager.removeCirclet</c>: every clan member loses the circlet (lord also loses the crown).</summary>
     void RemoveCirclets(ZoneClan clan, int castleId)
     {
         int circlet = castleId > 0 && castleId < SiegeProtocol.CircletItemIds.Length ? SiegeProtocol.CircletItemIds[castleId] : 0;
-        foreach (var session in OnlineMembers(clan))
+        foreach (var roster in clan.Members)
         {
-            if (!_byId.TryGetValue(session.ObjectId, out var member) || member.Inventory is not { } inventory)
+            if (_byId.TryGetValue(roster.CharacterId, out var member) && member.Session is not null && member.Inventory is { } inventory)
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                if (circlet > 0 && inventory.CountOf(circlet) > 0)
+                    Take(inventory, circlet, inventory.CountOf(circlet), changes);
+                if (member.ObjectId == clan.LeaderId && inventory.CountOf(SiegeProtocol.LordsCrownItemId) > 0)
+                    Take(inventory, SiegeProtocol.LordsCrownItemId, inventory.CountOf(SiegeProtocol.LordsCrownItemId), changes);
+                if (changes.Count == 0)
+                    continue;
+                FanInventory(member.Session, Collapse(changes));
+                SaveInventory(member.Session, inventory);
                 continue;
-            var changes = new List<InventoryUpdateEntryMsg>();
-            if (circlet > 0 && inventory.CountOf(circlet) > 0)
-                Take(inventory, circlet, inventory.CountOf(circlet), changes);
-            if (member.ObjectId == clan.LeaderId && inventory.CountOf(SiegeProtocol.LordsCrownItemId) > 0)
-                Take(inventory, SiegeProtocol.LordsCrownItemId, inventory.CountOf(SiegeProtocol.LordsCrownItemId), changes);
-            if (changes.Count == 0)
+            }
+            RemoveStoredCastleRegalia(clan, roster, circlet, castleId);
+        }
+    }
+
+    void RemoveStoredCastleRegalia(ZoneClan clan, ZoneClanMember roster, int circletId, int castleId)
+    {
+        if (_accounts?.FindById(roster.Account, roster.CharacterId) is not { Items: { } items })
+            return;
+        var kept = new List<StoredItem>();
+        bool changed = false;
+        foreach (var row in items)
+        {
+            if (circletId > 0 && row.ItemId == circletId)
+            {
+                changed = true;
                 continue;
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory);
+            }
+            if (roster.CharacterId == clan.LeaderId && row.ItemId == SiegeProtocol.LordsCrownItemId)
+            {
+                changed = true;
+                continue;
+            }
+            kept.Add(row);
+        }
+        if (!changed)
+            return;
+        var before = HoldingsFromStored(items);
+        var after = HoldingsFromStored(kept);
+        var bag = LedgerAccount.Inventory(roster.CharacterId);
+        var move = BeginLedgerMove(LedgerTxKind.Destroy, roster.CharacterId, castleId);
+        move.Observe(bag, before);
+        PostChange(move, bag, before, after, LedgerAccount.Of(SystemAccount.Destroyed));
+        _accounts.TryReplaceItems(roster.Account, roster.CharacterId, kept);
+        move.Commit(LedgerHoldingsOf);
+    }
+
+    /// <summary>Test hook for circlet removal (Mobius <c>CastleManager.removeCirclet</c>).</summary>
+    internal void RemoveCircletsForTest(int clanId, int castleId)
+    {
+        using (_affinity.Step())
+        {
+            if (_clan.TryGet(clanId, out var clan))
+                RemoveCirclets(clan, castleId);
         }
     }
 
@@ -305,36 +379,61 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius <c>Castle.addToTreasury</c>: shop tax lands in the castle treasury. Goddard and Schuttgart pay Rune's rate
     /// to Rune, the southern castles pay Aden's rate to Aden (when that castle has an owner); Aden and Rune keep all.
+    /// Returns what each treasury actually gained, which the treasury cap can make less than the share.
     /// </summary>
-    void CreditCastleTax(int castleId, long amount)
+    List<(int CastleId, long Amount)> CreditCastleTax(int castleId, long amount)
     {
+        var credited = new List<(int CastleId, long Amount)>();
         if (castleId <= 0 || amount <= 0)
-            return;
-        var castle = _siege.Find(castleId);
+            return credited;
+        var castle = _siege.Board.Find(castleId);
         if (castle == null || castle.OwnerClanId <= 0)
-            return;
-        int overlordId = castleId switch
-        {
-            AdenCastleId or RuneCastleId => 0,
-            GoddardCastleId or SchuttgartCastleId => RuneCastleId,
-            _ => AdenCastleId
-        };
-        if (overlordId > 0 && _siege.Find(overlordId) is { OwnerClanId: > 0 } overlord)
+            return credited;
+        int overlordId = OverlordOf(castleId);
+        if (overlordId > 0 && _siege.Board.Find(overlordId) is { OwnerClanId: > 0 } overlord)
         {
             long cut = (long)(amount * (overlord.TaxPercent / 100d));
-            if (cut > 0 && _siege.AddTreasury(overlordId, cut))
+            long before = overlord.Treasury;
+            if (cut > 0 && _siege.Board.AddTreasury(overlordId, cut))
+            {
                 amount -= cut;
+                credited.Add((overlordId, overlord.Treasury - before));
+            }
         }
 
         if (amount > 0)
-            _siege.AddTreasury(castleId, amount);
+        {
+            long before = castle.Treasury;
+            _siege.Board.AddTreasury(castleId, amount);
+            credited.Add((castleId, castle.Treasury - before));
+        }
+
         PersistSiege();
+        return credited;
     }
+
+    /// <summary>The castles whose treasury a tax at <paramref name="castleId"/> can reach, the castle first.</summary>
+    IEnumerable<int> TaxedTreasuries(int castleId)
+    {
+        if (castleId <= 0 || _siege.Board.Find(castleId) == null)
+            yield break;
+        yield return castleId;
+        int overlordId = OverlordOf(castleId);
+        if (overlordId > 0 && _siege.Board.Find(overlordId) != null)
+            yield return overlordId;
+    }
+
+    static int OverlordOf(int castleId) => castleId switch
+    {
+        AdenCastleId or RuneCastleId => 0,
+        GoddardCastleId or SchuttgartCastleId => RuneCastleId,
+        _ => AdenCastleId
+    };
 
     /// <summary>Test hook: castle as the board holds it.</summary>
     internal CastleSiege? CastleForTests(int castleId)
     {
-        lock (_gate)
-            return _siege.Find(castleId);
+        using (_affinity.Step())
+            return _siege.Board.Find(castleId);
     }
 }

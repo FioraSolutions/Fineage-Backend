@@ -76,11 +76,11 @@ public sealed class NetInteractionRulesTests
         var (a, aEntity) = await kit.EnterAsync();
         Assert.Null(await kit.World.TryMoveAsync(a, aEntity.X + 500, aEntity.Y, aEntity.Z, default));
         Assert.Null(await Act(kit, a, ActionProtocol.SitStand));
-        Assert.True(a.SitOnArrive);
+        Assert.True(aEntity.Intent.SitOnArrive);
         Assert.False(aEntity.Sitting);
 
         Assert.Null(await kit.World.TryMoveAsync(a, aEntity.X, aEntity.Y + 500, aEntity.Z, default));
-        Assert.False(a.SitOnArrive);
+        Assert.False(aEntity.Intent.SitOnArrive);
     }
 
     [Fact]

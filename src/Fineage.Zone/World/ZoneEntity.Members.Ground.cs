@@ -42,6 +42,19 @@ sealed partial class ZoneEntity
         set => EnsureGround().Stackable = value;
     }
 
+    /// <summary>Enchant level of a dropped piece; it travels with the piece back into a bag.</summary>
+    public int GroundEnchant
+    {
+        get => Ground?.Enchant ?? 0;
+        set => EnsureGround().Enchant = value;
+    }
+
+    /// <summary>
+    /// A non-stackable stack of one is a piece: its object id is the item's, kept from the bag it fell from and into
+    /// the bag that picks it up. A larger non-stackable stack (monster loot) becomes pieces on pickup.
+    /// </summary>
+    public bool GroundPiece => !GroundStackable && GroundCount == 1;
+
     ZoneGroundItemPayload EnsureGround() => Ground ??= new ZoneGroundItemPayload();
     /// <summary>Mobius DropProtection owner (killer); 0 = anyone may pick up.</summary>
     public int GroundOwnerId

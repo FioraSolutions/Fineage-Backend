@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
@@ -94,7 +95,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var (x, y) = Offset(loc.X, loc.Y);
+        var (x, y) = Offset(player, loc.X, loc.Y);
         if (!Loaded(x, y))
         {
             Notice(session, NpcServiceProtocol.DestinationUnloaded, NpcServiceProtocol.DestinationUnloadedText);
@@ -116,22 +117,48 @@ public sealed partial class ZoneWorld
         var inventory = player.Inventory!;
         if (!PlayerClasses.TryGet(change.ClassId, out var template) || template == null)
             return false;
-        // Mobius takeItems(item, -1) for every proof: the whole stack of each mark leaves the bag.
-        var touches = new List<BagTouch>();
         foreach (int itemId in change.ProofItemIds)
         {
-            int have = inventory.CountOf(itemId);
-            if (have <= 0)
-                return false; // all marks are required; the catalog already told the player which page to see
-            if (!inventory.TryTake(itemId, have, touches))
+            if (inventory.CountOf(itemId) <= 0)
                 return false;
         }
-        if (rewardItemId > 0 && rewardCount > 0 && _game.Items.TryGet(rewardItemId, out _))
-        {
-            var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
-            foreach (var piece in inventory.AddPieces(rewardItemId, rewardCount))
-                touches.Add(new BagTouch(before.Contains(piece.ObjectId) ? BagTouchKind.Modify : BagTouchKind.Add, piece));
-        }
+
+        int classId = change.ClassId;
+        if (!RecordBagChange(
+                player,
+                LedgerTxKind.ClassChange,
+                Fees,
+                () =>
+                {
+                    var touches = new List<BagTouch>();
+                    foreach (int itemId in change.ProofItemIds)
+                    {
+                        int have = inventory.CountOf(itemId);
+                        if (!inventory.TryTake(itemId, have, touches))
+                            return false;
+                    }
+
+                    if (rewardItemId > 0 && rewardCount > 0 && _game.Items.TryGet(rewardItemId, out _))
+                    {
+                        var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
+                        foreach (var piece in inventory.AddPieces(rewardItemId, rewardCount))
+                            touches.Add(new BagTouch(before.Contains(piece.ObjectId) ? BagTouchKind.Modify : BagTouchKind.Add, piece));
+                    }
+
+                    if (touches.Count > 0)
+                    {
+                        var invUpdate = new InventoryUpdateMsg
+                        {
+                            Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
+                        };
+                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+                        SaveInventory(session, inventory);
+                    }
+
+                    return true;
+                },
+                _ => classId))
+            return false;
 
         int previous = player.ClassId;
         player.ClassId = change.ClassId;
@@ -152,14 +179,8 @@ public sealed partial class ZoneWorld
         FanoutNetMoveType(player);
         FanoutMoveType(player);
 
-        var invUpdate = new InventoryUpdateMsg
-        {
-            Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
-        };
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
-
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
-        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+        NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
 
         // Mobius broadcastUserInfo: peers see the new class.
@@ -176,7 +197,6 @@ public sealed partial class ZoneWorld
         _persist.SaveClass(session.Account, session.ObjectId, change.ClassId);
         if (trackBase || player.SubClassActive)
             SaveClassState(session, player);
-        SaveInventory(session, inventory);
         SaveQuestProgress(session, player);
         ZoneLog.Info($"class-change object={session.ObjectId} {previous}->{change.ClassId} " +
                      $"proof={string.Join(",", change.ProofItemIds)}");
@@ -190,7 +210,7 @@ public sealed partial class ZoneWorld
     internal string? VillageMasterForTest(ZoneSession session, int npcId, string script, string evt, out string html)
     {
         html = "";
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!TryPlayer(session, out var player))
                 return "world";

@@ -176,14 +176,14 @@ public sealed class ZoneTrickTests
         var (kit, rec, session, player, _) = await EnterAsync();
         var (victimSession, victim) = await kit.EnterAsync(classId: 0, race: 0, level: 60, x: NetTestKit.ElfX + 80);
         victimSession.SelectedTargetId = player.ObjectId;
-        victimSession.AutoAttackTargetId = player.ObjectId;
+        victim.Intent.AutoAttackTargetId = player.ObjectId;
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, Trick, victim.ObjectId, CancellationToken.None, ctrlPressed: true));
         kit.Now = kit.Now.AddSeconds(2);
         kit.World.ResolvePendingHitForTest(player);
 
         Assert.Equal(0, victimSession.SelectedTargetId);
-        Assert.Equal(0, victimSession.AutoAttackTargetId);
+        Assert.Equal(0, victim.Intent.AutoAttackTargetId);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutTargetUnselected)),
             a => a[0] is IReadOnlyList<int> watchers && watchers.Contains(victim.ObjectId) && (int)a[1]! == player.ObjectId);
     }

@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -75,7 +76,7 @@ public sealed partial class ZoneWorld
         target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
         ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
-            _olympiad.NoteDamage(attacker.ObjectId, hit.Damage);
+            _olympiad.Board.NoteDamage(attacker.ObjectId, hit.Damage);
 
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
@@ -95,7 +96,7 @@ public sealed partial class ZoneWorld
                 attacker.Summon.TargetId = 0;
             }
             if (target.Session != null)
-                target.Session.AutoAttackTargetId = 0;
+                target.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(target, attacker.ObjectId);
         }
     }
@@ -126,6 +127,7 @@ public sealed partial class ZoneWorld
         ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
+        TryApplyRaidCurse(target, attacker, magicSkill: false, now);
         ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);
         AddHate(target, attacker, DamageHate(damage, target.Level));
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
@@ -143,18 +145,14 @@ public sealed partial class ZoneWorld
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
+        NoteBossDeath(npc);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;
         int y = npc.Y;
         int z = npc.Z;
 
-        var watchers = new List<ZoneEntity>();
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(objectId))
-                watchers.Add(player);
-        }
+        var watchers = WatchingPlayers(objectId);
 
         // Mobius Creature.doDie -> stopAllEffects(): a corpse carries no debuffs. Clearing them before the Die packet
         // also empties the watchers' abnormal bar, so the client's stun/sleep pose no longer holds the pawn on the
@@ -162,7 +160,7 @@ public sealed partial class ZoneWorld
         if (npc.Abnormals.Count > 0)
         {
             npc.Abnormals.Clear();
-            _withAbnormals.Remove(objectId);
+            _byId.Leave(npc, ActiveSets.WithAbnormals);
             FanoutAbnormal(npc);
         }
 
@@ -177,7 +175,7 @@ public sealed partial class ZoneWorld
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
             if (watcher.Session.SelectedTargetId == objectId)
-                watcher.Session.AutoAttackTargetId = 0;
+                watcher.Intent.AutoAttackTargetId = 0;
         }
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
@@ -190,20 +188,23 @@ public sealed partial class ZoneWorld
         int killerLevel = killer?.Level ?? npc.Level;
         if (npc.SpoilerObjectId != 0 && _dropCatalog.TryGet(npcId, out var definition))
         {
-            foreach (var stack in DropRoller.RollCorpse(definition, _dropRandom, _dropRates, npc.Level, killerLevel, raid))
+            foreach (var stack in DropRoller.RollCorpse(definition, Rng(_dropRandom, npc), _dropRates, npc.Level, killerLevel, raid))
                 npc.SweepItems.Add(stack);
         }
 
         int dropNpcId = ChestDropNpcId(npcId, npc.ChestSpecialDrop);
         LastDeathDropNpcIdForTest = dropNpcId;
-        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
+        int lootOwner = raid
+            ? RaidLootOwnerObjectId(npc, killer, id => _byId.TryGetValue(id, out var e) ? e : null, _party.Of)
+            : killer?.ObjectId ?? 0;
+        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded, lootOwnerObjectId: lootOwner);
         // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
         bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
         if (spoiled)
             ZoneLog.Info($"corpse object={objectId} spoiler={npc.SpoilerObjectId} sweep={npc.SweepItems.Count}");
         // Mobius DecayTaskManager: DefaultCorpseTime, + SpoiledCorpseExtendTime when spoiled; unswept spoil decays with the corpse.
-        SetDecayAtMs(npc, _clock().ToUnixTimeMilliseconds() + _spoilRules.CorpseMs(spoiled));
+        SetDecayAtMs(npc, NowUnixMs() + _spoilRules.CorpseMs(spoiled));
         if (npc.NpcType is "RaidBoss" or "GrandBoss")
         {
             foreach (int minionId in npc.MinionIds.ToArray())
@@ -229,9 +230,9 @@ public sealed partial class ZoneWorld
         npc.Chasing = false;
         SetAggroTarget(npc, 0);
         npc.LastAiTickMs = 0;
-        ForgetActiveSets(objectId);
         ScheduleRespawn(objectId);
 
+        // Every player, not only watchers: a target selected before the NPC left view must be cleared too.
         List<int>? netWatchers = null;
         foreach (var player in Players())
         {
@@ -239,6 +240,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (player.Knownlist.Remove(objectId))
             {
+                UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }
@@ -256,8 +258,8 @@ public sealed partial class ZoneWorld
 
     internal void DamageNpcByForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
-            DamageNpcBy(attacker, target, damage, _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            DamageNpcBy(attacker, target, damage, NowUnixMs());
     }
 
     bool VisibleTo(int observerId, int otherId)

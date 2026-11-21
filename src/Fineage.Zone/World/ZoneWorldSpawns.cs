@@ -56,6 +56,7 @@ public sealed partial class ZoneWorld
         }
 
         var bounds = ZoneMapFilter.BoundsList;
+        _spawnPeriodNight = IsNight;
         foreach (var map in maps)
         {
             foreach (var def in map.Npcs)
@@ -65,116 +66,10 @@ public sealed partial class ZoneWorld
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
                 _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def, MapId = map.MapId });
-                MaterializeSpawn(def, map.MapId);
+                if (SpawnPeriodActive(def))
+                    MaterializeSpawn(def, map.MapId);
             }
         }
-    }
-
-    void MaterializeSpawn(SpawnNpcDefinition def, string mapId)
-    {
-        if (_byId.ContainsKey(def.ObjectId))
-            return;
-
-        // Hand-built test spawn rows often omit combat stats (PDef=0). Fill from npcs.json
-        // when present so melee rolls fail loud only on genuine missing templates.
-        double pAtk = def.PAtk;
-        double pDef = def.PDef;
-        double mAtk = def.MAtk;
-        double mDef = def.MDef;
-        int level = def.Level;
-        int collisionRadius = 0;
-        if (Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(def.NpcId, out var template))
-        {
-            if (pAtk <= 0)
-                pAtk = template.PAtk;
-            if (pDef <= 0)
-                pDef = template.PDef;
-            if (mAtk <= 0)
-                mAtk = template.MAtk;
-            if (mDef <= 0)
-                mDef = template.MDef;
-            if (level <= 1 && template.Level > 1)
-                level = template.Level;
-            if (template.CollisionRadius > 0)
-                collisionRadius = (int)template.CollisionRadius;
-        }
-
-        var tax = MerchantTowns.For(mapId);
-        var entity = new ZoneEntity
-        {
-            ObjectId = def.ObjectId,
-            Kind = ZoneEntityKind.Npc,
-            Name = def.Name,
-            Title = def.Title,
-            NpcType = def.NpcType,
-            X = def.X,
-            Y = def.Y,
-            Z = def.Z,
-            Heading = def.Heading,
-            NpcId = def.NpcId,
-            Attackable = def.Attackable,
-            MaxHp = def.MaxHp,
-            CurHp = def.MaxHp,
-            MaxMp = def.MaxMp,
-            CurMp = def.MaxMp,
-            Level = level,
-            RewardExp = def.Exp,
-            RewardSp = def.Sp,
-            PAtk = pAtk,
-            HpRegen = def.HpRegen,
-            MpRegen = def.MpRegen,
-            PDef = pDef,
-            PAtkSpd = def.AttackSpeed,
-            BaseAccuracy = def.Accuracy,
-            BaseEvasion = def.Evasion,
-            BaseCritical = def.Critical,
-            RandomDamage = def.RandomDamage,
-            Dex = def.Dex,
-            ShieldDef = def.ShieldDef,
-            ShieldRate = def.ShieldRate,
-            MAtk = mAtk,
-            MDef = mDef,
-            AttackRange = def.AttackRange,
-            AttackType = def.AttackType,
-            Rhand = def.Rhand,
-            Lhand = def.Lhand,
-            CollisionRadius = collisionRadius,
-            Aggressive = def.Aggressive,
-            AggroRange = def.AggroRange,
-            ClanHelpRange = def.ClanHelpRange,
-            Clans = def.Clans,
-            IgnoreNpcIds = def.IgnoreNpcIds,
-            NpcSoulShotLeft = def.SoulShot,
-            NpcSoulShotChance = def.SoulShotChance,
-            NpcSpiritShotLeft = def.SpiritShot,
-            NpcSpiritShotChance = def.SpiritShotChance,
-            DefenceTraits = def.DefenceTraits,
-            AiSkills = FilterAttackSkills(def.AiSkills, _npcAiSupport.Get(def.NpcId)?.Suicide),
-            MinSkillChance = def.MinSkillChance,
-            MaxSkillChance = def.MaxSkillChance,
-            AiHealSkills = _npcAiSupport.Get(def.NpcId)?.Heal,
-            AiBuffSkills = _npcAiSupport.Get(def.NpcId)?.Buff,
-            AiDebuffSkills = _npcAiSupport.Get(def.NpcId)?.Debuff,
-            AiImmobilizeSkills = _npcAiSupport.Get(def.NpcId)?.Immobilize,
-            AiSilenceSkills = _npcAiSupport.Get(def.NpcId)?.Silence,
-            AiSuicideSkills = _npcAiSupport.Get(def.NpcId)?.Suicide,
-            RunSpeed = def.RunSpeed,
-            WalkSpeed = def.WalkSpeed,
-            // Mobius Creature._isRunning starts false. Attack intention calls setRunning().
-            Running = false,
-            GlobalAggro = -10,
-            // Mobius Spawn location is the returnHome target; captured at spawn, not at first aggro, so a mob that
-            // drifted before being attacked still walks back to the real spawn point.
-            HomeSet = true,
-            HomeX = def.X,
-            HomeY = def.Y,
-            HomeZ = def.Z,
-            MerchantCastleId = tax.CastleId,
-            MerchantTown = MerchantTowns.TownName(mapId),
-            MerchantBaseTaxPercent = tax.BaseTaxPercent
-        };
-        _byId.Add(entity.ObjectId, entity);
-        _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
     }
 
     void ScheduleRespawn(int objectId)
@@ -185,10 +80,10 @@ public sealed partial class ZoneWorld
         int delaySeconds = slot.Definition.RespawnDelaySeconds;
         int jitter = slot.Definition.RespawnRandomSeconds;
         if (jitter > 0)
-            delaySeconds += _spawnRandom.Next(0, jitter + 1);
+            delaySeconds += _spawnRandom.For(_regions.RegionOf(0, slot.Definition.X, slot.Definition.Y)).Next(0, jitter + 1);
 
         ClearSpawnDue(slot);
-        var at = _clock().AddSeconds(Math.Max(1, delaySeconds));
+        var at = DateTimeOffset.FromUnixTimeMilliseconds(NowUnixMs()).AddSeconds(Math.Max(1, delaySeconds));
         slot.RespawnAt = at;
         _spawnDue.Add((at.ToUnixTimeMilliseconds(), objectId));
     }
@@ -203,7 +98,7 @@ public sealed partial class ZoneWorld
 
     void TickSpawns()
     {
-        long nowMs = _clock().ToUnixTimeMilliseconds();
+        long nowMs = NowUnixMs();
         while (_spawnDue.Count > 0)
         {
             var first = _spawnDue.Min;
@@ -222,10 +117,18 @@ public sealed partial class ZoneWorld
             }
 
             ClearSpawnDue(slot);
+            if (!SpawnPeriodActive(slot.Definition))
+                continue;
             MaterializeSpawn(slot.Definition, slot.MapId);
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc);
         }
+    }
+
+    internal void FanoutNewNpcForTests(ZoneEntity npc)
+    {
+        using (_affinity.Step())
+            FanoutNewNpc(npc);
     }
 
     void FanoutNewNpc(ZoneEntity npc)
@@ -238,6 +141,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (!player.Knownlist.Add(npc.ObjectId))
                 continue;
+            TrackWatcher(player.ObjectId, npc.ObjectId);
             // Net clients: the respawn was added to the knownlist here, so the next move refresh sees no diff and
             // the mob stayed invisible until the player left and re-entered view ("mobs appear late"). Push the
             // EntitySpawn now, like Mobius Spawn.doSpawn → broadcast NpcInfo to the region.
@@ -248,7 +152,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
     internal void DespawnNpcForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_byId.TryGetValue(objectId, out var npc))
                 DespawnNpc(npc);
@@ -258,9 +162,10 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: advance respawn timers without waiting on the simulation loop.</summary>
     internal void AdvanceSpawnsForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            TickCorpseDecay(_clock().ToUnixTimeMilliseconds());
+            TickDayNightSpawns();
+            TickCorpseDecay(NowUnixMs());
             TickSpawns();
         }
     }

@@ -24,7 +24,7 @@ public sealed partial class ZoneWorld
 
     void TrackQuestSpawn(ZoneEntity entity, ZoneEntity owner, QuestSummon? summon)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int seconds = summon is { DespawnSec: > 0 } ? summon.DespawnSec : DefaultQuestDespawnSeconds;
         entity.QuestSpawn = new QuestSpawnState
         {
@@ -149,9 +149,10 @@ public sealed partial class ZoneWorld
         _questSpawns.Remove(npc.ObjectId);
         if (QuestSpawnOwner(npc) is not { } owner)
             return;
-        bool solo = ReferenceEquals(killer, owner) && !_partyByPlayer.ContainsKey(owner.ObjectId);
+        bool solo = ReferenceEquals(killer, owner) && !_party.InParty(owner.ObjectId);
         if (_quests.HasOwnedSteps(npc.NpcId))
-            PublishKill(owner, _quests.OnOwned(owner.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Kill, solo), npc);
+            PublishKill(owner, RecordQuest(owner,
+                () => _quests.OnOwned(owner.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Kill, solo)), npc);
         ApplySpawnVars(npc, summon.DeadVars);
         q.Leaving = true;
     }
@@ -168,7 +169,7 @@ public sealed partial class ZoneWorld
             return true;
         var owner = QuestSpawnOwner(npc);
         bool isOwner = owner != null && ReferenceEquals(attacker, owner);
-        bool solo = isOwner && !_partyByPlayer.ContainsKey(owner!.ObjectId);
+        bool solo = isOwner && !_party.InParty(owner!.ObjectId);
         if (summon.SoloGuard && !solo)
         {
             if (!string.IsNullOrEmpty(summon.GuardSay))
@@ -180,8 +181,10 @@ public sealed partial class ZoneWorld
 
         if (summon.Owned && isOwner && _quests.HasOwnedSteps(npc.NpcId))
         {
-            var outcome = _quests.OnOwned(owner!.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Attack, solo);
-            PublishKill(owner, outcome, npc);
+            var self = owner!;
+            var outcome = RecordQuest(self,
+                () => _quests.OnOwned(self.Quests, self.Inventory!, npc.NpcId, QuestActorOf(self), QuestHook.Attack, solo));
+            PublishKill(self, outcome, npc);
         }
 
         return false;
@@ -212,14 +215,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the quest-spawn despawn timers now.</summary>
     internal void TickQuestSpawnsForTest(long? now = null)
     {
-        lock (_gate)
-            TickQuestSpawns(now ?? _clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            TickQuestSpawns(now ?? NowUnixMs());
     }
 
     /// <summary>Test hook: kill credit as a dying NPC gives it (owned spawns included).</summary>
     internal void QuestKillEntityForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             npc.CurHp = 0;
             ApplyQuestKill(killer, npc);

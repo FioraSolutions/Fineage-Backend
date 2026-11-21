@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
@@ -91,6 +92,15 @@ public sealed class NetQuestTests
         Assert.Equal(QuestProtocol.CompletedState, quest.State);
         Assert.Contains(saved.Items!, item => item.ItemId == 736 && item.Count >= 1);
         Assert.Contains(saved.Items!, item => item.ItemId == 57 && item.Count == 25);
+
+        // Only the reward moved items, against the quests account; talking and accepting recorded nothing.
+        var bag = LedgerAccount.Inventory(actor.Player.ObjectId);
+        var quests = LedgerAccount.Of(SystemAccount.Quests);
+        var rewarded = Assert.Single(bench.Ledger.Entries, entry => entry.Transaction.Kind != LedgerTxKind.Adjustment).Transaction;
+        Assert.Equal((LedgerTxKind.QuestReward, actor.Player.ObjectId, QuestId), (rewarded.Kind, rewarded.CausedBy, rewarded.Reference));
+        Assert.Equal(
+            [(bag, 57, 25L), (quests, 57, -25L), (bag, 736, 1L), (quests, 736, -1L)],
+            rewarded.Postings.Select(posting => (posting.Account, posting.ItemId, posting.Amount)));
 
         // A fresh session sees the completed journal, which is what the Net enter burst sends.
         await actor.World.LeaveAsync(actor.Session, CancellationToken.None);

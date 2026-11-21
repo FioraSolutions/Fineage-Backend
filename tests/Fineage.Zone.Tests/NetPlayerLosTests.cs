@@ -35,7 +35,7 @@ public sealed class NetPlayerLosTests
         return geo;
     }
 
-    static async Task<(NetTestKit Kit, ZoneSession Session, NetBridgeRecorder Rec)> SetupAsync(bool wall)
+    static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Player, NetBridgeRecorder Rec)> SetupAsync(bool wall)
     {
         var kit = new NetTestKit(Map(), "los", Geo(wall));
         var (session, player) = await kit.EnterAsync(classId: 0, race: 0);
@@ -43,16 +43,16 @@ public sealed class NetPlayerLosTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
-        return (kit, session, rec);
+        return (kit, session, player, rec);
     }
 
     [Fact]
     public async Task Wall_between_blocks_the_swing_with_cannot_see_target()
     {
-        var (kit, session, rec) = await SetupAsync(wall: true);
+        var (kit, session, player, rec) = await SetupAsync(wall: true);
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
             m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgCannotSeeTarget);
     }
@@ -60,9 +60,9 @@ public sealed class NetPlayerLosTests
     [Fact]
     public async Task Open_ground_swings_normally()
     {
-        var (kit, session, rec) = await SetupAsync(wall: false);
+        var (kit, session, player, rec) = await SetupAsync(wall: false);
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
         Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
-        Assert.True(session.AutoAttackTargetId > 0);
+        Assert.True(player.Intent.AutoAttackTargetId > 0);
     }
 }

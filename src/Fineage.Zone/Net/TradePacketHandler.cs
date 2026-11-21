@@ -35,9 +35,9 @@ public sealed class TradePacketHandler
         }
 
         var req = NetCodec.DecodeTradeRequest(envelope.Payload);
-        string? error = await _world.TryTradeRequestAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new TradeRequestMsg { TargetObjectId = req.TargetObjectId },
+            new TradeRequestCommand(new TradeRequestMsg { TargetObjectId = req.TargetObjectId }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Trade request failed.", ct).ConfigureAwait(false);
@@ -57,13 +57,14 @@ public sealed class TradePacketHandler
         }
 
         var answer = NetCodec.DecodeTradeAnswerRequest(envelope.Payload);
-        string? error = await _world.TryTradeAnswerAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new TradeAnswerRequestMsg
-            {
-                RequestorObjectId = answer.RequestorObjectId,
-                Response = answer.Response
-            },
+            new TradeAnswerCommand(
+                new TradeAnswerRequestMsg
+                {
+                    RequestorObjectId = answer.RequestorObjectId,
+                    Response = answer.Response
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Trade answer failed.", ct).ConfigureAwait(false);
@@ -83,13 +84,14 @@ public sealed class TradePacketHandler
         }
 
         var add = NetCodec.DecodeTradeAddItemRequest(envelope.Payload);
-        string? error = await _world.TryTradeAddItemAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new TradeAddItemRequestMsg
-            {
-                InventoryObjectId = add.InventoryObjectId,
-                Count = add.Count
-            },
+            new TradeAddItemCommand(
+                new TradeAddItemRequestMsg
+                {
+                    InventoryObjectId = add.InventoryObjectId,
+                    Count = add.Count
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Trade add item failed.", ct).ConfigureAwait(false);
@@ -109,9 +111,9 @@ public sealed class TradePacketHandler
         }
 
         var done = NetCodec.DecodeTradeDoneRequest(envelope.Payload);
-        string? error = await _world.TryTradeDoneAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new TradeDoneRequestMsg { Response = done.Response },
+            new TradeDoneCommand(new TradeDoneRequestMsg { Response = done.Response }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Trade done failed.", ct).ConfigureAwait(false);

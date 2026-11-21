@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     public bool TrySetPlayerDead(int objectId, bool dead)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
                 return false;
@@ -24,7 +24,7 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryUseItemAsync(ZoneSession session, int objectId, CancellationToken ct)
     {
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryUseItem(session, objectId)));
     }
 
@@ -62,7 +62,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         // Mobius UseItem: recipe scrolls register into the craft book; ItemSkills handle potions / SOE / shots.
-        if (_manor.Data.Seed(item.ItemId) is { } seed)
+        if (_manor.Board.Data.Seed(item.ItemId) is { } seed)
             return TryUseSeed(session, player, item, seed);
         if (item.ItemId == ManorProtocol.HarvesterItemId)
             return TryUseHarvester(session, player);
@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
             return TryUsePetResurrectScroll(session, player, item);
         if (_soulCrystals.IsCrystal(item.ItemId))
             return TryUseSoulCrystal(session, player, item);
+        if (MercTicketIsSiegeGuardItem(item.ItemId))
+            return TryUseMercTicket(session, player, item);
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))

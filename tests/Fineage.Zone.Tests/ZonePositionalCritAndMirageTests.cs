@@ -129,7 +129,10 @@ public sealed class ZonePositionalCritAndMirageTests
         player.KnownSkills[FocusChance] = 1;
         player.Abnormals.Add(new ZoneAbnormalEntry
         {
-            Id = FocusChance, Value = 1, SkillLevel = 1, Slot = "FOCUS_DAGGER",
+            Id = FocusChance,
+            Value = 1,
+            SkillLevel = 1,
+            Slot = "FOCUS_DAGGER",
             ExpiresAtUnixMs = kit.Now.ToUnixTimeMilliseconds() + 120_000
         });
 
@@ -173,16 +176,19 @@ public sealed class ZonePositionalCritAndMirageTests
         var (_, defender) = await kit.EnterAsync(classId: 7, race: 0, level: 60, x: NetTestKit.ElfX + 60);
         defender.Abnormals.Add(new ZoneAbnormalEntry
         {
-            Id = Mirage, Value = 1, SkillLevel = 1, Slot = "MIRAGE",
+            Id = Mirage,
+            Value = 1,
+            SkillLevel = 1,
+            Slot = "MIRAGE",
             ExpiresAtUnixMs = kit.Now.ToUnixTimeMilliseconds() + 60_000
         });
         attackerSession.SelectedTargetId = defender.ObjectId;
-        attackerSession.AutoAttackTargetId = defender.ObjectId;
+        attacker.Intent.AutoAttackTargetId = defender.ObjectId;
 
         kit.World.RunDamageTriggersForTest(defender, attacker, 10);
 
         Assert.Equal(0, attackerSession.SelectedTargetId);
-        Assert.Equal(0, attackerSession.AutoAttackTargetId);
+        Assert.Equal(0, attacker.Intent.AutoAttackTargetId);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillLaunched)),
             a => (int)a[2]! == MirageTrigger);
     }
@@ -195,7 +201,10 @@ public sealed class ZonePositionalCritAndMirageTests
         var (_, defender) = await kit.EnterAsync(classId: 7, race: 0, level: 60, x: NetTestKit.ElfX + 60);
         defender.Abnormals.Add(new ZoneAbnormalEntry
         {
-            Id = Mirage, Value = 1, SkillLevel = 1, Slot = "MIRAGE",
+            Id = Mirage,
+            Value = 1,
+            SkillLevel = 1,
+            Slot = "MIRAGE",
             ExpiresAtUnixMs = kit.Now.ToUnixTimeMilliseconds() + 60_000
         });
         attackerSession.SelectedTargetId = defender.ObjectId;

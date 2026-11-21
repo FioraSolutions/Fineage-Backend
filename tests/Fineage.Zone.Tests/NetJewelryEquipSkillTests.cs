@@ -27,7 +27,11 @@ public sealed class NetJewelryEquipSkillTests
         var bag = new PlayerInventory(game.Items);
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 0, Level = 80, Inventory = bag
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 0,
+            Level = 80,
+            Inventory = bag
         };
         var world = new ZoneWorld(game: game);
         int accWithout = world.PlayerStats(player).Accuracy;
@@ -39,7 +43,8 @@ public sealed class NetJewelryEquipSkillTests
         mpWithout = player.MaxMp;
 
         bag.Equip(bag.Add(RingOfQueenAnt));
-        var with = world.PlayerStats(player); // RefreshGearSkills
+        world.RefreshGearSkills(player);
+        var with = world.PlayerStats(player);
         world.RefreshPlayerMaxima(player, fanout: false);
         Assert.Contains(RingSkill, player.GearSkills.Keys);
         Assert.True(with.Accuracy > accWithout, $"acc {with.Accuracy} should exceed bare {accWithout}");
@@ -52,6 +57,7 @@ public sealed class NetJewelryEquipSkillTests
 
         // both_fingers fills LFinger first
         bag.Unequip(bag.GetEquipped(PaperdollSlot.LFinger)!);
+        world.RefreshGearSkills(player);
         world.RefreshPlayerMaxima(player, fanout: false);
         Assert.Equal(accWithout, world.PlayerStats(player).Accuracy);
         Assert.Equal(critWithout, world.PlayerStats(player).CritDmg);

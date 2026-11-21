@@ -80,7 +80,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryPrivateStoreBuy(session, request)));
     }
 
@@ -99,7 +99,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Dead)
             return InventoryProtocol.Dead;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (ClanRules.IsInCombat(player.CombatUntilUnixMs, now) || IsCasting(player, now))
             return PrivateStoreProtocol.Combat;
         if (_tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId))

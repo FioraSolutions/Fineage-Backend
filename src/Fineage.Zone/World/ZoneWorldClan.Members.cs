@@ -47,10 +47,10 @@ public sealed partial class ZoneWorld
             ClearMemberTitle(targetEntity);
         else
             _accounts?.TrySetCharacterTitle(targetMember.Account, targetMember.CharacterId, "");
-        _clanByPlayer.Remove(targetObjectId);
+        _clan.Unlink(targetObjectId);
         clan.CharPenaltyExpiryUnixMs = recruit;
-        _joinExpiry[targetObjectId] = join;
-        _createExpiry[targetObjectId] = create;
+        _clan.SetJoinExpiry(targetObjectId, join);
+        _clan.SetCreateExpiry(targetObjectId, create);
         if (targetEntity != null)
         {
             targetEntity.ClanId = 0;
@@ -145,7 +145,7 @@ public sealed partial class ZoneWorld
 
     void DestroyClan(int clanId, long nowMs)
     {
-        if (!_clans.TryGetValue(clanId, out var clan))
+        if (!_clan.TryGet(clanId, out var clan))
             return;
 
         long leaderCreate = ClanRules.CreatePenaltyExpiry(nowMs);
@@ -165,20 +165,20 @@ public sealed partial class ZoneWorld
 
         foreach (var member in clan.Members)
         {
-            _clanByPlayer.Remove(member.CharacterId);
-            _joinExpiry[member.CharacterId] = 0;
+            _clan.Unlink(member.CharacterId);
+            _clan.SetJoinExpiry(member.CharacterId, 0);
             if (member.CharacterId == clan.LeaderId)
-                _createExpiry[member.CharacterId] = leaderCreate;
+                _clan.SetCreateExpiry(member.CharacterId, leaderCreate);
         }
 
-        _clans.Remove(clanId);
+        _clan.Remove(clanId);
         ReleaseSiegeClan(clanId);
         ForgetWars(clanId);
         ReleaseClanHalls(clanId);
-        foreach (var pair in _pendingClanInvites.ToList())
+        foreach (var pair in _clan.Invites)
         {
             if (pair.Value.ClanId == clanId)
-                _pendingClanInvites.Remove(pair.Key);
+                _clan.DropInvite(pair.Key);
         }
 
         var line = ClanLines.Dispersed();
@@ -198,7 +198,7 @@ public sealed partial class ZoneWorld
 
     void RefreshOnlineMember(ZoneEntity entity)
     {
-        if (entity.Session == null || !_clans.TryGetValue(entity.ClanId, out var clan))
+        if (entity.Session == null || !_clan.TryGet(entity.ClanId, out var clan))
             return;
         var member = clan.Members.FirstOrDefault(m => m.CharacterId == entity.ObjectId);
         if (member == null)
@@ -219,32 +219,16 @@ public sealed partial class ZoneWorld
 
     void ClearExpiredClanInvites(long nowMs)
     {
-        foreach (var pair in _pendingClanInvites.ToList())
+        foreach (var pair in _clan.Invites)
         {
             if (ClanRules.InviteExpired(pair.Value.ExpiresUnixMs, nowMs))
-                _pendingClanInvites.Remove(pair.Key);
+                _clan.DropInvite(pair.Key);
         }
     }
 
     bool RequestBusy(int objectId)
     {
-        if (_pendingClanInvites.ContainsKey(objectId))
-            return true;
-        foreach (var pending in _pendingClanInvites.Values)
-        {
-            if (pending.InviterObjectId == objectId)
-                return true;
-        }
-
-        if (_pendingInvites.ContainsKey(objectId))
-            return true;
-        foreach (var pending in _pendingInvites.Values)
-        {
-            if (pending.InviterObjectId == objectId)
-                return true;
-        }
-
-        return false;
+        return _clan.InInvite(objectId) || _party.InInvite(objectId);
     }
 
     bool IsInviteTarget(int inviterId, int targetId)
@@ -257,27 +241,27 @@ public sealed partial class ZoneWorld
     }
 
     int ClanIdFor(int characterId) =>
-        _clanByPlayer.TryGetValue(characterId, out int id) && _clans.ContainsKey(id) ? id : 0;
+        _clan.ClanIdOf(characterId);
 
     ZoneClan? ClanOf(int characterId)
     {
         int id = ClanIdFor(characterId);
-        return id == 0 ? null : _clans[id];
+        return id == 0 ? null : _clan.Get(id);
     }
 
     bool NameTaken(string? name) =>
-        name != null && _clans.Values.Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+        name != null && _clan.All.Any(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
 
     long JoinExpiry(int characterId)
     {
-        if (_joinExpiry.TryGetValue(characterId, out long value))
+        if (_clan.TryGetJoinExpiry(characterId, out long value))
             return value;
         return 0;
     }
 
     long CreateExpiry(int characterId, string? account = null)
     {
-        if (_createExpiry.TryGetValue(characterId, out long value))
+        if (_clan.TryGetCreateExpiry(characterId, out long value))
             return value;
         if (account != null && _accounts != null)
         {

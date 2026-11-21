@@ -13,10 +13,10 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class NetBossTests
 {
-    /// <summary>MinRandom: every respawn window opens at its lower bound, so the assertion is exact.</summary>
-    sealed class MinRandom : IBossRandom
+    /// <summary>MinRandom, the boss actor's stream: every respawn window opens at its lower bound, so the assertion is exact.</summary>
+    sealed class MinRandom : Random
     {
-        public long NextInclusive(long minInclusive, long maxInclusive) => minInclusive;
+        public override int Next(int maxValue) => 0;
     }
 
     static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
@@ -27,9 +27,8 @@ public sealed class NetBossTests
         var schedule = new BossSchedule(
             BossCatalog.From([Boss(enabled: true)]),
             new MemoryBossStore(),
-            () => clock,
-            new MinRandom());
-        var bench = new WorldBench(clock: () => clock, bosses: schedule);
+            clock.ToUnixTimeMilliseconds());
+        var bench = new WorldBench(clock: () => clock, bosses: schedule, bossRandom: new MinRandom());
         return (bench, bench.Rec);
     }
 
@@ -119,7 +118,7 @@ public sealed class NetBossTests
     }
 
     [Fact]
-    public void Status_codec_round_trips_every_field()
+    public void Boss_status_codec_round_trips_every_field()
     {
         var message = new BossStatusNetMsg
         {

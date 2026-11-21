@@ -33,6 +33,4 @@ public sealed class ZoneGameTime
     public int GameHour(long unixMsNow) => GameMinutes(unixMsNow) / 60;
 
     public bool IsNight(long unixMsNow) => GameHour(unixMsNow) < NightUntilHour;
-
-    public bool IsNightNow() => IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 }

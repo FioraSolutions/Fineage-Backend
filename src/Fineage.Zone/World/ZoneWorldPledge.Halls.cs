@@ -2,6 +2,8 @@ using Fineage.Accounts;
 using Fineage.Game.Services;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Clan;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -18,7 +20,7 @@ public sealed partial class ZoneWorld
     const int HallMinClanLevel = 2;
 
     ClanHallCatalog? _hallCatalog;
-    Dictionary<int, ClanHallSave>? _halls;
+    readonly HallAuctionActor _hallAuctions = new();
 
     internal ClanHallCatalog HallCatalog
     {
@@ -26,36 +28,36 @@ public sealed partial class ZoneWorld
         set
         {
             _hallCatalog = value;
-            _halls = null;
+            _hallAuctions.Halls = null;
         }
     }
 
     Dictionary<int, ClanHallSave> Halls(long now)
     {
-        if (_halls != null)
-            return _halls;
+        if (_hallAuctions.Halls != null)
+            return _hallAuctions.Halls;
         var stored = (_accounts?.ListClanHalls() ?? []).ToDictionary(h => h.Id);
-        _halls = [];
+        _hallAuctions.Halls = [];
         foreach (var info in HallCatalog.Halls.OrderBy(h => h.Id))
         {
             var hall = stored.TryGetValue(info.Id, out var s) ? s : new ClanHallSave { Id = info.Id, StartingBid = info.StartingBid };
             if (hall.StartingBid <= 0)
                 hall.StartingBid = info.StartingBid;
-            if (hall.OwnerClanId != 0 && !_clans.ContainsKey(hall.OwnerClanId))
+            if (hall.OwnerClanId != 0 && !_clan.Contains(hall.OwnerClanId))
                 hall.OwnerClanId = 0;
             if (hall.OwnerClanId == 0 && hall.AuctionEndUnixMs <= 0)
                 hall.AuctionEndUnixMs = now + HallAuctionMs;
-            _halls[hall.Id] = hall;
+            _hallAuctions.Halls[hall.Id] = hall;
         }
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
         {
-            var owned = _halls.Values.FirstOrDefault(h => h.OwnerClanId == clan.Id);
+            var owned = _hallAuctions.Halls.Values.FirstOrDefault(h => h.OwnerClanId == clan.Id);
             clan.D.HallId = owned?.Id ?? 0;
         }
-        return _halls;
+        return _hallAuctions.Halls;
     }
 
-    void SaveHalls() => _accounts?.SaveClanHalls([.. (_halls ?? []).Values.OrderBy(h => h.Id)]);
+    void SaveHalls() => _accounts?.SaveClanHalls([.. (_hallAuctions.Halls ?? []).Values.OrderBy(h => h.Id)]);
 
     /// <summary>The hall this clan has a live bid on (Mobius <c>getAuctionBiddedAt</c>), 0 none.</summary>
     int BidHallOf(int clanId, long now) =>
@@ -75,7 +77,7 @@ public sealed partial class ZoneWorld
                 Grade = info?.Grade ?? 0,
                 Lease = info?.Lease ?? 0,
                 OwnerClanId = h.OwnerClanId,
-                OwnerClanName = _clans.TryGetValue(h.OwnerClanId, out var owner) ? owner.Name : "",
+                OwnerClanName = _clan.TryGet(h.OwnerClanId, out var owner) ? owner.Name : "",
                 AuctionEndUnixMs = h.OwnerClanId == 0 ? h.AuctionEndUnixMs : 0,
                 StartingBid = h.StartingBid,
                 HighestBid = h.Bids.Count == 0 ? 0 : h.Bids.Max(b => b.Amount),
@@ -138,7 +140,7 @@ public sealed partial class ZoneWorld
 
     string? CancelHallBid(ZoneSession session, ZoneClan clan, int hallId)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         if (!HasPriv(clan, session.ObjectId, PledgeProtocol.PrivHallAuction))
             return NotAuthorized(session);
         if (!Halls(now).TryGetValue(hallId, out var hall))
@@ -162,27 +164,34 @@ public sealed partial class ZoneWorld
         SaveClan(clan);
     }
 
-    /// <summary>Mobius <c>ClanHallAuction.endAuction</c> for every hall whose auction time is up.</summary>
-    void TickHallAuctions(long now)
+    /// <summary>The hall auction stage at the step's wall sample: the halls are loaded, then due auctions settle.</summary>
+    void TickHallAuctions(TickContext tick)
     {
-        if (_halls == null && HallCatalog.Halls.Count == 0)
+        if (_hallAuctions.Halls == null && HallCatalog.Halls.Count == 0)
             return;
-        bool changed = false;
-        foreach (var hall in Halls(now).Values)
+        Halls(tick.WallUnixMs);
+        SettleHallAuctions(_hallAuctions.Step(tick), tick.WallUnixMs);
+    }
+
+    /// <summary>Mobius <c>ClanHallAuction.endAuction</c> for every hall whose auction time is up.</summary>
+    void SettleHallAuctions(IReadOnlyList<HallAuctionDue> due, long now)
+    {
+        if (due.Count == 0)
+            return;
+        var halls = Halls(now);
+        foreach (var ended in due)
         {
-            if (hall.OwnerClanId != 0 || hall.AuctionEndUnixMs > now)
-                continue;
-            changed = true;
+            var hall = halls[ended.HallId];
             var winner = hall.Bids
-                .Where(b => _clans.TryGetValue(b.ClanId, out var c) && c.D.HallId == 0)
+                .Where(b => _clan.TryGet(b.ClanId, out var c) && c.D.HallId == 0)
                 .OrderByDescending(b => b.Amount).ThenBy(b => b.TimeUnixMs).FirstOrDefault();
             foreach (var bid in hall.Bids)
             {
-                if (bid != winner && _clans.TryGetValue(bid.ClanId, out var loser))
+                if (bid != winner && _clan.TryGet(bid.ClanId, out var loser))
                     RefundHallBid(loser, bid.Amount, tax: true);
             }
             hall.Bids.Clear();
-            if (winner == null || !_clans.TryGetValue(winner.ClanId, out var clan))
+            if (winner == null || !_clan.TryGet(winner.ClanId, out var clan))
             {
                 hall.AuctionEndUnixMs = now + HallAuctionMs;
                 continue;
@@ -196,16 +205,15 @@ public sealed partial class ZoneWorld
             HallCatalog.TryGet(hall.Id, out var info);
             ClanLine(OnlineIds(clan), 0, $"Congratulations, your clan has won the clan hall {info?.Name ?? hall.Id.ToString()}!");
         }
-        if (changed)
-            SaveHalls();
+        SaveHalls();
     }
 
     /// <summary>Clan destroyed: its hall returns to auction and its live bid is dropped without refund target.</summary>
     void ReleaseClanHalls(int clanId)
     {
-        if (_halls == null && _accounts == null)
+        if (_hallAuctions.Halls == null && _accounts == null)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         bool changed = false;
         foreach (var hall in Halls(now).Values)
         {
@@ -225,22 +233,22 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: force every running auction to end now.</summary>
     internal void EndHallAuctionsForTest(long now)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             foreach (var hall in Halls(now).Values)
             {
                 if (hall.OwnerClanId == 0)
                     hall.AuctionEndUnixMs = now;
             }
-            TickHallAuctions(now);
+            SettleHallAuctions(_hallAuctions.Step(new TickContext(_simulationTicks.Tick, now, now)), now);
         }
     }
 
     internal (int Owner, int Bids, long Highest)? HallForTest(int hallId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            long now = _clock().ToUnixTimeMilliseconds();
+            long now = NowUnixMs();
             return Halls(now).TryGetValue(hallId, out var h)
                 ? (h.OwnerClanId, h.Bids.Count, h.Bids.Count == 0 ? 0 : h.Bids.Max(b => b.Amount))
                 : null;
@@ -253,9 +261,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: drop items straight into a clan warehouse.</summary>
     internal bool AddClanWarehouseItemForTest(int clanId, int itemId, int count)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             ClanWarehouseOf(clan)!.Add(itemId, count, 0, out _);
             return SaveClan(clan);

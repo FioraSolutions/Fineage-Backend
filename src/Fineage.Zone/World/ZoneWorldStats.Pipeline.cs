@@ -21,7 +21,7 @@ public sealed partial class ZoneWorld
             return reuse;
         var attrs = EffectiveAttributes(player);
         return ZoneCombat.RollSkillMastery(
-            _combatRandom, ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus)
+            Rng(_combatRandom, player), ps.SkillCritical, ps.SkillCriticalProbability, attrs.StrBonus, attrs.IntBonus)
             ? 100
             : reuse;
     }
@@ -98,7 +98,7 @@ public sealed partial class ZoneWorld
         if (attacker.Kind == ZoneEntityKind.Player)
         {
             if (attacker.Session != null)
-                attacker.Session.AutoAttackTargetId = 0;
+                attacker.Intent.AutoAttackTargetId = 0;
             ApplyPlayerDeath(attacker, target.ObjectId);
         }
         else if (attacker.Kind == ZoneEntityKind.Npc && attacker.Summon == null)

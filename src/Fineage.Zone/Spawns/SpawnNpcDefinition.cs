@@ -57,7 +57,8 @@ public sealed record SpawnNpcDefinition(
     int MaxSkillChance = 15,
     string AttackType = "",
     int Rhand = 0,
-    int Lhand = 0);
+    int Lhand = 0,
+    SpawnPeriodOfDay PeriodOfDay = SpawnPeriodOfDay.Any);
 
 public sealed record SpawnMapDefinition(
     string MapId,

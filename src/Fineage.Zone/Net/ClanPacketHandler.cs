@@ -11,16 +11,13 @@ namespace Fineage.Zone.Net;
 public sealed class ClanPacketHandler
 {
     readonly ZoneWorld _world;
-    readonly Func<DateTimeOffset> _clock;
     readonly Func<NetConnection, string, string, CancellationToken, Task> _reject;
 
     public ClanPacketHandler(
         ZoneWorld world,
-        Func<DateTimeOffset> clock,
         Func<NetConnection, string, string, CancellationToken, Task> reject)
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _reject = reject ?? throw new ArgumentNullException(nameof(reject));
     }
 
@@ -39,7 +36,10 @@ public sealed class ClanPacketHandler
 
         var create = NetCodec.DecodeClanCreateRequest(envelope.Payload);
         string? error = await _world
-            .TryClanCreateAsync(zoneSession, new ClanCreateRequestMsg { Name = create.Name }, _clock(), ct)
+            .ExecuteAsync(
+                zoneSession,
+                new ClanCreateCommand(new ClanCreateRequestMsg { Name = create.Name }),
+                ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan create failed.", ct).ConfigureAwait(false);
@@ -60,10 +60,10 @@ public sealed class ClanPacketHandler
 
         var invite = NetCodec.DecodeClanInviteRequest(envelope.Payload);
         string? error = await _world
-            .TryClanInviteAsync(
+            .ExecuteAsync(
                 zoneSession,
-                new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = invite.PledgeType },
-                _clock(),
+                new ClanInviteCommand(
+                    new ClanInviteRequestMsg { TargetObjectId = invite.TargetObjectId, PledgeType = invite.PledgeType }),
                 ct)
             .ConfigureAwait(false);
         if (error != null)
@@ -85,14 +85,14 @@ public sealed class ClanPacketHandler
 
         var answer = NetCodec.DecodeClanAnswer(envelope.Payload);
         string? error = await _world
-            .TryClanAnswerAsync(
+            .ExecuteAsync(
                 zoneSession,
-                new ClanAnswerJoinRequestMsg
-                {
-                    RequestorObjectId = answer.RequestorObjectId,
-                    Response = answer.Response
-                },
-                _clock(),
+                new ClanAnswerCommand(
+                    new ClanAnswerJoinRequestMsg
+                    {
+                        RequestorObjectId = answer.RequestorObjectId,
+                        Response = answer.Response
+                    }),
                 ct)
             .ConfigureAwait(false);
         if (error != null)
@@ -111,7 +111,7 @@ public sealed class ClanPacketHandler
             return;
         }
 
-        string? error = await _world.TryClanLeaveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new ClanLeaveCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan leave failed.", ct).ConfigureAwait(false);
     }
@@ -131,7 +131,10 @@ public sealed class ClanPacketHandler
 
         var kick = NetCodec.DecodeClanKickRequest(envelope.Payload);
         string? error = await _world
-            .TryClanKickAsync(zoneSession, new ClanKickRequestMsg { TargetObjectId = kick.TargetObjectId }, _clock(), ct)
+            .ExecuteAsync(
+                zoneSession,
+                new ClanKickCommand(new ClanKickRequestMsg { TargetObjectId = kick.TargetObjectId }),
+                ct)
             .ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan kick failed.", ct).ConfigureAwait(false);
@@ -149,7 +152,7 @@ public sealed class ClanPacketHandler
             return;
         }
 
-        string? error = await _world.TryClanDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new ClanDissolveCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan dissolve failed.", ct).ConfigureAwait(false);
     }
@@ -166,7 +169,7 @@ public sealed class ClanPacketHandler
             return;
         }
 
-        string? error = await _world.TryClanCancelDissolveAsync(zoneSession, _clock(), ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new ClanCancelDissolveCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan cancel dissolve failed.", ct).ConfigureAwait(false);
     }
@@ -186,7 +189,7 @@ public sealed class ClanPacketHandler
         }
 
         var command = NetCodec.DecodePledgeCommand(envelope.Payload);
-        string? error = await _world.TryPledgeCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new PledgeCommand(command), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Clan command failed.", ct).ConfigureAwait(false);
     }
@@ -206,7 +209,7 @@ public sealed class ClanPacketHandler
         }
 
         var command = NetCodec.DecodeCastleCommand(envelope.Payload);
-        string? error = await _world.TryCastleCommandAsync(zoneSession, command, _clock(), ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new CastleCommand(command), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Castle command failed.", ct).ConfigureAwait(false);
     }
@@ -226,7 +229,7 @@ public sealed class ClanPacketHandler
         }
 
         var command = NetCodec.DecodeManorCommand(envelope.Payload);
-        string? error = await _world.TryManorCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new ManorCommand(command), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Manor command failed.", ct).ConfigureAwait(false);
     }
@@ -246,7 +249,7 @@ public sealed class ClanPacketHandler
         }
 
         var command = NetCodec.DecodeSummonCommand(envelope.Payload);
-        string? error = await _world.TrySummonCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new SummonCommand(command), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Summon command failed.", ct).ConfigureAwait(false);
     }
@@ -266,7 +269,7 @@ public sealed class ClanPacketHandler
         }
 
         var command = NetCodec.DecodeDuelCommand(envelope.Payload);
-        string? error = await _world.TryDuelCommandAsync(zoneSession, command, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new DuelCommand(command), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Duel command failed.", ct).ConfigureAwait(false);
     }

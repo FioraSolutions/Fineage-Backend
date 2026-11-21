@@ -12,6 +12,8 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    readonly ChatActor _chat = new();
+
     /// <summary>Mobius GeneralConfig.BAN_CHAT_CHANNELS default: GENERAL;SHOUT;TRADE;HERO_VOICE;WHISPER.</summary>
     static bool BanCovers(int chatType) =>
         chatType is ChatProtocol.All or ChatProtocol.Shout or ChatProtocol.Trade or ChatProtocol.Hero or ChatProtocol.Tell;
@@ -25,11 +27,16 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         SystemMessageMsg? notice = null;
-        lock (_gate)
-        {
-            if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var speaker) || speaker.Session == null)
-                return Task.FromResult<string?>("world");
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var speaker) || speaker.Session == null)
+            return Task.FromResult<string?>("world");
 
+        if (GmChatCommand.TrySplit(normalized, out _, out _))
+        {
+            session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
+            notice = TryGmChat(speaker, session, normalized);
+        }
+        else
+        {
             long nowMs = now.ToUnixTimeMilliseconds();
             if (SayRules.IsFlood(session.LastChatUnixMs, nowMs))
             {
@@ -66,7 +73,8 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>(null);
         }
 
-        ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={chatType} text={normalized}");
+        if (!GmChatCommand.TrySplit(normalized, out _, out _))
+            ZoneLog.Info($"say object={session.ObjectId} name={session.Name} type={chatType} text={normalized}");
         return Task.FromResult<string?>(null);
     }
 
@@ -91,32 +99,31 @@ public sealed partial class ZoneWorld
             case ChatProtocol.Tell:
                 return Whisper(speaker, target, text, nowMs);
             case ChatProtocol.Party:
-                if (!_partyByPlayer.TryGetValue(speaker.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+                if (_party.Of(speaker.ObjectId) is not { } party)
                     return Plain("You are not in a party.");
                 SayToGroup(speaker, chatType, text, party.MemberIds);
                 return null;
             case ChatProtocol.Clan:
-                if (speaker.ClanId == 0)
+                if (speaker.ClanId == 0 || ClanOf(speaker.ObjectId) is not { } clan)
                     return Plain("You are not in a clan.");
-                SayToGroup(speaker, chatType, text,
-                    Players().Where(p => p.ClanId == speaker.ClanId).Select(p => p.ObjectId));
+                SayToGroup(speaker, chatType, text, OnlineMembers(clan).Select(member => member.ObjectId));
                 return null;
             case ChatProtocol.Alliance:
-            {
-                // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
-                int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
-                if (allyId == 0)
-                    return Plain("You are not in an alliance.");
-                SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
-                return null;
-            }
+                {
+                    // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
+                    int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
+                    if (allyId == 0)
+                        return Plain("You are not in an alliance.");
+                    SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
+                    return null;
+                }
             case ChatProtocol.Hero:
                 if (!speaker.Hero)
                     return Plain("Only Heroes can enter the Hero channel.");
                 if (speaker.Session!.LastHeroVoiceUnixMs > 0 && nowMs - speaker.Session.LastHeroVoiceUnixMs < ChatProtocol.HeroVoiceIntervalMs)
                     return Plain("Action failed. Heroes are only able to speak in the global channel once every 10 seconds.");
                 speaker.Session.LastHeroVoiceUnixMs = nowMs;
-                SayToGroup(speaker, chatType, text, Players().Select(p => p.ObjectId));
+                SayToGroup(speaker, chatType, text, _chat.Online);
                 return null;
             case ChatProtocol.PetitionPlayer:
             case ChatProtocol.PetitionGm:
@@ -173,6 +180,10 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutCreatureSay(netWatchers, Line(speaker, chatType, text));
     }
 
+    /// <summary>The player in the world with that name (case-insensitive), from the chat actor's roster.</summary>
+    ZoneEntity? OnlinePlayerNamed(string name) =>
+        _chat.Find(name) is var id and not 0 && _byId.TryGetValue(id, out var player) ? player : null;
+
     int RegionLocId(ZoneEntity entity) => _mapRegions.At(entity.X, entity.Y)?.LocId ?? 0;
 
     /// <summary>Mobius AbstractPlayerGroup.broadcastCreatureSay / Clan.broadcastCSToOnlineMembers.</summary>
@@ -202,15 +213,7 @@ public sealed partial class ZoneWorld
     {
         if (target.Length == 0)
             return null;
-        ZoneEntity? receiver = null;
-        foreach (var p in Players())
-        {
-            if (string.Equals(p.Name, target, StringComparison.OrdinalIgnoreCase))
-            {
-                receiver = p;
-                break;
-            }
-        }
+        var receiver = OnlinePlayerNamed(target);
 
         if (receiver?.Session == null || !receiver.Session.InWorld)
             return new SystemMessageMsg { Id = ChatProtocol.PlayerNotOnline, Params = [], Text = "That player is not online." };
@@ -229,9 +232,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void AnnounceToAll(string text, bool critical = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            var watchers = Players().Where(p => p.Session != null).Select(p => p.ObjectId).ToList();
+            var watchers = _chat.Online;
             if (watchers.Count == 0)
                 return;
             NetBridge?.FanoutCreatureSay(watchers, new CreatureSayMsg
@@ -247,8 +250,8 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius PunishmentType.CHAT_BAN for <paramref name="durationMs"/> (0 lifts it). For GM tools and tests.</summary>
     internal void SetChatBan(ZoneSession session, long durationMs)
     {
-        lock (_gate)
-            session.ChatBannedUntilUnixMs = durationMs > 0 ? _clock().ToUnixTimeMilliseconds() + durationMs : 0;
+        using (_affinity.Step())
+            session.ChatBannedUntilUnixMs = durationMs > 0 ? NowUnixMs() + durationMs : 0;
     }
 
     static bool HearsLocal(ZoneEntity speaker, ZoneEntity other) =>

@@ -1,5 +1,6 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -10,12 +11,39 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    bool IsAtWar(ZoneClan clan) => clan.D.WarTargets.Count > 0 || _clans.Values.Any(c => c.D.WarTargets.Contains(clan.Id));
+    bool IsAtWar(ZoneClan clan) => clan.D.WarTargets.Count > 0 || _clan.All.Any(c => c.D.WarTargets.Contains(clan.Id));
 
     bool Declared(int fromClanId, int toClanId) =>
-        _clans.TryGetValue(fromClanId, out var from) && from.D.WarTargets.Contains(toClanId);
+        _clan.TryGet(fromClanId, out var from) && from.D.WarTargets.Contains(toClanId);
 
     bool MutualWar(int a, int b) => a != 0 && b != 0 && a != b && Declared(a, b) && Declared(b, a);
+
+    bool WarCooldownActive(ZoneClan clan, int enemyClanId, long now) =>
+        clan.D.WarCooldownUntilUnixMs.TryGetValue(enemyClanId, out long until) && until > now;
+
+    void SetWarCooldown(ZoneClan clan, int enemyClanId, long now)
+    {
+        clan.D.WarCooldownUntilUnixMs[enemyClanId] = now + PledgeProtocol.WarCooldownMillis;
+    }
+
+    void ClearWarCooldown(ZoneClan clan, int enemyClanId) => clan.D.WarCooldownUntilUnixMs.Remove(enemyClanId);
+
+    /// <summary>
+    /// Mobius clan-war death XP: only the clan that declared war takes the reduced quarter loss when an enemy clan kills
+    /// its member (one-sided or mutual). Academy members are excluded.
+    /// </summary>
+    internal double ClanWarDeathExpShare(ZoneEntity victim, ZoneEntity killer)
+    {
+        if (victim.Kind != ZoneEntityKind.Player || killer.Kind != ZoneEntityKind.Player)
+            return 1d;
+        if (victim.PledgeType == PledgeProtocol.Academy || killer.PledgeType == PledgeProtocol.Academy)
+            return 1d;
+        int victimClan = ClanIdFor(victim.ObjectId);
+        int killerClan = ClanIdFor(killer.ObjectId);
+        if (victimClan == 0 || killerClan == 0 || victimClan == killerClan)
+            return 1d;
+        return Declared(victimClan, killerClan) ? PledgeProtocol.WarDeathExpShare : 1d;
+    }
 
     /// <summary>Mobius war PvP: both in clans at mutual war and neither is an academy member.</summary>
     bool AtMutualWar(ZoneEntity a, ZoneEntity b) =>
@@ -96,22 +124,19 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal byte[]? SpawnRelationFrame(ZoneEntity subject, ZoneEntity viewer)
     {
-        lock (_gate)
+        if (subject.Kind != ZoneEntityKind.Player || viewer.Kind != ZoneEntityKind.Player || subject.ObjectId == viewer.ObjectId)
+            return null;
+        int relation = RelationOf(subject, viewer);
+        if ((relation & SpawnRelationBits) == 0)
+            return null;
+        return NetCodec.EncodeRelationChanged(new RelationChangedNetMsg
         {
-            if (subject.Kind != ZoneEntityKind.Player || viewer.Kind != ZoneEntityKind.Player || subject.ObjectId == viewer.ObjectId)
-                return null;
-            int relation = RelationOf(subject, viewer);
-            if ((relation & SpawnRelationBits) == 0)
-                return null;
-            return NetCodec.EncodeRelationChanged(new RelationChangedNetMsg
-            {
-                ObjectId = subject.ObjectId,
-                Relation = relation,
-                AutoAttackable = PlayerAutoAttackable(viewer, subject),
-                Karma = subject.Karma,
-                PvpFlag = PvpFlagWire(subject)
-            });
-        }
+            ObjectId = subject.ObjectId,
+            Relation = relation,
+            AutoAttackable = PlayerAutoAttackable(viewer, subject),
+            Karma = subject.Karma,
+            PvpFlag = PvpFlagWire(subject)
+        });
     }
 
     void BroadcastClanRelations(ZoneClan clan)
@@ -138,7 +163,7 @@ public sealed partial class ZoneWorld
         }
         var target = string.IsNullOrWhiteSpace(targetName)
             ? null
-            : _clans.Values.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
+            : _clan.All.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
         if (target == null || target.Id == clan.Id)
         {
             SelfLine(session, 1565, "A clan war cannot be declared against a clan that does not exist!");
@@ -154,13 +179,20 @@ public sealed partial class ZoneWorld
             SelfLine(session, 1564, sizeText);
             return PledgeProtocol.Conditions;
         }
+        long now = NowUnixMs();
         if (clan.D.WarTargets.Contains(target.Id))
+        {
+            SelfLine(session, 628, $"You have already been at war with the {target.Name} clan: 5 days must pass before you can declare war again.", target.Name);
+            return PledgeProtocol.AlreadyAtWar;
+        }
+        if (WarCooldownActive(clan, target.Id, now))
         {
             SelfLine(session, 628, $"You have already been at war with the {target.Name} clan: 5 days must pass before you can declare war again.", target.Name);
             return PledgeProtocol.AlreadyAtWar;
         }
 
         clan.D.WarTargets.Add(target.Id);
+        ClearWarCooldown(clan, target.Id);
         if (!SaveClan(clan))
         {
             clan.D.WarTargets.Remove(target.Id);
@@ -185,7 +217,7 @@ public sealed partial class ZoneWorld
         }
         var target = string.IsNullOrWhiteSpace(targetName)
             ? null
-            : _clans.Values.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
+            : _clan.All.FirstOrDefault(c => string.Equals(c.Name, targetName.Trim(), StringComparison.OrdinalIgnoreCase));
         if (target == null)
         {
             SelfLine(session, 1565, "The clan does not exist.");
@@ -196,7 +228,7 @@ public sealed partial class ZoneWorld
             return PledgeProtocol.NotAtWar;
         }
         // Mobius RequestStopPledgeWar: refused while any member is in combat (1677).
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         foreach (var member in OnlineMembers(clan))
         {
             if (_byId.TryGetValue(member.ObjectId, out var e) && Clan.ClanRules.IsInCombat(e.CombatUntilUnixMs, now))
@@ -207,9 +239,11 @@ public sealed partial class ZoneWorld
         }
 
         clan.D.WarTargets.Remove(target.Id);
+        SetWarCooldown(clan, target.Id, now);
+        SetWarCooldown(target, clan.Id, now);
         if (surrender)
             target.D.WarTargets.Remove(clan.Id);
-        if (!SaveClan(clan) || (surrender && !SaveClan(target)))
+        if (!SaveClan(clan) || !SaveClan(target))
             return ClanProtocol.Store;
 
         if (surrender)
@@ -232,10 +266,10 @@ public sealed partial class ZoneWorld
     void SendWarList(ZoneSession session, ZoneClan clan)
     {
         var declared = clan.D.WarTargets
-            .Where(_clans.ContainsKey)
-            .Select(id => new PledgeWarNet { ClanId = id, Name = _clans[id].Name, Mutual = Declared(id, clan.Id) })
+            .Where(_clan.Contains)
+            .Select(id => new PledgeWarNet { ClanId = id, Name = _clan.Get(id).Name, Mutual = Declared(id, clan.Id) })
             .ToArray();
-        var attackers = _clans.Values
+        var attackers = _clan.All
             .Where(c => c.D.WarTargets.Contains(clan.Id))
             .Select(c => new PledgeWarNet { ClanId = c.Id, Name = c.Name, Mutual = clan.D.WarTargets.Contains(c.Id) })
             .ToArray();
@@ -245,8 +279,8 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius war kill reputation: killer clan +1 when the victim clan's score is above 0; victim clan −1 when the killer clan's is.</summary>
     void ApplyWarKillReputation(ZoneEntity killer, ZoneEntity victim)
     {
-        if (!_clans.TryGetValue(ClanIdFor(killer.ObjectId), out var killerClan) ||
-            !_clans.TryGetValue(ClanIdFor(victim.ObjectId), out var victimClan))
+        if (!_clan.TryGet(ClanIdFor(killer.ObjectId), out var killerClan) ||
+            !_clan.TryGet(ClanIdFor(victim.ObjectId), out var victimClan))
             return;
         bool victimHadRep = victimClan.D.Reputation > 0;
         bool killerHadRep = killerClan.D.Reputation > 0;
@@ -259,7 +293,7 @@ public sealed partial class ZoneWorld
     /// <summary>Drops every war row naming <paramref name="clanId"/> (clan destroyed).</summary>
     void ForgetWars(int clanId)
     {
-        foreach (var other in _clans.Values)
+        foreach (var other in _clan.All)
         {
             if (other.D.WarTargets.Remove(clanId))
             {
@@ -273,15 +307,21 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: relation bits <paramref name="subject"/> shows to <paramref name="viewer"/>.</summary>
     internal int RelationOfForTest(ZoneEntity subject, ZoneEntity viewer)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return RelationOf(subject, viewer);
+    }
+
+    internal double ClanWarDeathExpShareForTest(ZoneEntity victim, ZoneEntity killer)
+    {
+        using (_affinity.Step())
+            return ClanWarDeathExpShare(victim, killer);
     }
 
     internal bool SetMutualWarForTest(int a, int b)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(a, out var ca) || !_clans.TryGetValue(b, out var cb))
+            if (!_clan.TryGet(a, out var ca) || !_clan.TryGet(b, out var cb))
                 return false;
             if (!ca.D.WarTargets.Contains(b))
                 ca.D.WarTargets.Add(b);

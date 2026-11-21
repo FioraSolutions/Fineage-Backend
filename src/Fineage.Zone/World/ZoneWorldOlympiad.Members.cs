@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
 
     void QueueOlympiadStatus(ZoneSession session, long nowUnixMs)
     {
-        var view = _olympiad.View(session.ObjectId, nowUnixMs);
+        var view = _olympiad.Board.View(session.ObjectId, nowUnixMs);
         var message = new OlympiadStatusMsg
         {
             Period = view.Period,
@@ -134,7 +134,7 @@ public sealed partial class ZoneWorld
             HasCursedWeapon(entity.Inventory));
     }
 
-    static OlympiadActor ActorFor(ZoneEntity player) => new(
+    static OlympiadEntrant ActorFor(ZoneEntity player) => new(
         player.ObjectId,
         player.Name,
         player.ClassId,

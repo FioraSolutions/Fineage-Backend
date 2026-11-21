@@ -34,8 +34,10 @@ public sealed class PartyPacketHandler
         }
 
         var invite = NetCodec.DecodePartyInviteRequest(envelope.Payload);
-        string? error = await _world.TryPartyInviteAsync(
-            zoneSession, invite.TargetObjectId, invite.ItemDistribution, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new PartyInviteCommand(invite.TargetObjectId, invite.ItemDistribution),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Party invite failed.", ct).ConfigureAwait(false);
     }
@@ -54,8 +56,10 @@ public sealed class PartyPacketHandler
         }
 
         var answer = NetCodec.DecodePartyAnswerJoinRequest(envelope.Payload);
-        string? error = await _world.TryPartyAnswerAsync(
-            zoneSession, answer.RequestorObjectId, answer.Response, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new PartyAnswerCommand(answer.RequestorObjectId, answer.Response),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Party answer failed.", ct).ConfigureAwait(false);
     }
@@ -69,7 +73,7 @@ public sealed class PartyPacketHandler
             return;
         }
 
-        string? error = await _world.TryPartyLeaveAsync(zoneSession, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new PartyLeaveCommand(), ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Party leave failed.", ct).ConfigureAwait(false);
     }
@@ -88,8 +92,10 @@ public sealed class PartyPacketHandler
         }
 
         var kick = NetCodec.DecodePartyKickRequest(envelope.Payload);
-        string? error = await _world.TryPartyKickAsync(
-            zoneSession, kick.TargetObjectId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new PartyKickCommand(kick.TargetObjectId),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Party kick failed.", ct).ConfigureAwait(false);
     }
@@ -108,8 +114,10 @@ public sealed class PartyPacketHandler
         }
 
         var change = NetCodec.DecodePartyChangeLeaderRequest(envelope.Payload);
-        string? error = await _world.TryPartyChangeLeaderAsync(
-            zoneSession, change.TargetObjectId, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new PartyChangeLeaderCommand(change.TargetObjectId),
+            ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Party leader change failed.", ct).ConfigureAwait(false);
     }

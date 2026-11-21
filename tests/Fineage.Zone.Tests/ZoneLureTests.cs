@@ -95,7 +95,7 @@ public sealed class ZoneLureTests
         Assert.Equal(x, player.X);
         Assert.Equal(y, player.Y);
         Assert.False(player.MoveActive);
-        Assert.Equal(0, session.PendingCastSkillId);
+        Assert.Equal(0, player.Intent.PendingCastSkillId);
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public sealed class ZoneLureTests
             bag.Equip(bag.Add(10));
 
         Assert.Null(await kit.World.TrySkillUseAsync(session, 16, MobId, CancellationToken.None));
-        Assert.True(player.MoveActive || session.PendingCastSkillId == 16);
+        Assert.True(player.MoveActive || player.Intent.PendingCastSkillId == 16);
         Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)),
             a => ((Fineage.Protocol.MagicSkillUseMsg)a[1]!).SkillId == 16);
     }

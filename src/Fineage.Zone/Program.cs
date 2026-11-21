@@ -53,7 +53,7 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
 string stateDir = Arg(args, "--state-dir")
     ?? Environment.GetEnvironmentVariable("FINEAGE_STATE_DIR")
     ?? Path.Combine("data");
-IAccountStore accounts;
+PostgresAccountStore accounts;
 try
 {
     accounts = AccountStoreFactory.Open(Arg(args, "--database"));
@@ -73,17 +73,23 @@ Console.CancelKeyPress += (_, e) =>
     shutdown.Cancel();
 };
 
-var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir);
-var bosses = BossSchedule.OpenInStateDirectory(stateDir);
+var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
+bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
+    Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
+var bosses = BossSchedule.OpenInStateDirectory(
+    stateDir,
+    DateTimeOffset.UtcNow,
+    new MapFilteredBossSpawnPolicy(includeEnabledMapsBoot));
 var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
 // Hosted zone always loads every enabled spawn map (TI, Elven Village, Giran, …).
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
-bool includeEnabledMaps = !ZoneMapFilter.IsExplicitlyOff(
-    Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad);
-world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir));
+bool includeEnabledMaps = includeEnabledMapsBoot;
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
+    ledgerJournal: accounts.OpenLedgerJournal());
+world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
+FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;
@@ -110,6 +116,7 @@ if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOF
 
 string worldLabel = includeEnabledMaps ? "whole world (all enabled spawn maps)" : "single spawn map";
 Console.WriteLine($"[ZONE] world {storeLabel} {worldLabel} (maxConn={maxConnections} outboundQ={outboundQueue} aoi={ZoneAoiSettings.DescribeEffective()} npcs={world.NpcObjectIds.Count})");
+Console.WriteLine($"[ZONE] simulation seed={world.SimulationSeed} step={ZoneSimulationSettings.StepMilliseconds}ms regions={ZoneSimulationSettings.DescribeRegionExecutor(ZoneSimulationSettings.RegionWorkers)} (FINEAGE_ZONE_SEED replays the random streams; FINEAGE_ZONE_REGION_WORKERS spreads regions over threads)");
 Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are stored as seven-signs.json in the state directory.");
 Console.WriteLine("[ZONE] Olympiad registration and points are stored as olympiad.json in the state directory.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");
@@ -154,6 +161,17 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 finally
 {
     shutdown.Cancel();
+    try
+    {
+        await world.WaitSimulationAsync().ConfigureAwait(false);
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        Console.Error.WriteLine($"[ZONE] simulation shutdown: {ex.Message}");
+    }
+
+    world.ShutdownGracefully();
+    world.FlushLedgerOnShutdown();
     bosses.Save();
 }
 

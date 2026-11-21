@@ -22,9 +22,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import questio
 
-QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
+QROOT = ROOT / ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/scripts/quests"
 if not QROOT.is_dir():
-    QROOT = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
+    QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
 
 give = lambda i, c=1: {"op": "give_item", "itemId": i, "count": c}
 take = lambda i, c=1: {"op": "take_item", "itemId": i, "count": c}
@@ -86,14 +86,15 @@ def q262():
             minLevel=8,
             ops=START + [cond(1)],
         ),
-        d(NPC, "talk", "30137-04.html", cond=1),
+        d(NPC, "talk", "30137-04.htm", when="started", cond=1),
         d(
             NPC,
             "talk",
-            "30137-05.html",
+            "30137-05.htm",
+            when="started",
             cond=2,
             atLeast={SAC: 10},
-            ops=[adena(3000), {"op": "complete"}],
+            ops=[take(SAC, 10), adena(3000), {"op": "complete"}],
         ),
         d(20007, "kill", None, cond=1, party=True, raw="", ops=[drop(SAC, 0.3, limit=10, at=2)]),
         d(20400, "kill", None, cond=1, party=True, raw="", ops=[drop(SAC, 0.4, limit=10, at=2)]),
@@ -117,20 +118,21 @@ def q303():
         d(
             NPC,
             "event",
-            "30029-04.htm",
+            "30029-03.htm",
             when="absent",
-            event="30029-04",
+            event="30029-03",
             minLevel=10,
             ops=START + [cond(1)],
         ),
-        d(NPC, "talk", "30029-05.html", cond=1),
+        d(NPC, "talk", "30029-04.htm", when="started", cond=1),
         d(
             NPC,
             "talk",
-            "30029-06.html",
+            "30029-05.htm",
+            when="started",
             cond=2,
             atLeast={HEAD: 10},
-            ops=[adena(1000), exp_sp(2000, 0), {"op": "complete"}],
+            ops=[take(HEAD, 10), adena(1000), exp_sp(2000, 0), {"op": "complete"}],
         ),
         d(20361, "kill", None, cond=1, party=True, raw="", ops=[drop(HEAD, 0.4, limit=10, at=2)]),
     ]
@@ -150,7 +152,6 @@ def q313():
     dialogs = [
         d(NPC, "talk", "30150-02.htm", when="absent", maxLevel=7),
         d(NPC, "talk", "30150-03.htm", when="absent", minLevel=8),
-        d(NPC, "event", "30150-04.htm", when="absent", event="30150-04", minLevel=8),
         d(
             NPC,
             "event",
@@ -160,14 +161,15 @@ def q313():
             minLevel=8,
             ops=START + [cond(1)],
         ),
-        d(NPC, "talk", "30150-06.html", cond=1),
+        d(NPC, "talk", "30150-06.htm", when="started", cond=1),
         d(
             NPC,
             "talk",
-            "30150-07.html",
+            "30150-07.htm",
+            when="started",
             cond=2,
             atLeast={SAC: 10},
-            ops=[adena(3500), {"op": "complete"}],
+            ops=[take(SAC, 10), adena(3500), {"op": "complete"}],
         ),
         # Killer-only — NetQuestKillTests.Spore_fungus_kill_drops_spore_sacs
         d(20509, "kill", None, cond=1, raw="", ops=[drop(SAC, 0.4, limit=10, at=2)]),
@@ -202,12 +204,12 @@ def q320():
         d(
             NPC,
             "talk",
-            "30359-06.html",
+            "30359-06.htm",
             when="started",
             atLeast={BONE: 10},
             ops=[adena(8470), {"op": "complete"}],
         ),
-        d(NPC, "talk", "30359-05.html", when="started"),
+        d(NPC, "talk", "30359-05.htm", when="started"),
         d(20517, "kill", None, cond=1, party=True, raw="", ops=[drop(BONE, 0.18, limit=10, at=2)]),
         d(20518, "kill", None, cond=1, party=True, raw="", ops=[drop(BONE, 0.18, limit=10, at=2)]),
     ]
@@ -222,9 +224,11 @@ def q320():
 
 
 def main() -> None:
+    questio.ensure_meta(max_active=25, talk_range=250)
     for q in (q262(), q303(), q313(), q320()):
         questio.upsert_quest(q)
         print(f"upserted {q['id']} {q['name']} dialogs={len(q['dialogs'])}")
+    questio.ensure_meta(max_active=25, talk_range=250)
 
 
 if __name__ == "__main__":

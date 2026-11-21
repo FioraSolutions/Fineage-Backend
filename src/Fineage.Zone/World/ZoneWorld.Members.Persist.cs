@@ -29,7 +29,9 @@ public sealed partial class ZoneWorld
 
         if (!PlayerClasses.TryGet(session.ClassId, out var template) || template == null || template.Spawns.Count == 0)
             return new ClassSpawn.Point(TalkingIslandSpawn.X, TalkingIslandSpawn.Y, TalkingIslandSpawn.Z);
-        var picked = template.Spawns[_spawnRandom.Next(template.Spawns.Count)];
+        var spawns = template.Spawns;
+        int idx = _spawnRandom.For(_regions.RegionOf(0, spawns[0].X, spawns[0].Y)).Next(spawns.Count);
+        var picked = spawns[idx];
         return new ClassSpawn.Point(picked.X, picked.Y, picked.Z);
     }
 
@@ -54,7 +56,7 @@ public sealed partial class ZoneWorld
     {
         if (!_persist.Enabled || session.ObjectId <= 0)
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         long last = _lastPresenceSaveMs.GetValueOrDefault(session.ObjectId, long.MinValue / 2);
         if (now - last < PresenceSaveIntervalMs)
             return;
@@ -73,11 +75,8 @@ public sealed partial class ZoneWorld
 
     PlayerInventory LoadInventory(ZoneSession session, CharacterRecord? stored = null)
     {
-        if (stored == null)
-            return _game.CreateStarterInventory(session.ClassId, _itemIds);
-        // Items == null was backfilled off-lock in TryEnterAsync; treat missing as starter in-memory only.
-        if (stored.Items == null)
-            return _game.CreateStarterInventory(session.ClassId, _itemIds);
+        if (stored == null || stored.Items == null)
+            return new PlayerInventory(_game.Items, _itemIds);
 
         // Drop unknown templates with a log — Restore already skips them so EnterWorld stays up.
         foreach (var row in stored.Items)
@@ -94,7 +93,7 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
-        if (_deferInventoryPersist)
+        if (InventoryPersistDeferred)
         {
             _dirtyInventories[session.ObjectId] = (session, inventory);
             return;
@@ -103,9 +102,10 @@ public sealed partial class ZoneWorld
         _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
     }
 
-    /// <summary>Flush inventory/warehouse rows queued while <see cref="_deferInventoryPersist"/> was set. Call outside <c>_gate</c>.</summary>
+    /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set.</summary>
     void FlushDirtyInventories()
     {
+        TryFlushLedger();
         if (_dirtyInventories.Count > 0)
         {
             foreach (var (_, pair) in _dirtyInventories)
@@ -125,24 +125,26 @@ public sealed partial class ZoneWorld
         _dirtyWarehouses.Clear();
     }
 
-    /// <summary>Run <paramref name="underGate"/> under <c>_gate</c> with inventory/warehouse Postgres deferred until after unlock.</summary>
-    T WithDeferredInventoryPersist<T>(Func<T> underGate)
+    /// <summary>
+    /// Runs <paramref name="change"/> with inventory/warehouse Postgres deferred until it returns. Calls nest (a command
+    /// wrapping a world method that defers too): only the outermost one flushes.
+    /// </summary>
+    T WithDeferredInventoryPersist<T>(Func<T> change)
     {
         T result;
-        lock (_gate)
+        bool outermost = _deferInventoryPersistDepth == 0;
+        _deferInventoryPersistDepth++;
+        try
         {
-            _deferInventoryPersist = true;
-            try
-            {
-                result = underGate();
-            }
-            finally
-            {
-                _deferInventoryPersist = false;
-            }
+            result = change();
+        }
+        finally
+        {
+            _deferInventoryPersistDepth--;
         }
 
-        FlushDirtyInventories();
+        if (outermost)
+            FlushDirtyInventories();
         return result;
     }
 }

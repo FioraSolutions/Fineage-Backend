@@ -116,11 +116,11 @@ public sealed partial class ZoneWorld
             long travelMs = ApproachTarget(player, target, reach);
             if (travelMs < 0)
                 return SkillProtocol.Range;
-            session.AutoAttackTargetId = 0;
+            player.Intent.AutoAttackTargetId = 0;
             session.SelectedTargetId = targetId;
-            session.PendingCastSkillId = request.SkillId;
-            session.PendingCastTargetId = targetId;
-            session.PendingCastAtUnixMs = now + travelMs;
+            player.Intent.PendingCastSkillId = request.SkillId;
+            player.Intent.PendingCastTargetId = targetId;
+            player.Intent.PendingCastAtUnixMs = now + travelMs;
             return null;
         }
 
@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
         if (ConsumeItemBlocked(session, player, levelData))
             return null;
 
-        session.AutoAttackTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
         ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
@@ -178,7 +178,7 @@ public sealed partial class ZoneWorld
         }
 
         int chance = OpenChestSuccessChance(skillId, skillLevel, target.Level);
-        bool success = forceSuccess ?? (_combatRandom.Next(100) < chance);
+        bool success = forceSuccess ?? (Rng(_combatRandom, caster).Next(100) < chance);
         if (success)
         {
             BroadcastSocial(target, SocialChestOpenOk);
@@ -193,7 +193,7 @@ public sealed partial class ZoneWorld
 
     void OpenChestKill(ZoneEntity chest, ZoneEntity opener)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int damage = Math.Max(1, chest.CurHp);
         RecordDamage(chest, opener, damage);
         chest.CurHp = 0;
@@ -207,7 +207,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        NetBridge.FanoutSocialAction(NetWatchersOf(actor), actor.ObjectId, actionId);
+        NetBridge.FanoutSocialAction(KnownNetPlayersOf(actor), actor.ObjectId, actionId);
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the open payload (keys already assumed spent).</summary>
     internal void ApplyOpenChestForTest(ZoneEntity caster, ZoneEntity chest, int skillId, int skillLevel, bool? forceSuccess = null)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyOpenChest(caster, chest, skillId, skillLevel, forceSuccess);
     }
 }

@@ -11,9 +11,12 @@ public sealed class DeathDropRulesTests
     public void Karma_path_requires_pk_limit()
     {
         var r = Rules();
+        Assert.Equal(6, r.KarmaPkLimit);
         // Below PK limit: no karma rates; also no NPC path when killer is a player.
         Assert.Null(r.RatesFor(karma: 100, pkKills: r.KarmaPkLimit - 1, killerIsNpc: false, victimLevel: 20));
-        Assert.NotNull(r.RatesFor(karma: 100, pkKills: r.KarmaPkLimit, killerIsNpc: false, victimLevel: 1));
+        var rates = r.RatesFor(karma: 100, pkKills: r.KarmaPkLimit, killerIsNpc: false, victimLevel: 1);
+        Assert.NotNull(rates);
+        Assert.True(rates!.Value.Percent > 0);
     }
 
     [Fact]
@@ -21,7 +24,9 @@ public sealed class DeathDropRulesTests
     {
         var r = Rules();
         Assert.Null(r.RatesFor(0, 0, killerIsNpc: true, victimLevel: 4));
-        Assert.NotNull(r.RatesFor(0, 0, killerIsNpc: true, victimLevel: 5));
+        var npcRates = r.RatesFor(0, 0, killerIsNpc: true, victimLevel: 5);
+        Assert.NotNull(npcRates);
+        Assert.True(npcRates!.Value.Percent > 0);
         Assert.Null(r.RatesFor(0, 0, killerIsNpc: false, victimLevel: 40));
     }
 

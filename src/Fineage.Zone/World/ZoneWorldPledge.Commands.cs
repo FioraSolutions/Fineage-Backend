@@ -24,9 +24,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryPledgeCommand(session, command, now.ToUnixTimeMilliseconds());
+        string? error = TryPledgeCommand(session, command, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -99,7 +97,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>RequestPledgeInfo</c>: name, crest and alliance of any clan by id.</summary>
     string? SendPledgeInfo(ZoneSession session, int clanId)
     {
-        if (!_clans.TryGetValue(clanId, out var clan))
+        if (!_clan.TryGet(clanId, out var clan))
             return PledgeProtocol.NoSuchClan;
         NetBridge?.FanoutPledgeInfo([session.ObjectId], new PledgeInfoNetMsg
         {
@@ -344,8 +342,8 @@ public sealed partial class ZoneWorld
 
         clan.Members.Remove(member);
         ClearMemberTitle(player);
-        _clanByPlayer.Remove(player.ObjectId);
-        _joinExpiry[player.ObjectId] = 0;
+        _clan.Unlink(player.ObjectId);
+        _clan.SetJoinExpiry(player.ObjectId, 0);
         player.ClanId = 0;
         SyncClanStanding(player);
         int rep = PledgeProtocol.AcademyGraduationRep(joined);
@@ -381,7 +379,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: a proof-free class transfer through the village master path.</summary>
     internal bool ChangeClassForTest(ZoneSession session, int classId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return false;
@@ -393,7 +391,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the village master create_academy / create_royal / create_knight verb.</summary>
     internal string? CreateSubUnitForTest(ZoneSession session, string name, string leaderName, int family)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var clan = ClanOf(session.ObjectId);
             if (clan == null)
@@ -407,9 +405,9 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the village master change_clan_leader request, stored for the next start.</summary>
     internal bool RequestDelegationForTest(int clanId, int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || MemberOf(clan, characterId) == null)
+            if (!_clan.TryGet(clanId, out var clan) || MemberOf(clan, characterId) == null)
                 return false;
             clan.D.NewLeaderId = characterId;
             return SaveClan(clan);
@@ -418,7 +416,7 @@ public sealed partial class ZoneWorld
 
     internal bool PlayerAutoAttackableForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return PlayerAutoAttackable(attacker, target);
     }
 }

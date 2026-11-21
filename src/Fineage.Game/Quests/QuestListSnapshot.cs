@@ -20,4 +20,5 @@ public sealed class QuestListSnapshot
     public required byte[] CompletedMask { get; init; }
     public required int[] CompletedQuestIds { get; init; }
     public required int MaxActive { get; init; }
+    public QuestJournalRewardSet[] RewardSets { get; init; } = [];
 }

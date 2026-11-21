@@ -10,7 +10,6 @@ namespace Fineage.Zone.Olympiad;
 public sealed partial class OlympiadBoard
 {
     readonly IOlympiadStore _store;
-    readonly Random _random;
     readonly object _gate = new();
     readonly Dictionary<int, Noble> _nobles = [];
     readonly HashSet<int> _granted = [];
@@ -38,13 +37,11 @@ public sealed partial class OlympiadBoard
         DateTimeOffset now,
         OlympiadSettings? settings = null,
         IOlympiadStore? store = null,
-        OlympiadStadiumCatalog? stadiums = null,
-        Random? random = null)
+        OlympiadStadiumCatalog? stadiums = null)
     {
         Settings = settings ?? OlympiadSettings.Mobius;
         _store = store ?? new MemoryOlympiadStore();
         Stadiums = stadiums ?? OlympiadStadiumCatalog.LoadDefault();
-        _random = random ?? Random.Shared;
         _busy = new bool[Stadiums.Count];
         Load(_store.Load(), now.ToUnixTimeMilliseconds());
     }
@@ -148,8 +145,10 @@ public sealed partial class OlympiadBoard
         }
     }
 
-    public OlympiadStep Advance(long nowUnixMs, Func<int, OlympiadPresence?>? presence, bool announce = true)
+    /// <summary><paramref name="random"/> picks the class and the pair at matchmaking; the zone passes its seeded stream.</summary>
+    public OlympiadStep Advance(long nowUnixMs, Func<int, OlympiadPresence?>? presence, Random random, bool announce = true)
     {
+        ArgumentNullException.ThrowIfNull(random);
         var step = new OlympiadStep();
         lock (_gate)
         {
@@ -158,7 +157,7 @@ public sealed partial class OlympiadBoard
             CatchUp(nowUnixMs, step, announce);
             AdvanceMatches(nowUnixMs, step, presence);
             if (_inComp && nowUnixMs >= _nextMatchmake)
-                Matchmake(nowUnixMs, step, presence);
+                Matchmake(nowUnixMs, step, presence, random);
         }
 
         return step;

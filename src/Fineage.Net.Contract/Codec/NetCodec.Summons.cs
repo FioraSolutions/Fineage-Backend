@@ -68,12 +68,13 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.MaxLoad);
             w.WriteInt32Array(m.SkillIds);
             w.WriteByte(m.Dead ? (byte)1 : (byte)0);
+            w.WriteByte(m.Mountable ? (byte)1 : (byte)0);
         });
 
         public static SummonInfoNetMsg DecodeSummonInfo(System.ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new SummonInfoNetMsg
+            var m = new SummonInfoNetMsg
             {
                 ObjectId = r.ReadInt32(),
                 Kind = (SummonKindNet)r.ReadByte(),
@@ -106,6 +107,9 @@ namespace Fineage.Net.Contract
                 SkillIds = r.ReadInt32Array(),
                 Dead = r.ReadByte() != 0
             };
+            if (r.Remaining >= 1)
+                m.Mountable = r.ReadByte() != 0;
+            return m;
         }
 
         public static byte[] EncodeSummonGone(SummonGoneNetMsg m) => Write(w =>

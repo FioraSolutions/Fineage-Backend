@@ -49,6 +49,30 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> StageMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
+
+    public static readonly Histogram<int> StageRegions =
+        Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
+
+    public static readonly Counter<long> StageFailures =
+        Meter.CreateCounter<long>("fineage.tick.stage.failures", description: "Simulation stage or region bodies that threw (tag stage)");
+
+    public static readonly Counter<long> TickOverruns =
+        Meter.CreateCounter<long>("fineage.tick.overruns", description: "Simulation steps that took longer than the fixed step");
+
+    public static readonly Counter<long> TicksSkipped =
+        Meter.CreateCounter<long>("fineage.tick.skipped", description: "Simulation ticks a late step jumped over");
+
+    public static readonly Counter<long> RegionHandoffs =
+        Meter.CreateCounter<long>("fineage.region.handoffs", description: "Entities handed to another region at the end of a step");
+
+    public static readonly Counter<long> LedgerAdjustments =
+        Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
+
+    public static readonly Counter<long> LedgerFlushFailures =
+        Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,
@@ -91,10 +115,21 @@ public static class FineageTelemetry
         ObserveOnline,
         description: "Players currently in a zone simulation");
 
+    public static readonly ObservableGauge<int> CommandIngressQueued = Meter.CreateObservableGauge(
+        "fineage.command.ingress.queued",
+        ObserveCommandIngressQueued,
+        description: "Player commands waiting for the next simulation drain");
+
     public static Func<int>? OnlineCount { get; set; }
+    public static Func<int>? CommandIngressDepth { get; set; }
 
     static IEnumerable<Measurement<int>> ObserveOnline()
     {
         yield return new Measurement<int>(OnlineCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<int>> ObserveCommandIngressQueued()
+    {
+        yield return new Measurement<int>(CommandIngressDepth?.Invoke() ?? 0);
     }
 }

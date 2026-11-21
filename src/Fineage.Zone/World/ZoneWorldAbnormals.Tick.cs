@@ -1,38 +1,35 @@
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    void TickAbnormals()
+    void CollectAbnormals(TickContext tick, RegionWorkCollector work)
     {
-        if (_withAbnormals.Count == 0)
+        _byId.Collect(ActiveSets.WithAbnormals, work);
+    }
+
+    void TickEntityAbnormals(int id, long now)
+    {
+        if (!_byId.TryGetValue(id, out var entity))
             return;
-        long now = _clock().ToUnixTimeMilliseconds();
-        foreach (int id in _withAbnormals.ToArray())
+        if (entity.Abnormals.Count == 0)
         {
-            if (!_byId.TryGetValue(id, out var entity))
-            {
-                _withAbnormals.Remove(id);
-                continue;
-            }
-            if (entity.Abnormals.Count == 0)
-            {
-                _withAbnormals.Remove(id);
-                continue;
-            }
-
-            TickDotDamage(entity, now);
-            TickToggleDrain(entity, now);
-
-            if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
-                continue;
-            if (entity.Abnormals.Count == 0)
-                _withAbnormals.Remove(id);
-            FanoutAbnormal(entity);
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
+            return;
         }
+
+        TickDotDamage(entity, now);
+        TickToggleDrain(entity, now);
+
+        if (!ZoneAbnormals.TickExpired(entity.Abnormals, now))
+            return;
+        if (entity.Abnormals.Count == 0)
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
+        FanoutAbnormal(entity);
     }
 
     /// <summary>
@@ -62,7 +59,7 @@ public sealed partial class ZoneWorld
             DeactivateToggle(entity.Session, entity, entry.Id, _game.Skills.Find(entry.Id), "tick", sendAbort: !notified);
         }
         if (entity.Abnormals.Count == 0)
-            _withAbnormals.Remove(entity.ObjectId);
+            _byId.Leave(entity, ActiveSets.WithAbnormals);
     }
 
     /// <summary>Mobius effect <c>ticks</c> in ms for a toggle's MP drain (0 when the skill has no ticking drain).</summary>
@@ -127,8 +124,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
-        lock (_gate)
-            TickAbnormals();
+        RunStep(now => _simulationTicks.RunNow(_abnormalsStage, now));
         return Task.CompletedTask;
     }
 
@@ -140,15 +136,15 @@ public sealed partial class ZoneWorld
         bool force = true,
         ZoneEntity? attacker = null)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
-        lock (_gate)
+        long now = NowUnixMs();
+        using (_affinity.Step())
             return ApplyAbnormalFromSkill(template, levelData, target, now, attacker, force: force);
     }
 
     /// <summary>Test hook: PartySpelled / TargetStatus wire snapshot.</summary>
     internal Fineage.Protocol.AbnormalStatusUpdateMsg AbnormalSnapshotForTest(ZoneEntity entity)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return AbnormalFor(entity);
     }
 
@@ -166,19 +162,9 @@ public sealed partial class ZoneWorld
         if ((statful || target.HasStatAbnormal) && target.Kind == ZoneEntityKind.Player && target.Session != null)
             SelfUserInfo(target);
         target.HasStatAbnormal = statful;
-        List<int>? netWatchers = null;
-        foreach (var watcher in Players())
-        {
-            if (watcher.Session == null)
-                continue;
-            bool cares = ReferenceEquals(watcher, target) || watcher.Knownlist.Contains(target.ObjectId);
-            if (!cares)
-                continue;
-            netWatchers ??= [];
-            netWatchers.Add(watcher.ObjectId);
-        }
+        var netWatchers = NetWatchersOf(target);
 
-        if (netWatchers is { Count: > 0 } && NetBridge != null)
+        if (netWatchers.Count > 0 && NetBridge != null)
             NetBridge.FanoutAbnormalStatusUpdate(netWatchers, update);
         FanPartySpelled(target);
     }
@@ -189,7 +175,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     AbnormalStatusUpdateMsg AbnormalFor(ZoneEntity entity)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         int spoilExtra = entity.SpoilerObjectId != 0 ? 1 : 0;
         var effects = new AbnormalEffectMsg[entity.Abnormals.Count + spoilExtra];
         for (int i = 0; i < entity.Abnormals.Count; i++)
@@ -225,35 +211,29 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal bool TryBuildPresenceAbnormal(ZoneEntity entity, out AbnormalStatusUpdateMsg update)
     {
-        lock (_gate)
+        if (entity.Dead || entity.Kind is not (ZoneEntityKind.Player or ZoneEntityKind.Npc) ||
+            (entity.Abnormals.Count == 0 && entity.SpoilerObjectId == 0))
         {
-            if (entity.Dead || entity.Kind is not (ZoneEntityKind.Player or ZoneEntityKind.Npc) ||
-                (entity.Abnormals.Count == 0 && entity.SpoilerObjectId == 0))
-            {
-                update = null!;
-                return false;
-            }
-
-            update = AbnormalFor(entity);
-            return true;
+            update = null!;
+            return false;
         }
+
+        update = AbnormalFor(entity);
+        return true;
     }
 
     /// <summary>Mobius updateEffectIcons snapshot for EnterWorld (null when the bar is empty).</summary>
     internal bool TryBuildNetAbnormalStatus(ZoneSession session, out AbnormalStatusUpdateMsg update)
     {
-        lock (_gate)
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity) ||
+            entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
         {
-            if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity) ||
-                entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
-            {
-                update = null!;
-                return false;
-            }
-
-            update = AbnormalFor(entity);
-            return true;
+            update = null!;
+            return false;
         }
+
+        update = AbnormalFor(entity);
+        return true;
     }
 
     int ResolveAbnormalDurationSeconds(int effectId)

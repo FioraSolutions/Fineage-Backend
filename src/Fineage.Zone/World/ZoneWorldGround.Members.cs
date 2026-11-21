@@ -1,7 +1,10 @@
+using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -34,8 +37,11 @@ public sealed partial class ZoneWorld
 
     void PickupFailed(ZoneSession session, ZoneEntity ground)
     {
-        session.PendingPickupId = 0;
-        session.PendingPickupAtUnixMs = 0;
+        if (_byId.TryGetValue(session.ObjectId, out var player))
+        {
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
+        }
         string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
         ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.");
     }
@@ -45,11 +51,11 @@ public sealed partial class ZoneWorld
         foreach (var player in Players().ToList())
         {
             var session = player.Session;
-            if (session == null || session.PendingPickupId <= 0 || now < session.PendingPickupAtUnixMs)
+            if (session == null || player.Intent.PendingPickupId <= 0 || now < player.Intent.PendingPickupAtUnixMs)
                 continue;
-            int id = session.PendingPickupId;
-            session.PendingPickupId = 0;
-            session.PendingPickupAtUnixMs = 0;
+            int id = player.Intent.PendingPickupId;
+            player.Intent.PendingPickupId = 0;
+            player.Intent.PendingPickupAtUnixMs = 0;
             // Item may be gone (someone else took it) — that is a silent no-op like Mobius.
             if (_byId.TryGetValue(id, out var g) && g.Kind == ZoneEntityKind.GroundItem)
                 TryPickup(session, id, allowApproach: false);
@@ -77,8 +83,14 @@ public sealed partial class ZoneWorld
         if (item.Count < count)
             return "bad_request";
 
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Destroy, player.ObjectId, 0);
+        ObserveLedger(move, bag);
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
+        move.Post(bag, item.ItemId, -count, PiecesOf([item]));
+        move.Post(LedgerAccount.Of(SystemAccount.Destroyed), item.ItemId, count);
+        move.Commit(LedgerHoldingsOf);
 
         var invUpdate = removedEntirely
             ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
@@ -116,7 +128,7 @@ public sealed partial class ZoneWorld
         int dropX = useCoords ? x : player.X;
         int dropY = useCoords ? y : player.Y;
         int dropZ = useCoords ? z : player.Z;
-        AdvanceMove(player, _clock().ToUnixTimeMilliseconds());
+        AdvanceMove(player, NowUnixMs());
         if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
         {
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
@@ -129,23 +141,27 @@ public sealed partial class ZoneWorld
         }
 
         int itemId = item.ItemId;
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var move = BeginLedgerMove(LedgerTxKind.Drop, player.ObjectId, 0);
+        ObserveLedger(move, bag);
+        IReadOnlyList<int> pieces = item.Template.Stackable ? [] : [item.ObjectId];
+        int groundId = item.Template.Stackable ? _itemIds.Next() : item.ObjectId;
+        PostOntoGroundPlanned(move, bag, groundId, itemId, count, pieces);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"drop refused for object {session.ObjectId}: ledger rejected instance {groundId}");
+            return "ledger";
+        }
+
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
 
-        InventoryUpdateMsg invUpdate;
-        if (removedEntirely)
-        {
-            invUpdate = new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] };
-        }
-        else
-        {
-            invUpdate = InventoryMessages.Update(InventoryChange.Modify, item);
-        }
+        InventoryUpdateMsg invUpdate = removedEntirely
+            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
+            : InventoryMessages.Update(InventoryChange.Modify, item);
 
         if (NetBridge != null)
             NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
-
-        SaveInventory(session, player.Inventory);
 
         var watchers = new List<ZoneEntity> { player };
         foreach (var other in Players())
@@ -156,7 +172,7 @@ public sealed partial class ZoneWorld
                 watchers.Add(other);
         }
 
-        SpawnGroundStack(
+        var ground = SpawnGroundStack(
             itemId,
             count,
             dropX,
@@ -164,7 +180,13 @@ public sealed partial class ZoneWorld
             dropZ,
             player.InstanceId,
             watchers,
-            dropperObjectId: player.ObjectId);
+            dropperObjectId: player.ObjectId,
+            piece: item.Template.Stackable ? null : item,
+            reserveObjectId: item.Template.Stackable ? groundId : null);
+        if (ground == null)
+            return "bad_request";
+        move.Commit(LedgerHoldingsOf);
+        SaveInventory(session, player.Inventory);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");
         return null;
     }
@@ -179,7 +201,8 @@ public sealed partial class ZoneWorld
         IReadOnlyList<ZoneEntity> watchers,
         int victimLevel = 0,
         bool raid = false,
-        bool seeded = false)
+        bool seeded = false,
+        int lootOwnerObjectId = 0)
     {
         if (!_dropCatalog.TryGet(npcId, out var definition))
         {
@@ -187,31 +210,107 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
+        var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
         int killerLevel = killer?.Level ?? victimLevel;
-        var rolls = DropRoller.RollDeath(definition, _dropRandom, _dropRates, victimLevel, killerLevel, raid);
+        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid);
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
         if (rolls.Count == 0)
             ZoneLog.Info($"drop empty npc={npcId}");
 
-        int instanceId = killer?.InstanceId
-            ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
         int dropperId = killer?.ObjectId ?? 0;
-        int ownerId = killer?.Session != null ? killer.ObjectId : 0;
-        long now = _clock().ToUnixTimeMilliseconds();
+        int ownerId = lootOwnerObjectId != 0
+            ? lootOwnerObjectId
+            : killer?.Session != null
+                ? killer.ObjectId
+                : 0;
+        long now = NowUnixMs();
+        if (rolls.Count == 0)
+            return;
 
+        var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
+        var source = LedgerAccount.Of(SystemAccount.DropSource);
+        var planned = new List<(DropStack Stack, int Dx, int Dy, int GroundId)>();
+        var autoLoot = new List<(ZoneEntity Looter, DropStack Stack)>();
+        ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
         foreach (var stack in rolls)
         {
-            int dx = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            int dy = _dropRandom.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            if (!_game.Items.TryGet(stack.ItemId, out var template))
+                continue;
+            bool herb = IsHerb(stack.ItemId);
+            if (autoLooter != null
+                && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
+                && HasRoomForLootStack(autoLooter, stack.ItemId, stack.Count, template.Stackable))
+            {
+                var bag = LedgerAccount.Inventory(autoLooter.ObjectId);
+                ObserveLedger(move, bag);
+                move.Post(source, stack.ItemId, -stack.Count);
+                move.Post(bag, stack.ItemId, stack.Count);
+                autoLoot.Add((autoLooter, stack));
+                continue;
+            }
+
+            int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+            int groundId = _itemIds.Next();
+            IReadOnlyList<int> pieces = template.Stackable ? [] : [groundId];
+            PostOntoGroundPlanned(move, source, groundId, stack.ItemId, stack.Count, pieces);
+            planned.Add((stack, dx, dy, groundId));
+        }
+
+        if (!move.HasPostings)
+            return;
+
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"loot refused for npc {npcId}: ledger rejected ground postings");
+            return;
+        }
+
+        foreach (var (looter, stack) in autoLoot)
+            GrantInventoryStack(looter, stack.ItemId, stack.Count, notifyObtained: true);
+
+        foreach (var (stack, dx, dy, groundId) in planned)
+        {
             SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
                 ownerObjectId: ownerId,
-                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
+                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs),
+                reserveObjectId: groundId);
         }
+
+        move.Commit(LedgerHoldingsOf);
     }
 
-    void SpawnGroundStack(
+    ZoneEntity? AutoLootRecipient(ZoneEntity? killer, int lootOwnerObjectId)
+    {
+        if (killer?.Session == null || killer.Inventory == null)
+            return null;
+        if (lootOwnerObjectId != 0
+            && lootOwnerObjectId != killer.ObjectId
+            && _byId.TryGetValue(lootOwnerObjectId, out var owner)
+            && owner.Session != null
+            && owner.Inventory != null)
+            return owner;
+        return killer;
+    }
+
+    bool HasRoomForLootStack(ZoneEntity player, int itemId, int count, bool stackable) =>
+        player.Inventory != null
+        && GroundRules.HasRoomForGroundItem(
+            IsHerb(itemId),
+            player.Inventory.Items.Count,
+            player.Race,
+            stackable,
+            player.Inventory.FindByItemId(itemId) != null,
+            count);
+
+    /// <summary>
+    /// Places one stack on the ground and returns it, or null when there is nothing to place (no count, unknown item).
+    /// <paramref name="piece"/> is a piece leaving a bag: the stack takes over its object id and enchant.
+    /// </summary>
+    ZoneEntity? SpawnGroundStack(
         int itemId,
         int count,
         int x,
@@ -221,17 +320,21 @@ public sealed partial class ZoneWorld
         IReadOnlyList<ZoneEntity> watchers,
         int dropperObjectId = 0,
         int ownerObjectId = 0,
-        long expireAtMs = 0)
+        long expireAtMs = 0,
+        ItemInstance? piece = null,
+        int? reserveObjectId = null)
     {
         if (count <= 0)
-            return;
+            return null;
         if (!_game.Items.TryGet(itemId, out var template))
         {
             ZoneLog.Info($"drop skip unknown item={itemId}");
-            return;
+            return null;
         }
 
-        int objectId = _itemIds.Next();
+        if (piece != null && (template.Stackable || count != 1 || piece.ItemId != itemId))
+            throw new ArgumentException($"item {piece.ObjectId} is not one piece of {itemId}", nameof(piece));
+        int objectId = reserveObjectId ?? piece?.ObjectId ?? _itemIds.Next();
         var ground = new ZoneEntity
         {
             ObjectId = objectId,
@@ -243,8 +346,9 @@ public sealed partial class ZoneWorld
             GroundItemId = itemId,
             GroundCount = count,
             GroundStackable = template.Stackable,
+            GroundEnchant = piece?.EnchantLevel ?? 0,
             GroundOwnerId = ownerObjectId,
-            GroundProtectUntilMs = ownerObjectId != 0 ? _clock().ToUnixTimeMilliseconds() + DropProtectMs : 0,
+            GroundProtectUntilMs = ownerObjectId != 0 ? NowUnixMs() + DropProtectMs : 0,
             GroundExpireAtMs = expireAtMs
         };
         _byId[objectId] = ground;
@@ -260,6 +364,7 @@ public sealed partial class ZoneWorld
             if (watcher.Session == null)
                 continue;
             watcher.Knownlist.Add(objectId);
+            TrackWatcher(watcher.ObjectId, objectId);
             netWatchers ??= [];
             netWatchers.Add(watcher.ObjectId);
         }
@@ -280,6 +385,7 @@ public sealed partial class ZoneWorld
         }
 
         ZoneLog.Info($"drop object={objectId} item={itemId} count={count} dropper={dropperObjectId} @ {x},{y},{z}");
+        return ground;
     }
 
     void RemoveGroundItem(ZoneEntity ground)
@@ -290,16 +396,16 @@ public sealed partial class ZoneWorld
         _byId.Remove(objectId);
 
         List<int>? netWatchers = null;
-        foreach (var player in Players())
+        ForEachWatchingPlayer(objectId, player =>
         {
-            if (player.Session == null)
-                continue;
             if (player.Knownlist.Remove(objectId))
             {
+                UntrackWatcher(player.ObjectId, objectId);
                 netWatchers ??= [];
                 netWatchers.Add(player.ObjectId);
             }
-        }
+        });
+        DropWatcherIndex(objectId);
 
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {

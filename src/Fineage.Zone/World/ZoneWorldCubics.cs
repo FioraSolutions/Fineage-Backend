@@ -33,8 +33,9 @@ public sealed partial class ZoneWorld
         {
             return CubicCatalog.LoadDefault();
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
+            ZoneLog.Warn($"cubic catalog missing ({ex.FileName}); cubics are disabled until the datapack is present");
             return CubicCatalog.Empty;
         }
     }
@@ -63,7 +64,7 @@ public sealed partial class ZoneWorld
             {
                 var inventory = player.Inventory;
                 var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !Take(inventory, row.ItemId, row.ItemCount, changes))
+                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
                 {
                     SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
                     return;
@@ -148,9 +149,29 @@ public sealed partial class ZoneWorld
         if (player.Session == null)
             return;
         SelfUserInfo(player);
-        var peers = NetWatchersOf(player).Where(id => id != player.ObjectId).ToList();
+        var peers = KnownNetPlayersOf(player).Where(id => id != player.ObjectId).ToList();
         if (peers.Count > 0)
             NetBridge?.FanoutCharInfo(peers, player.ObjectId);
+    }
+
+    /// <summary>Mobius <c>Player.stopCubicsByOthers</c> on Olympiad arena entry.</summary>
+    void StopCubicsByOthers(ZoneEntity player)
+    {
+        if (!player.HasCubics)
+            return;
+        bool removed = false;
+        for (int i = player.Cubics.Count - 1; i >= 0; i--)
+        {
+            if (!player.Cubics[i].GivenByOther)
+                continue;
+            StopCubicAction(player.Cubics[i]);
+            player.Cubics.RemoveAt(i);
+            removed = true;
+        }
+        if (!player.HasCubics)
+            _withCubics.Remove(player.ObjectId);
+        if (removed)
+            BroadcastCubics(player);
     }
 
     /// <summary>Mobius <c>Player.removeCubic</c> for every cubic (death, logout).</summary>
@@ -255,9 +276,9 @@ public sealed partial class ZoneWorld
         }
         if (CubicCapped(owner, cubic))
             return;
-        if (_combatRandom.Next(100) >= cubic.Chance)
+        if (Rng(_combatRandom, owner).Next(100) >= cubic.Chance)
             return;
-        var pick = PickCubicSkill(cubic);
+        var pick = PickCubicSkill(owner, cubic);
         if (pick != null && TryCubicSkill(owner, cubic, pick, now))
             cubic.Count++;
     }
@@ -273,37 +294,38 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    CubicSkillRef? PickCubicSkill(CubicState cubic)
+    CubicSkillRef? PickCubicSkill(ZoneEntity owner, CubicState cubic)
     {
         var skills = cubic.Template.Skills.Where(static s => !s.Priority).ToList();
         if (skills.Count == 0)
             return null;
+        var rng = Rng(_combatRandom, owner);
         switch (cubic.Template.Selection.ToUpperInvariant())
         {
             case "ORDERED":
                 foreach (var s in skills)
                 {
-                    if (s.TriggerRate >= 100 || _combatRandom.Next(100) < s.TriggerRate)
+                    if (s.TriggerRate >= 100 || rng.Next(100) < s.TriggerRate)
                         return s;
                 }
                 return null;
             case "WEIGHTED":
-            {
-                int total = skills.Where(static s => s.TriggerRate > 0).Sum(static s => s.TriggerRate);
-                if (total > 0)
                 {
-                    int roll = _combatRandom.Next(total);
-                    foreach (var s in skills.Where(static s => s.TriggerRate > 0))
+                    int total = skills.Where(static s => s.TriggerRate > 0).Sum(static s => s.TriggerRate);
+                    if (total > 0)
                     {
-                        roll -= s.TriggerRate;
-                        if (roll < 0)
-                            return s;
+                        int roll = rng.Next(total);
+                        foreach (var s in skills.Where(static s => s.TriggerRate > 0))
+                        {
+                            roll -= s.TriggerRate;
+                            if (roll < 0)
+                                return s;
+                        }
                     }
+                    return skills[rng.Next(skills.Count)];
                 }
-                return skills[_combatRandom.Next(skills.Count)];
-            }
             default:
-                return skills[_combatRandom.Next(skills.Count)];
+                return skills[rng.Next(skills.Count)];
         }
     }
 
@@ -333,8 +355,8 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null)
             return;
-        var watchers = NetWatchersOf(owner);
-        foreach (int id in NetWatchersOf(target))
+        var watchers = KnownNetPlayersOf(owner);
+        foreach (int id in KnownNetPlayersOf(target))
         {
             if (!watchers.Contains(id))
                 watchers.Add(id);
@@ -414,7 +436,7 @@ public sealed partial class ZoneWorld
                 break;
             case "aggro":
                 // Mobius TargetMeProbability: the monster turns on the cubic's owner.
-                if (target.Kind == ZoneEntityKind.Npc && target.Summon == null && _combatRandom.Next(100) < action.AggroChance)
+                if (target.Kind == ZoneEntityKind.Npc && target.Summon == null && Rng(_combatRandom, owner).Next(100) < action.AggroChance)
                 {
                     AddHate(target, owner, DamageHate(Math.Max(1, (int)cubic.Power), target.Level));
                     SetAggroTarget(target, owner.ObjectId);
@@ -576,16 +598,16 @@ public sealed partial class ZoneWorld
 
     internal void TickCubicsForTest()
     {
-        lock (_gate)
-            TickCubics(_clock().ToUnixTimeMilliseconds());
+        using (_affinity.Step())
+            TickCubics(NowUnixMs());
     }
 
     internal bool SummonCubicForTest(ZoneEntity player, int skillId, int level, bool givenByOther = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var skill = Cubics.SummonSkill(skillId) ?? throw new ArgumentException($"no cubic skill {skillId}");
-            return SummonCubic(player, skill, level, givenByOther, _clock().ToUnixTimeMilliseconds());
+            return SummonCubic(player, skill, level, givenByOther, NowUnixMs());
         }
     }
 

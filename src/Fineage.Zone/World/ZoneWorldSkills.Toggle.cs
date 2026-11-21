@@ -1,6 +1,7 @@
 using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -134,7 +135,7 @@ public sealed partial class ZoneWorld
             level,
             template.AbnormalType);
         if (player.Abnormals.Count > 0)
-            _withAbnormals.Add(player.ObjectId);
+            _byId.Join(player, ActiveSets.WithAbnormals);
         // Mobius schedules the first effect tick one period after the toggle starts, not immediately.
         int periodMs = ToggleTickPeriodMs(skillId);
         if (periodMs > 0 && ActiveToggleIndex(player, skillId) is var index && index >= 0)
@@ -187,7 +188,7 @@ public sealed partial class ZoneWorld
         {
             player.Abnormals.RemoveAt(index);
             if (player.Abnormals.Count == 0)
-                _withAbnormals.Remove(player.ObjectId);
+                _byId.Leave(player, ActiveSets.WithAbnormals);
             FanoutAbnormal(player);
         }
 
@@ -215,8 +216,8 @@ public sealed partial class ZoneWorld
         player.PendingHit = null;
         if (player.Session != null)
         {
-            player.Session.AutoAttackTargetId = 0;
-            player.Session.ClearApproach();
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
         }
         // Mobius Creature.startFakeDeath: abortAttack() / abortCast() / stopMove(null) before the wait type goes out.
         AdvanceMove(player, now);
@@ -245,7 +246,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ClearAggroOf(ZoneEntity player)
     {
-        foreach (int id in _thinking.ToArray())
+        foreach (int id in Active(ActiveSets.Thinking))
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 continue;
@@ -273,7 +274,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the fake-death wake-up the way a hit / sit action would.</summary>
     internal bool WakeUpFromFakeDeathForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return WakeUpFromFakeDeath(player, "test");
     }
 

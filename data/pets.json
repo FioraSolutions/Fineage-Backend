@@ -1410,7 +1410,9 @@
      "hpRegen": 8.5,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12311,
@@ -2832,7 +2834,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12312,
@@ -4254,7 +4258,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12313,
@@ -5665,7 +5671,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12526,
@@ -7095,7 +7103,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": true,
+   "mountKind": 1
   },
   {
    "npcId": 12527,
@@ -8525,7 +8535,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": true,
+   "mountKind": 1
   },
   {
    "npcId": 12528,
@@ -9944,7 +9956,9 @@
      "hpRegen": 9.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": true,
+   "mountKind": 1
   },
   {
    "npcId": 12564,
@@ -11355,7 +11369,9 @@
      "hpRegen": 8.0,
      "mpRegen": 3.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12780,
@@ -12777,7 +12793,9 @@
      "hpRegen": 25.5,
      "mpRegen": 9.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12781,
@@ -14199,7 +14217,9 @@
      "hpRegen": 25.5,
      "mpRegen": 9.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   },
   {
    "npcId": 12782,
@@ -15621,7 +15641,9 @@
      "hpRegen": 25.5,
      "mpRegen": 9.0
     }
-   ]
+   ],
+   "mountable": false,
+   "mountKind": 0
   }
  ]
 }

@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 213 |
-| partial | 93 |
-| stub | 31 |
-| missing | 7 |
+| implemented | 224 |
+| partial | 90 |
+| stub | 27 |
+| missing | 3 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -44,10 +44,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 23 | Lidia's Heart | 64+ | story / newbie | stub | 51 dialog(s), no start; timers; auto-port |
 | 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | stub | 71 dialog(s), no start; auto-port |
 | 25 | Hiding Behind the Truth | 66+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
-| 27 | Chest caught with a bait of wind | 27+ | fishing | stub | 5 dialog(s), no start; auto-port |
-| 28 | Chest caught with a bait of icy air | 36+ | fishing | stub | 6 dialog(s), no start; auto-port |
-| 29 | Chest caught with a bait of earth | 48+ | fishing | stub | 6 dialog(s), no start; auto-port |
-| 30 | Chest caught with a bait of fire | 60+ | fishing | stub | 6 dialog(s), no start; auto-port |
+| 27 | Chest caught with a bait of wind | 27+ | fishing | implemented | hand-ported |
+| 28 | Chest caught with a bait of icy air | 36+ | fishing | implemented | hand-ported |
+| 29 | Chest caught with a bait of earth | 48+ | fishing | implemented | hand-ported |
+| 30 | Chest caught with a bait of fire | 60+ | fishing | implemented | hand-ported |
 | 31 | Secret Buried in the Swamp | 66+ | story / newbie | partial | no talk: 31661,31662,31663,31664; auto-port |
 | 32 | An Obvious Lie | 45+ | story / newbie | partial | no kill: 1/1 mobs; auto-port |
 | 33 | Make a Pair of Dress Shoes | 60+ | story / newbie | implemented | auto-port |
@@ -65,10 +65,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 47 | Into the Dark Forest | 3+ | story / newbie | implemented | hand-ported |
 | 48 | To the Immortal Plateau | 3+ | story / newbie | implemented | hand-ported |
 | 49 | The Road Home | 3+ | story / newbie | implemented | hand-ported |
-| 50 | Lanosco's Special Bait | 27+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 51 | O'Fulle's Special Bait | 36+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 52 | Willie's Special Bait | 48+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 53 | Linnaeus' Special Bait | 60+ | fishing | partial | no kill: 1/1 mobs; auto-port |
+| 50 | Lanosco's Special Bait | 27+ | fishing | implemented | hand-ported |
+| 51 | O'Fulle's Special Bait | 36+ | fishing | implemented | hand-ported |
+| 52 | Willie's Special Bait | 48+ | fishing | implemented | hand-ported |
+| 53 | Linnaeus' Special Bait | 60+ | fishing | implemented | hand-ported |
 | 70 | Saga of the Phoenix Knight |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 71 | Saga of Eva's Templar |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 72 | Saga of the Sword Muse |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
@@ -268,7 +268,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 382 | Kail's Magic Coin | 55+ | one-time | implemented | hand-ported |
 | 383 | Searching for Treasure | 42+ | repeatable | partial | no talk: 31148; auto-port |
 | 384 | Warehouse Keeper's Pastime | 40+ | repeatable | stub | 3 dialog(s), no start; auto-port |
-| 385 | Yoke of the Past | 20+ | repeatable | missing |  |
+| 385 | Yoke of the Past | 20+ | repeatable | implemented | hand-ported |
 | 386 | Stolen Dignity | 58+ | repeatable | stub | 2 dialog(s), no start; auto-port |
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
 | 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
@@ -292,13 +292,13 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
 | 422 | Repent Your Sins | 20+ | repeatable | stub | 36 dialog(s), no start; auto-port |
-| 426 | Quest for Fishing Shot |  | fishing | missing |  |
+| 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | stub | 2 dialog(s), no start; auto-port |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
 | 501 | Proof of Clan Alliance | 3–39 | clan | stub | 40 dialog(s), no start; timers; auto-port |
 | 503 | Pursuit of Clan Ambition! |  | clan | stub | 64 dialog(s), no start; auto-port |
 | 504 | Competition for the Bandit Stronghold |  | clan | stub | 2 dialog(s), no start; auto-port |
-| 505 | Blood Offering |  | clan | missing |  |
+| 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
 | 508 | A Clan's Reputation | 5+ | clan | stub | 2 dialog(s), no start; auto-port |
 | 509 | The Clan's Prestige | 6+ | clan | stub | 2 dialog(s), no start; auto-port |
 | 510 | A Clan's Reputation | 5+ | clan | stub | 3 dialog(s), no start; auto-port |
@@ -346,7 +346,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 643 | Rise and Fall of the Elroki Tribe | 75+ | repeatable | implemented | hand-ported |
 | 644 | Grave Robber Annihilation | 20+ | repeatable | implemented | hand-ported |
 | 645 | Ghosts of Batur | 23+ | repeatable | implemented | hand-ported |
-| 646 | Signs of Revolt | 40+ | repeatable | missing |  |
+| 646 | Signs of Revolt | 40+ | repeatable | implemented | hand-ported |
 | 647 | Influx of Machines | 46+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
 | 648 | An Ice Merchant's Dream | 53+ | repeatable | stub | 21 dialog(s), no start; auto-port |
 | 649 | A Looter and a Railroad Man | 30+ | repeatable | partial | no kill: 8/8 mobs; auto-port |

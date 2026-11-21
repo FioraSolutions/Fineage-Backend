@@ -1,0 +1,36 @@
+name: format-check
+
+# The tree predates a formatter gate, so only the C# files a pull request touches are verified.
+on:
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format-check:
+    name: format-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Verify whitespace of changed C# files
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" -- '*.cs')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No C# files changed against ${BASE_REF}."
+            exit 0
+          fi
+          printf 'Checking %s\n' "${files[@]}"
+          dotnet format whitespace --folder --verify-no-changes --include "${files[@]}"

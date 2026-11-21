@@ -4,7 +4,7 @@ namespace Fineage.Zone.Drops;
 
 /// <summary>
 /// Pure Mobius ground-loot checks (drop protection window + inventory slot capacity).
-/// World still owns party membership and the bag mutation under the gate.
+/// World still owns party membership and the bag mutation on the simulation thread.
 /// </summary>
 public static class GroundRules
 {

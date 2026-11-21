@@ -133,7 +133,10 @@ public sealed partial class MemoryAccountStore
                 castle.InProgress,
                 castle.EndsUnixMs,
                 castle.Treasury,
-                castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null)).ToArray();
+                castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null,
+                castle.HiredGuards is { Count: > 0 } guards
+                    ? guards.Select(g => new HiredSiegeGuardSave(g.ItemId, g.NpcId, g.X, g.Y, g.Z, g.Heading, g.GroundObjectId)).ToArray()
+                    : null)).ToArray();
         }
     }
 
@@ -245,7 +248,19 @@ public sealed partial class MemoryAccountStore
                 InProgress = castle.InProgress,
                 EndsUnixMs = castle.EndsUnixMs,
                 Treasury = castle.Treasury,
-                DoorUpgrades = castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null
+                DoorUpgrades = castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null,
+                HiredGuards = castle.HiredGuards is { Count: > 0 } guards
+                    ? guards.Select(g => new HiredSiegeGuardDto
+                    {
+                        ItemId = g.ItemId,
+                        NpcId = g.NpcId,
+                        X = g.X,
+                        Y = g.Y,
+                        Z = g.Z,
+                        Heading = g.Heading,
+                        GroundObjectId = g.GroundObjectId
+                    }).ToList()
+                    : null
             }).ToList();
             _data.SiegeClans = clans.Select(row => new SiegeClanDto
             {
@@ -383,6 +398,33 @@ public sealed partial class MemoryAccountStore
             return true;
         }
     }
+
+    public IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls()
+    {
+        lock (_gate)
+            return (_data.SiegableClanHalls ?? []).Select(CloneSiegableHall).ToArray();
+    }
+
+    public bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls)
+    {
+        ArgumentNullException.ThrowIfNull(halls);
+        lock (_gate)
+        {
+            _data.SiegableClanHalls = halls.Select(CloneSiegableHall).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    static SiegableClanHallSave CloneSiegableHall(SiegableClanHallSave hall) => new(
+        hall.Id,
+        hall.OwnerClanId,
+        hall.NextSiegeUnixMs,
+        hall.RegistrationClosed,
+        hall.InProgress,
+        hall.EndsUnixMs,
+        hall.Attackers?.ToArray(),
+        hall.PendingWinnerClanId);
 
     static ClanHallSave CloneHall(ClanHallSave hall) => new()
     {

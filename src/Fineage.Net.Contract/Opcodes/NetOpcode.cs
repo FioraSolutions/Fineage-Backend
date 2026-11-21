@@ -72,6 +72,12 @@ namespace Fineage.Net.Contract
         public const ushort RequestQuestList = 0x0330;
         public const ushort RequestQuestAbort = 0x0331;
         public const ushort QuestList = 0x0332;
+        /// <summary>Zone → client: Mobius quest radar arrow target (ShowRadar / RadarControl).</summary>
+        public const ushort QuestDirection = 0x0344;
+        /// <summary>Zone → client: per-NPC quest markers above nameplates (player-specific).</summary>
+        public const ushort QuestNpcMarks = 0x0345;
+        /// <summary>Zone → client: newbie tutorial UI (TutorialShowHtml, question mark, client events).</summary>
+        public const ushort TutorialUi = 0x0346;
         public const ushort PartyInviteRequest = 0x0333;
         public const ushort PartyAnswerJoinRequest = 0x0334;
         public const ushort PartyLeaveRequest = 0x0335;
@@ -333,5 +339,9 @@ namespace Fineage.Net.Contract
         public const ushort DuelEvent = 0x03C2;
         /// <summary>Zone → client: an opponent's bars during a duel (<c>DuelUserInfoNetMsg</c>, Mobius ExDuelUpdateUserInfo).</summary>
         public const ushort DuelUserInfo = 0x03C3;
+        /// <summary>Zone → watchers: mount / dismount visual (<c>RideNetMsg</c>, Mobius Ride 0x86).</summary>
+        public const ushort Ride = 0x03C4;
+        /// <summary>Zone → owner: pet / mount action gating (<c>PlayerActionStateNetMsg</c>).</summary>
+        public const ushort PlayerActionState = 0x03C5;
     }
 }

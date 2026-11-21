@@ -37,7 +37,7 @@ public sealed class CharacterActionPacketHandler
         }
 
         var revive = NetCodec.DecodeReviveRequest(envelope.Payload);
-        string? error = await _world.TryReviveAsync(zoneSession, revive.Action, ct).ConfigureAwait(false);
+        string? error = await _world.ExecuteAsync(zoneSession, new ReviveCommand(revive.Action), ct).ConfigureAwait(false);
         if (error != null)
         {
             await _reject(conn, error, "Revive failed.", ct).ConfigureAwait(false);
@@ -62,10 +62,9 @@ public sealed class CharacterActionPacketHandler
         }
 
         var bypass = NetCodec.DecodeBypassRequest(envelope.Payload);
-        string? error = await _world.TryBypassAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            bypass.NpcObjectId,
-            bypass.Command,
+            new BypassCommand(bypass.NpcObjectId, bypass.Command),
             ct).ConfigureAwait(false);
         if (error != null)
         {

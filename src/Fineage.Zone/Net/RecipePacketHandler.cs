@@ -35,9 +35,9 @@ public sealed class RecipePacketHandler
         }
 
         var req = NetCodec.DecodeRecipeBookOpen(envelope.Payload);
-        string? error = await _world.TryRecipeBookOpenAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new RecipeBookOpenMsg { Dwarven = req.Dwarven != 0 },
+            new RecipeBookOpenCommand(new RecipeBookOpenMsg { Dwarven = req.Dwarven != 0 }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Recipe book open failed.", ct).ConfigureAwait(false);
@@ -57,9 +57,9 @@ public sealed class RecipePacketHandler
         }
 
         var req = NetCodec.DecodeRecipeMakeSelf(envelope.Payload);
-        string? error = await _world.TryRecipeMakeSelfAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new RecipeMakeSelfMsg { RecipeId = req.RecipeId },
+            new RecipeMakeSelfCommand(new RecipeMakeSelfMsg { RecipeId = req.RecipeId }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Recipe make self failed.", ct).ConfigureAwait(false);
@@ -84,9 +84,9 @@ public sealed class RecipePacketHandler
             RecipeId = row.RecipeId,
             Price = row.Price
         }).ToArray();
-        string? error = await _world.TrySetRecipeShopAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new SetRecipeShopMsg { Message = req.Message ?? "", Items = items },
+            new SetRecipeShopCommand(new SetRecipeShopMsg { Message = req.Message ?? "", Items = items }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Recipe shop open failed.", ct).ConfigureAwait(false);
@@ -106,13 +106,14 @@ public sealed class RecipePacketHandler
         }
 
         var req = NetCodec.DecodeRecipeShopMakeInfo(envelope.Payload);
-        string? error = await _world.TryRecipeShopMakeInfoAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new RecipeShopMakeInfoMsg
-            {
-                ManufacturerObjectId = req.ManufacturerObjectId,
-                RecipeId = req.RecipeId
-            },
+            new RecipeShopMakeInfoCommand(
+                new RecipeShopMakeInfoMsg
+                {
+                    ManufacturerObjectId = req.ManufacturerObjectId,
+                    RecipeId = req.RecipeId
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Recipe shop make info failed.", ct).ConfigureAwait(false);
@@ -132,13 +133,14 @@ public sealed class RecipePacketHandler
         }
 
         var req = NetCodec.DecodeRecipeShopMakeItem(envelope.Payload);
-        string? error = await _world.TryRecipeShopMakeItemAsync(
+        string? error = await _world.ExecuteAsync(
             zoneSession,
-            new RecipeShopMakeItemMsg
-            {
-                ManufacturerObjectId = req.ManufacturerObjectId,
-                RecipeId = req.RecipeId
-            },
+            new RecipeShopMakeItemCommand(
+                new RecipeShopMakeItemMsg
+                {
+                    ManufacturerObjectId = req.ManufacturerObjectId,
+                    RecipeId = req.RecipeId
+                }),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "Recipe shop make item failed.", ct).ConfigureAwait(false);

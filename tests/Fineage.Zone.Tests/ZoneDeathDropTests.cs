@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Xunit;
@@ -48,6 +49,11 @@ public sealed class ZoneDeathDropTests
         Assert.True(player.Inventory.CountOf(1864) < before,
             $"expected stem drop, still has {player.Inventory.CountOf(1864)} ground={kit.World.GroundItemCountForTest()}");
         Assert.True(kit.World.GroundItemCountForTest() >= 1);
+        var deathDrop = Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.DeathDrop).Transaction;
+        Assert.Equal((player.ObjectId, mob.ObjectId), (deathDrop.CausedBy, deathDrop.Reference));
+        Assert.Equal(
+            kit.World.GroundItemCountForTest(),
+            deathDrop.Postings.Count(posting => posting.Account.Container == LedgerContainer.Ground));
     }
 
     [Fact]
@@ -72,6 +78,7 @@ public sealed class ZoneDeathDropTests
         kit.World.KillPlayerByNpcForTest(player, mob);
         Assert.Equal(before, player.Inventory.CountOf(1864));
         Assert.Equal(0, kit.World.GroundItemCountForTest());
+        Assert.DoesNotContain(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.DeathDrop);
     }
 
     /// <summary>Rnd.Next(100) always 0 → every percent check succeeds.</summary>

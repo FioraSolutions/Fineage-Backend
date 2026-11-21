@@ -25,6 +25,16 @@ public sealed partial class QuestCatalog
         public bool? Abortable { get; set; }
         public List<int>? QuestItems { get; set; }
         public List<DialogDto>? Dialogs { get; set; }
+        public Dictionary<string, List<OpDto>>? CondClientFx { get; set; }
+        public List<JournalRewardDto>? JournalRewards { get; set; }
+    }
+
+    sealed class JournalRewardDto
+    {
+        public string? Kind { get; set; }
+        public int ItemId { get; set; }
+        public long Count { get; set; }
+        public string? Label { get; set; }
     }
 
     sealed class DialogDto
@@ -114,6 +124,10 @@ public sealed partial class QuestCatalog
         public string? GuardSay { get; set; }
         public Dictionary<string, string>? GoneVars { get; set; }
         public Dictionary<string, string>? DeadVars { get; set; }
+        public string? Kind { get; set; }
+        public string? Html { get; set; }
+        public int EventId { get; set; }
+        public bool On { get; set; } = true;
     }
 
     sealed class HtmlByVarDto

@@ -48,12 +48,12 @@ public sealed class MobiusAttackGapTests
         Assert.Equal(hp, mob.CurHp);
 
         long atk = ZoneCombat.AttackTimeMs(kit.World.PlayerStats(player).PAtkSpd);
-        kit.Now = kit.Now.AddMilliseconds(atk / 4 + 1);
+        kit.AdvanceToTickCovering(kit.Now.ToUnixTimeMilliseconds() + atk / 4 + 1);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         int afterFirst = mob.CurHp;
         Assert.True(afterFirst < hp);
 
-        kit.Now = kit.Now.AddMilliseconds(atk / 2);
+        kit.AdvanceToTickCovering(kit.Now.ToUnixTimeMilliseconds() + atk / 2);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
         Assert.True(mob.CurHp < afterFirst);
         Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
@@ -69,7 +69,7 @@ public sealed class MobiusAttackGapTests
 
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, player.Intent.AutoAttackTargetId);
         Assert.Equal(hp, mob.CurHp);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
@@ -104,8 +104,8 @@ public sealed class MobiusAttackGapTests
         var castle = kit.World.FindCastle(1)!;
         Assert.Equal(0, kit.World.ActiveSiegeCastle(GludioX, GludioY, 0));
         Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
-        Assert.Equal(other.ObjectId, session.AutoAttackTargetId);
-        session.AutoAttackTargetId = 0;
+        Assert.Equal(other.ObjectId, attacker.Intent.AutoAttackTargetId);
+        attacker.Intent.AutoAttackTargetId = 0;
 
         castle.OwnerClanId = clan.Id;
         castle.InProgress = true;
@@ -114,7 +114,7 @@ public sealed class MobiusAttackGapTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         Assert.Null(await kit.World.TryAttackAsync(session, other.ObjectId, CancellationToken.None));
-        Assert.Equal(0, session.AutoAttackTargetId);
+        Assert.Equal(0, attacker.Intent.AutoAttackTargetId);
         Assert.Equal(500, victim.CurHp);
         Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
             m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgSiegeFriend);

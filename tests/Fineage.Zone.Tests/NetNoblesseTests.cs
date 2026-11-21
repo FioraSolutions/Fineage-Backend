@@ -103,5 +103,8 @@ public sealed class NetNoblesseTests
         Assert.DoesNotContain("quest_event:241:31739-03", LastHtml(bench));
         Assert.NotNull(await p.QuestEvent(talien.ObjectId, 241, "31739-03"));
         Assert.Null(p.Player.Quests.Find(241));
+        var html = LastHtml(bench);
+        Assert.False(string.IsNullOrWhiteSpace(html));
+        Assert.Contains("Talien", html);
     }
 }

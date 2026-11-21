@@ -1511,5 +1511,29 @@
         }
       ]
     }
-  ]
+  ],
+  "condClientFx": {
+    "1": [
+      {
+        "op": "tutorial_ui",
+        "kind": "question_mark",
+        "on": true
+      },
+      {
+        "op": "sound",
+        "name": "tutorial_voice_007"
+      }
+    ],
+    "2": [
+      {
+        "op": "tutorial_ui",
+        "kind": "question_mark",
+        "on": true
+      },
+      {
+        "op": "sound",
+        "name": "tutorial_voice_017"
+      }
+    ]
+  }
 }

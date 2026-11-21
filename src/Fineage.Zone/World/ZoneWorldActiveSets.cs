@@ -1,40 +1,35 @@
 using Fineage.Zone.Combat;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Mobius-style scheduling registries (ThinkTaskManager / MovementTaskManager analogues).
-/// Hot ticks iterate these sets only — never the full <c>_byId</c> table on an idle world.
-/// Mutations stay under <c>_gate</c> with the entity fields they mirror.
+/// Mobius-style scheduling registries (ThinkTaskManager / MovementTaskManager analogues), kept per owning region by
+/// <see cref="_byId"/>. Hot ticks iterate these sets only — never the full table on an idle world. Mutations happen on the
+/// simulation thread with the entity fields they mirror.
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    /// <summary>Entities with <see cref="ZoneEntity.MoveActive"/> (players + NPCs).</summary>
-    readonly HashSet<int> _moving = [];
-    /// <summary>NPCs whose region has a player, or who must still walk home (Mobius AttackableThinkTaskManager).</summary>
-    readonly HashSet<int> _thinking = [];
-    /// <summary>NPCs with aggro target and/or returning home (Mobius AI task membership).</summary>
-    readonly HashSet<int> _aiBusy = [];
-    /// <summary>Entities with a queued <see cref="ZoneEntity.PendingHit"/>.</summary>
-    readonly HashSet<int> _pendingHit = [];
-    /// <summary>NPC corpses with <see cref="ZoneEntity.DecayAtMs"/> &gt; 0.</summary>
-    readonly HashSet<int> _decaying = [];
-    /// <summary>Entities that still need HP/MP regen this sim tick.</summary>
-    readonly HashSet<int> _needRegen = [];
-    /// <summary>Entities with at least one abnormal (buff/debuff) to expire.</summary>
-    readonly HashSet<int> _withAbnormals = [];
-
     /// <summary>Test/diagnostics: sizes of the Mobius-style active registries.</summary>
     internal (int Moving, int AiBusy, int PendingHit, int Decaying, int NeedRegen, int WithAbnormals) ActiveSetCounts =>
-        (_moving.Count, _aiBusy.Count, _pendingHit.Count, _decaying.Count, _needRegen.Count, _withAbnormals.Count);
+        (_byId.CountOf(ActiveSets.Moving), _byId.CountOf(ActiveSets.AiBusy), _byId.CountOf(ActiveSets.PendingHit),
+            _byId.CountOf(ActiveSets.Decaying), _byId.CountOf(ActiveSets.NeedRegen), _byId.CountOf(ActiveSets.WithAbnormals));
+
+    /// <summary>Members of <paramref name="set"/> by owning region, then object id; safe to mutate the set while iterating.</summary>
+    int[] Active(ActiveSets set) => _byId.Snapshot(set);
+
+    void Track(ZoneEntity entity, ActiveSets set, bool member)
+    {
+        if (member)
+            _byId.Join(entity, set);
+        else
+            _byId.Leave(entity, set);
+    }
 
     internal void SetMoveActive(ZoneEntity entity, bool active)
     {
         entity.MoveActive = active;
-        if (active)
-            _moving.Add(entity.ObjectId);
-        else
-            _moving.Remove(entity.ObjectId);
+        Track(entity, ActiveSets.Moving, active);
     }
 
     internal void SetReturningHome(ZoneEntity npc, bool returning)
@@ -61,28 +56,19 @@ public sealed partial class ZoneWorld
     {
         if (npc.Kind != ZoneEntityKind.Npc)
             return;
-        if (npc.AggroTargetId > 0 || npc.ReturningHome)
-            _aiBusy.Add(npc.ObjectId);
-        else
-            _aiBusy.Remove(npc.ObjectId);
+        Track(npc, ActiveSets.AiBusy, npc.AggroTargetId > 0 || npc.ReturningHome);
     }
 
     internal void SetPendingHit(ZoneEntity entity, PendingSkillHit? hit)
     {
         entity.PendingHit = hit;
-        if (hit != null)
-            _pendingHit.Add(entity.ObjectId);
-        else
-            _pendingHit.Remove(entity.ObjectId);
+        Track(entity, ActiveSets.PendingHit, hit != null);
     }
 
     internal void SetDecayAtMs(ZoneEntity npc, long decayAtMs)
     {
         npc.DecayAtMs = decayAtMs;
-        if (decayAtMs > 0)
-            _decaying.Add(npc.ObjectId);
-        else
-            _decaying.Remove(npc.ObjectId);
+        Track(npc, ActiveSets.Decaying, decayAtMs > 0);
     }
 
     internal void SyncNeedRegen(ZoneEntity entity)
@@ -90,21 +76,7 @@ public sealed partial class ZoneWorld
         bool need = !entity.Dead
             && entity.CurHp > 0
             && (entity.CurHp < entity.MaxHp || entity.CurMp < entity.MaxMp);
-        if (need)
-            _needRegen.Add(entity.ObjectId);
-        else
-            _needRegen.Remove(entity.ObjectId);
-    }
-
-    void ForgetActiveSets(int objectId)
-    {
-        _moving.Remove(objectId);
-        _aiBusy.Remove(objectId);
-        _thinking.Remove(objectId);
-        _pendingHit.Remove(objectId);
-        _decaying.Remove(objectId);
-        _needRegen.Remove(objectId);
-        _withAbnormals.Remove(objectId);
+        Track(entity, ActiveSets.NeedRegen, need);
     }
 
     /// <summary>
@@ -117,24 +89,22 @@ public sealed partial class ZoneWorld
             return;
         if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
             return;
-        if (!_thinking.Add(npc.ObjectId))
+        if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
             return;
+        _byId.Join(npc, ActiveSets.Thinking);
         SpawnPrivates(npc);
     }
 
     void ReleaseThink(ZoneEntity npc)
     {
-        if (!_thinking.Contains(npc.ObjectId))
+        if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             return;
         if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondDouble(npc))
             return;
-        foreach (var player in Players())
-        {
-            if (player.Knownlist.Contains(npc.ObjectId))
-                return;
-        }
+        if (AnyLivePlayerWatching(npc.ObjectId))
+            return;
 
-        _thinking.Remove(npc.ObjectId);
+        _byId.Leave(npc, ActiveSets.Thinking);
     }
 
     bool DriftedBeyondDouble(ZoneEntity npc)

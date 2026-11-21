@@ -19,7 +19,7 @@ public sealed partial class ZoneWorld
     bool SameOrPartyIds(ZoneEntity player, out List<int> ids)
     {
         ids = [player.ObjectId];
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int partyId) && _parties.TryGetValue(partyId, out var party))
+        if (_party.Of(player.ObjectId) is { } party)
         {
             ids = [.. party.MemberIds];
             return true;
@@ -31,7 +31,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>Seed.onItemUse</c>: target checks, the castle territory rule, then the Sowing cast.</summary>
     string? TryUseSeed(ZoneSession session, ZoneEntity player, Fineage.Game.ItemInstance item, ManorSeed seed)
     {
-        if (_manor.Disabled)
+        if (_manor.Board.Disabled)
             return ManorProtocol.Disabled;
         int targetId = session.SelectedTargetId;
         if (targetId <= 0 || !_byId.TryGetValue(targetId, out var target) || target.Kind != ZoneEntityKind.Npc ||
@@ -74,7 +74,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius <c>Harvester.onItemUse</c>: a dead monster as the target, then the Harvesting cast.</summary>
     string? TryUseHarvester(ZoneSession session, ZoneEntity player)
     {
-        if (_manor.Disabled)
+        if (_manor.Board.Disabled)
             return ManorProtocol.Disabled;
         int targetId = session.SelectedTargetId;
         if (targetId <= 0 || !_byId.TryGetValue(targetId, out var target) || target.Kind != ZoneEntityKind.Npc ||
@@ -92,7 +92,7 @@ public sealed partial class ZoneWorld
     string? CastManorSkill(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int itemId,
         DeferredEffect effect, bool allowDeadTarget = false)
     {
-        long now = _clock().ToUnixTimeMilliseconds();
+        long now = NowUnixMs();
         var template = _game.Skills.Find(skillId);
         if (template == null || !template.TryLevelData(1, out var levelData))
             return SkillProtocol.Unknown;
@@ -127,10 +127,10 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ApplySow(ZoneSession session, ZoneEntity player, ZoneEntity target)
     {
-        if (target.Dead || target.CurHp <= 0 || !_manor.Data.CanBeSown(target.NpcId) || target.Seeded ||
+        if (target.Dead || target.CurHp <= 0 || !_manor.Board.Data.CanBeSown(target.NpcId) || target.Seeded ||
             target.SeederObjectId != player.ObjectId)
             return;
-        var seed = _manor.Data.Seed(target.SeedId);
+        var seed = _manor.Board.Data.Seed(target.SeedId);
         var inventory = player.Inventory;
         if (seed == null || inventory == null)
             return;
@@ -148,7 +148,7 @@ public sealed partial class ZoneWorld
             NetBridge?.FanoutPlaySound([player.ObjectId], 0, "ItemSound.quest_itemget", 0, 0, 0, 0, 0);
             target.Seeded = true;
             target.HarvestItemId = seed.CropId;
-            target.HarvestCount = ManorRules.HarvestCount(target.Level, seed.Level, _manor.Settings.Rate);
+            target.HarvestCount = ManorRules.HarvestCount(target.Level, seed.Level, _manor.Board.Settings.Rate);
             ClanLine(ids, ManorProtocol.SowSuccess, "The seed was successfully sown.");
         }
         else
@@ -215,7 +215,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: spawn a template monster at a point (no respawn bookkeeping beyond the normal spawn).</summary>
     internal ZoneEntity SpawnMonsterForTests(int npcId, int x, int y, int z)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
             int objectId = AllocateQuestNpcObjectId();

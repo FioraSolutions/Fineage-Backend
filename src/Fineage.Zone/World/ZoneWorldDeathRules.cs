@@ -34,13 +34,13 @@ public sealed partial class ZoneWorld
         {
             if (InArenaOnly(player))
                 return;
-            ApplyDeathExpLoss(player);
+            ApplyDeathExpLoss(player, killer);
             if (player.Karma > 0 && !InPvpArea(player))
                 RollDeathPenalty(player, killer);
             return;
         }
 
-        ApplyDeathExpLoss(player);
+        ApplyDeathExpLoss(player, killer);
         RollDeathPenalty(player, killer);
     }
 
@@ -49,7 +49,7 @@ public sealed partial class ZoneWorld
     /// taken from, so the loss follows the level table and not the absolute exp. The exp never goes below the start
     /// of the level, and <c>PlayableStat.removeExp</c> delevels when the bar underflows.
     /// </summary>
-    void ApplyDeathExpLoss(ZoneEntity player)
+    void ApplyDeathExpLoss(ZoneEntity player, ZoneEntity? killer = null)
     {
         if (player.Session == null)
             return;
@@ -67,6 +67,8 @@ public sealed partial class ZoneWorld
             return;
 
         long lost = _deathRules.ExpLost(player.Level, levelBarEnd - levelBarStart);
+        if (killer != null)
+            lost = (long)Math.Round(lost * ClanWarDeathExpShare(player, killer));
         if (lost <= 0)
             return;
 
@@ -120,7 +122,7 @@ public sealed partial class ZoneWorld
             return;
 
         // Mobius Rnd.get(1, 100) <= chance: an inclusive 1..chance roll out of 100.
-        int roll = _deathRandom.Next(1, 101);
+        int roll = Rng(_deathRandom, player).Next(1, 101);
         if (roll > chance)
             return;
 
@@ -234,7 +236,7 @@ public sealed partial class ZoneWorld
         });
         if (deleveled)
             NetBridge.FanoutSkillList(self,
-                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, _clock().ToUnixTimeMilliseconds()));
+                Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
     }
 
     /// <summary>

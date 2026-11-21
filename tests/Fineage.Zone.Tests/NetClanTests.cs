@@ -371,7 +371,7 @@ public sealed class NetClanTests
         Assert.Equal(ClanProtocol.Dissolving, await kit.World.TryClanDissolveAsync(session, kit.Now, default));
 
         kit.Now = kit.Now.AddMilliseconds(ClanProtocol.DissolveDays * ClanProtocol.DayMillis - 1);
-        kit.World.CompleteDueDissolutions(kit.Now);
+        kit.World.CompleteDueDissolutions();
         Assert.NotNull(kit.Store.FindClan(clanId));
 
         Assert.Null(await kit.World.TryClanCancelDissolveAsync(session, kit.Now, default));
@@ -379,7 +379,7 @@ public sealed class NetClanTests
         Assert.Equal(0, LastStatus(rec).DissolvingExpiryUnixMs);
 
         kit.Now = kit.Now.AddMilliseconds(ClanProtocol.DayMillis);
-        kit.World.CompleteDueDissolutions(kit.Now);
+        kit.World.CompleteDueDissolutions();
         Assert.NotNull(kit.Store.FindClan(clanId));
 
         // Re-requesting takes a fresh seven days from that moment, not from the cancelled one.
@@ -388,7 +388,7 @@ public sealed class NetClanTests
         Assert.Equal(ClanRules.DissolveExpiry(again), LastStatus(rec).DissolvingExpiryUnixMs);
 
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(ClanRules.DissolveExpiry(again));
-        kit.World.CompleteDueDissolutions(kit.Now);
+        kit.World.CompleteDueDissolutions();
         Assert.Equal(ClanProtocol.Dispersed, LastLine(rec).Id);
         Assert.Equal(0, ((Fineage.Protocol.PledgeStatusChangedMsg)rec.Of(nameof(IWorldEventPublisher.FanoutPledgeStatus))[^1][1]).ClanId);
         Assert.Equal(0, LastUserInfoClan(rec));

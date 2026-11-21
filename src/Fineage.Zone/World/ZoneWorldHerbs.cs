@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -23,21 +24,21 @@ public sealed partial class ZoneWorld
             switch (skill.Kind)
             {
                 case HerbKind.HpPercent:
-                {
-                    int hp = HerbCatalog.RestorePercent(player.CurHp, player.MaxHp, skill.AmountAt(level));
-                    player.CurHp += hp;
-                    vitals = true;
-                    NotifyLine(session.ObjectId, _herbs.HpRestoredMessage, $"{hp} HP has been restored.");
-                    break;
-                }
+                    {
+                        int hp = HerbCatalog.RestorePercent(player.CurHp, player.MaxHp, skill.AmountAt(level));
+                        player.CurHp += hp;
+                        vitals = true;
+                        NotifyLine(session.ObjectId, _herbs.HpRestoredMessage, $"{hp} HP has been restored.");
+                        break;
+                    }
                 case HerbKind.MpPercent:
-                {
-                    int mp = HerbCatalog.RestorePercent(player.CurMp, player.MaxMp, skill.AmountAt(level));
-                    player.CurMp += mp;
-                    vitals = true;
-                    NotifyLine(session.ObjectId, _herbs.MpRestoredMessage, $"{mp} MP has been restored.");
-                    break;
-                }
+                    {
+                        int mp = HerbCatalog.RestorePercent(player.CurMp, player.MaxMp, skill.AmountAt(level));
+                        player.CurMp += mp;
+                        vitals = true;
+                        NotifyLine(session.ObjectId, _herbs.MpRestoredMessage, $"{mp} MP has been restored.");
+                        break;
+                    }
                 default:
                     // Self-cast like ItemSkills: caster = target = picker.
                     CastBuff(player, player, skill.SkillId, level, skill.AbnormalLevel, skill.DurationSeconds);
@@ -65,19 +66,22 @@ public sealed partial class ZoneWorld
     /// <summary>Test: drop one ground stack next to <paramref name="player"/> and return its object id.</summary>
     internal int PlaceGroundForTest(ZoneEntity player, int itemId, int count = 1)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
-            var before = _byId.Keys.ToHashSet();
-            long now = _clock().ToUnixTimeMilliseconds();
-            SpawnGroundStack(itemId, count, player.X, player.Y, player.Z, 0, [player],
-                expireAtMs: now + (IsHerb(itemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs));
-            return _byId.Keys.First(id => !before.Contains(id));
+            long now = NowUnixMs();
+            var move = BeginLedgerMove(LedgerTxKind.Loot, 0, 0);
+            var ground = SpawnGroundStack(itemId, count, player.X, player.Y, player.Z, 0, [player],
+                expireAtMs: now + (IsHerb(itemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs))
+                ?? throw new ArgumentException($"item {itemId} cannot be placed", nameof(itemId));
+            PostOntoGround(move, LedgerAccount.Of(SystemAccount.DropSource), ground);
+            move.Commit(LedgerHoldingsOf);
+            return ground.ObjectId;
         }
     }
 
     internal bool ExistsForTest(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.ContainsKey(objectId);
     }
 }

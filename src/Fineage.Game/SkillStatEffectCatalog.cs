@@ -16,23 +16,44 @@ public sealed class SkillStatEffectCatalog
 
     static readonly Dictionary<string, CombatStat> StatNames = new(StringComparer.Ordinal)
     {
-        ["pAtk"] = CombatStat.PAtk, ["pDef"] = CombatStat.PDef, ["mAtk"] = CombatStat.MAtk, ["mDef"] = CombatStat.MDef,
-        ["pAtkSpd"] = CombatStat.PAtkSpd, ["mAtkSpd"] = CombatStat.MAtkSpd, ["accCombat"] = CombatStat.Accuracy,
-        ["rEvas"] = CombatStat.Evasion, ["critRate"] = CombatStat.CritRate, ["runSpd"] = CombatStat.RunSpd,
-        ["regHp"] = CombatStat.RegHp, ["regMp"] = CombatStat.RegMp,
-        ["weightLimit"] = CombatStat.WeightLimit, ["weightPenalty"] = CombatStat.WeightPenalty,
-        ["mCritRate"] = CombatStat.MCritRate, ["mCritPower"] = CombatStat.MagicCritDmg,
-        ["critDmg"] = CombatStat.CritDmg, ["critDmgAdd"] = CombatStat.CritDmgAdd, ["blowRate"] = CombatStat.BlowRate,
+        ["pAtk"] = CombatStat.PAtk,
+        ["pDef"] = CombatStat.PDef,
+        ["mAtk"] = CombatStat.MAtk,
+        ["mDef"] = CombatStat.MDef,
+        ["pAtkSpd"] = CombatStat.PAtkSpd,
+        ["mAtkSpd"] = CombatStat.MAtkSpd,
+        ["accCombat"] = CombatStat.Accuracy,
+        ["rEvas"] = CombatStat.Evasion,
+        ["critRate"] = CombatStat.CritRate,
+        ["runSpd"] = CombatStat.RunSpd,
+        ["regHp"] = CombatStat.RegHp,
+        ["regMp"] = CombatStat.RegMp,
+        ["regCp"] = CombatStat.RegCp,
+        ["weightLimit"] = CombatStat.WeightLimit,
+        ["weightPenalty"] = CombatStat.WeightPenalty,
+        ["mCritRate"] = CombatStat.MCritRate,
+        ["mCritPower"] = CombatStat.MagicCritDmg,
+        ["critDmg"] = CombatStat.CritDmg,
+        ["critDmgAdd"] = CombatStat.CritDmgAdd,
+        ["blowRate"] = CombatStat.BlowRate,
         ["pSkillEvas"] = CombatStat.PSkillEvasion,
         // Mobius positional stats (Focus Chance 356 / Focus Power 357 / Focus Death 355 / Assassin Servitor 1348).
-        ["critRatePos"] = CombatStat.CritRatePos, ["critDmgPos"] = CombatStat.CritDmgPos,
-        ["maxHp"] = CombatStat.MaxHp, ["maxMp"] = CombatStat.MaxMp, ["maxCp"] = CombatStat.MaxCp,
+        ["critRatePos"] = CombatStat.CritRatePos,
+        ["critDmgPos"] = CombatStat.CritDmgPos,
+        ["maxHp"] = CombatStat.MaxHp,
+        ["maxMp"] = CombatStat.MaxMp,
+        ["maxCp"] = CombatStat.MaxCp,
         ["healEffect"] = CombatStat.HealEffect,
-        ["pReuse"] = CombatStat.PReuse, ["mReuse"] = CombatStat.MReuse, ["dReuse"] = CombatStat.DReuse,
-        ["sDef"] = CombatStat.SDef, ["rShld"] = CombatStat.RShld,
+        ["pReuse"] = CombatStat.PReuse,
+        ["mReuse"] = CombatStat.MReuse,
+        ["dReuse"] = CombatStat.DReuse,
+        ["sDef"] = CombatStat.SDef,
+        ["rShld"] = CombatStat.RShld,
         ["reflectDam"] = CombatStat.ReflectDam,
-        ["reflectSkillPhysic"] = CombatStat.ReflectSkillPhysic, ["reflectSkillMagic"] = CombatStat.ReflectSkillMagic,
-        ["vengeancePdam"] = CombatStat.VengeancePdam, ["vengeanceMdam"] = CombatStat.VengeanceMdam,
+        ["reflectSkillPhysic"] = CombatStat.ReflectSkillPhysic,
+        ["reflectSkillMagic"] = CombatStat.ReflectSkillMagic,
+        ["vengeancePdam"] = CombatStat.VengeancePdam,
+        ["vengeanceMdam"] = CombatStat.VengeanceMdam,
         ["absorbDam"] = CombatStat.AbsorbDam,
         ["physicalMpConsumeRate"] = CombatStat.PhysicalMpConsumeRate,
         ["magicalMpConsumeRate"] = CombatStat.MagicalMpConsumeRate,
@@ -42,18 +63,28 @@ public sealed class SkillStatEffectCatalog
         ["skillCriticalProbability"] = CombatStat.SkillCriticalProbability,
         ["atkCountMax"] = CombatStat.AtkCountMax,
         ["pAtkRange"] = CombatStat.PAtkRange,
-        ["breath"] = CombatStat.Breath, ["fall"] = CombatStat.Fall,
-        ["cancelVuln"] = CombatStat.CancelVuln, ["debuffVuln"] = CombatStat.DebuffVuln,
-        ["holyPower"] = CombatStat.HolyPower, ["firePower"] = CombatStat.FirePower, ["darkRes"] = CombatStat.DarkRes,
-        ["holyRes"] = CombatStat.HolyRes, ["fireRes"] = CombatStat.FireRes,
-        ["waterRes"] = CombatStat.WaterRes, ["windRes"] = CombatStat.WindRes,
-        ["earthRes"] = CombatStat.EarthRes, ["transDam"] = CombatStat.TransDam,
-        ["cancel"] = CombatStat.Cancel, ["damageZoneVuln"] = CombatStat.DamageZoneVuln
+        ["breath"] = CombatStat.Breath,
+        ["fall"] = CombatStat.Fall,
+        ["cancelVuln"] = CombatStat.CancelVuln,
+        ["debuffVuln"] = CombatStat.DebuffVuln,
+        ["holyPower"] = CombatStat.HolyPower,
+        ["firePower"] = CombatStat.FirePower,
+        ["darkRes"] = CombatStat.DarkRes,
+        ["holyRes"] = CombatStat.HolyRes,
+        ["fireRes"] = CombatStat.FireRes,
+        ["waterRes"] = CombatStat.WaterRes,
+        ["windRes"] = CombatStat.WindRes,
+        ["earthRes"] = CombatStat.EarthRes,
+        ["transDam"] = CombatStat.TransDam,
+        ["cancel"] = CombatStat.Cancel,
+        ["damageZoneVuln"] = CombatStat.DamageZoneVuln
     };
 
     static readonly Dictionary<string, SkillPosition> PositionNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["front"] = SkillPosition.Front, ["side"] = SkillPosition.Side, ["behind"] = SkillPosition.Behind
+        ["front"] = SkillPosition.Front,
+        ["side"] = SkillPosition.Side,
+        ["behind"] = SkillPosition.Behind
     };
 
     readonly Dictionary<int, SkillStatEffect> _byId;
@@ -141,7 +172,7 @@ public sealed class SkillStatEffectCatalog
         bool moving = false,
         Func<string[], bool>? wearingSlot = null)
     {
-        foreach (var (skillId, level) in known)
+        foreach (var (skillId, level) in known.OrderBy(static p => p.Key))
         {
             if (!_byId.TryGetValue(skillId, out var effect))
                 continue;
@@ -226,7 +257,11 @@ public sealed class SkillStatEffectCatalog
                     continue;
                 char op = (e.GetProperty("op").GetString() ?? "") switch
                 {
-                    "mul" => 'm', "add" => 'a', "sub" => 's', "set" => '=', _ => '?'
+                    "mul" => 'm',
+                    "add" => 'a',
+                    "sub" => 's',
+                    "set" => '=',
+                    _ => '?'
                 };
                 if (op == '?')
                     continue;

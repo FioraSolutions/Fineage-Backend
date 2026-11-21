@@ -150,10 +150,10 @@ public sealed class NetGroundItemTests
         Assert.Null(await kit.World.TryPickupAsync(session, groundId, CancellationToken.None));
         Assert.Equal(900, stack.Count);
         Assert.True(player.MoveActive);
-        Assert.Equal(groundId, session.PendingPickupId);
+        Assert.Equal(groundId, player.Intent.PendingPickupId);
         Assert.Empty(InvRows(rec));
 
-        kit.Now = kit.Now.AddMilliseconds(session.PendingPickupAtUnixMs - kit.Now.ToUnixTimeMilliseconds() + 50);
+        kit.AdvanceToTickCovering(player.Intent.PendingPickupAtUnixMs);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
 
         Assert.Equal(1000, stack.Count);
@@ -204,10 +204,10 @@ public sealed class NetGroundItemTests
         Assert.Null(await kit.World.TryPickupAsync(session, groundId, CancellationToken.None));
         Assert.Equal(before, stack.Count);
         Assert.True(player.MoveActive);
-        Assert.Equal(groundId, session.PendingPickupId);
+        Assert.Equal(groundId, player.Intent.PendingPickupId);
         Assert.Empty(InvRows(rec));
 
-        kit.Now = kit.Now.AddMilliseconds(session.PendingPickupAtUnixMs - kit.Now.ToUnixTimeMilliseconds() + 50);
+        kit.AdvanceToTickCovering(player.Intent.PendingPickupAtUnixMs);
         await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
 
         Assert.Equal(before + 10, stack.Count);

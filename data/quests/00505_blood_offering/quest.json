@@ -1,0 +1,433 @@
+{
+  "id": 505,
+  "name": "Blood Offering",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [],
+  "dialogs": [
+    {
+      "npcId": 31127,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31127-talk-000.htm"
+    },
+    {
+      "npcId": 31128,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31128-talk-001.htm"
+    },
+    {
+      "npcId": 31129,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31129-talk-002.htm"
+    },
+    {
+      "npcId": 31130,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31130-talk-003.htm"
+    },
+    {
+      "npcId": 31131,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31131-talk-004.htm"
+    },
+    {
+      "npcId": 31137,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31137-talk-005.htm"
+    },
+    {
+      "npcId": 31138,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31138-talk-006.htm"
+    },
+    {
+      "npcId": 31139,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31139-talk-007.htm"
+    },
+    {
+      "npcId": 31140,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31140-talk-008.htm"
+    },
+    {
+      "npcId": 31141,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -114796,
+          "y": -179334,
+          "z": -6752
+        }
+      ],
+      "htmlFile": "31141-talk-009.htm"
+    },
+    {
+      "npcId": 31132,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -80204,
+          "y": 87056,
+          "z": -5154
+        }
+      ],
+      "htmlFile": "31132-talk-010.htm"
+    },
+    {
+      "npcId": 31133,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -77198,
+          "y": 87678,
+          "z": -5182
+        }
+      ],
+      "htmlFile": "31133-talk-011.htm"
+    },
+    {
+      "npcId": 31134,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -76183,
+          "y": 87135,
+          "z": -5179
+        }
+      ],
+      "htmlFile": "31134-talk-012.htm"
+    },
+    {
+      "npcId": 31135,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -76945,
+          "y": 86602,
+          "z": 5153
+        }
+      ],
+      "htmlFile": "31135-talk-013.htm"
+    },
+    {
+      "npcId": 31136,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -79970,
+          "y": 85997,
+          "z": -5154
+        }
+      ],
+      "htmlFile": "31136-talk-014.htm"
+    },
+    {
+      "npcId": 31142,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -79182,
+          "y": 111893,
+          "z": -4898
+        }
+      ],
+      "htmlFile": "31142-talk-015.htm"
+    },
+    {
+      "npcId": 31143,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -76176,
+          "y": 112505,
+          "z": -4899
+        }
+      ],
+      "htmlFile": "31143-talk-016.htm"
+    },
+    {
+      "npcId": 31144,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -75198,
+          "y": 111969,
+          "z": -4898
+        }
+      ],
+      "htmlFile": "31144-talk-017.htm"
+    },
+    {
+      "npcId": 31145,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -75920,
+          "y": 111435,
+          "z": -4900
+        }
+      ],
+      "htmlFile": "31145-talk-018.htm"
+    },
+    {
+      "npcId": 31146,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": -78928,
+          "y": 110825,
+          "z": -4926
+        }
+      ],
+      "htmlFile": "31146-talk-019.htm"
+    },
+    {
+      "npcId": 31488,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31488-talk-020.htm"
+    },
+    {
+      "npcId": 31489,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31489-talk-021.htm"
+    },
+    {
+      "npcId": 31490,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31490-talk-022.htm"
+    },
+    {
+      "npcId": 31491,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31491-talk-023.htm"
+    },
+    {
+      "npcId": 31492,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31492-talk-024.htm"
+    },
+    {
+      "npcId": 31493,
+      "hook": "talk",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "teleport",
+          "x": -80157,
+          "y": 111344,
+          "z": -4901
+        }
+      ],
+      "htmlFile": "31493-talk-025.htm"
+    }
+  ]
+}

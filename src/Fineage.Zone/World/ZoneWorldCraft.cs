@@ -1,5 +1,7 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Recipes;
+using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.Craft;
 using Fineage.Zone.Trade;
@@ -27,7 +29,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeMakeSelf(session, request)));
     }
 
@@ -37,7 +39,9 @@ public sealed partial class ZoneWorld
         bool resolved = _game.Recipes.TryGetByRecipeItem(item.ItemId, out var recipe);
         if (CraftRules.LearnScrollError(resolved, resolved && player.KnownRecipes.Contains(recipe!.Id)) is { } learnError)
             return learnError;
-        if (!player.Inventory!.TryRemoveFromStack(item, 1, out bool removedEntirely))
+        if (player.Inventory == null)
+            return InventoryProtocol.Blocked;
+        if (!RecordConsumeOne(player, item, recipe.Id, out bool removedEntirely))
             return InventoryProtocol.Blocked;
 
         player.KnownRecipes.Add(recipe.Id);
@@ -116,6 +120,7 @@ public sealed partial class ZoneWorld
         if (deny == TradeRules.IncomingDeny.Slots)
             return PrivateStoreProtocol.Slots;
 
+        var move = BeginCraft(player, null, recipe.Id, out var bagBefore);
         var changes = new List<InventoryUpdateEntryMsg>();
         foreach (var ing in recipe.Ingredients)
         {
@@ -147,7 +152,7 @@ public sealed partial class ZoneWorld
             });
         }
 
-        bool success = CraftRules.Succeeds(recipe.SuccessRate, _spawnRandom.Next(100));
+        bool success = CraftRules.Succeeds(recipe.SuccessRate, Rng(_spawnRandom, player).Next(100));
         int result = success ? 0 : 1;
         if (success)
         {
@@ -158,6 +163,7 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(change, made));
         }
 
+        FinishCraft(move, player, bagBefore, null, 0);
         SaveInventory(session, player.Inventory);
         if (changes.Count > 0)
         {
@@ -174,6 +180,39 @@ public sealed partial class ZoneWorld
         });
         // Fail still consumed materials/MP (Mobius); tell the client via RecipeItemMakeInfo, not Reject.
         return null;
+    }
+
+    /// <summary>
+    /// Opens the ledger move of a craft before anything is consumed, observing the customer's bag and the maker's
+    /// when someone else makes it.
+    /// </summary>
+    LedgerMove BeginCraft(ZoneEntity customer, ZoneEntity? maker, int recipeId, out LedgerHoldings bagBefore)
+    {
+        var move = BeginLedgerMove(LedgerTxKind.Craft, customer.ObjectId, recipeId);
+        bagBefore = HoldingsOf(customer.Inventory!);
+        move.Observe(LedgerAccount.Inventory(customer.ObjectId), bagBefore);
+        if (maker != null)
+            ObserveLedger(move, LedgerAccount.Inventory(maker.ObjectId));
+        return move;
+    }
+
+    /// <summary>
+    /// Records the craft: the customer's bag change goes against <see cref="SystemAccount.Crafting"/>, which passes
+    /// the fee on to the maker.
+    /// </summary>
+    void FinishCraft(LedgerMove move, ZoneEntity customer, LedgerHoldings bagBefore, ZoneEntity? maker, long fee)
+    {
+        var crafting = LedgerAccount.Of(SystemAccount.Crafting);
+        var bag = LedgerAccount.Inventory(customer.ObjectId);
+        PostChange(move, bag, bagBefore, HoldingsOf(customer.Inventory!), crafting);
+        if (maker != null && fee > 0)
+        {
+            move.Post(crafting, ShopTrade.AdenaItemId, -fee);
+            move.Post(LedgerAccount.Inventory(maker.ObjectId), ShopTrade.AdenaItemId, fee);
+        }
+
+        if (move.HasPostings)
+            move.Commit(LedgerHoldingsOf);
     }
 
     void LoadKnownRecipes(ZoneEntity entity, Fineage.Accounts.CharacterRecord? stored)

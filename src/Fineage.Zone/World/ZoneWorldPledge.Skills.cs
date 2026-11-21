@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 
@@ -99,11 +100,20 @@ public sealed partial class ZoneWorld
 
         if (row.Items.Count > 0)
         {
-            var changes = new List<InventoryUpdateEntryMsg>();
-            foreach (var item in row.Items)
-                Take(inventory!, item.ItemId, item.Count, changes);
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory!);
+            RecordBagChange(
+                player,
+                LedgerTxKind.ClanSkillAcquire,
+                Fees,
+                () =>
+                {
+                    var changes = new List<InventoryUpdateEntryMsg>();
+                    foreach (var item in row.Items)
+                        Take(inventory!, item.ItemId, item.Count, changes);
+                    FanInventory(session, Collapse(changes));
+                    SaveInventory(session, inventory!);
+                    return true;
+                },
+                _ => row.SkillId);
         }
 
         clan.Skills[row.SkillId] = row.Level;

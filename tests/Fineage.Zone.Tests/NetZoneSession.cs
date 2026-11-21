@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Zone.Net;
+using Fineage.Game.Economy;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -45,7 +46,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
     {
         tokens ??= new HandoffTokens(HandoffTokens.DefaultSecret);
         store ??= MemoryAccountStore.InMemory();
-        world ??= new ZoneWorld(accounts: store);
+        world ??= new ZoneWorld(accounts: store,
+        ledgerJournal: new MemoryLedgerJournal());
         var cts = new CancellationTokenSource();
         var zone = new NetZoneServer(
             tokens,
@@ -59,6 +61,8 @@ internal sealed class NetZoneHost : IAsyncDisposable
         var serve = Task.Run(
             () => server.RunAsync("127.0.0.1", 0, zone.HandleAsync, cts.Token, maxConnections: 8, inboxCapacity: 64),
             cts.Token);
+        // The world's clock is driven by the test, so no simulation loop drains handler commands: pump them.
+        _ = world.PumpCommandsAsync(cts.Token);
 
         int port = 0;
         for (int i = 0; i < 200 && port == 0; i++)

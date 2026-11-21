@@ -68,6 +68,11 @@ public sealed partial class ZoneWorld
             case HennaWearResult.WrongClass:
                 SendHtml(session, player, npc, "<html><body>That dye is not for your class.</body></html>");
                 return null;
+            case HennaWearResult.MissingFee:
+                SendHtml(
+                    session, player, npc,
+                    $"<html><body>You need {dye!.WearFee} adena to draw this symbol.</body></html>");
+                return null;
             case HennaWearResult.MissingItems:
                 ZoneLog.Warn(
                     $"henna wear refuse object={player.ObjectId} dye={dyeId} item={dye!.ItemId} " +
@@ -96,11 +101,19 @@ public sealed partial class ZoneWorld
     {
         if (!int.TryParse(slotToken, out int slot) || slot is < 0 or > 2)
             return "bad_request";
-        if (!TryCancelHenna(player, slot))
+        var cancel = TryCancelHennaPaying(player, slot);
+        switch (cancel)
         {
-            ZoneLog.Warn($"henna cancel failed object={player.ObjectId} slot={slot}");
-            SendHtml(session, player, npc, "<html><body>That symbol slot is empty.</body></html>");
-            return null;
+            case HennaCancelResult.MissingFee:
+                SendHtml(session, player, npc, "<html><body>You do not have enough adena to remove this symbol.</body></html>");
+                return null;
+            case HennaCancelResult.EmptySlot:
+            case HennaCancelResult.UnknownDye:
+                ZoneLog.Warn($"henna cancel failed object={player.ObjectId} slot={slot} result={cancel}");
+                SendHtml(session, player, npc, "<html><body>That symbol slot is empty.</body></html>");
+                return null;
+            case HennaCancelResult.NoInventory:
+                return "world";
         }
 
         ZoneLog.Info($"henna cancel object={player.ObjectId} slot={slot}");

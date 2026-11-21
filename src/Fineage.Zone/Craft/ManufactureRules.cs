@@ -5,7 +5,7 @@ namespace Fineage.Zone.Craft;
 
 /// <summary>
 /// Pure Mobius manufacture-shop checks (open list shape, visitor make prechecks).
-/// World owns range, inventory mutation, and fee transfer under the gate.
+/// World owns range, inventory mutation, and fee transfer on the simulation thread.
 /// </summary>
 public static class ManufactureRules
 {

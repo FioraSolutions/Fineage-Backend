@@ -4,7 +4,7 @@ namespace Fineage.Zone.Olympiad;
 
 public sealed partial class OlympiadBoard
 {
-    public OlympiadStep Register(OlympiadActor actor, bool classed, long nowUnixMs)
+    public OlympiadStep Register(OlympiadEntrant actor, bool classed, long nowUnixMs)
     {
         var step = new OlympiadStep();
         lock (_gate)
@@ -99,7 +99,7 @@ public sealed partial class OlympiadBoard
         }
     }
 
-    public OlympiadStep Unregister(OlympiadActor actor, long nowUnixMs)
+    public OlympiadStep Unregister(OlympiadEntrant actor, long nowUnixMs)
     {
         var step = new OlympiadStep();
         lock (_gate)

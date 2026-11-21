@@ -49,8 +49,8 @@ public sealed class NetChatChannelTests
         var (_, near) = await kit.EnterAsync(x: 300, y: 0);
         var (_, blocker) = await kit.EnterAsync(x: 300, y: 50);
         var (_, refusing) = await kit.EnterAsync(x: 300, y: 100);
-        blocker.Blocked[speaker.ObjectId] = speaker.Name;
-        refusing.BlockAll = true;
+        kit.World.SocialListsForTests(blocker).Blocked[speaker.ObjectId] = speaker.Name;
+        kit.World.SocialListsForTests(refusing).BlockAll = true;
         rec.Calls.Clear();
 
         Assert.Null(await kit.World.TrySayAsync(s, "hi", ChatProtocol.All, T0, Ct));
@@ -71,7 +71,7 @@ public sealed class NetChatChannelTests
         var (_, sameRegionFar) = await kit.EnterAsync(x: NetTestKit.ElfX + 6000, y: NetTestKit.ElfY);
         var (_, otherRegion) = await kit.EnterAsync(x: GludinX, y: GludinY, z: GludinZ);
         var (_, blocker) = await kit.EnterAsync(x: NetTestKit.ElfX + 100, y: NetTestKit.ElfY);
-        blocker.Blocked[speaker.ObjectId] = speaker.Name;
+        kit.World.SocialListsForTests(blocker).Blocked[speaker.ObjectId] = speaker.Name;
         Assert.Equal(regions.At(speaker.X, speaker.Y)?.LocId ?? 0, regions.At(sameRegionFar.X, sameRegionFar.Y)?.LocId ?? 0);
         rec.Calls.Clear();
 
@@ -89,7 +89,7 @@ public sealed class NetChatChannelTests
         Assert.Empty(Heard(rec, blocker));
 
         // Mobius ChatShout also drops listeners the speaker blocks; trade does not.
-        speaker.Blocked[sameRegionFar.ObjectId] = sameRegionFar.Name;
+        kit.World.SocialListsForTests(speaker).Blocked[sameRegionFar.ObjectId] = sameRegionFar.Name;
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "again", ChatProtocol.Shout, T0.AddSeconds(4), Ct));
         Assert.Empty(Heard(rec, sameRegionFar));
@@ -124,20 +124,20 @@ public sealed class NetChatChannelTests
         Assert.Empty(Says(rec));
         Assert.Equal(ChatProtocol.PlayerNotOnline, Assert.Single(LinesTo(rec, speaker)).Id);
 
-        receiver.Blocked[speaker.ObjectId] = speaker.Name;
+        kit.World.SocialListsForTests(receiver).Blocked[speaker.ObjectId] = speaker.Name;
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "unblock me", ChatProtocol.Tell, T0.AddSeconds(4), Ct, receiver.Name));
         Assert.Empty(Says(rec));
         Assert.Equal(ChatProtocol.MessageRefusal, Assert.Single(LinesTo(rec, speaker)).Id);
 
-        receiver.Blocked.Clear();
-        receiver.BlockAll = true;
+        kit.World.SocialListsForTests(receiver).Blocked.Clear();
+        kit.World.SocialListsForTests(receiver).BlockAll = true;
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "still?", ChatProtocol.Tell, T0.AddSeconds(6), Ct, receiver.Name));
         Assert.Equal(ChatProtocol.MessageRefusal, Assert.Single(LinesTo(rec, speaker)).Id);
 
         // A chat-banned receiver is in "message refusal" for others; a banned speaker cannot whisper at all.
-        receiver.BlockAll = false;
+        kit.World.SocialListsForTests(receiver).BlockAll = false;
         kit.World.SetChatBan(r, 60_000);
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "banned?", ChatProtocol.Tell, kit.Now.AddSeconds(8), Ct, receiver.Name));
@@ -155,8 +155,8 @@ public sealed class NetChatChannelTests
     public async Task Party_and_clan_lines_reach_online_members_anywhere_minus_blockers()
     {
         var (kit, rec) = New();
-        var (s, speaker) = await kit.EnterAsync(x: 0, y: 0);
-        var (_, mateFar) = await kit.EnterAsync(x: 60_000, y: 0);
+        var (s, speaker) = await kit.EnterAsync(x: 0, y: 0, level: 40);
+        var (far, mateFar) = await kit.EnterAsync(x: 60_000, y: 0, level: 20);
         var (_, mateBlocking) = await kit.EnterAsync(x: 10, y: 0);
         var (_, stranger) = await kit.EnterAsync(x: 20, y: 0);
         rec.Calls.Clear();
@@ -169,7 +169,7 @@ public sealed class NetChatChannelTests
         Assert.Equal("You are not in a clan.", Assert.Single(LinesTo(rec, speaker)).Text);
 
         kit.World.JoinPartyForTest(speaker, mateFar, mateBlocking);
-        mateBlocking.Blocked[speaker.ObjectId] = speaker.Name;
+        kit.World.SocialListsForTests(mateBlocking).Blocked[speaker.ObjectId] = speaker.Name;
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "pull", ChatProtocol.Party, T0.AddSeconds(4), Ct));
         Assert.Equal(ChatProtocol.Party, Assert.Single(Heard(rec, mateFar)).ChatType);
@@ -177,7 +177,10 @@ public sealed class NetChatChannelTests
         Assert.Empty(Heard(rec, mateBlocking));
         Assert.Empty(Heard(rec, stranger));
 
-        speaker.ClanId = mateFar.ClanId = 77;
+        Assert.Null(await kit.World.TryClanCreateAsync(s, new ClanCreateRequestMsg { Name = "Talkers" }, kit.Now, Ct));
+        Assert.Null(await kit.World.TryClanInviteAsync(s, new ClanInviteRequestMsg { TargetObjectId = mateFar.ObjectId }, kit.Now, Ct));
+        Assert.Null(await kit.World.TryClanAnswerAsync(far,
+            new ClanAnswerJoinRequestMsg { RequestorObjectId = speaker.ObjectId, Response = 1 }, kit.Now, Ct));
         rec.Calls.Clear();
         Assert.Null(await kit.World.TrySayAsync(s, "clan meet", ChatProtocol.Clan, T0.AddSeconds(6), Ct));
         Assert.Equal(ChatProtocol.Clan, Assert.Single(Heard(rec, mateFar)).ChatType);

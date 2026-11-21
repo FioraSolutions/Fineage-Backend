@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -139,7 +140,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the stored crest bytes (null when absent).</summary>
     internal byte[]? CrestBytesForTest(int crestId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return FindCrest(crestId)?.Data;
     }
 }
