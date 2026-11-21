@@ -158,6 +158,35 @@ public sealed partial class ZoneWorld
         return false;
     }
 
+    /// <summary>
+    /// Mobius <c>AttackableAI</c> follow path after self-buffs: buff the live leader when it still lacks the effect
+    /// (same skill table as thinkActive minion buff roll).
+    /// </summary>
+    internal bool TryNpcLeaderBuffForTest(ZoneEntity npc, long now) =>
+        RunStepForTest(() => TryNpcLeaderBuffSkill(npc, now));
+
+    bool TryNpcLeaderBuffSkill(ZoneEntity npc, long now)
+    {
+        if (npc.LeaderObjectId <= 0 || npc.AiBuffSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+        if (!_byId.TryGetValue(npc.LeaderObjectId, out var leader) || leader.CurHp <= 0 || leader.Dead)
+            return false;
+        if (!CanSeeTarget(npc, leader))
+            return false;
+
+        var ready = new List<NpcAiSupportSkill>();
+        foreach (var skill in ReadySupportSkills(npc, npc.AiBuffSkills, now))
+        {
+            if (leader.Abnormals.Any(a => a.Id == skill.SkillId))
+                continue;
+            ready.Add(skill);
+        }
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[Rng(_combatRandom, npc).Next(ready.Count)];
+        return CastNpcSupportSkill(npc, leader, pick, NpcSupportKind.Buff, now);
+    }
+
     /// <summary>Mobius BUFF scope (self): cast when the NPC is not already affected by that skill id.</summary>
     bool TryNpcSelfBuffSkill(ZoneEntity npc, long now)
     {

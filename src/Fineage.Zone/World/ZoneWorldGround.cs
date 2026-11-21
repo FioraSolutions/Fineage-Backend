@@ -42,6 +42,8 @@ public sealed partial class ZoneWorld
 
     /// <summary>Interlude SystemMessageId 151 CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
     public const int SysMsgDiscardTooFar = 151;
+    /// <summary>Interlude SystemMessageId 2011 THE_AUGMENTED_ITEM_CANNOT_BE_DISCARDED.</summary>
+    public const int SysMsgAugmentedCannotDiscard = 2011;
     /// <summary>Interlude SystemMessageId 28/29/30: obtained adena / S2 S1 / S1.</summary>
     public const int SysMsgObtainedAdena = 28;
     public const int SysMsgObtainedCount = 29;
