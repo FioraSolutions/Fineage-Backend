@@ -703,46 +703,4 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         Emit(nameof(IWorldEventPublisher.FanoutDungeonEntered), () => inner.FanoutDungeonEntered(watcherObjectIdsCopy, entered));
     }
-
-    void IWorldEventPublisher.FanoutAugmentShowMakeWindow(IReadOnlyList<int> watcherObjectIds) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowMakeWindow), () => inner.FanoutAugmentShowMakeWindow([.. watcherObjectIds]));
-
-    void IWorldEventPublisher.FanoutAugmentShowCancelWindow(IReadOnlyList<int> watcherObjectIds) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowCancelWindow), () => inner.FanoutAugmentShowCancelWindow([.. watcherObjectIds]));
-
-    void IWorldEventPublisher.FanoutAugmentPutItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutItemMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutItemResult), () => inner.FanoutAugmentPutItemResult(copy, result));
-    }
-
-    void IWorldEventPublisher.FanoutAugmentPutRefinerResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutRefinerMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutRefinerResult), () => inner.FanoutAugmentPutRefinerResult(copy, result));
-    }
-
-    void IWorldEventPublisher.FanoutAugmentPutGemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutGemMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutGemResult), () => inner.FanoutAugmentPutGemResult(copy, result));
-    }
-
-    void IWorldEventPublisher.FanoutAugmentVariationResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationResultMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentVariationResult), () => inner.FanoutAugmentVariationResult(copy, result));
-    }
-
-    void IWorldEventPublisher.FanoutAugmentPutCancelItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelItemMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutCancelItemResult), () => inner.FanoutAugmentPutCancelItemResult(copy, result));
-    }
-
-    void IWorldEventPublisher.FanoutAugmentCancelResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelResultMsg result)
-    {
-        int[] copy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentCancelResult), () => inner.FanoutAugmentCancelResult(copy, result));
-    }
 }

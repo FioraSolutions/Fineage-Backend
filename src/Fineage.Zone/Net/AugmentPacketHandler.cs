@@ -1,4 +1,5 @@
 using Fineage.Net.Contract;
+using Fineage.Net.Host;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;

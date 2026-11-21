@@ -12,12 +12,11 @@ public sealed class ClientHeavyParityTests
     public void Client_heavy_features_default_off()
     {
         using var _ = EnvScope.Unset(
-            ClientHeavyFeatures.AugmentationVariable,
             ClientHeavyFeatures.CursedWeaponsVariable,
             ClientHeavyFeatures.SkillEnchantVariable);
-        Assert.False(ClientHeavyFeatures.AugmentationEnabled);
         Assert.False(ClientHeavyFeatures.CursedWeaponsEnabled);
         Assert.False(ClientHeavyFeatures.SkillEnchantEnabled);
+        Assert.True(AugmentationRules.CanRefine);
         Assert.Equal(AugmentationCatalog.LoadDefault().IsLoaded, AugmentationRules.CanRefine);
         Assert.False(SkillEnchantRules.CanEnchant(1, 2));
     }

@@ -60,7 +60,7 @@ public sealed class InventoryUpdateEntryMsg
     public string ArmorType { get; set; } = "";
     /// <summary>Enchant level. Remove rows still carry the level the piece had. Older clients ignore this key.</summary>
     public int EnchantLevel { get; set; }
-  public int Option1 { get; set; }
+    public int Option1 { get; set; }
     public int Option2 { get; set; }
 }
 

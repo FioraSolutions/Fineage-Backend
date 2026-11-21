@@ -16,7 +16,7 @@ public static class AugmentationRules
 
     public static bool CanRefine => ActiveCatalog is { IsLoaded: true };
 
-    public static bool IsAugmented(ItemInstance item) => item.Option1 != 0 || item.Option2 != 0;
+    public static bool IsAugmented(ItemInstance item) => item.IsAugmented;
 
     public static int CombineVariationId(int option1, int option2) => (option2 << 16) | (option1 & 0xFFFF);
 

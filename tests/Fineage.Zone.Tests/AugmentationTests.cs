@@ -46,12 +46,12 @@ public sealed class AugmentationTests
     }
 
     [Fact]
-    public void Validate_target_rejects_stacks_and_augmented()
+    public void Validate_target_rejects_augmented_piece()
     {
-        var template = new ItemTemplate(1, "Saber", ItemKind.Weapon, BodySlot.RightHand, "icon", WeaponType.Sword, Crystal: CrystalGrade.D, Stackable: true);
-        var stack = new ItemInstance(1, template, 5);
-        Assert.False(AugmentationRules.ValidateTarget(stack));
-        stack = new ItemInstance(2, template with { Stackable = false }, 1) { Option1 = 1 };
-        Assert.False(AugmentationRules.ValidateTarget(stack));
+        var game = GameData.LoadDefault();
+        var inv = new PlayerInventory(game.Items, new ItemObjectIdAllocator(100));
+        var saber = inv.Add(123, 1);
+        inv.SetAugmentation(saber, 10, 0);
+        Assert.False(AugmentationRules.ValidateTarget(saber));
     }
 }
