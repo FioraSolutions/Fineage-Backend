@@ -232,6 +232,26 @@ On success Mobius updates skill level in DB and rebroadcasts `SkillList` / short
 
 ---
 
+## Live doors (castle + clan hall)
+
+**Server:** `DoorStatusNetMsg` on Net opcode `DoorStatus` (`0x03B7`). Agit gates use the same packet as castle gates; `hallId` is set when `castleId` is 0.
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `objectId` | int32 | Runtime door entity (NpcType `Door`, npcId 0) |
+| `doorId` | int32 | Mobius `Doors.xml` id (client static mesh) |
+| `open` | bool | Live geo + mesh state |
+| `curHp`, `maxHp` | int32×2 | Siege damage only when `attackable` |
+| `attackable` | bool | Castle siege (non-wall) or clan-hall siege |
+| `wall` | bool | |
+| `castleId` | int32 | Castle gates; 0 for agit |
+| `hallId` | int32 | Clan hall gates; 0 for castle |
+| `upgradeRatio` | int32 | Chamberlain ratio (castle only today) |
+
+**Unity:** Bind `doorId` to the static door prefab; track `objectId` for target/siege HP. Subscribe to `DoorStatus` after `EntitySpawn` for door NPCs.
+
+---
+
 ## Implementation queue (audit)
 
 | Order | Item | Server PR target | Client packets |

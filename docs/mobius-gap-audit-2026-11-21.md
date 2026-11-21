@@ -101,7 +101,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Siege guards / spawn disable | 🟡 | Guard hire, respawn link to towers | `SiegeGuardManager` | Towers ✅; hire flags `isHired=0` data | M |
 | **Mercenary tickets** | ❌ | Buy/deploy castle mercs | `MercTicketManager.java` | No matches in `src/` | M |
 | **Siege golem** | ❌ | Noble skill summon golem in siege | `ConditionPlayerCanSummonSiegeGolem` | `ZoneWorldSummons` generic only | M |
-| Door open on siege | 🟡 | Door timers during siege | `Castle.java` | Static door JSON | S |
+| Door open on siege | 🟡 | Cyclic `open_time` doors outside siege zones | `Door.java` `OPEN_BY_TIME` | Live Net doors + siege/CH respawn + doorman; no global cycle yet | S |
 
 ### Manor, castles, taxes
 

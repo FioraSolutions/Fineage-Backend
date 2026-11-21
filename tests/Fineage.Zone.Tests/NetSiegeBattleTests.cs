@@ -246,10 +246,10 @@ public sealed class NetSiegeBattleTests
         var door = NetCodec.DecodeDoorStatus(NetCodec.EncodeDoorStatus(new DoorStatusNetMsg
         {
             ObjectId = 5, DoorId = OuterGate, Open = true, CurHp = 10, MaxHp = 20, Attackable = true, Wall = false,
-            CastleId = 1, UpgradeRatio = 3
+            CastleId = 1, HallId = 0, UpgradeRatio = 3
         }));
-        Assert.Equal((5, OuterGate, true, 10, 20, true, false, 1, 3),
-            (door.ObjectId, door.DoorId, door.Open, door.CurHp, door.MaxHp, door.Attackable, door.Wall, door.CastleId, door.UpgradeRatio));
+        Assert.Equal((5, OuterGate, true, 10, 20, true, false, 1, 0, 3),
+            (door.ObjectId, door.DoorId, door.Open, door.CurHp, door.MaxHp, door.Attackable, door.Wall, door.CastleId, door.HallId, door.UpgradeRatio));
 
         var cmd = NetCodec.DecodeCastleCommand(NetCodec.EncodeCastleCommand(new CastleCommandNetMsg
         {
