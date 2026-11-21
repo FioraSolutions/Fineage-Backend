@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Login;
 using Npgsql;
 using Xunit;
@@ -22,6 +23,50 @@ public class PostgresNormalizedStoreTests
         catch
         {
             return null;
+        }
+    }
+
+    [Fact]
+    public void Create_after_reopen_allocates_unique_item_object_ids()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgoid" + suffix;
+        using (var store = PostgresAccountStore.Open(url))
+        {
+            var service = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+            Assert.True(service.Register(account, "secret1").Ok);
+            var created = service.CreateHuman(account, "A" + suffix, HumanClasses.Fighter);
+            Assert.True(created.Ok, created.Message);
+        }
+
+        // Lagging store_meta mimics a stale store_snapshot allocator after durable items landed in SQL.
+        using (var conn = new NpgsqlConnection(url))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE store_meta SET value_bigint = @low WHERE key = 'next_item_object_id'";
+            cmd.Parameters.AddWithValue("low", PlayerInventory.FirstObjectId);
+            Assert.Equal(1, cmd.ExecuteNonQuery());
+        }
+
+        using var reopened = PostgresAccountStore.Open(url);
+        var service2 = new LoginService(reopened, new HandoffTokens(HandoffTokens.DefaultSecret));
+        var created2 = service2.CreateHuman(account, "B" + suffix, HumanClasses.Fighter);
+        Assert.True(created2.Ok, created2.Message);
+
+        using (var conn = new NpgsqlConnection(url))
+        {
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*), COUNT(DISTINCT object_id) FROM character_items";
+            using var reader = cmd.ExecuteReader();
+            Assert.True(reader.Read());
+            Assert.Equal(reader.GetInt64(0), reader.GetInt64(1));
+            Assert.True(reader.GetInt64(0) >= 24);
         }
     }
 
