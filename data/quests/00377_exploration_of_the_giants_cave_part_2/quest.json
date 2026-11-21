@@ -1,0 +1,246 @@
+{
+  "id": 377,
+  "name": "Exploration of the Giants Cave, Part 2",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5955,
+    5945,
+    5946,
+    5947,
+    5948,
+    5949,
+    5950,
+    5951,
+    5952,
+    5953,
+    5954
+  ],
+  "dialogs": [
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        5892
+      ],
+      "htmlFile": "31147-talk-000.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 56,
+      "hasItem": 5892,
+      "htmlFile": "31147-talk-001.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 57,
+      "hasItem": 5892,
+      "htmlFile": "31147-talk-002.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "event",
+      "when": "absent",
+      "event": "31147-03",
+      "minLevel": 57,
+      "hasItem": 5892,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31147-event-31147-03-003.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31147-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItems": [
+        5945,
+        5946,
+        5947,
+        5948,
+        5949
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5945,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5946,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5947,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5948,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5949,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5338,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31147-talk-c1-005.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItems": [
+        5950,
+        5951,
+        5952,
+        5953,
+        5954
+      ],
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5950,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5951,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5952,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5953,
+          "count": 1
+        },
+        {
+          "op": "take_item",
+          "itemId": 5954,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 5420,
+          "count": 1
+        }
+      ],
+      "htmlFile": "31147-talk-c1-006.htm"
+    },
+    {
+      "npcId": 31147,
+      "hook": "event",
+      "when": "started",
+      "event": "31147-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31147-event-31147-07-007.htm"
+    },
+    {
+      "npcId": 20654,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5955,
+          "count": 1,
+          "chance": 0.8,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20656,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5955,
+          "count": 1,
+          "chance": 0.8,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20657,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5955,
+          "count": 1,
+          "chance": 0.8,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20658,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5955,
+          "count": 1,
+          "chance": 0.8,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

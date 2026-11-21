@@ -52810,6 +52810,105 @@
       "stackable": true
     },
     {
+      "id": 5945,
+      "name": "Book: Giants Science and Technology, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5946,
+      "name": "Book: Giants Science and Technology, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5947,
+      "name": "Book: Giants Science and Technology, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5948,
+      "name": "Book: Giants Science and Technology, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5949,
+      "name": "Book: Giants Science and Technology, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5950,
+      "name": "Almanac: Titan Culture, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5951,
+      "name": "Almanac: Titan Culture, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5952,
+      "name": "Almanac: Titan Culture, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5953,
+      "name": "Almanac: Titan Culture, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5954,
+      "name": "Almanac: Titan Culture, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5955,
+      "name": "Ancient Titan Book",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 5956,
       "name": "15 Year Old Wine",
       "kind": "etc",
@@ -59356,6 +59455,15 @@
       "price": 0,
       "weight": 10,
       "bodySlot": "hair"
+    },
+    {
+      "id": 7062,
+      "name": "Echo Crystal - Theme of Wedding",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i01",
+      "price": 0,
+      "weight": 10
     },
     {
       "id": 7063,

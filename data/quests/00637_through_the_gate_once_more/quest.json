@@ -1,0 +1,176 @@
+{
+  "id": 637,
+  "name": "Through the Gate Once More",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8066
+  ],
+  "dialogs": [
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "hasItem": 8067,
+      "htmlFile": "32010-talk-000.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        8065
+      ],
+      "minLevel": 73,
+      "htmlFile": "32010-talk-001.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 72,
+      "hasItem": 8065,
+      "htmlFile": "32010-talk-002.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 73,
+      "hasItem": 8065,
+      "lacksItems": [
+        8067
+      ],
+      "htmlFile": "32010-talk-003.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "event",
+      "when": "absent",
+      "event": "32010-04",
+      "minLevel": 73,
+      "hasItem": 8065,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32010-event-32010-04-004.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "event",
+      "when": "started",
+      "event": "32010-10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-event-32010-10-005.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "started",
+      "atLeast": {
+        "8066": 10
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8065,
+          "count": 1
+        },
+        {
+          "op": "take_all",
+          "items": [
+            8066
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 8067,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 8273,
+          "count": 10
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32010-talk-006.htm"
+    },
+    {
+      "npcId": 32010,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32010-talk-c1-007.htm"
+    },
+    {
+      "npcId": 21565,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8066,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21566,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8066,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 21567,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8066,
+          "count": 1,
+          "chance": 0.4,
+          "limit": 10,
+          "condAtLimit": 2
+        }
+      ]
+    }
+  ]
+}

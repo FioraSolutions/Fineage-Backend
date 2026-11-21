@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 226 |
+| implemented | 230 |
 | partial | 90 |
-| stub | 27 |
-| missing | 1 |
+| stub | 24 |
+| missing | 0 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -177,7 +177,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | partial | quest spawns missing; timers; hand-ported |
 | 246 | Possessor of a Precious Soul - 3 | 65+ | noblesse | implemented | hand-ported |
 | 247 | Possessor of a Precious Soul - 4 | 75+ | noblesse | implemented | hand-ported |
-| 255 | Tutorial | 6+ | tutorial | missing |  |
+| 255 | Tutorial | 6+ | tutorial | implemented | timers; hand-ported |
 | 257 | The Guard is Busy | 6+ | repeatable | implemented | hand-ported |
 | 258 | Bring Wolf Pelts | 3+ | repeatable | implemented | hand-ported |
 | 259 | Rancher's Plea | 15+ | repeatable | implemented | hand-ported |
@@ -257,10 +257,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 371 | Shriek of Ghosts | 59+ | repeatable | partial | no talk: 30929; no kill: 3/3 mobs; auto-port |
 | 372 | Legacy of Insolence | 59+ | repeatable | partial | no talk: 30839,30855,30929,31001; no kill: 6/6 mobs; auto-port |
 | 373 | Supplier of Reagents | 57+ | repeatable | partial | no talk: 31149; no kill: 7/7 mobs; auto-port |
-| 374 | Whisper of Dreams, Part 1 | 56+ | repeatable | stub | 6 dialog(s), no start; auto-port |
-| 375 | Whisper of Dreams, Part 2 | 60+ | repeatable | stub | 3 dialog(s), no start; auto-port |
+| 374 | Whisper of Dreams, Part 1 | 56+ | repeatable | implemented | auto-port |
+| 375 | Whisper of Dreams, Part 2 | 60+ | repeatable | implemented | auto-port |
 | 376 | Exploration of the Giants Cave, Part 1 | 51+ | repeatable | stub | 8 dialog(s), no start; auto-port |
-| 377 | Exploration of the Giants Cave, Part 2 | 57+ | repeatable | stub | 5 dialog(s), no start; auto-port |
+| 377 | Exploration of the Giants Cave, Part 2 | 57+ | repeatable | implemented | auto-port |
 | 378 | Magnificent Feast | 20+ | repeatable | implemented | auto-port |
 | 379 | Fantasy Wine | 20+ | repeatable | implemented | hand-ported |
 | 380 | Bring Out the Flavor of Ingredients! | 24+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
@@ -293,7 +293,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
 | 422 | Repent Your Sins | 20+ | repeatable | stub | 36 dialog(s), no start; auto-port |
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
-| 431 | Wedding March | 38+ | repeatable | stub | 2 dialog(s), no start; auto-port |
+| 431 | Wedding March | 38+ | repeatable | implemented | auto-port |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
 | 501 | Proof of Clan Alliance | 3–39 | clan | stub | 40 dialog(s), no start; timers; auto-port |
 | 503 | Pursuit of Clan Ambition! |  | clan | stub | 64 dialog(s), no start; auto-port |
@@ -334,10 +334,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 631 | Delicious Top Choice Meat | 65+ | repeatable | implemented | hand-ported |
 | 632 | Necromancer's Request | 63+ | repeatable | implemented | hand-ported |
 | 633 | In the Forgotten Village | 65+ | repeatable | partial | no kill: 1/27 mobs; hand-ported |
-| 634 | In Search of Fragments of Dimension | 20+ | repeatable | implemented | auto-port (rift) |
-| 635 | In the Dimensional Rift | 20+ | repeatable | implemented | auto-port (rift) |
+| 634 | In Search of Fragments of Dimension | 20+ | repeatable | stub | 118 dialog(s), no start; hand-ported |
+| 635 | In the Dimensional Rift | 20+ | repeatable | stub | 73 dialog(s), no start; hand-ported |
 | 636 | Truth Beyond the Gate |  | repeatable | implemented | hand-ported |
-| 637 | Through the Gate Once More | 73+ | repeatable | stub | 4 dialog(s), no start; auto-port |
+| 637 | Through the Gate Once More | 73+ | repeatable | implemented | auto-port |
 | 638 | Seekers of the Holy Grail | 73+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 639 | Guardians of the Holy Grail | 73+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
 | 640 | The Zero Hour | 66+ | repeatable | implemented | hand-ported |
