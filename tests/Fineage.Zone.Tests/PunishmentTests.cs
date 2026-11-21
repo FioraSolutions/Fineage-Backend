@@ -76,6 +76,22 @@ public sealed class PunishmentTests : IDisposable
     }
 
     [Fact]
+    public void Participation_registry_drives_zone_checks()
+    {
+        var bench = new WorldBench();
+        var world = bench.World;
+        const int id = 90210;
+        Assert.False(PlayerZoneChecks.IsInFestivalArena(world, id));
+        Assert.False(PlayerZoneChecks.IsInDimensionalRift(world, id));
+        PlayerZoneChecks.RegisterFestivalParticipation(world, id, inside: true);
+        PlayerZoneChecks.RegisterRiftParticipation(world, id, inside: true);
+        Assert.True(PlayerZoneChecks.IsInFestivalArena(world, id));
+        Assert.True(PlayerZoneChecks.IsInDimensionalRift(world, id));
+        PlayerZoneChecks.RegisterFestivalParticipation(world, id, inside: false);
+        Assert.False(PlayerZoneChecks.IsInFestivalArena(world, id));
+    }
+
+    [Fact]
     public async Task Char_ban_refuses_enter_and_audit_appends()
     {
         var manager = OpenManager();

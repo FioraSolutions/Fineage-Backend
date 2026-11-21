@@ -8,8 +8,11 @@ public sealed partial class ZoneWorld : IPunishmentSink
     PunishmentManager _punishments = null!;
     PunishmentActor _punishmentActor = null!;
     readonly Dictionary<int, long> _jailReturnDueMs = [];
+    readonly PlayerZoneParticipation _participation = new();
 
     public PunishmentManager PunishmentManager => _punishments;
+
+    public PlayerZoneParticipation PlayerParticipation => _participation;
 
     internal long PunishmentNowUnixMs() => NowUnixMs();
 
