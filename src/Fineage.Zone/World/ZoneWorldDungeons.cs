@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.SevenSigns;
@@ -50,27 +51,38 @@ public sealed partial class ZoneWorld
             return DungeonAccess.ToWire(code);
         }
 
-        if (site.FeeCount > 0)
+        int dungeonId = site.Id;
+        if (site.FeeCount > 0 && player.Inventory!.CountOf(site.FeeItemId) < site.FeeCount)
         {
-            var changes = new List<InventoryUpdateEntryMsg>();
-            if (!Take(player.Inventory, site.FeeItemId, site.FeeCount, changes))
-            {
-                QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id));
-                return DungeonProtocol.Fee;
-            }
-
-            if (changes.Count > 0)
-            {
-                var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
-                SaveInventory(session, player.Inventory);
-            }
+            QueueNotices(session, _dungeonAccess.RefusalLines(DungeonAccessCode.FeeRequired, site.Id));
+            return DungeonProtocol.Fee;
         }
 
-        Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
-        player.DungeonId = site.Id;
-        var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
-        NetBridge?.FanoutDungeonEntered([session.ObjectId], inside);
+        RecordBagChange(
+            player,
+            LedgerTxKind.DungeonEntryFee,
+            Fees,
+            () =>
+            {
+                if (site.FeeCount > 0)
+                {
+                    var changes = new List<InventoryUpdateEntryMsg>();
+                    Take(player.Inventory!, site.FeeItemId, site.FeeCount, changes);
+                    if (changes.Count > 0)
+                    {
+                        var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
+                        SaveInventory(session, player.Inventory);
+                    }
+                }
+
+                Relocate(player, site.EntranceX, site.EntranceY, site.EntranceZ);
+                player.DungeonId = site.Id;
+                var inside = Entered(site, inside: true, DungeonProtocol.ActionEnter);
+                NetBridge?.FanoutDungeonEntered([session.ObjectId], inside);
+                return true;
+            },
+            _ => dungeonId);
         return null;
     }
 

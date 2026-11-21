@@ -224,7 +224,31 @@ public enum LedgerTxKind
     PetFeed = 34,
 
     /// <summary>Items moved between owner inventory and pet inventory: <c>Reference</c> is control item id.</summary>
-    PetItemTransfer = 35
+    PetItemTransfer = 35,
+
+    /// <summary>Gatekeeper or teleporter fare: <c>Reference</c> is the destination id.</summary>
+    TeleportFee = 36,
+
+    /// <summary>Dungeon entrance fare: <c>Reference</c> is the dungeon id.</summary>
+    DungeonEntryFee = 37,
+
+    /// <summary>Clan level increase costs: <c>Reference</c> is the new clan level.</summary>
+    ClanLevelUp = 38,
+
+    /// <summary>Clan skill acquisition item costs: <c>Reference</c> is skill id.</summary>
+    ClanSkillAcquire = 39,
+
+    /// <summary>Trainer skill books consumed at learn time: <c>Reference</c> is skill id.</summary>
+    TrainerSkillLearn = 40,
+
+    /// <summary>Henna draw fee and dye consumption: <c>Reference</c> is dye id.</summary>
+    HennaDraw = 41,
+
+    /// <summary>Henna removal fee and dye return: <c>Reference</c> is dye id.</summary>
+    HennaRemove = 42,
+
+    /// <summary>Class transfer proof items: <c>Reference</c> is new class id.</summary>
+    ClassChange = 43
 }
 
 /// <summary>

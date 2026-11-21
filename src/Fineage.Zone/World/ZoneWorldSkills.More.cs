@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
@@ -74,12 +75,35 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Mobius consumes the books before SP; the bag update rides with the skill list.
-        var touches = new List<BagTouch>();
-        foreach (var item in row.Items)
+        if (row.Items.Count > 0 &&
+            !RecordBagChange(
+                player,
+                LedgerTxKind.TrainerSkillLearn,
+                Fees,
+                () =>
+                {
+                    var touches = new List<BagTouch>();
+                    foreach (var item in row.Items)
+                    {
+                        if (!inventory.TryTake(item.ItemId, item.Count, touches))
+                            return false;
+                    }
+
+                    if (touches.Count > 0)
+                    {
+                        var invUpdate = new InventoryUpdateMsg
+                        {
+                            Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
+                        };
+                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+                        SaveInventory(session, player.Inventory!);
+                    }
+
+                    return true;
+                },
+                _ => row.SkillId))
         {
-            if (!inventory.TryTake(item.ItemId, item.Count, touches))
-                return "bad_request";
+            return "bad_request";
         }
 
         player.Sp -= row.LevelUpSp;
@@ -94,17 +118,6 @@ public sealed partial class ZoneWorld
         string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
         // Mobius SystemMessage 277 "You have earned $s1."
         Notice(session, 277, $"You have earned {skillName}.");
-        if (touches.Count > 0)
-        {
-            // Mobius destroyItemByItemId per book: the bag drops before the trainer window re-opens.
-            var invUpdate = new InventoryUpdateMsg
-            {
-                Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
-            };
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
-            SaveInventory(session, player.Inventory!);
-        }
-
         // Mobius re-sends the list after a learn so the bought row leaves the window.
         var remaining = TrainerSkills.Available(_game.SkillTrees, _game.Skills, player.ClassId, player.Level, player.KnownSkills, _game.Classes);
         PublishAcquireSkillList(session, player, remaining);

@@ -1,5 +1,8 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
+using Fineage.Game.Services;
+using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
 
@@ -12,6 +15,16 @@ public sealed partial class ZoneWorld
         WrongClass,
         NoFreeSlot,
         MissingItems,
+        MissingFee,
+        NoInventory
+    }
+
+    internal enum HennaCancelResult
+    {
+        Ok,
+        EmptySlot,
+        UnknownDye,
+        MissingFee,
         NoInventory
     }
 
@@ -79,17 +92,47 @@ public sealed partial class ZoneWorld
         if (have < def.WearCount)
             return HennaWearResult.MissingItems;
 
-        if (!player.Inventory.TryConsume(def.ItemId, def.WearCount, out _, out _))
-            throw new InvalidOperationException(
-                $"henna consume failed object={player.ObjectId} item={def.ItemId} count={def.WearCount}");
+        if (def.WearFee > 0 && player.Inventory.CountOf(WarehouseRules.AdenaItemId) < def.WearFee)
+            return HennaWearResult.MissingFee;
 
-        if (!TryWearHenna(player, dyeId, out slot))
-        {
-            player.Inventory.Add(def.ItemId, def.WearCount);
-            return HennaWearResult.NoFreeSlot;
-        }
+        HennaWearResult result = HennaWearResult.Ok;
+        int wornSlot = -1;
+        RecordBagChange(
+            player,
+            LedgerTxKind.HennaDraw,
+            Fees,
+            () =>
+            {
+                if (!player.Inventory.TryConsume(def.ItemId, def.WearCount, out _, out _))
+                    throw new InvalidOperationException(
+                        $"henna consume failed object={player.ObjectId} item={def.ItemId} count={def.WearCount}");
+                if (def.WearFee > 0)
+                {
+                    var changes = new List<InventoryUpdateEntryMsg>();
+                    if (!Take(player.Inventory, WarehouseRules.AdenaItemId, def.WearFee, changes))
+                        throw new InvalidOperationException($"henna wear fee failed object={player.ObjectId}");
+                    if (player.Session != null && changes.Count > 0)
+                    {
+                        FanInventory(player.Session, Collapse(changes));
+                        SaveInventory(player.Session, player.Inventory);
+                    }
+                }
 
-        return HennaWearResult.Ok;
+                if (!TryWearHenna(player, dyeId, out wornSlot))
+                {
+                    player.Inventory.Add(def.ItemId, def.WearCount);
+                    if (def.WearFee > 0 && player.Session != null)
+                        GiveItem(player.Session, player.Inventory, WarehouseRules.AdenaItemId, def.WearFee);
+                    result = HennaWearResult.NoFreeSlot;
+                    return true;
+                }
+
+                return true;
+            },
+            _ => dyeId);
+        if (result == HennaWearResult.Ok)
+            slot = wornSlot;
+        return result;
     }
 
     /// <summary>Clear one henna slot and refresh cached deltas.</summary>
@@ -99,6 +142,60 @@ public sealed partial class ZoneWorld
             return false;
         SetHennaSlot(player, slot, 0);
         return true;
+    }
+
+    /// <summary>Mobius SymbolMaker remove: adena cancel fee, then return dye items.</summary>
+    internal HennaCancelResult TryCancelHennaPaying(ZoneEntity player, int slot)
+    {
+        if (slot is < 0 or >= HennaCatalog.SlotCount)
+            return HennaCancelResult.EmptySlot;
+        int dyeId = slot switch
+        {
+            0 => player.HennaDye1,
+            1 => player.HennaDye2,
+            2 => player.HennaDye3,
+            _ => 0
+        };
+        if (dyeId <= 0)
+            return HennaCancelResult.EmptySlot;
+        if (player.Inventory == null)
+            return HennaCancelResult.NoInventory;
+        if (!_henna.TryGet(dyeId, out var def))
+            return HennaCancelResult.UnknownDye;
+        if (def.CancelFee > 0 && player.Inventory.CountOf(WarehouseRules.AdenaItemId) < def.CancelFee)
+            return HennaCancelResult.MissingFee;
+
+        HennaCancelResult result = HennaCancelResult.Ok;
+        RecordBagChange(
+            player,
+            LedgerTxKind.HennaRemove,
+            Fees,
+            () =>
+            {
+                if (def.CancelFee > 0)
+                {
+                    var changes = new List<InventoryUpdateEntryMsg>();
+                    if (!Take(player.Inventory, WarehouseRules.AdenaItemId, def.CancelFee, changes))
+                        throw new InvalidOperationException($"henna cancel fee failed object={player.ObjectId}");
+                    if (player.Session != null && changes.Count > 0)
+                    {
+                        FanInventory(player.Session, Collapse(changes));
+                        SaveInventory(player.Session, player.Inventory);
+                    }
+                }
+
+                if (!TryCancelHenna(player, slot))
+                {
+                    result = HennaCancelResult.EmptySlot;
+                    return false;
+                }
+
+                if (def.CancelCount > 0 && player.Session != null)
+                    GiveItem(player.Session, player.Inventory, def.ItemId, def.CancelCount);
+                return true;
+            },
+            _ => dyeId);
+        return result;
     }
 
     internal void SetHennaSlot(ZoneEntity player, int slot, int dyeId)
