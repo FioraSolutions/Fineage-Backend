@@ -246,6 +246,9 @@ public sealed class PunishmentManager
         return ended;
     }
 
+    public void RecordGmAction(string gmName, int gmObjectId, string action, string target, string detail = "") =>
+        _audit.Append(gmName, gmObjectId, action, target, detail);
+
     public string ResolveCharacterKey(string nameOrId)
     {
         if (int.TryParse(nameOrId, out int id) && id > 0)
