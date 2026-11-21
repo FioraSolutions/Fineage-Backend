@@ -184,7 +184,7 @@ public sealed partial class ZoneWorld
     {
         if (!_bosses.Catalog.TryGet(order.NpcId, out var definition))
             return false;
-        if (!definition.Enabled && !order.IgnoreEnabled)
+        if (!_bosses.Schedule.ShouldSpawn(definition) && !order.IgnoreEnabled)
             return false;
         if (_byId.ContainsKey(definition.ObjectId))
             return false;

@@ -74,12 +74,16 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
-var bosses = BossSchedule.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
+bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
+    Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
+var bosses = BossSchedule.OpenInStateDirectory(
+    stateDir,
+    DateTimeOffset.UtcNow,
+    new MapFilteredBossSpawnPolicy(includeEnabledMapsBoot));
 var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
 // Hosted zone always loads every enabled spawn map (TI, Elven Village, Giran, …).
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
-bool includeEnabledMaps = !ZoneMapFilter.IsExplicitlyOff(
-    Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
+bool includeEnabledMaps = includeEnabledMapsBoot;
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
     ledgerJournal: accounts.OpenLedgerJournal());
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));

@@ -4,6 +4,7 @@ using Fineage.Login;
 using Fineage.Net.Contract;
 using Fineage.Zone.Net;
 using Fineage.Protocol;
+using Fineage.Zone.Bosses;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -180,7 +181,8 @@ public sealed class NpcTemplateSpawnTests
         var hosted = ZoneAoiSettings.CreateWorld();
         Assert.Equal(enabled.NpcObjectIds, hosted.NpcObjectIds);
         Assert.True(hosted.NpcObjectIds.Count > baseline.Count);
-        Assert.Equal(baseline.Count + extra, enabled.NpcObjectIds.Count);
+        int bosses = BossCatalog.LoadDefault().Bosses.Count(b => new MapFilteredBossSpawnPolicy(true).ShouldSpawn(b));
+        Assert.Equal(baseline.Count + extra + bosses, enabled.NpcObjectIds.Count);
         foreach (int id in baseline)
             Assert.Contains(id, enabled.NpcObjectIds);
         Assert.Contains(60013, enabled.NpcObjectIds);
