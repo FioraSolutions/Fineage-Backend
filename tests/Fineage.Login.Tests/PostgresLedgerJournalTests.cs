@@ -17,8 +17,8 @@ public sealed class PostgresLedgerJournalTests
         string? baseUrl = ConnectionString();
         if (baseUrl == null)
         {
-            // Local CI without Postgres: skip without failing the suite.
-            return;
+            throw Xunit.Sdk.SkipException.ForSkip(
+                "PostgreSQL is not reachable. Start `docker compose up -d postgres` or set FINEAGE_DATABASE_URL.");
         }
 
         string schema = "ledger_" + Guid.NewGuid().ToString("n")[..8];
