@@ -42,7 +42,7 @@ public sealed class NetForceChargeTests
         return (kit, session, player, rec);
     }
 
-  static bool Unsuitable(NetBridgeRecorder rec) =>
+    static bool Unsuitable(NetBridgeRecorder rec) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
             .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
 
