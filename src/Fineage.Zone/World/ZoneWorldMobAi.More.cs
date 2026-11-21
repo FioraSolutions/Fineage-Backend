@@ -30,6 +30,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     static bool IsValidMobAttackTarget(ZoneEntity npc, ZoneEntity target)
     {
+        if (IsGuard(npc) && target.Kind == ZoneEntityKind.Npc && target.Aggressive && target.Attackable &&
+            target.CurHp > 0 && !IsGuard(target) && ZoneCombat.IsCombatNpcType(target.NpcType))
+            return true;
         if (IsLivePlayable(target))
             return true;
         if (target.Dead || target.CurHp <= 0 || ReferenceEquals(npc, target))

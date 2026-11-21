@@ -11,7 +11,8 @@ namespace Fineage.Zone.World;
 internal abstract record ZoneRegionMessage(int TargetObjectId);
 
 /// <summary>Mobius <c>addDamageHate</c> from an aggro decision: <see cref="TargetObjectId"/> starts hating the attacker.</summary>
-internal sealed record HateMessage(int NpcObjectId, int AttackerObjectId, long Hate) : ZoneRegionMessage(NpcObjectId);
+internal sealed record HateMessage(int NpcObjectId, int AttackerObjectId, long Hate, bool AllowNpcAttacker = false)
+    : ZoneRegionMessage(NpcObjectId);
 
 public sealed partial class ZoneWorld
 {
@@ -50,7 +51,7 @@ public sealed partial class ZoneWorld
         {
             case HateMessage hate:
                 if (_byId.TryGetValue(hate.AttackerObjectId, out var attacker))
-                    AddHate(target, attacker, hate.Hate);
+                    AddHate(target, attacker, hate.Hate, hate.AllowNpcAttacker);
                 else
                     ZoneLog.Info($"[region] {message} from region {source?.ToString() ?? "world"} dropped: attacker {hate.AttackerObjectId} left the world");
                 break;
