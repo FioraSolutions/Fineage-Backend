@@ -1,3 +1,5 @@
+using Fineage.Game.Punishment;
+
 using Fineage.Zone.Punishment;
 
 namespace Fineage.Zone.World;

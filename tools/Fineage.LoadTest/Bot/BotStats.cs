@@ -9,6 +9,8 @@ public sealed class BotStats
     public string? LastError;
     public long ActionsAttempted;
     public long ActionsFailed;
+    public long RelogsAttempted;
+    public long RelogsSucceeded;
     public long RttSamples;
     public double RttSumMs;
     public double RttMaxMs;

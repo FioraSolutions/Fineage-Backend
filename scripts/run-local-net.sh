@@ -23,6 +23,7 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
 # Local playtest: GM chat (//gmshop, //setlevel, …) for allowlisted chars in data/admin-characters.json (KuK).
 export FINEAGE_ZONE_ADMIN="${FINEAGE_ZONE_ADMIN:-1}"
+export FINEAGE_ZONE_OUTBOUND_QUEUE="${FINEAGE_ZONE_OUTBOUND_QUEUE:-512}"
 
 PORTS=(5080 9106 9777 7780)
 
