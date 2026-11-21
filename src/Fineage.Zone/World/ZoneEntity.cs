@@ -36,6 +36,8 @@ sealed partial class ZoneEntity : IRegionMember
         set => _activeSets = value;
     }
     public ZoneEntityKind Kind { get; init; }
+    /// <summary>Mobius template <c>race</c> (UNDEAD, HUMANOID, …). NPCs only.</summary>
+    public string CreatureRace { get; init; } = "";
     public string Name { get; init; } = "";
     public string Title { get; set; } = "";
     /// <summary>NPC template payload; null until first template access (#353 composition).</summary>

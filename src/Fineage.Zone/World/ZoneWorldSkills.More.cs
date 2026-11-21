@@ -198,23 +198,13 @@ public sealed partial class ZoneWorld
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
 
-        // Mobius Skill.checkCondition: <cond><using kind=..></cond> on the skill itself (Focus Chance / Focus Power need
-        // a dagger, Trick/Switch/Bluff too) refuses the cast with SysMsg 113 "<skill> cannot be used due to unsuitable
-        // terms." No MP/reuse spent. Skill.checkCondition runs for every skill, so the gate lives here and not only in
-        // the damage path.
-        // Fishing (1312) also carries <using kind="FISHINGROD"/>, but Mobius' Fishing effect handler owns the rod and
-        // bait checks and answers with 1453 / 1454 ("no fishing pole" / "put bait on your hook"), which is what the
-        // client shows. Letting the generic gate win would replace those retail lines with a bare 113.
-        if (liveTemplate.UsingKinds.Length > 0 && !IsFishingSkill(request.SkillId) &&
-            !Wearing(player, liveTemplate.UsingKinds))
+        // Mobius Skill.checkCondition (single <see cref="SkillCastConditionEvaluator"/> path).
+        var condTarget = ResolveSkillConditionTarget(session, player, request, liveTemplate);
+        if (!SkillCastConditionsMet(session, player, condTarget, liveTemplate, request.SkillId))
         {
             SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
         }
-
-        // Mobius Skill.checkCondition <player elementSeed(s)|active_effect_id_lvl> (SysMsg 113).
-        if (!PlayerConditionsMet(session, player, liveTemplate))
-            return null;
 
         // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
         // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
