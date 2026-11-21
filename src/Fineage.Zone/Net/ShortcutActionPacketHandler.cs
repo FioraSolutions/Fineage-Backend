@@ -35,7 +35,7 @@ public sealed class ShortcutActionPacketHandler
         // next-target (MyTargetSelected), panel Attack (AttackRequest) and the three social
         // gestures (SocialAction); the rest of Mobius' action table is still V2-only.
         if (use.ActionId is not (ActionProtocol.SitStand or ActionProtocol.WalkRun
-            or ActionProtocol.Attack or ActionProtocol.NextTarget)
+            or ActionProtocol.Attack or ActionProtocol.NextTarget or ActionProtocol.RideMount)
             && !ActionProtocol.IsPanelSocial(use.ActionId))
         {
             await _reject(conn, ActionProtocol.Unsupported, $"action {use.ActionId} not on Net yet", ct).ConfigureAwait(false);

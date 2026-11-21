@@ -57,6 +57,7 @@
     <Content Include="..\..\data\soul-crystals.json" Link="data\soul-crystals.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\summons.json" Link="data\summons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\pets.json" Link="data\pets.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\mounts.json" Link="data\mounts.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\cubics.json" Link="data\cubics.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-combat.json" Link="data\skill-combat.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />

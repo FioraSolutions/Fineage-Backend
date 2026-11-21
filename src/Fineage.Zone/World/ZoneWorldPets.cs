@@ -298,6 +298,7 @@ public sealed partial class ZoneWorld
             StorePet(owner, entity);
         SendSummonInfo(entity);
         SendPetInventory(owner, entity);
+        SendPlayerActionState(owner);
         ZoneLog.Info($"pet spawn owner={owner.ObjectId} collar={collar.ObjectId} npc={npc.NpcId} lv{entity.Level} object={objectId} new={stored == null}");
         return entity;
     }

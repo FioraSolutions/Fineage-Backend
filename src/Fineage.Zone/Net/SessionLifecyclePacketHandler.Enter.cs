@@ -59,6 +59,8 @@ sealed partial class SessionLifecyclePacketHandler
         Self(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)));
         // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
         Self(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(ToNetShortcutInit(_world.BuildShortcutInit(zoneSession))));
+        if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
+            Self(NetOpcode.PlayerActionState, NetCodec.EncodePlayerActionState(actionState));
         // Mobius updateEffectIcons: restored buffs (character_skills_save) must land before EtcStatusUpdate.
         if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
             Self(NetOpcode.AbnormalStatusUpdate, NetCodec.EncodeAbnormalStatusUpdate(ToNetAbnormal(abnormals)));
