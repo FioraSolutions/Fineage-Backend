@@ -35,7 +35,11 @@ public static class PlayerZoneChecks
         world.PlayerParticipation.SetDimensionalRift(objectId, inside);
     }
 
-    public static bool IsOlympiadObserver(ZoneWorld world, int objectId) => false;
+    public static bool IsOlympiadObserver(ZoneWorld world, int objectId)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        return world.OlympiadObserving(objectId);
+    }
 
     public static bool IsInGrandBossZone(ZoneWorld world, int objectId) => false;
 }
