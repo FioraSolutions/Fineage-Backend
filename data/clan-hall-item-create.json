@@ -1,0 +1,38 @@
+{
+ "source": "Mobius ClanHallManager item_creation (list id = hallId + level × 100000). Extend with scripts/gen_clan_hall_item_create.py.",
+ "lists": [
+  {
+   "id": 100028,
+   "applyTaxes": false,
+   "maintainEnchantment": false,
+   "npcs": [35384],
+   "entries": [
+    {"id": 1, "ingredients": [{"id": 57, "count": 120}], "products": [{"id": 1060, "count": 1}]},
+    {"id": 2, "ingredients": [{"id": 57, "count": 400}], "products": [{"id": 1061, "count": 1}]}
+   ]
+  },
+  {
+   "id": 200028,
+   "applyTaxes": false,
+   "maintainEnchantment": false,
+   "npcs": [35384],
+   "entries": [
+    {"id": 1, "ingredients": [{"id": 57, "count": 120}], "products": [{"id": 1060, "count": 1}]},
+    {"id": 2, "ingredients": [{"id": 57, "count": 400}], "products": [{"id": 1061, "count": 1}]},
+    {"id": 3, "ingredients": [{"id": 57, "count": 2500}], "products": [{"id": 1539, "count": 1}]}
+   ]
+  },
+  {
+   "id": 300028,
+   "applyTaxes": false,
+   "maintainEnchantment": false,
+   "npcs": [35384],
+   "entries": [
+    {"id": 1, "ingredients": [{"id": 57, "count": 120}], "products": [{"id": 1060, "count": 1}]},
+    {"id": 2, "ingredients": [{"id": 57, "count": 400}], "products": [{"id": 1061, "count": 1}]},
+    {"id": 3, "ingredients": [{"id": 57, "count": 2500}], "products": [{"id": 1539, "count": 1}]},
+    {"id": 4, "ingredients": [{"id": 57, "count": 8000}], "products": [{"id": 3952, "count": 1}]}
+   ]
+  }
+ ]
+}

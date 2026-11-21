@@ -130,6 +130,7 @@ sealed class ZonePlayerIdentityPayload
     public int PledgeClass { get; set; }
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
+    public int InClanHallZoneId { get; set; }
     public double HallRegenHpMult { get; set; } = 1d;
     public double HallRegenMpMult { get; set; } = 1d;
     public int PledgeType { get; set; }

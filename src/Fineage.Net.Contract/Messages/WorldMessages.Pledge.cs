@@ -172,4 +172,10 @@ namespace Fineage.Net.Contract
     {
         public ClanHallNet[] Halls { get; set; } = System.Array.Empty<ClanHallNet>();
     }
+
+    public sealed class AgitDecoInfoNetMsg
+    {
+        public int HallId { get; set; }
+        public byte[] DecoBytes { get; set; } = [];
+    }
 }

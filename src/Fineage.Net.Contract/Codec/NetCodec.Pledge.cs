@@ -257,5 +257,31 @@ namespace Fineage.Net.Contract
             }
             return new ClanHallListNetMsg { Halls = halls };
         }
+
+        public const int AgitDecoByteCount = 12;
+
+        public static byte[] EncodeAgitDecoInfo(AgitDecoInfoNetMsg m) => Write(w =>
+        {
+            var deco = m.DecoBytes ?? [];
+            if (deco.Length != AgitDecoByteCount)
+                throw new InvalidDataException("agit_deco_bytes");
+            w.WriteInt32(m.HallId);
+            foreach (byte b in deco)
+                w.WriteByte(b);
+            w.WriteInt32(0);
+            w.WriteInt32(0);
+        });
+
+        public static AgitDecoInfoNetMsg DecodeAgitDecoInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int hallId = r.ReadInt32();
+            var deco = new byte[AgitDecoByteCount];
+            for (int i = 0; i < AgitDecoByteCount; i++)
+                deco[i] = r.ReadByte();
+            _ = r.ReadInt32();
+            _ = r.ReadInt32();
+            return new AgitDecoInfoNetMsg { HallId = hallId, DecoBytes = deco };
+        }
     }
 }

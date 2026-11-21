@@ -82,6 +82,8 @@ public sealed partial class ZoneWorld
             case NpcServiceIntent.NoblesSelect:
                 SendNoblesPage(session, player, npc, player.Noble);
                 return null;
+            case NpcServiceIntent.RequestNobless:
+                return RequestNoblessBypass(session, player, npc);
             case NpcServiceIntent.Olympiad:
                 return OlympiadNpcBypass(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.Subclass:
@@ -115,6 +117,7 @@ public sealed partial class ZoneWorld
             case NpcServiceIntent.HallLease:
             case NpcServiceIntent.HallSupport:
             case NpcServiceIntent.HallTeleport:
+            case NpcServiceIntent.HallItemCreate:
                 return TryHallManagerService(session, player, npc, reply);
             default:
                 return "bad_request";

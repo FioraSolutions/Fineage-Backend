@@ -94,6 +94,8 @@ publish/
 !data/item-skills.json
 !data/map-regions.json
 !data/clan-hall-spawns.json
+!data/clan-hall-functions.json
+!data/clan-hall-item-create.json
 !data/death-drop.json
 !data/cursed-weapons.json
 !data/npc-ai-support.json
