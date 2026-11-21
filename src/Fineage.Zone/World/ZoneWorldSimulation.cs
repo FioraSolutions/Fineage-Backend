@@ -5,6 +5,7 @@ using Fineage.Zone.Lottery;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
@@ -181,6 +182,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
         ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
+        ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
 
         // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.

@@ -133,6 +133,9 @@ public sealed partial class ZoneWorld
         pendingUnlink = null;
         if (session.ObjectId <= 0)
             return false;
+        long enterNow = NowUnixMs();
+        if (PunishmentBlocksEnter(session, enterNow))
+            return false;
         if (_byId.TryGetValue(session.ObjectId, out var occupied) && occupied.Kind != ZoneEntityKind.Player)
             return false;
 
@@ -251,6 +254,7 @@ public sealed partial class ZoneWorld
 
         AnnounceClanEnter(entity);
         FriendPlayerEnteredWorld(entity);
+        SyncPunishmentsOnEnter(session, entity, enterNow);
         known = entity.Knownlist.Count;
         return true;
     }

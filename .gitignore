@@ -47,6 +47,7 @@ data/*
 !data/doors.json
 !data/water-zones.json
 !data/peace-zones.json
+!data/jail-zone.json
 !data/pvp-zones.json
 !data/siege-zones.json
 !data/swamp-zones.json

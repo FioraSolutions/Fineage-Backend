@@ -19,6 +19,7 @@ using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.Lottery;
 using Fineage.Game.Services;
 using Fineage.Zone.Simulation;
@@ -199,7 +200,8 @@ public sealed partial class ZoneWorld
         ISimulationObserver? simulationObserver = null,
         ulong? simulationSeed = null,
         IRegionExecutor? regionExecutor = null,
-        ILedgerJournal? ledgerJournal = null)
+        ILedgerJournal? ledgerJournal = null,
+        PunishmentManager? punishments = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -311,6 +313,7 @@ public sealed partial class ZoneWorld
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
         _mammon = new MammonActor(_sevenSigns, GlobalStream(RandomPurpose.Mammon));
         SpawnCastleDoors();
+        InitPunishment(punishments);
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>
