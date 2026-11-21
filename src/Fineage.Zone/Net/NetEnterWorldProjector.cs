@@ -53,6 +53,32 @@ static class NetEnterWorldProjector
             frames.Add((NetOpcode.DoorStatus, door));
         if (entity.Dead)
             return frames;
+        if (entity.IsBoat)
+        {
+            frames.Add((NetOpcode.VehicleInfo, NetCodec.EncodeVehicleInfo(new VehicleInfoNetMsg
+            {
+                BoatObjectId = entity.ObjectId,
+                X = entity.X,
+                Y = entity.Y,
+                Z = entity.Z,
+                Heading = entity.Heading
+            })));
+            if (entity.MoveActive)
+            {
+                frames.Add((NetOpcode.VehicleDeparture, NetCodec.EncodeVehicleDeparture(new VehicleDepartureNetMsg
+                {
+                    BoatObjectId = entity.ObjectId,
+                    MoveSpeed = (int)(entity.Running ? entity.RunSpeed : entity.WalkSpeed),
+                    RotationSpeed = ZoneWorld.DefaultBoatRotationSpeed,
+                    DestX = entity.MoveDestX,
+                    DestY = entity.MoveDestY,
+                    DestZ = entity.MoveDestZ
+                })));
+            }
+
+            return frames;
+        }
+
         if (entity.MoveActive)
         {
             frames.Add((NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg

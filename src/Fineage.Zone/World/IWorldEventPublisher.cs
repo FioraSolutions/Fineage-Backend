@@ -249,6 +249,12 @@ interface IWorldEventPublisher
     /// <summary>Interlude MonRaceInfo (0xDD) to derby track watchers.</summary>
     void FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet);
 
+    /// <summary>Interlude <c>VehicleInfo</c> (0x59) for a boat actor. Called on the simulation thread.</summary>
+    void FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info);
+
+    /// <summary>Interlude <c>VehicleDeparture</c> (0x5A) when a boat leg starts. Called on the simulation thread.</summary>
+    void FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure);
+
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 
     void FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result);

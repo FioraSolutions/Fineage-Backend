@@ -46,7 +46,8 @@ public sealed partial class ZoneWorld
         npc.MoveCarryX = npc.MoveCarryY = 0;
         npc.MoveLastTickMs = now;
         SetMoveActive(npc, npc.X != destX || npc.Y != destY);
-        BroadcastNpcMove(npc, destX, destY, destZ);
+        if (!npc.IsBoat)
+            BroadcastNpcMove(npc, destX, destY, destZ);
     }
 
     /// <summary>
