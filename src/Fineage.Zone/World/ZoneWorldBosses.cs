@@ -55,12 +55,9 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Admin and test hook: marks the boss dead now, opening its respawn window, and, when the boss
-    /// is still in the world, removes it. Do not call it while holding the world gate; it takes that gate itself.
+    /// is still in the world, removes it. Must run on the simulation thread or inside a step.
     /// </summary>
-    public bool OnBossKilled(int npcId)
-    {
-        return KillBossLocked(npcId);
-    }
+    public bool OnBossKilled(int npcId) => KillBossNow(npcId);
 
     public Task<string?> TryBossStatusAsync(ZoneSession session, int npcId, CancellationToken ct)
     {
@@ -116,7 +113,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    bool KillBossLocked(int npcId)
+    bool KillBossNow(int npcId)
     {
         if (!_bosses.Catalog.TryGet(npcId, out var definition))
             return false;
@@ -130,7 +127,7 @@ public sealed partial class ZoneWorld
     string? ApplyAdminBoss(AdminBossScheduleMsg request)
     {
         if (request.Action == BossProtocol.ActionMarkDead)
-            return KillBossLocked(request.NpcId) ? null : BossProtocol.UnknownBoss;
+            return KillBossNow(request.NpcId) ? null : BossProtocol.UnknownBoss;
 
         if (request.Action != BossProtocol.ActionForceSpawn)
             return "bad_request";

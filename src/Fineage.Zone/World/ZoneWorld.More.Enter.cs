@@ -53,7 +53,7 @@ public sealed partial class ZoneWorld
             if (!TryEnter(session, stored, out int known, out int x, out int y, out int z, out var evicted))
                 return null;
             CountOnlinePlayers();
-            if (!TryGetLivePlayerUnlocked(session, out var player))
+            if (!TryGetLivePlayer(session, out var player))
                 throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
             return new EnterOutcome<T>(project(player), known, x, y, z, evicted);
         }, ct).ConfigureAwait(false);
@@ -61,7 +61,7 @@ public sealed partial class ZoneWorld
             return null;
 
         if (persistStarterBackfill &&
-            TryGetLivePlayerUnlocked(session, out var backfillPlayer) &&
+            TryGetLivePlayer(session, out var backfillPlayer) &&
             backfillPlayer.Inventory != null)
         {
             await Task.Run(
@@ -93,7 +93,7 @@ public sealed partial class ZoneWorld
             return null;
         var (projection, snapshot) = await OnSimulationAsync(session, "leave", () =>
         {
-            var before = projectBefore != null && TryGetLivePlayerUnlocked(session, out var player) ? projectBefore(player) : null;
+            var before = projectBefore != null && TryGetLivePlayer(session, out var player) ? projectBefore(player) : null;
             TryDetachPlayer(session, capturePersist: true, out _, out var captured);
             CountOnlinePlayers();
             return (before, captured);
