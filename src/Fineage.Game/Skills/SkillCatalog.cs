@@ -62,7 +62,7 @@ public sealed class SkillCatalog
             if (row.LevelData == null || row.LevelData.Count == 0)
                 throw new InvalidDataException($"{where} skill {row.SkillId} has no levelData.");
 
-            var levels = new SkillLevelData[row.LevelData.Count];            for (int i = 0; i < row.LevelData.Count; i++)
+            var levels = new SkillLevelData[row.LevelData.Count]; for (int i = 0; i < row.LevelData.Count; i++)
             {
                 var levelRow = row.LevelData[i];
                 int level = levelRow.Level == 0 ? i + 1 : levelRow.Level;

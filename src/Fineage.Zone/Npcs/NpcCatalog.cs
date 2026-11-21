@@ -220,18 +220,18 @@ public sealed class NpcCatalog
                 (row.Race ?? "").Trim().ToUpperInvariant()));
         }
 
-    static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
-    {
-        if (rows is not { Count: > 0 })
-            return null;
-        var list = new List<NpcAiSkill>(rows.Count);
-        foreach (var r in rows)
+        static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
         {
-            if (r.Id > 0 && r.Level > 0)
-                list.Add(new NpcAiSkill(r.Id, r.Level));
+            if (rows is not { Count: > 0 })
+                return null;
+            var list = new List<NpcAiSkill>(rows.Count);
+            foreach (var r in rows)
+            {
+                if (r.Id > 0 && r.Level > 0)
+                    list.Add(new NpcAiSkill(r.Id, r.Level));
+            }
+            return list.Count > 0 ? list : null;
         }
-        return list.Count > 0 ? list : null;
-    }
 
         return new NpcCatalog(byId);
     }

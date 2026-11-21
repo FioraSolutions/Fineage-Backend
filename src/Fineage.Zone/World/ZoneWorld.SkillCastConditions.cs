@@ -102,7 +102,12 @@ public sealed partial class ZoneWorld
         public override int Sex => player.Sex;
         public override string RaceName => player.Race switch
         {
-            0 => "HUMAN", 1 => "ELF", 2 => "DARKELF", 3 => "ORC", 4 => "DWARF", _ => "HUMAN"
+            0 => "HUMAN",
+            1 => "ELF",
+            2 => "DARKELF",
+            3 => "ORC",
+            4 => "DWARF",
+            _ => "HUMAN"
         };
         public override int ElementSeedTotal
         {
