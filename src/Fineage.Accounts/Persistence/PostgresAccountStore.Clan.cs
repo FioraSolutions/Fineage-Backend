@@ -157,6 +157,10 @@ public sealed partial class PostgresAccountStore
         return true;
     }
 
+    public IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls() => _inner.ListSiegableClanHalls();
+
+    public bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls) => _inner.SaveSiegableClanHalls(halls);
+
     public bool TrySetCharacterTitle(string account, int characterId, string title) =>
         RunSilent(
             () => _inner.TrySetCharacterTitle(account, characterId, title),

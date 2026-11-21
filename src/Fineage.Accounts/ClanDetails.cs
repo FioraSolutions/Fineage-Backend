@@ -79,3 +79,14 @@ public sealed class ClanHallBidSave
     public long Amount { get; set; }
     public long TimeUnixMs { get; set; }
 }
+
+/// <summary>Mobius <c>siegable_clanhall</c> + <c>clanhall_siege_attackers</c>.</summary>
+public sealed record SiegableClanHallSave(
+    int Id,
+    int OwnerClanId,
+    long NextSiegeUnixMs,
+    bool RegistrationClosed,
+    bool InProgress,
+    long EndsUnixMs,
+    IReadOnlyList<int>? Attackers = null,
+    int PendingWinnerClanId = 0);

@@ -167,6 +167,10 @@ public interface IAccountStore
 
     bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls);
 
+    IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls();
+
+    bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls);
+
     /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
     StoredPet? FindPet(int controlObjectId);
 
