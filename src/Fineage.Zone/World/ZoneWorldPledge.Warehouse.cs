@@ -26,6 +26,8 @@ public sealed partial class ZoneWorld
     /// <summary>The warehouse the open window points at (Mobius <c>getActiveWarehouse</c>).</summary>
     PrivateWarehouse? ActiveWarehouse(ZoneEntity player)
     {
+        if (player.FreightWithdrawOpen)
+            return player.Freight;
         if (!player.ClanWarehouseOpen)
             return player.Warehouse;
         var clan = ClanOf(player.ObjectId);
@@ -33,16 +35,30 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>The ledger account of the warehouse the open window points at.</summary>
-    LedgerAccount ActiveWarehouseAccount(ZoneEntity player) => player.ClanWarehouseOpen
-        ? LedgerAccount.ClanWarehouse(ClanOf(player.ObjectId)?.Id
-            ?? throw new InvalidOperationException($"player {player.ObjectId} has a clan warehouse open without a clan"))
-        : LedgerAccount.Warehouse(player.ObjectId);
+    LedgerAccount ActiveWarehouseAccount(ZoneEntity player)
+    {
+        if (player.FreightWithdrawOpen)
+            return LedgerAccount.Freight(player.ObjectId);
+        return player.ClanWarehouseOpen
+            ? LedgerAccount.ClanWarehouse(ClanOf(player.ObjectId)?.Id
+                ?? throw new InvalidOperationException($"player {player.ObjectId} has a clan warehouse open without a clan"))
+            : LedgerAccount.Warehouse(player.ObjectId);
+    }
 
-    int ActiveWarehouseSlots(ZoneEntity player) =>
-        player.ClanWarehouseOpen ? PledgeProtocol.ClanWarehouseSlots : WarehouseRules.WarehouseSlots(player.Race);
+    int ActiveWarehouseSlots(ZoneEntity player)
+    {
+        if (player.FreightWithdrawOpen)
+            return FreightRules.Slots;
+        return player.ClanWarehouseOpen ? PledgeProtocol.ClanWarehouseSlots : WarehouseRules.WarehouseSlots(player.Race);
+    }
 
     void SaveActiveWarehouse(ZoneSession session, ZoneEntity player)
     {
+        if (player.FreightWithdrawOpen)
+        {
+            SaveFreight(session, player);
+            return;
+        }
         if (!player.ClanWarehouseOpen)
         {
             SaveWarehouse(session, player);

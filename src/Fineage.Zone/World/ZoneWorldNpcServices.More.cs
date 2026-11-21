@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
         }
 
         player.ClanWarehouseOpen = false;
+        player.FreightWithdrawOpen = false;
         SendDepositList(session, player, npc);
         SendHtml(session, player, npc, "<html><body>%npcname%:<br>Deposit an item. The fee is 30 adena per item.</body></html>");
         return null;
@@ -48,6 +49,7 @@ public sealed partial class ZoneWorld
         }
 
         player.ClanWarehouseOpen = false;
+        player.FreightWithdrawOpen = false;
         SendWithdrawList(session, player, npc);
         SendHtml(session, player, npc, "<html><body>%npcname%:<br>Withdraw an item from your private warehouse.</body></html>");
         return null;

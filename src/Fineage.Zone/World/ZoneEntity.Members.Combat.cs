@@ -55,6 +55,12 @@ sealed partial class ZoneEntity
     public int InstanceId { get; set; }
     /// <summary>Private warehouse. Null on NPCs.</summary>
     public PrivateWarehouse? Warehouse { get; set; }
+    /// <summary>Freight packages addressed to this character. Null on NPCs until loaded.</summary>
+    public PrivateWarehouse? Freight { get; set; }
+    /// <summary>Withdraw window is listing freight instead of a private or clan warehouse.</summary>
+    public bool FreightWithdrawOpen { get; set; }
+    /// <summary>Last warehouse keeper object id used for freight (Mobius <c>getLastFolkNPC</c> for package send).</summary>
+    public int FreightKeeperNpcObjectId { get; set; }
     /// <summary>First character created on the account. Mobius <c>Player.isNewbie</c> when the account had no characters yet.</summary>
     public bool Newbie
     {

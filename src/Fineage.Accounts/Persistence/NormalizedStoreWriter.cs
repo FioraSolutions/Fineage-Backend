@@ -12,6 +12,7 @@ static partial class NormalizedStoreWriter
     public const string LocInventory = "inventory";
     public const string LocPaperdoll = "paperdoll";
     public const string LocWarehouse = "warehouse";
+    public const string LocFreight = "freight";
 
     public static void UpsertFromSnapshot(NpgsqlConnection conn, NpgsqlTransaction tx, string snapshotJson)
     {
@@ -304,7 +305,7 @@ static partial class NormalizedStoreWriter
             character.HennaDye2,
             character.HennaDye3);
 
-        ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse);
+        ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse, character.Freight);
         ReplaceQuests(conn, tx, character.Id, character.Quests);
         ReplaceShortcuts(conn, tx, character.Id, character.Shortcuts);
         ReplaceLearnedSkills(conn, tx, character.Id, character.LearnedSkills);

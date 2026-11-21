@@ -120,6 +120,7 @@ public sealed record CharacterRecord(
     long Exp = 0,
     IReadOnlyList<QuestSaveRow>? Quests = null,
     IReadOnlyList<StoredItem>? Warehouse = null,
+    IReadOnlyList<StoredItem>? Freight = null,
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
     IReadOnlyList<StoredSkill>? LearnedSkills = null,

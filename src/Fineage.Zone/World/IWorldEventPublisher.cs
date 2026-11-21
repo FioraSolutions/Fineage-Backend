@@ -118,6 +118,10 @@ interface IWorldEventPublisher
 
     void FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list);
 
+    void FanoutPackageToList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageToListMsg list);
+
+    void FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageSendableListMsg list);
+
     /// <summary>Mobius QuestList journal to the owner. Called on the simulation thread.</summary>
     void FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list);
 

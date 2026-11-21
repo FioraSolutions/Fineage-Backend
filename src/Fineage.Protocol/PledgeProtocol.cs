@@ -126,6 +126,8 @@ public static class PledgeProtocol
     public const int WarehouseFeePerItem = 30;
     public const int WarehouseTypePrivate = 1;
     public const int WarehouseTypeClan = 2;
+    /// <summary>Mobius <c>WareHouseWithdrawalList.FREIGHT</c> (package pickup).</summary>
+    public const int WarehouseTypeFreight = 4;
 
     // Mobius RelationChanged bits.
     public const int RelationPvpFlag = 0x00002;

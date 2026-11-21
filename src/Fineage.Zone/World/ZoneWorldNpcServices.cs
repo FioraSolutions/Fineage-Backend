@@ -63,6 +63,10 @@ public sealed partial class ZoneWorld
                 return OpenDeposit(session, player, npc);
             case NpcServiceIntent.Withdraw:
                 return OpenWithdraw(session, player, npc);
+            case NpcServiceIntent.PackageDeposit:
+                return OpenPackageDeposit(session, player, npc);
+            case NpcServiceIntent.PackageWithdraw:
+                return OpenPackageWithdraw(session, player, npc);
             case NpcServiceIntent.SupportMagic:
                 return ApplySupportMagic(session, npc.ObjectId, html: true);
             case NpcServiceIntent.SupportBlessing:

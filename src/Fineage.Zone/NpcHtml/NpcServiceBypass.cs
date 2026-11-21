@@ -39,7 +39,7 @@ public sealed class TeleportBypassHandler : IBypassHandler
     static string TeleportRulesNormal() => "NORMAL";
 }
 
-/// <summary>Private warehouse windows. Clan and freight stay stubbed.</summary>
+/// <summary>Private warehouse windows.</summary>
 public sealed class WarehouseBypassHandler : IBypassHandler
 {
     public IReadOnlyList<string> Commands { get; } = ["DepositP", "WithdrawP"];
@@ -51,6 +51,25 @@ public sealed class WarehouseBypassHandler : IBypassHandler
             return BypassReply.ServiceCall(NpcServiceIntent.Deposit);
         if (token.Equals("WithdrawP", StringComparison.OrdinalIgnoreCase))
             return BypassReply.ServiceCall(NpcServiceIntent.Withdraw);
+        return BypassReply.Fail("bad_request");
+    }
+}
+
+/// <summary>Freight warehouse (Mobius <c>handlers/bypass/npc/Freight</c>).</summary>
+public sealed class FreightBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } =
+        ["package_deposit", "package_withdraw", "DepositF", "WithdrawF"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var token = BypassCommands.Token(call.Command);
+        if (token.Equals("package_deposit", StringComparison.OrdinalIgnoreCase) ||
+            token.Equals("DepositF", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.PackageDeposit);
+        if (token.Equals("package_withdraw", StringComparison.OrdinalIgnoreCase) ||
+            token.Equals("WithdrawF", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.PackageWithdraw);
         return BypassReply.Fail("bad_request");
     }
 }

@@ -343,5 +343,13 @@ namespace Fineage.Net.Contract
         public const ushort Ride = 0x03C4;
         /// <summary>Zone → owner: pet / mount action gating (<c>PlayerActionStateNetMsg</c>).</summary>
         public const ushort PlayerActionState = 0x03C5;
+        /// <summary>Zone → sender: account characters to ship packages to (Mobius PackageToList 0xC2).</summary>
+        public const ushort PackageToList = 0x03C6;
+        /// <summary>Zone → sender: sendable bag items for one recipient (Mobius PackageSendableList 0xC3).</summary>
+        public const ushort PackageSendableList = 0x03C7;
+        /// <summary>Client → zone: ship lines to a character on the account (Mobius RequestPackageSend 0x9F).</summary>
+        public const ushort PackageSendRequest = 0x03C8;
+        /// <summary>Client → zone: list sendable items for one recipient (Mobius RequestPackageSendableItemList 0x9E).</summary>
+        public const ushort PackageSendableListRequest = 0x03C9;
     }
 }

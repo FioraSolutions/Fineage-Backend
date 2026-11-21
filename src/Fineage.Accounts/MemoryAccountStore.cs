@@ -114,7 +114,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
             if (character.Id >= _data.NextCharacterId)
                 _data.NextCharacterId = character.Id + 1;
-            foreach (var item in (character.Items ?? []).Concat(character.Warehouse ?? []))
+            foreach (var item in (character.Items ?? []).Concat(character.Warehouse ?? []).Concat(character.Freight ?? []))
             {
                 if (item.ObjectId >= _data.NextItemObjectId)
                     _data.NextItemObjectId = item.ObjectId + 1;
@@ -189,6 +189,14 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 ObjectId = item.ObjectId
             }).ToList(),
             Warehouse = character.Warehouse?.Select(item => new StoredItemDto
+            {
+                ItemId = item.ItemId,
+                Count = item.Count,
+                EquippedSlot = -1,
+                EnchantLevel = item.EnchantLevel,
+                ObjectId = item.ObjectId
+            }).ToList(),
+            Freight = character.Freight?.Select(item => new StoredItemDto
             {
                 ItemId = item.ItemId,
                 Count = item.Count,

@@ -28,7 +28,10 @@ public enum LedgerContainer : byte
     /// A private or clan warehouse. Warehouse stacks have no durable piece id yet, so the ledger holds them as a
     /// count per item: a piece deposited leaves its instance id behind and a piece withdrawn gets a new one.
     /// </summary>
-    Warehouse = 4
+    Warehouse = 4,
+
+    /// <summary>Freight packages addressed to this character (Mobius <c>ItemLocation.FREIGHT</c>).</summary>
+    Freight = 5
 }
 
 /// <summary>Sources and sinks. Their balances may go negative: a negative balance is what they minted.</summary>
@@ -111,6 +114,9 @@ public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, 
 
     public static LedgerAccount ClanWarehouse(int clanId) =>
         new(LedgerOwnerKind.Clan, clanId, LedgerContainer.Warehouse);
+
+    public static LedgerAccount Freight(int characterId) =>
+        new(LedgerOwnerKind.Character, characterId, LedgerContainer.Freight);
 
     public bool IsSystem => Owner == LedgerOwnerKind.System;
 
@@ -266,7 +272,13 @@ public enum LedgerTxKind
     GmGrant = 45,
 
     /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
-    Consume = 46
+    Consume = 46,
+
+    /// <summary>Bag into another character's freight on the same account: <c>Reference</c> is the recipient's character id.</summary>
+    FreightDeposit = 47,
+
+    /// <summary>Freight into the bag at any warehouse keeper: <c>Reference</c> is the keeper's npc id.</summary>
+    FreightWithdraw = 48
 }
 
 /// <summary>

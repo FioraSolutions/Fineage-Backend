@@ -126,4 +126,10 @@ public static class NpcServiceIntent
 
     /// <summary>Clan hall doorman <c>evolve N</c> (Mobius <c>PetManager.doEvolve</c>).</summary>
     public const string PetEvolve = "pet-evolve";
+
+    /// <summary>Freight keeper <c>package_deposit</c> / <c>DepositF</c>: open account character list for shipping.</summary>
+    public const string PackageDeposit = "package-deposit";
+
+    /// <summary>Freight keeper <c>package_withdraw</c> / <c>WithdrawF</c>: open freight pickup window.</summary>
+    public const string PackageWithdraw = "package-withdraw";
 }

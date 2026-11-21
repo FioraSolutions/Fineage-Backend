@@ -62,6 +62,9 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
     public void ReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items) =>
         _accounts?.TryReplaceWarehouse(account, characterId, items);
 
+    public void ReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items) =>
+        _accounts?.TryReplaceFreight(account, characterId, items);
+
     public void ReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
         _accounts?.TryReplaceQuests(account, characterId, quests);
 
