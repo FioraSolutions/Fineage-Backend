@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Accounts;
@@ -69,6 +70,11 @@ public sealed partial class ZoneWorld
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var store = ActiveWarehouseAccount(player);
+        var move = BeginLedgerMove(LedgerTxKind.WarehouseWithdraw, player.ObjectId, npc.NpcId);
+        ObserveLedger(move, bag);
+        ObserveLedger(move, store);
         foreach (var (stack, count, stackable) in planned)
         {
             if (!wh.TryTake(stack.ObjectId, count, out _, out _))
@@ -76,7 +82,11 @@ public sealed partial class ZoneWorld
             bool existed = stackable && player.Inventory.FindByItemId(stack.ItemId) != null;
             var added = player.Inventory.Add(stack.ItemId, count, stack.EnchantLevel);
             changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
+            move.Post(store, stack.ItemId, -count);
+            move.Post(bag, stack.ItemId, count, PiecesOf([added]));
         }
+
+        move.Commit(LedgerHoldingsOf);
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);

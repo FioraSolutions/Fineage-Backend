@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Accounts;
@@ -117,12 +118,19 @@ public sealed partial class ZoneWorld
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var store = ActiveWarehouseAccount(player);
+        var move = BeginLedgerMove(LedgerTxKind.WarehouseDeposit, player.ObjectId, npc.NpcId);
+        ObserveLedger(move, bag);
+        ObserveLedger(move, store);
         if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
         {
             Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText);
             return null;
         }
 
+        move.Post(bag, WarehouseRules.AdenaItemId, -fee);
+        move.Post(LedgerAccount.Of(SystemAccount.Fees), WarehouseRules.AdenaItemId, fee);
         foreach (var (item, count, _) in planned)
         {
             if (!player.Inventory.TryTakeFrom(item.ObjectId, count, out var taken, out bool removed) || taken == null)
@@ -131,7 +139,11 @@ public sealed partial class ZoneWorld
                 ? InventoryMessages.RemoveRow(taken, -1)
                 : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
             wh.Add(taken.ItemId, count, taken.EnchantLevel, out _);
+            move.Post(bag, taken.ItemId, -count, PiecesOf([taken]));
+            move.Post(store, taken.ItemId, count);
         }
+
+        move.Commit(LedgerHoldingsOf);
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
