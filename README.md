@@ -212,7 +212,7 @@ dotnet run --project src/Fineage.Login -- play <account> <password> <name> fight
 ## Related
 
 - Client: https://github.com/FioraSolutions/Fineage
-- [Fineage #14](https://github.com/FioraSolutions/Fineage/issues/14) — LoginServer v2 auth + session handoff
+- Live auth + handoff: [`docs/net-protocol.md`](docs/net-protocol.md) (Login **9106**/HTTP **5080** → Zone **9777**, HMAC handoff token)
 
 ## License
 
