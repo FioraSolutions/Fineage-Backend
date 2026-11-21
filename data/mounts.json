@@ -1,0 +1,10 @@
+{
+ "reference": "Mobius CT_0 Interlude: Ride packet mountType (1 strider, 2 wyvern), Wyvern Manager costs (npcs.properties).",
+ "wyvernDisplayNpcId": 12621,
+ "wyvernManager": {
+  "crystalItemId": 1460,
+  "crystalCount": 10,
+  "minStriderLevel": 55
+ },
+ "wyvernSkillId": 4289
+}
