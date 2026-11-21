@@ -130,6 +130,8 @@ public sealed partial class ZoneWorld
         TryApplyRaidCurse(target, attacker, magicSkill: false, now);
         ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);
         AddHate(target, attacker, DamageHate(damage, target.Level));
+        if (IsGuard(target))
+            CallGuardHelp(target, attacker);
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         if (target.CurHp <= 0)
         {

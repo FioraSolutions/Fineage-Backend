@@ -13,7 +13,8 @@ namespace Fineage.Zone;
 /// </list>
 /// <para>Env overrides: <c>FINEAGE_AGGRO_DISTANCE_CHECK_ENABLED</c>, <c>FINEAGE_AGGRO_DISTANCE_CHECK_RANGE</c>,
 /// <c>FINEAGE_AGGRO_DISTANCE_CHECK_RAIDS</c>, <c>FINEAGE_AGGRO_DISTANCE_CHECK_RAID_RANGE</c>,
-/// <c>FINEAGE_AGGRO_DISTANCE_CHECK_RESTORE_LIFE</c>, <c>FINEAGE_MAX_DRIFT_RANGE</c>.</para>
+/// <c>FINEAGE_AGGRO_DISTANCE_CHECK_RESTORE_LIFE</c>, <c>FINEAGE_MAX_DRIFT_RANGE</c>,
+/// <c>FINEAGE_GUARD_ATTACK_AGGRO_MOB</c>.</para>
 /// </summary>
 public static class ZoneNpcSettings
 {
@@ -23,6 +24,7 @@ public static class ZoneNpcSettings
     public const string AggroDistanceCheckRaidsVariable = "FINEAGE_AGGRO_DISTANCE_CHECK_RAIDS";
     public const string AggroDistanceCheckRaidRangeVariable = "FINEAGE_AGGRO_DISTANCE_CHECK_RAID_RANGE";
     public const string MaxDriftRangeVariable = "FINEAGE_MAX_DRIFT_RANGE";
+    public const string GuardAttackAggroMobVariable = "FINEAGE_GUARD_ATTACK_AGGRO_MOB";
 
     /// <summary>Mobius <c>NPC.ini AggroDistanceCheckEnabled = False</c>.</summary>
     public const bool DefaultAggroDistanceCheckEnabled = false;
@@ -36,6 +38,8 @@ public static class ZoneNpcSettings
     public const bool DefaultAggroDistanceCheckRestoreLife = true;
     /// <summary>Mobius <c>NPC.ini MaxDriftRange = 300</c>.</summary>
     public const int DefaultMaxDriftRange = 300;
+    /// <summary>Mobius <c>NPC.ini GuardAttackAggroMob = False</c> (CT0 Interlude).</summary>
+    public const bool DefaultGuardAttackAggroMob = false;
 
     public static bool AggroDistanceCheckEnabled =>
         ParseBool(Environment.GetEnvironmentVariable(AggroDistanceCheckEnabledVariable), DefaultAggroDistanceCheckEnabled);
@@ -54,6 +58,9 @@ public static class ZoneNpcSettings
 
     public static int MaxDriftRange =>
         ParsePositiveInt(Environment.GetEnvironmentVariable(MaxDriftRangeVariable), DefaultMaxDriftRange);
+
+    public static bool GuardAttackAggroMob =>
+        ParseBool(Environment.GetEnvironmentVariable(GuardAttackAggroMobVariable), DefaultGuardAttackAggroMob);
 
     /// <summary>
     /// Mobius starts HP/MP regeneration for a monster as soon as it is wounded (<c>CreatureStatus.setCurrentHp</c>)

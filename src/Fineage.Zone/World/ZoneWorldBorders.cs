@@ -1,4 +1,5 @@
 using Fineage.Game.Quests;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -107,6 +108,26 @@ public sealed partial class ZoneWorld
                     continue;
                 ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={npc.AggroRange}");
                 Post(new HateMessage(npc.ObjectId, p.ObjectId, 1));
+                break;
+            }
+
+            if (!guard || !ZoneNpcSettings.GuardAttackAggroMob)
+                continue;
+
+            owned.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            foreach (var monster in owned)
+            {
+                if (ReferenceEquals(monster, npc) || monster.Kind != ZoneEntityKind.Npc || !monster.Aggressive ||
+                    !monster.Attackable || monster.CurHp <= 0 || monster.InstanceId != npc.InstanceId ||
+                    IsGuard(monster) || !ZoneCombat.IsCombatNpcType(monster.NpcType))
+                    continue;
+                long mdx = npc.X - (long)monster.X, mdy = npc.Y - (long)monster.Y, mdz = npc.Z - (long)monster.Z;
+                if (mdx * mdx + mdy * mdy + mdz * mdz > (long)npc.AggroRange * npc.AggroRange)
+                    continue;
+                if (!CanSeePoint(npc, monster.X, monster.Y, monster.Z))
+                    continue;
+                ZoneLog.Info($"[aggro] guard={npc.ObjectId} ({npc.Name}) aggro on monster={monster.ObjectId} range={npc.AggroRange}");
+                Post(new HateMessage(npc.ObjectId, monster.ObjectId, 1, AllowNpcAttacker: true));
                 break;
             }
         }

@@ -55,7 +55,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Monster aggro/hate/LOS | ✅ | — | `AttackableAI` | `ZoneWorldMobAi` | — |
 | Raid minion | ✅ | — | `Monster.setLeader` | `ZoneWorldNpcMovement` | — |
 | Healer/buffer NPC AI | ✅ | — | `NpcAI` + scripts | `ZoneWorldNpcSkills` | — |
-| City guards / karma checks | 🟡 | Guards attack PK, protect children | `ai/others/Guard`, `SiegeGuard` | Generic `Monster` AI only | M |
+| City guards / karma checks | 🟡 | Guards attack PK; scan aggressive mobs when enabled; ally hate on hit | `ai/others/Guard`, `SiegeGuard` | Karma scan in `ScanAggression`; `CallGuardHelp`; `GuardTownAiTests` | M |
 | Event / quest NPC AI | 🟡 | Hundreds of `dist/.../ai/**` | Script AI | Quest pack + limited scripts | L |
 | Minion raid buff on follow | 🟡 | 1/30 clan buff roll close | `AttackableAI` | Follow only | S |
 
@@ -334,7 +334,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
 | 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
-| 14 | Guard / town AI | — | partial (base guard AI) | No |
+| 14 | Guard / town AI | (this agent, branch `cursor/guard-town-ai-rank14-f138`) | in progress — karma scan, guard ally hate, optional aggro mob (`FINEAGE_GUARD_ATTACK_AGGRO_MOB`) | No |
 | 15 | Zone types (swamp/damage/NL) | (this PR) | done — imported JSON + movement/sim | No |
 | 16 | Boats + walking NPCs | — | **next** | Yes — `docs/client-packet-contracts.md` |
 | 16a | Monster Derby Track | — | queued after #16 | Yes — `MonRaceInfo` `0xDD` |
