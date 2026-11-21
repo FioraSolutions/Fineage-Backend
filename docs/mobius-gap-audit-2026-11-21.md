@@ -318,7 +318,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
-| 1 | World spawns / hunting grounds | (pending) | in progress | No |
+| 1 | World spawns / hunting grounds | #701 | in progress | No |
 | 2 | Quest coverage | — | pending | No |
 | 3 | Item augmentation | — | pending | Yes (refine UI) |
 | 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
