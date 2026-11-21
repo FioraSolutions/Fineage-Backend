@@ -113,7 +113,8 @@ public sealed class ZoneCommandIngressTests
 
         Assert.Null(await reply);
         Assert.True(afterStep > before, "selecting a target fans out to the player");
-        Assert.InRange(seenByReply, before + 1, afterStep);
+        // Replies complete after apply; fan-out drains at the end of the step, not inside the commands stage.
+        Assert.Equal(before, seenByReply);
     }
 
     [Fact]

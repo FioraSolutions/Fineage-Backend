@@ -29,73 +29,41 @@ public sealed partial class ZoneWorld
     /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
     void ApplyCommands(TickContext tick)
     {
-        int countBudget = ZoneSimulationSettings.CommandsPerTick;
-        int wallBudgetMs = ZoneSimulationSettings.CommandsStageBudgetMs;
-        long wallDeadline = wallBudgetMs > 0
-            ? Stopwatch.GetTimestamp() + (long)((Stopwatch.Frequency * (double)wallBudgetMs) / 1000d)
-            : 0;
+        var batch = _ingress.TakeQueued(ZoneSimulationSettings.CommandsPerTick);
+        if (batch.Count == 0)
+            return;
 
-        while (true)
+        bool applied = false;
+        foreach (var submission in batch)
         {
-            var batch = _ingress.TakeQueued(countBudget);
-            if (batch.Count == 0)
-                break;
+            // Cancelled by its connection before this tick: it never happened.
+            if (submission.Reply.Task.IsCompleted)
+                continue;
 
-            bool applied = false;
-            var deferred = new List<ZoneCommandIngress.Submission>();
-            int index = 0;
-            for (; index < batch.Count; index++)
+            string? error = null;
+            Exception? failure = null;
+            long applyStarted = Stopwatch.GetTimestamp();
+            try
             {
-                if (wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline)
-                    break;
-
-                var submission = batch[index];
-
-                // Cancelled by its connection before this tick: it never happened.
-                if (submission.Reply.Task.IsCompleted)
-                    continue;
-
-                string? error = null;
-                Exception? failure = null;
-                long applyStarted = Stopwatch.GetTimestamp();
-                try
-                {
-                    error = submission.Command.Apply(this, submission.Session, tick);
-                }
-                catch (Exception ex)
-                {
-                    failure = ex;
-                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
-                    ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
-                }
-
-                if (submission.Command.Logged)
-                    _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
-                _ingress.Record(submission, error, failure);
-                applied = true;
-                CommandApplyTiming.RecordCommand(submission.Command.Name, CommandApplyTiming.ElapsedMs(applyStarted));
+                error = submission.Command.Apply(this, submission.Session, tick);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+                FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
+                ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
             }
 
-            if (index < batch.Count)
-                deferred.AddRange(batch.Skip(index));
-
-            if (deferred.Count > 0)
-            {
-                _ingress.PutBackFront(deferred);
-                string reason = wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline ? "wall_budget" : "partial_batch";
-                FineageTelemetry.CommandsDeferred.Add(deferred.Count, new KeyValuePair<string, object?>("reason", reason));
-            }
-
-            if (applied)
-                ReleaseAppliedCommandReplies();
-
-            if (wallDeadline > 0 && Stopwatch.GetTimestamp() >= wallDeadline)
-                break;
-
-            if (countBudget <= 0 || _ingress.QueuedDepth == 0)
-                break;
+            if (submission.Command.Logged)
+                _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
+                    failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+            _ingress.Record(submission, error, failure);
+            applied = true;
+            CommandApplyTiming.RecordCommand(submission.Command.Name, CommandApplyTiming.ElapsedMs(applyStarted));
         }
+
+        if (applied)
+            ReleaseAppliedCommandReplies();
     }
 
     /// <summary>

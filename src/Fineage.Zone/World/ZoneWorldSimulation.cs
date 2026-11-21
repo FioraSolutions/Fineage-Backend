@@ -110,9 +110,10 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// After the <c>commands</c> stage: seal and send the fan-out those commands caused, flush any inventory they
-    /// dirtied, and complete their handler replies so the rest of the step does not block on combat and regen. Must run
-    /// only inside a <see cref="RunStep"/> body while a fan-out batch is recording.
+    /// After the <c>commands</c> stage: flush inventory dirtied by commands, seal their fan-out batch, and complete
+    /// handler replies. The sealed batch is sent when the outer <see cref="RunStep"/> drains at the end of the tick so
+    /// move fan-out to every watcher does not block the rest of the 200 ms pipeline. Must run only inside a
+    /// <see cref="RunStep"/> body while a fan-out batch is recording.
     /// </summary>
     void ReleaseAppliedCommandReplies()
     {
@@ -121,9 +122,6 @@ public sealed partial class ZoneWorld
         CommandApplyTiming.RecordReleasePhase("flush_inventory", CommandApplyTiming.ElapsedMs(flushStarted));
 
         _fanout.Seal();
-        long drainStarted = Stopwatch.GetTimestamp();
-        _fanout.Drain();
-        CommandApplyTiming.RecordReleasePhase("fanout_drain", CommandApplyTiming.ElapsedMs(drainStarted));
 
         var applied = _ingress.TakeApplied();
         if (applied.Count > 0)

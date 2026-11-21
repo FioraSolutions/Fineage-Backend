@@ -178,7 +178,10 @@ public static class ReportWriter
             {
                 sb.AppendLine();
                 sb.AppendLine("### Tick stage p99 (ms)");
-                foreach (var (stage, ms) in r.Server.TickStageP99Ms.OrderByDescending(kv => kv.Value).Take(12))
+                foreach (var (stage, ms) in r.Server.TickStageP99Ms
+                             .Where(kv => kv.Value >= 0.5)
+                             .OrderByDescending(kv => kv.Value)
+                             .Take(24))
                     sb.AppendLine($"- `{stage}`: {ms:0.0}");
             }
 

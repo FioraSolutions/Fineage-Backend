@@ -75,15 +75,6 @@ public static class ZoneSimulationSettings
     public static int CommandsPerTick =>
         ReadInt("FINEAGE_ZONE_COMMANDS_PER_TICK", DefaultCommandsPerTick, min: 0, max: 10_000);
 
-    /// <summary>
-    /// Wall-time budget in milliseconds for one <c>commands</c> stage per step; unapplied submissions stay queued.
-    /// <c>0</c> means no limit (default, replay). Zone hosts set <c>FINEAGE_ZONE_COMMANDS_BUDGET_MS</c> (e.g. 90).
-    /// </summary>
-    public const int DefaultCommandsStageBudgetMs = 0;
-
-    public static int CommandsStageBudgetMs =>
-        ReadInt("FINEAGE_ZONE_COMMANDS_BUDGET_MS", DefaultCommandsStageBudgetMs, min: 0, max: StepMilliseconds);
-
     static int ReadInt(string name, int fallback, int min, int max)
     {
         string? text = Environment.GetEnvironmentVariable(name);
