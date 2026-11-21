@@ -295,6 +295,9 @@ public sealed partial class ZoneWorld
             Peace = SharedPeace.Value;
             Pvp = SharedPvp.Value;
             SiegeAreas = SharedSiegeZones.Value;
+            Swamp = SharedSwamp.Value;
+            Damage = SharedDamage.Value;
+            NoLanding = SharedNoLanding.Value;
         }
         BootstrapSpawns();
         BootstrapBosses();

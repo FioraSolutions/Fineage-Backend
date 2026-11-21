@@ -145,6 +145,31 @@ sealed partial class ZoneEntity
         set => EnsureMove().InWater = value;
     }
 
+    /// <summary>Mobius <c>ZoneId.SWAMP</c>: <see cref="MoveSpeedOf"/> multiplies live run/walk by <see cref="SwampMoveBonus"/>.</summary>
+    public bool InSwamp
+    {
+        get => Move?.InSwamp ?? false;
+        set => EnsureMove().InSwamp = value;
+    }
+
+    public double SwampMoveBonus
+    {
+        get => Move?.SwampMoveBonus ?? 1d;
+        set => EnsureMove().SwampMoveBonus = value;
+    }
+
+    public long DamageZoneNextAtMs
+    {
+        get => Move?.DamageZoneNextAtMs ?? 0;
+        set => EnsureMove().DamageZoneNextAtMs = value;
+    }
+
+    public long NoLandingDismountAtMs
+    {
+        get => Move?.NoLandingDismountAtMs ?? 0;
+        set => EnsureMove().NoLandingDismountAtMs = value;
+    }
+
     /// <summary>Mobius MoveData: server-side move in progress (Net path). Position advances by speed each tick.</summary>
     public bool MoveActive
     {
