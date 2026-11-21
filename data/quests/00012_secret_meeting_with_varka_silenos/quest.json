@@ -1,0 +1,117 @@
+{
+  "id": 12,
+  "name": "Secret Meeting With Varka Silenos",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7232
+  ],
+  "dialogs": [
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 73,
+      "htmlFile": "31296-talk-000.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 74,
+      "htmlFile": "31296-talk-001.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "event",
+      "when": "absent",
+      "event": "31296-03",
+      "minLevel": 74,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31296-event-31296-03-002.htm"
+    },
+    {
+      "npcId": 31296,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31296-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31258,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "31258-talk-c1-004.htm"
+    },
+    {
+      "npcId": 31258,
+      "hook": "event",
+      "when": "started",
+      "event": "31258-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "give_item",
+          "itemId": 7232,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "31258-event-31258-02-c1-005.htm"
+    },
+    {
+      "npcId": 31258,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "htmlFile": "31258-talk-c2-006.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 7232,
+      "htmlFile": "31378-talk-c2-007.htm"
+    },
+    {
+      "npcId": 31378,
+      "hook": "event",
+      "when": "started",
+      "event": "31378-02",
+      "cond": 2,
+      "hasItem": 7232,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7232,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 79761,
+          "sp": 0
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31378-event-31378-02-c2-008.htm"
+    }
+  ]
+}
