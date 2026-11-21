@@ -1,6 +1,7 @@
 using Fineage.Protocol;
 using Fineage.Zone;
 using Fineage.Zone.Punishment;
+using Fineage.Game.Punishment;
 using Fineage.Zone.World;
 using Xunit;
 
