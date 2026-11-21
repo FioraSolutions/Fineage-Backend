@@ -95,6 +95,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestAcquireSkill:
                             await _skillLearn.OnAcquireAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestEnchantSkillInfo:
+                            await _skillEnchant.OnInfoAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestEnchantSkill:
+                            await _skillEnchant.OnEnchantAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.EnchantRequest:
                             await _enchant.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

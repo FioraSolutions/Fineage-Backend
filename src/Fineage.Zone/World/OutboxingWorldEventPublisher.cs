@@ -319,6 +319,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo), () => inner.FanoutAcquireSkillInfo(watcherObjectIdsCopy, info));
     }
 
+    void IWorldEventPublisher.FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutEnchantSkillList), () => inner.FanoutEnchantSkillList(watcherObjectIdsCopy, list));
+    }
+
+    void IWorldEventPublisher.FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutEnchantSkillInfo), () => inner.FanoutEnchantSkillInfo(watcherObjectIdsCopy, info));
+    }
+
     void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
