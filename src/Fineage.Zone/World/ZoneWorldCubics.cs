@@ -33,8 +33,9 @@ public sealed partial class ZoneWorld
         {
             return CubicCatalog.LoadDefault();
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
+            ZoneLog.Warn($"cubic catalog missing ({ex.FileName}); cubics are disabled until the datapack is present");
             return CubicCatalog.Empty;
         }
     }
