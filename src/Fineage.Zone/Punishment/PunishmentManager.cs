@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game.Punishment;
 
 namespace Fineage.Zone.Punishment;
 
@@ -41,10 +42,9 @@ public sealed class PunishmentManager
 
     public static PunishmentManager OpenInStateDirectory(string stateDirectory)
     {
-        string dir = string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory;
-        string path = Path.Combine(dir, "punishments.json");
+        string dir = PunishmentStatePaths.ResolveStateDirectory(stateDirectory);
         return new PunishmentManager(
-          new JsonPunishmentStore(path),
+          new JsonPunishmentStore(PunishmentStatePaths.PunishmentsJsonPath(dir)),
           JailZoneCatalog.LoadDefault(),
           GmAuditLog.ForStateDirectory(dir));
     }

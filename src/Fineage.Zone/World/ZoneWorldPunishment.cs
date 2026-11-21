@@ -1,3 +1,4 @@
+using Fineage.Game.Punishment;
 using Fineage.Protocol;
 using Fineage.Zone.Punishment;
 
