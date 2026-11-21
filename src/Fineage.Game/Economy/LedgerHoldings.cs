@@ -19,7 +19,7 @@ public sealed class LedgerHoldings
     {
         if (count == 0)
             return this;
-        long next = _counts.GetValueOrDefault(itemId) + count;
+        long next = checked(_counts.GetValueOrDefault(itemId) + count);
         if (next == 0)
             _counts.Remove(itemId);
         else

@@ -256,6 +256,15 @@ public sealed class EconomyLedgerTests
     }
 
     [Fact]
+    public void Item_totals_use_checked_arithmetic()
+    {
+        var ledger = new EconomyLedger(new MemoryLedgerJournal(), 100);
+        var tx = new LedgerTransaction(new LedgerTxId(1, 0), LedgerTxKind.Adjustment, 0, 0, 0,
+            [Post(AliceBag, Adena, long.MaxValue), Post(Shop, Adena, long.MaxValue)]);
+        Assert.Throws<OverflowException>(() => ledger.Submit(tx));
+    }
+
+    [Fact]
     public void An_emptied_account_is_forgotten_and_reads_as_empty()
     {
         var ledger = new EconomyLedger(new MemoryLedgerJournal(), 100);

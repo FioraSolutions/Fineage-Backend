@@ -260,7 +260,7 @@ public sealed class EconomyLedger : IEconomyLedger
                 }
             }
 
-            if (holdings.CountOf(posting.ItemId) + posting.Amount < 0)
+            if (checked(holdings.CountOf(posting.ItemId) + posting.Amount) < 0)
                 return LedgerRejection.Overdraft;
             holdings.Add(posting.ItemId, posting.Amount);
         }
