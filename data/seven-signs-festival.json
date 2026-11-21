@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "offeringItemId": 5901,
+  "offeringValue": 5,
+  "maxOffset": 230,
+  "levelScores": [60, 70, 100, 120, 150],
+  "festivalLengthMinutes": 18,
+  "cycleLengthMinutes": 228,
+  "tiers": [
+    {
+      "id": 0,
+      "levelLabel": "31",
+      "dawn": { "playerSpawn": { "x": -79187, "y": 113186, "z": -4895 }, "witchNpcId": 31132, "witchX": -79183, "witchY": 113052, "witchZ": -4891 },
+      "dusk": { "playerSpawn": { "x": -77200, "y": 88966, "z": -5151 }, "witchNpcId": 31142, "witchX": -77199, "witchY": 88830, "witchZ": -5147 }
+    },
+    {
+      "id": 1,
+      "levelLabel": "42",
+      "dawn": { "playerSpawn": { "x": -75918, "y": 110137, "z": -4895 }, "witchNpcId": 31133, "witchX": -75916, "witchY": 110270, "witchZ": -4891 },
+      "dusk": { "playerSpawn": { "x": -76941, "y": 85307, "z": -5151 }, "witchNpcId": 31143, "witchX": -76942, "witchY": 85438, "witchZ": -5147 }
+    },
+    {
+      "id": 2,
+      "levelLabel": "53",
+      "dawn": { "playerSpawn": { "x": -73835, "y": 111969, "z": -4895 }, "witchNpcId": 31134, "witchX": -73979, "witchY": 111970, "witchZ": -4891 },
+      "dusk": { "playerSpawn": { "x": -74855, "y": 87135, "z": -5151 }, "witchNpcId": 31144, "witchX": -74990, "witchY": 87135, "witchZ": -5147 }
+    },
+    {
+      "id": 3,
+      "levelLabel": "64",
+      "dawn": { "playerSpawn": { "x": -76170, "y": 113804, "z": -4895 }, "witchNpcId": 31135, "witchX": -76174, "witchY": 113663, "witchZ": -4891 },
+      "dusk": { "playerSpawn": { "x": -80208, "y": 88222, "z": -5151 }, "witchNpcId": 31145, "witchX": -80208, "witchY": 88222, "witchZ": -5147 }
+    },
+    {
+      "id": 4,
+      "levelLabel": "none",
+      "dawn": { "playerSpawn": { "x": -78927, "y": 109528, "z": -4895 }, "witchNpcId": 31136, "witchX": -78930, "witchY": 109664, "witchZ": -4891 },
+      "dusk": { "playerSpawn": { "x": -79954, "y": 84697, "z": -5151 }, "witchNpcId": 31146, "witchX": -79954, "witchY": 84697, "witchZ": -5147 }
+    }
+  ]
+}

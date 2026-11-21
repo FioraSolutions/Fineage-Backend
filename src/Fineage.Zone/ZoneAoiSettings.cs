@@ -3,8 +3,8 @@ using Fineage.Game.Economy;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Olympiad;
-using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Punishment;
+using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone;
@@ -44,6 +44,7 @@ public static class ZoneAoiSettings
         IAoi? aoi = null,
         IAccountStore? accounts = null,
         SevenSignsEngine? sevenSigns = null,
+        SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = true,
         BossSchedule? bosses = null,
         OlympiadBoard? olympiad = null,
@@ -56,6 +57,7 @@ public static class ZoneAoiSettings
                 aoi,
                 accounts: accounts,
                 sevenSigns: sevenSigns,
+                festivalRuntime: festivalRuntime,
                 includeEnabledMaps: includeEnabledMaps,
                 bosses: bosses,
                 olympiad: olympiad,
@@ -70,6 +72,7 @@ public static class ZoneAoiSettings
                 new GridAoi(cell),
                 accounts: accounts,
                 sevenSigns: sevenSigns,
+                festivalRuntime: festivalRuntime,
                 includeEnabledMaps: includeEnabledMaps,
                 bosses: bosses,
                 olympiad: olympiad,

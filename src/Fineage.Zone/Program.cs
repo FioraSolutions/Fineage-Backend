@@ -74,7 +74,10 @@ Console.CancelKeyPress += (_, e) =>
     shutdown.Cancel();
 };
 
-var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
+var festivalCatalog = SevenSignsFestivalCatalog.LoadDefault();
+var festivalRuntime = new SevenSignsFestivalRuntime(festivalCatalog);
+var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow, festivalRuntime);
+festivalRuntime.BindEngine(sevenSigns);
 bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
 var bosses = BossSchedule.OpenInStateDirectory(
@@ -86,7 +89,7 @@ var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNo
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
 bool includeEnabledMaps = includeEnabledMapsBoot;
 var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
+var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
     ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments);
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);

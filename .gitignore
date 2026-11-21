@@ -32,6 +32,7 @@ data/*
 !data/npcs.json
 !data/dungeons.json
 !data/dimensional-rift.json
+!data/seven-signs-festival.json
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json

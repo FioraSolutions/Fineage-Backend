@@ -31,7 +31,7 @@ public sealed class RegionSimulationDeterminismTests
     static readonly string[] LegacySimulationOrder =
     [
         "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "dimensional-rift", "clan.dissolutions", "clan.hall-auctions",
-        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "mammon", "olympiad"
+        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "seven-signs-festival", "mammon", "olympiad"
     ];
 
     /// <summary>The end-of-tick barrier, after every stage of the step.</summary>
