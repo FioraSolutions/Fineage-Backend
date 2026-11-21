@@ -51,10 +51,24 @@ public sealed class PrometheusAggregate
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
 
+    /// <summary>Max sampled p99 of the <c>commands</c> simulation stage (server-side).</summary>
+    public double CommandsStageP99Ms { get; init; }
+
+    /// <summary>Peak p99 across stages for keys present in any scrape (load-test diagnostics).</summary>
+    public IReadOnlyDictionary<string, double> StageP99MsPeak { get; init; } =
+        new Dictionary<string, double>(StringComparer.Ordinal);
+
     public static PrometheusAggregate FromSamples(IReadOnlyList<PrometheusSample> samples)
     {
         if (samples.Count == 0)
             return new PrometheusAggregate();
+        var stagePeak = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (var sample in samples)
+        {
+            foreach (var (stage, p99) in sample.TickStageP99Ms)
+                stagePeak[stage] = Math.Max(p99, stagePeak.GetValueOrDefault(stage));
+        }
+
         return new PrometheusAggregate
         {
             TickP50Ms = Percentile(samples.Select(s => s.TickP50), 0.5),
@@ -72,7 +86,9 @@ public sealed class PrometheusAggregate
             OutboundDropped = samples.Max(s => s.OutboundDropped),
             TickStageP99Ms = MergeStageP99(samples),
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
-            BytesOutPerOnlinePlayer = PerPlayerBytes(samples)
+            BytesOutPerOnlinePlayer = PerPlayerBytes(samples),
+            CommandsStageP99Ms = stagePeak.GetValueOrDefault("commands"),
+            StageP99MsPeak = stagePeak
         };
     }
 
@@ -139,8 +155,8 @@ public static class ReportWriter
 
         sb.AppendLine();
         sb.AppendLine("## Client RTT (action timing)");
-        sb.AppendLine($"| p50 | p95 | p99 | max |");
-        sb.AppendLine($"| ---: | ---: | ---: | ---: |");
+        sb.AppendLine("| p50 | p95 | p99 (command→fanout) | max |");
+        sb.AppendLine("| ---: | ---: | ---: | ---: |");
         sb.AppendLine($"| {r.ClientRttP50Ms:0.0} | {r.ClientRttP95Ms:0.0} | {r.ClientRttP99Ms:0.0} | {r.ClientRttMaxMs:0.0} |");
 
         if (r.Server != null)
@@ -153,6 +169,8 @@ public static class ReportWriter
                 $"| {r.Server.TickP50Ms:0.0} | {r.Server.TickP95Ms:0.0} | {r.Server.TickP99Ms:0.0} | {r.Server.TickMaxMs:0.0} | {r.Server.TickOverruns} | {r.Server.TicksSkipped} | {r.Server.CommandIngressQueuedMax} | {r.Server.InPpsAvg:0.0} | {r.Server.OutPpsAvg:0.0} |");
             if (r.Server.OutboundDropped > 0)
                 sb.AppendLine($"- Outbound queue drops: **{r.Server.OutboundDropped}**");
+            sb.AppendLine();
+            sb.AppendLine($"commands stage p99 (server): **{r.Server.CommandsStageP99Ms:0.0} ms**");
             if (r.Server.TickStageP99Ms.Count > 0)
             {
                 sb.AppendLine();

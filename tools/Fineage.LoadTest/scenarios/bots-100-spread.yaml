@@ -1,0 +1,5 @@
+name: bots-100-spread
+botCount: 100
+rampUpSeconds: 30
+durationSeconds: 90
+spawnLayout: spread

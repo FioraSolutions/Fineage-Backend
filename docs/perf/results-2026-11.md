@@ -82,7 +82,21 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 | 0 | 4.38 ms | 0.31 ms | 1.51 ms |
 | 4 | 4.37 ms | 0.23 ms | 1.45 ms |
 
-**Bot matrix (100 / 500 bots, command→fanout p99):** not re-run on this VM (no Docker for Postgres). Reproduce with `./scripts/run-load-test.sh` on an environment that runs `run-local-net.sh`.
+## CI load-test-smoke (100-bot acceptance)
+
+GitHub Actions job `load-test-smoke` (`build-and-test.yml`) runs on PRs: `RegionParallelStressTests` / parallel-world oracle, then `bots-100-spread` at `FINEAGE_ZONE_REGION_WORKERS` **0** and **4** via `scripts/ci-load-test-smoke.sh`. Set `CI_LOAD_TEST_SIEGE=1` on the job to add `bots-500-siege` (0 and 4) when the runner budget allows.
+
+| Workers | In world | Stuck | Tick p99 (ms) | `commands` stage p99 (ms) | Command→fanout p99 (client RTT, ms) |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | *(from `local-logs/ci-load-smoke/summary.json` on green CI)* | | | | |
+| 4 | *(same artifact)* | | | | |
+
+Local reproduction:
+
+```bash
+export FINEAGE_BUILD_CONFIGURATION=Release
+./scripts/ci-load-test-smoke.sh
+```
 
 **Regression:** `RegionParallelWorldTests`, `RegionParallelStressTests`, and `RegionSimulationDeterminismTests` pass with the parallel movement/AI stages.
 

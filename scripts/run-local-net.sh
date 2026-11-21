@@ -200,13 +200,14 @@ esac
 
 stop
 ensure_postgres
-dotnet build src/Fineage.Login -c Debug -v q -nologo >/dev/null
-dotnet build src/Fineage.Zone -c Debug -v q -nologo >/dev/null
+BUILD_CFG="${FINEAGE_BUILD_CONFIGURATION:-Debug}"
+dotnet build src/Fineage.Login -c "$BUILD_CFG" -v q -nologo >/dev/null
+dotnet build src/Fineage.Zone -c "$BUILD_CFG" -v q -nologo >/dev/null
 
-LOGIN_BIN="$ROOT/src/Fineage.Login/bin/Debug/net10.0/Fineage.Login"
-ZONE_BIN="$ROOT/src/Fineage.Zone/bin/Debug/net10.0/Fineage.Zone"
-LOGIN_DLL="$ROOT/src/Fineage.Login/bin/Debug/net10.0/Fineage.Login.dll"
-ZONE_DLL="$ROOT/src/Fineage.Zone/bin/Debug/net10.0/Fineage.Zone.dll"
+LOGIN_BIN="$ROOT/src/Fineage.Login/bin/$BUILD_CFG/net10.0/Fineage.Login"
+ZONE_BIN="$ROOT/src/Fineage.Zone/bin/$BUILD_CFG/net10.0/Fineage.Zone"
+LOGIN_DLL="$ROOT/src/Fineage.Login/bin/$BUILD_CFG/net10.0/Fineage.Login.dll"
+ZONE_DLL="$ROOT/src/Fineage.Zone/bin/$BUILD_CFG/net10.0/Fineage.Zone.dll"
 if [[ -x "$LOGIN_BIN" && -x "$ZONE_BIN" ]]; then
   LOGIN_CMD=("$LOGIN_BIN")
   ZONE_CMD=("$ZONE_BIN")
