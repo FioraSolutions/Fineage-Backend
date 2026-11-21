@@ -66,6 +66,7 @@
     <Content Include="..\..\data\boats.json" Link="data\boats.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\event-drops.json" Link="data\event-drops.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\cursed-weapons.json" Link="data\cursed-weapons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-minions.json" Link="data\npc-minions.json" CopyToOutputDirectory="PreserveNewest" />
