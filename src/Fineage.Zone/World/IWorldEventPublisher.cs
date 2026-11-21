@@ -233,6 +233,9 @@ interface IWorldEventPublisher
     /// <summary>Interlude PlaySound (quest jingles): sent to the listed players only.</summary>
     void FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs);
 
+    /// <summary>Interlude MonRaceInfo (0xDD) to derby track watchers.</summary>
+    void FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet);
+
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 
     void FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result);

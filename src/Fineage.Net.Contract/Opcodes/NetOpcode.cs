@@ -343,5 +343,8 @@ namespace Fineage.Net.Contract
         public const ushort Ride = 0x03C4;
         /// <summary>Zone → owner: pet / mount action gating (<c>PlayerActionStateNetMsg</c>).</summary>
         public const ushort PlayerActionState = 0x03C5;
+
+        /// <summary>Zone → derby watchers: Interlude <c>MonRaceInfo</c> (0xDD).</summary>
+        public const ushort MonRaceInfo = 0x03C6;
     }
 }

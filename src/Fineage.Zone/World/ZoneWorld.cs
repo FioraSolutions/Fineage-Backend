@@ -310,6 +310,16 @@ public sealed partial class ZoneWorld
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
+        _monsterRaceSettings = MonsterRaceSettings.Mobius;
+        _monsterRaceBroadcast = _monsterRaceSettings.ResolveBroadcastZones(Peace);
+        _monsterRace = new MonsterRace.MonsterRaceActor(
+            new MonsterRace.MonsterRaceBoard(
+                WallNow().ToUnixTimeMilliseconds(),
+                _game.Items,
+                Npcs.NpcCatalog.LoadDefault(),
+                () => _itemIds.Next(),
+                _monsterRaceSettings),
+            GlobalStream(RandomPurpose.MonsterRace));
         _mammon = new MammonActor(_sevenSigns, GlobalStream(RandomPurpose.Mammon));
         SpawnCastleDoors();
     }

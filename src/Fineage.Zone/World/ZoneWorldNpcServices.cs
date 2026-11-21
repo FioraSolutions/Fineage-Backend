@@ -73,6 +73,8 @@ public sealed partial class ZoneWorld
                 return ShowTerritoryStatus(session, player, npc);
             case NpcServiceIntent.Loto:
                 return ShowLoto(session, player, npc, Math.Max(0, reply.ServiceId));
+            case NpcServiceIntent.MonsterRace:
+                return MonsterRaceBypass(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.NoblesSelect:
                 SendNoblesPage(session, player, npc, player.Noble);
                 return null;
