@@ -155,6 +155,83 @@ Withdraw uses existing `WarehouseWithdrawList` / `WarehouseWithdrawRequest` with
 
 ---
 
+## Item augmentation (variation / life stones)
+
+**Server feature:** `AugmentationData`, `RequestRefine` / cancel / gem confirm.  
+**Fineage today:** `AugmentationRules` + `FINEAGE_ALLOW_AUGMENTATION` (default **off**); no Net or persistence.
+
+### C2S (`0xD0` extended — Mobius `ExClientPackets`)
+
+| Sub | Name | Payload (ints) |
+|-----|------|----------------|
+| `0x2A` | `RequestConfirmRefinerItem` | targetObjId, refinerObjId |
+| `0x2B` | `RequestConfirmGemStone` | targetObjId, refinerObjId, gemstoneObjId, gemCount |
+| `0x2C` | `RequestRefine` | same four as gem confirm |
+| `0x2E` | `RequestRefineCancel` | targetObjId |
+
+### S2C (`0xFE` extended)
+
+| Sub | Name | Fields |
+|-----|------|--------|
+| `0x50` | `ExShowVariationMakeWindow` | (empty) |
+| `0x51` | `ExShowVariationCancelWindow` | (empty) |
+| `0x52` | `ExPutItemResultForVariationMake` | itemObjId, itemId, `1` |
+| `0x53` | `ExPutIntensiveResultForVariationMake` | refinerObjId, itemId, refinerId, `1` |
+| `0x54` | `ExPutCommissionResultForVariationMake` | gemstoneObjId, refinerItemId, gemstoneCount, `1` |
+| `0x55` | `ExVariationResult` | option12, option34, `unk` (1 success / 0 fail) |
+| `0x56` | `ExPutItemResultForVariationCancel` | targetObjId, itemId, `0`/`7` |
+| `0x57` | `ExVariationCancelResult` | refundAdena |
+
+Inventory updates must carry augmentation options on weapon/armor (`option1` / `option2` in Mobius item instance).
+
+---
+
+## Cursed weapons (Zariche / Akamanah)
+
+**Server feature:** `CursedWeaponsManager`, `data/CursedWeapons.xml`.  
+**Fineage today:** PvP level-20 rules + Olympiad inventory gate; `CursedWeaponsState` + `FINEAGE_ALLOW_CURSED_WEAPONS` (default **off**).
+
+### `ExCursedWeaponList` — S2C `0xFE` `0x45`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `count` | int32 | Active blade count |
+| ×`count` | int32 | Cursed **item id** (8190 Zariche, 8689 Akamanah) |
+
+### `ExCursedWeaponLocation` — S2C `0xFE` `0x46`
+
+| Field | Type | Notes |
+|-------|------|--------|
+| `count` | int32 | Rows (Mobius writes `0` twice when empty) |
+| ×row | | `itemId`, `activated` (0/1), `x`, `y`, `z` |
+
+Related: `SystemMessage` broadcast on spawn, drop on death, and disappearance timers.
+
+---
+
+## Skill enchant (+)
+
+**Server feature:** `RequestExEnchantSkill`, `EnchantSkillTreeData`.  
+**Fineage today:** learned level in `KnownSkills` / character_skills (`AccountModels`); `SkillEnchantRules` + `FINEAGE_ALLOW_SKILL_ENCHANT` (default **off**).
+
+### C2S (`0xD0` extended)
+
+| Sub | Name | Payload |
+|-----|------|---------|
+| `0x06` | `RequestExEnchantSkillInfo` | skillId |
+| `0x07` | `RequestExEnchantSkill` | skillId, skillLevel |
+
+### S2C (`0xFE` extended)
+
+| Sub | Name | Fields |
+|-----|------|--------|
+| `0x17` | `ExEnchantSkillList` | count × (`skillId`, `nextLevel`, `sp`, `exp` int64) |
+| `0x18` | `ExEnchantSkillInfo` | skillId, level, spCost, xpCost int64, rate, reqCount × (type, id, count, unk) |
+
+On success Mobius updates skill level in DB and rebroadcasts `SkillList` / shortcuts.
+
+---
+
 ## Implementation queue (audit)
 
 | Order | Item | Server PR target | Client packets |
