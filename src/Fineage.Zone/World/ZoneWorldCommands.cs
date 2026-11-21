@@ -15,6 +15,7 @@ public sealed partial class ZoneWorld
     SimulationLog? _commandLog;
 
     internal int SubmissionWakeCountForTest => _ingress.WakeSignalCountForTest;
+    internal int CommandIngressQueuedDepth => _ingress.QueuedDepth;
 
     /// <summary>
     /// Submits <paramref name="command"/> for <paramref name="session"/>. It is applied in phase 0 of the next step at

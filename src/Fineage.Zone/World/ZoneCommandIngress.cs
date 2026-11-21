@@ -95,6 +95,16 @@ internal sealed class ZoneCommandIngress
     /// <summary>Pending wake signals for test hosts that submit without a pump.</summary>
     internal int WakeSignalCountForTest => _submitted.CurrentCount;
 
+    /// <summary>Commands waiting for the next simulation drain.</summary>
+    internal int QueuedDepth
+    {
+        get
+        {
+            lock (_lock)
+                return _queued.Count;
+        }
+    }
+
     /// <summary>
     /// Refuses further submissions and fails the ones still queued with <paramref name="reason"/>, so no handler
     /// waits on a simulation that stopped.

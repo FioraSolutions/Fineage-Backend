@@ -1,0 +1,5 @@
+name: bots-1000-town
+botCount: 1000
+rampUpSeconds: 90
+durationSeconds: 120
+spawnLayout: town
