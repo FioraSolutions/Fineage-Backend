@@ -5,6 +5,7 @@ using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Party;
+using Fineage.Zone.Punishment;
 using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
@@ -25,12 +26,7 @@ public sealed partial class ZoneWorld
     public bool IsInDimensionalRift(int x, int y, int z) =>
         IsInDimensionalRiftZone(x, y, z) && !IsInDimensionalRiftPeace(x, y, z);
 
-    public bool PlayerInDimensionalRift(int objectId)
-    {
-        if (_party.Of(objectId) is not { } party)
-            return false;
-        return RiftBoard.PartyInRift(party.PartyId);
-    }
+    public bool PlayerInDimensionalRift(int objectId) => PlayerZoneChecks.IsInDimensionalRift(this, objectId);
 
     void TickDimensionalRift(Fineage.Zone.Simulation.TickContext tick)
     {
@@ -274,6 +270,7 @@ public sealed partial class ZoneWorld
     {
         var site = _dimensionalRift.Room(type, room);
         Relocate(player, site.Teleport.X, site.Teleport.Y, site.Teleport.Z);
+        PlayerZoneChecks.RegisterRiftParticipation(this, player.ObjectId, inside: true);
     }
 
     void TeleportToWaitingRoom(ZoneEntity player)
@@ -282,6 +279,7 @@ public sealed partial class ZoneWorld
             DimensionalRiftSettings.WaitingRoomType,
             DimensionalRiftSettings.WaitingRoomId);
         Relocate(player, peace.Teleport.X, peace.Teleport.Y, peace.Teleport.Z);
+        PlayerZoneChecks.RegisterRiftParticipation(this, player.ObjectId, inside: false);
         MaybeExitRiftQuest(player);
     }
 
