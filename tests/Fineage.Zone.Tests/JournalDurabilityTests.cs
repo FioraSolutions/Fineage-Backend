@@ -16,6 +16,7 @@ public sealed class JournalDurabilityTests
         _ = await bench.EnterAsync(items: [new StoredItem(57, 50, -1)]);
         bench.World.FlushLedgerOnShutdown();
         Assert.Equal(0, journal.PendingFlushCount);
+        Assert.NotEmpty(journal.Flushed);
     }
 
     [Fact]
