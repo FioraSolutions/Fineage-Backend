@@ -19,9 +19,18 @@ public sealed partial class ZoneWorld
 
     internal EconomyLedger LedgerForTests => _ledger;
 
+    internal LedgerHoldings LedgerHoldingsForTests(LedgerAccount account)
+    {
+        lock (_gate)
+            return LedgerHoldingsOf(account);
+    }
+
     /// <summary>A move at the step's tick, numbered after the tick's earlier moves.</summary>
     LedgerMove BeginLedgerMove(LedgerTxKind kind, int causedBy, int reference)
     {
+        if (RegionBodyScope.Of(this) != null)
+            throw new InvalidOperationException(
+                $"{kind} from a region body: ledger moves are numbered on the scheduler thread; defer it with AtBarrier");
         long tick = _simulationClock.TickAt(NowUnixMs());
         return new LedgerMove(_ledger, () => _ledgerIds.Next(tick), kind, _simulationClock.WallUnixMs(), causedBy, reference);
     }
@@ -35,6 +44,13 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Castle, Container: LedgerContainer.Treasury } =>
             new LedgerHoldings().Add(ShopTrade.AdenaItemId, _siege.Board.Find(account.OwnerId)?.Treasury
                 ?? throw new InvalidOperationException($"{account} is not a castle")),
+        { Owner: LedgerOwnerKind.World, Container: LedgerContainer.Ground } =>
+            _byId.TryGetValue(account.OwnerId, out var ground) && ground.Kind == ZoneEntityKind.GroundItem
+                ? GroundHoldingsOf(ground)
+                : new LedgerHoldings(),
+        { Owner: LedgerOwnerKind.Pet, Container: LedgerContainer.Inventory } =>
+            HoldingsOf(SummonedPet(account.OwnerId)?.Inventory
+                ?? throw new InvalidOperationException($"{account} is not a summoned pet")),
         _ => throw new InvalidOperationException($"{account} has no state in the zone")
     };
 

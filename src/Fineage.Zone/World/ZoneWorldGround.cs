@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -114,7 +115,11 @@ public sealed partial class ZoneWorld
             if (g.GroundExpireAtMs > 0 && now >= g.GroundExpireAtMs)
             {
                 ZoneLog.Info($"ground expire object={id} item={g.GroundItemId}");
+                var move = BeginLedgerMove(LedgerTxKind.Expire, 0, id);
+                PostOffGround(move, g);
+                move.Post(LedgerAccount.Of(SystemAccount.Destroyed), g.GroundItemId, g.GroundCount);
                 RemoveGroundItem(g);
+                move.Commit(LedgerHoldingsOf);
             }
         }
     }
@@ -187,7 +192,11 @@ public sealed partial class ZoneWorld
 
         if (IsHerb(ground.GroundItemId))
         {
+            var move = BeginLedgerMove(LedgerTxKind.Pickup, player.ObjectId, ground.ObjectId);
+            PostOffGround(move, ground);
+            move.Post(LedgerAccount.Of(SystemAccount.Destroyed), ground.GroundItemId, ground.GroundCount);
             UseHerbOnPickup(session, player, ground);
+            move.Commit(LedgerHoldingsOf);
             return null;
         }
 

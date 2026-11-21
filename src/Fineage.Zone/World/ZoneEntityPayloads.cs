@@ -35,6 +35,7 @@ sealed class ZoneGroundItemPayload
     public int ItemId { get; set; }
     public int Count { get; set; } = 1;
     public bool Stackable { get; set; }
+    public int Enchant { get; set; }
     public int OwnerId { get; set; }
     public long ProtectUntilMs { get; set; }
     public long ExpireAtMs { get; set; }

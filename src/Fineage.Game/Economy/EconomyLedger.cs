@@ -101,6 +101,18 @@ public sealed class EconomyLedger : IEconomyLedger
         }
     }
 
+    /// <summary>
+    /// Accounts holding anything. Emptied accounts are forgotten, so short-lived ones (a ground stack) do not pile up.
+    /// </summary>
+    public int AccountCount
+    {
+        get
+        {
+            lock (_sync)
+                return _balances.Count;
+        }
+    }
+
     /// <summary>A copy of what <paramref name="account"/> holds by the journal.</summary>
     public LedgerHoldings HoldingsOf(LedgerAccount account)
     {
@@ -237,7 +249,12 @@ public sealed class EconomyLedger : IEconomyLedger
         }
 
         foreach (var (account, holdings) in working)
-            _balances[account] = holdings;
+        {
+            if (holdings.IsEmpty)
+                _balances.Remove(account);
+            else
+                _balances[account] = holdings;
+        }
         foreach (int instance in released)
             _owners.Remove(instance);
         foreach (var (instance, account) in claimed)

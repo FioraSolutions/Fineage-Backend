@@ -232,6 +232,13 @@ public sealed class NetPetTests
         Assert.Equal(30, pet.Inventory.CountOf(57));
         Assert.False(bench.World.ExistsForTest(ground));
         Assert.Contains(Lines(bench), l => l.Id == ZoneWorld.SysMsgPetPickedUpAdena);
+        var pickup = bench.Ledger.Entries.Single(e => e.Transaction.Kind == Fineage.Game.Economy.LedgerTxKind.Pickup).Transaction;
+        Assert.Equal(
+            [
+                (Fineage.Game.Economy.LedgerAccount.Ground(ground), -30L),
+                (Fineage.Game.Economy.LedgerAccount.Pet(CollarOf(owner)), 30L)
+            ],
+            pickup.Postings.Select(p => (p.Account, p.Amount)));
     }
 
     [Fact]

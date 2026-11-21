@@ -13,6 +13,8 @@ public sealed class LedgerHoldings
 
     public long CountOf(int itemId) => _counts.GetValueOrDefault(itemId);
 
+    public bool IsEmpty => _counts.Count == 0 && _instances.Count == 0;
+
     public LedgerHoldings Add(int itemId, long count)
     {
         if (count == 0)
