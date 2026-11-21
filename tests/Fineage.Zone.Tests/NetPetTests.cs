@@ -16,6 +16,7 @@ public sealed class NetPetTests
 {
     const int WolfCollar = 2375, WolfFood = 2515, Wolf = 12077, PetScroll = 6387;
     const int WindFlute = 3500, WindHatchling = 12311, StriderBugle = 4422, WindStrider = 12526;
+    const int BabyPanpipe = 6648, BabySpice = 7582, BabyBuffalo = 12780;
     const int HatchlingFood = 4038;
     const int Gremlin = 20001;
     const int X = 46045, Y = 41251, Z = -3440;
@@ -76,6 +77,24 @@ public sealed class NetPetTests
         Assert.Equal(35, owner.Inventory.Find(CollarOf(owner, WindFlute))!.EnchantLevel);
         var info = (SummonInfoNetMsg)bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSummonInfo)).Last()[1]!;
         Assert.False(info.Mountable);
+    }
+
+    [Fact]
+    public async Task Baby_pet_heals_the_owner_when_it_eats_baby_spice_while_well_fed()
+    {
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Baby", new StoredItem(BabyPanpipe, 1, -1), new StoredItem(BabySpice, 2, -1));
+        owner.Player.CurHp = owner.Player.MaxHp / 2;
+        var baby = await SummonAsync(bench, owner, BabyPanpipe);
+        Assert.Equal(BabyBuffalo, baby.NpcId);
+        int food = owner.Inventory.Items.Single(i => i.ItemId == BabySpice).ObjectId;
+        Assert.Null(await Order(bench, owner, SummonCommandKind.GiveItem, item: food, count: 2));
+        baby.Summon!.Pet!.Fed = baby.Summon.Pet.Template.At(baby.Level).MaxMeal;
+        int hpBefore = owner.Player.CurHp;
+        Assert.Null(await Order(bench, owner, SummonCommandKind.UseItem, item: baby.Summon.Pet.Inventory.Items.Single(i => i.ItemId == BabySpice).ObjectId));
+        Assert.True(owner.Player.CurHp > hpBefore);
+        Assert.Contains(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillUse)),
+            a => (int)((MagicSkillUseMsg)a[1]!).SkillId is 4717 or 4718);
     }
 
     [Fact]
