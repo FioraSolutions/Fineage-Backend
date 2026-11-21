@@ -2622,6 +2622,54 @@
    ]
   },
   {
+   "skillId": 370,
+   "name": "Clan Vitality",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.06
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 371,
+   "name": "Clan Spirituality",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.1,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 372,
+   "name": "Clan Essence",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.1,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 373,
    "name": "Clan Lifeblood",
    "levels": 3,
@@ -2633,6 +2681,22 @@
       1.03,
       1.05,
       1.06
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 374,
+   "name": "Clan Morale",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.07
      ]
     }
    ]
@@ -2745,6 +2809,88 @@
       1.0,
       2.0,
       3.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 382,
+   "name": "Clan Withstand-Attack",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 383,
+   "name": "Clan Shield Boost",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 384,
+   "name": "Clan Cyclonic Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      5.0,
+      10.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 385,
+   "name": "Clan Magmatic Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.9,
+      0.85
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.7
      ]
     }
    ]
@@ -3174,6 +3320,89 @@
    ]
   },
   {
+   "skillId": 3013,
+   "name": "Special Ability: Health",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25,
+      1.25,
+      1.25,
+      1.25,
+      1.25
+     ]
+    },
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      0.0,
+      4.0,
+      0.0,
+      4.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3014,
+   "name": "Special Ability: Mana Up",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.3,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3018,
+   "name": "Special Ability: Back Blow",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRatePos",
+     "op": "mul",
+     "values": [
+      1.71,
+      1.67,
+      1.63,
+      1.6,
+      1.56,
+      1.53
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3019,
+   "name": "Special Ability: Back Blow",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.47,
+      1.45,
+      1.42,
+      1.4,
+      1.37
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3023,
    "name": "Special Ability: Critical Damage",
    "levels": 6,
@@ -3208,6 +3437,166 @@
       474.82,
       539.9
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 3027,
+   "name": "Special Ability: Rsk. Focus",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      138.7,
+      130.9,
+      123.1,
+      115.4,
+      107.7,
+      99.9
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3028,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3029,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.44,
+      4.24,
+      4.04,
+      3.84,
+      3.63,
+      3.41
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3030,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3031,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3032,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3033,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3034,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
     }
    ]
   },
@@ -3453,6 +3842,31 @@
    ]
   },
   {
+   "skillId": 3048,
+   "name": "Special Ability: Conversion",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.6,
+      1.6,
+      1.6
+     ]
+    },
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      0.6,
+      0.6,
+      0.6
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3050,
    "name": "Special Ability: Focus",
    "levels": 2,
@@ -3477,6 +3891,23 @@
      "values": [
       67.3
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 3056,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.11,
+      1.11,
+      1.11
+     ],
+     "hpBelow": 60
     }
    ]
   },
@@ -3508,6 +3939,21 @@
      "values": [
       38.09,
       39.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3063,
+   "name": "Special Ability: Back Blow",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "critRatePos",
+     "op": "mul",
+     "values": [
+      1.37,
+      1.37
      ]
     }
    ]
@@ -3589,6 +4035,37 @@
    ]
   },
   {
+   "skillId": 3069,
+   "name": "Special Ability: Risky Evasion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      6.8
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3071,
+   "name": "Special Ability: Rsk. Focus",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      130.0,
+      130.0
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
    "skillId": 3072,
    "name": "Special Ability: Empower",
    "levels": 2,
@@ -3652,6 +4129,29 @@
       112.26,
       125.66,
       139.41
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3238,
+   "name": "Item Skill: Prayer",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15,
+      1.16,
+      1.17,
+      1.18,
+      1.19
      ]
     }
    ]
@@ -3744,6 +4244,29 @@
       1.13,
       1.14,
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3246,
+   "name": "Item Skill: Heal Empower",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "add",
+     "values": [
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0,
+      17.0,
+      18.0,
+      19.0
      ]
     }
    ]
@@ -3855,6 +4378,173 @@
    ]
   },
   {
+   "skillId": 3252,
+   "name": "Item Skill: Kiss of Eva",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3253,
+   "name": "Item Skill: Acrobatics",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "fall",
+     "op": "sub",
+     "values": [
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3254,
+   "name": "Item Skill: Iron Body",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "damageZoneVuln",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.9,
+      0.85,
+      0.8,
+      0.75,
+      0.7,
+      0.65,
+      0.6,
+      0.55,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3255,
+   "name": "Item Skill: Skill Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3256,
+   "name": "Item Skill: Spell Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3257,
+   "name": "Item Skill: Music Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "danceMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3258,
+   "name": "Item Skill: Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    },
+    {
+     "stat": "danceMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3259,
+   "name": "Item Skill: Reflect Damage",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3500,
    "name": "Wooden Set",
    "levels": 1,
@@ -3894,6 +4584,20 @@
    }
   },
   {
+   "skillId": 3503,
+   "name": "Reinforced Leather Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      80.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3504,
    "name": "Knowledge Set",
    "levels": 1,
@@ -3910,6 +4614,20 @@
      "op": "mul",
      "values": [
       0.95
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3505,
+   "name": "Manticore Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      91.81
      ]
     }
    ]
@@ -4006,6 +4724,20 @@
    ]
   },
   {
+   "skillId": 3513,
+   "name": "Demon's Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "sub",
+     "values": [
+      269.65
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3514,
    "name": "Theca Leather Light Armor Set",
    "levels": 1,
@@ -4034,6 +4766,20 @@
    ]
   },
   {
+   "skillId": 3516,
+   "name": "Full Plate Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      269.65
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3517,
    "name": "Divine Set",
    "levels": 1,
@@ -4057,6 +4803,20 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3519,
+   "name": "Avadon Breastplate Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      294.49
      ]
     }
    ]
@@ -4155,6 +4915,27 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3525,
+   "name": "Doom Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      320.0
+     ]
+    },
+    {
+     "stat": "breath",
+     "op": "add",
+     "values": [
+      200.0
      ]
     }
    ]
@@ -4565,6 +5346,48 @@
    ]
   },
   {
+   "skillId": 3543,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      126.13
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3544,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3545,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      198.21
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3546,
    "name": "Equipped with Shield",
    "levels": 1,
@@ -4574,6 +5397,91 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3547,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3548,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.24
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3549,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.24
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3550,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.18
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3551,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3552,
+   "name": "Special Ability: PvP Damage",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      0.0,
+      4.0
      ]
     }
    ]
@@ -4968,6 +5876,20 @@
    ]
   },
   {
+   "skillId": 3568,
+   "name": "Special Ability: HP Drain",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3569,
    "name": "Special Ability: HP Regeneration",
    "levels": 4,
@@ -4980,6 +5902,34 @@
       4.92,
       5.15,
       5.18
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3570,
+   "name": "Special Ability: Robust Health",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.3
      ]
     }
    ]
@@ -5047,6 +5997,90 @@
       1.95,
       2.04,
       2.05
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3578,
+   "name": "Special Ability: Infinity Blade",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    },
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    },
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      9.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3580,
+   "name": "Special Ability: Infinity Axe",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    },
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.39
+     ]
+    },
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      9.0
      ]
     }
    ]
@@ -5157,6 +6191,27 @@
    ]
   },
   {
+   "skillId": 3593,
+   "name": "Special Ability: Infinity Bow",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3595,
    "name": "Special Ability: Infinity Scepter",
    "levels": 1,
@@ -5194,6 +6249,20 @@
      "op": "add",
      "values": [
       0.51
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3599,
+   "name": "Polearm Multi-attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      4.0
      ]
     }
    ]
@@ -5549,6 +6618,69 @@
      "op": "mul",
      "values": [
       1.05
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3608,
+   "name": "Apella Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      232.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3609,
+   "name": "Apella Light Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      195.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3610,
+   "name": "Apella Robe Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      177.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
      ]
     }
    ]
@@ -6130,6 +7262,34 @@
    }
   },
   {
+   "skillId": 4007,
+   "name": "Immortal Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4008,
+   "name": "Insect Skin",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "sub",
+     "values": [
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4021,
    "name": "Queen Ant",
    "levels": 1,
@@ -6317,6 +7477,20 @@
    ]
   },
   {
+   "skillId": 4095,
+   "name": "Damage Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4116,
    "name": "Resist M. Atk.",
    "levels": 10,
@@ -6386,6 +7560,34 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4226,
+   "name": "Ban Heal",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4233,
+   "name": "Vampiric Attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      15.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4246,
@@ -6758,6 +7960,74 @@
      100.0
     ]
    }
+  },
+  {
+   "skillId": 4333,
+   "name": "Resist Dark Attack",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4335,
+   "name": "Sacred Attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4336,
+   "name": "Dark Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "sub",
+     "values": [
+      11.0,
+      25.0,
+      43.0,
+      67.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4337,
+   "name": "Resist Sacred Attack",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4376,
@@ -7781,6 +9051,136 @@
    }
   },
   {
+   "skillId": 4418,
+   "name": "Fire Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "firePower",
+     "op": "add",
+     "values": [
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4419,
+   "name": "Water Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4420,
+   "name": "Wind Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4421,
+   "name": "Earth Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4422,
+   "name": "Dark Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4423,
+   "name": "Sacred Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4424,
    "name": "Resist Hand-to-hand Weapons",
    "levels": 5,
@@ -7839,6 +9239,114 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4429,
+   "name": "Greater Resist Fire Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4430,
+   "name": "Greater Resist Water Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4431,
+   "name": "Greater Resist Wind Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4432,
+   "name": "Greater Resist Earth Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4433,
+   "name": "Greater Resist Sacred Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4434,
+   "name": "Greater Resist Dark Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4435,
@@ -8411,6 +9919,34 @@
       1.24,
       1.27,
       1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5074,
+   "name": "The Victor of War",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5075,
+   "name": "The Vanquished of War",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      0.9
      ]
     }
    ]
