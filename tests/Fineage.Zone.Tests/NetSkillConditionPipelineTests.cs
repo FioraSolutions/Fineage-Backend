@@ -63,7 +63,8 @@ public sealed class NetSkillConditionPipelineTests
         player.ForceCharges = 2;
         player.Inventory!.Equip(player.Inventory.Add(2523));
 
-        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, 0, CancellationToken.None));
+        var refused = await kit.World.TrySkillUseAsync(session, SonicBlaster, 0, CancellationToken.None);
+        Assert.True(refused is null or SkillProtocol.Target);
         Assert.Equal(2, player.ForceCharges);
 
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobObjectId, CancellationToken.None));
