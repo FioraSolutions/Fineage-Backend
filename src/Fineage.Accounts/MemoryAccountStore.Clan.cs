@@ -399,6 +399,33 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls()
+    {
+        lock (_gate)
+            return (_data.SiegableClanHalls ?? []).Select(CloneSiegableHall).ToArray();
+    }
+
+    public bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls)
+    {
+        ArgumentNullException.ThrowIfNull(halls);
+        lock (_gate)
+        {
+            _data.SiegableClanHalls = halls.Select(CloneSiegableHall).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    static SiegableClanHallSave CloneSiegableHall(SiegableClanHallSave hall) => new(
+        hall.Id,
+        hall.OwnerClanId,
+        hall.NextSiegeUnixMs,
+        hall.RegistrationClosed,
+        hall.InProgress,
+        hall.EndsUnixMs,
+        hall.Attackers?.ToArray(),
+        hall.PendingWinnerClanId);
+
     static ClanHallSave CloneHall(ClanHallSave hall) => new()
     {
         Id = hall.Id,

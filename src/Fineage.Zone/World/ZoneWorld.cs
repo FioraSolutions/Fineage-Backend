@@ -15,6 +15,7 @@ using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
+using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
@@ -51,6 +52,7 @@ public sealed partial class ZoneWorld
     readonly DungeonAccess _dungeonAccess;
     readonly SiegeSettings _siegeSettings;
     readonly SiegeActor _siege;
+    readonly ChSiegeActor _chSiege;
     readonly NpcHtmlCatalog _html;
     readonly BypassRegistry _bypasses;
     readonly OlympiadActor _olympiad;
@@ -240,6 +242,7 @@ public sealed partial class ZoneWorld
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeActor(new SiegeBoard(NowUnixMs(), _siegeSettings));
+        _chSiege = new ChSiegeActor(new ChSiegeBoard(SiegableHallCatalog.Default.All), ChSiegeSettings.Default);
         var bossPolicy = new MapFilteredBossSpawnPolicy(includeEnabledMaps);
         _bosses = new BossActor(
             bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds(), spawnPolicy: bossPolicy),
@@ -298,6 +301,8 @@ public sealed partial class ZoneWorld
         BootstrapQuestNpcs();
         LoadClans();
         LoadSiege();
+        LoadChSiege();
+        SyncClanHallOwnership();
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));

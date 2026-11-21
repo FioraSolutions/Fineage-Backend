@@ -8,6 +8,7 @@ data/*
 !data/clan-halls.json
 !data/castles.json
 !data/merc_tickets.json
+!data/siegable-clan-halls.json
 !data/manor.json
 !data/fishing.json
 !data/recipes.json

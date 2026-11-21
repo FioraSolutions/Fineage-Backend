@@ -45,6 +45,9 @@ public sealed partial class ZoneWorld
         AnnounceClosed(now);
         bool joining = request.Joining == 1;
         bool attacker = request.Attacker == 1;
+        if (_chSiege.Board.IsSiegableHall(request.CastleId))
+            return Task.FromResult(TryChSiegeRegister(session, request, ClanInfoFor(session.ObjectId), now));
+
         var clan = ClanInfoFor(session.ObjectId);
         error = joining
             ? _siege.Board.Register(new SiegeRequester(session.ObjectId), clan, request.CastleId, attacker, now)
@@ -107,7 +110,13 @@ public sealed partial class ZoneWorld
         string? error;
         long now = NowUnixMs();
         AnnounceClosed(now);
-        if (_siege.Board.List(castleId, now) == null)
+        if (_chSiege.Board.IsSiegableHall(castleId))
+        {
+            error = _chSiege.Board.Find(castleId) == null ? SiegeProtocol.Castle : null;
+            if (error == null)
+                QueueChSiegeInfo(session, castleId, now);
+        }
+        else if (_siege.Board.List(castleId, now) == null)
             error = SiegeProtocol.Castle;
         else
         {
@@ -125,7 +134,9 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
-        string? error = CaptureLocked(clanId, castleId, NowUnixMs(), session);
+        string? error = _chSiege.Board.IsSiegableHall(castleId)
+            ? CaptureClanHall(clanId, castleId, NowUnixMs())
+            : CaptureLocked(clanId, castleId, NowUnixMs(), session);
 
         if (error != null)
             return Task.FromResult<string?>(error);

@@ -1,0 +1,66 @@
+{
+ "reference": "Mobius CT_0 Interlude siegable_clanhall.sql",
+ "halls": [
+  {
+   "id": 21,
+   "name": "Fortress of Resistance",
+   "location": "Dion",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0,
+   "allowStartWithoutAttackers": true
+  },
+  {
+   "id": 34,
+   "name": "Devastated Castle",
+   "location": "Aden",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0
+  },
+  {
+   "id": 35,
+   "name": "Bandit StrongHold",
+   "location": "Oren",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0
+  },
+  {
+   "id": 62,
+   "name": "Rainbow Springs",
+   "location": "Goddard",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0
+  },
+  {
+   "id": 63,
+   "name": "Beast Farm",
+   "location": "Rune",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0
+  },
+  {
+   "id": 64,
+   "name": "Fortress of the Dead",
+   "location": "Rune",
+   "description": "Contestable Clan Hall",
+   "siegeLengthMs": 3600000,
+   "schedulePeriodDays": 14,
+   "scheduleHour": 12,
+   "scheduleMinute": 0
+  }
+ ]
+}

@@ -18,6 +18,7 @@ public sealed partial class MemoryAccountStore
         public int NextCrestId { get; set; } = 1;
         public List<CrestDto> Crests { get; set; } = [];
         public List<ClanHallSave> ClanHalls { get; set; } = [];
+        public List<SiegableClanHallSave> SiegableClanHalls { get; set; } = [];
         public List<ManorProductionSave> ManorProduction { get; set; } = [];
         public List<ManorProcureSave> ManorProcure { get; set; } = [];
         public List<StoredPet> Pets { get; set; } = [];

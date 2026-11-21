@@ -195,6 +195,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
         ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
         ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);
+        ticks.AddWorldStage(ChSiegeActor.StageName, TickChSieges, slow);
         ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);
         ticks.AddWorldStage("fishing", tick => TickFishing(tick.NowUnixMs), slow);
         ticks.AddWorldStage(LotteryActor.StageName, tick => AnnounceLottery(_lottery.Step(tick)), slow);
