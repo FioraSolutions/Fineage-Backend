@@ -122,6 +122,31 @@ public sealed partial class MemoryAccountStore : IAccountStore
         }
     }
 
+    /// <summary>Raises in-memory allocation counters to match durable SQL (<c>store_meta</c> / max ids).</summary>
+    public void SyncAllocationCounters(int nextCharacterId, int nextClanId, long nextItemObjectId)
+    {
+        lock (_gate)
+        {
+            if (nextCharacterId > _data.NextCharacterId)
+                _data.NextCharacterId = nextCharacterId;
+            if (nextClanId > _data.NextClanId)
+                _data.NextClanId = nextClanId;
+            int itemNext = nextItemObjectId < PlayerInventory.FirstObjectId
+                ? PlayerInventory.FirstObjectId
+                : nextItemObjectId > int.MaxValue
+                    ? int.MaxValue
+                    : (int)nextItemObjectId;
+            if (itemNext > _data.NextItemObjectId)
+                _data.NextItemObjectId = itemNext;
+        }
+    }
+
+    public (int NextCharacterId, int NextClanId, int NextItemObjectId) AllocationCounters()
+    {
+        lock (_gate)
+            return (_data.NextCharacterId, _data.NextClanId, _data.NextItemObjectId);
+    }
+
     static CharacterDto ToDto(CharacterRecord character) =>
         new()
         {

@@ -365,6 +365,275 @@ public sealed class SiegeZones
     public static SiegeZones LoadDefault() => new(PeaceZones.LoadFile(FileName, "siege"));
 }
 
+/// <summary>Mobius <c>SwampZone</c> from <c>data/swamp-zones.json</c> (<c>zones/swamp.xml</c>).</summary>
+public sealed class SwampZones
+{
+    public const string FileName = "swamp-zones.json";
+    public static readonly SwampZones Empty = new([]);
+
+    readonly SwampZoneDef[] _zones;
+
+    public SwampZones(SwampZoneDef[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    /// <summary>First swamp polygon over (x,y,z); Mobius <c>getZone(playable, SwampZone.class)</c>.</summary>
+    public SwampZoneDef? At(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (EnvironmentZoneHit.Contains(zone, x, y, z))
+                return zone;
+        }
+        return null;
+    }
+
+    public static SwampZones LoadDefault() => new(EnvironmentZoneLoader.LoadSwampFile());
+}
+
+public sealed class SwampZoneDef
+{
+    public string Name { get; set; } = "";
+    public int MinZ { get; set; }
+    public int MaxZ { get; set; }
+    public (int X, int Y)[] Nodes { get; set; } = [];
+    public int MinX { get; set; }
+    public int MaxX { get; set; }
+    public int MinY { get; set; }
+    public int MaxY { get; set; }
+    public double MoveBonus { get; set; } = 0.5;
+}
+
+/// <summary>Mobius <c>DamageZone</c> from <c>data/damage-zones.json</c>.</summary>
+public sealed class DamageZones
+{
+    public const string FileName = "damage-zones.json";
+    public static readonly DamageZones Empty = new([]);
+
+    readonly DamageZoneDef[] _zones;
+
+    public DamageZones(DamageZoneDef[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public DamageZoneDef? At(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (!zone.Enabled)
+                continue;
+            if (zone.CastleId > 0)
+                continue;
+            if (EnvironmentZoneHit.Contains(zone, x, y, z))
+                return zone;
+        }
+        return null;
+    }
+
+    public static DamageZones LoadDefault() => new(EnvironmentZoneLoader.LoadDamageFile());
+}
+
+public sealed class DamageZoneDef
+{
+    public string Name { get; set; } = "";
+    public int MinZ { get; set; }
+    public int MaxZ { get; set; }
+    public (int X, int Y)[] Nodes { get; set; } = [];
+    public int MinX { get; set; }
+    public int MaxX { get; set; }
+    public int MinY { get; set; }
+    public int MaxY { get; set; }
+    public bool Enabled { get; set; } = true;
+    public int HpPerTick { get; set; } = 200;
+    public int MpPerTick { get; set; }
+    public int ReuseMs { get; set; } = 5000;
+    public int InitialDelayMs { get; set; } = 10;
+    public int CastleId { get; set; }
+}
+
+/// <summary>Mobius <c>NoLandingZone</c> from <c>data/no-landing-zones.json</c>.</summary>
+public sealed class NoLandingZones
+{
+    public const string FileName = "no-landing-zones.json";
+    public static readonly NoLandingZones Empty = new([]);
+
+    readonly NoLandingZoneDef[] _zones;
+
+    public NoLandingZones(NoLandingZoneDef[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public NoLandingZoneDef? At(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (EnvironmentZoneHit.Contains(zone, x, y, z))
+                return zone;
+        }
+        return null;
+    }
+
+    public static NoLandingZones LoadDefault() => new(EnvironmentZoneLoader.LoadNoLandingFile());
+}
+
+public sealed class NoLandingZoneDef
+{
+    public string Name { get; set; } = "";
+    public int MinZ { get; set; }
+    public int MaxZ { get; set; }
+    public (int X, int Y)[] Nodes { get; set; } = [];
+    public int MinX { get; set; }
+    public int MaxX { get; set; }
+    public int MinY { get; set; }
+    public int MaxY { get; set; }
+    public int DismountDelaySec { get; set; } = 5;
+}
+
+static class EnvironmentZoneHit
+{
+    internal static bool Contains(SwampZoneDef zone, int x, int y, int z) =>
+        PeaceZones.Hit([ToPeace(zone)], x, y, z);
+
+    internal static bool Contains(DamageZoneDef zone, int x, int y, int z) =>
+        PeaceZones.Hit([ToPeace(zone)], x, y, z);
+
+    internal static bool Contains(NoLandingZoneDef zone, int x, int y, int z) =>
+        PeaceZones.Hit([ToPeace(zone)], x, y, z);
+
+    static PeaceZone ToPeace(SwampZoneDef z) => new()
+    {
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
+    };
+
+    static PeaceZone ToPeace(DamageZoneDef z) => new()
+    {
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
+    };
+
+    static PeaceZone ToPeace(NoLandingZoneDef z) => new()
+    {
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
+    };
+}
+
+static class EnvironmentZoneLoader
+{
+    internal static SwampZoneDef[] LoadSwampFile() => LoadNPoly<SwampZoneDef>(SwampZones.FileName, "swamp", (r, z) =>
+    {
+        if (r.TryGetProperty("moveBonus", out var b))
+            z.MoveBonus = b.GetDouble();
+    });
+
+    internal static DamageZoneDef[] LoadDamageFile() => LoadNPoly<DamageZoneDef>(DamageZones.FileName, "damage", (r, z) =>
+    {
+        if (r.TryGetProperty("enabled", out var en))
+            z.Enabled = en.GetBoolean();
+        if (r.TryGetProperty("hpPerTick", out var hp))
+            z.HpPerTick = hp.GetInt32();
+        if (r.TryGetProperty("mpPerTick", out var mp))
+            z.MpPerTick = mp.GetInt32();
+        if (r.TryGetProperty("reuseMs", out var reuse))
+            z.ReuseMs = reuse.GetInt32();
+        if (r.TryGetProperty("initialDelayMs", out var delay))
+            z.InitialDelayMs = delay.GetInt32();
+        if (r.TryGetProperty("castleId", out var cid))
+            z.CastleId = cid.GetInt32();
+    });
+
+    internal static NoLandingZoneDef[] LoadNoLandingFile() => LoadNPoly<NoLandingZoneDef>(NoLandingZones.FileName, "no-landing", (r, z) =>
+    {
+        if (r.TryGetProperty("dismountDelaySec", out var d))
+            z.DismountDelaySec = d.GetInt32();
+    });
+
+    static T[] LoadNPoly<T>(string fileName, string logTag, Action<JsonElement, T> extra) where T : new()
+    {
+        string? path = MoveZoneFiles.Find(fileName);
+        if (path == null)
+        {
+            ZoneLog.Info($"[{logTag}] data/{fileName} not found");
+            return [];
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(path));
+            var list = new List<T>();
+            foreach (var r in doc.RootElement.EnumerateArray())
+            {
+                var nodes = r.GetProperty("nodes").EnumerateArray()
+                    .Select(n => (n[0].GetInt32(), n[1].GetInt32())).ToArray();
+                if (nodes.Length < 3)
+                    continue;
+                var zone = new T();
+                if (zone is SwampZoneDef sw)
+                {
+                    sw.Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "";
+                    sw.MinZ = r.GetProperty("minZ").GetInt32();
+                    sw.MaxZ = r.GetProperty("maxZ").GetInt32();
+                    sw.Nodes = nodes;
+                    sw.MinX = nodes.Min(n => n.Item1);
+                    sw.MaxX = nodes.Max(n => n.Item1);
+                    sw.MinY = nodes.Min(n => n.Item2);
+                    sw.MaxY = nodes.Max(n => n.Item2);
+                }
+                else if (zone is DamageZoneDef dmg)
+                {
+                    dmg.Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "";
+                    dmg.MinZ = r.GetProperty("minZ").GetInt32();
+                    dmg.MaxZ = r.GetProperty("maxZ").GetInt32();
+                    dmg.Nodes = nodes;
+                    dmg.MinX = nodes.Min(n => n.Item1);
+                    dmg.MaxX = nodes.Max(n => n.Item1);
+                    dmg.MinY = nodes.Min(n => n.Item2);
+                    dmg.MaxY = nodes.Max(n => n.Item2);
+                }
+                else if (zone is NoLandingZoneDef nl)
+                {
+                    nl.Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "";
+                    nl.MinZ = r.GetProperty("minZ").GetInt32();
+                    nl.MaxZ = r.GetProperty("maxZ").GetInt32();
+                    nl.Nodes = nodes;
+                    nl.MinX = nodes.Min(n => n.Item1);
+                    nl.MaxX = nodes.Max(n => n.Item1);
+                    nl.MinY = nodes.Min(n => n.Item2);
+                    nl.MaxY = nodes.Max(n => n.Item2);
+                }
+                extra(r, zone);
+                list.Add(zone);
+            }
+            ZoneLog.Info($"[{logTag}] loaded {list.Count} zone(s) from {path}");
+            return [.. list];
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Info($"[{logTag}] failed to load {path}: {ex.Message}");
+            return [];
+        }
+    }
+}
+
 static class MoveZoneFiles
 {
     internal static string? Find(string fileName)

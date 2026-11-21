@@ -43,7 +43,7 @@ public sealed partial class LoginService
         if (!_allowedRaces.Contains(template.Race))
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
 
-        var inventory = _game.CreateStarterInventory(classId);
+        var inventory = _game.CreateStarterInventory(classId, _store.NextItemObjectId);
         long adena = Math.Max(0, _create.StartingAdena);
         if (adena > 0)
             inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);

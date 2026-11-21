@@ -181,8 +181,8 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Servitor | ✅ | — | `Servitor.java` | `ZoneWorldSummons` | — |
 | Cubics | 🟡 | Offensive cubic uses M.Atk | `Cubic.java` | TODO in `ZoneWorldCubics` | S |
 | Pet hunger/exp/res | ✅ | — | `Pet.java` | `ZoneWorldPets` | — |
-| **Baby pet buffs** | ❌ | Auto-cast buffs when fed | `BabyPet` AI | Templates in `npcs.json`, no logic | M |
-| **Pet evolution** | ❌ | Wolf → strider etc. | `pet` data evolve | Not in `ZoneWorldPets` | M |
+| **Baby pet buffs** | ✅ | Auto-cast buffs when fed | `BabyPet` AI | `ZoneWorldPets` + skill-effects | — |
+| **Pet evolution** | ✅ | Wolf → strider, multisell hatchling | `PetManager.doEvolve` | `ZoneWorldPets.Evolve` + bypass | — |
 | Wyvern / strider | ✅ | — | `Ride` | `ZoneWorldMounts` | — |
 
 ### Zones & environment
@@ -191,9 +191,9 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 |--------|--------|-----|--------|---------|------|
 | Peace / PvP arena | ✅ | — | `zones/peace.xml`, arena | `PeaceZones`, `PvpZones` | — |
 | Water (swim speed) | ✅ | — | `WaterZone` | `WaterZones` | — |
-| **Swamp** (speed) | ❌ | `SwampZone` | `mobius-data/zones/swamp.xml` | Not loaded | S |
-| **Damage** zones | ❌ | Periodic damage | `DamageZone` | Not loaded | M |
-| **No landing** (wyvern) | ❌ | Fly restriction | `NoLandingZone` | Mount gates partial only | S |
+| **Swamp** (speed) | ✅ | `SwampZone` move_bonus | `mobius-data/zones/swamp.xml` | `SwampZones` + speed fold | — |
+| **Damage** zones | ✅ | Periodic HP/MP | `DamageZone` | `DamageZones` + sim tick | — |
+| **No landing** (wyvern) | ✅ | Wyvern dismount timer | `NoLandingZone` | `NoLandingZones` + mount hook | — |
 | **Mother tree** (elven regen) | ❌ | HP/MP bonus zone | `MotherTreeZone` | Not loaded | S |
 | Day/night spawns | ❌ | Swap spawn groups at game hour | `DayNightSpawnManager.java` | Not present | M |
 
@@ -207,6 +207,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Boss points ranking | ❌ | RB ranking NPC | `RaidBossPointsManager` | Not present | S |
 | Boats | ❌ | Gludin↔Talking Island etc. | `BoatManager.java` | Not present | M |
 | Walking NPCs | ❌ | Patrolling merchants | `WalkingManager.java` | Not present | S |
+| **Monster Derby Track** | ❌ | Race cycle, bets, payouts | `MonsterRaceManager.java`, Race Manager NPC | Spawn JSON only (`others_monster_race_track_npcs.json`) | M |
 
 ### Chat & restrictions
 
@@ -256,7 +257,7 @@ Fineage adds structured ledgers (`ConsumeLedger`, `GrantLedger`, …) beyond Mob
 
 ### Wire / protocol
 
-Documented in `docs/net-protocol.md`. Residual gaps: `MagicSkillCanceled`, full `RelationChanged` polish, auto-shot slot highlight (`combat-parity`).
+Documented in `docs/net-protocol.md`. **Blocked-feature wire layouts** (boats, derby): `docs/client-packet-contracts.md`. Residual gaps: `MagicSkillCanceled`, full `RelationChanged` polish, auto-shot slot highlight (`combat-parity`).
 
 ---
 
@@ -333,10 +334,11 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
-| 13 | Baby pet / evolution | #726 | done — BabyPet heal after spice; collar npc swap (Q421) | No |
+| 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
 | 14 | Guard / town AI | — | partial (base guard AI) | No |
-| 15 | Zone types (swamp/damage/NL) | — | pending | No |
-| 16 | Boats + walking NPCs | — | pending | No |
+| 15 | Zone types (swamp/damage/NL) | (this PR) | done — imported JSON + movement/sim | No |
+| 16 | Boats + walking NPCs | — | **next** | Yes — `docs/client-packet-contracts.md` |
+| 16a | Monster Derby Track | — | queued after #16 | Yes — `MonRaceInfo` `0xDD` |
 | 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
 | 18 | GM / punishment tooling | — | partial | No |
 | 19 | Compound skill conditions | — | pending | No |

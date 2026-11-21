@@ -11,11 +11,22 @@ public sealed class DayNightSpawnTests
     const int DayMobId = 9_000_778;
 
     [Fact]
+    public void FromLocalMidnight_uses_anchor_offset_not_process_timezone()
+    {
+        var utcMidnight = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        long refMs = utcMidnight.ToUnixTimeMilliseconds();
+        var gameTime = ZoneGameTime.FromLocalMidnight(utcMidnight);
+        long dayMs = refMs + ZoneGameTime.MillisPerIgDay * 10 / 24;
+        Assert.False(gameTime.IsNight(dayMs));
+        Assert.True(gameTime.IsNight(refMs + ZoneGameTime.MillisPerIgDay * 2 / 24));
+    }
+
+    [Fact]
     public void Night_only_spawn_appears_after_ig_night_begins()
     {
         var refTime = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        var gameTime = ZoneGameTime.FromLocalMidnight(refTime);
         long refMs = refTime.ToUnixTimeMilliseconds();
+        var gameTime = new ZoneGameTime(refMs);
         // IG hour 2 = night; IG hour 10 = day (Mobius: night when hour &lt; 6).
         long nightMs = refMs + ZoneGameTime.MillisPerIgDay * 2 / 24;
         long dayMs = refMs + ZoneGameTime.MillisPerIgDay * 10 / 24;

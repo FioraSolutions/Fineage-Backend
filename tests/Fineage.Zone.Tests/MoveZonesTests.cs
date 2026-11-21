@@ -48,5 +48,8 @@ public sealed class MoveZonesTests
     {
         Assert.True(DoorTable.LoadDefault().Count > 500);
         Assert.True(WaterZones.LoadDefault().Count > 400);
+        Assert.True(SwampZones.LoadDefault().Count >= 1);
+        Assert.True(DamageZones.LoadDefault().Count >= 1);
+        Assert.True(NoLandingZones.LoadDefault().Count >= 1);
     }
 }
