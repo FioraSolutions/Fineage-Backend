@@ -94,6 +94,21 @@ public sealed partial class SiegeBoard
                 if (ratio is 2 or 3 or 5)
                     castle.DoorUpgrades[doorId] = ratio;
             }
+            castle.HiredGuards.Clear();
+            foreach (var row in saved.HiredGuards ?? [])
+            {
+                if (row.NpcId > 0)
+                    castle.HiredGuards.Add(new HiredSiegeGuard
+                    {
+                        ItemId = row.ItemId,
+                        NpcId = row.NpcId,
+                        X = row.X,
+                        Y = row.Y,
+                        Z = row.Z,
+                        Heading = row.Heading,
+                        GroundObjectId = row.GroundObjectId
+                    });
+            }
             castle.Registrations.Clear();
         }
 
@@ -140,7 +155,10 @@ public sealed partial class SiegeBoard
         castle.InProgress,
         castle.EndsUnixMs,
         castle.Treasury,
-        castle.DoorUpgrades.Count > 0 ? new Dictionary<int, int>(castle.DoorUpgrades) : null)).ToList();
+        castle.DoorUpgrades.Count > 0 ? new Dictionary<int, int>(castle.DoorUpgrades) : null,
+        castle.HiredGuards.Count > 0
+            ? castle.HiredGuards.Select(g => new HiredSiegeGuardSave(g.ItemId, g.NpcId, g.X, g.Y, g.Z, g.Heading, g.GroundObjectId)).ToList()
+            : null)).ToList();
 
     public List<SiegeClanSave> ExportClans()
     {

@@ -133,7 +133,10 @@ public sealed partial class MemoryAccountStore
                 castle.InProgress,
                 castle.EndsUnixMs,
                 castle.Treasury,
-                castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null)).ToArray();
+                castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null,
+                castle.HiredGuards is { Count: > 0 } guards
+                    ? guards.Select(g => new HiredSiegeGuardSave(g.ItemId, g.NpcId, g.X, g.Y, g.Z, g.Heading, g.GroundObjectId)).ToArray()
+                    : null)).ToArray();
         }
     }
 
@@ -245,7 +248,19 @@ public sealed partial class MemoryAccountStore
                 InProgress = castle.InProgress,
                 EndsUnixMs = castle.EndsUnixMs,
                 Treasury = castle.Treasury,
-                DoorUpgrades = castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null
+                DoorUpgrades = castle.DoorUpgrades is { Count: > 0 } doors ? new Dictionary<int, int>(doors) : null,
+                HiredGuards = castle.HiredGuards is { Count: > 0 } guards
+                    ? guards.Select(g => new HiredSiegeGuardDto
+                    {
+                        ItemId = g.ItemId,
+                        NpcId = g.NpcId,
+                        X = g.X,
+                        Y = g.Y,
+                        Z = g.Z,
+                        Heading = g.Heading,
+                        GroundObjectId = g.GroundObjectId
+                    }).ToList()
+                    : null
             }).ToList();
             _data.SiegeClans = clans.Select(row => new SiegeClanDto
             {

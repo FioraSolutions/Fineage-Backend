@@ -163,6 +163,18 @@ public sealed partial class MemoryAccountStore
         public long EndsUnixMs { get; set; }
         public long Treasury { get; set; }
         public Dictionary<int, int>? DoorUpgrades { get; set; }
+        public List<HiredSiegeGuardDto>? HiredGuards { get; set; }
+    }
+
+    sealed class HiredSiegeGuardDto
+    {
+        public int ItemId { get; set; }
+        public int NpcId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+        public int Heading { get; set; }
+        public int GroundObjectId { get; set; }
     }
 
     sealed class SiegeClanDto

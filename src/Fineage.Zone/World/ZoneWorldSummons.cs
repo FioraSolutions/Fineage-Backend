@@ -65,6 +65,8 @@ public sealed partial class ZoneWorld
         var row = skill.At(level);
         if (row == null)
             return "skill";
+        if (request.SkillId == SummonSiegeGolemSkillId && !CanSummonSiegeGolem(session, player))
+            return null;
         if (SummonOf(player) != null)
         {
             SelfLine(session, SysMsgAlreadyHavePet, "You already have a pet.");

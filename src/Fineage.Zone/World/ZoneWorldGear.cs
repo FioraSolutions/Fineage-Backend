@@ -72,6 +72,8 @@ public sealed partial class ZoneWorld
             return TryUsePetResurrectScroll(session, player, item);
         if (_soulCrystals.IsCrystal(item.ItemId))
             return TryUseSoulCrystal(session, player, item);
+        if (MercTicketIsSiegeGuardItem(item.ItemId))
+            return TryUseMercTicket(session, player, item);
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))
