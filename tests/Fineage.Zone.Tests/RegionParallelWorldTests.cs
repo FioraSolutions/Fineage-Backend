@@ -293,9 +293,9 @@ public sealed class RegionParallelWorldTests
         var bench = new WorldBench(clock: () => clock.Now, geo: GeoEngine.Empty, regionExecutor: executor,
             simulationObserver: observer, simulationSeed: 94);
         const int duelX = 46045, duelY = 41251, duelZ = -3440;
-        var a = await bench.EnterAsync("parallel_duel_a", "Alpha", [new StoredItem(57, 1000, -1)], level: 60, x: duelX,
+        var a = await bench.EnterAsync("parallelduela", "Alpha", [new StoredItem(57, 1000, -1)], level: 60, x: duelX,
             y: duelY, z: duelZ, clearRecorder: false);
-        var b = await bench.EnterAsync("parallel_duel_b", "Bravo", [new StoredItem(57, 1000, -1)], level: 60,
+        var b = await bench.EnterAsync("parallelduelb", "Bravo", [new StoredItem(57, 1000, -1)], level: 60,
             x: duelX + 100, y: duelY, z: duelZ, clearRecorder: false);
         a.Player.CurHp = a.Player.MaxHp = 3000;
         b.Player.CurHp = b.Player.MaxHp = 3000;
@@ -338,8 +338,8 @@ public sealed class RegionParallelWorldTests
         var clock = OlympiadEvening;
         var bench = new WorldBench(clock: () => clock, olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 5 },
             regionExecutor: executor, simulationObserver: observer, simulationSeed: 95);
-        var one = await bench.EnterAsync("parallel_oly_1", "One", classId: Duelist, level: 78, clearRecorder: false);
-        var two = await bench.EnterAsync("parallel_oly_2", "Two", classId: Duelist, level: 78, clearRecorder: false);
+        var one = await bench.EnterAsync("paralleloly1", "One", classId: Duelist, level: 78, clearRecorder: false);
+        var two = await bench.EnterAsync("paralleloly2", "Two", classId: Duelist, level: 78, clearRecorder: false);
         bench.World.TrySetNoble(one.ObjectId, true);
         bench.World.TrySetNoble(two.ObjectId, true);
         Assert.Null(await bench.World.TryOlympiadRegisterAsync(one.Session, new OlympiadRegisterRequestMsg { Classed = 1 },
