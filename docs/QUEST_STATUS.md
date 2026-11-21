@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 216 |
-| partial | 94 |
-| stub | 31 |
+| implemented | 224 |
+| partial | 90 |
+| stub | 27 |
 | missing | 3 |
 | **total Mobius quests** | **344** |
 
@@ -44,10 +44,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 23 | Lidia's Heart | 64+ | story / newbie | stub | 51 dialog(s), no start; timers; auto-port |
 | 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | stub | 71 dialog(s), no start; auto-port |
 | 25 | Hiding Behind the Truth | 66+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
-| 27 | Chest caught with a bait of wind | 27+ | fishing | stub | 5 dialog(s), no start; auto-port |
-| 28 | Chest caught with a bait of icy air | 36+ | fishing | stub | 6 dialog(s), no start; auto-port |
-| 29 | Chest caught with a bait of earth | 48+ | fishing | stub | 6 dialog(s), no start; auto-port |
-| 30 | Chest caught with a bait of fire | 60+ | fishing | stub | 6 dialog(s), no start; auto-port |
+| 27 | Chest caught with a bait of wind | 27+ | fishing | implemented | auto-port |
+| 28 | Chest caught with a bait of icy air | 36+ | fishing | implemented | auto-port |
+| 29 | Chest caught with a bait of earth | 48+ | fishing | implemented | auto-port |
+| 30 | Chest caught with a bait of fire | 60+ | fishing | implemented | auto-port |
 | 31 | Secret Buried in the Swamp | 66+ | story / newbie | partial | no talk: 31661,31662,31663,31664; auto-port |
 | 32 | An Obvious Lie | 45+ | story / newbie | partial | no kill: 1/1 mobs; auto-port |
 | 33 | Make a Pair of Dress Shoes | 60+ | story / newbie | implemented | auto-port |
@@ -65,10 +65,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 47 | Into the Dark Forest | 3+ | story / newbie | implemented | hand-ported |
 | 48 | To the Immortal Plateau | 3+ | story / newbie | implemented | hand-ported |
 | 49 | The Road Home | 3+ | story / newbie | implemented | hand-ported |
-| 50 | Lanosco's Special Bait | 27+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 51 | O'Fulle's Special Bait | 36+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 52 | Willie's Special Bait | 48+ | fishing | partial | no kill: 1/1 mobs; auto-port |
-| 53 | Linnaeus' Special Bait | 60+ | fishing | partial | no kill: 1/1 mobs; auto-port |
+| 50 | Lanosco's Special Bait | 27+ | fishing | implemented | auto-port |
+| 51 | O'Fulle's Special Bait | 36+ | fishing | implemented | auto-port |
+| 52 | Willie's Special Bait | 48+ | fishing | implemented | auto-port |
+| 53 | Linnaeus' Special Bait | 60+ | fishing | implemented | auto-port |
 | 70 | Saga of the Phoenix Knight |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 71 | Saga of Eva's Templar |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 72 | Saga of the Sword Muse |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
