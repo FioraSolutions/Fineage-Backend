@@ -423,7 +423,10 @@ and an id older than the idempotency window (one hour of ticks) is refused as st
 `TxId` is `(tick, sequence)` from `LedgerTxSequence`. Moves run on the scheduler thread for now; region-originated
 moves will add the region when region bodies post them. The journal is hash-chained (`LedgerChain`).
 `PostgresLedgerJournal` (`economy_ledger`, migration 016) buffers appends and writes them in the step's persistence
-flush, after the step's body. Starting replays it and refuses a broken chain.
+flush. **Order:** journal `Flush` first, then inventory and warehouse snapshot rows (`FlushDirtyInventories`), so
+recovery always reconciles against an appended journal. Failed flushes re-queue the batch, log a warning, and count
+`fineage.ledger.flush_failures`; production shutdown calls `FlushLedgerOnShutdown` after the net loop stops.
+Starting replays it and refuses a broken chain.
 
 Inventories and treasuries still decide each move and are still saved as snapshots. A migrated move is recorded
 beside them with `LedgerMove`:

@@ -164,6 +164,9 @@ public sealed class EconomyLedger : IEconomyLedger
             return _byId.GetValueOrDefault(id);
     }
 
+    /// <summary>Buffered journal entries not yet written by <see cref="Flush"/>.</summary>
+    public int PendingFlushCount => _journal.PendingFlushCount;
+
     /// <summary>Writes buffered entries to durable storage. Call outside the step.</summary>
     public void Flush() => _journal.Flush();
 

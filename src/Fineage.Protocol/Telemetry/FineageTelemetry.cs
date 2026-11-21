@@ -70,6 +70,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> LedgerAdjustments =
         Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
 
+    public static readonly Counter<long> LedgerFlushFailures =
+        Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,

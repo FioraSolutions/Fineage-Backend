@@ -29,6 +29,8 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
         }
     }
 
+    public int PendingFlushCount => Pending;
+
     public IReadOnlyList<LedgerEntry> ReadAll()
     {
         var entries = new List<LedgerEntry>();
