@@ -43,9 +43,9 @@ public sealed class LocalizationCatalog
     }
 
     /// <summary>
-    /// Loads <c>data/l10n/&lt;locale&gt;/</c> plus the shipped English HTML that still lives
-    /// next to the rest of the datapack (<c>data/html</c>, <c>data/quests</c>, <c>data/mobius-quest-dialogs</c>).
-    /// A file under <c>data/l10n/en</c> wins over the legacy English tree.
+    /// Loads <c>data/l10n/&lt;locale&gt;/</c>. Shipped English NPC HTML stays in <c>data/html</c>
+    /// and is read by <c>NpcHtmlCatalog</c>. A file under <c>data/l10n/en/html</c> overrides that tree
+    /// when the HTML reader asks this catalog first.
     /// </summary>
     public static LocalizationCatalog Load(string dataDirectory, ILocalizationLog log)
     {
@@ -71,10 +71,6 @@ public sealed class LocalizationCatalog
             }
         }
 
-        var english = Table(tables, PlayerLocale.Default);
-        LoadHtmlTree(english, Path.Combine(root, "html"), "html", overwrite: false);
-        LoadHtmlTree(english, Path.Combine(root, "quests"), "html/quests", overwrite: false);
-        LoadHtmlTree(english, Path.Combine(root, "mobius-quest-dialogs"), "html/mobius-quest-dialogs", overwrite: false);
         return new LocalizationCatalog(tables, log);
     }
 

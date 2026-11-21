@@ -81,13 +81,12 @@ public sealed class LocalizationCatalogTests
     {
         string root = Path.Combine(Path.GetTempPath(), "fineage-l10n-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(root, "l10n", "ru", "html", "merchant"));
+        Directory.CreateDirectory(Path.Combine(root, "l10n", "en", "html", "merchant"));
         Directory.CreateDirectory(Path.Combine(root, "l10n", "ru", "names"));
-        Directory.CreateDirectory(Path.Combine(root, "html", "merchant"));
         Directory.CreateDirectory(Path.Combine(root, "l10n", "not-a-locale"));
         File.WriteAllText(Path.Combine(root, "l10n", "ru", "strings.json"), """{"chat.flood":"Не спамьте."}""");
         File.WriteAllText(Path.Combine(root, "l10n", "ru", "html", "merchant", "30001.htm"), "<html>ru</html>");
-        File.WriteAllText(Path.Combine(root, "html", "merchant", "30001.htm"), "<html>en</html>");
-        File.WriteAllText(Path.Combine(root, "html", "merchant", "30002.htm"), "<html>en-only</html>");
+        File.WriteAllText(Path.Combine(root, "l10n", "en", "html", "merchant", "30002.htm"), "<html>en-only</html>");
         File.WriteAllText(Path.Combine(root, "l10n", "ru", "names", "items.json"), """{"57":"Адена"}""");
         File.WriteAllText(Path.Combine(root, "l10n", "not-a-locale", "strings.json"), """{"chat.flood":"nope"}""");
 

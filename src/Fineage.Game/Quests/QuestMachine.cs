@@ -361,14 +361,17 @@ public sealed partial class QuestMachine : IQuestKillHook
         if (!TryOps(journal, inventory, quest, dialog.Ops, plan, roll, out var failure))
             return failure;
         var outcome = Commit(journal, inventory, quest, plan, hook, dialog.Event);
+        bool htmlByVar = dialog.HtmlByVar is { } byVar && plan.Vars.TryGetValue(byVar.Var, out var pick) &&
+                         byVar.Pages.TryGetValue(pick, out _);
         return new QuestOutcome
         {
             Failure = outcome.Failure,
             Message = outcome.Message,
-            Html = dialog.HtmlByVar is { } byVar && plan.Vars.TryGetValue(byVar.Var, out var pick) &&
-                   byVar.Pages.TryGetValue(pick, out var page)
+            Html = dialog.HtmlByVar is { } chosen && plan.Vars.TryGetValue(chosen.Var, out var chosenPick) &&
+                   chosen.Pages.TryGetValue(chosenPick, out var page)
                 ? page
                 : dialog.Html,
+            HtmlKey = htmlByVar ? null : dialog.HtmlKey,
             QuestId = quest.Id,
             Hook = hook,
             Event = dialog.Event,

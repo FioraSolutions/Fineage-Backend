@@ -85,7 +85,7 @@ public sealed partial class ZoneWorld
     void SendNoblesPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, bool noble)
     {
         string file = noble ? "teleporter/nobles_select.htm" : "teleporter/not_nobles.htm";
-        SendHtml(session, player, npc, _html.TryGet(file, out var html)
+        SendHtml(session, player, npc, TryPage(session.Language, file, out var html)
             ? html
             : "<html><body>%npcname%:<br>" + NpcServiceProtocol.NoblesOnlyText + "</body></html>");
     }

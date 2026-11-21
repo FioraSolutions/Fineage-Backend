@@ -116,7 +116,7 @@ public sealed partial class ZoneWorld
                 return false;
         }
 
-        html = _html.TryGet(file, out var page) ? page : NpcHtmlTextMissing(file);
+        html = TryPage(session.Language, file, out var page) ? page : NpcHtmlTextMissing(file);
         return true;
     }
 
@@ -151,7 +151,7 @@ public sealed partial class ZoneWorld
     string? AncientAdenaToAdena(ZoneSession session, ZoneEntity player, ZoneEntity npc, int amount)
     {
         var inventory = player.Inventory!;
-        string Page(string name) => _html.TryGet("seven_signs/" + name, out var h) ? h : NpcHtmlTextMissing(name);
+        string Page(string name) => TryPage(session.Language, "seven_signs/" + name, out var h) ? h : NpcHtmlTextMissing(name);
         if (amount < 1)
         {
             SendHtml(session, player, npc, Page("blkmrkt_3.htm"));

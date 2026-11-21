@@ -117,7 +117,7 @@ public sealed partial class ZoneWorld
                     NewbieBuffRefusal.LevelLow => "default/SupportMagicLowLevel.htm",
                     _ => null
                 };
-                SendHtml(session, player, npc, page != null && _html.TryGet(page, out var mobius)
+                SendHtml(session, player, npc, page != null && TryPage(session.Language, page, out var mobius)
                     ? mobius
                     : "<html><body>%npcname%:<br>" + text + "</body></html>");
             }
@@ -147,7 +147,7 @@ public sealed partial class ZoneWorld
 
     string? ShowBlessingPage(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
-        string page = _html.TryGet("default/BlessingOfProtection.htm", out var html)
+        string page = TryPage(session.Language, "default/BlessingOfProtection.htm", out var html)
             ? html
             : "<html><body>%npcname%:<br><a action=\"bypass -h npc_%objectId%_GiveBlessing\">Receive the Blessing of Protection.</a></body></html>";
         SendHtml(session, player, npc, page);

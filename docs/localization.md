@@ -51,7 +51,7 @@ Keys:
 | Vendored quest dialogs | `html/mobius-quest-dialogs/<relative>` |
 | Item / skill / NPC name | `name.item.<id>`, `name.skill.<id>`, `name.npc.<id>` |
 
-English HTML already shipped under `data/html`, `data/quests`, and `data/mobius-quest-dialogs` (when that tree is present) **is** the `en` corpus. A file at `data/l10n/en/html/...` overrides that tree. Other locales only read `data/l10n/<locale>/`. Dropping a folder named `en` is optional; the legacy trees are already English.
+English NPC HTML already shipped under `data/html` is the `en` corpus. Quest HTML shipped next to each quest is the English body of that dialog. A file at `data/l10n/en/html/...` overrides the shipped page. Other locales only read `data/l10n/<locale>/`. Dropping a folder named `en` is optional.
 
 The HTML loader asks the catalog for the player's locale, then the usual type folder (`merchant`, `guard`, …), then `default`, then `npcdefault.htm`. That path order is how an NPC page is chosen. It is not a second language fallback. A locale miss is still the one warning above.
 
@@ -77,6 +77,12 @@ The server localizes text it composes. The client localizes its own UI and the n
 5. **System messages and HTML.** `SystemMessage.text` and `NpcHtml.html` arrive in the player's language. Display them as sent. `SystemMessage.id` stays the Interlude id so the client can still pick an icon; the text is the line.
 6. **Adding a language on the client** is a new string table plus the matching `data/l10n/<locale>/` folder on the server. The packets do not change.
 
-## What is still English until a later pass
+## What the server localizes
 
-The catalog and the player language are in place. Call sites that still embed an English literal are not yet keys, so a new locale does not translate them. Those moves are the string-migration pass: chat and system lines, the HTML loader, and names the server inserts into a per-player packet. Broadcast `EntitySpawn` is one payload for every watcher, so a shared spawn name cannot differ per watcher without encoding the spawn once per recipient. Until that exists, nameplates that the client draws from `.dat` ids are the per-player names, and the server localizes names only on packets it sends to one player.
+- NPC, bypass, and quest-file HTML, through `LocalizedHtml`, using the character session's language.
+- Chat and combat system lines whose `SystemMessageMsg.Key` is set (`data/l10n/en/strings.json`). The zone fills `Text` for that player before the packet is encoded. The key is not on the wire.
+- Item and NPC names the server inserts into a per-player packet (HTML `%npcname%`, pet item lines), via `name.item.<id>` and `name.npc.<id>`.
+
+## What is still English
+
+System messages that still assign `Text` and leave `Key` empty are sent as written. Move one by adding the key to `strings.json` and setting `Key` (keep the English `Text` so a catalog miss still has a line until the English row exists). Broadcast `EntitySpawn` is one payload for every watcher, so a shared spawn name cannot differ per watcher. Nameplates the client draws from `.dat` ids stay on the client. Skill names are ids on the wire; the client resolves them from its own table.

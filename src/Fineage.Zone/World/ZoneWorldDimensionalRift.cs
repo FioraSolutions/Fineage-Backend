@@ -88,7 +88,7 @@ public sealed partial class ZoneWorld
 
         if (party.MemberIds.Count < _dimensionalRiftSettings.MinPartySize)
         {
-            string html = LoadRiftHtml("seven_signs/rift/SmallParty.htm")
+            string html = LoadRiftHtml(session, "seven_signs/rift/SmallParty.htm")
                 .Replace("%count%", _dimensionalRiftSettings.MinPartySize.ToString(), StringComparison.Ordinal);
             SendHtml(session, player, npc, html);
             return null;
@@ -115,7 +115,7 @@ public sealed partial class ZoneWorld
         {
             if (member.Inventory == null || member.Inventory.CountOf(DimensionalRiftSettings.FragmentItemId) < cost)
             {
-                string html = LoadRiftHtml("seven_signs/rift/NoFragments.htm")
+                string html = LoadRiftHtml(session, "seven_signs/rift/NoFragments.htm")
                     .Replace("%count%", cost.ToString(), StringComparison.Ordinal);
                 SendHtml(session, player, npc, html);
                 return null;
@@ -368,12 +368,12 @@ public sealed partial class ZoneWorld
 
     void SendRiftHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string path)
     {
-        string html = LoadRiftHtml(path).Replace("%npc_name%", npc.Name, StringComparison.Ordinal);
+        string html = LoadRiftHtml(session, path).Replace("%npc_name%", npc.Name, StringComparison.Ordinal);
         SendHtml(session, player, npc, html);
     }
 
-    string LoadRiftHtml(string path) =>
-        _html.TryGet(path, out var html) ? html : "<html><body>%npcname%</body></html>";
+    string LoadRiftHtml(ZoneSession session, string path) =>
+        TryPage(session.Language, path, out var html) ? html : "<html><body>%npcname%</body></html>";
 
     List<ZoneEntity> PartyMembersOf(ZoneParty party)
     {

@@ -3,11 +3,11 @@ namespace Fineage.Zone.NpcHtml;
 /// <summary>Mobius <c>ChatLink</c>. Page 0 runs first talk again. Any other page is that chat file.</summary>
 public sealed class ChatBypassHandler : IBypassHandler
 {
-    readonly NpcHtmlCatalog _html;
+    readonly LocalizedHtml _pages;
 
-    public ChatBypassHandler(NpcHtmlCatalog html)
+    public ChatBypassHandler(LocalizedHtml pages)
     {
-        _html = html ?? throw new ArgumentNullException(nameof(html));
+        _pages = pages ?? throw new ArgumentNullException(nameof(pages));
     }
 
     public IReadOnlyList<string> Commands { get; } = ["Chat"];
@@ -17,25 +17,25 @@ public sealed class ChatBypassHandler : IBypassHandler
         int page = NpcHtmlPaths.ChatPage(call.Command);
         if (page == 0)
             return BypassReply.TalkAgain();
-        return BypassReply.Page(NpcHtmlPaths.Read(_html, call.NpcType, call.NpcId, page));
+        return BypassReply.Page(_pages.ReadNpc(call.Language, call.NpcType, call.NpcId, page));
     }
 }
 
 /// <summary>Mobius <c>Link</c>. The path stays under <c>data/html</c>.</summary>
 public sealed class LinkBypassHandler : IBypassHandler
 {
-    readonly NpcHtmlCatalog _html;
+    readonly LocalizedHtml _pages;
 
-    public LinkBypassHandler(NpcHtmlCatalog html)
+    public LinkBypassHandler(LocalizedHtml pages)
     {
-        _html = html ?? throw new ArgumentNullException(nameof(html));
+        _pages = pages ?? throw new ArgumentNullException(nameof(pages));
     }
 
     public IReadOnlyList<string> Commands { get; } = ["Link"];
 
     public BypassReply Handle(BypassCall call)
     {
-        var page = NpcHtmlPaths.ReadLink(_html, call.NpcType, call.Command);
+        var page = _pages.ReadLink(call.Language, call.NpcType, call.Command);
         if (page.RejectedPath)
             return BypassReply.Fail("bad_request");
         return BypassReply.Page(page.Html);

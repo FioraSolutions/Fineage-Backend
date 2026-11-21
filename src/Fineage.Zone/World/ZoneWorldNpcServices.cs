@@ -150,7 +150,7 @@ public sealed partial class ZoneWorld
         var castle = _siege.Board.Find(npc.MerchantCastleId);
         bool owned = castle != null && castle.OwnerClanId > 0;
         string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
-        if (!_html.TryGet(file, out var html))
+        if (!TryPage(session.Language, file, out var html))
             html = "<html><body>%castlename%</body></html>";
         string clanName = "", leaderName = "";
         if (owned && _clan.TryGet(castle!.OwnerClanId, out var clan))

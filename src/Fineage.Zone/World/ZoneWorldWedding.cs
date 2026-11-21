@@ -320,7 +320,7 @@ public sealed partial class ZoneWorld
 
     string? WeddingNpcTalk(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
-        string html = _html.TryGet("wedding/Start.htm", out var page)
+        string html = TryPage(session.Language, "wedding/Start.htm", out var page)
             ? page.Replace("%fee%", _weddingSettings.WeddingPrice.ToString(System.Globalization.CultureInfo.InvariantCulture))
             : "<html><body>Wedding service unavailable.</body></html>";
         SendHtml(session, player, npc, html);
@@ -488,7 +488,7 @@ public sealed partial class ZoneWorld
     string WeddingHtml(ZoneEntity player, string file, string? token = null, string? value = null)
     {
         string key = $"wedding/{file}.html";
-        if (!_html.TryGet(key, out var html))
+        if (!TryPage(player.Session?.Language, key, out var html))
             html = $"<html><body>{file}</body></html>";
         if (token != null && value != null)
             html = html.Replace(token, value, StringComparison.Ordinal);

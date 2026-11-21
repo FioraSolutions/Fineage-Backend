@@ -44,6 +44,9 @@ public sealed class QuestOutcome
     public QuestFailure Failure { get; init; }
     public string Message { get; init; } = "";
     public string Html { get; init; } = "";
+
+    /// <summary>Catalog key when <see cref="Html"/> came from a quest HTML file. Null for inline HTML.</summary>
+    public string? HtmlKey { get; init; }
     public int QuestId { get; init; }
     public string Hook { get; init; } = "";
     public string Event { get; init; } = "";

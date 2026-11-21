@@ -24,6 +24,9 @@ public sealed record BypassCall
     public required string NpcType { get; init; }
     public required string PlayerName { get; init; }
     public required string Command { get; init; }
+
+    /// <summary>The player's language. Empty uses English.</summary>
+    public string Language { get; init; } = Fineage.Game.L10n.PlayerLocale.Default;
 }
 
 /// <summary>What the world should send after a bypass. At most one of the actions is set.</summary>

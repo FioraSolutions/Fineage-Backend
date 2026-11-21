@@ -56,7 +56,8 @@ public sealed partial class ZoneWorld
             NpcName = npc.Name,
             NpcType = npc.NpcType,
             PlayerName = player.Name,
-            Command = verb
+            Command = verb,
+            Language = session.Language
         });
         if (reply.Error != null)
             return reply.Error;
@@ -110,7 +111,7 @@ public sealed partial class ZoneWorld
                 SendHtml(session, player, npc, festival);
             return;
         }
-        SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page));
+        SendHtml(session, player, npc, _pages.ReadNpc(session.Language, npc.NpcType, npc.NpcId, page));
     }
 
     void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
@@ -122,7 +123,8 @@ public sealed partial class ZoneWorld
 
     void SendHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string html)
     {
-        string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npc.Name, player.Name));
+        string npcName = _pages.Name(session.Language, "npc", npc.NpcId, npc.Name);
+        string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npcName, player.Name));
         LastNpcHtmlForTest = rendered;
         FanoutNetHtml(session, npc, rendered);
     }
