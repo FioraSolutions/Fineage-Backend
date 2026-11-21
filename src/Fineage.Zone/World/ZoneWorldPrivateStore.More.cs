@@ -105,26 +105,23 @@ public sealed partial class ZoneWorld
 
         var buyerChanges = new List<InventoryUpdateEntryMsg>();
         var sellerChanges = new List<InventoryUpdateEntryMsg>();
+        var move = BeginStoreSale(buyer, store);
 
         // Take adena from buyer → seller.
         if (!TransferAdena(buyer.Inventory, store.Inventory, (int)cost, buyerChanges, sellerChanges))
             return PrivateStoreProtocol.Adena;
+        PostStoreAdena(move, buyer, store, cost);
 
-        foreach (var (listing, count) in transfers)
+        foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
         {
-            TransferOfferRow(store.Inventory, buyer.Inventory,
-                new TradeOfferRow
-                {
-                    InventoryObjectId = listing.InventoryObjectId,
-                    ItemId = listing.ItemId,
-                    Count = count,
-                    EnchantLevel = listing.EnchantLevel
-                },
-                sellerChanges, buyerChanges);
-            listing.Count -= count;
+            PostTradeRow(move, store, buyer, row);
+            TransferOfferRow(store.Inventory, buyer.Inventory, row, sellerChanges, buyerChanges);
+            listing.Count -= row.Count;
             if (listing.Count <= 0)
                 store.PrivateSellList.Remove(listing);
         }
+
+        move.Commit(LedgerHoldingsOf);
 
         if (store.Session != null)
             SaveInventory(store.Session, store.Inventory);

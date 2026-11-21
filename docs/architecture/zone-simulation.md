@@ -449,6 +449,10 @@ item identity needs the zone's item id allocator seeded from the store: today th
 on every boot, and the store re-keys colliding ids when it saves. Clan hall rent, auction refunds and matured crops still write
 the clan warehouse outside the ledger; the next observation records them as adjustments.
 
+A sale at a private store (step 11e), sell or buy store, is one `StoreSale` between the visitor's bag and the
+owner's: `CausedBy` is the visitor, `Reference` the owner, and pieces keep their ids as in a trade. Listed items stay
+in the owner's bag until sold, so, as with trade holds, store escrow waits for stores visited from another host.
+
 ---
 
 ## 4. Determinism
@@ -482,7 +486,8 @@ the clan warehouse outside the ledger; the next observation records them as adju
    respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
    commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
    `GroundLedgerTests` follows a piece through the ground and checks loot, expiry, party adena and destroy postings.
-   `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals.
+   `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals; `NetPrivateStoreTests` checks the
+   postings of a sale at sell and buy stores.
 
 ---
 
@@ -536,7 +541,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **11b (done)** | Trade between players as one `TradeSettle`; holds in trade escrow wait for trades between hosts. | Same outcomes, except that a traded non-stackable piece keeps its object id instead of getting a new one. A trade whose postings disagree with the bags fails the confirmation. |
 | **11c (done)** | Ground stacks as ledger accounts: loot, drop, death drop, pickup (party and pet included), expiry, herbs, destroy. | Same outcomes, except that a dropped piece keeps its object id and enchant on the ground and in the bag that picks it up (before, the enchant was lost and the piece got a new id), and a non-stackable loot stack of one keeps its ground object id when picked up. |
 | **11d (done)** | Private and clan warehouse deposits and withdrawals, deposit fee to `Fees`. | Same outcomes. |
-| 11e | Private store sales through store escrow. | Same outcomes. |
+| **11e (done)** | Private store sales (sell, package and buy stores) as one `StoreSale`; store escrow waits for stores visited from another host. | Same outcomes. A sale whose postings disagree with the bags fails the command. |
 | 11f | Quest rewards and crafting. Mail joins the ledger when the game has it. | Same outcomes; every owner change is on the journal. The snapshot writes stay until the reconciliation has run clean. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
 | 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |

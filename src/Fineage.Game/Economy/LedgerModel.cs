@@ -122,7 +122,13 @@ public enum LedgerTxKind
     WarehouseDeposit = 12,
 
     /// <summary>Private or clan warehouse into the bag: <c>Reference</c> is the warehouse keeper's npc id.</summary>
-    WarehouseWithdraw = 13
+    WarehouseWithdraw = 13,
+
+    /// <summary>
+    /// A sale at a private store, either way: <c>CausedBy</c> the visitor who bought or sold, <c>Reference</c> the
+    /// store's owner.
+    /// </summary>
+    StoreSale = 14
 }
 
 /// <summary>
