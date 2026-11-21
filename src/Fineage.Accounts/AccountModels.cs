@@ -194,6 +194,9 @@ public sealed record ClanRecord(
 /// <see cref="Treasury"/> is Mobius <c>castle.treasury</c>; <see cref="DoorUpgrades"/> is <c>castle_doorupgrade</c>
 /// (door id → HP ratio 2 / 3 / 5).
 /// </summary>
+/// <summary>One persisted mercenary post (<c>castle_siege_guards.isHired = 1</c>).</summary>
+public sealed record HiredSiegeGuardSave(int ItemId, int NpcId, int X, int Y, int Z, int Heading, int GroundObjectId = 0);
+
 public sealed record CastleSave(
     int Id,
     int OwnerClanId,
@@ -204,7 +207,8 @@ public sealed record CastleSave(
     bool InProgress,
     long EndsUnixMs,
     long Treasury = 0,
-    IReadOnlyDictionary<int, int>? DoorUpgrades = null);
+    IReadOnlyDictionary<int, int>? DoorUpgrades = null,
+    IReadOnlyList<HiredSiegeGuardSave>? HiredGuards = null);
 
 /// <summary>
 /// One <c>castle_manor_production</c> row (Mobius <c>SeedProduction</c>): seeds a castle sells this period or the next.

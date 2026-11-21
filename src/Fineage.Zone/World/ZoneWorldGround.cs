@@ -232,12 +232,14 @@ public sealed partial class ZoneWorld
             }
 
             GrantGroundPickup(looter, ground);
+            OnMercTicketGroundPickup(looter, ground);
             ZoneLog.Info(
                 $"pickup object={session.ObjectId} looter={looter.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=1");
             return null;
         }
 
         GrantGroundPickup(player, ground);
+        OnMercTicketGroundPickup(player, ground);
         ZoneLog.Info($"pickup object={session.ObjectId} ground={groundObjectId} item={ground.GroundItemId} count={ground.GroundCount} party=0");
         return null;
     }

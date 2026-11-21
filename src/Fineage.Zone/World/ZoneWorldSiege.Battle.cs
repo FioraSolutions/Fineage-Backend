@@ -140,10 +140,14 @@ public sealed partial class ZoneWorld
         if (data != null)
         {
             SpawnSiegeTowers(run, data);
-            // Mobius SiegeGuardManager.spawnSiegeGuard: the NPC garrison only stands for an NPC-owned castle.
+            // Mobius SiegeGuardManager.spawnSiegeGuard: NPC castles spawn the default garrison; player-owned castles spawn hired posts.
             if (castle.OwnerClanId == 0)
                 SpawnSiegeGuards(run, data, now);
+            else
+                SpawnHiredSiegeGuards(castle, run, data, now);
         }
+
+        ClearMercTicketGroundItems(castle.Id);
 
         RefreshSiegeRelations(run);
         ZoneLog.Info($"[siege] start castle={castle.Id} owner={castle.OwnerClanId} resume={resume} clans={run.Clans.Count}");
