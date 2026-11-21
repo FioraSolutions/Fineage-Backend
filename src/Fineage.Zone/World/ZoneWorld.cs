@@ -20,6 +20,7 @@ using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
 using Fineage.Zone.Lottery;
+using Fineage.Zone.MonsterRace;
 using Fineage.Game.Services;
 using Fineage.Zone.Simulation;
 
@@ -312,8 +313,8 @@ public sealed partial class ZoneWorld
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
         _monsterRaceSettings = MonsterRaceSettings.Mobius;
         _monsterRaceBroadcast = _monsterRaceSettings.ResolveBroadcastZones(Peace);
-        _monsterRace = new MonsterRace.MonsterRaceActor(
-            new MonsterRace.MonsterRaceBoard(
+        _monsterRace = new MonsterRaceActor(
+            new MonsterRaceBoard(
                 WallNow().ToUnixTimeMilliseconds(),
                 _game.Items,
                 Npcs.NpcCatalog.LoadDefault(),

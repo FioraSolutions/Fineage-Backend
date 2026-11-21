@@ -183,15 +183,15 @@ public sealed partial class ZoneWorld
                     var inventory = player.Inventory!;
                     if (inventory.CountOf(MonsterRaceProtocol.AdenaItemId) < price)
                     {
-                        SelfLine(session, MonsterRaceProtocol.NotSelling, "You do not have enough adena.");
+                        SelfLine(session, LotteryProtocol.NotEnoughAdena, "You do not have enough adena.");
                         return MonsterRaceProtocol.Adena;
                     }
 
                     var changes = new List<InventoryUpdateEntryMsg>();
                     Take(inventory, MonsterRaceProtocol.AdenaItemId, price, changes);
-                    var ticket = inventory.Add(MonsterRaceProtocol.TicketItemId, 1, board.RaceNumber);
-                    ticket.CustomType1 = session.RaceTicketLane;
-                    ticket.CustomType2 = price / 100;
+                    var ticket = inventory.Add(
+                        MonsterRaceProtocol.TicketItemId, 1, board.RaceNumber,
+                        session.RaceTicketLane, price / 100);
                     changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, ticket));
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);

@@ -39,7 +39,7 @@ public sealed class MonsterRaceSettings
             path = Path.Combine(Directory.GetCurrentDirectory(), "data", "monster-race.json");
         if (!File.Exists(path))
         {
-            ZoneLog.Error($"[monster-race] missing data file: data/monster-race.json");
+            ZoneLog.Warn($"[monster-race] missing data file: data/monster-race.json");
             return new MonsterRaceSettings { Enabled = false };
         }
 
@@ -72,7 +72,7 @@ public sealed class MonsterRaceSettings
         }
         catch (Exception ex)
         {
-            ZoneLog.Error($"[monster-race] failed to load data/monster-race.json: {ex.Message}");
+            ZoneLog.Warn($"[monster-race] failed to load data/monster-race.json: {ex.Message}");
             return new MonsterRaceSettings { Enabled = false };
         }
     }
@@ -100,7 +100,7 @@ public sealed class MonsterRaceSettings
             if (byName.TryGetValue(name, out var zone))
                 list.Add(zone);
             else
-                ZoneLog.Error($"[monster-race] broadcastPeaceZones: unknown peace zone '{name}'");
+                ZoneLog.Warn($"[monster-race] broadcastPeaceZones: unknown peace zone '{name}'");
         }
         return list.ToArray();
     }

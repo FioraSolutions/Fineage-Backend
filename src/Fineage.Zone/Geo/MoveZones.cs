@@ -232,6 +232,8 @@ public sealed class PeaceZones
 
     public int Count => _zones.Length;
 
+    public IReadOnlyList<PeaceZone> All => _zones;
+
     public bool Contains(int x, int y, int z) => Hit(_zones, x, y, z);
 
     internal static bool Hit(PeaceZone[] zones, int x, int y, int z)
