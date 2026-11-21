@@ -56,7 +56,7 @@ public sealed partial class ZoneWorld
             return false;
         bool soul = t.IsSoulshot;
         // Mobius OlympiadDisableBlessedSpiritShots: no blessed spiritshot charge inside an arena (auto use included).
-        if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiad.Board.Settings.DisableBlessedSpiritshots)
+        if (t.IsBlessedSpiritshot && _olympiadArena.Contains(player.ObjectId) && _olympiadDisableBlessedSpiritshots)
         {
             if (!quiet)
                 ShotNotice(session, OlympiadUseItemMessage, "You cannot use that item in a Grand Olympiad Games match.");
