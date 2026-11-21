@@ -14,6 +14,23 @@ jobs:
   build-and-test:
     name: build-and-test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FINEAGE_DATABASE_URL: >-
+        Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
     steps:
       - uses: actions/checkout@v4
 
