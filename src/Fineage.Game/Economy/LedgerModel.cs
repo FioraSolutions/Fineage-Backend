@@ -280,7 +280,6 @@ public enum LedgerTxKind
     /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
     Consume = 46,
 
-<<<<<<< HEAD
     /// <summary>Bag into another character's freight on the same account: <c>Reference</c> is the recipient's character id.</summary>
     FreightDeposit = 47,
 
