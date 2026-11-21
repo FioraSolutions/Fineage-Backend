@@ -575,12 +575,14 @@ public sealed partial class ZoneWorld
         ScheduleEffect(player, target, template, level, now, hitMs, (t, at) => effect(t, at));
     }
 
-    /// <summary>Mobius <c>Die</c> restart buttons for a dead player: bit0 castle, bit1 siege headquarters.</summary>
+    /// <summary>Mobius <c>Die</c> restart buttons for a dead player: bit0 castle, bit1 siege HQ, bit2 clan hall.</summary>
     int RestartFlagsFor(ZoneEntity player)
     {
         if (player.Kind != ZoneEntityKind.Player || SiegeClanOf(player) == 0)
             return 0;
         int flags = 0;
+        if (PlayerHallId(player) > 0 && _clanHallSpawns.HasSpawn(PlayerHallId(player)))
+            flags |= DeathProtocol.RestartClanHall;
         if (CastleRestartPoint(player) != null)
             flags |= DeathProtocol.RestartCastle;
         if (SiegeHqRestartPoint(player) != null)

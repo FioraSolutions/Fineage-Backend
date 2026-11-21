@@ -210,6 +210,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(LotteryActor.StageName, tick => AnnounceLottery(_lottery.Step(tick)), slow);
         ticks.AddWorldStage(MonsterRaceActor.StageName, tick => AnnounceMonsterRace(_monsterRace.Step(tick)), slow);
         ticks.AddWorldStage(SevenSignsActor.StageName, tick => ApplySevenSignsPeriods(_sevenSigns.Step(tick)), slow);
+        ticks.AddWorldStage(SevenSignsFestivalActor.StageName, TickSevenSignsFestival, slow);
         ticks.AddWorldStage(MammonActor.StageName, tick => PlaceMammons(_mammon.Step(tick)), slow);
         ticks.AddWorldStage(OlympiadActor.StageName, tick => ApplyOlympiad(_olympiad.Step(tick)), slow);
 

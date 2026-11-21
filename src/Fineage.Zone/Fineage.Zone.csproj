@@ -22,6 +22,7 @@
     <Content Include="..\..\data\pledge-skills.json" Link="data\pledge-skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-halls.json" Link="data\clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-hall-functions.json" Link="data\clan-hall-functions.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\clan-hall-spawns.json" Link="data\clan-hall-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\siegable-clan-halls.json" Link="data\siegable-clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\castles.json" Link="data\castles.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\manor.json" Link="data\manor.json" CopyToOutputDirectory="PreserveNewest" />
@@ -38,6 +39,7 @@
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dimensional-rift.json" Link="data\dimensional-rift.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\seven-signs-festival.json" Link="data\seven-signs-festival.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
@@ -79,6 +81,7 @@
     <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\item-skills.json" Link="data\item-skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\map-regions.json" Link="data\map-regions.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\clan-hall-spawns.json" Link="data\clan-hall-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\henna.json" Link="data\henna.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\armor-sets.json" Link="data\armor-sets.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\item-equip-skills.json" Link="data\item-equip-skills.json" CopyToOutputDirectory="PreserveNewest" />

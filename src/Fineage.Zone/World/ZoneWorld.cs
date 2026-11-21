@@ -53,6 +53,10 @@ public sealed partial class ZoneWorld
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
+    readonly SevenSignsFestivalCatalog _festivalCatalog;
+    readonly SevenSignsFestivalRuntime _festivalRuntime;
+    readonly SevenSignsFestivalActor _festivalActor;
+    int _nextFestivalInstanceId;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
     readonly DimensionalRiftCatalog _dimensionalRift;
@@ -73,6 +77,8 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
+    /// <summary>Mobius clan hall owner restart points (<c>data/clan-hall-spawns.json</c>).</summary>
+    readonly Fineage.Game.Services.ClanHallSpawnCatalog _clanHallSpawns;
     readonly int _teleportOffset;
     readonly IRegionRandom _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
@@ -165,6 +171,7 @@ public sealed partial class ZoneWorld
         Random? enchantRandom = null,
         EnchantRates? enchantRates = null,
         SevenSignsEngine? sevenSigns = null,
+        SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
@@ -200,6 +207,7 @@ public sealed partial class ZoneWorld
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
         Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
+        Fineage.Game.Services.ClanHallSpawnCatalog? clanHallSpawns = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
         ArmorSetCatalog? armorSets = null,
@@ -250,7 +258,13 @@ public sealed partial class ZoneWorld
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
-        _sevenSigns = new SevenSignsActor(sevenSigns ?? new SevenSignsEngine(WallNow()));
+        _festivalCatalog = festivalRuntime?.Board.Catalog ?? SevenSignsFestivalCatalog.LoadDefault();
+        _festivalRuntime = festivalRuntime ?? new SevenSignsFestivalRuntime(_festivalCatalog);
+        SevenSignsEngine ssEngine = sevenSigns ?? new SevenSignsEngine(WallNow(), festival: _festivalRuntime);
+        _festivalRuntime.BindEngine(ssEngine);
+        _sevenSigns = new SevenSignsActor(ssEngine);
+        _festivalActor = new SevenSignsFestivalActor(_festivalRuntime.Board);
+        _nextFestivalInstanceId = FestivalInstanceBase;
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _dimensionalRiftSettings = dimensionalRiftSettings ?? DimensionalRiftSettings.Default;
@@ -306,6 +320,7 @@ public sealed partial class ZoneWorld
         RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
+        _clanHallSpawns = clanHallSpawns ?? Fineage.Game.Services.ClanHallSpawnCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
         if (geo == null)
         {

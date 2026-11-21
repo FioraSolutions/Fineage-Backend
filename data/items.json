@@ -52727,6 +52727,16 @@
       "stackable": true
     },
     {
+      "id": 5901,
+      "name": "Blood Offering",
+      "kind": "etc",
+      "icon": "icon.etc_magic_coin_blood_i00",
+      "price": 0,
+      "weight": 0,
+      "stackable": true,
+      "quest": true
+    },
+    {
       "id": 5902,
       "name": "Scroll of Ancient Magic",
       "kind": "etc",
