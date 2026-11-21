@@ -467,11 +467,54 @@ public sealed partial class ZoneWorld
         var cast = new MagicSkillUseMsg { CasterObjectId = s.ObjectId, TargetObjectId = s.ObjectId, SkillId = 2048, SkillLevel = 1 };
         if (NetBridge != null && KnownWatchers(s.ObjectId) is { Count: > 0 } watchers)
             NetBridge.FanoutMagicSkillUse(watchers, cast);
+        TryBabyPetBuffAfterFeed(owner, s, pet);
         if (PetHungry(s, pet) && owner.Session is { } session)
             SelfLine(session, SysMsgPetAteStillHungry, "Your pet ate a little, but is still hungry.");
         SendPetInventory(owner, s);
         SendSummonInfo(s);
         return true;
+    }
+
+    static bool IsBabyPet(PetTemplate template) => template.Food.Any(f => f.ItemId == 7582);
+
+    /// <summary>Mobius <c>BabyPet</c>: when well fed after eating baby spice, casts a heal skill on the owner.</summary>
+    void TryBabyPetBuffAfterFeed(ZoneEntity owner, ZoneEntity s, PetState pet)
+    {
+        if (!IsBabyPet(pet.Template) || PetHungry(s, pet))
+            return;
+        var skills = pet.Template.Skills
+            .Where(row => row.MinLevel <= s.Level
+                && _skillEffects.TryGet(row.SkillId, out var fx) && fx.Any(e => e.Name == "Heal"))
+            .Select(row =>
+            {
+                int skillLevel = row.SkillLevel > 0 ? row.SkillLevel
+                    : s.Level > 70 ? 7 + (s.Level - 70) / 5 : Math.Max(1, s.Level / 10);
+                return (row.SkillId, skillLevel);
+            })
+            .ToArray();
+        if (skills.Length == 0)
+            return;
+        var (skillId, skillLevel) = skills[_petRandom.Next(skills.Length)];
+        if (!_skillEffects.TryGet(skillId, out var effects))
+            return;
+        var heal = effects.FirstOrDefault(e => e.Name == "Heal");
+        if (string.IsNullOrEmpty(heal.Name))
+            return;
+        int amount = (int)Math.Round(heal.PowerAt(skillLevel));
+        if (amount <= 0 || owner.CurHp >= owner.MaxHp)
+            return;
+        owner.CurHp = Math.Min(owner.MaxHp, owner.CurHp + amount);
+        FanoutVitals(owner, PlayerVitalsStatus(owner));
+        SyncNeedRegen(owner);
+        var buff = new MagicSkillUseMsg
+        {
+            CasterObjectId = s.ObjectId,
+            TargetObjectId = owner.ObjectId,
+            SkillId = skillId,
+            SkillLevel = skillLevel
+        };
+        if (NetBridge != null && KnownWatchers(s.ObjectId) is { Count: > 0 } watchers)
+            NetBridge.FanoutMagicSkillUse(watchers, buff);
     }
 
     // ---------------------------------------------------------------- exp
