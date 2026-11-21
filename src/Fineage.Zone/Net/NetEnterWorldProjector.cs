@@ -95,6 +95,32 @@ static class NetEnterWorldProjector
             AddFollowUp(destination, ref count, new(NetOpcode.DoorStatus, null, door), entity);
         if (entity.Dead)
             return count;
+        if (entity.IsBoat)
+        {
+            AddFollowUp(destination, ref count, new(NetOpcode.VehicleInfo, new VehicleInfoNetMsg
+            {
+                BoatObjectId = entity.ObjectId,
+                X = entity.X,
+                Y = entity.Y,
+                Z = entity.Z,
+                Heading = entity.Heading
+            }), entity);
+            if (entity.MoveActive)
+            {
+                AddFollowUp(destination, ref count, new(NetOpcode.VehicleDeparture, new VehicleDepartureNetMsg
+                {
+                    BoatObjectId = entity.ObjectId,
+                    MoveSpeed = (int)(entity.Running ? entity.RunSpeed : entity.WalkSpeed),
+                    RotationSpeed = ZoneWorld.DefaultBoatRotationSpeed,
+                    DestX = entity.MoveDestX,
+                    DestY = entity.MoveDestY,
+                    DestZ = entity.MoveDestZ
+                }), entity);
+            }
+
+            return count;
+        }
+
         if (entity.MoveActive)
         {
             AddFollowUp(destination, ref count, new(NetOpcode.MoveState, new MoveStateMsg

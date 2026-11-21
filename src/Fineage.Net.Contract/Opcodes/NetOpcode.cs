@@ -404,5 +404,9 @@ namespace Fineage.Net.Contract
         /// L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/ServerPackets.java:223.
         /// </summary>
         public const ushort AgitDecoInfo = 0xF7;
+        /// <summary>Zone → watchers: Interlude <c>VehicleInfo</c> (wire 0x59).</summary>
+        public const ushort VehicleInfo = 0x03E1;
+        /// <summary>Zone → watchers: Interlude <c>VehicleDeparture</c> (wire 0x5A).</summary>
+        public const ushort VehicleDeparture = 0x03E2;
     }
 }

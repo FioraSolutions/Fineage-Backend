@@ -45,7 +45,7 @@ Reference for **blocked or not-yet-emitted** Interlude S2C/C2S layouts the retai
 ## Boats (ship routes)
 
 **Server feature:** `BoatManager`, `Boat` actor, `BoatAI`, routes from datapack.  
-**Fineage today:** not implemented.
+**Fineage today:** `ZoneWorldBoats` route simulation; Net `VehicleInfo` `0x03E1` / `VehicleDeparture` `0x03E2` (Interlude wire `0x59` / `0x5A`).
 
 ### `VehicleInfo` — S2C `0x59`
 

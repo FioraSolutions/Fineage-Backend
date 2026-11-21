@@ -1,3 +1,4 @@
+using Fineage.Net.Contract;
 using Fineage.Zone.Boats;
 using Fineage.Zone.Spawns;
 
@@ -53,9 +54,15 @@ public sealed partial class ZoneWorld
                 Phase = BoatPhase.Leg
             };
             FanoutNewNpc(entity);
+            BroadcastBoatMove(entity, entity.X, entity.Y, entity.Z);
             ZoneLog.Info($"[boat] spawned id={def.Id} obj={objectId} at {def.SpawnX},{def.SpawnY}");
         }
     }
+
+    internal IEnumerable<ZoneEntity> BoatsForTests() => _byId.Values.Where(e => e.IsBoat);
+
+    internal void BroadcastBoatMoveForTests(ZoneEntity boat, int destX, int destY, int destZ) =>
+        BroadcastBoatMove(boat, destX, destY, destZ);
 
     void TickBoats(long now)
     {
@@ -99,7 +106,6 @@ public sealed partial class ZoneWorld
                             {
                                 var pt = dock.Points[0];
                                 boat.Heading = pt.Heading;
-                                FanoutBoatDeparture(boat, pt);
                                 StartNpcMove(boat, pt.X, pt.Y, pt.Z, now);
                             }
                         }
@@ -111,7 +117,6 @@ public sealed partial class ZoneWorld
                     boat.WalkSpeed = point.Speed / 2;
                     boat.Running = true;
                     boat.Heading = point.Heading;
-                    FanoutBoatDeparture(boat, point);
                     StartNpcMove(boat, point.X, point.Y, point.Z, now);
                     rt.PointIndex++;
                     break;
@@ -119,20 +124,41 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void FanoutBoatDeparture(ZoneEntity boat, BoatPathPoint dest)
+    void BroadcastBoatMove(ZoneEntity boat, int destX, int destY, int destZ)
     {
-        // Mobius VehicleDeparture: encoded in client-packet-contracts.md; move state is the Fineage Net path today.
-        NetBridge?.FanoutMoveState(
-            KnownWatchers(boat.ObjectId),
-            boat.ObjectId,
-            boat.X,
-            boat.Y,
-            boat.Z,
-            dest.X,
-            dest.Y,
-            dest.Z,
-            boat.Running);
+        var watchers = NetWatchersOfPeers(boat);
+        if (watchers is not { Count: > 0 } || NetBridge == null)
+            return;
+        if (!boat.MoveActive && boat.X == destX && boat.Y == destY && boat.Z == destZ)
+        {
+            NetBridge.FanoutVehicleInfo(watchers, VehicleInfoFrame(boat));
+            return;
+        }
+
+        NetBridge.FanoutVehicleDeparture(watchers, VehicleDepartureFrame(boat, destX, destY, destZ));
     }
+
+    static VehicleInfoNetMsg VehicleInfoFrame(ZoneEntity boat) => new()
+    {
+        BoatObjectId = boat.ObjectId,
+        X = boat.X,
+        Y = boat.Y,
+        Z = boat.Z,
+        Heading = boat.Heading
+    };
+
+    static VehicleDepartureNetMsg VehicleDepartureFrame(ZoneEntity boat, int destX, int destY, int destZ) => new()
+    {
+        BoatObjectId = boat.ObjectId,
+        MoveSpeed = (int)(boat.Running ? boat.RunSpeed : boat.WalkSpeed),
+        RotationSpeed = DefaultBoatRotationSpeed,
+        DestX = destX,
+        DestY = destY,
+        DestZ = destZ
+    };
+
+    /// <summary>Mobius <c>VehiclePathPoint</c> default rotation when the datapack omits it.</summary>
+    internal const int DefaultBoatRotationSpeed = 4000;
 }
 
 enum BoatPhase : byte
