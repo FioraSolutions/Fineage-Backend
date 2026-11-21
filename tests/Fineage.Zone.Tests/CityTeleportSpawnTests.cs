@@ -55,7 +55,7 @@ public sealed class CityTeleportSpawnTests
     ];
 
     [Fact]
-    public void Town_and_village_maps_are_enabled_and_the_road_stays_off()
+    public void Town_and_village_maps_and_ti_road_are_enabled_in_the_datapack()
     {
         var catalog = SpawnCatalog.LoadDefault();
         Assert.True(catalog.GetMap(SpawnCatalog.DefaultMapId).Enabled);
@@ -67,7 +67,7 @@ public sealed class CityTeleportSpawnTests
             Assert.NotEmpty(map.Npcs);
         }
 
-        Assert.False(catalog.GetMap("ti_village_road").Enabled);
+        Assert.True(catalog.GetMap("ti_village_road").Enabled);
     }
 
     [Fact]

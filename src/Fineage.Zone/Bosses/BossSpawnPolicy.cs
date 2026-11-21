@@ -2,8 +2,8 @@ namespace Fineage.Zone.Bosses;
 
 /// <summary>
 /// Whether a catalog boss row should spawn on this Zone process (shared with spawns'
-/// <see cref="ZoneMapFilter"/> bounds). Datapack <see cref="BossDefinition.Enabled"/> false
-/// means "not in the narrow dev slice"; whole-world hosts still spawn rows inside the active filter.
+/// <see cref="ZoneMapFilter"/> bounds). <see cref="BossDefinition.Enabled"/> false keeps script-only
+/// bosses off until their system spawns them; whole-world hosts materialize every other retail row.
 /// </summary>
 public interface IBossSpawnPolicy
 {
@@ -19,19 +19,25 @@ public sealed class DatapackBossSpawnPolicy : IBossSpawnPolicy
 }
 
 /// <summary>
-/// Hosted default: every boss with a real spawn point in the active map filter (or all when unbounded).
-/// Script-only rows (no respawn window at 0,0) stay off unless explicitly enabled in JSON.
+/// Hosted default: retail bosses from <c>raidbosses.json</c> when whole-world maps are on. Single-map /
+/// smoke worlds spawn only <c>enabled</c> rows that also lie inside <see cref="ZoneMapFilter.BoundsList"/> when set.
 /// </summary>
 public sealed class MapFilteredBossSpawnPolicy(bool includeEnabledMaps) : IBossSpawnPolicy
 {
     public bool ShouldSpawn(BossDefinition definition)
     {
-        if (definition.Enabled)
-            return true;
         if (!includeEnabledMaps)
-            return false;
+        {
+            if (!definition.Enabled)
+                return false;
+            var bounds = ZoneMapFilter.BoundsList;
+            return bounds.Count > 0 && ZoneMapFilter.Contains(bounds, definition.X, definition.Y);
+        }
+
         if (!definition.HasRespawnWindow && definition is { X: 0, Y: 0, Z: 0 })
             return false;
+        if (definition.Enabled)
+            return true;
         return ZoneMapFilter.Contains(ZoneMapFilter.BoundsList, definition.X, definition.Y);
     }
 }

@@ -1,7 +1,7 @@
 {
   "mapId": "ti_village_road",
-  "enabled": false,
-  "comment": "Second TI map slice in datapack; not materialized until multi-map init lands.",
+  "enabled": true,
+  "comment": "TI gremlin road spawns (Mobius TalkingIslandMonsters supplement).",
   "npcs": [
     {
       "objectId": 50101,

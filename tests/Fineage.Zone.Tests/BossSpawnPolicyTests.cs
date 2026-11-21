@@ -12,7 +12,7 @@ public sealed class BossSpawnPolicyTests
         var policy = new MapFilteredBossSpawnPolicy(includeEnabledMaps: true);
 
         var kutus = catalog.Get(25_001);
-        Assert.False(kutus.Enabled);
+        Assert.True(kutus.Enabled);
         Assert.True(policy.ShouldSpawn(kutus));
 
         var antharas = catalog.Get(29_019);
@@ -27,7 +27,12 @@ public sealed class BossSpawnPolicyTests
     public void Datapack_policy_requires_json_enabled()
     {
         var kutus = BossCatalog.LoadDefault().Get(25_001);
-        Assert.False(DatapackBossSpawnPolicy.Instance.ShouldSpawn(kutus));
+        Assert.True(kutus.Enabled);
+        Assert.True(DatapackBossSpawnPolicy.Instance.ShouldSpawn(kutus));
+
+        var anakazel = BossCatalog.LoadDefault().Get(25_333);
+        Assert.False(anakazel.Enabled);
+        Assert.False(DatapackBossSpawnPolicy.Instance.ShouldSpawn(anakazel));
     }
 
     [Fact]
@@ -35,6 +40,9 @@ public sealed class BossSpawnPolicyTests
     {
         var kutus = BossCatalog.LoadDefault().Get(25_001);
         Assert.False(new MapFilteredBossSpawnPolicy(includeEnabledMaps: false).ShouldSpawn(kutus));
+
+        var anakazel = BossCatalog.LoadDefault().Get(25_333);
+        Assert.False(new MapFilteredBossSpawnPolicy(includeEnabledMaps: false).ShouldSpawn(anakazel));
     }
 
     [Fact]
