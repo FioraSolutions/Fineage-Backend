@@ -11,8 +11,11 @@ public sealed class ClanHallManagerBypassHandler : IBypassHandler
         "manage_vault",
         "functions",
         "support",
-        "goto",
     ];
+
+    /// <summary>Mobius hall-only verbs (e.g. <c>goto</c>) must not register globally — teleporters use <c>goto</c> too.</summary>
+    public static bool IsHallOnlyCommand(string token) =>
+        token.Equals("goto", StringComparison.OrdinalIgnoreCase);
 
     public BypassReply Handle(BypassCall call)
     {

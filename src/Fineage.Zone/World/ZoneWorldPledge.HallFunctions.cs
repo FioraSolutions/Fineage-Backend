@@ -359,38 +359,38 @@ public sealed partial class ZoneWorld
         return false;
     }
 
-  void SyncHallRegenForClan(ZoneClan clan)
-  {
-    double hp = 1d;
-    double mp = 1d;
-    long now = NowUnixMs();
-    if (clan.D.HallId > 0 &&
-        Halls(now).TryGetValue(clan.D.HallId, out var hall) &&
-        hall.OwnerClanId == clan.Id)
+    void SyncHallRegenForClan(ZoneClan clan)
     {
-      var hpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreHp);
-      if (hpFn is { Level: > 0 })
-        hp += hpFn.Level / 100d;
-      var mpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreMp);
-      if (mpFn is { Level: > 0 })
-        mp += mpFn.Level / 100d;
+        double hp = 1d;
+        double mp = 1d;
+        long now = NowUnixMs();
+        if (clan.D.HallId > 0 &&
+            Halls(now).TryGetValue(clan.D.HallId, out var hall) &&
+            hall.OwnerClanId == clan.Id)
+        {
+            var hpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreHp);
+            if (hpFn is { Level: > 0 })
+                hp += hpFn.Level / 100d;
+            var mpFn = FindHallFunction(hall, HallFunctionProtocol.FuncRestoreMp);
+            if (mpFn is { Level: > 0 })
+                mp += mpFn.Level / 100d;
+        }
+
+        foreach (int id in OnlineIds(clan))
+        {
+            if (!_byId.TryGetValue(id, out var player))
+                continue;
+            player.HallRegenHpMult = hp;
+            player.HallRegenMpMult = mp;
+        }
     }
 
-    foreach (int id in OnlineIds(clan))
+    (double HpMult, double MpMult) HallRegenBonus(ZoneEntity player)
     {
-      if (!_byId.TryGetValue(id, out var player))
-        continue;
-      player.HallRegenHpMult = hp;
-      player.HallRegenMpMult = mp;
+        if (player.HideoutId <= 0 || !PlayerInsideHallArea(player.HideoutId, player.X, player.Y))
+            return (1d, 1d);
+        return (player.HallRegenHpMult, player.HallRegenMpMult);
     }
-  }
-
-  (double HpMult, double MpMult) HallRegenBonus(ZoneEntity player)
-  {
-    if (player.HideoutId <= 0 || !PlayerInsideHallArea(player.HideoutId, player.X, player.Y))
-      return (1d, 1d);
-    return (player.HallRegenHpMult, player.HallRegenMpMult);
-  }
 
     internal string? HallFunctionCommandForTest(ZoneSession session, ZoneEntity player, ZoneEntity npc, string command)
     {
