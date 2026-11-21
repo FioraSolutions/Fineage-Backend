@@ -74,7 +74,7 @@ public sealed class SkillCombatParityTests
             if (row.EffectRange is int effect && got.EffectRange != effect)
                 mismatches.Add($"{row.SkillId} effectRange {got.EffectRange} != {effect}");
 
-            if (!defs.TryGet(row.SkillId, out var def) || def.CastCondition == null)
+            if (defs.Find(row.SkillId) is not { CastCondition: not null })
             {
                 var wantKinds = row.UsingKinds ?? [];
                 if (!got.UsingKinds.SequenceEqual(wantKinds))
