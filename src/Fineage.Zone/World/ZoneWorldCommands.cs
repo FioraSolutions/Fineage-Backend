@@ -28,36 +28,46 @@ public sealed partial class ZoneWorld
     /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
     void ApplyCommands(TickContext tick)
     {
-        bool applied = false;
         int budget = ZoneSimulationSettings.CommandsPerTick;
-        foreach (var submission in _ingress.TakeQueued(budget))
+        while (true)
         {
-            // Cancelled by its connection before this tick: it never happened.
-            if (submission.Reply.Task.IsCompleted)
-                continue;
+            var batch = _ingress.TakeQueued(budget);
+            if (batch.Count == 0)
+                break;
 
-            string? error = null;
-            Exception? failure = null;
-            try
+            bool applied = false;
+            foreach (var submission in batch)
             {
-                error = submission.Command.Apply(this, submission.Session, tick);
-            }
-            catch (Exception ex)
-            {
-                failure = ex;
-                FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
-                ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
+                // Cancelled by its connection before this tick: it never happened.
+                if (submission.Reply.Task.IsCompleted)
+                    continue;
+
+                string? error = null;
+                Exception? failure = null;
+                try
+                {
+                    error = submission.Command.Apply(this, submission.Session, tick);
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
+                    ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
+                }
+
+                if (submission.Command.Logged)
+                    _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
+                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+                _ingress.Record(submission, error, failure);
+                applied = true;
             }
 
-            if (submission.Command.Logged)
-                _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                    failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
-            _ingress.Record(submission, error, failure);
-            applied = true;
+            if (applied)
+                ReleaseAppliedCommandReplies();
+
+            if (budget <= 0 || _ingress.QueuedDepth == 0)
+                break;
         }
-
-        if (applied)
-            ReleaseAppliedCommandReplies();
     }
 
     /// <summary>

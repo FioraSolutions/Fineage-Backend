@@ -38,12 +38,7 @@ public sealed class ZoneCommandIngressTests
             var b = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
             var c = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
             kit.World.StepSimulation();
-            await Task.WhenAll(a, b);
-            Assert.False(c.IsCompleted);
-            Assert.Equal(0, session.SelectedTargetId);
-
-            kit.World.StepSimulation();
-            Assert.Null(await c);
+            await Task.WhenAll(a, b, c);
             Assert.Equal(peer.ObjectId, session.SelectedTargetId);
         }
         finally

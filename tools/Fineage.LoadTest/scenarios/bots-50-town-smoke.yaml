@@ -1,0 +1,5 @@
+name: bots-50-town-smoke
+botCount: 50
+rampUpSeconds: 10
+durationSeconds: 45
+spawnLayout: town

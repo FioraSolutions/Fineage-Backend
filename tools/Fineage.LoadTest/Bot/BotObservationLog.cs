@@ -35,8 +35,17 @@ public sealed class BotObservationLog
             _tracker.Apply(opcode, copy, at);
     }
 
-    public void RecordCommandSent(ushort opcode, DateTimeOffset at) =>
-        _tracker.NoteLocalCommand(opcode, at);
+    public void BindSelf(ulong selfEntityValue)
+    {
+        lock (_stateGate)
+            _tracker.BindSelf(selfEntityValue);
+    }
+
+    public void RecordCommandSent(ushort opcode, DateTimeOffset at)
+    {
+        lock (_stateGate)
+            _tracker.NoteLocalCommand(opcode, at);
+    }
 
     public int VisibleNpcObjectId()
     {
@@ -50,6 +59,7 @@ public sealed class BotObservationLog
 
     public sealed class EntityTracker
     {
+        ulong _selfEntityValue;
         readonly Dictionary<ulong, TrackedEntity> _byValue = new();
         long _spawnOrdinal;
         readonly List<PendingBroadcast> _pendingCombat = [];
@@ -111,6 +121,9 @@ public sealed class BotObservationLog
                 case NetOpcode.MoveState:
                 {
                     var m = NetCodec.DecodeMoveState(payload);
+                    if (_selfEntityValue != 0 && m.EntityValue != _selfEntityValue)
+                        break;
+                    ClosePendingCombat(at, m.EntityValue);
                     ulong key = m.EntityValue;
                     int oid = (int)m.EntityValue;
                     if (_byValue.TryGetValue(key, out var e))
@@ -180,8 +193,12 @@ public sealed class BotObservationLog
             }
         }
 
+        public void BindSelf(ulong selfEntityValue) => _selfEntityValue = selfEntityValue;
+
         void ClosePendingCombat(DateTimeOffset at, ulong actorValue)
         {
+            if (_selfEntityValue != 0 && actorValue != _selfEntityValue)
+                return;
             for (int i = _pendingCombat.Count - 1; i >= 0; i--)
             {
                 var p = _pendingCombat[i];

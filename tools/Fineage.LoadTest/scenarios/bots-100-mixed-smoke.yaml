@@ -1,0 +1,6 @@
+name: bots-100-mixed-smoke
+botCount: 100
+rampUpSeconds: 15
+durationSeconds: 45
+spawnLayout: town
+behaviorProfile: mixed

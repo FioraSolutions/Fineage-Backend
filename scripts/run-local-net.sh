@@ -18,8 +18,7 @@ export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS-}"
 export FINEAGE_ZONE_BOUNDS="${FINEAGE_ZONE_BOUNDS-}"
 # Visibility must be spatial for ~34k NPCs (Zone defaults AOI_CELL to 3000 if unset).
 export FINEAGE_ZONE_AOI_CELL="${FINEAGE_ZONE_AOI_CELL:-3000}"
-# Cap commands-stage work per 200 ms step under burst bot/player input (0 = unlimited, tests).
-export FINEAGE_ZONE_COMMANDS_PER_TICK="${FINEAGE_ZONE_COMMANDS_PER_TICK:-20}"
+# Optional: cap commands applied per in-stage batch (<c>FINEAGE_ZONE_COMMANDS_PER_TICK</c>, default unlimited).
 export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 # Non-loopback binds refuse DefaultSecret; local SoT binds 0.0.0.0 so set the shared secret.
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
