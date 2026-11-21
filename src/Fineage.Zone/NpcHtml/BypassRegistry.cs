@@ -79,6 +79,7 @@ public sealed class BypassRegistry
         registry.Register(new WyvernRideBypassHandler());
         registry.Register(new PetEvolveBypassHandler());
         registry.Register(new RiftBypassHandler());
+        registry.Register(new FestivalBypassHandler());
         registry.Register(new DoormanBypassHandler());
         return registry;
     }

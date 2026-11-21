@@ -6,6 +6,13 @@
   "levelScores": [60, 70, 100, 120, 150],
   "festivalLengthMinutes": 18,
   "cycleLengthMinutes": 228,
+  "firstSpawnMinutes": 2,
+  "firstSwarmMinutes": 5,
+  "secondSpawnMinutes": 9,
+  "secondSwarmMinutes": 12,
+  "chestSpawnMinutes": 15,
+  "minPartySize": 5,
+  "defaultRespawnSeconds": 60,
   "tiers": [
     {
       "id": 0,

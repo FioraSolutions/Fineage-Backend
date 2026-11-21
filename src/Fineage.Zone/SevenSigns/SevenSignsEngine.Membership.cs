@@ -154,6 +154,19 @@ public sealed partial class SevenSignsEngine
     /// <summary>
     /// Festival of Darkness score hook. The same amount is removed from the rival when the rival has at least that many festival points.
     /// </summary>
+    public void CreditFestivalAncientAdena(int characterId, int amount)
+    {
+        if (characterId <= 0 || amount <= 0)
+            return;
+        lock (_gate)
+        {
+            var row = Find(characterId);
+            long next = (long)row.AncientAdena + amount;
+            row.AncientAdena = next > int.MaxValue ? int.MaxValue : (int)next;
+            Persist(force: false);
+        }
+    }
+
     public void AddFestivalScore(SevenSignsCabal cabal, int amount)
     {
         if (amount <= 0 || cabal is not (SevenSignsCabal.Dawn or SevenSignsCabal.Dusk))

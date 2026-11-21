@@ -100,6 +100,8 @@ public sealed partial class ZoneWorld
                 return ApplyPetEvolve(session, player, npc, reply.ServiceId);
             case NpcServiceIntent.DimensionalRift:
                 return ApplyDimensionalRift(session, player, npc, reply);
+            case NpcServiceIntent.Festival:
+                return ApplyFestival(session, player, npc, reply);
             case NpcServiceIntent.DoormanOpen:
                 return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: true);
             case NpcServiceIntent.DoormanClose:

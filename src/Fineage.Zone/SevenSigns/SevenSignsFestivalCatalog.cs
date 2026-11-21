@@ -38,6 +38,13 @@ public sealed class SevenSignsFestivalCatalog
         IReadOnlyList<int> levelScores,
         int festivalLengthMinutes,
         int cycleLengthMinutes,
+        long firstSpawnMs,
+        long firstSwarmMs,
+        long secondSpawnMs,
+        long secondSwarmMs,
+        long chestSpawnMs,
+        int minPartySize,
+        int defaultRespawnSeconds,
         IEnumerable<FestivalTier> tiers)
     {
         OfferingItemId = offeringItemId;
@@ -46,6 +53,13 @@ public sealed class SevenSignsFestivalCatalog
         LevelScores = levelScores.ToArray();
         FestivalLengthMs = festivalLengthMinutes * 60_000L;
         CycleLengthMs = cycleLengthMinutes * 60_000L;
+        FirstSpawnMs = firstSpawnMs;
+        FirstSwarmMs = firstSwarmMs;
+        SecondSpawnMs = secondSpawnMs;
+        SecondSwarmMs = secondSwarmMs;
+        ChestSpawnMs = chestSpawnMs;
+        MinPartySize = minPartySize;
+        DefaultRespawnSeconds = defaultRespawnSeconds;
         _tiers = [];
         foreach (var tier in tiers)
             _tiers.Add(tier.Id, tier);
@@ -59,6 +73,13 @@ public sealed class SevenSignsFestivalCatalog
     public IReadOnlyList<int> LevelScores { get; }
     public long FestivalLengthMs { get; }
     public long CycleLengthMs { get; }
+    public long FirstSpawnMs { get; }
+    public long FirstSwarmMs { get; }
+    public long SecondSpawnMs { get; }
+    public long SecondSwarmMs { get; }
+    public long ChestSpawnMs { get; }
+    public int MinPartySize { get; }
+    public int DefaultRespawnSeconds { get; }
 
     public FestivalTier Tier(int id) => _tiers[id];
 
@@ -74,6 +95,8 @@ public sealed class SevenSignsFestivalCatalog
         if (file.Version != 1)
             throw new InvalidDataException("Festival catalog version is not supported.");
         var tiers = (file.Tiers ?? []).Select(MapTier).ToList();
+        static long MinMs(int minutes, int fallbackMinutes) =>
+            Math.Max(0, (minutes > 0 ? minutes : fallbackMinutes) * 60_000L);
         return new SevenSignsFestivalCatalog(
             file.OfferingItemId,
             file.OfferingValue,
@@ -81,6 +104,13 @@ public sealed class SevenSignsFestivalCatalog
             file.LevelScores ?? [],
             file.FestivalLengthMinutes,
             file.CycleLengthMinutes,
+            MinMs(file.FirstSpawnMinutes, 2),
+            MinMs(file.FirstSwarmMinutes, 5),
+            MinMs(file.SecondSpawnMinutes, 9),
+            MinMs(file.SecondSwarmMinutes, 12),
+            MinMs(file.ChestSpawnMinutes, 15),
+            file.MinPartySize > 0 ? file.MinPartySize : SevenSignsFestivalGuide.MinPartySize,
+            file.DefaultRespawnSeconds > 0 ? file.DefaultRespawnSeconds : 60,
             tiers);
     }
 
@@ -122,6 +152,13 @@ public sealed class SevenSignsFestivalCatalog
         public List<int>? LevelScores { get; set; }
         public int FestivalLengthMinutes { get; set; }
         public int CycleLengthMinutes { get; set; }
+        public int FirstSpawnMinutes { get; set; }
+        public int FirstSwarmMinutes { get; set; }
+        public int SecondSpawnMinutes { get; set; }
+        public int SecondSwarmMinutes { get; set; }
+        public int ChestSpawnMinutes { get; set; }
+        public int MinPartySize { get; set; }
+        public int DefaultRespawnSeconds { get; set; }
         public List<FestivalTierDto>? Tiers { get; set; }
     }
 

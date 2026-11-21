@@ -1,3 +1,5 @@
+using Fineage.Protocol;
+
 namespace Fineage.Zone.SevenSigns;
 
 /// <summary>Per-cycle high offering scores (Mobius <c>setFinalScore</c>) and active instances.</summary>
@@ -9,6 +11,7 @@ public sealed class SevenSignsFestivalBoard
     readonly SevenSignsFestivalInstance?[] _activeByParty = new SevenSignsFestivalInstance?[MaxPartySlots];
     readonly int[] _dawnHighScore = new int[5];
     readonly int[] _duskHighScore = new int[5];
+    readonly long[] _accumulatedBonus = new long[5];
 
     public SevenSignsFestivalBoard(SevenSignsFestivalCatalog catalog)
     {
@@ -24,8 +27,40 @@ public sealed class SevenSignsFestivalBoard
     {
         Array.Clear(_dawnHighScore);
         Array.Clear(_duskHighScore);
+        Array.Clear(_accumulatedBonus);
         for (int i = 0; i < _activeByParty.Length; i++)
             _activeByParty[i] = null;
+    }
+
+    public long AccumulatedBonus(int tierId) =>
+        tierId is >= 0 and < 5 ? _accumulatedBonus[tierId] : 0;
+
+    public void AddAccumulatedBonus(int tierId, int stoneItemId, int stoneAmount)
+    {
+        if (tierId is < 0 or >= 5 || stoneAmount <= 0)
+            return;
+        int each = stoneItemId switch
+        {
+            SevenSignsProtocol.BlueSealStoneId => SevenSignsProtocol.BlueSealStoneValue,
+            SevenSignsProtocol.GreenSealStoneId => SevenSignsProtocol.GreenSealStoneValue,
+            SevenSignsProtocol.RedSealStoneId => SevenSignsProtocol.RedSealStoneValue,
+            _ => 0
+        };
+        if (each <= 0)
+            return;
+        _accumulatedBonus[tierId] += (long)stoneAmount * each;
+    }
+
+    public long TakeAccumulatedShare(int tierId, int memberCount)
+    {
+        if (tierId is < 0 or >= 5 || memberCount <= 0)
+            return 0;
+        long pool = _accumulatedBonus[tierId];
+        if (pool <= 0)
+            return 0;
+        long share = pool / memberCount;
+        _accumulatedBonus[tierId] = Math.Max(0, pool - share);
+        return share;
     }
 
     public bool PartyInFestival(int partyId) =>
