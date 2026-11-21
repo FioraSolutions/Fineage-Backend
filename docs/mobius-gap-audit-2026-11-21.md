@@ -321,7 +321,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
-| 2 | Quest coverage | #709, #717, #718, (batch 4 open) | partial — +Q156/167/306/317 hand-port; Q634/635 blocked (rift); ~86 partial remain | No |
+| 2 | Quest coverage | #709, #717, #718, #720 | partial — +16 hand-ported; Q634/635 blocked (rift); Q255→Q998; ~86 partial remain | No |
 | 3 | Item augmentation | — | blocked | Yes (refine UI + server `AugmentationData`) |
 | 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
