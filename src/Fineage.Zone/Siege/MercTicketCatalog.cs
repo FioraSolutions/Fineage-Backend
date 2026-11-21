@@ -84,7 +84,12 @@ public sealed class MercTicketCatalog
 
         var rows = (file.Tickets ?? [])
             .Where(t => t.ItemId > 0 && t.NpcId > 0 && t.CastleId > 0)
-            .Select(t => new MercTicketRow(t.ItemId, t.NpcId, t.CastleId, t.MaxPerType > 0 ? t.MaxPerType : 1))
+            .Select(t => new MercTicketRow(
+                t.ItemId,
+                t.NpcId,
+                t.CastleId,
+                t.MaxPerType > 0 ? t.MaxPerType : 1,
+                t.RespawnSeconds >= 0 ? t.RespawnSeconds : 0))
             .ToArray();
         return new MercTicketCatalog(rows, max, file.DawnTicketMinItemId > 0 ? file.DawnTicketMinItemId : 6175);
     }
@@ -102,10 +107,12 @@ public sealed class MercTicketCatalog
         public int NpcId { get; set; }
         public int CastleId { get; set; }
         public int MaxPerType { get; set; }
+        /// <summary>Mobius <c>castle_siege_guards.respawnDelay</c> for hired posts (0 = no respawn).</summary>
+        public int RespawnSeconds { get; set; }
     }
 }
 
-public readonly record struct MercTicketRow(int ItemId, int NpcId, int CastleId, int MaxPerType);
+public readonly record struct MercTicketRow(int ItemId, int NpcId, int CastleId, int MaxPerType, int RespawnSeconds = 0);
 
 /// <summary>One hired defender placement (<c>castle_siege_guards</c> isHired = 1).</summary>
 public sealed class HiredSiegeGuard
