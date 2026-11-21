@@ -6,16 +6,26 @@ import json, sys, pathlib
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/items"
-if not src.is_dir():
-    src = ROOT / "ref/mobius-ct0-interlude/data/stats/items"
+_default_item_dirs = (
+    ROOT / "ref/mobius-ct0-interlude/L2J_Mobius_CT_0_Interlude/dist/game/data/stats/items",
+    ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/items",
+    ROOT / "ref/mobius-ct0-interlude/data/stats/items",
+)
+if len(sys.argv) > 1:
+    src = pathlib.Path(sys.argv[1])
+else:
+    src = next((p for p in _default_item_dirs if p.is_dir()), _default_item_dirs[0])
 path = ROOT / "data/items.json"
 data = json.loads(path.read_text())
 have = {i["id"] for i in data["items"]}
 
 want = set()
 for p in (ROOT / "data/drops").glob("*.json"):
+    if p.name.startswith("spawn-droplist-"):
+        continue
     d = json.loads(p.read_text())
+    if "death" not in d:
+        continue
     rows = [i for g in d["death"]["groups"] for i in g["items"]] + d.get("corpse", {}).get("items", [])
     want |= {r["itemId"] for r in rows if r["itemId"] not in have}
 

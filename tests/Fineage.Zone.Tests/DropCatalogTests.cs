@@ -1,4 +1,8 @@
+using System.Text.Json;
+using Fineage.Game;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Npcs;
+using Fineage.Zone.Spawns;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -13,6 +17,79 @@ public sealed class DropCatalogTests
         Assert.True(catalog.TryGet(MobiusDropTestSeed.TrainingHallGremlinNpcId, out var gremlin));
         Assert.Single(gremlin!.Death.Groups);
         Assert.Equal(57, gremlin.Death.Groups[0].Items[0].ItemId);
+    }
+}
+
+public sealed class DropSpawnCoverageTests
+{
+    [Fact]
+    public void Enabled_world_spawns_cover_monster_and_raidboss_droplists()
+    {
+        string dataDir = GameData.FindDataDirectory(AppContext.BaseDirectory)!;
+        var spawns = SpawnCatalog.Load(dataDir);
+        var templates = NpcCatalog.Load(dataDir);
+        var catalog = DropCatalog.Load(dataDir);
+        var excluded = LoadExclusions(dataDir);
+
+        var required = new HashSet<int>();
+        foreach (var map in spawns.Maps.Values.Where(m => m.Enabled))
+        {
+            foreach (var row in map.Npcs)
+            {
+                if (!templates.ById.TryGetValue(row.NpcId, out var template))
+                    continue;
+                if (!RequiresDropCatalog(template))
+                    continue;
+                required.Add(row.NpcId);
+            }
+        }
+
+        LoadRaidBossSpawns(dataDir, templates, required);
+
+        var missing = required.Where(id => !excluded.Contains(id) && !catalog.TryGet(id, out _))
+            .OrderBy(id => id)
+            .ToList();
+        Assert.True(missing.Count == 0,
+            $"Missing droplist for {missing.Count} spawned Monster/RaidBoss npc id(s): {string.Join(", ", missing.Take(40))}"
+            + (missing.Count > 40 ? $" … +{missing.Count - 40} more" : ""));
+    }
+
+    static bool RequiresDropCatalog(NpcTemplate template) =>
+        template.Attackable && template.Type is "Monster" or "RaidBoss";
+
+    static void LoadRaidBossSpawns(string dataDir, NpcCatalog templates, HashSet<int> required)
+    {
+        string path = Path.Combine(dataDir, "raidbosses.json");
+        if (!File.Exists(path))
+            return;
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        if (!doc.RootElement.TryGetProperty("bosses", out var bosses))
+            return;
+        foreach (var row in bosses.EnumerateArray())
+        {
+            if (row.TryGetProperty("enabled", out var enabled) && !enabled.GetBoolean())
+                continue;
+            if (!row.TryGetProperty("npcId", out var idEl))
+                continue;
+            int npcId = idEl.GetInt32();
+            if (!templates.ById.TryGetValue(npcId, out var template) || !RequiresDropCatalog(template))
+                continue;
+            required.Add(npcId);
+        }
+    }
+
+    static HashSet<int> LoadExclusions(string dataDir)
+    {
+        string path = Path.Combine(dataDir, DropCatalog.DropsDirectoryName, "spawn-droplist-exclusions.json");
+        if (!File.Exists(path))
+            return [];
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        if (!doc.RootElement.TryGetProperty("npcIds", out var ids))
+            return [];
+        var set = new HashSet<int>();
+        foreach (var id in ids.EnumerateArray())
+            set.Add(id.GetInt32());
+        return set;
     }
 }
 
