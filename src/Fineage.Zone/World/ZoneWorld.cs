@@ -246,7 +246,11 @@ public sealed partial class ZoneWorld
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
         _party = new PartyActor(new PartyMembers(this));
-        _olympiad = new OlympiadActor(olympiad ?? new OlympiadBoard(WallNow(), olympiadSettings ?? OlympiadSettings.FromEnvironment()),
+        var resolvedOlympiadSettings = olympiadSettings ?? OlympiadSettings.FromEnvironment();
+        _olympiadEnchantLimit = resolvedOlympiadSettings.EnchantLimit;
+        _olympiadDisableBlessedSpiritshots = resolvedOlympiadSettings.DisableBlessedSpiritshots;
+        _olympiadRestrictedItems = resolvedOlympiadSettings.RestrictedItems;
+        _olympiad = new OlympiadActor(olympiad ?? new OlympiadBoard(WallNow(), resolvedOlympiadSettings),
             LookupOlympiad, GlobalStream(RandomPurpose.Olympiad));
         _teleports = teleports ?? TeleportCatalog.LoadDefault();
         _gmTeleports = gmTeleports ?? GmTeleportCatalog.LoadDefault();

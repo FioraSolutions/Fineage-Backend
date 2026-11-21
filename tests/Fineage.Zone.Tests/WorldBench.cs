@@ -48,7 +48,9 @@ internal sealed class WorldBench
         Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null,
         bool includeEnabledMaps = false,
         Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null,
-        ulong? simulationSeed = null)
+        ulong? simulationSeed = null,
+        Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
@@ -87,6 +89,8 @@ internal sealed class WorldBench
             includeEnabledMaps: includeEnabledMaps,
             gmTeleports: gmTeleports,
             simulationSeed: simulationSeed,
+            regionExecutor: regionExecutor,
+            simulationObserver: simulationObserver,
             ledgerJournal: Ledger);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;

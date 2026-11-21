@@ -13,6 +13,9 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     readonly HashSet<int> _olympiadArena = [];
+    readonly int _olympiadEnchantLimit;
+    readonly bool _olympiadDisableBlessedSpiritshots;
+    readonly IReadOnlySet<int> _olympiadRestrictedItems;
     const int OlympiadEquipItemMessage = 1507, OlympiadUseItemMessage = 1508;
     /// <summary>Mobius removals: every skill whose reuse delay is at most 15 minutes is ready again on entry.</summary>
     const long OlympiadReuseResetMaxMs = 900_000;
@@ -22,7 +25,7 @@ public sealed partial class ZoneWorld
     /// be equipped or used inside an arena. Unequipping is always allowed.
     /// </summary>
     bool OlympiadRestrictedItem(int itemId) =>
-        IsHeroItem(itemId) || _olympiad.Board.Settings.RestrictedItems.Contains(itemId);
+        IsHeroItem(itemId) || _olympiadRestrictedItems.Contains(itemId);
 
     string? OlympiadItemRefused(ZoneEntity player, ItemInstance item)
     {
