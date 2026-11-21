@@ -351,8 +351,11 @@ namespace Fineage.Net.Contract
         public const ushort PackageSendRequest = 0x03C8;
         /// <summary>Client → zone: list sendable items for one recipient (Mobius RequestPackageSendableItemList 0x9E).</summary>
         public const ushort PackageSendableListRequest = 0x03C9;
-
         /// <summary>Zone → derby watchers: Interlude <c>MonRaceInfo</c> (0xDD).</summary>
         public const ushort MonRaceInfo = 0x03CA;
+        /// <summary>Client → zone: answer wedding engagement.</summary>
+        public const ushort WeddingEngageAnswer = 0x03CB;
+        /// <summary>Zone → client: wedding engagement prompt.</summary>
+        public const ushort WeddingEngageAsk = 0x03CC;
     }
 }

@@ -287,7 +287,16 @@ public enum LedgerTxKind
     MonsterRaceBet = 49,
 
     /// <summary>Monster race ticket payout: <c>Reference</c> is ticket object id.</summary>
-    MonsterRacePayout = 50
+    MonsterRacePayout = 50,
+
+    /// <summary>Wedding ceremony fee at Andromeda: <c>Reference</c> is couple id.</summary>
+    WeddingCeremonyFee = 51,
+
+    /// <summary><c>.gotolove</c> teleport fee: <c>Reference</c> is partner object id.</summary>
+    WeddingTeleportFee = 52,
+
+    /// <summary>Married divorce adena transfer: payer inventory → partner inventory.</summary>
+    WeddingDivorcePenalty = 53
 }
 
 /// <summary>

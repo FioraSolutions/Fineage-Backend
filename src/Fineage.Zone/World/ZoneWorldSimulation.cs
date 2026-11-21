@@ -173,6 +173,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(PartyActor.StageName, TickParty);
         ticks.AddWorldStage("pending-pickups", tick => TickPendingPickups(tick.NowUnixMs));
         ticks.AddWorldStage("pending-talks", tick => TickPendingTalks(tick.NowUnixMs));
+        ticks.AddWorldStage("wedding-teleport", tick => TickPendingWeddingTeleports(tick.NowUnixMs));
         ticks.AddWorldStage("fear", tick => TickFear(tick.NowUnixMs));
         ticks.AddRegionStage(_aggressionStage);
         ticks.AddWorldStage("leash", tick => TickLeash(tick.NowUnixMs));

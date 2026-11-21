@@ -104,12 +104,12 @@ internal sealed class NetTestKit
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>
     public readonly record struct Character(string Account, int CharacterId, string Name, int ClassId);
 
-    public Character Create(int classId = 25, int race = 1, int level = 1, int x = ElfX, int y = ElfY, int z = ElfZ)
+    public Character Create(int classId = 25, int race = 1, int sex = 0, int level = 1, int x = ElfX, int y = ElfY, int z = ElfZ)
     {
         string account = "net" + (++_n);
         Assert.Equal(AddAccountStatus.Created, Store.TryAddAccount(account, "hash", "salt", 1, null));
         var kit = CharacterInventory.Rows(Game.CreateStarterInventory(classId));
-        var status = Store.TryAddCharacter(account, "Hero" + _n, classId: classId, race: race, sex: 0, out var created,
+        var status = Store.TryAddCharacter(account, "Hero" + _n, classId: classId, race: race, sex: sex, out var created,
             items: kit, hairStyle: 0, hairColor: 0, face: 0, hasPosition: true, x: x, y: y, z: z,
             level: level, maxHp: 100, hp: 100, maxMp: 80, mp: 80);
         Assert.Equal(CreateCharacterStatus.Ok, status);
@@ -126,6 +126,6 @@ internal sealed class NetTestKit
     }
 
     public async Task<(ZoneSession Session, ZoneEntity Entity)> EnterAsync(
-        int classId = 25, int race = 1, int x = ElfX, int y = ElfY, int z = ElfZ, int level = 1) =>
-        await EnterAsync(Create(classId, race, level, x, y, z));
+        int classId = 25, int race = 1, int sex = 0, int x = ElfX, int y = ElfY, int z = ElfZ, int level = 1) =>
+        await EnterAsync(Create(classId, race, sex, level, x, y, z));
 }

@@ -18,6 +18,19 @@ public sealed partial class ZoneWorld
     static bool BanCovers(int chatType) =>
         chatType is ChatProtocol.All or ChatProtocol.Shout or ChatProtocol.Trade or ChatProtocol.Hero or ChatProtocol.Tell;
 
+    static bool TryParseVoicedWedding(string text, out string verb)
+    {
+        verb = "";
+        if (!text.StartsWith(".", StringComparison.Ordinal))
+            return false;
+        string body = text[1..].Trim();
+        int space = body.IndexOf(' ');
+        verb = space < 0 ? body : body[..space];
+        return verb.Equals(WeddingProtocol.Engage, StringComparison.OrdinalIgnoreCase)
+            || verb.Equals(WeddingProtocol.Divorce, StringComparison.OrdinalIgnoreCase)
+            || verb.Equals(WeddingProtocol.GoToLove, StringComparison.OrdinalIgnoreCase);
+    }
+
     public Task<string?> TrySayAsync(
         ZoneSession session, string? text, int chatType, DateTimeOffset now, CancellationToken ct, string? target = null)
     {
@@ -34,6 +47,11 @@ public sealed partial class ZoneWorld
         {
             session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
             notice = TryGmChat(speaker, session, normalized);
+        }
+        else if (TryParseVoicedWedding(normalized, out string weddingVerb))
+        {
+            session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
+            TryWeddingVoiced(session, weddingVerb);
         }
         else
         {

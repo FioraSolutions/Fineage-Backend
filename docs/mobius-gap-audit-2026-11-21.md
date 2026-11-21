@@ -217,6 +217,7 @@ Run: `python3 tools/quest_status.py --mobius .cache/l2j-mobius/L2J_Mobius_CT_0_I
 | Level / cursed whisper trade | 🟡 | Cursed weapon shout/trade block | `Say2` | Karma + partial curse checks | S |
 | Chat ban | 🟡 | Full `PunishmentManager` | `PunishmentManager.java` | Chat ban field only | M |
 | Silence / message refusal | ✅ | — | block list | `ZoneWorldFriends` | — |
+| Wedding (custom) | 🟡 | Cupid bow N/A in CT_0 script; jail/festival/rift gotolove gates | `mods/events/Wedding`, `CoupleManager` | `ZoneWorldWedding`, `docs/wedding-v2-protocol.md` | S |
 
 ### Items, shots, henna
 
@@ -323,14 +324,14 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
 | 2 | Quest coverage | #709, #717, #718, #720 | partial — +16 hand-ported; Q634/635 blocked (rift); Q255→Q998; ~86 partial remain | No |
-| 3 | Item augmentation | — | blocked | Yes (refine UI + server `AugmentationData`) |
-| 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
+| 3 | Item augmentation | #745 | server gates + packet doc (`FINEAGE_ALLOW_AUGMENTATION`); refine UI/data TBD | Yes |
+| 4 | Cursed weapons | #745 | server gates + packet doc (`CursedWeaponsState`); full cycle TBD | Yes |
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
 | 6 | Seven Signs Festival | — | blocked | No (instances) |
 | 7 | Dimensional rift | — | done | No |
 | 8 | Siege mercenaries | #722 | done | No |
 | 9 | Siege golem (noble) | #722 | done | No |
-| 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
+| 10 | Skill enchant (+skills) | #745 | server gates + packet doc (`FINEAGE_ALLOW_SKILL_ENCHANT`); trainer flow TBD | Yes |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
 | 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
@@ -338,10 +339,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
 | 14 | Guard / town AI | #738 | done — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
 | 17 | Saga quest fidelity | #742 | done — helper timers, 4339 cast, archon skill-see | No |
-| 3 | Item augmentation | (PR pending) | server slice — `FINEAGE_ALLOW_AUGMENTATION`, packet doc | Yes |
-| 4 | Cursed weapons | (PR pending) | server slice — `CursedWeaponsState`, packet doc | Yes |
-| 10 | Skill enchant (+skills) | (PR pending) | server slice — `FINEAGE_ALLOW_SKILL_ENCHANT`, packet doc | Yes |
-| 2 | Quest batches | partial PRs | **ongoing** (this agent) | No |
+| 2 | Quest batches | #709, #717, #718, #720 | partial — calc hunts Q169/316/341/347 on dev; **blocked** on next `gen_quests_*.py` (missing `npcId-00.htm` html) | No |
 | 16a | Monster Derby Track | #736 | done — `MonsterRaceActor`, Race Manager HTML, `MonRaceInfo` `0x03CA` | Yes — `MonRaceInfo` `0xDD` wire in `docs/client-packet-contracts.md` |
 | 18 | GM / punishment tooling | — | **other agent** | No |
 | 19 | Compound skill conditions | — | **other agent** | No |
@@ -355,7 +353,7 @@ Avoid duplicate PRs on these rows:
 
 | Owner | Ranks / work |
 |-------|----------------|
-| **This agent (f138 main queue)** | 14–17 merged (#738, #742) → 3/4/10 + packet doc → quest batches |
+| **This agent (f138 main queue)** | 14–17, 3/4/10 (#738, #742, #745) merged; quest gens blocked on HTML import |
 | **Other agents** | 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
 
 Refresh `origin/dev` before branching; others may land parallel merges.
