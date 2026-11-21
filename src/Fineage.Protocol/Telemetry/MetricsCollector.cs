@@ -12,6 +12,7 @@ public sealed class MetricsCollector : IDisposable
     long _tickOverruns;
     long _ticksSkipped;
     long _regionHandoffs;
+    readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
     int _online;
     int _commandIngressQueued;
 
@@ -49,6 +50,9 @@ public sealed class MetricsCollector : IDisposable
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
+                LedgerAdjustments = _ledgerAdjustments
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 Stages = _stages
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
@@ -107,6 +111,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.tick.stage.failures":
                     Stage(StageOf(tags)).Failures += value;
+                    break;
+                case "fineage.ledger.adjustments":
+                    _ledgerAdjustments[MoveKindOf(tags)] = _ledgerAdjustments.GetValueOrDefault(MoveKindOf(tags)) + value;
                     break;
             }
         }
@@ -167,6 +174,17 @@ public sealed class MetricsCollector : IDisposable
         foreach (KeyValuePair<string, object?> tag in tags)
         {
             if (tag.Key == "stage" && tag.Value is string value)
+                return value;
+        }
+
+        return "";
+    }
+
+    static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        foreach (KeyValuePair<string, object?> tag in tags)
+        {
+            if (tag.Key == "move_kind" && tag.Value is string value)
                 return value;
         }
 
