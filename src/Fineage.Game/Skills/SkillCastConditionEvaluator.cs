@@ -124,7 +124,13 @@ public static class SkillCastConditionEvaluator
             case "cansweep":
                 return Bool(val) && ctx.CanSweep();
             case "cansummon":
-                return Bool(val) && ctx.CanSummon();
+                if (!Bool(val))
+                    return true;
+                if (ctx.CanSummon())
+                    return true;
+                if (ctx.HasSummon)
+                    ctx.SetRefusalMessage(SkillCastConditionRefusal.MultiplePetsOrServitors);
+                return false;
             case "cansummonsiegegolem":
                 return Bool(val) && ctx.CanSummonSiegeGolem();
             case "cancreatebase":
@@ -244,9 +250,20 @@ public static class SkillCastConditionEvaluator
         };
 }
 
+/// <summary>Mobius condition refusal system message ids surfaced to the zone layer.</summary>
+public static class SkillCastConditionRefusal
+{
+    /// <summary>Mobius <c>SystemMessageId.YOU_MAY_NOT_USE_MULTIPLE_PETS_OR_SERVITORS_AT_THE_SAME_TIME</c>.</summary>
+    public const int MultiplePetsOrServitors = 580;
+}
+
 /// <summary>Runtime facts for <see cref="SkillCastConditionEvaluator"/> (zone fills this per cast).</summary>
 public abstract class SkillCastConditionContext
 {
+    public int? RefusalMessageId { get; private set; }
+
+    public void SetRefusalMessage(int sysMsgId) => RefusalMessageId ??= sysMsgId;
+
     public abstract void LogUnsupported(string message);
     public abstract bool UsingKinds(string[] kinds);
     public abstract bool UsingSlot(string[] slots);
@@ -266,6 +283,7 @@ public abstract class SkillCastConditionContext
     public abstract bool InsideZone(int zoneId);
     public abstract bool CanSweep();
     public abstract bool CanSummon();
+    public abstract bool HasSummon { get; }
     public abstract bool CanSummonSiegeGolem();
     public abstract bool CanCreateSiegeBase();
     public abstract bool CanTakeCastle();

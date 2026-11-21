@@ -200,9 +200,14 @@ public sealed partial class ZoneWorld
 
         // Mobius Skill.checkCondition (single <see cref="SkillCastConditionEvaluator"/> path).
         var condTarget = ResolveSkillConditionTarget(session, player, request, liveTemplate);
-        if (!SkillCastConditionsMet(session, player, condTarget, liveTemplate, request.SkillId))
+        if (!SkillCastConditionsMet(session, player, condTarget, liveTemplate, request.SkillId, out int? refuseMsg))
         {
-            SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
+            if (refuseMsg is int msgId)
+                SelfLine(session, msgId, msgId == SkillCastConditionRefusal.MultiplePetsOrServitors
+                    ? "You may not use multiple pets or servitors at the same time."
+                    : $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
+            else
+                SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
         }
 

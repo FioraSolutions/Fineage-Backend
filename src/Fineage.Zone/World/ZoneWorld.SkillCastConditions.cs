@@ -27,13 +27,21 @@ public sealed partial class ZoneWorld
         ZoneEntity player,
         ZoneEntity? target,
         Fineage.Game.Skills.SkillDefinition template,
-        int skillId)
+        int skillId,
+        out int? refusalMessageId)
     {
+        refusalMessageId = null;
         if (template.CastCondition != null)
         {
             if (IsFishingSkill(skillId))
                 return true;
-            return SkillCastConditionEvaluator.Met(template.CastCondition, new SkillCastCtx(this, player, target));
+            var ctx = new SkillCastCtx(this, player, target);
+            if (!SkillCastConditionEvaluator.Met(template.CastCondition, ctx))
+            {
+                refusalMessageId = ctx.RefusalMessageId;
+                return false;
+            }
+            return true;
         }
 
         if (template.UsingKinds.Length > 0 && !IsFishingSkill(skillId) && !Wearing(player, template.UsingKinds))
@@ -135,6 +143,7 @@ public sealed partial class ZoneWorld
         public override bool InsideZone(int zoneId) => world.InsideZoneIdForTests(player, zoneId);
         public override bool CanSweep() => world.CanSweepForSkillCheck(player, target);
         public override bool CanSummon() => world.CanSummonForSkillCheck(player);
+        public override bool HasSummon => world.SummonOf(player) != null;
         public override bool CanSummonSiegeGolem() => world.CanSummonSiegeGolemForSkillCheck(player);
         public override bool CanCreateSiegeBase() => world.CanCreateSiegeBaseForSkillCheck(player);
         public override bool CanTakeCastle() => world.CanTakeCastleForSkillCheck(player);
