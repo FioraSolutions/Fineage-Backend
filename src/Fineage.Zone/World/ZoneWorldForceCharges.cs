@@ -51,6 +51,7 @@ public sealed partial class ZoneWorld
                     player.ForceCharges.ToString());
         }
 
+        RestartForceChargeDecay(player);
         BroadcastForceCharges(player);
         ZoneLog.Info($"force-charge object={player.ObjectId} charges={player.ForceCharges}/{cap}");
     }
@@ -77,7 +78,39 @@ public sealed partial class ZoneWorld
         else
             player.ForceCharges -= amount;
 
+        RestartForceChargeDecay(player);
         BroadcastForceCharges(player);
+    }
+
+    void RestartForceChargeDecay(ZoneEntity player)
+    {
+        if (player.ForceCharges <= 0)
+        {
+            player.ForceChargeResetAtUnixMs = 0;
+            return;
+        }
+
+        player.ForceChargeResetAtUnixMs = NowUnixMs() + ForceChargeRules.DecayMs;
+    }
+
+    internal void ClearForceCharges(ZoneEntity player)
+    {
+        if (player.ForceCharges <= 0 && player.ForceChargeResetAtUnixMs <= 0)
+            return;
+        player.ForceCharges = 0;
+        player.ForceChargeResetAtUnixMs = 0;
+        BroadcastForceCharges(player);
+    }
+
+    void TickForceChargeDecay(long now)
+    {
+        foreach (var player in Players())
+        {
+            if (player.ForceCharges <= 0 || player.ForceChargeResetAtUnixMs <= 0)
+                continue;
+            if (now >= player.ForceChargeResetAtUnixMs)
+                ClearForceCharges(player);
+        }
     }
 
     void BroadcastForceCharges(ZoneEntity player)

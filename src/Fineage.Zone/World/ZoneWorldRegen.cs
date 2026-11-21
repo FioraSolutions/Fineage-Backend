@@ -11,6 +11,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     Task? _simulation;
+    long _stepStartedTimestamp;
 
     public void StartSimulation(CancellationToken shutdown)
     {
@@ -18,6 +19,62 @@ public sealed partial class ZoneWorld
             return;
         _affinity.Drive();
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
+        _ = Task.Run(() => StepWatchdogAsync(shutdown));
+    }
+
+    /// <summary>Test hook: production affinity (handlers must go through the ingress) without starting the loop.</summary>
+    internal void DriveForTest() => _affinity.Drive();
+
+    /// <summary>
+    /// What the watchdog logs when the current step outlasts <see cref="ZoneSimulationSettings.StepWatchdogSeconds"/>:
+    /// the tick, how long it has run, and the region bodies still in flight (an empty list names a world stage, a
+    /// collect step or the barrier). Null while no step is overdue or none runs.
+    /// </summary>
+    internal string? StepWatchdogReport(TimeSpan? threshold = null)
+    {
+        long started = Volatile.Read(ref _stepStartedTimestamp);
+        if (started == 0)
+            return null;
+        var elapsed = Stopwatch.GetElapsedTime(started);
+        if (elapsed < (threshold ?? TimeSpan.FromSeconds(ZoneSimulationSettings.StepWatchdogSeconds)))
+            return null;
+        var bodies = _simulationTicks.InFlightRegionBodies;
+        string detail = bodies.Count == 0
+            ? "no region bodies in flight: a world stage, a collect step or the stage barrier is stuck"
+            : "region bodies still running: " + string.Join("; ", bodies);
+        return $"simulation step tick={_simulationTicks.Tick} has run {elapsed.TotalSeconds:F1}s without finishing: {detail}";
+    }
+
+    /// <summary>
+    /// The step that never returns used to be indistinguishable from an idle world: the loop sat in
+    /// <see cref="StepSimulation"/> and nothing was logged. The watchdog turns it into a concrete error naming the
+    /// stuck stage and region bodies, and repeats while the step lasts.
+    /// </summary>
+    async Task StepWatchdogAsync(CancellationToken ct)
+    {
+        string? last = null;
+        try
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
+                string? report = StepWatchdogReport();
+                if (report == null)
+                {
+                    last = null;
+                    continue;
+                }
+                if (report != last)
+                {
+                    last = report;
+                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
+                    ZoneLog.Error(report);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     /// <summary>
@@ -35,6 +92,7 @@ public sealed partial class ZoneWorld
                 long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
                 await Task.Delay(TimeSpan.FromMilliseconds(wait), ct).ConfigureAwait(false);
                 long started = Stopwatch.GetTimestamp();
+                Volatile.Write(ref _stepStartedTimestamp, started);
                 try
                 {
                     StepSimulation();
@@ -45,6 +103,10 @@ public sealed partial class ZoneWorld
                     // Movement, combat and regen all live on this loop, so one bad save must not end it.
                     FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step"));
                     ZoneLog.Warn($"simulation step tick={_simulationTicks.Tick} failed outside stage isolation: {ex}");
+                }
+                finally
+                {
+                    Volatile.Write(ref _stepStartedTimestamp, 0L);
                 }
                 FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }

@@ -36,6 +36,8 @@ public sealed class DropCatalog
         var byNpcId = new Dictionary<int, DropNpcDefinition>();
         foreach (string path in Directory.EnumerateFiles(dropsDir, "*.json"))
         {
+            if (Path.GetFileName(path).StartsWith("spawn-droplist-", StringComparison.Ordinal))
+                continue;
             var definition = ReadFile(path);
             if (byNpcId.ContainsKey(definition.NpcId))
                 throw new InvalidDataException($"Duplicate droplist npcId {definition.NpcId} in {path}.");

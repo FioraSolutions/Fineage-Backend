@@ -92,6 +92,7 @@ var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
     ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments);
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;

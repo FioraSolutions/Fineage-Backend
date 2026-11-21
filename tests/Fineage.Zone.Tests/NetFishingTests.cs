@@ -366,8 +366,8 @@ public sealed class NetFishingTests
         Assert.NotNull(registry.Find("FishingChampionship"));
         var reply = registry.Find("FishSkillList")!.Handle(Call("FishSkillList"));
         Assert.Equal(NpcServiceIntent.FishSkillList, reply.Service);
-        var page = registry.Find("FishingChampionship")!.Handle(Call("FishingChampionship"));
-        Assert.Contains("Championship", page.Html);
+        var champ = registry.Find("FishingChampionship")!.Handle(Call("FishingChampionship"));
+        Assert.Equal(NpcServiceIntent.FishingChampionship, champ.Service);
         await Task.CompletedTask;
     }
 

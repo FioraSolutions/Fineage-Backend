@@ -1,0 +1,11 @@
+{
+  "events": [
+    {
+      "id": "default-placeholder",
+      "startUnixMs": 0,
+      "endUnixMs": 0,
+      "maxKillerLevelGap": 9,
+      "groups": []
+    }
+  ]
+}

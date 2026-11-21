@@ -69,14 +69,14 @@
           },
           {
             "itemId": 1884,
-            "min": 3,
-            "max": 3,
+            "min": 1,
+            "max": 1,
             "chance": 40.0236
           },
           {
             "itemId": 1878,
-            "min": 2,
-            "max": 2,
+            "min": 1,
+            "max": 1,
             "chance": 30.0179
           },
           {
@@ -99,8 +99,8 @@
     "items": [
       {
         "itemId": 1061,
-        "min": 4,
-        "max": 10,
+        "min": 1,
+        "max": 2,
         "chance": 48.6166
       },
       {
