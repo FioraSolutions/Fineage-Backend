@@ -35,34 +35,13 @@ def mobius_quest_source_root() -> pathlib.Path:
     )
 
 
-def _mobius_page_name_variants(name: str) -> list[str]:
-    """Mobius exports often drop leading zeros on page suffixes (30333-2 vs 30333-02)."""
-    base = re.sub(r"\.html?$", "", name, flags=re.I)
-    variants: list[str] = [name, base]
-    matched = re.match(r"^(?P<npc>\d+)-(?P<page>0*)(?P<rest>\d+)(?P<suffix>[a-z]?)$", base, flags=re.I)
-    if matched:
-        npc = matched.group("npc")
-        rest = matched.group("rest")
-        suffix = matched.group("suffix")
-        compact = f"{npc}-{rest}{suffix}"
-        padded = f"{npc}-0{rest}{suffix}" if len(rest) == 1 else None
-        for stem in filter(None, (compact, padded, base)):
-            for ext in ("", ".htm", ".html"):
-                candidate = stem if ext == "" else f"{stem}{ext}"
-                if candidate not in variants:
-                    variants.append(candidate)
-    else:
-        for ext in (".htm", ".html"):
-            alt = f"{base}{ext}"
-            if alt not in variants:
-                variants.append(alt)
-    return variants
-
-
 def mobius_quest_html(qroot: pathlib.Path, script: str, qid: int, name: str) -> str:
     """Load one Mobius quest dialog and rewrite Quest bypass links for Fineage."""
     src = qroot / script
-    candidates = [src / v for v in _mobius_page_name_variants(name)]
+    if re.search(r"\.html?$", name, re.I):
+        candidates = [src / name]
+    else:
+        candidates = [src / f"{name}{ext}" for ext in ("", ".htm", ".html")]
     for path in candidates:
         if path.is_file():
             text = path.read_text(encoding="utf-8").strip()
