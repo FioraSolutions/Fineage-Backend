@@ -104,6 +104,11 @@ public static class PledgeProtocol
 
     public const int WarMinClanLevel = 3;
     public const int WarMinMembers = 15;
+    /// <summary>Mobius CT_0: after either side stops a war, neither may declare on the other for five days.</summary>
+    public const int WarCooldownDays = 5;
+    public const long WarCooldownMillis = WarCooldownDays * 24L * 3600 * 1000;
+    /// <summary>Mobius clan war death: members of the declaring clan lose one quarter of normal death XP when killed by the enemy clan.</summary>
+    public const double WarDeathExpShare = 0.25d;
 
     public const int CrestKindPledge = 0;
     public const int CrestKindLarge = 1;

@@ -18,6 +18,33 @@ public sealed partial class ZoneWorld
 
     bool MutualWar(int a, int b) => a != 0 && b != 0 && a != b && Declared(a, b) && Declared(b, a);
 
+    bool WarCooldownActive(ZoneClan clan, int enemyClanId, long now) =>
+        clan.D.WarCooldownUntilUnixMs.TryGetValue(enemyClanId, out long until) && until > now;
+
+    void SetWarCooldown(ZoneClan clan, int enemyClanId, long now)
+    {
+        clan.D.WarCooldownUntilUnixMs[enemyClanId] = now + PledgeProtocol.WarCooldownMillis;
+    }
+
+    void ClearWarCooldown(ZoneClan clan, int enemyClanId) => clan.D.WarCooldownUntilUnixMs.Remove(enemyClanId);
+
+    /// <summary>
+    /// Mobius clan-war death XP: only the clan that declared war takes the reduced quarter loss when an enemy clan kills
+    /// its member (one-sided or mutual). Academy members are excluded.
+    /// </summary>
+    internal double ClanWarDeathExpShare(ZoneEntity victim, ZoneEntity killer)
+    {
+        if (victim.Kind != ZoneEntityKind.Player || killer.Kind != ZoneEntityKind.Player)
+            return 1d;
+        if (victim.PledgeType == PledgeProtocol.Academy || killer.PledgeType == PledgeProtocol.Academy)
+            return 1d;
+        int victimClan = ClanIdFor(victim.ObjectId);
+        int killerClan = ClanIdFor(killer.ObjectId);
+        if (victimClan == 0 || killerClan == 0 || victimClan == killerClan)
+            return 1d;
+        return Declared(victimClan, killerClan) ? PledgeProtocol.WarDeathExpShare : 1d;
+    }
+
     /// <summary>Mobius war PvP: both in clans at mutual war and neither is an academy member.</summary>
     bool AtMutualWar(ZoneEntity a, ZoneEntity b) =>
         a.Kind == ZoneEntityKind.Player && b.Kind == ZoneEntityKind.Player &&
@@ -152,13 +179,20 @@ public sealed partial class ZoneWorld
             SelfLine(session, 1564, sizeText);
             return PledgeProtocol.Conditions;
         }
+        long now = NowUnixMs();
         if (clan.D.WarTargets.Contains(target.Id))
+        {
+            SelfLine(session, 628, $"You have already been at war with the {target.Name} clan: 5 days must pass before you can declare war again.", target.Name);
+            return PledgeProtocol.AlreadyAtWar;
+        }
+        if (WarCooldownActive(clan, target.Id, now))
         {
             SelfLine(session, 628, $"You have already been at war with the {target.Name} clan: 5 days must pass before you can declare war again.", target.Name);
             return PledgeProtocol.AlreadyAtWar;
         }
 
         clan.D.WarTargets.Add(target.Id);
+        ClearWarCooldown(clan, target.Id);
         if (!SaveClan(clan))
         {
             clan.D.WarTargets.Remove(target.Id);
@@ -205,9 +239,11 @@ public sealed partial class ZoneWorld
         }
 
         clan.D.WarTargets.Remove(target.Id);
+        SetWarCooldown(clan, target.Id, now);
+        SetWarCooldown(target, clan.Id, now);
         if (surrender)
             target.D.WarTargets.Remove(clan.Id);
-        if (!SaveClan(clan) || (surrender && !SaveClan(target)))
+        if (!SaveClan(clan) || !SaveClan(target))
             return ClanProtocol.Store;
 
         if (surrender)
@@ -273,6 +309,12 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
             return RelationOf(subject, viewer);
+    }
+
+    internal double ClanWarDeathExpShareForTest(ZoneEntity victim, ZoneEntity killer)
+    {
+        using (_affinity.Step())
+            return ClanWarDeathExpShare(victim, killer);
     }
 
     internal bool SetMutualWarForTest(int a, int b)
