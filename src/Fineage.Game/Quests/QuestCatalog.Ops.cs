@@ -38,6 +38,9 @@ public sealed partial class QuestCatalog
                 ? new ChangeClassOp(cls)
                 : throw new InvalidDataException($"{where} quest {questId} change_class needs classId 0..136."),
             "despawn" => new DespawnOp(),
+            "cast_skill" => op.ItemId > 0 && op.Count is int lvl and >= 1 and <= 100
+                ? new CastSkillOp(op.ItemId, lvl)
+                : throw new InvalidDataException($"{where} quest {questId} cast_skill needs itemId=skillId and count=level 1..100."),
             "pick_random" => ReadVarKey(op.Key, where, questId, "pick_random key") is { } pool &&
                              ReadVarKey(op.Name, where, questId, "pick_random name") is { } target
                 ? new PickRandomOp(pool, target)
@@ -89,9 +92,22 @@ public sealed partial class QuestCatalog
             throw new InvalidDataException($"{where} quest {questId} summon needs either x/y/z or atPlayer, not both.");
         if (op.DespawnSec is < 0 or > 86_400)
             throw new InvalidDataException($"{where} quest {questId} summon despawnSec must be 0..86400.");
+        IReadOnlyList<QuestScheduledSay>? scheduled = null;
+        if (op.ScheduledSays is { Count: > 0 })
+        {
+            var list = new List<QuestScheduledSay>(op.ScheduledSays.Count);
+            foreach (var row in op.ScheduledSays)
+            {
+                if (row.DelayMs < 0 || string.IsNullOrWhiteSpace(row.Text) || row.Text.Length > 500)
+                    throw new InvalidDataException($"{where} quest {questId} summon scheduledSays need delayMs >= 0 and text 1..500.");
+                list.Add(new QuestScheduledSay(row.DelayMs, row.Text));
+            }
+            scheduled = list;
+        }
+
         return new SummonOp(new QuestSummon(op.NpcId, op.X, op.Y, op.Z, op.AtPlayer, op.DespawnSec ?? 0, op.Owned,
             op.SoloGuard, op.Say, op.GoneSay, op.GuardSay,
-            ReadVarMap(op.GoneVars, where, questId), ReadVarMap(op.DeadVars, where, questId)));
+            ReadVarMap(op.GoneVars, where, questId), ReadVarMap(op.DeadVars, where, questId), scheduled));
     }
 
     static IReadOnlyDictionary<string, string>? ReadVarMap(Dictionary<string, string>? rows, string where, int questId)

@@ -337,7 +337,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 15 | Zone types (swamp/damage/NL) | #731 | done — imported JSON + movement/sim | No |
 | 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
 | 14 | Guard / town AI | #738 | in review (this agent) — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
-| 17 | Saga quest fidelity | — | **queued** (this agent) | No |
+| 17 | Saga quest fidelity | (this agent) | in progress — helper timers, 4339 cast, archon skill-see | No |
 | 3 | Item augmentation | — | **queued** (this agent, server + packet doc) | Yes |
 | 4 | Cursed weapons | — | **queued** (this agent, server + packet doc) | Yes |
 | 10 | Skill enchant (+skills) | — | **queued** (this agent, server + packet doc) | Yes |

@@ -85,6 +85,12 @@ public sealed partial class QuestCatalog
         public HtmlByVarDto? HtmlByVar { get; set; }
     }
 
+    sealed class ScheduledSayDto
+    {
+        public int DelayMs { get; set; }
+        public string? Text { get; set; }
+    }
+
     sealed class OpDto
     {
         public string? Op { get; set; }
@@ -124,6 +130,7 @@ public sealed partial class QuestCatalog
         public string? GuardSay { get; set; }
         public Dictionary<string, string>? GoneVars { get; set; }
         public Dictionary<string, string>? DeadVars { get; set; }
+        public List<ScheduledSayDto>? ScheduledSays { get; set; }
         public string? Kind { get; set; }
         public string? Html { get; set; }
         public int EventId { get; set; }
