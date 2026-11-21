@@ -36,10 +36,16 @@ public sealed class GridAoi : IAoi
 
     public void Move(int objectId, int x, int y)
     {
-        long key = CellKey(x, y);
-        if (_entityCell.TryGetValue(objectId, out long prev) && prev == key)
+        if (AtCell(objectId, x, y))
             return;
         Enter(objectId, x, y);
+    }
+
+    /// <summary>Whether <paramref name="x"/>/<paramref name="y"/> stays in the entity's current AOI cell.</summary>
+    public bool AtCell(int objectId, int x, int y)
+    {
+        long key = CellKey(x, y);
+        return _entityCell.TryGetValue(objectId, out long prev) && prev == key;
     }
 
     public void Leave(int objectId)
