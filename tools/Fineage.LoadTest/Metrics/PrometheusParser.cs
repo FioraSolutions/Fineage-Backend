@@ -21,6 +21,7 @@ public sealed class PrometheusSample
     public Dictionary<string, double> CommandApplyP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, double> MovePhaseP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, double> CommandReleaseP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, long> CommandsDeferred { get; init; } = new(StringComparer.Ordinal);
     public long OutboundDropped { get; init; }
     public long BytesOut { get; init; }
     public long BytesIn { get; init; }
@@ -63,6 +64,7 @@ public static class PrometheusParser
             CommandApplyP99Ms = ParseLabeledP99(text, "fineage_command_apply_ms", "command"),
             MovePhaseP99Ms = ParseLabeledP99(text, "fineage_command_move_phase_ms", "phase"),
             CommandReleaseP99Ms = ParseLabeledP99(text, "fineage_command_release_phase_ms", "phase"),
+            CommandsDeferred = ParseLabeledCounters(text, "fineage_command_deferred_total", "reason"),
             OutboundDropped = ParseCounterSum(text, "fineage_outbound_dropped_total"),
             BytesOut = ParseCounterSum(text, "fineage_bytes_out_total"),
             BytesIn = ParseCounterSum(text, "fineage_bytes_in_total"),
@@ -125,6 +127,15 @@ public static class PrometheusParser
     static Dictionary<string, double> ParseStageP99(string text) =>
         ParseLabeledP99(text, "fineage_tick_stage_ms", "stage",
             @"fineage_tick_stage_ms_bucket\{stage=""([^""]+)"",le=""([^""]+)""\}\s+(\d+)");
+
+    static Dictionary<string, long> ParseLabeledCounters(string text, string metric, string labelKey)
+    {
+        var result = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (Match match in Regex.Matches(text,
+                     $"^{Regex.Escape(metric)}\\{{{labelKey}=\"([^\"]+)\"\\}}\\s+(\\d+)", RegexOptions.Multiline))
+            result[match.Groups[1].Value] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        return result;
+    }
 
     static double Quantile(SortedDictionary<double, long> cumulative, long count, double q)
     {

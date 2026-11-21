@@ -51,6 +51,7 @@ public sealed class PrometheusAggregate
     public Dictionary<string, double> MovePhaseP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, double> CommandApplyP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, double> CommandReleaseP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, long> CommandsDeferred { get; init; } = new(StringComparer.Ordinal);
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
 
@@ -77,6 +78,7 @@ public sealed class PrometheusAggregate
             MovePhaseP99Ms = MergeStageP99(samples, s => s.MovePhaseP99Ms),
             CommandApplyP99Ms = MergeStageP99(samples, s => s.CommandApplyP99Ms),
             CommandReleaseP99Ms = MergeStageP99(samples, s => s.CommandReleaseP99Ms),
+            CommandsDeferred = MergeDeferred(samples),
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples)
         };
@@ -89,6 +91,18 @@ public sealed class PrometheusAggregate
         long bytes = samples.Max(s => s.BytesOut);
         int online = Math.Max(1, samples.Max(s => s.ZoneOnline));
         return bytes / (double)online;
+    }
+
+    static Dictionary<string, long> MergeDeferred(IReadOnlyList<PrometheusSample> samples)
+    {
+        var merged = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (var sample in samples)
+        {
+            foreach (var (reason, count) in sample.CommandsDeferred)
+                merged[reason] = Math.Max(merged.GetValueOrDefault(reason), count);
+        }
+
+        return merged;
     }
 
     static Dictionary<string, double> MergeStageP99(
@@ -190,6 +204,14 @@ public static class ReportWriter
                 sb.AppendLine("### Command release phase p99 (ms)");
                 foreach (var (phase, ms) in r.Server.CommandReleaseP99Ms.OrderByDescending(kv => kv.Value))
                     sb.AppendLine($"- `{phase}`: {ms:0.0}");
+            }
+
+            if (r.Server.CommandsDeferred.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("### Commands deferred (re-queued before apply)");
+                foreach (var (reason, count) in r.Server.CommandsDeferred.OrderByDescending(kv => kv.Value))
+                    sb.AppendLine($"- `{reason}`: {count}");
             }
         }
 

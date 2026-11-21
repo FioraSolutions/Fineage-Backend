@@ -67,6 +67,21 @@ YAML files under `tools/Fineage.LoadTest/scenarios/` control:
 ## Metrics
 
 - **Server:** scrape `FINEAGE_ZONE_METRICS_PORT` (`GET /metrics`) — tick histogram, overruns, stage histograms, ingress queue (`fineage_command_ingress_queued`), packet rates, rejects/errors.
+- **Command ingress profiling (p99 branch):** labeled histograms `fineage_command_apply_ms{command}`, `fineage_command_move_phase_ms{phase}` (`geo`, `geo_find_path`, `reconcile_knownlist`, `fanout_same_cell`, `plan_diff`), `fineage_command_release_phase_ms{phase}` (`flush_inventory`, `fanout_drain`), and counter `fineage_command_deferred_total{reason}`. Reports include p99 per label plus deferred counts.
+- **Command→fanout (client):** harness latency from tracked `MoveInput` / attack / skill send until the bot receives its own `MoveState` or combat ack (see `BotObservationLog`).
+
+### Ingress latency profile (step 1, 50-bot town, local VM, budgets 90 ms / 24 per tick)
+
+| Signal | Typical |
+| --- | --- |
+| Client command→fanout p50 | ~180 ms |
+| Client command→fanout p99 | ~2.5–2.9 s |
+| Server `request:move` apply p99 | &lt;0.5 ms (histogram floor) |
+| Move sub-phases (geo / AOI / plan_diff) p99 | &lt;0.5 ms |
+| Release (`fanout_drain`) p99 | &lt;0.5 ms |
+| Tick p99 | often pegged at 1000 ms bucket |
+
+**Takeaway:** burst move latency is dominated by **tick scheduling / ingress deferral and outbound delivery**, not per-move geo or knownlist work inside `Apply`. Tune `FINEAGE_ZONE_COMMANDS_BUDGET_MS` / `FINEAGE_ZONE_COMMANDS_PER_TICK` only after checking `fineage_command_deferred_total` and tick overruns, not by micro-optimizing AOI first.
 - **Client:** per-bot action RTT, disconnect and stuck counts.
 - **Process:** RSS / VmHWM via `/proc` for the zone PID passed to `--zone-pid`.
 - **Logs:** `local-logs/login-net.log`, `local-logs/zone-net.log` scanned for exceptions, stage failures, ledger, desync, deadlock, timeout, `handler_error`.
