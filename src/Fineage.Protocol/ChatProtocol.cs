@@ -45,6 +45,9 @@ public static class ChatProtocol
     /// </summary>
     public const int MaxTextLength = 105;
 
+    /// <summary>Mobius GeneralConfig.MINIMUM_CHAT_LEVEL default: shout channel opens at this level.</summary>
+    public const int ShoutMinLevel = 20;
+
     /// <summary>Mobius ChatTrade: trade channel opens at this level.</summary>
     public const int TradeMinLevel = 20;
 

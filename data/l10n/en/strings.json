@@ -4,6 +4,7 @@
   "chat.not_supported": "not supported yet",
   "chat.prohibited": "Chatting is currently prohibited.",
   "chat.trade_level": "Players can use Trade chat after Lv. {0}.",
+  "chat.shout_level": "Players can Shout after Lv. {0}.",
   "chat.not_party": "You are not in a party.",
   "chat.not_clan": "You are not in a clan.",
   "chat.not_alliance": "You are not in an alliance.",

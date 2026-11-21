@@ -122,6 +122,8 @@ public sealed partial class ZoneWorld
                 SayLocal(speaker, text);
                 return null;
             case ChatProtocol.Shout:
+                if (speaker.Level < ChatProtocol.ShoutMinLevel)
+                    return Plain("chat.shout_level", $"Players can Shout after Lv. {ChatProtocol.ShoutMinLevel}.", ChatProtocol.ShoutMinLevel.ToString());
                 SayRegion(speaker, chatType, text, speakerMustNotBlock: true);
                 return null;
             case ChatProtocol.Trade:
