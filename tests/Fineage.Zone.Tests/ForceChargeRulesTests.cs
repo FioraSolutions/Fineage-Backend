@@ -24,6 +24,12 @@ public sealed class ForceChargeRulesTests
     }
 
     [Fact]
+    public void Decay_interval_matches_mobius_reset_charges_task()
+    {
+        Assert.Equal(600_000, ForceChargeRules.DecayMs);
+    }
+
+    [Fact]
     public void Missing_charge_param_fails()
     {
         var row = new SkillEffectCatalog.Effect("FocusEnergy", "", 100, 1);

@@ -430,6 +430,7 @@ public sealed partial class ZoneWorld
         // Mobius stopAllEffectsExceptThoseThatLastThroughDeath: buffs of the old class do not carry over.
         bool hadAbnormals = player.Abnormals.Count > 0;
         player.Abnormals.Clear();
+        ClearForceCharges(player);
         player.BaseRunSpeed = template.RunSpeed;
         player.BaseWalkSpeed = template.WalkSpeed;
         player.Dex = template.Dex;

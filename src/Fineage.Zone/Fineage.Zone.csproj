@@ -79,6 +79,7 @@
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-dots.json" Link="data\skill-dots.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-effects.json" Link="data\skill-effects.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-effect-coverage.json" Link="data\skill-effect-coverage.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-stat-effects.json" Link="data\skill-stat-effects.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-persist-flags.json" Link="data\skill-persist-flags.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
