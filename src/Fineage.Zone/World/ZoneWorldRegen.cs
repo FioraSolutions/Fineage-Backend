@@ -54,7 +54,9 @@ public sealed partial class ZoneWorld
         }
         finally
         {
-            _ingress.Close($"the zone simulation stopped at tick {_simulationTicks.Tick}");
+            ShutdownSaveOnlinePlayers();
+            FlushLedgerOnShutdown();
+            CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }
     }
 
