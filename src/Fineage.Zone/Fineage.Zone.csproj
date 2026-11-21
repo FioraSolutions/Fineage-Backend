@@ -53,6 +53,8 @@
     <Content Include="..\..\data\swamp-zones.json" Link="data\swamp-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\damage-zones.json" Link="data\damage-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\no-landing-zones.json" Link="data\no-landing-zones.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\walking-routes.json" Link="data\walking-routes.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\boats.json" Link="data\boats.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />

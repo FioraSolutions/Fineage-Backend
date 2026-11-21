@@ -334,14 +334,31 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | #724 | done — CH siege schedule + `SiegeInfo` by hall id | No |
 | 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
-| 14 | Guard / town AI | (this agent, branch `cursor/guard-town-ai-rank14-f138`) | in progress — karma scan, guard ally hate, optional aggro mob (`FINEAGE_GUARD_ATTACK_AGGRO_MOB`) | No |
-| 15 | Zone types (swamp/damage/NL) | (this PR) | done — imported JSON + movement/sim | No |
-| 16 | Boats + walking NPCs | — | **next** | Yes — `docs/client-packet-contracts.md` |
-| 16a | Monster Derby Track | — | queued after #16 | Yes — `MonRaceInfo` `0xDD` |
-| 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
-| 18 | GM / punishment tooling | — | partial | No |
-| 19 | Compound skill conditions | — | pending | No |
-| 20 | Freight warehouse | — | blocked | No (no account freight persistence) |
+| 15 | Zone types (swamp/damage/NL) | #731 | done — imported JSON + movement/sim | No |
+| 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
+| 14 | Guard / town AI | #738 | in review (this agent) — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
+| 17 | Saga quest fidelity | — | **queued** (this agent) | No |
+| 3 | Item augmentation | — | **queued** (this agent, server + packet doc) | Yes |
+| 4 | Cursed weapons | — | **queued** (this agent, server + packet doc) | Yes |
+| 10 | Skill enchant (+skills) | — | **queued** (this agent, server + packet doc) | Yes |
+| 2 | Quest batches | partial PRs | **ongoing** (this agent) | No |
+| 16a | Monster Derby Track | — | **other agent** — do not duplicate | Yes — `MonRaceInfo` `0xDD` |
+| 18 | GM / punishment tooling | — | **other agent** | No |
+| 19 | Compound skill conditions | — | **other agent** | No |
+| 20 | Freight warehouse | — | **other agent** | No (no account freight persistence) |
+| 6 | Seven Signs Festival | — | **other agent** | No (instances) |
+| 7 | Dimensional rift | — | **other agent** | No (unblocks Q634/635) |
+
+### Parallel ownership (2026-11-21)
+
+Avoid duplicate PRs on these rows:
+
+| Owner | Ranks / work |
+|-------|----------------|
+| **This agent (f138 main queue)** | 15 done, **#734** done → **#738** rank 14 → 17 → 3/4/10 + packet doc → quest batches |
+| **Other agents** | 16a Derby, 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
+
+Refresh `origin/dev` before branching; others may land parallel merges.
 
 ---
 
