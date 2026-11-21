@@ -58,7 +58,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static IEnumerable<NpcAiSupportSkill> EnumerateSignetHostileSkills(NpcAiSupportRow row)
+    static IEnumerable<NpcAiSupportSkill> EnumerateSignetHostileSkills(NpcAiSupportCatalog.NpcAiSupportRow row)
     {
         if (row.Debuff is { Count: > 0 } debuffs)
         {
