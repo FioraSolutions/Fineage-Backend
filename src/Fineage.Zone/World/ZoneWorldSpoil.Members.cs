@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
@@ -9,7 +10,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    void DistributeSweepAdena(ZoneParty party, ZoneEntity sweeper, ZoneEntity corpse, int adena, HashSet<int> touched)
+    void DistributeSweepAdena(ZoneParty party, ZoneEntity sweeper, ZoneEntity corpse, int adena, HashSet<int> touched, int npcId)
     {
         var inRange = new List<ZoneEntity>();
         foreach (int id in party.MemberIds)
@@ -22,7 +23,7 @@ public sealed partial class ZoneWorld
         }
         if (inRange.Count == 0)
         {
-            GrantSweepStack(sweeper, WarehouseRules.AdenaItemId, adena, touched);
+            GrantSweepStack(sweeper, WarehouseRules.AdenaItemId, adena, touched, npcId);
             return;
         }
 
@@ -30,17 +31,26 @@ public sealed partial class ZoneWorld
         if (share <= 0)
             return;
         foreach (var m in inRange)
-            GrantSweepStack(m, WarehouseRules.AdenaItemId, share, touched);
+            GrantSweepStack(m, WarehouseRules.AdenaItemId, share, touched, npcId);
     }
 
-    void GrantSweepStack(ZoneEntity looter, int itemId, int count, HashSet<int> touched)
+    void GrantSweepStack(ZoneEntity looter, int itemId, int count, HashSet<int> touched, int npcId)
     {
         if (looter.Inventory == null || looter.Session == null || count <= 0)
             return;
-        var added = looter.Inventory.Add(itemId, count);
-        var update = InventoryMessages.Update(InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
-        touched.Add(looter.ObjectId);
+        RecordBagChange(
+            looter,
+            LedgerTxKind.SweepLoot,
+            LedgerAccount.Of(SystemAccount.DropSource),
+            () =>
+            {
+                var added = looter.Inventory.Add(itemId, count);
+                var update = InventoryMessages.Update(InventoryChange.Add, added);
+                NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
+                touched.Add(looter.ObjectId);
+                return true;
+            },
+            _ => npcId);
     }
 
     bool CanReceiveSweep(ZoneEntity player, List<Fineage.Zone.Drops.DropStack> stacks)
