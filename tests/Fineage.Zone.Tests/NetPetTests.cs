@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using System.Linq;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
@@ -77,6 +78,38 @@ public sealed class NetPetTests
         Assert.Equal(35, owner.Inventory.Find(CollarOf(owner, WindFlute))!.EnchantLevel);
         var info = (SummonInfoNetMsg)bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSummonInfo)).Last()[1]!;
         Assert.False(info.Mountable);
+    }
+
+    [Fact]
+    public async Task Pet_exchange_ticket_multisell_gives_the_matching_baby_collar()
+    {
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Ticket", new StoredItem(7583, 1, -1));
+        const int PetManagerNpc = 30828;
+        var npc = bench.World.SpawnFolkForTests(PetManagerNpc, X + 80, Y, Z);
+        Assert.Null(await owner.BypassAsync(npc.ObjectId, "Multisell 101"));
+        var multi = (MultiSellListMsg)bench.Rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)).Last()[1]!;
+        int buffalo = multi.Entries.Single(e => e.Ingredients.Any(i => i.ItemId == 7583)).EntryId;
+        Assert.Null(await owner.MultiSell(npc.ObjectId, 101, buffalo, 1));
+        Assert.Equal(0, owner.Inventory.CountOf(7583));
+        Assert.Equal(1, owner.Inventory.CountOf(BabyPanpipe));
+    }
+
+    [Fact]
+    public async Task Hatchling_flute_can_evolve_to_strider_bugle_at_level_55()
+    {
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Grow", new StoredItem(WindFlute, 1, -1, 55));
+        var hatch = await SummonAsync(bench, owner, WindFlute);
+        bench.World.AddPetExpForTest(owner.Player, 0);
+        Assert.Equal(55, hatch.Level);
+        Assert.True(bench.World.TryEvolvePetCollar(owner.Session, owner.Player, WindFlute, StriderBugle, 55));
+        Assert.Null(bench.World.SummonOfForTest(owner.Player));
+        Assert.Equal(1, owner.Inventory.CountOf(StriderBugle));
+        Assert.Equal(0, owner.Inventory.CountOf(WindFlute));
+        var strider = await SummonAsync(bench, owner, StriderBugle);
+        Assert.Equal(WindStrider, strider.NpcId);
+        Assert.Equal(55, strider.Level);
     }
 
     [Fact]
