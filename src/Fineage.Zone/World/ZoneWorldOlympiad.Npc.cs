@@ -1,5 +1,6 @@
 using System.Globalization;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
 
@@ -155,10 +156,20 @@ public sealed partial class ZoneWorld
             case 10:
                 {
                     int passes = _olympiad.Board.TakePasses(player.ObjectId);
-                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Board.Settings.RewardItemId, out _))
+                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Board.Settings.RewardItemId, out var _))
                     {
-                        GiveItem(session, player.Inventory, _olympiad.Board.Settings.RewardItemId, passes);
-                        SaveInventory(session, player.Inventory);
+                        int itemId = _olympiad.Board.Settings.RewardItemId;
+                        RecordBagChange(
+                            player,
+                            LedgerTxKind.OlympiadGrant,
+                            LedgerAccount.Of(SystemAccount.Olympiad),
+                            () =>
+                            {
+                                GiveItem(session, player.Inventory, itemId, passes);
+                                SaveInventory(session, player.Inventory);
+                                return true;
+                            },
+                            _ => itemId);
                     }
                     return null;
                 }
@@ -221,8 +232,17 @@ public sealed partial class ZoneWorld
     {
         if (player.Inventory == null || !_game.Items.TryGet(itemId, out _))
             return;
-        GiveItem(session, player.Inventory, itemId, 1);
-        SaveInventory(session, player.Inventory);
+        RecordBagChange(
+            player,
+            LedgerTxKind.OlympiadGrant,
+            LedgerAccount.Of(SystemAccount.Olympiad),
+            () =>
+            {
+                GiveItem(session, player.Inventory, itemId, 1);
+                SaveInventory(session, player.Inventory);
+                return true;
+            },
+            _ => itemId);
     }
 
     /// <summary>Hero on/off: flag, hero skills, skill list, UserInfo / CharInfo.</summary>

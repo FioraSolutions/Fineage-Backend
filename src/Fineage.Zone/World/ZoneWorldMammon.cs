@@ -1,3 +1,5 @@
+using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 using Fineage.Zone.SevenSigns;
@@ -161,13 +163,22 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        Take(inventory, SevenSignsProtocol.AncientAdenaItemId, amount, changes);
-        if (changes.Count > 0)
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
-        GiveItem(session, inventory, SevenSignsProtocol.AdenaItemId, amount);
-        ZoneLog.Info($"[mammon] aa->adena object={player.ObjectId} amount={amount}");
-        SendHtml(session, player, npc, Page("blkmrkt_5.htm"));
+        RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsExchange,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                Take(inventory, SevenSignsProtocol.AncientAdenaItemId, amount, changes);
+                if (changes.Count > 0)
+                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
+                GiveItem(session, inventory, SevenSignsProtocol.AdenaItemId, amount);
+                ZoneLog.Info($"[mammon] aa->adena object={player.ObjectId} amount={amount}");
+                SendHtml(session, player, npc, Page("blkmrkt_5.htm"));
+                return true;
+            },
+            _ => amount);
         return null;
     }
 }

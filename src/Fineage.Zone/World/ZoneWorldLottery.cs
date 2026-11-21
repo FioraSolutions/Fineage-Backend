@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 using Fineage.Zone.Lottery;
@@ -180,23 +181,34 @@ public sealed partial class ZoneWorld
             return LotteryProtocol.Adena;
         }
 
-        var ticket = Lottery.Sell(mask, now);
-        if (ticket == null)
-        {
-            SelfLine(session, LotteryProtocol.NoLongerAvailable, "Tickets for the current lottery are no longer available.");
-            return LotteryProtocol.Closed;
-        }
+        LotteryTicket? sold = null;
+        string? error = RecordBagChange(
+            player,
+            LedgerTxKind.LotteryBuy,
+            LedgerAccount.Of(SystemAccount.Lottery),
+            () =>
+            {
+                var ticket = Lottery.Sell(mask, now);
+                if (ticket == null)
+                {
+                    SelfLine(session, LotteryProtocol.NoLongerAvailable, "Tickets for the current lottery are no longer available.");
+                    return LotteryProtocol.Closed;
+                }
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        Take(inventory, LotteryProtocol.AdenaItemId, (int)price, changes);
-        var item = inventory.Add(LotteryProtocol.TicketItemId, 1, ticket.Serial);
-        changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, item));
-        FanInventory(session, Collapse(changes));
-        SaveInventory(session, inventory);
-        string name = item.Template.Name;
-        SelfLine(session, LotteryProtocol.Earned, $"You have earned {name}.", name);
-        ZoneLog.Info($"[lottery] ticket object={player.ObjectId} lottery={ticket.Number} serial={ticket.Serial} numbers={string.Join(',', LotteryBoard.NumbersOf(mask))}");
-        return null;
+                sold = ticket;
+                var changes = new List<InventoryUpdateEntryMsg>();
+                Take(inventory, LotteryProtocol.AdenaItemId, (int)price, changes);
+                var item = inventory.Add(LotteryProtocol.TicketItemId, 1, ticket.Serial);
+                changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, item));
+                FanInventory(session, Collapse(changes));
+                SaveInventory(session, inventory);
+                string name = item.Template.Name;
+                SelfLine(session, LotteryProtocol.Earned, $"You have earned {name}.", name);
+                ZoneLog.Info($"[lottery] ticket object={player.ObjectId} lottery={ticket.Number} serial={ticket.Serial} numbers={string.Join(',', LotteryBoard.NumbersOf(mask))}");
+                return (string?)null;
+            },
+            _ => sold?.Number ?? Lottery.Number);
+        return error;
     }
 
     string LotteryResults(ZoneEntity player)
@@ -231,21 +243,30 @@ public sealed partial class ZoneWorld
         var ticket = Lottery.Ticket(item.EnchantLevel);
         if (ticket != null && ticket.Number >= Lottery.Number)
             return LotteryProtocol.NotATicket;
-        long adena = ticket != null && Lottery.Check(ticket.Serial) is { } win ? win.Adena : 0;
 
-        SelfLine(session, LotteryProtocol.Disappeared, $"{item.Template.Name} has disappeared.", item.Template.Name);
-        int left = inventory.TakeOne(item);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-            InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, item));
-        if (adena > 0)
-        {
-            GiveItem(session, inventory, LotteryProtocol.AdenaItemId, (int)Math.Min(int.MaxValue, adena));
-            SelfLine(session, 52, $"You have earned {adena} adena.", adena.ToString(CultureInfo.InvariantCulture));
-        }
-        SaveInventory(session, inventory);
-        if (ticket != null)
-            Lottery.Forget(ticket.Serial);
-        ZoneLog.Info($"[lottery] claim object={player.ObjectId} serial={ticket?.Serial} adena={adena}");
-        return null;
+        int serial = ticket?.Serial ?? item.EnchantLevel;
+        return RecordBagChange(
+            player,
+            LedgerTxKind.LotteryPrize,
+            LedgerAccount.Of(SystemAccount.Lottery),
+            () =>
+            {
+                long adena = ticket != null && Lottery.Check(ticket.Serial) is { } win ? win.Adena : 0;
+                SelfLine(session, LotteryProtocol.Disappeared, $"{item.Template.Name} has disappeared.", item.Template.Name);
+                int left = inventory.TakeOne(item);
+                NetBridge?.FanoutInventoryUpdate([player.ObjectId],
+                    InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, item));
+                if (adena > 0)
+                {
+                    GiveItem(session, inventory, LotteryProtocol.AdenaItemId, (int)Math.Min(int.MaxValue, adena));
+                    SelfLine(session, 52, $"You have earned {adena} adena.", adena.ToString(CultureInfo.InvariantCulture));
+                }
+                SaveInventory(session, inventory);
+                if (ticket != null)
+                    Lottery.Forget(ticket.Serial);
+                ZoneLog.Info($"[lottery] claim object={player.ObjectId} serial={ticket?.Serial} adena={adena}");
+                return (string?)null;
+            },
+            _ => serial);
     }
 }
