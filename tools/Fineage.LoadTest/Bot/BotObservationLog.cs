@@ -123,7 +123,8 @@ public sealed class BotObservationLog
                     var m = NetCodec.DecodeMoveState(payload);
                     if (_selfEntityValue != 0 && m.EntityValue != _selfEntityValue)
                         break;
-                    ClosePendingCombat(at, m.EntityValue);
+                    ClosePendingCommand(at, m.EntityValue, NetOpcode.MoveInput);
+                    ClosePendingCommand(at, m.EntityValue, NetOpcode.AttackRequest, NetOpcode.UseSkill);
                     ulong key = m.EntityValue;
                     int oid = (int)m.EntityValue;
                     if (_byValue.TryGetValue(key, out var e))
@@ -170,13 +171,13 @@ public sealed class BotObservationLog
                 case NetOpcode.AttackState:
                 {
                     var a = NetCodec.DecodeAttackState(payload);
-                    ClosePendingCombat(at, a.AttackerValue);
+                    ClosePendingCommand(at, a.AttackerValue, NetOpcode.AttackRequest);
                     break;
                 }
                 case NetOpcode.MagicSkillUse:
                 {
                     var c = NetCodec.DecodeMagicSkillUse(payload);
-                    ClosePendingCombat(at, (ulong)(uint)c.CasterObjectId);
+                    ClosePendingCommand(at, (ulong)(uint)c.CasterObjectId, NetOpcode.UseSkill);
                     break;
                 }
                 case NetOpcode.SocialAction:
@@ -195,7 +196,7 @@ public sealed class BotObservationLog
 
         public void BindSelf(ulong selfEntityValue) => _selfEntityValue = selfEntityValue;
 
-        void ClosePendingCombat(DateTimeOffset at, ulong actorValue)
+        void ClosePendingCommand(DateTimeOffset at, ulong actorValue, params ushort[] opcodes)
         {
             if (_selfEntityValue != 0 && actorValue != _selfEntityValue)
                 return;
@@ -208,7 +209,7 @@ public sealed class BotObservationLog
                     continue;
                 }
 
-                if (p.Opcode is NetOpcode.AttackRequest or NetOpcode.UseSkill)
+                if (opcodes.Contains(p.Opcode))
                 {
                     _commandToFanoutMs.Add((at - p.SentAt).TotalMilliseconds);
                     _pendingCombat.RemoveAt(i);
