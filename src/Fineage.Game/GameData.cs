@@ -29,6 +29,7 @@ public sealed partial class GameData
         QuestCatalog quests,
         SkillCatalog skills,
         SkillTreeCatalog skillTrees,
+        TransferSkillTreeCatalog transferSkillTrees,
         SkillEnchantCatalog skillEnchants,
         RecipeCatalog recipes)
     {
@@ -38,6 +39,7 @@ public sealed partial class GameData
         Quests = quests;
         Skills = skills;
         SkillTrees = skillTrees;
+        TransferSkillTrees = transferSkillTrees;
         SkillEnchants = skillEnchants;
         Recipes = recipes;
     }
@@ -55,6 +57,8 @@ public sealed partial class GameData
 
     public SkillTreeCatalog SkillTrees { get; }
 
+    public TransferSkillTreeCatalog TransferSkillTrees { get; }
+
     public SkillEnchantCatalog SkillEnchants { get; }
 
     public RecipeCatalog Recipes { get; }
@@ -71,9 +75,13 @@ public sealed partial class GameData
         var quests = QuestCatalog.LoadPack(Path.Combine(dataDirectory, QuestCatalog.DirectoryName), items);
         var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
         var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));
+        var transferPath = Path.Combine(dataDirectory, TransferSkillTreeCatalog.FileName);
+        var transferSkillTrees = File.Exists(transferPath)
+            ? TransferSkillTreeCatalog.Load(transferPath)
+            : TransferSkillTreeCatalog.Empty;
         var skillEnchants = LoadSkillEnchants(Path.Combine(dataDirectory, SkillEnchantCatalog.FileName));
         var recipes = RecipeCatalog.Load(Path.Combine(dataDirectory, RecipeCatalog.FileName));
-        return new GameData(items, kits, classes, quests, skills, skillTrees, skillEnchants, recipes);
+        return new GameData(items, kits, classes, quests, skills, skillTrees, transferSkillTrees, skillEnchants, recipes);
     }
 
     public static GameData LoadDefault()
@@ -122,6 +130,7 @@ public sealed partial class GameData
             quests ?? QuestCatalog.Empty,
             skills: SkillCatalog.Parse("{\"skills\":[]}", "memory"),
             skillTrees: SkillTreeCatalog.Parse("{\"trees\":[]}", "memory"),
+            transferSkillTrees: TransferSkillTreeCatalog.Empty,
             skillEnchants: SkillEnchantCatalog.Empty,
             recipes: RecipeCatalog.Empty);
     }

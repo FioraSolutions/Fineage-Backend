@@ -77662,6 +77662,30 @@
       "weight": 0
     },
     {
+      "id": 15307,
+      "name": "Holy Pomander - Cardinal",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_bishop_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
+      "id": 15308,
+      "name": "Holy Pomander - Eva's Saint",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_elder_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
+      "id": 15309,
+      "name": "Holy Pomander - Shillien Saint",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_silienelder_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
       "id": 15533,
       "name": "Quest Item 15533",
       "kind": "etc",

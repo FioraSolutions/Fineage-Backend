@@ -32,6 +32,7 @@ data/*
 !data/skill-dots.json
 !data/skill-trees.json
 !data/skill-enchant-tree.json
+!data/skill-transfer-trees.json
 !data/henna.json
 !data/npcs.json
 !data/dungeons.json

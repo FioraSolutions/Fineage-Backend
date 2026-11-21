@@ -182,6 +182,13 @@ public sealed partial class ZoneWorld
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
+        NetBridge?.FanoutMagicSkillUse(KnownNetPlayersOf(player), new MagicSkillUseMsg
+        {
+            CasterObjectId = player.ObjectId,
+            TargetObjectId = player.ObjectId,
+            SkillId = ClassChangeAnimationSkillId,
+            SkillLevel = 1
+        });
 
         // Mobius broadcastUserInfo: peers see the new class.
         List<int>? netPeers = null;
