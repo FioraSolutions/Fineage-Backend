@@ -100,6 +100,7 @@ public sealed partial class ZoneWorld
 
             // Mobius onMagicLaunchedTimer → broadcastPacket(MagicSkillLaunched) to the caster's knownlist.
             FanoutSkillLaunched(player, hit.Combat.SkillId, hit.Level, target);
+            ApplyFocusEnergyAfterCombatHit(player, hit.Combat.SkillId, hit.Level);
         }
 
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
