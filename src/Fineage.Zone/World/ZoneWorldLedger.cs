@@ -107,6 +107,13 @@ public sealed partial class ZoneWorld
         return holdings;
     }
 
+    static LedgerHoldings HoldingsOf(PlayerInventory inventory) => LedgerInventoryChange.HoldingsFrom(inventory);
+
+    /// <summary>Delegates to <see cref="LedgerInventoryChange.PostChange"/> for partial-class ledger sites and tests.</summary>
+    internal static void PostChange(
+        LedgerMove move, LedgerAccount account, LedgerHoldings before, LedgerHoldings after, LedgerAccount counterpart) =>
+        LedgerInventoryChange.PostChange(move, account, before, after, counterpart);
+
     /// <summary>
     /// Runs <paramref name="change"/>, which may change <paramref name="player"/>'s bag only, and records what it
     /// gained and lost against <paramref name="counterpart"/>. Nothing is recorded when the bag is unchanged.
