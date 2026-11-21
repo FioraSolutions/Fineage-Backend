@@ -15,14 +15,14 @@ public sealed class NetSkillConditionPipelineTests
     const int CursedBone = 1458;
     const int SonicBlaster = 6;
     const int SonicFocus = 8;
-    const int MobId = 9_300_080;
+    const int MobObjectId = 90_001;
 
     static SpawnCatalog ForceMap() =>
         SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["pipe"] = new("pipe", true,
             [
-                new SpawnNpcDefinition(MobId, 90_001, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
+                new SpawnNpcDefinition(9_300_080, MobObjectId, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
                     0, true, 50_000, 1f, 1f, 60, 0, "", "Monster", Level: 1, Aggressive: false)
             ])
         });
@@ -66,8 +66,8 @@ public sealed class NetSkillConditionPipelineTests
         Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, 0, CancellationToken.None));
         Assert.Equal(2, player.ForceCharges);
 
-        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
-        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobObjectId, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, MobObjectId, CancellationToken.None));
         Assert.Equal(0, player.ForceCharges);
     }
 }
