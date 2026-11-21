@@ -214,6 +214,8 @@ public sealed class GlobalActorTests
         Assert.True(death > 0, "the boss did not die");
         Assert.True(schedule.TryView(BossNpcId, out var view));
         Assert.Equal(BossLifeStatus.Dead, view.Status);
+        Assert.InRange(view.RespawnUnixMs - death, Window.Min, Window.Max);
+        Assert.Contains(recorder.Calls, c => c.Method is "FanoutAttackState" or "FanoutAttack");
         return new Kill(kit, schedule, recorder, log, death, view.RespawnUnixMs);
     }
 

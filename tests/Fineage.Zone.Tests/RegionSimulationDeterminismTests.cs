@@ -168,6 +168,8 @@ public sealed class RegionSimulationDeterminismTests
         }
 
         Assert.True(target.CurHp < targetHp, $"auto-attack never hit: hp {target.CurHp} of {targetHp}");
+        int damage = targetHp - target.CurHp;
+        Assert.InRange(damage, 1, targetHp);
 
         return (CaptureState(kit, tracked), CaptureFanout(recorder));
     }

@@ -22,9 +22,9 @@ public sealed class EntityWatcherIndexTests
     {
         var (_, a, b, far) = await NearbyPairAsync();
         a.World.AssertWatcherIndexConsistent();
-        Assert.True(a.Player.Knownlist.Contains(b.ObjectId));
-        Assert.True(b.Player.Knownlist.Contains(a.ObjectId));
-        Assert.False(a.Player.Knownlist.Contains(far.ObjectId));
+        Assert.Contains(b.ObjectId, a.Player.Knownlist);
+        Assert.Contains(a.ObjectId, b.Player.Knownlist);
+        Assert.DoesNotContain(far.ObjectId, a.Player.Knownlist);
 
         var peers = a.World.CopyNetWatcherIds(a.ObjectId);
         Assert.Contains(b.ObjectId, peers);
@@ -37,7 +37,7 @@ public sealed class EntityWatcherIndexTests
         var (bench, a, b, far) = await NearbyPairAsync();
         bench.World.TeleportPlayerForTests(a.Session, far.Player.X - 40, far.Player.Y, far.Player.Z);
         bench.World.AssertWatcherIndexConsistent();
-        Assert.True(a.Player.Knownlist.Contains(far.ObjectId));
+        Assert.Contains(far.ObjectId, a.Player.Knownlist);
         Assert.Contains(far.ObjectId, bench.World.CopyNetWatcherIds(a.ObjectId));
         Assert.DoesNotContain(b.ObjectId, bench.World.CopyNetWatcherIds(a.ObjectId));
     }
@@ -54,7 +54,7 @@ public sealed class EntityWatcherIndexTests
 
         bench.World.DespawnNpcForTests(npc.ObjectId);
         bench.World.AssertWatcherIndexConsistent();
-        Assert.False(a.Player.Knownlist.Contains(npc.ObjectId));
+        Assert.DoesNotContain(npc.ObjectId, a.Player.Knownlist);
         Assert.Empty(bench.World.CopyNetWatcherIds(npc.ObjectId));
     }
 
