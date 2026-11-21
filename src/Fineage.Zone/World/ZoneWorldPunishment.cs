@@ -102,8 +102,13 @@ public sealed partial class ZoneWorld : IPunishmentSink
         }
     }
 
-    static long SessionChatBanUntil(long expirationUnixMs) =>
-      expirationUnixMs == 0 ? long.MaxValue : expirationUnixMs;
+    static long SessionChatBanUntil(long chatBanUntilUnixMs) =>
+      chatBanUntilUnixMs switch
+      {
+          < 0 => 0,
+          0 => long.MaxValue,
+          _ => chatBanUntilUnixMs,
+      };
 
     void ApplyChatBanToOnline(int objectId, long expirationUnixMs, bool active)
     {

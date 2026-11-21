@@ -102,11 +102,12 @@ public sealed class PunishmentManager
     public bool IsJailed(int characterId, long nowUnixMs) =>
       HasActive(PunishmentAffect.Character, PunishmentType.Jail, characterId.ToString(), nowUnixMs);
 
+    /// <summary>Session mapping uses -1 for no ban, 0 for permanent, &gt;0 for timed expiry unix ms.</summary>
     public long ChatBanUntilUnixMs(int characterId, long nowUnixMs)
     {
         var row = GetActive(PunishmentAffect.Character, PunishmentType.ChatBan, characterId.ToString(), nowUnixMs);
         if (row == null)
-            return 0;
+            return -1;
         return row.ExpirationUnixMs;
     }
 
