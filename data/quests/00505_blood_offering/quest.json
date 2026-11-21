@@ -15,9 +15,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31127-talk-000.htm"
@@ -32,9 +29,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31128-talk-001.htm"
@@ -49,9 +43,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31129-talk-002.htm"
@@ -66,9 +57,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31130-talk-003.htm"
@@ -83,9 +71,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31131-talk-004.htm"
@@ -100,9 +85,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31137-talk-005.htm"
@@ -117,9 +99,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31138-talk-006.htm"
@@ -134,9 +113,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31139-talk-007.htm"
@@ -151,9 +127,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31140-talk-008.htm"
@@ -168,9 +141,6 @@
           "x": -114796,
           "y": -179334,
           "z": -6752
-        },
-        {
-          "op": "complete"
         }
       ],
       "htmlFile": "31141-talk-009.htm"
@@ -178,7 +148,7 @@
     {
       "npcId": 31132,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -192,7 +162,7 @@
     {
       "npcId": 31133,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -206,7 +176,7 @@
     {
       "npcId": 31134,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -220,13 +190,13 @@
     {
       "npcId": 31135,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
           "x": -76945,
           "y": 86602,
-          "z": -5153
+          "z": 5153
         }
       ],
       "htmlFile": "31135-talk-013.htm"
@@ -234,7 +204,7 @@
     {
       "npcId": 31136,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -248,7 +218,7 @@
     {
       "npcId": 31142,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -262,7 +232,7 @@
     {
       "npcId": 31143,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -276,7 +246,7 @@
     {
       "npcId": 31144,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -290,7 +260,7 @@
     {
       "npcId": 31145,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -304,7 +274,7 @@
     {
       "npcId": 31146,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "teleport",
@@ -318,7 +288,7 @@
     {
       "npcId": 31488,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -340,15 +310,9 @@
       "htmlFile": "31488-talk-020.htm"
     },
     {
-      "npcId": 31488,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31488-talk-021.htm"
-    },
-    {
       "npcId": 31489,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -367,18 +331,12 @@
           "z": -4901
         }
       ],
-      "htmlFile": "31489-talk-022.htm"
-    },
-    {
-      "npcId": 31489,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31489-talk-023.htm"
+      "htmlFile": "31489-talk-021.htm"
     },
     {
       "npcId": 31490,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -397,18 +355,12 @@
           "z": -4901
         }
       ],
-      "htmlFile": "31490-talk-024.htm"
-    },
-    {
-      "npcId": 31490,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31490-talk-025.htm"
+      "htmlFile": "31490-talk-022.htm"
     },
     {
       "npcId": 31491,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -427,18 +379,12 @@
           "z": -4901
         }
       ],
-      "htmlFile": "31491-talk-026.htm"
-    },
-    {
-      "npcId": 31491,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31491-talk-027.htm"
+      "htmlFile": "31491-talk-023.htm"
     },
     {
       "npcId": 31492,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -457,18 +403,12 @@
           "z": -4901
         }
       ],
-      "htmlFile": "31492-talk-028.htm"
-    },
-    {
-      "npcId": 31492,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31492-talk-029.htm"
+      "htmlFile": "31492-talk-024.htm"
     },
     {
       "npcId": 31493,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
       "ops": [
         {
           "op": "create"
@@ -487,13 +427,7 @@
           "z": -4901
         }
       ],
-      "htmlFile": "31493-talk-030.htm"
-    },
-    {
-      "npcId": 31493,
-      "hook": "talk",
-      "when": "started",
-      "htmlFile": "31493-talk-031.htm"
+      "htmlFile": "31493-talk-025.htm"
     }
   ]
 }

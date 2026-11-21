@@ -25,6 +25,22 @@
       "npcId": 31095,
       "hook": "event",
       "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31095-event-03-002.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31095-event-04-003.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "absent",
       "event": "05",
       "minLevel": 20,
       "ops": [
@@ -35,7 +51,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31095-event-05-002.htm"
+      "htmlFile": "31095-event-05-004.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31095-event-06-005.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31095-event-07-006.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31095-event-05-007.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31095-event-06-008.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31095-event-07-009.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31095-event-11-010.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31095-event-10-011.htm"
     },
     {
       "npcId": 31095,
@@ -44,15 +122,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31095-talk-003.htm"
+      "htmlFile": "31095-talk-012.htm"
     },
     {
       "npcId": 31095,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -61,33 +137,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31095-talk-004.htm"
-    },
-    {
-      "npcId": 31095,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31095-event-10-005.htm"
+      "htmlFile": "31095-talk-013.htm"
     },
     {
       "npcId": 31096,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31096-talk-006.htm"
+      "htmlFile": "31096-talk-014.htm"
     },
     {
       "npcId": 31096,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31096-talk-007.htm"
+      "htmlFile": "31096-talk-015.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31096-event-03-016.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31096-event-04-017.htm"
     },
     {
       "npcId": 31096,
@@ -103,7 +183,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31096-event-05-008.htm"
+      "htmlFile": "31096-event-05-018.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31096-event-06-019.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31096-event-07-020.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31096-event-05-021.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31096-event-06-022.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31096-event-07-023.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31096-event-11-024.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31096-event-10-025.htm"
     },
     {
       "npcId": 31096,
@@ -112,15 +254,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31096-talk-009.htm"
+      "htmlFile": "31096-talk-026.htm"
     },
     {
       "npcId": 31096,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -129,33 +269,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31096-talk-010.htm"
-    },
-    {
-      "npcId": 31096,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31096-event-10-011.htm"
+      "htmlFile": "31096-talk-027.htm"
     },
     {
       "npcId": 31097,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31097-talk-012.htm"
+      "htmlFile": "31097-talk-028.htm"
     },
     {
       "npcId": 31097,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31097-talk-013.htm"
+      "htmlFile": "31097-talk-029.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31097-event-03-030.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31097-event-04-031.htm"
     },
     {
       "npcId": 31097,
@@ -171,7 +315,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31097-event-05-014.htm"
+      "htmlFile": "31097-event-05-032.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31097-event-06-033.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31097-event-07-034.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31097-event-05-035.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31097-event-06-036.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31097-event-07-037.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31097-event-11-038.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31097-event-10-039.htm"
     },
     {
       "npcId": 31097,
@@ -180,15 +386,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31097-talk-015.htm"
+      "htmlFile": "31097-talk-040.htm"
     },
     {
       "npcId": 31097,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -197,33 +401,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31097-talk-016.htm"
-    },
-    {
-      "npcId": 31097,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31097-event-10-017.htm"
+      "htmlFile": "31097-talk-041.htm"
     },
     {
       "npcId": 31098,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31098-talk-018.htm"
+      "htmlFile": "31098-talk-042.htm"
     },
     {
       "npcId": 31098,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31098-talk-019.htm"
+      "htmlFile": "31098-talk-043.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31098-event-03-044.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31098-event-04-045.htm"
     },
     {
       "npcId": 31098,
@@ -239,7 +447,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31098-event-05-020.htm"
+      "htmlFile": "31098-event-05-046.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31098-event-06-047.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31098-event-07-048.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31098-event-05-049.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31098-event-06-050.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31098-event-07-051.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31098-event-11-052.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31098-event-10-053.htm"
     },
     {
       "npcId": 31098,
@@ -248,15 +518,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31098-talk-021.htm"
+      "htmlFile": "31098-talk-054.htm"
     },
     {
       "npcId": 31098,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -265,33 +533,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31098-talk-022.htm"
-    },
-    {
-      "npcId": 31098,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31098-event-10-023.htm"
+      "htmlFile": "31098-talk-055.htm"
     },
     {
       "npcId": 31099,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31099-talk-024.htm"
+      "htmlFile": "31099-talk-056.htm"
     },
     {
       "npcId": 31099,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31099-talk-025.htm"
+      "htmlFile": "31099-talk-057.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31099-event-03-058.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31099-event-04-059.htm"
     },
     {
       "npcId": 31099,
@@ -307,7 +579,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31099-event-05-026.htm"
+      "htmlFile": "31099-event-05-060.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31099-event-06-061.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31099-event-07-062.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31099-event-05-063.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31099-event-06-064.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31099-event-07-065.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31099-event-11-066.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31099-event-10-067.htm"
     },
     {
       "npcId": 31099,
@@ -316,15 +650,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31099-talk-027.htm"
+      "htmlFile": "31099-talk-068.htm"
     },
     {
       "npcId": 31099,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -333,33 +665,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31099-talk-028.htm"
-    },
-    {
-      "npcId": 31099,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31099-event-10-029.htm"
+      "htmlFile": "31099-talk-069.htm"
     },
     {
       "npcId": 31100,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31100-talk-030.htm"
+      "htmlFile": "31100-talk-070.htm"
     },
     {
       "npcId": 31100,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31100-talk-031.htm"
+      "htmlFile": "31100-talk-071.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31100-event-03-072.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31100-event-04-073.htm"
     },
     {
       "npcId": 31100,
@@ -375,7 +711,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31100-event-05-032.htm"
+      "htmlFile": "31100-event-05-074.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31100-event-06-075.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31100-event-07-076.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31100-event-05-077.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31100-event-06-078.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31100-event-07-079.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31100-event-11-080.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31100-event-10-081.htm"
     },
     {
       "npcId": 31100,
@@ -384,15 +782,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31100-talk-033.htm"
+      "htmlFile": "31100-talk-082.htm"
     },
     {
       "npcId": 31100,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -401,33 +797,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31100-talk-034.htm"
-    },
-    {
-      "npcId": 31100,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31100-event-10-035.htm"
+      "htmlFile": "31100-talk-083.htm"
     },
     {
       "npcId": 31101,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31101-talk-036.htm"
+      "htmlFile": "31101-talk-084.htm"
     },
     {
       "npcId": 31101,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31101-talk-037.htm"
+      "htmlFile": "31101-talk-085.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31101-event-03-086.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31101-event-04-087.htm"
     },
     {
       "npcId": 31101,
@@ -443,7 +843,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31101-event-05-038.htm"
+      "htmlFile": "31101-event-05-088.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31101-event-06-089.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31101-event-07-090.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31101-event-05-091.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31101-event-06-092.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31101-event-07-093.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31101-event-11-094.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31101-event-10-095.htm"
     },
     {
       "npcId": 31101,
@@ -452,15 +914,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31101-talk-039.htm"
+      "htmlFile": "31101-talk-096.htm"
     },
     {
       "npcId": 31101,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -469,33 +929,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31101-talk-040.htm"
-    },
-    {
-      "npcId": 31101,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31101-event-10-041.htm"
+      "htmlFile": "31101-talk-097.htm"
     },
     {
       "npcId": 31102,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31102-talk-042.htm"
+      "htmlFile": "31102-talk-098.htm"
     },
     {
       "npcId": 31102,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31102-talk-043.htm"
+      "htmlFile": "31102-talk-099.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31102-event-03-100.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31102-event-04-101.htm"
     },
     {
       "npcId": 31102,
@@ -511,7 +975,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31102-event-05-044.htm"
+      "htmlFile": "31102-event-05-102.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31102-event-06-103.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31102-event-07-104.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31102-event-05-105.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31102-event-06-106.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31102-event-07-107.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31102-event-11-108.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31102-event-10-109.htm"
     },
     {
       "npcId": 31102,
@@ -520,15 +1046,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31102-talk-045.htm"
+      "htmlFile": "31102-talk-110.htm"
     },
     {
       "npcId": 31102,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -537,33 +1061,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31102-talk-046.htm"
-    },
-    {
-      "npcId": 31102,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31102-event-10-047.htm"
+      "htmlFile": "31102-talk-111.htm"
     },
     {
       "npcId": 31103,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31103-talk-048.htm"
+      "htmlFile": "31103-talk-112.htm"
     },
     {
       "npcId": 31103,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31103-talk-049.htm"
+      "htmlFile": "31103-talk-113.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31103-event-03-114.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31103-event-04-115.htm"
     },
     {
       "npcId": 31103,
@@ -579,7 +1107,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31103-event-05-050.htm"
+      "htmlFile": "31103-event-05-116.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31103-event-06-117.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31103-event-07-118.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31103-event-05-119.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31103-event-06-120.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31103-event-07-121.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31103-event-11-122.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31103-event-10-123.htm"
     },
     {
       "npcId": 31103,
@@ -588,15 +1178,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31103-talk-051.htm"
+      "htmlFile": "31103-talk-124.htm"
     },
     {
       "npcId": 31103,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -605,33 +1193,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31103-talk-052.htm"
-    },
-    {
-      "npcId": 31103,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31103-event-10-053.htm"
+      "htmlFile": "31103-talk-125.htm"
     },
     {
       "npcId": 31104,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31104-talk-054.htm"
+      "htmlFile": "31104-talk-126.htm"
     },
     {
       "npcId": 31104,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31104-talk-055.htm"
+      "htmlFile": "31104-talk-127.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31104-event-03-128.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31104-event-04-129.htm"
     },
     {
       "npcId": 31104,
@@ -647,7 +1239,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31104-event-05-056.htm"
+      "htmlFile": "31104-event-05-130.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31104-event-06-131.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31104-event-07-132.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31104-event-05-133.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31104-event-06-134.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31104-event-07-135.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31104-event-11-136.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31104-event-10-137.htm"
     },
     {
       "npcId": 31104,
@@ -656,15 +1310,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31104-talk-057.htm"
+      "htmlFile": "31104-talk-138.htm"
     },
     {
       "npcId": 31104,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -673,33 +1325,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31104-talk-058.htm"
-    },
-    {
-      "npcId": 31104,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31104-event-10-059.htm"
+      "htmlFile": "31104-talk-139.htm"
     },
     {
       "npcId": 31105,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31105-talk-060.htm"
+      "htmlFile": "31105-talk-140.htm"
     },
     {
       "npcId": 31105,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31105-talk-061.htm"
+      "htmlFile": "31105-talk-141.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31105-event-03-142.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31105-event-04-143.htm"
     },
     {
       "npcId": 31105,
@@ -715,7 +1371,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31105-event-05-062.htm"
+      "htmlFile": "31105-event-05-144.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31105-event-06-145.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31105-event-07-146.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31105-event-05-147.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31105-event-06-148.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31105-event-07-149.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31105-event-11-150.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31105-event-10-151.htm"
     },
     {
       "npcId": 31105,
@@ -724,15 +1442,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31105-talk-063.htm"
+      "htmlFile": "31105-talk-152.htm"
     },
     {
       "npcId": 31105,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -741,33 +1457,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31105-talk-064.htm"
-    },
-    {
-      "npcId": 31105,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31105-event-10-065.htm"
+      "htmlFile": "31105-talk-153.htm"
     },
     {
       "npcId": 31106,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31106-talk-066.htm"
+      "htmlFile": "31106-talk-154.htm"
     },
     {
       "npcId": 31106,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31106-talk-067.htm"
+      "htmlFile": "31106-talk-155.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31106-event-03-156.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31106-event-04-157.htm"
     },
     {
       "npcId": 31106,
@@ -783,7 +1503,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31106-event-05-068.htm"
+      "htmlFile": "31106-event-05-158.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31106-event-06-159.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31106-event-07-160.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31106-event-05-161.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31106-event-06-162.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31106-event-07-163.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31106-event-11-164.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31106-event-10-165.htm"
     },
     {
       "npcId": 31106,
@@ -792,15 +1574,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31106-talk-069.htm"
+      "htmlFile": "31106-talk-166.htm"
     },
     {
       "npcId": 31106,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -809,33 +1589,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31106-talk-070.htm"
-    },
-    {
-      "npcId": 31106,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31106-event-10-071.htm"
+      "htmlFile": "31106-talk-167.htm"
     },
     {
       "npcId": 31107,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31107-talk-072.htm"
+      "htmlFile": "31107-talk-168.htm"
     },
     {
       "npcId": 31107,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31107-talk-073.htm"
+      "htmlFile": "31107-talk-169.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31107-event-03-170.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31107-event-04-171.htm"
     },
     {
       "npcId": 31107,
@@ -851,7 +1635,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31107-event-05-074.htm"
+      "htmlFile": "31107-event-05-172.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31107-event-06-173.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31107-event-07-174.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31107-event-05-175.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31107-event-06-176.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31107-event-07-177.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31107-event-11-178.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31107-event-10-179.htm"
     },
     {
       "npcId": 31107,
@@ -860,15 +1706,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31107-talk-075.htm"
+      "htmlFile": "31107-talk-180.htm"
     },
     {
       "npcId": 31107,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -877,33 +1721,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31107-talk-076.htm"
-    },
-    {
-      "npcId": 31107,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31107-event-10-077.htm"
+      "htmlFile": "31107-talk-181.htm"
     },
     {
       "npcId": 31108,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31108-talk-078.htm"
+      "htmlFile": "31108-talk-182.htm"
     },
     {
       "npcId": 31108,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31108-talk-079.htm"
+      "htmlFile": "31108-talk-183.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31108-event-03-184.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31108-event-04-185.htm"
     },
     {
       "npcId": 31108,
@@ -919,7 +1767,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31108-event-05-080.htm"
+      "htmlFile": "31108-event-05-186.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31108-event-06-187.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31108-event-07-188.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31108-event-05-189.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31108-event-06-190.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31108-event-07-191.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31108-event-11-192.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31108-event-10-193.htm"
     },
     {
       "npcId": 31108,
@@ -928,15 +1838,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31108-talk-081.htm"
+      "htmlFile": "31108-talk-194.htm"
     },
     {
       "npcId": 31108,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -945,33 +1853,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31108-talk-082.htm"
-    },
-    {
-      "npcId": 31108,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31108-event-10-083.htm"
+      "htmlFile": "31108-talk-195.htm"
     },
     {
       "npcId": 31109,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31109-talk-084.htm"
+      "htmlFile": "31109-talk-196.htm"
     },
     {
       "npcId": 31109,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31109-talk-085.htm"
+      "htmlFile": "31109-talk-197.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31109-event-03-198.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31109-event-04-199.htm"
     },
     {
       "npcId": 31109,
@@ -987,7 +1899,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31109-event-05-086.htm"
+      "htmlFile": "31109-event-05-200.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31109-event-06-201.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31109-event-07-202.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31109-event-05-203.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31109-event-06-204.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31109-event-07-205.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31109-event-11-206.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31109-event-10-207.htm"
     },
     {
       "npcId": 31109,
@@ -996,15 +1970,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31109-talk-087.htm"
+      "htmlFile": "31109-talk-208.htm"
     },
     {
       "npcId": 31109,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1013,33 +1985,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31109-talk-088.htm"
-    },
-    {
-      "npcId": 31109,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31109-event-10-089.htm"
+      "htmlFile": "31109-talk-209.htm"
     },
     {
       "npcId": 31110,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31110-talk-090.htm"
+      "htmlFile": "31110-talk-210.htm"
     },
     {
       "npcId": 31110,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31110-talk-091.htm"
+      "htmlFile": "31110-talk-211.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31110-event-03-212.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31110-event-04-213.htm"
     },
     {
       "npcId": 31110,
@@ -1055,7 +2031,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31110-event-05-092.htm"
+      "htmlFile": "31110-event-05-214.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31110-event-06-215.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31110-event-07-216.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31110-event-05-217.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31110-event-06-218.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31110-event-07-219.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31110-event-11-220.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31110-event-10-221.htm"
     },
     {
       "npcId": 31110,
@@ -1064,15 +2102,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31110-talk-093.htm"
+      "htmlFile": "31110-talk-222.htm"
     },
     {
       "npcId": 31110,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1081,33 +2117,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31110-talk-094.htm"
-    },
-    {
-      "npcId": 31110,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31110-event-10-095.htm"
+      "htmlFile": "31110-talk-223.htm"
     },
     {
       "npcId": 31114,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31114-talk-096.htm"
+      "htmlFile": "31114-talk-224.htm"
     },
     {
       "npcId": 31114,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31114-talk-097.htm"
+      "htmlFile": "31114-talk-225.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31114-event-03-226.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31114-event-04-227.htm"
     },
     {
       "npcId": 31114,
@@ -1123,7 +2163,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31114-event-05-098.htm"
+      "htmlFile": "31114-event-05-228.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31114-event-06-229.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31114-event-07-230.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31114-event-05-231.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31114-event-06-232.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31114-event-07-233.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31114-event-11-234.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31114-event-10-235.htm"
     },
     {
       "npcId": 31114,
@@ -1132,15 +2234,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31114-talk-099.htm"
+      "htmlFile": "31114-talk-236.htm"
     },
     {
       "npcId": 31114,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1149,33 +2249,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31114-talk-100.htm"
-    },
-    {
-      "npcId": 31114,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31114-event-10-101.htm"
+      "htmlFile": "31114-talk-237.htm"
     },
     {
       "npcId": 31115,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31115-talk-102.htm"
+      "htmlFile": "31115-talk-238.htm"
     },
     {
       "npcId": 31115,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31115-talk-103.htm"
+      "htmlFile": "31115-talk-239.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31115-event-03-240.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31115-event-04-241.htm"
     },
     {
       "npcId": 31115,
@@ -1191,7 +2295,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31115-event-05-104.htm"
+      "htmlFile": "31115-event-05-242.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31115-event-06-243.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31115-event-07-244.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31115-event-05-245.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31115-event-06-246.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31115-event-07-247.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31115-event-11-248.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31115-event-10-249.htm"
     },
     {
       "npcId": 31115,
@@ -1200,15 +2366,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31115-talk-105.htm"
+      "htmlFile": "31115-talk-250.htm"
     },
     {
       "npcId": 31115,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1217,33 +2381,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31115-talk-106.htm"
-    },
-    {
-      "npcId": 31115,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31115-event-10-107.htm"
+      "htmlFile": "31115-talk-251.htm"
     },
     {
       "npcId": 31116,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31116-talk-108.htm"
+      "htmlFile": "31116-talk-252.htm"
     },
     {
       "npcId": 31116,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31116-talk-109.htm"
+      "htmlFile": "31116-talk-253.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31116-event-03-254.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31116-event-04-255.htm"
     },
     {
       "npcId": 31116,
@@ -1259,7 +2427,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31116-event-05-110.htm"
+      "htmlFile": "31116-event-05-256.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31116-event-06-257.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31116-event-07-258.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31116-event-05-259.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31116-event-06-260.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31116-event-07-261.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31116-event-11-262.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31116-event-10-263.htm"
     },
     {
       "npcId": 31116,
@@ -1268,15 +2498,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31116-talk-111.htm"
+      "htmlFile": "31116-talk-264.htm"
     },
     {
       "npcId": 31116,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1285,33 +2513,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31116-talk-112.htm"
-    },
-    {
-      "npcId": 31116,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31116-event-10-113.htm"
+      "htmlFile": "31116-talk-265.htm"
     },
     {
       "npcId": 31117,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31117-talk-114.htm"
+      "htmlFile": "31117-talk-266.htm"
     },
     {
       "npcId": 31117,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31117-talk-115.htm"
+      "htmlFile": "31117-talk-267.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31117-event-03-268.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31117-event-04-269.htm"
     },
     {
       "npcId": 31117,
@@ -1327,7 +2559,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31117-event-05-116.htm"
+      "htmlFile": "31117-event-05-270.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31117-event-06-271.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31117-event-07-272.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31117-event-05-273.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31117-event-06-274.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31117-event-07-275.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31117-event-11-276.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31117-event-10-277.htm"
     },
     {
       "npcId": 31117,
@@ -1336,15 +2630,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31117-talk-117.htm"
+      "htmlFile": "31117-talk-278.htm"
     },
     {
       "npcId": 31117,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1353,33 +2645,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31117-talk-118.htm"
-    },
-    {
-      "npcId": 31117,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31117-event-10-119.htm"
+      "htmlFile": "31117-talk-279.htm"
     },
     {
       "npcId": 31118,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31118-talk-120.htm"
+      "htmlFile": "31118-talk-280.htm"
     },
     {
       "npcId": 31118,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31118-talk-121.htm"
+      "htmlFile": "31118-talk-281.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31118-event-03-282.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31118-event-04-283.htm"
     },
     {
       "npcId": 31118,
@@ -1395,7 +2691,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31118-event-05-122.htm"
+      "htmlFile": "31118-event-05-284.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31118-event-06-285.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31118-event-07-286.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31118-event-05-287.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31118-event-06-288.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31118-event-07-289.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31118-event-11-290.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31118-event-10-291.htm"
     },
     {
       "npcId": 31118,
@@ -1404,15 +2762,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31118-talk-123.htm"
+      "htmlFile": "31118-talk-292.htm"
     },
     {
       "npcId": 31118,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1421,33 +2777,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31118-talk-124.htm"
-    },
-    {
-      "npcId": 31118,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31118-event-10-125.htm"
+      "htmlFile": "31118-talk-293.htm"
     },
     {
       "npcId": 31119,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31119-talk-126.htm"
+      "htmlFile": "31119-talk-294.htm"
     },
     {
       "npcId": 31119,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31119-talk-127.htm"
+      "htmlFile": "31119-talk-295.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31119-event-03-296.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31119-event-04-297.htm"
     },
     {
       "npcId": 31119,
@@ -1463,7 +2823,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31119-event-05-128.htm"
+      "htmlFile": "31119-event-05-298.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31119-event-06-299.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31119-event-07-300.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31119-event-05-301.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31119-event-06-302.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31119-event-07-303.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31119-event-11-304.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31119-event-10-305.htm"
     },
     {
       "npcId": 31119,
@@ -1472,15 +2894,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31119-talk-129.htm"
+      "htmlFile": "31119-talk-306.htm"
     },
     {
       "npcId": 31119,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1489,33 +2909,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31119-talk-130.htm"
-    },
-    {
-      "npcId": 31119,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31119-event-10-131.htm"
+      "htmlFile": "31119-talk-307.htm"
     },
     {
       "npcId": 31120,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31120-talk-132.htm"
+      "htmlFile": "31120-talk-308.htm"
     },
     {
       "npcId": 31120,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31120-talk-133.htm"
+      "htmlFile": "31120-talk-309.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31120-event-03-310.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31120-event-04-311.htm"
     },
     {
       "npcId": 31120,
@@ -1531,7 +2955,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31120-event-05-134.htm"
+      "htmlFile": "31120-event-05-312.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31120-event-06-313.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31120-event-07-314.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31120-event-05-315.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31120-event-06-316.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31120-event-07-317.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31120-event-11-318.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31120-event-10-319.htm"
     },
     {
       "npcId": 31120,
@@ -1540,15 +3026,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31120-talk-135.htm"
+      "htmlFile": "31120-talk-320.htm"
     },
     {
       "npcId": 31120,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1557,33 +3041,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31120-talk-136.htm"
-    },
-    {
-      "npcId": 31120,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31120-event-10-137.htm"
+      "htmlFile": "31120-talk-321.htm"
     },
     {
       "npcId": 31121,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31121-talk-138.htm"
+      "htmlFile": "31121-talk-322.htm"
     },
     {
       "npcId": 31121,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31121-talk-139.htm"
+      "htmlFile": "31121-talk-323.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31121-event-03-324.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31121-event-04-325.htm"
     },
     {
       "npcId": 31121,
@@ -1599,7 +3087,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31121-event-05-140.htm"
+      "htmlFile": "31121-event-05-326.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31121-event-06-327.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31121-event-07-328.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31121-event-05-329.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31121-event-06-330.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31121-event-07-331.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31121-event-11-332.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31121-event-10-333.htm"
     },
     {
       "npcId": 31121,
@@ -1608,15 +3158,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31121-talk-141.htm"
+      "htmlFile": "31121-talk-334.htm"
     },
     {
       "npcId": 31121,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1625,33 +3173,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31121-talk-142.htm"
-    },
-    {
-      "npcId": 31121,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31121-event-10-143.htm"
+      "htmlFile": "31121-talk-335.htm"
     },
     {
       "npcId": 31122,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31122-talk-144.htm"
+      "htmlFile": "31122-talk-336.htm"
     },
     {
       "npcId": 31122,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31122-talk-145.htm"
+      "htmlFile": "31122-talk-337.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31122-event-03-338.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31122-event-04-339.htm"
     },
     {
       "npcId": 31122,
@@ -1667,7 +3219,69 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31122-event-05-146.htm"
+      "htmlFile": "31122-event-05-340.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31122-event-06-341.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31122-event-07-342.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "05",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31122-event-05-343.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31122-event-06-344.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31122-event-07-345.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31122-event-11-346.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31122-event-10-347.htm"
     },
     {
       "npcId": 31122,
@@ -1676,15 +3290,13 @@
       "lacksItems": [
         5902
       ],
-      "htmlFile": "31122-talk-147.htm"
+      "htmlFile": "31122-talk-348.htm"
     },
     {
       "npcId": 31122,
       "hook": "talk",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "hasItem": 5902,
       "ops": [
         {
           "op": "exchange_all",
@@ -1693,33 +3305,37 @@
           "per": 1
         }
       ],
-      "htmlFile": "31122-talk-148.htm"
-    },
-    {
-      "npcId": 31122,
-      "hook": "event",
-      "when": "started",
-      "event": "10",
-      "ops": [
-        {
-          "op": "complete"
-        }
-      ],
-      "htmlFile": "31122-event-10-149.htm"
+      "htmlFile": "31122-talk-349.htm"
     },
     {
       "npcId": 31123,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31123-talk-150.htm"
+      "htmlFile": "31123-talk-350.htm"
     },
     {
       "npcId": 31123,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31123-talk-151.htm"
+      "htmlFile": "31123-talk-351.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31123-event-03-352.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31123-event-04-353.htm"
     },
     {
       "npcId": 31123,
@@ -1735,33 +3351,57 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31123-event-05-152.htm"
+      "htmlFile": "31123-event-05-354.htm"
     },
     {
       "npcId": 31123,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        5902
-      ],
-      "htmlFile": "31123-talk-153.htm"
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31123-event-06-355.htm"
     },
     {
       "npcId": 31123,
-      "hook": "talk",
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31123-event-07-356.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "event": "05",
       "ops": [
         {
-          "op": "exchange_all",
-          "itemId": 5902,
-          "rewardItemId": 5965,
-          "per": 1
+          "op": "create"
+        },
+        {
+          "op": "start"
         }
       ],
-      "htmlFile": "31123-talk-154.htm"
+      "htmlFile": "31123-event-05-357.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31123-event-06-358.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31123-event-07-359.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31123-event-11-360.htm"
     },
     {
       "npcId": 31123,
@@ -1773,21 +3413,61 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31123-event-10-155.htm"
+      "htmlFile": "31123-event-10-361.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31123-talk-362.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5902,
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31123-talk-363.htm"
     },
     {
       "npcId": 31124,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31124-talk-156.htm"
+      "htmlFile": "31124-talk-364.htm"
     },
     {
       "npcId": 31124,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31124-talk-157.htm"
+      "htmlFile": "31124-talk-365.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31124-event-03-366.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31124-event-04-367.htm"
     },
     {
       "npcId": 31124,
@@ -1803,33 +3483,57 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31124-event-05-158.htm"
+      "htmlFile": "31124-event-05-368.htm"
     },
     {
       "npcId": 31124,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        5902
-      ],
-      "htmlFile": "31124-talk-159.htm"
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31124-event-06-369.htm"
     },
     {
       "npcId": 31124,
-      "hook": "talk",
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31124-event-07-370.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "event": "05",
       "ops": [
         {
-          "op": "exchange_all",
-          "itemId": 5902,
-          "rewardItemId": 5965,
-          "per": 1
+          "op": "create"
+        },
+        {
+          "op": "start"
         }
       ],
-      "htmlFile": "31124-talk-160.htm"
+      "htmlFile": "31124-event-05-371.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31124-event-06-372.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31124-event-07-373.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31124-event-11-374.htm"
     },
     {
       "npcId": 31124,
@@ -1841,21 +3545,61 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31124-event-10-161.htm"
+      "htmlFile": "31124-event-10-375.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31124-talk-376.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5902,
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31124-talk-377.htm"
     },
     {
       "npcId": 31125,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31125-talk-162.htm"
+      "htmlFile": "31125-talk-378.htm"
     },
     {
       "npcId": 31125,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31125-talk-163.htm"
+      "htmlFile": "31125-talk-379.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31125-event-03-380.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31125-event-04-381.htm"
     },
     {
       "npcId": 31125,
@@ -1871,33 +3615,57 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31125-event-05-164.htm"
+      "htmlFile": "31125-event-05-382.htm"
     },
     {
       "npcId": 31125,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        5902
-      ],
-      "htmlFile": "31125-talk-165.htm"
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31125-event-06-383.htm"
     },
     {
       "npcId": 31125,
-      "hook": "talk",
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31125-event-07-384.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "event": "05",
       "ops": [
         {
-          "op": "exchange_all",
-          "itemId": 5902,
-          "rewardItemId": 5965,
-          "per": 1
+          "op": "create"
+        },
+        {
+          "op": "start"
         }
       ],
-      "htmlFile": "31125-talk-166.htm"
+      "htmlFile": "31125-event-05-385.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31125-event-06-386.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31125-event-07-387.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31125-event-11-388.htm"
     },
     {
       "npcId": 31125,
@@ -1909,21 +3677,61 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31125-event-10-167.htm"
+      "htmlFile": "31125-event-10-389.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31125-talk-390.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5902,
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31125-talk-391.htm"
     },
     {
       "npcId": 31126,
       "hook": "talk",
       "when": "absent",
       "maxLevel": 19,
-      "htmlFile": "31126-talk-168.htm"
+      "htmlFile": "31126-talk-392.htm"
     },
     {
       "npcId": 31126,
       "hook": "talk",
       "when": "absent",
       "minLevel": 20,
-      "htmlFile": "31126-talk-169.htm"
+      "htmlFile": "31126-talk-393.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "absent",
+      "event": "03",
+      "minLevel": 20,
+      "htmlFile": "31126-event-03-394.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "absent",
+      "event": "04",
+      "minLevel": 20,
+      "htmlFile": "31126-event-04-395.htm"
     },
     {
       "npcId": 31126,
@@ -1939,33 +3747,57 @@
           "op": "start"
         }
       ],
-      "htmlFile": "31126-event-05-170.htm"
+      "htmlFile": "31126-event-05-396.htm"
     },
     {
       "npcId": 31126,
-      "hook": "talk",
-      "when": "started",
-      "lacksItems": [
-        5902
-      ],
-      "htmlFile": "31126-talk-171.htm"
+      "hook": "event",
+      "when": "absent",
+      "event": "06",
+      "htmlFile": "31126-event-06-397.htm"
     },
     {
       "npcId": 31126,
-      "hook": "talk",
+      "hook": "event",
+      "when": "absent",
+      "event": "07",
+      "htmlFile": "31126-event-07-398.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
       "when": "started",
-      "hasAny": [
-        5902
-      ],
+      "event": "05",
       "ops": [
         {
-          "op": "exchange_all",
-          "itemId": 5902,
-          "rewardItemId": 5965,
-          "per": 1
+          "op": "create"
+        },
+        {
+          "op": "start"
         }
       ],
-      "htmlFile": "31126-talk-172.htm"
+      "htmlFile": "31126-event-05-399.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "started",
+      "event": "06",
+      "htmlFile": "31126-event-06-400.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "started",
+      "event": "07",
+      "htmlFile": "31126-event-07-401.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "started",
+      "event": "11",
+      "htmlFile": "31126-event-11-402.htm"
     },
     {
       "npcId": 31126,
@@ -1977,7 +3809,31 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "31126-event-10-173.htm"
+      "htmlFile": "31126-event-10-403.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31126-talk-404.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 5902,
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31126-talk-405.htm"
     },
     {
       "npcId": 21208,

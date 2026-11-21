@@ -53,7 +53,27 @@
       "hook": "talk",
       "when": "started",
       "cond": 2,
+      "atLeast": {
+        "8087": 180
+      },
       "htmlFile": "32016-talk-c2-004.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32016-talk-005.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "32016-06",
+      "cond": 2,
+      "atLeast": {
+        "8087": 180
+      },
+      "htmlFile": "32016-event-32016-06-c2-006.htm"
     },
     {
       "npcId": 32016,
@@ -79,7 +99,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "32016-event-0-c2-005.htm"
+      "htmlFile": "32016-event-0-c2-007.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "0",
+      "htmlFile": "32016-event-0-008.htm"
     },
     {
       "npcId": 32016,
@@ -105,7 +132,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "32016-event-1-c2-006.htm"
+      "htmlFile": "32016-event-1-c2-009.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "1",
+      "htmlFile": "32016-event-1-010.htm"
     },
     {
       "npcId": 32016,
@@ -131,7 +165,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "32016-event-2-c2-007.htm"
+      "htmlFile": "32016-event-2-c2-011.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "2",
+      "htmlFile": "32016-event-2-012.htm"
     },
     {
       "npcId": 32016,
@@ -156,7 +197,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "32016-event-3-c2-008.htm"
+      "htmlFile": "32016-event-3-c2-013.htm"
+    },
+    {
+      "npcId": 32016,
+      "hook": "event",
+      "when": "started",
+      "event": "3",
+      "htmlFile": "32016-event-3-014.htm"
     },
     {
       "npcId": 22029,
