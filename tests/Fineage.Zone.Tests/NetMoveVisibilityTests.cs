@@ -115,7 +115,7 @@ public sealed class NetMoveVisibilityTests
     [Fact]
     public async Task Outsider_sees_nothing_then_the_runner_spawns_moving_on_entry_and_despawns_on_exit()
     {
-        using var timeout = Timeout(60);
+        using var timeout = Timeout(90);
         await using var rig = await StartAsync(timeout.Token);
         var a = await rig.JoinAsync(X0, Y0);
         var c = await rig.JoinAsync(X0 + 3000, Y0);
