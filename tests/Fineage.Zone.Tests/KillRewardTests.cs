@@ -18,6 +18,7 @@ public sealed class KillRewardTests
     const int MobId = 9_500_001;
     const long MobExp = 1000;
     const int MobSp = 100;
+    const int SummonKat = 1111;
 
     static SpawnCatalog Map(int level = 1) =>
         SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
@@ -189,7 +190,91 @@ public sealed class KillRewardTests
         Assert.Equal((500d, 50d), KillRewardFormula.CalculateExpAndSp(24, 24, 1000, 100, 5, 10, 40));
         Assert.Equal((30d, 3d), KillRewardFormula.CalculateExpAndSp(85, 95, 1000, 100, 10, 10, 40));
         Assert.Equal(1.1, KillRewardFormula.PartyBonus(2));
+        Assert.Equal(1.2, KillRewardFormula.PartyBonus(3));
         Assert.Equal(2.2, KillRewardFormula.PartyBonus(9));
         Assert.Equal(2.2, KillRewardFormula.PartyBonus(12));
+    }
+
+    [Fact]
+    public async Task Party_bonus_counts_only_level_valid_members()
+    {
+        var (kit, mob, _) = await SetupAsync();
+        var (_, leader) = await kit.EnterAsync();
+        var (_, cutOff) = await kit.EnterAsync(x: NetTestKit.ElfX + 100);
+        leader.Level = 25;
+        leader.Exp = kit.Game.Classes!.Experience.ExpToBeLevel(25);
+        cutOff.Level = 4;
+        cutOff.Exp = kit.Game.Classes.Experience.ExpToBeLevel(4);
+        kit.World.JoinPartyForTest(leader, cutOff);
+        mob.DamageBy[leader.ObjectId] = 600;
+        mob.DamageBy[cutOff.ObjectId] = 400;
+
+        kit.World.GrantKillRewardForTest(leader, mob);
+
+        // 25 - 4 > PartyXpCutoffLevel: cutOff is excluded, so no 1.10 party bonus — same pool as a solo kill.
+        long leaderGain = leader.Exp - kit.Game.Classes.Experience.ExpToBeLevel(25);
+        Assert.Equal(MobExp, leaderGain);
+        Assert.Equal(0, cutOff.Exp - kit.Game.Classes.Experience.ExpToBeLevel(4));
+    }
+
+    [Fact]
+    public async Task Party_member_at_exact_cutoff_level_still_shares_the_pool()
+    {
+        var (kit, mob, _) = await SetupAsync();
+        var (_, high) = await kit.EnterAsync();
+        var (_, edge) = await kit.EnterAsync(x: NetTestKit.ElfX + 100);
+        high.Level = 25;
+        high.Exp = kit.Game.Classes!.Experience.ExpToBeLevel(25);
+        edge.Level = 5;
+        edge.Exp = kit.Game.Classes.Experience.ExpToBeLevel(5);
+        kit.World.JoinPartyForTest(high, edge);
+        mob.DamageBy[high.ObjectId] = 500;
+        mob.DamageBy[edge.ObjectId] = 500;
+
+        kit.World.GrantKillRewardForTest(high, mob);
+
+        // topLvl - edge.Level == 20 → still in the pool; 2-member bonus 1.10, split 25²:5².
+        long highGain = high.Exp - kit.Game.Classes.Experience.ExpToBeLevel(25);
+        long edgeGain = edge.Exp - kit.Game.Classes.Experience.ExpToBeLevel(5);
+        Assert.Equal(1058, highGain);
+        Assert.Equal(42, edgeGain);
+        Assert.Equal((long)(MobExp * KillRewardFormula.PartyBonus(2)), highGain + edgeGain);
+    }
+
+    [Fact]
+    public async Task Party_servitor_penalty_scales_only_that_members_exp_share()
+    {
+        var (kit, mob, _) = await SetupAsync();
+        var (_, plain) = await kit.EnterAsync();
+        var (_, tamer) = await kit.EnterAsync(x: NetTestKit.ElfX + 100);
+        kit.World.JoinPartyForTest(plain, tamer);
+        kit.World.SpawnServitorForTest(tamer, SummonKat, 1);
+        mob.DamageBy[plain.ObjectId] = 500;
+        mob.DamageBy[tamer.ObjectId] = 500;
+
+        kit.World.GrantKillRewardForTest(plain, mob);
+
+        long plainGain = plain.Exp;
+        long tamerGain = tamer.Exp;
+        Assert.Equal(550, plainGain);
+        Assert.Equal(385, tamerGain);
+        Assert.Equal(Math.Round(plainGain * 0.7), tamerGain);
+    }
+
+    [Fact]
+    public async Task Party_member_out_of_range_earns_nothing_even_in_the_same_party()
+    {
+        var (kit, mob, rec) = await SetupAsync();
+        var (_, near) = await kit.EnterAsync();
+        var (_, far) = await kit.EnterAsync(x: NetTestKit.ElfX + ZoneWorld.QuestPartyRange + 100);
+        kit.World.JoinPartyForTest(near, far);
+        mob.DamageBy[near.ObjectId] = 500;
+        mob.DamageBy[far.ObjectId] = 500;
+
+        kit.World.GrantKillRewardForTest(near, mob);
+
+        Assert.Equal(MobExp, near.Exp);
+        Assert.Equal(0, far.Exp);
+        Assert.Single(KillNotices(rec));
     }
 }

@@ -75,7 +75,10 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Mobius <c>Party.distributeXpAndSp</c> over the members of one party that took part in the kill.</summary>
+    /// <summary>
+    /// Mobius <c>Party.distributeXpAndSp</c> over the members of one party that took part in the kill.
+    /// Vitality points and <c>useVitalityRate</c> from Mobius are not ported (Interlude Fineage has no vitality system).
+    /// </summary>
     void SharePartyKill(
         ZoneParty party,
         ZoneEntity npc,
