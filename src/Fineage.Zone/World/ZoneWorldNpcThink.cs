@@ -131,6 +131,7 @@ public sealed partial class ZoneWorld
     {
         public string Name => "random-walk";
 
+        // The body moves only its own region's NPCs and reads positions the movement stages settled this tick.
         public bool Parallel => true;
 
         public void Collect(TickContext tick, RegionWorkCollector work) => world.CollectNpcThink(tick, work);

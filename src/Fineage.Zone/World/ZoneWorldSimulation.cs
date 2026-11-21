@@ -35,6 +35,9 @@ public sealed partial class ZoneWorld
     IRegionStage _randomWalkStage;
     IRegionStage _playerMovementStage;
     IRegionStage _npcMovementStage;
+    IRegionStage _pendingHitStage;
+    IRegionStage _autoAttackStage;
+    IRegionStage _mobAttackStage;
 
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
@@ -209,7 +212,7 @@ public sealed partial class ZoneWorld
     [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_byId), nameof(_simulationObserver),
         nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage),
         nameof(_aggressionStage), nameof(_randomWalkStage), nameof(_playerMovementStage), nameof(_npcMovementStage),
-        nameof(_borders))]
+        nameof(_borders), nameof(_pendingHitStage), nameof(_autoAttackStage), nameof(_mobAttackStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
@@ -227,6 +230,12 @@ public sealed partial class ZoneWorld
         _randomWalkStage = new RandomWalkStage(this);
         _playerMovementStage = new PlayerMovementStage(this);
         _npcMovementStage = new NpcMovementStage(this);
+        _pendingHitStage = new RegionStage("pending-hits", CollectPendingHits, (tick, id) => PendingHitEntity(id, tick.NowUnixMs),
+            parallel: true);
+        _autoAttackStage = new RegionStage("auto-attacks", CollectAutoAttackers, (tick, id) => AutoAttackEntity(id, tick.NowUnixMs),
+            parallel: true);
+        _mobAttackStage = new RegionStage("mob-attacks", CollectAiBusy, (tick, id) => MobAttackEntity(id, tick.NowUnixMs),
+            parallel: true);
 
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
         // Every region body runs in a RegionBodyScope, so the executor cannot change the outcome; it only decides
@@ -243,10 +252,10 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("npc.paths", TickNpcPathfindStage);
         ticks.AddRegionStage(_npcMovementStage);
         ticks.AddRegionStage(_randomWalkStage);
-        ticks.AddWorldStage("pending-hits", tick => TickPendingHits(tick.NowUnixMs));
+        ticks.AddRegionStage(_pendingHitStage);
         ticks.AddWorldStage("melee-hits", tick => TickMeleeHits(tick.NowUnixMs));
         ticks.AddWorldStage("pvp-flags", tick => TickPvpFlags(tick.NowUnixMs));
-        ticks.AddWorldStage("auto-attacks", tick => TickAutoAttacks(tick.NowUnixMs));
+        ticks.AddRegionStage(_autoAttackStage);
         ticks.AddWorldStage("pending-casts", tick => TickPendingCasts(tick.NowUnixMs));
         ticks.AddWorldStage("queued-moves", tick => TickQueuedMoves(tick.NowUnixMs));
         ticks.AddWorldStage("trade-range", _ => TickTradeRange());
@@ -257,7 +266,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("fear", tick => TickFear(tick.NowUnixMs));
         ticks.AddRegionStage(_aggressionStage);
         ticks.AddWorldStage("leash", tick => TickLeash(tick.NowUnixMs));
-        ticks.AddWorldStage("mob-attacks", tick => TickMobAttacks(tick.NowUnixMs));
+        ticks.AddRegionStage(_mobAttackStage);
         ticks.AddWorldStage("summons", tick => TickSummons(tick.NowUnixMs));
         ticks.AddWorldStage("cubics", tick => TickCubics(tick.NowUnixMs));
         ticks.AddWorldStage("duels", tick => TickDuels(tick.NowUnixMs));

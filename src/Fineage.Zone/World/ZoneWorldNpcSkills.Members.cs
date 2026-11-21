@@ -131,7 +131,7 @@ public sealed partial class ZoneWorld
             return;
 
         // Support skills (heal/buff/debuff) carry Apply; attack skills carry Combat.
-        if (hit.Apply is Action<ZoneEntity, long> apply)
+        if (hit.Apply is Action<ZoneEntity, long>)
         {
             if (hit.EscapeRange > 0
                 && !ZoneCombat.Within(npc.X, npc.Y, target.X, target.Y, SkillCastReach(hit.EscapeRange, npc, target)))
@@ -139,7 +139,8 @@ public sealed partial class ZoneWorld
             if (!ReferenceEquals(npc, target) && !CanSeeTarget(npc, target))
                 return;
             FanoutSkillLaunched(npc, hit.SkillId, hit.Level, target);
-            apply(target, now);
+            // The effect may write a target another region owns: it runs at the stage barrier.
+            Post(new SkillEffectMessage(npc.ObjectId, hit, now));
             return;
         }
 
@@ -158,9 +159,21 @@ public sealed partial class ZoneWorld
         FanoutSkillLaunched(npc, hit.Combat.SkillId, hit.Level, target);
         int damage = RollNpcSkillDamage(npc, target, hit.Combat, hit.Level);
         ZoneHotPathLogs.NpcSkillHit(hit.Combat.SkillId, hit.Level, damage);
+        // The target may be owned by another region: HP, triggers, death land at the stage barrier.
+        Post(new SkillDamageMessage(npc.ObjectId, target.ObjectId, damage, hit.Combat.SkillId, hit.Level, now));
+    }
+
+    /// <summary>
+    /// The target side of an NPC skill hit (Mobius <c>onMagicHitTimer</c>): damage triggers, the summon-caster
+    /// branches, HP, cast break and death. Runs where the target may be written: at the stage barrier
+    /// (<see cref="SkillDamageMessage"/>) or anywhere a region body is not running.
+    /// </summary>
+    void ApplyNpcSkillDamage(ZoneEntity npc, ZoneEntity target, int damage, long now)
+    {
         // Mobius onCreatureDamageReceived → TriggerSkillByDamage runs before the summon branch splits the victim kinds.
         if (damage > 0 && target.Kind == ZoneEntityKind.Player)
             RunDamageTriggers(target, npc, damage);
+        bool summonCaster = npc.Summon != null;
         if (summonCaster)
         {
             var targetPc = CreditOf(target);

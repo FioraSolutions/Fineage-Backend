@@ -553,7 +553,7 @@ public sealed partial class ZoneWorld
                 continue;
             var (damage, flags) = RollPlayerMelee(player, ps, entity, soulshot);
             QueueAttackerDamageLine(player, entity, damage, flags);
-            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, entity.ObjectId, damage, due, flags));
+            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, entity.ObjectId, damage, due, flags));
             queued++;
         }
     }

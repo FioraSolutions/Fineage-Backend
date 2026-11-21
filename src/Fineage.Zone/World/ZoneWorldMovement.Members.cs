@@ -52,6 +52,23 @@ public sealed partial class ZoneWorld
             mover.Running);
     }
 
+    /// <summary>
+    /// <see cref="AdvanceMove"/> from a combat region body: the movement stages already advanced every mover at
+    /// this same tick, so the call is a no-op by construction. A real advance here would relocate an entity
+    /// inside a body, which the directory refuses — log the missed mover instead of throwing on a worker thread.
+    /// </summary>
+    void AdvanceMoveSettled(ZoneEntity e, long now)
+    {
+        if (e.MoveActive && now > e.MoveLastTickMs)
+        {
+            ZoneLog.Error(
+                $"[region] entity {e.ObjectId} has {now - e.MoveLastTickMs}ms of unadvanced movement at tick time {now}: " +
+                "a movement stage skipped a mover; positions read by this combat stage are one step stale");
+            return;
+        }
+        AdvanceMove(e, now);
+    }
+
     void AdvanceMove(ZoneEntity e, long now)
     {
         if (!e.MoveActive)
