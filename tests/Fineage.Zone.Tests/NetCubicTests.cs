@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 public sealed class NetCubicTests
 {
     const int StormSkill = 10, LifeSkill = 67, ViperSkill = 278, BindingSkill = 1279, MassStormSkill = 1328, Mastery = 143;
+    const int StormCubicAction = 4049, ViperCubicAction = 4052, BindingCubicAction = 4164;
     const int CrystalD = 1458;
     const int Gremlin = 20001;
     const int X = 46045, Y = 41251, Z = -3440;
@@ -163,9 +164,9 @@ public sealed class NetCubicTests
     public void Offensive_cubic_debuffs_include_owner_m_atk_in_land_rolls()
     {
         var (bench, _) = Open();
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingSkill));
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperSkill));
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormSkill));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormCubicAction));
     }
 
     [Fact]
