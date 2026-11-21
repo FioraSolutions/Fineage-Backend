@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
@@ -36,7 +37,7 @@ public sealed partial class ZoneWorld
         {
             if (!TryPlayer(session, out var player))
                 return "world";
-            var outcome = _quests.Abort(player.Quests, player.Inventory!, questId);
+            var outcome = RecordQuest(player, () => _quests.Abort(player.Quests, player.Inventory!, questId));
             if (outcome.Ok || outcome.Lines.Count > 0)
                 Publish(session, player, outcome, npcObjectId: 0, npcId: 0);
             return outcome.Ok ? null : FailureCode(outcome.Failure);
@@ -144,11 +145,11 @@ public sealed partial class ZoneWorld
         if (eventName == null)
             TryNewbieHelperGift(session, player, npc);
 
-        outcome = eventName == null
+        outcome = RecordQuest(player, () => eventName == null
             ? _quests.FirstTalk(player.Quests, player.Inventory!, npc.NpcId, npc.Name, QuestActorOf(player))
             : eventName.Length == 0
                 ? _quests.Talk(player.Quests, player.Inventory!, questId, npc.NpcId, QuestActorOf(player))
-                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player));
+                : _quests.AdvEvent(player.Quests, player.Inventory!, questId, npc.NpcId, eventName, QuestActorOf(player)));
         if (IsNpcPage(outcome))
         {
             SendNpcPage(session, player, npc, 0);
@@ -239,7 +240,8 @@ public sealed partial class ZoneWorld
             return;
         if (npc.QuestAttackSpawned || !_quests.HasAttackSteps(npc.NpcId))
             return;
-        var outcome = _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet));
+        var outcome = RecordQuest(attacker,
+            () => _quests.OnAttack(attacker.Quests, attacker.Inventory, npc.NpcId, QuestActorOf(attacker, byPet)));
         if (outcome.Ok && outcome.Spawns.Count > 0)
             npc.QuestAttackSpawned = true;
         PublishKill(attacker, outcome, npc);
@@ -267,7 +269,10 @@ public sealed partial class ZoneWorld
             long dx = member.X - (long)npc.X, dy = member.Y - (long)npc.Y;
             if (npc.ObjectId != 0 && dx * dx + dy * dy > (long)AlliancePenaltyRange * AlliancePenaltyRange)
                 continue;
-            foreach (var outcome in _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId))
+            var outcomes = RecordBagChange(member, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests),
+                () => _quests.BreakAlliance(member.Quests, member.Inventory, npc.NpcId).ToList(),
+                list => list.Count == 1 ? list[0].QuestId : 0);
+            foreach (var outcome in outcomes)
                 PublishKill(member, outcome, npc);
         }
     }
@@ -279,7 +284,7 @@ public sealed partial class ZoneWorld
         if (killer.Inventory == null || killer.Dead || killer.Session == null)
             return;
         ApplyAllianceBetrayal(killer, npc);
-        var outcome = _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer));
+        var outcome = RecordQuest(killer, () => _quests.OnKill(killer.Quests, killer.Inventory, npc.NpcId, QuestActorOf(killer)));
         PublishKill(killer, outcome, npc);
 
         // Mobius executeForEachPlayer: party members near the corpse share raid-head style steps.
@@ -289,7 +294,8 @@ public sealed partial class ZoneWorld
             {
                 if (member == killer || member.Inventory == null || member.Dead || member.Session == null)
                     continue;
-                PublishKill(member, _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member)), npc);
+                PublishKill(member, RecordQuest(member,
+                    () => _quests.OnEveryoneKill(member.Quests, member.Inventory, npc.NpcId, QuestActorOf(member))), npc);
             }
         }
 
@@ -307,7 +313,8 @@ public sealed partial class ZoneWorld
             if (eligible.Count == 0)
                 continue;
             var winner = eligible[Rng(_questRandom, killer).Next(eligible.Count)];
-            PublishKill(winner, _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner)), npc);
+            PublishKill(winner, RecordQuest(winner,
+                () => _quests.OnPartyKill(winner.Quests, winner.Inventory!, questId, npc.NpcId, QuestActorOf(winner))), npc);
         }
     }
 

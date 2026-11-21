@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Recipes;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
@@ -87,6 +88,17 @@ public sealed class NetManufactureTests
         Assert.True(maker.Inventory!.CountOf(ShopTrade.AdenaItemId) >= fee);
         Assert.True(maker.CurMp < makerMpBefore);
         Assert.Equal(PrivateStoreProtocol.TypeManufacture, maker.PrivateStoreType);
+
+        // The customer's bag changes against crafting, which hands the fee to the maker.
+        var customerBag = LedgerAccount.Inventory(customer.ObjectId);
+        var crafting = LedgerAccount.Of(SystemAccount.Crafting);
+        var craft = Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.Craft).Transaction;
+        Assert.Equal((customer.ObjectId, RecipeListId), (craft.CausedBy, craft.Reference));
+        Assert.Equal(
+            [(customerBag, WoodenArrow, 500L), (crafting, WoodenArrow, -500L), (customerBag, ShopTrade.AdenaItemId, -fee),
+                (customerBag, Stem, -4L), (crafting, Stem, 4L), (customerBag, IronOre, -2L), (crafting, IronOre, 2L),
+                (LedgerAccount.Inventory(maker.ObjectId), ShopTrade.AdenaItemId, fee)],
+            craft.Postings.Select(posting => (posting.Account, posting.ItemId, posting.Amount)));
     }
 
     [Fact]
@@ -109,6 +121,7 @@ public sealed class NetManufactureTests
                 ManufacturerObjectId = maker.ObjectId,
                 RecipeId = RecipeListId
             }, default));
+        Assert.DoesNotContain(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.Craft);
     }
 
     [Fact]

@@ -169,6 +169,7 @@ public sealed partial class ZoneWorld
         var customerChanges = new List<InventoryUpdateEntryMsg>();
         var makerChanges = new List<InventoryUpdateEntryMsg>();
 
+        var move = BeginCraft(customer, maker, recipe.Id, out var bagBefore);
         // Mobius: fee first, then materials, then success roll (fee kept on fail).
         if (fee > 0 && !TransferAdena(customer.Inventory, makerInventory, (int)fee, customerChanges, makerChanges))
             return CraftProtocol.Adena;
@@ -214,6 +215,7 @@ public sealed partial class ZoneWorld
             customerChanges.Add(InventoryMessages.ChangeRow(change, made));
         }
 
+        FinishCraft(move, customer, bagBefore, maker, fee);
         SaveInventory(session, customer.Inventory);
         if (maker.Session != null)
             SaveInventory(maker.Session, makerInventory);

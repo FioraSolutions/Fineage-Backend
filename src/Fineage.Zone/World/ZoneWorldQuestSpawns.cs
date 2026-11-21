@@ -151,7 +151,8 @@ public sealed partial class ZoneWorld
             return;
         bool solo = ReferenceEquals(killer, owner) && !_party.InParty(owner.ObjectId);
         if (_quests.HasOwnedSteps(npc.NpcId))
-            PublishKill(owner, _quests.OnOwned(owner.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Kill, solo), npc);
+            PublishKill(owner, RecordQuest(owner,
+                () => _quests.OnOwned(owner.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Kill, solo)), npc);
         ApplySpawnVars(npc, summon.DeadVars);
         q.Leaving = true;
     }
@@ -180,8 +181,10 @@ public sealed partial class ZoneWorld
 
         if (summon.Owned && isOwner && _quests.HasOwnedSteps(npc.NpcId))
         {
-            var outcome = _quests.OnOwned(owner!.Quests, owner.Inventory!, npc.NpcId, QuestActorOf(owner), QuestHook.Attack, solo);
-            PublishKill(owner, outcome, npc);
+            var self = owner!;
+            var outcome = RecordQuest(self,
+                () => _quests.OnOwned(self.Quests, self.Inventory!, npc.NpcId, QuestActorOf(self), QuestHook.Attack, solo));
+            PublishKill(self, outcome, npc);
         }
 
         return false;

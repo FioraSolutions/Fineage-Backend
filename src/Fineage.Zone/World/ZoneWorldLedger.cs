@@ -1,6 +1,7 @@
-using Fineage.Game.Services;
 using Fineage.Game;
 using Fineage.Game.Economy;
+using Fineage.Game.Quests;
+using Fineage.Game.Services;
 using Fineage.Game.Shops;
 
 namespace Fineage.Zone.World;
@@ -86,6 +87,64 @@ public sealed partial class ZoneWorld
             holdings.Add(stack.ItemId, stack.Count);
         return holdings;
     }
+
+    /// <summary>
+    /// Posts everything <paramref name="account"/> gained and lost between two observations, with the system account
+    /// <paramref name="counterpart"/> on the other side of every change: pieces by instance id, the rest by count.
+    /// </summary>
+    internal static void PostChange(
+        LedgerMove move, LedgerAccount account, LedgerHoldings before, LedgerHoldings after, LedgerAccount counterpart)
+    {
+        if (!counterpart.IsSystem)
+            throw new ArgumentException("the counterpart of a change takes no pieces, so it must be a system account", nameof(counterpart));
+        var pieces = new Dictionary<int, long>();
+        void Pieces(LedgerHoldings from, LedgerHoldings without, int sign)
+        {
+            foreach (var group in from.Instances
+                         .Where(piece => !without.Instances.TryGetValue(piece.Key, out int item) || item != piece.Value)
+                         .GroupBy(piece => piece.Value, piece => piece.Key))
+            {
+                var ids = group.Order().ToList();
+                move.Post(account, group.Key, sign * ids.Count, ids);
+                move.Post(counterpart, group.Key, -sign * ids.Count);
+                pieces[group.Key] = pieces.GetValueOrDefault(group.Key) + sign * ids.Count;
+            }
+        }
+
+        Pieces(before, after, -1);
+        Pieces(after, before, 1);
+        foreach (int item in before.Counts.Keys.Union(after.Counts.Keys).Order())
+        {
+            long rest = after.CountOf(item) - before.CountOf(item) - pieces.GetValueOrDefault(item);
+            move.Post(account, item, rest);
+            move.Post(counterpart, item, -rest);
+        }
+    }
+
+    /// <summary>
+    /// Runs <paramref name="change"/>, which may change <paramref name="player"/>'s bag only, and records what it
+    /// gained and lost against <paramref name="counterpart"/>. Nothing is recorded when the bag is unchanged.
+    /// </summary>
+    T RecordBagChange<T>(
+        ZoneEntity player, LedgerTxKind kind, LedgerAccount counterpart, Func<T> change, Func<T, int> reference)
+    {
+        if (player.Inventory == null)
+            return change();
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var before = HoldingsOf(player.Inventory);
+        var result = change();
+        var after = HoldingsOf(player.Inventory);
+        if (after.SameAs(before))
+            return result;
+        var move = BeginLedgerMove(kind, player.ObjectId, reference(result));
+        move.Observe(bag, before);
+        PostChange(move, bag, before, after, counterpart);
+        move.Commit(LedgerHoldingsOf);
+        return result;
+    }
+
+    QuestOutcome RecordQuest(ZoneEntity player, Func<QuestOutcome> step) => RecordBagChange(
+        player, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests), step, outcome => outcome.QuestId);
 
     void ObserveLedger(LedgerMove move, LedgerAccount account) => move.Observe(account, LedgerHoldingsOf(account));
 
