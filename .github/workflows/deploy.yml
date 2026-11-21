@@ -11,8 +11,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    name: test
+    uses: ./.github/workflows/dotnet-test-with-postgres.yml
+    with:
+      verbosity: minimal
+
   deploy:
     name: deploy-linux-x64-to-homeserver
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,9 +28,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
-      - name: Test
-        run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity minimal
 
       # The live host is homeserver (Debian 13, x86-64). An arm64 publish made the
       # binaries unrunnable there, so keep the runtime identifier aligned with the host.
