@@ -14,6 +14,8 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    readonly HashSet<int> _loggedMissingAggroRange = [];
+
     const int AggroScanIntervalMs = 500;
     const int ClanCallIntervalMs = 1000;
     /// <summary>Mobius <c>MAX_ATTACK_TIMEOUT = 1200</c> game ticks (100 ms), two minutes.</summary>
@@ -95,9 +97,22 @@ public sealed partial class ZoneWorld
     /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
     /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
     /// </summary>
+    /// <summary>Template <c>ai aggroRange</c> for proactive scan; logs once and returns false when missing on an aggressive mob.</summary>
+    internal bool TryGetProactiveAggroRange(ZoneEntity npc, out int aggroRange)
+    {
+        aggroRange = npc.AggroRange;
+        if (aggroRange > 0)
+            return true;
+        if (!npc.Aggressive || (!npc.Attackable && !IsGuard(npc)))
+            return false;
+        if (_loggedMissingAggroRange.Add(npc.NpcId))
+            ZoneLog.Warn($"[aggro] npcId={npc.NpcId} ({npc.Name}) missing ai/aggroRange — proactive acquisition skipped");
+        return false;
+    }
+
     bool ValidHateTarget(ZoneEntity npc, int targetId) =>
         _byId.TryGetValue(targetId, out var t) && !t.FakeDeath &&
-        SameInstance(npc.ObjectId, t.ObjectId) && ZoneCombat.InAggroRange(npc.X, npc.Y, t.X, t.Y) &&
+        SameInstance(npc.ObjectId, t.ObjectId) && ZoneCombat.WithinAggroForgetRange(npc.X, npc.Y, t.X, t.Y) &&
         IsValidMobAttackTarget(npc, t);
 
     /// <summary>A connected living player, or a living summon (Mobius <c>isPlayable</c>).</summary>

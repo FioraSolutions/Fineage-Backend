@@ -188,7 +188,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Warehouse = character.Warehouse?.Select(item => new StoredItemDto
             {
@@ -198,7 +200,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Freight = character.Freight?.Select(item => new StoredItemDto
             {
@@ -208,7 +212,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
@@ -308,6 +314,28 @@ public sealed partial class MemoryAccountStore : IAccountStore
             }
 
             credential = new AccountCredential(row.Name, row.PasswordHash, row.PasswordSalt, row.Iterations);
+            return true;
+        }
+    }
+
+    public string GetLanguage(string account)
+    {
+        lock (_gate)
+            return Fineage.Game.L10n.PlayerLocale.Normalize(FindAccount(account)?.Language);
+    }
+
+    public bool TrySetLanguage(string account, string language)
+    {
+        string normalized = Fineage.Game.L10n.PlayerLocale.Normalize(language);
+        lock (_gate)
+        {
+            var row = FindAccount(account);
+            if (row == null)
+                return false;
+            if (string.Equals(row.Language, normalized, StringComparison.Ordinal))
+                return true;
+            row.Language = normalized;
+            Save();
             return true;
         }
     }

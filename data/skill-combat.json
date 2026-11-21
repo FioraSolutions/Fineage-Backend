@@ -130,9 +130,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "DUAL"
-   ],
    "effectRange": 400,
    "magicLevel": [
     38,
@@ -172,7 +169,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUAL"
+    ]
+   }
   },
   {
    "skillId": 3,
@@ -219,10 +222,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     3,
@@ -234,7 +233,14 @@
     13,
     14,
     15
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 5,
@@ -381,9 +387,21 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUAL"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUAL"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 3
+     }
+    ]
+   }
   },
   {
    "skillId": 6,
@@ -554,11 +572,23 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUAL",
-    "SWORD",
-    "BLUNT"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUAL",
+       "SWORD",
+       "BLUNT"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 2
+     }
+    ]
+   }
   },
   {
    "skillId": 7,
@@ -693,11 +723,23 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUAL",
-    "SWORD",
-    "BLUNT"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUAL",
+       "SWORD",
+       "BLUNT"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 2
+     }
+    ]
+   }
   },
   {
    "skillId": 9,
@@ -856,11 +898,23 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUAL",
-    "SWORD",
-    "BLUNT"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUAL",
+       "SWORD",
+       "BLUNT"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 2
+     }
+    ]
+   }
   },
   {
    "skillId": 16,
@@ -982,10 +1036,13 @@
    ],
    "fullLethal": 0,
    "halfLethal": 0,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 17,
@@ -1144,9 +1201,21 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUALFIST"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUALFIST"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 1
+     }
+    ]
+   }
   },
   {
    "skillId": 19,
@@ -1277,9 +1346,6 @@
    "castRange": 900,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     38,
@@ -1319,7 +1385,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 24,
@@ -1432,9 +1504,6 @@
    "castRange": 500,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1000,
    "magicLevel": [
     44,
@@ -1468,7 +1537,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 29,
@@ -1560,9 +1635,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 400,
    "magicLevel": [
     3,
@@ -1589,7 +1661,13 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 30,
@@ -1763,10 +1841,13 @@
    "fullLethal": 4,
    "halfLethal": 1,
    "overHit": false,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 35,
@@ -1901,9 +1982,21 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUALFIST"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUALFIST"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 1
+     }
+    ]
+   }
   },
   {
    "skillId": 36,
@@ -2034,9 +2127,6 @@
    "castRange": -1,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "POLE"
-   ],
    "magicLevel": [
     38,
     39,
@@ -2075,7 +2165,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "POLE"
+    ]
+   }
   },
   {
    "skillId": 48,
@@ -2206,9 +2302,6 @@
    "castRange": -1,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "POLE"
-   ],
    "magicLevel": [
     38,
     39,
@@ -2247,7 +2340,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "POLE"
+    ]
+   }
   },
   {
    "skillId": 49,
@@ -2373,7 +2472,11 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "target",
+    "race": "UNDEAD"
+   }
   },
   {
    "skillId": 54,
@@ -2540,9 +2643,6 @@
    "castRange": 600,
    "baseCritRate": 0,
    "overHit": false,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 1100,
    "magicLevel": [
     22,
@@ -2594,7 +2694,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 56,
@@ -2686,9 +2792,6 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1200,
    "magicLevel": [
     3,
@@ -2715,7 +2818,13 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 70,
@@ -2978,15 +3087,18 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 400,
    "magicLevel": [
     55,
     64,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 84,
@@ -3015,14 +3127,17 @@
    "castRange": -1,
    "baseCritRate": 0,
    "overHit": false,
-   "usingKinds": [
-    "DUAL"
-   ],
    "magicLevel": [
     55,
     60,
     72
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUAL"
+    ]
+   }
   },
   {
    "skillId": 98,
@@ -3129,9 +3244,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     18,
@@ -3149,7 +3261,13 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 101,
@@ -3289,9 +3407,6 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     34,
@@ -3334,7 +3449,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 105,
@@ -3517,9 +3638,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 400,
    "magicLevel": [
     18,
@@ -3537,7 +3655,13 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 190,
@@ -3668,10 +3792,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     38,
@@ -3711,7 +3831,14 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 223,
@@ -3878,11 +4005,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "DAGGER",
-    "DUAL"
-   ],
    "effectRange": 400,
    "magicLevel": [
     22,
@@ -3934,7 +4056,15 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "DAGGER",
+     "DUAL"
+    ]
+   }
   },
   {
    "skillId": 245,
@@ -3999,9 +4129,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "POLE"
-   ],
    "effectRange": 400,
    "magicLevel": [
     18,
@@ -4019,7 +4146,13 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "POLE"
+    ]
+   }
   },
   {
    "skillId": 255,
@@ -4084,10 +4217,6 @@
    "castRange": 40,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     18,
@@ -4105,7 +4234,14 @@
     34,
     35,
     36
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 260,
@@ -4236,9 +4372,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     38,
@@ -4278,7 +4411,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 261,
@@ -4389,9 +4528,21 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUAL"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUAL"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 4
+     }
+    ]
+   }
   },
   {
    "skillId": 263,
@@ -4565,10 +4716,13 @@
    ],
    "fullLethal": 5,
    "halfLethal": 0,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 279,
@@ -4741,9 +4895,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 400,
    "magicLevel": [
     38,
@@ -4783,7 +4934,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 281,
@@ -4914,9 +5071,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 400,
    "magicLevel": [
     38,
@@ -4956,7 +5110,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 284,
@@ -5139,9 +5299,21 @@
     73,
     74
    ],
-   "usingKinds": [
-    "DUALFIST"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "DUALFIST"
+      ]
+     },
+     {
+      "op": "player",
+      "charges": 2
+     }
+    ]
+   }
   },
   {
    "skillId": 289,
@@ -5291,9 +5463,6 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": false,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     59,
@@ -5312,7 +5481,13 @@
     72,
     73,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 315,
@@ -5399,10 +5574,24 @@
     73,
     74
    ],
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ]
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "SWORD",
+       "BLUNT"
+      ]
+     },
+     {
+      "op": "using",
+      "slots": [
+       "lrhand"
+      ]
+     }
+    ]
+   }
   },
   {
    "skillId": 321,
@@ -5468,10 +5657,13 @@
    ],
    "fullLethal": 4,
    "halfLethal": 1,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 325,
@@ -5497,7 +5689,20 @@
    "effectRange": 400,
    "magicLevel": [
     -1
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "player",
+      "siegezone": false
+     },
+     {
+      "op": "player",
+      "isridingstrider": true
+     }
+    ]
+   }
   },
   {
    "skillId": 343,
@@ -5520,13 +5725,16 @@
    "castRange": 900,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     76
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 344,
@@ -5556,10 +5764,13 @@
    ],
    "fullLethal": 8,
    "halfLethal": 2,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 345,
@@ -5582,13 +5793,16 @@
    "castRange": 600,
    "baseCritRate": 10,
    "overHit": false,
-   "usingKinds": [
-    "DUAL"
-   ],
    "effectRange": 1100,
    "magicLevel": [
     78
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUAL"
+    ]
+   }
   },
   {
    "skillId": 346,
@@ -5611,13 +5825,16 @@
    "castRange": 600,
    "baseCritRate": 10,
    "overHit": false,
-   "usingKinds": [
-    "DUALFIST"
-   ],
    "effectRange": 1100,
    "magicLevel": [
     78
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUALFIST"
+    ]
+   }
   },
   {
    "skillId": 347,
@@ -5640,12 +5857,15 @@
    "castRange": -1,
    "baseCritRate": 25,
    "overHit": true,
-   "usingKinds": [
-    "POLE"
-   ],
    "magicLevel": [
     78
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "POLE"
+    ]
+   }
   },
   {
    "skillId": 348,
@@ -5668,13 +5888,16 @@
    "castRange": 40,
    "baseCritRate": 20,
    "overHit": true,
-   "usingKinds": [
-    "BLUNT"
-   ],
    "effectRange": 400,
    "magicLevel": [
     76
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 354,
@@ -5697,13 +5920,16 @@
    "castRange": 900,
    "baseCritRate": 15,
    "overHit": false,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     77
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 361,
@@ -5726,13 +5952,16 @@
    "castRange": 500,
    "baseCritRate": 20,
    "overHit": true,
-   "usingKinds": [
-    "POLE"
-   ],
    "effectRange": 1000,
    "magicLevel": [
     77
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "POLE"
+    ]
+   }
   },
   {
    "skillId": 362,
@@ -5755,14 +5984,17 @@
    "castRange": 40,
    "baseCritRate": 20,
    "overHit": true,
-   "usingKinds": [
-    "BLUNT",
-    "SWORD"
-   ],
    "effectRange": 400,
    "magicLevel": [
     77
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BLUNT",
+     "SWORD"
+    ]
+   }
   },
   {
    "skillId": 369,
@@ -5785,13 +6017,16 @@
    "castRange": 900,
    "baseCritRate": 0,
    "overHit": true,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1400,
    "magicLevel": [
     78
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 400,
@@ -5841,10 +6076,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ],
    "effectRange": 90,
    "magicLevel": [
     55,
@@ -5857,7 +6088,14 @@
     70,
     72,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 401,
@@ -5907,10 +6145,6 @@
    "castRange": 40,
    "baseCritRate": 15,
    "overHit": true,
-   "usingKinds": [
-    "SWORD",
-    "BLUNT"
-   ],
    "effectRange": 90,
    "magicLevel": [
     55,
@@ -5923,7 +6157,14 @@
     70,
     72,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "SWORD",
+     "BLUNT"
+    ]
+   }
   },
   {
    "skillId": 407,
@@ -6034,9 +6275,6 @@
    "castRange": -1,
    "baseCritRate": 15,
    "overHit": false,
-   "usingKinds": [
-    "DUAL"
-   ],
    "magicLevel": [
     55,
     58,
@@ -6048,7 +6286,13 @@
     70,
     72,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DUAL"
+    ]
+   }
   },
   {
    "skillId": 409,
@@ -6114,10 +6358,13 @@
    ],
    "fullLethal": 10,
    "halfLethal": 3,
-   "usingKinds": [
-    "DAGGER"
-   ],
-   "effectRange": 400
+   "effectRange": 400,
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "DAGGER"
+    ]
+   }
   },
   {
    "skillId": 1028,
@@ -6215,7 +6462,11 @@
     70,
     72,
     74
-   ]
+   ],
+   "castCondition": {
+    "op": "target",
+    "race": "UNDEAD"
+   }
   },
   {
    "skillId": 1031,
@@ -6269,7 +6520,11 @@
     30,
     33,
     35
-   ]
+   ],
+   "castCondition": {
+    "op": "target",
+    "race": "UNDEAD"
+   }
   },
   {
    "skillId": 1090,
@@ -8556,7 +8811,11 @@
    "effectRange": 1400,
    "magicLevel": [
     68
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "elementSeeds": 2
+   }
   },
   {
    "skillId": 1289,
@@ -8582,7 +8841,12 @@
    "effectRange": 1400,
    "magicLevel": [
     70
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "elementSeed": "FIRE",
+    "elementSeedCount": 2
+   }
   },
   {
    "skillId": 1290,
@@ -8608,7 +8872,12 @@
    "effectRange": 1400,
    "magicLevel": [
     70
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "elementSeed": "WATER",
+    "elementSeedCount": 2
+   }
   },
   {
    "skillId": 1291,
@@ -8634,7 +8903,12 @@
    "effectRange": 1400,
    "magicLevel": [
     70
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "elementSeed": "WIND",
+    "elementSeedCount": 2
+   }
   },
   {
    "skillId": 1292,
@@ -8660,7 +8934,22 @@
    "effectRange": 1400,
    "magicLevel": [
     72
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "player",
+      "elementSeed": "WATER",
+      "elementSeedCount": 1
+     },
+     {
+      "op": "player",
+      "elementSeed": "WIND",
+      "elementSeedCount": 1
+     }
+    ]
+   }
   },
   {
    "skillId": 1293,
@@ -8686,7 +8975,22 @@
    "effectRange": 1400,
    "magicLevel": [
     72
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "player",
+      "elementSeed": "FIRE",
+      "elementSeedCount": 1
+     },
+     {
+      "op": "player",
+      "elementSeed": "WIND",
+      "elementSeedCount": 1
+     }
+    ]
+   }
   },
   {
    "skillId": 1294,
@@ -8712,7 +9016,22 @@
    "effectRange": 1400,
    "magicLevel": [
     72
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "player",
+      "elementSeed": "FIRE",
+      "elementSeedCount": 1
+     },
+     {
+      "op": "player",
+      "elementSeed": "WATER",
+      "elementSeedCount": 1
+     }
+    ]
+   }
   },
   {
    "skillId": 1295,
@@ -9025,7 +9344,12 @@
    "effectRange": 1000,
    "magicLevel": [
     80
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "activeEffectId": 5105,
+    "activeEffectLevel": 3
+   }
   },
   {
    "skillId": 1420,
@@ -9051,7 +9375,12 @@
    "effectRange": 1000,
    "magicLevel": [
     80
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "activeEffectId": 5105,
+    "activeEffectLevel": 3
+   }
   },
   {
    "skillId": 1421,
@@ -9077,7 +9406,12 @@
    "effectRange": 1000,
    "magicLevel": [
     80
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "activeEffectId": 5105,
+    "activeEffectLevel": 3
+   }
   },
   {
    "skillId": 1423,
@@ -9103,7 +9437,12 @@
    "effectRange": 1000,
    "magicLevel": [
     80
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "activeEffectId": 5105,
+    "activeEffectLevel": 3
+   }
   },
   {
    "skillId": 2234,
@@ -9129,7 +9468,22 @@
    "effectRange": 1400,
    "magicLevel": [
     85
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "using",
+      "kinds": [
+       "BOW"
+      ]
+     },
+     {
+      "op": "player",
+      "insideZoneId": 2234
+     }
+    ]
+   }
   },
   {
    "skillId": 3049,
@@ -12253,9 +12607,6 @@
    "castRange": 700,
    "baseCritRate": 0,
    "overHit": false,
-   "usingKinds": [
-    "BOW"
-   ],
    "effectRange": 1200,
    "magicLevel": [
     10,
@@ -12270,7 +12621,13 @@
     85,
     90,
     95
-   ]
+   ],
+   "castCondition": {
+    "op": "using",
+    "kinds": [
+     "BOW"
+    ]
+   }
   },
   {
    "skillId": 4124,
@@ -23810,7 +24167,11 @@
     85,
     85,
     85
-   ]
+   ],
+   "castCondition": {
+    "op": "player",
+    "insideZoneId": 5015
+   }
   },
   {
    "skillId": 5018,
@@ -24842,7 +25203,21 @@
    "effectRange": 1600,
    "magicLevel": [
     70
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "and",
+      "items": [
+       {
+        "op": "target",
+        "npcIds": []
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "skillId": 5111,
@@ -24868,7 +25243,21 @@
    "effectRange": 2000,
    "magicLevel": [
     70
-   ]
+   ],
+   "castCondition": {
+    "op": "and",
+    "items": [
+     {
+      "op": "and",
+      "items": [
+       {
+        "op": "target",
+        "npcIds": []
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "skillId": 5117,

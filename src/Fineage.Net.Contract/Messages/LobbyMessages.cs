@@ -5,6 +5,12 @@ namespace Fineage.Net.Contract
         public string Account { get; set; } = "";
         public string Password { get; set; } = "";
         public bool RegisterIfMissing { get; set; }
+
+        /// <summary>
+        /// Player language tag. Null when the client omitted the tail (older clients).
+        /// A sent value, including empty, is stored; the server normalizes unknown tags to <c>en</c>.
+        /// </summary>
+        public string? Language { get; set; }
     }
 
     public sealed class AuthResultMsg

@@ -258,6 +258,13 @@ sealed partial class ZoneEntity
         get => Status?.SpiritshotCharge ?? 0;
         set => EnsureStatus().SpiritshotCharge = value;
     }
+
+    /// <summary>Mobius force charges (Sonic Focus / Focus Force); surfaced in EtcStatusUpdate.</summary>
+    public int ForceCharges
+    {
+        get => Status?.ForceCharges ?? 0;
+        set => EnsureStatus().ForceCharges = Math.Clamp(value, 0, 7);
+    }
     /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
     public int NpcSoulShotLeft
     {

@@ -157,17 +157,17 @@ public sealed partial class ZoneWorld
             return;
         if ((flags & ZoneCombat.HitFlagMiss) != 0)
         {
-            NetBridge.FanoutSystemMessage([attacker.ObjectId], CombatLines.Missed());
+            NetBridge.FanoutSystemMessage([attacker.ObjectId], Localize(attacker, CombatLines.Missed()));
             return;
         }
         if ((flags & ZoneCombat.HitFlagCrit) != 0)
-            NetBridge.FanoutSystemMessage([attacker.ObjectId], CombatLines.CriticalHit());
+            NetBridge.FanoutSystemMessage([attacker.ObjectId], Localize(attacker, CombatLines.CriticalHit()));
         if (damage <= 0)
             return;
 
         NetBridge.FanoutSystemMessage(
             [attacker.ObjectId],
-            CombatLines.HitTarget(target.Name, damage));
+            Localize(attacker, CombatLines.HitTarget(target.Name, damage)));
     }
 
     /// <summary>
@@ -180,13 +180,13 @@ public sealed partial class ZoneWorld
             return;
         if ((flags & ZoneCombat.HitFlagMiss) != 0)
         {
-            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.AvoidedAttack(attacker.Name));
+            NetBridge.FanoutSystemMessage([victim.ObjectId], Localize(victim, CombatLines.AvoidedAttack(attacker.Name)));
             return;
         }
         if ((flags & ZoneCombat.HitFlagShield) != 0)
-            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.ShieldDefense());
+            NetBridge.FanoutSystemMessage([victim.ObjectId], Localize(victim, CombatLines.ShieldDefense()));
         if (damage > 0)
-            NetBridge.FanoutSystemMessage([victim.ObjectId], CombatLines.HitYou(attacker.Name, damage));
+            NetBridge.FanoutSystemMessage([victim.ObjectId], Localize(victim, CombatLines.HitYou(attacker.Name, damage)));
     }
 
     /// <summary>

@@ -148,7 +148,7 @@ public sealed partial class ZoneWorld
         player.Race == OlympiadProtocol.DwarfRace ? OlympiadProtocol.DwarfInventoryLimit : OlympiadProtocol.InventoryLimit;
 
     static bool HasCursedWeapon(PlayerInventory? inventory) =>
-        CursedWeaponsState.InventoryHasCursedWeapon(inventory);
+        CursedWeaponsManager.InventoryHasCursedWeapon(inventory);
 
     void CollectVisible(ZoneEntity self, HashSet<int> into)
     {

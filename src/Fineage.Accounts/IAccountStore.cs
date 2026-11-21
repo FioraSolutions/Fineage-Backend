@@ -15,6 +15,15 @@ public interface IAccountStore
 
     bool TryGetCredential(string account, out AccountCredential credential);
 
+    /// <summary>
+    /// The account's player language (<see cref="Fineage.Game.L10n.PlayerLocale.Default"/> when unset).
+    /// Language is an account preference: every character on the account shares it, and the zone session copies it at enter.
+    /// </summary>
+    string GetLanguage(string account);
+
+    /// <summary>Stores a normalized player language on the account. False when the account does not exist.</summary>
+    bool TrySetLanguage(string account, string language);
+
     CreateCharacterStatus TryAddCharacter(
         string account,
         string name,
@@ -197,4 +206,10 @@ public interface IAccountStore
 
     /// <summary>Removes couples that reference a deleted character (Mobius <c>GameClient</c> cleanup).</summary>
     bool PurgeWeddingCouplesForCharacter(int characterId);
+
+    /// <summary>Mobius <c>cursed_weapons</c> table: active Zariche / Akamanah blades.</summary>
+    IReadOnlyList<CursedWeaponRecord> ListCursedWeapons();
+
+    /// <summary>Replaces persisted cursed weapon rows (one row per blade id).</summary>
+    bool SaveCursedWeapons(IReadOnlyList<CursedWeaponRecord> rows);
 }

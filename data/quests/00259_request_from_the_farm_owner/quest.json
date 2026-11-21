@@ -115,32 +115,18 @@
       "npcId": 30405,
       "hook": "event",
       "when": "started",
-      "event": "30405-05b",
-      "htmlFile": "30405-event-30405-05b-010.htm"
-    },
-    {
-      "npcId": 30405,
-      "hook": "event",
-      "when": "started",
-      "event": "30405-05d",
-      "htmlFile": "30405-event-30405-05d-011.htm"
-    },
-    {
-      "npcId": 30405,
-      "hook": "event",
-      "when": "started",
       "event": "30405-06",
       "atLeast": {
         "1495": 10
       },
-      "htmlFile": "30405-event-30405-06-012.htm"
+      "htmlFile": "30405-event-30405-06-010.htm"
     },
     {
       "npcId": 30405,
       "hook": "event",
       "when": "started",
       "event": "30405-06",
-      "htmlFile": "30405-event-30405-06-013.htm"
+      "htmlFile": "30405-event-30405-06-011.htm"
     },
     {
       "npcId": 30405,
@@ -162,7 +148,7 @@
           "count": 2
         }
       ],
-      "htmlFile": "30405-event-30405-04-014.htm"
+      "htmlFile": "30405-event-30405-04-012.htm"
     },
     {
       "npcId": 30405,
@@ -184,51 +170,7 @@
           "count": 250
         }
       ],
-      "htmlFile": "30405-event-30405-05-015.htm"
-    },
-    {
-      "npcId": 30405,
-      "hook": "event",
-      "when": "started",
-      "event": "30405-05a",
-      "atLeast": {
-        "1495": 10
-      },
-      "ops": [
-        {
-          "op": "take_item",
-          "itemId": 1495,
-          "count": 10
-        },
-        {
-          "op": "give_item",
-          "itemId": 1835,
-          "count": 60
-        }
-      ],
-      "htmlFile": "30405-event-30405-05a-016.htm"
-    },
-    {
-      "npcId": 30405,
-      "hook": "event",
-      "when": "started",
-      "event": "30405-05c",
-      "atLeast": {
-        "1495": 10
-      },
-      "ops": [
-        {
-          "op": "take_item",
-          "itemId": 1495,
-          "count": 10
-        },
-        {
-          "op": "give_item",
-          "itemId": 2509,
-          "count": 30
-        }
-      ],
-      "htmlFile": "30405-event-30405-05c-017.htm"
+      "htmlFile": "30405-event-30405-05-013.htm"
     },
     {
       "npcId": 20103,

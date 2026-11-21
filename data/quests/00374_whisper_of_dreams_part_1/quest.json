@@ -1,0 +1,418 @@
+{
+  "id": 374,
+  "name": "Whisper of Dreams, Part 1",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5884,
+    5885,
+    5886,
+    5887
+  ],
+  "dialogs": [
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 55,
+      "htmlFile": "30515-talk-000.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 56,
+      "htmlFile": "30515-talk-001.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "absent",
+      "event": "30515-03",
+      "minLevel": 56,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "condStone",
+          "value": "1"
+        }
+      ],
+      "htmlFile": "30515-event-30515-03-002.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "lacksItems": [
+        5886
+      ],
+      "htmlFile": "30515-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "lacksItems": [
+        5886
+      ],
+      "htmlFile": "30515-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 5886,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30515-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 5886,
+      "htmlFile": "30515-talk-c2-006.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-08",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30515-event-30515-08-007.htm"
+    },
+    {
+      "npcId": 30557,
+      "hook": "talk",
+      "when": "started",
+      "cond": 2,
+      "hasItem": 5886,
+      "htmlFile": "30557-talk-c2-008.htm"
+    },
+    {
+      "npcId": 30557,
+      "hook": "event",
+      "when": "started",
+      "event": "30557-02",
+      "cond": 2,
+      "hasItem": 5886,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        },
+        {
+          "op": "take_all",
+          "items": [
+            5886
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5887,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30557-event-30557-02-c2-009.htm"
+    },
+    {
+      "npcId": 30557,
+      "hook": "event",
+      "when": "started",
+      "event": "30557-02",
+      "cond": 2,
+      "lacksItems": [
+        5886
+      ],
+      "htmlFile": "30557-event-30557-02-c2-010.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-0",
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            5884,
+            5885
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5486,
+          "count": 3
+        },
+        {
+          "op": "give_adena",
+          "count": 2950
+        }
+      ],
+      "htmlFile": "30515-event-30515-06-0-011.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-0",
+      "htmlFile": "30515-event-30515-06-0-012.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-1",
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            5884,
+            5885
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5487,
+          "count": 2
+        },
+        {
+          "op": "give_adena",
+          "count": 18050
+        }
+      ],
+      "htmlFile": "30515-event-30515-06-1-013.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-1",
+      "htmlFile": "30515-event-30515-06-1-014.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-2",
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            5884,
+            5885
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5488,
+          "count": 2
+        },
+        {
+          "op": "give_adena",
+          "count": 18050
+        }
+      ],
+      "htmlFile": "30515-event-30515-06-2-015.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-2",
+      "htmlFile": "30515-event-30515-06-2-016.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-3",
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            5884,
+            5885
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5485,
+          "count": 4
+        },
+        {
+          "op": "give_adena",
+          "count": 10450
+        }
+      ],
+      "htmlFile": "30515-event-30515-06-3-017.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-3",
+      "htmlFile": "30515-event-30515-06-3-018.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-4",
+      "atLeast": {
+        "5884": 65,
+        "5885": 65
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            5884,
+            5885
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5489,
+          "count": 6
+        },
+        {
+          "op": "give_adena",
+          "count": 15550
+        }
+      ],
+      "htmlFile": "30515-event-30515-06-4-019.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-06-4",
+      "htmlFile": "30515-event-30515-06-4-020.htm"
+    },
+    {
+      "npcId": 20620,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5884,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20621,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5885,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20620,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "varAtLeast": {
+        "condStone": 1
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5886,
+          "count": 1,
+          "chance": 0.01,
+          "limit": 1
+        },
+        {
+          "op": "unset",
+          "key": "condStone"
+        }
+      ]
+    },
+    {
+      "npcId": 20621,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "varAtLeast": {
+        "condStone": 1
+      },
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5886,
+          "count": 1,
+          "chance": 0.01,
+          "limit": 1
+        },
+        {
+          "op": "unset",
+          "key": "condStone"
+        }
+      ]
+    }
+  ]
+}

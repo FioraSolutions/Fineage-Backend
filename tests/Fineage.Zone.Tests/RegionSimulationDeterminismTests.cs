@@ -25,12 +25,13 @@ public sealed class RegionSimulationDeterminismTests
         "commands", "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
         "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
         "wedding-teleport", "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
-        "ground-expiry", "environment.zones", "punishment", "door-auto-close"
+        "ground-expiry", "environment.zones", "punishment", "door-auto-close", "cursed-weapons"
     ];
 
     static readonly string[] LegacySimulationOrder =
     [
         "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "dimensional-rift", "clan.dissolutions", "clan.hall-auctions",
+        "clan.hall-functions",
         "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "seven-signs-festival", "mammon", "olympiad"
     ];
 

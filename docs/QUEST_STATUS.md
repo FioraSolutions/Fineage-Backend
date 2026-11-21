@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 226 |
-| partial | 90 |
-| stub | 27 |
-| missing | 1 |
+| implemented | 240 |
+| partial | 94 |
+| stub | 10 |
+| missing | 0 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -108,7 +108,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 106 | Forgotten Truth | 10+ | story / newbie | implemented | hand-ported |
 | 107 | Merciless Punishment | 12+ | repeatable | implemented | hand-ported |
 | 108 | Jumble, Tumble, Diamond Fuss | 10+ | story / newbie | implemented | hand-ported |
-| 109 | In Search of the Nest | 66+ | story / newbie | stub | 11 dialog(s), no start; auto-port |
+| 109 | In Search of the Nest | 66+ | story / newbie | implemented | hand-ported |
 | 110 | To the Primeval Isle | 75+ | story / newbie | implemented | auto-port |
 | 111 | Elrokian Hunter's Proof | 75+ | story / newbie | partial | no kill: 16/16 mobs; auto-port |
 | 112 | Walk of Fate | 20+ | story / newbie | implemented | auto-port |
@@ -126,7 +126,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 124 | Meeting the Elroki | 75+ | story / newbie | implemented | auto-port |
 | 125 | The Name of Evil - 1 | 76+ | story / newbie | partial | no kill: 10/10 mobs; auto-port |
 | 126 | The Name of Evil - 2 | 77+ | story / newbie | implemented | auto-port |
-| 127 | Kamael: A Window to the Future |  | story / newbie | stub | 19 dialog(s), no start; auto-port |
+| 127 | Kamael: A Window to the Future |  | story / newbie | implemented | auto-port |
 | 151 | Cure for Fever Disease | 15+ | story / newbie | implemented | hand-ported |
 | 152 | Shards of Golem | 10+ | story / newbie | implemented | hand-ported |
 | 153 | Deliver Goods | 2+ | story / newbie | implemented | hand-ported |
@@ -177,7 +177,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | partial | quest spawns missing; timers; hand-ported |
 | 246 | Possessor of a Precious Soul - 3 | 65+ | noblesse | implemented | hand-ported |
 | 247 | Possessor of a Precious Soul - 4 | 75+ | noblesse | implemented | hand-ported |
-| 255 | Tutorial | 6+ | tutorial | missing |  |
+| 255 | Tutorial | 6+ | tutorial | implemented | timers; hand-ported |
 | 257 | The Guard is Busy | 6+ | repeatable | implemented | hand-ported |
 | 258 | Bring Wolf Pelts | 3+ | repeatable | implemented | hand-ported |
 | 259 | Rancher's Plea | 15+ | repeatable | implemented | hand-ported |
@@ -257,19 +257,19 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 371 | Shriek of Ghosts | 59+ | repeatable | partial | no talk: 30929; no kill: 3/3 mobs; auto-port |
 | 372 | Legacy of Insolence | 59+ | repeatable | partial | no talk: 30839,30855,30929,31001; no kill: 6/6 mobs; auto-port |
 | 373 | Supplier of Reagents | 57+ | repeatable | partial | no talk: 31149; no kill: 7/7 mobs; auto-port |
-| 374 | Whisper of Dreams, Part 1 | 56+ | repeatable | stub | 6 dialog(s), no start; auto-port |
-| 375 | Whisper of Dreams, Part 2 | 60+ | repeatable | stub | 3 dialog(s), no start; auto-port |
-| 376 | Exploration of the Giants Cave, Part 1 | 51+ | repeatable | stub | 8 dialog(s), no start; auto-port |
-| 377 | Exploration of the Giants Cave, Part 2 | 57+ | repeatable | stub | 5 dialog(s), no start; auto-port |
+| 374 | Whisper of Dreams, Part 1 | 56+ | repeatable | implemented | hand-ported |
+| 375 | Whisper of Dreams, Part 2 | 60+ | repeatable | implemented | hand-ported |
+| 376 | Exploration of the Giants Cave, Part 1 | 51+ | repeatable | implemented | hand-ported |
+| 377 | Exploration of the Giants Cave, Part 2 | 57+ | repeatable | implemented | hand-ported |
 | 378 | Magnificent Feast | 20+ | repeatable | implemented | auto-port |
 | 379 | Fantasy Wine | 20+ | repeatable | implemented | hand-ported |
 | 380 | Bring Out the Flavor of Ingredients! | 24+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
 | 381 | Let's Become a Royal Member! | 55+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 382 | Kail's Magic Coin | 55+ | one-time | implemented | hand-ported |
 | 383 | Searching for Treasure | 42+ | repeatable | partial | no talk: 31148; auto-port |
-| 384 | Warehouse Keeper's Pastime | 40+ | repeatable | stub | 3 dialog(s), no start; auto-port |
+| 384 | Warehouse Keeper's Pastime | 40+ | repeatable | partial | no kill: 2/28 mobs; auto-port |
 | 385 | Yoke of the Past | 20+ | repeatable | implemented | hand-ported |
-| 386 | Stolen Dignity | 58+ | repeatable | stub | 2 dialog(s), no start; auto-port |
+| 386 | Stolen Dignity | 58+ | repeatable | implemented | auto-port |
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
 | 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
 | 403 | Path to a Rogue | 19+ | 1st class (Path) | implemented | hand-ported |
@@ -291,17 +291,17 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 419 | Get a Pet | 15+ | pet | implemented | hand-ported |
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
-| 422 | Repent Your Sins | 20+ | repeatable | stub | 36 dialog(s), no start; auto-port |
+| 422 | Repent Your Sins | 20+ | repeatable | partial | no talk: 30300,30597,30612,30718; no kill: 3/4 mobs; auto-port |
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
-| 431 | Wedding March | 38+ | repeatable | stub | 2 dialog(s), no start; auto-port |
+| 431 | Wedding March | 38+ | repeatable | implemented | hand-ported |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
 | 501 | Proof of Clan Alliance | 3–39 | clan | stub | 40 dialog(s), no start; timers; auto-port |
 | 503 | Pursuit of Clan Ambition! |  | clan | stub | 64 dialog(s), no start; auto-port |
-| 504 | Competition for the Bandit Stronghold |  | clan | stub | 2 dialog(s), no start; auto-port |
+| 504 | Competition for the Bandit Stronghold |  | clan | implemented | hand-ported |
 | 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
-| 508 | A Clan's Reputation | 5+ | clan | stub | 2 dialog(s), no start; auto-port |
-| 509 | The Clan's Prestige | 6+ | clan | stub | 2 dialog(s), no start; auto-port |
-| 510 | A Clan's Reputation | 5+ | clan | stub | 3 dialog(s), no start; auto-port |
+| 508 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
+| 509 | The Clan's Prestige | 6+ | clan | implemented | hand-ported |
+| 510 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
 | 601 | Watching Eyes | 71+ | repeatable | implemented | hand-ported |
 | 602 | Shadow of Light | 68+ | repeatable | implemented | hand-ported |
 | 603 | Daimon the White-Eyed - Part 1 | 73+ | repeatable | partial | no talk: 31548,31549,31550,31551,31552; no kill: 3/3 mobs; auto-port |
@@ -329,15 +329,15 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 625 | The Finest Ingredients - Part 2 | 73+ | repeatable | partial | no kill: 1/1 mobs; timers; auto-port |
 | 626 | A Dark Twilight | 60+ | one-time | implemented | hand-ported |
 | 627 | Heart in Search of Power | 60+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
-| 628 | Hunt of the Golden Ram Mercenary Force | 66+ | repeatable | stub | 11 dialog(s), no start; auto-port |
+| 628 | Hunt of the Golden Ram Mercenary Force | 66+ | repeatable | implemented | hand-ported |
 | 629 | Clean up the Swamp of Screams | 66+ | repeatable | implemented | hand-ported |
 | 631 | Delicious Top Choice Meat | 65+ | repeatable | implemented | hand-ported |
 | 632 | Necromancer's Request | 63+ | repeatable | implemented | hand-ported |
 | 633 | In the Forgotten Village | 65+ | repeatable | partial | no kill: 1/27 mobs; hand-ported |
-| 634 | In Search of Fragments of Dimension | 20+ | repeatable | implemented | auto-port (rift) |
-| 635 | In the Dimensional Rift | 20+ | repeatable | implemented | auto-port (rift) |
+| 634 | In Search of Fragments of Dimension | 20+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
+| 635 | In the Dimensional Rift | 20+ | repeatable | implemented | hand-ported |
 | 636 | Truth Beyond the Gate |  | repeatable | implemented | hand-ported |
-| 637 | Through the Gate Once More | 73+ | repeatable | stub | 4 dialog(s), no start; auto-port |
+| 637 | Through the Gate Once More | 73+ | repeatable | implemented | hand-ported |
 | 638 | Seekers of the Holy Grail | 73+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 639 | Guardians of the Holy Grail | 73+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
 | 640 | The Zero Hour | 66+ | repeatable | implemented | hand-ported |
@@ -348,7 +348,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 645 | Ghosts of Batur | 23+ | repeatable | implemented | hand-ported |
 | 646 | Signs of Revolt | 40+ | repeatable | implemented | hand-ported |
 | 647 | Influx of Machines | 46+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
-| 648 | An Ice Merchant's Dream | 53+ | repeatable | stub | 21 dialog(s), no start; auto-port |
+| 648 | An Ice Merchant's Dream | 53+ | repeatable | partial | no talk: 32023; auto-port |
 | 649 | A Looter and a Railroad Man | 30+ | repeatable | partial | no kill: 8/8 mobs; auto-port |
 | 650 | A Broken Dream | 39+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
 | 651 | Runaway Youth | 26+ | repeatable | partial | quest spawns missing; timers; hand-ported |

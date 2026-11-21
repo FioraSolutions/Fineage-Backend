@@ -140,7 +140,9 @@ public static class InventoryMessages
             Icon = row.Icon,
             WeaponType = row.WeaponType,
             ArmorType = row.ArmorType,
-            EnchantLevel = row.EnchantLevel
+            EnchantLevel = row.EnchantLevel,
+            Option1 = row.Option1,
+            Option2 = row.Option2
         };
     }
 
@@ -190,7 +192,9 @@ public static class InventoryMessages
             Icon = item.Template.Icon,
             WeaponType = item.Template.WeaponType == WeaponType.None ? "" : WeaponToken(item.Template.WeaponType),
             ArmorType = item.Template.ArmorType == ArmorType.None ? "" : ArmorToken(item.Template.ArmorType),
-            EnchantLevel = item.EnchantLevel
+            EnchantLevel = item.EnchantLevel,
+            Option1 = item.Option1,
+            Option2 = item.Option2
         };
     }
 

@@ -23,15 +23,14 @@ public sealed partial class ZoneWorld
         }
 
         int adena = ground.GroundCount;
-        var move = BeginLedgerMove(LedgerTxKind.Pickup, picker.ObjectId, ground.ObjectId);
-        PostOffGround(move, ground);
-        RemoveGroundItem(ground);
         var receivers = new List<(ZoneEntity Member, int Amount)>();
         if (inRange.Count == 0)
             receivers.Add((picker, adena));
         else if (PartyLootRules.AdenaShare(adena, inRange.Count) is var share and > 0)
             receivers.AddRange(inRange.Select(m => (m, share)));
 
+        var move = BeginLedgerMove(LedgerTxKind.Pickup, picker.ObjectId, ground.ObjectId);
+        PostOffGround(move, ground);
         long received = 0;
         foreach (var (member, amount) in receivers)
         {
@@ -39,12 +38,25 @@ public sealed partial class ZoneWorld
                 continue;
             var bag = LedgerAccount.Inventory(member.ObjectId);
             ObserveLedger(move, bag);
-            GrantInventoryStack(member, WarehouseRules.AdenaItemId, amount, notifyObtained: true);
             move.Post(bag, WarehouseRules.AdenaItemId, amount);
             received += amount;
         }
 
         move.Post(LedgerAccount.Of(SystemAccount.Destroyed), WarehouseRules.AdenaItemId, adena - received);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"party adena pickup refused ground {ground.ObjectId}: ledger rejected the postings");
+            return;
+        }
+
+        foreach (var (member, amount) in receivers)
+        {
+            if (member.Inventory == null || member.Session == null)
+                continue;
+            GrantInventoryStack(member, WarehouseRules.AdenaItemId, amount, notifyObtained: true);
+        }
+
+        RemoveGroundItem(ground);
         move.Commit(LedgerHoldingsOf);
     }
 
@@ -92,6 +104,7 @@ public sealed partial class ZoneWorld
         move.Commit(LedgerHoldingsOf);
         SaveInventory(looter.Session, looter.Inventory);
         NotifyObtained(looter.Session, itemId, count);
+        OnCursedWeaponGroundPickup(looter, ground);
     }
 
 }

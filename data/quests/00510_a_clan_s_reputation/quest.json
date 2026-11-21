@@ -1,0 +1,131 @@
+{
+  "id": 510,
+  "name": "A Clan's Reputation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8767
+  ],
+  "dialogs": [
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "31331-talk-000.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "event",
+      "when": "absent",
+      "event": "31331-3",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31331-event-31331-3-001.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "below": {
+        "8767": 10
+      },
+      "htmlFile": "31331-talk-c1-002.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "8767": 10
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            8767
+          ]
+        },
+        {
+          "op": "give_adena",
+          "count": 5000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31331-talk-c1-003.htm"
+    },
+    {
+      "npcId": 31331,
+      "hook": "event",
+      "when": "started",
+      "event": "31331-6",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31331-event-31331-6-004.htm"
+    },
+    {
+      "npcId": 22215,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8767,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22216,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8767,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 22217,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8767,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

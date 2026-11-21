@@ -61,7 +61,7 @@ public sealed class NetSiegeOfflineCircletTests
         var offlineLedger = LedgerAccount.Inventory(away.Id);
         var destroy = Assert.Single(ledger.Entries
             .Select(e => e.Transaction)
-            .Where(t => t.Kind == LedgerTxKind.Destroy && t.CausedBy == away.Id));
+, t => t.Kind == LedgerTxKind.Destroy && t.CausedBy == away.Id);
         Assert.Equal(Gludio, destroy.Reference);
         Assert.Contains(destroy.Postings, p => p.Account == offlineLedger && p.ItemId == circlet && p.Amount < 0);
     }

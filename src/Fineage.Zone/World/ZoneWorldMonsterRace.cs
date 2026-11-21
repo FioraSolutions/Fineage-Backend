@@ -139,7 +139,7 @@ public sealed partial class ZoneWorld
         string html;
         if (val is >= 0 and <= 9)
         {
-            html = RaceHtml(npc, 2);
+            html = RaceHtml(session, npc, 2);
             html = ReplaceRunners(html, board);
             html = html.Replace("No1", val == 0 ? "" : val.ToString(CultureInfo.InvariantCulture));
             if (val != 0)
@@ -149,7 +149,7 @@ public sealed partial class ZoneWorld
         {
             if (session.RaceTicketLane == 0)
                 return null;
-            html = RaceHtml(npc, 3);
+            html = RaceHtml(session, npc, 3);
             html = html.Replace("0place", session.RaceTicketLane.ToString(CultureInfo.InvariantCulture));
             html = html.Replace("Mob1", RunnerName(board, session.RaceTicketLane - 1));
             int priceIndex = val - 10;
@@ -161,7 +161,7 @@ public sealed partial class ZoneWorld
         {
             if (session.RaceTicketLane == 0 || session.RaceTicketPriceIndex == 0)
                 return null;
-            html = RaceHtml(npc, 4);
+            html = RaceHtml(session, npc, 4);
             int price = MonsterRaceProtocol.TicketPrices[session.RaceTicketPriceIndex - 1];
             html = html.Replace("0place", session.RaceTicketLane.ToString(CultureInfo.InvariantCulture));
             html = html.Replace("Mob1", RunnerName(board, session.RaceTicketLane - 1));
@@ -225,7 +225,7 @@ public sealed partial class ZoneWorld
             return ShowRaceChat(session, player, npc, 0);
         }
 
-        string html = RaceHtml(npc, 5);
+        string html = RaceHtml(session, npc, 5);
         html = ReplaceRunners(html, board);
         var odds = board.Odds;
         for (int i = 0; i < 8; i++)
@@ -243,7 +243,7 @@ public sealed partial class ZoneWorld
 
     string? ShowRaceInfo(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
-        string html = ReplaceRunners(RaceHtml(npc, 6), MonsterRace);
+        string html = ReplaceRunners(RaceHtml(session, npc, 6), MonsterRace);
         SendHtml(session, player, npc, html);
         return null;
     }
@@ -263,7 +263,7 @@ public sealed partial class ZoneWorld
                 .Append(ticket.CustomType2 * 100).Append("</font> Adena</td></tr>");
         }
 
-        string html = RaceHtml(npc, 7).Replace("%tickets%", sb.ToString());
+        string html = RaceHtml(session, npc, 7).Replace("%tickets%", sb.ToString());
         SendHtml(session, player, npc, html);
         return null;
     }
@@ -282,7 +282,7 @@ public sealed partial class ZoneWorld
         int lane = ticket.CustomType1;
         int bet = ticket.CustomType2 * 100;
         bool winner = lane == info.FirstLane + 1;
-        string html = RaceHtml(npc, 8)
+        string html = RaceHtml(session, npc, 8)
             .Replace("%raceId%", ticket.EnchantLevel.ToString(CultureInfo.InvariantCulture))
             .Replace("%lane%", lane.ToString(CultureInfo.InvariantCulture))
             .Replace("%bet%", bet.ToString(CultureInfo.InvariantCulture))
@@ -345,17 +345,17 @@ public sealed partial class ZoneWorld
                 .Append("</font> Times</td></tr>");
         }
 
-        string html = RaceHtml(npc, 9).Replace("%infos%", sb.ToString());
+        string html = RaceHtml(session, npc, 9).Replace("%infos%", sb.ToString());
         SendHtml(session, player, npc, html);
         return null;
     }
 
-    string RaceHtml(ZoneEntity npc, int page) =>
-        NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page).Replace("%objectId%", npc.ObjectId.ToString(CultureInfo.InvariantCulture));
+    string RaceHtml(ZoneSession session, ZoneEntity npc, int page) =>
+        _pages.ReadNpc(session.Language, npc.NpcType, npc.NpcId, page).Replace("%objectId%", npc.ObjectId.ToString(CultureInfo.InvariantCulture));
 
     string? ShowRaceChat(ZoneSession session, ZoneEntity player, ZoneEntity npc, int page)
     {
-        SendHtml(session, player, npc, RaceHtml(npc, page));
+        SendHtml(session, player, npc, RaceHtml(session, npc, page));
         return null;
     }
 

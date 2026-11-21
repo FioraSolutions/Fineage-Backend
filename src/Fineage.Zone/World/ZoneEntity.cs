@@ -69,6 +69,10 @@ sealed partial class ZoneEntity : IRegionMember
     public QuestSpawnState? QuestSpawn { get; set; }
     /// <summary>Dimensional rift room mob: which party instance owns this spawn.</summary>
     public int RiftPartyId { get; set; }
+    /// <summary>Festival instance mob owned by one party run.</summary>
+    public int FestivalPartyId { get; set; }
+    /// <summary>Mobius festival monster blood offering multiplier (1, 2, or 5).</summary>
+    public int FestivalOfferingBonus { get; set; } = 1;
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

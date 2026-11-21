@@ -28,7 +28,30 @@ public sealed partial class ZoneWorld
         added?.Sort();
         removed?.Sort();
         ZoneLog.Info($"[aoi] move refresh obj={e.ObjectId} at={e.X},{e.Y} +{added?.Count ?? 0} -{removed?.Count ?? 0}");
-        NetBridge.FanoutKnownlistDiff(e.ObjectId, (IReadOnlyList<int>?)added ?? [], (IReadOnlyList<int>?)removed ?? []);
+        var addedList = (IReadOnlyList<int>?)added ?? [];
+        NetBridge.FanoutKnownlistDiff(e.ObjectId, addedList, (IReadOnlyList<int>?)removed ?? []);
+        FanoutMoveSyncToNewWatchers(e, addedList, ack != null);
+    }
+
+    /// <summary>Mid-run AOI adds: new player watchers see the mover at the live leg origin.</summary>
+    void FanoutMoveSyncToNewWatchers(ZoneEntity mover, IReadOnlyList<int> added, bool legAckAlreadySent)
+    {
+        if (legAckAlreadySent || added.Count == 0 || !mover.MoveActive || NetBridge == null || mover.Session == null)
+            return;
+
+        var watchers = new List<int> { mover.ObjectId };
+        foreach (int id in added)
+        {
+            if (_byId.TryGetValue(id, out var peer) && peer.Session != null)
+                watchers.Add(id);
+        }
+
+        NetBridge.FanoutMoveState(
+            watchers,
+            mover.ObjectId,
+            mover.X, mover.Y, mover.Z,
+            mover.MoveDestX, mover.MoveDestY, mover.MoveDestZ,
+            mover.Running);
     }
 
     void AdvanceMove(ZoneEntity e, long now)

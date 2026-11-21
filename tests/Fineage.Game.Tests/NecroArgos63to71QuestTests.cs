@@ -20,14 +20,14 @@ public sealed class NecroArgos63to71QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 632, Wiz = 31522, Heart = 7542;
         var me = Any(63);
-        Assert.True(m.AdvEvent(j, bag, Q, Wiz, "31522-104", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Wiz, "31522-03", me).Ok);
 
         for (int i = 0; i < 200; i++)
             m.OnPartyKill(j, bag, Q, 21593, me); // 59.2%
         Assert.Equal(200, bag.CountOf(Heart));
         Assert.Equal(2, j.Find(Q)!.Cond);
 
-        Assert.True(m.AdvEvent(j, bag, Q, Wiz, "31522-202", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Wiz, "31522-06", me).Ok);
         Assert.Equal(0, bag.CountOf(Heart));
         Assert.Equal(120000, bag.CountOf(57));
         Assert.Equal(1, j.Find(Q)!.Cond);

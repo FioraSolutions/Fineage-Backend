@@ -84,6 +84,12 @@ public static class SkillCastConditionEvaluator
                 return Int(val, out int mpPct) && ctx.MpPercent <= mpPct;
             case "charges":
                 return Int(val, out int needCharges) && ctx.SoulCharges >= needCharges;
+            case "chargesbylevel":
+                if (val.ValueKind != JsonValueKind.Array || val.GetArrayLength() == 0)
+                    return false;
+                int idx = Math.Clamp(ctx.SkillLevel - 1, 0, val.GetArrayLength() - 1);
+                needCharges = val[idx].GetInt32();
+                return ctx.SoulCharges >= needCharges;
             case "level":
                 return Int(val, out int minLevel) && ctx.Level >= minLevel;
             case "levelrange":
@@ -265,6 +271,7 @@ public abstract class SkillCastConditionContext
     public void SetRefusalMessage(int sysMsgId) => RefusalMessageId ??= sysMsgId;
 
     public abstract void LogUnsupported(string message);
+    public abstract int SkillLevel { get; }
     public abstract bool UsingKinds(string[] kinds);
     public abstract bool UsingSlot(string[] slots);
     public abstract int InventoryUsedSlots { get; }

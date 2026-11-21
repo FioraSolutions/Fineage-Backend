@@ -27,15 +27,7 @@
       "npcId": 30873,
       "hook": "event",
       "when": "absent",
-      "event": "30873-03",
-      "minLevel": 52,
-      "htmlFile": "30873-event-30873-03-002.htm"
-    },
-    {
-      "npcId": 30873,
-      "hook": "event",
-      "when": "absent",
-      "event": "30873-04",
+      "event": "30873-2",
       "minLevel": 52,
       "ops": [
         {
@@ -49,26 +41,19 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30873-event-30873-04-003.htm"
+      "htmlFile": "30873-event-30873-2-002.htm"
     },
     {
       "npcId": 30873,
       "hook": "event",
       "when": "started",
-      "event": "30873-09",
-      "htmlFile": "30873-event-30873-09-004.htm"
-    },
-    {
-      "npcId": 30873,
-      "hook": "event",
-      "when": "started",
-      "event": "30873-10",
+      "event": "30873-6",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30873-event-30873-10-005.htm"
+      "htmlFile": "30873-event-30873-6-003.htm"
     },
     {
       "npcId": 30873,
@@ -95,7 +80,7 @@
           "bonusAdena": 6000
         }
       ],
-      "htmlFile": "30873-talk-006.htm"
+      "htmlFile": "30873-talk-004.htm"
     },
     {
       "npcId": 30873,
@@ -132,7 +117,7 @@
           "bonusAdena": 6000
         }
       ],
-      "htmlFile": "30873-talk-007.htm"
+      "htmlFile": "30873-talk-005.htm"
     },
     {
       "npcId": 30873,
@@ -152,7 +137,7 @@
           "bonusAdena": 6000
         }
       ],
-      "htmlFile": "30873-talk-008.htm"
+      "htmlFile": "30873-talk-006.htm"
     },
     {
       "npcId": 30873,
@@ -172,7 +157,7 @@
           "bonusAdena": 0
         }
       ],
-      "htmlFile": "30873-talk-009.htm"
+      "htmlFile": "30873-talk-007.htm"
     },
     {
       "npcId": 30873,
@@ -204,13 +189,13 @@
           "bonusAdena": 0
         }
       ],
-      "htmlFile": "30873-talk-010.htm"
+      "htmlFile": "30873-talk-008.htm"
     },
     {
       "npcId": 30873,
       "hook": "talk",
       "when": "started",
-      "htmlFile": "30873-talk-011.htm"
+      "htmlFile": "30873-talk-009.htm"
     },
     {
       "npcId": 20666,

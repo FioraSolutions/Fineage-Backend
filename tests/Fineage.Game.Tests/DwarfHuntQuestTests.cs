@@ -45,7 +45,7 @@ public sealed class DwarfHuntQuestTests
         const int Neck = 1483, Memo = 1486, Contract = 1487;
         var me = Dwarf(5);
 
-        Assert.Contains("Dwarven characters", m.Talk(j, bag, Q, Spiron, Human(10)).Html ?? "");
+        Assert.Contains("Dwarven character", m.Talk(j, bag, Q, Spiron, Human(10)).Html ?? "");
         Assert.True(m.AdvEvent(j, bag, Q, Spiron, "30532-03", me).Ok);
         Assert.Equal(1, j.Find(Q)!.Cond);
 

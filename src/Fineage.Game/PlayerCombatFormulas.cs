@@ -98,14 +98,18 @@ public static class PlayerPassiveSources
     public static Dictionary<int, int> Merge(
         IReadOnlyDictionary<int, int> knownSkills,
         IReadOnlyDictionary<int, int> clanSkills,
-        IReadOnlyDictionary<int, int>? gearSkills = null)
+        IReadOnlyDictionary<int, int>? gearSkills = null,
+        IReadOnlyDictionary<int, int>? cursedSkills = null)
     {
         int gearCount = gearSkills?.Count ?? 0;
-        var map = new Dictionary<int, int>(knownSkills.Count + clanSkills.Count + gearCount);
+        int curseCount = cursedSkills?.Count ?? 0;
+        var map = new Dictionary<int, int>(knownSkills.Count + clanSkills.Count + gearCount + curseCount);
         MergeInto(map, knownSkills);
         MergeInto(map, clanSkills);
         if (gearSkills != null)
             MergeInto(map, gearSkills);
+        if (cursedSkills != null)
+            MergeInto(map, cursedSkills);
         return map;
     }
 
@@ -116,9 +120,10 @@ public static class PlayerPassiveSources
     public static IEnumerable<KeyValuePair<int, int>> EnumerateOrdered(
         IReadOnlyDictionary<int, int> knownSkills,
         IReadOnlyDictionary<int, int> clanSkills,
-        IReadOnlyDictionary<int, int>? gearSkills = null)
+        IReadOnlyDictionary<int, int>? gearSkills = null,
+        IReadOnlyDictionary<int, int>? cursedSkills = null)
     {
-        foreach (var pair in Merge(knownSkills, clanSkills, gearSkills).OrderBy(static p => p.Key))
+        foreach (var pair in Merge(knownSkills, clanSkills, gearSkills, cursedSkills).OrderBy(static p => p.Key))
             yield return pair;
     }
 

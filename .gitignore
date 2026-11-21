@@ -35,6 +35,7 @@ data/*
 !data/dungeons.json
 !data/dimensional-rift.json
 !data/seven-signs-festival.json
+!data/seven-signs-festival-spawns.json
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
@@ -47,8 +48,12 @@ data/*
 !data/spawns/**
 !data/drops/
 !data/drops/**
+!data/augmentation/
+!data/augmentation/**
 !data/html/
 !data/html/**
+!data/l10n/
+!data/l10n/**
 !data/buylists.json
 !data/multisell.json
 !data/village-masters.json
@@ -90,6 +95,7 @@ publish/
 !data/map-regions.json
 !data/clan-hall-spawns.json
 !data/death-drop.json
+!data/cursed-weapons.json
 !data/npc-ai-support.json
 !data/npc-minions.json
 !data/henna.json

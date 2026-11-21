@@ -130,7 +130,7 @@ public sealed partial class ZoneWorld
     SkillListMsg SkillListFor(ZoneEntity entity)
     {
         // Same union as NetEnterWorldProjector.BuildSkills (known + clan + gear).
-        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
+        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills, entity.CursedSkills);
         var rows = skills
             .OrderBy(pair => pair.Key)
             .Select(pair => new KnownSkill(pair.Key, pair.Value))
@@ -210,6 +210,12 @@ public sealed partial class ZoneWorld
                 SelfLine(session, SysMsgUnsuitableTerms, $"{liveTemplate.Name} cannot be used due to unsuitable terms.");
             return null;
         }
+
+        if (ConsumeItemBlocked(session, player, liveLevelData))
+            return null;
+
+        if (_skillEffects.TryGet(request.SkillId, out var focusFx) && HasFocusEnergy(focusFx))
+            return TrySkillUseFocusEnergy(session, player, request, liveTemplate, liveLevelData, level, now);
 
         // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
         // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions

@@ -407,8 +407,6 @@ public sealed partial class ZoneWorld
             return null;
 
         ConsumeSkillMp(player, template, levelData.MpConsume);
-        if (!ConsumeSkillItems(session, player, levelData))
-            return null;
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;
@@ -505,8 +503,6 @@ public sealed partial class ZoneWorld
         if (target != null)
             UpdatePvPStatus(player, target, now);
         ConsumeSkillMp(player, template, levelData.MpConsume);
-        if (!ConsumeSkillItems(session, player, levelData))
-            return null;
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
             player.SkillReuseUntilMs[request.SkillId] = now + reuseMs;

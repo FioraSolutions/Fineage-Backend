@@ -215,7 +215,9 @@ static class NetEnterWorldProjector
                 Kind = src.Kind ?? "",
                 Icon = src.Icon ?? "",
                 WeaponType = src.WeaponType ?? "",
-                ArmorType = src.ArmorType ?? ""
+                ArmorType = src.ArmorType ?? "",
+                Option1 = src.Option1,
+                Option2 = src.Option2
             };
         }
 
@@ -229,7 +231,7 @@ static class NetEnterWorldProjector
     internal static SkillListMsg BuildSkills(ZoneEntity entity, long nowUnixMs)
     {
         var rows = new List<SkillListEntryMsg>();
-        foreach (var pair in PlayerPassiveSources.EnumerateOrdered(entity.KnownSkills, entity.ClanSkills, entity.GearSkills))
+        foreach (var pair in PlayerPassiveSources.EnumerateOrdered(entity.KnownSkills, entity.ClanSkills, entity.GearSkills, entity.CursedSkills))
         {
             int reuse = 0;
             if (entity.SkillReuseUntilMs.TryGetValue(pair.Key, out long until) && until > nowUnixMs)

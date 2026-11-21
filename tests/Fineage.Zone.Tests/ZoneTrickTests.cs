@@ -81,7 +81,9 @@ public sealed class ZoneTrickTests
         Assert.Equal(400, skill!.CastRange);
         Assert.Equal(1200, skill.HitTimeMs);
         Assert.Equal(20_000, skill.ReuseDelayMs);
-        Assert.Contains("DAGGER", skill.UsingKinds);
+        Assert.NotNull(skill.CastCondition);
+        Assert.Equal("using", skill.CastCondition.Op);
+        Assert.Contains("DAGGER", skill.CastCondition.Kinds ?? []);
 
         Assert.True(SkillEffectCatalog.LoadDefault().TryGet(Trick, out var rows));
         Assert.Equal(["DeleteHateOfMe", "TargetCancel"], rows.Select(r => r.Name).ToArray());

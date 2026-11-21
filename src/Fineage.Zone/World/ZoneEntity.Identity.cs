@@ -78,6 +78,18 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().HideoutId = value;
     }
 
+    public double HallRegenHpMult
+    {
+        get => Identity?.HallRegenHpMult ?? 1d;
+        set => EnsureIdentity().HallRegenHpMult = value;
+    }
+
+    public double HallRegenMpMult
+    {
+        get => Identity?.HallRegenMpMult ?? 1d;
+        set => EnsureIdentity().HallRegenMpMult = value;
+    }
+
     public int PledgeType
     {
         get => Identity?.PledgeType ?? 0;
@@ -163,6 +175,24 @@ sealed partial class ZoneEntity
     {
         get => Identity?.Karma ?? 0;
         set => EnsureIdentity().Karma = value;
+    }
+
+    public int SavedKarmaBeforeCurse
+    {
+        get => Identity?.SavedKarmaBeforeCurse ?? 0;
+        set => EnsureIdentity().SavedKarmaBeforeCurse = value;
+    }
+
+    public int SavedPkKillsBeforeCurse
+    {
+        get => Identity?.SavedPkKillsBeforeCurse ?? 0;
+        set => EnsureIdentity().SavedPkKillsBeforeCurse = value;
+    }
+
+    public int CursedWeaponItemId
+    {
+        get => Identity?.CursedWeaponItemId ?? 0;
+        set => EnsureIdentity().CursedWeaponItemId = value;
     }
 
     public int CoupleId

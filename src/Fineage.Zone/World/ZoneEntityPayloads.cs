@@ -130,6 +130,8 @@ sealed class ZonePlayerIdentityPayload
     public int PledgeClass { get; set; }
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
+    public double HallRegenHpMult { get; set; } = 1d;
+    public double HallRegenMpMult { get; set; } = 1d;
     public int PledgeType { get; set; }
     public int PowerGrade { get; set; }
     public int ClanPrivileges { get; set; }
@@ -145,6 +147,10 @@ sealed class ZonePlayerIdentityPayload
     public int PkKills { get; set; }
     public int PvpKills { get; set; }
     public int Karma { get; set; }
+    public int SavedKarmaBeforeCurse { get; set; }
+    public int SavedPkKillsBeforeCurse { get; set; }
+    /// <summary>Mobius <c>getCursedWeaponEquippedId</c>; 0 when none.</summary>
+    public int CursedWeaponItemId { get; set; }
     public int ClanId { get; set; }
     public bool Newbie { get; set; } = true;
 
@@ -194,6 +200,12 @@ sealed class ZoneEntityCombatPayload
     public long CastingUntilMs { get; set; }
     public PendingSkillHit? PendingHit { get; set; }
     public int ActiveEnchantObjectId { get; set; }
+    public bool AugmentCancelWindow { get; set; }
+    /// <summary>Variation make UI: selected target, life stone, gemstone.</summary>
+    public int AugmentTargetObjectId { get; set; }
+    public int AugmentRefinerObjectId { get; set; }
+    public int AugmentGemstoneObjectId { get; set; }
+    public long AugmentGemstoneCount { get; set; }
     public long DecayAtMs { get; set; }
 }
 
@@ -244,6 +256,8 @@ sealed class ZonePlayerSkillsPayload
     /// Rebuilt by <c>RefreshGearSkills</c>; never persisted.
     /// </summary>
     public Dictionary<int, int> GearSkills { get; } = [];
+    /// <summary>Ephemeral Zariche / Akamanah passive while the blade is active (Mobius <c>addSkill(false)</c>).</summary>
+    public Dictionary<int, int> CursedSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }
@@ -262,6 +276,8 @@ sealed class ZonePlayerStatusPayload
     public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
+    public int ForceCharges { get; set; }
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius henna dye ids in the three tattoo slots (0 = empty).</summary>
     public int HennaDye1 { get; set; }
@@ -329,6 +345,16 @@ sealed class ZoneNpcAggroPayload
     public int ChaseDestY { get; set; }
     public bool Chasing { get; set; }
     public long LastAiTickMs { get; set; }
+    /// <summary>Mobius <c>AttackableThinkTaskManager</c> next <c>thinkActive</c> at this unix ms.</summary>
+    public long NextThinkMs { get; set; }
+    /// <summary>Last geo <c>getValidLocation</c> for idle wander, keyed to <see cref="WanderGeoFromX"/>/<see cref="WanderGeoFromY"/>.</summary>
+    public int WanderGeoFromX { get; set; }
+    public int WanderGeoFromY { get; set; }
+    public int WanderWantX { get; set; }
+    public int WanderWantY { get; set; }
+    public int WanderGeoDestX { get; set; }
+    public int WanderGeoDestY { get; set; }
+    public int WanderGeoDestZ { get; set; }
     public bool HomeSet { get; set; }
     public int HomeX { get; set; }
     public int HomeY { get; set; }

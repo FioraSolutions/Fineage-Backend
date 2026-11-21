@@ -64,8 +64,8 @@ def q156():
     LETTER, DIARY, SOUL = 1022, 1023, 5250
     dialogs = [
         d(LILITH, "talk", "30368-01.htm", when="absent"),
-        d(LILITH, "event", "30368-02.html", when="absent", event="30368-02"),
-        d(LILITH, "event", "30368-03.html", when="absent", event="30368-03"),
+        d(LILITH, "event", "30368-02.htm", when="absent", event="30368-02"),
+        d(LILITH, "event", "30368-03.htm", when="absent", event="30368-03"),
         d(LILITH, "event", "30368-04.htm", when="absent", event="30368-04", maxLevel=14),
         d(
             LILITH,
@@ -85,11 +85,11 @@ def q156():
             hasItem=DIARY,
             ops=[take(DIARY), give(SOUL), exp_sp(3000, 0), {"op": "complete"}],
         ),
-        d(BAENEDES, "talk", "30369-01.html", cond=1, hasItem=LETTER),
+        d(BAENEDES, "talk", "30369-01.htm", cond=1, hasItem=LETTER),
         d(
             BAENEDES,
             "event",
-            "30369-02.html",
+            "30369-02.htm",
             event="30369-02",
             cond=1,
             hasItem=LETTER,
@@ -98,13 +98,13 @@ def q156():
         d(
             BAENEDES,
             "event",
-            "30369-03.html",
+            "30369-03.htm",
             event="30369-03",
             cond=1,
             hasItem=LETTER,
             ops=[exp_sp(3000, 0), {"op": "complete"}],
         ),
-        d(BAENEDES, "talk", "30369-04.html", cond=2, hasItem=DIARY),
+        d(BAENEDES, "talk", "30369-04.htm", cond=2, hasItem=DIARY),
     ]
     return {
         "id": Q,
@@ -133,12 +133,12 @@ def q167():
             ops=START + [give(C_LETTER), cond(1)],
         ),
         d(CARLON, "talk", "30350-05.htm", cond=1, hasItem=C_LETTER),
-        d(HAPROCK, "talk", "30255-01.html", cond=1, hasItem=C_LETTER),
-        d(HAPROCK, "event", "30255-02.html", event="30255-02", cond=1, hasItem=C_LETTER),
+        d(HAPROCK, "talk", "30255-01.htm", cond=1, hasItem=C_LETTER),
+        d(HAPROCK, "event", "30255-02.htm", event="30255-02", cond=1, hasItem=C_LETTER),
         d(
             HAPROCK,
             "event",
-            "30255-03.html",
+            "30255-03.htm",
             event="30255-03",
             cond=1,
             hasItem=C_LETTER,
@@ -147,18 +147,18 @@ def q167():
         d(
             HAPROCK,
             "event",
-            "30255-04.html",
+            "30255-04.htm",
             event="30255-04",
             cond=1,
             hasItem=C_LETTER,
             ops=[take(C_LETTER), adena(3000), {"op": "complete"}],
         ),
-        d(HAPROCK, "talk", "30255-05.html", cond=2, hasItem=N_LETTER),
-        d(NORMAN, "talk", "30210-01.html", cond=2, hasItem=N_LETTER),
+        d(HAPROCK, "talk", "30255-05.htm", cond=2, hasItem=N_LETTER),
+        d(NORMAN, "talk", "30210-01.htm", cond=2, hasItem=N_LETTER),
         d(
             NORMAN,
             "event",
-            "30210-02.html",
+            "30210-02.htm",
             event="30210-02",
             cond=2,
             hasItem=N_LETTER,
@@ -251,7 +251,7 @@ def q317():
         d(
             RIZRAELL,
             "event",
-            "30361-08.html",
+            "30361-08.htm",
             when="started",
             event="30361-08",
             hasItem=SHARD,
@@ -260,7 +260,7 @@ def q317():
         d(
             RIZRAELL,
             "event",
-            "30361-08.html",
+            "30361-08.htm",
             when="started",
             event="30361-08",
             lacksItems=[SHARD],
@@ -269,13 +269,13 @@ def q317():
         d(
             RIZRAELL,
             "event",
-            "30361-09.html",
+            "30361-09.htm",
             when="started",
             event="30361-09",
             hasItem=SHARD,
             ops=[sell],
         ),
-        d(RIZRAELL, "event", "30361-09.html", when="started", event="30361-09", lacksItems=[SHARD]),
+        d(RIZRAELL, "event", "30361-09.htm", when="started", event="30361-09", lacksItems=[SHARD]),
     ]
     for mob in MOBS:
         dialogs.append(d(mob, "kill", None, when="started", raw="", ops=[drop(SHARD, 0.5)]))

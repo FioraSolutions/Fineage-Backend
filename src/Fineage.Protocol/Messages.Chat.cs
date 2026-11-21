@@ -29,4 +29,12 @@ public sealed class SystemMessageMsg
     public int Id { get; set; }
     public string[] Params { get; set; } = [];
     public string Text { get; set; } = "";
+
+    /// <summary>
+    /// Localization key. Empty means <see cref="Text"/> is already the line to send
+    /// (player chat, or a string that has not been moved to the catalog yet).
+    /// The zone fills <see cref="Text"/> from the player's locale before the packet is encoded.
+    /// The key is not on the wire.
+    /// </summary>
+    public string Key { get; set; } = "";
 }

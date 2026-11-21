@@ -15,6 +15,9 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
     readonly NetPresenceHub _presence;
     readonly Func<ZoneEntity, int> _playerSpawnPAtkSpd;
 
+    /// <summary>EntitySpawn frames emitted at the last knownlist diff drain (Fineage.Zone.Tests).</summary>
+    internal int KnownlistSpawnCountAtDrain { get; private set; }
+
     public NetWorldEventPublisher(
         ZoneWorld world,
         EntityIdMap ids,
@@ -68,72 +71,95 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
     Action IWorldEventPublisher.PrepareKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
     {
         var frames = new PreparedFrames(_presence);
-        if (!_world.TryGetEntityById(selfObjectId, out var selfEntity))
-            return frames.Send;
-        var self = _ids.AllocateOrGet(selfObjectId);
-        byte[]? selfSpawn = null;
-        List<(ushort Opcode, byte[] Payload)>? selfFollowUps = null;
-        foreach (int id in added)
+        var removedSet = new HashSet<int>(removed);
+        var addedIds = added.ToArray();
+        if (removed.Count > 0)
         {
-            if (!_world.TryGetEntityById(id, out var seen))
-                continue;
-            var otherId = _ids.AllocateOrGet(id);
-            if (seen.Kind == ZoneEntityKind.GroundItem)
+            var self = _ids.AllocateOrGet(selfObjectId);
+            var despawnSelf = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
             {
-                frames.Normal(selfObjectId, NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
+                EntityValue = self.Value,
+                EntityGeneration = self.Generation
+            });
+            foreach (int id in removed)
+            {
+                var forgotten = _ids.AllocateOrGet(id);
+                frames.Critical(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
                 {
-                    DropperObjectId = 0,
-                    EntityValue = otherId.Value,
-                    EntityGeneration = otherId.Generation,
-                    ItemId = seen.GroundItemId,
-                    X = seen.X,
-                    Y = seen.Y,
-                    Z = seen.Z,
-                    Stackable = seen.GroundStackable,
-                    Count = seen.GroundCount
+                    EntityValue = forgotten.Value,
+                    EntityGeneration = forgotten.Generation
                 }));
-                continue;
-            }
-
-            frames.Critical(selfObjectId, NetOpcode.EntitySpawn,
-                NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, _playerSpawnPAtkSpd(seen))));
-            // Same ordered (critical) lane as the spawn, so the state never overtakes the pawn it describes.
-            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId, _world))
-                frames.Critical(selfObjectId, opcode, payload);
-            if (_world.SpawnRelationFrame(seen, selfEntity) is { } seenRelation)
-                frames.Critical(selfObjectId, NetOpcode.RelationChanged, seenRelation);
-            if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
-            {
-                selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
-                frames.Critical(id, NetOpcode.EntitySpawn, selfSpawn);
-                selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world);
-                foreach (var (opcode, payload) in selfFollowUps)
-                    frames.Critical(id, opcode, payload);
-                if (_world.SpawnRelationFrame(selfEntity, seen) is { } selfRelation)
-                    frames.Critical(id, NetOpcode.RelationChanged, selfRelation);
+                if (_world.TryGetLivePlayerById(id, out _))
+                    frames.Critical(id, NetOpcode.EntityDespawn, despawnSelf);
             }
         }
 
-        if (removed.Count == 0)
-            return frames.Send;
-        var despawnSelf = NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+        return () =>
         {
-            EntityValue = self.Value,
-            EntityGeneration = self.Generation
-        });
-        foreach (int id in removed)
-        {
-            var forgotten = _ids.AllocateOrGet(id);
-            frames.Critical(selfObjectId, NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+            KnownlistSpawnCountAtDrain = 0;
+            if (!_world.TryGetEntityById(selfObjectId, out var selfEntity))
             {
-                EntityValue = forgotten.Value,
-                EntityGeneration = forgotten.Generation
-            }));
-            if (_world.TryGetLivePlayerById(id, out _))
-                frames.Critical(id, NetOpcode.EntityDespawn, despawnSelf);
-        }
+                ZoneLog.Warn($"knownlist diff drain skip spawns self={selfObjectId}: observer no longer in world");
+                frames.Send();
+                return;
+            }
 
-        return frames.Send;
+            var self = _ids.AllocateOrGet(selfObjectId);
+            byte[]? selfSpawn = null;
+            List<(ushort Opcode, byte[] Payload)>? selfFollowUps = null;
+            foreach (int id in addedIds)
+            {
+                if (removedSet.Contains(id))
+                {
+                    ZoneLog.Warn($"knownlist diff skip spawn object {id}: despawned same tick as add");
+                    continue;
+                }
+
+                if (!_world.TryGetEntityById(id, out var seen))
+                {
+                    ZoneLog.Warn($"knownlist diff skip spawn object {id}: entity no longer in world at drain");
+                    continue;
+                }
+
+                var otherId = _ids.AllocateOrGet(id);
+                if (seen.Kind == ZoneEntityKind.GroundItem)
+                {
+                    frames.Normal(selfObjectId, NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
+                    {
+                        DropperObjectId = 0,
+                        EntityValue = otherId.Value,
+                        EntityGeneration = otherId.Generation,
+                        ItemId = seen.GroundItemId,
+                        X = seen.X,
+                        Y = seen.Y,
+                        Z = seen.Z,
+                        Stackable = seen.GroundStackable,
+                        Count = seen.GroundCount
+                    }));
+                    continue;
+                }
+
+                KnownlistSpawnCountAtDrain++;
+                frames.Critical(selfObjectId, NetOpcode.EntitySpawn,
+                    NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildPresenceSpawn(seen, otherId, _playerSpawnPAtkSpd(seen))));
+                foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(seen, otherId, _world))
+                    frames.Critical(selfObjectId, opcode, payload);
+                if (_world.SpawnRelationFrame(seen, selfEntity) is { } seenRelation)
+                    frames.Critical(selfObjectId, NetOpcode.RelationChanged, seenRelation);
+                if (seen.Kind == ZoneEntityKind.Player && seen.Session is { InWorld: true })
+                {
+                    selfSpawn ??= NetCodec.EncodeEntitySpawn(NetEnterWorldProjector.BuildRemoteSpawn(selfEntity, self, _playerSpawnPAtkSpd(selfEntity)));
+                    frames.Critical(id, NetOpcode.EntitySpawn, selfSpawn);
+                    selfFollowUps ??= NetEnterWorldProjector.BuildPresenceFollowUps(selfEntity, self, _world);
+                    foreach (var (opcode, payload) in selfFollowUps)
+                        frames.Critical(id, opcode, payload);
+                    if (_world.SpawnRelationFrame(selfEntity, seen) is { } selfRelation)
+                        frames.Critical(id, NetOpcode.RelationChanged, selfRelation);
+                }
+            }
+
+            frames.Send();
+        };
     }
 
     void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)

@@ -27,6 +27,7 @@ using Fineage.Game.Services;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
+using Fineage.Zone.CursedWeapons;
 
 namespace Fineage.Zone.World;
 
@@ -54,6 +55,7 @@ public sealed partial class ZoneWorld
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
     readonly SevenSignsFestivalCatalog _festivalCatalog;
+    readonly SevenSignsFestivalSpawnCatalog _festivalSpawns;
     readonly SevenSignsFestivalRuntime _festivalRuntime;
     readonly SevenSignsFestivalActor _festivalActor;
     int _nextFestivalInstanceId;
@@ -67,6 +69,8 @@ public sealed partial class ZoneWorld
     readonly SiegeActor _siege;
     readonly ChSiegeActor _chSiege;
     readonly NpcHtmlCatalog _html;
+    readonly Fineage.Game.L10n.LocalizationCatalog _l10n;
+    readonly LocalizedHtml _pages;
     readonly BypassRegistry _bypasses;
     readonly OlympiadActor _olympiad;
     readonly TeleportCatalog _teleports;
@@ -102,6 +106,8 @@ public sealed partial class ZoneWorld
     readonly SkillEffectCatalog _skillEffects;
     /// <summary>Mobius hennaList dyes (data/henna.json). Deltas fold before the STR/DEX bonus table.</summary>
     readonly HennaCatalog _henna;
+    /// <summary>Mobius augmentation options/chances (data/augmentation/*.json).</summary>
+    readonly Augmentation.AugmentationCatalog _augmentation;
     /// <summary>Mobius armorsets (data/armor-sets.json). Complete-set skills fold via GearSkills.</summary>
     readonly ArmorSetCatalog _armorSets;
     /// <summary>Mobius Inventory item_skill on Weapon/Armor (data/item-equip-skills.json).</summary>
@@ -210,6 +216,7 @@ public sealed partial class ZoneWorld
         Fineage.Game.Services.ClanHallSpawnCatalog? clanHallSpawns = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
+        Augmentation.AugmentationCatalog? augmentation = null,
         ArmorSetCatalog? armorSets = null,
         ItemEquipSkillCatalog? equipSkills = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
@@ -220,7 +227,8 @@ public sealed partial class ZoneWorld
         ulong? simulationSeed = null,
         IRegionExecutor? regionExecutor = null,
         ILedgerJournal? ledgerJournal = null,
-        PunishmentManager? punishments = null)
+        PunishmentManager? punishments = null,
+        Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -236,6 +244,8 @@ public sealed partial class ZoneWorld
         _skillDots = skillDots ?? SkillDotCatalog.LoadDefault();
         _skillEffects = skillEffects ?? SkillEffectCatalog.LoadDefault();
         _henna = henna ?? HennaCatalog.LoadDefault();
+        _augmentation = augmentation ?? Augmentation.AugmentationCatalog.LoadDefault();
+        Augmentation.AugmentationRules.BindCatalog(_augmentation);
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
         _combatRandom = Streams(combatRandom, RandomPurpose.Combat);
@@ -259,6 +269,7 @@ public sealed partial class ZoneWorld
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
         _festivalCatalog = festivalRuntime?.Board.Catalog ?? SevenSignsFestivalCatalog.LoadDefault();
+        _festivalSpawns = SevenSignsFestivalSpawnCatalog.LoadDefault();
         _festivalRuntime = festivalRuntime ?? new SevenSignsFestivalRuntime(_festivalCatalog);
         SevenSignsEngine ssEngine = sevenSigns ?? new SevenSignsEngine(WallNow(), festival: _festivalRuntime);
         _festivalRuntime.BindEngine(ssEngine);
@@ -281,8 +292,21 @@ public sealed partial class ZoneWorld
         _bosses = new BossActor(
             bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds(), spawnPolicy: bossPolicy),
             bossRandom ?? GlobalStream(RandomPurpose.Boss));
+        IReadOnlyList<Fineage.Accounts.CursedWeaponRecord>? curseRows = null;
+        try
+        {
+            curseRows = accounts?.ListCursedWeapons();
+        }
+        catch (Exception ex)
+        {
+            ZoneLog.Warn($"cursed weapons restore skipped: {ex.Message}");
+        }
+
+        _cursedWeapons = new CursedWeaponsManager(CursedWeaponsCatalog.LoadDefault(), curseRows);
         _html = html ?? NpcHtmlCatalog.LoadDefault();
-        _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
+        _l10n = localization ?? LoadLocalization();
+        _pages = new LocalizedHtml(_l10n, _html);
+        _bypasses = bypasses ?? BypassRegistry.CreateDefault(_pages);
         _party = new PartyActor(new PartyMembers(this));
         var resolvedOlympiadSettings = olympiadSettings ?? OlympiadSettings.FromEnvironment();
         _olympiadEnchantLimit = resolvedOlympiadSettings.EnchantLimit;

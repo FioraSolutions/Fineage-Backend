@@ -74,6 +74,17 @@ public sealed partial class LoginService
 
     public bool AccountExists(string account) => _store.AccountExists(account);
 
+    /// <summary>
+    /// Stores the language the client sent on Auth. A null tag is an omitted tail: the account keeps
+    /// the language it already has (English for a new account).
+    /// </summary>
+    public void RememberLanguage(string account, string? language)
+    {
+        if (language == null || string.IsNullOrWhiteSpace(account))
+            return;
+        _store.TrySetLanguage(account, Fineage.Game.L10n.PlayerLocale.Normalize(language));
+    }
+
     public LoginResult<string> Register(string account, string password)
     {
         if (!NameRules.IsAccountName(account))

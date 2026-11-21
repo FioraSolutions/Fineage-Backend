@@ -438,7 +438,7 @@ public sealed partial class ZoneWorld
             }
             if (food != null)
             {
-                string name = ItemName(food.ItemId);
+                string name = ItemName(session.Language, food.ItemId);
                 SelfLine(session, SysMsgPetAteFood, $"Your pet was hungry so it ate {name}.", name);
                 PetEat(owner, s, pet, food);
             }
@@ -451,7 +451,11 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    string ItemName(int itemId) => _game.Items.TryGet(itemId, out var def) && def != null ? def.Name : itemId.ToString();
+    string ItemName(string? locale, int itemId)
+    {
+        string english = _game.Items.TryGet(itemId, out var def) && def != null ? def.Name : itemId.ToString();
+        return _pages.Name(locale, "item", itemId, english);
+    }
 
     /// <summary>Mobius <c>PetFood.useFood</c> for a pet: one piece from its bag, + the food skill's feed, cap at max.</summary>
     bool PetEat(ZoneEntity owner, ZoneEntity s, PetState pet, ItemInstance food)
@@ -648,7 +652,7 @@ public sealed partial class ZoneWorld
             {
                 inventory.Remove(collar);
                 changes.Add(InventoryMessages.Update(InventoryChange.Remove, collar).Changes[0]);
-                string name = ItemName(collar.ItemId);
+                string name = ItemName(session.Language, collar.ItemId);
                 SelfLine(session, SysMsgItemDisappeared, $"{name} has disappeared.", name);
             }
             if (changes.Count > 0)
@@ -779,7 +783,7 @@ public sealed partial class ZoneWorld
             return;
         if (owner.Dead || s.Dead || s.CurHp <= 0)
         {
-            string name = ItemName(item.ItemId);
+            string name = ItemName(session.Language, item.ItemId);
             SelfLine(session, SysMsgUnsuitableTerms, $"{name} cannot be used due to unsuitable terms.", name);
             return;
         }
@@ -794,7 +798,7 @@ public sealed partial class ZoneWorld
     {
         pet.PickupTargetId = 0;
         var session = owner.Session!;
-        string name = ItemName(ground.GroundItemId);
+        string name = ItemName(session.Language, ground.GroundItemId);
         if (!CanPickupProtected(owner, ground, now) || IsHerb(ground.GroundItemId) || !_game.Items.TryGet(ground.GroundItemId, out var def) || def == null)
         {
             SelfLine(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.", name);
@@ -892,7 +896,7 @@ public sealed partial class ZoneWorld
         int targetId = session.SelectedTargetId;
         if (!_byId.TryGetValue(targetId, out var target) || PetOf(target) == null || !target.Dead)
         {
-            string name = ItemName(scroll.ItemId);
+            string name = ItemName(session.Language, scroll.ItemId);
             SelfLine(session, SysMsgUnsuitableTerms, $"{name} cannot be used due to unsuitable terms.", name);
             return null;
         }

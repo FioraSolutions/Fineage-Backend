@@ -181,6 +181,8 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     readonly Dictionary<int, Owner> _owners = [];
     readonly SortedDictionary<RegionId, RegionContainer> _regions = [];
     readonly HashSet<int> _relocated = [];
+    readonly HashSet<RegionId> _borderDirty = [];
+    readonly Dictionary<RegionId, List<T>> _borderCache = [];
     readonly Action<string>? _requireOwner;
 
     sealed class Owner(RegionContainer region)
@@ -248,6 +250,13 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
             Touch("listing regions");
             return _regions.Values;
         }
+    }
+
+    /// <summary>The region bucket for <paramref name="region"/>, when it owns at least one entity.</summary>
+    public bool TryGetContainer(RegionId region, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out RegionContainer container)
+    {
+        Touch("reading regions");
+        return _regions.TryGetValue(region, out container);
     }
 
     /// <summary>The region whose body runs on this thread, if any.</summary>
@@ -329,6 +338,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
         region.Install(objectId, entity.ActiveSets, CellKey(entity));
         _entities.Add(objectId, entity);
         _owners.Add(objectId, new Owner(region));
+        _borderDirty.Add(region.Id);
     }
 
     /// <summary>Takes the entity out of its region and every active set.</summary>
@@ -339,7 +349,8 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
         if (!_entities.Remove(objectId, out var entity))
             return false;
         _owners.Remove(objectId, out var owner);
-        owner!.Region.Uninstall(objectId, entity.ActiveSets);
+        _borderDirty.Add(owner!.Region.Id);
+        owner.Region.Uninstall(objectId, entity.ActiveSets);
         DropIfEmpty(owner.Region);
         entity.ActiveSets = ActiveSets.None;
         _relocated.Remove(objectId);
@@ -433,8 +444,10 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
         if (!_entities.TryGetValue(objectId, out var entity))
             return;
         RequireOutsideBody($"relocating entity {objectId}");
-        _owners[objectId].Region.MoveToCell(objectId, CellKey(entity));
+        var owner = _owners[objectId];
+        owner.Region.MoveToCell(objectId, CellKey(entity));
         _relocated.Add(objectId);
+        _borderDirty.Add(owner.Region.Id);
     }
 
     /// <summary>
@@ -467,6 +480,8 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
             DropIfEmpty(from);
             owner.Region = to;
             owner.Epoch++;
+            _borderDirty.Add(from.Id);
+            _borderDirty.Add(to.Id);
             transfers.Add(new RegionTransfer(id, from.Id, to.Id, owner.Epoch));
         }
 
@@ -534,6 +549,12 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
         RequireOutsideBody("publishing border snapshots");
         foreach (var region in _regions.Values)
         {
+            if (_borderCache.TryGetValue(region.Id, out var cached) && !_borderDirty.Contains(region.Id))
+            {
+                yield return (region.Id, cached);
+                continue;
+            }
+
             var members = new List<T>();
             foreach (int id in region.Members)
             {
@@ -543,8 +564,11 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
             }
 
             members.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+            _borderCache[region.Id] = members;
             yield return (region.Id, members);
         }
+
+        _borderDirty.Clear();
     }
 
     /// <summary>

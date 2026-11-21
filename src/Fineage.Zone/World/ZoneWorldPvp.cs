@@ -109,6 +109,7 @@ public sealed partial class ZoneWorld
             ApplyWarKillReputation(killer, victim);
             ZoneLog.Info($"[pvp] war-kill killer={killer.ObjectId} victim={victim.ObjectId} pvp={killer.PvpKills}");
             BroadcastPvpAppearance(killer);
+            RecordCursedKill(killer);
             return;
         }
 
@@ -118,6 +119,7 @@ public sealed partial class ZoneWorld
             PersistKarmaPk(killer);
             ZoneLog.Info($"[pvp] pvp-kill killer={killer.ObjectId} victim={victim.ObjectId} pvp={killer.PvpKills}");
             BroadcastPvpAppearance(killer);
+            RecordCursedKill(killer);
             return;
         }
 
@@ -131,6 +133,7 @@ public sealed partial class ZoneWorld
         ZoneLog.Info(
             $"[pvp] pk killer={killer.ObjectId} victim={victim.ObjectId} karma={killer.Karma} pk={killer.PkKills}");
         BroadcastPvpAppearance(killer);
+        RecordCursedKill(killer);
     }
 
     /// <summary>

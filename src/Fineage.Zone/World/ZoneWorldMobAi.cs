@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
         {
             TickPlayerMovement(now);
             TickNpcMovement(now);
-            TickRandomWalk(now);
+            RunNpcThinkTick(now);
             TickPendingHits(now);
             TickMeleeHits(now);
             _simulationTicks.RunNow(_aggressionStage, now);
@@ -89,6 +89,12 @@ public sealed partial class ZoneWorld
             if (!CanSeeTarget(player, target))
             {
                 AbortCast(player, "no-los", notify: false);
+                return;
+            }
+
+            if (!LaunchConsumeItems(player.Session, player, hit))
+            {
+                AbortCast(player, "item-consume", notify: false);
                 return;
             }
 
@@ -237,7 +243,7 @@ public sealed partial class ZoneWorld
             if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
                 !IsValidMobAttackTarget(npc, player) ||
                 !SameInstance(npc.ObjectId, player.ObjectId) ||
-                !ZoneCombat.InAggroRange(npc.X, npc.Y, player.X, player.Y))
+                !ZoneCombat.WithinAggroForgetRange(npc.X, npc.Y, player.X, player.Y))
             {
                 // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
                 npc.HateList.Remove(npc.AggroTargetId);

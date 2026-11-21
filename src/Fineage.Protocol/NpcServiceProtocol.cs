@@ -135,9 +135,23 @@ public static class NpcServiceIntent
     /// <summary>Freight keeper <c>package_withdraw</c> / <c>WithdrawF</c>: open freight pickup window.</summary>
     public const string PackageWithdraw = "package-withdraw";
 
+    /// <summary>Blacksmith variation make (<c>Augment 1</c>).</summary>
+    public const string AugmentMake = "augment-make";
+
+    /// <summary>Blacksmith variation cancel (<c>Augment 2</c>).</summary>
+    public const string AugmentCancel = "augment-cancel";
+
     /// <summary>Mobius <c>EnterRift</c> / <c>ChangeRiftRoom</c> / <c>ExitRift</c> (Seven Signs rift HTML).</summary>
     public const string DimensionalRift = "dimensional-rift";
 
+    /// <summary>Mobius festival guide <c>Festival</c> / <c>FestivalDesc</c> bypass commands.</summary>
+    public const string Festival = "festival";
+
     public const string DoormanOpen = "doorman-open";
     public const string DoormanClose = "doorman-close";
+    public const string HallLease = "hall-lease";
+    public const string HallFunction = "hall-function";
+    public const string HallSupport = "hall-support";
+    public const string HallTeleport = "hall-teleport";
+    public const string HallDeco = "hall-deco";
 }

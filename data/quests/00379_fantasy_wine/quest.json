@@ -26,23 +26,23 @@
       "npcId": 30074,
       "hook": "event",
       "when": "absent",
-      "event": "30074-02",
+      "event": "30074-2",
       "minLevel": 20,
-      "htmlFile": "30074-event-30074-02-002.htm"
+      "htmlFile": "30074-event-30074-2-002.htm"
     },
     {
       "npcId": 30074,
       "hook": "event",
       "when": "absent",
-      "event": "30074-03",
+      "event": "30074-3",
       "minLevel": 20,
-      "htmlFile": "30074-event-30074-03-003.htm"
+      "htmlFile": "30074-event-30074-3-003.htm"
     },
     {
       "npcId": 30074,
       "hook": "event",
       "when": "absent",
-      "event": "30074-04",
+      "event": "30074-4",
       "minLevel": 20,
       "ops": [
         {
@@ -56,14 +56,14 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30074-event-30074-04-004.htm"
+      "htmlFile": "30074-event-30074-4-004.htm"
     },
     {
       "npcId": 30074,
       "hook": "event",
       "when": "absent",
-      "event": "30074-05",
-      "htmlFile": "30074-event-30074-05-005.htm"
+      "event": "30074-5",
+      "htmlFile": "30074-event-30074-5-005.htm"
     },
     {
       "npcId": 30074,

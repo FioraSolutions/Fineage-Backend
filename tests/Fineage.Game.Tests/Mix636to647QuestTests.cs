@@ -32,7 +32,7 @@ public sealed class Mix636to647QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 379, Harlan = 30074, Leaf = 5893, Stone = 5894, Wine30 = 5957;
         var me = Any(20);
-        Assert.True(m.AdvEvent(j, bag, Q, Harlan, "30074-04", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Harlan, "30074-4", me).Ok);
 
         for (int i = 0; i < 80; i++)
             m.OnKill(j, bag, 20291, me);

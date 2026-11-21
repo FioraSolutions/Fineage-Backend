@@ -25,12 +25,29 @@ public sealed class SevenSignsFestivalActor : GlobalActor<SevenSignsFestivalEffe
 
     protected override void OnStep(long nowUnixMs, List<SevenSignsFestivalEffect> effects)
     {
-        for (int partyId = 0; partyId < 4096; partyId++)
+        EmitCycleEffects(nowUnixMs, effects);
+        var catalog = _board.Catalog;
+        for (int partyId = 0; partyId < SevenSignsFestivalBoard.MaxPartySlots; partyId++)
         {
             var instance = _board.OfParty(partyId);
-            if (instance == null || instance.EndAtUnixMs > nowUnixMs)
+            if (instance == null)
                 continue;
-            effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.EndInstance));
+            if (instance.EndAtUnixMs > 0 && instance.EndAtUnixMs <= nowUnixMs)
+            {
+                effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.EndInstance));
+                continue;
+            }
+
+            long elapsed = nowUnixMs - instance.StartedAtUnixMs;
+            if (!instance.WitchSpawned && elapsed >= catalog.FirstSpawnMs)
+            {
+                effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.SpawnWitch));
+                effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.SpawnPrimary));
+            }
+            if (!instance.SecondarySpawned && elapsed >= catalog.SecondSpawnMs)
+                effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.SpawnSecondary));
+            if (!instance.ChestSpawned && elapsed >= catalog.ChestSpawnMs)
+                effects.Add(new SevenSignsFestivalEffect(partyId, SevenSignsFestivalEffectKind.SpawnChests));
         }
     }
 
@@ -54,6 +71,7 @@ public sealed class SevenSignsFestivalActor : GlobalActor<SevenSignsFestivalEffe
             MemberSnapshot = members.ToList(),
             InstanceId = instanceId,
             OfferingScore = offeringScore,
+            StartedAtUnixMs = nowUnixMs,
             EndAtUnixMs = nowUnixMs + _board.Catalog.FestivalLengthMs
         };
         _board.Register(instance);
@@ -61,4 +79,24 @@ public sealed class SevenSignsFestivalActor : GlobalActor<SevenSignsFestivalEffe
     }
 
     public void KillInstance(int partyId) => _board.Remove(partyId);
+
+    void EmitCycleEffects(long nowUnixMs, List<SevenSignsFestivalEffect> effects)
+    {
+        bool active = _board.FestivalSliceActive(nowUnixMs);
+        if (active && !_board.GlobalFestivalActive)
+        {
+            _board.SetGlobalFestivalActive(true);
+            foreach (var reg in _board.Registrations())
+            {
+                if (!reg.Launched)
+                    effects.Add(new SevenSignsFestivalEffect(reg.PartyId, SevenSignsFestivalEffectKind.LaunchRegistration));
+            }
+        }
+        else if (!active && _board.GlobalFestivalActive)
+        {
+            _board.SetGlobalFestivalActive(false);
+            foreach (var reg in _board.Registrations())
+                reg.Launched = false;
+        }
+    }
 }

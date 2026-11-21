@@ -51,7 +51,7 @@ public sealed partial class NetZoneServer
 
                             break;
                         case NetOpcode.EnterWorld:
-                            await _session.OnEnterAsync(conn, zoneSession, self, ct).ConfigureAwait(false);
+                            await _session.OnEnterAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.MoveInput:
                             await _movement.OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
@@ -103,6 +103,24 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.EnchantCancel:
                             await _enchant.OnCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentConfirmTarget:
+                            await _augment.OnConfirmTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentConfirmRefiner:
+                            await _augment.OnConfirmRefinerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentConfirmGem:
+                            await _augment.OnConfirmGemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentRefine:
+                            await _augment.OnRefineAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentRefineCancel:
+                            await _augment.OnRefineCancelAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.AugmentCancelWindow:
+                            await _augment.OnCancelWindowAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.ClanCreateRequest:
                             await _clan.OnCreateAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);

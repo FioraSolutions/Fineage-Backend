@@ -29,11 +29,12 @@ public static class TradeRules
         bool canDropTradeStore,
         bool stackable,
         long requestedCount,
-        long availableCount)
+        long availableCount,
+        bool augmented = false)
     {
         if (!found)
             return InventoryProtocol.NotOwned;
-        if (equipped || !canDropTradeStore)
+        if (equipped || !canDropTradeStore || augmented)
             return TradeProtocol.Item;
         if (requestedCount > availableCount)
             return TradeProtocol.Item;

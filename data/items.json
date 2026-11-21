@@ -37756,6 +37756,15 @@
       "quest": true
     },
     {
+      "id": 4332,
+      "name": "Tarlk Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 4337,
       "name": "Alligator Leather",
       "kind": "etc",
@@ -45041,6 +45050,14 @@
       "stackable": true,
       "price": 156600,
       "weight": 30
+    },
+    {
+      "id": 5009,
+      "name": "Trophy of Alliance",
+      "kind": "etc",
+      "icon": "icon.etc_trophy_i01",
+      "price": 50,
+      "weight": 0
     },
     {
       "id": 5011,
@@ -52810,6 +52827,294 @@
       "stackable": true
     },
     {
+      "id": 5922,
+      "name": "Blueprint: Giants Golem 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5923,
+      "name": "Blueprint: Giants Golem 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5924,
+      "name": "Blueprint: Giants Golem 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5925,
+      "name": "Blueprint: Giants Golem 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5926,
+      "name": "Blueprint: Giants Golem 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5927,
+      "name": "Book: Basics of Giants Magic, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5928,
+      "name": "Book: Basics of Giants Magic, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5929,
+      "name": "Book: Basics of Giants Magic, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5930,
+      "name": "Book: Basics of Giants Magic, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5931,
+      "name": "Book: Basics of Giants Magic, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5932,
+      "name": "Handbook: Giants Architecture, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5933,
+      "name": "Handbook: Giants Architecture, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5934,
+      "name": "Handbook: Giants Architecture, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5935,
+      "name": "Handbook: Giants Architecture, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5936,
+      "name": "Handbook: Giants Architecture, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5937,
+      "name": "Book: Giants Medical Science, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5938,
+      "name": "Book: Giants Medical Science, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5939,
+      "name": "Book: Giants Medical Science, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5940,
+      "name": "Book: Giants Medical Science, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5941,
+      "name": "Book: Giants Medical Science, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5944,
+      "name": "Ancient Parchment",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_roll_of_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5945,
+      "name": "Book: Giants Science and Technology, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5946,
+      "name": "Book: Giants Science and Technology, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5947,
+      "name": "Book: Giants Science and Technology, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5948,
+      "name": "Book: Giants Science and Technology, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5949,
+      "name": "Book: Giants Science and Technology, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5950,
+      "name": "Almanac: Titan Culture, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5951,
+      "name": "Almanac: Titan Culture, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5952,
+      "name": "Almanac: Titan Culture, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5953,
+      "name": "Almanac: Titan Culture, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5954,
+      "name": "Almanac: Titan Culture, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_summon_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5955,
+      "name": "Ancient Titan Book",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_spell_books_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 5956,
       "name": "15 Year Old Wine",
       "kind": "etc",
@@ -53665,6 +53970,15 @@
       "stackable": true,
       "icon": "icon.etc_sealstone_red_i00",
       "price": 10
+    },
+    {
+      "id": 6363,
+      "name": "Stolen Infernium Ore",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_inf_ore_high_i00",
+      "price": 200,
+      "weight": 0
     },
     {
       "id": 6364,
@@ -59356,6 +59670,15 @@
       "price": 0,
       "weight": 10,
       "bodySlot": "hair"
+    },
+    {
+      "id": 7062,
+      "name": "Echo Crystal - Theme of Wedding",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_echo_crystal_i01",
+      "price": 0,
+      "weight": 10
     },
     {
       "id": 7063,
@@ -77155,6 +77478,52 @@
       "icon": "icon.etc_question_mark_i00",
       "price": 0,
       "weight": 0
+    },
+    {
+      "id": 8190,
+      "name": "Demonic Sword Zariche",
+      "kind": "weapon",
+      "icon": "icon.weapon_unique_zariche_i00",
+      "bodySlot": "lrhand",
+      "weaponType": "sword",
+      "price": 0,
+      "weight": 1840,
+      "pAtk": 361,
+      "mAtk": 137,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 1,
+      "spiritshots": 1,
+      "enchantable": false,
+      "sellable": false,
+      "dropable": true,
+      "destroyable": true,
+      "tradeable": false
+    },
+    {
+      "id": 8689,
+      "name": "Blood Sword Akamanah",
+      "kind": "weapon",
+      "icon": "icon.weapon_unique_akamanah_i00",
+      "bodySlot": "lrhand",
+      "weaponType": "sword",
+      "price": 0,
+      "weight": 1840,
+      "pAtk": 361,
+      "mAtk": 137,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 1,
+      "spiritshots": 1,
+      "enchantable": false,
+      "sellable": false,
+      "dropable": true,
+      "destroyable": true,
+      "tradeable": false
     }
   ]
 }

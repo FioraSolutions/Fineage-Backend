@@ -325,6 +325,30 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutEnchantResult), () => inner.FanoutEnchantResult(watcherObjectIdsCopy, result));
     }
 
+    void IWorldEventPublisher.FanoutAugmentShowMakeWindow(IReadOnlyList<int> watcherObjectIds) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowMakeWindow), () => inner.FanoutAugmentShowMakeWindow([.. watcherObjectIds]));
+
+    void IWorldEventPublisher.FanoutAugmentShowCancelWindow(IReadOnlyList<int> watcherObjectIds) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowCancelWindow), () => inner.FanoutAugmentShowCancelWindow([.. watcherObjectIds]));
+
+    void IWorldEventPublisher.FanoutAugmentPutItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutItemMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutItemResult), () => inner.FanoutAugmentPutItemResult([.. watcherObjectIds], msg));
+
+    void IWorldEventPublisher.FanoutAugmentPutRefinerResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutRefinerMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutRefinerResult), () => inner.FanoutAugmentPutRefinerResult([.. watcherObjectIds], msg));
+
+    void IWorldEventPublisher.FanoutAugmentPutGemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutGemMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutGemResult), () => inner.FanoutAugmentPutGemResult([.. watcherObjectIds], msg));
+
+    void IWorldEventPublisher.FanoutAugmentVariationResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationResultMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentVariationResult), () => inner.FanoutAugmentVariationResult([.. watcherObjectIds], msg));
+
+    void IWorldEventPublisher.FanoutAugmentPutCancelItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelItemMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutCancelItemResult), () => inner.FanoutAugmentPutCancelItemResult([.. watcherObjectIds], msg));
+
+    void IWorldEventPublisher.FanoutAugmentCancelResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelResultMsg msg) =>
+        Emit(nameof(IWorldEventPublisher.FanoutAugmentCancelResult), () => inner.FanoutAugmentCancelResult([.. watcherObjectIds], msg));
+
     void IWorldEventPublisher.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
@@ -678,5 +702,17 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         Emit(nameof(IWorldEventPublisher.FanoutDungeonEntered), () => inner.FanoutDungeonEntered(watcherObjectIdsCopy, entered));
+    }
+
+    void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponList), () => inner.FanoutCursedWeaponList(watcherObjectIdsCopy, list));
+    }
+
+    void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponLocation), () => inner.FanoutCursedWeaponLocation(watcherObjectIdsCopy, location));
     }
 }

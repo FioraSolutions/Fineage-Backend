@@ -64,12 +64,12 @@ static class EquipConditionReader
             case "any":
                 return new EquipRequirement.AnyOf(ReadGroup(value, path, itemId, property.Name));
             case "not":
-            {
-                var inner = Read(value, path, itemId);
-                if (inner == null)
-                    throw new InvalidDataException($"{path} item {itemId} equip.not is empty.");
-                return new EquipRequirement.Negate(inner);
-            }
+                {
+                    var inner = Read(value, path, itemId);
+                    if (inner == null)
+                        throw new InvalidDataException($"{path} item {itemId} equip.not is empty.");
+                    return new EquipRequirement.Negate(inner);
+                }
             default:
                 throw new InvalidDataException($"{path} item {itemId} has unknown equip field '{property.Name}'.");
         }

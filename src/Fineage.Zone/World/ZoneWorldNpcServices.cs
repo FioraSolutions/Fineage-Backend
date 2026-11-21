@@ -88,6 +88,10 @@ public sealed partial class ZoneWorld
                 return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
             case NpcServiceIntent.AncientAdenaToAdena:
                 return AncientAdenaToAdena(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.AugmentMake:
+                return TryAugmentOpenMake(session);
+            case NpcServiceIntent.AugmentCancel:
+                return TryAugmentOpenCancel(session);
             case NpcServiceIntent.FishSkillList:
                 return ShowFishingSkills(session, player, npc);
             case NpcServiceIntent.SkillList:
@@ -100,10 +104,18 @@ public sealed partial class ZoneWorld
                 return ApplyPetEvolve(session, player, npc, reply.ServiceId);
             case NpcServiceIntent.DimensionalRift:
                 return ApplyDimensionalRift(session, player, npc, reply);
+            case NpcServiceIntent.Festival:
+                return ApplyFestival(session, player, npc, reply);
             case NpcServiceIntent.DoormanOpen:
                 return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: true);
             case NpcServiceIntent.DoormanClose:
                 return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: false);
+            case NpcServiceIntent.HallFunction:
+            case NpcServiceIntent.HallDeco:
+            case NpcServiceIntent.HallLease:
+            case NpcServiceIntent.HallSupport:
+            case NpcServiceIntent.HallTeleport:
+                return TryHallManagerService(session, player, npc, reply);
             default:
                 return "bad_request";
         }
@@ -142,7 +154,7 @@ public sealed partial class ZoneWorld
         var castle = _siege.Board.Find(npc.MerchantCastleId);
         bool owned = castle != null && castle.OwnerClanId > 0;
         string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
-        if (!_html.TryGet(file, out var html))
+        if (!TryPage(session.Language, file, out var html))
             html = "<html><body>%castlename%</body></html>";
         string clanName = "", leaderName = "";
         if (owned && _clan.TryGet(castle!.OwnerClanId, out var clan))

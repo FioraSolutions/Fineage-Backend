@@ -35,7 +35,8 @@ public sealed partial class ZoneWorld
         {
             if (IsFishingSkill(skillId))
                 return true;
-            var ctx = new SkillCastCtx(this, player, target);
+            int skillLevel = player.KnownSkills.GetValueOrDefault(skillId, 1);
+            var ctx = new SkillCastCtx(this, player, target, skillId, skillLevel);
             if (!SkillCastConditionEvaluator.Met(template.CastCondition, ctx))
             {
                 refusalMessageId = ctx.RefusalMessageId;
@@ -79,16 +80,29 @@ public sealed partial class ZoneWorld
     internal bool CanResurrectForSkillCheck(ZoneEntity player, ZoneEntity? target) =>
         target is { Dead: true, Kind: ZoneEntityKind.Player };
 
+    /// <summary>Mobius <c>ConditionPlayerInsideZone</c>: instance id match (Olympiad stadium, etc.).</summary>
+    internal bool PlayerInsideMobiusZone(ZoneEntity player, int zoneId)
+    {
+        if (zoneId <= 0)
+            return false;
+        if (player.InstanceId == zoneId)
+            return true;
+        return InsideZoneIdForTests(player, zoneId);
+    }
+
     internal bool InsideZoneIdForTests(ZoneEntity player, int zoneId) => false;
 
     internal bool InSiegeZoneForTests(ZoneEntity player) =>
         CastleAtEntity(player) > 0 || SiegeAreas.CastleAt(player.X, player.Y, player.Z) > 0;
 
-    sealed class SkillCastCtx(ZoneWorld world, ZoneEntity player, ZoneEntity? target) : SkillCastConditionContext
+    sealed class SkillCastCtx(ZoneWorld world, ZoneEntity player, ZoneEntity? target, int skillId, int skillLevel)
+        : SkillCastConditionContext
     {
         readonly long _now = world.NowUnixMs();
 
-        public override void LogUnsupported(string message) => ZoneLog.Warn(message);
+        public override void LogUnsupported(string message) =>
+            ZoneLog.Warn($"skill={skillId} lv={skillLevel} {message}");
+        public override int SkillLevel => skillLevel;
         public override bool UsingKinds(string[] kinds) => ConditionUsingItemType.Matches(player.Inventory, kinds);
         public override bool UsingSlot(string[] slots) => ConditionUsingItemType.MatchesSlot(player.Inventory, slots);
         public override int InventoryUsedSlots => player.Inventory?.Items.Count ?? 0;
@@ -105,7 +119,7 @@ public sealed partial class ZoneWorld
         }
         public override int HpPercent => player.MaxHp <= 0 ? 0 : (int)(player.CurHp * 100 / player.MaxHp);
         public override int MpPercent => player.MaxMp <= 0 ? 0 : (int)(player.CurMp * 100 / player.MaxMp);
-        public override int SoulCharges => 0;
+        public override int SoulCharges => player.ForceCharges;
         public override int Level => player.Level;
         public override int Sex => player.Sex;
         public override string RaceName => player.Race switch
@@ -140,7 +154,7 @@ public sealed partial class ZoneWorld
         }
         public override bool HasActiveSkill(int skillId, int level) =>
             player.KnownSkills.TryGetValue(skillId, out int lv) && lv >= level;
-        public override bool InsideZone(int zoneId) => world.InsideZoneIdForTests(player, zoneId);
+        public override bool InsideZone(int zoneId) => world.PlayerInsideMobiusZone(player, zoneId);
         public override bool CanSweep() => world.CanSweepForSkillCheck(player, target);
         public override bool CanSummon() => world.CanSummonForSkillCheck(player);
         public override bool HasSummon => world.SummonOf(player) != null;
@@ -169,7 +183,10 @@ public sealed partial class ZoneWorld
                 : string.IsNullOrEmpty(target.CreatureRace) ? world.NpcRaceOf(target) : target.CreatureRace;
         public override int TargetNpcId => target?.NpcId ?? 0;
         public override string TargetNpcType => target?.NpcType ?? "";
-        public override bool TargetIsPartyMateExceptSelf => false;
+        public override bool TargetIsPartyMateExceptSelf =>
+            target != null && target.Kind == ZoneEntityKind.Player &&
+            target.ObjectId != player.ObjectId &&
+            world.SameParty(player.ObjectId, target.ObjectId);
         public override bool TargetHasActiveSkill(int skillId)
         {
             if (target == null) return false;

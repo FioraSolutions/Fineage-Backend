@@ -296,4 +296,15 @@ public sealed partial class QuestCatalog
             throw new FileNotFoundException($"{where} quest {questId} htmlFile '{file}' not found.", path);
         return File.ReadAllText(path);
     }
+
+    static string? HtmlKeyOf(DialogDto dialog, string? htmlBaseDir)
+    {
+        string file = (dialog.HtmlFile ?? "").Trim();
+        if (file.Length == 0 || string.IsNullOrWhiteSpace(htmlBaseDir))
+            return null;
+        string folder = Path.GetFileName(htmlBaseDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        if (folder.Length == 0)
+            return null;
+        return "html/quests/" + folder + "/" + file;
+    }
 }

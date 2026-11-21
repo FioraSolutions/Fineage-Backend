@@ -21,12 +21,26 @@ public static partial class ZoneCombat
     /// <summary>Placeholder until NPC pAtk formulas are imported: scales with level.</summary>
     public static int MobMeleeDamage(int level) => Math.Max(1, 4 + level * 2);
 
-    public static bool InAggroRange(int ax, int ay, int bx, int by)
+    /// <summary>Mobius <c>AttackableAI.thinkActive</c> / <c>autoAttackCondition</c>: 2D radius from template <c>aggroRange</c> and |dz| ≤ <see cref="AggroMaxZDelta"/>.</summary>
+    public static bool WithinProactiveAggroRange(int ax, int ay, int az, int bx, int by, int bz, int aggroRange)
+    {
+        if (aggroRange <= 0)
+            return false;
+        if (Math.Abs(az - bz) > AggroMaxZDelta)
+            return false;
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        return dx * dx + dy * dy <= (long)aggroRange * aggroRange;
+    }
+
+    /// <summary>Combat leash / hate forget (Mobius pursuit), not proactive acquisition — always <see cref="AggroForgetRange"/>.</summary>
+    public static bool WithinAggroForgetRange(int ax, int ay, int bx, int by)
     {
         long dx = ax - (long)bx;
         long dy = ay - (long)by;
         return dx * dx + dy * dy <= (long)AggroForgetRange * AggroForgetRange;
     }
+
 
     public static bool InMeleeRange(int ax, int ay, int bx, int by)
     {

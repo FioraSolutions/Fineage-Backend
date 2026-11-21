@@ -82,13 +82,13 @@
       "npcId": 30892,
       "hook": "event",
       "when": "started",
-      "event": "30892-10",
+      "event": "30892-08",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30892-event-30892-10-006.htm"
+      "htmlFile": "30892-event-30892-08-006.htm"
     },
     {
       "npcId": 30892,

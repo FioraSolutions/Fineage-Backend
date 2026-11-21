@@ -33,8 +33,8 @@
       "npcId": 30526,
       "hook": "event",
       "when": "absent",
-      "event": "30526-04",
-      "htmlFile": "30526-event-30526-04-003.htm"
+      "event": "30526-03",
+      "htmlFile": "30526-event-30526-03-003.htm"
     },
     {
       "npcId": 30526,
@@ -123,7 +123,7 @@
       "npcId": 30526,
       "hook": "event",
       "when": "started",
-      "event": "30526-10",
+      "event": "30526-09",
       "cond": 6,
       "hasItem": 4285,
       "ops": [
@@ -141,20 +141,20 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30526-event-30526-10-c6-014.htm"
+      "htmlFile": "30526-event-30526-09-c6-014.htm"
     },
     {
       "npcId": 30526,
       "hook": "event",
       "when": "started",
-      "event": "30526-10",
-      "htmlFile": "30526-event-30526-10-015.htm"
+      "event": "30526-09",
+      "htmlFile": "30526-event-30526-09-015.htm"
     },
     {
       "npcId": 30526,
       "hook": "event",
       "when": "started",
-      "event": "30526-11",
+      "event": "30526-09",
       "cond": 6,
       "hasItem": 4285,
       "ops": [
@@ -171,7 +171,7 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30526-event-30526-11-c6-016.htm"
+      "htmlFile": "30526-event-30526-09-c6-016.htm"
     },
     {
       "npcId": 30532,

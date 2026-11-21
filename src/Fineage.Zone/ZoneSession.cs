@@ -48,7 +48,16 @@ public sealed class ZoneSession
     /// <summary>Mobius chat ban (PunishmentType.CHAT_BAN): unix ms until which banned channels are refused; 0 = none.</summary>
     public long ChatBannedUntilUnixMs { get; set; }
 
+    /// <summary>
+    /// Player language for this character session. Copied from the account at enter, or from the
+    /// EnterWorld tail when the client sends one. Defaults to <c>en</c>.
+    /// </summary>
+    public string Language { get; private set; } = Fineage.Game.L10n.PlayerLocale.Default;
+
     public bool Bound => ObjectId != 0;
+
+    public void SetLanguage(string? language) =>
+        Language = Fineage.Game.L10n.PlayerLocale.Normalize(language);
 
     public void Bind(int objectId, string account, string name, int classId, int race = 0, int sex = 0)
     {
@@ -85,5 +94,6 @@ public sealed class ZoneSession
         RaceTicketPriceIndex = 0;
         LastChatUnixMs = 0;
         LastHeroVoiceUnixMs = 0;
+        Language = Fineage.Game.L10n.PlayerLocale.Default;
     }
 }

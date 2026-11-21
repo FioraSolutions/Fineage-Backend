@@ -24,6 +24,8 @@ namespace Fineage.Net.Contract
                 w.WriteString(row.Icon ?? "");
                 w.WriteString(row.WeaponType ?? "");
                 w.WriteString(row.ArmorType ?? "");
+                w.WriteInt32(row.Option1);
+                w.WriteInt32(row.Option2);
             }
         });
 
@@ -49,6 +51,11 @@ namespace Fineage.Net.Contract
                     WeaponType = r.ReadString(),
                     ArmorType = r.ReadString()
                 };
+                if (r.Remaining >= 8)
+                {
+                    rows[i].Option1 = r.ReadInt32();
+                    rows[i].Option2 = r.ReadInt32();
+                }
             }
 
             return new ItemListNetMsg { Items = rows };

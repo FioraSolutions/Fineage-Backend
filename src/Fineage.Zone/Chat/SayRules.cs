@@ -47,6 +47,7 @@ public static class SayRules
         return new SystemMessageMsg
         {
             Id = ChatProtocol.Welcome,
+            Key = "chat.welcome",
             Params = [who],
             Text = $"Welcome, {who}."
         };
@@ -55,6 +56,7 @@ public static class SayRules
     public static SystemMessageMsg NotSupported(int chatType) => new()
     {
         Id = ChatProtocol.ChatNotSupported,
+        Key = "chat.not_supported",
         Params = [chatType.ToString()],
         Text = "not supported yet"
     };
@@ -62,6 +64,7 @@ public static class SayRules
     public static SystemMessageMsg Flood() => new()
     {
         Id = ChatProtocol.ChatFlood,
+        Key = "chat.flood",
         Params = [],
         Text = "Please do not spam the chat."
     };

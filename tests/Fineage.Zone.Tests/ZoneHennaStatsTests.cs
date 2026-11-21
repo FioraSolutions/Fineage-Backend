@@ -32,7 +32,10 @@ public sealed class ZoneHennaStatsTests
     {
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 1, Level = 20,
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 1,
+            Level = 20,
             Inventory = new PlayerInventory(GameData.LoadDefault().Items)
         };
         var world = new ZoneWorld();

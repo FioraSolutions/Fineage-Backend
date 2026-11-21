@@ -25,7 +25,7 @@ public sealed partial class SevenSignsEngine
         }
 
         if (ended == SevenSignsPeriod.Recruiting)
-            _festival?.OnCompetitionStarted();
+            _festival?.OnCompetitionStarted(utcNow);
         else if (ended == SevenSignsPeriod.Competition)
             _festival?.OnCompetitionEnded(endedWinner);
 

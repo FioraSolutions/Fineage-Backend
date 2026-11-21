@@ -25,7 +25,7 @@
       "npcId": 30111,
       "hook": "event",
       "when": "absent",
-      "event": "30111-02",
+      "event": "30111-2",
       "minLevel": 48,
       "ops": [
         {
@@ -39,26 +39,19 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30111-event-30111-02-002.htm"
+      "htmlFile": "30111-event-30111-2-002.htm"
     },
     {
       "npcId": 30111,
       "hook": "event",
       "when": "started",
-      "event": "30111-05",
+      "event": "30111-6",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30111-event-30111-05-003.htm"
-    },
-    {
-      "npcId": 30111,
-      "hook": "event",
-      "when": "started",
-      "event": "30111-06",
-      "htmlFile": "30111-event-30111-06-004.htm"
+      "htmlFile": "30111-event-30111-6-003.htm"
     },
     {
       "npcId": 30111,
@@ -78,7 +71,7 @@
           "bonusAdena": 29000
         }
       ],
-      "htmlFile": "30111-talk-005.htm"
+      "htmlFile": "30111-talk-004.htm"
     },
     {
       "npcId": 30111,
@@ -87,7 +80,7 @@
       "lacksItems": [
         5874
       ],
-      "htmlFile": "30111-talk-006.htm"
+      "htmlFile": "30111-talk-005.htm"
     },
     {
       "npcId": 20986,

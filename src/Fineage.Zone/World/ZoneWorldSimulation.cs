@@ -30,6 +30,7 @@ public sealed partial class ZoneWorld
     IRegionStage _regenNpcsStage;
     IRegionStage _abnormalsStage;
     IRegionStage _aggressionStage;
+    IRegionStage _randomWalkStage;
 
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
@@ -136,19 +137,22 @@ public sealed partial class ZoneWorld
 
     [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_byId), nameof(_simulationObserver),
         nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage),
-        nameof(_aggressionStage), nameof(_borders))]
+        nameof(_aggressionStage), nameof(_randomWalkStage), nameof(_borders))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
         _regions = partition;
         _byId = new RegionDirectory<ZoneEntity>(partition, requireOwner: _affinity.Require);
         _simulationObserver = observer;
+        if (observer is ZoneSimulationObserver production)
+            production.BindNpcDiagnostics(TickNpcDiagnostics);
         _borders = new BorderSnapshots<ZonePresence>(partition, BorderReach);
         _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id), parallel: true);
         _regenNpcsStage = new RegionStage("regen.npcs", CollectRegenNpcs, (_, id) => RegenNpc(id), parallel: true);
         _abnormalsStage = new RegionStage("abnormals", CollectAbnormals, (tick, id) => TickEntityAbnormals(id, tick.NowUnixMs),
             parallel: true);
         _aggressionStage = new AggressionStage(this);
+        _randomWalkStage = new RandomWalkStage(this);
 
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
         // Every region body runs in a RegionBodyScope, so the executor cannot change the outcome; it only decides
@@ -162,7 +166,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("movement.player", tick => TickPlayerMovement(tick.NowUnixMs));
         ticks.AddWorldStage("arena", _ => TickArenaZones());
         ticks.AddWorldStage("movement.npc", tick => TickNpcMovement(tick.NowUnixMs));
-        ticks.AddWorldStage("random-walk", tick => TickRandomWalk(tick.NowUnixMs));
+        ticks.AddRegionStage(_randomWalkStage);
         ticks.AddWorldStage("pending-hits", tick => TickPendingHits(tick.NowUnixMs));
         ticks.AddWorldStage("melee-hits", tick => TickMeleeHits(tick.NowUnixMs));
         ticks.AddWorldStage("pvp-flags", tick => TickPvpFlags(tick.NowUnixMs));
@@ -187,6 +191,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
         ticks.AddWorldStage(PunishmentActor.StageName, tick => TickPunishments(tick.NowUnixMs));
         ticks.AddWorldStage("door-auto-close", tick => TickDoorAutoClose(tick.WallUnixMs));
+        ticks.AddWorldStage("cursed-weapons", tick => TickCursedWeapons(tick.NowUnixMs));
 
         // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.
@@ -202,6 +207,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(DimensionalRiftActor.StageName, TickDimensionalRift, slow);
         ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
         ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
+        ticks.AddWorldStage(HallFunctionActor.StageName, TickHallFunctions, slow);
         ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);
         ticks.AddWorldStage(ChSiegeActor.StageName, TickChSieges, slow);
         ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);

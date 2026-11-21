@@ -1,0 +1,448 @@
+{
+  "id": 508,
+  "name": "A Clan's Reputation",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8277,
+    8279,
+    8280,
+    8281,
+    8282,
+    8494
+  ],
+  "dialogs": [
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30868-talk-000.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "started",
+      "event": "30868-7",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-event-30868-7-001.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "1",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "1"
+        }
+      ],
+      "htmlFile": "30868-event-1-002.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "1",
+      "hasItem": 8277,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8277,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 6500
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-003.htm"
+    },
+    {
+      "npcId": 25252,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "1",
+      "lacksItems": [
+        8277
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8277,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "2",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "2"
+        }
+      ],
+      "htmlFile": "30868-event-2-005.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "2",
+      "hasItem": 8279,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8279,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 4000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-006.htm"
+    },
+    {
+      "npcId": 25140,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "2",
+      "lacksItems": [
+        8279
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8279,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "3",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "3"
+        }
+      ],
+      "htmlFile": "30868-event-3-008.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "3",
+      "hasItem": 8280,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8280,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 3000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-009.htm"
+    },
+    {
+      "npcId": 25255,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "3",
+      "lacksItems": [
+        8280
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8280,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "4",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "4"
+        }
+      ],
+      "htmlFile": "30868-event-4-011.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "4",
+      "hasItem": 8281,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8281,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 10500
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-012.htm"
+    },
+    {
+      "npcId": 25245,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "4",
+      "lacksItems": [
+        8281
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8281,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "5",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "5"
+        }
+      ],
+      "htmlFile": "30868-event-5-014.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "5",
+      "hasItem": 8282,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8282,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 4000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-015.htm"
+    },
+    {
+      "npcId": 25051,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "5",
+      "lacksItems": [
+        8282
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8282,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 30868,
+      "hook": "event",
+      "when": "absent",
+      "event": "6",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "raid",
+          "value": "6"
+        }
+      ],
+      "htmlFile": "30868-event-6-017.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "6",
+      "hasItem": 8494,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8494,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 6000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30868-talk-c1-018.htm"
+    },
+    {
+      "npcId": 25524,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "whenVar": "raid",
+      "whenValue": "6",
+      "lacksItems": [
+        8494
+      ],
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8494,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    }
+  ]
+}

@@ -187,7 +187,10 @@ def auto_ported_ids() -> set[int]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mobius", default="/workspace/mobius/L2J_Mobius_CT_0_Interlude")
+    ap.add_argument(
+        "--mobius",
+        default=os.path.join(ROOT, ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude"),
+    )
     ap.add_argument("--out", default=os.path.join(ROOT, "docs", "QUEST_STATUS.md"))
     args = ap.parse_args()
     qdir = os.path.join(args.mobius, "dist/game/data/scripts/quests")

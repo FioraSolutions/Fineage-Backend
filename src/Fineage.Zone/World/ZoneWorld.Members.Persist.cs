@@ -105,7 +105,12 @@ public sealed partial class ZoneWorld
     /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set.</summary>
     void FlushDirtyInventories()
     {
-        TryFlushLedger();
+        if (!TryFlushLedger())
+        {
+            ZoneLog.Warn("inventory persist blocked: auditable economy ledger flush failed");
+            return;
+        }
+
         if (_dirtyInventories.Count > 0)
         {
             foreach (var (_, pair) in _dirtyInventories)

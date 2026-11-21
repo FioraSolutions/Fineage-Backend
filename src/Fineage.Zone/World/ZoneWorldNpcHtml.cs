@@ -39,7 +39,10 @@ public sealed partial class ZoneWorld
         if (TryClanMasterVerb(session, player, npc, verb, out var clanError))
             return clanError;
 
-        var handler = _bypasses.Find(verb);
+        IBypassHandler? handler = string.Equals(npc.NpcType, "ClanHallManager", StringComparison.Ordinal) &&
+                                 ClanHallManagerBypassHandler.IsHallOnlyCommand(verb)
+            ? new ClanHallManagerBypassHandler()
+            : _bypasses.Find(verb);
         if (handler == null)
         {
             SendHtml(session, player, npc, BypassRegistry.NotImplemented);
@@ -53,7 +56,8 @@ public sealed partial class ZoneWorld
             NpcName = npc.Name,
             NpcType = npc.NpcType,
             PlayerName = player.Name,
-            Command = verb
+            Command = verb,
+            Language = session.Language
         });
         if (reply.Error != null)
             return reply.Error;
@@ -101,7 +105,13 @@ public sealed partial class ZoneWorld
                 SendHtml(session, player, npc, mammon);
             return;
         }
-        SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page));
+        if (page == 0 && FestivalFirstPage(session, player, npc, out var festival))
+        {
+            if (festival != null)
+                SendHtml(session, player, npc, festival);
+            return;
+        }
+        SendHtml(session, player, npc, _pages.ReadNpc(session.Language, npc.NpcType, npc.NpcId, page));
     }
 
     void SendQuestList(ZoneSession session, ZoneEntity player, ZoneEntity npc)
@@ -113,7 +123,8 @@ public sealed partial class ZoneWorld
 
     void SendHtml(ZoneSession session, ZoneEntity player, ZoneEntity npc, string html)
     {
-        string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npc.Name, player.Name));
+        string npcName = _pages.Name(session.Language, "npc", npc.NpcId, npc.Name);
+        string rendered = NpcHtmlText.Apply(html, new NpcHtmlText.Tokens(npc.ObjectId, npc.NpcId, npcName, player.Name));
         LastNpcHtmlForTest = rendered;
         FanoutNetHtml(session, npc, rendered);
     }

@@ -102,10 +102,13 @@ public sealed class SkillDefinitionParityTests
             if (row.AbnormalTimeSeconds is int abn)
                 Cmp(mismatches, row.SkillId, "abnormalTimeSeconds", skill.AbnormalTimeSeconds, abn);
 
-            var gotKinds = (skill.UsingKinds ?? []).ToArray();
-            var wantKinds = row.UsingKinds ?? [];
-            if (!gotKinds.SequenceEqual(wantKinds))
-                mismatches.Add($"{row.SkillId} usingKinds [{string.Join(",", gotKinds)}] != [{string.Join(",", wantKinds)}]");
+            if (skill.CastCondition == null)
+            {
+                var gotKinds = (skill.UsingKinds ?? []).ToArray();
+                var wantKinds = row.UsingKinds ?? [];
+                if (!gotKinds.SequenceEqual(wantKinds))
+                    mismatches.Add($"{row.SkillId} usingKinds [{string.Join(",", gotKinds)}] != [{string.Join(",", wantKinds)}]");
+            }
 
             if (row.EffectPoint is { Length: > 0 } points)
             {

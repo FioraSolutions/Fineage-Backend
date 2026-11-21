@@ -14,17 +14,22 @@ public sealed partial class ZoneWorld
             TryFlushLedger();
     }
 
-    internal void TryFlushLedger()
+    /// <returns>False when the auditable economy ledger flush failed and durable inventory must not proceed.</returns>
+    internal bool TryFlushLedger()
     {
         int pending = _ledger.PendingFlushCount;
+        if (pending == 0)
+            return true;
         try
         {
             _ledger.Flush();
+            return true;
         }
         catch (Exception ex)
         {
-            ZoneLog.Warn($"ledger flush failed pending={pending}: {ex.Message}");
+            ZoneLog.Warn($"auditable economy ledger flush failed pending={pending}: {ex.Message}");
             FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
+            return false;
         }
     }
 }

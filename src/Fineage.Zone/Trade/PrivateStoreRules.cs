@@ -23,9 +23,9 @@ public static class PrivateStoreRules
     }
 
     /// <summary>Refuse non-stackable multi-count or adena-as-merchandise.</summary>
-    public static string? SellStockError(bool found, bool equipped, bool canDropTradeStore, bool stackable, long count, long available, int itemId)
+    public static string? SellStockError(bool found, bool equipped, bool canDropTradeStore, bool stackable, long count, long available, int itemId, bool augmented = false)
     {
-        if (!found || equipped || !canDropTradeStore || available < count)
+        if (!found || equipped || !canDropTradeStore || available < count || augmented)
             return PrivateStoreProtocol.Item;
         if (!stackable && count != 1)
             return PrivateStoreProtocol.Item;

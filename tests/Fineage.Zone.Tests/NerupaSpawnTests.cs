@@ -43,7 +43,7 @@ public sealed class NerupaSpawnTests
         Assert.Equal(2444, nerupa.MaxHp);
 
         // Exactly one lord of this template across every map, in the town object-id band.
-        Assert.Single(SpawnCatalog.LoadDefault().Maps.Values.SelectMany(m => m.Npcs).Where(row => row.NpcId == NerupaNpcId));
+        Assert.Single(SpawnCatalog.LoadDefault().Maps.Values.SelectMany(m => m.Npcs), row => row.NpcId == NerupaNpcId);
         Assert.InRange(nerupa.ObjectId, Fineage.Game.NpcObjectIdAllocator.First, Fineage.Game.NpcObjectIdAllocator.ExclusiveEnd - 1);
     }
 

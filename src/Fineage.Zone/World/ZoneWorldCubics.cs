@@ -50,28 +50,10 @@ public sealed partial class ZoneWorld
         var row = skill.At(level);
         if (row == null)
             return "skill";
-        if (row.ItemId > 0 && row.ItemCount > 0 && (player.Inventory?.CountOf(row.ItemId) ?? 0) < row.ItemCount)
-        {
-            SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
-            return null;
-        }
-
         StartStaticCast(session, player, player, request.SkillId, template, levelData, level, now, (_, at) =>
         {
             if (player.Dead)
                 return;
-            if (row.ItemId > 0 && row.ItemCount > 0)
-            {
-                var inventory = player.Inventory;
-                var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
-                {
-                    SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
-                    return;
-                }
-                FanInventory(session, Collapse(changes));
-                SaveInventory(session, inventory);
-            }
 
             // Mobius PARTY target: the caster and every living party member within the skill's affect range.
             IEnumerable<ZoneEntity> targets = skill.Party

@@ -494,7 +494,8 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var guard) || guard.CurHp <= 0 || guard.Dead || guard.AggroTargetId > 0)
                 continue;
-            int range = guard.AggroRange > 0 ? guard.AggroRange : 1000;
+            if (!TryGetProactiveAggroRange(guard, out int range))
+                continue;
             foreach (var p in players)
             {
                 if (p.Dead || p.CurHp <= 0 || p.Session == null || !SameInstance(guard.ObjectId, p.ObjectId))

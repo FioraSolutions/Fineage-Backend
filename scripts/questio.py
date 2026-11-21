@@ -76,12 +76,18 @@ def quest_dir(quest_id: int, name: str) -> pathlib.Path:
 def ensure_meta(reference: str | None = None, max_active: int = 25, talk_range: int = 150) -> None:
     QUESTS_DIR.mkdir(parents=True, exist_ok=True)
     meta = {"maxActive": max_active, "talkRange": talk_range}
-    if reference:
-        meta["reference"] = reference
-    elif META_PATH.exists():
+    if META_PATH.exists():
         old = json.loads(META_PATH.read_text(encoding="utf-8"))
-        if "reference" in old:
+        if "maxActive" in old:
+            meta["maxActive"] = old["maxActive"]
+        if "talkRange" in old:
+            meta["talkRange"] = old["talkRange"]
+        if reference:
+            meta["reference"] = reference
+        elif "reference" in old:
             meta["reference"] = old["reference"]
+    elif reference:
+        meta["reference"] = reference
     META_PATH.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 

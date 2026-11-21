@@ -349,7 +349,12 @@ public sealed class NetFishingTests
 
     static Fineage.Zone.NpcHtml.BypassCall Call(string command) => new()
     {
-        NpcObjectId = 1, NpcId = Fisherman, NpcName = "Fisher", NpcType = "Fisherman", PlayerName = "A", Command = command
+        NpcObjectId = 1,
+        NpcId = Fisherman,
+        NpcName = "Fisher",
+        NpcType = "Fisherman",
+        PlayerName = "A",
+        Command = command
     };
 
     [Fact]
@@ -387,8 +392,22 @@ public sealed class NetFishingTests
     {
         var m = new FishingEventNetMsg
         {
-            Kind = 2, FisherObjectId = 77, FishGroup = -1, X = 1, Y = -2, Z = 3, NightLure = true, Time = 19, Hp = 150, Mode = 1,
-            LureType = 2, Deceptive = 1, GoodUse = 2, Anim = 1, Penalty = 4, Win = true
+            Kind = 2,
+            FisherObjectId = 77,
+            FishGroup = -1,
+            X = 1,
+            Y = -2,
+            Z = 3,
+            NightLure = true,
+            Time = 19,
+            Hp = 150,
+            Mode = 1,
+            LureType = 2,
+            Deceptive = 1,
+            GoodUse = 2,
+            Anim = 1,
+            Penalty = 4,
+            Win = true
         };
         var back = NetCodec.DecodeFishingEvent(NetCodec.EncodeFishingEvent(m));
         Assert.Equivalent(m, back);

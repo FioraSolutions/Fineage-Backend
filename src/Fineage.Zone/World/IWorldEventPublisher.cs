@@ -162,6 +162,15 @@ interface IWorldEventPublisher
     /// <summary>Mobius EnchantResult to the enchanter. Called on the simulation thread.</summary>
     void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result);
 
+    void FanoutAugmentShowMakeWindow(IReadOnlyList<int> watcherObjectIds);
+    void FanoutAugmentShowCancelWindow(IReadOnlyList<int> watcherObjectIds);
+    void FanoutAugmentPutItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutItemMsg msg);
+    void FanoutAugmentPutRefinerResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutRefinerMsg msg);
+    void FanoutAugmentPutGemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutGemMsg msg);
+    void FanoutAugmentVariationResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationResultMsg msg);
+    void FanoutAugmentPutCancelItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelItemMsg msg);
+    void FanoutAugmentCancelResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelResultMsg msg);
+
     void FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status);
 
     void FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list);
@@ -310,4 +319,10 @@ interface IWorldEventPublisher
 
     /// <summary>The catacomb/necropolis result, also the validation kick.</summary>
     void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered);
+
+    /// <summary>Mobius <c>ExCursedWeaponList</c>.</summary>
+    void FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list);
+
+    /// <summary>Mobius <c>ExCursedWeaponLocation</c>.</summary>
+    void FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location);
 }

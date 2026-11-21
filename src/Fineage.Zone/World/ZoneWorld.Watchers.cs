@@ -317,4 +317,16 @@ public sealed partial class ZoneWorld
         using (_affinity.Step())
             RefreshMovingKnownlist(entity, ack);
     }
+
+    internal void RefreshMovingKnownlistMidRunForTests(ZoneEntity entity)
+    {
+        using (_affinity.Step())
+            RefreshMovingKnownlist(entity, null);
+    }
+
+    internal void FanoutMoveSyncToNewWatchersForTests(ZoneEntity mover, IReadOnlyList<int> added, bool legAckAlreadySent)
+    {
+        using (_affinity.Step())
+            FanoutMoveSyncToNewWatchers(mover, added, legAckAlreadySent);
+    }
 }

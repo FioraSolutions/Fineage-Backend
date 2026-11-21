@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Emit data/clan-hall-functions.json from Mobius Feature.ini defaults (CT_0 Interlude)."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "data" / "clan-hall-functions.json"
+
+# org.l2jmobius.gameserver.config.FeatureConfig load() defaults
+SPECS = {
+    "teleport": {
+        "type": 1,
+        "feeRatioMs": 604800000,
+        "levels": [
+            {"level": 1, "fee": 7000},
+            {"level": 2, "fee": 14000},
+        ],
+    },
+    "itemCreate": {
+        "type": 2,
+        "feeRatioMs": 86400000,
+        "levels": [
+            {"level": 1, "fee": 30000},
+            {"level": 2, "fee": 70000},
+            {"level": 3, "fee": 140000},
+        ],
+    },
+    "restoreHp": {
+        "type": 3,
+        "feeRatioMs": 86400000,
+        "levels": [
+            {"level": 20, "fee": 700},
+            {"level": 40, "fee": 800},
+            {"level": 80, "fee": 1000},
+            {"level": 100, "fee": 1166},
+            {"level": 120, "fee": 1500},
+            {"level": 140, "fee": 1750},
+            {"level": 160, "fee": 2000},
+            {"level": 180, "fee": 2250},
+            {"level": 200, "fee": 2500},
+            {"level": 220, "fee": 3250},
+            {"level": 240, "fee": 3270},
+            {"level": 260, "fee": 4250},
+            {"level": 280, "fee": 5166},
+        ],
+    },
+    "restoreMp": {
+        "type": 4,
+        "feeRatioMs": 86400000,
+        "levels": [
+            {"level": 5, "fee": 2000},
+            {"level": 15, "fee": 3750},
+            {"level": 30, "fee": 6500},
+            {"level": 40, "fee": 13750},
+            {"level": 50, "fee": 20000},
+        ],
+    },
+    "restoreExp": {
+        "type": 5,
+        "feeRatioMs": 86400000,
+        "levels": [
+            {"level": 5, "fee": 3000},
+            {"level": 10, "fee": 6000},
+            {"level": 15, "fee": 9000},
+            {"level": 25, "fee": 15000},
+            {"level": 35, "fee": 21000},
+            {"level": 40, "fee": 23330},
+            {"level": 50, "fee": 30000},
+        ],
+    },
+    "support": {
+        "type": 6,
+        "feeRatioMs": 86400000,
+        "levels": [
+            {"level": 1, "fee": 2500},
+            {"level": 2, "fee": 5000},
+            {"level": 3, "fee": 7000},
+            {"level": 4, "fee": 11000},
+            {"level": 5, "fee": 21000},
+            {"level": 6, "fee": 36000},
+            {"level": 7, "fee": 37000},
+            {"level": 8, "fee": 52000},
+        ],
+    },
+    "decoFront": {
+        "type": 7,
+        "feeRatioMs": 259200000,
+        "levels": [
+            {"level": 1, "fee": 1300},
+            {"level": 2, "fee": 4000},
+        ],
+    },
+    "decoCurtains": {
+        "type": 8,
+        "feeRatioMs": 604800000,
+        "levels": [
+            {"level": 1, "fee": 2000},
+            {"level": 2, "fee": 2500},
+        ],
+    },
+}
+
+doc = {
+    "source": "Mobius CT_0 Interlude Feature.ini ClanHall* defaults (FeatureConfig.java)",
+    "hallLeasePeriodMs": 604800000,
+    "buffMpFree": False,
+    "functions": SPECS,
+}
+
+OUT.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+print(f"wrote {OUT}")
