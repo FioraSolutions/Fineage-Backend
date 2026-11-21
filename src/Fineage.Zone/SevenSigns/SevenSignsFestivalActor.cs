@@ -25,6 +25,7 @@ public sealed class SevenSignsFestivalActor : GlobalActor<SevenSignsFestivalEffe
 
     protected override void OnStep(long nowUnixMs, List<SevenSignsFestivalEffect> effects)
     {
+        EmitCycleEffects(nowUnixMs, effects);
         var catalog = _board.Catalog;
         for (int partyId = 0; partyId < SevenSignsFestivalBoard.MaxPartySlots; partyId++)
         {
@@ -78,4 +79,24 @@ public sealed class SevenSignsFestivalActor : GlobalActor<SevenSignsFestivalEffe
     }
 
     public void KillInstance(int partyId) => _board.Remove(partyId);
+
+    void EmitCycleEffects(long nowUnixMs, List<SevenSignsFestivalEffect> effects)
+    {
+        bool active = _board.FestivalSliceActive(nowUnixMs);
+        if (active && !_board.GlobalFestivalActive)
+        {
+            _board.SetGlobalFestivalActive(true);
+            foreach (var reg in _board.Registrations())
+            {
+                if (!reg.Launched)
+                    effects.Add(new SevenSignsFestivalEffect(reg.PartyId, SevenSignsFestivalEffectKind.LaunchRegistration));
+            }
+        }
+        else if (!active && _board.GlobalFestivalActive)
+        {
+            _board.SetGlobalFestivalActive(false);
+            foreach (var reg in _board.Registrations())
+                reg.Launched = false;
+        }
+    }
 }

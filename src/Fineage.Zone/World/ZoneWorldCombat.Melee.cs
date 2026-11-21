@@ -138,6 +138,7 @@ public sealed partial class ZoneWorld
             if (attacker.Summon != null)
                 attacker.Summon.TargetId = 0;
             RemoveDeadNpc(target, killer: credit);
+            TryGrantFestivalBloodOffering(credit, target);
             GrantKillReward(credit, target);
         }
     }

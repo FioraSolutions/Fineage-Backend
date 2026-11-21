@@ -20,6 +20,16 @@ public sealed class SevenSignsFestivalInstance
     public int? WitchObjectId { get; set; }
 }
 
+public sealed class FestivalPartyRegistration
+{
+    public int PartyId { get; init; }
+    public int LeaderObjectId { get; init; }
+    public int TierId { get; init; }
+    public SevenSignsCabal Cabal { get; init; }
+    public List<int> Members { get; init; } = [];
+    public bool Launched { get; set; }
+}
+
 public enum SevenSignsFestivalEffectKind
 {
     SpawnPrimary,
@@ -27,6 +37,7 @@ public enum SevenSignsFestivalEffectKind
     SpawnChests,
     SpawnWitch,
     SpawnChallenge,
+    LaunchRegistration,
     EndInstance
 }
 

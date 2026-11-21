@@ -73,6 +73,8 @@ public sealed class SevenSignsFestivalCatalog
     public IReadOnlyList<int> LevelScores { get; }
     public long FestivalLengthMs { get; }
     public long CycleLengthMs { get; }
+    /// <summary>Mobius <c>FESTIVAL_SIGNUP_TIME</c>: cycle length minus festival run minus one minute.</summary>
+    public long SignupCloseMs => Math.Max(0, CycleLengthMs - FestivalLengthMs - 60_000);
     public long FirstSpawnMs { get; }
     public long FirstSwarmMs { get; }
     public long SecondSpawnMs { get; }
