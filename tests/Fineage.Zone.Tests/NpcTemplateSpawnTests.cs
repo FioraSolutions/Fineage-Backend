@@ -15,7 +15,7 @@ namespace Fineage.Zone.Tests;
 
 public sealed class NpcTemplateSpawnTests
 {
-    const int MobiusTemplateCount = 6519;
+    const int MobiusTemplateCount = 6520;
     const int TalkingIslandNpcCount = 90;
 
     [Fact]

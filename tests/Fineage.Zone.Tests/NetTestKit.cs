@@ -126,6 +126,6 @@ internal sealed class NetTestKit
     }
 
     public async Task<(ZoneSession Session, ZoneEntity Entity)> EnterAsync(
-        int classId = 25, int race = 1, int x = ElfX, int y = ElfY, int z = ElfZ, int level = 1) =>
-        await EnterAsync(Create(classId, race, level, x, y, z));
+        int classId = 25, int race = 1, int sex = 0, int x = ElfX, int y = ElfY, int z = ElfZ, int level = 1) =>
+        await EnterAsync(Create(classId, race, sex, level, x, y, z));
 }
