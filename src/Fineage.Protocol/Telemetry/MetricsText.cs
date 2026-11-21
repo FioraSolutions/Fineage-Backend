@@ -54,6 +54,8 @@ public sealed class MetricsSnapshot
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
+    public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
@@ -163,6 +165,20 @@ public static class MetricsText
         AppendHelp(sb, "fineage_region_handoffs_total", "Entities handed to another region at the end of a step");
         sb.Append("# TYPE fineage_region_handoffs_total counter\n");
         sb.Append("fineage_region_handoffs_total ").Append(snapshot.RegionHandoffs.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        if (snapshot.LedgerAdjustments.Count > 0)
+        {
+            AppendHelp(sb, "fineage_ledger_adjustments_total", "Alignment adjustments before a ledger move");
+            sb.Append("# TYPE fineage_ledger_adjustments_total counter\n");
+            foreach (var pair in snapshot.LedgerAdjustments)
+            {
+                sb.Append("fineage_ledger_adjustments_total{move_kind=\"")
+                    .Append(Escape(pair.Key))
+                    .Append("\"} ")
+                    .Append(pair.Value.ToString(CultureInfo.InvariantCulture))
+                    .Append('\n');
+            }
+        }
+
         AppendStages(sb, snapshot.Stages);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");

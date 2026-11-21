@@ -74,6 +74,7 @@ public sealed class LedgerMove
         var postings = Alignment(account, before);
         if (postings.Count == 0)
             return;
+        LedgerAdjustments.Raise(_kind, account, postings);
         var adjustment = new LedgerTransaction(_nextId(), LedgerTxKind.Adjustment, _causedBy, 0, _wallUnixMs, postings);
         var result = _ledger.Submit(adjustment);
         if (!result.Ok)

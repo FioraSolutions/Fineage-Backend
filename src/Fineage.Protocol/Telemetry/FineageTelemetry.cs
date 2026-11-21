@@ -67,6 +67,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> RegionHandoffs =
         Meter.CreateCounter<long>("fineage.region.handoffs", description: "Entities handed to another region at the end of a step");
 
+    public static readonly Counter<long> LedgerAdjustments =
+        Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,
