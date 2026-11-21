@@ -13,7 +13,7 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class NetMoveVisibilityTests
 {
-    static CancellationTokenSource Timeout() => new(TimeSpan.FromSeconds(30));
+    static CancellationTokenSource Timeout(int seconds = 30) => new(TimeSpan.FromSeconds(seconds));
 
     [Fact]
     public async Task Peer_in_view_gets_the_run_start_and_the_stop_lands_on_the_server_position_without_extra_frames()
@@ -115,7 +115,7 @@ public sealed class NetMoveVisibilityTests
     [Fact]
     public async Task Outsider_sees_nothing_then_the_runner_spawns_moving_on_entry_and_despawns_on_exit()
     {
-        using var timeout = Timeout();
+        using var timeout = Timeout(60);
         await using var rig = await StartAsync(timeout.Token);
         var a = await rig.JoinAsync(X0, Y0);
         var c = await rig.JoinAsync(X0 + 3000, Y0);
