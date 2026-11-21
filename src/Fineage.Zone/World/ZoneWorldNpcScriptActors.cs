@@ -1,6 +1,7 @@
 using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Punishment;
 namespace Fineage.Zone.World;
+
 public sealed partial class ZoneWorld
 {
     string? OracleTeleportBypass(ZoneSession session, ZoneEntity player, ZoneEntity npc, string scriptEvent)
