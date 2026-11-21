@@ -237,7 +237,7 @@ public sealed class NetEnchantRulesTests
     [Fact]
     public async Task Equipped_plus_four_enchant_raises_UserInfo_pAtk()
     {
-        var bench = new Bench(0, 0);
+        var bench = new Bench(0, 0, 0, 0);
         var (session, player) = await bench.EnterAsync("ench", "Alden",
             new StoredItem(Saber, 1, 7, 0), Bag(NormalD, 4));
         var baseline = bench.World.BuildUserInfo(player).PAtk;

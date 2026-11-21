@@ -280,6 +280,8 @@ sealed class ZonePlayerStatusPayload
     public int SpiritshotCharge { get; set; }
     /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
     public int ForceCharges { get; set; }
+    /// <summary>Mobius <c>ResetChargesTask</c>: unix ms when stacks clear after 10 min idle (0 = none scheduled).</summary>
+    public long ForceChargeResetAtUnixMs { get; set; }
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius henna dye ids in the three tattoo slots (0 = empty).</summary>
     public int HennaDye1 { get; set; }

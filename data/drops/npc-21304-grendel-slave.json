@@ -18,102 +18,96 @@
         ]
       },
       {
-        "chance": 0.0018,
+        "chance": 0.8433,
         "items": [
-          {
-            "itemId": 212,
-            "min": 1,
-            "max": 1,
-            "chance": 50
-          },
-          {
-            "itemId": 2504,
-            "min": 1,
-            "max": 1,
-            "chance": 50
-          }
-        ]
-      },
-      {
-        "chance": 30.2513,
-        "items": [
-          {
-            "itemId": 8346,
-            "min": 1,
-            "max": 1,
-            "chance": 0.54973
-          },
           {
             "itemId": 8341,
             "min": 1,
             "max": 1,
-            "chance": 0.41684
+            "chance": 14.9522
+          },
+          {
+            "itemId": 7899,
+            "min": 1,
+            "max": 1,
+            "chance": 0.1056
+          },
+          {
+            "itemId": 7894,
+            "min": 1,
+            "max": 1,
+            "chance": 0.1056
           },
           {
             "itemId": 5543,
             "min": 1,
             "max": 1,
-            "chance": 0.90905
+            "chance": 32.6069
           },
           {
             "itemId": 5532,
             "min": 1,
             "max": 1,
-            "chance": 0.90046
+            "chance": 32.2997
+          },
+          {
+            "itemId": 8346,
+            "min": 1,
+            "max": 1,
+            "chance": 19.7187
+          },
+          {
+            "itemId": 2504,
+            "min": 1,
+            "max": 1,
+            "chance": 0.1056
+          },
+          {
+            "itemId": 212,
+            "min": 1,
+            "max": 1,
+            "chance": 0.1057
+          }
+        ]
+      },
+      {
+        "chance": 39.6359,
+        "items": [
+          {
+            "itemId": 4041,
+            "min": 1,
+            "max": 1,
+            "chance": 1.1817
           },
           {
             "itemId": 5277,
             "min": 1,
             "max": 1,
-            "chance": 0.07934
-          },
-          {
-            "itemId": 4044,
-            "min": 1,
-            "max": 1,
-            "chance": 4.5284
-          },
-          {
-            "itemId": 4041,
-            "min": 1,
-            "max": 1,
-            "chance": 0.85418
+            "chance": 0.0605
           },
           {
             "itemId": 4039,
             "min": 1,
             "max": 1,
-            "chance": 4.03123
+            "chance": 4.5297
           },
           {
             "itemId": 1894,
             "min": 1,
             "max": 1,
-            "chance": 4.29304
+            "chance": 4.7681
           },
           {
             "itemId": 1344,
-            "min": 132,
-            "max": 397,
-            "chance": 82.6411
+            "min": 20,
+            "max": 60,
+            "chance": 84.9304
           },
           {
-            "itemId": 8731,
+            "itemId": 4044,
             "min": 1,
             "max": 1,
-            "chance": 0.68295
-          },
-          {
-            "itemId": 8741,
-            "min": 1,
-            "max": 1,
-            "chance": 0.05686
-          },
-          {
-            "itemId": 8751,
-            "min": 1,
-            "max": 1,
-            "chance": 0.05686
+            "chance": 4.5296
           }
         ]
       }
