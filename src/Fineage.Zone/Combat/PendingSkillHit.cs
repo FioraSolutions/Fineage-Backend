@@ -16,6 +16,11 @@ public sealed record PendingSkillHit(int TargetId, int Damage, long DueUnixMs, S
 
     /// <summary>Resurrection / corpse skills: deferred effect must land on a dead player (Mobius PC_BODY).</summary>
     public bool AllowDeadTarget { get; init; }
+    /// <summary>Mobius <c>itemConsumeId</c> destroyed at hit time (after launch checks).</summary>
+    public int ItemConsumeId { get; init; }
+    public int ItemConsumeCount { get; init; }
+    /// <summary>Force / sonic charges spent when the cast actually starts (<c>player charges</c> condition).</summary>
+    public int ChargeSpend { get; init; }
     /// <summary>ZoneWorld-owned effect delegate (target, now, outbound) run at hitTime.</summary>
     public Delegate? Apply { get; init; }
 }

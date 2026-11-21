@@ -76,7 +76,8 @@ public sealed partial class ZoneWorld
         DeferredEffect effect, bool allowDeadTarget = false)
     {
         bool self = ReferenceEquals(player, target);
-        SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
+        template.TryLevelData(level, out var levelData);
+        var pending = new PendingSkillHit(target.ObjectId, 0, now + Math.Max(0, hitTimeMs), null, level)
         {
             SkillId = template.SkillId,
             MagicType = template.MagicType,
@@ -84,7 +85,8 @@ public sealed partial class ZoneWorld
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
             AllowDeadTarget = allowDeadTarget,
             Apply = effect
-        });
+        };
+        SetPendingHit(player, ArmCastResources(player, pending, template, levelData));
         if (hitTimeMs <= 0)
             ResolvePendingHit(player, now);
     }
@@ -121,6 +123,12 @@ public sealed partial class ZoneWorld
                 AbortCast(player, "no-los", notify: false);
                 return;
             }
+        }
+
+        if (!LaunchConsumeItems(player.Session, player, hit))
+        {
+            AbortCast(player, "item-consume", notify: false);
+            return;
         }
 
         ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");

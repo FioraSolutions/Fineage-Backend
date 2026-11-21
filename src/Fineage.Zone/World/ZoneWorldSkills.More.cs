@@ -211,9 +211,8 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        int chargeCost = SkillCastConditionCharges.Required(liveTemplate.CastCondition);
-        if (chargeCost > 0)
-            SpendForceCharges(player, chargeCost);
+        if (ConsumeItemBlocked(session, player, liveLevelData))
+            return null;
 
         if (_skillEffects.TryGet(request.SkillId, out var focusFx) && HasFocusEnergy(focusFx))
             return TrySkillUseFocusEnergy(session, player, request, liveTemplate, liveLevelData, level, now);

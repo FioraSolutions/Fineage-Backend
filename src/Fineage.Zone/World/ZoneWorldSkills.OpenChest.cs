@@ -149,8 +149,6 @@ public sealed partial class ZoneWorld
         {
             if (t.Dead || t.CurHp <= 0)
                 return;
-            if (!ConsumeSkillItems(session, player, levelData))
-                return;
             ApplyOpenChest(player, t, request.SkillId, level);
         });
         return null;

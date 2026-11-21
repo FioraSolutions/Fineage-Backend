@@ -101,19 +101,6 @@ public sealed partial class ZoneWorld
                 IncorrectTarget(session);
                 return;
             }
-            if (row.ItemId > 0 && row.ItemCount > 0)
-            {
-                var inventory = player.Inventory;
-                var changes = new List<InventoryUpdateEntryMsg>();
-                if (inventory == null || !RecordConsume(player, request.SkillId, row.ItemId, row.ItemCount, changes))
-                {
-                    SelfLine(session, SysMsgNotEnoughItems, "There are not enough necessary items to use the skill.");
-                    return;
-                }
-                FanInventory(session, Collapse(changes));
-                SaveInventory(session, inventory);
-            }
-
             // Mobius Summon on a CORPSE_MOB target: the body is used up.
             if (corpse != null)
                 DespawnNpc(corpse);

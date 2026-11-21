@@ -98,9 +98,6 @@ public sealed partial class ZoneWorld
         {
             if (t.Dead)
                 return;
-            // Mobius destroys the consumable at launch and only then rolls the product list.
-            if (!ConsumeSkillItems(session, t, levelData))
-                return;
             var group = RollExtractable(groups);
             if (group == null || group.Items.Count == 0)
             {
@@ -252,8 +249,6 @@ public sealed partial class ZoneWorld
         ScheduleEffect(player, player, template, level, now, hitMs, (t, at) =>
         {
             if (t.Dead)
-                return;
-            if (!ConsumeSkillItems(session, t, levelData))
                 return;
             for (int i = 0; i < npcCount; i++)
                 SpawnSignet(t, npcId, x, y, z, at);

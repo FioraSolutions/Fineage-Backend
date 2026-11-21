@@ -312,9 +312,6 @@
         -386,
         -388
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -576,10 +573,6 @@
         -79,
         -83,
         -86
-      ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
       ],
       "castCondition": {
         "op": "using",
@@ -884,9 +877,6 @@
         -574,
         -578,
         -582
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "castCondition": {
         "op": "and",
@@ -1215,11 +1205,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "DUAL",
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -1533,11 +1518,6 @@
         -166,
         -167
       ],
-      "usingKinds": [
-        "DUAL",
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -1625,11 +1605,6 @@
         200,
         200,
         200
-      ],
-      "usingKinds": [
-        "DUAL",
-        "SWORD",
-        "BLUNT"
       ],
       "castCondition": {
         "op": "using",
@@ -1995,11 +1970,6 @@
         -166,
         -167
       ],
-      "usingKinds": [
-        "DUAL",
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -2224,9 +2194,6 @@
         -164,
         -167
       ],
-      "usingKinds": [
-        "DAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -2361,9 +2328,6 @@
         -162,
         -164,
         -167
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -3048,9 +3012,6 @@
         -169,
         -173
       ],
-      "usingKinds": [
-        "DAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -3412,9 +3373,6 @@
         -192,
         -193,
         -194
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "affectRange": 200,
       "castCondition": {
@@ -4059,9 +4017,6 @@
         -661,
         -665
       ],
-      "usingKinds": [
-        "BOW"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -4458,9 +4413,6 @@
         -328,
         -331,
         -333
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "affectRange": 150,
       "castCondition": {
@@ -5342,9 +5294,6 @@
         -197,
         -202
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -5662,9 +5611,6 @@
         -547,
         -551,
         -554
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -6101,9 +6047,6 @@
         -193,
         -194
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "affectRange": 150,
       "castCondition": {
         "op": "and",
@@ -6430,9 +6373,6 @@
         -328,
         -331,
         -333
-      ],
-      "usingKinds": [
-        "POLE"
       ],
       "affectRange": 150,
       "castCondition": {
@@ -7060,9 +7000,6 @@
         -166,
         -167
       ],
-      "usingKinds": [
-        "POLE"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -7395,9 +7332,6 @@
         150,
         150,
         150
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "castCondition": {
         "op": "using",
@@ -7835,9 +7769,6 @@
         -386,
         -388
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -8051,9 +7982,6 @@
         -327,
         -337,
         -346
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "castCondition": {
         "op": "using",
@@ -9666,9 +9594,6 @@
       "effectPoint": [
         268
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -9813,9 +9738,6 @@
         -304,
         -333
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "abnormalVisualEffect": "STUN",
       "basicProperty": "CON",
       "activateRate": 80,
@@ -9891,9 +9813,6 @@
       "effectPoint": [
         204
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -9945,9 +9864,6 @@
         -523,
         -566,
         -646
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "abnormalVisualEffect": "DOT_POISON",
       "affectRange": 150,
@@ -10527,9 +10443,6 @@
         -650,
         -655
       ],
-      "usingKinds": [
-        "SHIELD"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -10761,9 +10674,6 @@
         -646,
         -655
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -10840,9 +10750,6 @@
         -279,
         -311,
         -323
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "abnormalVisualEffect": "DOT_BLEEDING",
       "castCondition": {
@@ -11210,9 +11117,6 @@
         -169,
         -173
       ],
-      "usingKinds": [
-        "BLUNT"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -11562,9 +11466,6 @@
         -656,
         -661,
         -665
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -12305,9 +12206,6 @@
       "effectPoint": [
         438
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -12934,9 +12832,6 @@
         -164,
         -169,
         -173
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -15153,13 +15048,6 @@
         438,
         523
       ],
-      "usingKinds": [
-        "BOW",
-        "DUALFIST",
-        "SWORD",
-        "BLUNT",
-        "POLE"
-      ],
       "castCondition": {
         "op": "player",
         "hp": 30
@@ -15502,10 +15390,6 @@
         -328,
         -331,
         -333
-      ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
       ],
       "castCondition": {
         "op": "using",
@@ -18489,11 +18373,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "SWORD",
-        "DAGGER",
-        "DUAL"
-      ],
       "abnormalVisualEffect": "DOT_BLEEDING",
       "castCondition": {
         "op": "using",
@@ -21273,9 +21152,6 @@
         -169,
         -173
       ],
-      "usingKinds": [
-        "POLE"
-      ],
       "affectRange": 80,
       "castCondition": {
         "op": "using",
@@ -23227,10 +23103,6 @@
         -169,
         -173
       ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -24403,9 +24275,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "BLUNT"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -24604,9 +24473,6 @@
         -765,
         -771,
         -776
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "castCondition": {
         "op": "and",
@@ -25248,9 +25114,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "DAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -25472,9 +25335,6 @@
       "effectPoint": [
         523
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -25507,9 +25367,6 @@
       "abnormalType": "DANCE_OF_INSPIRATION",
       "effectPoint": [
         438
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "affectRange": 1000,
       "castCondition": {
@@ -25544,9 +25401,6 @@
       "effectPoint": [
         467
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -25579,9 +25433,6 @@
       "abnormalType": "DANCE_OF_FIRE",
       "effectPoint": [
         379
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "affectRange": 1000,
       "castCondition": {
@@ -25616,9 +25467,6 @@
       "effectPoint": [
         549
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -25652,9 +25500,6 @@
       "effectPoint": [
         495
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -25687,9 +25532,6 @@
       "abnormalType": "DANCE_OF_LIGHT",
       "effectPoint": [
         408
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "affectRange": 1000,
       "castCondition": {
@@ -26153,9 +25995,6 @@
         -386,
         -388
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -26481,9 +26320,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -26515,9 +26351,6 @@
       "abnormalType": "POSSESSION",
       "effectPoint": [
         379
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "castCondition": {
         "op": "using",
@@ -26948,9 +26781,6 @@
         -574,
         -578,
         -582
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "castCondition": {
         "op": "and",
@@ -27668,9 +27498,6 @@
       "effectPoint": [
         624
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -27955,9 +27782,6 @@
       "abnormalType": "POSSESSION",
       "effectPoint": [
         582
-      ],
-      "usingKinds": [
-        "DUALFIST"
       ],
       "castCondition": {
         "op": "using",
@@ -28309,9 +28133,6 @@
       "effectPoint": [
         635
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -28372,9 +28193,6 @@
       "effectPoint": [
         582
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -28408,9 +28226,6 @@
       "effectPoint": [
         655
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -28443,9 +28258,6 @@
       "abnormalType": "DANCE_OF_PROTECTION",
       "effectPoint": [
         611
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "affectRange": 1000,
       "castCondition": {
@@ -28708,9 +28520,6 @@
         646,
         655
       ],
-      "usingKinds": [
-        "BOW"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -28860,9 +28669,6 @@
         -656,
         -661,
         -665
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "castCondition": {
         "op": "using",
@@ -29014,10 +28820,6 @@
         -496,
         -499
       ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -29105,9 +28907,6 @@
         }
       ],
       "abnormalTimeSeconds": 120,
-      "usingKinds": [
-        "POLE"
-      ],
       "effectPoint": [
         303,
         303,
@@ -29269,9 +29068,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "POLE"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -29375,9 +29171,6 @@
         -328,
         -331,
         -333
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -29882,9 +29675,6 @@
       "effectPoint": [
         -897
       ],
-      "usingKinds": [
-        "BOW"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -29916,9 +29706,6 @@
       "effectPoint": [
         -337
       ],
-      "usingKinds": [
-        "DAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -29948,9 +29735,6 @@
       "effectRange": 1100,
       "effectPoint": [
         -340
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "castCondition": {
         "op": "using",
@@ -29982,9 +29766,6 @@
       "effectPoint": [
         -340
       ],
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -30013,9 +29794,6 @@
       ],
       "effectPoint": [
         -679
-      ],
-      "usingKinds": [
-        "POLE"
       ],
       "affectRange": 150,
       "castCondition": {
@@ -30047,9 +29825,6 @@
       "effectRange": 400,
       "effectPoint": [
         -337
-      ],
-      "usingKinds": [
-        "BLUNT"
       ],
       "castCondition": {
         "op": "using",
@@ -30109,9 +29884,6 @@
       "effectPoint": [
         669
       ],
-      "usingKinds": [
-        "SHIELD"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -30142,9 +29914,6 @@
       "abnormalType": "REFLECT_ABNORMAL",
       "effectPoint": [
         669
-      ],
-      "usingKinds": [
-        "SHIELD"
       ],
       "castCondition": {
         "op": "using",
@@ -30182,9 +29951,6 @@
       "basicProperty": "CON",
       "effectPoint": [
         -666
-      ],
-      "usingKinds": [
-        "SHIELD"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -30224,9 +29990,6 @@
       "effectPoint": [
         -666
       ],
-      "usingKinds": [
-        "SHIELD"
-      ],
       "abnormalVisualEffect": "SILENCE",
       "castCondition": {
         "op": "using",
@@ -30264,9 +30027,6 @@
       "effectPoint": [
         -507
       ],
-      "usingKinds": [
-        "BOW"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -30297,9 +30057,6 @@
       "abnormalType": "FOCUS_DAGGER",
       "effectPoint": [
         669
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -30332,10 +30089,6 @@
       "effectPoint": [
         669
       ],
-      "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -30367,10 +30120,6 @@
       "abnormalType": "FOCUS_DAGGER",
       "effectPoint": [
         669
-      ],
-      "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -30409,10 +30158,6 @@
       "basicProperty": "CON",
       "effectPoint": [
         -360
-      ],
-      "usingKinds": [
-        "DAGGER",
-        "DUALDAGGER"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -30503,9 +30248,6 @@
       "effectPoint": [
         -507
       ],
-      "usingKinds": [
-        "POLE"
-      ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
         "op": "using",
@@ -30543,10 +30285,6 @@
       "basicProperty": "CON",
       "effectPoint": [
         -507
-      ],
-      "usingKinds": [
-        "BLUNT",
-        "SWORD"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -30636,9 +30374,6 @@
       "effectPoint": [
         669
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 1000,
       "castCondition": {
         "op": "using",
@@ -30672,9 +30407,6 @@
       "abnormalVisualEffect": "STEALTH",
       "effectPoint": [
         666
-      ],
-      "usingKinds": [
-        "DUAL"
       ],
       "affectRange": 1000,
       "castCondition": {
@@ -30712,9 +30444,6 @@
       "effectPoint": [
         -666
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "abnormalVisualEffect": "FLESH_STONE",
       "affectRange": 150,
       "castCondition": {
@@ -30748,9 +30477,6 @@
       "effectPoint": [
         -3992
       ],
-      "usingKinds": [
-        "SHIELD"
-      ],
       "affectRange": 200,
       "castCondition": {
         "op": "using",
@@ -30783,9 +30509,6 @@
       "abnormalType": "SPEED_UP_SPECIAL",
       "effectPoint": [
         -337
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "castCondition": {
         "op": "using",
@@ -30895,10 +30618,6 @@
         -909,
         -965
       ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -31007,10 +30726,6 @@
         -882,
         -909,
         -965
-      ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT"
       ],
       "castCondition": {
         "op": "using",
@@ -31451,12 +31166,6 @@
         438,
         523
       ],
-      "usingKinds": [
-        "SWORD",
-        "POLE",
-        "DUALFIST",
-        "BLUNT"
-      ],
       "castCondition": {
         "op": "player",
         "hp": 30
@@ -31664,9 +31373,6 @@
         -669,
         -669
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "affectRange": 200,
       "castCondition": {
         "op": "using",
@@ -31772,9 +31478,6 @@
         -331,
         -333
       ],
-      "usingKinds": [
-        "DAGGER"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -31821,9 +31524,6 @@
         243,
         418,
         495
-      ],
-      "usingKinds": [
-        "DAGGER"
       ],
       "castCondition": {
         "op": "using",
@@ -32057,9 +31757,6 @@
         121,
         121
       ],
-      "usingKinds": [
-        "BOW"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -32146,9 +31843,6 @@
         268,
         268,
         268
-      ],
-      "usingKinds": [
-        "BOW"
       ],
       "castCondition": {
         "op": "using",
@@ -32528,12 +32222,6 @@
         438,
         523
       ],
-      "usingKinds": [
-        "SWORD",
-        "BLUNT",
-        "POLE",
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "player",
         "hp": 30
@@ -32594,9 +32282,6 @@
         120,
         120,
         120
-      ],
-      "usingKinds": [
-        "POLE"
       ],
       "castCondition": {
         "op": "using",
@@ -32740,10 +32425,6 @@
       "abnormalType": "POSSESSION",
       "effectPoint": [
         268
-      ],
-      "usingKinds": [
-        "DUALFIST",
-        "FIST"
       ],
       "castCondition": {
         "op": "using",
@@ -33172,9 +32853,6 @@
       "abnormalVisualEffect": "INVINCIBILITY",
       "basicProperty": "MEN",
       "lvlBonusRate": 2,
-      "usingKinds": [
-        "DUAL"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -33218,9 +32896,6 @@
       "abnormalVisualEffect": "INVINCIBILITY",
       "basicProperty": "MEN",
       "lvlBonusRate": 2,
-      "usingKinds": [
-        "DUALFIST"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -33551,9 +33226,6 @@
         204,
         438
       ],
-      "usingKinds": [
-        "DUAL"
-      ],
       "castCondition": {
         "op": "and",
         "items": [
@@ -33561,6 +33233,13 @@
             "op": "using",
             "kinds": [
               "DUAL"
+            ]
+          },
+          {
+            "op": "player",
+            "chargesByLevel": [
+              2,
+              3
             ]
           }
         ]
@@ -33626,9 +33305,6 @@
         -203,
         -203,
         -203
-      ],
-      "usingKinds": [
-        "POLE"
       ],
       "abnormalVisualEffect": "STUN",
       "castCondition": {
@@ -33942,7 +33618,14 @@
       "effectPoint": [
         438,
         438
-      ]
+      ],
+      "castCondition": {
+        "op": "player",
+        "chargesByLevel": [
+          2,
+          3
+        ]
+      }
     },
     {
       "skillId": 1001,
@@ -60444,9 +60127,6 @@
       ],
       "magicType": 2,
       "effectRange": -1,
-      "usingKinds": [
-        "FISHINGROD"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -60657,9 +60337,6 @@
       ],
       "magicType": 2,
       "effectRange": -1,
-      "usingKinds": [
-        "FISHINGROD"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [
@@ -60870,9 +60547,6 @@
       ],
       "magicType": 2,
       "effectRange": -1,
-      "usingKinds": [
-        "FISHINGROD"
-      ],
       "castCondition": {
         "op": "using",
         "kinds": [

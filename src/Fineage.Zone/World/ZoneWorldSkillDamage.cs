@@ -13,7 +13,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     string? CastMobiusAttack(ZoneSession session, ZoneEntity player, ZoneEntity target, int skillId, int level,
-        SkillCombatData combat, SkillDefinition template, long now)
+        SkillCombatData combat, SkillDefinition template, SkillLevelData levelData, long now)
     {
         int mpInitial = SkillMpCost(player, template, combat.MpInitialAt(level));
         int mpLaunch = SkillMpCost(player, template, combat.MpAt(level));
@@ -45,7 +45,8 @@ public sealed partial class ZoneWorld
         EnterCombatStanceOnCast(player, template, level, now);
         session.SelectedTargetId = target.ObjectId;
         player.CastingUntilMs = now + hitTime + coolTime;
-        SetPendingHit(player, new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level));
+        var pending = new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level);
+        SetPendingHit(player, ArmCastResources(player, pending, template, levelData));
         ZoneLog.Info($"[skill] cast {skillId} lv{level} kind={combat.Kind} hit={hitTime}ms cool={coolTime}ms reuse={reuse}ms");
         if (hitTime == 0)
             ResolvePendingHit(player, now);

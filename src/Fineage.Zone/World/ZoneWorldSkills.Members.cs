@@ -47,7 +47,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         if (_skillCombat.TryGet(request.SkillId, out var combat))
-            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, template, now);
+            return CastMobiusAttack(session, player, target, request.SkillId, level, combat, template, levelData, now);
 
         // Fail-loud: attack skills without skill-combat.json rows must not invent damage (was power+10 stub).
         ZoneLog.Warn($"skill-combat missing skillId={request.SkillId} — refuse cast");
