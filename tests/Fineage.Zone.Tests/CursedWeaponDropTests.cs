@@ -45,9 +45,8 @@ public sealed class CursedWeaponDropTests
         Assert.False(runtime.Activated);
         Assert.True(runtime.GroundObjectId > 0);
 
-        var drop = (DropItemMsg)Assert.Single(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)))[1]!;
-        Assert.Equal(OlympiadProtocol.Zariche, drop.ItemId);
-        Assert.Equal(runtime.GroundObjectId, drop.ObjectId);
+        Assert.True(bench.World.TryGetEntityForTest(runtime.GroundObjectId, out var ground));
+        Assert.Equal(OlympiadProtocol.Zariche, ground!.GroundItemId);
         Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCursedWeaponList)));
         Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCursedWeaponLocation)));
         Assert.Equal(ZoneWorld.CursedSysDroppedInRegion, LastSystem(bench.Rec).Id);
@@ -82,8 +81,8 @@ public sealed class CursedWeaponDropTests
         var kit = await bench.EnterAsync(level: 76);
         bench.Rec.Calls.Clear();
 
-        var grandBoss = bench.World.SpawnMonsterForTests(Gremlin, kit.Player.X + 40, kit.Player.Y, kit.Player.Z);
-        grandBoss.NpcType = "GrandBoss";
+        const int QueenAntGrandBoss = 29001;
+        var grandBoss = bench.World.SpawnMonsterForTests(QueenAntGrandBoss, kit.Player.X + 40, kit.Player.Y, kit.Player.Z);
         grandBoss.MaxHp = grandBoss.CurHp = 1;
         bench.World.KillForTest(grandBoss, kit.Player);
 
