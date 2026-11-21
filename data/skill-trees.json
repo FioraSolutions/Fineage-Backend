@@ -1,5 +1,6 @@
 {
-  "skillTrees": [
+  "reference": "Class skill trees transcribed from Mobius dist/game/data/stats/players/skillTrees. Original JSON.",
+  "trees": [
     {
       "classId": 56,
       "skills": [
