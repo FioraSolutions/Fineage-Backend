@@ -3,19 +3,148 @@
   "name": "Competition for the Bandit Stronghold",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    4332
+  ],
   "dialogs": [
     {
       "npcId": 35437,
       "hook": "talk",
-      "when": "started",
+      "when": "absent",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
       "htmlFile": "35437-talk-000.htm"
     },
     {
       "npcId": 35437,
       "hook": "talk",
-      "when": "completed",
-      "htmlFile": "35437-talk-001.htm"
+      "when": "started",
+      "cond": 1,
+      "below": {
+        "4332": 30
+      },
+      "htmlFile": "35437-talk-c1-001.htm"
+    },
+    {
+      "npcId": 35437,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "4332": 30
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            4332
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 5009,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "35437-talk-c1-002.htm"
+    },
+    {
+      "npcId": 20570,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4332,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 30,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20571,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4332,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 30,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20572,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4332,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 30,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20573,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4332,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 30,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20574,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4332,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 30,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }

@@ -30,8 +30,11 @@
       "npcId": 31494,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -74,8 +77,11 @@
       "npcId": 31495,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -118,8 +124,11 @@
       "npcId": 31496,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -162,8 +171,11 @@
       "npcId": 31497,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -206,8 +218,11 @@
       "npcId": 31498,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -250,8 +265,11 @@
       "npcId": 31499,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -294,8 +312,11 @@
       "npcId": 31500,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -338,8 +359,11 @@
       "npcId": 31501,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -382,8 +406,11 @@
       "npcId": 31502,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -426,8 +453,11 @@
       "npcId": 31503,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -470,8 +500,11 @@
       "npcId": 31504,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -514,8 +547,11 @@
       "npcId": 31505,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -558,8 +594,11 @@
       "npcId": 31506,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }
@@ -602,8 +641,11 @@
       "npcId": 31507,
       "hook": "event",
       "event": "02",
-      "when": "created",
+      "when": "absent",
       "ops": [
+        {
+          "op": "create"
+        },
         {
           "op": "start"
         }

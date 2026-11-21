@@ -37756,6 +37756,15 @@
       "quest": true
     },
     {
+      "id": 4332,
+      "name": "Tarlk Amulet",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_orcish_talisman_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 4337,
       "name": "Alligator Leather",
       "kind": "etc",
@@ -45041,6 +45050,14 @@
       "stackable": true,
       "price": 156600,
       "weight": 30
+    },
+    {
+      "id": 5009,
+      "name": "Trophy of Alliance",
+      "kind": "etc",
+      "icon": "icon.etc_trophy_i01",
+      "price": 50,
+      "weight": 0
     },
     {
       "id": 5011,
@@ -52808,6 +52825,195 @@
       "price": 200,
       "weight": 0,
       "stackable": true
+    },
+    {
+      "id": 5922,
+      "name": "Blueprint: Giants Golem 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5923,
+      "name": "Blueprint: Giants Golem 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5924,
+      "name": "Blueprint: Giants Golem 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5925,
+      "name": "Blueprint: Giants Golem 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5926,
+      "name": "Blueprint: Giants Golem 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_black_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5927,
+      "name": "Book: Basics of Giants Magic, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5928,
+      "name": "Book: Basics of Giants Magic, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5929,
+      "name": "Book: Basics of Giants Magic, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5930,
+      "name": "Book: Basics of Giants Magic, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5931,
+      "name": "Book: Basics of Giants Magic, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_blue_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5932,
+      "name": "Handbook: Giants Architecture, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5933,
+      "name": "Handbook: Giants Architecture, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5934,
+      "name": "Handbook: Giants Architecture, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5935,
+      "name": "Handbook: Giants Architecture, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5936,
+      "name": "Handbook: Giants Architecture, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_red_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5937,
+      "name": "Book: Giants Medical Science, Chapter 1",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5938,
+      "name": "Book: Giants Medical Science, Chapter 2",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5939,
+      "name": "Book: Giants Medical Science, Chapter 3",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5940,
+      "name": "Book: Giants Medical Science, Chapter 4",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5941,
+      "name": "Book: Giants Medical Science, Chapter 5",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_paper_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
+      "id": 5944,
+      "name": "Ancient Parchment",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_roll_of_paper_black_i00",
+      "price": 0,
+      "weight": 0
     },
     {
       "id": 5945,
