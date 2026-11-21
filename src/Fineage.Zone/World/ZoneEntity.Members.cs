@@ -89,6 +89,9 @@ sealed partial class ZoneEntity
 
     public Dictionary<int, int> CursedSkills => EnsureSkills().CursedSkills;
 
+    internal HashSet<(int ItemId, int SkillId)> ReportedMissingEquipSkills =>
+        EnsureSkills().ReportedMissingEquipSkills;
+
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal
     {
