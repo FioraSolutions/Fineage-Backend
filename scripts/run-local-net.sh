@@ -34,23 +34,48 @@ bootout_launch_agents() {
   done
 }
 
+listen_pids() {
+  local p=$1
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltnp "sport = :$p" 2>/dev/null |
+      sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | sort -u
+    return
+  fi
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -n tcp "$p" 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -u
+    return
+  fi
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true
+  fi
+}
+
+port_listening() {
+  local p=$1
+  [[ -n "$(listen_pids "$p" | head -1)" ]]
+}
+
 kill_ports() {
-  local p pids
+  local p pid
   for p in "${PORTS[@]}"; do
-    pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
-    if [[ -n "${pids}" ]]; then kill ${pids} 2>/dev/null || true; fi
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      kill "$pid" 2>/dev/null || true
+    done < <(listen_pids "$p")
   done
   for _ in $(seq 1 10); do
     local busy=0
     for p in "${PORTS[@]}"; do
-      if [[ -n "$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)" ]]; then busy=1; fi
+      port_listening "$p" && busy=1
     done
     [[ "$busy" == 0 ]] && break
     sleep 0.5
   done
   for p in "${PORTS[@]}"; do
-    pids=$(lsof -tiTCP:"$p" -sTCP:LISTEN 2>/dev/null || true)
-    if [[ -n "${pids}" ]]; then kill -9 ${pids} 2>/dev/null || true; fi
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      kill -9 "$pid" 2>/dev/null || true
+    done < <(listen_pids "$p")
   done
 }
 
