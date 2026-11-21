@@ -9,8 +9,8 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>
-    /// Drop selected inventory rows at the corpse. Clan-war and PvP-zone exemptions are not modelled yet
-    /// (no war / PVP zone data). Adena, quest items, and <c>death-drop.json</c> non-droppable ids are skipped.
+    /// Drop selected inventory rows at the corpse. No drops in a PVP arena/siege zone or between clans at mutual war.
+    /// Adena, quest items, and <c>death-drop.json</c> non-droppable ids are skipped.
     /// </summary>
     void OnDieDropItem(ZoneEntity player, int killerObjectId)
     {
@@ -21,6 +21,8 @@ public sealed partial class ZoneWorld
         bool killerIsNpc = killer is { Kind: ZoneEntityKind.Npc };
         // Mobius onDieDropItem: nothing drops when a player kills you inside a PVP zone (arena / siege).
         if (killer is { Kind: ZoneEntityKind.Player } && InPvpArea(player))
+            return;
+        if (killer is { Kind: ZoneEntityKind.Player } && AtMutualWar(killer, player))
             return;
         var rates = _deathDrop.RatesFor(player.Karma, player.PkKills, killerIsNpc, player.Level);
         if (rates is not { } r)
