@@ -161,6 +161,16 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 finally
 {
     shutdown.Cancel();
+    try
+    {
+        await world.WaitSimulationAsync().ConfigureAwait(false);
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        Console.Error.WriteLine($"[ZONE] simulation shutdown: {ex.Message}");
+    }
+
+    world.ShutdownGracefully();
     world.FlushLedgerOnShutdown();
     bosses.Save();
 }

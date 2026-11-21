@@ -2,6 +2,7 @@ using Fineage.Accounts;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Zone;
 using Fineage.Zone.Chat;
 using Fineage.Zone.World;
 using NetHelloAck = Fineage.Net.Contract.HelloAckMsg;
@@ -138,9 +139,10 @@ sealed partial class SessionLifecyclePacketHandler
             peers = await _world.LeaveAsync(zoneSession, _ => _world.SnapshotKnownPlayers(zoneSession).ConvertAll(peer => peer.ObjectId),
                 CancellationToken.None).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex)
         {
-            /* ignore */
+            ZoneLog.Warn(
+                $"leave detach failed session={zoneSession.WireSessionId} account={zoneSession.Account} char={zoneSession.ObjectId}: {ex}");
         }
 
         try
@@ -157,9 +159,10 @@ sealed partial class SessionLifecyclePacketHandler
                         .ConfigureAwait(false);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            /* ignore */
+            ZoneLog.Warn(
+                $"leave despawn failed session={zoneSession.WireSessionId} account={zoneSession.Account} char={zoneSession.ObjectId}: {ex}");
         }
 
         if (registeredObjectId != 0)
