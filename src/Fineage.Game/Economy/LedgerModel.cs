@@ -49,7 +49,13 @@ public enum SystemAccount
     Destroyed = 4,
 
     /// <summary>Service fees paid to NPCs: the warehouse deposit fee.</summary>
-    Fees = 5
+    Fees = 5,
+
+    /// <summary>Counterpart of quest rewards, quest items handed out and taken back, and the newbie helper gift.</summary>
+    Quests = 6,
+
+    /// <summary>Takes crafting materials and hands out what was made.</summary>
+    Crafting = 7
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -128,7 +134,16 @@ public enum LedgerTxKind
     /// A sale at a private store, either way: <c>CausedBy</c> the visitor who bought or sold, <c>Reference</c> the
     /// store's owner.
     /// </summary>
-    StoreSale = 14
+    StoreSale = 14,
+
+    /// <summary>What a quest step gave and took: <c>Reference</c> is the quest id (0 when a kill moved several).</summary>
+    QuestReward = 15,
+
+    /// <summary>
+    /// Materials into crafting and the product out, in one move whether the roll succeeded or not; a manufacture
+    /// also pays the maker's fee. <c>CausedBy</c> is the customer, <c>Reference</c> the recipe id.
+    /// </summary>
+    Craft = 16
 }
 
 /// <summary>

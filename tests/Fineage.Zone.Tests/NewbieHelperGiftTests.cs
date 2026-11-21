@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
@@ -33,11 +34,20 @@ public sealed class NewbieHelperGiftTests
         Assert.Contains(inventory.Changes, row => row.ItemId == NewbieHelperGift.ScrollRecovery && row.Count == NewbieHelperGift.ScrollCount);
 
         Assert.Contains("SupportMagic.htm", LastHtml(bench), StringComparison.Ordinal);
+        var gift = Assert.Single(bench.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.QuestReward).Transaction;
+        Assert.Equal(NewbieHelperGift.QuestId, gift.Reference);
+        var bag = LedgerAccount.Inventory(actor.Player.ObjectId);
+        Assert.Equal(
+            inventory.Changes.Select(row => (row.ItemId, (long)row.Count)).Order(),
+            gift.Postings.Where(posting => posting.Account == bag).Select(posting => (posting.ItemId, posting.Amount)).Order());
+        Assert.All(gift.Postings, posting => Assert.True(posting.Account == bag || posting.Account == LedgerAccount.Of(SystemAccount.Quests)));
+        int entries = bench.Ledger.Entries.Count;
 
         // Second talk: the page again, but no second kit.
         bench.Rec.Calls.Clear();
         Assert.Null(await actor.Talk(guide.ObjectId));
         Assert.Empty(bench.Rec.Of(nameof(FanoutInventoryUpdate)));
+        Assert.Equal(entries, bench.Ledger.Entries.Count);
         Assert.Contains("SupportMagic.htm", LastHtml(bench), StringComparison.Ordinal);
     }
 

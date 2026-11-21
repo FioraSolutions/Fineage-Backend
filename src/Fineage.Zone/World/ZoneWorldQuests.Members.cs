@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Fineage.Net.Contract;
 using Fineage.Game.Services;
@@ -254,9 +255,13 @@ public sealed partial class ZoneWorld
             changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, added));
         }
 
-        Grant(shotId, shotCount);
-        Grant(NewbieHelperGift.TravelToken, NewbieHelperGift.TokenCount);
-        Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
+        RecordBagChange(player, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests), () =>
+        {
+            Grant(shotId, shotCount);
+            Grant(NewbieHelperGift.TravelToken, NewbieHelperGift.TokenCount);
+            Grant(NewbieHelperGift.ScrollRecovery, NewbieHelperGift.ScrollCount);
+            return NewbieHelperGift.QuestId;
+        }, questId => questId);
 
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
         var update = new InventoryUpdateMsg { Changes = changes.ToArray() };

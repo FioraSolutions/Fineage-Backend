@@ -453,6 +453,14 @@ A sale at a private store (step 11e), sell or buy store, is one `StoreSale` betw
 owner's: `CausedBy` is the visitor, `Reference` the owner, and pieces keep their ids as in a trade. Listed items stay
 in the owner's bag until sold, so, as with trade holds, store escrow waits for stores visited from another host.
 
+Quest steps and crafting (step 11f) are recorded from the bag's change: the bag is read before the step and after
+it, and what it gained and lost is posted against a system account (`PostChange`), pieces by instance id. A quest
+step that moves items, including the newbie helper's kit, is one `QuestReward` against `Quests` (`Reference` is the
+quest id); a step that moves nothing records nothing. A craft is one `Craft` against `Crafting` (`Reference` is the
+recipe id): materials in and, when the roll succeeds, the product out. At a manufacture shop the customer's fee goes
+through `Crafting` to the maker in the same move. Items used up by use (potions, shots, arrows, recipe scrolls) are
+not a ledger kind; the next observation records them as adjustments. Mail joins the ledger when the game has it.
+
 ---
 
 ## 4. Determinism
@@ -487,7 +495,8 @@ in the owner's bag until sold, so, as with trade holds, store escrow waits for s
    commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
    `GroundLedgerTests` follows a piece through the ground and checks loot, expiry, party adena and destroy postings.
    `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals; `NetPrivateStoreTests` checks the
-   postings of a sale at sell and buy stores.
+   postings of a sale at sell and buy stores. `BagChangeLedgerTests` checks the before/after postings; the quest,
+   newbie helper, craft and manufacture tests check their `QuestReward` and `Craft` moves.
 
 ---
 
@@ -542,7 +551,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **11c (done)** | Ground stacks as ledger accounts: loot, drop, death drop, pickup (party and pet included), expiry, herbs, destroy. | Same outcomes, except that a dropped piece keeps its object id and enchant on the ground and in the bag that picks it up (before, the enchant was lost and the piece got a new id), and a non-stackable loot stack of one keeps its ground object id when picked up. |
 | **11d (done)** | Private and clan warehouse deposits and withdrawals, deposit fee to `Fees`. | Same outcomes. |
 | **11e (done)** | Private store sales (sell, package and buy stores) as one `StoreSale`; store escrow waits for stores visited from another host. | Same outcomes. A sale whose postings disagree with the bags fails the command. |
-| 11f | Quest rewards and crafting. Mail joins the ledger when the game has it. | Same outcomes; every owner change is on the journal. The snapshot writes stay until the reconciliation has run clean. |
+| **11f (done)** | Quest rewards and crafting (self and manufacture) recorded from the bag's change; mail joins the ledger when the game has it. | Same outcomes; every owner change except use is on the journal. The snapshot writes stay until the reconciliation has run clean. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
 | 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |
 
