@@ -119,6 +119,7 @@ public sealed partial class ZoneWorld
         FanoutRide(player, MountProtocol.RideMount, kind, npcId);
         RefreshRunSpeedAndFanout(player);
         SendMountActionState(player);
+        UpdateMoveEnvironment(player);
     }
 
     void Dismount(ZoneEntity player)

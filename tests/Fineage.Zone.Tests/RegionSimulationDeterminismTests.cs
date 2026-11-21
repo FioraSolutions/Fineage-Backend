@@ -25,7 +25,7 @@ public sealed class RegionSimulationDeterminismTests
         "commands", "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
         "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
         "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
-        "ground-expiry"
+        "ground-expiry", "environment.zones"
     ];
 
     static readonly string[] LegacySimulationOrder =

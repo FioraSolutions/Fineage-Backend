@@ -180,6 +180,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("corpse-decay", tick => TickCorpseDecay(tick.NowUnixMs));
         ticks.AddWorldStage("attack-stance", tick => TickAttackStance(tick.NowUnixMs));
         ticks.AddWorldStage("ground-expiry", tick => TickGroundExpiry(tick.NowUnixMs));
+        ticks.AddWorldStage("environment.zones", tick => TickEnvironmentZones(tick.NowUnixMs));
 
         // Every slow period: the former 3 s loop, in its original order. Calendar schedules (clan deadlines, auctions,
         // sieges, manor, lottery, mammon) take the step's wall sample; the rest follows simulation time.

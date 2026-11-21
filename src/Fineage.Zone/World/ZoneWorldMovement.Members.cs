@@ -90,7 +90,7 @@ public sealed partial class ZoneWorld
         _aoi.Move(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
             SyncSession(e, e.Session);
-        UpdateWaterState(e);
+        UpdateMoveEnvironment(e);
     }
 
     /// <summary>
@@ -108,6 +108,9 @@ public sealed partial class ZoneWorld
             speed = e.Running ? e.SwimRunSpeed : e.SwimWalkSpeed;
         else
             speed = e.Running ? e.RunSpeed : e.WalkSpeed;
+
+        if (e.InSwamp && e.SwampMoveBonus > 0 && e.SwampMoveBonus < 1)
+            speed *= (float)e.SwampMoveBonus;
 
         // Only entities with no template speed at all fall back (Mobius baseRunSpd default 120).
         bool hasBases = e.BaseRunSpeed > 0 || e.BaseWalkSpeed > 0 || e.BaseSwimRunSpeed > 0 || e.BaseSwimWalkSpeed > 0;
