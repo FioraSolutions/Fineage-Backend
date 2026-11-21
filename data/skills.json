@@ -10569,6 +10569,15 @@
       "effectPoint": [
         235,
         523
+      ],
+      "usingKinds": [
+        "BOW",
+        "DAGGER",
+        "FIST",
+        "DUALFIST",
+        "SWORD",
+        "BLUNT",
+        "POLE"
       ]
     },
     {
@@ -11054,6 +11063,9 @@
       "effectPoint": [
         303,
         549
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -12444,6 +12456,9 @@
           "abnormalLevel": 1,
           "magicLevel": 40
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -12773,6 +12788,9 @@
           "abnormalLevel": 1,
           "magicLevel": 1
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -13653,6 +13671,9 @@
           "abnormalLevel": 1,
           "magicLevel": 15
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -13952,6 +13973,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -14794,6 +14818,9 @@
           "abnormalLevel": 1,
           "magicLevel": 52
         }
+      ],
+      "usingKinds": [
+        "SHIELD"
       ]
     },
     {
@@ -14814,6 +14841,9 @@
           "abnormalLevel": 1,
           "magicLevel": 1
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -15126,7 +15156,14 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "BOW",
+        "DUALFIST",
+        "SWORD",
+        "BLUNT",
+        "POLE"
+      ]
     },
     {
       "skillId": 181,
@@ -16042,6 +16079,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BLUNT"
       ]
     },
     {
@@ -16419,6 +16459,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -16747,6 +16790,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {
@@ -17075,6 +17121,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "FIST",
+        "DUALFIST"
       ]
     },
     {
@@ -17316,6 +17366,9 @@
           "abnormalLevel": 1,
           "magicLevel": 1
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -17644,6 +17697,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -17972,6 +18028,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -18859,6 +18919,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -19354,6 +19417,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -19731,6 +19797,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -20073,6 +20142,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -20373,6 +20445,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -20673,6 +20748,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -20973,6 +21051,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -21611,6 +21692,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BOW",
+        "POLE"
       ]
     },
     {
@@ -21918,6 +22003,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "BOW",
+        "POLE"
       ]
     },
     {
@@ -22246,6 +22335,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "MAGIC"
       ]
     },
     {
@@ -22574,6 +22666,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -22888,6 +22983,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -23487,6 +23585,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -23731,6 +23833,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -23975,6 +24080,9 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -27721,6 +27829,10 @@
           "abnormalLevel": 1,
           "magicLevel": 74
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT"
       ]
     },
     {
@@ -27815,6 +27927,9 @@
       "effectPoint": [
         597,
         646
+      ],
+      "usingKinds": [
+        "DUAL"
       ]
     },
     {
@@ -29053,6 +29168,9 @@
           "abnormalLevel": 1,
           "magicLevel": 40
         }
+      ],
+      "usingKinds": [
+        "LIGHT"
       ]
     },
     {
@@ -31336,7 +31454,13 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "POLE",
+        "DUALFIST",
+        "BLUNT"
+      ]
     },
     {
       "skillId": 407,
@@ -32407,7 +32531,13 @@
       "castCondition": {
         "op": "player",
         "hp": 30
-      }
+      },
+      "usingKinds": [
+        "SWORD",
+        "BLUNT",
+        "POLE",
+        "DUALFIST"
+      ]
     },
     {
       "skillId": 421,
@@ -32507,6 +32637,9 @@
           "abnormalLevel": 1,
           "magicLevel": 65
         }
+      ],
+      "usingKinds": [
+        "POLE"
       ]
     },
     {
@@ -32615,7 +32748,8 @@
         ]
       },
       "usingKinds": [
-        "DUALFIST"
+        "DUALFIST",
+        "FIST"
       ]
     },
     {
@@ -32710,6 +32844,9 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "HEAVY"
       ]
     },
     {
@@ -32730,6 +32867,13 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "SWORD",
+        "BLUNT",
+        "POLE",
+        "DUAL",
+        "DUALFIST"
       ]
     },
     {
@@ -32750,6 +32894,9 @@
           "abnormalLevel": 1,
           "magicLevel": 1
         }
+      ],
+      "usingKinds": [
+        "BOW"
       ]
     },
     {
@@ -32770,6 +32917,9 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "DAGGER"
       ]
     },
     {
@@ -32830,6 +32980,10 @@
           "abnormalLevel": 1,
           "magicLevel": 78
         }
+      ],
+      "usingKinds": [
+        "LIGHT",
+        "MAGIC"
       ]
     },
     {

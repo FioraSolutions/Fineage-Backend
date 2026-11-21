@@ -44,6 +44,8 @@ def msgid_113_kinds(body: str) -> list[str]:
 def flatten_kinds(body: str) -> list[str]:
     kinds: list[str] = []
     kinds.extend(msgid_113_kinds(body))
+    for m in re.finditer(r'<using\s+kind="([A-Z_ ,]+)"', body):
+        kinds.extend(k.strip() for k in m.group(1).split(",") if k.strip())
     try:
         skill_el = ET.fromstring(body)
     except ET.ParseError:
