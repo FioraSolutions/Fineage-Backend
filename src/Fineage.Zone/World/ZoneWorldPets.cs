@@ -187,7 +187,19 @@ public sealed partial class ZoneWorld
 
         var stored = LoadPet(collar.ObjectId);
         if (stored != null && stored.NpcId != template.NpcId)
-            stored = null; // a collar of another kind (should not happen): start over
+        {
+            if (stored.OwnerCharacterId != owner.ObjectId)
+                stored = null;
+            else
+            {
+                // Q421 flute → strider bugle: same control object id, new item/npc — keep exp, meal and bag.
+                stored = stored with { NpcId = template.NpcId };
+                if (_persist.Enabled)
+                    _persist.SavePet(stored);
+                else
+                    _petMemory[stored.ControlObjectId] = stored;
+            }
+        }
         var bag = new PlayerInventory(_game.Items, _itemIds);
         foreach (var row in stored?.Items ?? [])
         {
@@ -359,6 +371,7 @@ public sealed partial class ZoneWorld
 
     void FillPetInfo(SummonInfoNetMsg info, ZoneEntity s, PetState pet)
     {
+        info.Mountable = pet.Template.Mountable;
         info.Exp = pet.Exp;
         info.ExpLevelStart = pet.Template.ExpForLevel(s.Level);
         info.ExpLevelEnd = pet.Template.ExpForLevel(s.Level + 1);

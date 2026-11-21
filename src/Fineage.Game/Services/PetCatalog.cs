@@ -2,6 +2,14 @@ using System.Text.Json;
 
 namespace Fineage.Game.Services;
 
+/// <summary>Mobius <c>Ride</c> mountType: 0 none, 1 strider, 2 wyvern.</summary>
+public enum PetMountKind : byte
+{
+    None = 0,
+    Strider = 1,
+    Wyvern = 2,
+}
+
 /// <summary>One level row of a pet (Mobius <c>stats/pets</c> <c>&lt;stat level&gt;</c>).</summary>
 public sealed record PetLevel(
     int Level,
@@ -34,6 +42,8 @@ public sealed record PetTemplate(
     int HungryLimit,
     int Load,
     bool SyncLevel,
+    bool Mountable,
+    PetMountKind MountKind,
     IReadOnlyList<PetSkillRow> Skills,
     IReadOnlyList<PetLevel> Levels)
 {
@@ -94,6 +104,8 @@ public sealed class PetCatalog
         public int HungryLimit { get; set; }
         public int Load { get; set; }
         public bool SyncLevel { get; set; }
+        public bool Mountable { get; set; }
+        public byte MountKind { get; set; }
         public List<PetSkillRow>? Skills { get; set; }
         public List<PetLevel>? Levels { get; set; }
     }
@@ -121,9 +133,12 @@ public sealed class PetCatalog
                     throw new InvalidDataException($"{source} pet {dto.NpcId} level row {levels[i].Level} is invalid.");
             }
 
+            bool mountable = dto.Mountable;
+            var mountKind = dto.MountKind is > 0 and <= 2 ? (PetMountKind)dto.MountKind
+                : mountable ? PetMountKind.Strider : PetMountKind.None;
             var pet = new PetTemplate(dto.NpcId, dto.ItemId, dto.Index, dto.SummonSkillId,
                 dto.SummonCastMs > 0 ? dto.SummonCastMs : 5000, dto.Food ?? [], Math.Clamp(dto.HungryLimit, 0, 100),
-                Math.Max(0, dto.Load), dto.SyncLevel, dto.Skills ?? [], levels);
+                Math.Max(0, dto.Load), dto.SyncLevel, mountable, mountKind, dto.Skills ?? [], levels);
             if (!map.TryAdd(pet.ItemId, pet))
                 throw new InvalidDataException($"{source} repeats collar item {pet.ItemId}.");
         }
