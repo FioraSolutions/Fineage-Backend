@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
-/// <summary>Mobius CT_0 clan war gaps: five-day re-declare cooldown, quarter death XP for the declaring side.</summary>
+/// <summary>Mobius CT_0 clan wars: cooldown, death XP, mutual-war PvP/reputation, relation bits, surrender.</summary>
 public sealed class NetClanWarParityTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()
@@ -71,5 +71,56 @@ public sealed class NetClanWarParityTests
 
         Assert.Equal(PledgeProtocol.WarDeathExpShare, kit.World.ClanWarDeathExpShareForTest(a.Member, b.Member));
         Assert.Equal(1d, kit.World.ClanWarDeathExpShareForTest(a.Member, c.Member));
+    }
+
+    [Fact]
+    public async Task Mutual_war_kill_counts_as_pvp_without_pk_or_karma_and_shifts_reputation()
+    {
+        var (kit, _) = World();
+        var a = await ClanAsync(kit, "Alpha");
+        var b = await ClanAsync(kit, "Beta");
+        Assert.True(kit.World.SetMutualWarForTest(a.ClanId, b.ClanId));
+        Assert.True(kit.World.SetClanReputationForTest(a.ClanId, 100));
+        Assert.True(kit.World.SetClanReputationForTest(b.ClanId, 20));
+
+        int pvpBefore = b.LeaderE.PvpKills;
+        int karmaBefore = b.LeaderE.Karma;
+        kit.World.KillPlayerByNpcForTest(a.Member, b.LeaderE);
+
+        Assert.Equal(karmaBefore, b.LeaderE.Karma);
+        Assert.Equal(pvpBefore + 1, b.LeaderE.PvpKills);
+        Assert.Equal(99, kit.Store.FindClan(a.ClanId)!.Details!.Reputation);
+        Assert.Equal(21, kit.Store.FindClan(b.ClanId)!.Details!.Reputation);
+    }
+
+    [Fact]
+    public async Task War_relation_bits_show_one_sided_then_mutual()
+    {
+        var (kit, _) = World();
+        var a = await ClanAsync(kit, "Alpha");
+        var b = await ClanAsync(kit, "Beta");
+        Assert.Null(await Cmd(kit, a.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.DeclareWar, Name = "Beta" }));
+
+        int oneSided = kit.World.RelationOfForTest(b.Member, a.Member);
+        Assert.NotEqual(0, oneSided & PledgeProtocol.RelationOneSidedWar);
+        Assert.Equal(0, oneSided & PledgeProtocol.RelationMutualWar);
+
+        Assert.Null(await Cmd(kit, b.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.DeclareWar, Name = "Alpha" }));
+        int mutual = kit.World.RelationOfForTest(a.Member, b.Member);
+        Assert.NotEqual(0, mutual & PledgeProtocol.RelationMutualWar);
+    }
+
+    [Fact]
+    public async Task Surrender_ends_the_war_on_both_sides()
+    {
+        var (kit, _) = World();
+        var a = await ClanAsync(kit, "Alpha");
+        var b = await ClanAsync(kit, "Beta");
+        Assert.True(kit.World.SetMutualWarForTest(a.ClanId, b.ClanId));
+
+        Assert.Null(await Cmd(kit, a.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.SurrenderWar, Name = "Beta" }));
+        Assert.Equal(PledgeProtocol.NotAtWar,
+            await Cmd(kit, b.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.StopWar, Name = "Alpha" }));
+        Assert.Equal(0, kit.World.RelationOfForTest(a.Member, b.Member) & PledgeProtocol.RelationMutualWar);
     }
 }
