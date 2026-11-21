@@ -127,11 +127,11 @@ def q276():
             minLevel=15,
             ops=START + [cond(1)],
         ),
-        d(TANAPI, "talk", "30571-04.html", cond=1),
+        d(TANAPI, "talk", "30571-04.htm", cond=1),
         d(
             TANAPI,
             "talk",
-            "30571-05.html",
+            "30571-05.htm",
             cond=2,
             hasItem=CRYSTAL,
             ops=[give(PANTS), give(TOTEM_ITEM), {"op": "complete"}],
@@ -185,11 +185,11 @@ def q277():
             minLevel=15,
             ops=START + [cond(1)],
         ),
-        d(TAMIL, "talk", "30576-04.html", cond=1),
+        d(TAMIL, "talk", "30576-04.htm", cond=1),
         d(
             TAMIL,
             "talk",
-            "30576-05.html",
+            "30576-05.htm",
             cond=2,
             atLeast={STONE: 20},
             ops=[give(CHARM, 2), {"op": "complete"}],
@@ -223,12 +223,12 @@ def q296():
             minLevel=15,
             ops=START + [cond(1)],
         ),
-        d(MION, "event", "30519-06.html", when="started", event="30519-06", ops=[{"op": "complete"}]),
-        d(MION, "event", "30519-07.html", when="started", event="30519-07"),
+        d(MION, "event", "30519-06.htm", when="started", event="30519-06", ops=[{"op": "complete"}]),
+        d(MION, "event", "30519-07.htm", when="started", event="30519-07"),
         d(
             MION,
             "talk",
-            "30519-05.html",
+            "30519-05.htm",
             when="started",
             hasItem=SILK,
             ops=[
@@ -240,12 +240,12 @@ def q296():
                 }
             ],
         ),
-        d(MION, "talk", "30519-04.html", when="started", lacksItems=[SILK]),
-        d(NATHAN, "talk", "30548-01.html", when="started"),
+        d(MION, "talk", "30519-04.htm", when="started", lacksItems=[SILK]),
+        d(NATHAN, "talk", "30548-01.htm", when="started"),
         d(
             NATHAN,
             "event",
-            "30548-03.html",
+            "30548-03.htm",
             when="started",
             event="30548-03",
             hasItem=SPIN,
@@ -253,7 +253,7 @@ def q296():
             # exchange_all: each spinnerette → 19 silk
             ops=[{"op": "exchange_all", "itemId": SPIN, "rewardItemId": SILK, "per": 19}],
         ),
-        d(NATHAN, "event", "30548-02.html", when="started", event="30548-03", lacksItems=[SPIN]),
+        d(NATHAN, "event", "30548-02.htm", when="started", event="30548-03", lacksItems=[SPIN]),
     ]
     for mob in MOBS:
         dialogs.append(
@@ -293,11 +293,11 @@ def q297():
             minLevel=15,
             ops=START + [cond(1)],
         ),
-        d(WIRPHY, "talk", "30540-04.html", cond=1),
+        d(WIRPHY, "talk", "30540-04.htm", cond=1),
         d(
             WIRPHY,
             "talk",
-            "30540-05.html",
+            "30540-05.htm",
             cond=2,
             atLeast={STONE: 20},
             ops=[give(TOKEN, 2), {"op": "complete"}],
@@ -320,7 +320,7 @@ def q324():
     SAC = 1077
     chances = {20034: 0.26, 20038: 0.29, 20043: 0.30}
     dialogs = [
-        d(ASTARON, "talk", "30351-02.html", when="absent", maxLevel=17),
+        d(ASTARON, "talk", "30351-02.htm", when="absent", maxLevel=17),
         d(ASTARON, "talk", "30351-03.htm", when="absent", minLevel=18),
         d(
             ASTARON,
@@ -331,11 +331,11 @@ def q324():
             minLevel=18,
             ops=START + [cond(1)],
         ),
-        d(ASTARON, "talk", "30351-05.html", cond=1),
+        d(ASTARON, "talk", "30351-05.htm", cond=1),
         d(
             ASTARON,
             "talk",
-            "30351-06.html",
+            "30351-06.htm",
             cond=2,
             atLeast={SAC: 10},
             ops=[adena(5810), {"op": "complete"}],

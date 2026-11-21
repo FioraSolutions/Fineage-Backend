@@ -11,23 +11,16 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import questio
-QDIR = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
-if not QDIR.is_dir():
-    QDIR = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
+
+QROOT = questio.mobius_quest_root()
 
 
 class Gen:
     def __init__(self, qid, script):
-        self.qid, self.script, self.src, self.rows = qid, script, QDIR / script, []
+        self.qid, self.script, self.rows = qid, script, []
 
     def html(self, name):
-        for ext in ("", ".htm", ".html"):
-            p = self.src / (name + ext)
-            if p.exists():
-                text = p.read_text(encoding="utf-8").strip()
-                return re.sub(rf'bypass -h Quest {self.script} ([A-Za-z0-9_\-]+)(?:\.html?)?',
-                              lambda m: f"quest_event:{self.qid}:{m.group(1)}", text)
-        raise SystemExit(f"{self.script}: missing html {name}")
+        return questio.mobius_quest_html(QROOT, self.script, self.qid, name)
 
     def d(self, npc, hook, page, when="started", ops=None, event=None, raw=None, **gates):
         row = {"npcId": npc, "hook": hook, "when": when}
@@ -82,19 +75,19 @@ def q406():
     g.d(SORIUS, "talk", "30327-01.htm", when="completed")
     g.accept(SORIUS, ELVEN_FIGHTER, ELVEN_KNIGHT, BROOCH, ("30327-05.htm", None))
     g.d(SORIUS, "event", "30327-06.htm", when="absent", event="30327-06", classes=[ELVEN_FIGHTER], minLevel=18, lacksItems=[BROOCH], ops=START)
-    g.reward(SORIUS, "30327-10.html", [], BROOCH, ((320534, 23152), (456128, 29850), (591724, 33328)), hasItem=BOX)
-    g.d(SORIUS, "talk", "30327-07.html", lacksItems=[TOPAZ])
-    g.d(SORIUS, "talk", "30327-09.html", atLeast={TOPAZ: 20}, lacksItems=[MEMO, LETTER], ops=[give(LETTER), cond(3)])
-    g.d(SORIUS, "talk", "30327-11.html", atLeast={TOPAZ: 20})
-    g.d(SORIUS, "talk", "30327-08.html", hasItem=TOPAZ)
-    g.d(KLUTO, "talk", "30317-06.html", hasItem=BOX)
-    g.d(KLUTO, "talk", "30317-01.html", hasItem=LETTER, atLeast={TOPAZ: 20})
-    g.d(KLUTO, "talk", "30317-05.html", hasItem=MEMO, atLeast={TOPAZ: 20, EMERALD: 20},
+    g.reward(SORIUS, "30327-10.htm", [], BROOCH, ((320534, 23152), (456128, 29850), (591724, 33328)), hasItem=BOX)
+    g.d(SORIUS, "talk", "30327-07.htm", lacksItems=[TOPAZ])
+    g.d(SORIUS, "talk", "30327-09.htm", atLeast={TOPAZ: 20}, lacksItems=[MEMO, LETTER], ops=[give(LETTER), cond(3)])
+    g.d(SORIUS, "talk", "30327-11.htm", atLeast={TOPAZ: 20})
+    g.d(SORIUS, "talk", "30327-08.htm", hasItem=TOPAZ)
+    g.d(KLUTO, "talk", "30317-06.htm", hasItem=BOX)
+    g.d(KLUTO, "talk", "30317-01.htm", hasItem=LETTER, atLeast={TOPAZ: 20})
+    g.d(KLUTO, "talk", "30317-05.htm", hasItem=MEMO, atLeast={TOPAZ: 20, EMERALD: 20},
         ops=[give(BOX), take(TOPAZ, 20), take(EMERALD, 20), take(MEMO), cond(6)])
-    g.d(KLUTO, "talk", "30317-04.html", hasItems=[MEMO, EMERALD], atLeast={TOPAZ: 20})
-    g.d(KLUTO, "talk", "30317-03.html", hasItem=MEMO, lacksItems=[EMERALD], atLeast={TOPAZ: 20})
-    g.d(KLUTO, "event", "30317-02.html", event="30317-02", hasItem=LETTER, lacksItems=[MEMO], ops=[take(LETTER), give(MEMO), cond(4)])
-    g.d(KLUTO, "event", "30317-02.html", event="30317-02", hasItem=LETTER, ops=[take(LETTER), cond(4)])
+    g.d(KLUTO, "talk", "30317-04.htm", hasItems=[MEMO, EMERALD], atLeast={TOPAZ: 20})
+    g.d(KLUTO, "talk", "30317-03.htm", hasItem=MEMO, lacksItems=[EMERALD], atLeast={TOPAZ: 20})
+    g.d(KLUTO, "event", "30317-02.htm", event="30317-02", hasItem=LETTER, lacksItems=[MEMO], ops=[take(LETTER), give(MEMO), cond(4)])
+    g.d(KLUTO, "event", "30317-02.htm", event="30317-02", hasItem=LETTER, ops=[take(LETTER), cond(4)])
     for mob in (20035, 20042, 20045, 20051, 20054, 20060):  # skeletons / Ruin Spartoi / Salamander Noble
         g.d(mob, "kill", None, lacksItems=[BOX], ops=[{"op": "drop_item", "itemId": TOPAZ, "count": 1, "chance": 0.7, "limit": 20, "condAtLimit": 2}])
     g.d(20782, "kill", None, hasItem=MEMO, ops=[{"op": "drop_item", "itemId": EMERALD, "count": 1, "chance": 0.5, "limit": 20, "condAtLimit": 5}])
@@ -110,23 +103,23 @@ def q407():
     g.d(REORIA, "talk", "30328-01.htm", when="absent")
     g.d(REORIA, "talk", "30328-01.htm", when="completed")
     g.accept(REORIA, ELVEN_FIGHTER, ELVEN_SCOUT, REC, ("30328-05.htm", START + [give(LETTER)]))
-    g.d(REORIA, "talk", "30328-06.html", hasItem=LETTER)
-    g.reward(REORIA, "30328-07.html", [take(GUARD)], REC, ((320534, 19932), (456128, 26630), (591724, 33328)), hasItem=GUARD)
-    g.d(REORIA, "talk", "30328-08.html", **v1)
-    g.d(BABENCO, "talk", "30334-01.html", **v1)
-    g.d(MORETTI, "talk", "30337-01.html", hasItem=LETTER, lacksItems=TORN)
-    g.d(MORETTI, "talk", "30337-04.html", lacksItems=[MLETTER, PLETTER, GUARD] + TORN, **v1)
-    g.d(MORETTI, "talk", "30337-06.html", hasItems=TORN, lacksItems=[MLETTER, PLETTER, GUARD],
+    g.d(REORIA, "talk", "30328-06.htm", hasItem=LETTER)
+    g.reward(REORIA, "30328-07.htm", [take(GUARD)], REC, ((320534, 19932), (456128, 26630), (591724, 33328)), hasItem=GUARD)
+    g.d(REORIA, "talk", "30328-08.htm", **v1)
+    g.d(BABENCO, "talk", "30334-01.htm", **v1)
+    g.d(MORETTI, "talk", "30337-01.htm", hasItem=LETTER, lacksItems=TORN)
+    g.d(MORETTI, "talk", "30337-04.htm", lacksItems=[MLETTER, PLETTER, GUARD] + TORN, **v1)
+    g.d(MORETTI, "talk", "30337-06.htm", hasItems=TORN, lacksItems=[MLETTER, PLETTER, GUARD],
         ops=[take(t) for t in TORN] + [give(HERB), give(MLETTER), cond(4)], **v1)
-    g.d(MORETTI, "talk", "30337-05.html", lacksItems=[MLETTER, PLETTER, GUARD], **v1)
-    g.d(MORETTI, "talk", "30337-07.html", hasItem=PLETTER, ops=[take(PLETTER), give(GUARD), cond(8)])
-    g.d(MORETTI, "talk", "30337-09.html", hasItems=[HERB, MLETTER])
-    g.d(MORETTI, "talk", "30337-08.html", hasItem=GUARD)
-    g.d(MORETTI, "event", "30337-02.html", event="30337-02")
-    g.d(MORETTI, "event", "30337-03.html", event="30337-03", hasItem=LETTER, ops=[take(LETTER), setv("variable", 1), cond(2)])
-    g.d(PRIAS, "talk", "30426-02.html", hasItems=[MLETTER, HERB, KEY], ops=[take(KEY), take(HERB), take(MLETTER), give(PLETTER), cond(7)])
-    g.d(PRIAS, "talk", "30426-01.html", hasItems=[MLETTER, HERB], ops=[cond(5)])
-    g.d(PRIAS, "talk", "30426-04.html", hasItem=PLETTER)
+    g.d(MORETTI, "talk", "30337-05.htm", lacksItems=[MLETTER, PLETTER, GUARD], **v1)
+    g.d(MORETTI, "talk", "30337-07.htm", hasItem=PLETTER, ops=[take(PLETTER), give(GUARD), cond(8)])
+    g.d(MORETTI, "talk", "30337-09.htm", hasItems=[HERB, MLETTER])
+    g.d(MORETTI, "talk", "30337-08.htm", hasItem=GUARD)
+    g.d(MORETTI, "event", "30337-02.htm", event="30337-02")
+    g.d(MORETTI, "event", "30337-03.htm", event="30337-03", hasItem=LETTER, ops=[take(LETTER), setv("variable", 1), cond(2)])
+    g.d(PRIAS, "talk", "30426-02.htm", hasItems=[MLETTER, HERB, KEY], ops=[take(KEY), take(HERB), take(MLETTER), give(PLETTER), cond(7)])
+    g.d(PRIAS, "talk", "30426-01.htm", hasItems=[MLETTER, HERB], ops=[cond(5)])
+    g.d(PRIAS, "talk", "30426-04.htm", hasItem=PLETTER)
     # Ol Mahum Patrol 20053 (cond 2): next missing torn letter; the 4th sets cond 3.
     for i, t in enumerate(TORN):
         ops = [give(t)] + ([cond(3)] if i == 3 else [])
@@ -149,30 +142,30 @@ def q409():
     g.d(MANUEL, "talk", "30293-04.htm", when="completed")
     g.accept(MANUEL, ELVEN_MAGE, ORACLE, LEAF, ("30293-05.htm", START + [setv("memo", 1), give(MEDAL)]))
     four = [MONEY, DIARY, ORDER, HALF]
-    g.d(MANUEL, "talk", "30293-09.html", hasItem=MEDAL, lacksItems=four, ops=[setv("memo", 1), cond(8)], **m(2))
-    g.d(MANUEL, "talk", "30293-06.html", hasItem=MEDAL, lacksItems=four, ops=[setv("memo", 1)])
-    g.reward(MANUEL, "30293-08.html", [], LEAF, ((320534, 20392), (456128, 27090), (591724, 33788)),
+    g.d(MANUEL, "talk", "30293-09.htm", hasItem=MEDAL, lacksItems=four, ops=[setv("memo", 1), cond(8)], **m(2))
+    g.d(MANUEL, "talk", "30293-06.htm", hasItem=MEDAL, lacksItems=four, ops=[setv("memo", 1)])
+    g.reward(MANUEL, "30293-08.htm", [], LEAF, ((320534, 20392), (456128, 27090), (591724, 33788)),
              hasItem=MEDAL, hasItems=[MONEY, DIARY, ORDER], lacksItems=[HALF])
-    g.d(MANUEL, "talk", "30293-07.html", hasItem=MEDAL)
-    g.d(ALLANA, "talk", "30424-05.html", hasItem=MEDAL, lacksItems=four, **m(2))
-    g.d(ALLANA, "talk", "30424-01.html", hasItem=MEDAL, lacksItems=four, ops=[cond(2)], **m(1))
-    g.d(ALLANA, "talk", "30424-02.html", hasItems=[MEDAL, ORDER], lacksItems=[MONEY, DIARY, HALF], ops=[setv("memo", 2), give(HALF), cond(4)])
-    g.d(ALLANA, "talk", "30424-06.html", hasItems=[MEDAL, ORDER, HALF], lacksItems=[MONEY, DIARY, NECK], ops=[setv("memo", 2), cond(4)], **m(3))
-    g.d(ALLANA, "talk", "30424-03.html", hasItems=[MEDAL, ORDER, HALF], lacksItems=[MONEY, DIARY])
-    g.d(ALLANA, "talk", "30424-04.html", hasItems=[MEDAL, MONEY, ORDER, HALF], lacksItems=[DIARY], ops=[give(DIARY), take(HALF), cond(9)])
-    g.d(ALLANA, "talk", "30424-05.html", hasItems=[MEDAL, MONEY, ORDER, DIARY], ops=[cond(7)])
+    g.d(MANUEL, "talk", "30293-07.htm", hasItem=MEDAL)
+    g.d(ALLANA, "talk", "30424-05.htm", hasItem=MEDAL, lacksItems=four, **m(2))
+    g.d(ALLANA, "talk", "30424-01.htm", hasItem=MEDAL, lacksItems=four, ops=[cond(2)], **m(1))
+    g.d(ALLANA, "talk", "30424-02.htm", hasItems=[MEDAL, ORDER], lacksItems=[MONEY, DIARY, HALF], ops=[setv("memo", 2), give(HALF), cond(4)])
+    g.d(ALLANA, "talk", "30424-06.htm", hasItems=[MEDAL, ORDER, HALF], lacksItems=[MONEY, DIARY, NECK], ops=[setv("memo", 2), cond(4)], **m(3))
+    g.d(ALLANA, "talk", "30424-03.htm", hasItems=[MEDAL, ORDER, HALF], lacksItems=[MONEY, DIARY])
+    g.d(ALLANA, "talk", "30424-04.htm", hasItems=[MEDAL, MONEY, ORDER, HALF], lacksItems=[DIARY], ops=[give(DIARY), take(HALF), cond(9)])
+    g.d(ALLANA, "talk", "30424-05.htm", hasItems=[MEDAL, MONEY, ORDER, DIARY], ops=[cond(7)])
     for ev in ("30424-08", "30424-09"):
-        g.d(ALLANA, "event", ev + ".html", event=ev)
-    g.d(ALLANA, "event", "30424-07.html", event="30424-07", **m(1))
+        g.d(ALLANA, "event", ev + ".htm", event=ev)
+    g.d(ALLANA, "event", "30424-07.htm", event="30424-07", **m(1))
     # Mobius replay_1: setMemoState(2) + addSpawn lizardmen 27032-27034 at Allana (no HTML).
     g.d(ALLANA, "event", None, event="replay_1", raw="",
         ops=[setv("memo", 2), spawn(27032), spawn(27033), spawn(27034)])
-    g.d(PERRIN, "talk", "30428-04.html", hasItems=[MEDAL, ORDER, HALF, NECK], ops=[give(MONEY), take(NECK), cond(6)])
-    g.d(PERRIN, "talk", "30428-05.html", hasItems=[MEDAL, ORDER, HALF, MONEY])
-    g.d(PERRIN, "talk", "30428-06.html", hasItems=[MEDAL, ORDER, HALF], **m(3))
-    g.d(PERRIN, "talk", "30428-01.html", hasItems=[MEDAL, ORDER, HALF])
+    g.d(PERRIN, "talk", "30428-04.htm", hasItems=[MEDAL, ORDER, HALF, NECK], ops=[give(MONEY), take(NECK), cond(6)])
+    g.d(PERRIN, "talk", "30428-05.htm", hasItems=[MEDAL, ORDER, HALF, MONEY])
+    g.d(PERRIN, "talk", "30428-06.htm", hasItems=[MEDAL, ORDER, HALF], **m(3))
+    g.d(PERRIN, "talk", "30428-01.htm", hasItems=[MEDAL, ORDER, HALF])
     for ev in ("30428-02", "30428-03"):
-        g.d(PERRIN, "event", ev + ".html", event=ev, **m(2))
+        g.d(PERRIN, "event", ev + ".htm", event=ev, **m(2))
     # Mobius replay_2: setMemoState(3) + addSpawn Tamil 27035 at Perrin (no HTML).
     g.d(PERRIN, "event", None, event="replay_2", raw="",
         ops=[setv("memo", 3), spawn(27035)], **m(2))

@@ -67,7 +67,7 @@ def q158():
     BIOTIN, NERKAS = 30031, 27016
     TABLET, SOE_D = 1025, 956
     dialogs = [
-        d(BIOTIN, "talk", "30031-01.html", when="absent", maxLevel=20),
+        d(BIOTIN, "talk", "30031-02.htm", when="absent", maxLevel=20),
         d(BIOTIN, "talk", "30031-02.htm", when="absent", minLevel=21),
         d(
             BIOTIN,
@@ -78,11 +78,11 @@ def q158():
             minLevel=21,
             ops=START + [cond(1)],
         ),
-        d(BIOTIN, "talk", "30031-04.html", cond=1),
+        d(BIOTIN, "talk", "30031-04.htm", cond=1),
         d(
             BIOTIN,
             "talk",
-            "30031-05.html",
+            "30031-05.htm",
             cond=2,
             hasItem=TABLET,
             ops=[give(SOE_D), adena(1495), exp_sp(17818, 927), {"op": "complete"}],
@@ -118,7 +118,7 @@ def q626():
         21536: 0.774, 21539: 0.848, 21540: 0.880, 21658: 0.790,
     }
     dialogs = [
-        d(HIERARCH, "talk", "31517-00.htm", when="absent", maxLevel=59),
+        d(HIERARCH, "talk", "31517-01.htm", when="absent", maxLevel=59),
         d(HIERARCH, "talk", "31517-01.htm", when="absent", minLevel=60),
         d(
             HIERARCH,
@@ -129,29 +129,29 @@ def q626():
             minLevel=60,
             ops=START + [cond(1)],
         ),
-        d(HIERARCH, "event", "31517-05.html", when="started", event="31517-05"),
-        d(HIERARCH, "talk", "31517-04.html", cond=2, atLeast={BLOOD: 300}),
-        d(HIERARCH, "talk", "31517-03.html", when="started"),
+        d(HIERARCH, "event", "31517-05.htm", when="started", event="31517-05"),
+        d(HIERARCH, "talk", "31517-04.htm", cond=2, atLeast={BLOOD: 300}),
+        d(HIERARCH, "talk", "31517-03.htm", when="started"),
         d(
             HIERARCH,
             "event",
-            "31517-07.html",
+            "31517-07.htm",
             when="started",
             event="Exp",
             atLeast={BLOOD: 300},
             ops=[take(BLOOD, 300), exp_sp(162773, 12500), {"op": "complete"}],
         ),
-        d(HIERARCH, "event", "31517-06.html", when="started", event="Exp"),
+        d(HIERARCH, "event", "31517-06.htm", when="started", event="Exp"),
         d(
             HIERARCH,
             "event",
-            "31517-07.html",
+            "31517-07.htm",
             when="started",
             event="Adena",
             atLeast={BLOOD: 300},
             ops=[take(BLOOD, 300), adena(100000), {"op": "complete"}],
         ),
-        d(HIERARCH, "event", "31517-06.html", when="started", event="Adena"),
+        d(HIERARCH, "event", "31517-06.htm", when="started", event="Adena"),
     ]
     for mob, ch in mobs.items():
         dialogs.append(
@@ -184,32 +184,32 @@ def q629():
         21513: 0.682, 21514: 0.595, 21515: 0.727, 21516: 0.879, 21517: 0.999,
     }
     dialogs = [
-        d(PIERCE, "talk", "31553-02.htm", when="absent", maxLevel=65),
-        d(PIERCE, "talk", "31553-01.htm", when="absent", minLevel=66),
+        d(PIERCE, "talk", "31553-3.htm", when="absent", maxLevel=65),
+        d(PIERCE, "talk", "31553-3.htm", when="absent", minLevel=66),
         d(
             PIERCE,
             "event",
-            "31553-03.htm",
+            "31553-3.htm",
             when="absent",
-            event="31553-03",
+            event="31553-3",
             minLevel=66,
             ops=START + [cond(1)],
         ),
-        d(PIERCE, "event", "31553-04.html", when="started", event="31553-04"),
-        d(PIERCE, "event", "31553-06.html", when="started", event="31553-06"),
+        d(PIERCE, "event", "31553-4.htm", when="started", event="31553-04"),
+        d(PIERCE, "event", "31553-6.htm", when="started", event="31553-6"),
         d(
             PIERCE,
             "event",
-            "31553-07.html",
+            "31553-6.htm",
             when="started",
-            event="31553-07",
+            event="31553-6",
             atLeast={TALON: 100},
             ops=[take(TALON, 100), give(COIN, 20)],
         ),
-        d(PIERCE, "event", "31553-08.html", when="started", event="31553-07"),
-        d(PIERCE, "event", "31553-09.html", when="started", event="31553-09", ops=[{"op": "complete"}]),
-        d(PIERCE, "talk", "31553-04.html", when="started", atLeast={TALON: 100}),
-        d(PIERCE, "talk", "31553-05.html", when="started"),
+        d(PIERCE, "event", "31553-5.htm", when="started", event="31553-6"),
+        d(PIERCE, "event", "31553-6.htm", when="started", event="31553-6", ops=[{"op": "complete"}]),
+        d(PIERCE, "talk", "31553-4.htm", when="started", atLeast={TALON: 100}),
+        d(PIERCE, "talk", "31553-5.htm", when="started"),
     ]
     for mob, ch in mobs.items():
         dialogs.append(

@@ -15,9 +15,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import questio
 
-SRC = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests/Q00999_T0Tutorial"
-if not SRC.is_dir():
-    SRC = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests/Q00999_T0Tutorial"
+QROOT = questio.mobius_quest_root()
+SCRIPT = "Q00999_T0Tutorial"
 
 Q = 999
 BLUE_GEM = 6353
@@ -35,16 +34,7 @@ drop = lambda chance=1.0: {
 
 
 def html(name: str) -> str:
-    for ext in ("", ".htm", ".html"):
-        p = SRC / (name + ext)
-        if p.exists():
-            text = p.read_text(encoding="utf-8").strip()
-            return re.sub(
-                r"bypass -h Quest Q00999_T0Tutorial ([A-Za-z0-9_\-]+)(?:\.html?)?",
-                lambda m: f"quest_event:{Q}:{m.group(1)}",
-                text,
-            )
-    raise SystemExit(f"missing html {name}")
+    return questio.mobius_quest_html(QROOT, SCRIPT, Q, name)
 
 
 def d(npc, hook, page, when="started", ops=None, event=None, raw=None, **gates):

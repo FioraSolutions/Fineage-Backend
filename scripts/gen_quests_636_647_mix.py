@@ -63,14 +63,14 @@ def html_loader(script: str, qid: int):
 
 
 def q636():
-    Q, d = 636, html_loader("Q00636_TruthBeyond", 636)
+    Q, d = 636, html_loader("Q00636_TruthBeyondTheGate", 636)
     ELIYAH, FLAURON = 31329, 32010
     VISITOR, FADED, MARK = 8064, 8065, 8067
     dialogs = [
         d(
             ELIYAH,
             "talk",
-            "31329-mark.htm",
+            "31329-01.htm",
             when="absent",
             hasAny=[VISITOR, FADED, MARK],
             ops=[{"op": "complete"}],
@@ -116,33 +116,33 @@ def q379():
     LEAF, STONE = 5893, 5894
     WINE30 = 5957  # most common (random < 9 → 60%)
     dialogs = [
-        d(HARLAN, "talk", "30074-06.html", when="absent", maxLevel=19),
-        d(HARLAN, "talk", "30074-01.htm", when="absent", minLevel=20),
-        d(HARLAN, "event", "30074-02.htm", when="absent", event="30074-02", minLevel=20),
-        d(HARLAN, "event", "30074-03.htm", when="absent", event="30074-03", minLevel=20),
+        d(HARLAN, "talk", "30074-6.htm", when="absent", maxLevel=19),
+        d(HARLAN, "talk", "30074-1.htm", when="absent", minLevel=20),
+        d(HARLAN, "event", "30074-2.htm", when="absent", event="30074-2", minLevel=20),
+        d(HARLAN, "event", "30074-3.htm", when="absent", event="30074-3", minLevel=20),
         d(
             HARLAN,
             "event",
-            "30074-04.htm",
+            "30074-4.htm",
             when="absent",
-            event="30074-04",
+            event="30074-4",
             minLevel=20,
             ops=START + [cond(1)],
         ),
-        d(HARLAN, "event", "30074-05.html", when="absent", event="30074-05"),
+        d(HARLAN, "event", "30074-5.htm", when="absent", event="30074-5"),
         d(
             HARLAN,
             "talk",
-            "30074-10.html",
+            "30074-8.htm",
             when="started",
             atLeast={LEAF: 80, STONE: 100},
         ),
         # Partial leaf/stone nuance (08/09) collapsed — no "below count" gate yet
-        d(HARLAN, "talk", "30074-07.html", when="started"),
+        d(HARLAN, "talk", "30074-7.htm", when="started"),
         d(
             HARLAN,
             "event",
-            "30074-12.html",
+            "30074-8.htm",
             when="started",
             event="30074-11",
             atLeast={LEAF: 80, STONE: 100},
