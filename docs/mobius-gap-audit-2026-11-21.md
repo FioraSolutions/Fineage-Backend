@@ -336,7 +336,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
 | 15 | Zone types (swamp/damage/NL) | #731 | done — imported JSON + movement/sim | No |
 | 16 | Boats + walking NPCs | #734 | in review — Routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
-| 14 | Guard / town AI | — | **queued** (this agent) | No |
+| 14 | Guard / town AI | #738 | in review (this agent) — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
 | 17 | Saga quest fidelity | — | **queued** (this agent) | No |
 | 3 | Item augmentation | — | **queued** (this agent, server + packet doc) | Yes |
 | 4 | Cursed weapons | — | **queued** (this agent, server + packet doc) | Yes |
@@ -355,7 +355,7 @@ Avoid duplicate PRs on these rows:
 
 | Owner | Ranks / work |
 |-------|----------------|
-| **This agent (f138 main queue)** | 15→16→14→17→3/4/10 (server slices + `docs/client-packet-contracts.md`)→quest batches |
+| **This agent (f138 main queue)** | 15 done → **#734** rank 16 → **#738** rank 14 → 17 → 3/4/10 + packet doc → quest batches |
 | **Other agents** | 16a Derby, 19 compound conditions, 18 GM/punishment, 20 freight, 6 Festival, 7 rift |
 
 Refresh `origin/dev` before branching; others may land parallel merges.
