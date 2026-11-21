@@ -51,6 +51,10 @@ public sealed partial class ZoneWorld
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
+    readonly SevenSignsFestivalCatalog _festivalCatalog;
+    readonly SevenSignsFestivalRuntime _festivalRuntime;
+    readonly SevenSignsFestivalActor _festivalActor;
+    int _nextFestivalInstanceId;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
     readonly DimensionalRiftCatalog _dimensionalRift;
@@ -163,6 +167,7 @@ public sealed partial class ZoneWorld
         Random? enchantRandom = null,
         EnchantRates? enchantRates = null,
         SevenSignsEngine? sevenSigns = null,
+        SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
@@ -248,7 +253,13 @@ public sealed partial class ZoneWorld
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
-        _sevenSigns = new SevenSignsActor(sevenSigns ?? new SevenSignsEngine(WallNow()));
+        _festivalCatalog = festivalRuntime?.Board.Catalog ?? SevenSignsFestivalCatalog.LoadDefault();
+        _festivalRuntime = festivalRuntime ?? new SevenSignsFestivalRuntime(_festivalCatalog);
+        SevenSignsEngine ssEngine = sevenSigns ?? new SevenSignsEngine(WallNow(), festival: _festivalRuntime);
+        _festivalRuntime.BindEngine(ssEngine);
+        _sevenSigns = new SevenSignsActor(ssEngine);
+        _festivalActor = new SevenSignsFestivalActor(_festivalRuntime.Board);
+        _nextFestivalInstanceId = FestivalInstanceBase;
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
         _dimensionalRiftSettings = dimensionalRiftSettings ?? DimensionalRiftSettings.Default;

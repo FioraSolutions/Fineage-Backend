@@ -10,6 +10,16 @@ public sealed partial class SevenSignsEngine
             return ScoreLocked(cabal);
     }
 
+    public int DawnFestivalScore()
+    {
+        lock (_gate) return _dawnFestival;
+    }
+
+    public int DuskFestivalScore()
+    {
+        lock (_gate) return _duskFestival;
+    }
+
     public SevenSignsCabal WinningCabal
     {
         get { lock (_gate) return Winner(); }
