@@ -15,9 +15,9 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import questio
-SRC = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests/Q00102_SeaOfSporesFever"
-if not SRC.is_dir():
-    SRC = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests/Q00102_SeaOfSporesFever"
+
+QROOT = questio.mobius_quest_root()
+SCRIPT = "Q00102_SeaOfSporesFever"
 Q = 102
 
 COBENDELL, BERROS, VELTRESS, RAYEN, ALBERIUS, GARTRANDELL = 30156, 30217, 30219, 30221, 30284, 30285
@@ -33,16 +33,7 @@ SENTINELS = {GARTRANDELL: MED5, RAYEN: MED4, VELTRESS: MED3, BERROS: MED2}
 
 
 def html(name: str) -> str:
-    for ext in ("", ".htm", ".html"):
-        p = SRC / (name + ext)
-        if p.exists():
-            text = p.read_text(encoding="utf-8").strip()
-            return re.sub(
-                r"bypass -h Quest Q00102_SeaOfSporesFever ([A-Za-z0-9_\-]+)(?:\.html?)?",
-                lambda m: f"quest_event:{Q}:{m.group(1)}",
-                text,
-            )
-    raise SystemExit(f"missing html {name}")
+    return questio.mobius_quest_html(QROOT, SCRIPT, Q, name)
 
 
 def d(npc, hook, page, when="started", ops=None, event=None, raw=None, **gates):
@@ -80,30 +71,30 @@ dialogs: list[dict] = [
     d(ALBERIUS, "talk", "30284-00.htm", when="absent"),
     d(ALBERIUS, "event", "30284-02.htm", when="absent", event="30284-02", races=[1], minLevel=12,
       ops=START + [give(LETTER), cond(1)]),
-    d(ALBERIUS, "talk", "30284-03.html", cond=1, hasItem=LETTER),
-    d(ALBERIUS, "talk", "30284-09.html", cond=2, hasItem=AMULET),
-    d(ALBERIUS, "talk", "30284-04.html", cond=4, hasItem=MED1,
+    d(ALBERIUS, "talk", "30284-03.htm", cond=1, hasItem=LETTER),
+    d(ALBERIUS, "talk", "30284-09.htm", cond=2, hasItem=AMULET),
+    d(ALBERIUS, "talk", "30284-04.htm", cond=4, hasItem=MED1,
       ops=[take(MED1), give(LIST), cond(5)]),
-    d(ALBERIUS, "talk", "30284-05.html", cond=5, hasAny=MEDS),
-    d(ALBERIUS, "talk", "30284-06.html", cond=6, isMage=True, lacksItems=MEDS,
+    d(ALBERIUS, "talk", "30284-05.htm", cond=5, hasAny=MEDS),
+    d(ALBERIUS, "talk", "30284-06.htm", cond=6, isMage=True, lacksItems=MEDS,
       ops=reward(STAFF, SPS, 500)),
-    d(ALBERIUS, "talk", "30284-06.html", cond=6, isMage=False, lacksItems=MEDS,
+    d(ALBERIUS, "talk", "30284-06.htm", cond=6, isMage=False, lacksItems=MEDS,
       ops=reward(SWORD, SS, 500)),
-    d(COBENDELL, "talk", "30156-03.html", cond=1, hasItem=LETTER,
+    d(COBENDELL, "talk", "30156-03.htm", cond=1, hasItem=LETTER,
       ops=[take(LETTER), give(AMULET), cond(2)]),
-    d(COBENDELL, "talk", "30156-05.html", cond=3, atLeast={TEAR: 10},
+    d(COBENDELL, "talk", "30156-05.htm", cond=3, atLeast={TEAR: 10},
       ops=[take(AMULET), take(TEAR, 10),
            give(MED1), give(MED2), give(MED3), give(MED4), give(MED5), cond(4)]),
-    d(COBENDELL, "talk", "30156-04.html", cond=2, hasItem=AMULET),
-    d(COBENDELL, "talk", "30156-06.html", cond=4, hasAny=MEDS),
-    d(COBENDELL, "talk", "30156-07.html", cond=5, hasAny=MEDS),
+    d(COBENDELL, "talk", "30156-04.htm", cond=2, hasItem=AMULET),
+    d(COBENDELL, "talk", "30156-06.htm", cond=4, hasAny=MEDS),
+    d(COBENDELL, "talk", "30156-07.htm", cond=5, hasAny=MEDS),
 ]
 
 for npc, med in SENTINELS.items():
     others = [m for m in MEDS if m != med]
-    dialogs.append(d(npc, "talk", f"{npc}-01.html", cond=5, hasItems=[LIST, med], lacksItems=others,
+    dialogs.append(d(npc, "talk", f"{npc}-01.htm", cond=5, hasItems=[LIST, med], lacksItems=others,
                      ops=[take(med), cond(6)]))
-    dialogs.append(d(npc, "talk", f"{npc}-01.html", cond=5, hasItems=[LIST, med], ops=[take(med)]))
+    dialogs.append(d(npc, "talk", f"{npc}-01.htm", cond=5, hasItems=[LIST, med], ops=[take(med)]))
 
 for mob in (DRYAD, DRYAD_ELDER):
     dialogs.append(d(mob, "kill", None, cond=2, raw="",

@@ -60,21 +60,20 @@ def q366():
         "bonusAdena": 29000,
     }
     dialogs = [
-        d(DIETER, "talk", "30111-03.html", when="absent", maxLevel=47),
-        d(DIETER, "talk", "30111-01.htm", when="absent", minLevel=48),
+        d(DIETER, "talk", "30111-0.htm", when="absent", maxLevel=47),
+        d(DIETER, "talk", "30111-1.htm", when="absent", minLevel=48),
         d(
             DIETER,
             "event",
-            "30111-02.htm",
+            "30111-2.htm",
             when="absent",
-            event="30111-02",
+            event="30111-2",
             minLevel=48,
             ops=START + [cond(1)],
         ),
-        d(DIETER, "event", "30111-05.html", when="started", event="30111-05", ops=[{"op": "complete"}]),
-        d(DIETER, "event", "30111-06.html", when="started", event="30111-06"),
-        d(DIETER, "talk", "30111-04.html", when="started", hasItem=HAIR, ops=[sell]),
-        d(DIETER, "talk", "30111-07.html", when="started", lacksItems=[HAIR]),
+        d(DIETER, "event", "30111-6.htm", when="started", event="30111-6", ops=[{"op": "complete"}]),
+        d(DIETER, "talk", "30111-4.htm", when="started", hasItem=HAIR, ops=[sell]),
+        d(DIETER, "talk", "30111-3.htm", when="started", lacksItems=[HAIR]),
     ]
     for mob, ch in mobs.items():
         dialogs.append(
@@ -108,7 +107,7 @@ def q368():
         "bonusAdena": 2000,
     }
     dialogs = [
-        d(RESTINA, "talk", "30926-03.html", when="absent", maxLevel=35),
+        d(RESTINA, "talk", "30926-03.htm", when="absent", maxLevel=35),
         d(RESTINA, "talk", "30926-01.htm", when="absent", minLevel=36),
         d(
             RESTINA,
@@ -119,12 +118,12 @@ def q368():
             minLevel=36,
             ops=START + [cond(1)],
         ),
-        d(RESTINA, "event", "30926-05.html", when="started", event="30926-05", ops=[{"op": "complete"}]),
-        d(RESTINA, "event", "30926-06.html", when="started", event="30926-06"),
+        d(RESTINA, "event", "30926-05.htm", when="started", event="30926-05", ops=[{"op": "complete"}]),
+        d(RESTINA, "event", "30926-06.htm", when="started", event="30926-06"),
         d(
             RESTINA,
             "talk",
-            "30926-04.html",
+            "30926-04.htm",
             when="started",
             atLeast={FANG: 10},
             ops=[sell_hi],
@@ -132,12 +131,12 @@ def q368():
         d(
             RESTINA,
             "talk",
-            "30926-04.html",
+            "30926-04.htm",
             when="started",
             hasItem=FANG,
             ops=[sell_lo],
         ),
-        d(RESTINA, "talk", "30926-07.html", when="started", lacksItems=[FANG]),
+        d(RESTINA, "talk", "30926-06.htm", when="started", lacksItems=[FANG]),
     ]
     for mob, ch in mobs.items():
         dialogs.append(

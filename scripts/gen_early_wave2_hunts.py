@@ -84,15 +84,15 @@ def q151():
         d(ELLIAS, "talk", "30050-01.htm", when="absent", maxLevel=14),
         d(ELLIAS, "talk", "30050-02.htm", when="absent", minLevel=15),
         d(ELLIAS, "event", "30050-03.htm", when="absent", event="30050-03", minLevel=15, ops=START + [cond(1)]),
-        d(ELLIAS, "talk", "30050-04.html", cond=1),
-        d(ELLIAS, "talk", "30050-05.html", cond=1, hasItem=POISON),
-        d(ELLIAS, "talk", "30050-06.html", cond=3, hasItem=MED, ops=[
+        d(ELLIAS, "talk", "30050-04.htm", cond=1),
+        d(ELLIAS, "talk", "30050-05.htm", cond=1, hasItem=POISON),
+        d(ELLIAS, "talk", "30050-06.htm", cond=3, hasItem=MED, ops=[
             give(SHIELD), {"op": "give_exp_sp", "exp": 13106, "sp": 613}, {"op": "complete"},
         ]),
-        d(YOHANES, "talk", "30032-01.html", cond=2, hasItem=POISON, ops=[
+        d(YOHANES, "talk", "30032-01.htm", cond=2, hasItem=POISON, ops=[
             take(POISON, 1), give(MED), cond(3),
         ]),
-        d(YOHANES, "talk", "30032-02.html", cond=3, hasItem=MED),
+        d(YOHANES, "talk", "30032-02.htm", cond=3, hasItem=MED),
     ]
     for mob in MOBS:
         dialogs.append(
@@ -117,21 +117,21 @@ def q152():
         d(HARRYS, "talk", "30035-01.htm", when="absent", maxLevel=9),
         d(HARRYS, "talk", "30035-02.htm", when="absent", minLevel=10),
         d(HARRYS, "event", "30035-03.htm", when="absent", event="30035-03", minLevel=10, ops=START + [give(R1), cond(1)]),
-        d(HARRYS, "talk", "30035-04a.html", cond=1, hasItem=R1),
-        d(HARRYS, "talk", "30035-04.html", cond=2, hasItem=R2),
-        d(HARRYS, "talk", "30035-04.html", cond=3, hasItem=R2),
-        d(HARRYS, "talk", "30035-05.html", cond=4, hasItems=[R2, BOX], ops=[
+        d(HARRYS, "talk", "30035-03.htm", cond=1, hasItem=R1),
+        d(HARRYS, "talk", "30035-04.htm", cond=2, hasItem=R2),
+        d(HARRYS, "talk", "30035-04.htm", cond=3, hasItem=R2),
+        d(HARRYS, "talk", "30035-04.htm", cond=4, hasItems=[R2, BOX], ops=[
             give(ARMOR), {"op": "give_exp_sp", "exp": 5000, "sp": 0}, {"op": "complete"},
         ]),
-        d(ALTRAN, "event", "30283-02.html", when="started", event="30283-02", cond=1, hasItem=R1, ops=[
+        d(ALTRAN, "event", "30283-02.htm", when="started", event="30283-02", cond=1, hasItem=R1, ops=[
             take(R1, 1), give(R2), cond(2),
         ]),
-        d(ALTRAN, "talk", "30283-01.html", cond=1, hasItem=R1),
-        d(ALTRAN, "talk", "30283-03.html", cond=2, hasItem=R2, lacksItems=[BOX]),
-        d(ALTRAN, "talk", "30283-04.html", cond=3, hasItems=[R2, SHARD], atLeast={SHARD: 5}, ops=[
+        d(ALTRAN, "talk", "30283-01.htm", cond=1, hasItem=R1),
+        d(ALTRAN, "talk", "30283-03.htm", cond=2, hasItem=R2, lacksItems=[BOX]),
+        d(ALTRAN, "talk", "30283-04.htm", cond=3, hasItems=[R2, SHARD], atLeast={SHARD: 5}, ops=[
             take(SHARD, 5), give(BOX), cond(4),
         ]),
-        d(ALTRAN, "talk", "30283-05.html", cond=4, hasItems=[R2, BOX]),
+        d(ALTRAN, "talk", "30283-05.htm", cond=4, hasItems=[R2, BOX]),
         d(20016, "kill", None, cond=2, raw="", ops=[drop(SHARD, 0.3, limit=5, at=3)]),
     ]
     return {
@@ -150,10 +150,10 @@ def q157():
     WILFORD = 30005
     ORE, BUCKLER = 1024, 20
     dialogs = [
-        d(WILFORD, "talk", "30005-01.htm", when="absent", maxLevel=4),
+        d(WILFORD, "talk", "30005-02.htm", when="absent", maxLevel=4),
         d(WILFORD, "talk", "30005-02.htm", when="absent", minLevel=5),
-        d(WILFORD, "talk", "30005-05.html", when="started"),
-        d(WILFORD, "talk", "30005-06.html", cond=2, hasItems=[ORE], atLeast={ORE: 20}, ops=[
+        d(WILFORD, "talk", "30005-05.htm", when="started"),
+        d(WILFORD, "talk", "30005-06.htm", cond=2, hasItems=[ORE], atLeast={ORE: 20}, ops=[
             give(BUCKLER), {"op": "complete"},
         ]),
         d(WILFORD, "event", "30005-03.htm", when="any", event="30005-03"),
@@ -180,8 +180,8 @@ def q164():
         d(CREAMEES, "talk", "30149-02.htm", when="absent", races=[0, 1, 3, 4], maxLevel=20),
         d(CREAMEES, "talk", "30149-03.htm", when="absent", races=[0, 1, 3, 4], minLevel=21),
         d(CREAMEES, "event", "30149-04.htm", when="absent", event="30149-04", races=[0, 1, 3, 4], minLevel=21, ops=START + [cond(1)]),
-        d(CREAMEES, "talk", "30149-05.html", cond=1),
-        d(CREAMEES, "talk", "30149-06.html", cond=2, hasItem=SKULL, ops=[
+        d(CREAMEES, "talk", "30149-05.htm", cond=1),
+        d(CREAMEES, "talk", "30149-06.htm", cond=2, hasItem=SKULL, ops=[
             {"op": "give_adena", "count": 42130},
             {"op": "give_exp_sp", "exp": 35637, "sp": 1854}, {"op": "complete"},
         ]),
@@ -208,8 +208,8 @@ def q165():
         d(NELSYA, "talk", "30348-01.htm", when="absent", races=[2], maxLevel=2),
         d(NELSYA, "talk", "30348-02.htm", when="absent", races=[2], minLevel=3),
         d(NELSYA, "event", "30348-03.htm", when="absent", event="30348-03", races=[2], minLevel=3, ops=START + [cond(1)]),
-        d(NELSYA, "talk", "30348-04.html", cond=1),
-        d(NELSYA, "talk", "30348-05.html", cond=2, atLeast={BEZOAR: 13}, ops=[
+        d(NELSYA, "talk", "30348-04.htm", cond=1),
+        d(NELSYA, "talk", "30348-05.htm", cond=2, atLeast={BEZOAR: 13}, ops=[
             give(POT, 5), {"op": "give_exp_sp", "exp": 1000, "sp": 0}, {"op": "complete"},
         ]),
     ]
@@ -234,13 +234,13 @@ def q169():
     CRACKED, PERFECT, LEGS = 1030, 1031, 31
     dialogs = [
         d(V, "talk", "30145-00.htm", when="absent", races=[0, 1, 3, 4]),
-        d(V, "talk", "30145-01.htm", when="absent", races=[2], maxLevel=14),
+        d(V, "talk", "30145-02.htm", when="absent", races=[2], maxLevel=14),
         d(V, "talk", "30145-02.htm", when="absent", races=[2], minLevel=15),
         d(V, "event", "30145-03.htm", when="absent", event="30145-03", races=[2], minLevel=15, ops=START + [cond(1)]),
-        d(V, "talk", "30145-04.html", cond=1, lacksItems=[PERFECT]),
-        d(V, "talk", "30145-05.html", cond=1, hasItem=CRACKED, lacksItems=[PERFECT]),
-        d(V, "talk", "30145-06.html", cond=2, hasItem=PERFECT),
-        d(V, "event", "30145-07.html", when="started", event="30145-07", cond=2, hasItem=PERFECT, ops=[
+        d(V, "talk", "30145-04.htm", cond=1, lacksItems=[PERFECT]),
+        d(V, "talk", "30145-05.htm", cond=1, hasItem=CRACKED, lacksItems=[PERFECT]),
+        d(V, "talk", "30145-06.htm", cond=2, hasItem=PERFECT),
+        d(V, "event", "30145-07.htm", when="started", event="30145-07", cond=2, hasItem=PERFECT, ops=[
             give(LEGS),
             {"op": "give_exp_sp", "exp": 17475, "sp": 818},
             {"op": "give_adena", "count": 17030},  # base; cracked bonus in Mobius is +10 each
@@ -280,10 +280,10 @@ def q170():
     dialogs = [
         d(VELLIOR, "talk", "30305-03.htm", when="absent", races=[0, 1, 3, 4]),
         d(VELLIOR, "talk", "30305-02.htm", when="absent", races=[2], maxLevel=20),
-        d(VELLIOR, "talk", "30305-01.htm", when="absent", races=[2], minLevel=21),
+        d(VELLIOR, "talk", "30305-02.htm", when="absent", races=[2], minLevel=21),
         d(VELLIOR, "event", "30305-04.htm", when="absent", event="30305-04", races=[2], minLevel=21, ops=START + [cond(1)]),
-        d(VELLIOR, "talk", "30305-05.html", cond=1),
-        d(VELLIOR, "talk", "30305-06.html", cond=2, ops=[
+        d(VELLIOR, "talk", "30305-05.htm", cond=1),
+        d(VELLIOR, "talk", "30305-06.htm", cond=2, ops=[
             {"op": "give_adena", "count": 102680}, {"op": "give_exp_sp", "exp": 38607, "sp": 4018}, {"op": "complete"},
         ]),
         d(27022, "kill", None, cond=1, raw="", ops=[give(CRYSTAL), cond(2)]),
@@ -304,16 +304,16 @@ def q257():
     G = 30039
     MARK, AMULET, NECK, FANG = 1084, 752, 1085, 1086
     dialogs = [
-        d(G, "talk", "30039-01.html", when="absent", maxLevel=5),
+        d(G, "talk", "30039-01.htm", when="absent", maxLevel=5),
         d(G, "talk", "30039-02.htm", when="absent", minLevel=6),
         d(G, "event", "30039-03.htm", when="absent", event="30039-03", minLevel=6, ops=START + [give(MARK), cond(1)]),
-        d(G, "event", "30039-05.html", when="started", event="30039-05", ops=[{"op": "complete"}]),
-        d(G, "event", "30039-06.html", when="started", event="30039-06"),
-        d(G, "talk", "30039-04.html", cond=1, lacksItems=[AMULET, NECK, FANG]),
+        d(G, "event", "30039-05.htm", when="started", event="30039-05", ops=[{"op": "complete"}]),
+        d(G, "event", "30039-06.htm", when="started", event="30039-06"),
+        d(G, "talk", "30039-04.htm", cond=1, lacksItems=[AMULET, NECK, FANG]),
         d(
             G,
             "talk",
-            "30039-07.html",
+            "30039-07.htm",
             cond=1,
             hasAny=[AMULET, NECK, FANG],
             ops=[
@@ -368,14 +368,14 @@ def q258():
     LECTOR = 30001
     PELT = 702
     dialogs = [
-        d(LECTOR, "talk", "30001-01.html", when="absent", maxLevel=2),
+        d(LECTOR, "talk", "30001-01.htm", when="absent", maxLevel=2),
         d(LECTOR, "talk", "30001-02.htm", when="absent", minLevel=3),
-        d(LECTOR, "event", "30001-03.html", when="absent", event="30001-03", minLevel=3, ops=START + [cond(1)]),
-        d(LECTOR, "talk", "30001-04.html", cond=1),
+        d(LECTOR, "event", "30001-03.htm", when="absent", event="30001-03", minLevel=3, ops=START + [cond(1)]),
+        d(LECTOR, "talk", "30001-03.htm", cond=1),
         d(
             LECTOR,
             "talk",
-            "30001-05.html",
+            "30001-05.htm",
             cond=2,
             atLeast={PELT: 40},
             ops=[give(390), {"op": "complete"}],
@@ -407,17 +407,17 @@ def q260():
         20473: NECK,
     }
     dialogs = [
-        d(RAYEN, "talk", "30221-01.html", when="absent", races=[0, 2, 3, 4]),
-        d(RAYEN, "talk", "30221-02.html", when="absent", races=[1], maxLevel=5),
+        d(RAYEN, "talk", "30221-01.htm", when="absent", races=[0, 2, 3, 4]),
+        d(RAYEN, "talk", "30221-02.htm", when="absent", races=[1], maxLevel=5),
         d(RAYEN, "talk", "30221-03.htm", when="absent", races=[1], minLevel=6),
         d(RAYEN, "event", "30221-04.htm", when="absent", event="30221-04", races=[1], minLevel=6, ops=START + [cond(1)]),
-        d(RAYEN, "event", "30221-07.html", when="started", event="30221-07", ops=[{"op": "complete"}]),
-        d(RAYEN, "event", "30221-08.html", when="started", event="30221-08"),
-        d(RAYEN, "talk", "30221-05.html", cond=1, lacksItems=[AMU, NECK]),
+        d(RAYEN, "event", "30221-07.htm", when="started", event="30221-07", ops=[{"op": "complete"}]),
+        d(RAYEN, "event", "30221-07.htm", when="started", event="30221-07"),
+        d(RAYEN, "talk", "30221-05.htm", cond=1, lacksItems=[AMU, NECK]),
         d(
             RAYEN,
             "talk",
-            "30221-06.html",
+            "30221-06.htm",
             cond=1,
             hasAny=[AMU, NECK],
             ops=[
@@ -453,13 +453,13 @@ def q263():
         d(K, "talk", "30346-02.htm", when="absent", races=[2], maxLevel=7),
         d(K, "talk", "30346-03.htm", when="absent", races=[2], minLevel=8),
         d(K, "event", "30346-04.htm", when="absent", event="30346-04", races=[2], minLevel=8, ops=START + [cond(1)]),
-        d(K, "event", "30346-07.html", when="started", event="30346-07", ops=[{"op": "complete"}]),
-        d(K, "event", "30346-08.html", when="started", event="30346-08"),
-        d(K, "talk", "30346-05.html", cond=1, lacksItems=[AMU, NECK]),
+        d(K, "event", "30346-07.htm", when="started", event="30346-07", ops=[{"op": "complete"}]),
+        d(K, "event", "30346-07.htm", when="started", event="30346-07"),
+        d(K, "talk", "30346-05.htm", cond=1, lacksItems=[AMU, NECK]),
         d(
             K,
             "talk",
-            "30346-06.html",
+            "30346-06.htm",
             cond=1,
             hasAny=[AMU, NECK],
             ops=[
@@ -493,11 +493,11 @@ def q264():
         d(PAINT, "talk", "30136-01.htm", when="absent", maxLevel=2),
         d(PAINT, "talk", "30136-02.htm", when="absent", minLevel=3),
         d(PAINT, "event", "30136-03.htm", when="absent", event="30136-03", minLevel=3, ops=START + [cond(1)]),
-        d(PAINT, "talk", "30136-04.html", cond=1),
+        d(PAINT, "talk", "30136-04.htm", cond=1),
         d(
             PAINT,
             "talk",
-            "30136-05.html",
+            "30136-05.htm",
             cond=2,
             atLeast={CLAW: 50},
             ops=[
@@ -526,17 +526,17 @@ def q265():
     K = 30357
     SHACK = 1368
     dialogs = [
-        d(K, "talk", "30357-01.html", when="absent", races=[0, 1, 3, 4]),
-        d(K, "talk", "30357-02.html", when="absent", races=[2], maxLevel=5),
+        d(K, "talk", "30357-01.htm", when="absent", races=[0, 1, 3, 4]),
+        d(K, "talk", "30357-02.htm", when="absent", races=[2], maxLevel=5),
         d(K, "talk", "30357-03.htm", when="absent", races=[2], minLevel=6),
         d(K, "event", "30357-04.htm", when="absent", event="30357-04", races=[2], minLevel=6, ops=START + [cond(1)]),
-        d(K, "event", "30357-07.html", when="started", event="30357-07", ops=[{"op": "complete"}]),
-        d(K, "event", "30357-08.html", when="started", event="30357-08"),
-        d(K, "talk", "30357-05.html", cond=1, lacksItems=[SHACK]),
+        d(K, "event", "30357-07.htm", when="started", event="30357-07", ops=[{"op": "complete"}]),
+        d(K, "event", "30357-07.htm", when="started", event="30357-07"),
+        d(K, "talk", "30357-05.htm", cond=1, lacksItems=[SHACK]),
         d(
             K,
             "talk",
-            "30357-06.html",
+            "30357-06.htm",
             cond=1,
             hasItem=SHACK,
             ops=[{"op": "sell_items", "prices": [{"itemId": SHACK, "adena": 12}], "bonusMin": 10, "bonusAdena": 500}],
@@ -564,11 +564,11 @@ def q266():
         d(PIXY, "talk", "31852-02.htm", when="absent", races=[1], maxLevel=2),
         d(PIXY, "talk", "31852-03.htm", when="absent", races=[1], minLevel=3),
         d(PIXY, "event", "31852-04.htm", when="absent", event="31852-04", races=[1], minLevel=3, ops=START + [cond(1)]),
-        d(PIXY, "talk", "31852-05.html", cond=1),
+        d(PIXY, "talk", "31852-05.htm", cond=1),
         d(
             PIXY,
             "talk",
-            "31852-06.html",
+            "31852-05.htm",
             cond=2,
             atLeast={FANG: 100},
             ops=[give(1336), give(1060), {"op": "complete"}],
@@ -629,11 +629,11 @@ def q271():
             lacksItems=[NECK_COURAGE, NECK_VALOR],
             ops=START + [cond(1)],
         ),
-        d(RUKAIN, "talk", "30577-05.html", cond=1),
+        d(RUKAIN, "talk", "30577-05.htm", cond=1),
         d(
             RUKAIN,
             "talk",
-            "30577-06.html",
+            "30577-06.htm",
             cond=2,
             atLeast={FANG: 50},
             ops=[
@@ -663,11 +663,11 @@ def q272():
         d(LIVINA, "talk", "30572-02.htm", when="absent", races=[3], maxLevel=4),
         d(LIVINA, "talk", "30572-03.htm", when="absent", races=[3], minLevel=5),
         d(LIVINA, "event", "30572-04.htm", when="absent", event="30572-04", races=[3], minLevel=5, ops=START + [cond(1)]),
-        d(LIVINA, "talk", "30572-05.html", cond=1),
+        d(LIVINA, "talk", "30572-05.htm", cond=1),
         d(
             LIVINA,
             "talk",
-            "30572-06.html",
+            "30572-05.htm",
             cond=2,
             atLeast={HEAD: 50},
             ops=[{"op": "give_adena", "count": 1500}, {"op": "complete"}],
@@ -696,13 +696,13 @@ def q273():
         d(V, "talk", "30566-02.htm", when="absent", races=[3], maxLevel=5),
         d(V, "talk", "30566-03.htm", when="absent", races=[3], minLevel=6),
         d(V, "event", "30566-04.htm", when="absent", event="30566-04", races=[3], minLevel=6, ops=START + [cond(1)]),
-        d(V, "event", "30566-08.html", when="started", event="30566-08", ops=[{"op": "complete"}]),
-        d(V, "event", "30566-09.html", when="started", event="30566-09"),
-        d(V, "talk", "30566-05.html", cond=1, lacksItems=[BLACK, RED]),
+        d(V, "event", "30566-08.htm", when="started", event="30566-08", ops=[{"op": "complete"}]),
+        d(V, "event", "30566-08.htm", when="started", event="30566-08"),
+        d(V, "talk", "30566-05.htm", cond=1, lacksItems=[BLACK, RED]),
         d(
             V,
             "talk",
-            "30566-06.html",
+            "30566-06.htm",
             cond=1,
             hasItems=[BLACK],
             lacksItems=[RED],
@@ -714,7 +714,7 @@ def q273():
         d(
             V,
             "talk",
-            "30566-07.html",
+            "30566-07.htm",
             cond=1,
             hasItem=RED,
             ops=[
@@ -754,16 +754,16 @@ def q274():
     HEAD, TOTEM = 1477, 1501
     NECK_COURAGE, NECK_VALOR = 1506, 1507
     dialogs = [
-        d(B, "talk", "30569-08.html", when="absent", lacksItems=[NECK_COURAGE, NECK_VALOR]),
-        d(B, "talk", "30569-01.html", when="absent", races=[0, 1, 2, 4], hasAny=[NECK_COURAGE, NECK_VALOR]),
-        d(B, "talk", "30569-02.html", when="absent", races=[3], maxLevel=8, hasAny=[NECK_COURAGE, NECK_VALOR]),
+        d(B, "talk", "30569-07.htm", when="absent", lacksItems=[NECK_COURAGE, NECK_VALOR]),
+        d(B, "talk", "30569-01.htm", when="absent", races=[0, 1, 2, 4], hasAny=[NECK_COURAGE, NECK_VALOR]),
+        d(B, "talk", "30569-02.htm", when="absent", races=[3], maxLevel=8, hasAny=[NECK_COURAGE, NECK_VALOR]),
         d(B, "talk", "30569-03.htm", when="absent", races=[3], minLevel=9, hasAny=[NECK_COURAGE, NECK_VALOR]),
         d(B, "event", "30569-04.htm", when="absent", event="30569-04", races=[3], minLevel=9, hasAny=[NECK_COURAGE, NECK_VALOR], ops=START + [cond(1)]),
-        d(B, "talk", "30569-05.html", cond=1),
+        d(B, "talk", "30569-05.htm", cond=1),
         d(
             B,
             "talk",
-            "30569-06.html",
+            "30569-06.htm",
             cond=2,
             atLeast={HEAD: 40},
             lacksItems=[TOTEM],
@@ -779,7 +779,7 @@ def q274():
         d(
             B,
             "talk",
-            "30569-07.html",
+            "30569-07.htm",
             cond=2,
             atLeast={HEAD: 40},
             hasItem=TOTEM,

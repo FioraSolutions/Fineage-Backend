@@ -59,15 +59,15 @@ def q105():
         d(K, "talk", "30218-03.htm", when="absent", races=[1], minLevel=10),
         d(K, "talk", "30218-02.htm", when="absent", races=[1]),
         d(K, "talk", "30218-01.htm", when="absent"),
-        d(K, "event", "30218-04.html", when="absent", event="30218-04", races=[1], minLevel=10,
+        d(K, "event", "30218-04.htm", when="absent", event="30218-04", races=[1], minLevel=10,
           ops=START + [give(O1), cond(1)]),
-        d(K, "event", "30218-05.html", when="any", event="30218-05"),
-        d(K, "talk", "30218-06.html", cond=1, hasAny=[O1, 1837, 1838, 1839]),
+        d(K, "event", "30218-05.htm", when="any", event="30218-05"),
+        d(K, "talk", "30218-06.htm", cond=1, hasAny=[O1, 1837, 1838, 1839]),
         # Linear path: only 1st then 5th order (Mobius rolls random among 1-4 / 5-8).
-        d(K, "talk", "30218-07.html", cond=2, hasItem=T1,
+        d(K, "talk", "30218-07.htm", cond=2, hasItem=T1,
           ops=[take(O1), take(T1), give(O5), cond(3)]),
-        d(K, "talk", "30218-08.html", cond=3, hasItem=O5),
-        d(K, "talk", "30218-09.html", cond=4, hasItem=T2, ops=[
+        d(K, "talk", "30218-08.htm", cond=3, hasItem=O5),
+        d(K, "talk", "30218-08.htm", cond=4, hasItem=T2, ops=[
             {"op": "give_adena", "count": 17599},
             {"op": "give_exp_sp", "exp": 41478, "sp": 3555},
             {"op": "complete"},
@@ -90,14 +90,14 @@ def q159():
     dialogs = [
         d(A, "talk", "30154-03.htm", when="absent", races=[1], minLevel=12),
         d(A, "talk", "30154-02.htm", when="absent", races=[1]),
-        d(A, "talk", "30154-01.htm", when="absent"),
-        d(A, "event", "30154-04.htm", when="absent", event="30154-04", races=[1], minLevel=12,
+        d(A, "talk", "30154-00.htm", when="absent"),
+        d(A, "event", "30154-03.htm", when="absent", event="30154-03", races=[1], minLevel=12,
           ops=START + [give(C1), cond(1)]),
-        d(A, "talk", "30154-05.html", cond=1, hasItem=C1, lacksItems=[DUST]),
-        d(A, "talk", "30154-06.html", cond=2, hasItems=[C1, DUST],
+        d(A, "talk", "30154-05.htm", cond=1, hasItem=C1, lacksItems=[DUST]),
+        d(A, "talk", "30154-06.htm", cond=2, hasItems=[C1, DUST],
           ops=[take(C1), take(DUST), give(C2), cond(3)]),
-        d(A, "talk", "30154-07.html", cond=3, hasItem=C2),
-        d(A, "talk", "30154-08.html", cond=4, hasItem=C2, atLeast={DUST: 5}, ops=[
+        d(A, "talk", "30154-07.htm", cond=3, hasItem=C2),
+        d(A, "talk", "30154-08.htm", cond=4, hasItem=C2, atLeast={DUST: 5}, ops=[
             {"op": "give_adena", "count": 18250},
             {"op": "complete"},
         ]),
@@ -127,13 +127,13 @@ def q162():
         d(U, "event", "30147-04.htm", when="absent", event="30147-04",
           races=[0, 1, 3, 4], minLevel=12, ops=START + [cond(1)]),
         # Done when 10 bones + 3 skulls (Mobius REQUIRED_COUNT 13)
-        d(U, "talk", "30147-06.html", cond=1, atLeast={BONE: 10, SKULL: 3}, ops=[
+        d(U, "talk", "30147-06.htm", cond=1, atLeast={BONE: 10, SKULL: 3}, ops=[
             give(SHIELD),
             {"op": "give_exp_sp", "exp": 22652, "sp": 1004},
             {"op": "give_adena", "count": 24000},
             {"op": "complete"},
         ]),
-        d(U, "talk", "30147-05.html", cond=1),
+        d(U, "talk", "30147-05.htm", cond=1),
     ]
     for mob, ch in skulls.items():
         dialogs.append(d(mob, "kill", None, cond=1, raw="", ops=[drop(SKULL, ch, limit=3)]))
@@ -156,16 +156,16 @@ def q163():
         d(S, "talk", "30220-02.htm", when="absent", races=[0, 1, 3, 4], minLevel=11),
         d(S, "talk", "30220-01.htm", when="absent", races=[0, 1, 3, 4]),
         d(S, "talk", "30220-00.htm", when="absent", races=[2]),
-        d(S, "event", "30220-03.html", when="any", event="30220-03"),
-        d(S, "event", "30220-04.html", when="any", event="30220-04"),
+        d(S, "event", "30220-02.htm", when="any", event="30220-02"),
+        d(S, "event", "30220-05.htm", when="any", event="30220-05"),
         d(S, "event", "30220-05.htm", when="absent", event="30220-05",
           races=[0, 1, 3, 4], minLevel=11, ops=START + [cond(1)]),
-        d(S, "talk", "30220-07.html", cond=1, hasItems=poems, ops=[
+        d(S, "talk", "30220-05.htm", cond=1, hasItems=poems, ops=[
             {"op": "give_exp_sp", "exp": 21643, "sp": 943},
             {"op": "give_adena", "count": 13890},
             {"op": "complete"},
         ]),
-        d(S, "talk", "30220-06.html", cond=1),
+        d(S, "talk", "30220-05.htm", cond=1),
     ]
     # One kill dialog per mob: OnKill matches a single dialog; Mobius rolls all four independently.
     poem_ops = [drop(poem, ch, limit=1) for poem, ch in chances.items()]

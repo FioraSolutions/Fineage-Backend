@@ -234,7 +234,7 @@ def q358():
     # Random among REWARDS — fix first (Dark Crystal Shield recipe)
     REWARD = 5364
     dialogs = [
-        d(OLTRAN, "talk", "30862-05.html", when="absent", maxLevel=62),
+        d(OLTRAN, "talk", "30862-05.htm", when="absent", maxLevel=62),
         d(OLTRAN, "talk", "30862-01.htm", when="absent", minLevel=63),
         d(OLTRAN, "event", "30862-02.htm", when="absent", event="30862-02", minLevel=63),
         d(OLTRAN, "event", "30862-03.htm", when="absent", event="30862-03", minLevel=63),
@@ -250,12 +250,12 @@ def q358():
         d(
             OLTRAN,
             "talk",
-            "30862-07.html",
+            "30862-07.htm",
             when="started",
             atLeast={SCALE: NEED},
             ops=[take(SCALE, NEED), give(REWARD), {"op": "complete"}],
         ),
-        d(OLTRAN, "talk", "30862-06.html", when="started"),
+        d(OLTRAN, "talk", "30862-06.htm", when="started"),
     ]
     for mob, ch in ((20672, 0.71), (20673, 0.74)):
         dialogs.append(

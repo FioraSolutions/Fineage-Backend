@@ -154,7 +154,7 @@ def q3():
     # Race: Dark Elf = 2
     dialogs = [
         d(TALLOTH, "talk", "30141-00.htm", when="absent", races=[0, 1, 3, 4]),
-        d(TALLOTH, "talk", "30141-01.html", when="absent", races=[2], maxLevel=15),
+        d(TALLOTH, "talk", "30141-00.htm", when="absent", races=[2], maxLevel=15),
         d(TALLOTH, "talk", "30141-02.htm", when="absent", races=[2], minLevel=16),
         d(
             TALLOTH,
@@ -169,13 +169,13 @@ def q3():
         d(
             TALLOTH,
             "talk",
-            "30141-06.html",
+            "30141-03.htm",
             cond=1,
             atLeast={EYE: 1, STONE: 1, BLOOD: 1},
             ops=[take(EYE), take(STONE), take(BLOOD), give(SCROLL), {"op": "complete"}],
         ),
-        d(TALLOTH, "talk", "30141-04.html", cond=1),
-        d(TALLOTH, "event", "30141-05.html", cond=1, event="30141-05"),
+        d(TALLOTH, "talk", "30141-03.htm", cond=1),
+        d(TALLOTH, "event", "30141-03.htm", cond=1, event="30141-03"),
     ]
     # Unique one-shots (Mobius: give if missing; cond 2 when all three — we finish via atLeast).
     for mob in (20031,):

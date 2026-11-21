@@ -75,45 +75,22 @@ def q632():
         21591: 0.502, 21592: 0.370, 21593: 0.592, 21594: 0.554, 21595: 0.392,
     }
     dialogs = [
-        d(WIZ, "talk", "31522-103.htm", when="absent", maxLevel=62),
-        d(WIZ, "talk", "31522-101.htm", when="absent", minLevel=63),
+        d(WIZ, "talk", "31522-01.htm", when="absent", maxLevel=62),
+        d(WIZ, "talk", "31522-02.htm", when="absent", minLevel=63),
+        d(WIZ, "event", "31522-03.htm", when="absent", event="31522-03", minLevel=63, ops=START),
+        d(WIZ, "talk", "31522-04.htm", when="started", lacksItems=[HEART]),
+        d(WIZ, "talk", "31522-05.htm", when="started", atLeast={HEART: 200}),
         d(
             WIZ,
             "event",
-            "31522-104.htm",
-            when="absent",
-            event="31522-104",
-            minLevel=63,
-            ops=START + [cond(1), setv("memo", 11)],
-        ),
-        d(WIZ, "event", "31522-201.html", when="started", event="31522-201"),
-        d(
-            WIZ,
-            "event",
-            "31522-202.html",
+            "31522-06.htm",
             when="started",
-            event="31522-202",
+            event="31522-06",
             atLeast={HEART: 200},
-            ops=[take(HEART, 200), adena(120000), setv("memo", 11), cond(1)],
+            ops=[take(HEART, 200), adena(120000), cond(1)],
         ),
-        d(WIZ, "event", "31522-203.html", when="started", event="31522-202"),
-        d(
-            WIZ,
-            "event",
-            "31522-204.html",
-            when="started",
-            event="31522-204",
-            ops=[{"op": "complete"}],
-        ),
-        d(
-            WIZ,
-            "talk",
-            "31522-105.html",
-            when="started",
-            atLeast={HEART: 200},
-            ops=[setv("memo", 12), cond(2)],
-        ),
-        d(WIZ, "talk", "31522-106.html", when="started"),
+        d(WIZ, "event", "31522-09.htm", when="started", event="31522-06", lacksItems=[HEART]),
+        d(WIZ, "event", "31522-08.htm", when="started", event="31522-08", ops=[{"op": "complete"}]),
     ]
     for mob, ch in brains.items():
         dialogs.append(
@@ -162,7 +139,7 @@ def q633():
         21601: (RIB, 0.677),
     }
     dialogs = [
-        d(MINA, "talk", "31388-02.htm", when="absent", maxLevel=64),
+        d(MINA, "talk", "31388-01.htm", when="absent", maxLevel=64),
         d(MINA, "talk", "31388-01.htm", when="absent", minLevel=65),
         d(
             MINA,
@@ -173,23 +150,23 @@ def q633():
             minLevel=65,
             ops=START + [cond(1)],
         ),
-        d(MINA, "event", "31388-04.html", when="started", event="31388-04"),
-        d(MINA, "event", "31388-05.html", when="started", event="31388-05"),
-        d(MINA, "event", "31388-06.html", when="started", event="31388-06"),
+        d(MINA, "event", "31388-04.htm", when="started", event="31388-04"),
+        d(MINA, "event", "31388-05.htm", when="started", event="31388-05"),
+        d(MINA, "event", "31388-06.htm", when="started", event="31388-06"),
         d(
             MINA,
             "event",
-            "31388-07.html",
+            "31388-07.htm",
             when="started",
             event="31388-07",
             cond=2,
             atLeast={RIB: 200},
             ops=[take(RIB, 200), adena(25000), exp_sp(305235, 0), cond(1)],
         ),
-        d(MINA, "event", "31388-08.html", when="started", event="31388-07"),
-        d(MINA, "event", "31388-09.html", when="started", event="31388-09", ops=[{"op": "complete"}]),
-        d(MINA, "talk", "31388-04.html", when="started", atLeast={RIB: 200}),
-        d(MINA, "talk", "31388-05.html", when="started"),
+        d(MINA, "event", "31388-08.htm", when="started", event="31388-07"),
+        d(MINA, "event", "31388-09.htm", when="started", event="31388-09", ops=[{"op": "complete"}]),
+        d(MINA, "talk", "31388-04.htm", when="started", atLeast={RIB: 200}),
+        d(MINA, "talk", "31388-05.htm", when="started"),
     ]
     for mob, (item, ch) in drops.items():
         if item == RIB:
@@ -220,7 +197,7 @@ def q601():
     # Random reward → no-item branch (i=3): 230000 adena (jewelry ids missing in Fineage)
     finish = [take(PROOF, 100), adena(230000), {"op": "complete"}]
     dialogs = [
-        d(EYE, "talk", "31683-00.htm", when="absent", maxLevel=70),
+        d(EYE, "talk", "31683-03.htm", when="absent", maxLevel=70),
         d(EYE, "talk", "31683-01.htm", when="absent", minLevel=71),
         d(
             EYE,
@@ -231,18 +208,18 @@ def q601():
             minLevel=71,
             ops=START + [cond(1)],
         ),
-        d(EYE, "talk", "31683-03.html", cond=1),
-        d(EYE, "talk", "31683-04.html", cond=2),
+        d(EYE, "talk", "31683-03.htm", cond=1),
+        d(EYE, "talk", "31683-04.htm", cond=2),
         d(
             EYE,
             "event",
-            "31683-05.html",
+            "31683-05.htm",
             event="31683-05",
             cond=2,
             atLeast={PROOF: 100},
             ops=finish,
         ),
-        d(EYE, "event", "31683-06.html", event="31683-05", when="started"),
+        d(EYE, "event", "31683-06.htm", event="31683-05", when="started"),
     ]
     for mob, ch in mobs.items():
         dialogs.append(
@@ -272,7 +249,7 @@ def q602():
     # no-item branch: adena 100000 + exp/sp
     finish = [take(DARK, 100), adena(100000), exp_sp(140000, 11250), {"op": "complete"}]
     dialogs = [
-        d(EYE, "talk", "31683-00.htm", when="absent", maxLevel=67),
+        d(EYE, "talk", "31683-03.htm", when="absent", maxLevel=67),
         d(EYE, "talk", "31683-01.htm", when="absent", minLevel=68),
         d(
             EYE,
@@ -283,18 +260,18 @@ def q602():
             minLevel=68,
             ops=START + [cond(1)],
         ),
-        d(EYE, "talk", "31683-03.html", cond=1),
-        d(EYE, "talk", "31683-04.html", cond=2),
+        d(EYE, "talk", "31683-03.htm", cond=1),
+        d(EYE, "talk", "31683-04.htm", cond=2),
         d(
             EYE,
             "event",
-            "31683-05.html",
+            "31683-05.htm",
             event="31683-05",
             cond=2,
             atLeast={DARK: 100},
             ops=finish,
         ),
-        d(EYE, "event", "31683-06.html", event="31683-05", when="started"),
+        d(EYE, "event", "31683-06.htm", event="31683-05", when="started"),
         d(21299, "kill", None, cond=1, raw="", ops=[drop(DARK, 0.560, limit=100, at=2)]),
         d(21304, "kill", None, cond=1, raw="", ops=[drop(DARK, 0.800, limit=100, at=2)]),
     ]

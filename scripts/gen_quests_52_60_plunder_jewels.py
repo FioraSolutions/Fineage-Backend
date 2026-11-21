@@ -88,26 +88,23 @@ def q360():
         "bonusAdena": 0,
     }
     dialogs = [
-        d(COLEMAN, "talk", "30873-01.html", when="absent", maxLevel=51),
-        d(COLEMAN, "talk", "30873-02.htm", when="absent", minLevel=52),
-        d(COLEMAN, "event", "30873-03.htm", when="absent", event="30873-03", minLevel=52),
+        d(COLEMAN, "talk", "30873-0a.htm", when="absent", maxLevel=51),
+        d(COLEMAN, "talk", "30873-0.htm", when="absent", minLevel=52),
         d(
             COLEMAN,
             "event",
-            "30873-04.htm",
+            "30873-2.htm",
             when="absent",
-            event="30873-04",
+            event="30873-2",
             minLevel=52,
             ops=START + [cond(1)],
         ),
-        d(COLEMAN, "event", "30873-09.html", when="started", event="30873-09"),
-        # Mobius exitQuest(false) — one-shot
-        d(COLEMAN, "event", "30873-10.html", when="started", event="30873-10", ops=[{"op": "complete"}]),
+        d(COLEMAN, "event", "30873-6.htm", when="started", event="30873-6", ops=[{"op": "complete"}]),
         # Sell paths; ≥5 pieces → recipe first (Mobius converts on the 5th kill)
         d(
             COLEMAN,
             "talk",
-            "30873-07.html",
+            "30873-5.htm",
             when="started",
             hasItem=SUPPLY,
             hasAny=[RECIPE],
@@ -116,7 +113,7 @@ def q360():
         d(
             COLEMAN,
             "talk",
-            "30873-07.html",
+            "30873-5.htm",
             when="started",
             hasItem=SUPPLY,
             atLeast={PIECE: 5},
@@ -125,7 +122,7 @@ def q360():
         d(
             COLEMAN,
             "talk",
-            "30873-06.html",
+            "30873-6.htm",
             when="started",
             hasItem=SUPPLY,
             ops=[sell_supply],
@@ -133,7 +130,7 @@ def q360():
         d(
             COLEMAN,
             "talk",
-            "30873-08.html",
+            "30873-4.htm",
             when="started",
             hasItem=RECIPE,
             ops=[sell_recipe],
@@ -141,12 +138,12 @@ def q360():
         d(
             COLEMAN,
             "talk",
-            "30873-08.html",
+            "30873-4.htm",
             when="started",
             atLeast={PIECE: 5},
             ops=[take(PIECE, 5), give(RECIPE), sell_recipe],
         ),
-        d(COLEMAN, "talk", "30873-05.html", when="started"),
+        d(COLEMAN, "talk", "30873-5.htm", when="started"),
     ]
     for mob, ch in mobs.items():
         # Mobius: killer in range (not getRandomPartyMember). Avoid party+piece limit
@@ -186,7 +183,7 @@ def q369():
     }
     m = lambda v: dict(whenVar="memo", whenValue=str(v))
     dialogs = [
-        d(NELL, "talk", "30376-03.html", when="absent", maxLevel=24),
+        d(NELL, "talk", "30376-03.htm", when="absent", maxLevel=24),
         d(NELL, "talk", "30376-01.htm", when="absent", minLevel=25),
         d(
             NELL,
@@ -197,24 +194,24 @@ def q369():
             minLevel=25,
             ops=START + [cond(1), setv("memo", 1)],
         ),
-        d(NELL, "event", "30376-05.html", when="started", event="30376-05"),
-        d(NELL, "event", "30376-07.html", when="started", event="30376-07", ops=[{"op": "complete"}]),
+        d(NELL, "event", "30376-05.htm", when="started", event="30376-05"),
+        d(NELL, "event", "30376-07.htm", when="started", event="30376-07", ops=[{"op": "complete"}]),
         # Phase 1 complete: 50+50
         d(
             NELL,
             "talk",
-            "30376-04.html",
+            "30376-04.htm",
             when="started",
             atLeast={FLARE: 50, FREEZE: 50},
             ops=[take(FLARE, 50), take(FREEZE, 50), adena(31810), setv("memo", 2), cond(2)],
             **m(1),
         ),
-        d(NELL, "talk", "30376-08.html", when="started", **m(1)),
-        d(NELL, "talk", "30376-09.html", when="started", **m(2)),
+        d(NELL, "talk", "30376-08.htm", when="started", **m(1)),
+        d(NELL, "talk", "30376-09.htm", when="started", **m(2)),
         d(
             NELL,
             "event",
-            "30376-06.html",
+            "30376-06.htm",
             when="started",
             event="30376-06",
             ops=[setv("memo", 3), cond(3)],
@@ -224,13 +221,13 @@ def q369():
         d(
             NELL,
             "talk",
-            "30376-10.html",
+            "30376-10.htm",
             when="started",
             atLeast={FLARE: 200, FREEZE: 200},
             ops=[take(FLARE, 200), take(FREEZE, 200), adena(84415), {"op": "complete"}],
             **m(3),
         ),
-        d(NELL, "talk", "30376-11.html", when="started", **m(3)),
+        d(NELL, "talk", "30376-10.htm", when="started", **m(3)),
     ]
     for mob, (item, ch, cnt) in mobs.items():
         dialogs.append(

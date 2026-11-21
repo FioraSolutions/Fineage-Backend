@@ -148,11 +148,11 @@ def q291():
             minLevel=4,
             ops=START + [cond(1)],
         ),
-        d(MARYSE, "talk", "30553-04.html", cond=1),
+        d(MARYSE, "talk", "30553-04.htm", cond=1),
         d(
             MARYSE,
             "talk",
-            "30553-05.html",
+            "30553-05.htm",
             cond=2,
             atLeast={PELT: 40},
             ops=[
@@ -196,13 +196,13 @@ def q292():
             minLevel=5,
             ops=START + [cond(1)],
         ),
-        d(SPIRON, "event", "30532-06.html", when="started", event="30532-06", ops=[{"op": "complete"}]),
-        d(SPIRON, "event", "30532-07.html", when="started", event="30532-07"),
+        d(SPIRON, "event", "30532-06.htm", when="started", event="30532-06", ops=[{"op": "complete"}]),
+        d(SPIRON, "event", "30532-07.htm", when="started", event="30532-07"),
         # 3 memos → contract turn-in (+ jewelry if held). Mobius converts on the 3rd kill.
         d(
             SPIRON,
             "talk",
-            "30532-10.html",
+            "30532-10.htm",
             when="started",
             hasAny=JEWEL,
             atLeast={MEMO: 3},
@@ -212,7 +212,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-10.html",
+            "30532-10.htm",
             when="started",
             atLeast={MEMO: 3},
             lacksItems=[CONTRACT],
@@ -222,7 +222,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-10.html",
+            "30532-10.htm",
             when="started",
             hasAny=JEWEL,
             hasItem=CONTRACT,
@@ -232,7 +232,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-09.html",
+            "30532-09.htm",
             when="started",
             hasAny=JEWEL,
             atLeast={MEMO: 2},
@@ -243,7 +243,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-08.html",
+            "30532-08.htm",
             when="started",
             hasAny=JEWEL,
             hasItem=MEMO,
@@ -254,7 +254,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-05.html",
+            "30532-05.htm",
             when="started",
             hasAny=JEWEL,
             lacksItems=[MEMO, CONTRACT],
@@ -264,7 +264,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-10.html",
+            "30532-10.htm",
             when="started",
             hasItem=CONTRACT,
             lacksItems=JEWEL,
@@ -274,7 +274,7 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-09.html",
+            "30532-09.htm",
             when="started",
             atLeast={MEMO: 2},
             lacksItems=JEWEL + [CONTRACT],
@@ -282,21 +282,21 @@ def q292():
         d(
             SPIRON,
             "talk",
-            "30532-08.html",
+            "30532-08.htm",
             when="started",
             hasItem=MEMO,
             lacksItems=JEWEL + [CONTRACT],
         ),
-        d(SPIRON, "talk", "30532-04.html", when="started", lacksItems=JEWEL + [MEMO, CONTRACT]),
+        d(SPIRON, "talk", "30532-04.htm", when="started", lacksItems=JEWEL + [MEMO, CONTRACT]),
         d(
             BALANKI,
             "talk",
-            "30533-02.html",
+            "30533-02.htm",
             when="started",
             hasItem=CONTRACT,
             ops=[take(CONTRACT), adena(620)],
         ),
-        d(BALANKI, "talk", "30533-01.html", when="started", lacksItems=[CONTRACT]),
+        d(BALANKI, "talk", "30533-01.htm", when="started", lacksItems=[CONTRACT]),
     ]
     # One kill dialog per mob (Find returns first match). Cond1: jewelry + memo; else jewelry only.
     for mob, item in MOBS.items():
@@ -341,12 +341,12 @@ def q293():
             minLevel=6,
             ops=START + [cond(1)],
         ),
-        d(FILAUR, "event", "30535-07.html", when="started", event="30535-07", ops=[{"op": "complete"}]),
-        d(FILAUR, "event", "30535-08.html", when="started", event="30535-08"),
+        d(FILAUR, "event", "30535-07.htm", when="started", event="30535-07", ops=[{"op": "complete"}]),
+        d(FILAUR, "event", "30535-08.htm", when="started", event="30535-08"),
         d(
             FILAUR,
             "talk",
-            "30535-10.html",
+            "30535-09.htm",
             when="started",
             hasItems=[ORE, MAP],
             ops=[sell([(ORE, 5), (MAP, 500)], bonus_min=10, bonus_adena=2000)],
@@ -354,7 +354,7 @@ def q293():
         d(
             FILAUR,
             "talk",
-            "30535-06.html",
+            "30535-06.htm",
             when="started",
             hasItem=ORE,
             lacksItems=[MAP],
@@ -363,25 +363,25 @@ def q293():
         d(
             FILAUR,
             "talk",
-            "30535-09.html",
+            "30535-08.htm",
             when="started",
             hasItem=MAP,
             lacksItems=[ORE],
             ops=[sell([(ORE, 5), (MAP, 500)], bonus_min=10, bonus_adena=2000)],
         ),
-        d(FILAUR, "talk", "30535-05.html", when="started", lacksItems=[ORE, MAP]),
-        d(CHICHIRIN, "talk", "30539-01.html", when="started"),
+        d(FILAUR, "talk", "30535-05.htm", when="started", lacksItems=[ORE, MAP]),
+        d(CHICHIRIN, "talk", "30539-01.htm", when="started"),
         d(
             CHICHIRIN,
             "event",
-            "30539-03.html",
+            "30539-03.htm",
             when="started",
             event="30539-03",
             atLeast={FRAG: 4},
             ops=[take(FRAG, 4), give(MAP)],
         ),
         # Same event, no atLeast — refuse when under 4 fragments.
-        d(CHICHIRIN, "event", "30539-02.html", when="started", event="30539-03"),
+        d(CHICHIRIN, "event", "30539-02.htm", when="started", event="30539-03"),
     ]
     for mob in MOBS:
         dialogs.append(
@@ -423,11 +423,11 @@ def q294():
             minLevel=10,
             ops=START + [cond(1)],
         ),
-        d(KEEF, "talk", "30534-04.html", cond=1),
+        d(KEEF, "talk", "30534-04.htm", cond=1),
         d(
             KEEF,
             "talk",
-            "30534-06.html",
+            "30534-06.htm",
             cond=2,
             atLeast={FANG: 100},
             hasItem=RING,
@@ -436,7 +436,7 @@ def q294():
         d(
             KEEF,
             "talk",
-            "30534-05.html",
+            "30534-05.htm",
             cond=2,
             atLeast={FANG: 100},
             lacksItems=[RING],

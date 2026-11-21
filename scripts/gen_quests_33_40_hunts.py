@@ -80,10 +80,10 @@ def q329():
             minLevel=33,
             ops=START + [cond(1)],
         ),
-        d(ROLENTO, "event", "30437-06.html", when="started", event="30437-06", ops=[{"op": "complete"}]),
-        d(ROLENTO, "event", "30437-07.html", when="started", event="30437-07"),
-        d(ROLENTO, "talk", "30437-05.html", when="started", hasAny=parts, ops=[sell]),
-        d(ROLENTO, "talk", "30437-04.html", when="started", lacksItems=parts),
+        d(ROLENTO, "event", "30437-06.htm", when="started", event="30437-06", ops=[{"op": "complete"}]),
+        d(ROLENTO, "event", "30437-07.htm", when="started", event="30437-07"),
+        d(ROLENTO, "talk", "30437-05.htm", when="started", hasAny=parts, ops=[sell]),
+        d(ROLENTO, "talk", "30437-04.htm", when="started", lacksItems=parts),
     ]
     for mob, (golem_ch, broken_ch) in mobs.items():
         dialogs.append(
@@ -129,12 +129,12 @@ def q338():
             minLevel=40,
             ops=START + [cond(1)],
         ),
-        d(ENVERUN, "talk", "30892-04.html", when="started"),
+        d(ENVERUN, "talk", "30892-04.htm", when="started"),
         # Sell is an event (Mobius onAdvEvent 30892-06)
         d(
             ENVERUN,
             "event",
-            "30892-06.html",
+            "30892-06.htm",
             when="started",
             event="30892-06",
             hasItem=LEATHER,
@@ -143,15 +143,15 @@ def q338():
         d(
             ENVERUN,
             "event",
-            "30892-05.html",
+            "30892-05.htm",
             when="started",
             event="30892-06",
             lacksItems=[LEATHER],
         ),
-        d(ENVERUN, "event", "30892-10.html", when="started", event="30892-10", ops=[{"op": "complete"}]),
-        d(ENVERUN, "event", "30892-07.html", when="started", event="30892-07"),
-        d(ENVERUN, "event", "30892-08.html", when="started", event="30892-08"),
-        d(ENVERUN, "event", "30892-09.html", when="started", event="30892-09"),
+        d(ENVERUN, "event", "30892-08.htm", when="started", event="30892-08", ops=[{"op": "complete"}]),
+        d(ENVERUN, "event", "30892-07.htm", when="started", event="30892-07"),
+        d(ENVERUN, "event", "30892-08.htm", when="started", event="30892-08"),
+        d(ENVERUN, "event", "30892-09.htm", when="started", event="30892-09"),
         # Always 1 leather + 19% second
         d(
             20135,

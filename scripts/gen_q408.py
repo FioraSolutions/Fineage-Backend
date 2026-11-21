@@ -11,7 +11,9 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import questio
-SRC = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests/Q00408_PathOfTheElvenWizard"
+
+QROOT = questio.mobius_quest_root()
+SCRIPT = "Q00408_PathOfTheElvenWizard"
 Q = 408
 ROSSELA, GREENIS, THALIA, NORTHWIND = 30414, 30157, 30371, 30423
 LETTER, RED_DOWN, RUBY, AQUAMARINE, APPLE, GOLD_LEAVES, LOVE, AMETHYST, NOBILITY, PERIDOT = 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1225, 1226, 1229
@@ -21,13 +23,7 @@ CARRIERS = [LETTER, APPLE, LOVE, CHARM, SAP, POTPOURRI]
 
 
 def html(name):
-    for ext in ("", ".htm", ".html"):
-        p = SRC / (name + ext)
-        if p.exists():
-            text = p.read_text(encoding="utf-8").strip()
-            return re.sub(r'bypass -h Quest Q00408_PathOfTheElvenWizard ([A-Za-z0-9_\-]+)(?:\.html?)?',
-                          lambda m: f"quest_event:{Q}:{m.group(1)}", text)
-    raise SystemExit(f"missing html {name}")
+    return questio.mobius_quest_html(QROOT, SCRIPT, Q, name)
 
 
 def d(npc, hook, page, when="started", ops=None, event=None, **gates):
@@ -58,10 +54,10 @@ dialogs += [
     d(ROSSELA, "event", "30414-02.htm", when="any", event="30414-02"),
 ]
 # Symbol picks: show the done page, or hand out the carrier item once (Mobius "if !has give").
-for ev, done, carrier, page in (("30414-10", RUBY, LETTER, "30414-07.html"), ("30414-12", AQUAMARINE, APPLE, "30414-13.html"),
-                                ("30414-16", NOBILITY, LOVE, "30414-17.html")):
+for ev, done, carrier, page in (("30414-10", RUBY, LETTER, "30414-07.htm"), ("30414-14", AQUAMARINE, APPLE, "30414-13.htm"),
+                                ("30414-18", NOBILITY, LOVE, "30414-17.htm")):
     dialogs += [
-        d(ROSSELA, "event", ev + ".html", event=ev, hasItem=done),
+        d(ROSSELA, "event", ev + ".htm", event=ev, hasItem=done),
         d(ROSSELA, "event", page, event=ev, hasItem=PERIDOT, lacksItems=[done, carrier], ops=[give(carrier)]),
         d(ROSSELA, "event", page, event=ev, hasItem=PERIDOT, lacksItems=[done]),
     ]
@@ -73,50 +69,50 @@ for lo, hi, exp, sp in ((20, 0, 320534, 22532), (19, 19, 456128, 29230), (0, 18,
         g["minLevel"] = lo
     if hi:
         g["maxLevel"] = hi
-    dialogs.append(d(ROSSELA, "talk", "30414-20.html", ops=[{"op": "give_adena", "count": 163800}, give(DIAMOND),
+    dialogs.append(d(ROSSELA, "talk", "30414-20.htm", ops=[{"op": "give_adena", "count": 163800}, give(DIAMOND),
                                                           {"op": "give_exp_sp", "exp": exp, "sp": sp}, {"op": "complete"}], **g))
 dialogs += [
-    d(ROSSELA, "talk", "30414-11.html", hasItem=PERIDOT, lacksItems=CARRIERS),
-    d(ROSSELA, "talk", "30414-08.html", hasItem=LETTER),
-    d(ROSSELA, "talk", "30414-21.html", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM]),
-    d(ROSSELA, "talk", "30414-09.html", hasItem=CHARM),
-    d(ROSSELA, "talk", "30414-14.html", hasItem=APPLE),
-    d(ROSSELA, "talk", "30414-22.html", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP]),
-    d(ROSSELA, "talk", "30414-15.html", hasItem=SAP),
-    d(ROSSELA, "talk", "30414-18.html", hasItem=LOVE),
-    d(ROSSELA, "talk", "30414-23.html", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI]),
-    d(ROSSELA, "talk", "30414-19.html", hasItem=POTPOURRI),
+    d(ROSSELA, "talk", "30414-11.htm", hasItem=PERIDOT, lacksItems=CARRIERS),
+    d(ROSSELA, "talk", "30414-08.htm", hasItem=LETTER),
+    d(ROSSELA, "talk", "30414-20.htm", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM]),
+    d(ROSSELA, "talk", "30414-09.htm", hasItem=CHARM),
+    d(ROSSELA, "talk", "30414-14.htm", hasItem=APPLE),
+    d(ROSSELA, "talk", "30414-24.htm", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP]),
+    d(ROSSELA, "talk", "30414-15.htm", hasItem=SAP),
+    d(ROSSELA, "talk", "30414-18.htm", hasItem=LOVE),
+    d(ROSSELA, "talk", "30414-25.htm", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI]),
+    d(ROSSELA, "talk", "30414-19.htm", hasItem=POTPOURRI),
 ]
 # Greenis: letter -> charm; 5 red down + charm -> ruby.
 dialogs += [
-    d(GREENIS, "talk", "30157-01.html", hasItem=LETTER),
-    d(GREENIS, "talk", "30157-04.html", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM], lacksItems=[RUBY],
+    d(GREENIS, "talk", "30157-01.htm", hasItem=LETTER),
+    d(GREENIS, "talk", "30157-04.htm", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM], lacksItems=[RUBY],
       ops=[take(RED_DOWN, 5), give(RUBY), take(CHARM)]),
-    d(GREENIS, "talk", "30157-04.html", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM], ops=[take(RED_DOWN, 5), take(CHARM)]),
-    d(GREENIS, "talk", "30157-03.html", hasItem=CHARM),
-    d(GREENIS, "event", "30157-02.html", event="30157-02", hasItem=LETTER, lacksItems=[CHARM], ops=[take(LETTER), give(CHARM)]),
-    d(GREENIS, "event", "30157-02.html", event="30157-02", hasItem=LETTER, ops=[take(LETTER)]),
-    d(GREENIS, "event", "30157-02.html", event="30157-02"),
+    d(GREENIS, "talk", "30157-04.htm", hasItem=RED_DOWN, minCount=5, hasItems=[CHARM], ops=[take(RED_DOWN, 5), take(CHARM)]),
+    d(GREENIS, "talk", "30157-03.htm", hasItem=CHARM),
+    d(GREENIS, "event", "30157-02.htm", event="30157-02", hasItem=LETTER, lacksItems=[CHARM], ops=[take(LETTER), give(CHARM)]),
+    d(GREENIS, "event", "30157-02.htm", event="30157-02", hasItem=LETTER, ops=[take(LETTER)]),
+    d(GREENIS, "event", "30157-02.htm", event="30157-02"),
 ]
 # Thalia: apple -> sap; 5 gold leaves + sap -> aquamarine.
 dialogs += [
-    d(THALIA, "talk", "30371-01.html", hasItem=APPLE),
-    d(THALIA, "talk", "30371-04.html", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP], lacksItems=[AQUAMARINE],
+    d(THALIA, "talk", "30371-01.htm", hasItem=APPLE),
+    d(THALIA, "talk", "30371-04.htm", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP], lacksItems=[AQUAMARINE],
       ops=[give(AQUAMARINE), take(GOLD_LEAVES, 5), take(SAP)]),
-    d(THALIA, "talk", "30371-04.html", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP], ops=[take(GOLD_LEAVES, 5), take(SAP)]),
-    d(THALIA, "talk", "30371-03.html", hasItem=SAP),
-    d(THALIA, "event", "30371-02.html", event="30371-02", hasItem=APPLE, lacksItems=[SAP], ops=[take(APPLE), give(SAP)]),
-    d(THALIA, "event", "30371-02.html", event="30371-02", hasItem=APPLE, ops=[take(APPLE)]),
-    d(THALIA, "event", "30371-02.html", event="30371-02"),
+    d(THALIA, "talk", "30371-04.htm", hasItem=GOLD_LEAVES, minCount=5, hasItems=[SAP], ops=[take(GOLD_LEAVES, 5), take(SAP)]),
+    d(THALIA, "talk", "30371-03.htm", hasItem=SAP),
+    d(THALIA, "event", "30371-02.htm", event="30371-02", hasItem=APPLE, lacksItems=[SAP], ops=[take(APPLE), give(SAP)]),
+    d(THALIA, "event", "30371-02.htm", event="30371-02", hasItem=APPLE, ops=[take(APPLE)]),
+    d(THALIA, "event", "30371-02.htm", event="30371-02"),
 ]
 # Northwind: immortal love -> potpourri; 2 amethyst + potpourri -> nobility amethyst.
 dialogs += [
-    d(NORTHWIND, "talk", "30423-01.html", hasItem=LOVE, lacksItems=[POTPOURRI], ops=[take(LOVE), give(POTPOURRI)]),
-    d(NORTHWIND, "talk", "30423-01.html", hasItem=LOVE, ops=[take(LOVE)]),
-    d(NORTHWIND, "talk", "30423-03.html", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI], lacksItems=[NOBILITY],
+    d(NORTHWIND, "talk", "30423-01.htm", hasItem=LOVE, lacksItems=[POTPOURRI], ops=[take(LOVE), give(POTPOURRI)]),
+    d(NORTHWIND, "talk", "30423-01.htm", hasItem=LOVE, ops=[take(LOVE)]),
+    d(NORTHWIND, "talk", "30423-03.htm", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI], lacksItems=[NOBILITY],
       ops=[take(AMETHYST, 2), give(NOBILITY), take(POTPOURRI)]),
-    d(NORTHWIND, "talk", "30423-03.html", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI], ops=[take(AMETHYST, 2), take(POTPOURRI)]),
-    d(NORTHWIND, "talk", "30423-02.html", hasItem=POTPOURRI),
+    d(NORTHWIND, "talk", "30423-03.htm", hasItem=AMETHYST, minCount=2, hasItems=[POTPOURRI], ops=[take(AMETHYST, 2), take(POTPOURRI)]),
+    d(NORTHWIND, "talk", "30423-02.htm", hasItem=POTPOURRI),
 ]
 # Kills (killer only, Mobius onKill + ALT_PARTY_RANGE check on the killer).
 drop = lambda i, ch, lim: [{"op": "drop_item", "itemId": i, "count": 1, "chance": ch, "limit": lim}]

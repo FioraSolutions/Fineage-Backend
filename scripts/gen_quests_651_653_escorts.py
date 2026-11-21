@@ -59,9 +59,9 @@ def q651():
     BATIDAE, IVAN = 31989, 32014
     SOE = 736
     dialogs = [
-        d(IVAN, "talk", "32014-01a.htm", when="absent", maxLevel=25),
-        d(IVAN, "talk", "32014-01.htm", when="absent", minLevel=26),
-        d(IVAN, "event", "32014-03.html", when="absent", event="32014-03", minLevel=26),
+        d(IVAN, "talk", "32014-01.htm", when="absent", maxLevel=25),
+        d(IVAN, "talk", "32014-02.htm", when="absent", minLevel=26),
+        d(IVAN, "event", "32014-03.htm", when="absent", event="32014-03", minLevel=26),
         d(
             IVAN,
             "event",
@@ -75,17 +75,17 @@ def q651():
         d(
             IVAN,
             "event",
-            "32014-05.htm",
+            "32014-03.htm",
             when="absent",
             event="32014-04",
             minLevel=26,
             lacksItems=[SOE],
         ),
-        d(IVAN, "talk", "32014-02.html", when="started"),
+        d(IVAN, "talk", "32014-02.htm", when="started"),
         d(
             BATIDAE,
             "talk",
-            "31989-01.html",
+            "31989-01.htm",
             when="started",
             ops=[adena(2883), {"op": "complete"}],
         ),
@@ -105,9 +105,9 @@ def q652():
     TANTAN, SARA = 32012, 30180
     SS_C, SCROLL = 1464, 956
     dialogs = [
-        d(TANTAN, "talk", "32012-01a.htm", when="absent", maxLevel=45),
+        d(TANTAN, "talk", "32012-01.htm", when="absent", maxLevel=45),
         d(TANTAN, "talk", "32012-01.htm", when="absent", minLevel=46),
-        d(TANTAN, "event", "32012-03.html", when="absent", event="32012-03", minLevel=46),
+        d(TANTAN, "event", "32012-03.htm", when="absent", event="32012-03", minLevel=46),
         d(
             TANTAN,
             "event",
@@ -121,17 +121,17 @@ def q652():
         d(
             TANTAN,
             "event",
-            "32012-05.htm",
+            "32012-04.htm",
             when="absent",
             event="32012-04",
             minLevel=46,
         ),
-        d(TANTAN, "talk", "32012-02.html", when="started"),
+        d(TANTAN, "talk", "32012-02.htm", when="started"),
         # Mobius 50% scroll+5026 vs 10000 — most-common path is 10000 (60%)
         d(
             SARA,
             "talk",
-            "30180-02.html",
+            "30180-02.htm",
             when="started",
             ops=[adena(10000), {"op": "complete"}],
         ),
@@ -151,9 +151,9 @@ def q653():
     GALIBREDO, SUKI = 30181, 32013
     SOE = 736
     dialogs = [
-        d(SUKI, "talk", "32013-01a.htm", when="absent", maxLevel=35),
+        d(SUKI, "talk", "32013-01.htm", when="absent", maxLevel=35),
         d(SUKI, "talk", "32013-01.htm", when="absent", minLevel=36),
-        d(SUKI, "event", "32013-03.html", when="absent", event="32013-03", minLevel=36),
+        d(SUKI, "event", "32013-03.htm", when="absent", event="32013-03", minLevel=36),
         d(
             SUKI,
             "event",
@@ -167,7 +167,7 @@ def q653():
         d(
             SUKI,
             "event",
-            "32013-05.htm",
+            "32013-04.htm",
             when="absent",
             event="32013-04",
             minLevel=36,
@@ -177,7 +177,7 @@ def q653():
         d(
             GALIBREDO,
             "talk",
-            "30181-01.html",
+            "30181-01.htm",
             when="started",
             ops=[adena(2553), {"op": "complete"}],
         ),

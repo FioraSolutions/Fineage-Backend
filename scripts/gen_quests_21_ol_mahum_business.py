@@ -91,10 +91,10 @@ def q326():
             minLevel=21,
             ops=START + [cond(1)],
         ),
-        d(LEOPOLD, "event", "30435-07.html", when="started", event="30435-07", ops=[{"op": "complete"}]),
-        d(LEOPOLD, "event", "30435-08.html", when="started", event="30435-08"),
-        d(LEOPOLD, "talk", "30435-05.html", when="started", hasAny=parts, ops=[sell]),
-        d(LEOPOLD, "talk", "30435-04.html", when="started", lacksItems=parts),
+        d(LEOPOLD, "event", "30435-07.htm", when="started", event="30435-07", ops=[{"op": "complete"}]),
+        d(LEOPOLD, "event", "30435-08.htm", when="started", event="30435-08"),
+        d(LEOPOLD, "talk", "30435-05.htm", when="started", hasAny=parts, ops=[sell]),
+        d(LEOPOLD, "talk", "30435-04.htm", when="started", lacksItems=parts),
     ]
     for mob, (ch, item) in drops.items():
         dialogs.append(d(mob, "kill", None, when="started", raw="", ops=[drop(item, ch)]))
@@ -143,9 +143,9 @@ def q328():
             minLevel=21,
             ops=START + [cond(1)],
         ),
-        d(SARIEN, "event", "30436-06.html", when="started", event="30436-06", ops=[{"op": "complete"}]),
-        d(SARIEN, "talk", "30436-05.html", when="started", hasAny=parts, ops=[sell]),
-        d(SARIEN, "talk", "30436-04.html", when="started", lacksItems=parts),
+        d(SARIEN, "event", "30436-06.htm", when="started", event="30436-06", ops=[{"op": "complete"}]),
+        d(SARIEN, "talk", "30436-05.htm", when="started", hasAny=parts, ops=[sell]),
+        d(SARIEN, "talk", "30436-04.htm", when="started", lacksItems=parts),
     ]
     for mob, (carc, lens) in eyes.items():
         dialogs.append(
