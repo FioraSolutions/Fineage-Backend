@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "rewardItemId": 57,
+  "rewards": [800000, 500000, 300000, 200000, 100000],
+  "periodMs": 604800000,
+  "lureBonusMinId": 8484,
+  "lureBonusMaxId": 8486,
+  "lureBonusMax": 3.0
+}
