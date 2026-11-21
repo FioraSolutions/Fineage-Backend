@@ -18,7 +18,7 @@ static partial class NormalizedStoreReader
         using var cmd = conn.CreateCommand();
         cmd.CommandText =
             """
-            SELECT object_id, item_id, count, enchant_level, loc, loc_data, custom_type1, custom_type2
+            SELECT object_id, item_id, count, enchant_level, loc, loc_data, custom_type1, custom_type2, option1, option2
             FROM character_items
             WHERE character_id = @cid AND loc = ANY(@locs)
             ORDER BY object_id
@@ -38,7 +38,9 @@ static partial class NormalizedStoreReader
             int equipped = loc == NormalizedStoreWriter.LocPaperdoll ? locData : -1;
             int customType1 = reader.FieldCount > 6 && !reader.IsDBNull(6) ? reader.GetInt32(6) : 0;
             int customType2 = reader.FieldCount > 7 && !reader.IsDBNull(7) ? reader.GetInt32(7) : 0;
-            rows.Add(new StoredItem(itemId, count, equipped, enchant, checked((int)oid), customType1, customType2));
+            int option1 = reader.FieldCount > 8 && !reader.IsDBNull(8) ? reader.GetInt32(8) : 0;
+            int option2 = reader.FieldCount > 9 && !reader.IsDBNull(9) ? reader.GetInt32(9) : 0;
+            rows.Add(new StoredItem(itemId, count, equipped, enchant, checked((int)oid), customType1, customType2, option1, option2));
         }
 
         return rows;

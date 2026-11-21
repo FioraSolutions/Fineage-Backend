@@ -305,7 +305,10 @@ public enum LedgerTxKind
     ClanHallFunction = 54,
 
     /// <summary>Auctionable hall rent: <c>Reference</c> is hall id.</summary>
-    ClanHallLease = 55
+    ClanHallLease = 55,
+
+    /// <summary>Life stone refine: consumes stone/gems; <c>Reference</c> is life stone item id.</summary>
+    Augment = 56
 }
 
 /// <summary>

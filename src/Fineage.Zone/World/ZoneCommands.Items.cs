@@ -54,6 +54,42 @@ public sealed record EnchantCancelCommand : ZoneCommand
         Completed(world.TryEnchantCancelAsync(session, CancellationToken.None));
 }
 
+public sealed record AugmentConfirmTargetCommand(int TargetObjectId) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentConfirmTargetAsync(session, TargetObjectId, CancellationToken.None));
+}
+
+public sealed record AugmentConfirmRefinerCommand(int TargetObjectId, int RefinerObjectId) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentConfirmRefinerAsync(session, TargetObjectId, RefinerObjectId, CancellationToken.None));
+}
+
+public sealed record AugmentConfirmGemCommand(int TargetObjectId, int RefinerObjectId, int GemstoneObjectId, long GemstoneCount) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentConfirmGemAsync(session, TargetObjectId, RefinerObjectId, GemstoneObjectId, GemstoneCount, CancellationToken.None));
+}
+
+public sealed record AugmentRefineCommand(int TargetObjectId, int RefinerObjectId, int GemstoneObjectId, long GemstoneCount) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentRefineAsync(session, TargetObjectId, RefinerObjectId, GemstoneObjectId, GemstoneCount, CancellationToken.None));
+}
+
+public sealed record AugmentRefineCancelCommand(int TargetObjectId) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentRefineCancelAsync(session, TargetObjectId, CancellationToken.None));
+}
+
+public sealed record AugmentCancelWindowCommand : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryAugmentCancelWindowAsync(session, CancellationToken.None));
+}
+
 public sealed record AutoSoulShotCommand(int ItemId, bool Enabled) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

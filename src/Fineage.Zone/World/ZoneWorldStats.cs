@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
     PlayerGearBases GearBases(ZoneEntity player, ClassTemplate template)
     {
         ItemInstance? Equipped(PaperdollSlot slot) => player.Inventory?.GetEquipped(slot);
-        return PlayerGearBases.From(
+        var gear = PlayerGearBases.From(
             template,
             Equipped,
             ZoneCombat.DefaultWeaponRange,
@@ -118,6 +118,7 @@ public sealed partial class ZoneWorld
             ZoneCombat.NakedLegsPDef,
             ZoneCombat.DefaultPlayerPDef,
             _olympiadArena.Contains(player.ObjectId) ? _olympiadEnchantLimit : -1);
+        return Augmentation.AugmentationStatMods.Apply(gear, player.Inventory, _augmentation);
     }
 
     /// <summary>Mobius GameTimeTaskManager.isNight for HitConditionBonus dark −10.</summary>
@@ -192,6 +193,7 @@ public sealed partial class ZoneWorld
         gear.Clear();
         _equipSkills.CollectEquipped(player.Inventory, gear);
         CollectArmorSetSkills(player, gear);
+        Augmentation.AugmentationStatMods.CollectGearSkills(player.Inventory, _augmentation, gear);
     }
 
     void CollectArmorSetSkills(ZoneEntity player, Dictionary<int, int> target)

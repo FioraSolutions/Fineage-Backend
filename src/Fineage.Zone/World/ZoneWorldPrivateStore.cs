@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
+using Fineage.Zone.Augmentation;
 using Fineage.Zone.Trade;
 using Fineage.Zone.Clan;
 
@@ -158,7 +159,8 @@ public sealed partial class ZoneWorld
                     stackable: item?.Template.Stackable == true,
                     count: row.Count,
                     available: item?.Count ?? 0,
-                    itemId: item?.ItemId ?? 0) is { } stock)
+                    itemId: item?.ItemId ?? 0,
+                    augmented: item != null && AugmentationRules.IsAugmented(item)) is { } stock)
                 return stock;
             if (PrivateStoreRules.AdenaLineError(row.Price, row.Count, totalPrice) is { } adena)
                 return adena;

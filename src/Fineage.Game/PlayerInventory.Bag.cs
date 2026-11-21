@@ -11,7 +11,9 @@ public sealed partial class PlayerInventory
         int EnchantLevel,
         int EquippedSlot,
         int CustomType1 = 0,
-        int CustomType2 = 0);
+        int CustomType2 = 0,
+        int Option1 = 0,
+        int Option2 = 0);
 
     /// <summary>Replaces every row from a stored snapshot (shop ledger refusal rollback).</summary>
     public void ReplaceFromStored(IReadOnlyList<StoredRow> items)
@@ -24,7 +26,7 @@ public sealed partial class PlayerInventory
             if (!_catalog.TryGet(row.ItemId, out _))
                 continue;
             ItemInstance instance = row.ObjectId > 0
-                ? AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2)
+                ? AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2, row.Option1, row.Option2)
                 : Add(row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2);
             if (row.EquippedSlot >= 0 && instance.Template.Equippable)
                 Equip(instance);
@@ -231,7 +233,7 @@ public sealed partial class PlayerInventory
     /// Restores a persisted stack/piece with a durable <paramref name="objectId"/>.
     /// Stackable rows with a known id do not merge into another stack.
     /// </summary>
-    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0, int customType1 = 0, int customType2 = 0)
+    public ItemInstance AddRestored(int objectId, int itemId, int count, int enchantLevel = 0, int customType1 = 0, int customType2 = 0, int option1 = 0, int option2 = 0)
     {
         if (objectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(objectId), objectId, "Object id must be positive.");
@@ -250,10 +252,28 @@ public sealed partial class PlayerInventory
         {
             EnchantLevel = enchantLevel,
             CustomType1 = customType1,
-            CustomType2 = customType2
+            CustomType2 = customType2,
+            Option1 = option1,
+            Option2 = option2
         };
         _items.Add(item);
         return item;
+    }
+
+    public void SetAugmentation(ItemInstance item, int option1, int option2)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        if (!ReferenceEquals(Find(item.ObjectId), item))
+            throw new InvalidOperationException($"Item object {item.ObjectId} is not in this inventory.");
+        if (item.Template.Stackable)
+            throw new InvalidOperationException($"Stackable item {item.ItemId} cannot be augmented.");
+        item.Option1 = option1;
+        item.Option2 = option2;
+    }
+
+    public void ClearAugmentation(ItemInstance item)
+    {
+        SetAugmentation(item, 0, 0);
     }
 
     public void SetEnchantLevel(ItemInstance item, int level)

@@ -33,7 +33,9 @@ public sealed record StoredItem(
     int EnchantLevel = 0,
     int ObjectId = 0,
     int CustomType1 = 0,
-    int CustomType2 = 0);
+    int CustomType2 = 0,
+    int Option1 = 0,
+    int Option2 = 0);
 
 /// <summary>
 /// One Mobius <c>character_shortcuts</c> row. <see cref="Slot"/> is 0..11 on <see cref="Page"/> 0..9.

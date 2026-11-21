@@ -23,6 +23,7 @@ public sealed partial class NetZoneServer
     readonly TimeSpan _idleTimeout;
     readonly bool _adminCommands;
     readonly EnchantPacketHandler _enchant;
+    readonly AugmentPacketHandler _augment;
     readonly ClanPacketHandler _clan;
     readonly TradePacketHandler _trade;
     readonly PartyPacketHandler _party;
@@ -67,6 +68,7 @@ public sealed partial class NetZoneServer
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
         _enchant = new EnchantPacketHandler(_world, RejectAsync);
+        _augment = new AugmentPacketHandler(_world, RejectAsync);
         _clan = new ClanPacketHandler(_world, RejectAsync);
         _trade = new TradePacketHandler(_world, RejectAsync);
         _party = new PartyPacketHandler(_world, RejectAsync);

@@ -105,6 +105,8 @@ public sealed partial class ZoneWorld
     readonly SkillEffectCatalog _skillEffects;
     /// <summary>Mobius hennaList dyes (data/henna.json). Deltas fold before the STR/DEX bonus table.</summary>
     readonly HennaCatalog _henna;
+    /// <summary>Mobius augmentation options/chances (data/augmentation/*.json).</summary>
+    readonly Augmentation.AugmentationCatalog _augmentation;
     /// <summary>Mobius armorsets (data/armor-sets.json). Complete-set skills fold via GearSkills.</summary>
     readonly ArmorSetCatalog _armorSets;
     /// <summary>Mobius Inventory item_skill on Weapon/Armor (data/item-equip-skills.json).</summary>
@@ -213,6 +215,7 @@ public sealed partial class ZoneWorld
         Fineage.Game.Services.ClanHallSpawnCatalog? clanHallSpawns = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
+        Augmentation.AugmentationCatalog? augmentation = null,
         ArmorSetCatalog? armorSets = null,
         ItemEquipSkillCatalog? equipSkills = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
@@ -240,6 +243,8 @@ public sealed partial class ZoneWorld
         _skillDots = skillDots ?? SkillDotCatalog.LoadDefault();
         _skillEffects = skillEffects ?? SkillEffectCatalog.LoadDefault();
         _henna = henna ?? HennaCatalog.LoadDefault();
+        _augmentation = augmentation ?? Augmentation.AugmentationCatalog.LoadDefault();
+        Augmentation.AugmentationRules.BindCatalog(_augmentation);
         _armorSets = armorSets ?? ArmorSetCatalog.LoadDefault();
         _equipSkills = equipSkills ?? ItemEquipSkillCatalog.LoadDefault();
         _combatRandom = Streams(combatRandom, RandomPurpose.Combat);

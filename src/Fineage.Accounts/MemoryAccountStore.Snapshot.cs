@@ -62,7 +62,9 @@ public sealed partial class MemoryAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = objectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             });
         }
 
@@ -166,7 +168,7 @@ public sealed partial class MemoryAccountStore
                 ? null
                 : character.Items.Select(item => new StoredItem(
                     item.ItemId, item.Count, item.EquippedSlot, item.EnchantLevel, item.ObjectId,
-                    item.CustomType1, item.CustomType2)).ToArray(),
+                    item.CustomType1, item.CustomType2, item.Option1, item.Option2)).ToArray(),
             character.HairStyle,
             character.HairColor,
             character.Face,
@@ -198,12 +200,12 @@ public sealed partial class MemoryAccountStore
                 ? null
                 : character.Warehouse.Select(item => new StoredItem(
                     item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId,
-                    item.CustomType1, item.CustomType2)).ToArray(),
+                    item.CustomType1, item.CustomType2, item.Option1, item.Option2)).ToArray(),
             character.Freight == null
                 ? null
                 : character.Freight.Select(item => new StoredItem(
                     item.ItemId, item.Count, -1, item.EnchantLevel, item.ObjectId,
-                    item.CustomType1, item.CustomType2)).ToArray(),
+                    item.CustomType1, item.CustomType2, item.Option1, item.Option2)).ToArray(),
             character.Newbie,
             character.Shortcuts == null
                 ? null

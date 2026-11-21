@@ -196,6 +196,12 @@ sealed class ZoneEntityCombatPayload
     public long CastingUntilMs { get; set; }
     public PendingSkillHit? PendingHit { get; set; }
     public int ActiveEnchantObjectId { get; set; }
+    public bool AugmentCancelWindow { get; set; }
+    /// <summary>Variation make UI: selected target, life stone, gemstone.</summary>
+    public int AugmentTargetObjectId { get; set; }
+    public int AugmentRefinerObjectId { get; set; }
+    public int AugmentGemstoneObjectId { get; set; }
+    public long AugmentGemstoneCount { get; set; }
     public long DecayAtMs { get; set; }
 }
 

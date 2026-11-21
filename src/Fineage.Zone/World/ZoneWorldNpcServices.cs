@@ -88,6 +88,10 @@ public sealed partial class ZoneWorld
                 return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
             case NpcServiceIntent.AncientAdenaToAdena:
                 return AncientAdenaToAdena(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.AugmentMake:
+                return TryAugmentOpenMake(session);
+            case NpcServiceIntent.AugmentCancel:
+                return TryAugmentOpenCancel(session);
             case NpcServiceIntent.FishSkillList:
                 return ShowFishingSkills(session, player, npc);
             case NpcServiceIntent.SkillList:

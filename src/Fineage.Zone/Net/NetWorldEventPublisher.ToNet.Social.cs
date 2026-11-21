@@ -25,7 +25,9 @@ sealed partial class NetWorldEventPublisher
                 Kind = row.Kind ?? "",
                 Icon = row.Icon ?? "",
                 WeaponType = row.WeaponType ?? "",
-                ArmorType = row.ArmorType ?? ""
+                ArmorType = row.ArmorType ?? "",
+                Option1 = row.Option1,
+                Option2 = row.Option2
             };
         }
         var payload = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });

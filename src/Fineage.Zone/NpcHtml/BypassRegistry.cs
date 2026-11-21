@@ -88,6 +88,7 @@ public sealed class BypassRegistry
         registry.Register(new FestivalBypassHandler());
         registry.Register(new DoormanBypassHandler());
         registry.Register(new ClanHallManagerBypassHandler());
+        registry.Register(new AugmentBypassHandler());
         return registry;
     }
 

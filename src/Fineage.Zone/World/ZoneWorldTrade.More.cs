@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Zone.Augmentation;
 using Fineage.Zone.Trade;
 
 namespace Fineage.Zone.World;
@@ -32,7 +33,8 @@ public sealed partial class ZoneWorld
             canDropTradeStore: item?.Template.CanDropTradeStore == true,
             stackable: item?.Template.Stackable == true,
             requestedCount: count,
-            availableCount: item?.Count ?? 0);
+            availableCount: item?.Count ?? 0,
+            augmented: item != null && AugmentationRules.IsAugmented(item));
         if (offerError != null || item == null)
             return offerError ?? TradeProtocol.Item;
 
