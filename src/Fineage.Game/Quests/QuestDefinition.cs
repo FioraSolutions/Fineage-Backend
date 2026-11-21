@@ -225,7 +225,10 @@ public sealed record QuestDialog(
     int SumMax = -1,
     /// <summary>An item whose object id is stored in this var is still in the bag.</summary>
     string? HoldsVarItem = null,
-    QuestHtmlByVar? HtmlByVar = null);
+    QuestHtmlByVar? HtmlByVar = null,
+    bool? InRiftPeace = null,
+    bool? InRift = null,
+    int MaxStarted = 0);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>
@@ -239,6 +242,15 @@ public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, 
 
     /// <summary>Attack hook: the landed hit came from the player's pet.</summary>
     public bool ByPet { get; init; }
+
+    /// <summary>Mobius dimensional rift waiting room (type 0 room 0).</summary>
+    public bool? InRiftPeace { get; init; }
+
+    /// <summary>Mobius <c>checkIfInRiftZone</c> outer band (type 0 room 1).</summary>
+    public bool? InRift { get; init; }
+
+    /// <summary>Active started quest rows (Mobius <c>getAllActiveQuests().size()</c>).</summary>
+    public int StartedQuestCount { get; init; }
 
     /// <summary>
     /// Uniform [0, 1) draws for this actor's random branches, drops and picks (the zone passes the acting character's

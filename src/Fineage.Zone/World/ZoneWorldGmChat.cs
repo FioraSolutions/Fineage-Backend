@@ -108,6 +108,8 @@ public sealed partial class ZoneWorld
         var target = FindOnlinePlayer(args.Trim());
         if (target == null)
             return "That player is not online.";
+        if (IsInDimensionalRift(target.X, target.Y, target.Z))
+            return "That player is inside the dimensional rift.";
         return GmRelocate(gm, target.X, target.Y, target.Z);
     }
 

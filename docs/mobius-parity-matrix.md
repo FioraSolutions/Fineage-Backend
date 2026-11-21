@@ -93,7 +93,7 @@
 | 70 | Raid/grand boss schedule | 🟡 | L | `ZoneWorldBosses`; world gating disables most spawns |
 | 71 | Seven Signs (engine, stones, catacombs gate) | 🟡 | M | `SevenSigns/*`; **Festival of Darkness** instance ❌ |
 | 72 | Mammon merchants | ✅ | — | `ZoneWorldMammon` |
-| 73 | Dimensional rift | ❌ | L | Mobius `DimensionalRiftManager.java` |
+| 73 | Dimensional rift | ✅ | L | `DimensionalRiftCatalog` + `ZoneWorldDimensionalRift` |
 | 74 | Cursed weapons (Zariche/Akamanah) | ❌ | L | Rules only (`PlayableAttackRules`); Mobius `CursedWeaponsManager.java` |
 | 75 | Lottery (Loto) | ✅ | — | `ZoneWorldLottery` |
 | **Castle & siege** |

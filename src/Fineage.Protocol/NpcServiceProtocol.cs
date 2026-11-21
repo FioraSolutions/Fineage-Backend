@@ -134,4 +134,7 @@ public static class NpcServiceIntent
 
     /// <summary>Freight keeper <c>package_withdraw</c> / <c>WithdrawF</c>: open freight pickup window.</summary>
     public const string PackageWithdraw = "package-withdraw";
+
+    /// <summary>Mobius <c>EnterRift</c> / <c>ChangeRiftRoom</c> / <c>ExitRift</c> (Seven Signs rift HTML).</summary>
+    public const string DimensionalRift = "dimensional-rift";
 }

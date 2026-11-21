@@ -67,6 +67,8 @@ sealed partial class ZoneEntity : IRegionMember
     public bool QuestAttackSpawned { get; set; }
     /// <summary>Set on NPCs a quest step raised: owner, despawn timer, saga summon data.</summary>
     public QuestSpawnState? QuestSpawn { get; set; }
+    /// <summary>Dimensional rift room mob: which party instance owns this spawn.</summary>
+    public int RiftPartyId { get; set; }
     /// <summary>Players: changes on class transfer (Mobius setClassId).</summary>
     public int ClassId { get; set; }
     public int NpcId

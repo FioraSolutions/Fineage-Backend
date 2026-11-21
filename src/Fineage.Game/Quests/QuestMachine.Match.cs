@@ -59,6 +59,12 @@ public sealed partial class QuestMachine
             return false;
         if (dialog.SubClass is bool wantSub && who.SubClass != wantSub)
             return false;
+        if (dialog.InRiftPeace is bool peace && (who.InRiftPeace ?? false) != peace)
+            return false;
+        if (dialog.InRift is bool inRift && (who.InRift ?? false) != inRift)
+            return false;
+        if (dialog.MaxStarted > 0 && who.StartedQuestCount > dialog.MaxStarted)
+            return false;
         return true;
     }
 

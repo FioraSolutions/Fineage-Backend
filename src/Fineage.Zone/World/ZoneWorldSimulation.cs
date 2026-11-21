@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Fineage.Zone.Bosses;
+using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
@@ -196,6 +197,7 @@ public sealed partial class ZoneWorld
         }, slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
         ticks.AddWorldStage(BossActor.StageName, tick => SpawnBosses(_bosses.Step(tick)), slow);
+        ticks.AddWorldStage(DimensionalRiftActor.StageName, TickDimensionalRift, slow);
         ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
         ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
         ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);

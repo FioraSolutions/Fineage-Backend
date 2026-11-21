@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 224 |
+| implemented | 226 |
 | partial | 90 |
 | stub | 27 |
-| missing | 3 |
+| missing | 1 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -334,8 +334,8 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 631 | Delicious Top Choice Meat | 65+ | repeatable | implemented | hand-ported |
 | 632 | Necromancer's Request | 63+ | repeatable | implemented | hand-ported |
 | 633 | In the Forgotten Village | 65+ | repeatable | partial | no kill: 1/27 mobs; hand-ported |
-| 634 | In Search of Fragments of Dimension | 20+ | repeatable | missing |  |
-| 635 | In the Dimensional Rift | 20+ | repeatable | missing |  |
+| 634 | In Search of Fragments of Dimension | 20+ | repeatable | implemented | auto-port (rift) |
+| 635 | In the Dimensional Rift | 20+ | repeatable | implemented | auto-port (rift) |
 | 636 | Truth Beyond the Gate |  | repeatable | implemented | hand-ported |
 | 637 | Through the Gate Once More | 73+ | repeatable | stub | 4 dialog(s), no start; auto-port |
 | 638 | Seekers of the Holy Grail | 73+ | repeatable | partial | no kill: 2/2 mobs; auto-port |

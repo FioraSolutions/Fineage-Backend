@@ -180,7 +180,10 @@ public sealed partial class QuestCatalog
             Math.Max(0, dialog.SumMin),
             dialog.SumMax,
             ReadVarKey(dialog.HoldsVarItem, where, questId, "holdsVarItem"),
-            ReadHtmlByVar(dialog.HtmlByVar, htmlBaseDir, where, questId));
+            ReadHtmlByVar(dialog.HtmlByVar, htmlBaseDir, where, questId),
+            dialog.InRiftPeace,
+            dialog.InRift,
+            Math.Max(0, dialog.MaxStarted));
     }
 
     static string? ReadPetGate(string? pet, string where, int questId)

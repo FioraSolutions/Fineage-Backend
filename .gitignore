@@ -30,6 +30,7 @@ data/*
 !data/henna.json
 !data/npcs.json
 !data/dungeons.json
+!data/dimensional-rift.json
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json

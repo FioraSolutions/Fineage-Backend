@@ -15,6 +15,7 @@ using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
+using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
@@ -52,6 +53,10 @@ public sealed partial class ZoneWorld
     readonly SevenSignsActor _sevenSigns;
     readonly DungeonCatalog _dungeons;
     readonly DungeonAccess _dungeonAccess;
+    readonly DimensionalRiftCatalog _dimensionalRift;
+    readonly DimensionalRiftSettings _dimensionalRiftSettings;
+    readonly DimensionalRiftActor _dimensionalRiftActor;
+    readonly Random _riftRandom;
     readonly SiegeSettings _siegeSettings;
     readonly SiegeActor _siege;
     readonly ChSiegeActor _chSiege;
@@ -161,6 +166,8 @@ public sealed partial class ZoneWorld
         bool includeEnabledMaps = false,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
+        DimensionalRiftCatalog? dimensionalRift = null,
+        DimensionalRiftSettings? dimensionalRiftSettings = null,
         SiegeSettings? siege = null,
         BossSchedule? bosses = null,
         Random? bossRandom = null,
@@ -244,6 +251,13 @@ public sealed partial class ZoneWorld
         _sevenSigns = new SevenSignsActor(sevenSigns ?? new SevenSignsEngine(WallNow()));
         _dungeons = dungeons ?? DungeonCatalog.LoadDefault();
         _dungeonAccess = new DungeonAccess(_dungeons, dungeonAccess ?? DungeonAccessOptions.FromEnvironment());
+        _dimensionalRiftSettings = dimensionalRiftSettings ?? DimensionalRiftSettings.Default;
+        _dimensionalRift = dimensionalRift ?? DimensionalRiftCatalog.LoadDefault();
+        _riftRandom = GlobalStream(RandomPurpose.Service);
+        _dimensionalRiftActor = new DimensionalRiftActor(
+            new DimensionalRiftBoard(_dimensionalRift),
+            _dimensionalRiftSettings,
+            _riftRandom);
         _siegeSettings = siege ?? SiegeSettings.FromEnvironment();
         _siege = new SiegeActor(new SiegeBoard(NowUnixMs(), _siegeSettings));
         _chSiege = new ChSiegeActor(new ChSiegeBoard(SiegableHallCatalog.Default.All), ChSiegeSettings.Default);
