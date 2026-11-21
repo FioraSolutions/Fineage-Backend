@@ -9,7 +9,7 @@ namespace Fineage.Zone.World;
 internal sealed class ZoneCommandIngress
 {
     readonly object _lock = new();
-    readonly SemaphoreSlim _submitted = new(0);
+    readonly SemaphoreSlim _submitted = new(0, 1);
     List<Submission> _queued = [];
     List<Applied> _applied = [];
     long _sequence;
@@ -30,6 +30,8 @@ internal sealed class ZoneCommandIngress
                 return Task.FromException<string?>(new InvalidOperationException(
                     $"command {command.Name} for object {session.ObjectId} refused: {_closed}"));
             _queued.Add(new Submission(++_sequence, session, command, reply));
+            if (_submitted.CurrentCount == 0)
+                _submitted.Release();
         }
 
         if (ct.CanBeCanceled)
@@ -39,7 +41,6 @@ internal sealed class ZoneCommandIngress
             reply.Task.ContinueWith(static (_, state) => ((CancellationTokenRegistration)state!).Dispose(), registration,
                 CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
-        _submitted.Release();
         return reply.Task;
     }
 
@@ -90,6 +91,9 @@ internal sealed class ZoneCommandIngress
 
     /// <summary>Waits until something was submitted since the last wait (hand-driven hosts pump with it).</summary>
     public Task WaitForSubmissionAsync(CancellationToken ct) => _submitted.WaitAsync(ct);
+
+    /// <summary>Pending wake signals for test hosts that submit without a pump.</summary>
+    internal int WakeSignalCountForTest => _submitted.CurrentCount;
 
     /// <summary>
     /// Refuses further submissions and fails the ones still queued with <paramref name="reason"/>, so no handler

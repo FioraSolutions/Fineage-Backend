@@ -16,6 +16,16 @@ public sealed class ZoneCommandIngressTests
     const int BlessedD = 6575;
 
     [Fact]
+    public async Task Submission_wake_signal_does_not_accumulate_without_a_pump()
+    {
+        var (kit, session, _, _) = await SetupAsync();
+        using var cts = new CancellationTokenSource();
+        for (int i = 0; i < 10_000; i++)
+            _ = kit.World.ExecuteAsync(session, new CancelTargetCommand(), cts.Token);
+        Assert.InRange(kit.World.SubmissionWakeCountForTest, 0, 1);
+    }
+
+    [Fact]
     public async Task Commands_apply_in_submission_order_within_one_step()
     {
         var (kit, session, peer, _) = await SetupAsync();
