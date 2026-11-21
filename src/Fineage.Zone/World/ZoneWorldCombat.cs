@@ -326,6 +326,11 @@ public sealed partial class ZoneWorld
             approachMs = -1;
             return null;
         }
+        if (BlocksAttackWhileMounted(player))
+        {
+            approachMs = -1;
+            return null;
+        }
         // Mobius onIntentionAttack: sitting, stunned, sleeping, paralyzed, or physically muted → ActionFailed.
         if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player))
         {

@@ -297,7 +297,11 @@ public sealed partial class ZoneWorld
         if (watchers is { Count: > 0 })
             NetBridge?.FanoutEntityDespawn(watchers, id);
         if (owner?.Session != null)
+        {
             NetBridge?.FanoutSummonGone([owner.ObjectId], new SummonGoneNetMsg { ObjectId = id, Kind = st.Kind, Reason = reason });
+            if (st.Kind == SummonKindNet.Pet)
+                SendPlayerActionState(owner);
+        }
         ZoneLog.Info($"summon gone object={id} owner={st.OwnerObjectId} reason={reason}");
     }
 

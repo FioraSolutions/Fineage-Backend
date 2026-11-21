@@ -339,5 +339,9 @@ namespace Fineage.Net.Contract
         public const ushort DuelEvent = 0x03C2;
         /// <summary>Zone → client: an opponent's bars during a duel (<c>DuelUserInfoNetMsg</c>, Mobius ExDuelUpdateUserInfo).</summary>
         public const ushort DuelUserInfo = 0x03C3;
+        /// <summary>Zone → watchers: mount / dismount visual (<c>RideNetMsg</c>, Mobius Ride 0x86).</summary>
+        public const ushort Ride = 0x03C4;
+        /// <summary>Zone → owner: pet / mount action gating (<c>PlayerActionStateNetMsg</c>).</summary>
+        public const ushort PlayerActionState = 0x03C5;
     }
 }

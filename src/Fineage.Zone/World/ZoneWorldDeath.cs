@@ -84,6 +84,7 @@ public sealed partial class ZoneWorld
             return;
 
         EndFishing(player, win: false);
+        ClearMount(player);
         player.Dead = true;
         player.CurHp = 0;
         ClosePrivateStore(player.ObjectId, standUp: false);
