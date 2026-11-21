@@ -102,6 +102,8 @@ public sealed partial class ZoneWorld
         var cast = BuildCast(player, target, request.SkillId, level, hitMs, reuseMs);
         StopForCast(player, target, now);
         FanoutSkill(player, target, cast, targetStatus: null, CasterMpStatus(player));
+        if (target.Kind == ZoneEntityKind.Npc && ApplyOwnedSkillSee(player, target))
+            return null;
         // Mobius onMagicFinalizer: a friendly buff (Dash, Might, Wind Walk) is not isBad() → no attack stance.
         EnterCombatStanceOnCast(player, template, level, now);
         player.CastingUntilMs = now + Math.Max(0, hitMs);

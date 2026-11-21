@@ -99,6 +99,9 @@ public sealed record SocialOp(int Action) : QuestOp;
 /// Mobius <c>addSpawn</c> + a per-spawn quest timer (sagas): an NPC owned by the quest player, optionally at the
 /// player's feet, that despawns after <see cref="DespawnSec"/> and writes vars back into the owner's quest row.
 /// </summary>
+/// <summary>Mobius saga <c>startQuestTimer</c> chat line after <paramref name="DelayMs"/> from spawn.</summary>
+public sealed record QuestScheduledSay(int DelayMs, string Text);
+
 public sealed record QuestSummon(
     int NpcId,
     int? X,
@@ -114,7 +117,8 @@ public sealed record QuestSummon(
     string? GoneSay,
     string? GuardSay,
     IReadOnlyDictionary<string, string>? GoneVars,
-    IReadOnlyDictionary<string, string>? DeadVars)
+    IReadOnlyDictionary<string, string>? DeadVars,
+    IReadOnlyList<QuestScheduledSay>? ScheduledSays = null)
 {
     /// <summary>Quest whose row the vars go into; filled when the step runs.</summary>
     public int QuestId { get; init; }
@@ -130,6 +134,9 @@ public sealed record ChangeClassOp(int ClassId) : QuestOp;
 
 /// <summary>Mobius <c>deleteSpawn(npc)</c> on the dialog / attacked NPC, without its despawn vars.</summary>
 public sealed record DespawnOp : QuestOp;
+
+/// <summary>Mobius saga helper <c>cast(npc, player, skillId, level)</c> — visual <c>MagicSkillUse</c> only.</summary>
+public sealed record CastSkillOp(int SkillId, int Level) : QuestOp;
 
 /// <summary>Mobius Q419 quiz: take one random space-separated token out of <c>Pool</c> into <c>Target</c>.</summary>
 public sealed record PickRandomOp(string Pool, string Target) : QuestOp;
@@ -150,15 +157,17 @@ public sealed class QuestExtras
 
     public List<QuestSummon> Summons { get; } = [];
     public List<string> Says { get; } = [];
+    public List<CastSkillOp> Casts { get; } = [];
     public int ClassChange { get; set; }
     public bool Despawn { get; set; }
 
-    public bool Empty => Summons.Count == 0 && Says.Count == 0 && ClassChange == 0 && !Despawn;
+    public bool Empty => Summons.Count == 0 && Says.Count == 0 && Casts.Count == 0 && ClassChange == 0 && !Despawn;
 
     public void MergeFrom(QuestExtras other)
     {
         Summons.AddRange(other.Summons);
         Says.AddRange(other.Says);
+        Casts.AddRange(other.Casts);
         if (other.ClassChange != 0)
             ClassChange = other.ClassChange;
         Despawn |= other.Despawn;
