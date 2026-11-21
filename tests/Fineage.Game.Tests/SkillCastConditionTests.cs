@@ -33,6 +33,7 @@ public sealed class SkillCastConditionTests
         public override bool InsideZone(int zoneId) => false;
         public override bool CanSweep() => false;
         public override bool CanSummon() => false;
+        public override bool HasSummon => false;
         public override bool CanSummonSiegeGolem() => false;
         public override bool CanCreateSiegeBase() => false;
         public override bool CanTakeCastle() => false;
