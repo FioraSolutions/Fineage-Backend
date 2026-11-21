@@ -198,6 +198,9 @@ public sealed partial class ZoneWorld
         {
             PetControlObjectId = PetControlObjectIdOf(player),
             ByPet = byPet,
+            InRiftPeace = IsInDimensionalRiftPeace(player.X, player.Y, player.Z),
+            InRift = IsInDimensionalRift(player.X, player.Y, player.Z),
+            StartedQuestCount = player.Quests.StartedCount,
             Roll = Rng(_questRandom, player).NextDouble
         };
 

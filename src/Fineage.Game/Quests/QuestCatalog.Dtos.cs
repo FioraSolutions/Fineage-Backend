@@ -83,6 +83,9 @@ public sealed partial class QuestCatalog
         public int SumMax { get; set; } = -1;
         public string? HoldsVarItem { get; set; }
         public HtmlByVarDto? HtmlByVar { get; set; }
+        public bool? InRiftPeace { get; set; }
+        public bool? InRift { get; set; }
+        public int MaxStarted { get; set; }
     }
 
     sealed class ScheduledSayDto

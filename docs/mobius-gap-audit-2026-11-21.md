@@ -125,7 +125,7 @@ Each row: **status**, **concrete gap** (what Mobius does that Fineage does not, 
 | Periods / seal votes / stones | ✅ | — | `SevenSigns.java` | `SevenSignsEngine` | — |
 | Catacomb/necropolis **entry** | 🟡 | Full gate NPC + validation kick | `DimensionalRift` gates | Teleport + cabal checks | S |
 | **Festival of Darkness** | ❌ | Instance rooms, scores, rewards | `SevenSignsFestival` | `ISevenSignsFestivalHook` only | L |
-| **Dimensional rift** | ❌ | Rift rooms, jumps, rewards | `DimensionalRiftManager.java` | No manager | L |
+| **Dimensional rift** | ✅ | Rift rooms, jumps, rewards | `DimensionalRiftManager.java` | `ZoneWorldDimensionalRift` | L |
 | Mammon spawn | ✅ | — | `SignsPriest` / Mammon | `ZoneWorldMammon` | — |
 
 ### Cursed weapons
@@ -272,7 +272,7 @@ Documented in `docs/net-protocol.md`. **Blocked-feature wire layouts** (boats, d
 
 Fineage-only: Q256, Q998.
 
-Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Batch 2: Q50–Q53 bait + Q27–Q30 chest chain — `scripts/gen_quests_rank2_fishing.py` (bait prerequisite chain not JSON-gated). Still blocked on dimensional rift: Q634, Q635; Q255 skipped (Fineage Q998).
+Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Batch 2: Q50–Q53 bait + Q27–Q30 chest chain — `scripts/gen_quests_rank2_fishing.py` (bait prerequisite chain not JSON-gated). Q634/Q635 ship with dimensional rift (#7); Q255 skipped (Fineage Q998).
 
 ---
 
@@ -302,7 +302,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 4 | Cursed weapons | ❌ | No acquire/drop cycle | `CursedWeaponsManager.java` | L |
 | 5 | Auto-loot | ❌ | All drops to ground | `Attackable.java` + `PlayerConfig` | M |
 | 6 | Seven Signs Festival | ❌ | No instance / rewards | `SevenSignsFestival` | L |
-| 7 | Dimensional rift | ❌ | No rift instances | `DimensionalRiftManager.java` | L |
+| 7 | Dimensional rift | ✅ | Instances + Q634/Q635 | `DimensionalRiftManager.java` | L |
 | 8 | Siege mercenaries | ❌ | No ticket deploy | `MercTicketManager.java` | M |
 | 9 | Siege golem (noble) | ❌ | No summon siege golem | `ConditionPlayerCanSummonSiegeGolem` | M |
 | 10 | Skill enchant (+skills) | ❌ | No ExEnchantSkill | `RequestExEnchantSkill.java` | M |
@@ -327,7 +327,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 4 | Cursed weapons | — | blocked | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
 | 6 | Seven Signs Festival | — | blocked | No (instances) |
-| 7 | Dimensional rift | — | blocked | No (unblocks Q634/635) |
+| 7 | Dimensional rift | — | done | No |
 | 8 | Siege mercenaries | #722 | done | No |
 | 9 | Siege golem (noble) | #722 | done | No |
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |

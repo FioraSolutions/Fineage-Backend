@@ -240,6 +240,10 @@ public sealed partial class ZoneWorld
             return "party_busy";
         if (_party.IsInvited(targetObjectId))
             return "party_busy";
+        if (_party.Of(inviter.ObjectId) is { } riftParty && RiftBoard.PartyInRift(riftParty.PartyId))
+            return "party_busy";
+        if (_party.Of(targetObjectId) is { } targetParty && RiftBoard.PartyInRift(targetParty.PartyId))
+            return "party_busy";
 
         int distribution = itemDistribution;
         if (_party.InParty(inviter.ObjectId))

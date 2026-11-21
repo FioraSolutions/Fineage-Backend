@@ -143,6 +143,7 @@ public sealed partial class ZoneWorld
         if (wasFlagged)
             BroadcastPvpAppearance(player);
 
+        RiftOnPlayerDeath(player);
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)
         {
@@ -196,6 +197,7 @@ public sealed partial class ZoneWorld
         player.Running = true;
         RestoreExpFromDeath(player, revivePower);
 
+        RiftOnPlayerRevive(player, usedTeleport: false);
         FanoutRevive(player);
         if (player.Session != null)
         {
@@ -231,6 +233,8 @@ public sealed partial class ZoneWorld
         FanoutRevive(player);
         // Relocate fans TeleportToLocation to the owner and every peer that held it in view.
         Relocate(player, x, y, z, heading: 0);
+        if (PlayerInDimensionalRift(player.ObjectId) || _party.Of(player.ObjectId) is { } party && RiftBoard.PartyInRift(party.PartyId))
+            RiftOnPlayerRevive(player, usedTeleport: true);
 
         if (player.Session != null)
         {

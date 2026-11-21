@@ -255,6 +255,7 @@ public sealed partial class ZoneWorld
 
         AnnounceClanEnter(entity);
         FriendPlayerEnteredWorld(entity);
+        RiftSanitizeLogin(entity);
         SyncPunishmentsOnEnter(session, entity, enterNow);
         known = entity.Knownlist.Count;
         return true;

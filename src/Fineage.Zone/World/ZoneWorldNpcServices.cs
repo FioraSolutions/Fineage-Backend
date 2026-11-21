@@ -98,6 +98,8 @@ public sealed partial class ZoneWorld
                 return TryWyvernRideFromManager(session, player, npc);
             case NpcServiceIntent.PetEvolve:
                 return ApplyPetEvolve(session, player, npc, reply.ServiceId);
+            case NpcServiceIntent.DimensionalRift:
+                return ApplyDimensionalRift(session, player, npc, reply);
             default:
                 return "bad_request";
         }
