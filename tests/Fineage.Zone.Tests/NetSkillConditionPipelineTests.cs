@@ -8,10 +8,9 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
-/// <summary>Shared cast-condition pipelines: HP threshold, item consume at hit, charge spend at cast start.</summary>
+/// <summary>Shared cast-condition pipelines: item consume at hit, charge spend at cast start.</summary>
 public sealed class NetSkillConditionPipelineTests
 {
-    const int Guts = 139;
     const int StormCubic = 10;
     const int CursedBone = 1458;
     const int SonicBlaster = 6;
@@ -29,28 +28,6 @@ public sealed class NetSkillConditionPipelineTests
         });
 
     [Fact]
-    public async Task Guts_refused_above_hp_threshold_then_casts_when_low()
-    {
-        var kit = new NetTestKit();
-        var (session, player) = await kit.EnterAsync(classId: 0, race: 0, level: 52);
-        player.KnownSkills[Guts] = 3;
-        player.CurMp = player.MaxMp = 500;
-        player.CurHp = player.MaxHp;
-        var (bridge, rec) = NetBridgeRecorder.Create();
-        kit.World.NetBridge = bridge;
-
-        Assert.Null(await kit.World.TrySkillUseAsync(session, Guts, player.ObjectId, CancellationToken.None));
-        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
-
-        player.CurHp = player.MaxHp * 25 / 100;
-        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();
-        Assert.Null(await kit.World.TrySkillUseAsync(session, Guts, player.ObjectId, CancellationToken.None));
-        Assert.False(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
-    }
-
-    [Fact]
     public async Task Item_consume_checked_before_cast_and_spent_at_hit()
     {
         var kit = new NetTestKit();
@@ -63,8 +40,8 @@ public sealed class NetSkillConditionPipelineTests
         int mp = player.CurMp;
         Assert.Null(await kit.World.TrySkillUseAsync(session, StormCubic, player.ObjectId, CancellationToken.None));
         Assert.Equal(mp, player.CurMp);
-        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgNotEnoughItems));
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
+            m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgNotEnoughItems);
 
         player.Inventory!.Add(CursedBone, 5);
         rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();

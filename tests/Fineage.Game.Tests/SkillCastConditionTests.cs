@@ -20,7 +20,8 @@ public sealed class SkillCastConditionTests
         public override int InventoryUsedSlots => Used;
         public override int InventoryLimit => Limit;
         public override int LoadPercent => LoadPct;
-        public override int HpPercent => 100;
+        public int HpPercentValue { get; set; } = 100;
+        public override int HpPercent => HpPercentValue;
         public override int MpPercent => 100;
         public override int SoulCharges => 0;
         public override int Level => 20;
@@ -84,6 +85,18 @@ public sealed class SkillCastConditionTests
         Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
         ctx.TargetRaceName = "HUMANOID";
         Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
+    }
+
+    [Fact]
+    public void Player_hp_gate_refuses_above_threshold()
+    {
+        var json = """{"op":"player","hp":30}""";
+        var cond = SkillCastCondition.Parse(JsonDocument.Parse(json).RootElement);
+        var ctx = new TestCtx();
+        ctx.HpPercentValue = 100;
+        Assert.False(SkillCastConditionEvaluator.Met(cond, ctx));
+        ctx.HpPercentValue = 25;
+        Assert.True(SkillCastConditionEvaluator.Met(cond, ctx));
     }
 
     [Fact]

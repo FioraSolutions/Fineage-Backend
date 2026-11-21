@@ -538,16 +538,6 @@ public sealed partial class ZoneWorld
         {
             if (CreateBaseBlock(session, player, template, out var castle) != null || castle == null)
                 return;
-            var inventory = player.Inventory;
-            var changes = new List<InventoryUpdateEntryMsg>();
-            if (inventory == null || !Take(inventory, SiegeProtocol.HeadquartersItemId, SiegeProtocol.HeadquartersItemCount, changes))
-            {
-                SelfLine(session, 351, "There are not enough necessary items to use the skill.");
-                return;
-            }
-
-            FanInventory(session, Collapse(changes));
-            SaveInventory(session, inventory);
             string title = _clan.TryGet(SiegeClanOf(player), out var clan) ? clan.Name : "";
             var flag = SpawnSiegeNpc(SiegeProtocol.HeadquartersNpcId, player.X, player.Y, player.Z, player.Heading,
                 new SiegeNpcInfo { Role = SiegeNpcRole.Flag, CastleId = castle.Id, FlagClanId = SiegeClanOf(player) }, title);
