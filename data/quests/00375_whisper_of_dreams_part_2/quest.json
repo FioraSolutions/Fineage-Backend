@@ -1,0 +1,157 @@
+{
+  "id": 375,
+  "name": "Whisper of Dreams, Part 2",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5888,
+    5889
+  ],
+  "dialogs": [
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "lacksItems": [
+        5887
+      ],
+      "htmlFile": "30515-talk-000.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 59,
+      "hasItem": 5887,
+      "htmlFile": "30515-talk-001.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 60,
+      "hasItem": 5887,
+      "htmlFile": "30515-talk-002.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "absent",
+      "event": "30515-03",
+      "minLevel": 60,
+      "hasItem": 5887,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "take_item",
+          "itemId": 5887,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "30515-event-30515-03-003.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "below": {
+        "5888": 100
+      },
+      "htmlFile": "30515-talk-c1-004.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "atLeast": {
+        "5888": 100,
+        "5889": 100
+      },
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 5888,
+          "count": 100
+        },
+        {
+          "op": "take_item",
+          "itemId": 5889,
+          "count": 100
+        },
+        {
+          "op": "set",
+          "key": "rew",
+          "value": "5348 5350 5352"
+        },
+        {
+          "op": "pick_random",
+          "key": "rew",
+          "name": "pick"
+        },
+        {
+          "op": "give_item",
+          "itemId": 5348,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30515-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30515,
+      "hook": "event",
+      "when": "started",
+      "event": "30515-07",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30515-event-30515-07-006.htm"
+    },
+    {
+      "npcId": 20629,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5888,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20624,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5889,
+          "count": 1,
+          "chance": 0.9,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}
