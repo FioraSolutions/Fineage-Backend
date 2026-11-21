@@ -56,6 +56,7 @@ public sealed partial class ZoneWorld
         }
 
         var bounds = ZoneMapFilter.BoundsList;
+        _spawnPeriodNight = IsNight;
         foreach (var map in maps)
         {
             foreach (var def in map.Npcs)
@@ -65,7 +66,8 @@ public sealed partial class ZoneWorld
                 if (_spawnSlots.ContainsKey(def.ObjectId))
                     throw new InvalidOperationException($"Duplicate spawn object id {def.ObjectId}.");
                 _spawnSlots.Add(def.ObjectId, new SpawnSlotState { Definition = def, MapId = map.MapId });
-                MaterializeSpawn(def, map.MapId);
+                if (SpawnPeriodActive(def))
+                    MaterializeSpawn(def, map.MapId);
             }
         }
     }
@@ -115,6 +117,8 @@ public sealed partial class ZoneWorld
             }
 
             ClearSpawnDue(slot);
+            if (!SpawnPeriodActive(slot.Definition))
+                continue;
             MaterializeSpawn(slot.Definition, slot.MapId);
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
                 FanoutNewNpc(npc);
@@ -160,6 +164,7 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
         {
+            TickDayNightSpawns();
             TickCorpseDecay(NowUnixMs());
             TickSpawns();
         }

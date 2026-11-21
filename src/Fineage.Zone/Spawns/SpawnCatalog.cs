@@ -111,6 +111,7 @@ public sealed class SpawnCatalog
                 if (row.RespawnRandomSeconds < 0)
                     throw new InvalidDataException($"{map.Path} object {objectId} has negative respawnRandomSeconds.");
 
+                var period = SpawnPeriodOfDayParse.Parse(row.PeriodOfDay);
                 npcs.Add(FromTemplate(
                     objectId,
                     template,
@@ -124,7 +125,8 @@ public sealed class SpawnCatalog
                     Speed(row.RunSpeed, template.RunSpeed, 80f),
                     Speed(row.WalkSpeed, template.WalkSpeed, 40f),
                     Math.Max(0, row.RespawnDelaySeconds),
-                    Math.Max(0, row.RespawnRandomSeconds)));
+                    Math.Max(0, row.RespawnRandomSeconds),
+                    periodOfDay: period));
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));
@@ -150,7 +152,8 @@ public sealed class SpawnCatalog
         float? runSpeed = null,
         float? walkSpeed = null,
         int respawnDelaySeconds = 0,
-        int respawnRandomSeconds = 0) => new(
+        int respawnRandomSeconds = 0,
+        SpawnPeriodOfDay periodOfDay = SpawnPeriodOfDay.Any) => new(
         objectId,
         template.NpcId,
         string.IsNullOrWhiteSpace(name) ? template.Name : name,
@@ -200,7 +203,8 @@ public sealed class SpawnCatalog
         template.MaxSkillChance,
         template.AttackType,
         template.Rhand,
-        template.Lhand);
+        template.Lhand,
+        periodOfDay);
 
     public static SpawnCatalog LoadDefault()
     {
@@ -272,7 +276,8 @@ public sealed class SpawnCatalog
                 row.RunSpeed,
                 row.WalkSpeed,
                 row.RespawnDelaySeconds,
-                row.RespawnRandomSeconds));
+                row.RespawnRandomSeconds,
+                row.PeriodOfDay));
         }
 
         return new PendingMap(path, file.MapId.Trim(), file.Enabled, npcs);
@@ -293,7 +298,8 @@ public sealed class SpawnCatalog
         float? RunSpeed,
         float? WalkSpeed,
         int RespawnDelaySeconds,
-        int RespawnRandomSeconds);
+        int RespawnRandomSeconds,
+        string? PeriodOfDay);
 
     sealed class MapFileDto
     {
@@ -317,6 +323,7 @@ public sealed class SpawnCatalog
         public float? WalkSpeed { get; set; }
         public int RespawnDelaySeconds { get; set; } = 60;
         public int RespawnRandomSeconds { get; set; }
+        public string? PeriodOfDay { get; set; }
     }
 }
 

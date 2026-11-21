@@ -11,7 +11,8 @@
       "z": -2773,
       "heading": 39756,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91974,
@@ -21,7 +22,8 @@
       "z": -2807,
       "heading": 16334,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91975,
@@ -31,7 +33,8 @@
       "z": -2762,
       "heading": 39879,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91976,
@@ -41,7 +44,8 @@
       "z": -2734,
       "heading": 62989,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91977,
@@ -51,7 +55,8 @@
       "z": -2643,
       "heading": 14573,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91978,
@@ -61,7 +66,8 @@
       "z": -2527,
       "heading": 31208,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91979,
@@ -71,7 +77,8 @@
       "z": -2428,
       "heading": 30245,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91980,
@@ -81,7 +88,8 @@
       "z": -2489,
       "heading": 62618,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91981,
@@ -91,7 +99,8 @@
       "z": -2378,
       "heading": 20054,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91982,
@@ -101,7 +110,8 @@
       "z": -2319,
       "heading": 23945,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91983,
@@ -111,7 +121,8 @@
       "z": -2360,
       "heading": 19740,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91984,
@@ -121,7 +132,8 @@
       "z": -2408,
       "heading": 59762,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91985,
@@ -131,7 +143,8 @@
       "z": -2816,
       "heading": 3994,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91986,
@@ -141,7 +154,8 @@
       "z": -2797,
       "heading": 61552,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91987,
@@ -151,7 +165,8 @@
       "z": -2481,
       "heading": 33935,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91988,
@@ -161,7 +176,8 @@
       "z": -2332,
       "heading": 44477,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91989,
@@ -171,7 +187,8 @@
       "z": -2350,
       "heading": 4945,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91990,
@@ -181,7 +198,8 @@
       "z": -2418,
       "heading": 32575,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91991,
@@ -191,7 +209,8 @@
       "z": -2484,
       "heading": 44619,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91992,
@@ -201,7 +220,8 @@
       "z": -2415,
       "heading": 20440,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91993,
@@ -211,7 +231,8 @@
       "z": -2567,
       "heading": 22131,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91994,
@@ -221,7 +242,8 @@
       "z": -2689,
       "heading": 41346,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91995,
@@ -231,7 +253,8 @@
       "z": -2619,
       "heading": 2681,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91996,
@@ -241,7 +264,8 @@
       "z": -2649,
       "heading": 12909,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91997,
@@ -251,7 +275,8 @@
       "z": -2798,
       "heading": 48573,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91998,
@@ -261,7 +286,8 @@
       "z": -2804,
       "heading": 33049,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 91999,
@@ -271,7 +297,8 @@
       "z": -2738,
       "heading": 46936,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92000,
@@ -281,7 +308,8 @@
       "z": -2384,
       "heading": 0,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92001,
@@ -291,7 +319,8 @@
       "z": -2452,
       "heading": 32309,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92002,
@@ -301,7 +330,8 @@
       "z": -2286,
       "heading": 18107,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92003,
@@ -311,7 +341,8 @@
       "z": -2395,
       "heading": 9347,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92004,
@@ -321,7 +352,8 @@
       "z": -2389,
       "heading": 18520,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92005,
@@ -331,7 +363,8 @@
       "z": -2486,
       "heading": 28972,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92006,
@@ -341,7 +374,8 @@
       "z": -2387,
       "heading": 54522,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92007,
@@ -351,7 +385,8 @@
       "z": -2526,
       "heading": 20444,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92008,
@@ -361,7 +396,8 @@
       "z": -2718,
       "heading": 63936,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92009,
@@ -371,7 +407,8 @@
       "z": -2781,
       "heading": 30615,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92010,
@@ -381,7 +418,8 @@
       "z": -2761,
       "heading": 0,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92011,
@@ -391,7 +429,8 @@
       "z": -2516,
       "heading": 64364,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92012,
@@ -401,7 +440,8 @@
       "z": -2600,
       "heading": 56683,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92013,
@@ -411,7 +451,8 @@
       "z": -2422,
       "heading": 52009,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92014,
@@ -421,7 +462,8 @@
       "z": -2404,
       "heading": 57183,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92015,
@@ -431,7 +473,8 @@
       "z": -2320,
       "heading": 28292,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92016,
@@ -441,7 +484,8 @@
       "z": -2337,
       "heading": 20890,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92017,
@@ -451,7 +495,8 @@
       "z": -2371,
       "heading": 32667,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92018,
@@ -461,7 +506,8 @@
       "z": -2365,
       "heading": 28400,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92019,
@@ -471,7 +517,8 @@
       "z": -2554,
       "heading": 30731,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92020,
@@ -481,7 +528,8 @@
       "z": -2812,
       "heading": 60296,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92021,
@@ -491,7 +539,8 @@
       "z": -2802,
       "heading": 36236,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92022,
@@ -501,7 +550,8 @@
       "z": -2799,
       "heading": 37933,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92023,
@@ -511,7 +561,8 @@
       "z": -2693,
       "heading": 55037,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92024,
@@ -521,7 +572,8 @@
       "z": -2666,
       "heading": 3356,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92025,
@@ -531,7 +583,8 @@
       "z": -2562,
       "heading": 33529,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92026,
@@ -541,7 +594,8 @@
       "z": -2448,
       "heading": 62053,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92027,
@@ -551,7 +605,8 @@
       "z": -2402,
       "heading": 33200,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92028,
@@ -561,7 +616,8 @@
       "z": -2321,
       "heading": 47935,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92029,
@@ -571,7 +627,8 @@
       "z": -2412,
       "heading": 37155,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92030,
@@ -581,7 +638,8 @@
       "z": -2400,
       "heading": 56279,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92031,
@@ -591,7 +649,8 @@
       "z": -2441,
       "heading": 27330,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 92032,
@@ -601,7 +660,8 @@
       "z": -2650,
       "heading": 19666,
       "respawnDelaySeconds": 37,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     }
   ]
 }

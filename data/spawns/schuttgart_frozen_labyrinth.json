@@ -1761,7 +1761,8 @@
       "z": -3744,
       "heading": 24576,
       "respawnDelaySeconds": 60,
-      "respawnRandomSeconds": 0
+      "respawnRandomSeconds": 0,
+      "periodOfDay": "night"
     },
     {
       "objectId": 96841,

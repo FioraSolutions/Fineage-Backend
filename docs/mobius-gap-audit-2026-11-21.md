@@ -330,7 +330,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 8 | Siege mercenaries | — | pending | No |
 | 9 | Siege golem (noble) | — | pending | No |
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
-| 11 | Day/night spawns | — | pending | No |
+| 11 | Day/night spawns | (open) | partial — engine + 784 datapack rows | No |
 | 12 | Clan hall siege | — | pending | No |
 | 13 | Baby pet / evolution | — | pending | No |
 | 14 | Guard / town AI | — | partial (base guard AI) | No |
