@@ -18,7 +18,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // Skill use may spoil/sweep/consume → SaveInventory after unlock (B8).
+        // Skill use may spoil/sweep/consume → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => TrySkillUse(session, new SkillUseIntent(skillId, targetObjectId, ctrlPressed))));
     }
@@ -60,7 +60,7 @@ public sealed partial class ZoneWorld
 
     internal string? TrainerServiceForTest(ZoneSession session, string intent, int skillId = -1, int npcObjectId = 0)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";
@@ -82,7 +82,7 @@ public sealed partial class ZoneWorld
         if (skillId <= 0 || level <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        // Trainer purchase can consume SP items / update bag → SaveInventory after unlock (B8).
+        // Trainer purchase can consume SP items / update bag → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)

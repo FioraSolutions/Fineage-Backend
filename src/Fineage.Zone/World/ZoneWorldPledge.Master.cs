@@ -313,7 +313,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the start-of-server delegation step without reloading the world.</summary>
     internal bool ApplyLeaderDelegationForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan) || clan.D.NewLeaderId == 0)
                 return false;

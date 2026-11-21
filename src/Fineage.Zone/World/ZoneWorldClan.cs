@@ -20,9 +20,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanCreate(session, request.Name, now.ToUnixTimeMilliseconds());
+        string? error = TryClanCreate(session, request.Name, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -37,9 +35,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanInvite(session, invite, now.ToUnixTimeMilliseconds());
+        string? error = TryClanInvite(session, invite, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -54,9 +50,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanAnswer(session, answer, now.ToUnixTimeMilliseconds());
+        string? error = TryClanAnswer(session, answer, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -65,9 +59,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanLeave(session, now.ToUnixTimeMilliseconds());
+        string? error = TryClanLeave(session, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -82,9 +74,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanKick(session, kick.TargetObjectId, now.ToUnixTimeMilliseconds());
+        string? error = TryClanKick(session, kick.TargetObjectId, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -93,9 +83,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanDissolve(session, now.ToUnixTimeMilliseconds());
+        string? error = TryClanDissolve(session, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -104,16 +92,14 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryClanCancelDissolve(session, now.ToUnixTimeMilliseconds());
+        string? error = TryClanCancelDissolve(session, now.ToUnixTimeMilliseconds());
         return error;
     }
 
     /// <summary>Test and admin hook: runs the clan actor's dissolution step at the current tick.</summary>
     public void CompleteDueDissolutions()
     {
-        lock (_gate)
+        using (_affinity.Step())
             CompleteDueDissolutionsNow();
     }
 
@@ -146,7 +132,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: reread clan rows the store gained after boot (siege registration reads this cache).</summary>
     internal bool ReloadClansForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             _clan.Clear();
             LoadClans();

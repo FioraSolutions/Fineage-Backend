@@ -160,14 +160,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the Soul Crystal skill landed on <paramref name="npc"/> from <paramref name="player"/>.</summary>
     internal void SoulAbsorbForTest(ZoneEntity player, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             AbsorbSoul(player, npc);
     }
 
     /// <summary>Test hook: <paramref name="npc"/> died to <paramref name="killer"/> (soul crystal step only).</summary>
     internal void SoulKillForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             LevelSoulCrystals(killer, npc);
     }
 }

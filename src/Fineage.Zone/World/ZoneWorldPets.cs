@@ -860,7 +860,7 @@ public sealed partial class ZoneWorld
 
     internal void TickPetFeedForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (PetEntityOf(player) is { } s && OwnerOf(s) is { } owner)
                 TickPetFeed(owner, s, s.Summon!.Pet!, NowUnixMs());
@@ -869,7 +869,7 @@ public sealed partial class ZoneWorld
 
     internal void AddPetExpForTest(ZoneEntity player, long exp)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (PetEntityOf(player) is { } s && OwnerOf(s) is { } owner)
                 AddPetExp(owner, s, s.Summon!.Pet!, exp);
@@ -878,13 +878,13 @@ public sealed partial class ZoneWorld
 
     internal void KillSummonForTest(ZoneEntity summon)
     {
-        lock (_gate)
+        using (_affinity.Step())
             SummonDied(summon, null, NowUnixMs());
     }
 
     internal StoredPet? LoadPetForTest(int controlObjectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return LoadPet(controlObjectId);
     }
 }

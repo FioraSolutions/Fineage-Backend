@@ -36,7 +36,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: a talkable (non-attackable) template NPC at a point.</summary>
     internal ZoneEntity SpawnFolkForTests(int npcId, int x, int y, int z)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
             int objectId = AllocateQuestNpcObjectId();
@@ -50,7 +50,7 @@ public sealed partial class ZoneWorld
 
     internal void TickMammonForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick => PlaceMammons(_mammon.Step(tick)));
     }
 

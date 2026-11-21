@@ -125,14 +125,14 @@ public sealed partial class ZoneWorld
     /// <summary>Count of live ground stacks (death loot / bag drops).</summary>
     internal int GroundItemCountForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values.Count(e => e.Kind == ZoneEntityKind.GroundItem);
     }
 
     /// <summary>ObjectId of the first live ground stack (test helper).</summary>
     internal int FindGroundObjectIdForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             foreach (var e in _byId.Values)
             {

@@ -43,8 +43,9 @@ public sealed partial class ZoneWorld
                 ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
             }
 
-            _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+            if (submission.Command.Logged)
+                _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
+                    failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
             _ingress.Record(submission, error, failure);
         }
     }
@@ -55,12 +56,13 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal async Task PumpCommandsAsync(CancellationToken ct)
     {
+        _affinity.Drive();
         try
         {
             while (true)
             {
                 await _ingress.WaitForSubmissionAsync(ct).ConfigureAwait(false);
-                RunUnderGate(wall => _simulationTicks.RunNow(CommandsStage, wall));
+                RunStep(wall => _simulationTicks.RunNow(CommandsStage, wall));
             }
         }
         catch (OperationCanceledException)
@@ -71,7 +73,7 @@ public sealed partial class ZoneWorld
     /// <summary>Starts recording every step and command of this world into a fresh log (tests and diagnostics).</summary>
     internal SimulationLog RecordSimulation()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             _commandLog = new SimulationLog(
                 new SimulationLogHeader(_simulationSeed, _simulationTicks.StepMilliseconds, _simulationTicks.Tick));
@@ -122,7 +124,7 @@ public sealed partial class ZoneWorld
 
     ZoneSession SessionOf(CommandLogEntry entry)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             return _byId.TryGetValue(entry.ActorObjectId, out var actor) && actor.Session is { } live
                 ? live

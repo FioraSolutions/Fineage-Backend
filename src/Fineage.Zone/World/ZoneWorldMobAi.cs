@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
 {
     internal Task RunCombatTickAsync(CancellationToken ct)
     {
-        RunUnderGate(now =>
+        RunStep(now =>
         {
             TickPlayerMovement(now);
             TickNpcMovement(now);

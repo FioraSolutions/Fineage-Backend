@@ -124,14 +124,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the clan warehouse's stack object ids.</summary>
     internal List<int> ClanWarehouseStacksForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _clan.TryGet(clanId, out var clan) ? ClanWarehouseOf(clan)!.Items.Select(i => i.ObjectId).ToList() : [];
     }
 
     /// <summary>Test hook: the clan warehouse rows (item id → count).</summary>
     internal Dictionary<int, int> ClanWarehouseForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan))
                 return [];

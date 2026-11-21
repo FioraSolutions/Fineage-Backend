@@ -69,7 +69,7 @@ public sealed partial class ZoneWorld
 
     internal bool OlympiadTargetRefusedForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return OlympiadTargetRefused(attacker, target);
     }
 

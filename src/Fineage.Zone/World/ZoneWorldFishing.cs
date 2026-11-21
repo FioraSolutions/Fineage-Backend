@@ -608,25 +608,25 @@ public sealed partial class ZoneWorld
 
     internal void TickFishingForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickFishing(NowUnixMs());
     }
 
     internal (int Hp, int MaxHp, int Mode, int Deceptive, int Time)? FishFightForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _fishers.TryGetValue(objectId, out var l) && l.Fight is { } f ? (f.Hp, f.MaxHp, f.Mode, f.Deceptive, f.Time) : null;
     }
 
     internal (int FishId, int Group, int BaitX, int BaitY, int BaitZ)? FishingLineForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _fishers.TryGetValue(objectId, out var l) ? (l.Fish.FishId, l.Group, l.BaitX, l.BaitY, l.BaitZ) : null;
     }
 
     internal void SetFishModeForTests(int objectId, int mode, int deceptive)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_fishers.TryGetValue(objectId, out var l) && l.Fight is { } f)
             {

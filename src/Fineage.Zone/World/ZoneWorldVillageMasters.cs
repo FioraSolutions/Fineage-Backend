@@ -190,7 +190,7 @@ public sealed partial class ZoneWorld
     internal string? VillageMasterForTest(ZoneSession session, int npcId, string script, string evt, out string html)
     {
         html = "";
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!TryPlayer(session, out var player))
                 return "world";

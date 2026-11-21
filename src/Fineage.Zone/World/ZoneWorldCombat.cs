@@ -12,9 +12,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TrySelectTarget(session, targetObjectId);
+        string? error = TrySelectTarget(session, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 
@@ -23,17 +21,14 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-        {
-            if (!_byId.TryGetValue(session.ObjectId, out var player))
-                return Task.FromResult<string?>("world");
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
+            return Task.FromResult<string?>("world");
 
-            int previous = session.SelectedTargetId;
-            session.SelectedTargetId = 0;
-            player.Intent.AutoAttackTargetId = 0;
-            player.Intent.ClearApproach();
-            NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
-        }
+        int previous = session.SelectedTargetId;
+        session.SelectedTargetId = 0;
+        player.Intent.AutoAttackTargetId = 0;
+        player.Intent.ClearApproach();
+        NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
 
         return Task.FromResult<string?>(null);
     }
@@ -49,29 +44,26 @@ public sealed partial class ZoneWorld
 
         string? error;
         long approachMs = 0;
-        lock (_gate)
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
         {
-            if (!_byId.TryGetValue(session.ObjectId, out var player))
+            error = "world";
+        }
+        else
+        {
+            var intent = player.Intent;
+            int previous = intent.AutoAttackTargetId;
+            long now0 = NowUnixMs();
+            int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
+            bool alreadySwinging = previous > 0 && previous == requested && intent.ApproachTargetId == 0 &&
+                intent.NextAutoAttackUnixMs > now0;
+            // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
+            error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
+            if (error == null && !alreadySwinging && approachMs >= 0)
             {
-                error = "world";
-            }
-            else
-            {
-                var intent = player.Intent;
-                int previous = intent.AutoAttackTargetId;
-                long now0 = NowUnixMs();
-                int requested = targetObjectId > 0 ? targetObjectId : session.SelectedTargetId;
-                bool alreadySwinging = previous > 0 && previous == requested && intent.ApproachTargetId == 0 &&
-                    intent.NextAutoAttackUnixMs > now0;
-                // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
-                error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
-                if (error == null && !alreadySwinging && approachMs >= 0)
-                {
-                    intent.AutoAttackTargetId = session.SelectedTargetId;
-                    // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
-                    intent.NextAutoAttackUnixMs = NowUnixMs() +
-                        (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
-                }
+                intent.AutoAttackTargetId = session.SelectedTargetId;
+                // Approaching: first swing on arrival (Mobius onEvtArrived -> doAttack); else next swing after Pspd.
+                intent.NextAutoAttackUnixMs = NowUnixMs() +
+                    (approachMs > 0 ? approachMs : PlayerAttackTimeMs(session.ObjectId));
             }
         }
         return Task.FromResult<string?>(error);

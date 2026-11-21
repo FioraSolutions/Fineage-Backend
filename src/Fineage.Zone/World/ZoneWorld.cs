@@ -103,11 +103,11 @@ public sealed partial class ZoneWorld
     readonly DropCatalog _dropCatalog;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
-    readonly object _gate = new();
+    readonly WorldAffinity _affinity = new();
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
-    /// <see cref="SaveWarehouse"/> refresh under the lock but queue Postgres until the outermost call has released
-    /// <c>_gate</c> and runs <see cref="FlushDirtyInventories"/> (Claude B8 — keep SQL off <c>_gate</c>).
+    /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
+    /// <see cref="FlushDirtyInventories"/>, once per step instead of once per change.
     /// </summary>
     int _deferInventoryPersistDepth;
 
@@ -301,7 +301,7 @@ public sealed partial class ZoneWorld
     {
         get
         {
-            lock (_gate)
+            using (_affinity.Step())
             {
                 var ids = new List<int>();
                 foreach (var entity in _byId.Values)
@@ -316,31 +316,21 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Players with an active zone session in the world (for OTEL <c>fineage.zone.online</c>).</summary>
-    public int OnlinePlayerCount
-    {
-        get
-        {
-            lock (_gate)
-            {
-                int count = 0;
-                foreach (var entity in _byId.Values)
-                {
-                    if (entity.Kind == ZoneEntityKind.Player && entity.Session is { InWorld: true })
-                        count++;
-                }
+    int _onlinePlayers;
 
-                return count;
-            }
-        }
+    /// <summary>
+    /// Players with an active zone session in the world (for OTEL <c>fineage.zone.online</c>), counted at each enter
+    /// and leave; any thread may read it.
+    /// </summary>
+    public int OnlinePlayerCount => Volatile.Read(ref _onlinePlayers);
+
+    void CountOnlinePlayers()
+    {
+        Volatile.Write(ref _onlinePlayers, Players().Count);
     }
 
     /// <summary>Live player entity after a successful enter (same object Net enter projects from).</summary>
-    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity)
-    {
-        lock (_gate)
-            return TryGetLivePlayerUnlocked(session, out entity);
-    }
+    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity) => TryGetLivePlayerUnlocked(session, out entity);
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
@@ -362,24 +352,21 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal List<ZoneEntity> SnapshotKnownPlayers(ZoneSession session)
     {
-        lock (_gate)
+        if (!TryGetLivePlayerUnlocked(session, out var self))
+            return [];
+
+        var players = new List<ZoneEntity>(self.Knownlist.Count);
+        foreach (int id in self.Knownlist)
         {
-            if (!TryGetLivePlayerUnlocked(session, out var self))
-                return [];
-
-            var players = new List<ZoneEntity>(self.Knownlist.Count);
-            foreach (int id in self.Knownlist)
-            {
-                if (_byId.TryGetValue(id, out var other) &&
-                    other.Kind == ZoneEntityKind.Player &&
-                    other.Session is { InWorld: true } &&
-                    other.InstanceId == self.InstanceId)
-                    players.Add(other);
-            }
-
-            players.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
-            return players;
+            if (_byId.TryGetValue(id, out var other) &&
+                other.Kind == ZoneEntityKind.Player &&
+                other.Session is { InWorld: true } &&
+                other.InstanceId == self.InstanceId)
+                players.Add(other);
         }
+
+        players.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
+        return players;
     }
 
 }

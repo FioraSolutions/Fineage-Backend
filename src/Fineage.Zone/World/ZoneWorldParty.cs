@@ -32,8 +32,7 @@ public sealed partial class ZoneWorld
         if (!Fineage.Game.Services.PartyLootRules.IsValidDistribution(itemDistribution))
             return Task.FromResult<string?>("bad_request");
 
-        lock (_gate)
-            return Task.FromResult<string?>(TryPartyInvite(session, targetObjectId, itemDistribution));
+        return Task.FromResult<string?>(TryPartyInvite(session, targetObjectId, itemDistribution));
     }
 
     public Task<string?> TryPartyAnswerAsync(
@@ -42,8 +41,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            return Task.FromResult<string?>(TryPartyAnswer(session, requestorObjectId, response));
+        return Task.FromResult<string?>(TryPartyAnswer(session, requestorObjectId, response));
     }
 
     public Task<string?> TryPartyLeaveAsync(ZoneSession session, CancellationToken ct)
@@ -51,8 +49,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            return Task.FromResult<string?>(TryPartyLeave(session.ObjectId));
+        return Task.FromResult<string?>(TryPartyLeave(session.ObjectId));
     }
 
     public Task<string?> TryPartyKickAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
@@ -60,8 +57,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            return Task.FromResult<string?>(TryPartyKick(session, targetObjectId));
+        return Task.FromResult<string?>(TryPartyKick(session, targetObjectId));
     }
 
     public Task<string?> TryPartyChangeLeaderAsync(ZoneSession session, int targetObjectId, CancellationToken ct)
@@ -69,8 +65,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            return Task.FromResult<string?>(TryPartyChangeLeader(session, targetObjectId));
+        return Task.FromResult<string?>(TryPartyChangeLeader(session, targetObjectId));
     }
 
     /// <summary>
@@ -193,7 +188,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: set a player's HP through the normal vitals fanout (party bars included).</summary>
     internal void SetPlayerHpForTest(ZoneEntity player, int hp)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             player.CurHp = Math.Clamp(hp, 1, player.MaxHp);
             FanoutVitals(player, PlayerVitalsStatus(player));
@@ -202,7 +197,7 @@ public sealed partial class ZoneWorld
 
     internal Task RunPartyTickForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick =>
             {
                 TickParty(tick);
@@ -213,7 +208,7 @@ public sealed partial class ZoneWorld
 
     internal Task RunTradeRangeTickForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickTradeRange();
         return Task.CompletedTask;
     }

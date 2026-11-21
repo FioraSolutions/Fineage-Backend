@@ -4,7 +4,7 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Bridge ZoneWorld int object ids ↔ Net EntityId (not a gameplay adapter). Thread-safe: world fan-out sends run after
-/// the ZoneWorld gate is released, alongside handlers that allocate under it.
+/// the step, alongside handlers that allocate on I/O threads.
 /// </summary>
 public sealed class EntityIdMap
 {

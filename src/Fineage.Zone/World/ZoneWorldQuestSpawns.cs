@@ -215,14 +215,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the quest-spawn despawn timers now.</summary>
     internal void TickQuestSpawnsForTest(long? now = null)
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickQuestSpawns(now ?? NowUnixMs());
     }
 
     /// <summary>Test hook: kill credit as a dying NPC gives it (owned spawns included).</summary>
     internal void QuestKillEntityForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             npc.CurHp = 0;
             ApplyQuestKill(killer, npc);

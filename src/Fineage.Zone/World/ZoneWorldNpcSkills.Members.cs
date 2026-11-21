@@ -274,7 +274,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: force a support cast (heal/buff/debuff) ignoring AI chance gates.</summary>
     internal bool CastNpcSupportForTest(ZoneEntity npc, ZoneEntity target, NpcAiSupportSkill skill, string kind)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var k = kind.ToLowerInvariant() switch
             {
@@ -292,7 +292,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: force Death Bomb (AoE + self-die) ignoring HP%/chance gates.</summary>
     internal bool CastNpcSuicideForTest(ZoneEntity npc, ZoneEntity hateTarget, NpcAiSupportSkill skill)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             return CastNpcSuicideSkill(npc, hateTarget, skill, NowUnixMs());
         }

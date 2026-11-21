@@ -6,23 +6,26 @@ namespace Fineage.Zone.World;
 
 /// <summary>
 /// A player input to the simulation. Handlers submit it with <see cref="ZoneWorld.ExecuteAsync"/>; the
-/// <c>commands</c> stage applies it under the world gate at the start of the next step, at the tick time, and records
-/// it in the command log. <see cref="Name"/> is the type name in kebab case without the <c>Command</c> suffix.
+/// <c>commands</c> stage applies it on the simulation thread at the start of the next step, at the tick time, and
+/// records it in the command log. <see cref="Name"/> is the type name in kebab case without the <c>Command</c> suffix.
 /// </summary>
 public abstract record ZoneCommand : ISimulationCommand
 {
     static readonly ConcurrentDictionary<Type, string> Names = new();
 
-    public string Name => Names.GetOrAdd(GetType(), NameOf);
+    public virtual string Name => Names.GetOrAdd(GetType(), NameOf);
+
+    /// <summary>Player input is logged and replayed; requests (<see cref="ZoneRequest{T}"/>) are neither.</summary>
+    internal virtual bool Logged => true;
 
     /// <summary>Applies the command for <paramref name="session"/>; returns the rejection reason, or null.</summary>
     internal abstract string? Apply(ZoneWorld world, ZoneSession session, TickContext tick);
 
-    /// <summary>The result of a world rule that runs under the gate, and so has completed when it returns.</summary>
+    /// <summary>The result of a world rule that runs on the simulation thread, and so has completed when it returns.</summary>
     protected string? Completed(Task<string?> rule) =>
         rule.IsCompleted
             ? rule.GetAwaiter().GetResult()
-            : throw new InvalidOperationException($"command {Name} did not complete synchronously under the world gate");
+            : throw new InvalidOperationException($"command {Name} did not complete synchronously on the simulation thread");
 
     /// <summary>Simulation time of the step applying the command: what rules compare against.</summary>
     protected static DateTimeOffset TickTime(TickContext tick) => DateTimeOffset.FromUnixTimeMilliseconds(tick.NowUnixMs);

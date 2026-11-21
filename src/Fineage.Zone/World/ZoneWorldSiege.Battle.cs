@@ -543,7 +543,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: one simulation pass of the siege timers.</summary>
     internal void TickSiegesForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick =>
             {
                 TickSieges(tick);
@@ -553,7 +553,7 @@ public sealed partial class ZoneWorld
 
     internal IReadOnlyList<ZoneEntity> SiegeNpcsForTests(int castleId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values.Where(e => e.SiegeNpc != null && e.SiegeNpc.CastleId == castleId).ToList();
     }
 }

@@ -27,38 +27,35 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         SystemMessageMsg? notice = null;
-        lock (_gate)
-        {
-            if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var speaker) || speaker.Session == null)
-                return Task.FromResult<string?>("world");
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var speaker) || speaker.Session == null)
+            return Task.FromResult<string?>("world");
 
-            if (GmChatCommand.TrySplit(normalized, out _, out _))
+        if (GmChatCommand.TrySplit(normalized, out _, out _))
+        {
+            session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
+            notice = TryGmChat(speaker, session, normalized);
+        }
+        else
+        {
+            long nowMs = now.ToUnixTimeMilliseconds();
+            if (SayRules.IsFlood(session.LastChatUnixMs, nowMs))
             {
-                session.LastChatUnixMs = now.ToUnixTimeMilliseconds();
-                notice = TryGmChat(speaker, session, normalized);
+                notice = SayRules.Flood();
+            }
+            else if (!SayRules.IsDelivered(chatType))
+            {
+                session.LastChatUnixMs = nowMs;
+                notice = SayRules.NotSupported(chatType);
+            }
+            else if (session.ChatBannedUntilUnixMs > nowMs && BanCovers(chatType))
+            {
+                // Mobius Say2.runImpl: a chat-banned player gets CHATTING_IS_CURRENTLY_PROHIBITED on banned channels.
+                notice = new SystemMessageMsg { Id = ChatProtocol.ChattingProhibited, Params = [], Text = "Chatting is currently prohibited." };
             }
             else
             {
-                long nowMs = now.ToUnixTimeMilliseconds();
-                if (SayRules.IsFlood(session.LastChatUnixMs, nowMs))
-                {
-                    notice = SayRules.Flood();
-                }
-                else if (!SayRules.IsDelivered(chatType))
-                {
-                    session.LastChatUnixMs = nowMs;
-                    notice = SayRules.NotSupported(chatType);
-                }
-                else if (session.ChatBannedUntilUnixMs > nowMs && BanCovers(chatType))
-                {
-                    // Mobius Say2.runImpl: a chat-banned player gets CHATTING_IS_CURRENTLY_PROHIBITED on banned channels.
-                    notice = new SystemMessageMsg { Id = ChatProtocol.ChattingProhibited, Params = [], Text = "Chatting is currently prohibited." };
-                }
-                else
-                {
-                    session.LastChatUnixMs = nowMs;
-                    notice = Deliver(speaker, chatType, normalized, target?.Trim() ?? "", nowMs);
-                }
+                session.LastChatUnixMs = nowMs;
+                notice = Deliver(speaker, chatType, normalized, target?.Trim() ?? "", nowMs);
             }
         }
 
@@ -235,7 +232,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void AnnounceToAll(string text, bool critical = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var watchers = _chat.Online;
             if (watchers.Count == 0)
@@ -253,7 +250,7 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius PunishmentType.CHAT_BAN for <paramref name="durationMs"/> (0 lifts it). For GM tools and tests.</summary>
     internal void SetChatBan(ZoneSession session, long durationMs)
     {
-        lock (_gate)
+        using (_affinity.Step())
             session.ChatBannedUntilUnixMs = durationMs > 0 ? NowUnixMs() + durationMs : 0;
     }
 

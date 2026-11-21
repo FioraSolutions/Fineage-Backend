@@ -146,14 +146,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test: first live attackable NPC (spoil target).</summary>
     internal ZoneEntity? AttackableForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values.FirstOrDefault(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0);
     }
 
     /// <summary>Test hook: up to <paramref name="take"/> living attackable NPCs.</summary>
     internal List<ZoneEntity> AttackablesForTest(int take = 2)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values
                 .Where(e => e.Kind == ZoneEntityKind.Npc && e.Attackable && e.CurHp > 0)
                 .Take(take)
@@ -163,7 +163,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test: kill an NPC through the normal death path (corpse, drops, spoil roll, decay timer).</summary>
     internal void KillForTest(ZoneEntity npc, ZoneEntity killer)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             npc.CurHp = 0;
             RemoveDeadNpc(npc, killer);
@@ -173,7 +173,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test: run corpse decay at the kit clock.</summary>
     internal void DecayForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickCorpseDecay(NowUnixMs());
     }
 }

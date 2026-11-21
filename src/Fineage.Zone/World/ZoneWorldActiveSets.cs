@@ -5,8 +5,8 @@ namespace Fineage.Zone.World;
 
 /// <summary>
 /// Mobius-style scheduling registries (ThinkTaskManager / MovementTaskManager analogues), kept per owning region by
-/// <see cref="_byId"/>. Hot ticks iterate these sets only — never the full table on an idle world. Mutations stay under
-/// <c>_gate</c> with the entity fields they mirror.
+/// <see cref="_byId"/>. Hot ticks iterate these sets only — never the full table on an idle world. Mutations happen on the
+/// simulation thread with the entity fields they mirror.
 /// </summary>
 public sealed partial class ZoneWorld
 {

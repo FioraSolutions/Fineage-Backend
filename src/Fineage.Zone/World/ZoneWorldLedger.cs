@@ -23,7 +23,7 @@ public sealed partial class ZoneWorld
 
     internal LedgerHoldings LedgerHoldingsForTests(LedgerAccount account)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return LedgerHoldingsOf(account);
     }
 

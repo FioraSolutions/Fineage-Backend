@@ -99,19 +99,16 @@ public sealed partial class ZoneWorld
     /// <summary>Net StopMove: halt at the server's interpolated position so the correction is truthful.</summary>
     internal void StopMove(ZoneSession session)
     {
-        lock (_gate)
+        if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
         {
-            if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player)
-            {
-                AdvanceMove(e, NowUnixMs());
-                bool wasMoving = e.MoveActive;
-                StopTimedMove(e);
-                SyncSession(e, session);
-                // Mobius StopMove is broadcast: peers would otherwise keep running the pawn to the old destination.
-                // An idle StopMove (client spam) fans nothing.
-                if (wasMoving)
-                    FanoutStopInPlace(e);
-            }
+            AdvanceMove(e, NowUnixMs());
+            bool wasMoving = e.MoveActive;
+            StopTimedMove(e);
+            SyncSession(e, session);
+            // Mobius StopMove is broadcast: peers would otherwise keep running the pawn to the old destination.
+            // An idle StopMove (client spam) fans nothing.
+            if (wasMoving)
+                FanoutStopInPlace(e);
         }
     }
 
@@ -134,25 +131,22 @@ public sealed partial class ZoneWorld
     {
         dxy = 0;
         dz = 0;
-        lock (_gate)
+        if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
+            return false;
+        AdvanceMove(e, NowUnixMs());
+        bool geo = _geo.HasGeo(e.X, e.Y);
+        if (geo)
+            e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+        SyncSession(e, session);
+        double dx = clientX - e.X, dy = clientY - e.Y;
+        dxy = (int)Math.Sqrt(dx * dx + dy * dy);
+        dz = Math.Abs(clientZ - e.Z);
+        double allowXy = ValidateMaxXyDrift;
+        if (e.MoveActive)
         {
-            if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player || e.Dead)
-                return false;
-            AdvanceMove(e, NowUnixMs());
-            bool geo = _geo.HasGeo(e.X, e.Y);
-            if (geo)
-                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
-            SyncSession(e, session);
-            double dx = clientX - e.X, dy = clientY - e.Y;
-            dxy = (int)Math.Sqrt(dx * dx + dy * dy);
-            dz = Math.Abs(clientZ - e.Z);
-            double allowXy = ValidateMaxXyDrift;
-            if (e.MoveActive)
-            {
-                allowXy += MoveSpeedOf(e) * ValidateLagSeconds;
-            }
-            return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
+            allowXy += MoveSpeedOf(e) * ValidateLagSeconds;
         }
+        return dxy > allowXy || dz > (geo ? ValidateMaxZDriftGeo : ValidateMaxZDrift);
     }
 
     /// <summary>

@@ -92,13 +92,10 @@ public sealed partial class ZoneWorld
     /// <summary>Net enter path: the same EtcStatusUpdate a client would get from <c>refreshOverloaded</c>.</summary>
     internal bool TryBuildNetEtcStatus(ZoneSession session, out Fineage.Protocol.EtcStatusUpdateMsg status)
     {
-        lock (_gate)
+        if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
         {
-            if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
-            {
-                status = EtcStatusOf(e);
-                return true;
-            }
+            status = EtcStatusOf(e);
+            return true;
         }
         status = null!;
         return false;

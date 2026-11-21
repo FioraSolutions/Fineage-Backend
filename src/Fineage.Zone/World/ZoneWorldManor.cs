@@ -626,7 +626,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the next manor mode change now.</summary>
     internal void ChangeManorModeForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_manor.Advance(NowUnixMs()) is { } change)
                 ApplyManorMode(change);
@@ -635,7 +635,7 @@ public sealed partial class ZoneWorld
 
     internal void TickManorForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick => ApplyManorModes(_manor.Step(tick)));
     }
 }

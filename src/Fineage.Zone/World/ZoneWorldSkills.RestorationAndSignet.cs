@@ -297,7 +297,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: plant a signet NPC without a cast (despawn timer included).</summary>
     internal ZoneEntity? SpawnSignetForTest(ZoneEntity owner, int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             return SpawnSignet(owner, npcId, owner.X, owner.Y, owner.Z, NowUnixMs());
         }

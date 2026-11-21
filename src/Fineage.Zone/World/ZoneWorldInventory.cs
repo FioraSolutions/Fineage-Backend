@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         string? error;
-        lock (_gate)
+        using (_affinity.Step())
             error = TryGrantItem(session, itemId, count);
         if (error != null)
             return Task.FromResult<string?>(error);

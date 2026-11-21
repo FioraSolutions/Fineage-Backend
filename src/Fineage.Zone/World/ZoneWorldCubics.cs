@@ -577,13 +577,13 @@ public sealed partial class ZoneWorld
 
     internal void TickCubicsForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickCubics(NowUnixMs());
     }
 
     internal bool SummonCubicForTest(ZoneEntity player, int skillId, int level, bool givenByOther = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var skill = Cubics.SummonSkill(skillId) ?? throw new ArgumentException($"no cubic skill {skillId}");
             return SummonCubic(player, skill, level, givenByOther, NowUnixMs());

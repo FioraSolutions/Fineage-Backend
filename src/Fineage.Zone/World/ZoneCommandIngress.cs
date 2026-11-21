@@ -54,7 +54,7 @@ internal sealed class ZoneCommandIngress
         }
     }
 
-    /// <summary>Under the gate: the outcome of an applied command; its reply waits for <see cref="TakeApplied"/>.</summary>
+    /// <summary>On the simulation thread: the outcome of an applied command; its reply waits for <see cref="TakeApplied"/>.</summary>
     public void Record(Submission submission, string? error, Exception? failure)
     {
         lock (_lock)
@@ -62,7 +62,7 @@ internal sealed class ZoneCommandIngress
     }
 
     /// <summary>
-    /// Under the gate, right after the step's fan-out batch was sealed: the replies of the commands it applied. The
+    /// On the simulation thread, right after the step's fan-out batch was sealed: the replies of the commands it applied. The
     /// caller completes them with <see cref="Complete"/> once its own inventory writes and fan-out drain are done.
     /// </summary>
     public IReadOnlyList<Applied> TakeApplied()

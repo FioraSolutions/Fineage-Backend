@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     public bool TrySetPlayerDead(int objectId, bool dead)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
                 return false;
@@ -24,7 +24,7 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryUseItemAsync(ZoneSession session, int objectId, CancellationToken ct)
     {
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryUseItem(session, objectId)));
     }
 

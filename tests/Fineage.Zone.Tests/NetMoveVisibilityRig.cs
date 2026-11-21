@@ -95,20 +95,21 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
         await Host.DisposeAsync();
     }
 
+    /// <summary>The live entity, read as a step: the command pump owns the world while the test runs.</summary>
+    public ZoneEntity EntityOf(int objectId)
+    {
+        var entity = World.OnStepForTest(() => World.TryGetEntityById(objectId, out var found) ? found : null);
+        Assert.True(entity != null, $"entity {objectId} not in world");
+        return entity;
+    }
+
     internal sealed class Player(NetMoveVisibilityRig rig, NetZoneSession session, ulong entityValue)
     {
         public NetZoneSession Net { get; } = session;
         public ulong EntityValue { get; } = entityValue;
         public int ObjectId => (int)EntityValue;
 
-        public ZoneEntity Entity
-        {
-            get
-            {
-                Assert.True(rig.World.TryGetEntityById(ObjectId, out var e), $"entity {ObjectId} not in world");
-                return e;
-            }
-        }
+        public ZoneEntity Entity => rig.EntityOf(ObjectId);
 
         public Task MoveAsync(int x, int y, int z = Z0) =>
             Net.SendAsync(NetOpcode.MoveInput, NetCodec.EncodeMoveInput(new MoveInputMsg { DestX = x, DestY = y, DestZ = z }), rig.Ct);

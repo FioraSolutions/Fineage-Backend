@@ -11,9 +11,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryCharacterAction(session, actionId, targetObjectId);
+        string? error = TryCharacterAction(session, actionId, targetObjectId);
         return Task.FromResult<string?>(error);
     }
 

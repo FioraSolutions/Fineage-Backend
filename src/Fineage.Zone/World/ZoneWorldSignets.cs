@@ -86,14 +86,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the signet aura timers now.</summary>
     internal void TickSignetsForTest(long? now = null)
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickSignets(now ?? NowUnixMs());
     }
 
     /// <summary>Test hook: every live NPC in the world (signets included).</summary>
     internal List<ZoneEntity> SpawnedNpcsForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.Values.Where(e => e.Kind == ZoneEntityKind.Npc).ToList();
     }
 }

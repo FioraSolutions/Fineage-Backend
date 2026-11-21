@@ -233,7 +233,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the open payload (keys already assumed spent).</summary>
     internal void ApplyOpenChestForTest(ZoneEntity caster, ZoneEntity chest, int skillId, int skillLevel, bool? forceSuccess = null)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyOpenChest(caster, chest, skillId, skillLevel, forceSuccess);
     }
 }

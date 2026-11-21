@@ -4,7 +4,7 @@ namespace Fineage.Zone.Skills;
 
 /// <summary>
 /// Pure Mobius skill-use prechecks (dead / mute / known / passive / reuse / MP).
-/// World owns templates, casting queue, and combat path selection under the gate.
+/// World owns templates, casting queue, and combat path selection on the simulation thread.
 /// </summary>
 public static class SkillUseRules
 {

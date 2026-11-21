@@ -12,9 +12,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         int targetId = targetObjectId > 0 ? targetObjectId : session.ObjectId;
-        string? error;
-        lock (_gate)
-            error = TryBuffRequest(session, targetId, effectId, remove);
+        string? error = TryBuffRequest(session, targetId, effectId, remove);
         if (error != null)
             return Task.FromResult<string?>(error);
 

@@ -15,25 +15,21 @@ public sealed partial class ZoneWorld
     /// </summary>
     public string? ReportOlympiadResult(int matchId, int winnerObjectId, DateTimeOffset? now = null)
     {
-        lock (_gate)
-        {
-            var step = _olympiad.Board.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
-            if (step.Error != null)
-                return step.Error;
-            ApplyOlympiad(step);
-            return null;
-        }
+        var step = _olympiad.Board.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
+        if (step.Error != null)
+            return step.Error;
+        ApplyOlympiad(step);
+        return null;
     }
 
     public bool GrantNoblesse(int characterId)
     {
-        lock (_gate)
-            return _olympiad.Board.GrantNoblesse(characterId);
+        return _olympiad.Board.GrantNoblesse(characterId);
     }
 
     public Task AdvanceOlympiadAsync(CancellationToken ct = default)
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick =>
             {
                 ApplyOlympiad(_olympiad.Step(tick));
@@ -46,14 +42,11 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        lock (_gate)
-        {
-            long now = NowUnixMs();
-            var step = _olympiad.Advance(now);
-            ApplyOlympiad(step);
-            if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
-                QueueOlympiadStatus(session, now);
-        }
+        long now = NowUnixMs();
+        var step = _olympiad.Advance(now);
+        ApplyOlympiad(step);
+        if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
+            QueueOlympiadStatus(session, now);
 
         return Task.FromResult<string?>(null);
     }
@@ -82,12 +75,9 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        lock (_gate)
-        {
-            // Mobius RequestOlympiadObserverEnd: the same leave request ends an observation.
-            if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
-                return Task.FromResult<string?>(null);
-        }
+        // Mobius RequestOlympiadObserverEnd: the same leave request ends an observation.
+        if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
+            return Task.FromResult<string?>(null);
         return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now));
     }
 
@@ -95,7 +85,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        // Rewards may SaveInventory → flush after unlock (B8).
+        // Rewards may SaveInventory → flush after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             var step = _olympiad.Board.Report(matchId, winnerObjectId, NowUnixMs());

@@ -3,7 +3,7 @@ using Fineage.Accounts;
 namespace Fineage.Zone.Shortcuts;
 
 /// <summary>
-/// Pure Mobius hotbar slot checks. World owns bag/skill lookups and persistence under the gate.
+/// Pure Mobius hotbar slot checks. World owns bag/skill lookups and persistence on the simulation thread.
 /// </summary>
 public static class ShortCutRules
 {

@@ -210,7 +210,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: set a clan's reputation (persisted, broadcast).</summary>
     internal bool SetClanReputationForTest(int clanId, int reputation)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan))
                 return false;
@@ -222,7 +222,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: set a clan's level directly (persisted, broadcast).</summary>
     internal bool SetClanLevelForTest(int clanId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan))
                 return false;
@@ -236,25 +236,25 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the live clan details (copy).</summary>
     internal ClanDetails? ClanDetailsForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _clan.TryGet(clanId, out var clan) ? clan.D.Clone() : null;
     }
 
     internal (int Level, int LeaderId, int CrestId, int MemberCount)? ClanSummaryForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _clan.TryGet(clanId, out var c) ? (c.Level, c.LeaderId, c.CrestId, c.Members.Count) : null;
     }
 
     internal int ClanIdOfForTest(int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return ClanIdFor(characterId);
     }
 
     internal int PledgeTypeOfForTest(int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return ClanOf(characterId) is { } c ? MemberOf(c, characterId)?.PledgeType ?? 0 : 0;
     }
 }

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
-/// <summary>Step 4 outbox: per-step batches, coalescing per (kind, subject, audience), and gate-ordered sends.</summary>
+/// <summary>Step 4 outbox: per-step batches, coalescing per (kind, subject, audience), and step-ordered sends.</summary>
 public sealed class WorldFanoutOutboxTests
 {
     [Fact]
@@ -124,7 +124,7 @@ public sealed class WorldFanoutOutboxTests
     }
 
     [Fact]
-    public void Sends_from_steps_and_handlers_on_several_threads_arrive_in_gate_order()
+    public void Sends_from_steps_and_handlers_on_several_threads_arrive_in_step_order()
     {
         var (bridge, rec, fanout) = Outbox();
         var gate = new object();

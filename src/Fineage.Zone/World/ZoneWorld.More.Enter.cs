@@ -22,10 +22,21 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct)
+    public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct) =>
+        await EnterAsync(session, static _ => EnterAccepted, ct).ConfigureAwait(false) != null;
+
+    static readonly object EnterAccepted = new();
+
+    sealed record EnterOutcome<T>(T Projection, int Known, int X, int Y, int Z, List<UnlinkPersistSnapshot>? Evicted);
+
+    /// <summary>
+    /// Loads the character, enters it on the simulation thread and, in the same step, runs <paramref name="project"/>
+    /// on the new player, so what the client is sent describes the world it entered. Null when the enter is refused.
+    /// </summary>
+    internal async Task<T?> EnterAsync<T>(ZoneSession session, Func<ZoneEntity, T> project, CancellationToken ct)
+        where T : class
     {
-        // Load durable character state off the world lock so a slow Postgres round-trip
-        // cannot stall move/combat handlers waiting on _gate.
+        // Durable character state and the starter-kit backfill are Postgres round-trips: they stay on the caller.
         CharacterRecord? stored = null;
         if (_accounts != null && session.ObjectId > 0)
         {
@@ -34,7 +45,6 @@ public sealed partial class ZoneWorld
                 ct).ConfigureAwait(false);
         }
 
-        // Starter-kit backfill is durable IO — keep it off the lock too.
         if (stored is { Items: null } && _accounts != null)
         {
             var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
@@ -44,48 +54,61 @@ public sealed partial class ZoneWorld
             stored = stored with { Items = CharacterInventory.Rows(granted) };
         }
 
-        bool ok;
-        int known;
-        int enterX = 0, enterY = 0, enterZ = 0;
-        List<UnlinkPersistSnapshot>? pendingUnlink = null;
-        lock (_gate)
-            ok = TryEnter(session, stored, out known, out enterX, out enterY, out enterZ, out pendingUnlink);
-        if (!ok)
-            return false;
-
-        if (pendingUnlink is { Count: > 0 })
+        var entered = await OnSimulationAsync(session, "enter", () =>
         {
-            foreach (var snapshot in pendingUnlink)
+            if (!TryEnter(session, stored, out int known, out int x, out int y, out int z, out var evicted))
+                return null;
+            CountOnlinePlayers();
+            if (!TryGetLivePlayerUnlocked(session, out var player))
+                throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
+            return new EnterOutcome<T>(project(player), known, x, y, z, evicted);
+        }, ct).ConfigureAwait(false);
+        if (entered == null)
+            return null;
+
+        if (entered.Evicted is { Count: > 0 })
+        {
+            foreach (var snapshot in entered.Evicted)
                 PersistUnlinkSnapshot(snapshot);
         }
 
-        // Presence / last_access after the world commit so DB latency is not under _gate.
-        SavePresence(session, enterX, enterY, enterZ, touchAccess: true);
-        ZoneLog.EnterWorld(session, known);
-        return true;
+        SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
+        ZoneLog.EnterWorld(session, entered.Known);
+        return entered.Projection;
     }
 
-    public Task LeaveAsync(ZoneSession session, CancellationToken ct)
+    public Task LeaveAsync(ZoneSession session, CancellationToken ct) => LeaveAsync<object>(session, null, ct);
+
+    /// <summary>
+    /// Takes the session's player out of the world on the simulation thread; <paramref name="projectBefore"/> runs on
+    /// the live player first, in the same step (what its peers must be told). Null when it was not in the world.
+    /// </summary>
+    internal async Task<T?> LeaveAsync<T>(ZoneSession session, Func<ZoneEntity, T>? projectBefore, CancellationToken ct)
+        where T : class
     {
-        UnlinkPersistSnapshot? snapshot = null;
-        lock (_gate)
-            TryDetachPlayer(session, capturePersist: true, out _, out snapshot);
+        if (session.ObjectId == 0)
+            return null;
+        var (projection, snapshot) = await OnSimulationAsync(session, "leave", () =>
+        {
+            var before = projectBefore != null && TryGetLivePlayerUnlocked(session, out var player) ? projectBefore(player) : null;
+            TryDetachPlayer(session, capturePersist: true, out _, out var captured);
+            CountOnlinePlayers();
+            return (before, captured);
+        }, ct).ConfigureAwait(false);
         if (snapshot == null)
-            return Task.CompletedTask;
+            return projection;
 
         PersistUnlinkSnapshot(snapshot.Value);
 
         _sevenSigns.Engine.Save();
         _bosses.Schedule.Save();
         ZoneLog.LeaveWorld(session);
-        return Task.CompletedTask;
+        return projection;
     }
 
     public Task<string?> TryMoveAsync(ZoneSession session, int destX, int destY, int destZ, CancellationToken ct)
     {
-        string? error;
-        lock (_gate)
-            error = TryMove(session, destX, destY, destZ);
+        string? error = TryMove(session, destX, destY, destZ);
         if (error != null)
             return Task.FromResult<string?>(error);
 

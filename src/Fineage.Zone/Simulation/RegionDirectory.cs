@@ -181,6 +181,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     readonly Dictionary<int, Owner> _owners = [];
     readonly SortedDictionary<RegionId, RegionContainer> _regions = [];
     readonly HashSet<int> _relocated = [];
+    readonly Action<string>? _requireOwner;
 
     sealed class Owner(RegionContainer region)
     {
@@ -188,12 +189,23 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
         public long Epoch { get; set; }
     }
 
-    public RegionDirectory(IRegionPartition partition, int cellSize = DefaultCellSize)
+    /// <param name="requireOwner">
+    /// Called with what is about to happen on every access outside a region body; throws when the calling thread does
+    /// not own the directory (the world's simulation thread).
+    /// </param>
+    public RegionDirectory(IRegionPartition partition, int cellSize = DefaultCellSize, Action<string>? requireOwner = null)
     {
         _partition = partition ?? throw new ArgumentNullException(nameof(partition));
         if (cellSize <= 0)
             throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, "Spatial cell size must be positive.");
         CellSize = cellSize;
+        _requireOwner = requireOwner;
+    }
+
+    void Touch(string what)
+    {
+        if (_requireOwner != null && !ReferenceEquals(t_bodyOf, this))
+            _requireOwner(what);
     }
 
     public IRegionPartition Partition => _partition;
@@ -201,31 +213,74 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     /// <summary>Side of the spatial cells each region indexes its entities by.</summary>
     public int CellSize { get; }
 
-    public int Count => _entities.Count;
+    public int Count
+    {
+        get
+        {
+            Touch("counting entities");
+            return _entities.Count;
+        }
+    }
 
-    public Dictionary<int, T>.ValueCollection Values => _entities.Values;
+    public Dictionary<int, T>.ValueCollection Values
+    {
+        get
+        {
+            Touch("listing entities");
+            return _entities.Values;
+        }
+    }
 
-    public Dictionary<int, T>.KeyCollection Keys => _entities.Keys;
+    public Dictionary<int, T>.KeyCollection Keys
+    {
+        get
+        {
+            Touch("listing entity ids");
+            return _entities.Keys;
+        }
+    }
 
     /// <summary>Regions that own at least one entity, ascending.</summary>
-    public IReadOnlyCollection<RegionContainer> Regions => _regions.Values;
+    public IReadOnlyCollection<RegionContainer> Regions
+    {
+        get
+        {
+            Touch("listing regions");
+            return _regions.Values;
+        }
+    }
 
     /// <summary>The region whose body runs on this thread, if any.</summary>
     public RegionId? CurrentBody => ReferenceEquals(t_bodyOf, this) ? t_bodyRegion : null;
 
-    public bool ContainsKey(int objectId) => _entities.ContainsKey(objectId);
+    public bool ContainsKey(int objectId)
+    {
+        Touch("reading entities");
+        return _entities.ContainsKey(objectId);
+    }
 
-    public bool TryGetValue(int objectId, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T entity) =>
-        _entities.TryGetValue(objectId, out entity);
+    public bool TryGetValue(int objectId, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T entity)
+    {
+        Touch("reading entities");
+        return _entities.TryGetValue(objectId, out entity);
+    }
 
-    public T? GetValueOrDefault(int objectId) => _entities.GetValueOrDefault(objectId);
+    public T? GetValueOrDefault(int objectId)
+    {
+        Touch("reading entities");
+        return _entities.GetValueOrDefault(objectId);
+    }
 
     /// <summary>Reading throws for an unknown id; writing places the entity, replacing the one with that id.</summary>
     public T this[int objectId]
     {
-        get => _entities.TryGetValue(objectId, out var entity)
-            ? entity
-            : throw new KeyNotFoundException($"entity {objectId} is not in the world");
+        get
+        {
+            Touch("reading entities");
+            return _entities.TryGetValue(objectId, out var entity)
+                ? entity
+                : throw new KeyNotFoundException($"entity {objectId} is not in the world");
+        }
         set
         {
             Remove(objectId);
@@ -264,6 +319,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     {
         ArgumentNullException.ThrowIfNull(entity);
         RequireOutsideBody($"placing entity {objectId}");
+        Touch($"placing entity {objectId}");
         if (entity.ObjectId != objectId)
             throw new ArgumentException($"entity {entity.ObjectId} cannot be placed under id {objectId}", nameof(objectId));
         if (_entities.ContainsKey(objectId))
@@ -279,6 +335,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     public bool Remove(int objectId)
     {
         RequireOutsideBody($"removing entity {objectId}");
+        Touch($"removing entity {objectId}");
         if (!_entities.Remove(objectId, out var entity))
             return false;
         _owners.Remove(objectId, out var owner);
@@ -293,6 +350,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     public RegionPlacement OwnerOf(T entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
+        Touch("reading region owners");
         if (!_entities.TryGetValue(entity.ObjectId, out var placed) || !ReferenceEquals(placed, entity))
             throw new InvalidOperationException($"entity {entity.ObjectId} is not placed in any region");
         var owner = _owners[entity.ObjectId];
@@ -301,6 +359,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
 
     public bool TryOwnerOf(int objectId, out RegionPlacement placement)
     {
+        Touch("reading region owners");
         if (_owners.TryGetValue(objectId, out var owner))
         {
             placement = new RegionPlacement(owner.Region.Id, owner.Epoch);
@@ -314,6 +373,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     public void Join(T entity, ActiveSets set)
     {
         RegionContainer.IndexOf(set);
+        Touch("changing active sets");
         if ((entity.ActiveSets & set) != 0)
             return;
         var owner = OwnerForSetChange(entity, set);
@@ -324,6 +384,7 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     public void Leave(T entity, ActiveSets set)
     {
         RegionContainer.IndexOf(set);
+        Touch("changing active sets");
         if ((entity.ActiveSets & set) == 0)
             return;
         var owner = OwnerForSetChange(entity, set);

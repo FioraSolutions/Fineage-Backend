@@ -40,8 +40,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        lock (_gate)
-            return Task.FromResult(TryCastleCommand(session, command, now.ToUnixTimeMilliseconds()));
+        return Task.FromResult(TryCastleCommand(session, command, now.ToUnixTimeMilliseconds()));
     }
 
     string? TryCastleCommand(ZoneSession session, CastleCommandNetMsg c, long now)
@@ -360,7 +359,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: castle as the board holds it.</summary>
     internal CastleSiege? CastleForTests(int castleId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _siege.Board.Find(castleId);
     }
 }

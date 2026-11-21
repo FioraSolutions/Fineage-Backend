@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => Buy(session, npcObjectId, listId, items)));
     }
@@ -41,9 +41,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = Preview(session, npcObjectId);
+        string? error = Preview(session, npcObjectId);
         return Task.FromResult<string?>(error);
     }
 

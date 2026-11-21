@@ -169,18 +169,15 @@ public sealed partial class ZoneWorld
     {
         status = null!;
         members = null!;
-        lock (_gate)
-        {
-            if (_clan.Count == 0)
-                return false;
-            var clan = ClanOf(session.ObjectId);
-            if (clan == null)
-                return false;
+        if (_clan.Count == 0)
+            return false;
+        var clan = ClanOf(session.ObjectId);
+        if (clan == null)
+            return false;
 
-            status = StatusOf(clan);
-            members = MembersOf(clan);
-            return true;
-        }
+        status = StatusOf(clan);
+        members = MembersOf(clan);
+        return true;
     }
 
     void SyncClanStanding(ZoneEntity entity)
@@ -263,7 +260,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test/admin hook: put a skill on the clan book, persist it, and refresh every online member.</summary>
     internal bool TrySetClanSkillForTest(int clanId, int skillId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan) || skillId <= 0)
                 return false;

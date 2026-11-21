@@ -22,7 +22,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test and diagnostics: the region that owns <paramref name="objectId"/> and the epoch of that route.</summary>
     internal RegionPlacement RegionOwnerOf(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             return _byId.TryOwnerOf(objectId, out var placement)
                 ? placement
@@ -33,14 +33,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test: places a bare entity without a session, AOI entry or fanout.</summary>
     internal void PlaceForTests(ZoneEntity entity)
     {
-        lock (_gate)
+        using (_affinity.Step())
             _byId.Add(entity.ObjectId, entity);
     }
 
     /// <summary>Test and diagnostics: throws when an entity has no owner or two, or a region's sets drifted.</summary>
     internal void VerifyRegions()
     {
-        lock (_gate)
+        using (_affinity.Step())
             _byId.Verify();
     }
 }

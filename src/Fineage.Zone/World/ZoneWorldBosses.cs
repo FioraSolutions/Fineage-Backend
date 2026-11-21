@@ -58,8 +58,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     public bool OnBossKilled(int npcId)
     {
-        lock (_gate)
-            return KillBossLocked(npcId);
+        return KillBossLocked(npcId);
     }
 
     public Task<string?> TryBossStatusAsync(ZoneSession session, int npcId, CancellationToken ct)
@@ -70,9 +69,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
 
         BossStatusMsg? message;
-        string? error;
-        lock (_gate)
-            error = BuildBossStatus(npcId, out message);
+        string? error = BuildBossStatus(npcId, out message);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -87,9 +84,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = ApplyAdminBoss(request);
+        string? error = ApplyAdminBoss(request);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -99,7 +94,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the boss actor's stage now, without the simulation loop.</summary>
     internal void AdvanceBossesForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick =>
             {
                 SpawnBosses(_bosses.Step(tick));
@@ -111,7 +106,7 @@ public sealed partial class ZoneWorld
 
     internal (int Hp, int Mp) BossVitalsForTests(int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var definition = _bosses.Catalog.Get(npcId);
             if (!_byId.TryGetValue(definition.ObjectId, out var entity))

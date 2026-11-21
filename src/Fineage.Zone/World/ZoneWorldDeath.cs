@@ -10,9 +10,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        string? error;
-        lock (_gate)
-            error = TryRevive(session, action);
+        string? error = TryRevive(session, action);
         if (error != null)
             return Task.FromResult<string?>(error);
 
@@ -21,16 +19,8 @@ public sealed partial class ZoneWorld
 
     public Task<string?> TryAdminKillPlayerAsync(ZoneSession session, CancellationToken ct)
     {
-        if (!IsLive(session))
-            return Task.FromResult<string?>("world");
-
-        string? error;
-        lock (_gate)
-            error = TryAdminKillPlayer(session);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        using (_affinity.Step())
+            return Task.FromResult(IsLive(session) ? TryAdminKillPlayer(session) : "world");
     }
 
     string? TryAdminKillPlayer(ZoneSession session)

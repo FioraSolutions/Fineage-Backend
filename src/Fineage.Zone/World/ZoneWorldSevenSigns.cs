@@ -14,8 +14,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            QueueRecord(session);
+        QueueRecord(session);
         return Task.FromResult<string?>(null);
     }
 
@@ -24,7 +23,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // Seal stone trade mutates inventory → SaveInventory after unlock (B8).
+        // Seal stone trade mutates inventory → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => ApplySevenSigns(session, request)));
     }
 
@@ -32,7 +31,7 @@ public sealed partial class ZoneWorld
     public Task<bool> AdvanceSevenSignsAsync(CancellationToken ct)
     {
         bool advanced;
-        lock (_gate)
+        using (_affinity.Step())
             advanced = AtHookTick(tick => ApplySevenSignsPeriods(_sevenSigns.Step(tick)));
         return Task.FromResult(advanced);
     }

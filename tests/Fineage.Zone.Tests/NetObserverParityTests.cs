@@ -146,7 +146,7 @@ public sealed class NetObserverParityTests
         var a = await rig.JoinAsync(X, Y, Z);
         var w = await rig.JoinAsync(X - 1500, Y, Z);
         a.Entity.MaxHp = a.Entity.CurHp = 1_000_000;
-        Assert.True(rig.World.TryGetEntityById(MobId, out var mob));
+        var mob = rig.EntityOf(MobId);
         mob.GlobalAggro = 0; // skip the spawn grace (Mobius _globalAggro = -10)
         await a.DrainAsync();
         await w.DrainAsync();
@@ -233,7 +233,7 @@ public sealed class NetObserverParityTests
         Assert.Empty(Payloads(fe, NetOpcode.MagicSkillLaunched, LaunchBy(a.ObjectId)));
 
         // Damage number: the caster's own line; the watcher only sees the mob's HP bar move.
-        Assert.True(rig.World.TryGetEntityById(MobId, out var mob));
+        var mob = rig.EntityOf(MobId);
         if (mob.CurHp < mob.MaxHp)
             Assert.Contains(Lines(fa), l => l.Id == CombatProtocol.HitTargetForDamage && l.Params[0] == mob.Name);
         Assert.DoesNotContain(Lines(fw), l => PrivateCombatLines.Contains(l.Id));
@@ -267,7 +267,7 @@ public sealed class NetObserverParityTests
     {
         var (rig, a, west, east) = await CastSceneAsync();
         await using var _ = rig;
-        Assert.True(rig.World.TryGetEntityById(MobId, out var mob));
+        var mob = rig.EntityOf(MobId);
         a.Entity.MaxHp = a.Entity.CurHp = 1_000_000;
         var debuff = new NpcAiSupportSkill(4038, 2, HitTimeMs: 1000, ReuseDelayMs: 8000, Mp: 20, MpInitial: 0,
             AbnormalTimeSeconds: 30, AbnormalLevel: 2);
