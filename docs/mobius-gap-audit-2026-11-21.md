@@ -341,7 +341,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 16 | Boats + walking NPCs | #734 | done — walking routes + 5 boats; vehicle wire pending | Yes — `docs/client-packet-contracts.md` |
 | 14 | Guard / town AI | #738 | done — karma scan, ally hate, `FINEAGE_GUARD_ATTACK_AGGRO_MOB` | No |
 | 17 | Saga quest fidelity | #742 | done — helper timers, 4339 cast, archon skill-see | No |
-| 2 | Quest batches | #709, #717, #718, #720 | partial — calc hunts Q169/316/341/347 on dev; **blocked** on next `gen_quests_*.py` (missing `npcId-00.htm` html) | No |
+| 2 | Quest batches | #709, #717, #718, #720 | partial — `import_mobius_quest_html.py` + vendored dialogs; further gens may need script/html name fixes | No |
 | 16a | Monster Derby Track | #736 | done — `MonsterRaceActor`, Race Manager HTML, `MonRaceInfo` `0x03CA` | Yes — `MonRaceInfo` `0xDD` wire in `docs/client-packet-contracts.md` |
 | 18 | GM / punishment tooling | — | **other agent** | No |
 | 19 | Compound skill conditions | — | **other agent** | No |

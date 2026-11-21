@@ -10,7 +10,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import questio
 
-QROOT = ROOT / ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/scripts/quests"
+QROOT = questio.mobius_quest_root()
 FRAGMENT = 7079
 GATES = list(range(31494, 31508))
 VORTEX = list(range(31488, 31507))
