@@ -502,20 +502,38 @@ static class EnvironmentZoneHit
 
     static PeaceZone ToPeace(SwampZoneDef z) => new()
     {
-        Name = z.Name, MinZ = z.MinZ, MaxZ = z.MaxZ, Nodes = z.Nodes,
-        MinX = z.MinX, MaxX = z.MaxX, MinY = z.MinY, MaxY = z.MaxY
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
     };
 
     static PeaceZone ToPeace(DamageZoneDef z) => new()
     {
-        Name = z.Name, MinZ = z.MinZ, MaxZ = z.MaxZ, Nodes = z.Nodes,
-        MinX = z.MinX, MaxX = z.MaxX, MinY = z.MinY, MaxY = z.MaxY
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
     };
 
     static PeaceZone ToPeace(NoLandingZoneDef z) => new()
     {
-        Name = z.Name, MinZ = z.MinZ, MaxZ = z.MaxZ, Nodes = z.Nodes,
-        MinX = z.MinX, MaxX = z.MaxX, MinY = z.MinY, MaxY = z.MaxY
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
     };
 }
 
