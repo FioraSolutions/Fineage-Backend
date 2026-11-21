@@ -131,6 +131,8 @@ public sealed partial class ZoneWorld
     {
         public string Name => "random-walk";
 
+        public bool Parallel => true;
+
         public void Collect(TickContext tick, RegionWorkCollector work) => world.CollectNpcThink(tick, work);
 
         public void RunRegion(TickContext tick, RegionId region, IReadOnlyList<int> objectIds) =>
