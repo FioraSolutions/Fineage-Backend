@@ -91,7 +91,8 @@ public sealed class NetPartyStatusTests
 
         var wire = NetCodec.EncodePartyMemberList(new PartyMemberListNetMsg
         {
-            LeaderObjectId = 1, PartyId = 2,
+            LeaderObjectId = 1,
+            PartyId = 2,
             Members = [new PartyMemberEntryNet { ObjectId = 1, Name = "A", CurHp = 5, MaxHp = 9, CurCp = 33, MaxCp = 44 }]
         });
         var back = NetCodec.DecodePartyMemberList(wire);

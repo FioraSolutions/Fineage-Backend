@@ -250,6 +250,12 @@ On success Mobius updates skill level in DB and rebroadcasts `SkillList` / short
 
 **Unity:** Bind `doorId` to the static door prefab; track `objectId` for target/siege HP. Subscribe to `DoorStatus` after `EntitySpawn` for door NPCs.
 
+### Clan hall manager functions (bypass pipeline)
+
+HTML uses `ClanHallManager` bypasses (`manage recovery hp N`, `manage other tele N`, `support`, `goto`). The zone routes them through `NpcServiceIntent` `hall-function` / `hall-deco` / `hall-support` / `hall-teleport` / `hall-lease` without replaying manager HTML.
+
+**TBD — Mobius `AgitDecoInfo`:** Interlude clients expect `S→C AgitDecoInfo` when decor or regen functions change. Fineage persists `ClanHallSave.DecoFront` / `DecoCurtains` and function levels server-side; Net fan-out of `AgitDecoInfo` is not wired yet (decoration visuals client-only until added).
+
 ---
 
 ## Clan hall escape and death restart

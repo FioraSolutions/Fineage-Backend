@@ -31,6 +31,7 @@ public sealed class RegionSimulationDeterminismTests
     static readonly string[] LegacySimulationOrder =
     [
         "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "dimensional-rift", "clan.dissolutions", "clan.hall-auctions",
+        "clan.hall-functions",
         "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "seven-signs-festival", "mammon", "olympiad"
     ];
 

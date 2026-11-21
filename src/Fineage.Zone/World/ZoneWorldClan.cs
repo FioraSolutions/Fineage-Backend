@@ -125,6 +125,7 @@ public sealed partial class ZoneWorld
                 ApplyLeaderDelegation(clan);
         }
         _hallAuctions.Halls = null;
+        _hallFunctions.Halls = null;
 
         CompleteDueDissolutionsNow();
     }

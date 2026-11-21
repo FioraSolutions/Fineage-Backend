@@ -39,7 +39,10 @@ public sealed partial class ZoneWorld
         if (TryClanMasterVerb(session, player, npc, verb, out var clanError))
             return clanError;
 
-        var handler = _bypasses.Find(verb);
+        IBypassHandler? handler = string.Equals(npc.NpcType, "ClanHallManager", StringComparison.Ordinal) &&
+                                 ClanHallManagerBypassHandler.IsHallOnlyCommand(verb)
+            ? new ClanHallManagerBypassHandler()
+            : _bypasses.Find(verb);
         if (handler == null)
         {
             SendHtml(session, player, npc, BypassRegistry.NotImplemented);

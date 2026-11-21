@@ -78,6 +78,18 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().HideoutId = value;
     }
 
+    public double HallRegenHpMult
+    {
+        get => Identity?.HallRegenHpMult ?? 1d;
+        set => EnsureIdentity().HallRegenHpMult = value;
+    }
+
+    public double HallRegenMpMult
+    {
+        get => Identity?.HallRegenMpMult ?? 1d;
+        set => EnsureIdentity().HallRegenMpMult = value;
+    }
+
     public int PledgeType
     {
         get => Identity?.PledgeType ?? 0;

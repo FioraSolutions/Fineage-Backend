@@ -130,11 +130,12 @@ public sealed partial class ZoneWorld
         var mods = PlayerStatMods(entity);
         var posture = RegenPosture(entity);
         var (conBonus, menBonus) = RegenStatBonuses(entity);
+        var (hallHp, hallMp) = HallRegenBonus(entity);
         double hpRate = mods.Apply(CombatStat.RegHp, entity.CurHp < entity.MaxHp
-            ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture)
+            ? ZoneRegen.HpPerTick(entity.Level, conBonus, posture) * hallHp
             : 0d);
         double mpRate = mods.Apply(CombatStat.RegMp, entity.CurMp < entity.MaxMp
-            ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture)
+            ? ZoneRegen.MpPerTick(entity.Level, menBonus, posture) * hallMp
             : 0d);
         double cpRate = entity.CurCp < entity.MaxCp ? CpRegenRate(entity, mods, posture, conBonus) : 0d;
 

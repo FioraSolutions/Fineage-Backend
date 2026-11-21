@@ -439,7 +439,16 @@ public sealed partial class MemoryAccountStore
             BidderName = bid.BidderName,
             Amount = bid.Amount,
             TimeUnixMs = bid.TimeUnixMs
-        }).ToList()
+        }).ToList(),
+        Functions = hall.Functions.Select(fn => new ClanHallFunctionSave
+        {
+            Type = fn.Type,
+            Level = fn.Level,
+            Lease = fn.Lease,
+            EndUnixMs = fn.EndUnixMs
+        }).ToList(),
+        DecoFront = hall.DecoFront,
+        DecoCurtains = hall.DecoCurtains
     };
 
     public bool TrySetCharacterTitle(string account, int characterId, string title)

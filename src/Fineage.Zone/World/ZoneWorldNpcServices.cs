@@ -104,6 +104,12 @@ public sealed partial class ZoneWorld
                 return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: true);
             case NpcServiceIntent.DoormanClose:
                 return TryDoormanDoors(session, player, npc, reply.ServiceArg, open: false);
+            case NpcServiceIntent.HallFunction:
+            case NpcServiceIntent.HallDeco:
+            case NpcServiceIntent.HallLease:
+            case NpcServiceIntent.HallSupport:
+            case NpcServiceIntent.HallTeleport:
+                return TryHallManagerService(session, player, npc, reply);
             default:
                 return "bad_request";
         }
