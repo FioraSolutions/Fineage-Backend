@@ -42,6 +42,8 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
             // (Claude B9). Bootstrap only when the SQL side is empty.
             if (!store.HasNormalizedCharacterRows())
                 store.BackfillNormalizedFromSnapshot();
+            else
+                store.SyncAllocationCountersFromDatabase();
             return store;
         }
         catch
@@ -331,6 +333,16 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
         using var cmd = conn.CreateCommand();
         cmd.CommandText = "SELECT EXISTS (SELECT 1 FROM characters LIMIT 1)";
         return cmd.ExecuteScalar() is true;
+    }
+
+    void SyncAllocationCountersFromDatabase()
+    {
+        using var conn = _dataSource.OpenConnection();
+        var counters = NormalizedStoreMeta.ReadAllocationCounters(conn);
+        _inner.SyncAllocationCounters(
+            counters.NextCharacterId,
+            counters.NextClanId,
+            counters.NextItemObjectId);
     }
 
     // --- IAccountStore ---

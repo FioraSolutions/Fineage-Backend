@@ -96,6 +96,11 @@ public sealed partial class PostgresAccountStore
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
             NormalizedStoreWriter.UpsertCharacterRecord(conn, tx, created);
+            var (nextCharacterId, nextClanId, nextItemObjectId) = _inner.AllocationCounters();
+            NormalizedStoreMeta.WriteAllocationCounters(
+                conn,
+                tx,
+                new NormalizedStoreMeta.AllocationCounters(nextCharacterId, nextClanId, nextItemObjectId));
             tx.Commit();
         }
 
