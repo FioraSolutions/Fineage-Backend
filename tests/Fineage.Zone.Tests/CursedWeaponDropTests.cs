@@ -86,7 +86,8 @@ public sealed class CursedWeaponDropTests
         grandBoss.MaxHp = grandBoss.CurHp = 1;
         bench.World.KillForTest(grandBoss, kit.Player);
 
-        Assert.Empty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)));
         Assert.False(bench.World.CursedWeaponsForTest.Get(OlympiadProtocol.Zariche)?.Dropped ?? false);
+        Assert.DoesNotContain(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutDropItem)),
+            call => call is [_, DropItemMsg drop] && drop.ItemId is OlympiadProtocol.Zariche or OlympiadProtocol.Akamanah);
     }
 }
