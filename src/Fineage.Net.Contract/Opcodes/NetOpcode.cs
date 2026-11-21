@@ -398,5 +398,7 @@ namespace Fineage.Net.Contract
         public const ushort EnchantSkillList = 0x03DF;
         /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
+        /// <summary>Zone → client: Mobius <c>AgitDecoInfo</c> (wire 0xFD).</summary>
+        public const ushort AgitDecoInfo = 0x03E1;
     }
 }

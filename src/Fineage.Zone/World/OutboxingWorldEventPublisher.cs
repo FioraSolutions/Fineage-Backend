@@ -415,6 +415,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutClanHallList), () => inner.FanoutClanHallList(watcherObjectIdsCopy, halls));
     }
 
+    void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutAgitDecoInfo), () => inner.FanoutAgitDecoInfo(watcherObjectIdsCopy, deco));
+    }
+
     void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
