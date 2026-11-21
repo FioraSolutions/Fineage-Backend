@@ -18,26 +18,26 @@ public enum PunishmentType
 /// <summary>One active or historical punishment row (Mobius <c>punishments</c> table).</summary>
 public sealed class PunishmentRow
 {
-  public int Version { get; set; } = 1;
+    public int Version { get; set; } = 1;
 
-  /// <summary>Account name or character id string.</summary>
-  public string Key { get; set; } = "";
+    /// <summary>Account name or character id string.</summary>
+    public string Key { get; set; } = "";
 
-  public PunishmentAffect Affect { get; set; }
+    public PunishmentAffect Affect { get; set; }
 
-  public PunishmentType Type { get; set; }
+    public PunishmentType Type { get; set; }
 
-  /// <summary>Unix ms when the punishment ends; 0 = permanent / until removed.</summary>
-  public long ExpirationUnixMs { get; set; }
+    /// <summary>Unix ms when the punishment ends; 0 = permanent / until removed.</summary>
+    public long ExpirationUnixMs { get; set; }
 
-  public string Reason { get; set; } = "";
+    public string Reason { get; set; } = "";
 
-  public string PunishedBy { get; set; } = "";
+    public string PunishedBy { get; set; } = "";
 }
 
 public sealed class PunishmentSnapshot
 {
-  public int Version { get; set; } = 1;
+    public int Version { get; set; } = 1;
 
-  public List<PunishmentRow> Rows { get; set; } = [];
+    public List<PunishmentRow> Rows { get; set; } = [];
 }
