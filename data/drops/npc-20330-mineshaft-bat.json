@@ -46,19 +46,19 @@
           {
             "itemId": 1798,
             "min": 1,
-            "max": 2,
+            "max": 1,
             "chance": 21.1951
           },
           {
             "itemId": 1864,
-            "min": 3,
-            "max": 3,
+            "min": 1,
+            "max": 1,
             "chance": 43.2378
           },
           {
             "itemId": 1869,
             "min": 1,
-            "max": 2,
+            "max": 1,
             "chance": 21.6192
           }
         ]
@@ -76,7 +76,7 @@
       {
         "itemId": 1866,
         "min": 1,
-        "max": 2,
+        "max": 1,
         "chance": 11.1988
       },
       {

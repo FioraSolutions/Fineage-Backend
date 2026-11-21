@@ -223,7 +223,10 @@ public sealed partial class ZoneWorld
         int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
         var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
         int killerLevel = killer?.Level ?? victimLevel;
-        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid);
+        long now = NowUnixMs();
+        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
+        if (killer != null && !seeded)
+            rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
@@ -236,7 +239,6 @@ public sealed partial class ZoneWorld
             : killer?.Session != null
                 ? killer.ObjectId
                 : 0;
-        long now = NowUnixMs();
         if (rolls.Count == 0)
             return;
 

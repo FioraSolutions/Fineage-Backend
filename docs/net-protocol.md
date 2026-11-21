@@ -280,6 +280,10 @@ How much of the datapack is spawned:
 Hosted Zone defaults to the full enabled datapack with `GridAoi(3000)`, so a player only receives
 NPCs around them, not all 34k. Do not pair the whole world with `SingleCellAoi`.
 
+Starter villages, cathedral towns, and regional hunt maps: see
+[`spawn-world-coverage.md`](spawn-world-coverage.md). Production template:
+`deploy/fineage.env.example` (do not set `FINEAGE_ZONE_MAPS` on a full-world host).
+
 ## Scale seams
 
 - `IAccountStore` — Postgres (normalized character domain) now, JSON for tests
