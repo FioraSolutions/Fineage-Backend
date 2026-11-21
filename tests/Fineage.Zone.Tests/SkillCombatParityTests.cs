@@ -49,7 +49,9 @@ public sealed class SkillCombatParityTests
         Assert.NotEmpty(snapshot);
 
         var catalog = SkillCombatCatalog.LoadDefault();
-        var defs = SkillCatalog.LoadDefault();
+        var skillsPath = TeleportCatalog.FindFile(SkillCatalog.FileName)
+            ?? throw new InvalidOperationException("skills.json");
+        var defs = SkillCatalog.Load(skillsPath);
         var mismatches = new List<string>();
 
         foreach (var row in snapshot)
