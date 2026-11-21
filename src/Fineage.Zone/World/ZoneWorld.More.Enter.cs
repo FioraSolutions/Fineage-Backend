@@ -16,6 +16,7 @@ using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 
 namespace Fineage.Zone.World;
@@ -45,14 +46,7 @@ public sealed partial class ZoneWorld
                 ct).ConfigureAwait(false);
         }
 
-        if (stored is { Items: null } && _accounts != null)
-        {
-            var granted = _game.CreateStarterInventory(session.ClassId, _itemIds);
-            await Task.Run(
-                () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, granted),
-                ct).ConfigureAwait(false);
-            stored = stored with { Items = CharacterInventory.Rows(granted) };
-        }
+        bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
         var entered = await OnSimulationAsync(session, "enter", () =>
         {
@@ -65,6 +59,15 @@ public sealed partial class ZoneWorld
         }, ct).ConfigureAwait(false);
         if (entered == null)
             return null;
+
+        if (persistStarterBackfill &&
+            TryGetLivePlayerUnlocked(session, out var backfillPlayer) &&
+            backfillPlayer.Inventory != null)
+        {
+            await Task.Run(
+                () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, backfillPlayer.Inventory),
+                ct).ConfigureAwait(false);
+        }
 
         if (entered.Evicted is { Count: > 0 })
         {
@@ -151,6 +154,7 @@ public sealed partial class ZoneWorld
 
         var spawn = SpawnFor(session, stored);
         var inventory = LoadInventory(session, stored);
+        bool applyStarterKit = NeedsStarterInventory(stored);
         var vitals = LoadVitals(session, stored);
         var warehouse = new PrivateWarehouse(_game.Items);
         if (stored?.Warehouse != null)
@@ -218,6 +222,8 @@ public sealed partial class ZoneWorld
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
         _byId[entity.ObjectId] = entity;
+        if (applyStarterKit)
+            ApplyStarterKitLedger(entity);
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
         _chat.Entered(entity.ObjectId, entity.Name);

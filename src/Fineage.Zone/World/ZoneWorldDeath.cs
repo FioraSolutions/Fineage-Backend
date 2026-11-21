@@ -35,6 +35,13 @@ public sealed partial class ZoneWorld
         return null;
     }
 
+    /// <summary>Test hook: full player death pipeline with a killer object id.</summary>
+    internal void ApplyPlayerDeathForTest(ZoneEntity player, int killerObjectId)
+    {
+        using (_affinity.Step())
+            ApplyPlayerDeath(player, killerObjectId);
+    }
+
     string? TryRevive(ZoneSession session, int action)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
