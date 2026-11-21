@@ -106,9 +106,15 @@ public sealed partial class ZoneWorld
         var mods = PlayerStatMods(player);
         var posture = RegenPosture(player);
         var (conBonus, menBonus) = RegenStatBonuses(player);
-        return (
-            mods.Apply(CombatStat.RegHp, ZoneRegen.HpPerTick(player.Level, conBonus, posture)),
-            mods.Apply(CombatStat.RegMp, ZoneRegen.MpPerTick(player.Level, menBonus, posture)));
+        var (hallHp, hallMp) = HallRegenBonus(player);
+        var (mtHp, mtMp) = MotherTreeRegenBonus(player);
+        double hp = mods.Apply(CombatStat.RegHp, ZoneRegen.HpPerTick(player.Level, conBonus, posture) * hallHp);
+        double mp = mods.Apply(CombatStat.RegMp, ZoneRegen.MpPerTick(player.Level, menBonus, posture) * hallMp);
+        if (mtHp > 0)
+            hp += mtHp;
+        if (mtMp > 0)
+            mp += mtMp;
+        return (hp, mp);
     }
 
     void CollectRegenPlayers(TickContext tick, RegionWorkCollector work)
