@@ -10,10 +10,12 @@ public sealed partial class ZoneWorld
     static readonly Lazy<SwampZones> SharedSwamp = new(SwampZones.LoadDefault);
     static readonly Lazy<DamageZones> SharedDamage = new(DamageZones.LoadDefault);
     static readonly Lazy<NoLandingZones> SharedNoLanding = new(NoLandingZones.LoadDefault);
+    static readonly Lazy<MotherTreeZones> SharedMotherTree = new(MotherTreeZones.LoadDefault);
 
     internal SwampZones Swamp { get; set; } = SwampZones.Empty;
     internal DamageZones Damage { get; set; } = DamageZones.Empty;
     internal NoLandingZones NoLanding { get; set; } = NoLandingZones.Empty;
+    internal MotherTreeZones MotherTree { get; set; } = MotherTreeZones.Empty;
 
     void UpdateMoveEnvironment(ZoneEntity e)
     {
