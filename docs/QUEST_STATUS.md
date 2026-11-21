@@ -7,10 +7,10 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 213 |
-| partial | 93 |
+| implemented | 216 |
+| partial | 94 |
 | stub | 31 |
-| missing | 7 |
+| missing | 3 |
 | **total Mobius quests** | **344** |
 
 Fineage-only packs: 256, 998 (Q256 newbie helper gift, Q998 Net smoke).
@@ -268,7 +268,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 382 | Kail's Magic Coin | 55+ | one-time | implemented | hand-ported |
 | 383 | Searching for Treasure | 42+ | repeatable | partial | no talk: 31148; auto-port |
 | 384 | Warehouse Keeper's Pastime | 40+ | repeatable | stub | 3 dialog(s), no start; auto-port |
-| 385 | Yoke of the Past | 20+ | repeatable | missing |  |
+| 385 | Yoke of the Past | 20+ | repeatable | implemented | hand-ported |
 | 386 | Stolen Dignity | 58+ | repeatable | stub | 2 dialog(s), no start; auto-port |
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
 | 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
@@ -292,13 +292,13 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 420 | Little Wing | 35+ | pet | partial | no kill: 17/17 mobs; teleport missing; auto-port |
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
 | 422 | Repent Your Sins | 20+ | repeatable | stub | 36 dialog(s), no start; auto-port |
-| 426 | Quest for Fishing Shot |  | fishing | missing |  |
+| 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | stub | 2 dialog(s), no start; auto-port |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
 | 501 | Proof of Clan Alliance | 3–39 | clan | stub | 40 dialog(s), no start; timers; auto-port |
 | 503 | Pursuit of Clan Ambition! |  | clan | stub | 64 dialog(s), no start; auto-port |
 | 504 | Competition for the Bandit Stronghold |  | clan | stub | 2 dialog(s), no start; auto-port |
-| 505 | Blood Offering |  | clan | missing |  |
+| 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
 | 508 | A Clan's Reputation | 5+ | clan | stub | 2 dialog(s), no start; auto-port |
 | 509 | The Clan's Prestige | 6+ | clan | stub | 2 dialog(s), no start; auto-port |
 | 510 | A Clan's Reputation | 5+ | clan | stub | 3 dialog(s), no start; auto-port |
@@ -346,7 +346,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 643 | Rise and Fall of the Elroki Tribe | 75+ | repeatable | implemented | hand-ported |
 | 644 | Grave Robber Annihilation | 20+ | repeatable | implemented | hand-ported |
 | 645 | Ghosts of Batur | 23+ | repeatable | implemented | hand-ported |
-| 646 | Signs of Revolt | 40+ | repeatable | missing |  |
+| 646 | Signs of Revolt | 40+ | repeatable | implemented | hand-ported |
 | 647 | Influx of Machines | 46+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
 | 648 | An Ice Merchant's Dream | 53+ | repeatable | stub | 21 dialog(s), no start; auto-port |
 | 649 | A Looter and a Railroad Man | 30+ | repeatable | partial | no kill: 8/8 mobs; auto-port |
