@@ -1,6 +1,8 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Game.Shops;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Simulation;
@@ -109,8 +111,31 @@ public sealed partial class ZoneWorld
                 }
             }
 
+        }
+
+        long procureRevenue = 0;
+        foreach (var crop in _manor.Board.Procure(castleId, next: false))
+        {
             if (crop.Amount > 0)
-                _siege.Board.AddTreasury(castleId, crop.Amount * crop.Price);
+                procureRevenue += crop.Amount * crop.Price;
+        }
+
+        if (procureRevenue > 0)
+        {
+            RecordTreasuryAdena(
+                castleId,
+                LedgerTxKind.ManorCropProcure,
+                castleId,
+                procureRevenue,
+                SystemAccount.Manor,
+                () =>
+                {
+                    foreach (var crop in _manor.Board.Procure(castleId, next: false))
+                    {
+                        if (crop.Amount > 0)
+                            _siege.Board.AddTreasury(castleId, crop.Amount * crop.Price);
+                    }
+                });
         }
 
         if (warehouseChanged)
@@ -162,7 +187,15 @@ public sealed partial class ZoneWorld
         }
 
         if (cost > 0)
-            _siege.Board.AddTreasury(castleId, -cost);
+        {
+            RecordTreasuryAdena(
+                castleId,
+                LedgerTxKind.ManorPeriodCost,
+                castleId,
+                -cost,
+                SystemAccount.Manor,
+                () => _siege.Board.AddTreasury(castleId, -cost));
+        }
     }
 
     /// <summary>Mobius <c>Castle.updateOwnerInDB(null)</c> → <c>resetManorData</c>: an ownerless castle has no manor.</summary>
@@ -412,19 +445,31 @@ public sealed partial class ZoneWorld
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)total, changes))
-            return ManorProtocol.Adena;
-        foreach (var (product, count) in order)
-        {
-            product.TryDecrease(count);
-            int before = inventory.CountOf(product.SeedId);
-            var stack = inventory.Add(product.SeedId, (int)count);
-            changes.Add(InventoryMessages.ChangeRow(before == 0 ? InventoryChange.Add : InventoryChange.Modify, stack));
-        }
+        var seedLines = order.Select(o => (o.Product.SeedId, o.Count)).ToList();
+        string? refused = RecordManorSeedBuy(
+            player,
+            c.CastleId,
+            total,
+            seedLines,
+            () =>
+            {
+                if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)total, changes))
+                    throw new InvalidOperationException("manor seed buy take failed after ledger check");
+                foreach (var (product, count) in order)
+                {
+                    product.TryDecrease(count);
+                    int before = inventory.CountOf(product.SeedId);
+                    var stack = inventory.Add(product.SeedId, (int)count);
+                    changes.Add(InventoryMessages.ChangeRow(before == 0 ? InventoryChange.Add : InventoryChange.Modify, stack));
+                }
 
-        FanInventory(session, Collapse(changes));
-        SaveInventory(session, inventory);
-        _siege.Board.AddTreasury(c.CastleId, total);
+                FanInventory(session, Collapse(changes));
+                SaveInventory(session, inventory);
+                if (!_siege.Board.AddTreasury(c.CastleId, total))
+                    throw new InvalidOperationException("manor treasury credit failed after ledger check");
+            });
+        if (refused != null)
+            return refused;
         SelfLine(session, ManorProtocol.AdenaDisappeared, $"{total} adena disappeared.", total.ToString());
         PersistManor();
         PersistSiege();

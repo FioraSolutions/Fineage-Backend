@@ -55,7 +55,16 @@ public enum SystemAccount
     Quests = 6,
 
     /// <summary>Takes crafting materials and hands out what was made.</summary>
-    Crafting = 7
+    Crafting = 7,
+
+    /// <summary>Door, wall and other castle upgrades paid from a lord's bag.</summary>
+    CastleMaintenance = 8,
+
+    /// <summary>Manor seed sales and crop procurements.</summary>
+    Manor = 9,
+
+    /// <summary>Circlets and crowns granted to castle members.</summary>
+    CastleGrants = 10
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -143,7 +152,31 @@ public enum LedgerTxKind
     /// Materials into crafting and the product out, in one move whether the roll succeeded or not; a manufacture
     /// also pays the maker's fee. <c>CausedBy</c> is the customer, <c>Reference</c> the recipe id.
     /// </summary>
-    Craft = 16
+    Craft = 16,
+
+    /// <summary>Adena from a character's bag into a castle treasury: <c>Reference</c> is the castle id.</summary>
+    TreasuryDeposit = 17,
+
+    /// <summary>Adena from a castle treasury into a character's bag: <c>Reference</c> is the castle id.</summary>
+    TreasuryWithdraw = 18,
+
+    /// <summary>A castle door or wall upgrade: <c>Reference</c> is the door id.</summary>
+    CastleUpgrade = 19,
+
+    /// <summary>A circlet or crown item granted to a castle member: <c>Reference</c> is the castle id.</summary>
+    CastleGrant = 20,
+
+    /// <summary>Seeds bought from a manor manager: <c>Reference</c> is the castle id.</summary>
+    ManorSeedBuy = 21,
+
+    /// <summary>
+    /// Crop procure revenue credited to the castle treasury at period close: <c>Reference</c> is the castle id;
+    /// <c>CausedBy</c> is 0.
+    /// </summary>
+    ManorCropProcure = 22,
+
+    /// <summary>Manor period approval cost drawn from the treasury: <c>Reference</c> is the castle id; <c>CausedBy</c> is 0.</summary>
+    ManorPeriodCost = 23
 }
 
 /// <summary>

@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
@@ -175,9 +176,14 @@ public sealed partial class ZoneWorld
         if (inventory == null || amount <= 0 || amount > castle.Treasury ||
             (long)inventory.CountOf(PledgeProtocol.AdenaItemId) + amount > int.MaxValue)
             return SiegeProtocol.Adena;
-        if (!_siege.Board.AddTreasury(castle.Id, -amount))
-            return SiegeProtocol.Adena;
-        GiveItem(session, inventory, PledgeProtocol.AdenaItemId, (int)amount);
+        string? refused = RecordTreasuryExchange(session, player, castle, LedgerTxKind.TreasuryWithdraw, amount, () =>
+        {
+            if (!_siege.Board.AddTreasury(castle.Id, -amount))
+                throw new InvalidOperationException("treasury withdraw underflow");
+            GiveItem(session, inventory, PledgeProtocol.AdenaItemId, (int)amount);
+        });
+        if (refused != null)
+            return refused;
         PersistSiege();
         return null;
     }
@@ -193,9 +199,15 @@ public sealed partial class ZoneWorld
         }
 
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)amount, changes))
-            return SiegeProtocol.Adena;
-        _siege.Board.AddTreasury(castle.Id, amount);
+        string? refused = RecordTreasuryExchange(session, player, castle, LedgerTxKind.TreasuryDeposit, amount, () =>
+        {
+            if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)amount, changes))
+                throw new InvalidOperationException("deposit take failed after ledger check");
+            if (!_siege.Board.AddTreasury(castle.Id, amount))
+                throw new InvalidOperationException("treasury deposit overflow");
+        });
+        if (refused != null)
+            return refused;
         FanInventory(session, Collapse(changes));
         SaveInventory(session, inventory);
         PersistSiege();
@@ -226,22 +238,30 @@ public sealed partial class ZoneWorld
             return SiegeProtocol.UpgradeLevel;
         var inventory = player.Inventory;
         var changes = new List<InventoryUpdateEntryMsg>();
-        if (inventory == null || inventory.CountOf(PledgeProtocol.AdenaItemId) < price ||
-            !Take(inventory, PledgeProtocol.AdenaItemId, (int)price, changes))
+        if (inventory == null || inventory.CountOf(PledgeProtocol.AdenaItemId) < price)
         {
             SelfLine(session, SiegeProtocol.NotEnoughAdena, "You do not have enough adena.");
             return SiegeProtocol.Adena;
         }
 
-        FanInventory(session, Collapse(changes));
-        SaveInventory(session, inventory);
-        castle.DoorUpgrades[doorId] = ratio;
-        if (_castleDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
+        if (!RecordCastleUpgrade(player, doorId, price, () =>
+            {
+                if (!Take(inventory, PledgeProtocol.AdenaItemId, (int)price, changes))
+                    throw new InvalidOperationException("castle upgrade take failed after ledger check");
+                FanInventory(session, Collapse(changes));
+                SaveInventory(session, inventory);
+                castle.DoorUpgrades[doorId] = ratio;
+                if (_castleDoors.TryGetValue(doorId, out int objectId) && _byId.TryGetValue(objectId, out var door) && !door.Dead)
+                {
+                    door.MaxHp = door.SiegeNpc!.BaseHp * ratio;
+                    door.CurHp = door.MaxHp;
+                    FanoutVitals(door, StatusFor(door));
+                    FanoutDoorStatus(door);
+                }
+            }))
         {
-            door.MaxHp = door.SiegeNpc!.BaseHp * ratio;
-            door.CurHp = door.MaxHp;
-            FanoutVitals(door, StatusFor(door));
-            FanoutDoorStatus(door);
+            SelfLine(session, SiegeProtocol.NotEnoughAdena, "You do not have enough adena.");
+            return SiegeProtocol.Adena;
         }
 
         PersistSiege();
@@ -259,10 +279,18 @@ public sealed partial class ZoneWorld
             return SiegeProtocol.Inventory;
         if (inventory.CountOf(itemId) > 0)
             return SiegeProtocol.HasItem;
-        if (_game.Items.TryGet(itemId, out _))
-            GiveItem(session, inventory, itemId, 1);
-        else
+        if (!_game.Items.TryGet(itemId, out _))
             return SiegeProtocol.Inventory;
+        RecordBagChange(
+            player,
+            LedgerTxKind.CastleGrant,
+            LedgerAccount.Of(SystemAccount.CastleGrants),
+            () =>
+            {
+                GiveItem(session, inventory, itemId, 1);
+                return 0;
+            },
+            _ => castle.Id);
         return null;
     }
 
