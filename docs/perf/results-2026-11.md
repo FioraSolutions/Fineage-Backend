@@ -69,6 +69,23 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 
 **Honest caveat:** Without a classic protocol adapter, we cannot produce apples-to-apples bot RTT or tick tables against Mobius. Fineage numbers above are from the shared bot tool; Mobius remains a documented fetch/build path only for this iteration.
 
+## Zone parallel stages (Nov 22) — movement + AI
+
+**Scheduler / directory (builds on PR #843):** region bodies may call `Relocated` on entities they own; global `GridAoi` updates from movement defer to `RegionBodyScope.Commit` (ascending region order) so parallel stages do not race the shared spatial hash. Knownlist and fan-out side effects from movement defer via `AtBarrier` to the same commit.
+
+**Parallel stages enabled:** `movement.player`, `movement.npc`, `random-walk`, `aggression` (existing parallel: `regen.*`, `abnormals`).
+
+**Idle full-world micro-benchmark** (34k NPCs, no players, 50 samples after warm-up):
+
+| `FINEAGE_ZONE_REGION_WORKERS` | Tick total p99 | `random-walk` p99 | `handoff` p99 |
+| ---: | ---: | ---: | ---: |
+| 0 | 4.38 ms | 0.31 ms | 1.51 ms |
+| 4 | 4.37 ms | 0.23 ms | 1.45 ms |
+
+**Bot matrix (100 / 500 bots, command→fanout p99):** not re-run on this VM (no Docker for Postgres). Reproduce with `./scripts/run-load-test.sh` on an environment that runs `run-local-net.sh`.
+
+**Regression:** `RegionParallelWorldTests`, `RegionParallelStressTests`, and `RegionSimulationDeterminismTests` pass with the parallel movement/AI stages.
+
 ## Prioritized bugs / follow-ups
 
 | P | Issue | Repro |

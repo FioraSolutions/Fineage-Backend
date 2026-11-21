@@ -19,13 +19,23 @@ public sealed class LoadScenario
     public int Race { get; set; } = 1;
     public Dictionary<string, double> ActionWeights { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["move"] = 0.35,
-        ["attack"] = 0.2,
-        ["skill"] = 0.1,
-        ["say"] = 0.1,
-        ["pickup"] = 0.1,
-        ["trade"] = 0.05,
-        ["party"] = 0.05,
-        ["teleport"] = 0.05
+        ["move"] = 0.30,
+        ["attack"] = 0.18,
+        ["skill"] = 0.10,
+        ["say"] = 0.08,
+        ["sit"] = 0.08,
+        ["social"] = 0.06,
+        ["pickup"] = 0.08,
+        ["trade"] = 0.04,
+        ["party"] = 0.04,
+        ["teleport"] = 0.03,
+        ["pvp"] = 0.05,
+        ["relog"] = 0.02
     };
+
+    /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
+    public int AoiCellSize { get; set; } = 3000;
+
+    /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
+    public string? Extends { get; set; }
 }
