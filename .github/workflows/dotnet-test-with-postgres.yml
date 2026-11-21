@@ -1,0 +1,42 @@
+# Shared Release test job with CI Postgres (P1-14). Used by build-and-test and deploy.
+name: dotnet-test-with-postgres
+
+on:
+  workflow_call:
+    inputs:
+      verbosity:
+        description: dotnet test --verbosity
+        type: string
+        default: normal
+
+jobs:
+  test:
+    name: dotnet-test-with-postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FINEAGE_DATABASE_URL: >-
+        Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity ${{ inputs.verbosity }}
