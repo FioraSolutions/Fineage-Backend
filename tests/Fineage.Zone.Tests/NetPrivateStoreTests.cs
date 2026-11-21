@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
@@ -87,6 +88,27 @@ public sealed class NetPrivateStoreTests
         Assert.True(sellerEntity.Inventory.CountOf(ShopTrade.AdenaItemId) >= price);
         Assert.Equal(PrivateStoreProtocol.TypeNone, sellerEntity.PrivateStoreType);
         Assert.Empty(sellerEntity.PrivateSellList);
+        AssertSale(kit, visitor: buyerEntity, store: sellerEntity, payer: buyerEntity, giver: sellerEntity, offered, price);
+    }
+
+    /// <summary>One <see cref="LedgerTxKind.StoreSale"/>: the adena one way, the item (by piece when it has one) the other.</summary>
+    static void AssertSale(
+        NetTestKit kit, ZoneEntity visitor, ZoneEntity store, ZoneEntity payer, ZoneEntity giver, ItemInstance item, long price)
+    {
+        var sale = Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.StoreSale).Transaction;
+        Assert.Equal((visitor.ObjectId, store.ObjectId), (sale.CausedBy, sale.Reference));
+        var payee = ReferenceEquals(payer, visitor) ? store : visitor;
+        var receiver = ReferenceEquals(giver, visitor) ? store : visitor;
+        string pieces = item.Template.Stackable ? "" : $"{item.ObjectId}";
+        Assert.Equal(
+            [
+                (LedgerAccount.Inventory(payer.ObjectId), ShopTrade.AdenaItemId, -price, ""),
+                (LedgerAccount.Inventory(payee.ObjectId), ShopTrade.AdenaItemId, price, ""),
+                (LedgerAccount.Inventory(giver.ObjectId), item.ItemId, -1L, pieces),
+                (LedgerAccount.Inventory(receiver.ObjectId), item.ItemId, 1L, pieces)
+            ],
+            sale.Postings.Select(posting =>
+                (posting.Account, posting.ItemId, posting.Amount, string.Join(",", posting.InstanceIds))));
     }
 
     [Fact]
@@ -133,6 +155,7 @@ public sealed class NetPrivateStoreTests
             Items = [new PrivateStoreSellRowMsg { InventoryObjectId = offered.ObjectId, Count = 1, Price = 50 }]
         }, default));
         Assert.Equal(PrivateStoreProtocol.TypeSell, sellerEntity.PrivateStoreType);
+        Assert.DoesNotContain(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.StoreSale);
     }
 
     [Fact]
@@ -191,6 +214,7 @@ public sealed class NetPrivateStoreTests
         Assert.True(sellerEntity.Inventory.CountOf(ShopTrade.AdenaItemId) >= price);
         Assert.Equal(PrivateStoreProtocol.TypeNone, buyerEntity.PrivateStoreType);
         Assert.Empty(buyerEntity.PrivateBuyList);
+        AssertSale(kit, visitor: sellerEntity, store: buyerEntity, payer: buyerEntity, giver: sellerEntity, offered, price);
     }
 
     [Fact]
