@@ -2,7 +2,9 @@ using System.Globalization;
 using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Fishing;
+
 namespace Fineage.Zone.World;
+
 public sealed partial class ZoneWorld
 {
     readonly FishingChampionshipActor _fishingChampionship;

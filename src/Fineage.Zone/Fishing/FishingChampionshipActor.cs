@@ -1,5 +1,7 @@
 using Fineage.Zone.Simulation;
+
 namespace Fineage.Zone.Fishing;
+
 public sealed class FishingChampionshipActor : GlobalActor<bool>
 {
     public const string StageName = "fishing-championship";
