@@ -48,6 +48,7 @@ internal sealed class WorldBench
         Fineage.Zone.DimensionalRift.DimensionalRiftCatalog? dimensionalRift = null,
         Fineage.Zone.DimensionalRift.DimensionalRiftSettings? dimensionalRiftSettings = null,
         Random? combatRandom = null,
+        Random? dropRandom = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
         Random? fishingRandom = null,
@@ -64,8 +65,10 @@ internal sealed class WorldBench
         Store = MemoryAccountStore.InMemory();
         Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
-        IRegionExecutor resolvedExecutor =
-            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
+        IRegionExecutor resolvedExecutor = regionExecutor ??
+            (combatRandom != null || dropRandom != null
+                ? SequentialRegionExecutor.Instance
+                : ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
             Game,
@@ -97,6 +100,7 @@ internal sealed class WorldBench
             dimensionalRift: dimensionalRift,
             dimensionalRiftSettings: dimensionalRiftSettings,
             combatRandom: combatRandom,
+            dropRandom: dropRandom,
             manor: manor,
             manorRandom: manorRandom,
             fishingRandom: fishingRandom,

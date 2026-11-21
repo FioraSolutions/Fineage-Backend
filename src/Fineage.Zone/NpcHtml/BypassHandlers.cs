@@ -35,6 +35,8 @@ public sealed class LinkBypassHandler : IBypassHandler
 
     public BypassReply Handle(BypassCall call)
     {
+        if (call.Command.Contains("fishing_championship.htm", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(Fineage.Protocol.NpcServiceIntent.FishingChampionshipClaim);
         var page = _pages.ReadLink(call.Language, call.NpcType, call.Command);
         if (page.RejectedPath)
             return BypassReply.Fail("bad_request");

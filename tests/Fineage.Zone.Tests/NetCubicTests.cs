@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 public sealed class NetCubicTests
 {
     const int StormSkill = 10, LifeSkill = 67, ViperSkill = 278, BindingSkill = 1279, MassStormSkill = 1328, Mastery = 143;
+    const int StormCubicAction = 4049, ViperCubicAction = 4052, BindingCubicAction = 4164;
     const int CrystalD = 1458;
     const int Gremlin = 20001;
     const int X = 46045, Y = 41251, Z = -3440;
@@ -165,10 +166,9 @@ public sealed class NetCubicTests
         // Action skill ids from data/cubics.json: Binding cubic 6 → 4164, Viper cubic 4 → 4052, Storm cubic 1 → 4049.
         const int BindingAction = 4164, ViperAction = 4052, StormAction = 4049;
         var (bench, _) = Open();
-        // Mobius cubic *action* skill ids from data/cubics.json actions[], not SummonCubic ids.
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingAction));
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperAction));
-        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormCubicAction));
     }
 
     [Fact]

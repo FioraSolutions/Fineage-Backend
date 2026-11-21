@@ -6,6 +6,8 @@ namespace Fineage.Zone.Combat;
 /// </summary>
 public static class ForceChargeRules
 {
+    /// <summary>Mobius <c>ResetChargesTask</c> — 600 s after the last charge change while stacks &gt; 0.</summary>
+    public const int DecayMs = 600_000;
     public const int MaxStack = 7;
     public const int SysMsgForceIncreased = 323;
     public const int SysMsgForceMaxCapacity = 324;

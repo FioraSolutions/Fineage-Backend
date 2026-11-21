@@ -119,9 +119,19 @@ public sealed partial class ZoneWorld
                 throw new InvalidOperationException(
                     $"region {_region} ({stage}) entered while region {t_current._region} runs on this thread");
             var body = _world._byId.EnterBody(_region);
-            var recording = _world._fanout.RecordRegion(_fanout);
-            t_current = this;
-            return new Entered(body, recording);
+            try
+            {
+                var recording = _world._fanout.RecordRegion(_fanout);
+                t_current = this;
+                return new Entered(body, recording);
+            }
+            catch
+            {
+                // A half-entered scope must not leak the thread-static directory body onto a pooled thread:
+                // every later region body scheduled on it would fail "a body runs on this thread" forever.
+                body.Dispose();
+                throw;
+            }
         }
 
         public void Defer(Action write) => _deferred.Add(write);

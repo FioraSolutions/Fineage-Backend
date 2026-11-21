@@ -13,6 +13,7 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | Doc | Role |
 |-----|------|
 | [`docs/net-protocol.md`](docs/net-protocol.md) | **Live wire SoT** — lobby/zone Net opcodes, presence, Postgres, enter-world order |
+| [`docs/spawn-world-coverage.md`](docs/spawn-world-coverage.md) | Mobius spawn maps, hosted defaults, starter continents |
 | [`docs/MOBIUS_XML_REF.md`](docs/MOBIUS_XML_REF.md) | Mobius CT0 XML → `data/` |
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |
 | `docs/*-v2-protocol.md` | Feature **semantics** only; MsgType numbers inside are legacy MessagePack |
@@ -29,7 +30,7 @@ Lobby (Login **9106**): `Hello` → `Auth` (register-if-missing) → `CreateChar
 
 Zone (**9777**): `Hello` → `Auth` (account + handoff) → `EnterWorld`. Projector sends Net bootstrap (`EntitySpawn` self, `PlayerStats`, `UserInfo`, `ItemList`, `SkillList`, `ShortCutInit`), then AOI fanout for peers/NPCs. Move / combat / loot / chat / shop / quest / party / trade / clan use **`NetOpcode` `0x03xx`** — full tables in [`docs/net-protocol.md`](docs/net-protocol.md). Game logic lives in `ZoneWorld*` + `Combat/`; Net is the projection layer (`NetZoneServer`).
 
-Spawns: `data/spawns/*.json` (Mobius-style). Default map is the active spawn map (`ti_cedric` unless overridden); whole Interlude world needs `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS` or a map whitelist. Starter kits: `data/starter-kits.json`. Accounts and characters: PostgreSQL only (`FINEAGE_DATABASE_URL`).
+Spawns: `data/spawns/*.json` (Mobius-style). **Hosted default** loads every map with `"enabled": true` (unset `FINEAGE_ZONE_MAPS`; see [`docs/spawn-world-coverage.md`](docs/spawn-world-coverage.md)). Set `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0` only for single-map smoke (`ti_cedric`). Starter kits: `data/starter-kits.json`. Accounts and characters: PostgreSQL only (`FINEAGE_DATABASE_URL`).
 
 HTTP on Login **5080**: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/status`. Bind defaults **0.0.0.0** unless `--bind` / `FINEAGE_BIND` says otherwise.
 

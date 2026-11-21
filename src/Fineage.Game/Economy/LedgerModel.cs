@@ -308,7 +308,9 @@ public enum LedgerTxKind
     ClanHallLease = 55,
 
     /// <summary>Life stone refine: consumes stone/gems; <c>Reference</c> is life stone item id.</summary>
-    Augment = 56
+    Augment = 56,
+
+    FishingChampionshipPrize = 57
 }
 
 /// <summary>

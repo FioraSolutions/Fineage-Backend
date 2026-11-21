@@ -46,4 +46,26 @@ public sealed class EnvironmentZoneTests
         Assert.NotNull(TinySwamp().At(50, 50, 0));
         Assert.Null(TinySwamp().At(200, 50, 0));
     }
+
+    [Fact]
+    public void Imported_mother_tree_town_polygon_covers_elven_village_center()
+    {
+        var zones = MotherTreeZones.LoadDefault();
+        Assert.True(zones.Count > 0);
+        var zone = zones.At(45365, 49596, -3010);
+        Assert.NotNull(zone);
+        Assert.Equal(2, zone!.HpRegenBonus);
+        Assert.Equal(1, zone.MpRegenBonus);
+        Assert.Equal(1, zone.AffectedRace);
+    }
+
+    [Fact]
+    public async Task Elf_inside_mother_tree_gets_flat_regen_bonus()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var (_, elf) = await kit.EnterAsync(classId: 25, race: 1, x: 45365, y: 49596, z: -3010);
+        Assert.Equal((2, 1), kit.World.MotherTreeRegenBonusForTest(elf));
+        var (_, human) = await kit.EnterAsync(classId: 0, race: 0, x: 45365, y: 49596, z: -3010);
+        Assert.Equal((0, 0), kit.World.MotherTreeRegenBonusForTest(human));
+    }
 }
