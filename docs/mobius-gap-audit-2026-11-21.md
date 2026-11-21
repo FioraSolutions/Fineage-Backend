@@ -314,6 +314,31 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 19 | Compound skill conditions | 🟡 | Wrong refuse on edge skills | `Skill` conditions | M |
 | 20 | Freight warehouse | ❌ | Cannot ship items | `Warehouse` freight | S |
 
+### Top 20 implementation status
+
+| Rank | Item | PR(s) | Status | Client work needed |
+|------|------|-------|--------|-------------------|
+| 1 | World spawns / hunting grounds | #701 | in progress | No |
+| 2 | Quest coverage | — | pending | No |
+| 3 | Item augmentation | — | pending | Yes (refine UI) |
+| 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
+| 5 | Auto-loot | — | pending | No |
+| 6 | Seven Signs Festival | — | pending | No |
+| 7 | Dimensional rift | — | pending | No |
+| 8 | Siege mercenaries | — | pending | No |
+| 9 | Siege golem (noble) | — | pending | No |
+| 10 | Skill enchant (+skills) | — | pending | Yes (ExEnchantSkill) |
+| 11 | Day/night spawns | — | pending | No |
+| 12 | Clan hall siege | — | pending | No |
+| 13 | Baby pet / evolution | — | pending | No |
+| 14 | Guard / town AI | — | pending | No |
+| 15 | Zone types (swamp/damage/NL) | — | pending | No |
+| 16 | Boats + walking NPCs | — | pending | No |
+| 17 | Saga quest fidelity | — | pending | No |
+| 18 | GM / punishment tooling | — | pending | No |
+| 19 | Compound skill conditions | — | pending | No |
+| 20 | Freight warehouse | — | pending | No |
+
 ---
 
 ## Suggested audit refresh

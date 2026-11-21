@@ -155,7 +155,7 @@ public sealed class NpcTemplateSpawnTests
                 Assert.InRange(row.ObjectId, NpcObjectIdAllocator.First, NpcObjectIdAllocator.ExclusiveEnd - 1));
         }
 
-        Assert.False(spawns.GetMap("ti_village_road").Enabled);
+        Assert.True(spawns.GetMap("ti_village_road").Enabled);
     }
 
     [Fact]

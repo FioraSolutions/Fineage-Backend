@@ -11,14 +11,15 @@ public sealed class BossScheduleTests
     const int ZeroId = 25333;
 
     [Fact]
-    public void Catalog_loads_interlude_rows_disabled_outside_talking_island()
+    public void Catalog_loads_interlude_rows_enabled_for_retail_hosts()
     {
         var catalog = BossCatalog.LoadDefault();
 
         Assert.Equal(223, catalog.Bosses.Count);
         Assert.Equal(215, catalog.Bosses.Count(boss => boss.Kind == BossKind.Raid));
         Assert.Equal(8, catalog.Bosses.Count(boss => boss.Kind == BossKind.Grand));
-        Assert.All(catalog.Bosses, boss => Assert.False(boss.Enabled));
+        Assert.Equal(216, catalog.Bosses.Count(boss => boss.Enabled));
+        Assert.Equal(7, catalog.Bosses.Count(boss => !boss.Enabled));
         Assert.Equal(BossCatalog.FirstObjectId, catalog.Get(RaidId).ObjectId);
         Assert.Equal(BossCatalog.FirstObjectId + catalog.Bosses.Count - 1, catalog.Bosses[^1].ObjectId);
         Assert.Equal(80223, catalog.Get(29096).ObjectId);

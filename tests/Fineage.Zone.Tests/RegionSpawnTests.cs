@@ -145,7 +145,7 @@ public sealed class RegionSpawnTests
             Assert.NotEmpty(map.Npcs);
         }
 
-        Assert.False(catalog.GetMap("ti_village_road").Enabled);
+        Assert.True(catalog.GetMap("ti_village_road").Enabled);
         Assert.Equal(90, catalog.GetMap(SpawnCatalog.TalkingIslandVillageMapId).Npcs.Count);
         Assert.Equal(21, Count(catalog.GetMap("others_19_22"), 20506));
         Assert.Equal(25, Count(catalog.GetMap("orc_starting"), 20311));

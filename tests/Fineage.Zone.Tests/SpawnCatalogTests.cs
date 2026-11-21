@@ -6,7 +6,7 @@ namespace Fineage.Zone.Tests;
 public sealed class SpawnCatalogTests
 {
     [Fact]
-    public void Default_datapack_loads_cedric_smoke_and_dormant_village_map()
+    public void Default_datapack_loads_cedric_smoke_and_ti_road_slice()
     {
         var catalog = SpawnCatalog.LoadDefault();
         Assert.True(catalog.Maps.ContainsKey(SpawnCatalog.SmokeMapId));
@@ -18,7 +18,7 @@ public sealed class SpawnCatalogTests
         Assert.All(cedric.Npcs, row => Assert.Equal(TalkingIsland.GremlinNpcId, row.NpcId));
 
         var road = catalog.GetMap("ti_village_road");
-        Assert.False(road.Enabled);
+        Assert.True(road.Enabled);
         Assert.Equal(2, road.Npcs.Count);
     }
 
