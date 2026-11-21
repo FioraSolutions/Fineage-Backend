@@ -126,6 +126,23 @@ public sealed class EconomyLedger : IEconomyLedger
             return _owners.TryGetValue(instanceId, out var owner) ? owner : null;
     }
 
+    /// <summary>Highest piece instance id recorded in the journal, or 0 when none were ever posted.</summary>
+    public int MaxInstanceId
+    {
+        get
+        {
+            lock (_sync)
+            {
+                if (_owners.Count == 0)
+                    return 0;
+                int max = 0;
+                foreach (int id in _owners.Keys)
+                    max = Math.Max(max, id);
+                return max;
+            }
+        }
+    }
+
     /// <summary>The entry committed under <paramref name="id"/> while it is inside the idempotency window.</summary>
     public LedgerEntry? Find(LedgerTxId id)
     {

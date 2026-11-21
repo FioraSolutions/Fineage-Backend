@@ -219,7 +219,6 @@ public sealed partial class ZoneWorld
         _gameTime = gameTime ?? ZoneGameTime.FromLocalMidnight(WallNow());
         _aoi = new RelocationTrackingAoi(aoi ?? new SingleCellAoi(), _byId.Relocated);
         _game = game ?? GameData.LoadDefault();
-        _itemIds = itemIds ?? new ItemObjectIdAllocator();
         _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);
         _dropRandom = Streams(dropRandom ?? spawnRandom, RandomPurpose.Drop);
         _accounts = accounts;
@@ -263,6 +262,7 @@ public sealed partial class ZoneWorld
         _shopStock = new ShopStock(_buyLists);
         _ledger = new EconomyLedger(ledgerJournal ?? new MemoryLedgerJournal(),
             LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
+        _itemIds = SeedItemObjectIds(accounts, itemIds, _ledger);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
         _deathRandom = Streams(deathRandom, RandomPurpose.Death);

@@ -4,6 +4,9 @@ namespace Fineage.Accounts;
 
 public interface IAccountStore
 {
+    /// <summary>Next item instance id this store will assign (Mobius character_items sequence).</summary>
+    int NextItemObjectId { get; }
+
     bool AccountExists(string account);
 
     AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email);

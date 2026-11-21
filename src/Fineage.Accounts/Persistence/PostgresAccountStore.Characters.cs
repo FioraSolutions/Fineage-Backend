@@ -12,6 +12,8 @@ namespace Fineage.Accounts;
 /// </summary>
 public sealed partial class PostgresAccountStore
 {
+    public int NextItemObjectId => _inner.NextItemObjectId;
+
     public bool AccountExists(string account) => _inner.AccountExists(account);
 
     public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email)
