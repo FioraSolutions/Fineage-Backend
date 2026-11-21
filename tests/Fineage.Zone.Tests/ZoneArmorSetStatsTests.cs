@@ -20,6 +20,7 @@ public sealed class ZoneArmorSetStatsTests
 
         bag.Equip(bag.Add(2386)); // legs
         bag.Equip(bag.Add(43));   // wooden helmet (head)
+        world.RefreshGearSkills(player);
         int withSet = world.PlayerStats(player).PDef;
         Assert.True(withSet > without, $"set PDef {withSet} should exceed incomplete {without}");
     }
@@ -38,13 +39,16 @@ public sealed class ZoneArmorSetStatsTests
         bag.Equip(bag.Add(2407));
         bag.Equip(bag.Add(5767));
         bag.Equip(bag.Add(5779));
+        world.RefreshGearSkills(player);
         int without = world.PlayerStats(player).MAtkSpd;
 
         bag.Equip(bag.Add(512));
+        world.RefreshGearSkills(player);
         int withSet = world.PlayerStats(player).MAtkSpd;
         Assert.True(withSet > without, $"complete set cast {withSet} should exceed incomplete {without}");
 
         bag.Unequip(bag.GetEquipped(PaperdollSlot.Head)!);
+        world.RefreshGearSkills(player);
         Assert.Equal(without, world.PlayerStats(player).MAtkSpd);
     }
 
@@ -62,14 +66,17 @@ public sealed class ZoneArmorSetStatsTests
         bag.Equip(bag.Add(6383));
         bag.Equip(bag.Add(6384));
         bag.Equip(bag.Add(6385));
+        world.RefreshGearSkills(player);
         int castWithout = world.PlayerStats(player).MAtkSpd;
         int matkWithout = world.PlayerStats(player).MAtk;
 
         bag.Equip(bag.Add(6386));
+        world.RefreshGearSkills(player);
         Assert.Equal(castWithout, world.PlayerStats(player).MAtkSpd);
         Assert.True(world.PlayerStats(player).MAtk > matkWithout);
 
         bag.Unequip(bag.GetEquipped(PaperdollSlot.Head)!);
+        world.RefreshGearSkills(player);
         Assert.Equal(matkWithout, world.PlayerStats(player).MAtk);
     }
 }

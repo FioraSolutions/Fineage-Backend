@@ -39,12 +39,12 @@ public sealed class NetArmorSetSkillListTests
         bag.Equip(bag.Add(Chest));
         bag.Equip(bag.Add(Gloves));
         bag.Equip(bag.Add(Feet));
-        world.PlayerStats(player); // RefreshGearSkills via PlayerStatMods
+        world.RefreshGearSkills(player);
         var incomplete = NetEnterWorldProjector.BuildSkills(player, 0);
         Assert.DoesNotContain(incomplete.Skills, s => s.SkillId == SetPassive);
 
         bag.Equip(bag.Add(Head));
-        world.PlayerStats(player);
+        world.RefreshGearSkills(player);
         var complete = NetEnterWorldProjector.BuildSkills(player, 0);
         Assert.Contains(complete.Skills, s => s.SkillId == SetMarker && s.Level == 1);
         Assert.Contains(complete.Skills, s => s.SkillId == SetPassive && s.Level == 1);

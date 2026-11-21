@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fineage.Accounts;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -23,6 +24,33 @@ public sealed class RegionParallelWorldTests
 
     /// <summary>The west edge of tile 22_19, east of Elven Village (21_19).</summary>
     const int TileEdgeX = (22 - GridRegionPartition.MapTileOffsetX) * GridRegionPartition.MapTileSize;
+
+    [Fact]
+    public async Task Parallel_regen_does_not_mutate_gear_skills_across_regions()
+    {
+        const int RingOfQueenAnt = 6660;
+        const int RingSkill = 3562;
+        DateTimeOffset now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
+        var bench = new WorldBench(clock: () => now, regionExecutor: new ParallelRegionExecutor(4), simulationSeed: 91);
+        var near = await bench.EnterAsync("near", "Near", [new StoredItem(RingOfQueenAnt, 1, -1)], level: 80);
+        Assert.Null(await near.Use(near.Slot(RingOfQueenAnt)));
+        var far = await bench.EnterAsync("far", "Far", level: 80, x: NetTestKit.ElfX + 2 * GridRegionPartition.MapTileSize);
+        Assert.NotEqual(
+            bench.World.RegionOwnerOf(near.ObjectId).Region,
+            bench.World.RegionOwnerOf(far.ObjectId).Region);
+        Assert.Contains(RingSkill, near.Player.GearSkills.Keys);
+
+        var nearGear = new Dictionary<int, int>(near.Player.GearSkills);
+        var farGear = new Dictionary<int, int>(far.Player.GearSkills);
+        for (int step = 0; step < 30; step++)
+        {
+            now = now.AddMilliseconds(ZoneSimulationSettings.StepMilliseconds);
+            bench.World.StepSimulation();
+        }
+
+        Assert.Equal(nearGear, near.Player.GearSkills);
+        Assert.Equal(farGear, far.Player.GearSkills);
+    }
 
     [Fact]
     public async Task Parallel_regions_reproduce_the_sequential_run()

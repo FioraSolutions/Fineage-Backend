@@ -63,6 +63,7 @@ public sealed class DebuffLandRateTests
         Assert.Null(world.PlayerDefenceTraits(player));
 
         bag.Equip(bag.Add(RingOfQueenAnt));
+        world.RefreshGearSkills(player);
         var traits = world.PlayerDefenceTraits(player);
         Assert.NotNull(traits);
         Assert.Equal(1.30, traits!["poison"], 3);

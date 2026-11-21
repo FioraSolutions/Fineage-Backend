@@ -69,6 +69,7 @@ internal sealed class FriendsActor() : GlobalActor(ActorName)
     /// <summary>Mobius <c>BlockList.isBlocked(owner, other)</c>: the owner blocks everyone or blocks the other.</summary>
     public bool Blocks(int ownerObjectId, int otherObjectId)
     {
+        RequireActorThread();
         var lists = Of(ownerObjectId);
         return lists.BlockAll || lists.Blocked.ContainsKey(otherObjectId);
     }
@@ -76,6 +77,7 @@ internal sealed class FriendsActor() : GlobalActor(ActorName)
     /// <summary>The players in the world who are friends with <paramref name="objectId"/> both ways, ascending.</summary>
     public List<int> MutualOnline(int objectId)
     {
+        RequireActorThread();
         var lists = Of(objectId);
         var mutual = new List<int>();
         foreach (int friendId in lists.Friends.Keys.Order())
