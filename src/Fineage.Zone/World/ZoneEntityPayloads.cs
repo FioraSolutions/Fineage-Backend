@@ -197,6 +197,10 @@ sealed class ZoneEntityMovePayload
     public float? LiveSwimWalkSpeed { get; set; }
     public bool Running { get; set; } = true;
     public bool InWater { get; set; }
+    public bool InSwamp { get; set; }
+    public double SwampMoveBonus { get; set; } = 1d;
+    public long DamageZoneNextAtMs { get; set; }
+    public long NoLandingDismountAtMs { get; set; }
     public bool MoveActive { get; set; }
     public int MoveDestX { get; set; }
     public int MoveDestY { get; set; }

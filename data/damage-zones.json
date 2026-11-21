@@ -1,0 +1,2 @@
+[{"name":"cruma_boss_damage_zone","minZ":-6519,"maxZ":-6319,"nodes":[[17869,108566],[18071,108774],[18072,109060],[17865,109265],[17580,109264],[17379,109062],[17379,108774],[17584,108569]],"enabled":true,"hpPerTick":18,"mpPerTick":0,"reuseMs":5000,"initialDelayMs":10,"castleId":0},
+{"name":"19_26_tolles_destruction1","minZ":-9136,"maxZ":-7936,"nodes":[[-15015,271415],[-10033,271428],[-10033,276448],[-15016,276448]],"enabled":false,"hpPerTick":2000,"mpPerTick":0,"reuseMs":5000,"initialDelayMs":10,"castleId":0}]

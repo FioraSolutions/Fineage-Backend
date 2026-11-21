@@ -10,6 +10,9 @@ Mobius reference (L2J_Mobius_CT_0_Interlude):
   dist/game/data/zones/ssq.xml    (PeaceZone rows only)
   dist/game/data/zones/pvp.xml    (ArenaZone NPoly, Mobius ZoneId.PVP)
   dist/game/data/zones/castle_siege.xml (SiegeZone NPoly + castleId; PVP only while that siege runs)
+  dist/game/data/zones/swamp.xml       (SwampZone NPoly + move_bonus)
+  dist/game/data/zones/damage.xml      (DamageZone NPoly + dmgHPSec / reuse / …)
+  dist/game/data/zones/no_landing.xml  (NoLandingZone NPoly + dismountDelay)
 
 Usage:
   python3 tools/import_doors_water.py /path/to/mobius/data [out_dir=data]
@@ -131,6 +134,78 @@ def sieges(data: Path) -> list[dict]:
     return out
 
 
+def zone_stats(z) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for child in z:
+        if local(child.tag) == "stat":
+            out[child.attrib["name"]] = child.attrib["val"]
+    return out
+
+
+def npoly_zones(data: Path, file: str, type_name: str) -> list[dict]:
+    """Mobius NPoly zones under zones/<file> with optional <stat> children."""
+    out = []
+    path = data / "zones" / file
+    if not path.is_file():
+        print(f"skip missing {path}", file=sys.stderr)
+        return out
+    for z in ET.parse(path).getroot():
+        if local(z.tag) != "zone" or z.attrib.get("type") != type_name:
+            continue
+        a = z.attrib
+        if a.get("shape") != "NPoly":
+            print(f"skip non-NPoly {type_name} {a.get('name')}", file=sys.stderr)
+            continue
+        nodes = [[int(n.attrib["X"]), int(n.attrib["Y"])] for n in z if local(n.tag) == "node"]
+        if len(nodes) < 3:
+            continue
+        stats = zone_stats(z)
+        row = {
+            "name": a.get("name", ""),
+            "minZ": int(a["minZ"]),
+            "maxZ": int(a["maxZ"]),
+            "nodes": nodes,
+        }
+        row.update(stats)
+        if stats.get("default_enabled", "true").lower() == "false":
+            row["enabled"] = False
+        out.append(row)
+    return out
+
+
+def swamp(data: Path) -> list[dict]:
+    rows = npoly_zones(data, "swamp.xml", "SwampZone")
+    for r in rows:
+        r["moveBonus"] = float(r.pop("move_bonus", "0.5"))
+    return rows
+
+
+def damage(data: Path) -> list[dict]:
+    rows = npoly_zones(data, "damage.xml", "DamageZone")
+    out = []
+    for r in rows:
+        out.append({
+            "name": r["name"],
+            "minZ": r["minZ"],
+            "maxZ": r["maxZ"],
+            "nodes": r["nodes"],
+            "enabled": r.get("enabled", True),
+            "hpPerTick": int(float(r.get("dmgHPSec", r.get("hpPerTick", "200")))),
+            "mpPerTick": int(float(r.get("dmgMPSec", r.get("mpPerTick", "0")))),
+            "reuseMs": int(r.get("reuse", 5000)),
+            "initialDelayMs": int(r.get("initialDelay", r.get("initialDelayMs", 10))),
+            "castleId": int(r["castleId"]) if "castleId" in r else 0,
+        })
+    return out
+
+
+def no_landing(data: Path) -> list[dict]:
+    rows = npoly_zones(data, "no_landing.xml", "NoLandingZone")
+    for r in rows:
+        r["dismountDelaySec"] = int(r.pop("dismountDelay", r.get("dismountDelaySec", "5")))
+    return rows
+
+
 def water(data: Path) -> list[dict]:
     out = []
     for z in ET.parse(data / "zones" / "water.xml").getroot():
@@ -154,12 +229,16 @@ def main() -> None:
     data = Path(sys.argv[1])
     out_dir = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("data")
     d, w, p, a, s = doors(data), water(data), peace(data), arenas(data), sieges(data)
+    sw, dmg, nl = swamp(data), damage(data), no_landing(data)
     (out_dir / "doors.json").write_text(json.dumps(d, separators=(",", ":"), ensure_ascii=False, indent=None).replace("},{", "},\n{") + "\n")
     (out_dir / "water-zones.json").write_text(json.dumps(w, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "peace-zones.json").write_text(json.dumps(p, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "pvp-zones.json").write_text(json.dumps(a, separators=(",", ":")).replace("},{", "},\n{") + "\n")
     (out_dir / "siege-zones.json").write_text(json.dumps(s, separators=(",", ":")).replace("},{", "},\n{") + "\n")
-    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)} siege={len(s)}")
+    (out_dir / "swamp-zones.json").write_text(json.dumps(sw, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    (out_dir / "damage-zones.json").write_text(json.dumps(dmg, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    (out_dir / "no-landing-zones.json").write_text(json.dumps(nl, separators=(",", ":")).replace("},{", "},\n{") + "\n")
+    print(f"doors={len(d)} water={len(w)} peace={len(p)} pvp={len(a)} siege={len(s)} swamp={len(sw)} damage={len(dmg)} noLanding={len(nl)}")
 
 
 if __name__ == "__main__":
