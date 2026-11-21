@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -56,5 +57,22 @@ public sealed class CastInterruptTests
 
         // Abort hook is idempotent once nothing is in flight.
         Assert.False(kit.World.AbortCastForTest(p));
+    }
+
+    [Fact]
+    public async Task Target_gone_at_launch_emits_MagicSkillCanceled_to_watchers()
+    {
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        kit.World.NetBridge = bridge;
+        var mob = kit.World.AttackableForTest()!;
+        var (s, p) = await kit.EnterAsync(classId: 25, x: mob.X + 100, y: mob.Y, z: mob.Z);
+        p.KnownSkills[1177] = 1;
+        p.CurMp = 80;
+        Assert.Null(await kit.World.TrySkillUseAsync(s, 1177, mob.ObjectId, CancellationToken.None));
+        mob.X += 3000;
+        kit.World.ResolvePendingHitForTest(p);
+        var cancel = rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillCanceled));
+        Assert.Contains(cancel, c => c[1] is int oid && oid == p.ObjectId);
     }
 }
