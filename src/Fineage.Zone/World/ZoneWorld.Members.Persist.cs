@@ -75,11 +75,8 @@ public sealed partial class ZoneWorld
 
     PlayerInventory LoadInventory(ZoneSession session, CharacterRecord? stored = null)
     {
-        if (stored == null)
-            return _game.CreateStarterInventory(session.ClassId, _itemIds);
-        // Items == null was backfilled off-lock in TryEnterAsync; treat missing as starter in-memory only.
-        if (stored.Items == null)
-            return _game.CreateStarterInventory(session.ClassId, _itemIds);
+        if (stored == null || stored.Items == null)
+            return new PlayerInventory(_game.Items, _itemIds);
 
         // Drop unknown templates with a log — Restore already skips them so EnterWorld stays up.
         foreach (var row in stored.Items)
