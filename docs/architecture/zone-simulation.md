@@ -1,10 +1,10 @@
 # Zone simulation architecture
 
-Status: **steps 1–8 implemented** (region tick scheduler with regen and abnormals per region, the combat loop on the
-same scheduler, the reverse watcher index, the per-step fan-out outbox, tick-derived time with seeded per-region
-random streams, a command log and replay, command ingress for player input, region containers with in-process
-handoff, and region bodies isolated by scopes, border snapshots and region messages, with regen and abnormals able
-to run on worker threads behind `FINEAGE_ZONE_REGION_WORKERS`, off by default); steps 9 and later are proposals.
+Status: **steps 1–12 implemented** (single `RegionTickScheduler` step at 200 ms with slow stages at period 15;
+region containers and handoff; region bodies with optional `ParallelRegionExecutor` behind
+`FINEAGE_ZONE_REGION_WORKERS`; command ingress and replay; global and social actors; economy ledger on critical
+moves with Postgres append-only journal; `WorldAffinity` replaces `ZoneWorld._gate`). **Step 13+** (`IRegionHost` over
+a transport) is planned.
 Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolution, regen, abnormals, presence
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
@@ -15,16 +15,16 @@ Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region
 
 ## 1. Summary
 
-| | Today | Target |
+| | Implemented (step 12) | Target (step 13+) |
 |---|---|---|
-| Ownership | One `ZoneWorld` owns every entity in one `Dictionary<int, ZoneEntity>` | Regions (map tile per instance, splittable) own their entities |
-| Concurrency | One `lock (_gate)` serialises two loops and every packet handler | Regions tick in parallel; one thread per region per step, no locks on hot paths |
-| Clock | Two `PeriodicTimer`s (3 s and 200 ms), wall clock read per subsystem | One fixed-step clock; stages declare a period in ticks; one time sample per step |
-| Cross-entity effects | Direct mutation of any entity under the lock | Direct inside a region; messages between regions; handoff when crossing borders |
-| Global systems | `Tick*` calls inside the 3 s loop | Single-threaded actors with mailboxes |
-| Fan-out | Per event: scan all players, encode, `TrySend` per watcher | Per region per tick: outbox, coalesce, encode once, batch per connection |
-| Economy | Inventories persisted as whole-bag snapshots | One append-only, double-entry, idempotent ledger service; inventories become projections |
-| Scale-out | One process, one world | Same region abstraction behind `IRegionHost`; gateways route by entity owner |
+| Ownership | `RegionDirectory` + per-region containers; handoff at the end-of-tick barrier | Same abstraction behind `IRegionHost`; gateways route by owner |
+| Concurrency | `WorldAffinity`: one thread owns a step; region stages may use workers (off by default) | Parallel region workers as default on hot tiles; no world-wide lock |
+| Clock | One `RegionTickScheduler` (200 ms); slow stages at period 15; one time sample per step | Unchanged |
+| Cross-entity effects | Region bodies own their entities; border snapshots and region messages | Transport-delivered messages between hosts |
+| Global systems | `GlobalActor` (bosses, sieges, olympiad, lottery, …) on the scheduler thread | Same actors; optional remote mailboxes |
+| Fan-out | Per-step outbox via `OutboxingWorldEventPublisher`; watcher index trims full scans | Fully coalesced batched frames per connection |
+| Economy | Double-entry ledger + hash-chained journal on shop, trade, ground, warehouse, and more; bags still persisted | All value moves on the journal; bags are projections only |
+| Scale-out | One process, one world | Multi-process region hosts |
 
 ---
 
@@ -32,25 +32,25 @@ Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region
 
 ### 2.1 What runs where
 
-There are not many independent timers: the world has **two** loops, both started by `ZoneWorld.StartSimulation`
-(`src/Fineage.Zone/World/ZoneWorldRegen.cs`), and both take the same global lock.
+One loop drives the world: `SimulationLoopAsync` (`World/ZoneWorldRegen.cs`) wakes on each fixed step, calls
+`StepSimulation`, and the thread running that step owns the world (`WorldAffinity`). Packet handlers submit commands
+and requests to `ZoneCommandIngress`; they do not touch world state directly.
 
 ```mermaid
 flowchart LR
     subgraph IO["Net I/O (thread pool, one task per connection)"]
         C1[NetConnection read loop] --> H1[NetZoneServer.HandleAsync<br/>*PacketHandler]
     end
-    subgraph SIM["Simulation (thread pool)"]
-        S[SimulationLoopAsync<br/>PeriodicTimer 3000 ms<br/>regen, spawns, abnormals, bosses,<br/>clan, sieges, manor, fishing,<br/>lottery, seven signs, mammon, olympiad]
-        K[CombatLoopAsync<br/>PeriodicTimer 200 ms<br/>24 Tick* systems: movement, AI,<br/>hits, casts, aggro, leash, duels, decay]
+    subgraph SIM["Simulation (dedicated loop)"]
+        S[SimulationLoopAsync<br/>RegionTickScheduler<br/>200 ms step, period-15 slow stages]
     end
-    G{{"ZoneWorld._gate<br/>(one lock, ~200 sites)"}}
-    W[(ZoneWorld state<br/>_byId, active sets,<br/>knownlists, AOI, sessions)]
-    H1 -->|lock| G
-    S -->|lock| G
-    K -->|lock| G
-    G --> W
-    W -->|IWorldEventPublisher| P[NetWorldEventPublisher] --> HUB[NetPresenceHub<br/>lock per send] --> OUT[NetConnection outbound channel]
+    ING[ZoneCommandIngress]
+    AFF[WorldAffinity<br/>step owner thread]
+    W[(ZoneWorld state<br/>regions, active sets,<br/>knownlists, AOI, sessions)]
+    H1 -->|commands / requests| ING
+    S --> AFF --> W
+    ING -->|applied in commands stage| AFF
+    W -->|outbox per step| P[OutboxingWorldEventPublisher] --> HUB[NetPresenceHub] --> OUT[NetConnection]
 ```
 
 ### 2.2 Concrete bottlenecks
