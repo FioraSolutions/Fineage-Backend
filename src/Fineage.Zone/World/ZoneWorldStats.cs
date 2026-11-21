@@ -131,11 +131,10 @@ public sealed partial class ZoneWorld
     /// <item>Virtual weight / grade / death penalties</item>
     /// </list>
     /// Gear SA and complete armor-set skills live in <see cref="ZoneEntity.GearSkills"/>
-    /// (rebuilt by <see cref="RefreshGearSkills"/>).
+    /// (rebuilt on equip/enter by <see cref="RefreshGearSkills"/>, not on every stat read).
     /// </summary>
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
-        RefreshGearSkills(player);
         var mods = FoldAbnormals(player);
         mods = FoldLearnedClanAndGearPassives(player, mods);
         mods = FoldWeightPenalty(player, mods);
@@ -179,16 +178,16 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
     internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)
     {
-        RefreshGearSkills(player);
         return _defenceTraits.Collect(PassiveSkillLevels(player));
     }
 
     /// <summary>
     /// Rebuild ephemeral <see cref="ZoneEntity.GearSkills"/> from equipped item_skill rows and complete armor sets
-    /// (Mobius Inventory temporary skills). Safe to call often — clears and refills the map.
+    /// (Mobius Inventory temporary skills). Called from equip/enter paths, not from read-only stat folds.
     /// </summary>
     internal void RefreshGearSkills(ZoneEntity player)
     {
+        AssertBodyOwns(player);
         var gear = player.GearSkills;
         gear.Clear();
         _equipSkills.CollectEquipped(player.Inventory, gear);

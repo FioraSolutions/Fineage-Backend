@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -71,6 +72,21 @@ public sealed partial class ZoneWorld
             "a parallel region executor needs the world's seeded region streams");
     }
 
+    /// <summary>DEBUG: a region body may write only entities its region owns.</summary>
+    [Conditional("DEBUG")]
+    void AssertBodyOwns(ZoneEntity entity)
+    {
+        if (RegionBodyScope.Of(this) is not { } scope)
+            return;
+        var owner = _byId.OwnerOf(entity).Region;
+        if (owner != scope.Region)
+        {
+            Debug.Fail($"region {scope.Region}'s body wrote entity {entity.ObjectId}, owned by region {owner}");
+            throw new InvalidOperationException(
+                $"region {scope.Region}'s body wrote entity {entity.ObjectId}, owned by region {owner}");
+        }
+    }
+
     /// <summary>
     /// The scope one region body runs in: the directory refuses cross-region writes, fan-out records into the
     /// region's own batch, and world bookkeeping and messages wait for the barrier. <see cref="Commit"/> runs on the
@@ -93,6 +109,8 @@ public sealed partial class ZoneWorld
 
         public static RegionBodyScope? Of(ZoneWorld world) =>
             t_current is { } scope && ReferenceEquals(scope._world, world) ? scope : null;
+
+        internal RegionId Region => _region;
 
         public IDisposable Enter()
         {

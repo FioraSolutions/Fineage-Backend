@@ -60,13 +60,16 @@ public sealed class SocialActorTests
         var clan = new ClanActor();
         var chat = new ChatActor();
         var friends = new FriendsActor();
+        friends.Load(1, "Ally", null);
         Action[] requests =
         [
             () => party.InParty(1),
             () => party.Step(new TickContext(1, 0, 0)),
             () => clan.ClanIdOf(1),
             () => chat.Find("Scout"),
-            () => friends.TryGet(1, out _)
+            () => friends.TryGet(1, out _),
+            () => friends.Blocks(1, 2),
+            () => friends.MutualOnline(1)
         ];
         var observer = new FailureLog();
         var partition = new GridRegionPartition(1000);

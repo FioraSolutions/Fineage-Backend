@@ -33,18 +33,22 @@ public sealed class NetArmorSetSkillListTests
         var bag = new Fineage.Game.PlayerInventory(game.Items);
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 94, Level = 80, Inventory = bag
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 94,
+            Level = 80,
+            Inventory = bag
         };
         var world = new ZoneWorld(game: game);
         bag.Equip(bag.Add(Chest));
         bag.Equip(bag.Add(Gloves));
         bag.Equip(bag.Add(Feet));
-        world.PlayerStats(player); // RefreshGearSkills via PlayerStatMods
+        world.RefreshGearSkills(player);
         var incomplete = NetEnterWorldProjector.BuildSkills(player, 0);
         Assert.DoesNotContain(incomplete.Skills, s => s.SkillId == SetPassive);
 
         bag.Equip(bag.Add(Head));
-        world.PlayerStats(player);
+        world.RefreshGearSkills(player);
         var complete = NetEnterWorldProjector.BuildSkills(player, 0);
         Assert.Contains(complete.Skills, s => s.SkillId == SetMarker && s.Level == 1);
         Assert.Contains(complete.Skills, s => s.SkillId == SetPassive && s.Level == 1);
