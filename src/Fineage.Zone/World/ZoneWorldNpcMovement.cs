@@ -145,7 +145,10 @@ public sealed partial class ZoneWorld
         }
 
         if (RndBound(npc, RandomWalkRate) == 0)
-            TryNpcSelfBuffSkill(npc, now);
+        {
+            if (!TryNpcSelfBuffSkill(npc, now))
+                TryNpcLeaderBuffSkill(npc, now);
+        }
         return true;
     }
 
@@ -207,7 +210,8 @@ public sealed partial class ZoneWorld
                     HomeY = y,
                     HomeZ = master.Z,
                     LeaderObjectId = master.ObjectId,
-                    RaidMinion = master.NpcType is "RaidBoss" or "GrandBoss"
+                    RaidMinion = master.NpcType is "RaidBoss" or "GrandBoss",
+                    AiBuffSkills = _npcAiSupport.Get(template.NpcId)?.Buff
                 };
                 _byId.Add(objectId, entity);
                 _aoi.Enter(objectId, x, y);
