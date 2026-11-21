@@ -22,7 +22,11 @@ public sealed class SevenSignsFestivalRuntime : ISevenSignsFestivalHook
 
     public void BindEngine(SevenSignsEngine engine) => _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
-    public void OnCompetitionStarted() => _board.ResetCycle();
+    public void OnCompetitionStarted(DateTimeOffset utcNow)
+    {
+        _board.ResetCycle();
+        _board.BeginCompetition(utcNow.ToUnixTimeMilliseconds());
+    }
 
     public void OnCompetitionEnded(SevenSignsCabal winnerBeforeReward)
     {

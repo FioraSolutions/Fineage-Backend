@@ -65,6 +65,11 @@ public sealed partial class ZoneWorld
                     SendFestivalPage(session, player, npc, profile, 2, "a", false);
                     return null;
                 }
+                if (FestivalBoard.GlobalFestivalActive || !FestivalBoard.SignupOpen(NowUnixMs()))
+                {
+                    SendFestivalPage(session, player, npc, profile, 2, "f", false);
+                    return null;
+                }
                 if (_party.Of(player.ObjectId) is not { } party)
                 {
                     SendFestivalPage(session, player, npc, profile, 2, "b", false);
@@ -89,6 +94,8 @@ public sealed partial class ZoneWorld
                 return null;
             case 2:
                 return PayFestivalSignup(session, player, npc, profile, stoneId);
+            case 3:
+                return RegisterFestivalScore(session, player, npc, profile);
             case 6:
                 SendFestivalBonusTable(session, player, npc);
                 return null;
@@ -115,11 +122,20 @@ public sealed partial class ZoneWorld
 
     string? PayFestivalSignup(ZoneSession session, ZoneEntity player, ZoneEntity npc, FestivalGuideProfile profile, int stoneId)
     {
+        if (!FestivalBoard.SignupOpen(NowUnixMs()))
+            return "festival_closed";
         int cost = SevenSignsFestivalGuide.StoneCost(profile, stoneId);
         if (cost <= 0)
             return "bad_request";
         if (player.Inventory == null || player.Inventory.CountOf(stoneId) < cost)
             return "no_stones";
+        if (_party.Of(player.ObjectId) is not { } party || party.LeaderObjectId != player.ObjectId)
+            return "no_party";
+        if (FestivalBoard.Registrations().Any(r => r.PartyId == party.PartyId))
+        {
+            SendFestivalPage(session, player, npc, profile, 2, "f", false);
+            return null;
+        }
 
         return RecordBagChange(
             player,
@@ -136,14 +152,72 @@ public sealed partial class ZoneWorld
                     SaveInventory(session, player.Inventory);
                 }
 
-                var enter = TryStartFestivalEnter(player, profile.TierId, profile.Cabal);
-                if (enter != null)
+                FestivalBoard.RegisterParty(new FestivalPartyRegistration
                 {
-                    SendFestivalPage(session, player, npc, profile, 2, "f", false);
-                    return (string?)enter;
+                    PartyId = party.PartyId,
+                    LeaderObjectId = player.ObjectId,
+                    TierId = profile.TierId,
+                    Cabal = profile.Cabal,
+                    Members = party.MemberIds.ToList()
+                });
+                SendFestivalPage(session, player, npc, profile, 2, "e", false);
+                return (string?)null;
+            },
+            _ => profile.TierId);
+    }
+
+    string? RegisterFestivalScore(ZoneSession session, ZoneEntity player, ZoneEntity npc, FestivalGuideProfile profile)
+    {
+        if (_sevenSigns.Engine.Period == SevenSignsPeriod.SealValidation)
+        {
+            SendFestivalPage(session, player, npc, profile, 3, "a", false);
+            return null;
+        }
+        if (!FestivalBoard.IsPreviousLeader(profile.Cabal, profile.TierId, player.ObjectId))
+        {
+            SendFestivalPage(session, player, npc, profile, 3, "b", false);
+            return null;
+        }
+        if (player.Inventory == null)
+            return "world";
+
+        int offeringId = _festivalCatalog.OfferingItemId;
+        int count = player.Inventory.CountOf(offeringId);
+        if (count <= 0)
+            return "no_offerings";
+
+        return RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsContribute,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                Take(player.Inventory, offeringId, count, changes);
+                if (changes.Count > 0)
+                {
+                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
+                    SaveInventory(session, player.Inventory);
                 }
 
-                SendFestivalPage(session, player, npc, profile, 2, "e", false);
+                long offeringScore = (long)count * _festivalCatalog.OfferingValue;
+                var previousMembers = FestivalBoard.PreviousParticipants(profile.Cabal, profile.TierId);
+                bool claimed = _festivalRuntime.TryRecordInstanceScore(profile.Cabal, profile.TierId, offeringScore);
+                if (claimed)
+                {
+                    int memberCount = Math.Max(1, previousMembers.Count);
+                    long bonusShare = FestivalBoard.TakeAccumulatedShare(profile.TierId, memberCount);
+                    if (bonusShare > 0 && _festivalRuntime.Engine != null)
+                    {
+                        int each = (int)Math.Min(int.MaxValue, bonusShare);
+                        foreach (int memberId in previousMembers)
+                            _festivalRuntime.Engine.CreditFestivalAncientAdena(memberId, each);
+                    }
+                    FestivalBoard.ClearPreviousParticipants(profile.Cabal, profile.TierId);
+                    SendFestivalPage(session, player, npc, profile, 3, "c", false);
+                }
+                else
+                    SendFestivalPage(session, player, npc, profile, 3, "d", false);
                 return (string?)null;
             },
             _ => profile.TierId);
@@ -235,7 +309,7 @@ public sealed partial class ZoneWorld
             .Replace("%npcname%", npc.Name, StringComparison.Ordinal)
             .Replace("%festivalType%", SevenSignsFestivalGuide.FestivalName(profile.TierId), StringComparison.Ordinal)
             .Replace("%festivalMins%", FestivalMinsLine(), StringComparison.Ordinal)
-            .Replace("%cycleMins%", "0", StringComparison.Ordinal)
+            .Replace("%cycleMins%", (_festivalCatalog.CycleLengthMs / 60_000).ToString(), StringComparison.Ordinal)
             .Replace("%blueStoneNeeded%", profile.BlueStones.ToString(), StringComparison.Ordinal)
             .Replace("%greenStoneNeeded%", profile.GreenStones.ToString(), StringComparison.Ordinal)
             .Replace("%redStoneNeeded%", profile.RedStones.ToString(), StringComparison.Ordinal)
@@ -243,8 +317,18 @@ public sealed partial class ZoneWorld
         return html;
     }
 
-    string FestivalMinsLine() =>
-        _sevenSigns.Engine.Period == SevenSignsPeriod.SealValidation
-            ? "<font color=\"FF0000\">This is the Seal Validation period. Festivals will resume next week.</font>"
-            : "<font color=\"FF0000\">The festival is available during the competition period.</font>";
+    string FestivalMinsLine()
+    {
+        if (_sevenSigns.Engine.Period == SevenSignsPeriod.SealValidation)
+            return "<font color=\"FF0000\">This is the Seal Validation period. Festivals will resume next week.</font>";
+        long now = NowUnixMs();
+        if (FestivalBoard.GlobalFestivalActive)
+            return "<font color=\"FF0000\">The festival is in progress.</font>";
+        int mins = FestivalBoard.MinutesToNextFestivalStart(now);
+        if (mins < 0)
+            return "<font color=\"FF0000\">The festival is available during the competition period.</font>";
+        if (FestivalBoard.FestivalSliceActive(now))
+            return "<font color=\"FF0000\">The festival has begun!</font>";
+        return $"<font color=\"FF0000\">The next festival will begin in {mins} minute(s).</font>";
+    }
 }

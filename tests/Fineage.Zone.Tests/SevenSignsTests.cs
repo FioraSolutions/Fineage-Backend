@@ -333,7 +333,7 @@ public sealed class SevenSignsEngineTests
         public SevenSignsEngine? Engine { get; set; }
         public Action<SevenSignsEngine>? OnEnded { get; init; }
 
-        public void OnCompetitionStarted() => Started++;
+        public void OnCompetitionStarted(DateTimeOffset utcNow) => Started++;
 
         public void OnCompetitionEnded(SevenSignsCabal winnerBeforeReward)
         {

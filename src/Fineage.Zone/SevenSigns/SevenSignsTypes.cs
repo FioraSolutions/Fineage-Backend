@@ -40,7 +40,7 @@ public enum SevenSignsStrifeRole
 /// </summary>
 public interface ISevenSignsFestivalHook
 {
-    void OnCompetitionStarted();
+    void OnCompetitionStarted(DateTimeOffset utcNow);
 
     /// <summary>Called with the winner taken before this hook runs, so a score change here can still move seal ownership.</summary>
     void OnCompetitionEnded(SevenSignsCabal winnerBeforeReward);

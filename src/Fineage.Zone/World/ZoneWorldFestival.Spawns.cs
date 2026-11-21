@@ -11,6 +11,12 @@ public sealed partial class ZoneWorld
 
     void ApplyFestivalEffect(SevenSignsFestivalEffect effect)
     {
+        if (effect.Kind == SevenSignsFestivalEffectKind.LaunchRegistration)
+        {
+            LaunchFestivalRegistration(effect.PartyId);
+            return;
+        }
+
         if (FestivalBoard.OfParty(effect.PartyId) is not { } instance)
             return;
         switch (effect.Kind)
@@ -19,19 +25,19 @@ public sealed partial class ZoneWorld
                 SpawnFestivalWitch(instance);
                 break;
             case SevenSignsFestivalEffectKind.SpawnPrimary:
-                SpawnFestivalWave(instance, FestivalMobWave.Primary, skipArchers: false);
+                SpawnFestivalWave(instance, FestivalMobWave.Primary, skipArchers: false, offeringBonus: 1);
                 instance.PrimarySpawned = true;
                 break;
             case SevenSignsFestivalEffectKind.SpawnSecondary:
-                SpawnFestivalWave(instance, FestivalMobWave.Secondary, skipArchers: false);
+                SpawnFestivalWave(instance, FestivalMobWave.Secondary, skipArchers: false, offeringBonus: 1);
                 instance.SecondarySpawned = true;
                 break;
             case SevenSignsFestivalEffectKind.SpawnChests:
-                SpawnFestivalWave(instance, FestivalMobWave.Chest, skipArchers: false);
+                SpawnFestivalWave(instance, FestivalMobWave.Chest, skipArchers: false, offeringBonus: 5);
                 instance.ChestSpawned = true;
                 break;
             case SevenSignsFestivalEffectKind.SpawnChallenge:
-                SpawnFestivalWave(instance, FestivalMobWave.Primary, skipArchers: true);
+                SpawnFestivalWave(instance, FestivalMobWave.Primary, skipArchers: true, offeringBonus: 2);
                 break;
             case SevenSignsFestivalEffectKind.EndInstance:
                 EndFestivalInstance(effect.PartyId, recordScore: true);
@@ -64,7 +70,8 @@ public sealed partial class ZoneWorld
     void SpawnFestivalWave(
         SevenSignsFestivalInstance instance,
         FestivalMobWave wave,
-        bool skipArchers)
+        bool skipArchers,
+        int offeringBonus)
     {
         var templates = NpcCatalog.LoadDefault();
         foreach (var row in _festivalSpawns.Spawns(instance.Cabal, instance.TierId, wave))
@@ -87,6 +94,7 @@ public sealed partial class ZoneWorld
                 continue;
             npc.InstanceId = instance.InstanceId;
             npc.FestivalPartyId = instance.PartyId;
+            npc.FestivalOfferingBonus = Math.Max(1, offeringBonus);
             instance.SpawnedNpcObjectIds.Add(objectId);
             FanoutNewNpc(npc);
         }

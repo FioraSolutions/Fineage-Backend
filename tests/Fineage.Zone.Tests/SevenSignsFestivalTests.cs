@@ -60,9 +60,15 @@ public sealed class SevenSignsFestivalTests : IDisposable
         Assert.True(PlayerZoneChecks.IsInFestivalArena(bench.World, mate.ObjectId));
         Assert.True(leader.Player.InstanceId >= ZoneWorld.FestivalInstanceBase);
 
-        int duskBefore = engine.DuskFestivalScore();
         Assert.Null(await leader.BypassAsync(0, "admin_festival_end"));
         Assert.False(PlayerZoneChecks.IsInFestivalArena(bench.World, leader.ObjectId));
+        Assert.True(festival.Board.IsPreviousLeader(SevenSignsCabal.Dusk, 0, leader.ObjectId));
+
+        Assert.Null(await bench.World.TryGiveItemAsync(leader.Session, catalog.OfferingItemId, 50, default));
+        int duskBefore = engine.DuskFestivalScore();
+        int offerings = leader.Player.Inventory!.CountOf(catalog.OfferingItemId);
+        long offeringScore = offerings * (long)catalog.OfferingValue;
+        Assert.True(festival.TryRecordInstanceScore(SevenSignsCabal.Dusk, 0, offeringScore));
         Assert.Equal(duskBefore + catalog.LevelScores[0], engine.DuskFestivalScore());
     }
 }

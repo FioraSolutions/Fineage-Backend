@@ -35,4 +35,21 @@ public sealed class SevenSignsFestivalParityTests
         Assert.Equal(SevenSignsCabal.Dawn, profile.Cabal);
         Assert.Equal(900, profile.BlueStones);
     }
+
+    [Fact]
+    public void Board_mobius_cycle_windows()
+    {
+        var catalog = SevenSignsFestivalCatalog.LoadDefault();
+        var board = new SevenSignsFestivalBoard(catalog);
+        const long anchor = 1_000_000;
+        board.BeginCompetition(anchor);
+        long signupClose = catalog.SignupCloseMs;
+        Assert.True(board.SignupOpen(anchor));
+        Assert.False(board.FestivalSliceActive(anchor));
+        Assert.True(board.SignupOpen(anchor + signupClose - 1));
+        Assert.False(board.SignupOpen(anchor + signupClose));
+        Assert.True(board.FestivalSliceActive(anchor + signupClose));
+        Assert.True(board.FestivalSliceActive(anchor + signupClose + catalog.FestivalLengthMs - 1));
+        Assert.False(board.FestivalSliceActive(anchor + signupClose + catalog.FestivalLengthMs));
+    }
 }
