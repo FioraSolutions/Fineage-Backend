@@ -703,4 +703,16 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         Emit(nameof(IWorldEventPublisher.FanoutDungeonEntered), () => inner.FanoutDungeonEntered(watcherObjectIdsCopy, entered));
     }
+
+    void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponList), () => inner.FanoutCursedWeaponList(watcherObjectIdsCopy, list));
+    }
+
+    void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponLocation), () => inner.FanoutCursedWeaponLocation(watcherObjectIdsCopy, location));
+    }
 }

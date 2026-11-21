@@ -188,7 +188,7 @@ public sealed partial class ZoneWorld
                 attacker.Kind == ZoneEntityKind.Player && target.Kind == ZoneEntityKind.Player,
                 attacker.Level, target.Level, attacker.Karma, target.Karma,
                 HasBlessing(attacker), HasBlessing(target),
-                HasCursedWeapon(attacker.Inventory), HasCursedWeapon(target.Inventory),
+                WieldsCursedWeapon(attacker), WieldsCursedWeapon(target),
                 badSkill,
                 targetInPvp: target.InstanceId != 0 || Pvp.Contains(target.X, target.Y, target.Z)
                     || InActiveSiegePvp(target.X, target.Y, target.Z)))

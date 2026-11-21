@@ -1,0 +1,27 @@
+{
+  "reference": "Mobius CT0 Interlude data/CursedWeapons.xml",
+  "blades": [
+    {
+      "itemId": 8190,
+      "name": "Demonic Sword Zariche",
+      "skillId": 3603,
+      "transformId": 301,
+      "disappearChance": 50,
+      "dropRate": 1,
+      "durationMinutes": 300,
+      "durationLostMinutes": 3,
+      "stageKills": 10
+    },
+    {
+      "itemId": 8689,
+      "name": "Blood Sword Akamanah",
+      "skillId": 3629,
+      "transformId": 302,
+      "disappearChance": 50,
+      "dropRate": 1,
+      "durationMinutes": 300,
+      "durationLostMinutes": 3,
+      "stageKills": 10
+    }
+  ]
+}

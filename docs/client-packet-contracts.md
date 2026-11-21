@@ -205,8 +205,8 @@ Unity client must decode **trailing** `option1`/`option2` on `0x030A` ItemList a
 
 ## Cursed weapons (Zariche / Akamanah)
 
-**Server feature:** `CursedWeaponsManager`, `data/CursedWeapons.xml`.  
-**Fineage today:** PvP level-20 rules + Olympiad inventory gate; `CursedWeaponsState` + `FINEAGE_ALLOW_CURSED_WEAPONS` (default **off**).
+**Server feature:** `CursedWeaponsManager`, `data/cursed-weapons.json`.  
+**Fineage:** full Mobius cycle (mob drop, pickup/equip, karma/skill stages, timer, death drop/dissolve, `cursed_weapons` persistence). Net opcodes `CursedWeaponList` (`0x03DB`) / `CursedWeaponLocation` (`0x03DC`) — placed after the augmentation block (`0x03CD`–`0x03DA`) so both systems can ship in separate PRs.
 
 ### `ExCursedWeaponList` — S2C `0xFE` `0x45`
 

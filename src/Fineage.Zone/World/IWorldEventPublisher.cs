@@ -319,4 +319,10 @@ interface IWorldEventPublisher
 
     /// <summary>The catacomb/necropolis result, also the validation kick.</summary>
     void FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered);
+
+    /// <summary>Mobius <c>ExCursedWeaponList</c>.</summary>
+    void FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list);
+
+    /// <summary>Mobius <c>ExCursedWeaponLocation</c>.</summary>
+    void FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location);
 }

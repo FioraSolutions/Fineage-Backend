@@ -104,6 +104,7 @@ public sealed partial class ZoneWorld
         move.Commit(LedgerHoldingsOf);
         SaveInventory(looter.Session, looter.Inventory);
         NotifyObtained(looter.Session, itemId, count);
+        OnCursedWeaponGroundPickup(looter, ground);
     }
 
 }

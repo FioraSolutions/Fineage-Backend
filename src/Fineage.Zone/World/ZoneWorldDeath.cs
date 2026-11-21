@@ -142,6 +142,10 @@ public sealed partial class ZoneWorld
         ApplyDeathConsequences(player, killerObjectId);
         // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
         OnDieDropItem(player, killerObjectId);
+        if (killerObjectId > 0 && _byId.TryGetValue(killerObjectId, out var killerEntity))
+            OnCursedOwnerDeath(player, killerEntity);
+        else
+            OnCursedOwnerDeath(player, null);
         // Mobius Player.doDie karma tempfix: a dying PK keeps 3/4 of its karma (under 200 → 0).
         if (player.Karma > 0)
         {

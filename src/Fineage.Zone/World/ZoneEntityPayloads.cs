@@ -147,6 +147,10 @@ sealed class ZonePlayerIdentityPayload
     public int PkKills { get; set; }
     public int PvpKills { get; set; }
     public int Karma { get; set; }
+    public int SavedKarmaBeforeCurse { get; set; }
+    public int SavedPkKillsBeforeCurse { get; set; }
+    /// <summary>Mobius <c>getCursedWeaponEquippedId</c>; 0 when none.</summary>
+    public int CursedWeaponItemId { get; set; }
     public int ClanId { get; set; }
     public bool Newbie { get; set; } = true;
 
@@ -252,6 +256,8 @@ sealed class ZonePlayerSkillsPayload
     /// Rebuilt by <c>RefreshGearSkills</c>; never persisted.
     /// </summary>
     public Dictionary<int, int> GearSkills { get; } = [];
+    /// <summary>Ephemeral Zariche / Akamanah passive while the blade is active (Mobius <c>addSkill(false)</c>).</summary>
+    public Dictionary<int, int> CursedSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }

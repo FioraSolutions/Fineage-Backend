@@ -130,7 +130,7 @@ public sealed partial class ZoneWorld
     SkillListMsg SkillListFor(ZoneEntity entity)
     {
         // Same union as NetEnterWorldProjector.BuildSkills (known + clan + gear).
-        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills);
+        var skills = PlayerPassiveSources.Merge(entity.KnownSkills, entity.ClanSkills, entity.GearSkills, entity.CursedSkills);
         var rows = skills
             .OrderBy(pair => pair.Key)
             .Select(pair => new KnownSkill(pair.Key, pair.Value))

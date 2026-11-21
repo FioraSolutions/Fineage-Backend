@@ -87,6 +87,8 @@ sealed partial class ZoneEntity
     /// </summary>
     public Dictionary<int, int> GearSkills => EnsureSkills().GearSkills;
 
+    public Dictionary<int, int> CursedSkills => EnsureSkills().CursedSkills;
+
     /// <summary>True while an abnormal with combat stat funcs is active (UserInfo refresh on change).</summary>
     public bool HasStatAbnormal
     {

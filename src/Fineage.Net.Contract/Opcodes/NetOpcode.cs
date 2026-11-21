@@ -386,5 +386,9 @@ namespace Fineage.Net.Contract
         public const ushort AugmentPutCancelItemResult = 0x03D9;
         /// <summary>Zone → client: Mobius <c>ExVariationCancelResult</c>.</summary>
         public const ushort AugmentCancelResult = 0x03DA;
+        /// <summary>Zone → client: Mobius ExCursedWeaponList (wire 0xFE 0x45).</summary>
+        public const ushort CursedWeaponList = 0x03DB;
+        /// <summary>Zone → client: Mobius ExCursedWeaponLocation (wire 0xFE 0x46).</summary>
+        public const ushort CursedWeaponLocation = 0x03DC;
     }
 }

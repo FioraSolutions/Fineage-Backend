@@ -202,4 +202,36 @@ sealed partial class NetWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.DungeonEntered, payload);
     }
 
+    void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list)
+    {
+        var payload = NetCodec.EncodeCursedWeaponList(new CursedWeaponListNetMsg
+        {
+            ItemIds = list.ItemIds ?? []
+        });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.CursedWeaponList, payload);
+    }
+
+    void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location)
+    {
+        var rows = location.Rows ?? [];
+        var netRows = new CursedWeaponLocationRowNet[rows.Length];
+        for (int i = 0; i < rows.Length; i++)
+        {
+            var row = rows[i];
+            netRows[i] = new CursedWeaponLocationRowNet
+            {
+                ItemId = row.ItemId,
+                Activated = row.Activated,
+                X = row.X,
+                Y = row.Y,
+                Z = row.Z
+            };
+        }
+
+        var payload = NetCodec.EncodeCursedWeaponLocation(new CursedWeaponLocationNetMsg { Rows = netRows });
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.CursedWeaponLocation, payload);
+    }
+
 }
