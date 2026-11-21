@@ -121,12 +121,11 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Mobius <c>EtcStatusUpdate</c> body (<c>EtcStatusUpdate.java:32-45</c>). Fields this server does not model yet
-    /// (force charges, chat ban, danger area, charm of courage, death penalty) go out as 0, exactly like a clean
-    /// character in Mobius.
+    /// (chat ban, danger area, charm of courage) go out as 0 when unmodeled; force charges follow Sonic Focus stacks.
     /// </summary>
     internal static Fineage.Protocol.EtcStatusUpdateMsg EtcStatusOf(ZoneEntity player) => new()
     {
-        Charges = 0,
+        Charges = player.ForceCharges,
         WeightPenalty = player.WeightPenaltyLevel,
         ChatBlocked = false,
         DangerArea = false,

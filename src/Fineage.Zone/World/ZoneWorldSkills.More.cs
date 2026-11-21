@@ -211,6 +211,13 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        int chargeCost = SkillCastConditionCharges.Required(liveTemplate.CastCondition);
+        if (chargeCost > 0)
+            SpendForceCharges(player, chargeCost);
+
+        if (_skillEffects.TryGet(request.SkillId, out var focusFx) && HasFocusEnergy(focusFx))
+            return TrySkillUseFocusEnergy(session, player, request, liveTemplate, liveLevelData, level, now);
+
         // Mobius operateType T: the second press switches the toggle off, otherwise it applies its own abnormal.
         // This branch comes BEFORE the fake-death refuse, mirroring Player.checkUseMagicConditions
         // ("Note: do not check this before TOGGLE reset"): a fake-dead pawn can switch Fake Death (60) off with a

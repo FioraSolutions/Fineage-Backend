@@ -264,6 +264,8 @@ sealed class ZonePlayerStatusPayload
     public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
+    public int ForceCharges { get; set; }
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius henna dye ids in the three tattoo slots (0 = empty).</summary>
     public int HennaDye1 { get; set; }
