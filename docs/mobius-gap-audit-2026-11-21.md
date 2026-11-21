@@ -321,7 +321,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
-| 2 | Quest coverage | (PR pending) | in progress | No |
+| 2 | Quest coverage | [cursor/quest-missing-rank2-f138](https://github.com/FioraSolutions/Fineage-Backend/tree/cursor/quest-missing-rank2-f138) | in progress | No |
 | 3 | Item augmentation | — | pending | Yes (refine UI) |
 | 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | — | pending | No |
