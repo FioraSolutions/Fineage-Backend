@@ -1,0 +1,2639 @@
+{
+  "id": 385,
+  "name": "Yoke of the Past",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    5902
+  ],
+  "dialogs": [
+    {
+      "npcId": 31095,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31095-talk-000.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31095-talk-001.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31095-event-05-002.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31095-talk-003.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31095-talk-004.htm"
+    },
+    {
+      "npcId": 31095,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31095-event-10-005.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31096-talk-006.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31096-talk-007.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31096-event-05-008.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31096-talk-009.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31096-talk-010.htm"
+    },
+    {
+      "npcId": 31096,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31096-event-10-011.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31097-talk-012.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31097-talk-013.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31097-event-05-014.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31097-talk-015.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31097-talk-016.htm"
+    },
+    {
+      "npcId": 31097,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31097-event-10-017.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31098-talk-018.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31098-talk-019.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31098-event-05-020.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31098-talk-021.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31098-talk-022.htm"
+    },
+    {
+      "npcId": 31098,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31098-event-10-023.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31099-talk-024.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31099-talk-025.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31099-event-05-026.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31099-talk-027.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31099-talk-028.htm"
+    },
+    {
+      "npcId": 31099,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31099-event-10-029.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31100-talk-030.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31100-talk-031.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31100-event-05-032.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31100-talk-033.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31100-talk-034.htm"
+    },
+    {
+      "npcId": 31100,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31100-event-10-035.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31101-talk-036.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31101-talk-037.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31101-event-05-038.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31101-talk-039.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31101-talk-040.htm"
+    },
+    {
+      "npcId": 31101,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31101-event-10-041.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31102-talk-042.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31102-talk-043.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31102-event-05-044.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31102-talk-045.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31102-talk-046.htm"
+    },
+    {
+      "npcId": 31102,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31102-event-10-047.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31103-talk-048.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31103-talk-049.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31103-event-05-050.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31103-talk-051.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31103-talk-052.htm"
+    },
+    {
+      "npcId": 31103,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31103-event-10-053.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31104-talk-054.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31104-talk-055.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31104-event-05-056.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31104-talk-057.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31104-talk-058.htm"
+    },
+    {
+      "npcId": 31104,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31104-event-10-059.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31105-talk-060.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31105-talk-061.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31105-event-05-062.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31105-talk-063.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31105-talk-064.htm"
+    },
+    {
+      "npcId": 31105,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31105-event-10-065.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31106-talk-066.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31106-talk-067.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31106-event-05-068.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31106-talk-069.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31106-talk-070.htm"
+    },
+    {
+      "npcId": 31106,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31106-event-10-071.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31107-talk-072.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31107-talk-073.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31107-event-05-074.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31107-talk-075.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31107-talk-076.htm"
+    },
+    {
+      "npcId": 31107,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31107-event-10-077.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31108-talk-078.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31108-talk-079.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31108-event-05-080.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31108-talk-081.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31108-talk-082.htm"
+    },
+    {
+      "npcId": 31108,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31108-event-10-083.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31109-talk-084.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31109-talk-085.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31109-event-05-086.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31109-talk-087.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31109-talk-088.htm"
+    },
+    {
+      "npcId": 31109,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31109-event-10-089.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31110-talk-090.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31110-talk-091.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31110-event-05-092.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31110-talk-093.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31110-talk-094.htm"
+    },
+    {
+      "npcId": 31110,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31110-event-10-095.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31114-talk-096.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31114-talk-097.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31114-event-05-098.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31114-talk-099.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31114-talk-100.htm"
+    },
+    {
+      "npcId": 31114,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31114-event-10-101.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31115-talk-102.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31115-talk-103.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31115-event-05-104.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31115-talk-105.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31115-talk-106.htm"
+    },
+    {
+      "npcId": 31115,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31115-event-10-107.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31116-talk-108.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31116-talk-109.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31116-event-05-110.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31116-talk-111.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31116-talk-112.htm"
+    },
+    {
+      "npcId": 31116,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31116-event-10-113.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31117-talk-114.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31117-talk-115.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31117-event-05-116.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31117-talk-117.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31117-talk-118.htm"
+    },
+    {
+      "npcId": 31117,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31117-event-10-119.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31118-talk-120.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31118-talk-121.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31118-event-05-122.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31118-talk-123.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31118-talk-124.htm"
+    },
+    {
+      "npcId": 31118,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31118-event-10-125.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31119-talk-126.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31119-talk-127.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31119-event-05-128.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31119-talk-129.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31119-talk-130.htm"
+    },
+    {
+      "npcId": 31119,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31119-event-10-131.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31120-talk-132.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31120-talk-133.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31120-event-05-134.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31120-talk-135.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31120-talk-136.htm"
+    },
+    {
+      "npcId": 31120,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31120-event-10-137.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31121-talk-138.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31121-talk-139.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31121-event-05-140.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31121-talk-141.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31121-talk-142.htm"
+    },
+    {
+      "npcId": 31121,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31121-event-10-143.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31122-talk-144.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31122-talk-145.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31122-event-05-146.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31122-talk-147.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31122-talk-148.htm"
+    },
+    {
+      "npcId": 31122,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31122-event-10-149.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31123-talk-150.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31123-talk-151.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31123-event-05-152.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31123-talk-153.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31123-talk-154.htm"
+    },
+    {
+      "npcId": 31123,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31123-event-10-155.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31124-talk-156.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31124-talk-157.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31124-event-05-158.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31124-talk-159.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31124-talk-160.htm"
+    },
+    {
+      "npcId": 31124,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31124-event-10-161.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31125-talk-162.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31125-talk-163.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31125-event-05-164.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31125-talk-165.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31125-talk-166.htm"
+    },
+    {
+      "npcId": 31125,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31125-event-10-167.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 19,
+      "htmlFile": "31126-talk-168.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 20,
+      "htmlFile": "31126-talk-169.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "absent",
+      "event": "05",
+      "minLevel": 20,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        }
+      ],
+      "htmlFile": "31126-event-05-170.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "started",
+      "lacksItems": [
+        5902
+      ],
+      "htmlFile": "31126-talk-171.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "talk",
+      "when": "started",
+      "hasAny": [
+        5902
+      ],
+      "ops": [
+        {
+          "op": "exchange_all",
+          "itemId": 5902,
+          "rewardItemId": 5965,
+          "per": 1
+        }
+      ],
+      "htmlFile": "31126-talk-172.htm"
+    },
+    {
+      "npcId": 31126,
+      "hook": "event",
+      "when": "started",
+      "event": "10",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31126-event-10-173.htm"
+    },
+    {
+      "npcId": 21208,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.07,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21209,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.08,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21210,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.11,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21211,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.11,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21213,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.14,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21214,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.19,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21215,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.19,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21217,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.24,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21218,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21219,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21221,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.37,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21222,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.46,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21223,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.45,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21224,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21225,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.54,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21226,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.66,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21227,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.64,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21228,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.7,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21229,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21230,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.91,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21231,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.86,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21236,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.12,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21237,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.14,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21238,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.19,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21239,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.19,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21240,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.22,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21241,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.24,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21242,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21243,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.3,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21244,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.34,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21245,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.37,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21246,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.46,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21247,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.45,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21248,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21249,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.54,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21250,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.66,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21251,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.64,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21252,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.7,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21253,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.75,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21254,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.91,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21255,
+      "hook": "kill",
+      "when": "started",
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5902,
+          "count": 1,
+          "chance": 0.86,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

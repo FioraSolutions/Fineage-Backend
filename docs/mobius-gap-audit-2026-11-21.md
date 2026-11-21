@@ -271,6 +271,8 @@ Documented in `docs/net-protocol.md`. Residual gaps: `MagicSkillCanceled`, full 
 
 Fineage-only: Q256, Q998.
 
+Rank-2 quest batch (PR 1): Q385, Q426, Q505, Q646 — generator `scripts/gen_quests_rank2_missing.py`. Still blocked on dimensional rift: Q634, Q635; Q255 skipped (Fineage Q998).
+
 ---
 
 ## Data coverage summary
@@ -318,8 +320,8 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
-| 1 | World spawns / hunting grounds | #701 | in progress | No |
-| 2 | Quest coverage | — | pending | No |
+| 1 | World spawns / hunting grounds | #701 | done | No |
+| 2 | Quest coverage | (PR pending) | in progress | No |
 | 3 | Item augmentation | — | pending | Yes (refine UI) |
 | 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | — | pending | No |
