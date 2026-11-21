@@ -327,8 +327,8 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 5 | Auto-loot | #719 | done | No (`FINEAGE_AUTO_LOOT*`) |
 | 6 | Seven Signs Festival | — | blocked | No (instances) |
 | 7 | Dimensional rift | — | blocked | No (unblocks Q634/635) |
-| 8 | Siege mercenaries | PR pending | in_progress | No |
-| 9 | Siege golem (noble) | PR pending | in_progress | No |
+| 8 | Siege mercenaries | #722 | done | No |
+| 9 | Siege golem (noble) | #722 | done | No |
 | 10 | Skill enchant (+skills) | — | blocked | Yes (ExEnchantSkill) |
 | 11 | Day/night spawns | #721 | done — periodOfDay + IG transition | No |
 | 12 | Clan hall siege | — | pending | No |
