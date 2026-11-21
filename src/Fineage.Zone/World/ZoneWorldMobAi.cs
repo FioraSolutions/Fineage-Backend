@@ -133,6 +133,11 @@ public sealed partial class ZoneWorld
         if (TryExplodeTreasureBox(player, target, now))
             return;
         DuelNoteOutsideHit(player, target);
+        bool magicSkill = hit.Combat is { Kind: SkillDamageKind.Magical }
+                          || (hit.Combat != null && _game.Skills.Find(hit.Combat.SkillId) is { MagicType: 1 });
+        if (TryApplyRaidCurse(target, player, magicSkill, now))
+            return;
+
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
         if (hit.Combat != null && damage > 0)

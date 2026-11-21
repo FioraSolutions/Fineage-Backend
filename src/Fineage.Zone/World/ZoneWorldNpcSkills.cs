@@ -248,13 +248,13 @@ public sealed partial class ZoneWorld
     internal static readonly HashSet<string> ImmobilizeSlots = new(StringComparer.OrdinalIgnoreCase)
     {
         // HOLD = Interlude Anchor / Aerial Yoke family when datapack uses that slot name.
-        "SLEEP", "ROOT_MAGICALLY", "ROOT_PHYSICALLY", "STUN", "PARALYZE", "HOLD"
+        "SLEEP", "ROOT_MAGICALLY", "ROOT_PHYSICALLY", "STUN", "PARALYZE", "HOLD", "TURN_STONE"
     };
 
     /// <summary>Slots that also block skill use (root still allows casting).</summary>
     internal static readonly HashSet<string> ActionBlockSlots = new(StringComparer.OrdinalIgnoreCase)
     {
-        "SLEEP", "STUN", "PARALYZE", "HOLD"
+        "SLEEP", "STUN", "PARALYZE", "HOLD", "TURN_STONE"
     };
 
     internal static readonly HashSet<string> SilenceSlots = new(StringComparer.OrdinalIgnoreCase)
