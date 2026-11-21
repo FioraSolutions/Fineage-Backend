@@ -214,7 +214,7 @@ Data: `data/castles.json` (written by `tools/import_castles.py` from Mobius Sieg
 | `DuelUserInfo` `0x03C3` (S → C) | `string name, int32 objectId, classId, level, hp, maxHp, mp, maxMp, cp, maxCp` (Mobius ExDuelUpdateUserInfo): an opponent's bars, to the other side only, on duel start and each HP / MP change. CP = max CP (no CP pool yet). |
 | `Ride` `0x03C4` (S → watchers) | `int32 objectId, int32 action` (0 dismount / 1 mount), `byte mountKind` (0 none, 1 strider, 2 wyvern), `int32 rideNpcId` (Mobius template id + 1_000_000 on mount, 0 on dismount). Fanout on action 38 mount/dismount and wyvern manager rent. Client draws the mount model; speeds follow `UserInfo` / `MoveState` run/walk. |
 | `PlayerActionState` `0x03C5` (S → owner) | `bool petOut, bool mountablePet, bool mounted, bool canRide, byte mountKind, int32 petControlObjectId`. Sent on enter world, pet spawn/dismiss, mount/dismount, and when gates change (peace/siege/combat/fed). Client uses `mountablePet` + `SummonInfo.mountable` for pet panel actions and `canRide`/`mounted` for Interlude action 38 (Ride). |
-| `EntityDie` tail | optional **`byte restartFlags`**: bit0 castle, bit1 siege HQ (absent ⇒ 0). `ReviveRequest` action 3 = to castle, 4 = to siege HQ (`revive_no_castle` / `revive_no_hq`). |
+| `EntityDie` tail | optional **`byte restartFlags`**: bit0 castle, bit1 siege HQ, bit2 clan hall (absent ⇒ 0). `ReviveRequest` action 3 = castle, 4 = siege HQ, 5 = clan hall (`revive_no_castle` / `revive_no_hq` / `revive_no_clanhall`). |
 
 | Rule | Behaviour |
 |------|-----------|

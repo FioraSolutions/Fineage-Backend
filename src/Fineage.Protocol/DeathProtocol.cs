@@ -29,12 +29,17 @@ public static class DeathProtocol
     /// <summary>Mobius <c>RequestRestartPoint</c> case 3 (siege HQ): attacker clan with a standing headquarters.</summary>
     public const int ReviveToSiegeHq = 4;
 
+    /// <summary>Mobius <c>RequestRestartPoint</c> case 1 (clan hall): owner clan's hideout restart.</summary>
+    public const int ReviveToClanHall = 5;
+
     /// <summary>Die restart bits for the dead player (Mobius <c>Die</c> canTeleport flags).</summary>
     public const int RestartCastle = 1;
     public const int RestartSiegeHq = 2;
+    public const int RestartClanHall = 4;
 
     public const string NoCastle = "revive_no_castle";
     public const string NoHeadquarters = "revive_no_hq";
+    public const string NoClanHall = "revive_no_clanhall";
 
     public const string NotDead = "revive_not_dead";
     public const string AlreadyDead = "death_already";

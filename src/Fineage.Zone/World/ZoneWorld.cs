@@ -73,6 +73,8 @@ public sealed partial class ZoneWorld
     readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
+    /// <summary>Mobius clan hall owner restart points (<c>data/clan-hall-spawns.json</c>).</summary>
+    readonly Fineage.Game.Services.ClanHallSpawnCatalog _clanHallSpawns;
     readonly int _teleportOffset;
     readonly IRegionRandom _serviceRandom;
     /// <summary>Hit/miss, crit and damage spread rolls (Mobius Rnd in Formulas).</summary>
@@ -200,6 +202,7 @@ public sealed partial class ZoneWorld
         bool? npcRegen = null,
         Fineage.Game.Services.ItemSkillCatalog? itemSkills = null,
         Fineage.Game.Services.MapRegionCatalog? mapRegions = null,
+        Fineage.Game.Services.ClanHallSpawnCatalog? clanHallSpawns = null,
         ZoneGameTime? gameTime = null,
         HennaCatalog? henna = null,
         ArmorSetCatalog? armorSets = null,
@@ -306,6 +309,7 @@ public sealed partial class ZoneWorld
         RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
+        _clanHallSpawns = clanHallSpawns ?? Fineage.Game.Services.ClanHallSpawnCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
         if (geo == null)
         {

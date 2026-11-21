@@ -1,5 +1,5 @@
 {
-  "reference": "L2J Mobius CT0 Interlude: stats/items handler ItemSkills + item_skill, resolved against stats/skills (including skills/custom). Effects are flattened to what the zone executes: buff, healOverTime, heal, manaHeal, escapeTown, teleport, dispel, restoration, recovery. Mobius UseItem consumes one item on success.",
+  "reference": "L2J Mobius CT0 Interlude: stats/items handler ItemSkills + item_skill, resolved against stats/skills (including skills/custom). Effects are flattened to what the zone executes: buff, healOverTime, heal, manaHeal, escapeTown, escapeClanHall, teleport, dispel, restoration, recovery. Mobius UseItem consumes one item on success.",
   "items": [
     {
       "itemId": 728,
@@ -90,6 +90,34 @@
           "skillId": 2036,
           "skillLevel": 1,
           "name": "Blessed Scroll of Escape"
+        }
+      ]
+    },
+    {
+      "itemId": 1829,
+      "name": "Scroll of Escape: Clan Hall",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "escapeClanHall",
+          "skillId": 2040,
+          "skillLevel": 1,
+          "name": "Scroll of Escape: Clan Hall"
+        }
+      ]
+    },
+    {
+      "itemId": 5858,
+      "name": "Blessed Scroll of Escape: Clan Hall",
+      "etcType": "SCROLL",
+      "reuseDelayMs": 0,
+      "effects": [
+        {
+          "kind": "escapeClanHall",
+          "skillId": 2177,
+          "skillLevel": 1,
+          "name": "Blessed Scroll of Escape: Clan Hall"
         }
       ]
     },

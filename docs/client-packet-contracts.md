@@ -252,6 +252,20 @@ On success Mobius updates skill level in DB and rebroadcasts `SkillList` / short
 
 ---
 
+## Clan hall escape and death restart
+
+**Data:** `data/clan-hall-spawns.json` — Mobius `zones/clan_hall.xml` owner_restart (+ optional chaotic). Consumables **1829** / **5858** (`escapeClanHall`, skills **2040** / **2177**).
+
+| Direction | Opcode / message | Field additions |
+|-----------|------------------|-----------------|
+| C→S | `ReviveRequest` `0x031E` | `action = 5` (`DeathProtocol.ReviveToClanHall`) — restart inside owned clan hall |
+| S→C | `EntityDie` | Optional tail `restartFlags` **bit2** (`4`) = clan hall button when `clan.hideoutId > 0` |
+| S→C | `TeleportToLocation` | Same as village restart after `Revive` when action 5 succeeds |
+
+Errors: `revive_no_clanhall`, `escape_no_clan_hall` (scroll use without hideout).
+
+---
+
 ## Implementation queue (audit)
 
 | Order | Item | Server PR target | Client packets |
