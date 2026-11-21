@@ -426,6 +426,12 @@ beside them with `LedgerMove`:
 Shop buy, sell and multisell (`ZoneWorldLedger.cs`) post against the `NpcShop` system account. Castle tax goes from
 the shop to each treasury in the amount it actually received (the overlord's cut, the treasury cap).
 
+A confirmed trade (step 11b) is one `TradeSettle` between the two bags: `CausedBy` is the requestor, `Reference` the
+partner. A traded piece keeps its object id, so the ledger follows it from one owner to the next. An empty trade,
+and one refused for weight or bag slots, records nothing. Offered items stay in the giver's bag until both confirm,
+so a hold would contradict the state; holds in trade escrow come with trades between hosts, where settling takes
+more than one step.
+
 ---
 
 ## 4. Determinism
@@ -457,7 +463,7 @@ the shop to each treasury in the amount it actually received (the overlord's cut
    `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
    pins the generator to reference values. `GlobalActorTests` replays a boss kill, its seeded respawn window and the
    respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
-   commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included.
+   commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
 
 ---
 
@@ -508,7 +514,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
 | **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
 | **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |
-| 11b | Trade between players, with holds in trade escrow (`HoldAsync` / `CommitAsync` / `ReleaseAsync`). | Same outcomes. |
+| **11b (done)** | Trade between players as one `TradeSettle`; holds in trade escrow wait for trades between hosts. | Same outcomes, except that a traded non-stackable piece keeps its object id instead of getting a new one. A trade whose postings disagree with the bags fails the confirmation. |
 | 11c | Pickup and drop through the ground account. | Same outcomes. |
 | 11d | Warehouse and clan warehouse deposits and withdrawals. | Same outcomes. |
 | 11e | Private store sales through store escrow. | Same outcomes. |

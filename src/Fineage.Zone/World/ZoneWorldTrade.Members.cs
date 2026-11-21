@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Trade;
@@ -61,6 +62,15 @@ public sealed partial class ZoneWorld
         NotifyLine(partner.ObjectId, id, text);
     }
 
+    /// <summary>One offer row on the trade's settlement: the giver's pieces move to the receiver by instance id.</summary>
+    void PostTradeRow(LedgerMove move, ZoneEntity giver, ZoneEntity receiver, TradeOfferRow row)
+    {
+        var item = giver.Inventory!.Find(row.InventoryObjectId)!;
+        IReadOnlyList<int> pieces = item.Template.Stackable ? [] : [item.ObjectId];
+        move.Post(LedgerAccount.Inventory(giver.ObjectId), item.ItemId, -row.Count, pieces);
+        move.Post(LedgerAccount.Inventory(receiver.ObjectId), item.ItemId, row.Count, pieces);
+    }
+
     static void TransferOfferRow(
         PlayerInventory from,
         PlayerInventory to,
@@ -83,7 +93,10 @@ public sealed partial class ZoneWorld
         else
             fromChanges.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, item));
 
-        var received = to.Add(itemId, (int)row.Count, enchant);
+        // Mobius TradeList.doExchange hands over the piece itself, so it keeps its object id in the new bag.
+        var received = stackable
+            ? to.Add(itemId, (int)row.Count)
+            : to.AddRestored(item.ObjectId, itemId, 1, enchant);
         int change = !stackable || before == 0 ? InventoryChange.Add : InventoryChange.Modify;
         toChanges.Add(InventoryMessages.ChangeRow(change, received));
     }

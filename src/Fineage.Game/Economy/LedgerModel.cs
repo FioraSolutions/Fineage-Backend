@@ -59,7 +59,8 @@ public enum LedgerTxKind
     Adjustment = 1,
     ShopBuy = 2,
     ShopSell = 3,
-    ShopExchange = 4
+    ShopExchange = 4,
+    TradeSettle = 5
 }
 
 /// <summary>
@@ -90,8 +91,9 @@ public sealed record LedgerPosting(LedgerAccount Account, int ItemId, long Amoun
 }
 
 /// <summary>
-/// A move between owners. <see cref="CausedBy"/> is the character that caused it (0 for none); <see cref="Reference"/>
-/// names what it went through: the NPC template for shop moves, 0 for adjustments.
+/// A move between owners. <see cref="CausedBy"/> is the character that caused it (0 for none; a trade's requestor);
+/// <see cref="Reference"/> names what it went through: the NPC template for shop moves, the partner for trades, 0 for
+/// adjustments.
 /// </summary>
 public sealed record LedgerTransaction(
     LedgerTxId Id,

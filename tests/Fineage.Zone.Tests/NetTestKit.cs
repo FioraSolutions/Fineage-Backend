@@ -54,6 +54,8 @@ internal sealed class NetTestKit
     public MemoryAccountStore Store { get; }
     public GameData Game { get; } = TestCatalogs.Game;
     public ZoneWorld World { get; }
+
+    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; } = new();
     public DateTimeOffset Now { get; set; } = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000);
     int _n;
 
@@ -91,7 +93,7 @@ internal sealed class NetTestKit
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
             simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: regionExecutor,
-            bosses: bosses);
+            bosses: bosses, ledgerJournal: Ledger);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>
