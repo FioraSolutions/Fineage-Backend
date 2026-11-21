@@ -1,0 +1,5 @@
+name: bots-500-siege
+botCount: 500
+rampUpSeconds: 60
+durationSeconds: 120
+spawnLayout: siege

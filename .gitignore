@@ -62,6 +62,7 @@ TestResults/
 # Local run artifacts
 local-data/
 local-logs/
+.cache/
 publish/
 !data/spoil.json
 !data/herbs.json

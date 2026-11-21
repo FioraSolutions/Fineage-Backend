@@ -94,7 +94,14 @@ public sealed partial class NetLoginServer
         var auth = NetCodec.DecodeAuth(envelope.Payload);
         LoginResult<string> result;
         if (auth.RegisterIfMissing && !_service.AccountExists(auth.Account))
-            result = _service.Register(auth.Account, auth.Password);
+        {
+            if (!LoginLoadTestSettings.AllowsRegisterIfMissing(auth.Account, auth.Password, registerIfMissing: true))
+            {
+                result = LoginResult<string>.Fail("register_denied", "Auto-registration is not enabled for this account.");
+            }
+            else
+                result = _service.Register(auth.Account, auth.Password);
+        }
         else
             result = _service.Login(auth.Account, auth.Password);
 

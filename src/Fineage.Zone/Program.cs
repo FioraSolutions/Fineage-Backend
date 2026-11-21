@@ -85,6 +85,7 @@ var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSig
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
+FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;
 int outboundQueue = ZoneNetSettings.OutboundQueue;

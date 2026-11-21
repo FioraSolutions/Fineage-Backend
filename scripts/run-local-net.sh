@@ -4,6 +4,10 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+if [[ -z "${DOTNET_ROOT:-}" && -d "${HOME}/.dotnet" ]]; then
+  export DOTNET_ROOT="${HOME}/.dotnet"
+  export PATH="${DOTNET_ROOT}:${PATH}"
+fi
 mkdir -p local-logs local-data
 CMD="${1:-start}"
 

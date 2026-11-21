@@ -13,6 +13,7 @@ public sealed class MetricsCollector : IDisposable
     long _ticksSkipped;
     long _regionHandoffs;
     int _online;
+    int _commandIngressQueued;
 
     public MetricsCollector()
     {
@@ -43,6 +44,7 @@ public sealed class MetricsCollector : IDisposable
             return new MetricsSnapshot
             {
                 PlayersOnline = _online,
+                CommandIngressQueued = _commandIngressQueued,
                 Tick = _tick.Freeze(),
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
@@ -112,10 +114,20 @@ public sealed class MetricsCollector : IDisposable
 
     void OnInt(Instrument instrument, int value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (!IsOurs(instrument) || instrument.Name != "fineage.zone.online")
+        if (!IsOurs(instrument))
             return;
         lock (_gate)
-            _online = value;
+        {
+            switch (instrument.Name)
+            {
+                case "fineage.zone.online":
+                    _online = value;
+                    break;
+                case "fineage.command.ingress.queued":
+                    _commandIngressQueued = value;
+                    break;
+            }
+        }
     }
 
     void OnDouble(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)

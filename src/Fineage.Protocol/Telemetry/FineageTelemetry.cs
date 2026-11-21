@@ -109,10 +109,21 @@ public static class FineageTelemetry
         ObserveOnline,
         description: "Players currently in a zone simulation");
 
+    public static readonly ObservableGauge<int> CommandIngressQueued = Meter.CreateObservableGauge(
+        "fineage.command.ingress.queued",
+        ObserveCommandIngressQueued,
+        description: "Player commands waiting for the next simulation drain");
+
     public static Func<int>? OnlineCount { get; set; }
+    public static Func<int>? CommandIngressDepth { get; set; }
 
     static IEnumerable<Measurement<int>> ObserveOnline()
     {
         yield return new Measurement<int>(OnlineCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<int>> ObserveCommandIngressQueued()
+    {
+        yield return new Measurement<int>(CommandIngressDepth?.Invoke() ?? 0);
     }
 }

@@ -49,6 +49,7 @@ public sealed class StageMetrics
 public sealed class MetricsSnapshot
 {
     public int PlayersOnline { get; init; }
+    public int CommandIngressQueued { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
@@ -166,6 +167,9 @@ public static class MetricsText
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");
         sb.Append("fineage_zone_online ").Append(snapshot.PlayersOnline.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_command_ingress_queued", "Player commands waiting for the next simulation drain");
+        sb.Append("# TYPE fineage_command_ingress_queued gauge\n");
+        sb.Append("fineage_command_ingress_queued ").Append(snapshot.CommandIngressQueued.ToString(CultureInfo.InvariantCulture)).Append('\n');
         return sb.ToString();
     }
 
