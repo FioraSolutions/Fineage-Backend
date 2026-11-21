@@ -506,12 +506,16 @@ public sealed partial class ZoneWorld
             BasicProperty = action.BasicProperty.Equals("NONE", StringComparison.OrdinalIgnoreCase) ? "" : action.BasicProperty,
             Trait = action.Trait,
             LvlBonusRate = action.LvlBonusRate,
-            // Mobius calcCubicSkillSuccess has no M.Atk / M.Def term ("TODO: Pending").
-            MagicType = 0
+            // Fineage: fold owner M.Atk into calcEffectSuccess (Mobius Interlude still TODO on cubics).
+            MagicType = 1
         };
         _cubicActionSkills[action.SkillId] = def;
         return def;
     }
+
+    /// <summary>Test hook: offensive cubic actions participate in M.Atk debuff land rolls.</summary>
+    internal bool CubicActionUsesMagicAtkForTests(int skillId) =>
+        Cubics.Action(skillId) is { } action && CubicActionSkill(action).MagicType == 1;
 
     /// <summary>
     /// Mobius <c>CubicHeal.run</c>: the most hurt (by HP %) living party member or party summon within 900, or the
