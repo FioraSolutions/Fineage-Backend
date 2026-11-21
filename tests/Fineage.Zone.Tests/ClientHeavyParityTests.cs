@@ -13,8 +13,10 @@ public sealed class ClientHeavyParityTests
     {
         using var _ = EnvScope.Unset(ClientHeavyFeatures.SkillEnchantVariable);
         Assert.False(ClientHeavyFeatures.SkillEnchantEnabled);
+        var augment = AugmentationCatalog.LoadDefault();
+        AugmentationRules.BindCatalog(augment);
+        Assert.True(augment.IsLoaded, "data/augmentation/*.json must load in test host");
         Assert.True(AugmentationRules.CanRefine);
-        Assert.Equal(AugmentationCatalog.LoadDefault().IsLoaded, AugmentationRules.CanRefine);
         Assert.False(SkillEnchantRules.CanEnchant(1, 2));
     }
 
