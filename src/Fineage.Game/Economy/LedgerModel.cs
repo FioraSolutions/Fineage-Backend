@@ -10,7 +10,9 @@ public enum LedgerOwnerKind : byte
     World = 3,
 
     /// <summary>A pet, by the object id of its control item, which outlives every summoning.</summary>
-    Pet = 4
+    Pet = 4,
+
+    Clan = 5
 }
 
 public enum LedgerContainer : byte
@@ -20,7 +22,13 @@ public enum LedgerContainer : byte
     Treasury = 2,
 
     /// <summary>One stack on the ground, by its object id.</summary>
-    Ground = 3
+    Ground = 3,
+
+    /// <summary>
+    /// A private or clan warehouse. Warehouse stacks have no durable piece id yet, so the ledger holds them as a
+    /// count per item: a piece deposited leaves its instance id behind and a piece withdrawn gets a new one.
+    /// </summary>
+    Warehouse = 4
 }
 
 /// <summary>Sources and sinks. Their balances may go negative: a negative balance is what they minted.</summary>
@@ -38,7 +46,10 @@ public enum SystemAccount
     DropSource = 3,
 
     /// <summary>Items destroyed from a bag, ground stacks that expired, herbs used on pickup, party adena remainders.</summary>
-    Destroyed = 4
+    Destroyed = 4,
+
+    /// <summary>Service fees paid to NPCs: the warehouse deposit fee.</summary>
+    Fees = 5
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -58,6 +69,12 @@ public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, 
 
     public static LedgerAccount Pet(int controlObjectId) =>
         new(LedgerOwnerKind.Pet, controlObjectId, LedgerContainer.Inventory);
+
+    public static LedgerAccount Warehouse(int characterId) =>
+        new(LedgerOwnerKind.Character, characterId, LedgerContainer.Warehouse);
+
+    public static LedgerAccount ClanWarehouse(int clanId) =>
+        new(LedgerOwnerKind.Clan, clanId, LedgerContainer.Warehouse);
 
     public bool IsSystem => Owner == LedgerOwnerKind.System;
 
@@ -99,7 +116,13 @@ public enum LedgerTxKind
     Destroy = 10,
 
     /// <summary>A ground stack expires: <c>Reference</c> is the stack's object id.</summary>
-    Expire = 11
+    Expire = 11,
+
+    /// <summary>Bag into a private or clan warehouse, fee included: <c>Reference</c> is the warehouse keeper's npc id.</summary>
+    WarehouseDeposit = 12,
+
+    /// <summary>Private or clan warehouse into the bag: <c>Reference</c> is the warehouse keeper's npc id.</summary>
+    WarehouseWithdraw = 13
 }
 
 /// <summary>

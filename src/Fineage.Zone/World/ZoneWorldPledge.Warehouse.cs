@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
@@ -30,6 +31,12 @@ public sealed partial class ZoneWorld
         var clan = ClanOf(player.ObjectId);
         return clan == null ? null : ClanWarehouseOf(clan);
     }
+
+    /// <summary>The ledger account of the warehouse the open window points at.</summary>
+    LedgerAccount ActiveWarehouseAccount(ZoneEntity player) => player.ClanWarehouseOpen
+        ? LedgerAccount.ClanWarehouse(ClanOf(player.ObjectId)?.Id
+            ?? throw new InvalidOperationException($"player {player.ObjectId} has a clan warehouse open without a clan"))
+        : LedgerAccount.Warehouse(player.ObjectId);
 
     int ActiveWarehouseSlots(ZoneEntity player) =>
         player.ClanWarehouseOpen ? PledgeProtocol.ClanWarehouseSlots : WarehouseRules.WarehouseSlots(player.Race);
@@ -112,6 +119,13 @@ public sealed partial class ZoneWorld
         else
             SendWithdrawList(session, player, npc);
         return null;
+    }
+
+    /// <summary>Test hook: the clan warehouse's stack object ids.</summary>
+    internal List<int> ClanWarehouseStacksForTest(int clanId)
+    {
+        lock (_gate)
+            return _clan.TryGet(clanId, out var clan) ? ClanWarehouseOf(clan)!.Items.Select(i => i.ObjectId).ToList() : [];
     }
 
     /// <summary>Test hook: the clan warehouse rows (item id → count).</summary>

@@ -1,3 +1,4 @@
+using Fineage.Game.Services;
 using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Shops;
@@ -48,6 +49,14 @@ public sealed partial class ZoneWorld
             _byId.TryGetValue(account.OwnerId, out var ground) && ground.Kind == ZoneEntityKind.GroundItem
                 ? GroundHoldingsOf(ground)
                 : new LedgerHoldings(),
+        { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Warehouse } =>
+            HoldingsOf(_byId.TryGetValue(account.OwnerId, out var owner) && owner.Warehouse != null
+                ? owner.Warehouse
+                : throw new InvalidOperationException($"{account} has no warehouse in the world")),
+        { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
+            HoldingsOf(_clan.TryGet(account.OwnerId, out var clan)
+                ? ClanWarehouseOf(clan)!
+                : throw new InvalidOperationException($"{account} is not a clan")),
         { Owner: LedgerOwnerKind.Pet, Container: LedgerContainer.Inventory } =>
             HoldingsOf(SummonedPet(account.OwnerId)?.Inventory
                 ?? throw new InvalidOperationException($"{account} is not a summoned pet")),
@@ -67,6 +76,14 @@ public sealed partial class ZoneWorld
                 throw new InvalidOperationException($"non-stackable item {item.ObjectId} has count {item.Count}");
         }
 
+        return holdings;
+    }
+
+    static LedgerHoldings HoldingsOf(PrivateWarehouse warehouse)
+    {
+        var holdings = new LedgerHoldings();
+        foreach (var stack in warehouse.Items)
+            holdings.Add(stack.ItemId, stack.Count);
         return holdings;
     }
 

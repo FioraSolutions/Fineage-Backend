@@ -441,6 +441,14 @@ non-stackable stack of one is a piece: it keeps the item's object id and enchant
 bag that takes it. Stacks still on the ground at shutdown stay on their accounts in the journal; the ground is not
 saved. Ledger moves are numbered on the scheduler thread, and starting one from a region body throws.
 
+Deposits and withdrawals (step 11d) move between the bag and the private warehouse (`character/warehouse`) or the
+clan warehouse (`clan/warehouse`); the deposit fee goes to the `Fees` system account. Warehouse stacks have no
+durable piece id (their ids are local to the warehouse and the store re-keys them on save), so a warehouse holds a
+count per item: a deposited piece leaves the ledger's instance tracking and a withdrawn one starts a new id. Durable
+item identity needs the zone's item id allocator seeded from the store: today the allocator starts at the first id
+on every boot, and the store re-keys colliding ids when it saves. Clan hall rent, auction refunds and matured crops still write
+the clan warehouse outside the ledger; the next observation records them as adjustments.
+
 ---
 
 ## 4. Determinism
@@ -474,6 +482,7 @@ saved. Ledger moves are numbered on the scheduler thread, and starting one from 
    respawn, and checks that actors read the step's time and refuse region bodies. `ShopLedgerTests` replays shop
    commands and checks that the economy ledger's journal comes out byte for byte the same, hash chain included. `TradeLedgerTests` checks a trade's settlement postings and that refused trades post nothing.
    `GroundLedgerTests` follows a piece through the ground and checks loot, expiry, party adena and destroy postings.
+   `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals.
 
 ---
 
@@ -526,7 +535,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |
 | **11b (done)** | Trade between players as one `TradeSettle`; holds in trade escrow wait for trades between hosts. | Same outcomes, except that a traded non-stackable piece keeps its object id instead of getting a new one. A trade whose postings disagree with the bags fails the confirmation. |
 | **11c (done)** | Ground stacks as ledger accounts: loot, drop, death drop, pickup (party and pet included), expiry, herbs, destroy. | Same outcomes, except that a dropped piece keeps its object id and enchant on the ground and in the bag that picks it up (before, the enchant was lost and the piece got a new id), and a non-stackable loot stack of one keeps its ground object id when picked up. |
-| 11d | Warehouse and clan warehouse deposits and withdrawals. | Same outcomes. |
+| **11d (done)** | Private and clan warehouse deposits and withdrawals, deposit fee to `Fees`. | Same outcomes. |
 | 11e | Private store sales through store escrow. | Same outcomes. |
 | 11f | Quest rewards and crafting. Mail joins the ledger when the game has it. | Same outcomes; every owner change is on the journal. The snapshot writes stay until the reconciliation has run clean. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
