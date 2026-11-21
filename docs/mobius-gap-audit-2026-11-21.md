@@ -321,7 +321,7 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | Rank | Item | PR(s) | Status | Client work needed |
 |------|------|-------|--------|-------------------|
 | 1 | World spawns / hunting grounds | #701 | done | No |
-| 2 | Quest coverage | #TBD | partial — Q385/426/505/646; Q634/635/255 still missing | No |
+| 2 | Quest coverage | #709 | partial — Q385/426/505/646; Q634/635/255 still missing | No |
 | 3 | Item augmentation | — | pending | Yes (refine UI) |
 | 4 | Cursed weapons | — | pending | Yes (ExCursedWeapon*) |
 | 5 | Auto-loot | — | pending | No |
