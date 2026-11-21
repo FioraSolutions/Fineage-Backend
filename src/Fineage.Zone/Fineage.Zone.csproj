@@ -26,6 +26,7 @@
     <Content Include="..\..\data\siegable-clan-halls.json" Link="data\siegable-clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\castles.json" Link="data\castles.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\manor.json" Link="data\manor.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\fishing-championship.json" Link="data\fishing-championship.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\fishing.json" Link="data\fishing.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\monster-race.json" Link="data\monster-race.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\stat-bonuses.json" Link="data\stat-bonuses.json" CopyToOutputDirectory="PreserveNewest" />
@@ -53,6 +54,7 @@
     <Content Include="..\..\data\buylists.json" Link="data\buylists.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\admin-characters.json" Link="data\admin-characters.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\jail-zone.json" Link="data\jail-zone.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\mother-tree-zones.json" Link="data\mother-tree-zones.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\multisell.json" Link="data\multisell.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\doors.json" Link="data\doors.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\water-zones.json" Link="data\water-zones.json" CopyToOutputDirectory="PreserveNewest" />
@@ -66,6 +68,7 @@
     <Content Include="..\..\data\boats.json" Link="data\boats.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\xp-percent-lost.json" Link="data\xp-percent-lost.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\death-drop.json" Link="data\death-drop.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\event-drops.json" Link="data\event-drops.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\cursed-weapons.json" Link="data\cursed-weapons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-minions.json" Link="data\npc-minions.json" CopyToOutputDirectory="PreserveNewest" />
@@ -79,6 +82,7 @@
     <Content Include="..\..\data\skill-passives.json" Link="data\skill-passives.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-dots.json" Link="data\skill-dots.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-effects.json" Link="data\skill-effects.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-effect-coverage.json" Link="data\skill-effect-coverage.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-stat-effects.json" Link="data\skill-stat-effects.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-persist-flags.json" Link="data\skill-persist-flags.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />

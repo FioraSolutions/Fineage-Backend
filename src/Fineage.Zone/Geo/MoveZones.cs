@@ -407,6 +407,47 @@ public sealed class SwampZones
     public static SwampZones LoadDefault() => new(EnvironmentZoneLoader.LoadSwampFile());
 }
 
+/// <summary>Mobius <c>MotherTreeZone</c> from <c>data/mother-tree-zones.json</c>.</summary>
+public sealed class MotherTreeZones
+{
+    public const string FileName = "mother-tree-zones.json";
+    public static readonly MotherTreeZones Empty = new([]);
+
+    readonly MotherTreeZoneDef[] _zones;
+
+    public MotherTreeZones(MotherTreeZoneDef[] zones) => _zones = zones;
+
+    public int Count => _zones.Length;
+
+    public MotherTreeZoneDef? At(int x, int y, int z)
+    {
+        foreach (var zone in _zones)
+        {
+            if (EnvironmentZoneHit.Contains(zone, x, y, z))
+                return zone;
+        }
+        return null;
+    }
+
+    public static MotherTreeZones LoadDefault() => new(EnvironmentZoneLoader.LoadMotherTreeFile());
+}
+
+public sealed class MotherTreeZoneDef
+{
+    public string Name { get; set; } = "";
+    public int MinZ { get; set; }
+    public int MaxZ { get; set; }
+    public (int X, int Y)[] Nodes { get; set; } = [];
+    public int MinX { get; set; }
+    public int MaxX { get; set; }
+    public int MinY { get; set; }
+    public int MaxY { get; set; }
+    public int HpRegenBonus { get; set; }
+    public int MpRegenBonus { get; set; }
+    /// <summary>Mobius <c>affectedRace</c>; -1 = any race.</summary>
+    public int AffectedRace { get; set; } = -1;
+}
+
 public sealed class SwampZoneDef
 {
     public string Name { get; set; } = "";
@@ -507,6 +548,9 @@ public sealed class NoLandingZoneDef
 
 static class EnvironmentZoneHit
 {
+    internal static bool Contains(MotherTreeZoneDef zone, int x, int y, int z) =>
+        PeaceZones.Hit([ToPeace(zone)], x, y, z);
+
     internal static bool Contains(SwampZoneDef zone, int x, int y, int z) =>
         PeaceZones.Hit([ToPeace(zone)], x, y, z);
 
@@ -515,6 +559,18 @@ static class EnvironmentZoneHit
 
     internal static bool Contains(NoLandingZoneDef zone, int x, int y, int z) =>
         PeaceZones.Hit([ToPeace(zone)], x, y, z);
+
+    static PeaceZone ToPeace(MotherTreeZoneDef z) => new()
+    {
+        Name = z.Name,
+        MinZ = z.MinZ,
+        MaxZ = z.MaxZ,
+        Nodes = z.Nodes,
+        MinX = z.MinX,
+        MaxX = z.MaxX,
+        MinY = z.MinY,
+        MaxY = z.MaxY
+    };
 
     static PeaceZone ToPeace(SwampZoneDef z) => new()
     {
@@ -555,6 +611,17 @@ static class EnvironmentZoneHit
 
 static class EnvironmentZoneLoader
 {
+    internal static MotherTreeZoneDef[] LoadMotherTreeFile() => LoadNPoly<MotherTreeZoneDef>(
+        MotherTreeZones.FileName, "mother-tree", (r, z) =>
+        {
+            if (r.TryGetProperty("hpRegenBonus", out var hp))
+                z.HpRegenBonus = hp.GetInt32();
+            if (r.TryGetProperty("mpRegenBonus", out var mp))
+                z.MpRegenBonus = mp.GetInt32();
+            if (r.TryGetProperty("affectedRace", out var race))
+                z.AffectedRace = race.GetInt32();
+        });
+
     internal static SwampZoneDef[] LoadSwampFile() => LoadNPoly<SwampZoneDef>(SwampZones.FileName, "swamp", (r, z) =>
     {
         if (r.TryGetProperty("moveBonus", out var b))
@@ -635,6 +702,17 @@ static class EnvironmentZoneLoader
                     nl.MaxX = nodes.Max(n => n.Item1);
                     nl.MinY = nodes.Min(n => n.Item2);
                     nl.MaxY = nodes.Max(n => n.Item2);
+                }
+                else if (zone is MotherTreeZoneDef mt)
+                {
+                    mt.Name = r.TryGetProperty("name", out var nm) ? nm.GetString() ?? "" : "";
+                    mt.MinZ = r.GetProperty("minZ").GetInt32();
+                    mt.MaxZ = r.GetProperty("maxZ").GetInt32();
+                    mt.Nodes = nodes;
+                    mt.MinX = nodes.Min(n => n.Item1);
+                    mt.MaxX = nodes.Max(n => n.Item1);
+                    mt.MinY = nodes.Min(n => n.Item2);
+                    mt.MaxY = nodes.Max(n => n.Item2);
                 }
                 extra(r, zone);
                 list.Add(zone);

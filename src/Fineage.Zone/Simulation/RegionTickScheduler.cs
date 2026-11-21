@@ -1,6 +1,16 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Fineage.Zone.Simulation;
+
+/// <summary>A region body running right now: what a step watchdog names when a step does not finish.</summary>
+public sealed record RegionBodyTrace(string Stage, RegionId Region, int ManagedThreadId, long StartedTimestamp)
+{
+    public TimeSpan Elapsed => Stopwatch.GetElapsedTime(StartedTimestamp);
+
+    public override string ToString() =>
+        $"{Stage}@{Region} on thread {ManagedThreadId} for {Elapsed.TotalMilliseconds:F0} ms";
+}
 
 /// <summary>
 /// Fixed-step simulation clock. Each <see cref="Step"/> moves <see cref="Tick"/> to the next tick (or, when the caller
@@ -20,11 +30,20 @@ public sealed class RegionTickScheduler
     readonly IRegionExecutor _executor;
     readonly ISimulationObserver _observer;
     readonly IRegionScopes _scopes;
+    readonly ConcurrentDictionary<long, RegionBodyTrace> _inFlight = new();
+    long _inFlightSeq;
 
     [ThreadStatic] static RegionId? t_body;
 
     /// <summary>The region whose body runs on this thread, or null outside region bodies.</summary>
     public static RegionId? CurrentBody => t_body;
+
+    /// <summary>
+    /// The region bodies running right now, in (stage, region) order. Empty between region stages and while world
+    /// stages run, so a stuck step with an empty list points at a world stage, the collect step or the barrier.
+    /// </summary>
+    public IReadOnlyList<RegionBodyTrace> InFlightRegionBodies =>
+        _inFlight.Values.OrderBy(t => t.Stage, StringComparer.Ordinal).ThenBy(t => t.Region).ToList();
 
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
     /// <param name="executor">Runs the regions of stages that allow it (<see cref="IRegionStage.Parallel"/>).</param>
@@ -242,6 +261,9 @@ public sealed class RegionTickScheduler
             {
                 var outer = t_body;
                 t_body = work[i].Region;
+                long traceId = Interlocked.Increment(ref owner._inFlightSeq);
+                owner._inFlight[traceId] = new RegionBodyTrace(Name, work[i].Region,
+                    Environment.CurrentManagedThreadId, Stopwatch.GetTimestamp());
                 try
                 {
                     // The pin is per thread: a worker reads the step's time like the scheduler thread does.
@@ -255,6 +277,7 @@ public sealed class RegionTickScheduler
                 }
                 finally
                 {
+                    owner._inFlight.TryRemove(traceId, out _);
                     t_body = outer;
                 }
             });

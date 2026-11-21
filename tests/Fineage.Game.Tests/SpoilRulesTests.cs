@@ -10,6 +10,8 @@ public sealed class SpoilRulesTests
     {
         var rules = SpoilRules.LoadDefault();
         Assert.True(rules.IsSpoilSkill(254));
+        Assert.True(rules.IsSpoilSkill(302));
+        Assert.Equal(28, rules.MagicLevel(302, 1));
         Assert.True(rules.IsSweepSkill(42));
         Assert.Equal(10, rules.MagicLevel(254, 1));
         Assert.Equal(72, rules.MagicLevel(254, 11));
