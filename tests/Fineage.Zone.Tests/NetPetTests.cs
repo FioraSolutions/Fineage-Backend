@@ -15,6 +15,8 @@ namespace Fineage.Zone.Tests;
 public sealed class NetPetTests
 {
     const int WolfCollar = 2375, WolfFood = 2515, Wolf = 12077, PetScroll = 6387;
+    const int WindFlute = 3500, WindHatchling = 12311, StriderBugle = 4422, WindStrider = 12526;
+    const int HatchlingFood = 4038;
     const int Gremlin = 20001;
     const int X = 46045, Y = 41251, Z = -3440;
     static readonly CancellationToken Ct = CancellationToken.None;
@@ -35,13 +37,15 @@ public sealed class NetPetTests
         return await bench.EnterAsync(name.ToLowerInvariant(), name, [.. all], level: 20, x: X, y: Y, z: Z);
     }
 
-    static int CollarOf(BenchPlayer owner) => owner.Inventory.Items.Single(i => i.ItemId == WolfCollar).ObjectId;
+    static int CollarOf(BenchPlayer owner) => CollarOf(owner, WolfCollar);
 
-    static async Task<ZoneEntity> SummonAsync(WorldBench bench, BenchPlayer owner)
+    static int CollarOf(BenchPlayer owner, int itemId) => owner.Inventory.Items.Single(i => i.ItemId == itemId).ObjectId;
+
+    static async Task<ZoneEntity> SummonAsync(WorldBench bench, BenchPlayer owner, int collarItemId = WolfCollar)
     {
         owner.Player.CastingUntilMs = 0;
         owner.Player.CombatUntilUnixMs = 0;
-        Assert.Null(await bench.World.TryUseItemAsync(owner.Session, CollarOf(owner), Ct));
+        Assert.Null(await bench.World.TryUseItemAsync(owner.Session, CollarOf(owner, collarItemId), Ct));
         Assert.Null(bench.World.SummonOfForTest(owner.Player)); // 5 s cast
         bench.World.ResolvePendingHitForTest(owner.Player);
         var pet = bench.World.SummonOfForTest(owner.Player);
@@ -60,6 +64,46 @@ public sealed class NetPetTests
             clock.Now = clock.Now.AddMilliseconds(stepMs);
             await bench.World.RunCombatTickAsync(Ct);
         }
+    }
+
+    [Fact]
+    public async Task Hatchling_flute_summons_at_pet_template_level_without_ride_flag()
+    {
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Hatch", new StoredItem(WindFlute, 1, -1));
+        var hatch = await SummonAsync(bench, owner, WindFlute);
+        Assert.Equal((WindHatchling, 35, SummonKindNet.Pet), (hatch.NpcId, hatch.Level, hatch.Summon!.Kind));
+        Assert.Equal(35, owner.Inventory.Find(CollarOf(owner, WindFlute))!.EnchantLevel);
+        var info = (SummonInfoNetMsg)bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSummonInfo)).Last()[1]!;
+        Assert.False(info.Mountable);
+    }
+
+    [Fact]
+    public async Task Strider_bugle_summon_info_allows_ride_from_pet_data()
+    {
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Rider", new StoredItem(StriderBugle, 1, -1, 55));
+        var strider = await SummonAsync(bench, owner, StriderBugle);
+        Assert.Equal((WindStrider, 55, SummonKindNet.Pet), (strider.NpcId, strider.Level, strider.Summon!.Kind));
+        var info = (SummonInfoNetMsg)bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSummonInfo)).Last()[1]!;
+        Assert.True(info.Mountable);
+    }
+
+    [Fact]
+    public async Task Evolved_collar_keeps_pet_progress_when_npc_template_changes()
+    {
+        const int oid = 880_001;
+        var (bench, _) = Open();
+        var owner = await OwnerAsync(bench, "Evolve", new StoredItem(StriderBugle, 1, -1, 56, oid));
+        bench.Store.SavePet(new StoredPet(oid, owner.ObjectId, WindHatchling, "", 56, 500_000, 400, 200, 800,
+            [new StoredItem(HatchlingFood, 2, -1, 0, 880_002)]));
+        var strider = await SummonAsync(bench, owner, StriderBugle);
+        Assert.Equal(WindStrider, strider.NpcId);
+        Assert.Equal(56, strider.Level);
+        Assert.Equal(500_000L, strider.Summon!.Pet!.Exp);
+        Assert.Equal(800, strider.Summon.Pet.Fed);
+        Assert.Equal(2, strider.Summon.Pet.Inventory.CountOf(HatchlingFood));
+        Assert.Equal((WindStrider, 56), (bench.Store.FindPet(oid)!.NpcId, bench.Store.FindPet(oid)!.Level));
     }
 
     [Fact]

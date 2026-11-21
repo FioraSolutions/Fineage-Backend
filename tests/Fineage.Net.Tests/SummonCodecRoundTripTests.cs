@@ -40,6 +40,14 @@ public sealed class SummonCodecRoundTripTests
         Assert.Equal((600, 1200, 253, 120, true, 9), (info.Feed, info.MaxFeed, info.PAtkSpd, info.RunSpeed, info.Following, info.TargetObjectId));
         Assert.Equal([4068, 4139], info.SkillIds);
         Assert.True(info.Dead);
+        Assert.False(info.Mountable);
+
+        var mounted = NetCodec.DecodeSummonInfo(NetCodec.EncodeSummonInfo(new SummonInfoNetMsg
+            { ObjectId = 1, Kind = SummonKindNet.Pet, NpcId = 12526, Mountable = true }));
+        Assert.True(mounted.Mountable);
+        byte[] infoBytes = NetCodec.EncodeSummonInfo(new SummonInfoNetMsg { ObjectId = 1, Kind = SummonKindNet.Pet, Mountable = true });
+        var oldInfo = NetCodec.DecodeSummonInfo(infoBytes.AsSpan(0, infoBytes.Length - 1));
+        Assert.False(oldInfo.Mountable);
 
         var gone = NetCodec.DecodeSummonGone(NetCodec.EncodeSummonGone(new SummonGoneNetMsg { ObjectId = 5, Kind = SummonKindNet.Pet, Reason = 3 }));
         Assert.Equal((5, SummonKindNet.Pet, 3), (gone.ObjectId, gone.Kind, gone.Reason));
