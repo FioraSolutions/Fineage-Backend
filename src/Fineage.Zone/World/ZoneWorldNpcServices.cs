@@ -84,6 +84,8 @@ public sealed partial class ZoneWorld
                 return null;
             case NpcServiceIntent.Olympiad:
                 return OlympiadNpcBypass(session, player, npc, reply.ServiceArg);
+            case NpcServiceIntent.RaidBossRanking:
+                return ShowRaidBossRanking(session, player, npc);
             case NpcServiceIntent.Subclass:
                 return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
             case NpcServiceIntent.AncientAdenaToAdena:

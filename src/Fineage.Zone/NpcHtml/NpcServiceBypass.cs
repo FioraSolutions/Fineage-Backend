@@ -128,6 +128,16 @@ public sealed class FishermanBypassHandler : IBypassHandler
             : BypassReply.ServiceCall(NpcServiceIntent.FishingChampionship);
 }
 
+public sealed class RaidBossRankingBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["RaidRanking"];
+
+    public BypassReply Handle(BypassCall call) =>
+        BypassCommands.Token(call.Command).Equals("RaidRanking", StringComparison.OrdinalIgnoreCase)
+            ? BypassReply.ServiceCall(NpcServiceIntent.RaidBossRanking)
+            : BypassReply.Fail("bad_request");
+}
+
 /// <summary>Race Manager <c>BuyTicket</c> / <c>ShowOdds</c> / … (Mobius <c>RaceManager</c>).</summary>
 public sealed class MonsterRaceBypassHandler : IBypassHandler
 {

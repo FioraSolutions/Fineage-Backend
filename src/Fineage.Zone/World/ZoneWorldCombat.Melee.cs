@@ -149,6 +149,7 @@ public sealed partial class ZoneWorld
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
         NoteBossDeath(npc);
+        NoteRaidBossPoints(npc, killer);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;
