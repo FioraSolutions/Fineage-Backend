@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -75,7 +76,17 @@ public sealed partial class ZoneWorld
         if (bag == null || arrow == null || player.Session == null)
             return;
 
-        int left = bag.TakeOne(arrow);
+        int left = 0;
+        RecordBagChange(
+            player,
+            LedgerTxKind.Consume,
+            Consumed,
+            () =>
+            {
+                left = bag.TakeOne(arrow);
+                return arrow.ItemId;
+            },
+            id => id);
         var update = InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, arrow);
         NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
         if (left == 0)
