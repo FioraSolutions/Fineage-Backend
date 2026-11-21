@@ -131,9 +131,12 @@ public sealed partial class GameData
             kits.Add(new StarterKit(row.ClassId, entries));
         }
 
+        if (file.MobiusStartingAdena < 0)
+            throw new InvalidDataException($"{path} mobiusStartingAdena must not be negative.");
+
         try
         {
-            return new StarterKits(kits);
+            return new StarterKits(kits, file.MobiusStartingAdena);
         }
         catch (ArgumentException ex)
         {
