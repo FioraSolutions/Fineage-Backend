@@ -27,7 +27,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal List<ZoneEntity> SnapshotKnownEntities(ZoneSession session)
     {
-        if (!TryGetLivePlayerUnlocked(session, out var self))
+        if (!TryGetLivePlayer(session, out var self))
             return [];
 
         var list = new List<ZoneEntity>(self.Knownlist.Count);
@@ -47,21 +47,9 @@ public sealed partial class ZoneWorld
     /// <summary>Object ids on the session's knownlist (any entity kind). For move enter/leave diffs.</summary>
     internal HashSet<int> SnapshotKnownIds(ZoneSession session)
     {
-        if (!TryGetLivePlayerUnlocked(session, out var self))
+        if (!TryGetLivePlayer(session, out var self))
             return [];
         return new HashSet<int>(self.Knownlist);
-    }
-
-    bool TryGetLivePlayerUnlocked(ZoneSession session, out ZoneEntity entity)
-    {
-        if (session.ObjectId != 0 &&
-            _byId.TryGetValue(session.ObjectId, out entity!) &&
-            entity.Kind == ZoneEntityKind.Player &&
-            ReferenceEquals(entity.Session, session) &&
-            session.InWorld)
-            return true;
-        entity = null!;
-        return false;
     }
 
     /// <summary>Live player by object id (for Net knownlist enter diffs).</summary>

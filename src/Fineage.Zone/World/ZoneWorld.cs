@@ -344,7 +344,17 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Live player entity after a successful enter (same object Net enter projects from).</summary>
-    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity) => TryGetLivePlayerUnlocked(session, out entity);
+    internal bool TryGetLivePlayer(ZoneSession session, out ZoneEntity entity)
+    {
+        if (session.ObjectId != 0 &&
+            _byId.TryGetValue(session.ObjectId, out entity!) &&
+            entity.Kind == ZoneEntityKind.Player &&
+            ReferenceEquals(entity.Session, session) &&
+            session.InWorld)
+            return true;
+        entity = null!;
+        return false;
+    }
 
     /// <summary>
     /// Optional Net PacketEnvelope bridge for sim/AI fanout (MoveState) while V2 flushes stay on ZoneSession streams.
@@ -366,7 +376,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal List<ZoneEntity> SnapshotKnownPlayers(ZoneSession session)
     {
-        if (!TryGetLivePlayerUnlocked(session, out var self))
+        if (!TryGetLivePlayer(session, out var self))
             return [];
 
         var players = new List<ZoneEntity>(self.Knownlist.Count);

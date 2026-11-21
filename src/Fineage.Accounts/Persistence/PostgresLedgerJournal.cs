@@ -14,8 +14,8 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     readonly NpgsqlDataSource _dataSource;
-    readonly object _gate = new();
-    readonly object _flushGate = new();
+    readonly object _pendingLock = new();
+    readonly object _flushLock = new();
     readonly List<LedgerEntry> _pending = [];
 
     internal PostgresLedgerJournal(NpgsqlDataSource dataSource) => _dataSource = dataSource;
@@ -24,7 +24,7 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
     {
         get
         {
-            lock (_gate)
+            lock (_pendingLock)
                 return _pending.Count;
         }
     }
@@ -62,16 +62,16 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
     public void Append(LedgerEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        lock (_gate)
+        lock (_pendingLock)
             _pending.Add(entry);
     }
 
     public void Flush()
     {
-        lock (_flushGate)
+        lock (_flushLock)
         {
             List<LedgerEntry> taken;
-            lock (_gate)
+            lock (_pendingLock)
             {
                 if (_pending.Count == 0)
                     return;
@@ -85,7 +85,7 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
             }
             catch
             {
-                lock (_gate)
+                lock (_pendingLock)
                     _pending.InsertRange(0, taken);
                 throw;
             }
