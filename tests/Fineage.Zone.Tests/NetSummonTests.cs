@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game.Skills;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
@@ -87,7 +88,7 @@ public sealed class NetSummonTests
         owner.Player.SkillReuseUntilMs.Clear();
         owner.Player.CastingUntilMs = 0;
         Assert.Null(await bench.World.TrySkillUseAsync(owner.Session, SummonKat, 0, Ct));
-        Assert.Equal(ZoneWorld.SysMsgAlreadyHavePet, Lines(bench).Last().Id);
+        Assert.Equal(SkillCastConditionRefusal.MultiplePetsOrServitors, Lines(bench).Last().Id);
         Assert.Equal(7, owner.Inventory.CountOf(CrystalD));
     }
 

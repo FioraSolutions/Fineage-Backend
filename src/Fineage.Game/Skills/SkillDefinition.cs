@@ -110,6 +110,9 @@ public sealed class SkillDefinition
     /// </summary>
     public string[] UsingKinds { get; init; } = [];
 
+    /// <summary>Mobius <c>&lt;conditions&gt;</c> tree from datapack (shared <see cref="SkillCastConditionEvaluator"/>).</summary>
+    public SkillCastCondition? CastCondition { get; init; }
+
     public bool AppliesAbnormal => AbnormalTimeSeconds > 0;
 
     public bool IsBuffSkill => AppliesAbnormal && !IsDebuff;

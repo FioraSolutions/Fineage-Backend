@@ -69,7 +69,9 @@ public sealed record NpcTemplate(
     /// <summary>Mobius <c>equipment rhand</c> item id (0 = none).</summary>
     int Rhand = 0,
     /// <summary>Mobius <c>equipment lhand</c> item id (0 = none).</summary>
-    int Lhand = 0);
+    int Lhand = 0,
+    /// <summary>Mobius <c>stats race</c> (UNDEAD, HUMANOID, …). Empty when omitted.</summary>
+    string Race = "");
 
 /// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
 public readonly record struct NpcAiSkill(int SkillId, int Level);
@@ -214,21 +216,22 @@ public sealed class NpcCatalog
                 Math.Max(0, row.SkillDelaySeconds),
                 (row.AttackType ?? "").Trim(),
                 Math.Max(0, row.Rhand),
-                Math.Max(0, row.Lhand)));
+                Math.Max(0, row.Lhand),
+                (row.Race ?? "").Trim().ToUpperInvariant()));
         }
 
-    static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
-    {
-        if (rows is not { Count: > 0 })
-            return null;
-        var list = new List<NpcAiSkill>(rows.Count);
-        foreach (var r in rows)
+        static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
         {
-            if (r.Id > 0 && r.Level > 0)
-                list.Add(new NpcAiSkill(r.Id, r.Level));
+            if (rows is not { Count: > 0 })
+                return null;
+            var list = new List<NpcAiSkill>(rows.Count);
+            foreach (var r in rows)
+            {
+                if (r.Id > 0 && r.Level > 0)
+                    list.Add(new NpcAiSkill(r.Id, r.Level));
+            }
+            return list.Count > 0 ? list : null;
         }
-        return list.Count > 0 ? list : null;
-    }
 
         return new NpcCatalog(byId);
     }
@@ -305,6 +308,7 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>equipment rhand</c> / <c>lhand</c> item ids.</summary>
         public int Rhand { get; set; }
         public int Lhand { get; set; }
+        public string? Race { get; set; }
     }
 
     sealed class AiSkillDto

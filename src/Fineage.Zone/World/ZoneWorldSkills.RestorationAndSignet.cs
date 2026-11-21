@@ -79,11 +79,6 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        // Mobius <cond><and><player invSize="10"/><player weight="80"/></and></cond>: refuse when the bag is
-        // nearly full (fewer than 10 free slots) or nearly overweight (80 % of max load).
-        if (!RestorationRoomAvailable(session, player))
-            return null;
-
         if (ConsumeItemBlocked(session, player, levelData))
             return null;
 
