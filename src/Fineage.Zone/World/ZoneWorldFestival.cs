@@ -16,14 +16,14 @@ public sealed partial class ZoneWorld
     void TickSevenSignsFestival(Simulation.TickContext tick)
     {
         foreach (var effect in _festivalActor.Step(tick))
-        {
-            if (effect.Kind == SevenSignsFestivalEffectKind.EndInstance)
-                EndFestivalInstance(effect.PartyId, recordScore: true);
-        }
+            ApplyFestivalEffect(effect);
     }
 
     /// <summary>GM / test entry: party leader starts a festival instance (competition period only).</summary>
-    internal string? TryAdminFestivalEnter(ZoneEntity leader, int tierId, SevenSignsCabal cabal)
+    internal string? TryAdminFestivalEnter(ZoneEntity leader, int tierId, SevenSignsCabal cabal) =>
+        TryStartFestivalEnter(leader, tierId, cabal);
+
+    string? TryStartFestivalEnter(ZoneEntity leader, int tierId, SevenSignsCabal cabal)
     {
         if (_sevenSigns.Engine.Period != SevenSignsPeriod.Competition)
             return "festival_closed";
@@ -114,8 +114,22 @@ public sealed partial class ZoneWorld
             }
         }
 
-        if (recordScore)
-            _festivalRuntime.TryRecordInstanceScore(instance.Cabal, instance.TierId, instance.OfferingScore);
+        if (recordScore && instance.MemberSnapshot.Count > 0)
+        {
+            bool claimed = _festivalRuntime.TryRecordInstanceScore(instance.Cabal, instance.TierId, instance.OfferingScore);
+            if (claimed)
+            {
+                long bonusShare = FestivalBoard.TakeAccumulatedShare(instance.TierId, instance.MemberSnapshot.Count);
+                if (bonusShare > 0 && _festivalRuntime.Engine != null)
+                {
+                    int each = (int)Math.Min(int.MaxValue, bonusShare);
+                    foreach (int memberId in instance.MemberSnapshot)
+                        _festivalRuntime.Engine.CreditFestivalAncientAdena(memberId, each);
+                }
+            }
+        }
+
+        UnspawnFestivalInstance(instance);
         _festivalActor.KillInstance(partyId);
     }
 }

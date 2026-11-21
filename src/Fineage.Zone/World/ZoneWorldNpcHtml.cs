@@ -104,6 +104,12 @@ public sealed partial class ZoneWorld
                 SendHtml(session, player, npc, mammon);
             return;
         }
+        if (page == 0 && FestivalFirstPage(session, player, npc, out var festival))
+        {
+            if (festival != null)
+                SendHtml(session, player, npc, festival);
+            return;
+        }
         SendHtml(session, player, npc, NpcHtmlPaths.Read(_html, npc.NpcType, npc.NpcId, page));
     }
 

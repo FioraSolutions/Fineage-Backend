@@ -18,6 +18,8 @@ public sealed class SevenSignsFestivalRuntime : ISevenSignsFestivalHook
 
     public SevenSignsFestivalBoard Board => _board;
 
+    internal SevenSignsEngine? Engine => _engine;
+
     public void BindEngine(SevenSignsEngine engine) => _engine = engine ?? throw new ArgumentNullException(nameof(engine));
 
     public void OnCompetitionStarted() => _board.ResetCycle();

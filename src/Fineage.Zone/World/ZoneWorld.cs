@@ -54,6 +54,7 @@ public sealed partial class ZoneWorld
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
     readonly SevenSignsFestivalCatalog _festivalCatalog;
+    readonly SevenSignsFestivalSpawnCatalog _festivalSpawns;
     readonly SevenSignsFestivalRuntime _festivalRuntime;
     readonly SevenSignsFestivalActor _festivalActor;
     int _nextFestivalInstanceId;
@@ -259,6 +260,7 @@ public sealed partial class ZoneWorld
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
         _festivalCatalog = festivalRuntime?.Board.Catalog ?? SevenSignsFestivalCatalog.LoadDefault();
+        _festivalSpawns = SevenSignsFestivalSpawnCatalog.LoadDefault();
         _festivalRuntime = festivalRuntime ?? new SevenSignsFestivalRuntime(_festivalCatalog);
         SevenSignsEngine ssEngine = sevenSigns ?? new SevenSignsEngine(WallNow(), festival: _festivalRuntime);
         _festivalRuntime.BindEngine(ssEngine);

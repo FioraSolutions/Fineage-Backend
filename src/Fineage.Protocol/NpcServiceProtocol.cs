@@ -138,6 +138,9 @@ public static class NpcServiceIntent
     /// <summary>Mobius <c>EnterRift</c> / <c>ChangeRiftRoom</c> / <c>ExitRift</c> (Seven Signs rift HTML).</summary>
     public const string DimensionalRift = "dimensional-rift";
 
+    /// <summary>Mobius festival guide <c>Festival</c> / <c>FestivalDesc</c> bypass commands.</summary>
+    public const string Festival = "festival";
+
     public const string DoormanOpen = "doorman-open";
     public const string DoormanClose = "doorman-close";
     public const string HallLease = "hall-lease";

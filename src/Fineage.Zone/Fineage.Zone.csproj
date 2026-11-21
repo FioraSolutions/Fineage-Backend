@@ -40,6 +40,7 @@
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dimensional-rift.json" Link="data\dimensional-rift.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\seven-signs-festival.json" Link="data\seven-signs-festival.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\seven-signs-festival-spawns.json" Link="data\seven-signs-festival-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
