@@ -66,8 +66,15 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Pet, Container: LedgerContainer.Inventory } =>
             HoldingsOf(SummonedPet(account.OwnerId)?.Inventory
                 ?? throw new InvalidOperationException($"{account} is not a summoned pet")),
+        { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Progress } progress =>
+            _byId.TryGetValue(progress.OwnerId, out var progressPlayer)
+                ? ProgressHoldingsOf(progressPlayer)
+                : throw new InvalidOperationException($"{account} has no character in the world"),
         _ => throw new InvalidOperationException($"{account} has no state in the zone")
     };
+
+    static LedgerHoldings ProgressHoldingsOf(ZoneEntity player) =>
+        new LedgerHoldings().Add(LedgerResourceIds.Sp, player.Sp).Add(LedgerResourceIds.Exp, player.Exp);
 
     static LedgerHoldings HoldingsFromStored(IReadOnlyList<StoredItem> items)
     {

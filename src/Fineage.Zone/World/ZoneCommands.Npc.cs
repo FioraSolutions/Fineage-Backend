@@ -27,6 +27,18 @@ public sealed record AcquireSkillCommand(int SkillId, int Level, int SkillType, 
         Completed(world.TryAcquireSkillAsync(session, SkillId, Level, SkillType, Informing, CancellationToken.None));
 }
 
+public sealed record EnchantSkillInfoCommand(int SkillId, int SkillLevel) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryEnchantSkillInfoAsync(session, SkillId, SkillLevel, CancellationToken.None));
+}
+
+public sealed record EnchantSkillCommand(int SkillId, int SkillLevel) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryEnchantSkillAsync(session, SkillId, SkillLevel, CancellationToken.None));
+}
+
 public sealed record CharacterActionCommand(int ActionId, int TargetObjectId) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

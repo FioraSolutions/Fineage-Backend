@@ -31,7 +31,10 @@ public enum LedgerContainer : byte
     Warehouse = 4,
 
     /// <summary>Freight packages addressed to this character (Mobius <c>ItemLocation.FREIGHT</c>).</summary>
-    Freight = 5
+    Freight = 5,
+
+    /// <summary>Character SP and EXP balances (<see cref="LedgerResourceIds"/>).</summary>
+    Progress = 6
 }
 
 /// <summary>Sources and sinks. Their balances may go negative: a negative balance is what they minted.</summary>
@@ -123,6 +126,9 @@ public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, 
 
     public static LedgerAccount Freight(int characterId) =>
         new(LedgerOwnerKind.Character, characterId, LedgerContainer.Freight);
+
+    public static LedgerAccount Progress(int characterId) =>
+        new(LedgerOwnerKind.Character, characterId, LedgerContainer.Progress);
 
     public bool IsSystem => Owner == LedgerOwnerKind.System;
 
@@ -308,7 +314,10 @@ public enum LedgerTxKind
     ClanHallLease = 55,
 
     /// <summary>Life stone refine: consumes stone/gems; <c>Reference</c> is life stone item id.</summary>
-    Augment = 56
+    Augment = 56,
+
+    /// <summary>Trainer skill enchant SP/EXP fee: <c>Reference</c> is skill id.</summary>
+    TrainerSkillEnchant = 57
 }
 
 /// <summary>

@@ -33,6 +33,7 @@
     <Content Include="..\..\data\questname-e_interlude.txt" Link="data\questname-e_interlude.txt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data/skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data/skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-enchant-tree.json" Link="data/skill-enchant-tree.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npcs.json" Link="data\npcs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\raidbosses.json" Link="data\raidbosses.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spawns\**\*.json" Link="data\spawns\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

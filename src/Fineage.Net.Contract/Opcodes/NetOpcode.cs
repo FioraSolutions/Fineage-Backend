@@ -390,5 +390,13 @@ namespace Fineage.Net.Contract
         public const ushort CursedWeaponList = 0x03DB;
         /// <summary>Zone → client: Mobius ExCursedWeaponLocation (wire 0xFE 0x46).</summary>
         public const ushort CursedWeaponLocation = 0x03DC;
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkillInfo</c>.</summary>
+        public const ushort RequestEnchantSkillInfo = 0x03DD;
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkill</c>.</summary>
+        public const ushort RequestEnchantSkill = 0x03DE;
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillList</c>.</summary>
+        public const ushort EnchantSkillList = 0x03DF;
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
+        public const ushort EnchantSkillInfo = 0x03E0;
     }
 }
