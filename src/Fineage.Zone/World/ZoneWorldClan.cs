@@ -173,7 +173,7 @@ public sealed partial class ZoneWorld
             if (clan.D.NewLeaderId != 0)
                 ApplyLeaderDelegation(clan);
         }
-        _halls = null;
+        _hallAuctions.Halls = null;
 
         CompleteDueDissolutions(NowUnixMs());
     }

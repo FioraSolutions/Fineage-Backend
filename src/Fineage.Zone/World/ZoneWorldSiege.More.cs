@@ -16,7 +16,7 @@ public sealed partial class ZoneWorld
 
         var saved = _accounts.ListCastles();
         if (saved.Count > 0)
-            _siege.Restore(saved, _accounts.ListSiegeClans(), NowUnixMs());
+            _siege.Board.Restore(saved, _accounts.ListSiegeClans(), NowUnixMs());
         else
             AdoptClanOwners();
         ApplyBoardOwnersToClans();
@@ -27,14 +27,14 @@ public sealed partial class ZoneWorld
         foreach (var clan in _clans.Values)
         {
             if (clan.CastleId > 0)
-                _siege.TryAdoptOwner(clan.CastleId, clan.Id);
+                _siege.Board.TryAdoptOwner(clan.CastleId, clan.Id);
         }
     }
 
     void ReleaseSiegeClan(int clanId)
     {
-        int castleId = _siege.CastleOwnedBy(clanId);
-        _siege.ReleaseClan(clanId);
+        int castleId = _siege.Board.CastleOwnedBy(clanId);
+        _siege.Board.ReleaseClan(clanId);
         PersistSiege();
         ResetManorIfOwnerless(castleId);
     }
@@ -43,15 +43,15 @@ public sealed partial class ZoneWorld
     {
         AnnounceClosed(nowUnixMs);
         int target = castleId == 0 ? ActiveSiegeCastleFor(clanId) : castleId;
-        int previousOwner = target > 0 ? _siege.Find(target)?.OwnerClanId ?? 0 : 0;
+        int previousOwner = target > 0 ? _siege.Board.Find(target)?.OwnerClanId ?? 0 : 0;
         string? error = castleId == 0
-            ? _siege.CaptureCastle(clanId, nowUnixMs)
-            : _siege.CaptureCastle(clanId, castleId, nowUnixMs, AllyOfClan);
+            ? _siege.Board.CaptureCastle(clanId, nowUnixMs)
+            : _siege.Board.CaptureCastle(clanId, castleId, nowUnixMs, AllyOfClan);
         if (error != null)
             return error;
 
-        int taken = _siege.CastleOwnedBy(clanId);
-        var castle = _siege.Find(taken);
+        int taken = _siege.Board.CastleOwnedBy(clanId);
+        var castle = _siege.Board.Find(taken);
         ApplyBoardOwnersToClans();
         if (!PersistSiege())
             return SiegeProtocol.Store;
@@ -81,7 +81,7 @@ public sealed partial class ZoneWorld
     /// <summary>The running siege this clan attacks (legacy capture without a castle id).</summary>
     int ActiveSiegeCastleFor(int clanId)
     {
-        foreach (var castle in _siege.Castles)
+        foreach (var castle in _siege.Board.Castles)
         {
             if (castle.InProgress && SiegeSide(clanId, castle.Id) == SiegeProtocol.StateAttacker)
                 return castle.Id;
@@ -92,9 +92,9 @@ public sealed partial class ZoneWorld
 
     void AnnounceClosed(long nowUnixMs)
     {
-        foreach (int castleId in _siege.Refresh(nowUnixMs))
+        foreach (int castleId in _siege.Board.Refresh(nowUnixMs))
         {
-            var castle = _siege.Find(castleId);
+            var castle = _siege.Board.Find(castleId);
             if (castle != null)
                 Broadcast(SiegeLines.RegistrationEnded(castle.Name));
         }
@@ -103,7 +103,7 @@ public sealed partial class ZoneWorld
     void ApplyBoardOwnersToClans()
     {
         foreach (var clan in _clans.Values)
-            clan.CastleId = _siege.CastleOwnedBy(clan.Id);
+            clan.CastleId = _siege.Board.CastleOwnedBy(clan.Id);
         foreach (var entity in _byId.Values)
         {
             if (entity.Kind == ZoneEntityKind.Player)
@@ -118,7 +118,7 @@ public sealed partial class ZoneWorld
         var owners = new Dictionary<int, int>();
         foreach (var clan in _clans.Values)
             owners[clan.Id] = clan.CastleId;
-        return _accounts.SaveSiege(_siege.ExportCastles(), _siege.ExportClans(), owners);
+        return _accounts.SaveSiege(_siege.Board.ExportCastles(), _siege.Board.ExportClans(), owners);
     }
 
     SiegeClanInfo? ClanInfoFor(int characterId)
@@ -137,7 +137,7 @@ public sealed partial class ZoneWorld
 
     void QueueSiegeInfo(ZoneSession session, int castleId, long nowUnixMs)
     {
-        var list = _siege.List(castleId, nowUnixMs);
+        var list = _siege.Board.List(castleId, nowUnixMs);
         if (list == null)
             return;
         var msg = new SiegeInfoMsg

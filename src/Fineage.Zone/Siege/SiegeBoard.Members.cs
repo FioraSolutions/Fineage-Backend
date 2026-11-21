@@ -39,7 +39,7 @@ public sealed partial class SiegeBoard
     bool WindowClosed(CastleSiege castle, long nowUnixMs) =>
         SiegeRules.WindowClosed(castle.SiegeUnixMs, nowUnixMs, Settings.RegistrationCloseMillis);
 
-    SiegeJoinCheck Check(SiegeActor actor, SiegeClanInfo? clan, CastleSiege castle, bool asAttacker, long nowUnixMs)
+    SiegeJoinCheck Check(SiegeRequester actor, SiegeClanInfo? clan, CastleSiege castle, bool asAttacker, long nowUnixMs)
     {
         int owned = clan == null ? 0 : CastleOwnedBy(clan.Id);
         return new SiegeJoinCheck(

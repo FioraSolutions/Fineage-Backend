@@ -5,7 +5,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public SiegeBoard Sieges => _siege;
+    public SiegeBoard Sieges => _siege.Board;
 
     /// <summary>
     /// Admin and test hook. The clan must be an attacker on the one siege that is in progress.
@@ -30,7 +30,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             long ms = (now ?? WallNow()).ToUnixTimeMilliseconds();
-            string? error = _siege.EndSiege(castleId, ms);
+            string? error = _siege.Board.EndSiege(castleId, ms);
             if (error == null)
             {
                 SyncSiegeRuntime(ms);
@@ -56,12 +56,12 @@ public sealed partial class ZoneWorld
             bool attacker = request.Attacker == 1;
             var clan = ClanInfoFor(session.ObjectId);
             error = joining
-                ? _siege.Register(new SiegeActor(session.ObjectId), clan, request.CastleId, attacker, now)
-                : _siege.Unregister(new SiegeActor(session.ObjectId), clan, request.CastleId, now);
+                ? _siege.Board.Register(new SiegeRequester(session.ObjectId), clan, request.CastleId, attacker, now)
+                : _siege.Board.Unregister(new SiegeRequester(session.ObjectId), clan, request.CastleId, now);
             if (error == null)
             {
                 PersistSiege();
-                var castle = _siege.Find(request.CastleId);
+                var castle = _siege.Board.Find(request.CastleId);
                 string name = castle?.Name ?? "";
                 var line = joining
                     ? attacker ? SiegeLines.RegisteredAttacker(name) : SiegeLines.RegisteredDefender(name)
@@ -88,8 +88,8 @@ public sealed partial class ZoneWorld
         {
             long now = NowUnixMs();
             AnnounceClosed(now);
-            error = _siege.AnswerDefender(
-                new SiegeActor(session.ObjectId),
+            error = _siege.Board.AnswerDefender(
+                new SiegeRequester(session.ObjectId),
                 ClanInfoFor(session.ObjectId),
                 request.CastleId,
                 request.ClanId,
@@ -98,7 +98,7 @@ public sealed partial class ZoneWorld
             if (error == null)
             {
                 PersistSiege();
-                string name = _siege.Find(request.CastleId)?.Name ?? "";
+                string name = _siege.Board.Find(request.CastleId)?.Name ?? "";
                 var line = request.Approved == 1
                     ? SiegeLines.DefenderApproved(name)
                     : SiegeLines.DefenderRefused(name);
@@ -122,7 +122,7 @@ public sealed partial class ZoneWorld
         {
             long now = NowUnixMs();
             AnnounceClosed(now);
-            if (_siege.List(castleId, now) == null)
+            if (_siege.Board.List(castleId, now) == null)
                 error = SiegeProtocol.Castle;
             else
             {

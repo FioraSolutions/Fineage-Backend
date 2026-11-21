@@ -200,7 +200,16 @@ sequenceDiagram
   (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take
   `_gate`: the scheduler thread holds it while it waits at the barrier.
 - **Global actors** run on the scheduler thread as world stages (cheap) or on their own single-threaded loop when
-  they do I/O; they talk to regions only by message.
+  they do I/O; they talk to regions only by message. In process (step 9) each one is a `GlobalActor<TEffect>`
+  (`Simulation/GlobalActor.cs`) that owns its state and holds no clock: its stage calls `Step(tick)`, which runs the
+  actor's schedule at the tick time (`ActorTime.Simulation`: boss respawns, olympiad) or at the step's wall sample
+  (`ActorTime.Calendar`: seven signs, sieges, manor, lottery, mammon, hall auctions) and returns effects that the world
+  applies after the actor returned (spawns, notices, castle and arena changes). Rolls draw from the actor's own stream
+  (`RandomPurpose.Boss`, `Lottery`, `Mammon`, `Olympiad`). Commands reach the actor's state through a guarded
+  accessor (`Board`, `Engine`, `Schedule`) at the step's time. Region bodies never reach an actor: the accessors
+  and `Step` throw when `RegionTickScheduler.CurrentBody` is set, and a body that has news for one (a boss died to a
+  DoT) defers it with `AtBarrier`, which runs on the scheduler thread in region order. Stage names and their order
+  are unchanged.
 - **Persistence and the ledger** run outside the tick. Regions hand them immutable records and get results back
   as messages.
 
@@ -396,8 +405,7 @@ external settlement backend can consume the committed feed without the simulatio
    `t × step` (`Simulation/SimulationClock.cs`), so tick numbers mean the same instant on every host and never repeat
    across restarts. Stages run at `TickContext.NowUnixMs`, the tick time; the wall sample travels as
    `TickContext.WallUnixMs` and is used only for calendar schedules (clan dissolution deadlines, hall auctions,
-   sieges, manor, lottery, mammon); seven signs and boss respawns keep their own clocks until they become actors
-   (step 9). Inside a step the clock is pinned for the scheduler thread, so every rule a stage reaches reads the tick
+   sieges, manor, lottery, seven signs, mammon); no system keeps a clock of its own (step 9). Inside a step the clock is pinned for the scheduler thread, so every rule a stage reaches reads the tick
    time; parallel region bodies use the `TickContext` they are given. The loop sleeps until the next tick is due. A
    late step jumps to the tick the wall clock is in and reports the skipped ticks (a stage whose period was crossed
    runs once); a step while the wall clock is behind still advances one tick. Commands run inside the step that
@@ -418,10 +426,8 @@ external settlement backend can consume the committed feed without the simulatio
    (same content, seed and starting tick) by submitting each command entry through the same ingress and applying it
    in the next step entry, and fails at the first entry whose tick or outcome differs.
    `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
-   pins the generator to reference values.
-
-   Not yet covered: boss respawn windows (seeded with the boss actor, step 9), and the seven signs and boss schedules,
-   which keep their own clocks until they become actors (step 9).
+   pins the generator to reference values. `GlobalActorTests` replays a boss kill, its seeded respawn window and the
+   respawn, and checks that actors read the step's time and refuse region bodies.
 
 ---
 
@@ -469,7 +475,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
 | **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
-| 9 | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls. | Same schedules. |
+| **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
 | 10 | Social actors: party, clan, chat, friends. | Same. |
 | 11a–f | Ledger: journal + `IEconomyLedger` in-process, then one movement kind per PR: shop buy/sell, trade, pickup/drop, warehouse, private store, mail, quest rewards, crafting. Each runs alongside the snapshot writes with a reconciliation check until removed. | Same outcomes; every move is now auditable. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |

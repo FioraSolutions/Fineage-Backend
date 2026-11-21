@@ -53,7 +53,7 @@ public sealed class SiegeRegistration
     public int Side { get; set; }
 }
 
-public readonly record struct SiegeActor(int CharacterId);
+public readonly record struct SiegeRequester(int CharacterId);
 
 public sealed class SiegeClanInfo
 {

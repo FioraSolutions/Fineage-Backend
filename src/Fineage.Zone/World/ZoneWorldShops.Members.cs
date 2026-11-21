@@ -64,7 +64,7 @@ public sealed partial class ZoneWorld
         owned = false;
         if (npc.MerchantCastleId <= 0)
             return;
-        var castle = _siege.Find(npc.MerchantCastleId);
+        var castle = _siege.Board.Find(npc.MerchantCastleId);
         if (castle == null || castle.OwnerClanId <= 0)
             return;
         owned = true;

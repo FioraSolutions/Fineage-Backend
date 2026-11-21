@@ -75,8 +75,8 @@ public sealed partial class ZoneWorld
 
         PersistUnlinkSnapshot(snapshot.Value);
 
-        _sevenSigns.Save();
-        _bosses.Save();
+        _sevenSigns.Engine.Save();
+        _bosses.Schedule.Save();
         ZoneLog.LeaveWorld(session);
         return Task.CompletedTask;
     }

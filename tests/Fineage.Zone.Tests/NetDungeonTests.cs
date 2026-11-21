@@ -228,7 +228,7 @@ public sealed class NetDungeonTests
 
     static WorldBench World(MutableGameClock clock, DungeonCatalog catalog) => new(
         clock: () => clock.UtcNow,
-        sevenSigns: new SevenSignsEngine(clock),
+        sevenSigns: new SevenSignsEngine(clock.UtcNow),
         dungeons: catalog,
         dungeonAccess: new DungeonAccessOptions());
 

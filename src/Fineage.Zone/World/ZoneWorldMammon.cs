@@ -9,51 +9,26 @@ namespace Fineage.Zone.World;
 /// Mammon NPCs tied to Seven Signs, after Mobius <c>SevenSigns.spawnSevenSignsNPC</c> and <c>AutoSpawnHandler</c>:
 /// during competition results and seal validation the Merchant of Mammon walks the Necropolises while the winning
 /// cabal holds Avarice, and the Blacksmith of Mammon walks the Catacombs while it holds Gnosis. Each appears 30 s
-/// after its seal goes live and moves to a random spot of its list every hour; outside that window both are gone.
-/// The talk pages gate on the strict rule, the shops are the datapack multisells (Ancient Adena prices,
+/// after its seal goes live and moves to a random spot of its list every hour; outside that window both are gone
+/// (<see cref="MammonActor"/> keeps that schedule; the world places the NPCs it returns). The talk pages gate on the strict rule, the shops are the datapack multisells (Ancient Adena prices,
 /// sealed A/S armor and jewel release, weapon special abilities), and the Black Marketeer swaps Ancient Adena 1:1.
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    /// <summary>Mobius <c>AutoSpawnHandler</c> defaults: first spawn 30 s after activation, then every hour.</summary>
-    internal const long MammonInitialDelayMs = 30_000;
-    internal const long MammonMoveMs = 3_600_000;
-
-    /// <summary>Mobius <c>random_spawn_loc</c> group 11: the eight Necropolises.</summary>
-    internal static readonly (int X, int Y, int Z)[] MammonMerchantSpots =
-    [
-        (-52172, 78884, -4741),   // Necropolis of Devotion
-        (-41350, 209876, -5087),  // Necropolis of Sacrifice
-        (-21657, 77164, -5173),   // Patriots' Necropolis
-        (45029, 123802, -5413),   // Pilgrims' Necropolis
-        (83175, 208998, -5439),   // Saints' Necropolis
-        (111337, 173804, -5439),  // Necropolis of Worship
-        (118343, 132578, -4831),  // Necropolis of Martyrdom
-        (172373, -17833, -4901)   // Disciples' Necropolis
-    ];
-
-    /// <summary>Mobius <c>random_spawn_loc</c> group 12: the six Catacombs.</summary>
-    internal static readonly (int X, int Y, int Z)[] MammonBlacksmithSpots =
-    [
-        (-19360, 13278, -4901),   // Catacomb of Dark Omens
-        (-53131, -250502, -7909), // Catacomb of the Heretic
-        (46303, 170091, -4981),   // Catacomb of the Branded
-        (-20485, -251008, -8165), // Catacomb of the Apostate
-        (12669, -248698, -9581),  // Catacomb of the Forbidden Path
-        (140519, 79464, -5429)    // Catacomb of the Witch
-    ];
-
     sealed class MammonSlot
     {
         public int ObjectId;
-        public long DueMs;
-        public int Spot = -1;
     }
 
+    readonly MammonActor _mammon;
     readonly MammonSlot _mammonMerchant = new();
     readonly MammonSlot _mammonBlacksmith = new();
 
-    internal Random MammonRandom { get; set; }
+    internal Random MammonRandom
+    {
+        get => _mammon.Random;
+        set => _mammon.Random = value;
+    }
 
     internal ZoneEntity? MammonMerchantForTests => _mammonMerchant.ObjectId != 0 ? _byId.GetValueOrDefault(_mammonMerchant.ObjectId) : null;
     internal ZoneEntity? MammonBlacksmithForTests => _mammonBlacksmith.ObjectId != 0 ? _byId.GetValueOrDefault(_mammonBlacksmith.ObjectId) : null;
@@ -76,38 +51,19 @@ public sealed partial class ZoneWorld
     internal void TickMammonForTests()
     {
         lock (_gate)
-            TickMammon(NowUnixMs());
+            AtHookTick(tick => PlaceMammons(_mammon.Step(tick)));
     }
 
-    void TickMammon(long now)
+    int PlaceMammons(IReadOnlyList<MammonPlacement> placements)
     {
-        var effects = _sevenSigns.Effects();
-        TickMammonSlot(_mammonMerchant, SevenSignsProtocol.MammonMerchantId, MammonMerchantSpots, effects.MammonMerchant, now);
-        TickMammonSlot(_mammonBlacksmith, SevenSignsProtocol.MammonBlacksmithId, MammonBlacksmithSpots, effects.MammonBlacksmith, now);
-    }
-
-    void TickMammonSlot(MammonSlot slot, int npcId, (int X, int Y, int Z)[] spots, bool active, long now)
-    {
-        if (!active)
+        foreach (var placement in placements)
         {
+            var slot = placement.NpcId == SevenSignsProtocol.MammonMerchantId ? _mammonMerchant : _mammonBlacksmith;
             RemoveMammon(slot);
-            slot.DueMs = 0;
-            return;
-        }
-
-        if (slot.DueMs == 0)
-        {
-            slot.DueMs = now + MammonInitialDelayMs;
-            return;
-        }
-        if (now < slot.DueMs)
-            return;
-
-        RemoveMammon(slot);
-        slot.Spot = MammonRandom.Next(spots.Length);
-        var (x, y, z) = spots[slot.Spot];
-        if (Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
-        {
+            if (placement.At is not var (x, y, z))
+                continue;
+            if (!Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(placement.NpcId, out var template))
+                continue;
             int objectId = AllocateQuestNpcObjectId();
             MaterializeSpawn(SpawnCatalog.FromTemplate(objectId, template, x, y, z, 0, attackable: false), _activeMapId);
             if (_byId.TryGetValue(objectId, out var npc))
@@ -115,10 +71,11 @@ public sealed partial class ZoneWorld
                 npc.HomeSet = false;
                 FanoutNewNpc(npc);
                 slot.ObjectId = objectId;
-                ZoneLog.Info($"[mammon] spawn npc={npcId} object={objectId} at={x},{y},{z}");
+                ZoneLog.Info($"[mammon] spawn npc={placement.NpcId} object={objectId} at={x},{y},{z}");
             }
         }
-        slot.DueMs = now + MammonMoveMs;
+
+        return placements.Count;
     }
 
     void RemoveMammon(MammonSlot slot)
@@ -166,11 +123,11 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius strict seven signs: the talker's cabal must be the winner and own the seal the NPC serves.</summary>
     bool MammonAllowed(ZoneSession session, ZoneEntity player, bool gnosis)
     {
-        if (!_sevenSigns.Options.Strict)
+        if (!_sevenSigns.Engine.Options.Strict)
             return true;
-        var effects = _sevenSigns.Effects();
+        var effects = _sevenSigns.Engine.Effects();
         var winner = effects.WinningCabal;
-        var cabal = (SevenSignsCabal)_sevenSigns.PlayerCabal(player.ObjectId);
+        var cabal = (SevenSignsCabal)_sevenSigns.Engine.PlayerCabal(player.ObjectId);
         var owner = gnosis ? effects.GnosisOwner : effects.AvariceOwner;
         switch (winner)
         {

@@ -117,7 +117,7 @@ public sealed partial class ZoneWorld
             ZoneCombat.MysticNakedLegsPDef,
             ZoneCombat.NakedLegsPDef,
             ZoneCombat.DefaultPlayerPDef,
-            _olympiadArena.Contains(player.ObjectId) ? _olympiad.Settings.EnchantLimit : -1);
+            _olympiadArena.Contains(player.ObjectId) ? _olympiad.Board.Settings.EnchantLimit : -1);
     }
 
     /// <summary>Mobius GameTimeTaskManager.isNight for HitConditionBonus dark −10.</summary>

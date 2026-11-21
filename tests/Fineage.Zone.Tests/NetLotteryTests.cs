@@ -35,7 +35,7 @@ public sealed class NetLotteryTests
     {
         var clock = new MutableClock { Now = Start };
         var bench = new WorldBench(clock: () => clock.Now);
-        var board = new LotteryBoard(settings, store ?? new MemoryLotteryStore(), Start.ToUnixTimeMilliseconds());
+        var board = new LotteryBoard(Start.ToUnixTimeMilliseconds(), settings, store ?? new MemoryLotteryStore());
         bench.World.UseLottery(board);
         return new Rig { Bench = bench, Clock = clock, Board = board };
     }
@@ -69,7 +69,7 @@ public sealed class NetLotteryTests
     [Fact]
     public void Draw_times_fall_on_saturday_evening_and_sales_close_ten_minutes_before()
     {
-        var board = new LotteryBoard(nowUnixMs: Start.ToUnixTimeMilliseconds());
+        var board = new LotteryBoard(Start.ToUnixTimeMilliseconds());
         Assert.Equal(Draw.ToUnixTimeMilliseconds(), board.EndUnixMs);
         Assert.True(board.Selling(Draw.AddMinutes(-11).ToUnixTimeMilliseconds()));
         Assert.False(board.Selling(Draw.AddMinutes(-10).ToUnixTimeMilliseconds()));
@@ -227,20 +227,20 @@ public sealed class NetLotteryTests
         try
         {
             long now = Start.ToUnixTimeMilliseconds();
-            var board = LotteryBoard.OpenInStateDirectory(dir, nowUnixMs: now);
+            var board = LotteryBoard.OpenInStateDirectory(dir, now);
             int end = 0;
             var t = board.Sell(LotteryBoard.MaskOf([1, 2, 3, 4, 5])!.Value, now);
             Assert.NotNull(t);
             board.Tick(board.EndUnixMs, new Seq(0, 1, 2, 3, 4), []);
             end++;
 
-            var again = LotteryBoard.OpenInStateDirectory(dir);
+            var again = LotteryBoard.OpenInStateDirectory(dir, now);
             Assert.Equal(2, again.Number);
             Assert.Equal(board.Prize, again.Prize);
             Assert.Equal(board.EndUnixMs, again.EndUnixMs);
             Assert.Equal((1, board.Draw(1)!.Prize1), again.Check(t!.Serial));
             again.Forget(t.Serial);
-            Assert.Null(LotteryBoard.OpenInStateDirectory(dir).Ticket(t.Serial));
+            Assert.Null(LotteryBoard.OpenInStateDirectory(dir, now).Ticket(t.Serial));
             Assert.Equal(1, end);
         }
         finally

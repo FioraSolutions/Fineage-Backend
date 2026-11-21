@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Siege;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
@@ -43,29 +44,39 @@ public sealed partial class ZoneWorld
 
     internal CastleData CastleTable { get; set; } = CastleData.Default;
 
-    /// <summary>Simulation tick: auto start at the siege time, the countdown, guard aggro and respawns, auto end.</summary>
-    void TickSieges(long now)
+    /// <summary>
+    /// The siege stage at the step's wall sample: battles a restart interrupted resume, the calendar
+    /// (<see cref="SiegeActor"/>) starts and ends sieges, then every other running battle ticks its countdown, guard
+    /// aggro and respawns.
+    /// </summary>
+    void TickSieges(TickContext tick)
     {
-        foreach (var castle in _siege.Castles)
+        long now = tick.WallUnixMs;
+        foreach (var castle in _siege.Board.Castles)
         {
-            if (!castle.InProgress && castle.ScheduleAccepted && castle.SiegeUnixMs > 0 && castle.SiegeUnixMs <= now &&
-                !_siegeRun.ContainsKey(castle.Id))
-            {
-                StartSiegeLocked(castle.Id, now);
-                continue;
-            }
-
             if (castle.InProgress && !_siegeRun.ContainsKey(castle.Id))
                 OnSiegeStarted(castle, now, resume: true);
-            if (!_siegeRun.TryGetValue(castle.Id, out var run))
-                continue;
-            if (castle.InProgress && castle.EndsUnixMs > 0 && castle.EndsUnixMs <= now)
-            {
-                if (_siege.EndSiege(castle.Id, now) == null)
-                    SyncSiegeRuntime(now);
-                continue;
-            }
+        }
 
+        var moved = new HashSet<int>();
+        foreach (var transition in _siege.Step(tick))
+        {
+            moved.Add(transition.CastleId);
+            switch (transition)
+            {
+                case SiegeStartTransition start:
+                    ApplySiegeStart(start, now);
+                    break;
+                case SiegeEndTransition { Error: null }:
+                    SyncSiegeRuntime(now);
+                    break;
+            }
+        }
+
+        foreach (var castle in _siege.Board.Castles)
+        {
+            if (moved.Contains(castle.Id) || !_siegeRun.TryGetValue(castle.Id, out var run))
+                continue;
             AnnounceCountdown(castle, run, now);
             TickSiegeGuards(castle, run, now);
         }
@@ -73,28 +84,33 @@ public sealed partial class ZoneWorld
 
     SiegeStartKind StartSiegeLocked(int castleId, long now)
     {
-        var before = _siege.Find(castleId);
+        var before = _siege.Board.Find(castleId);
         int owner = before?.OwnerClanId ?? 0;
-        var kind = _siege.StartSiege(castleId, now);
-        if (kind == SiegeStartKind.Cancelled && before != null)
+        var kind = _siege.Board.StartSiege(castleId, now);
+        if (before != null)
+            ApplySiegeStart(new SiegeStartTransition(castleId, kind, owner, before.Name), now);
+        return kind;
+    }
+
+    void ApplySiegeStart(SiegeStartTransition start, long now)
+    {
+        if (start.Kind == SiegeStartKind.Cancelled)
         {
             // Mobius startSiege: no attackers → 846 (NPC castle) or 295 (owned), then the next date is picked.
-            Broadcast(owner > 0 ? SiegeLines.CancelledOwned(before.Name) : SiegeLines.SiegeCancelled(before.Name));
+            Broadcast(start.OwnerBefore > 0 ? SiegeLines.CancelledOwned(start.Name) : SiegeLines.SiegeCancelled(start.Name));
             PersistSiege();
         }
-        else if (kind == SiegeStartKind.Started)
+        else if (start.Kind == SiegeStartKind.Started)
         {
             SyncSiegeRuntime(now);
             PersistSiege();
         }
-
-        return kind;
     }
 
     /// <summary>Starts or tears down the fight state for every castle whose board state moved.</summary>
     void SyncSiegeRuntime(long now)
     {
-        foreach (var castle in _siege.Castles)
+        foreach (var castle in _siege.Board.Castles)
         {
             bool running = _siegeRun.ContainsKey(castle.Id);
             if (castle.InProgress && !running)
@@ -173,7 +189,7 @@ public sealed partial class ZoneWorld
         if (previousOwner > 0 && previousOwner != castle.OwnerClanId && _clans.TryGetValue(previousOwner, out var loser))
             RemoveCirclets(loser, castle.Id);
 
-        foreach (int defender in _siege.SideClans(castle.Id, attackers: false))
+        foreach (int defender in _siege.Board.SideClans(castle.Id, attackers: false))
         {
             if (run.Flags.Remove(defender, out int flag))
                 DespawnSiegeNpc(flag);
@@ -214,9 +230,9 @@ public sealed partial class ZoneWorld
     {
         if (castle.OwnerClanId > 0)
             run.Clans.Add(castle.OwnerClanId);
-        foreach (int id in _siege.SideClans(castle.Id, attackers: true))
+        foreach (int id in _siege.Board.SideClans(castle.Id, attackers: true))
             run.Clans.Add(id);
-        foreach (int id in _siege.SideClans(castle.Id, attackers: false))
+        foreach (int id in _siege.Board.SideClans(castle.Id, attackers: false))
             run.Clans.Add(id);
     }
 
@@ -299,9 +315,9 @@ public sealed partial class ZoneWorld
     {
         var clans = new HashSet<int>();
         if (attackers)
-            clans.UnionWith(_siege.SideClans(castleId, attackers: true));
+            clans.UnionWith(_siege.Board.SideClans(castleId, attackers: true));
         if (defenders)
-            clans.UnionWith(_siege.SideClans(castleId, attackers: false));
+            clans.UnionWith(_siege.Board.SideClans(castleId, attackers: false));
         var ids = new List<int>();
         foreach (int clanId in clans)
         {
@@ -527,7 +543,11 @@ public sealed partial class ZoneWorld
     internal void TickSiegesForTests()
     {
         lock (_gate)
-            TickSieges(NowUnixMs());
+            AtHookTick(tick =>
+            {
+                TickSieges(tick);
+                return 0;
+            });
     }
 
     internal IReadOnlyList<ZoneEntity> SiegeNpcsForTests(int castleId)

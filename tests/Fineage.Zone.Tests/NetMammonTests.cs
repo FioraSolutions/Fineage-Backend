@@ -50,7 +50,7 @@ public sealed class NetMammonTests
     static async Task<Rig> Open(SevenSignsPeriod stopAt = SevenSignsPeriod.SealValidation, SevenSignsOptions? options = null)
     {
         var clock = new MutableGameClock(Start);
-        var engine = new SevenSignsEngine(clock, options);
+        var engine = new SevenSignsEngine(clock.UtcNow, options);
         var bench = new WorldBench(clock: () => clock.UtcNow, sevenSigns: engine);
         var dawn = await bench.EnterAsync("dawn", "Lord", items: [new StoredItem(57, 1000, -1)], classId: 1);
         var dusk = await bench.EnterAsync("dusk", "Rebel", items: [new StoredItem(57, 1000, -1)], classId: 1);
@@ -227,7 +227,10 @@ public sealed class NetMammonTests
         Task<string?> Act(BenchPlayer who, int action, int blue = 0, int green = 0, int red = 0) =>
             world.TrySevenSignsActionAsync(who.Session, new SevenSignsActionRequestMsg
             {
-                Action = action, BlueStones = blue, GreenStones = green, RedStones = red
+                Action = action,
+                BlueStones = blue,
+                GreenStones = green,
+                RedStones = red
             }, CancellationToken.None);
 
         Assert.Equal(SevenSignsProtocol.StonesMissing, await Act(p, SevenSignsProtocol.ActionExchangeStones, blue: 5));

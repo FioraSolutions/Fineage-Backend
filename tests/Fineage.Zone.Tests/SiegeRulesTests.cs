@@ -194,8 +194,8 @@ public class SiegeRulesTests
     {
         var board = new SiegeBoard(NowMs);
         var clan = Clan(5, level: 4);
-        Assert.Equal(SiegeProtocol.Clan, board.Register(new SiegeActor(1), null, 1, true, NowMs));
-        Assert.Equal(SiegeProtocol.Leader, board.Register(new SiegeActor(99), clan, 1, true, NowMs));
+        Assert.Equal(SiegeProtocol.Clan, board.Register(new SiegeRequester(1), null, 1, true, NowMs));
+        Assert.Equal(SiegeProtocol.Leader, board.Register(new SiegeRequester(99), clan, 1, true, NowMs));
         var dissolving = Clan(5, level: 4, dissolving: NowMs + 1);
         Assert.Equal(SiegeProtocol.Dissolving, board.Register(Leader(dissolving), dissolving, 1, true, NowMs));
         Assert.Equal(SiegeProtocol.Castle, board.Register(Leader(clan), clan, 40, true, NowMs));
@@ -216,7 +216,7 @@ public class SiegeRulesTests
 
         var world = new ZoneWorld(accounts: store, clock: () => Now, siege: SiegeSettings.Mobius);
         Assert.Null(world.Sieges.Register(
-            new SiegeActor(leader.Id),
+            new SiegeRequester(leader.Id),
             new SiegeClanInfo { Id = clan!.Id, Level = 4, LeaderId = leader.Id },
             1, true, NowMs));
         world.Sieges.Find(1)!.TaxPercent = 0;
@@ -246,5 +246,5 @@ public class SiegeRulesTests
         DissolvingExpiryUnixMs = dissolving
     };
 
-    static SiegeActor Leader(SiegeClanInfo clan) => new(clan.LeaderId);
+    static SiegeRequester Leader(SiegeClanInfo clan) => new(clan.LeaderId);
 }

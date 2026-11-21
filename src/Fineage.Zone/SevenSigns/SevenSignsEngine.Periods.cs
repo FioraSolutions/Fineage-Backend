@@ -4,8 +4,6 @@ namespace Fineage.Zone.SevenSigns;
 
 public sealed partial class SevenSignsEngine
 {
-    public bool AdvanceDue(IList<SevenSignsNotice> notices) => TryAdvance(_clock.UtcNow, notices);
-
     public bool TryAdvance(DateTimeOffset utcNow, IList<SevenSignsNotice> notices)
     {
         ArgumentNullException.ThrowIfNull(notices);

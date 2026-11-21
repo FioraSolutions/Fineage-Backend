@@ -38,9 +38,9 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        _dungeonAccess.Observe(_sevenSigns);
+        _dungeonAccess.Observe(_sevenSigns.Engine);
         var character = new DungeonCharacter(
-            (SevenSignsCabal)_sevenSigns.PlayerCabal(session.ObjectId),
+            (SevenSignsCabal)_sevenSigns.Engine.PlayerCabal(session.ObjectId),
             player.Dead,
             itemId => player.Inventory.FindByItemId(itemId)?.Count ?? 0);
         var code = _dungeonAccess.CanEnter(character, site.Id);
@@ -76,14 +76,14 @@ public sealed partial class ZoneWorld
 
     void EvictDungeonLosers()
     {
-        _dungeonAccess.Observe(_sevenSigns);
-        var period = _sevenSigns.Period;
+        _dungeonAccess.Observe(_sevenSigns.Engine);
+        var period = _sevenSigns.Engine.Period;
         var notice = DungeonAccess.KickNotice(period);
         foreach (var player in Players())
         {
             if (player.DungeonId == 0 || player.Session == null)
                 continue;
-            var cabal = (SevenSignsCabal)_sevenSigns.PlayerCabal(player.ObjectId);
+            var cabal = (SevenSignsCabal)_sevenSigns.Engine.PlayerCabal(player.ObjectId);
             if (_dungeonAccess.MayRemain(cabal, player.DungeonId))
                 continue;
             if (!_dungeons.TryGet(player.DungeonId, out var site))

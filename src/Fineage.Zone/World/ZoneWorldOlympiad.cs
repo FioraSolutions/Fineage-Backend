@@ -6,7 +6,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    public OlympiadBoard Olympiad => _olympiad;
+    public OlympiadBoard Olympiad => _olympiad.Board;
 
     /// <summary>
     /// Combat hook. <paramref name="winnerObjectId"/> 0 is a draw (the HP-less tie).
@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            var step = _olympiad.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
+            var step = _olympiad.Board.Report(matchId, winnerObjectId, (now ?? WallNow()).ToUnixTimeMilliseconds());
             if (step.Error != null)
                 return step.Error;
             ApplyOlympiad(step);
@@ -28,13 +28,17 @@ public sealed partial class ZoneWorld
     public bool GrantNoblesse(int characterId)
     {
         lock (_gate)
-            return _olympiad.GrantNoblesse(characterId);
+            return _olympiad.Board.GrantNoblesse(characterId);
     }
 
     public Task AdvanceOlympiadAsync(CancellationToken ct = default)
     {
         lock (_gate)
-            TickOlympiad();
+            AtHookTick(tick =>
+            {
+                ApplyOlympiad(_olympiad.Step(tick));
+                return 0;
+            });
         return Task.CompletedTask;
     }
 
@@ -45,7 +49,7 @@ public sealed partial class ZoneWorld
         lock (_gate)
         {
             long now = NowUnixMs();
-            var step = _olympiad.Advance(now, LookupOlympiad, _olympiadRandom);
+            var step = _olympiad.Advance(now);
             ApplyOlympiad(step);
             if (!step.RefreshAll && !step.RefreshStatus.Contains(session.ObjectId))
                 QueueOlympiadStatus(session, now);
@@ -63,7 +67,7 @@ public sealed partial class ZoneWorld
         return RunOlympiadAsync(now =>
         {
             var player = _byId[session.ObjectId];
-            return _olympiad.Register(ActorFor(player), request.Classed == 1, now);
+            return _olympiad.Board.Register(ActorFor(player), request.Classed == 1, now);
         });
     }
 
@@ -71,7 +75,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        return RunOlympiadAsync(now => _olympiad.Unregister(ActorFor(_byId[session.ObjectId]), now));
+        return RunOlympiadAsync(now => _olympiad.Board.Unregister(ActorFor(_byId[session.ObjectId]), now));
     }
 
     public Task<string?> TryOlympiadLeaveAsync(ZoneSession session, CancellationToken ct)
@@ -84,7 +88,7 @@ public sealed partial class ZoneWorld
             if (_byId.TryGetValue(session.ObjectId, out var watcher) && EndOlympiadObserve(watcher))
                 return Task.FromResult<string?>(null);
         }
-        return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now, LookupOlympiad));
+        return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now));
     }
 
     public Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
@@ -94,17 +98,17 @@ public sealed partial class ZoneWorld
         // Rewards may SaveInventory → flush after unlock (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
-            var step = _olympiad.Report(matchId, winnerObjectId, NowUnixMs());
+            var step = _olympiad.Board.Report(matchId, winnerObjectId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
             return step.Error;
         }));
     }
 
-    void TickOlympiad()
+    void ApplyOlympiad(IReadOnlyList<OlympiadStep> steps)
     {
-        var step = _olympiad.Advance(NowUnixMs(), LookupOlympiad, _olympiadRandom, announce: false);
-        ApplyOlympiad(step);
+        foreach (var step in steps)
+            ApplyOlympiad(step);
     }
 
     void NoteOlympiadDisconnect(ZoneEntity entity)
@@ -113,7 +117,7 @@ public sealed partial class ZoneWorld
             return;
         _olympiadArena.Remove(entity.ObjectId);
         _olympiadObservers.Remove(entity.ObjectId);
-        var step = _olympiad.Disconnect(entity.ObjectId, NowUnixMs(), LookupOlympiad);
+        var step = _olympiad.Disconnect(entity.ObjectId, NowUnixMs());
         ApplyOlympiad(step);
     }
 

@@ -122,7 +122,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var castle = _siege.Find(npc.MerchantCastleId);
+        var castle = _siege.Board.Find(npc.MerchantCastleId);
         bool owned = castle != null && castle.OwnerClanId > 0;
         string file = owned ? "territorystatus.htm" : "territorynoclan.htm";
         if (!_html.TryGet(file, out var html))

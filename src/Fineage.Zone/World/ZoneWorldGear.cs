@@ -62,7 +62,7 @@ public sealed partial class ZoneWorld
             return null;
         }
         // Mobius UseItem: recipe scrolls register into the craft book; ItemSkills handle potions / SOE / shots.
-        if (_manor.Data.Seed(item.ItemId) is { } seed)
+        if (_manor.Board.Data.Seed(item.ItemId) is { } seed)
             return TryUseSeed(session, player, item, seed);
         if (item.ItemId == ManorProtocol.HarvesterItemId)
             return TryUseHarvester(session, player);
