@@ -1,6 +1,8 @@
 using System.Reflection;
 using Fineage.Game;
 using Fineage.Accounts;
+using Fineage.Zone;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
@@ -89,10 +91,12 @@ internal sealed class NetTestKit
         Fineage.Zone.Bosses.BossSchedule? bosses = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
+        IRegionExecutor resolvedExecutor =
+            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
         World = new ZoneWorld(aoi, game: Game, accounts: Store, clock: () => Now, spawnCatalog: spawns, activeMapId: map, geo: geo,
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
-            simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: regionExecutor,
+            simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,
             bosses: bosses, ledgerJournal: Ledger);
     }
 
