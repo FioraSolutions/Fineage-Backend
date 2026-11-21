@@ -22,6 +22,16 @@ public sealed class LedgerTxSequence
 
         return new LedgerTxId(_tick, _next++);
     }
+
+    /// <summary>After journal replay, continue numbering past the last committed id.</summary>
+    public void Adopt(LedgerTxId id)
+    {
+        if (id.Tick > _tick || (id.Tick == _tick && id.Sequence >= _next))
+        {
+            _tick = id.Tick;
+            _next = id.Sequence + 1;
+        }
+    }
 }
 
 /// <summary>

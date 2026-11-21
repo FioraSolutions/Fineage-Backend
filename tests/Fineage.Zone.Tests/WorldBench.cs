@@ -50,10 +50,12 @@ internal sealed class WorldBench
         Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null,
         ulong? simulationSeed = null,
         Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
-        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null)
+        Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
+        Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
+        Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
@@ -98,7 +100,7 @@ internal sealed class WorldBench
 
     public GameData Game { get; }
     public MemoryAccountStore Store { get; }
-    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; } = new();
+    public Fineage.Game.Economy.MemoryLedgerJournal Ledger { get; }
     public ZoneWorld World { get; }
     public IWorldEventPublisher Bridge { get; }
     public NetBridgeRecorder Rec { get; }

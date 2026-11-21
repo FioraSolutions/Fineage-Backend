@@ -262,8 +262,11 @@ public sealed partial class ZoneWorld
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
         _multisells = multisells ?? MultiSellCatalog.LoadDefault();
         _shopStock = new ShopStock(_buyLists);
-        _ledger = new EconomyLedger(ledgerJournal ?? new MemoryLedgerJournal(),
-            LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
+        var journal = ledgerJournal ?? new MemoryLedgerJournal();
+        _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
+        foreach (var entry in journal.ReadAll())
+            _ledgerIds.Adopt(entry.Transaction.Id);
+        ExpireOrphanGroundJournalAccounts();
         _itemIds = SeedItemObjectIds(accounts, itemIds, _ledger);
         _deathRules = deathRules ?? DeathRuleCatalog.LoadDefault();
         _deathDrop = deathDrop ?? Fineage.Game.Services.DeathDropRules.LoadDefault();
