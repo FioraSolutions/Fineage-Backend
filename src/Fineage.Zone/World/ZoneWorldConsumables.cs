@@ -143,7 +143,9 @@ public sealed partial class ZoneWorld
         }
 
         // Mobius destroys the item only when the handler's cast lands; a refused use must not eat the stack.
-        if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
+        if (player.Inventory == null)
+            return InventoryProtocol.NotOwned;
+        if (!RecordConsumeOne(player, item, item.ItemId, out bool removedEntirely))
             return InventoryProtocol.NotOwned;
 
         if (hpTotal > 0)
