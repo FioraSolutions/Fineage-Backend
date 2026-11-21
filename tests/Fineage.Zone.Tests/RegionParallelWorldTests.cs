@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Fineage.Accounts;
+using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Olympiad;
