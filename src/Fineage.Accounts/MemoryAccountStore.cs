@@ -311,4 +311,26 @@ public sealed partial class MemoryAccountStore : IAccountStore
             return true;
         }
     }
+
+    public string GetLanguage(string account)
+    {
+        lock (_gate)
+            return Fineage.Game.L10n.PlayerLocale.Normalize(FindAccount(account)?.Language);
+    }
+
+    public bool TrySetLanguage(string account, string language)
+    {
+        string normalized = Fineage.Game.L10n.PlayerLocale.Normalize(language);
+        lock (_gate)
+        {
+            var row = FindAccount(account);
+            if (row == null)
+                return false;
+            if (string.Equals(row.Language, normalized, StringComparison.Ordinal))
+                return true;
+            row.Language = normalized;
+            Save();
+            return true;
+        }
+    }
 }

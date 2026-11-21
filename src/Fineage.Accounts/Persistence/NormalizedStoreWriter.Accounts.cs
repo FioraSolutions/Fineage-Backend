@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using Fineage.Game;
+using Fineage.Game.L10n;
 using Fineage.Game.Quests;
 using Npgsql;
 
@@ -42,6 +43,9 @@ static partial class NormalizedStoreWriter
             : DBNull.Value;
         if (email is string es && string.IsNullOrWhiteSpace(es))
             email = DBNull.Value;
+        string? language = account.TryGetProperty("language", out var lang) && lang.ValueKind == JsonValueKind.String
+            ? PlayerLocale.Normalize(lang.GetString())
+            : null;
         UpsertAccountRow(
             conn,
             tx,
@@ -49,7 +53,8 @@ static partial class NormalizedStoreWriter
             email,
             account.GetProperty("passwordHash").GetString() ?? "",
             account.GetProperty("passwordSalt").GetString() ?? "",
-            account.GetProperty("iterations").GetInt32());
+            account.GetProperty("iterations").GetInt32(),
+            language);
     }
 
     /// <summary>
@@ -63,25 +68,29 @@ static partial class NormalizedStoreWriter
         object? email,
         string passwordHash,
         string passwordSalt,
-        int iterations)
+        int iterations,
+        string? language = null)
     {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
+        // A null language leaves the stored tag alone (credential upsert). A snapshot passes the tag.
         cmd.CommandText =
             """
-            INSERT INTO accounts (name, email, password_hash, password_salt, iterations)
-            VALUES (@name, @email, @hash, @salt, @iter)
+            INSERT INTO accounts (name, email, password_hash, password_salt, iterations, language)
+            VALUES (@name, @email, @hash, @salt, @iter, COALESCE(@language, 'en'))
             ON CONFLICT (name) DO UPDATE SET
                 email = EXCLUDED.email,
                 password_hash = EXCLUDED.password_hash,
                 password_salt = EXCLUDED.password_salt,
-                iterations = EXCLUDED.iterations
+                iterations = EXCLUDED.iterations,
+                language = CASE WHEN @language IS NULL THEN accounts.language ELSE EXCLUDED.language END
             """;
         cmd.Parameters.AddWithValue("name", name);
         cmd.Parameters.AddWithValue("email", email ?? DBNull.Value);
         cmd.Parameters.AddWithValue("hash", passwordHash);
         cmd.Parameters.AddWithValue("salt", passwordSalt);
         cmd.Parameters.AddWithValue("iter", iterations);
+        cmd.Parameters.AddWithValue("language", (object?)language ?? DBNull.Value);
         cmd.ExecuteNonQuery();
     }
 

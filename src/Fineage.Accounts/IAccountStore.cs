@@ -15,6 +15,15 @@ public interface IAccountStore
 
     bool TryGetCredential(string account, out AccountCredential credential);
 
+    /// <summary>
+    /// The account's player language (<see cref="Fineage.Game.L10n.PlayerLocale.Default"/> when unset).
+    /// Language is an account preference: every character on the account shares it, and the zone session copies it at enter.
+    /// </summary>
+    string GetLanguage(string account);
+
+    /// <summary>Stores a normalized player language on the account. False when the account does not exist.</summary>
+    bool TrySetLanguage(string account, string language);
+
     CreateCharacterStatus TryAddCharacter(
         string account,
         string name,

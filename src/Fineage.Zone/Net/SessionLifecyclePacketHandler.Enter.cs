@@ -11,7 +11,8 @@ namespace Fineage.Zone.Net;
 
 sealed partial class SessionLifecyclePacketHandler
 {
-    public async Task OnEnterAsync(NetConnection conn, ZoneSession zoneSession, EntityId self, CancellationToken ct)
+    public async Task OnEnterAsync(
+        NetConnection conn, ZoneSession zoneSession, EntityId self, PacketEnvelope envelope, CancellationToken ct)
     {
         RequireHello(conn);
         if (!zoneSession.Bound)
@@ -20,6 +21,9 @@ sealed partial class SessionLifecyclePacketHandler
             await _reject(conn, "auth_required", "Auth with a handoff token first.", ct).ConfigureAwait(false);
             return;
         }
+
+        var enter = NetCodec.DecodeEnterWorld(envelope.Payload);
+        _world.ApplyPlayerLanguage(zoneSession, enter.Language);
 
         var burst = await _world.EnterAsync(zoneSession, entity => PlanEnter(zoneSession, self, entity), ct)
             .ConfigureAwait(false);
