@@ -37,7 +37,7 @@ public sealed class Collect8to10QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 303, Npc = 30029, Head = 963;
         var me = Any(10);
-        Assert.True(m.AdvEvent(j, bag, Q, Npc, "30029-04", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Npc, "30029-03", me).Ok);
         for (int i = 0; i < 10; i++)
             m.OnPartyKill(j, bag, Q, 20361, me);
         Assert.Equal(10, bag.CountOf(Head));
