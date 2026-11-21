@@ -19,7 +19,7 @@ public sealed class ZoneSimulationTickBudgetTests(ITestOutputHelper output)
     {
         DisableAmbientBoats();
         var observer = new SubsystemTimingObserver();
-        var bench = new WorldBench(includeEnabledMaps: true, simulationObserver: observer, combatRandom: new MissRandomWalk());
+        var bench = new WorldBench(includeEnabledMaps: true, simulationObserver: observer, simulationSeed: 42);
         Assert.Equal(0, bench.World.ActiveSetCounts.Thinking);
 
         GC.Collect();
