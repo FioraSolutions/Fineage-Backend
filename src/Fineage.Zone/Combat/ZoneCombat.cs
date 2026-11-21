@@ -160,6 +160,9 @@ public static partial class ZoneCombat
     public static readonly int MobAttackIntervalMs = AttackTimeMs(DefaultNpcPAtkSpd);
     public const int AggroForgetRange = 3000;
 
+    /// <summary>Mobius <c>AttackableAI.autoAttackCondition</c>: beyond this vertical gap targets are ignored.</summary>
+    public const int AggroMaxZDelta = 300;
+
     /// <summary>Mobius melee hitTime = attack time / 2: damage lands mid-swing (client AttackShot), not on packet.</summary>
     public static readonly int PlayerMeleeHitDelayMs = HitTimeMs(DefaultPlayerPAtkSpd);
     public static readonly int MobMeleeHitDelayMs = HitTimeMs(DefaultNpcPAtkSpd);
