@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// MoveToLocation to the knownlist on every new leg, StopMove broadcast, CharInfo + MoveToLocation / ChangeWaitType
 /// when a pawn enters someone's view, DeleteObject when it leaves; the server never trusts client coordinates.
 /// </summary>
+[Collection(nameof(NetMoveVisibilityCollection))]
 public sealed class NetMoveVisibilityTests
 {
     static CancellationTokenSource Timeout(int seconds = 30) => new(TimeSpan.FromSeconds(seconds));
