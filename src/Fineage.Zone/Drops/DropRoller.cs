@@ -119,7 +119,8 @@ public static class DropRoller
                 }
 
                 bool adena = item.ItemId == AdenaItemId;
-                double gap = LevelGapChance(victimLevel, killerLevel, adena);
+                // Mobius raid/grand bosses: no level-gap penalty on death drops (retail RB tables).
+                double gap = raid ? 100 : LevelGapChance(victimLevel, killerLevel, adena);
                 if (random.NextDouble() * 100 > gap)
                     continue;
 

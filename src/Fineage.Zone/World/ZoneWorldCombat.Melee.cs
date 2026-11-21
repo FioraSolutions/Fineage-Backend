@@ -193,7 +193,10 @@ public sealed partial class ZoneWorld
 
         int dropNpcId = ChestDropNpcId(npcId, npc.ChestSpecialDrop);
         LastDeathDropNpcIdForTest = dropNpcId;
-        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded);
+        int lootOwner = raid
+            ? RaidLootOwnerObjectId(npc, killer, id => _byId.TryGetValue(id, out var e) ? e : null, _party.Of)
+            : killer?.ObjectId ?? 0;
+        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded, lootOwnerObjectId: lootOwner);
         // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
         bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;
         npc.CorpseAwaitingSweep = npc.SweepItems.Count > 0;
