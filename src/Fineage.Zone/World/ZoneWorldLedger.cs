@@ -49,10 +49,8 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Castle, Container: LedgerContainer.Treasury } =>
             new LedgerHoldings().Add(ShopTrade.AdenaItemId, _siege.Board.Find(account.OwnerId)?.Treasury
                 ?? throw new InvalidOperationException($"{account} is not a castle")),
-        { Owner: LedgerOwnerKind.World, Container: LedgerContainer.Ground } =>
-            _byId.TryGetValue(account.OwnerId, out var ground) && ground.Kind == ZoneEntityKind.GroundItem
-                ? GroundHoldingsOf(ground)
-                : new LedgerHoldings(),
+        { Owner: LedgerOwnerKind.World, Container: LedgerContainer.Ground } groundAccount =>
+            GroundHoldingsInWorld(groundAccount),
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Warehouse } =>
             HoldingsOf(_byId.TryGetValue(account.OwnerId, out var owner) && owner.Warehouse != null
                 ? owner.Warehouse

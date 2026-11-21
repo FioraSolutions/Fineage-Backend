@@ -10,6 +10,17 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    LedgerHoldings GroundHoldingsInWorld(LedgerAccount account)
+    {
+        var journal = _ledger.HoldingsOf(account);
+        if (_byId.TryGetValue(account.OwnerId, out var ground) && ground.Kind == ZoneEntityKind.GroundItem)
+            return GroundHoldingsOf(ground);
+        if (!journal.IsEmpty)
+            throw new InvalidOperationException(
+                $"ground:{account.OwnerId} is not a live ground stack in the world");
+        return journal;
+    }
+
     static LedgerHoldings GroundHoldingsOf(ZoneEntity ground) => ground.GroundPiece
         ? new LedgerHoldings().AddPiece(ground.GroundItemId, ground.ObjectId)
         : new LedgerHoldings().Add(ground.GroundItemId, ground.GroundCount);
@@ -31,6 +42,17 @@ public sealed partial class ZoneWorld
         }
 
         return null;
+    }
+
+    /// <summary>Test seam: despawn a ground stack without posting a ledger move.</summary>
+    internal void RemoveGroundForTest(int groundObjectId)
+    {
+        using (_affinity.Step())
+        {
+            if (!_byId.TryGetValue(groundObjectId, out var ground) || ground.Kind != ZoneEntityKind.GroundItem)
+                throw new InvalidOperationException($"object {groundObjectId} is not a ground stack");
+            RemoveGroundItem(ground);
+        }
     }
 
     /// <summary>Posts a stack that <see cref="SpawnGroundStack"/> just placed as coming from <paramref name="from"/>.</summary>
