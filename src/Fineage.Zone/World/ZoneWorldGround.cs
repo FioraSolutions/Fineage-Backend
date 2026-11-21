@@ -2,6 +2,7 @@ using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -64,9 +65,7 @@ public sealed partial class ZoneWorld
 
     bool CanPickupProtected(ZoneEntity player, ZoneEntity ground, long now)
     {
-        bool sameParty = _partyByPlayer.TryGetValue(ground.GroundOwnerId, out int ownerParty)
-            && _partyByPlayer.TryGetValue(player.ObjectId, out int myParty)
-            && ownerParty == myParty;
+        bool sameParty = _party.SameParty(ground.GroundOwnerId, player.ObjectId);
         return GroundRules.CanPickupProtected(
             ground.GroundOwnerId,
             ground.GroundProtectUntilMs,
@@ -145,9 +144,7 @@ public sealed partial class ZoneWorld
         // weight-check a pickup (validateWeight is only on buy / withdraw / trade), so an overloaded character may
         // still loot and simply carries the weight penalty — matching the reference means slots-only here.
         // Party RANDOM/BY_TURN modes check the eventual looter instead of the picker (Party.distributeItem).
-        ZoneParty? pickupParty = null;
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int pickupPartyId))
-            _parties.TryGetValue(pickupPartyId, out pickupParty);
+        ZoneParty? pickupParty = _party.Of(player.ObjectId);
         bool partyDistributes = pickupParty != null
                                 && pickupParty.ItemDistribution != (int)PartyDistributionType.FindersKeepers
                                 && !IsHerb(ground.GroundItemId);

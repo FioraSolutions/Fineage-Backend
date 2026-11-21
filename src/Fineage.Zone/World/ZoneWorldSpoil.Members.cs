@@ -3,6 +3,7 @@ using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 

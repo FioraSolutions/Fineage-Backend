@@ -9,8 +9,17 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    /// <summary>Invitee objectId → inviter objectId.</summary>
-    readonly Dictionary<int, int> _pendingFriendInvites = [];
+    readonly FriendsActor _friends = new();
+
+    /// <summary>The friend and block lists of a player in the world.</summary>
+    SocialLists Lists(ZoneEntity player) => _friends.Of(player.ObjectId);
+
+    /// <summary>Test hook: the live lists of a player in the world.</summary>
+    internal SocialLists SocialListsForTests(ZoneEntity player)
+    {
+        lock (_gate)
+            return Lists(player);
+    }
 
     public async Task<string?> TryFriendInviteAsync(ZoneSession session, FriendInviteMsg request, CancellationToken ct)
     {
@@ -70,61 +79,27 @@ public sealed partial class ZoneWorld
         return error;
     }
 
-    void LoadSocialLists(ZoneEntity entity, CharacterRecord? stored)
-    {
-        entity.Friends.Clear();
-        entity.Blocked.Clear();
-        entity.BlockAll = stored?.BlockAll ?? false;
-        if (stored?.Friends != null)
-        {
-            foreach (var row in stored.Friends)
-            {
-                if (row.ObjectId > 0 && !string.IsNullOrWhiteSpace(row.Name))
-                    entity.Friends[row.ObjectId] = row.Name.Trim();
-            }
-        }
-        if (stored?.Blocked != null)
-        {
-            foreach (var row in stored.Blocked)
-            {
-                if (row.ObjectId > 0 && !string.IsNullOrWhiteSpace(row.Name))
-                    entity.Blocked[row.ObjectId] = row.Name.Trim();
-            }
-        }
-    }
+    void LoadSocialLists(ZoneEntity entity, CharacterRecord? stored) => _friends.Load(entity.ObjectId, entity.Name, stored);
 
     void FriendPlayerEnteredWorld(ZoneEntity player)
     {
-        foreach (var (friendId, _) in player.Friends)
+        foreach (int friendId in _friends.MutualOnline(player.ObjectId))
         {
-            if (!_byId.TryGetValue(friendId, out var friend) || friend.Session == null || !friend.Session.InWorld)
-                continue;
-            if (!friend.Friends.ContainsKey(player.ObjectId))
+            if (!_byId.TryGetValue(friendId, out var friend))
                 continue;
             FanoutFriendUpdate(friend.ObjectId, added: true, player.ObjectId, player.Name, online: true);
             FanoutFriendUpdate(player.ObjectId, added: true, friend.ObjectId, friend.Name, online: true);
         }
     }
 
+    /// <summary>Tells the leaver's online friends it went offline, then drops its lists and invites.</summary>
     void FriendPlayerLeftWorld(int objectId)
     {
-        _pendingFriendInvites.Remove(objectId);
-        foreach (var (inviteeId, inviterId) in _pendingFriendInvites.ToList())
-        {
-            if (inviterId == objectId)
-                _pendingFriendInvites.Remove(inviteeId);
-        }
-
-        if (!_byId.TryGetValue(objectId, out var leaving) || leaving.Kind != ZoneEntityKind.Player)
+        if (!_friends.TryGet(objectId, out var leaving))
             return;
-        foreach (var (friendId, _) in leaving.Friends)
-        {
-            if (!_byId.TryGetValue(friendId, out var friend) || friend.Session == null || !friend.Session.InWorld)
-                continue;
-            if (!friend.Friends.ContainsKey(objectId))
-                continue;
-            FanoutFriendUpdate(friend.ObjectId, added: true, objectId, leaving.Name, online: false);
-        }
+        foreach (int friendId in _friends.MutualOnline(objectId))
+            FanoutFriendUpdate(friendId, added: true, objectId, leaving.Name, online: false);
+        _friends.Unload(objectId);
     }
 
     string? TryFriendInvite(ZoneSession session, FriendInviteMsg request)
@@ -135,10 +110,10 @@ public sealed partial class ZoneWorld
         var target = FindOnlinePlayerByName(name);
         bool targetOnline = target?.Session != null && target.Session.InWorld;
         bool blockedEitherWay = targetOnline
-            && (IsBlocked(target!, self) || self.BlockAll || IsBlocked(self, target!) || target!.BlockAll);
-        bool alreadyFriends = targetOnline && self.Friends.ContainsKey(target!.ObjectId);
+            && (IsBlocked(target!, self) || Lists(self).BlockAll || IsBlocked(self, target!) || Lists(target!).BlockAll);
+        bool alreadyFriends = targetOnline && Lists(self).Friends.ContainsKey(target!.ObjectId);
         bool eitherBusy = targetOnline
-            && (_pendingFriendInvites.ContainsKey(target!.ObjectId) || _pendingFriendInvites.ContainsKey(self.ObjectId));
+            && (_friends.IsInvited(target!.ObjectId) || _friends.IsInvited(self.ObjectId));
         if (FriendRules.InviteError(
                 name,
                 self.Name,
@@ -146,11 +121,11 @@ public sealed partial class ZoneWorld
                 blockedEitherWay,
                 alreadyFriends,
                 eitherBusy,
-                self.Friends.Count,
-                targetOnline ? target!.Friends.Count : 0) is { } inviteError)
+                Lists(self).Friends.Count,
+                targetOnline ? Lists(target!).Friends.Count : 0) is { } inviteError)
             return inviteError;
 
-        _pendingFriendInvites[target!.ObjectId] = self.ObjectId;
+        _friends.Invite(target!.ObjectId, self.ObjectId);
         NetBridge?.FanoutFriendInviteAsk([target.ObjectId], new FriendInviteAskMsg
         {
             RequestorName = self.Name
@@ -163,7 +138,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var self))
             return "world";
-        if (!_pendingFriendInvites.Remove(self.ObjectId, out int inviterId))
+        if (!_friends.TakeInvite(self.ObjectId, out int inviterId))
             return FriendProtocol.Busy;
         if (!_byId.TryGetValue(inviterId, out var inviter) || inviter.Session == null || !inviter.Session.InWorld)
             return FriendProtocol.Missing;
@@ -176,14 +151,14 @@ public sealed partial class ZoneWorld
 
         if (FriendRules.AcceptError(
                 inviterOnlineInWorld: true,
-                alreadyFriendsEitherWay: self.Friends.ContainsKey(inviter.ObjectId)
-                    || inviter.Friends.ContainsKey(self.ObjectId),
-                selfFriendCount: self.Friends.Count,
-                inviterFriendCount: inviter.Friends.Count) is { } acceptError)
+                alreadyFriendsEitherWay: Lists(self).Friends.ContainsKey(inviter.ObjectId)
+                    || Lists(inviter).Friends.ContainsKey(self.ObjectId),
+                selfFriendCount: Lists(self).Friends.Count,
+                inviterFriendCount: Lists(inviter).Friends.Count) is { } acceptError)
             return acceptError;
 
-        self.Friends[inviter.ObjectId] = inviter.Name;
-        inviter.Friends[self.ObjectId] = self.Name;
+        Lists(self).Friends[inviter.ObjectId] = inviter.Name;
+        Lists(inviter).Friends[self.ObjectId] = self.Name;
         PersistFriends(self);
         PersistFriends(inviter);
 
@@ -198,7 +173,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var self))
             return "world";
-        var rows = self.Friends
+        var rows = Lists(self).Friends
             .OrderBy(kv => kv.Value, StringComparer.OrdinalIgnoreCase)
             .Select(kv => new FriendRowMsg
             {

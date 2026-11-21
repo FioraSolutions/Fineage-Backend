@@ -212,7 +212,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             ChangeReputation(clan, reputation - clan.D.Reputation);
             return true;
@@ -224,7 +224,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             clan.Level = level;
             SaveClan(clan);
@@ -237,13 +237,13 @@ public sealed partial class ZoneWorld
     internal ClanDetails? ClanDetailsForTest(int clanId)
     {
         lock (_gate)
-            return _clans.TryGetValue(clanId, out var clan) ? clan.D.Clone() : null;
+            return _clan.TryGet(clanId, out var clan) ? clan.D.Clone() : null;
     }
 
     internal (int Level, int LeaderId, int CrestId, int MemberCount)? ClanSummaryForTest(int clanId)
     {
         lock (_gate)
-            return _clans.TryGetValue(clanId, out var c) ? (c.Level, c.LeaderId, c.CrestId, c.Members.Count) : null;
+            return _clan.TryGet(clanId, out var c) ? (c.Level, c.LeaderId, c.CrestId, c.Members.Count) : null;
     }
 
     internal int ClanIdOfForTest(int characterId)

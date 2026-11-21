@@ -317,7 +317,7 @@ public sealed partial class ZoneWorld
     IEnumerable<ZoneEntity> QuestPartyCandidates(ZoneEntity killer)
     {
         yield return killer;
-        if (!_partyByPlayer.TryGetValue(killer.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(killer.ObjectId) is not { } party)
             yield break;
         foreach (int id in party.MemberIds)
         {
@@ -346,18 +346,9 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            var party = new ZoneParty
-            {
-                PartyId = _nextPartyId++,
-                LeaderObjectId = members[0].ObjectId,
-                ItemDistribution = (int)distribution
-            };
-            _parties[party.PartyId] = party;
-            foreach (var m in members)
-            {
-                party.MemberIds.Add(m.ObjectId);
-                _partyByPlayer[m.ObjectId] = party.PartyId;
-            }
+            var party = _party.Create(members[0].ObjectId, (int)distribution);
+            foreach (var m in members.Skip(1))
+                _party.Join(party, m.ObjectId);
         }
     }
 

@@ -197,6 +197,7 @@ public sealed partial class ZoneWorld
         _byId[entity.ObjectId] = entity;
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
+        _chat.Entered(entity.ObjectId, entity.Name);
         session.X = entity.X;
         session.Y = entity.Y;
         session.Z = entity.Z;

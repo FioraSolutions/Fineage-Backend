@@ -53,23 +53,6 @@ sealed partial class ZoneEntity
 
     ZonePlayerStorePayload EnsureStore() => Store ??= new ZonePlayerStorePayload();
 
-    /// <summary>Player social payload; null until first friend/block access (#353 composition).</summary>
-    public ZonePlayerSocialPayload? Social { get; set; }
-
-    /// <summary>Friend objectId → name snapshot (Mobius friend list).</summary>
-    public Dictionary<int, string> Friends => EnsureSocial().Friends;
-
-    /// <summary>Blocked objectId → name snapshot (Mobius ignore list).</summary>
-    public Dictionary<int, string> Blocked => EnsureSocial().Blocked;
-
-    /// <summary>Mobius block-all / message refusal mode.</summary>
-    public bool BlockAll
-    {
-        get => Social?.BlockAll ?? false;
-        set => EnsureSocial().BlockAll = value;
-    }
-
-    ZonePlayerSocialPayload EnsureSocial() => Social ??= new ZonePlayerSocialPayload();
     /// <summary>NPC Mobius physical attack (0 = unknown → level placeholder). Players read the class template.</summary>
     public double PAtk
     {

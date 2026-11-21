@@ -138,19 +138,19 @@ public sealed partial class ZoneWorld
 
         if (party)
         {
-            if (!_partyByPlayer.TryGetValue(player.ObjectId, out int pa) || !_parties.TryGetValue(pa, out var myParty) ||
+            if (_party.Of(player.ObjectId) is not { } myParty ||
                 myParty.LeaderObjectId != player.ObjectId)
             {
                 SelfLine(session, DuelSysCannotRequest, "You are unable to request a duel at this time.");
                 return;
             }
-            if (!_partyByPlayer.TryGetValue(target.ObjectId, out int pb) || !_parties.TryGetValue(pb, out var theirParty))
+            if (_party.Of(target.ObjectId) is not { } theirParty)
             {
                 SelfLine(session, DuelSysTargetNoParty,
                     "Since the person you challenged is not currently in a party, they cannot duel against your party.");
                 return;
             }
-            if (pa == pb)
+            if (ReferenceEquals(myParty, theirParty))
             {
                 SelfLine(session, DuelSysCannotRequest, "You are unable to request a duel at this time.");
                 return;
@@ -226,7 +226,7 @@ public sealed partial class ZoneWorld
         // Re-check everybody: the world moved on during the ask (Mobius DuelManager.addDuel).
         var teamA = party ? PartyMembersOf(requester) : [requester];
         var teamB = party ? PartyMembersOf(player) : [player];
-        if (party && (!_partyByPlayer.TryGetValue(requester.ObjectId, out int pa) || !_partyByPlayer.TryGetValue(player.ObjectId, out int pb) || pa == pb))
+        if (party && (!_party.InParty(requester.ObjectId) || !_party.InParty(player.ObjectId) || _party.SameParty(requester.ObjectId, player.ObjectId)))
             return;
         foreach (var m in teamA.Concat(teamB))
         {

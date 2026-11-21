@@ -209,7 +209,8 @@ sequenceDiagram
   accessor (`Board`, `Engine`, `Schedule`) at the step's time. Region bodies never reach an actor: the accessors
   and `Step` throw when `RegionTickScheduler.CurrentBody` is set, and a body that has news for one (a boss died to a
   DoT) defers it with `AtBarrier`, which runs on the scheduler thread in region order. Stage names and their order
-  are unchanged.
+  are unchanged. The social actors (step 10, §3.5) use the same guard; chat and friends have no schedule and derive
+  from the untyped `GlobalActor`, so they are request-only.
 - **Persistence and the ledger** run outside the tick. Regions hand them immutable records and get results back
   as messages.
 
@@ -271,6 +272,14 @@ cross-host form delivers them at *t+1*. Damage and abnormal-apply messages come 
 position) to them once per tick in a batch; the actors fan out to members through gateway routing, independent of
 which region or process a member is in. Chat channels with a range (say, shout) resolve the audience from region
 AOI; global channels (trade, hero, clan) go through the social actor.
+
+In process (step 10): `PartyActor`, `ClanActor`, `FriendsActor` and `ChatActor` own parties and party invites,
+clans, members, penalties and clan invites, the friend and block lists of online players, and the online roster by
+id and name. Entities keep only their party and clan ids. The `party` stage steps `PartyActor` at tick time: it
+sends the queued member bars (every 300 ms) and positions (every 3 s) to online mates, parties in ascending id
+order. The `clan.dissolutions` stage steps `ClanActor` at the wall sample and destroys due clans in ascending id
+order. Region bodies queue vitals and buff-icon changes for the party with `AtBarrier`. Whispers, hero, announce
+and clan chat resolve their audience from the roster and the clan actor, not by scanning players.
 
 **Global systems** (olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan hall auctions) become
 actors with their own state and mailbox. They act on the world through messages
@@ -476,7 +485,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
 | **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
 | **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
-| 10 | Social actors: party, clan, chat, friends. | Same. |
+| **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
 | 11a–f | Ledger: journal + `IEconomyLedger` in-process, then one movement kind per PR: shop buy/sell, trade, pickup/drop, warehouse, private store, mail, quest rewards, crafting. Each runs alongside the snapshot writes with a reconciliation check until removed. | Same outcomes; every move is now auditable. |
 | 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
 | 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |

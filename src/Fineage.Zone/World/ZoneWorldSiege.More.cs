@@ -24,7 +24,7 @@ public sealed partial class ZoneWorld
 
     void AdoptClanOwners()
     {
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
         {
             if (clan.CastleId > 0)
                 _siege.Board.TryAdoptOwner(clan.CastleId, clan.Id);
@@ -58,13 +58,13 @@ public sealed partial class ZoneWorld
 
         if (castle != null)
         {
-            string clanName = _clans.TryGetValue(clanId, out var winner) ? winner.Name : "";
+            string clanName = _clan.TryGet(clanId, out var winner) ? winner.Name : "";
             Broadcast(SiegeLines.CastleCaptured(clanName, castle.Name));
             if (castle.InProgress)
                 OnSiegeMidVictory(castle, previousOwner, nowUnixMs);
             else
             {
-                if (previousOwner != 0 && previousOwner != clanId && _clans.TryGetValue(previousOwner, out var loser))
+                if (previousOwner != 0 && previousOwner != clanId && _clan.TryGet(previousOwner, out var loser))
                     RemoveCirclets(loser, castle.Id);
                 SyncSiegeRuntime(nowUnixMs);
             }
@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    int AllyOfClan(int clanId) => _clans.TryGetValue(clanId, out var clan) ? clan.D.AllyId : 0;
+    int AllyOfClan(int clanId) => _clan.TryGet(clanId, out var clan) ? clan.D.AllyId : 0;
 
     /// <summary>The running siege this clan attacks (legacy capture without a castle id).</summary>
     int ActiveSiegeCastleFor(int clanId)
@@ -102,7 +102,7 @@ public sealed partial class ZoneWorld
 
     void ApplyBoardOwnersToClans()
     {
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
             clan.CastleId = _siege.Board.CastleOwnedBy(clan.Id);
         foreach (var entity in _byId.Values)
         {
@@ -116,7 +116,7 @@ public sealed partial class ZoneWorld
         if (_accounts == null)
             return true;
         var owners = new Dictionary<int, int>();
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
             owners[clan.Id] = clan.CastleId;
         return _accounts.SaveSiege(_siege.Board.ExportCastles(), _siege.Board.ExportClans(), owners);
     }

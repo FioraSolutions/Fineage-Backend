@@ -11,7 +11,7 @@ public sealed partial class ZoneWorld
     {
         if (_accounts == null)
         {
-            clan.Id = _nextClanId++;
+            clan.Id = _clan.AllocateId();
             return true;
         }
 
@@ -171,7 +171,7 @@ public sealed partial class ZoneWorld
         members = null!;
         lock (_gate)
         {
-            if (_clans.Count == 0)
+            if (_clan.Count == 0)
                 return false;
             var clan = ClanOf(session.ObjectId);
             if (clan == null)
@@ -265,7 +265,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan) || skillId <= 0)
+            if (!_clan.TryGet(clanId, out var clan) || skillId <= 0)
                 return false;
             if (level <= 0)
                 clan.Skills.Remove(skillId);

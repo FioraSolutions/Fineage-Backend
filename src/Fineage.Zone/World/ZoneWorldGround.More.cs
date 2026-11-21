@@ -2,6 +2,7 @@ using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 

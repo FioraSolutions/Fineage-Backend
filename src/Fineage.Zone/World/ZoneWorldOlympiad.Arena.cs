@@ -81,7 +81,7 @@ public sealed partial class ZoneWorld
             return;
         EndOlympiadObserve(player);
         AbortCast(player, "olympiad", notify: false);
-        if (player.Session != null && _partyByPlayer.ContainsKey(player.ObjectId))
+        if (player.Session != null && _party.InParty(player.ObjectId))
             TryPartyLeave(player.ObjectId);
         player.Abnormals.Clear();
         player.ActiveEnchantObjectId = 0;

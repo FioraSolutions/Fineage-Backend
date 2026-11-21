@@ -4,6 +4,7 @@ using Fineage.Zone.Clan;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.Manor;
 using Fineage.Zone.Olympiad;
+using Fineage.Zone.Party;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
@@ -147,7 +148,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("pending-casts", tick => TickPendingCasts(tick.NowUnixMs));
         ticks.AddWorldStage("queued-moves", tick => TickQueuedMoves(tick.NowUnixMs));
         ticks.AddWorldStage("trade-range", _ => TickTradeRange());
-        ticks.AddWorldStage("party", tick => TickParty(tick.NowUnixMs));
+        ticks.AddWorldStage(PartyActor.StageName, TickParty);
         ticks.AddWorldStage("pending-pickups", tick => TickPendingPickups(tick.NowUnixMs));
         ticks.AddWorldStage("pending-talks", tick => TickPendingTalks(tick.NowUnixMs));
         ticks.AddWorldStage("fear", tick => TickFear(tick.NowUnixMs));
@@ -168,7 +169,7 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage("spawns", _ => TickSpawns(), slow);
         ticks.AddRegionStage(_abnormalsStage, slow);
         ticks.AddWorldStage(BossActor.StageName, tick => SpawnBosses(_bosses.Step(tick)), slow);
-        ticks.AddWorldStage("clan.dissolutions", tick => CompleteDueDissolutions(tick.WallUnixMs), slow);
+        ticks.AddWorldStage(ClanActor.StageName, tick => DissolveClans(tick, _clan.Step(tick)), slow);
         ticks.AddWorldStage(HallAuctionActor.StageName, TickHallAuctions, slow);
         ticks.AddWorldStage(SiegeActor.StageName, TickSieges, slow);
         ticks.AddWorldStage(ManorActor.StageName, tick => ApplyManorModes(_manor.Step(tick)), slow);

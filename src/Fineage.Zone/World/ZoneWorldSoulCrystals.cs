@@ -140,7 +140,7 @@ public sealed partial class ZoneWorld
     List<ZoneEntity> PartyMembersOf(ZoneEntity player)
     {
         var list = new List<ZoneEntity> { player };
-        if (!_partyByPlayer.TryGetValue(player.ObjectId, out int partyId) || !_parties.TryGetValue(partyId, out var party))
+        if (_party.Of(player.ObjectId) is not { } party)
             return list;
         foreach (int id in party.MemberIds)
         {

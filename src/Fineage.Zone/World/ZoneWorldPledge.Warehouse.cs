@@ -1,6 +1,7 @@
 using Fineage.Game.Services;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
+using Fineage.Zone.Clan;
 
 namespace Fineage.Zone.World;
 
@@ -118,7 +119,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return [];
             return ClanWarehouseOf(clan)!.Items.GroupBy(i => i.ItemId).ToDictionary(g => g.Key, g => g.Sum(i => i.Count));
         }

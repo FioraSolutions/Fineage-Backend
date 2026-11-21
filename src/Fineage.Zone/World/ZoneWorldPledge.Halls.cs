@@ -43,13 +43,13 @@ public sealed partial class ZoneWorld
             var hall = stored.TryGetValue(info.Id, out var s) ? s : new ClanHallSave { Id = info.Id, StartingBid = info.StartingBid };
             if (hall.StartingBid <= 0)
                 hall.StartingBid = info.StartingBid;
-            if (hall.OwnerClanId != 0 && !_clans.ContainsKey(hall.OwnerClanId))
+            if (hall.OwnerClanId != 0 && !_clan.Contains(hall.OwnerClanId))
                 hall.OwnerClanId = 0;
             if (hall.OwnerClanId == 0 && hall.AuctionEndUnixMs <= 0)
                 hall.AuctionEndUnixMs = now + HallAuctionMs;
             _hallAuctions.Halls[hall.Id] = hall;
         }
-        foreach (var clan in _clans.Values)
+        foreach (var clan in _clan.All)
         {
             var owned = _hallAuctions.Halls.Values.FirstOrDefault(h => h.OwnerClanId == clan.Id);
             clan.D.HallId = owned?.Id ?? 0;
@@ -77,7 +77,7 @@ public sealed partial class ZoneWorld
                 Grade = info?.Grade ?? 0,
                 Lease = info?.Lease ?? 0,
                 OwnerClanId = h.OwnerClanId,
-                OwnerClanName = _clans.TryGetValue(h.OwnerClanId, out var owner) ? owner.Name : "",
+                OwnerClanName = _clan.TryGet(h.OwnerClanId, out var owner) ? owner.Name : "",
                 AuctionEndUnixMs = h.OwnerClanId == 0 ? h.AuctionEndUnixMs : 0,
                 StartingBid = h.StartingBid,
                 HighestBid = h.Bids.Count == 0 ? 0 : h.Bids.Max(b => b.Amount),
@@ -183,15 +183,15 @@ public sealed partial class ZoneWorld
         {
             var hall = halls[ended.HallId];
             var winner = hall.Bids
-                .Where(b => _clans.TryGetValue(b.ClanId, out var c) && c.D.HallId == 0)
+                .Where(b => _clan.TryGet(b.ClanId, out var c) && c.D.HallId == 0)
                 .OrderByDescending(b => b.Amount).ThenBy(b => b.TimeUnixMs).FirstOrDefault();
             foreach (var bid in hall.Bids)
             {
-                if (bid != winner && _clans.TryGetValue(bid.ClanId, out var loser))
+                if (bid != winner && _clan.TryGet(bid.ClanId, out var loser))
                     RefundHallBid(loser, bid.Amount, tax: true);
             }
             hall.Bids.Clear();
-            if (winner == null || !_clans.TryGetValue(winner.ClanId, out var clan))
+            if (winner == null || !_clan.TryGet(winner.ClanId, out var clan))
             {
                 hall.AuctionEndUnixMs = now + HallAuctionMs;
                 continue;
@@ -263,7 +263,7 @@ public sealed partial class ZoneWorld
     {
         lock (_gate)
         {
-            if (!_clans.TryGetValue(clanId, out var clan))
+            if (!_clan.TryGet(clanId, out var clan))
                 return false;
             ClanWarehouseOf(clan)!.Add(itemId, count, 0, out _);
             return SaveClan(clan);

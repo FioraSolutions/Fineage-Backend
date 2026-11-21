@@ -148,14 +148,6 @@ sealed class ZonePlayerIdentityPayload
     public bool Newbie { get; set; } = true;
 }
 
-/// <summary>Player friend/block social fields composed off <see cref="ZoneEntity"/> (#353).</summary>
-sealed class ZonePlayerSocialPayload
-{
-    public Dictionary<int, string> Friends { get; } = [];
-    public Dictionary<int, string> Blocked { get; } = [];
-    public bool BlockAll { get; set; }
-}
-
 /// <summary>Shared HP/MP/XP/sitting/death fields composed off <see cref="ZoneEntity"/> (#353).</summary>
 sealed class ZoneEntityVitalsPayload
 {

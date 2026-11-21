@@ -3,6 +3,7 @@ using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Skills;
+using Fineage.Zone.Party;
 
 namespace Fineage.Zone.World;
 
@@ -93,8 +94,7 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    bool SameParty(int a, int b) =>
-        _partyByPlayer.TryGetValue(a, out int pa) && _partyByPlayer.TryGetValue(b, out int pb) && pa == pb;
+    bool SameParty(int a, int b) => _party.SameParty(a, b);
 
     /// <summary>
     /// Mobius Sweeper (skill 42) + ConditionPlayerCanSweep + ConsumeBody: spoiled (343), spoiler or party mate (683), corpse not
@@ -134,9 +134,7 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        ZoneParty? party = null;
-        if (_partyByPlayer.TryGetValue(player.ObjectId, out int partyId))
-            _parties.TryGetValue(partyId, out party);
+        ZoneParty? party = _party.Of(player.ObjectId);
 
         var touchInventories = new HashSet<int>();
         foreach (var stack in target.SweepItems)
