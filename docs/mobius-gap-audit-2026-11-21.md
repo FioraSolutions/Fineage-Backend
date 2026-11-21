@@ -336,7 +336,8 @@ Ordered for a **live Interlude shard** (leveling → gear → economy → endgam
 | 13 | Baby pet / evolution | #726, #728 | done — spice heal + evolve/multisell | No |
 | 14 | Guard / town AI | — | partial (base guard AI) | No |
 | 15 | Zone types (swamp/damage/NL) | (this PR) | done — imported JSON + movement/sim | No |
-| 16 | Boats + walking NPCs | — | **next** | Yes — `docs/client-packet-contracts.md` |
+| 16 | Boats + walking NPCs | (this PR) | done — Routes.xml + 5 boat scripts; move fan-out (vehicle wire pending) | Yes — `docs/client-packet-contracts.md` |
+| 16a | Monster Derby Track | — | **next** | Yes — `MonRaceInfo` `0xDD` |
 | 16a | Monster Derby Track | — | queued after #16 | Yes — `MonRaceInfo` `0xDD` |
 | 17 | Saga quest fidelity | — | partial (`QuestCatalog.Sagas`) | No |
 | 18 | GM / punishment tooling | — | partial | No |
