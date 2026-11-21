@@ -33,7 +33,11 @@ public sealed class ZoneArmorSetStatsTests
         var bag = new PlayerInventory(game.Items);
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 94, Level = 80, Inventory = bag
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 94,
+            Level = 80,
+            Inventory = bag
         };
         var world = new ZoneWorld();
         bag.Equip(bag.Add(2407));
@@ -60,7 +64,11 @@ public sealed class ZoneArmorSetStatsTests
         var bag = new PlayerInventory(game.Items);
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 94, Level = 80, Inventory = bag
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 94,
+            Level = 80,
+            Inventory = bag
         };
         var world = new ZoneWorld();
         bag.Equip(bag.Add(6383));

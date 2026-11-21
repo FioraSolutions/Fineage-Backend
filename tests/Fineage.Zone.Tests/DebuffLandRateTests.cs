@@ -57,7 +57,11 @@ public sealed class DebuffLandRateTests
         var bag = new PlayerInventory(game.Items);
         var player = new ZoneEntity
         {
-            ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 0, Level = 80, Inventory = bag
+            ObjectId = 1,
+            Kind = ZoneEntityKind.Player,
+            ClassId = 0,
+            Level = 80,
+            Inventory = bag
         };
         var world = new ZoneWorld(game: game);
         Assert.Null(world.PlayerDefenceTraits(player));
