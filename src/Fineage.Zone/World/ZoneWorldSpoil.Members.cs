@@ -162,9 +162,9 @@ public sealed partial class ZoneWorld
             // Mobius Spoil effect (instant, physical skill: not interrupted by hits) at hitTime.
             if (areaSpoil)
             {
-                ScheduleEffect(player, target, template, level, now, hitMs, (_, at) =>
+                ScheduleEffect(player, target, template, level, now, hitMs, (primary, _) =>
                 {
-                    foreach (var victim in HostileAffectTargets(player, at, template))
+                    foreach (var victim in HostileAffectTargets(player, primary, template))
                     {
                         if (victim.Kind != ZoneEntityKind.Npc || !victim.Attackable || victim.Dead || victim.CurHp <= 0)
                             continue;
