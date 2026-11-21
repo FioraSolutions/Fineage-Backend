@@ -163,11 +163,15 @@ public sealed partial class ZoneWorld : IPunishmentSink
           });
     }
 
-    void KickBannedOnline(int objectId)
+    void KickBannedOnline(int objectId) =>
+        DisconnectOnlinePlayer(objectId, $"ban kick object={objectId}");
+
+    /// <summary>Detach an online session from the world (ban kick, admin kick).</summary>
+    internal void DisconnectOnlinePlayer(int objectId, string logLine)
     {
         if (!_byId.TryGetValue(objectId, out var player) || player.Session is not { } session)
             return;
-        ZoneLog.Info($"ban kick object={objectId}");
+        ZoneLog.Info(logLine);
         TryDetachPlayer(session, capturePersist: true, out _, out var snapshot);
         if (snapshot.HasValue)
             PersistUnlinkSnapshot(snapshot.Value);

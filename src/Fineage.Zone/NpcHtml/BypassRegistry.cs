@@ -77,7 +77,7 @@ public sealed class BypassRegistry
         registry.Register(new FreightBypassHandler());
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
-        registry.Register(new FishermanBypassHandler(pages));
+        registry.Register(new FishermanBypassHandler());
         registry.Register(new LotoBypassHandler());
         registry.Register(new MonsterRaceBypassHandler());
         registry.Register(new SevenSignsBypassHandler());

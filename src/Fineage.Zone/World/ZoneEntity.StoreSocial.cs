@@ -265,6 +265,13 @@ sealed partial class ZoneEntity
         get => Status?.ForceCharges ?? 0;
         set => EnsureStatus().ForceCharges = Math.Clamp(value, 0, 7);
     }
+
+    /// <summary>Mobius <c>ResetChargesTask</c> deadline (runtime only; not persisted on relog).</summary>
+    public long ForceChargeResetAtUnixMs
+    {
+        get => Status?.ForceChargeResetAtUnixMs ?? 0;
+        set => EnsureStatus().ForceChargeResetAtUnixMs = Math.Max(0, value);
+    }
     /// <summary>NPC remaining Mobius SoulShot stock (template starting count; decremented on fire).</summary>
     public int NpcSoulShotLeft
     {
