@@ -188,7 +188,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Warehouse = character.Warehouse?.Select(item => new StoredItemDto
             {
@@ -198,7 +200,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Freight = character.Freight?.Select(item => new StoredItemDto
             {
@@ -208,7 +212,9 @@ public sealed partial class MemoryAccountStore : IAccountStore
                 EnchantLevel = item.EnchantLevel,
                 ObjectId = item.ObjectId,
                 CustomType1 = item.CustomType1,
-                CustomType2 = item.CustomType2
+                CustomType2 = item.CustomType2,
+                Option1 = item.Option1,
+                Option2 = item.Option2
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),

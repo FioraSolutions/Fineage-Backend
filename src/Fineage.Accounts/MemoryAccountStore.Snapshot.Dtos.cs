@@ -209,5 +209,7 @@ public sealed partial class MemoryAccountStore
         public int ObjectId { get; set; }
         public int CustomType1 { get; set; }
         public int CustomType2 { get; set; }
+        public int Option1 { get; set; }
+        public int Option2 { get; set; }
     }
 }

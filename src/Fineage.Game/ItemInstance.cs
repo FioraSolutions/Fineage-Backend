@@ -28,6 +28,20 @@ public sealed class ItemInstance
     /// <summary>Mobius custom type 2 (monster race ticket bet / 100 adena).</summary>
     public int CustomType2 { get; internal set; }
 
+    /// <summary>Mobius variation option 1 (lower 16 bits of augmentation id).</summary>
+    public int Option1 { get; internal set; }
+
+    /// <summary>Mobius variation option 2 (upper 16 bits of augmentation id).</summary>
+    public int Option2 { get; internal set; }
+
+    /// <summary>Variation option 1 (low 16 bits of Mobius variation id).</summary>
+    public int Option1 { get; internal set; }
+
+    /// <summary>Variation option 2 (high 16 bits of Mobius variation id).</summary>
+    public int Option2 { get; internal set; }
+
+    public bool IsAugmented => Option1 != 0 || Option2 != 0;
+
     /// <summary>Paperdoll slot while worn. Null while the item is only in the bag.</summary>
     public PaperdollSlot? EquippedSlot { get; internal set; }
 

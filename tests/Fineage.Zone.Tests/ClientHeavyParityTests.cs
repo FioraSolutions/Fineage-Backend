@@ -18,7 +18,7 @@ public sealed class ClientHeavyParityTests
         Assert.False(ClientHeavyFeatures.AugmentationEnabled);
         Assert.False(ClientHeavyFeatures.CursedWeaponsEnabled);
         Assert.False(ClientHeavyFeatures.SkillEnchantEnabled);
-        Assert.False(AugmentationRules.CanRefine);
+        Assert.Equal(AugmentationCatalog.LoadDefault().IsLoaded, AugmentationRules.CanRefine);
         Assert.False(SkillEnchantRules.CanEnchant(1, 2));
     }
 

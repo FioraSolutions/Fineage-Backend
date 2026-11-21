@@ -18,6 +18,8 @@ namespace Fineage.Net.Contract
         public string WeaponType { get; set; } = "";
         /// <summary>Armor token ("light", "heavy", "magic"), empty when not armor.</summary>
         public string ArmorType { get; set; } = "";
+        public int Option1 { get; set; }
+        public int Option2 { get; set; }
     }
 
     public sealed class ItemListNetMsg
@@ -61,6 +63,8 @@ namespace Fineage.Net.Contract
         public string Icon { get; set; } = "";
         public string WeaponType { get; set; } = "";
         public string ArmorType { get; set; } = "";
+        public int Option1 { get; set; }
+        public int Option2 { get; set; }
     }
 
     public sealed class InventoryUpdateNetMsg

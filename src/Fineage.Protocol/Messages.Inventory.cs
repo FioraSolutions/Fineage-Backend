@@ -23,6 +23,10 @@ public sealed class ItemListEntryMsg
     public string ArmorType { get; set; } = "";
     /// <summary>Enchant level. 0 when the piece is not enchanted. Older clients ignore this key.</summary>
     public int EnchantLevel { get; set; }
+    /// <summary>Mobius variation option 1. Trailing for older clients.</summary>
+    public int Option1 { get; set; }
+    /// <summary>Mobius variation option 2. Trailing for older clients.</summary>
+    public int Option2 { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.ItemList"/> (1014). Every item in the entering player's inventory.</summary>
@@ -56,6 +60,8 @@ public sealed class InventoryUpdateEntryMsg
     public string ArmorType { get; set; } = "";
     /// <summary>Enchant level. Remove rows still carry the level the piece had. Older clients ignore this key.</summary>
     public int EnchantLevel { get; set; }
+  public int Option1 { get; set; }
+    public int Option2 { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.InventoryUpdate"/> (1015).</summary>

@@ -215,7 +215,9 @@ static class NetEnterWorldProjector
                 Kind = src.Kind ?? "",
                 Icon = src.Icon ?? "",
                 WeaponType = src.WeaponType ?? "",
-                ArmorType = src.ArmorType ?? ""
+                ArmorType = src.ArmorType ?? "",
+                Option1 = src.Option1,
+                Option2 = src.Option2
             };
         }
 

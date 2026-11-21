@@ -357,5 +357,34 @@ namespace Fineage.Net.Contract
         public const ushort WeddingEngageAnswer = 0x03CB;
         /// <summary>Zone → client: wedding engagement prompt.</summary>
         public const ushort WeddingEngageAsk = 0x03CC;
+
+        /// <summary>Client → zone: Mobius <c>RequestConfirmTargetItem</c> (target object id).</summary>
+        public const ushort AugmentConfirmTarget = 0x03CD;
+        /// <summary>Client → zone: Mobius <c>RequestConfirmRefinerItem</c>.</summary>
+        public const ushort AugmentConfirmRefiner = 0x03CE;
+        /// <summary>Client → zone: Mobius <c>RequestConfirmGemStone</c>.</summary>
+        public const ushort AugmentConfirmGem = 0x03CF;
+        /// <summary>Client → zone: Mobius <c>RequestRefine</c>.</summary>
+        public const ushort AugmentRefine = 0x03D0;
+        /// <summary>Client → zone: Mobius <c>RequestRefineCancel</c> (remove augmentation).</summary>
+        public const ushort AugmentRefineCancel = 0x03D1;
+        /// <summary>Client → zone: close variation make window without refine.</summary>
+        public const ushort AugmentCancelWindow = 0x03D2;
+        /// <summary>Zone → client: Mobius <c>ExShowVariationMakeWindow</c>.</summary>
+        public const ushort AugmentShowMakeWindow = 0x03D3;
+        /// <summary>Zone → client: Mobius <c>ExShowVariationCancelWindow</c>.</summary>
+        public const ushort AugmentShowCancelWindow = 0x03D4;
+        /// <summary>Zone → client: Mobius <c>ExPutItemResultForVariationMake</c>.</summary>
+        public const ushort AugmentPutItemResult = 0x03D5;
+        /// <summary>Zone → client: Mobius <c>ExPutIntensiveResultForVariationMake</c>.</summary>
+        public const ushort AugmentPutRefinerResult = 0x03D6;
+        /// <summary>Zone → client: Mobius <c>ExPutCommissionResultForVariationMake</c>.</summary>
+        public const ushort AugmentPutGemResult = 0x03D7;
+        /// <summary>Zone → client: Mobius <c>ExVariationResult</c>.</summary>
+        public const ushort AugmentVariationResult = 0x03D8;
+        /// <summary>Zone → client: Mobius <c>ExPutItemResultForVariationCancel</c>.</summary>
+        public const ushort AugmentPutCancelItemResult = 0x03D9;
+        /// <summary>Zone → client: Mobius <c>ExVariationCancelResult</c>.</summary>
+        public const ushort AugmentCancelResult = 0x03DA;
     }
 }

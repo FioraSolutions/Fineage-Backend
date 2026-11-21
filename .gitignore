@@ -48,6 +48,8 @@ data/*
 !data/spawns/**
 !data/drops/
 !data/drops/**
+!data/augmentation/
+!data/augmentation/**
 !data/html/
 !data/html/**
 !data/l10n/

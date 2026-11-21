@@ -243,5 +243,35 @@ sealed partial class ZoneEntity
         get => Combat?.ActiveEnchantObjectId ?? 0;
         set => EnsureCombat().ActiveEnchantObjectId = value;
     }
+
+    public bool AugmentCancelWindow
+    {
+        get => Combat?.AugmentCancelWindow ?? false;
+        set => EnsureCombat().AugmentCancelWindow = value;
+    }
+
+    public int AugmentTargetObjectId
+    {
+        get => Combat?.AugmentTargetObjectId ?? 0;
+        set => EnsureCombat().AugmentTargetObjectId = value;
+    }
+
+    public int AugmentRefinerObjectId
+    {
+        get => Combat?.AugmentRefinerObjectId ?? 0;
+        set => EnsureCombat().AugmentRefinerObjectId = value;
+    }
+
+    public int AugmentGemstoneObjectId
+    {
+        get => Combat?.AugmentGemstoneObjectId ?? 0;
+        set => EnsureCombat().AugmentGemstoneObjectId = value;
+    }
+
+    public long AugmentGemstoneCount
+    {
+        get => Combat?.AugmentGemstoneCount ?? 0;
+        set => EnsureCombat().AugmentGemstoneCount = value;
+    }
     /// <summary>Ground-drop payload; null unless <see cref="Kind"/> is GroundItem (#353 composition).</summary>
 }

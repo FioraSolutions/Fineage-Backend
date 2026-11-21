@@ -158,7 +158,7 @@ Withdraw uses existing `WarehouseWithdrawList` / `WarehouseWithdrawRequest` with
 ## Item augmentation (variation / life stones)
 
 **Server feature:** `AugmentationData`, `RequestRefine` / cancel / gem confirm.  
-**Fineage today:** `AugmentationRules` + `FINEAGE_ALLOW_AUGMENTATION` (default **off**); no Net or persistence.
+**Fineage today:** `AugmentationCatalog` + `AugmentationRules` (enabled when `data/augmentation/*.json` loads). Net opcodes **0x03CD–0x03DA** mirror the Mobius Ex variation window; `ItemList` / `InventoryUpdate` rows carry trailing `option1` / `option2`.
 
 ### C2S (`0xD0` extended — Mobius `ExClientPackets`)
 
@@ -183,6 +183,23 @@ Withdraw uses existing `WarehouseWithdrawList` / `WarehouseWithdrawRequest` with
 | `0x57` | `ExVariationCancelResult` | refundAdena |
 
 Inventory updates must carry augmentation options on weapon/armor (`option1` / `option2` in Mobius item instance).
+
+### Fineage Net (zone port `0x03CD`–`0x03DA`)
+
+| Opcode | Direction | Payload |
+|--------|-----------|---------|
+| `0x03CD` | C2S | `targetObjectId` |
+| `0x03CE` | C2S | `targetObjectId`, `refinerObjectId` |
+| `0x03CF` | C2S | above + `gemstoneObjectId`, `gemstoneCount` (i64) |
+| `0x03D0` | C2S | same as gem confirm (refine) |
+| `0x03D1` | C2S | `targetObjectId` (remove augmentation) |
+| `0x03D2` | C2S | empty (close make window) |
+| `0x03D3`–`0x03D4` | S2C | empty (show make / cancel window) |
+| `0x03D5`–`0x03D7` | S2C | Mobius put-item / refiner / gem commission results |
+| `0x03D8` | S2C | `option1`, `option2`, `success` |
+| `0x03D9`–`0x03DA` | S2C | cancel item + cancel result (`refundAdena`) |
+
+Unity client must decode **trailing** `option1`/`option2` on `0x030A` ItemList and `0x0315` InventoryUpdate after armor/weapon metadata strings.
 
 ---
 
