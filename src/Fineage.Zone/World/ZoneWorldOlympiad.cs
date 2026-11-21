@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
 
@@ -182,11 +183,20 @@ public sealed partial class ZoneWorld
             return;
         if (!_game.Items.TryGet(grant.ItemId, out _))
             return;
-        var added = entity.Inventory.Add(grant.ItemId, grant.Count);
-        var update = InventoryMessages.Update(InventoryChange.Add, added);
-        // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
-        NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
-        SaveInventory(entity.Session, entity.Inventory);
+        RecordBagChange(
+            entity,
+            LedgerTxKind.OlympiadGrant,
+            LedgerAccount.Of(SystemAccount.Olympiad),
+            () =>
+            {
+                var added = entity.Inventory.Add(grant.ItemId, grant.Count);
+                var update = InventoryMessages.Update(InventoryChange.Add, added);
+                // The Gate Pass lands in the bag, so Net clients need the same row the V2 frame carries.
+                NetBridge?.FanoutInventoryUpdate([entity.ObjectId], update);
+                SaveInventory(entity.Session, entity.Inventory);
+                return true;
+            },
+            _ => grant.ItemId);
     }
 
     void QueueNotice(OlympiadNotice notice)

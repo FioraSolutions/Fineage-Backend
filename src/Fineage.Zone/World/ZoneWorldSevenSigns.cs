@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.SevenSigns;
@@ -107,25 +108,33 @@ public sealed partial class ZoneWorld
 
         var inventory = player.Inventory;
         var changes = new List<InventoryUpdateEntryMsg>();
-        string? error = _sevenSigns.Engine.TryJoin(
-            session.ObjectId,
-            classLevel,
-            clanOwnsCastle: player.CastleId > 0,
-            (SevenSignsCabal)request.Cabal,
-            (SevenSignsSeal)request.Seal,
-            cost => Pay(inventory, cost, changes),
-            notices);
-        if (error != null)
-            return error;
+        return RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsJoin,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                string? error = _sevenSigns.Engine.TryJoin(
+                    session.ObjectId,
+                    classLevel,
+                    clanOwnsCastle: player.CastleId > 0,
+                    (SevenSignsCabal)request.Cabal,
+                    (SevenSignsSeal)request.Seal,
+                    cost => Pay(inventory, cost, changes),
+                    notices);
+                if (error != null)
+                    return error;
 
-        if (changes.Count > 0)
-        {
-            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
-            SaveInventory(session, inventory);
-        }
+                if (changes.Count > 0)
+                {
+                    var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
+                    SaveInventory(session, inventory);
+                }
 
-        return null;
+                return (string?)null;
+            },
+            _ => request.Cabal);
     }
 
     string? Contribute(
@@ -144,27 +153,47 @@ public sealed partial class ZoneWorld
         if (error != null)
             return error;
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
-        Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
-        Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
-        if (changes.Count > 0)
-        {
-            var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
-            SaveInventory(session, inventory);
-        }
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
+            return "world";
+        return RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsContribute,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
+                Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
+                Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
+                if (changes.Count > 0)
+                {
+                    var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
+                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
+                    SaveInventory(session, inventory);
+                }
 
-        return null;
+                return (string?)null;
+            },
+            _ => request.BlueStones + request.GreenStones + request.RedStones);
     }
 
     string? ClaimSevenSignsReward(ZoneSession session, PlayerInventory inventory)
     {
         if (_sevenSigns.Engine.TryClaimReward(session.ObjectId, out int reward) is { } error)
             return error;
-        GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
-        ZoneLog.Info($"[ssq] reward object={session.ObjectId} aa={reward}");
-        return null;
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
+            return "world";
+        return RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsReward,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
+                ZoneLog.Info($"[ssq] reward object={session.ObjectId} aa={reward}");
+                return (string?)null;
+            },
+            _ => reward);
     }
 
     /// <summary>Mobius priest <c>SevenSigns 17/18</c>: the stones are destroyed and paid for in Ancient Adena.</summary>
@@ -180,14 +209,24 @@ public sealed partial class ZoneWorld
             !HasStones(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones))
             return SevenSignsProtocol.StonesMissing;
 
-        var changes = new List<InventoryUpdateEntryMsg>();
-        Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
-        Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
-        Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
-        if (changes.Count > 0)
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
-        GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
-        return null;
+        if (!_byId.TryGetValue(session.ObjectId, out var player))
+            return "world";
+        return RecordBagChange(
+            player,
+            LedgerTxKind.SevenSignsExchange,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                var changes = new List<InventoryUpdateEntryMsg>();
+                Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
+                Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
+                Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
+                if (changes.Count > 0)
+                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
+                GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
+                return (string?)null;
+            },
+            _ => reward);
     }
 
     void QueueRecord(ZoneSession session)

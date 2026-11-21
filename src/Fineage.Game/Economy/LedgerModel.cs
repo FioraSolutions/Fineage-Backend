@@ -64,7 +64,16 @@ public enum SystemAccount
     Manor = 9,
 
     /// <summary>Circlets and crowns granted to castle members.</summary>
-    CastleGrants = 10
+    CastleGrants = 10,
+
+    /// <summary>Lottery ticket sales and jackpot payouts.</summary>
+    Lottery = 11,
+
+    /// <summary>Seven Signs fees, contributions and period rewards.</summary>
+    SevenSigns = 12,
+
+    /// <summary>Olympiad gate passes and noble grants.</summary>
+    Olympiad = 13
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -176,7 +185,28 @@ public enum LedgerTxKind
     ManorCropProcure = 22,
 
     /// <summary>Manor period approval cost drawn from the treasury: <c>Reference</c> is the castle id; <c>CausedBy</c> is 0.</summary>
-    ManorPeriodCost = 23
+    ManorPeriodCost = 23,
+
+    /// <summary>A lottery ticket purchase: <c>Reference</c> is the draw number.</summary>
+    LotteryBuy = 24,
+
+    /// <summary>A claimed lottery prize: <c>Reference</c> is the ticket serial.</summary>
+    LotteryPrize = 25,
+
+    /// <summary>Seven Signs cabal registration fee.</summary>
+    SevenSignsJoin = 26,
+
+    /// <summary>Seal stones contributed to the cabal score.</summary>
+    SevenSignsContribute = 27,
+
+    /// <summary>Weekly Seven Signs ancient adena reward.</summary>
+    SevenSignsReward = 28,
+
+    /// <summary>Seal stones traded for ancient adena at a priest.</summary>
+    SevenSignsExchange = 29,
+
+    /// <summary>Olympiad noble gate passes or board grants: <c>Reference</c> is item id.</summary>
+    OlympiadGrant = 30
 }
 
 /// <summary>
