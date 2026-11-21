@@ -70,6 +70,7 @@ public sealed partial class MemoryAccountStore
         public List<StoredQuestDto>? Quests { get; set; }
         public List<StoredItemDto>? Items { get; set; }
         public List<StoredItemDto>? Warehouse { get; set; }
+        public List<StoredItemDto>? Freight { get; set; }
         public bool Newbie { get; set; } = true;
         public List<StoredShortcutDto>? Shortcuts { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }

@@ -6,8 +6,8 @@ Mobius Interlude uses `ConfirmDlg` for engage answers on the GameServer protocol
 
 | Direction | Opcode | Name |
 |-----------|--------|------|
-| Server → client | `0x03C7` | `WeddingEngageAsk` |
-| Client → server | `0x03C6` | `WeddingEngageAnswer` |
+| Server → client | `0x03CB` | `WeddingEngageAsk` |
+| Client → server | `0x03CA` | `WeddingEngageAnswer` |
 
 ## Payloads (`NetCodec`)
 

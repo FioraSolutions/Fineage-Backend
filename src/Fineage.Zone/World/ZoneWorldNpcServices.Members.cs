@@ -72,7 +72,8 @@ public sealed partial class ZoneWorld
         var changes = new List<InventoryUpdateEntryMsg>();
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var store = ActiveWarehouseAccount(player);
-        var move = BeginLedgerMove(LedgerTxKind.WarehouseWithdraw, player.ObjectId, npc.NpcId);
+        var moveKind = player.FreightWithdrawOpen ? LedgerTxKind.FreightWithdraw : LedgerTxKind.WarehouseWithdraw;
+        var move = BeginLedgerMove(moveKind, player.ObjectId, npc.NpcId);
         ObserveLedger(move, bag);
         ObserveLedger(move, store);
         foreach (var (stack, count, stackable) in planned)
@@ -91,6 +92,8 @@ public sealed partial class ZoneWorld
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
         SaveActiveWarehouse(session, player);
+        if (player.FreightWithdrawOpen)
+            player.FreightWithdrawOpen = false;
         Notice(session, NpcServiceProtocol.TransactionComplete, NpcServiceProtocol.TransactionCompleteText);
         return null;
     }

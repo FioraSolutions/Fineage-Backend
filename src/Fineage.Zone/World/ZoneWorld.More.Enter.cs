@@ -222,6 +222,7 @@ public sealed partial class ZoneWorld
         LoadShortcuts(entity, stored);
         SyncClanStanding(entity);
         RefreshGradePenalty(entity);
+        EnsureFreightLoaded(entity, stored);
         _byId[entity.ObjectId] = entity;
         if (applyStarterKit)
             ApplyStarterKitLedger(entity);

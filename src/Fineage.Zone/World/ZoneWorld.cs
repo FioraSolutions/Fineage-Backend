@@ -118,6 +118,7 @@ public sealed partial class ZoneWorld
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
+    readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
     readonly bool _npcRegen;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
@@ -302,6 +303,7 @@ public sealed partial class ZoneWorld
             NoLanding = SharedNoLanding.Value;
         }
         BootstrapSpawns();
+        BootstrapBoats();
         BootstrapBosses();
         BootstrapQuestNpcs();
         LoadClans();

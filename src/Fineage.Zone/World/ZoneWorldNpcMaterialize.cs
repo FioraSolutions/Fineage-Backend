@@ -97,6 +97,7 @@ public sealed partial class ZoneWorld
         };
         _byId.Add(entity.ObjectId, entity);
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
+        AttachWalkingRoute(entity);
     }
 
     /// <summary>

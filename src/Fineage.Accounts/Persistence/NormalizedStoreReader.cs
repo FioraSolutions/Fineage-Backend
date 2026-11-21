@@ -183,6 +183,7 @@ static partial class NormalizedStoreReader
     {
         var items = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocInventory, NormalizedStoreWriter.LocPaperdoll);
         var warehouse = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocWarehouse);
+        var freight = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocFreight);
         var quests = LoadQuests(conn, stub.Id);
         var shortcuts = LoadShortcuts(conn, stub.Id);
         var learned = LoadLearnedSkills(conn, stub.Id);
@@ -220,6 +221,7 @@ static partial class NormalizedStoreReader
             stub.Exp,
             quests,
             warehouse,
+            freight,
             stub.Newbie,
             shortcuts,
             learned,
