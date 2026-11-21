@@ -161,6 +161,7 @@ catch (Exception ex) when (ex is not OperationCanceledException)
 finally
 {
     shutdown.Cancel();
+    world.FlushLedgerOnShutdown();
     bosses.Save();
 }
 

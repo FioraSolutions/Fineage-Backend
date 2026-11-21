@@ -13,6 +13,7 @@ public sealed class MetricsCollector : IDisposable
     long _ticksSkipped;
     long _regionHandoffs;
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
+    long _ledgerFlushFailures;
     int _online;
     int _commandIngressQueued;
 
@@ -53,6 +54,7 @@ public sealed class MetricsCollector : IDisposable
                 LedgerAdjustments = _ledgerAdjustments
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
+                LedgerFlushFailures = _ledgerFlushFailures,
                 Stages = _stages
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
@@ -114,6 +116,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.ledger.adjustments":
                     _ledgerAdjustments[MoveKindOf(tags)] = _ledgerAdjustments.GetValueOrDefault(MoveKindOf(tags)) + value;
+                    break;
+                case "fineage.ledger.flush_failures":
+                    _ledgerFlushFailures += value;
                     break;
             }
         }

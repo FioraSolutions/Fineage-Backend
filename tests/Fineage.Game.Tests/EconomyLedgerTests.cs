@@ -293,5 +293,7 @@ public sealed class EconomyLedgerTests
         public void Flush()
         {
         }
+
+        public int PendingFlushCount => 0;
     }
 }

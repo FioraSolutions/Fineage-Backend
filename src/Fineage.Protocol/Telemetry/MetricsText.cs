@@ -56,6 +56,7 @@ public sealed class MetricsSnapshot
     public long RegionHandoffs { get; init; }
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
+    public long LedgerFlushFailures { get; init; }
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }

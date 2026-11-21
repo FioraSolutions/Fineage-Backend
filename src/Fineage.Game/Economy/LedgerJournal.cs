@@ -14,9 +14,12 @@ public interface ILedgerJournal
     void Append(LedgerEntry entry);
 
     void Flush();
+
+    /// <summary>Buffered entries not yet written by <see cref="Flush"/>.</summary>
+    int PendingFlushCount { get; }
 }
 
-public sealed class MemoryLedgerJournal : ILedgerJournal
+public class MemoryLedgerJournal : ILedgerJournal
 {
     readonly List<LedgerEntry> _entries = [];
 
@@ -24,15 +27,17 @@ public sealed class MemoryLedgerJournal : ILedgerJournal
 
     public IReadOnlyList<LedgerEntry> ReadAll() => _entries.ToList();
 
-    public void Append(LedgerEntry entry)
+    public virtual void Append(LedgerEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
         _entries.Add(entry);
     }
 
-    public void Flush()
+    public virtual void Flush()
     {
     }
+
+    public virtual int PendingFlushCount => 0;
 }
 
 /// <summary>
