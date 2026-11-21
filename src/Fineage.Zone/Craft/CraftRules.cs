@@ -4,7 +4,7 @@ namespace Fineage.Zone.Craft;
 
 /// <summary>
 /// Pure Mobius self-craft checks (busy / learned / skill / MP).
-/// World owns materials scan, weight/slots, consume, and success roll under the gate.
+/// World owns materials scan, weight/slots, consume, and success roll on the simulation thread.
 /// </summary>
 public static class CraftRules
 {

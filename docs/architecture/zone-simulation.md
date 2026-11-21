@@ -9,7 +9,7 @@ Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolut
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
 
-Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Simulation actor / retire global `_gate`").
+Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region hosts over a transport").
 
 ---
 
@@ -57,7 +57,7 @@ flowchart LR
 
 | # | Bottleneck | Where | Effect |
 |---|---|---|---|
-| B1 | One lock for the whole world | `ZoneWorld._gate` (`World/ZoneWorld.cs:98`), ~200 `lock (_gate)` sites in `World/`, entered by every packet handler through `ZoneWorld` methods | The zone runs on one core at a time. A 200 ms combat tick, a 3 s sim tick and every packet handler queue behind each other; handler latency grows with tick cost. |
+| B1 | One lock for the whole world | `ZoneWorld._gate` (`World/ZoneWorld.cs:98`), ~200 `lock (_gate)` sites in `World/`, entered by every packet handler through `ZoneWorld` methods | The zone runs on one core at a time. A 200 ms combat tick, a 3 s sim tick and every packet handler queue behind each other; handler latency grows with tick cost. **Fixed in step 12** (the thread running a step owns the world, `WorldAffinity`; handlers submit commands and requests). |
 | B2 | Audience by full player scan | `Players()` (`World/ZoneWorld.Members.Views.cs:50`) allocates a list by scanning every entity; 48 `foreach … in Players()` call sites, e.g. `FanoutVitals` (`World/ZoneWorldRegen.Members.cs:82`), `FanoutAbnormal` (`World/ZoneWorldAbnormals.Tick.cs:158`), `ActorAudience` (`World/ZoneWorldCombat.Members.cs:257`), `ReleaseThink` (`World/ZoneWorldActiveSets.cs:125`) | Every vitals/abnormal/attack fan-out costs O(players), so a tick costs O(subjects × players). 2 000 wounded entities × 3 000 players is 6 M knownlist probes per regen tick, all under B1. |
 | B3 | Per-tick list copies of the population | `TickAutoAttacks` copies `Players().ToList()` every 200 ms (`World/ZoneWorldCombat.Members.cs:124`); regen/abnormal ticks `ToArray()` the active sets | Steady allocation at 5 Hz feeds GC pauses, which stall the lock holder. |
 | B4 | Simulation loop died silently on any exception | `SimulationLoopAsync` had no catch; the task was never observed | One throw in any of 13 systems stopped regen, spawns, sieges and olympiad for the rest of the process. **Fixed in step 1** (per-stage isolation, logged with stage/region/tick). |
@@ -185,8 +185,18 @@ sequenceDiagram
   submission order (phase 0). The handler awaits the outcome, which completes only after the applying step's
   persistence flush and fan-out drain, so a reply never overtakes the frames or writes it caused. A submission
   cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
-  tick it stopped at. Still outside commands until step 12: enter and leave (session lifecycle), shortcut bar edits (UI
-  state the simulation never reads) and read-only snapshot builders.
+  tick it stopped at.
+- **One owner (step 12).** `ZoneWorld._gate` is gone. Once the simulation loop or a command pump drives the world,
+  only the thread running a step touches it (`World/WorldAffinity.cs`), and the region bodies that step runs;
+  `RegionDirectory` checks it on every access and throws "… off the simulation thread" for anyone else, so a missed
+  handler is an error, not a race. Work that is not player input goes through the same ingress as a `ZoneRequest`
+  (`World/ZoneRequests.cs`), applied in submission order with the commands around it and neither logged nor
+  replayed: enter and leave (the database load and save stay on the caller), shortcut bar edits, and the read-only
+  projections handlers send (`OnSimulationAsync`). A handler that needs state before and after its command (the
+  knownlist diff of a move) uses `ExecuteAroundAsync`: the command is applied and logged as usual and the
+  projection reads around it in the same step. Frames built there (`Net/NetFrame.cs`) are sent from the I/O thread.
+  A world nothing drives (tests, tools) runs these bodies on the caller. Steps from more than one thread (a pump and
+  a test or admin hook) take turns; handlers never do.
 - **Region bodies (step 8).** Every region body runs in an `IRegionScope` (`Simulation/IRegionScope.cs`) that the
   scheduler commits in ascending region order after the stage barrier, whichever executor ran the bodies. The world's
   scope (`World/ZoneWorldRegionBodies.cs`) records the body's fan-out into a batch of its own
@@ -197,8 +207,8 @@ sequenceDiagram
   `IRegionStage.Parallel`; regen (players, NPCs) and abnormals do. `FINEAGE_ZONE_REGION_WORKERS` picks the executor:
   0 (default) runs regions one after another on the scheduler thread, N spreads opted-in stages over N workers; the
   startup banner prints `regions=sequential|parallel:N`. A parallel executor refuses an injected `Random`
-  (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take
-  `_gate`: the scheduler thread holds it while it waits at the barrier.
+  (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take a
+  world turn (`WorldAffinity.Step` throws there): the scheduler thread holds it while it waits at the barrier.
 - **Global actors** run on the scheduler thread as world stages (cheap) or on their own single-threaded loop when
   they do I/O; they talk to regions only by message. In process (step 9) each one is a `GlobalActor<TEffect>`
   (`Simulation/GlobalActor.cs`) that owns its state and holds no clock: its stage calls `Step(tick)`, which runs the
@@ -296,11 +306,11 @@ actors with their own state and mailbox. They act on the world through messages
   MoveState, ChangeMoveType, AbnormalStatusUpdate). StatusUpdate carries a subset of attributes, so a superseded
   write's other attributes are merged into the latest. The surviving write takes the position of the last one;
   ordered must-deliver events (Attack, MagicSkillUse, Die, spawn and despawn) keep emission order around it.
-- **Sealed and gate-ordered (step 4):** a step records into a batch under `_gate` and seals it before unlocking.
+- **Sealed and step-ordered (step 4):** a step records into a batch and seals it when its body returns.
   Payload inputs are captured then: watcher lists are copied, and the two calls whose encoding reads world state
   (knownlist diff, CharInfo) are built by `IWorldEventPublisher.Prepare*`. One send lock drains sealed batches
   before any send made outside a step, so handler traffic never overtakes an earlier step. Sends never take
-  `_gate`. A failed send is logged with its exception, counted as `fineage.tick.stage.failures{stage="fanout"}`, and
+  a world turn. A failed send is logged with its exception, counted as `fineage.tick.stage.failures{stage="fanout"}`, and
   the rest of the batch still goes out.
 - **Encode once per event, batch per connection:** one frame group per connection per tick, written with one
   channel write. That replaces the per-frame `NetPresenceHub` lock (B8); the hub's id→connection map becomes a
@@ -413,7 +423,7 @@ and an id older than the idempotency window (one hour of ticks) is refused as st
 `TxId` is `(tick, sequence)` from `LedgerTxSequence`. Moves run on the scheduler thread for now; region-originated
 moves will add the region when region bodies post them. The journal is hash-chained (`LedgerChain`).
 `PostgresLedgerJournal` (`economy_ledger`, migration 016) buffers appends and writes them in the step's persistence
-flush, outside the gate. Starting replays it and refuses a broken chain.
+flush, after the step's body. Starting replays it and refuses a broken chain.
 
 Inventories and treasuries still decide each move and are still saved as snapshots. A migrated move is recorded
 beside them with `LedgerMove`:
@@ -475,7 +485,8 @@ not a ledger kind; the next observation records them as adjustments. Mail joins 
    runs once); a step while the wall clock is behind still advances one tick. Commands run inside the step that
    drains them, so they read its tick time and, for calendar rules (clan deadlines, teleport fee hours), its wall
    sample: `SimulationClock.Pin` pins both, and world code reads them through `NowUnixMs`/`WallNow`, never the live
-   clock. Outside a step (enter, leave, snapshots) both read the wall clock.
+   clock. Enter, leave and handler projections are requests applied by a step, so they read its time too; only a world
+   nothing drives (tests, tools) is touched outside a step, at the wall clock.
 2. **Ordered iteration.** Region work runs in ascending `RegionId`, entities in ascending object id
    (`RegionWorkCollector.Drain`), never in hash order. Inbound messages are sorted by `(source, sequence)`.
 3. **Seeded randomness** per region and purpose (section 3.2), never `Random.Shared` in rules. Outcomes of
@@ -486,7 +497,7 @@ not a ledger kind; the next observation records them as adjustments. Mail joins 
    fan-out sequences, and that outcomes do not depend on the partition (map tiles, 500-unit cells, one cell).
    `RegionTickSchedulerTests` checks that parallel and sequential executors reach identical region-local state.
    Player input goes through `ZoneWorld.ExecuteAsync(session, command)` (`World/ZoneCommands*.cs`). When a world records (`SimulationLog`), every step and command is appended in
-   gate order with its tick, wall sample, actor and outcome; `ReplayAsync` runs the log on a world built the same way
+   the order the simulation applied it, with its tick, wall sample, actor and outcome; `ReplayAsync` runs the log on a world built the same way
    (same content, seed and starting tick) by submitting each command entry through the same ingress and applying it
    in the next step entry, and fails at the first entry whose tick or outcome differs.
    `SimulationReplayTests` replays a recorded fight and checks identical state and fan-out; `SimulationRandomTests`
@@ -497,6 +508,8 @@ not a ledger kind; the next observation records them as adjustments. Mail joins 
    `WarehouseLedgerTests` checks private and clan deposits, fees and withdrawals; `NetPrivateStoreTests` checks the
    postings of a sale at sell and buy stores. `BagChangeLedgerTests` checks the before/after postings; the quest,
    newbie helper, craft and manufacture tests check their `QuestReward` and `Craft` moves.
+   `WorldAffinityTests` checks that a driven world refuses touches off the simulation thread, that requests are
+   served on it unlogged, and that a command applied around a projection is logged once.
 
 ---
 
@@ -536,10 +549,10 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 
 | PR | Change | Behaviour |
 |---|---|---|
-| **1 (this)** | `RegionTickScheduler`, `GridRegionPartition`, executors, observer and metrics. The 3 s loop body becomes a scheduler step: regen (players, NPCs) and abnormals/DoT/toggles as region stages, the other systems as world stages in the original order. Sequential executor under `_gate`. | Identical per-entity rules. Intra-tick order is now deterministic (region, id) instead of hash order; a throwing system is logged and isolated instead of killing the loop. |
+| **1 (this)** | `RegionTickScheduler`, `GridRegionPartition`, executors, observer and metrics. The 3 s loop body becomes a scheduler step: regen (players, NPCs) and abnormals/DoT/toggles as region stages, the other systems as world stages in the original order. Sequential executor under `_gate` (removed in step 12). | Identical per-entity rules. Intra-tick order is now deterministic (region, id) instead of hash order; a throwing system is logged and isolated instead of killing the loop. |
 | 2 | Fold the 200 ms combat loop into the same scheduler: base step 200 ms, sim stages at period 15, one loop, one time sample per step. Its 24 `Tick*` become stages (world stages first). | Same cadences. |
 | 3 | Reverse knownlist index ("watchers of X") kept in sync with knownlist changes; replace `Players()` scans in `FanoutVitals`, `FanoutAbnormal`, `ActorAudience`, `ReleaseThink` (B2, B3). | Same audiences, measurably cheaper. |
-| 4 | Per-tick outbox: systems emit presence events, flushed after the step outside `_gate` in gate order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
+| 4 | Per-tick outbox: systems emit presence events, flushed after the step in step order, coalescing replaceable updates per subject and audience (B8). | Fewer redundant frames; same final client state. |
 | **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
 | **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
@@ -552,7 +565,7 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **11d (done)** | Private and clan warehouse deposits and withdrawals, deposit fee to `Fees`. | Same outcomes. |
 | **11e (done)** | Private store sales (sell, package and buy stores) as one `StoreSale`; store escrow waits for stores visited from another host. | Same outcomes. A sale whose postings disagree with the bags fails the command. |
 | **11f (done)** | Quest rewards and crafting (self and manufacture) recorded from the bag's change; mail joins the ledger when the game has it. | Same outcomes; every owner change except use is on the journal. The snapshot writes stay until the reconciliation has run clean. |
-| 12 | Remove `_gate`: the last handlers go through commands or read-only snapshots. | — |
+| **12 (done)** | Remove `_gate`: enter, leave, shortcut edits and handler projections go through the ingress as unlogged requests; the move knownlist diff is planned around its command; `WorldAffinity` makes every other touch of a driven world throw. Actors keep their internal locks for readers off the simulation thread (status pages, stores). | Enter, leave, shortcut edits and the projections handlers send cost up to one tick (≤ 200 ms), like commands. The quest client effects of an enter go out after the enter burst; a leaver's despawn goes to others after the leave. |
 | 13+ | `IRegionHost` over a transport: two processes on one machine, then the gateway split. | Operational only. |
 
 ---

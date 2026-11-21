@@ -16,6 +16,7 @@ public sealed partial class ZoneWorld
     {
         if (_simulation != null)
             return;
+        _affinity.Drive();
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
     }
 
@@ -25,7 +26,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     async Task SimulationLoopAsync(CancellationToken ct)
     {
-        lock (_gate)
+        using (_affinity.Step())
             _simulationTicks.Resume(_simulationClock.WallUnixMs());
         try
         {
@@ -60,7 +61,7 @@ public sealed partial class ZoneWorld
     /// <summary>One simulation regen tick on demand (tests and admin diagnostics), same stages the loop runs.</summary>
     internal async Task RunRegenTickAsync(CancellationToken ct)
     {
-        RunUnderGate(now =>
+        RunStep(now =>
         {
             _simulationTicks.RunNow(_regenPlayersStage, now);
             _simulationTicks.RunNow(_regenNpcsStage, now);

@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("bad_request");
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeMakeSelf(session, request)));
     }
 

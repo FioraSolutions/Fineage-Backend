@@ -124,7 +124,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
-        RunUnderGate(now => _simulationTicks.RunNow(_abnormalsStage, now));
+        RunStep(now => _simulationTicks.RunNow(_abnormalsStage, now));
         return Task.CompletedTask;
     }
 
@@ -137,14 +137,14 @@ public sealed partial class ZoneWorld
         ZoneEntity? attacker = null)
     {
         long now = NowUnixMs();
-        lock (_gate)
+        using (_affinity.Step())
             return ApplyAbnormalFromSkill(template, levelData, target, now, attacker, force: force);
     }
 
     /// <summary>Test hook: PartySpelled / TargetStatus wire snapshot.</summary>
     internal Fineage.Protocol.AbnormalStatusUpdateMsg AbnormalSnapshotForTest(ZoneEntity entity)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return AbnormalFor(entity);
     }
 
@@ -211,35 +211,29 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal bool TryBuildPresenceAbnormal(ZoneEntity entity, out AbnormalStatusUpdateMsg update)
     {
-        lock (_gate)
+        if (entity.Dead || entity.Kind is not (ZoneEntityKind.Player or ZoneEntityKind.Npc) ||
+            (entity.Abnormals.Count == 0 && entity.SpoilerObjectId == 0))
         {
-            if (entity.Dead || entity.Kind is not (ZoneEntityKind.Player or ZoneEntityKind.Npc) ||
-                (entity.Abnormals.Count == 0 && entity.SpoilerObjectId == 0))
-            {
-                update = null!;
-                return false;
-            }
-
-            update = AbnormalFor(entity);
-            return true;
+            update = null!;
+            return false;
         }
+
+        update = AbnormalFor(entity);
+        return true;
     }
 
     /// <summary>Mobius updateEffectIcons snapshot for EnterWorld (null when the bar is empty).</summary>
     internal bool TryBuildNetAbnormalStatus(ZoneSession session, out AbnormalStatusUpdateMsg update)
     {
-        lock (_gate)
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity) ||
+            entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
         {
-            if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity) ||
-                entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
-            {
-                update = null!;
-                return false;
-            }
-
-            update = AbnormalFor(entity);
-            return true;
+            update = null!;
+            return false;
         }
+
+        update = AbnormalFor(entity);
+        return true;
     }
 
     int ResolveAbnormalDurationSeconds(int effectId)

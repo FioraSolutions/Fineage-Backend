@@ -233,7 +233,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: force every running auction to end now.</summary>
     internal void EndHallAuctionsForTest(long now)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             foreach (var hall in Halls(now).Values)
             {
@@ -246,7 +246,7 @@ public sealed partial class ZoneWorld
 
     internal (int Owner, int Bids, long Highest)? HallForTest(int hallId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             long now = NowUnixMs();
             return Halls(now).TryGetValue(hallId, out var h)
@@ -261,7 +261,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: drop items straight into a clan warehouse.</summary>
     internal bool AddClanWarehouseItemForTest(int clanId, int itemId, int count)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan))
                 return false;

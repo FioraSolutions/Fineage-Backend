@@ -14,7 +14,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => TryPickup(session, groundObjectId)));
     }
 
@@ -97,7 +97,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: roll + drop death loot for <paramref name="npcId"/> as if <paramref name="killer"/> killed it here.</summary>
     internal void DropDeathLootForTest(int npcId, int x, int y, int z, ZoneEntity killer)
     {
-        lock (_gate)
+        using (_affinity.Step())
             SpawnDeathDrops(npcId, x, y, z, killer, [killer]);
     }
 

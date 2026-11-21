@@ -272,14 +272,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: apply PvP status as if <paramref name="attacker"/> damaged <paramref name="target"/>.</summary>
     internal void UpdatePvPStatusForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             UpdatePvPStatus(attacker, target, NowUnixMs());
     }
 
     /// <summary>Test hook: run kill karma/PK rules.</summary>
     internal void OnKillUpdatePvPKarmaForTest(ZoneEntity killer, ZoneEntity victim)
     {
-        lock (_gate)
+        using (_affinity.Step())
             OnKillUpdatePvPKarma(killer, victim, victim.PvpFlagged);
     }
 }

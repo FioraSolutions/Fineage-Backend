@@ -66,7 +66,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test: drop one ground stack next to <paramref name="player"/> and return its object id.</summary>
     internal int PlaceGroundForTest(ZoneEntity player, int itemId, int count = 1)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             long now = NowUnixMs();
             var move = BeginLedgerMove(LedgerTxKind.Loot, 0, 0);
@@ -81,7 +81,7 @@ public sealed partial class ZoneWorld
 
     internal bool ExistsForTest(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.ContainsKey(objectId);
     }
 }

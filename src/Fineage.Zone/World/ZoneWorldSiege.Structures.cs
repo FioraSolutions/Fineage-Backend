@@ -148,8 +148,7 @@ public sealed partial class ZoneWorld
     /// <summary>Follow-up frame for a door that just entered a client's view (see NetEnterWorldProjector).</summary>
     internal byte[]? DoorStatusFrame(ZoneEntity entity)
     {
-        lock (_gate)
-            return entity.SiegeNpc is { Role: SiegeNpcRole.Door } ? NetCodec.EncodeDoorStatus(DoorStatusOf(entity)) : null;
+        return entity.SiegeNpc is { Role: SiegeNpcRole.Door } ? NetCodec.EncodeDoorStatus(DoorStatusOf(entity)) : null;
     }
 
     void FanoutDoorStatus(ZoneEntity door, ZoneEntity? also = null)
@@ -459,7 +458,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: place the holy artifact of <paramref name="castleId"/> next to the given point.</summary>
     internal ZoneEntity SpawnArtifactForTests(int castleId, int x, int y, int z)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             int npcId = CastleTable.Find(castleId)!.ArtifactNpcIds[0];
             var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
@@ -475,7 +474,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: worlds with injected geo start without doors; give them a door table and spawn the gates.</summary>
     internal void LoadCastleDoorsForTests(DoorTable table)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             Doors = table;
             _ownDoorTable = false;
@@ -486,19 +485,19 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: one landed hit of <paramref name="damage"/> through the siege structure gate.</summary>
     internal bool SiegeHitForTests(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return SiegeNpcHit(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CastleDoorForTests(int doorId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _castleDoors.TryGetValue(doorId, out int id) && _byId.TryGetValue(id, out var door) ? door : null;
     }
 
     internal bool GeoDoorOpenForTests(int doorId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return Doors.Get(doorId)?.Open == true;
     }
 }

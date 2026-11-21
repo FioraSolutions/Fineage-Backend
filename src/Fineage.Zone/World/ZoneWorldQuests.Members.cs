@@ -172,30 +172,27 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal QuestListMsg NetQuestList(ZoneSession session)
     {
-        lock (_gate)
-        {
-            if (!TryPlayer(session, out var player))
-                return new QuestListMsg();
+        if (!TryPlayer(session, out var player))
+            return new QuestListMsg();
 
-            var list = _quests.List(player.Quests);
-            return new QuestListMsg
+        var list = _quests.List(player.Quests);
+        return new QuestListMsg
+        {
+            Active = list.Active.Select(entry => new QuestJournalEntryMsg
             {
-                Active = list.Active.Select(entry => new QuestJournalEntryMsg
-                {
-                    QuestId = entry.QuestId,
-                    Name = entry.Name ?? "",
-                    State = entry.State,
-                    Cond = entry.Cond,
-                    ProgressFlags = entry.ProgressFlags,
-                    JournalWord = entry.JournalWord,
-                    Repeatable = entry.Repeatable
-                }).ToArray(),
-                CompletedMask = list.CompletedMask ?? [],
-                CompletedQuestIds = list.CompletedQuestIds ?? [],
-                MaxActive = list.MaxActive,
-                RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
-            };
-        }
+                QuestId = entry.QuestId,
+                Name = entry.Name ?? "",
+                State = entry.State,
+                Cond = entry.Cond,
+                ProgressFlags = entry.ProgressFlags,
+                JournalWord = entry.JournalWord,
+                Repeatable = entry.Repeatable
+            }).ToArray(),
+            CompletedMask = list.CompletedMask ?? [],
+            CompletedQuestIds = list.CompletedQuestIds ?? [],
+            MaxActive = list.MaxActive,
+            RewardSets = (list.RewardSets ?? []).Select(ToRewardSetMsg).ToArray()
+        };
     }
 
     static QuestJournalRewardSetMsg ToRewardSetMsg(QuestJournalRewardSet set) => new()

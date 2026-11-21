@@ -88,7 +88,7 @@ public sealed partial class ZoneWorld
     public bool TrySetEquipStanding(int objectId, PlayerEquipStanding standing)
     {
         ArgumentNullException.ThrowIfNull(standing);
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
                 return false;

@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     public Task<string?> TryTeleportSelectAsync(
         ZoneSession session, int npcObjectId, string? listName, int locationId, CancellationToken ct)
     {
-        // Teleport fee may SaveInventory → flush after unlock (B8).
+        // Teleport fee may SaveInventory → flush after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => TeleportTo(session, npcObjectId, listName ?? "", locationId, html: false)));
     }
@@ -21,7 +21,7 @@ public sealed partial class ZoneWorld
     public Task<string?> TryWarehouseDepositAsync(
         ZoneSession session, int npcObjectId, WarehouseLine[] lines, CancellationToken ct)
     {
-        // World mutate under _gate; Postgres inventory write after unlock (B8).
+        // The Postgres inventory write runs after the change, once per step (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => DepositPrivate(session, npcObjectId, lines, html: false)));
     }
@@ -95,7 +95,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
     internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";

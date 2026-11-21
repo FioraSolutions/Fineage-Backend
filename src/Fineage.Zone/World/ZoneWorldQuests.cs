@@ -20,8 +20,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        lock (_gate)
-            QueueList(session);
+        QueueList(session);
         return Task.FromResult<string?>(null);
     }
 
@@ -32,7 +31,7 @@ public sealed partial class ZoneWorld
         if (questId <= 0)
             return Task.FromResult<string?>("bad_request");
 
-        // Abort may strip quest items → SaveInventory after unlock (B8).
+        // Abort may strip quest items → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() =>
         {
             if (!TryPlayer(session, out var player))
@@ -208,14 +207,14 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void QuestKillForTest(ZoneEntity killer, int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyQuestKill(killer, new ZoneEntity { Kind = ZoneEntityKind.Npc, NpcId = npcId, ObjectId = 0 });
     }
 
     /// <summary>Test hook: run the exp/sp → level-up pipeline the way a kill reward does.</summary>
     internal void GrantExpForTest(ZoneEntity killer, long exp, int sp)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!ApplyExpSp(killer, exp, sp))
                 return;
@@ -227,7 +226,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the kill-reward split exactly like a dying mob does (reads <see cref="ZoneEntity.DamageBy"/>).</summary>
     internal void GrantKillRewardForTest(ZoneEntity killer, ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             GrantKillReward(killer, npc);
     }
 
@@ -250,7 +249,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: one landed hit by <paramref name="attacker"/> on <paramref name="npc"/>.</summary>
     internal void QuestAttackForTest(ZoneEntity attacker, ZoneEntity npc, bool byPet = false)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplyQuestAttack(attacker, npc, byPet);
     }
 
@@ -351,7 +350,7 @@ public sealed partial class ZoneWorld
 
     internal void JoinPartyForTest(Fineage.Game.Services.PartyDistributionType distribution, params ZoneEntity[] members)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var party = _party.Create(members[0].ObjectId, (int)distribution);
             foreach (var m in members.Skip(1))

@@ -8,13 +8,13 @@ public sealed partial class ZoneWorld
 {
     public int PlayerDungeonId(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.TryGetValue(objectId, out var entity) ? entity.DungeonId : 0;
     }
 
     public Task<string?> TryDungeonAsync(ZoneSession session, DungeonEnterRequestMsg request, CancellationToken ct)
     {
-        // Enter fee / key consume → SaveInventory after unlock (B8).
+        // Enter fee / key consume → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => ApplyDungeon(session, request)));
     }
 

@@ -4,7 +4,7 @@ namespace Fineage.Zone.Trade;
 
 /// <summary>
 /// Pure Mobius trade checks (offer rows, item eligibility, receiver weight/slots).
-/// World keeps session state and inventory mutation under the gate.
+/// World keeps session state and inventory mutation on the simulation thread.
 /// </summary>
 public static class TradeRules
 {

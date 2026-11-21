@@ -59,7 +59,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal void AssertWatcherIndexConsistent()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var expected = new Dictionary<int, HashSet<int>>();
             foreach (var player in Players())
@@ -294,7 +294,7 @@ public sealed partial class ZoneWorld
     /// <summary>Re-anchor a live player and rebuild knownlist + watcher index (tests).</summary>
     internal void TeleportPlayerForTests(ZoneSession session, int x, int y, int z)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!TryGetLivePlayer(session, out var player))
                 return;
@@ -314,7 +314,7 @@ public sealed partial class ZoneWorld
 
     internal void RefreshMovingKnownlistForTests(ZoneEntity entity, MoveToMsg ack)
     {
-        lock (_gate)
+        using (_affinity.Step())
             RefreshMovingKnownlist(entity, ack);
     }
 }

@@ -152,7 +152,7 @@ public sealed partial class ZoneWorld
     internal bool TrySetPlayerLevelForTests(ZoneSession session, int level)
     {
         ZoneEntity player;
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var entity) || entity.Inventory == null)
                 return false;
@@ -169,7 +169,7 @@ public sealed partial class ZoneWorld
 
     internal NpcInfoMsg NpcInfoByTemplateForTests(int npcId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             ZoneEntity? found = null;
             foreach (var entity in _byId.Values)

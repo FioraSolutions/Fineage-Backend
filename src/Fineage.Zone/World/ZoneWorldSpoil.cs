@@ -15,7 +15,7 @@ public sealed partial class ZoneWorld
             return Task.FromResult<string?>("world");
 
         string? error;
-        lock (_gate)
+        using (_affinity.Step())
             error = TryAdminSpoil(session, request.TargetObjectId);
         if (error != null)
             return Task.FromResult<string?>(error);
@@ -28,7 +28,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // Sweep grants items → SaveInventory after unlock (B8).
+        // Sweep grants items → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(
             () => TryAdminSweep(session, request.TargetObjectId)));
     }

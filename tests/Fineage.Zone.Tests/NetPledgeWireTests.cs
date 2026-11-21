@@ -1,5 +1,6 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -13,7 +14,7 @@ public sealed class NetPledgeWireTests
     static async Task<int> ClanAsync(NetMoveVisibilityRig rig, NetMoveVisibilityRig.Player p, string name)
     {
         p.Entity.Level = 10;
-        Assert.Null(await rig.World.TryClanCreateAsync(p.Entity.Session!, new ClanCreateRequestMsg { Name = name }, rig.Clock(), rig.Ct));
+        Assert.Null(await rig.World.ExecuteAsync(p.Entity.Session!, new ClanCreateCommand(new ClanCreateRequestMsg { Name = name }), rig.Ct));
         return p.Entity.ClanId;
     }
 
@@ -28,7 +29,8 @@ public sealed class NetPledgeWireTests
 
         await a.Net.SendAsync(NetOpcode.PledgeCommand, NetCodec.EncodePledgeCommand(new PledgeCommandNetMsg
         {
-            Kind = PledgeCommandKind.RequestPledgeInfo, IntArg1 = clanId
+            Kind = PledgeCommandKind.RequestPledgeInfo,
+            IntArg1 = clanId
         }), rig.Ct);
         var frames = await a.DrainAsync();
         var info = NetCodec.DecodePledgeInfo(Assert.Single(frames, f => f.Opcode == NetOpcode.PledgeInfo).Payload);

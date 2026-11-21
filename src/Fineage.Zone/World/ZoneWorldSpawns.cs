@@ -230,7 +230,7 @@ public sealed partial class ZoneWorld
 
     internal void FanoutNewNpcForTests(ZoneEntity npc)
     {
-        lock (_gate)
+        using (_affinity.Step())
             FanoutNewNpc(npc);
     }
 
@@ -255,7 +255,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
     internal void DespawnNpcForTests(int objectId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (_byId.TryGetValue(objectId, out var npc))
                 DespawnNpc(npc);
@@ -265,7 +265,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: advance respawn timers without waiting on the simulation loop.</summary>
     internal void AdvanceSpawnsForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             TickCorpseDecay(NowUnixMs());
             TickSpawns();

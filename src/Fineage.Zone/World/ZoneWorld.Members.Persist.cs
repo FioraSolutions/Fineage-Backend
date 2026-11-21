@@ -105,7 +105,7 @@ public sealed partial class ZoneWorld
         _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
     }
 
-    /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set. Call outside <c>_gate</c>.</summary>
+    /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set.</summary>
     void FlushDirtyInventories()
     {
         _ledger.Flush();
@@ -129,26 +129,21 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Run <paramref name="underGate"/> under <c>_gate</c> with inventory/warehouse Postgres deferred until after unlock.
-    /// Calls nest (a command wrapping a world method that defers too): only the outermost one flushes, once the gate is
-    /// released.
+    /// Runs <paramref name="change"/> with inventory/warehouse Postgres deferred until it returns. Calls nest (a command
+    /// wrapping a world method that defers too): only the outermost one flushes.
     /// </summary>
-    T WithDeferredInventoryPersist<T>(Func<T> underGate)
+    T WithDeferredInventoryPersist<T>(Func<T> change)
     {
         T result;
-        bool outermost;
-        lock (_gate)
+        bool outermost = _deferInventoryPersistDepth == 0;
+        _deferInventoryPersistDepth++;
+        try
         {
-            outermost = _deferInventoryPersistDepth == 0;
-            _deferInventoryPersistDepth++;
-            try
-            {
-                result = underGate();
-            }
-            finally
-            {
-                _deferInventoryPersistDepth--;
-            }
+            result = change();
+        }
+        finally
+        {
+            _deferInventoryPersistDepth--;
         }
 
         if (outermost)

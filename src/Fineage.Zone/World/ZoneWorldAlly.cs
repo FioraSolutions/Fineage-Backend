@@ -23,14 +23,14 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the alliance of a clan (id, name, crest, penalty type).</summary>
     internal (int AllyId, string? Name, int CrestId, int PenaltyType) AllyOfForTest(int clanId)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _clan.TryGet(clanId, out var c) ? (c.D.AllyId, c.D.AllyName, c.D.AllyCrestId, c.D.AllyPenaltyType) : default;
     }
 
     /// <summary>Test hook: village master <c>create_ally</c>.</summary>
     internal string? CreateAllyForTest(ZoneSession session, string name)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return CreateAlly(session, ClanOf(session.ObjectId), name, NowUnixMs());
     }
 

@@ -274,7 +274,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: run the fake-death wake-up the way a hit / sit action would.</summary>
     internal bool WakeUpFromFakeDeathForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return WakeUpFromFakeDeath(player, "test");
     }
 

@@ -78,7 +78,8 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var reg = NetCodec.DecodeShortCut(envelope.Payload);
-        var regReply = _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level);
+        var regReply = await _world.OnSimulationAsync(zoneSession, "shortcut-register",
+            () => _world.RegisterShortcut(zoneSession, reg.Type, reg.Slot, reg.Id, reg.Level), ct).ConfigureAwait(false);
         await SendShortcutReplyAsync(conn, regReply, envelope.RequestSequence, ct).ConfigureAwait(false);
     }
 
@@ -92,7 +93,8 @@ public sealed class ShortcutActionPacketHandler
             return;
 
         var del = NetCodec.DecodeShortCutDel(envelope.Payload);
-        var delReply = _world.DeleteShortcut(zoneSession, del.Slot);
+        var delReply = await _world.OnSimulationAsync(zoneSession, "shortcut-delete",
+            () => _world.DeleteShortcut(zoneSession, del.Slot), ct).ConfigureAwait(false);
         await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
     }
 

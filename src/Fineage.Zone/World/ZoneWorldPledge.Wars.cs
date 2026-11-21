@@ -97,22 +97,19 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal byte[]? SpawnRelationFrame(ZoneEntity subject, ZoneEntity viewer)
     {
-        lock (_gate)
+        if (subject.Kind != ZoneEntityKind.Player || viewer.Kind != ZoneEntityKind.Player || subject.ObjectId == viewer.ObjectId)
+            return null;
+        int relation = RelationOf(subject, viewer);
+        if ((relation & SpawnRelationBits) == 0)
+            return null;
+        return NetCodec.EncodeRelationChanged(new RelationChangedNetMsg
         {
-            if (subject.Kind != ZoneEntityKind.Player || viewer.Kind != ZoneEntityKind.Player || subject.ObjectId == viewer.ObjectId)
-                return null;
-            int relation = RelationOf(subject, viewer);
-            if ((relation & SpawnRelationBits) == 0)
-                return null;
-            return NetCodec.EncodeRelationChanged(new RelationChangedNetMsg
-            {
-                ObjectId = subject.ObjectId,
-                Relation = relation,
-                AutoAttackable = PlayerAutoAttackable(viewer, subject),
-                Karma = subject.Karma,
-                PvpFlag = PvpFlagWire(subject)
-            });
-        }
+            ObjectId = subject.ObjectId,
+            Relation = relation,
+            AutoAttackable = PlayerAutoAttackable(viewer, subject),
+            Karma = subject.Karma,
+            PvpFlag = PvpFlagWire(subject)
+        });
     }
 
     void BroadcastClanRelations(ZoneClan clan)
@@ -274,13 +271,13 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: relation bits <paramref name="subject"/> shows to <paramref name="viewer"/>.</summary>
     internal int RelationOfForTest(ZoneEntity subject, ZoneEntity viewer)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return RelationOf(subject, viewer);
     }
 
     internal bool SetMutualWarForTest(int a, int b)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(a, out var ca) || !_clan.TryGet(b, out var cb))
                 return false;

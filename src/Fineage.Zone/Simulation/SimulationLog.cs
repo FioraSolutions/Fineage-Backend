@@ -12,7 +12,7 @@ public interface ISimulationCommand
 /// </summary>
 public sealed record SimulationLogHeader(ulong Seed, int StepMilliseconds, long StartTick);
 
-/// <summary>One recorded input, in gate order. <paramref name="Tick"/> is the last tick the clock had reached.</summary>
+/// <summary>One recorded input, in the order the simulation applied it. <paramref name="Tick"/> is the last tick the clock had reached.</summary>
 public abstract record SimulationLogEntry(long Sequence, long Tick, long WallUnixMs);
 
 /// <summary>A scheduler step that reached <see cref="SimulationLogEntry.Tick"/> from a wall sample of <see cref="SimulationLogEntry.WallUnixMs"/>.</summary>

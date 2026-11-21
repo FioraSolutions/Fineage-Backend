@@ -1,6 +1,6 @@
 namespace Fineage.Zone.Net;
 
-/// <summary>Frames encoded from world state under the ZoneWorld gate and sent later without touching the world.</summary>
+/// <summary>Frames encoded from world state on the simulation thread and sent later without touching the world.</summary>
 sealed class PreparedFrames(NetPresenceHub presence)
 {
     readonly List<(int ObjectId, ushort Opcode, byte[] Payload, bool Critical)> _frames = [];

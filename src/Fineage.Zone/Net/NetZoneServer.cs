@@ -82,7 +82,7 @@ public sealed partial class NetZoneServer
         _chat = new ChatPacketHandler(_world, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
         _knownlist = new NetKnownlistFanout(_world, _ids, _presence, PlayerSpawnPAtkSpd);
-        _movement = new MovementPacketHandler(_world, RejectAsync, _knownlist.FanDiffAsync);
+        _movement = new MovementPacketHandler(_world, RejectAsync, _knownlist);
         _characterActions = new CharacterActionPacketHandler(_world, RejectAsync);
         _session = new SessionLifecyclePacketHandler(
             _handoff, _world, _ids, _presence, _clock, PlayerSpawnPAtkSpd, RejectAsync);

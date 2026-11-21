@@ -3,11 +3,10 @@ using Fineage.Protocol.Telemetry;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Keeps world fan-out in <c>_gate</c> order once simulation steps send after unlock. A step records into a batch
-/// under the gate and seals it into the queue before releasing; every send, batched or immediate, then goes through
-/// one send lock that drains sealed batches first. A handler that emits right after a step therefore never
-/// overtakes that step's traffic. Sends must not take <c>_gate</c>: a handler holding it may be waiting for the send
-/// lock.
+/// Keeps world fan-out in step order. A step records into a batch and seals it into the queue when its body
+/// returns; every send, batched or immediate, then goes through one send lock that drains sealed batches first. A
+/// handler that emits right after a step therefore never overtakes that step's traffic. Sends must not take a world
+/// turn: the step holding it may be waiting for the send lock.
 /// </summary>
 internal sealed class WorldFanoutSequencer
 {
@@ -53,11 +52,11 @@ internal sealed class WorldFanoutSequencer
         if (region.Count == 0)
             return;
         var step = Recording ??
-                   throw new InvalidOperationException("region fan-out committed outside a recorded step; region stages run under RunUnderGate");
+                   throw new InvalidOperationException("region fan-out committed outside a recorded step; region stages run inside RunStep");
         step.Absorb(region);
     }
 
-    /// <summary>Under <c>_gate</c>. Nested steps join the outer batch.</summary>
+    /// <summary>At the start of a step. Nested steps join the outer batch.</summary>
     public void Begin()
     {
         if (_depth++ > 0)
@@ -66,7 +65,7 @@ internal sealed class WorldFanoutSequencer
         Volatile.Write(ref _recording, new WorldFanoutBatch());
     }
 
-    /// <summary>Under <c>_gate</c>, before releasing it: queues the batch behind earlier ones.</summary>
+    /// <summary>When the step's body returns: queues the batch behind earlier ones.</summary>
     public void Seal()
     {
         if (_depth == 0)
@@ -79,7 +78,7 @@ internal sealed class WorldFanoutSequencer
             _sealed.Enqueue(batch);
     }
 
-    /// <summary>After releasing <c>_gate</c>: sends every sealed batch in queue order.</summary>
+    /// <summary>After sealing: sends every sealed batch in queue order.</summary>
     public void Drain()
     {
         lock (_sendLock)

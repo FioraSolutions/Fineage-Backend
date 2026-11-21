@@ -79,9 +79,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = TryDuelCommand(session, msg);
+        string? error = TryDuelCommand(session, msg);
         return Task.FromResult(error);
     }
 
@@ -706,13 +704,13 @@ public sealed partial class ZoneWorld
 
     internal void RunDuelTickForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickDuels(NowUnixMs());
     }
 
     internal int DuelCountForTest
     {
-        get { lock (_gate) return _duels.Count; }
+        get { using (_affinity.Step()) return _duels.Count; }
     }
 }
 
@@ -721,19 +719,19 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: a skill hit of <paramref name="damage"/> from <paramref name="attacker"/> on a player.</summary>
     internal void SkillDamagePlayerForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
+        using (_affinity.Step())
             ApplySkillDamageToPlayer(attacker, target, damage, NowUnixMs());
     }
 
     internal ZoneEntity? CubicTargetForTest(ZoneEntity owner)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return CubicTarget(owner);
     }
 
     internal bool DuelTargetRefusedForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return DuelTargetRefused(attacker, target);
     }
 }

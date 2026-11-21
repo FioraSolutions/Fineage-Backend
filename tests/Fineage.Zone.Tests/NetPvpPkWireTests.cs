@@ -174,8 +174,8 @@ public sealed class NetPvpPkWireTests
     {
         var (rig, a, b, _) = await TrioAsync();
         await using var _r = rig;
-        Assert.Null(await rig.World.TryPartyInviteAsync(a.Entity.Session!, b.ObjectId, 0, Ct));
-        Assert.Null(await rig.World.TryPartyAnswerAsync(b.Entity.Session!, a.ObjectId, 1, Ct));
+        Assert.Null(await rig.World.ExecuteAsync(a.Entity.Session!, new PartyInviteCommand(b.ObjectId, 0), Ct));
+        Assert.Null(await rig.World.ExecuteAsync(b.Entity.Session!, new PartyAnswerCommand(a.ObjectId, 1), Ct));
         b.Entity.PvpFlagged = true;
         b.Entity.PvpFlagUntilMs = rig.NowMs + ZoneWorld.PvpNormalTimeMs;
 

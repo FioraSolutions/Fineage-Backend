@@ -254,7 +254,7 @@ public sealed partial class ZoneWorld
 
     internal void DamageNpcByForTest(ZoneEntity attacker, ZoneEntity target, int damage)
     {
-        lock (_gate)
+        using (_affinity.Step())
             DamageNpcBy(attacker, target, damage, NowUnixMs());
     }
 

@@ -235,7 +235,7 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    /// <summary>Inventory / warehouse / vitals / quests / presence — must run outside <c>_gate</c>.</summary>
+    /// <summary>Inventory / warehouse / vitals / quests / presence — runs after the leave, from its snapshot.</summary>
     void PersistUnlinkSnapshot(UnlinkPersistSnapshot snapshot)
     {
         var session = snapshot.Session;

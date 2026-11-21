@@ -31,7 +31,7 @@ public sealed partial class ZoneWorld
     /// <summary>Swap in the persisted board (host: <c>lottery.json</c> in the state directory).</summary>
     public void UseLottery(LotteryBoard board)
     {
-        lock (_gate)
+        using (_affinity.Step())
             _lottery.Use(board);
     }
 
@@ -49,14 +49,14 @@ public sealed partial class ZoneWorld
 
     internal void TickLotteryForTests()
     {
-        lock (_gate)
+        using (_affinity.Step())
             AtHookTick(tick => AnnounceLottery(_lottery.Step(tick)));
     }
 
     /// <summary>Test: one <c>Loto N</c> bypass against a lottery seller (spawned or a stand-in).</summary>
     internal string? LotoForTest(ZoneSession session, int value, int npcId = LotteryPageNpc)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return "world";

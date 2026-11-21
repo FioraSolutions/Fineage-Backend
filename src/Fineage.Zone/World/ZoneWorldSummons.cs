@@ -617,9 +617,7 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error;
-        lock (_gate)
-            error = TrySummonCommand(session, msg);
+        string? error = TrySummonCommand(session, msg);
         return Task.FromResult(error);
     }
 
@@ -784,13 +782,13 @@ public sealed partial class ZoneWorld
 
     internal ZoneEntity? SummonOfForTest(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return SummonOf(player);
     }
 
     internal bool TryGetEntityForTest(int objectId, out ZoneEntity? entity)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             bool found = _byId.TryGetValue(objectId, out var e);
             entity = e;
@@ -800,13 +798,13 @@ public sealed partial class ZoneWorld
 
     internal void TickSummonsForTest()
     {
-        lock (_gate)
+        using (_affinity.Step())
             TickSummons(NowUnixMs());
     }
 
     internal ZoneEntity? SpawnServitorForTest(ZoneEntity owner, int skillId, int level)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var skill = _summonSkills.Find(skillId) ?? throw new ArgumentException($"no summon skill {skillId}");
             return SpawnServitor(owner, skill, skill.At(level)!, level, NowUnixMs());

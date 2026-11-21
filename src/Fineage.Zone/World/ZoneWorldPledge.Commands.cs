@@ -24,9 +24,7 @@ public sealed partial class ZoneWorld
         if (!session.InWorld)
             return "world";
 
-        string? error;
-        lock (_gate)
-            error = TryPledgeCommand(session, command, now.ToUnixTimeMilliseconds());
+        string? error = TryPledgeCommand(session, command, now.ToUnixTimeMilliseconds());
         return error;
     }
 
@@ -381,7 +379,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: a proof-free class transfer through the village master path.</summary>
     internal bool ChangeClassForTest(ZoneSession session, int classId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_byId.TryGetValue(session.ObjectId, out var player))
                 return false;
@@ -393,7 +391,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the village master create_academy / create_royal / create_knight verb.</summary>
     internal string? CreateSubUnitForTest(ZoneSession session, string name, string leaderName, int family)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             var clan = ClanOf(session.ObjectId);
             if (clan == null)
@@ -407,7 +405,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the village master change_clan_leader request, stored for the next start.</summary>
     internal bool RequestDelegationForTest(int clanId, int characterId)
     {
-        lock (_gate)
+        using (_affinity.Step())
         {
             if (!_clan.TryGet(clanId, out var clan) || MemberOf(clan, characterId) == null)
                 return false;
@@ -418,7 +416,7 @@ public sealed partial class ZoneWorld
 
     internal bool PlayerAutoAttackableForTest(ZoneEntity attacker, ZoneEntity target)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return PlayerAutoAttackable(attacker, target);
     }
 }

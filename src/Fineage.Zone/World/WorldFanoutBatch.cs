@@ -11,7 +11,7 @@ internal enum PresenceCoalesceKind : byte
 
 /// <summary>
 /// Fan-out recorded during one simulation step (zone-simulation.md §3.6). Entries are bound sends whose inputs were
-/// captured under <c>_gate</c>; sending reads no world state. A replaceable write removes the earlier write for the
+/// captured during the step; sending reads no world state. A replaceable write removes the earlier write for the
 /// same (kind, subject, audience) and is appended at its own position, so every send keeps its order relative to
 /// the ordered events around it.
 /// </summary>

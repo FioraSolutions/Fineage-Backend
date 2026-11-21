@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: the live lists of a player in the world.</summary>
     internal SocialLists SocialListsForTests(ZoneEntity player)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return Lists(player);
     }
 
@@ -27,9 +27,7 @@ public sealed partial class ZoneWorld
             return "bad_request";
         if (!session.InWorld)
             return "world";
-        string? error;
-        lock (_gate)
-            error = TryFriendInvite(session, request);
+        string? error = TryFriendInvite(session, request);
         return error;
     }
 
@@ -39,9 +37,7 @@ public sealed partial class ZoneWorld
             return "bad_request";
         if (!session.InWorld)
             return "world";
-        string? error;
-        lock (_gate)
-            error = TryFriendAnswer(session, request);
+        string? error = TryFriendAnswer(session, request);
         return error;
     }
 
@@ -49,9 +45,7 @@ public sealed partial class ZoneWorld
     {
         if (!session.InWorld)
             return "world";
-        string? error;
-        lock (_gate)
-            error = TryFriendList(session);
+        string? error = TryFriendList(session);
         return error;
     }
 
@@ -61,9 +55,7 @@ public sealed partial class ZoneWorld
             return "bad_request";
         if (!session.InWorld)
             return "world";
-        string? error;
-        lock (_gate)
-            error = TryFriendDelete(session, request);
+        string? error = TryFriendDelete(session, request);
         return error;
     }
 
@@ -73,9 +65,7 @@ public sealed partial class ZoneWorld
             return "bad_request";
         if (!session.InWorld)
             return "world";
-        string? error;
-        lock (_gate)
-            error = TryBlockRequest(session, request);
+        string? error = TryBlockRequest(session, request);
         return error;
     }
 

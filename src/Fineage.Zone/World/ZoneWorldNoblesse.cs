@@ -78,7 +78,7 @@ public sealed partial class ZoneWorld
     /// <summary>Admin / test entry: grant or revoke noblesse on a live character.</summary>
     public bool TrySetNoble(int objectId, bool noble)
     {
-        lock (_gate)
+        using (_affinity.Step())
             return _byId.TryGetValue(objectId, out var player) && SetNoble(player, noble);
     }
 

@@ -6,23 +6,25 @@ namespace Fineage.Zone.Net;
 
 /// <summary>
 /// Movement opcodes extracted from <see cref="NetZoneServer"/> (B2b / #353).
-/// Knownlist AOI refresh after a successful move stays on the shared fanout callback.
+/// The knownlist spawn/despawn frames of a move are planned in the step that applies it and sent after the reply.
 /// </summary>
 public sealed class MovementPacketHandler
 {
     readonly ZoneWorld _world;
     readonly Func<NetConnection, string, string, CancellationToken, Task> _reject;
-    readonly Func<NetConnection, ZoneSession, EntityId, HashSet<int>, HashSet<int>, CancellationToken, Task> _fanKnownlistDiff;
+    readonly NetKnownlistFanout _knownlist;
 
-    public MovementPacketHandler(
+    internal MovementPacketHandler(
         ZoneWorld world,
         Func<NetConnection, string, string, CancellationToken, Task> reject,
-        Func<NetConnection, ZoneSession, EntityId, HashSet<int>, HashSet<int>, CancellationToken, Task> fanKnownlistDiff)
+        NetKnownlistFanout knownlist)
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
         _reject = reject ?? throw new ArgumentNullException(nameof(reject));
-        _fanKnownlistDiff = fanKnownlistDiff ?? throw new ArgumentNullException(nameof(fanKnownlistDiff));
+        _knownlist = knownlist ?? throw new ArgumentNullException(nameof(knownlist));
     }
+
+    readonly record struct MovePlan(string? Error, int X, int Y, int Z, List<NetFrame> Frames);
 
     public async Task OnMoveAsync(
         NetConnection conn,
@@ -39,11 +41,15 @@ public sealed class MovementPacketHandler
         }
 
         var move = NetCodec.DecodeMoveInput(envelope.Payload);
-        var before = _world.SnapshotKnownIds(zoneSession);
-
-        string? error = await _world.ExecuteAsync(
-            zoneSession, new MoveCommand(move.DestX, move.DestY, move.DestZ), ct).ConfigureAwait(false);
-        if (error != null)
+        var plan = await _world.ExecuteAroundAsync(zoneSession, new MoveCommand(move.DestX, move.DestY, move.DestZ), apply =>
+        {
+            var before = _world.SnapshotKnownIds(zoneSession);
+            string? error = apply();
+            // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
+            var frames = error == null ? _knownlist.PlanDiff(zoneSession, self, before, _world.SnapshotKnownIds(zoneSession)) : [];
+            return new MovePlan(error, zoneSession.X, zoneSession.Y, zoneSession.Z, frames);
+        }, ct).ConfigureAwait(false);
+        if (plan.Error != null)
         {
             await conn.SendAsync(
                 NetOpcode.PositionCorrection,
@@ -51,18 +57,16 @@ public sealed class MovementPacketHandler
                 {
                     EntityValue = self.Value,
                     EntityGeneration = self.Generation,
-                    X = zoneSession.X,
-                    Y = zoneSession.Y,
-                    Z = zoneSession.Z
+                    X = plan.X,
+                    Y = plan.Y,
+                    Z = plan.Z
                 }),
                 envelope.RequestSequence,
                 ct).ConfigureAwait(false);
             return;
         }
 
-        var after = _world.SnapshotKnownIds(zoneSession);
-        // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
-        await _fanKnownlistDiff(conn, zoneSession, self, before, after, ct).ConfigureAwait(false);
+        await _knownlist.SendAsync(conn, plan.Frames, ct).ConfigureAwait(false);
     }
 
     public async Task OnValidatePositionAsync(

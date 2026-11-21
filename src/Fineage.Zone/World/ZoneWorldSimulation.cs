@@ -43,19 +43,21 @@ public sealed partial class ZoneWorld
     DateTimeOffset WallNow() => DateTimeOffset.FromUnixTimeMilliseconds(_simulationClock.WallUnixMs());
 
     /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
-    internal void StepSimulation() => RunUnderGate(wall =>
+    internal void StepSimulation() => RunStep(wall =>
     {
         _simulationTicks.Step(wall);
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
     });
 
     /// <summary>
-    /// Runs <paramref name="body"/> under <c>_gate</c> with one wall sample. Its fan-out is recorded into one batch that
-    /// is sealed before the lock is released and sent after it; inventory/warehouse Postgres writes the stages dirtied
-    /// are flushed after the lock too. Commands it applied are answered last.
+    /// Runs <paramref name="body"/> as a step with one wall sample, on the calling thread, which owns the world until
+    /// the step is over (<see cref="WorldAffinity"/>). Its fan-out is recorded into one batch, sealed when the body
+    /// returns and then sent; inventory/warehouse Postgres writes the stages dirtied are flushed before the send.
+    /// Commands it applied are answered last.
     /// </summary>
-    void RunUnderGate(Action<long> body)
+    void RunStep(Action<long> body)
     {
+        using var turn = _affinity.Step();
         bool outermost = _fanout.Recording == null;
         IReadOnlyList<ZoneCommandIngress.Applied> answered = [];
         try
@@ -119,7 +121,7 @@ public sealed partial class ZoneWorld
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
         _regions = partition;
-        _byId = new RegionDirectory<ZoneEntity>(partition);
+        _byId = new RegionDirectory<ZoneEntity>(partition, requireOwner: _affinity.Require);
         _simulationObserver = observer;
         _borders = new BorderSnapshots<ZonePresence>(partition, BorderReach);
         _regenPlayersStage = new RegionStage("regen.players", CollectRegenPlayers, (_, id) => RegenPlayer(id), parallel: true);

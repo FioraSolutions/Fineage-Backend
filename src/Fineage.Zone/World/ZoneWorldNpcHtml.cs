@@ -10,7 +10,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
-        // Bypass may class-change / fee / warehouse → SaveInventory after unlock (B8).
+        // Bypass may class-change / fee / warehouse → SaveInventory after the change (B8).
         return Task.FromResult(WithDeferredInventoryPersist(() => Bypass(session, npcObjectId, command)));
     }
 
