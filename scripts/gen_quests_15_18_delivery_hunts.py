@@ -22,7 +22,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import questio
 
-QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
+QROOT = ROOT / ".cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/scripts/quests"
+if not QROOT.is_dir():
+    QROOT = ROOT / "ref/mobius-ct0-interlude/dist/game/data/scripts/quests"
 if not QROOT.is_dir():
     QROOT = ROOT / "ref/mobius-ct0-interlude/data/scripts/quests"
 
@@ -45,9 +47,11 @@ def html_loader(script: str, qid: int):
     src = QROOT / script
 
     def html(name: str) -> str:
-        candidates = [src / name] if re.search(r"\.html?$", name, re.I) else [
-            src / f"{name}{ext}" for ext in ("", ".htm", ".html")
-        ]
+        if re.search(r"\.html?$", name, re.I):
+            stem = re.sub(r"\.html?$", "", name, flags=re.I)
+            candidates = [src / name, src / f"{stem}.htm", src / f"{stem}.html"]
+        else:
+            candidates = [src / f"{name}{ext}" for ext in ("", ".htm", ".html")]
         for p in candidates:
             if p.exists():
                 text = p.read_text(encoding="utf-8").strip()
@@ -79,24 +83,24 @@ def q156():
         d(LILITH, "talk", "30368-01.htm", when="absent"),
         d(LILITH, "event", "30368-02.html", when="absent", event="30368-02"),
         d(LILITH, "event", "30368-03.html", when="absent", event="30368-03"),
-        d(LILITH, "event", "30368-04.htm", when="absent", event="30368-05", maxLevel=14),
+        d(LILITH, "event", "30368-04.htm", when="absent", event="30368-04", maxLevel=14),
         d(
             LILITH,
             "event",
             "30368-05.htm",
             when="absent",
-            event="30368-05",
+            event="30368-04",
             minLevel=15,
             ops=START + [give(LETTER), cond(1)],
         ),
-        d(LILITH, "talk", "30368-06.html", cond=1, hasItem=LETTER),
+        d(LILITH, "talk", "30368-05.htm", cond=1, hasItem=LETTER),
         d(
             LILITH,
             "talk",
-            "30368-07.html",
+            "30368-06.htm",
             cond=2,
             hasItem=DIARY,
-            ops=[give(SOUL), exp_sp(3000, 0), {"op": "complete"}],
+            ops=[take(DIARY), give(SOUL), exp_sp(3000, 0), {"op": "complete"}],
         ),
         d(BAENEDES, "talk", "30369-01.html", cond=1, hasItem=LETTER),
         d(
@@ -134,18 +138,18 @@ def q167():
     NORMAN, HAPROCK, CARLON = 30210, 30255, 30350
     C_LETTER, N_LETTER = 1076, 1106
     dialogs = [
-        d(CARLON, "talk", "30350-01.htm", when="absent", maxLevel=14),
-        d(CARLON, "talk", "30350-02.htm", when="absent", minLevel=15),
+        d(CARLON, "talk", "30350-02.htm", when="absent", maxLevel=14),
+        d(CARLON, "talk", "30350-03.htm", when="absent", minLevel=15),
         d(
             CARLON,
             "event",
-            "30350-03.htm",
+            "30350-04.htm",
             when="absent",
-            event="30350-03",
+            event="30350-04",
             minLevel=15,
             ops=START + [give(C_LETTER), cond(1)],
         ),
-        d(CARLON, "talk", "30350-04.html", cond=1, hasItem=C_LETTER),
+        d(CARLON, "talk", "30350-05.htm", cond=1, hasItem=C_LETTER),
         d(HAPROCK, "talk", "30255-01.html", cond=1, hasItem=C_LETTER),
         d(HAPROCK, "event", "30255-02.html", event="30255-02", cond=1, hasItem=C_LETTER),
         d(
@@ -164,7 +168,7 @@ def q167():
             event="30255-04",
             cond=1,
             hasItem=C_LETTER,
-            ops=[adena(15000), {"op": "complete"}],
+            ops=[take(C_LETTER), adena(3000), {"op": "complete"}],
         ),
         d(HAPROCK, "talk", "30255-05.html", cond=2, hasItem=N_LETTER),
         d(NORMAN, "talk", "30210-01.html", cond=2, hasItem=N_LETTER),
@@ -175,7 +179,7 @@ def q167():
             event="30210-02",
             cond=2,
             hasItem=N_LETTER,
-            ops=[adena(20000), {"op": "complete"}],
+            ops=[take(N_LETTER), adena(20000), {"op": "complete"}],
         ),
     ]
     return {
@@ -203,26 +207,25 @@ def q306():
     }
     sell = {
         "op": "sell_items",
-        "prices": [{"itemId": FLAME, "adena": 40}, {"itemId": ICE, "adena": 40}],
+        "prices": [{"itemId": FLAME, "adena": 60}, {"itemId": ICE, "adena": 60}],
         "bonusMin": 10,
         "bonusAdena": 5000,
     }
     dialogs = [
-        d(KATERINA, "talk", "30004-02.htm", when="absent", maxLevel=16),
-        d(KATERINA, "talk", "30004-03.htm", when="absent", minLevel=17),
+        d(KATERINA, "talk", "30004-01.htm", when="absent", maxLevel=16),
+        d(KATERINA, "talk", "30004-02.htm", when="absent", minLevel=17),
         d(
             KATERINA,
             "event",
-            "30004-04.htm",
+            "30004-03.htm",
             when="absent",
-            event="30004-04",
+            event="30004-03",
             minLevel=17,
             ops=START + [cond(1)],
         ),
-        d(KATERINA, "event", "30004-08.html", when="started", event="30004-08", ops=[{"op": "complete"}]),
-        d(KATERINA, "event", "30004-09.html", when="started", event="30004-09"),
-        d(KATERINA, "talk", "30004-07.html", when="started", hasAny=[FLAME, ICE], ops=[sell]),
-        d(KATERINA, "talk", "30004-05.html", when="started", lacksItems=[FLAME, ICE]),
+        d(KATERINA, "event", "30004-06.htm", when="started", event="30004-06", ops=[{"op": "complete"}]),
+        d(KATERINA, "talk", "30004-05.htm", when="started", hasAny=[FLAME, ICE], ops=[sell]),
+        d(KATERINA, "talk", "30004-04.htm", when="started", lacksItems=[FLAME, ICE]),
     ]
     for mob, item in drops.items():
         dialogs.append(d(mob, "kill", None, when="started", raw="", ops=[drop(item, 1.0)]))
@@ -259,8 +262,8 @@ def q317():
             minLevel=18,
             ops=START + [cond(1)],
         ),
-        d(RIZRAELL, "talk", "30361-07.html", when="started", hasItem=SHARD),
-        d(RIZRAELL, "talk", "30361-05.html", when="started", lacksItems=[SHARD]),
+        d(RIZRAELL, "talk", "30361-07.htm", when="started", hasItem=SHARD, ops=[sell]),
+        d(RIZRAELL, "talk", "30361-05.htm", when="started", lacksItems=[SHARD]),
         # 08 = sell + quit; 09 = sell + continue
         d(
             RIZRAELL,
@@ -307,6 +310,7 @@ def main() -> None:
     for q in (q156(), q167(), q306(), q317()):
         questio.upsert_quest(q)
         print(f"upserted {q['id']} {q['name']} dialogs={len(q['dialogs'])}")
+    questio.ensure_meta(max_active=25, talk_range=250)
 
 
 if __name__ == "__main__":

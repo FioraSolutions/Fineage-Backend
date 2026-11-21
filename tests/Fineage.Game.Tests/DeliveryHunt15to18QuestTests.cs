@@ -20,7 +20,7 @@ public sealed class DeliveryHunt15to18QuestTests
         var (m, bag, j) = Setup();
         const int Q = 156, Lilith = 30368, Baenedes = 30369, Letter = 1022, Diary = 1023, Soul = 5250;
         var me = Any(15);
-        Assert.True(m.AdvEvent(j, bag, Q, Lilith, "30368-05", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Lilith, "30368-04", me).Ok);
         Assert.Equal(1, bag.CountOf(Letter));
 
         Assert.True(m.AdvEvent(j, bag, Q, Baenedes, "30369-02", me).Ok);
@@ -42,7 +42,7 @@ public sealed class DeliveryHunt15to18QuestTests
         var (m, bag, j) = Setup();
         const int Q = 156, Lilith = 30368, Baenedes = 30369;
         var me = Any(15);
-        Assert.True(m.AdvEvent(j, bag, Q, Lilith, "30368-05", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Lilith, "30368-04", me).Ok);
         var done = m.AdvEvent(j, bag, Q, Baenedes, "30369-03", me);
         Assert.True(done.Ok);
         Assert.Equal(3000, done.Exp);
@@ -56,7 +56,7 @@ public sealed class DeliveryHunt15to18QuestTests
         var (m, bag, j) = Setup();
         const int Q = 167, Carlon = 30350, Haprock = 30255, Norman = 30210;
         var me = Any(15);
-        Assert.True(m.AdvEvent(j, bag, Q, Carlon, "30350-03", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Carlon, "30350-04", me).Ok);
         Assert.Equal(1, bag.CountOf(1076));
 
         Assert.True(m.AdvEvent(j, bag, Q, Haprock, "30255-03", me).Ok);
@@ -76,9 +76,9 @@ public sealed class DeliveryHunt15to18QuestTests
         var (m, bag, j) = Setup();
         const int Q = 167, Carlon = 30350, Haprock = 30255;
         var me = Any(15);
-        Assert.True(m.AdvEvent(j, bag, Q, Carlon, "30350-03", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Carlon, "30350-04", me).Ok);
         Assert.True(m.AdvEvent(j, bag, Q, Haprock, "30255-04", me).Ok);
-        Assert.Equal(15000, bag.CountOf(57));
+        Assert.Equal(3000, bag.CountOf(57));
         Assert.Equal(QuestPhase.Completed, j.Find(Q)!.Phase);
     }
 
@@ -88,7 +88,7 @@ public sealed class DeliveryHunt15to18QuestTests
         var (m, bag, j) = Setup(0.0);
         const int Q = 306, Katerina = 30004, Flame = 1020, Ice = 1021;
         var me = Any(17);
-        Assert.True(m.AdvEvent(j, bag, Q, Katerina, "30004-04", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Katerina, "30004-03", me).Ok);
 
         m.OnKill(j, bag, 20109, me); // flame
         m.OnKill(j, bag, 20110, me); // ice
@@ -98,15 +98,15 @@ public sealed class DeliveryHunt15to18QuestTests
         Assert.True(m.Talk(j, bag, Q, Katerina, me).Ok);
         Assert.Equal(0, bag.CountOf(Flame));
         Assert.Equal(0, bag.CountOf(Ice));
-        Assert.Equal(80, bag.CountOf(57)); // 2×40, no bonus (<10)
+        Assert.Equal(120, bag.CountOf(57)); // 2×60, no bonus (<10)
 
         for (int i = 0; i < 10; i++)
             m.OnKill(j, bag, 20109, me);
         Assert.Equal(10, bag.CountOf(Flame));
         Assert.True(m.Talk(j, bag, Q, Katerina, me).Ok);
-        Assert.Equal(80 + 10 * 40 + 5000, bag.CountOf(57));
+        Assert.Equal(120 + 10 * 60 + 5000, bag.CountOf(57));
 
-        Assert.True(m.AdvEvent(j, bag, Q, Katerina, "30004-08", me).Ok);
+        Assert.True(m.AdvEvent(j, bag, Q, Katerina, "30004-06", me).Ok);
         Assert.Null(j.Find(Q));
     }
 
@@ -122,10 +122,7 @@ public sealed class DeliveryHunt15to18QuestTests
             m.OnKill(j, bag, 20036, me);
         Assert.Equal(10, bag.CountOf(Shard));
 
-        Assert.True(m.Talk(j, bag, Q, Rizraell, me).Ok); // 07 — no sell yet
-        Assert.Equal(10, bag.CountOf(Shard));
-
-        Assert.True(m.AdvEvent(j, bag, Q, Rizraell, "30361-09", me).Ok); // sell + continue
+        Assert.True(m.Talk(j, bag, Q, Rizraell, me).Ok); // 07 — sell on talk (Mobius parity)
         Assert.Equal(0, bag.CountOf(Shard));
         Assert.Equal(10 * 40 + 2988, bag.CountOf(57));
         Assert.NotNull(j.Find(Q));

@@ -26,7 +26,7 @@
       "npcId": 30004,
       "hook": "event",
       "when": "absent",
-      "event": "30004-04",
+      "event": "30004-03",
       "minLevel": 17,
       "ops": [
         {
@@ -40,26 +40,19 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30004-event-30004-04-002.htm"
+      "htmlFile": "30004-event-30004-03-002.htm"
     },
     {
       "npcId": 30004,
       "hook": "event",
       "when": "started",
-      "event": "30004-08",
+      "event": "30004-06",
       "ops": [
         {
           "op": "complete"
         }
       ],
-      "htmlFile": "30004-event-30004-08-003.htm"
-    },
-    {
-      "npcId": 30004,
-      "hook": "event",
-      "when": "started",
-      "event": "30004-09",
-      "htmlFile": "30004-event-30004-09-004.htm"
+      "htmlFile": "30004-event-30004-06-003.htm"
     },
     {
       "npcId": 30004,
@@ -75,18 +68,18 @@
           "prices": [
             {
               "itemId": 1020,
-              "adena": 40
+              "adena": 60
             },
             {
               "itemId": 1021,
-              "adena": 40
+              "adena": 60
             }
           ],
           "bonusMin": 10,
           "bonusAdena": 5000
         }
       ],
-      "htmlFile": "30004-talk-005.htm"
+      "htmlFile": "30004-talk-004.htm"
     },
     {
       "npcId": 30004,
@@ -96,7 +89,7 @@
         1020,
         1021
       ],
-      "htmlFile": "30004-talk-006.htm"
+      "htmlFile": "30004-talk-005.htm"
     },
     {
       "npcId": 20109,

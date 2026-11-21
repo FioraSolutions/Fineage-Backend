@@ -32,15 +32,15 @@
       "npcId": 30368,
       "hook": "event",
       "when": "absent",
-      "event": "30368-05",
+      "event": "30368-04",
       "maxLevel": 14,
-      "htmlFile": "30368-event-30368-05-003.htm"
+      "htmlFile": "30368-event-30368-04-003.htm"
     },
     {
       "npcId": 30368,
       "hook": "event",
       "when": "absent",
-      "event": "30368-05",
+      "event": "30368-04",
       "minLevel": 15,
       "ops": [
         {
@@ -59,7 +59,7 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30368-event-30368-05-004.htm"
+      "htmlFile": "30368-event-30368-04-004.htm"
     },
     {
       "npcId": 30368,
@@ -76,6 +76,11 @@
       "cond": 2,
       "hasItem": 1023,
       "ops": [
+        {
+          "op": "take_item",
+          "itemId": 1023,
+          "count": 1
+        },
         {
           "op": "give_item",
           "itemId": 5250,
