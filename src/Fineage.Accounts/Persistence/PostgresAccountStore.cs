@@ -42,6 +42,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
             // (Claude B9). Bootstrap only when the SQL side is empty.
             if (!store.HasNormalizedCharacterRows())
                 store.BackfillNormalizedFromSnapshot();
+            store.HydrateWeddingFromNormalized();
             return store;
         }
         catch

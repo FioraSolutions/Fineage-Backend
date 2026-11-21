@@ -343,5 +343,9 @@ namespace Fineage.Net.Contract
         public const ushort Ride = 0x03C4;
         /// <summary>Zone → owner: pet / mount action gating (<c>PlayerActionStateNetMsg</c>).</summary>
         public const ushort PlayerActionState = 0x03C5;
+        /// <summary>Client → zone: answer wedding engagement.</summary>
+        public const ushort WeddingEngageAnswer = 0x03C6;
+        /// <summary>Zone → client: wedding engagement prompt.</summary>
+        public const ushort WeddingEngageAsk = 0x03C7;
     }
 }

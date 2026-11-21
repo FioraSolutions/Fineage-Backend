@@ -21,6 +21,8 @@ using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
 using Fineage.Zone.Lottery;
 using Fineage.Game.Services;
+using Fineage.Game.Wedding;
+using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -307,6 +309,8 @@ public sealed partial class ZoneWorld
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
         _mammon = new MammonActor(_sevenSigns, GlobalStream(RandomPurpose.Mammon));
+        _weddingSettings = WeddingSettings.LoadDefault();
+        _wedding = new WeddingActor(accounts?.ListWeddingCouples(), accounts?.NextWeddingCoupleId ?? 1);
         SpawnCastleDoors();
     }
 

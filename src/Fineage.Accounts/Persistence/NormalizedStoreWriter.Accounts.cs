@@ -18,6 +18,7 @@ static partial class NormalizedStoreWriter
         if (nextItem < PlayerInventory.FirstObjectId)
             nextItem = PlayerInventory.FirstObjectId;
         SetMeta(conn, tx, "next_item_object_id", nextItem);
+        SetMeta(conn, tx, "next_wedding_couple_id", ReadInt(root, "nextWeddingCoupleId", 1));
     }
 
     static void SetMeta(NpgsqlConnection conn, NpgsqlTransaction tx, string key, long value)

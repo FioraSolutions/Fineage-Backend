@@ -268,6 +268,8 @@ interface IWorldEventPublisher
 
     void FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendInviteAskMsg ask);
 
+    void FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask);
+
     void FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list);
 
     void FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendUpdateMsg update);

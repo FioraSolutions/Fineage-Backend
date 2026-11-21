@@ -290,6 +290,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.FriendAnswer:
                             await _friends.OnAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.WeddingEngageAnswer:
+                            await _wedding.OnEngageAnswerAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.FriendListRequest:
                             await _friends.OnListRequestAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;

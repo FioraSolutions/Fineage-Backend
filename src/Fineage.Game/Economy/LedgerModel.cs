@@ -266,7 +266,16 @@ public enum LedgerTxKind
     GmGrant = 45,
 
     /// <summary>Item consumed from a bag: <c>Reference</c> is item id (or skill id for skill costs).</summary>
-    Consume = 46
+    Consume = 46,
+
+    /// <summary>Wedding ceremony fee at Andromeda: <c>Reference</c> is couple id.</summary>
+    WeddingCeremonyFee = 47,
+
+    /// <summary><c>.gotolove</c> teleport fee: <c>Reference</c> is partner object id.</summary>
+    WeddingTeleportFee = 48,
+
+    /// <summary>Married divorce adena transfer: payer inventory → partner inventory.</summary>
+    WeddingDivorcePenalty = 49
 }
 
 /// <summary>

@@ -49,6 +49,10 @@ public sealed class PlayerIntent
     /// <summary>Mobius saveNextIntention(MOVE_TO): move order received mid-cast, run when the cast ends.</summary>
     public Fineage.Protocol.MoveToMsg? QueuedMove { get; set; }
 
-    /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
-    public bool SitOnArrive { get; set; }
+  /// <summary>Mobius RequestActionUse sit while moving: NextAction(EVT_ARRIVED) → sit on arrival.</summary>
+  public bool SitOnArrive { get; set; }
+
+    /// <summary>Mobius Wedding <c>goToLove</c> SoE cast before teleport.</summary>
+    public int WeddingTeleportPartnerId { get; set; }
+    public long WeddingTeleportAtUnixMs { get; set; }
 }

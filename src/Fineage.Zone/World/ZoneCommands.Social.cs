@@ -142,3 +142,9 @@ public sealed record SayCommand(string? Text, int ChatType, string? Target) : Zo
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         Completed(world.TrySayAsync(session, Text, ChatType, TickTime(tick), CancellationToken.None, Target));
 }
+
+public sealed record WeddingEngageAnswerCommand(int Response) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryWeddingEngageAnswerAsync(session, Response, CancellationToken.None));
+}

@@ -22,6 +22,8 @@ public sealed partial class MemoryAccountStore
         public List<ManorProductionSave> ManorProduction { get; set; } = [];
         public List<ManorProcureSave> ManorProcure { get; set; } = [];
         public List<StoredPet> Pets { get; set; } = [];
+        public List<WeddingCoupleRecord> WeddingCouples { get; set; } = [];
+        public int NextWeddingCoupleId { get; set; } = 1;
     }
 
     sealed class AccountDto

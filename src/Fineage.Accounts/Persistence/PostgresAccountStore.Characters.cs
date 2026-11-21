@@ -240,6 +240,7 @@ public sealed partial class PostgresAccountStore
             conn =>
             {
                 using var tx = conn.BeginTransaction();
+                NormalizedStoreWriter.PurgeWeddingCouplesForCharacter(conn, tx, characterId);
                 NormalizedStoreWriter.DeleteCharacter(conn, tx, characterId);
                 tx.Commit();
             });
