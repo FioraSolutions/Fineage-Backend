@@ -27,7 +27,7 @@
       "npcId": 30333,
       "hook": "event",
       "when": "absent",
-      "event": "30333-03",
+      "event": "30333-1",
       "minLevel": 25,
       "ops": [
         {
@@ -46,7 +46,7 @@
           "count": 1
         }
       ],
-      "htmlFile": "30333-event-30333-03-002.htm"
+      "htmlFile": "30333-event-30333-1-002.htm"
     },
     {
       "npcId": 30333,
@@ -66,7 +66,7 @@
       "npcId": 30344,
       "hook": "event",
       "when": "started",
-      "event": "30344-04",
+      "event": "30344-4",
       "cond": 1,
       "hasItem": 7182,
       "ops": [
@@ -80,7 +80,7 @@
           "cond": 2
         }
       ],
-      "htmlFile": "30344-event-30344-04-c1-005.htm"
+      "htmlFile": "30344-event-30344-4-c1-005.htm"
     },
     {
       "npcId": 30344,
@@ -117,7 +117,7 @@
       "npcId": 30344,
       "hook": "event",
       "when": "started",
-      "event": "30344-06",
+      "event": "30344-4",
       "cond": 3,
       "ops": [
         {
@@ -129,13 +129,13 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30344-event-30344-06-c3-009.htm"
+      "htmlFile": "30344-event-30344-4-c3-009.htm"
     },
     {
       "npcId": 30344,
       "hook": "event",
       "when": "started",
-      "event": "30344-06",
+      "event": "30344-4",
       "cond": 2,
       "atLeast": {
         "7183": 50,
@@ -155,14 +155,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30344-event-30344-06-c2-010.htm"
+      "htmlFile": "30344-event-30344-4-c2-010.htm"
     },
     {
       "npcId": 30344,
       "hook": "event",
       "when": "started",
-      "event": "30344-06",
-      "htmlFile": "30344-event-30344-06-011.htm"
+      "event": "30344-4",
+      "htmlFile": "30344-event-30344-4-011.htm"
     },
     {
       "npcId": 20922,

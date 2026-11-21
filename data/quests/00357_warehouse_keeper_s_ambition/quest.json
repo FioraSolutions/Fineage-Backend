@@ -25,30 +25,30 @@
       "npcId": 30686,
       "hook": "event",
       "when": "absent",
-      "event": "30686-01",
-      "htmlFile": "30686-event-30686-01-002.htm"
+      "event": "30686-1",
+      "htmlFile": "30686-event-30686-1-002.htm"
     },
     {
       "npcId": 30686,
       "hook": "event",
       "when": "absent",
-      "event": "30686-03",
+      "event": "30686-2",
       "minLevel": 47,
-      "htmlFile": "30686-event-30686-03-003.htm"
+      "htmlFile": "30686-event-30686-2-003.htm"
     },
     {
       "npcId": 30686,
       "hook": "event",
       "when": "absent",
-      "event": "30686-04",
+      "event": "30686-3",
       "minLevel": 47,
-      "htmlFile": "30686-event-30686-04-004.htm"
+      "htmlFile": "30686-event-30686-3-004.htm"
     },
     {
       "npcId": 30686,
       "hook": "event",
       "when": "absent",
-      "event": "30686-05",
+      "event": "30686-4",
       "minLevel": 47,
       "ops": [
         {
@@ -62,7 +62,7 @@
           "cond": 1
         }
       ],
-      "htmlFile": "30686-event-30686-05-005.htm"
+      "htmlFile": "30686-event-30686-4-005.htm"
     },
     {
       "npcId": 30686,
@@ -84,14 +84,7 @@
       "npcId": 30686,
       "hook": "event",
       "when": "started",
-      "event": "30686-10",
-      "htmlFile": "30686-event-30686-10-008.htm"
-    },
-    {
-      "npcId": 30686,
-      "hook": "event",
-      "when": "started",
-      "event": "30686-09",
+      "event": "30686-7",
       "atLeast": {
         "5867": 100
       },
@@ -108,7 +101,7 @@
           "bonusAdena": 40500
         }
       ],
-      "htmlFile": "30686-event-30686-09-009.htm"
+      "htmlFile": "30686-event-30686-7-009.htm"
     },
     {
       "npcId": 30686,
@@ -135,7 +128,7 @@
       "npcId": 30686,
       "hook": "event",
       "when": "started",
-      "event": "30686-11",
+      "event": "30686-8",
       "atLeast": {
         "5867": 100
       },
@@ -155,13 +148,13 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30686-event-30686-11-011.htm"
+      "htmlFile": "30686-event-30686-8-011.htm"
     },
     {
       "npcId": 30686,
       "hook": "event",
       "when": "started",
-      "event": "30686-11",
+      "event": "30686-8",
       "hasItem": 5867,
       "ops": [
         {
@@ -179,13 +172,13 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30686-event-30686-11-012.htm"
+      "htmlFile": "30686-event-30686-8-012.htm"
     },
     {
       "npcId": 30686,
       "hook": "event",
       "when": "started",
-      "event": "30686-11",
+      "event": "30686-8",
       "lacksItems": [
         5867
       ],
@@ -194,7 +187,14 @@
           "op": "complete"
         }
       ],
-      "htmlFile": "30686-event-30686-11-013.htm"
+      "htmlFile": "30686-event-30686-8-013.htm"
+    },
+    {
+      "npcId": 30686,
+      "hook": "event",
+      "when": "started",
+      "event": "30686-8",
+      "htmlFile": "30686-event-30686-8-008.htm"
     },
     {
       "npcId": 20594,
