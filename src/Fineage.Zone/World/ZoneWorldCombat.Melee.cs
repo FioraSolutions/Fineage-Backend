@@ -127,6 +127,7 @@ public sealed partial class ZoneWorld
         ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
+        TryApplyRaidCurse(target, attacker, magicSkill: false, now);
         ApplyQuestAttack(credit, target, byPet: attacker.Summon?.Pet != null);
         AddHate(target, attacker, DamageHate(damage, target.Level));
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
