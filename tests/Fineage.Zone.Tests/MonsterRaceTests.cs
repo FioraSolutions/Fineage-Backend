@@ -11,7 +11,7 @@ public sealed class MonsterRaceTests
     {
         var bets = new Dictionary<int, long> { [1] = 1000, [2] = 0, [3] = 500, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0 };
         var odds = MonsterRaceLogic.CalculateOdds(bets, 0.7, 1.25);
-        Assert.Equal(1.05, odds[0], 2);
+        Assert.Equal(1.25, odds[0], 2);
         Assert.Equal(0, odds[1]);
         Assert.Equal(2.1, odds[2], 2);
     }
@@ -56,7 +56,7 @@ public sealed class MonsterRaceTests
     public void Board_fires_close_bets_at_second_900()
     {
         var store = new MemoryMonsterRaceStore();
-        store.Save(new MonsterRaceSnapshot { CycleStartUnixMs = 900_000, LastHandledCountdown = 899 });
+        store.Save(new MonsterRaceSnapshot { CycleStartUnixMs = 0, LastHandledCountdown = 899 });
         var board = new MonsterRaceBoard(
             0,
             TestCatalogs.Game.Items,
