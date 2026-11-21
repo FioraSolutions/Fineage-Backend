@@ -206,6 +206,15 @@ public sealed partial class NetZoneServer
                         case NetOpcode.PartyChangeLeaderRequest:
                             await _party.OnChangeLeaderAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.CommandChannelAskRequest:
+                            await _commandChannel.OnAskAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.CommandChannelAcceptRequest:
+                            await _commandChannel.OnAcceptAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.CommandChannelOustRequest:
+                            await _commandChannel.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

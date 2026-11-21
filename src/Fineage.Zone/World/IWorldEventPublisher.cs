@@ -237,6 +237,14 @@ interface IWorldEventPublisher
 
     void FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions);
 
+    void FanoutCommandChannelAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelAskJoinMsg ask);
+
+    void FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds);
+
+    void FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds);
+
+    void FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info);
+
     /// <summary>Interlude MagicSkillLaunched at hitTime: caster + everyone who sees the caster.</summary>
     void FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds);
 

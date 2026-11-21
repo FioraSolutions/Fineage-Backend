@@ -390,5 +390,20 @@ namespace Fineage.Net.Contract
         public const ushort CursedWeaponList = 0x03DB;
         /// <summary>Zone → client: Mobius ExCursedWeaponLocation (wire 0xFE 0x46).</summary>
         public const ushort CursedWeaponLocation = 0x03DC;
+
+        /// <summary>Client → zone: Mobius <c>RequestExAskJoinMPCC</c> (target player name).</summary>
+        public const ushort CommandChannelAskRequest = 0x03DD;
+        /// <summary>Client → zone: Mobius <c>RequestExAcceptJoinMPCC</c> (1 accept, 0 decline).</summary>
+        public const ushort CommandChannelAcceptRequest = 0x03DE;
+        /// <summary>Client → zone: Mobius <c>RequestExOustFromMPCC</c> (party leader name to oust).</summary>
+        public const ushort CommandChannelOustRequest = 0x03DF;
+        /// <summary>Zone → client: Mobius <c>ExAskJoinMPCC</c>.</summary>
+        public const ushort CommandChannelAskJoin = 0x03E0;
+        /// <summary>Zone → client: Mobius <c>ExOpenMPCC</c>.</summary>
+        public const ushort CommandChannelOpen = 0x03E1;
+        /// <summary>Zone → client: Mobius <c>ExCloseMPCC</c>.</summary>
+        public const ushort CommandChannelClose = 0x03E2;
+        /// <summary>Zone → client: Mobius <c>ExMultiPartyCommandChannelInfo</c>.</summary>
+        public const ushort CommandChannelInfo = 0x03E3;
     }
 }

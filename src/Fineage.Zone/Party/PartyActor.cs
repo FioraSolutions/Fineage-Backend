@@ -84,6 +84,12 @@ internal sealed class PartyActor : GlobalActor<PartyFrame>
         return _byPlayer.TryGetValue(objectId, out int partyId) && _parties.TryGetValue(partyId, out var party) ? party : null;
     }
 
+    public ZoneParty? PartyById(int partyId)
+    {
+        RequireActorThread();
+        return _parties.TryGetValue(partyId, out var party) ? party : null;
+    }
+
     public bool InParty(int objectId)
     {
         RequireActorThread();

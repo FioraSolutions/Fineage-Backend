@@ -517,6 +517,30 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutPartyMemberPosition), () => inner.FanoutPartyMemberPosition(watcherObjectIdsCopy, positions));
     }
 
+    void IWorldEventPublisher.FanoutCommandChannelAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelAskJoinMsg ask)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelAskJoin), () => inner.FanoutCommandChannelAskJoin(watcherObjectIdsCopy, ask));
+    }
+
+    void IWorldEventPublisher.FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelOpen), () => inner.FanoutCommandChannelOpen(watcherObjectIdsCopy));
+    }
+
+    void IWorldEventPublisher.FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelClose), () => inner.FanoutCommandChannelClose(watcherObjectIdsCopy));
+    }
+
+    void IWorldEventPublisher.FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelInfo), () => inner.FanoutCommandChannelInfo(watcherObjectIdsCopy, info));
+    }
+
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];

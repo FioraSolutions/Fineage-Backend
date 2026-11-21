@@ -167,8 +167,27 @@ public sealed partial class ZoneWorld
                     Params = [],
                     Text = "You are currently not in a petition chat."
                 };
+            case ChatProtocol.PartyRoomCommander:
+                if (_party.Of(speaker.ObjectId) is not { } ccParty)
+                    return null;
+                if (_commandChannel.OfParty(ccParty.PartyId) is not { } ccCmd)
+                    return null;
+                if (ccCmd.LeaderObjectId != speaker.ObjectId)
+                    return null;
+                SayToGroup(speaker, chatType, text, CommandChannelOnlineMembers(ccCmd));
+                return null;
+            case ChatProtocol.PartyRoomAll:
+                if (_party.Of(speaker.ObjectId) is not { } roomParty)
+                    return null;
+                if (_commandChannel.OfParty(roomParty.PartyId) is not { } ccAll)
+                    return null;
+                if (roomParty.LeaderObjectId != speaker.ObjectId)
+                    return null;
+                SayToGroup(speaker, chatType, text, CommandChannelOnlineMembers(ccAll));
+                return null;
+            case ChatProtocol.PartyMatchRoom:
+                return null;
             default:
-                // Party match room / command channel: Mobius returns silently when the speaker has none.
                 return null;
         }
     }
