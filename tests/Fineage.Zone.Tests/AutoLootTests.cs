@@ -1,5 +1,6 @@
 using Fineage.Game.Economy;
 using Fineage.Zone;
+using Fineage.Zone.Drops;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
