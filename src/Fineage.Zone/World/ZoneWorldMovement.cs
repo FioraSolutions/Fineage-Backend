@@ -71,7 +71,7 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
-        ReconcileKnownlist(entity, ack);
+        ReconcileKnownlist(entity, ack, _knownlistDiffActive ? _knownlistDiffAfter : null);
         entity.AoiRefreshX = curX;
         entity.AoiRefreshY = curY;
 

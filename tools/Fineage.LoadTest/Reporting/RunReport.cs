@@ -1,4 +1,5 @@
 using Fineage.LoadTest.Bot;
+using Fineage.LoadTest.Consistency;
 using Fineage.LoadTest.Metrics;
 
 namespace Fineage.LoadTest.Reporting;
@@ -11,8 +12,11 @@ public sealed class RunReport
     public string SpawnLayout { get; init; } = "";
     public int BotCount { get; init; }
     public int BotsInWorld { get; init; }
+    public int PeakZoneOnline { get; init; }
     public int BotsDisconnected { get; init; }
     public int BotsStuck { get; init; }
+    public long RelogsAttempted { get; init; }
+    public long RelogsSucceeded { get; init; }
     public double ClientRttP50Ms { get; init; }
     public double ClientRttP95Ms { get; init; }
     public double ClientRttP99Ms { get; init; }
@@ -23,6 +27,7 @@ public sealed class RunReport
     public bool Passed { get; init; }
     public List<string> FailReasons { get; init; } = [];
     public List<string> Bugs { get; init; } = [];
+    public ConsistencyReport? Consistency { get; init; }
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset FinishedAt { get; init; }
 }
@@ -41,6 +46,10 @@ public sealed class PrometheusAggregate
     public long PacketsRejected { get; init; }
     public long PacketsErrored { get; init; }
     public int ZoneOnlineMax { get; init; }
+    public long OutboundDropped { get; init; }
+    public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public double BytesOutPerOnlinePlayer { get; init; }
+    public long LedgerAdjustments { get; init; }
 
     public static PrometheusAggregate FromSamples(IReadOnlyList<PrometheusSample> samples)
     {
@@ -59,8 +68,33 @@ public sealed class PrometheusAggregate
             OutPpsAvg = samples.Average(s => s.OutPps),
             PacketsRejected = samples.Max(s => s.PacketsRejected),
             PacketsErrored = samples.Max(s => s.PacketsErrored),
-            ZoneOnlineMax = samples.Max(s => s.ZoneOnline)
+            ZoneOnlineMax = samples.Max(s => s.ZoneOnline),
+            OutboundDropped = samples.Max(s => s.OutboundDropped),
+            TickStageP99Ms = MergeStageP99(samples),
+            LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
+            BytesOutPerOnlinePlayer = PerPlayerBytes(samples)
         };
+    }
+
+    static double PerPlayerBytes(IReadOnlyList<PrometheusSample> samples)
+    {
+        if (samples.Count == 0)
+            return 0;
+        long bytes = samples.Max(s => s.BytesOut);
+        int online = Math.Max(1, samples.Max(s => s.ZoneOnline));
+        return bytes / (double)online;
+    }
+
+    static Dictionary<string, double> MergeStageP99(IReadOnlyList<PrometheusSample> samples)
+    {
+        var merged = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (var sample in samples)
+        {
+            foreach (var (stage, p99) in sample.TickStageP99Ms)
+                merged[stage] = Math.Max(merged.GetValueOrDefault(stage), p99);
+        }
+
+        return merged;
     }
 
     static double Percentile(IEnumerable<double> values, double q)
@@ -117,6 +151,15 @@ public static class ReportWriter
             sb.AppendLine($"| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
             sb.AppendLine(
                 $"| {r.Server.TickP50Ms:0.0} | {r.Server.TickP95Ms:0.0} | {r.Server.TickP99Ms:0.0} | {r.Server.TickMaxMs:0.0} | {r.Server.TickOverruns} | {r.Server.TicksSkipped} | {r.Server.CommandIngressQueuedMax} | {r.Server.InPpsAvg:0.0} | {r.Server.OutPpsAvg:0.0} |");
+            if (r.Server.OutboundDropped > 0)
+                sb.AppendLine($"- Outbound queue drops: **{r.Server.OutboundDropped}**");
+            if (r.Server.TickStageP99Ms.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("### Tick stage p99 (ms)");
+                foreach (var (stage, ms) in r.Server.TickStageP99Ms.OrderByDescending(kv => kv.Value).Take(12))
+                    sb.AppendLine($"- `{stage}`: {ms:0.0}");
+            }
         }
 
         if (r.ZoneProcess != null)
@@ -144,6 +187,23 @@ public static class ReportWriter
             int n = 1;
             foreach (string bug in r.Bugs)
                 sb.AppendLine($"{n++}. {bug}");
+        }
+
+        if (r.Consistency != null)
+        {
+            sb.AppendLine();
+            sb.AppendLine("## Consistency oracle");
+            sb.AppendLine($"- Pairwise AOI checks: **{r.Consistency.PairwiseObserversCompared}**");
+            sb.AppendLine($"- Issues: **{r.Consistency.Issues.Count}** ({(r.Consistency.Passed ? "PASS" : "FAIL")})");
+            sb.AppendLine($"- Command→fanout latency ms: p50 **{r.Consistency.BroadcastLatencyP50Ms:0.0}**, p95 **{r.Consistency.BroadcastLatencyP95Ms:0.0}**, p99 **{r.Consistency.BroadcastLatencyP99Ms:0.0}**");
+            if (r.Consistency.Issues.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("| kind | observer | detail |");
+                sb.AppendLine("| --- | ---: | --- |");
+                foreach (var issue in r.Consistency.Issues.Take(40))
+                    sb.AppendLine($"| {issue.Kind} | {issue.ObserverBotId} | {issue.Detail.Replace('|', '/')} |");
+            }
         }
 
         return sb.ToString();

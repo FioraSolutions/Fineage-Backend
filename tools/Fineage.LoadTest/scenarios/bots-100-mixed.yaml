@@ -1,0 +1,5 @@
+name: bots-100-mixed
+extends: stress-mixed-weights.yaml
+botCount: 100
+rampUpSeconds: 45
+durationSeconds: 120

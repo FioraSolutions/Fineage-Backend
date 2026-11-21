@@ -1,0 +1,6 @@
+name: bots-20-smoke
+extends: stress-mixed-weights.yaml
+botCount: 20
+rampUpSeconds: 10
+durationSeconds: 45
+spawnLayout: town

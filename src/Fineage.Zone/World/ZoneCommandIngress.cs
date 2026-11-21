@@ -46,13 +46,28 @@ internal sealed class ZoneCommandIngress
     }
 
     /// <summary>Everything submitted so far, in submission order; later submissions wait for the next drain.</summary>
-    public IReadOnlyList<Submission> TakeQueued()
+    public IReadOnlyList<Submission> TakeQueued() => TakeQueued(0);
+
+    /// <summary>
+    /// Up to <paramref name="maxPerTick"/> submissions in order; when <paramref name="maxPerTick"/> is
+    /// <c>&lt;= 0</c>, takes all. The rest stay queued for the next step.
+    /// </summary>
+    public IReadOnlyList<Submission> TakeQueued(int maxPerTick)
     {
         lock (_lock)
         {
-            var taken = _queued;
-            _queued = [];
-            return taken;
+            if (_queued.Count == 0)
+                return [];
+            if (maxPerTick <= 0 || _queued.Count <= maxPerTick)
+            {
+                var taken = _queued;
+                _queued = [];
+                return taken;
+            }
+
+            var batch = _queued.GetRange(0, maxPerTick);
+            _queued.RemoveRange(0, maxPerTick);
+            return batch;
         }
     }
 

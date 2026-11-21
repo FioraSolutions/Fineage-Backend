@@ -1,5 +1,6 @@
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Simulation;
+using Fineage.Zone;
 
 namespace Fineage.Zone.World;
 
@@ -28,7 +29,8 @@ public sealed partial class ZoneWorld
     void ApplyCommands(TickContext tick)
     {
         bool applied = false;
-        foreach (var submission in _ingress.TakeQueued())
+        int budget = ZoneSimulationSettings.CommandsPerTick;
+        foreach (var submission in _ingress.TakeQueued(budget))
         {
             // Cancelled by its connection before this tick: it never happened.
             if (submission.Reply.Task.IsCompleted)

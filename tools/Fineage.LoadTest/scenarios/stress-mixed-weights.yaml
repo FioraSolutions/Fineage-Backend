@@ -1,0 +1,16 @@
+# Mixed behavior profile: combat, PvP, social, economy hooks, relog churn.
+actionWeights:
+  move: 0.22
+  attack: 0.14
+  skill: 0.12
+  pvp: 0.08
+  say: 0.06
+  sit: 0.05
+  social: 0.05
+  pickup: 0.06
+  trade: 0.05
+  party: 0.05
+  teleport: 0.04
+  relog: 0.03
+spawnLayout: spread
+aoiCellSize: 3000

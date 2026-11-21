@@ -33,6 +33,9 @@ sealed class NetKnownlistFanout
     /// </summary>
     public List<NetFrame> PlanDiff(ZoneSession zoneSession, EntityId self, HashSet<int> before, HashSet<int> after)
     {
+        if (SetsEqual(before, after))
+            return [];
+
         var frames = new List<NetFrame>();
         // Newly visible: EntitySpawn. Forgotten: EntityDespawn.
         foreach (int id in after.OrderBy(static x => x))
@@ -106,4 +109,17 @@ sealed class NetKnownlistFanout
 
     public Task SendAsync(NetConnection conn, IEnumerable<NetFrame> frames, CancellationToken ct) =>
         NetFrame.SendAsync(conn, _presence, frames, ct);
+
+    static bool SetsEqual(HashSet<int> before, HashSet<int> after)
+    {
+        if (before.Count != after.Count)
+            return false;
+        foreach (int id in before)
+        {
+            if (!after.Contains(id))
+                return false;
+        }
+
+        return true;
+    }
 }

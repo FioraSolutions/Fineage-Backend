@@ -66,6 +66,15 @@ public static class ZoneSimulationSettings
     /// <summary>The region executor as one banner token: <c>sequential</c> or <c>parallel:N</c>.</summary>
     public static string DescribeRegionExecutor(int workers) => workers == 0 ? "sequential" : $"parallel:{workers}";
 
+    /// <summary>
+    /// Max player commands applied per simulation step in the <c>commands</c> stage; <c>0</c> means no limit (default,
+    /// tests, replay). Under burst load set <c>FINEAGE_ZONE_COMMANDS_PER_TICK</c> (e.g. 20) in the zone host.
+    /// </summary>
+    public const int DefaultCommandsPerTick = 0;
+
+    public static int CommandsPerTick =>
+        ReadInt("FINEAGE_ZONE_COMMANDS_PER_TICK", DefaultCommandsPerTick, min: 0, max: 10_000);
+
     static int ReadInt(string name, int fallback, int min, int max)
     {
         string? text = Environment.GetEnvironmentVariable(name);

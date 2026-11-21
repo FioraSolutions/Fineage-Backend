@@ -26,6 +26,36 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
+    public async Task Commands_apply_in_submission_order_across_steps_when_per_tick_budget_limits_batch()
+    {
+        var prior = Environment.GetEnvironmentVariable("FINEAGE_ZONE_COMMANDS_PER_TICK");
+        try
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_ZONE_COMMANDS_PER_TICK", "2");
+            var (kit, session, peer, _) = await SetupAsync();
+
+            var a = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+            var b = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
+            var c = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+            kit.World.StepSimulation();
+            await Task.WhenAll(a, b);
+            Assert.False(c.IsCompleted);
+            Assert.Equal(0, session.SelectedTargetId);
+
+            kit.World.StepSimulation();
+            Assert.Null(await c);
+            Assert.Equal(peer.ObjectId, session.SelectedTargetId);
+        }
+        finally
+        {
+            if (prior is null)
+                Environment.SetEnvironmentVariable("FINEAGE_ZONE_COMMANDS_PER_TICK", null);
+            else
+                Environment.SetEnvironmentVariable("FINEAGE_ZONE_COMMANDS_PER_TICK", prior);
+        }
+    }
+
+    [Fact]
     public async Task Commands_apply_in_submission_order_within_one_step()
     {
         var (kit, session, peer, _) = await SetupAsync();

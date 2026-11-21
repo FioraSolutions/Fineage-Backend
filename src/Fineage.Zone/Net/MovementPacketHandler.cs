@@ -44,11 +44,20 @@ public sealed class MovementPacketHandler
         var command = new MoveCommand(move.DestX, move.DestY, move.DestZ);
         var plan = await _world.ExecuteAroundAsync(zoneSession, command, apply =>
         {
-            var before = _world.SnapshotKnownIds(zoneSession);
-            string? error = apply();
-            // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
-            var frames = error == null ? _knownlist.PlanDiff(zoneSession, self, before, _world.SnapshotKnownIds(zoneSession)) : [];
-            return new MovePlan(error, command.ResultX, command.ResultY, command.ResultZ, frames);
+            _world.BeginKnownlistDiff(zoneSession);
+            try
+            {
+                string? error = apply();
+                // MoveState to self + stayed peers is fanned by ZoneWorld.ReconcileKnownlist → NetBridge.
+                var frames = error == null
+                    ? _knownlist.PlanDiff(zoneSession, self, _world.KnownlistDiffBefore, _world.KnownlistDiffAfter)
+                    : [];
+                return new MovePlan(error, command.ResultX, command.ResultY, command.ResultZ, frames);
+            }
+            finally
+            {
+                _world.EndKnownlistDiff();
+            }
         }, ct).ConfigureAwait(false);
         if (plan.Error != null)
         {
