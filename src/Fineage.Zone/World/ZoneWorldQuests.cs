@@ -438,7 +438,10 @@ public sealed partial class ZoneWorld
         if (outcome.Html.Length > 0)
         {
             if (_byId.TryGetValue(npcObjectId, out var npcEntity))
-                FanoutNetHtml(session, npcEntity, outcome.Html);
+            {
+                string html = _pages.Document(session.Language, outcome.HtmlKey, outcome.Html);
+                FanoutNetHtml(session, npcEntity, html);
+            }
         }
 
         ApplyTutorialUiOutcome(session, outcome.TutorialUi);

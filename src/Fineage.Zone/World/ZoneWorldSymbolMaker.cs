@@ -25,7 +25,7 @@ public sealed partial class ZoneWorld
 
         if (SymbolMakerPages.Contains(e))
         {
-            SendHtml(session, player, npc, ReadSymbolMakerHtml(e));
+            SendHtml(session, player, npc, ReadSymbolMakerHtml(session, e));
             return null;
         }
 
@@ -209,9 +209,9 @@ public sealed partial class ZoneWorld
         parts.Add($"{name}{(value > 0 ? "+" : "")}{value}");
     }
 
-    string ReadSymbolMakerHtml(string fileName)
+    string ReadSymbolMakerHtml(ZoneSession session, string fileName)
     {
-        if (!_html.TryGet($"symbolmaker/{fileName}", out var html))
+        if (!TryPage(session.Language, $"symbolmaker/{fileName}", out var html))
             throw new FileNotFoundException($"Missing Symbol Maker HTML symbolmaker/{fileName}");
         return html;
     }

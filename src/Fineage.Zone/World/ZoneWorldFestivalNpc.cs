@@ -303,10 +303,11 @@ public sealed partial class ZoneWorld
 
     string LoadFestivalHtml(string path, ZoneEntity npc, ZoneEntity player, FestivalGuideProfile profile)
     {
-        string html = _html.TryGet(path, out var body) ? body : "<html><body>%npcname%</body></html>";
+        string npcName = _pages.Name(player.Session?.Language, "npc", npc.NpcId, npc.Name);
+        string html = TryPage(player.Session?.Language, path, out var body) ? body : "<html><body>%npcname%</body></html>";
         html = html.Replace("%objectId%", npc.ObjectId.ToString(), StringComparison.Ordinal)
-            .Replace("%npc_name%", npc.Name, StringComparison.Ordinal)
-            .Replace("%npcname%", npc.Name, StringComparison.Ordinal)
+            .Replace("%npc_name%", npcName, StringComparison.Ordinal)
+            .Replace("%npcname%", npcName, StringComparison.Ordinal)
             .Replace("%festivalType%", SevenSignsFestivalGuide.FestivalName(profile.TierId), StringComparison.Ordinal)
             .Replace("%festivalMins%", FestivalMinsLine(), StringComparison.Ordinal)
             .Replace("%cycleMins%", (_festivalCatalog.CycleLengthMs / 60_000).ToString(), StringComparison.Ordinal)

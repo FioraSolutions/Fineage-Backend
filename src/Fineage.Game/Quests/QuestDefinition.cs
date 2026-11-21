@@ -228,7 +228,12 @@ public sealed record QuestDialog(
     QuestHtmlByVar? HtmlByVar = null,
     bool? InRiftPeace = null,
     bool? InRift = null,
-    int MaxStarted = 0);
+    int MaxStarted = 0,
+    /// <summary>
+    /// Catalog key for a file-backed page (<c>html/quests/&lt;folder&gt;/&lt;file&gt;</c>).
+    /// Null when the HTML is inline in the quest JSON. The zone serves the player's locale.
+    /// </summary>
+    string? HtmlKey = null);
 
 /// <summary>
 /// Who is talking. Mobius quest scripts branch on <c>player.getRace()</c> / <c>getLevel()</c>

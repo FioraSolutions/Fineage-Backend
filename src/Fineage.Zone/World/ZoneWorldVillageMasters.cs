@@ -52,7 +52,7 @@ public sealed partial class ZoneWorld
         if (result.Change is { } change && !ApplyClassChange(session, player, change, result.RewardItemId, result.RewardCount))
             return "bad_request";
 
-        if (!_html.TryGet(result.HtmlPath, out var html))
+        if (!TryPage(session.Language, result.HtmlPath, out var html))
         {
             ZoneLog.Info($"village-master page missing {result.HtmlPath}");
             html = QuestBypassHandler.Unavailable;
@@ -71,7 +71,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     string? NewbieTravel(ZoneSession session, ZoneEntity player, ZoneEntity npc, NewbieTravelToken travel, string evt)
     {
-        string Page(string file) => _html.TryGet($"newbie_travel/{file}", out var h) ? h : QuestBypassHandler.Unavailable;
+        string Page(string file) => TryPage(session.Language, $"newbie_travel/{file}", out var h) ? h : QuestBypassHandler.Unavailable;
         if (evt.Length == 0)
         {
             if (!travel.Destinations.ContainsKey(npc.NpcId))

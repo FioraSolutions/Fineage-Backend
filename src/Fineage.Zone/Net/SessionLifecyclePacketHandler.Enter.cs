@@ -83,7 +83,7 @@ sealed partial class SessionLifecyclePacketHandler
             Self(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(NetZoneServer.ToNetPledgeMemberList(clanMembers)));
         }
 
-        var welcome = SayRules.Welcome(zoneSession.Name);
+        var welcome = _world.Localize(zoneSession, SayRules.Welcome(zoneSession.Name));
         Self(NetOpcode.SystemMessage, NetCodec.EncodeSystemMessage(new SystemMessageNetMsg
         {
             Id = welcome.Id,

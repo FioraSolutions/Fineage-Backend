@@ -124,6 +124,7 @@ public sealed partial class QuestCatalog
             ops.Add(ReadOp(op, items, where, questId));
 
         string html = ResolveHtml(dialog, htmlBaseDir, where, questId);
+        string? htmlKey = HtmlKeyOf(dialog, htmlBaseDir);
         // Mobius addSpawn / teleToLocation events often return null htmltext; allow empty HTML for those steps.
         bool spawnOnly = ops.Exists(static o => o is SpawnNpcOp or TeleportOp or SummonOp or DespawnOp);
         if (hook is not (QuestHook.Kill or QuestHook.Attack) && string.IsNullOrWhiteSpace(html) && !spawnOnly)
@@ -183,7 +184,8 @@ public sealed partial class QuestCatalog
             ReadHtmlByVar(dialog.HtmlByVar, htmlBaseDir, where, questId),
             dialog.InRiftPeace,
             dialog.InRift,
-            Math.Max(0, dialog.MaxStarted));
+            Math.Max(0, dialog.MaxStarted),
+            htmlKey);
     }
 
     static string? ReadPetGate(string? pet, string where, int questId)

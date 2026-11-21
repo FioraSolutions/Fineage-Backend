@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
 
     void SendClanPage(ZoneSession session, ZoneEntity player, ZoneEntity npc, string path)
     {
-        if (!_html.TryGet(path, out var html))
+        if (!TryPage(session.Language, path, out var html))
             html = QuestBypassHandler.Unavailable;
         SendHtml(session, player, npc, html);
     }

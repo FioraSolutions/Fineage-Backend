@@ -120,9 +120,9 @@ public sealed class TrainerBypassHandler : IBypassHandler
 /// </summary>
 public sealed class FishermanBypassHandler : IBypassHandler
 {
-    readonly NpcHtmlCatalog _html;
+    readonly LocalizedHtml _pages;
 
-    public FishermanBypassHandler(NpcHtmlCatalog html) => _html = html ?? throw new ArgumentNullException(nameof(html));
+    public FishermanBypassHandler(LocalizedHtml pages) => _pages = pages ?? throw new ArgumentNullException(nameof(pages));
 
     public IReadOnlyList<string> Commands { get; } = ["FishSkillList", "FishingChampionship"];
 
@@ -130,7 +130,7 @@ public sealed class FishermanBypassHandler : IBypassHandler
     {
         if (BypassCommands.Token(call.Command).Equals("FishSkillList", StringComparison.OrdinalIgnoreCase))
             return BypassReply.ServiceCall(NpcServiceIntent.FishSkillList);
-        var page = NpcHtmlPaths.ReadLink(_html, call.NpcType, "Link fisherman/fishing_championship.htm");
+        var page = _pages.ReadLink(call.Language, call.NpcType, "Link fisherman/fishing_championship.htm");
         return page.RejectedPath ? BypassReply.Fail("bad_request") : BypassReply.Page(page.Html);
     }
 }

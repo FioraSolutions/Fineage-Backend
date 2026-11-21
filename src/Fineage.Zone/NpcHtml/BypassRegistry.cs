@@ -1,3 +1,6 @@
+using Fineage.Accounts;
+using Fineage.Game.L10n;
+
 namespace Fineage.Zone.NpcHtml;
 
 /// <summary>
@@ -53,12 +56,15 @@ public sealed class BypassRegistry
         }
     }
 
-    public static BypassRegistry CreateDefault(NpcHtmlCatalog html)
+    public static BypassRegistry CreateDefault(NpcHtmlCatalog html) =>
+        CreateDefault(new LocalizedHtml(LocalizationCatalog.Empty(new FineageLocalizationLog()), html));
+
+    public static BypassRegistry CreateDefault(LocalizedHtml pages)
     {
-        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(pages);
         var registry = new BypassRegistry();
-        registry.Register(new ChatBypassHandler(html));
-        registry.Register(new LinkBypassHandler(html));
+        registry.Register(new ChatBypassHandler(pages));
+        registry.Register(new LinkBypassHandler(pages));
         registry.Register(new QuestBypassHandler());
         registry.Register(new ShopBypassHandler());
         // Mobius Wear opens ShopPreviewList (try-on). Net has no preview window yet.
@@ -71,7 +77,7 @@ public sealed class BypassRegistry
         registry.Register(new FreightBypassHandler());
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
-        registry.Register(new FishermanBypassHandler(html));
+        registry.Register(new FishermanBypassHandler(pages));
         registry.Register(new LotoBypassHandler());
         registry.Register(new MonsterRaceBypassHandler());
         registry.Register(new SevenSignsBypassHandler());

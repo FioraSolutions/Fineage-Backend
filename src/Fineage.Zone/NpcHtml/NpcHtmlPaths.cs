@@ -35,6 +35,16 @@ public static class NpcHtmlPaths
     public static string FileName(int npcId, int page) =>
         page <= 0 ? $"{npcId}.htm" : $"{npcId}-{page}.htm";
 
+    /// <summary>Type folder, then <c>default</c>, then <c>npcdefault.htm</c>. This is page choice, not a language fallback.</summary>
+    public static IReadOnlyList<string> Candidates(string? npcType, int npcId, int page)
+    {
+        string file = FileName(npcId, page);
+        string folder = Folder(npcType);
+        if (string.Equals(folder, "default", StringComparison.Ordinal))
+            return [$"{folder}/{file}", "npcdefault.htm"];
+        return [$"{folder}/{file}", $"default/{file}", "npcdefault.htm"];
+    }
+
     /// <summary>Page body for <c>showChatWindow</c>. Missing files use the standard nothing-to-say page.</summary>
     public static string Read(NpcHtmlCatalog catalog, string? npcType, int npcId, int page)
     {

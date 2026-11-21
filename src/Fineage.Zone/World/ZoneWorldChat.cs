@@ -68,7 +68,13 @@ public sealed partial class ZoneWorld
             else if (session.ChatBannedUntilUnixMs > nowMs && BanCovers(chatType))
             {
                 // Mobius Say2.runImpl: a chat-banned player gets CHATTING_IS_CURRENTLY_PROHIBITED on banned channels.
-                notice = new SystemMessageMsg { Id = ChatProtocol.ChattingProhibited, Params = [], Text = "Chatting is currently prohibited." };
+                notice = new SystemMessageMsg
+                {
+                    Id = ChatProtocol.ChattingProhibited,
+                    Key = "chat.prohibited",
+                    Params = [],
+                    Text = "Chatting is currently prohibited."
+                };
             }
             else
             {
@@ -79,6 +85,7 @@ public sealed partial class ZoneWorld
 
         if (notice != null)
         {
+            notice = Localize(session, notice);
             NetBridge?.FanoutSystemMessage(
                 [session.ObjectId],
                 new SystemMessageMsg
@@ -98,6 +105,14 @@ public sealed partial class ZoneWorld
 
     static SystemMessageMsg Plain(string text) => new() { Id = ChatProtocol.SystemPlain, Params = [], Text = text };
 
+    static SystemMessageMsg Plain(string key, string text, params string[] args) => new()
+    {
+        Id = ChatProtocol.SystemPlain,
+        Key = key,
+        Params = args,
+        Text = text
+    };
+
     /// <summary>Routes one accepted line; returns the refusal for the speaker, or null when it went out.</summary>
     SystemMessageMsg? Deliver(ZoneEntity speaker, int chatType, string text, string target, long nowMs)
     {
@@ -111,19 +126,19 @@ public sealed partial class ZoneWorld
                 return null;
             case ChatProtocol.Trade:
                 if (speaker.Level < ChatProtocol.TradeMinLevel)
-                    return Plain($"Players can use Trade chat after Lv. {ChatProtocol.TradeMinLevel}.");
+                    return Plain("chat.trade_level", $"Players can use Trade chat after Lv. {ChatProtocol.TradeMinLevel}.", ChatProtocol.TradeMinLevel.ToString());
                 SayRegion(speaker, chatType, text, speakerMustNotBlock: false);
                 return null;
             case ChatProtocol.Tell:
                 return Whisper(speaker, target, text, nowMs);
             case ChatProtocol.Party:
                 if (_party.Of(speaker.ObjectId) is not { } party)
-                    return Plain("You are not in a party.");
+                    return Plain("chat.not_party", "You are not in a party.");
                 SayToGroup(speaker, chatType, text, party.MemberIds);
                 return null;
             case ChatProtocol.Clan:
                 if (speaker.ClanId == 0 || ClanOf(speaker.ObjectId) is not { } clan)
-                    return Plain("You are not in a clan.");
+                    return Plain("chat.not_clan", "You are not in a clan.");
                 SayToGroup(speaker, chatType, text, OnlineMembers(clan).Select(member => member.ObjectId));
                 return null;
             case ChatProtocol.Alliance:
@@ -131,21 +146,27 @@ public sealed partial class ZoneWorld
                     // Mobius ChatAlliance: every online member of every clan in the speaker's alliance.
                     int allyId = speaker.ClanId == 0 ? 0 : ClanOf(speaker.ObjectId)?.D.AllyId ?? 0;
                     if (allyId == 0)
-                        return Plain("You are not in an alliance.");
+                        return Plain("chat.not_alliance", "You are not in an alliance.");
                     SayToGroup(speaker, chatType, text, AllyOnlineIds(allyId));
                     return null;
                 }
             case ChatProtocol.Hero:
                 if (!speaker.Hero)
-                    return Plain("Only Heroes can enter the Hero channel.");
+                    return Plain("chat.hero_only", "Only Heroes can enter the Hero channel.");
                 if (speaker.Session!.LastHeroVoiceUnixMs > 0 && nowMs - speaker.Session.LastHeroVoiceUnixMs < ChatProtocol.HeroVoiceIntervalMs)
-                    return Plain("Action failed. Heroes are only able to speak in the global channel once every 10 seconds.");
+                    return Plain("chat.hero_wait", "Action failed. Heroes are only able to speak in the global channel once every 10 seconds.");
                 speaker.Session.LastHeroVoiceUnixMs = nowMs;
                 SayToGroup(speaker, chatType, text, _chat.Online);
                 return null;
             case ChatProtocol.PetitionPlayer:
             case ChatProtocol.PetitionGm:
-                return new SystemMessageMsg { Id = ChatProtocol.NotInPetitionChat, Params = [], Text = "You are currently not in a petition chat." };
+                return new SystemMessageMsg
+                {
+                    Id = ChatProtocol.NotInPetitionChat,
+                    Key = "chat.not_petition",
+                    Params = [],
+                    Text = "You are currently not in a petition chat."
+                };
             default:
                 // Party match room / command channel: Mobius returns silently when the speaker has none.
                 return null;
@@ -234,8 +255,20 @@ public sealed partial class ZoneWorld
         var receiver = OnlinePlayerNamed(target);
 
         if (receiver?.Session == null || !receiver.Session.InWorld)
-            return new SystemMessageMsg { Id = ChatProtocol.PlayerNotOnline, Params = [], Text = "That player is not online." };
-        var refusal = new SystemMessageMsg { Id = ChatProtocol.MessageRefusal, Params = [], Text = "That person is in message refusal mode." };
+            return new SystemMessageMsg
+            {
+                Id = ChatProtocol.PlayerNotOnline,
+                Key = "chat.not_online",
+                Params = [],
+                Text = "That player is not online."
+            };
+        var refusal = new SystemMessageMsg
+        {
+            Id = ChatProtocol.MessageRefusal,
+            Key = "chat.refusal",
+            Params = [],
+            Text = "That person is in message refusal mode."
+        };
         if (receiver.Session.ChatBannedUntilUnixMs > nowMs || IsBlocked(receiver, speaker))
             return refusal;
 

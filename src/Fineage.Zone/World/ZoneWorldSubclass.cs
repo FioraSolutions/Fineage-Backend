@@ -140,36 +140,36 @@ public sealed partial class ZoneWorld
         switch (choice)
         {
             case 0:
-                page = Page("SubClass.htm");
+                page = Page(session, "SubClass.htm");
                 break;
             case 1:
                 {
                     var available = subs.Count >= MaxSubclasses ? [] : AvailableSubclasses(player, npc);
                     page = available.Count == 0
-                        ? Page("SubClass_Fail.htm")
-                        : Page("SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
+                        ? Page(session, "SubClass_Fail.htm")
+                        : Page(session, "SubClass_Add.htm")?.Replace("%list%", ClassLinks(available, id =>
                             $"<a action=\"bypass npc_%objectId%_Subclass 4 {id}\" msg=\"1268;{ClassName(id)}\">{ClassName(id)}</a><br>"));
                     break;
                 }
             case 2:
                 if (subs.Count == 0)
                 {
-                    page = Page("SubClass_ChangeNo.htm");
+                    page = Page(session, "SubClass_ChangeNo.htm");
                     break;
                 }
                 var list = new StringBuilder();
                 list.Append($"<a action=\"bypass -h npc_%objectId%_Subclass 5 0\">{ClassName(player.BaseClassId)}</a><br>");
                 foreach (var s in subs)
                     list.Append($"<a action=\"bypass -h npc_%objectId%_Subclass 5 {s.Index}\">{ClassName(s.ClassId)}</a><br>");
-                page = Page("SubClass_Change.htm")?.Replace("%list%", list.ToString());
+                page = Page(session, "SubClass_Change.htm")?.Replace("%list%", list.ToString());
                 break;
             case 3:
                 if (subs.Count == 0)
                 {
-                    page = Page("SubClass_ModifyEmpty.htm");
+                    page = Page(session, "SubClass_ModifyEmpty.htm");
                     break;
                 }
-                page = Page("SubClass_Modify.htm");
+                page = Page(session, "SubClass_Modify.htm");
                 for (int i = 1; i <= MaxSubclasses; i++)
                 {
                     var row = subs.FirstOrDefault(s => s.Index == i);
@@ -179,18 +179,18 @@ public sealed partial class ZoneWorld
             case 4:
                 if (!CanAddSubclass(player, subs) || !IsValidNewSubclass(player, npc, one))
                 {
-                    page = Page("SubClass_Fail.htm");
+                    page = Page(session, "SubClass_Fail.htm");
                     break;
                 }
                 if (!AddSubclass(session, player, one, subs.Count + 1))
                     return "bad_request";
                 Notice(session, SubclassAddedMessageId, "The new sub class has been added.");
-                page = Page("SubClass_AddOk.htm");
+                page = Page(session, "SubClass_AddOk.htm");
                 break;
             case 5:
                 if (player.ClassIndex == one)
                 {
-                    page = Page("SubClass_Current.htm");
+                    page = Page(session, "SubClass_Current.htm");
                     break;
                 }
                 if (one != 0 && subs.All(s => s.Index != one))
@@ -208,7 +208,7 @@ public sealed partial class ZoneWorld
                         Plain(session, "There are no sub classes available at this time.");
                         return null;
                     }
-                    page = Page(one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
+                    page = Page(session, one is >= 1 and <= 3 ? $"SubClass_ModifyChoice{one}.htm" : "SubClass_ModifyChoice.htm")
                         ?.Replace("%list%", ClassLinks(available, id =>
                             $"<a action=\"bypass npc_%objectId%_Subclass 7 {one} {id}\" msg=\"1445;\">{ClassName(id)}</a><br>"));
                     break;
@@ -218,7 +218,7 @@ public sealed partial class ZoneWorld
                     return "bad_request";
                 ModifySubclass(session, player, one, two);
                 Notice(session, SubclassAddedMessageId, "The new sub class has been added.");
-                page = Page("SubClass_ModifyOk.htm")?.Replace("%name%", ClassName(two));
+                page = Page(session, "SubClass_ModifyOk.htm")?.Replace("%name%", ClassName(two));
                 break;
             default:
                 return "bad_request";
@@ -228,7 +228,8 @@ public sealed partial class ZoneWorld
         return null;
     }
 
-    string? Page(string file) => _html.TryGet("villagemaster/" + file, out var html) ? html : null;
+    string? Page(ZoneSession session, string file) =>
+        TryPage(session.Language, "villagemaster/" + file, out var html) ? html : null;
 
     string ClassName(int classId) =>
         PlayerClasses.TryGet(classId, out var t) && t != null ? t.Name : $"Class {classId}";

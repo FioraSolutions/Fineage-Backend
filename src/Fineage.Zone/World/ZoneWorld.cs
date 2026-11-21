@@ -68,6 +68,8 @@ public sealed partial class ZoneWorld
     readonly SiegeActor _siege;
     readonly ChSiegeActor _chSiege;
     readonly NpcHtmlCatalog _html;
+    readonly Fineage.Game.L10n.LocalizationCatalog _l10n;
+    readonly LocalizedHtml _pages;
     readonly BypassRegistry _bypasses;
     readonly OlympiadActor _olympiad;
     readonly TeleportCatalog _teleports;
@@ -221,7 +223,8 @@ public sealed partial class ZoneWorld
         ulong? simulationSeed = null,
         IRegionExecutor? regionExecutor = null,
         ILedgerJournal? ledgerJournal = null,
-        PunishmentManager? punishments = null)
+        PunishmentManager? punishments = null,
+        Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -284,7 +287,9 @@ public sealed partial class ZoneWorld
             bosses ?? BossSchedule.LoadDefault(WallNow().ToUnixTimeMilliseconds(), spawnPolicy: bossPolicy),
             bossRandom ?? GlobalStream(RandomPurpose.Boss));
         _html = html ?? NpcHtmlCatalog.LoadDefault();
-        _bypasses = bypasses ?? BypassRegistry.CreateDefault(_html);
+        _l10n = localization ?? LoadLocalization();
+        _pages = new LocalizedHtml(_l10n, _html);
+        _bypasses = bypasses ?? BypassRegistry.CreateDefault(_pages);
         _party = new PartyActor(new PartyMembers(this));
         var resolvedOlympiadSettings = olympiadSettings ?? OlympiadSettings.FromEnvironment();
         _olympiadEnchantLimit = resolvedOlympiadSettings.EnchantLimit;

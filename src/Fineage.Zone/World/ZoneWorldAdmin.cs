@@ -124,7 +124,7 @@ public sealed partial class ZoneWorld
 
     string? SendAdminHtml(ZoneSession session, ZoneEntity player, string relativePath)
     {
-        if (!_html.TryGet(relativePath, out string html) || string.IsNullOrEmpty(html))
+        if (!TryPage(session.Language, relativePath, out string html) || string.IsNullOrEmpty(html))
         {
             ZoneLog.Info($"admin html missing path={relativePath}");
             return "bad_request";

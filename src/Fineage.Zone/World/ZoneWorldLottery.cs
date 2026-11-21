@@ -67,10 +67,10 @@ public sealed partial class ZoneWorld
         }
     }
 
-    string LotteryPage(ZoneEntity npc, int page)
+    string LotteryPage(ZoneSession session, ZoneEntity npc, int page)
     {
         string own = page == 0 ? $"default/{npc.NpcId}.htm" : $"default/{npc.NpcId}-{page}.htm";
-        if (_html.TryGet(own, out var html) || _html.TryGet($"default/{LotteryPageNpc}-{page}.htm", out html))
+        if (TryPage(session.Language, own, out var html) || TryPage(session.Language, $"default/{LotteryPageNpc}-{page}.htm", out html))
             return html;
         return "<html><body>I have nothing to say to you.</body></html>";
     }
@@ -85,13 +85,13 @@ public sealed partial class ZoneWorld
         {
             case LotteryProtocol.PageBuy:
                 Array.Clear(picks);
-                html = LotteryPage(npc, 1);
+                html = LotteryPage(session, npc, 1);
                 break;
             case >= 1 and <= LotteryProtocol.PageContinue:
                 if (SalesClosed(session, board, now))
                     return LotteryProtocol.Closed;
                 Toggle(picks, value);
-                html = LotteryPage(npc, 5);
+                html = LotteryPage(session, npc, 5);
                 foreach (int pick in picks.Where(p => p > 0))
                 {
                     string b = pick.ToString("00", CultureInfo.InvariantCulture);
@@ -106,16 +106,16 @@ public sealed partial class ZoneWorld
                     return LotteryProtocol.Closed;
                 if (BuyTicket(session, player, picks, now) is { } error)
                     return error;
-                html = LotteryPage(npc, 6);
+                html = LotteryPage(session, npc, 6);
                 break;
             case LotteryProtocol.PageJackpot:
-                html = LotteryPage(npc, 3);
+                html = LotteryPage(session, npc, 3);
                 break;
             case LotteryProtocol.PageResults:
-                html = LotteryPage(npc, 4).Replace("%result%", LotteryResults(player));
+                html = LotteryPage(session, npc, 4).Replace("%result%", LotteryResults(player));
                 break;
             case LotteryProtocol.PageRules:
-                html = LotteryPage(npc, 2);
+                html = LotteryPage(session, npc, 2);
                 break;
             case > LotteryProtocol.PageRules:
                 return ClaimTicket(session, player, value);
