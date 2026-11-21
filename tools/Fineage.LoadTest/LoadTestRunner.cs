@@ -70,6 +70,7 @@ public sealed class LoadTestRunner
         if (loginLog != null) logs.Add(loginLog);
         if (zoneLog != null) logs.Add(zoneLog);
         var logIssues = LogScanner.ScanFiles(logs);
+        var tickOverrunSlowest = LogScanner.ParseTickOverrunSlowest(logs);
 
         int inWorld = stats.Count(s => s.InWorld && !s.Disconnected);
         int peakOnline = promSamples.Count > 0 ? promSamples.Max(s => s.ZoneOnline) : 0;
@@ -128,6 +129,7 @@ public sealed class LoadTestRunner
             Server = PrometheusAggregate.FromSamples(promSamples),
             ZoneProcess = proc,
             LogIssues = logIssues,
+            TickOverrunSlowestMs = tickOverrunSlowest,
             Passed = failReasons.Count == 0,
             FailReasons = failReasons,
             Bugs = bugs,

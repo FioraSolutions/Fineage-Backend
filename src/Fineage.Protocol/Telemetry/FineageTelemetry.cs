@@ -49,6 +49,10 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> StepFanoutDrainMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.step_fanout_drain.ms", unit: "ms",
+            description: "Wall time to drain sealed fan-out batches at end of a simulation step");
+
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
 

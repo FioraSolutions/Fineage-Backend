@@ -8,6 +8,7 @@ public sealed class MetricsCollector : IDisposable
     readonly object _gate = new();
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
+    readonly DurationHistogram _stepFanoutDrain = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     readonly Dictionary<string, DurationHistogram> _commandApply = new(StringComparer.Ordinal);
     readonly Dictionary<string, DurationHistogram> _movePhases = new(StringComparer.Ordinal);
@@ -52,6 +53,7 @@ public sealed class MetricsCollector : IDisposable
                 PlayersOnline = _online,
                 CommandIngressQueued = _commandIngressQueued,
                 Tick = _tick.Freeze(),
+                StepFanoutDrain = _stepFanoutDrain.Freeze(),
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
@@ -174,6 +176,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.tick.ms":
                     _tick.Record(value);
+                    break;
+                case "fineage.tick.step_fanout_drain.ms":
+                    _stepFanoutDrain.Record(value);
                     break;
                 case "fineage.tick.stage.ms":
                     Stage(StageOf(tags)).Duration.Record(value);

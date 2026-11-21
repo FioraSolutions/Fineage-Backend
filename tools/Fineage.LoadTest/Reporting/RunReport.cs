@@ -24,6 +24,7 @@ public sealed class RunReport
     public PrometheusAggregate? Server { get; init; }
     public ProcessSample? ZoneProcess { get; init; }
     public List<LogIssue> LogIssues { get; init; } = [];
+    public Dictionary<string, double> TickOverrunSlowestMs { get; init; } = new(StringComparer.Ordinal);
     public bool Passed { get; init; }
     public List<string> FailReasons { get; init; } = [];
     public List<string> Bugs { get; init; } = [];
@@ -52,6 +53,7 @@ public sealed class PrometheusAggregate
     public Dictionary<string, double> CommandApplyP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, double> CommandReleaseP99Ms { get; init; } = new(StringComparer.Ordinal);
     public Dictionary<string, long> CommandsDeferred { get; init; } = new(StringComparer.Ordinal);
+    public double StepFanoutDrainP99Ms { get; init; }
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
 
@@ -79,6 +81,7 @@ public sealed class PrometheusAggregate
             CommandApplyP99Ms = MergeStageP99(samples, s => s.CommandApplyP99Ms),
             CommandReleaseP99Ms = MergeStageP99(samples, s => s.CommandReleaseP99Ms),
             CommandsDeferred = MergeDeferred(samples),
+            StepFanoutDrainP99Ms = samples.Count > 0 ? samples.Max(s => s.StepFanoutDrainP99Ms) : 0,
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples)
         };
@@ -216,6 +219,20 @@ public static class ReportWriter
                 foreach (var (reason, count) in r.Server.CommandsDeferred.OrderByDescending(kv => kv.Value))
                     sb.AppendLine($"- `{reason}`: {count}");
             }
+
+            if (r.Server.StepFanoutDrainP99Ms >= 0.5)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"### End-of-step fan-out drain p99 (ms): **{r.Server.StepFanoutDrainP99Ms:0.0}**");
+            }
+        }
+
+        if (r.TickOverrunSlowestMs.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("## Tick overrun slowest stages (zone log, max ms)");
+            foreach (var (stage, ms) in r.TickOverrunSlowestMs.OrderByDescending(kv => kv.Value).Take(12))
+                sb.AppendLine($"- `{stage}`: {ms:0.0}");
         }
 
         if (r.ZoneProcess != null)

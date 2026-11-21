@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Fineage.Protocol.Telemetry;
 
 namespace Fineage.LoadTest.Metrics;
 
@@ -9,6 +10,7 @@ public sealed class PrometheusSample
     public double TickP95 { get; init; }
     public double TickP99 { get; init; }
     public double TickMax { get; init; }
+    public double StepFanoutDrainP99Ms { get; init; }
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long CommandIngressQueued { get; init; }
@@ -31,7 +33,7 @@ public sealed class PrometheusSample
 
 public static class PrometheusParser
 {
-    static readonly double[] Bounds = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000];
+    static readonly double[] Bounds = MetricsText.DurationBoundsMs;
 
     public static PrometheusSample Parse(string text)
     {
@@ -52,6 +54,7 @@ public static class PrometheusParser
             TickP95 = Quantile(buckets, tickCount, 0.95),
             TickP99 = Quantile(buckets, tickCount, 0.99),
             TickMax = EstimateMax(buckets, tickSum, tickCount),
+            StepFanoutDrainP99Ms = ParseSimpleHistogramP99(text, "fineage_tick_step_fanout_drain_ms"),
             TickOverruns = ParseLong(text, "fineage_tick_overruns_total"),
             TicksSkipped = ParseLong(text, "fineage_tick_skipped_total"),
             CommandIngressQueued = ParseLong(text, "fineage_command_ingress_queued"),
@@ -127,6 +130,22 @@ public static class PrometheusParser
     static Dictionary<string, double> ParseStageP99(string text) =>
         ParseLabeledP99(text, "fineage_tick_stage_ms", "stage",
             @"fineage_tick_stage_ms_bucket\{stage=""([^""]+)"",le=""([^""]+)""\}\s+(\d+)");
+
+    static double ParseSimpleHistogramP99(string text, string metric)
+    {
+        var buckets = new SortedDictionary<double, long>();
+        long count = ParseLong(text, $"{metric}_count");
+        foreach (Match match in Regex.Matches(text,
+                     $@"{Regex.Escape(metric)}_bucket{{le=""([^""]+)""}}\s+(\d+)", RegexOptions.Multiline))
+        {
+            double le = match.Groups[1].Value == "+Inf"
+                ? double.PositiveInfinity
+                : double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            buckets[le] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
+
+        return Quantile(buckets, count, 0.99);
+    }
 
     static Dictionary<string, long> ParseLabeledCounters(string text, string metric, string labelKey)
     {

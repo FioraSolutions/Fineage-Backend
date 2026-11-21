@@ -51,6 +51,7 @@ public sealed class MetricsSnapshot
     public int PlayersOnline { get; init; }
     public int CommandIngressQueued { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
+    public HistogramMetrics StepFanoutDrain { get; init; } = new();
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
@@ -71,7 +72,8 @@ public sealed class MetricsSnapshot
 
 public static class MetricsText
 {
-    public static readonly double[] DurationBoundsMs = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000];
+    public static readonly double[] DurationBoundsMs =
+        [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000, 10_000];
 
     public static TrafficTotals Totals(MetricsSnapshot snapshot)
     {
@@ -165,6 +167,9 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_ms", "Zone simulation tick duration");
         sb.Append("# TYPE fineage_tick_ms histogram\n");
         AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick);
+        AppendHelp(sb, "fineage_tick_step_fanout_drain_ms", "Fan-out TCP drain at end of each simulation step");
+        sb.Append("# TYPE fineage_tick_step_fanout_drain_ms histogram\n");
+        AppendHistogramSamples(sb, "fineage_tick_step_fanout_drain_ms", "", snapshot.StepFanoutDrain);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');

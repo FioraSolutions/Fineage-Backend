@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Fineage.LoadTest.Reporting;
@@ -48,5 +49,34 @@ public static class LogScanner
         }
 
         return map.Values.OrderByDescending(i => i.Count).ToList();
+    }
+
+    /// <summary>Parses zone overrun warnings (slowest stage lines) for load-test stage breakdown.</summary>
+    public static Dictionary<string, double> ParseTickOverrunSlowest(IEnumerable<string> paths)
+    {
+        var merged = new Dictionary<string, double>(StringComparer.Ordinal);
+        var overrun = new Regex(
+            @"simulation tick \d+ took ([0-9.]+) ms, over its \d+ ms step; slowest: ([^""]+)",
+            RegexOptions.CultureInvariant);
+        var stage = new Regex(@"([a-z0-9._-]+)=([0-9.]+)ms", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        foreach (string path in paths)
+        {
+            if (!File.Exists(path))
+                continue;
+            foreach (string line in File.ReadLines(path))
+            {
+                var m = overrun.Match(line);
+                if (!m.Success)
+                    continue;
+                foreach (Match part in stage.Matches(m.Groups[2].Value))
+                {
+                    string name = part.Groups[1].Value;
+                    double ms = double.Parse(part.Groups[2].Value, CultureInfo.InvariantCulture);
+                    merged[name] = Math.Max(merged.GetValueOrDefault(name), ms);
+                }
+            }
+        }
+
+        return merged;
     }
 }

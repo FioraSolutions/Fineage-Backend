@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
@@ -103,7 +104,9 @@ public sealed partial class ZoneWorld
         }
         finally
         {
+            long drainStarted = Stopwatch.GetTimestamp();
             _fanout.Drain();
+            FineageTelemetry.StepFanoutDrainMilliseconds.Record(CommandApplyTiming.ElapsedMs(drainStarted));
             if (answered.Count > 0)
                 ZoneCommandIngress.Complete(answered);
         }

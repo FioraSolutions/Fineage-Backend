@@ -35,4 +35,7 @@ Scrape stage histograms: `curl -s localhost:9465/metrics | rg fineage_tick_stage
 ## Follow-ups
 
 - Burst `request:enter` during ramp still dominates one `commands` tick (apply + inventory/knownlist), separate from move fan-out drain.
+- Local net / load scripts default `FINEAGE_ZONE_COMMANDS_PER_TICK=24` so login bursts spread across steps without a wall-clock budget.
+- Load reports now scrape overrun `slowest:` lines and `fineage_tick_step_fanout_drain_ms` p99; revert `NetMoveVisibility` timeout bumps (30→120s on PR #835) after tick p99 is back under 200 ms.
+- CI `NetMoveVisibilityTests.Outsider_*` at 120 s is the same symptom under saturated runners (hand-driven ticks wait on wall clock); fix is tick cost, not AOI logic — passes in ~5 s isolated.
 - Peer `StalePosition` in the oracle until AOI/command timing is tightened; self `MoveInput`→`MoveState` p99 still ~2.8 s (queue + end-of-step drain).
