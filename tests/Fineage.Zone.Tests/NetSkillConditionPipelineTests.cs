@@ -1,0 +1,96 @@
+using Fineage.Net.Contract;
+using Fineage.Protocol;
+using Fineage.Zone.Geo;
+using Fineage.Zone.Net;
+using Fineage.Zone.Spawns;
+using Fineage.Zone.World;
+using Xunit;
+
+namespace Fineage.Zone.Tests;
+
+/// <summary>Shared cast-condition pipelines: HP threshold, item consume at hit, charge spend at cast start.</summary>
+public sealed class NetSkillConditionPipelineTests
+{
+    const int Guts = 139;
+    const int StormCubic = 10;
+    const int CursedBone = 1458;
+    const int SonicBlaster = 6;
+    const int SonicFocus = 8;
+    const int MobId = 9_300_080;
+
+    static SpawnCatalog ForceMap() =>
+        SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+        {
+            ["pipe"] = new("pipe", true,
+            [
+                new SpawnNpcDefinition(MobId, 90_001, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ,
+                    0, true, 50_000, 1f, 1f, 60, 0, "", "Monster", Level: 1, Aggressive: false)
+            ])
+        });
+
+    [Fact]
+    public async Task Guts_refused_above_hp_threshold_then_casts_when_low()
+    {
+        var kit = new NetTestKit();
+        var (session, player) = await kit.EnterAsync(classId: 0, race: 0, level: 52);
+        player.KnownSkills[Guts] = 3;
+        player.CurMp = player.MaxMp = 500;
+        player.CurHp = player.MaxHp;
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Guts, player.ObjectId, CancellationToken.None));
+        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
+
+        player.CurHp = player.MaxHp * 25 / 100;
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();
+        Assert.Null(await kit.World.TrySkillUseAsync(session, Guts, player.ObjectId, CancellationToken.None));
+        Assert.False(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
+    }
+
+    [Fact]
+    public async Task Item_consume_checked_before_cast_and_spent_at_hit()
+    {
+        var kit = new NetTestKit();
+        var (session, player) = await kit.EnterAsync(classId: 10, race: 1, level: 40);
+        player.KnownSkills[StormCubic] = 1;
+        player.CurMp = player.MaxMp = 500;
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+
+        int mp = player.CurMp;
+        Assert.Null(await kit.World.TrySkillUseAsync(session, StormCubic, player.ObjectId, CancellationToken.None));
+        Assert.Equal(mp, player.CurMp);
+        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgNotEnoughItems));
+
+        player.Inventory!.Add(CursedBone, 5);
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();
+        Assert.Null(await kit.World.TrySkillUseAsync(session, StormCubic, player.ObjectId, CancellationToken.None));
+        Assert.Equal(5, player.Inventory.CountOf(CursedBone));
+        kit.Now = kit.Now.AddSeconds(10);
+        kit.World.ResolvePendingHitForTest(player);
+        Assert.Equal(0, player.Inventory.CountOf(CursedBone));
+    }
+
+    [Fact]
+    public async Task Sonic_blaster_spends_charges_at_cast_start_not_on_refusal()
+    {
+        var kit = new NetTestKit(ForceMap(), "pipe", new GeoEngine());
+        var (session, player) = await kit.EnterAsync(classId: 2, race: 0, level: 80);
+        player.KnownSkills[SonicBlaster] = 37;
+        player.KnownSkills[SonicFocus] = 7;
+        player.CurMp = player.MaxMp = 2000;
+        player.ForceCharges = 2;
+        player.Inventory!.Equip(player.Inventory.Add(2523));
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, 0, CancellationToken.None));
+        Assert.Equal(2, player.ForceCharges);
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicBlaster, MobId, CancellationToken.None));
+        Assert.Equal(0, player.ForceCharges);
+    }
+}

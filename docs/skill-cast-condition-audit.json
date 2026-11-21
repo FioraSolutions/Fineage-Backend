@@ -1,0 +1,504 @@
+{
+  "source": "/agent/repos/Fineage-Backend/.cache/l2j-mobius/L2J_Mobius_CT_0_Interlude/dist/game/data/stats/skills",
+  "rows": [
+    {
+      "conditionType": "op:player",
+      "skillCount": 359,
+      "implemented": true,
+      "sampleSkillIds": [
+        5,
+        6,
+        7,
+        9,
+        13,
+        17,
+        25,
+        35,
+        42,
+        139,
+        176,
+        181
+      ]
+    },
+    {
+      "conditionType": "op:and",
+      "skillCount": 148,
+      "implemented": true,
+      "sampleSkillIds": [
+        5,
+        6,
+        7,
+        9,
+        13,
+        17,
+        35,
+        261,
+        284,
+        299,
+        315,
+        323
+      ]
+    },
+    {
+      "conditionType": "op:using",
+      "skillCount": 103,
+      "implemented": true,
+      "sampleSkillIds": [
+        1,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        16,
+        17,
+        19
+      ]
+    },
+    {
+      "conditionType": "player.invsize",
+      "skillCount": 102,
+      "implemented": true,
+      "sampleSkillIds": [
+        323,
+        324,
+        419,
+        1324,
+        1387,
+        2078,
+        2079,
+        2080,
+        2081,
+        2082,
+        2083,
+        2084
+      ]
+    },
+    {
+      "conditionType": "player.weight",
+      "skillCount": 102,
+      "implemented": true,
+      "sampleSkillIds": [
+        323,
+        324,
+        419,
+        1324,
+        1387,
+        2078,
+        2079,
+        2080,
+        2081,
+        2082,
+        2083,
+        2084
+      ]
+    },
+    {
+      "conditionType": "using.kind",
+      "skillCount": 102,
+      "implemented": true,
+      "sampleSkillIds": [
+        1,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        16,
+        17,
+        19
+      ]
+    },
+    {
+      "conditionType": "op:target",
+      "skillCount": 36,
+      "implemented": true,
+      "sampleSkillIds": [
+        49,
+        97,
+        107,
+        405,
+        450,
+        1013,
+        1028,
+        1031,
+        1034,
+        1042,
+        1049,
+        1258
+      ]
+    },
+    {
+      "conditionType": "player.insidezoneid",
+      "skillCount": 28,
+      "implemented": true,
+      "sampleSkillIds": [
+        1050,
+        1255,
+        2013,
+        2036,
+        2040,
+        2041,
+        2099,
+        2100,
+        2177,
+        2178,
+        2213,
+        2214
+      ]
+    },
+    {
+      "conditionType": "player.cansummon",
+      "skillCount": 27,
+      "implemented": true,
+      "sampleSkillIds": [
+        13,
+        25,
+        283,
+        299,
+        301,
+        448,
+        1111,
+        1128,
+        1129,
+        1154,
+        1225,
+        1226
+      ]
+    },
+    {
+      "conditionType": "op:not",
+      "skillCount": 24,
+      "implemented": true,
+      "sampleSkillIds": [
+        1013,
+        1050,
+        1255,
+        1258,
+        2013,
+        2036,
+        2040,
+        2041,
+        2099,
+        2100,
+        2177,
+        2178
+      ]
+    },
+    {
+      "conditionType": "player.activeeffectid",
+      "skillCount": 17,
+      "implemented": true,
+      "sampleSkillIds": [
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        1419,
+        1420,
+        1421,
+        1422,
+        1423
+      ]
+    },
+    {
+      "conditionType": "player.canescape",
+      "skillCount": 17,
+      "implemented": true,
+      "sampleSkillIds": [
+        1050,
+        1255,
+        2013,
+        2036,
+        2040,
+        2041,
+        2099,
+        2100,
+        2177,
+        2178,
+        2213,
+        2214
+      ]
+    },
+    {
+      "conditionType": "target.race",
+      "skillCount": 15,
+      "implemented": true,
+      "sampleSkillIds": [
+        49,
+        97,
+        107,
+        405,
+        450,
+        1028,
+        1031,
+        1034,
+        1042,
+        1049,
+        1400,
+        2240
+      ]
+    },
+    {
+      "conditionType": "player.charges",
+      "skillCount": 13,
+      "implemented": true,
+      "sampleSkillIds": [
+        5,
+        6,
+        7,
+        9,
+        17,
+        35,
+        261,
+        284,
+        441,
+        442,
+        443,
+        451
+      ]
+    },
+    {
+      "conditionType": "target.npcids",
+      "skillCount": 12,
+      "implemented": true,
+      "sampleSkillIds": [
+        2235,
+        2236,
+        2237,
+        2238,
+        2322,
+        3260,
+        3262,
+        3626,
+        3627,
+        3628,
+        5110,
+        5111
+      ]
+    },
+    {
+      "conditionType": "player.elementseed",
+      "skillCount": 9,
+      "implemented": true,
+      "sampleSkillIds": [
+        1289,
+        1290,
+        1291,
+        1292,
+        1293,
+        1294
+      ]
+    },
+    {
+      "conditionType": "player.canresurrect",
+      "skillCount": 8,
+      "implemented": true,
+      "sampleSkillIds": [
+        1016,
+        1254,
+        2014,
+        2049,
+        2062,
+        2321,
+        3160,
+        3263
+      ]
+    },
+    {
+      "conditionType": "player.hp",
+      "skillCount": 6,
+      "implemented": true,
+      "sampleSkillIds": [
+        139,
+        176,
+        181,
+        342,
+        406,
+        420
+      ]
+    },
+    {
+      "conditionType": "player.levelrange",
+      "skillCount": 6,
+      "implemented": true,
+      "sampleSkillIds": [
+        2286,
+        2287,
+        2288,
+        2289,
+        2306,
+        2307
+      ]
+    },
+    {
+      "conditionType": "target.npctype",
+      "skillCount": 6,
+      "implemented": true,
+      "sampleSkillIds": [
+        1258,
+        2065,
+        2179,
+        2229,
+        3596,
+        3598
+      ]
+    },
+    {
+      "conditionType": "player.sex",
+      "skillCount": 4,
+      "implemented": true,
+      "sampleSkillIds": [
+        2134,
+        2135,
+        2303,
+        2304
+      ]
+    },
+    {
+      "conditionType": "player.callpc",
+      "skillCount": 3,
+      "implemented": true,
+      "sampleSkillIds": [
+        1403,
+        1404,
+        1429
+      ]
+    },
+    {
+      "conditionType": "player.cansummonsiegegolem",
+      "skillCount": 3,
+      "implemented": true,
+      "sampleSkillIds": [
+        13,
+        299,
+        448
+      ]
+    },
+    {
+      "conditionType": "player.elementseeds",
+      "skillCount": 3,
+      "implemented": true,
+      "sampleSkillIds": [
+        1288,
+        1326,
+        1327
+      ]
+    },
+    {
+      "conditionType": "player.cancreatebase",
+      "skillCount": 2,
+      "implemented": true,
+      "sampleSkillIds": [
+        247,
+        326
+      ]
+    },
+    {
+      "conditionType": "target.mypartyexceptme",
+      "skillCount": 2,
+      "implemented": true,
+      "sampleSkillIds": [
+        1403,
+        1404
+      ]
+    },
+    {
+      "conditionType": "player.activeskillid",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        2274
+      ]
+    },
+    {
+      "conditionType": "player.cansweep",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        42
+      ]
+    },
+    {
+      "conditionType": "player.cantakecastle",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        246
+      ]
+    },
+    {
+      "conditionType": "player.chaotic",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        2286
+      ]
+    },
+    {
+      "conditionType": "player.clanhall",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        2177
+      ]
+    },
+    {
+      "conditionType": "player.flying",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        327
+      ]
+    },
+    {
+      "conditionType": "player.isridingstrider",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        325
+      ]
+    },
+    {
+      "conditionType": "player.mp",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        1271
+      ]
+    },
+    {
+      "conditionType": "player.siegezone",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        325
+      ]
+    },
+    {
+      "conditionType": "target.activeskillid",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        1013
+      ]
+    },
+    {
+      "conditionType": "using.slot",
+      "skillCount": 1,
+      "implemented": true,
+      "sampleSkillIds": [
+        315
+      ]
+    }
+  ]
+}

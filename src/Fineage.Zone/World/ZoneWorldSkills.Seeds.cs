@@ -93,7 +93,10 @@ public sealed partial class ZoneWorld
             }
             return false;
         }
-        return true;
+
+        ZoneLog.Warn(
+            $"skill playerCondition unsupported type={cond.Type} arg={cond.Arg} value={cond.Value} object={player.ObjectId}");
+        return false;
     }
 
     /// <summary>

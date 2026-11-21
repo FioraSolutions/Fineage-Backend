@@ -92,6 +92,12 @@ public sealed partial class ZoneWorld
                 return;
             }
 
+            if (!LaunchConsumeItems(player.Session, player, hit))
+            {
+                AbortCast(player, "item-consume", notify: false);
+                return;
+            }
+
             // Mobius onMagicLaunchedTimer → broadcastPacket(MagicSkillLaunched) to the caster's knownlist.
             FanoutSkillLaunched(player, hit.Combat.SkillId, hit.Level, target);
         }
