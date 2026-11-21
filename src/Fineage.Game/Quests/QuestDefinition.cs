@@ -48,6 +48,9 @@ public sealed record TakeItemOp(int ItemId, int Count) : QuestOp;
 
 public sealed record CompleteOp : QuestOp;
 
+/// <summary>Mobius <c>st.exitQuest(true)</c>: quit a started quest — the row is deleted, quest items wiped, GiveUp sound.</summary>
+public sealed record ExitOp : QuestOp;
+
 /// <summary>
 /// Mobius <c>giveItemRandomly(player, npc, item, count, limit, chance, playSound)</c> on kill:
 /// roll <c>chance</c>, never above <c>limit</c> (0 = no cap), ItemGet sound, Middle + <c>condAtLimit</c> when the cap is reached.
@@ -229,6 +232,10 @@ public sealed record QuestDialog(
     bool? InRiftPeace = null,
     bool? InRift = null,
     int MaxStarted = 0,
+    /// <summary>Mobius <c>st.getCond() &gt;= n</c> lower bound (0 = none); applied after <see cref="Cond"/>.</summary>
+    int MinCond = 0,
+    /// <summary>Mobius <c>st.getCond() &lt;= n</c> upper bound (0 = none); applied after <see cref="Cond"/>.</summary>
+    int MaxCond = 0,
     /// <summary>
     /// Catalog key for a file-backed page (<c>html/quests/&lt;folder&gt;/&lt;file&gt;</c>).
     /// Null when the HTML is inline in the quest JSON. The zone serves the player's locale.
