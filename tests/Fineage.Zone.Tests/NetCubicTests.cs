@@ -160,6 +160,15 @@ public sealed class NetCubicTests
     }
 
     [Fact]
+    public void Offensive_cubic_debuffs_include_owner_m_atk_in_land_rolls()
+    {
+        var (bench, _) = Open();
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingSkill));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperSkill));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormSkill));
+    }
+
+    [Fact]
     public async Task Binding_cubic_paralyzes_the_target()
     {
         var (bench, clock) = Open();
