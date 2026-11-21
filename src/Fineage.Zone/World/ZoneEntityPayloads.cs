@@ -258,6 +258,8 @@ sealed class ZonePlayerSkillsPayload
     public Dictionary<int, int> GearSkills { get; } = [];
     /// <summary>Ephemeral Zariche / Akamanah passive while the blade is active (Mobius <c>addSkill(false)</c>).</summary>
     public Dictionary<int, int> CursedSkills { get; } = [];
+    /// <summary>Equipped <c>item_skill</c> rows already warned as missing from stat catalogs (per login).</summary>
+    internal HashSet<(int ItemId, int SkillId)> ReportedMissingEquipSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }
