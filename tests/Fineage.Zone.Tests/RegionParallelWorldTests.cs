@@ -1,5 +1,8 @@
 using System.Text.Json;
 using Fineage.Accounts;
+using Fineage.Protocol;
+using Fineage.Zone.Geo;
+using Fineage.Zone.Olympiad;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -18,6 +21,12 @@ public sealed class RegionParallelWorldTests
     const int FirstMobId = 9_810_001;
     const int MobCount = 12;
     const int Bleed = 96;
+    const int Relax = 226;
+    const int FakeDeath = 60;
+    const int Duelist = 88;
+    const int WindWalk = 1204;
+
+    static readonly DateTimeOffset OlympiadEvening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
 
     /// <summary>400-unit regions around Elven Village, so a few thousand units hold a dozen regions.</summary>
     static readonly GridRegionPartition Fine = new(400, handoffMargin: 40);
@@ -178,6 +187,58 @@ public sealed class RegionParallelWorldTests
     }
 
     [Fact]
+    public void NetTestKit_honors_FINEAGE_ZONE_REGION_WORKERS_when_no_executor_is_passed()
+    {
+        string? prior = Environment.GetEnvironmentVariable("FINEAGE_ZONE_REGION_WORKERS");
+        try
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_ZONE_REGION_WORKERS", "4");
+            var kit = new NetTestKit(simulationSeed: 1);
+            Assert.IsType<ParallelRegionExecutor>(kit.World.SimulationTicks.Executor);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_ZONE_REGION_WORKERS", prior);
+        }
+    }
+
+    [Fact]
+    public async Task Toggle_and_fake_death_in_different_regions_reproduce_the_sequential_run()
+    {
+        var sequential = await RunToggleAndFakeDeathAsync(SequentialRegionExecutor.Instance);
+        var parallel = await RunToggleAndFakeDeathAsync(new ParallelRegionExecutor(4));
+
+        Assert.Empty(sequential.Failures);
+        Assert.Empty(parallel.Failures);
+        Assert.Equal(sequential.State, parallel.State);
+        Assert.Equal(sequential.Fanout, parallel.Fanout);
+    }
+
+    [Fact]
+    public async Task Duels_reproduce_the_sequential_run_under_parallel_regions()
+    {
+        var sequential = await RunDuelAsync(SequentialRegionExecutor.Instance);
+        var parallel = await RunDuelAsync(new ParallelRegionExecutor(4));
+
+        Assert.Empty(sequential.Failures);
+        Assert.Empty(parallel.Failures);
+        Assert.Equal(sequential.State, parallel.State);
+        Assert.Equal(sequential.Fanout, parallel.Fanout);
+    }
+
+    [Fact]
+    public async Task Olympiad_arena_abnormals_reproduce_the_sequential_run_under_parallel_regions()
+    {
+        var sequential = await RunOlympiadAsync(SequentialRegionExecutor.Instance);
+        var parallel = await RunOlympiadAsync(new ParallelRegionExecutor(4));
+
+        Assert.Empty(sequential.Failures);
+        Assert.Empty(parallel.Failures);
+        Assert.Equal(sequential.State, parallel.State);
+        Assert.Equal(sequential.Fanout, parallel.Fanout);
+    }
+
+    [Fact]
     public void A_parallel_executor_refuses_an_injected_random_shared_by_every_region()
     {
         var error = Assert.Throws<InvalidOperationException>(() =>
@@ -188,6 +249,131 @@ public sealed class RegionParallelWorldTests
     }
 
     sealed record Run(List<string> State, List<string> Fanout, List<StageFailure> Failures, Dictionary<string, int> MaxRegions);
+
+    static async Task<Run> RunToggleAndFakeDeathAsync(IRegionExecutor executor)
+    {
+        var observer = new RecordingObserver();
+        var kit = new NetTestKit(regions: GridRegionPartition.MapTiles, regionExecutor: executor, simulationObserver: observer,
+            simulationSeed: 93);
+        var (bridge, recorder) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+        var (relaxSession, relaxPlayer) = await kit.EnterAsync(classId: 7, level: 40);
+        var (fakeSession, fakePlayer) = await kit.EnterAsync(classId: 7, level: 40,
+            x: NetTestKit.ElfX + 2 * GridRegionPartition.MapTileSize);
+        Assert.NotEqual(
+            GridRegionPartition.MapTiles.RegionOf(0, relaxPlayer.X, relaxPlayer.Y),
+            GridRegionPartition.MapTiles.RegionOf(0, fakePlayer.X, fakePlayer.Y));
+
+        relaxPlayer.KnownSkills[Relax] = 1;
+        relaxPlayer.Sitting = true;
+        relaxPlayer.CurMp = 300;
+        fakePlayer.KnownSkills[FakeDeath] = 1;
+        fakePlayer.CurMp = 400;
+        Assert.Null(await kit.World.TrySkillUseAsync(relaxSession, Relax, 0, CancellationToken.None));
+        Assert.Null(await kit.World.TrySkillUseAsync(fakeSession, FakeDeath, 0, CancellationToken.None));
+
+        for (int step = 0; step < 20; step++)
+        {
+            kit.Now = kit.Now.AddMilliseconds(step % 5 == 0 ? 666 : 200);
+            kit.World.StepSimulation();
+        }
+
+        return new Run(
+            [DescribeTogglePlayer(relaxPlayer), DescribeTogglePlayer(fakePlayer)],
+            CaptureFanout(recorder),
+            observer.Failures,
+            observer.MaxRegions);
+    }
+
+    static async Task<Run> RunDuelAsync(IRegionExecutor executor)
+    {
+        var observer = new RecordingObserver();
+        var clock = new MutableClock { Now = DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000) };
+        var bench = new WorldBench(clock: () => clock.Now, geo: GeoEngine.Empty, regionExecutor: executor,
+            simulationObserver: observer, simulationSeed: 94);
+        const int duelX = 46045, duelY = 41251, duelZ = -3440;
+        var a = await bench.EnterAsync("parallel_duel_a", "Alpha", [new StoredItem(57, 1000, -1)], level: 60, x: duelX,
+            y: duelY, z: duelZ, clearRecorder: false);
+        var b = await bench.EnterAsync("parallel_duel_b", "Bravo", [new StoredItem(57, 1000, -1)], level: 60,
+            x: duelX + 100, y: duelY, z: duelZ, clearRecorder: false);
+        a.Player.CurHp = a.Player.MaxHp = 3000;
+        b.Player.CurHp = b.Player.MaxHp = 3000;
+
+        Assert.Null(await bench.World.TryDuelCommandAsync(a.Session,
+            new DuelCommandNetMsg { Kind = DuelCommandKind.Request, TargetName = b.Player.Name }, CancellationToken.None));
+        Assert.Null(await bench.World.TryDuelCommandAsync(b.Session,
+            new DuelCommandNetMsg { Kind = DuelCommandKind.Answer, Response = 1 }, CancellationToken.None));
+        for (int i = 0; i < 8; i++)
+        {
+            clock.Now = clock.Now.AddSeconds(1);
+            bench.World.RunDuelTickForTest();
+            bench.World.StepSimulation();
+        }
+
+        Assert.Equal(DuelFighterState.Duelling, a.Player.DuelState);
+        bench.World.SkillDamagePlayerForTest(a.Player, b.Player, 1200);
+
+        for (int step = 0; step < 6; step++)
+        {
+            clock.Now = clock.Now.AddSeconds(1);
+            bench.World.RunDuelTickForTest();
+            bench.World.StepSimulation();
+        }
+
+        lock (bench.Rec.Calls)
+            bench.Rec.Calls.Clear();
+        bench.World.StepSimulation();
+
+        return new Run(
+            [DescribeDuelPlayer(a.Player), DescribeDuelPlayer(b.Player)],
+            CaptureFanout(bench.Rec),
+            observer.Failures,
+            observer.MaxRegions);
+    }
+
+    static async Task<Run> RunOlympiadAsync(IRegionExecutor executor)
+    {
+        var observer = new RecordingObserver();
+        var clock = OlympiadEvening;
+        var bench = new WorldBench(clock: () => clock, olympiadSettings: new OlympiadSettings { ClassedMin = 2, WaitSeconds = 5 },
+            regionExecutor: executor, simulationObserver: observer, simulationSeed: 95);
+        var one = await bench.EnterAsync("parallel_oly_1", "One", classId: Duelist, level: 78, clearRecorder: false);
+        var two = await bench.EnterAsync("parallel_oly_2", "Two", classId: Duelist, level: 78, clearRecorder: false);
+        bench.World.TrySetNoble(one.ObjectId, true);
+        bench.World.TrySetNoble(two.ObjectId, true);
+        Assert.Null(await bench.World.TryOlympiadRegisterAsync(one.Session, new OlympiadRegisterRequestMsg { Classed = 1 },
+            CancellationToken.None));
+        Assert.Null(await bench.World.TryOlympiadRegisterAsync(two.Session, new OlympiadRegisterRequestMsg { Classed = 1 },
+            CancellationToken.None));
+
+        async Task AdvanceAsync(DateTimeOffset when)
+        {
+            clock = when;
+            await bench.World.AdvanceOlympiadAsync(CancellationToken.None);
+        }
+
+        await AdvanceAsync(OlympiadEvening.AddSeconds(61));
+        await AdvanceAsync(OlympiadEvening.AddSeconds(66));
+        Assert.True(bench.World.InOlympiadArena(one.ObjectId));
+
+        var wind = bench.Game.Skills.Find(WindWalk) ?? throw new InvalidOperationException($"skill {WindWalk} missing");
+        Assert.True(wind.TryLevelData(1, out var windLevel));
+        Assert.True(bench.World.ApplyAbnormalFromSkillForTest(wind, windLevel, one.Player));
+
+        clock = clock.AddSeconds(wind.AbnormalTimeSeconds + 1);
+        for (int step = 0; step < 8; step++)
+            bench.World.StepSimulation();
+
+        lock (bench.Rec.Calls)
+            bench.Rec.Calls.Clear();
+        bench.World.StepSimulation();
+
+        return new Run(
+            [DescribeOlympiadPlayer(one.Player), DescribeOlympiadPlayer(two.Player)],
+            CaptureFanout(bench.Rec),
+            observer.Failures,
+            observer.MaxRegions);
+    }
 
     static async Task<Run> RunAsync(IRegionExecutor executor, ulong seed)
     {
@@ -260,6 +446,15 @@ public sealed class RegionParallelWorldTests
     static SpawnNpcDefinition AggressiveMob(int objectId, int x, int y) =>
         new(objectId, 98200 + objectId % 100, "Watcher", x, y, NetTestKit.ElfZ, 0, true, 500, 80f, 40f, 60, 0, "", "Monster",
             Level: 5, AttackRange: 40, AttackSpeed: 253, Aggressive: true, AggroRange: 1000, ClanHelpRange: 0, Clans: []);
+
+    static string DescribeTogglePlayer(ZoneEntity e) =>
+        $"{e.ObjectId} mp={e.CurMp} sit={e.Sitting} fake={e.FakeDeath} ab=[{string.Join(",", e.Abnormals.Select(a => a.Id))}]";
+
+    static string DescribeDuelPlayer(ZoneEntity e) =>
+        $"{e.ObjectId} hp={e.CurHp} duel={e.DuelId}/{e.DuelState} team={e.DuelTeam}";
+
+    static string DescribeOlympiadPlayer(ZoneEntity e) =>
+        $"{e.ObjectId} hp={e.CurHp} mp={e.CurMp} ab=[{string.Join(",", e.Abnormals.Select(a => a.Id))}]";
 
     static List<string> CaptureState(NetTestKit kit, int[] tracked)
     {

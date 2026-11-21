@@ -2,7 +2,9 @@ using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Zone;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
 using Xunit;
@@ -57,6 +59,8 @@ internal sealed class WorldBench
         Store = MemoryAccountStore.InMemory();
         Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
+        IRegionExecutor resolvedExecutor =
+            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
             Game,
@@ -91,7 +95,7 @@ internal sealed class WorldBench
             includeEnabledMaps: includeEnabledMaps,
             gmTeleports: gmTeleports,
             simulationSeed: simulationSeed,
-            regionExecutor: regionExecutor,
+            regionExecutor: resolvedExecutor,
             simulationObserver: simulationObserver,
             ledgerJournal: Ledger);
         (Bridge, Rec) = NetBridgeRecorder.Create();
