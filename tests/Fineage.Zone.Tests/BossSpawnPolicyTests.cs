@@ -21,6 +21,21 @@ public sealed class BossSpawnPolicyTests
         var anakazel = catalog.Get(25_333);
         Assert.False(anakazel.HasRespawnWindow);
         Assert.False(policy.ShouldSpawn(anakazel));
+
+        var halisha = catalog.Get(25_339);
+        Assert.True(halisha.Enabled);
+        Assert.False(halisha.IsWorldScheduledSpawn);
+        Assert.False(policy.ShouldSpawn(halisha));
+
+        var venom = catalog.Get(29_054);
+        Assert.True(venom.Enabled);
+        Assert.False(venom.IsWorldScheduledSpawn);
+        Assert.False(policy.ShouldSpawn(venom));
+
+        var frintezza = catalog.Get(29_045);
+        Assert.True(frintezza.Enabled);
+        Assert.False(frintezza.IsWorldScheduledSpawn);
+        Assert.False(policy.ShouldSpawn(frintezza));
     }
 
     [Fact]
