@@ -71,9 +71,9 @@ public sealed partial class ZoneWorld
             // Mobius AttackableAI.autoAttackCondition: a Guard (attackable=false in the datapack) only auto-aggroes
             // players carrying karma, inside its template aggro range and line of sight.
             bool guard = IsGuard(npc);
-            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || npc.AggroRange <= 0 || (!npc.Attackable && !guard) ||
+            if (npc.Kind != ZoneEntityKind.Npc || !npc.Aggressive || (!npc.Attackable && !guard) ||
                 npc.CurHp <= 0 || npc.AggroTargetId > 0 || npc.ReturningHome || now < npc.NextAggroScanMs ||
-                IsTreasureBox(npc.NpcId))
+                IsTreasureBox(npc.NpcId) || !TryGetProactiveAggroRange(npc, out int aggroRange))
                 continue;
             // _globalAggro starts at -10 and climbs once per think. A hit zeroes it.
             if (npc.GlobalAggro < 0)
@@ -82,14 +82,14 @@ public sealed partial class ZoneWorld
 
             owned.Clear();
             candidates.Clear();
-            _byId.OwnedNear(region, npc.X, npc.Y, npc.AggroRange, owned);
+            _byId.OwnedNear(region, npc.X, npc.Y, aggroRange, owned);
             foreach (var entity in owned)
             {
                 if (entity.Kind == ZoneEntityKind.Player)
                     candidates.Add(PresenceOf(entity));
             }
 
-            _borders.NeighboursNear(region, npc.X, npc.Y, npc.AggroRange, candidates);
+            _borders.NeighboursNear(region, npc.X, npc.Y, aggroRange, candidates);
             candidates.Sort(static (a, b) => a.ObjectId.CompareTo(b.ObjectId));
             foreach (var p in candidates)
             {
@@ -100,13 +100,12 @@ public sealed partial class ZoneWorld
                 // Mobius VarkaKetra.onNpcHate: Ketra / Varka monsters leave their allies alone.
                 if (QuestMachine.IsAlliedWith(npc.NpcId, p.Alliance))
                     continue;
-                long dx = npc.X - (long)p.X, dy = npc.Y - (long)p.Y, dz = npc.Z - (long)p.Z;
-                if (dx * dx + dy * dy + dz * dz > (long)npc.AggroRange * npc.AggroRange)
+                if (!ZoneCombat.WithinProactiveAggroRange(npc.X, npc.Y, npc.Z, p.X, p.Y, p.Z, aggroRange))
                     continue;
                 // Mobius isAggressiveTowards → me.isAggressive() && GeoEngine.canSeeTarget(me, target).
                 if (!CanSeePoint(npc, p.X, p.Y, p.Z))
                     continue;
-                ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={npc.AggroRange}");
+                ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={aggroRange}");
                 Post(new HateMessage(npc.ObjectId, p.ObjectId, 1));
                 break;
             }
@@ -121,12 +120,11 @@ public sealed partial class ZoneWorld
                     !monster.Attackable || monster.CurHp <= 0 || monster.InstanceId != npc.InstanceId ||
                     IsGuard(monster) || !ZoneCombat.IsCombatNpcType(monster.NpcType))
                     continue;
-                long mdx = npc.X - (long)monster.X, mdy = npc.Y - (long)monster.Y, mdz = npc.Z - (long)monster.Z;
-                if (mdx * mdx + mdy * mdy + mdz * mdz > (long)npc.AggroRange * npc.AggroRange)
+                if (!ZoneCombat.WithinProactiveAggroRange(npc.X, npc.Y, npc.Z, monster.X, monster.Y, monster.Z, aggroRange))
                     continue;
                 if (!CanSeePoint(npc, monster.X, monster.Y, monster.Z))
                     continue;
-                ZoneLog.Info($"[aggro] guard={npc.ObjectId} ({npc.Name}) aggro on monster={monster.ObjectId} range={npc.AggroRange}");
+                ZoneLog.Info($"[aggro] guard={npc.ObjectId} ({npc.Name}) aggro on monster={monster.ObjectId} range={aggroRange}");
                 Post(new HateMessage(npc.ObjectId, monster.ObjectId, 1, AllowNpcAttacker: true));
                 break;
             }
