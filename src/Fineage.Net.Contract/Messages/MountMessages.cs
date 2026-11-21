@@ -4,7 +4,8 @@ namespace Fineage.Net.Contract;
 public sealed class RideNetMsg
 {
     public int ObjectId { get; set; }
-  /// <summary><see cref="Fineage.Protocol.MountProtocol.RideMount"/> or <see cref="Fineage.Protocol.MountProtocol.RideDismount"/>.</summary>
+
+    /// <summary><see cref="Fineage.Protocol.MountProtocol.RideMount"/> or <see cref="Fineage.Protocol.MountProtocol.RideDismount"/>.</summary>
     public int Action { get; set; }
     /// <summary>0 none, 1 strider, 2 wyvern (Mobius mountType).</summary>
     public byte MountKind { get; set; }

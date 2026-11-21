@@ -10,7 +10,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-  /// <summary>Mobius wyvern manager <c>RideWyvern</c> (castle-owning clan leader).</summary>
+    /// <summary>Mobius wyvern manager <c>RideWyvern</c> (castle-owning clan leader).</summary>
     string? TryWyvernRideFromManager(ZoneSession session, ZoneEntity player, ZoneEntity npc)
     {
         var rules = MountRules;
