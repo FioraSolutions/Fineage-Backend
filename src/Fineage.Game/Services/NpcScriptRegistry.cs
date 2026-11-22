@@ -29,11 +29,22 @@ public sealed class NpcScriptRegistry
     public static NpcScriptRegistry Parse(string json, string source)
     {
         var file = JsonSerializer.Deserialize<NpcScriptFile>(json, JsonOptions) ?? throw new InvalidDataException($"{source} was empty.");
+        if (file.Scripts == null)
+            throw new InvalidDataException($"{source} needs a scripts array.");
         var map = new Dictionary<string, NpcScriptEntry>(StringComparer.OrdinalIgnoreCase);
-        foreach (var row in file.Scripts ?? [])
+        foreach (var row in file.Scripts)
         {
-            map[row.Id!.Trim()] = new NpcScriptEntry(row.Id.Trim(), row.Pipeline!.Trim(), row.Status ?? "implemented", row.MobiusRef ?? "");
+            if (string.IsNullOrWhiteSpace(row.Id))
+                throw new InvalidDataException($"{source} has a script row with no id.");
+            if (string.IsNullOrWhiteSpace(row.Pipeline))
+                throw new InvalidDataException($"{source} script '{row.Id}' has no pipeline.");
+            if (string.IsNullOrWhiteSpace(row.Status))
+                throw new InvalidDataException($"{source} script '{row.Id}' has no status.");
+            string id = row.Id.Trim();
+            if (!map.TryAdd(id, new NpcScriptEntry(id, row.Pipeline.Trim(), row.Status.Trim(), row.MobiusRef ?? "")))
+                throw new InvalidDataException($"{source} lists script '{id}' twice.");
         }
+
         return new NpcScriptRegistry(map);
     }
 }
