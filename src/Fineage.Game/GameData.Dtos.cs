@@ -66,6 +66,9 @@ public sealed partial class GameData
 
     sealed class KitFileDto
     {
+        /// <summary>Mobius CT0 <c>Player.ini StartingAdena</c>; omitted means 0.</summary>
+        public long MobiusStartingAdena { get; set; }
+
         public List<KitDto>? Kits { get; set; }
     }
 

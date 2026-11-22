@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Login.Net;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
@@ -199,6 +201,55 @@ public class CharacterCreationTests
         {
             AllowedClasses = new HashSet<int> { 1 }
         }));
+    }
+
+    public static IEnumerable<object[]> PlaytestStarterCases() =>
+        CharacterCreateOptions.PlaytestStarters.Select(static p => new object[] { p.ClassId, p.Race });
+
+    [Theory]
+    [MemberData(nameof(PlaytestStarterCases))]
+    public void Playtest_starter_kit_matches_datapack_on_create(int classId, int race)
+    {
+        var expected = GameData.LoadDefault().StarterKits.ForClass(classId);
+        Assert.False(expected.IsEmpty);
+        var service = Service(create: new CharacterCreateOptions { CharMaxNumber = 0 });
+        Assert.True(service.Register("alice", "secret1").Ok);
+
+        var created = service.CreateHuman("alice", "R" + classId, classId, race: race);
+        Assert.True(created.Ok, created.Message);
+        Assert.Equal(race, created.Value!.Race);
+        Assert.NotEmpty(created.Value.Items!);
+        foreach (var entry in expected.Entries)
+        {
+            var row = Assert.Single(created.Value.Items!, item => item.ItemId == entry.ItemId);
+            Assert.Equal(entry.Count, row.Count);
+            if (entry.Equipped)
+                Assert.True(row.EquippedSlot >= 0, $"item {entry.ItemId} should be equipped");
+            else
+                Assert.Equal(-1, row.EquippedSlot);
+        }
+    }
+
+    [Fact]
+    public void Create_posts_starter_kit_to_ledger_when_journal_is_wired()
+    {
+        var journal = new MemoryLedgerJournal();
+        var ledger = new EconomyLedger(journal, StarterKitLedger.IdempotencyWallMilliseconds);
+        var ids = new LedgerTxSequence();
+        var service = new LoginService(
+            MemoryAccountStore.InMemory(),
+            new HandoffTokens(HandoffTokens.DefaultSecret),
+            ledger: ledger,
+            ledgerIds: ids);
+        Assert.True(service.Register("grant", "secret1").Ok);
+        var created = service.CreateHuman("grant", "Fresh", HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+
+        var entry = Assert.Single(journal.Entries, e => e.Transaction.Kind == LedgerTxKind.StarterKit);
+        Assert.Equal(HumanClasses.Fighter, entry.Transaction.Reference);
+        var bag = LedgerAccount.Inventory(created.Value!.Id);
+        Assert.Contains(entry.Transaction.Postings, p => p.Account == bag && p.ItemId == 219 && p.Amount > 0);
+        Assert.Contains(entry.Transaction.Postings, p => p.Account == LedgerAccount.Of(SystemAccount.StarterKit) && p.Amount < 0);
     }
 
     [Fact]

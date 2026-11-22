@@ -16,6 +16,13 @@ public class StarterKitTests
     ];
 
     [Fact]
+    public void Datapack_exposes_mobius_starting_adena_default()
+    {
+        var data = GameData.LoadDefault();
+        Assert.Equal(0, data.StarterKits.MobiusStartingAdena);
+    }
+
+    [Fact]
     public void Human_fighter_matches_mobius_initial_equipment()
     {
         var data = GameData.LoadDefault();
