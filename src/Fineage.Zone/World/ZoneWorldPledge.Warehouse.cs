@@ -17,8 +17,9 @@ public sealed partial class ZoneWorld
     {
         if (clan.Warehouse != null)
             return clan.Warehouse;
-        var wh = new PrivateWarehouse(_game.Items);
+        var wh = new PrivateWarehouse(_game.Items, _itemIds);
         wh.Restore(clan.D.Warehouse.Select(i => new WarehouseRow(i.ItemId, i.Count, i.EnchantLevel, i.ObjectId)));
+        LogWarehouseLoad("clan-warehouse", clan.Id, wh);
         clan.Warehouse = wh;
         return wh;
     }

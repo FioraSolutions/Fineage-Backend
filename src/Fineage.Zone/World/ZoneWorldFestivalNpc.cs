@@ -148,7 +148,6 @@ public sealed partial class ZoneWorld
                 FestivalBoard.AddAccumulatedBonus(profile.TierId, stoneId, cost);
                 if (changes.Count > 0)
                 {
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                     SaveInventory(session, player.Inventory);
                 }
 
@@ -196,7 +195,6 @@ public sealed partial class ZoneWorld
                 Take(player.Inventory, offeringId, count, changes);
                 if (changes.Count > 0)
                 {
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                     SaveInventory(session, player.Inventory);
                 }
 

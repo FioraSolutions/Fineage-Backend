@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Freight != null)
             return;
-        var freight = new PrivateWarehouse(_game.Items);
+        var freight = new PrivateWarehouse(_game.Items, _itemIds);
         var rows = stored?.Freight;
         if (rows == null && player.Session is { } session)
         {
@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
 
         if (rows != null)
             freight.Restore(rows.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("freight", player.ObjectId, freight);
         player.Freight = freight;
     }
 
@@ -44,9 +45,10 @@ public sealed partial class ZoneWorld
         }
 
         var stored = _accounts?.FindById(account, recipientId);
-        var freight = new PrivateWarehouse(_game.Items);
+        var freight = new PrivateWarehouse(_game.Items, _itemIds);
         if (stored?.Freight != null)
             freight.Restore(stored.Freight.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("freight", recipientId, freight);
         return freight;
     }
 
@@ -72,31 +74,13 @@ public sealed partial class ZoneWorld
     {
         if (player.Freight == null)
             return;
-        if (InventoryPersistDeferred)
+        lock (_economyLock)
         {
             _dirtyFreight[session.ObjectId] = player;
-            return;
+            if (InventoryPersistDeferred)
+                return;
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
         }
-
-        ReplaceFreightNow(session, player);
-    }
-
-    bool ReplaceFreightNow(ZoneSession session, ZoneEntity player)
-    {
-        if (player.Freight == null)
-            return true;
-        var stacks = player.Freight.Items;
-        var stored = new StoredItem[stacks.Count];
-        for (int i = 0; i < stacks.Count; i++)
-        {
-            var stack = stacks[i];
-            stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
-        }
-
-        return CommitStore(
-            "freight replace",
-            session,
-            () => _persist.ReplaceFreight(session.Account, session.ObjectId, stored));
     }
 
     void PersistFreightStacks(string account, int characterId, PrivateWarehouse freight)
@@ -109,9 +93,8 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        if (!_persist.ReplaceFreight(account, characterId, stored))
-            ZoneLog.Warn(
-                $"freight replace refused account={account} character={characterId}: store returned false");
+        lock (_economyLock)
+            _dirtyOfflineFreight.Add(new EconomyBagWrite(account, characterId) { Freight = stored });
     }
 
     string? OpenPackageDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc)

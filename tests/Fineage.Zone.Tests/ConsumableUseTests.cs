@@ -33,7 +33,12 @@ public sealed class ConsumableUseTests
     static int Grant(NetTestKit kit, ZoneEntity player, int itemId, int count = 1)
     {
         lock (kit.World)
-            return player.Inventory!.Add(itemId, count).ObjectId;
+        {
+            var item = player.Inventory!.Add(itemId, count);
+            // The fixture add is not an action. Drop it so the use publishes only the consume.
+            player.Inventory.DiscardChanges();
+            return item.ObjectId;
+        }
     }
 
     [Fact]
@@ -126,11 +131,12 @@ public sealed class ConsumableUseTests
 
         Assert.Equal(0, p.Inventory.CountOf(CompressedSoulshots));
         Assert.Equal(shotsBefore + 300, p.Inventory.CountOf(SoulshotNoGrade));
-        // The package's shots merge into the stack the character already carries, so the Add row reports the merged count.
+        // A stack the character already carries is a modify. A new stack is an add. The count is the merged total.
+        int shotChange = shotsBefore > 0 ? InventoryChange.Modify : InventoryChange.Add;
         var added = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
             .Select(call => Assert.IsType<InventoryUpdateMsg>(call[1]))
             .SelectMany(update => update.Changes)
-            .Any(row => row.ItemId == SoulshotNoGrade && row.Change == InventoryChange.Add && row.Count == shotsBefore + 300);
+            .Any(row => row.ItemId == SoulshotNoGrade && row.Change == shotChange && row.Count == shotsBefore + 300);
         Assert.True(added);
     }
 

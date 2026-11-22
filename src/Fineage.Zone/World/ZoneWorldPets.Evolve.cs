@@ -84,8 +84,7 @@ public sealed partial class ZoneWorld
             _petMemory[controlId] = row;
 
         if (player.Session is { } sess && collar != null)
-            NetBridge?.FanoutInventoryUpdate([sess.ObjectId],
-                InventoryMessages.Update(InventoryChange.Modify, collar));
+            SaveInventory(sess, player.Inventory!);
         return true;
     }
 }

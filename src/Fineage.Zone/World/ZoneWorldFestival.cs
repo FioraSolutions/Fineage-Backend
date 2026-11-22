@@ -62,7 +62,6 @@ public sealed partial class ZoneWorld
                     offeringScore += costEach * _festivalCatalog.OfferingValue;
                     if (changes.Count > 0 && member.Session.ObjectId == leader.Session?.ObjectId)
                     {
-                        NetBridge?.FanoutInventoryUpdate([member.Session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                         SaveInventory(member.Session, member.Inventory);
                     }
                     else if (member.Session.ObjectId != leader.Session?.ObjectId)

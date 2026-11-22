@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 
 namespace Fineage.Accounts;
@@ -59,6 +60,13 @@ public interface IAccountStore
 
     /// <summary>Replaces freight packages stored for this character.</summary>
     bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items);
+
+    /// <summary>
+    /// Inserts <paramref name="entries"/> and applies every bag in <paramref name="bags"/> in one transaction.
+    /// A failure leaves the ledger and every bag, warehouse, and freight hold as they were.
+    /// A null list on a bag means that container is not part of this commit. An empty list clears it.
+    /// </summary>
+    void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags);
 
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);

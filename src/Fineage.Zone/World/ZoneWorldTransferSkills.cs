@@ -125,10 +125,6 @@ public sealed partial class ZoneWorld
 
                     if (touches.Count > 0)
                     {
-                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg
-                        {
-                            Changes = touches.Select(t => InventoryMessages.ChangeRow((int)t.Kind, t.Item)).ToArray()
-                        });
                         SaveInventory(session, inventory);
                     }
 

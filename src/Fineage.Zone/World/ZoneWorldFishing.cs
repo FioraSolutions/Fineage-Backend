@@ -138,8 +138,6 @@ public sealed partial class ZoneWorld
                 return lureId;
             },
             id => id);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-            InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, lure));
         SaveInventory(session, inventory);
 
         StartFishing(session, player, lureId, baitX, baitY, baitZ, now);
@@ -528,8 +526,6 @@ public sealed partial class ZoneWorld
         }
 
         int left = player.Inventory.TakeOne(shot);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-            InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, shot));
         SaveInventory(session, player.Inventory);
         player.FishShotCharged = true;
         NetBridge?.FanoutMagicSkillUse(WatchersOf(player),

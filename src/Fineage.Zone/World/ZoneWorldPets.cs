@@ -363,7 +363,6 @@ public sealed partial class ZoneWorld
         }
         if (owner.Session is { } session)
         {
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(InventoryChange.Modify, collar));
             SaveInventory(session, owner.Inventory);
         }
     }
@@ -918,7 +917,6 @@ public sealed partial class ZoneWorld
             if (!_byId.ContainsKey(target.ObjectId) || !target.Dead || player.Inventory?.Find(scrollObjectId) is not { } item)
                 return;
             player.Inventory.TryReduce(item, 1, out bool removed);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(removed ? InventoryChange.Remove : InventoryChange.Modify, item));
             SaveInventory(session, player.Inventory);
             RevivePet(target, 100);
         });

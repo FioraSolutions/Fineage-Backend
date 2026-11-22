@@ -92,12 +92,10 @@ public sealed partial class ZoneWorld
 
         if (sellerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([seller.ObjectId], new InventoryUpdateMsg { Changes = sellerChanges.ToArray() });
             SelfUserInfo(seller);
         }
         if (storeChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([store.ObjectId], new InventoryUpdateMsg { Changes = storeChanges.ToArray() });
             SelfUserInfo(store);
         }
 

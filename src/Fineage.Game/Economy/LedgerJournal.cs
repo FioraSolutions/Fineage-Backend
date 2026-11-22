@@ -17,6 +17,19 @@ public interface ILedgerJournal
 
     /// <summary>Buffered entries not yet written by <see cref="Flush"/>.</summary>
     int PendingFlushCount { get; }
+
+    /// <summary>
+    /// Hands the buffered entries to <paramref name="write"/> so the caller can persist them in the same
+    /// transaction as the item rows. <paramref name="write"/> throwing puts the entries back in the buffer.
+    /// The memory journal has already stored them in <see cref="Append"/>, so it passes an empty list and
+    /// still runs <see cref="Flush"/> first.
+    /// </summary>
+    void CommitWith(Action<IReadOnlyList<LedgerEntry>> write)
+    {
+        ArgumentNullException.ThrowIfNull(write);
+        Flush();
+        write([]);
+    }
 }
 
 public class MemoryLedgerJournal : ILedgerJournal

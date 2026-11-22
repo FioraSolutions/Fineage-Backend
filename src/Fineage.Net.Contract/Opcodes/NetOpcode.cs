@@ -413,6 +413,13 @@ namespace Fineage.Net.Contract
         /// <summary>Zone → client: <c>ExMultiPartyCommandChannelInfo</c> (wire 0xFE 0x30). ServerPackets.java:265.</summary>
         public const ushort CommandChannelInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x30));
         /// <summary>
+        /// Client → zone: Interlude C2S <c>RequestItemList</c>, opcode <c>0x0F</c>, empty body.
+        /// Mobius CT_0 Interlude <c>ClientPackets.REQUEST_ITEM_LIST(0x0F, RequestItemList::new)</c>
+        /// (<c>L2J_Mobius_CT_0_Interlude/.../network/ClientPackets.java</c>). On that table <c>0x14</c> is
+        /// <c>UseItem</c>, not the item-list request. The reply is <see cref="ItemList"/> at the current cursor.
+        /// </summary>
+        public const ushort RequestItemList = 0x000F;
+        /// <summary>
         /// Zone → client: Mobius <c>AgitDecoInfo</c>.
         /// <c>ServerPackets.AGIT_DECO_INFO(0xF7)</c>,
         /// L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/ServerPackets.java:223.

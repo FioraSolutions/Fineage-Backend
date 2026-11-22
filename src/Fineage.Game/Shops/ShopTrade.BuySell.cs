@@ -81,24 +81,49 @@ public static partial class ShopTrade
         if (subtotal > inventory.CountOf(AdenaItemId))
             return ShopMutation.Fail(ShopDeny.Adena);
 
+        var taken = new List<(int ItemId, int Count)>();
         foreach (var (itemId, count) in wanted)
         {
-            if (list.Find(itemId) is { Limited: true } && !stock.TryTake(list.Id, itemId, count, nowUnixMs))
+            if (list.Find(itemId) is not { Limited: true })
+                continue;
+            if (!stock.TryTake(list.Id, itemId, count, nowUnixMs))
+            {
+                ReturnStock(stock, list.Id, taken);
                 return ShopMutation.Fail(ShopDeny.Stock);
+            }
+
+            taken.Add((itemId, count));
         }
 
+        var backup = inventory.SnapshotRows();
         var result = new ShopMutation { CastleTax = Math.Min(castleTax, subtotal) };
-        PayAdena(inventory, (int)subtotal, result);
-        foreach (var step in plan)
+        try
         {
-            bool existed = inventory.FindByItemId(step.Product.ItemId) != null;
-            var pieces = inventory.AddPieces(step.Product.ItemId, step.Count);
-            foreach (var piece in pieces)
-                Remember(result.Touches, piece, existed && piece.Template.Stackable);
-            result.Gained.Add(Transfer(step.Product.ItemId, step.Count, pieces));
+            PayAdena(inventory, (int)subtotal, result);
+            foreach (var step in plan)
+            {
+                bool existed = inventory.FindByItemId(step.Product.ItemId) != null;
+                var pieces = inventory.AddPieces(step.Product.ItemId, step.Count);
+                foreach (var piece in pieces)
+                    Remember(result.Touches, piece, existed && piece.Template.Stackable);
+                result.Gained.Add(Transfer(step.Product.ItemId, step.Count, pieces));
+            }
+        }
+        catch (Exception ex)
+        {
+            inventory.ReplaceFromStored(backup);
+            ReturnStock(stock, list.Id, taken);
+            throw new InvalidOperationException(
+                $"Shop buy failed for list {list.Id} after {taken.Count} stock rows: {ex.Message}", ex);
         }
 
         return result;
+    }
+
+    static void ReturnStock(ShopStock stock, int listId, List<(int ItemId, int Count)> taken)
+    {
+        foreach (var (itemId, count) in taken)
+            stock.Return(listId, itemId, count);
     }
 
     public static ShopMutation Sell(PlayerInventory inventory, IReadOnlyList<ShopObjectLine> lines)
@@ -136,16 +161,31 @@ public static partial class ShopTrade
         if (adena > MaxAdena || adena + total > MaxAdena)
             return ShopMutation.Fail(ShopDeny.Pocket);
 
+        var backup = inventory.SnapshotRows();
         var result = new ShopMutation();
-        foreach (var (item, count, _) in plan)
+        try
         {
-            if (!inventory.TryReduce(item, count, out bool removed))
-                return ShopMutation.Fail(ShopDeny.NotTradable);
-            result.Touches.Add(new ShopTouch(removed ? ShopTouchKind.Remove : ShopTouchKind.Modify, item));
-            result.Lost.Add(Transfer(item.ItemId, count, [item]));
+            foreach (var (item, count, _) in plan)
+            {
+                if (!inventory.TryReduce(item, count, out bool removed))
+                {
+                    inventory.ReplaceFromStored(backup);
+                    return ShopMutation.Fail(ShopDeny.NotTradable);
+                }
+
+                result.Touches.Add(new ShopTouch(removed ? ShopTouchKind.Remove : ShopTouchKind.Modify, item));
+                result.Lost.Add(Transfer(item.ItemId, count, [item]));
+            }
+
+            GainAdena(inventory, (int)total, result);
+        }
+        catch (Exception ex)
+        {
+            inventory.ReplaceFromStored(backup);
+            throw new InvalidOperationException(
+                $"Shop sell failed for {plan.Count} lines: {ex.Message}", ex);
         }
 
-        GainAdena(inventory, (int)total, result);
         return result;
     }
 }

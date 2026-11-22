@@ -99,7 +99,6 @@ public sealed partial class ZoneWorld
                 .ToArray()
         };
 
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
         RemoveGroundItem(ground);
         move.Commit(LedgerHoldingsOf);
         SaveInventory(looter.Session, looter.Inventory);

@@ -121,9 +121,17 @@ public sealed partial class ZoneWorld
     (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies()
     {
         long flushStart = Stopwatch.GetTimestamp();
-        bool committed = FlushDirtyInventories();
-        if (!committed)
-            _ingress.FailUncommitted(UncommittedEconomicCharacters(), EconomyCommitFailed);
+        bool committed;
+        HashSet<int>? uncommitted = null;
+        lock (_economyLock)
+        {
+            committed = FlushDirtyInventories();
+            if (!committed)
+                uncommitted = UncommittedEconomicCharacters();
+        }
+
+        if (uncommitted != null)
+            _ingress.FailUncommitted(uncommitted, EconomyCommitFailed);
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
 
         long sealStart = Stopwatch.GetTimestamp();
@@ -142,14 +150,20 @@ public sealed partial class ZoneWorld
 
     HashSet<int> UncommittedEconomicCharacters()
     {
-        var ids = new HashSet<int>(_dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count);
-        foreach (int id in _dirtyInventories.Keys)
-            ids.Add(id);
-        foreach (int id in _dirtyWarehouses.Keys)
-            ids.Add(id);
-        foreach (int id in _dirtyFreight.Keys)
-            ids.Add(id);
-        return ids;
+        lock (_economyLock)
+        {
+            var ids = new HashSet<int>(
+                _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineFreight.Count);
+            foreach (int id in _dirtyInventories.Keys)
+                ids.Add(id);
+            foreach (int id in _dirtyWarehouses.Keys)
+                ids.Add(id);
+            foreach (int id in _dirtyFreight.Keys)
+                ids.Add(id);
+            foreach (var bag in _dirtyOfflineFreight)
+                ids.Add(bag.CharacterId);
+            return ids;
+        }
     }
 
     /// <summary>

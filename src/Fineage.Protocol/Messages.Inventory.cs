@@ -33,9 +33,14 @@ public sealed class ItemListEntryMsg
 public sealed class ItemListMsg
 {
     public ItemListEntryMsg[] Items { get; set; } = [];
+    /// <summary>
+    /// Cursor this snapshot establishes. 0 means the tail was absent. A positive value replaces the client's cursor.
+    /// The next <see cref="InventoryUpdateMsg"/> must be this value plus one.
+    /// </summary>
+    public int Version { get; set; }
 }
 
-/// <summary>0 add, 1 modify, 2 remove. Equip and unequip send modify rows. Give and grant send add rows.</summary>
+/// <summary>0 add, 1 modify, 2 remove. Equip and unequip send modify rows. A new object id is add; a merge into an existing stack is modify.</summary>
 public static class InventoryChange
 {
     public const int Add = 0;
@@ -68,6 +73,11 @@ public sealed class InventoryUpdateEntryMsg
 public sealed class InventoryUpdateMsg
 {
     public InventoryUpdateEntryMsg[] Changes { get; set; } = [];
+    /// <summary>
+    /// Cursor after this commit. The client applies the rows only when this is its cursor plus one,
+    /// then stores this value. A replay (this value at or below the cursor) is ignored. A gap requests a new ItemList.
+    /// </summary>
+    public int Version { get; set; }
 }
 
 /// <summary>Opcode <see cref="MsgType.GrantItemRequest"/> (13). Adds items to the requesting player's bag.</summary>

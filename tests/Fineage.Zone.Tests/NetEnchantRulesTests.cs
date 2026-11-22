@@ -299,7 +299,9 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
         var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
-        Assert.Contains(update.Changes, row => row.ItemId == Blade && row.EnchantLevel == 16);
+        Assert.Contains(update.Changes, row => row.ItemId == CrystalS && row.Change == InventoryChange.Remove);
+        Assert.DoesNotContain(update.Changes, row => row.ItemId == Blade && row.EnchantLevel != 16);
+        Assert.Equal(16, player.Inventory!.FindByItemId(Blade)!.EnchantLevel);
         Assert.DoesNotContain(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == CrystalS);
     }

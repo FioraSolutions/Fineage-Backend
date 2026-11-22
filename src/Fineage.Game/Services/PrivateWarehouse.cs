@@ -1,6 +1,6 @@
 namespace Fineage.Game.Services;
 
-/// <summary>One private-warehouse stack. Object ids are session-local and start at <see cref="PrivateWarehouse.FirstObjectId"/>.</summary>
+/// <summary>One private-warehouse stack. Object ids come from the zone <see cref="ItemObjectIdAllocator"/>.</summary>
 public sealed class WarehouseStack
 {
     public WarehouseStack(int objectId, int itemId, int count, int enchantLevel)
@@ -21,22 +21,28 @@ public sealed class WarehouseStack
 }
 
 /// <summary>
-/// A character's private warehouse. Stacks persist as item id, count, and enchant.
-/// Object ids are assigned again on load.
+/// A character's private warehouse, freight hold, or clan warehouse.
+/// Plain stackables share one stack per item id. Non-stackables are one piece per object id.
+/// Object ids are owned by <see cref="ItemObjectIdAllocator"/> so a row cannot collide with a bag slot.
 /// </summary>
 public sealed class PrivateWarehouse
 {
     public const int FirstObjectId = 2_000_000;
 
     readonly ItemCatalog _catalog;
+    readonly ItemObjectIdAllocator _ids;
     readonly List<WarehouseStack> _items = [];
-    int _nextId = FirstObjectId;
+    readonly List<string> _loadWarnings = [];
 
-    public PrivateWarehouse(ItemCatalog catalog)
+    public PrivateWarehouse(ItemCatalog catalog, ItemObjectIdAllocator ids)
     {
         ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(ids);
         _catalog = catalog;
+        _ids = ids;
     }
+
+    public IReadOnlyList<string> LoadWarnings => _loadWarnings;
 
     public IReadOnlyList<WarehouseStack> Items => _items;
 
@@ -76,19 +82,41 @@ public sealed class PrivateWarehouse
         {
             if (enchantLevel != 0)
                 throw new InvalidOperationException($"Stackable item {itemId} cannot carry an enchant level.");
-            var existing = FindByItemId(itemId);
+            var existing = FindPlain(itemId);
             if (existing != null)
             {
                 existing.Count = checked(existing.Count + count);
                 created = false;
                 return existing;
             }
+
+            var stack = new WarehouseStack(_ids.Next(), itemId, count, 0);
+            _items.Add(stack);
+            created = true;
+            return stack;
         }
 
-        var stack = new WarehouseStack(_nextId++, itemId, count, enchantLevel);
-        _items.Add(stack);
+        WarehouseStack? first = null;
+        for (int i = 0; i < count; i++)
+        {
+            var piece = new WarehouseStack(_ids.Next(), itemId, 1, enchantLevel);
+            _items.Add(piece);
+            first ??= piece;
+        }
+
         created = true;
-        return stack;
+        return first!;
+    }
+
+    WarehouseStack? FindPlain(int itemId)
+    {
+        foreach (var stack in _items)
+        {
+            if (stack.ItemId == itemId && stack.EnchantLevel == 0)
+                return stack;
+        }
+
+        return null;
     }
 
     public bool TryTake(int objectId, int count, out WarehouseStack? stack, out bool removed)
@@ -117,24 +145,51 @@ public sealed class PrivateWarehouse
     public void Restore(IEnumerable<WarehouseRow>? rows)
     {
         _items.Clear();
-        _nextId = FirstObjectId;
+        _loadWarnings.Clear();
         if (rows == null)
             return;
         foreach (var row in rows)
         {
             if (row.Count < 1 || row.ItemId <= 0)
                 throw new InvalidDataException($"Warehouse item {row.ItemId} count {row.Count} is invalid.");
+            if (!_catalog.TryGet(row.ItemId, out var template))
+                throw new InvalidDataException($"Warehouse item {row.ItemId} object {row.ObjectId} has no template.");
+
             if (row.ObjectId > 0)
+                _ids.Observe(row.ObjectId);
+
+            if (template.Stackable)
             {
-                if (Find(row.ObjectId) != null)
+                if (row.EnchantLevel != 0)
+                    throw new InvalidDataException($"Warehouse stackable item {row.ItemId} object {row.ObjectId} cannot carry an enchant level.");
+                var existing = FindPlain(row.ItemId);
+                if (existing != null)
+                {
+                    existing.Count = checked(existing.Count + row.Count);
+                    _loadWarnings.Add(
+                        $"warehouse merge duplicate stack item={row.ItemId} droppedObjectId={row.ObjectId} keptObjectId={existing.ObjectId} count={row.Count}");
+                    continue;
+                }
+
+                int objectId = row.ObjectId > 0 ? row.ObjectId : _ids.Next();
+                if (row.ObjectId > 0 && Find(row.ObjectId) != null)
                     throw new InvalidDataException($"Warehouse object id {row.ObjectId} is duplicated.");
-                if (row.ObjectId >= _nextId)
-                    _nextId = checked(row.ObjectId + 1);
-                _items.Add(new WarehouseStack(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel));
+                _items.Add(new WarehouseStack(objectId, row.ItemId, row.Count, 0));
                 continue;
             }
 
-            Add(row.ItemId, row.Count, row.EnchantLevel, out _);
+            if (row.ObjectId > 0 && Find(row.ObjectId) != null)
+                throw new InvalidDataException($"Warehouse object id {row.ObjectId} is duplicated.");
+            if (row.Count != 1)
+            {
+                _loadWarnings.Add(
+                    $"warehouse split non-stackable item={row.ItemId} objectId={row.ObjectId} count={row.Count}");
+            }
+
+            int firstId = row.ObjectId > 0 ? row.ObjectId : _ids.Next();
+            _items.Add(new WarehouseStack(firstId, row.ItemId, 1, row.EnchantLevel));
+            for (int i = 1; i < row.Count; i++)
+                _items.Add(new WarehouseStack(_ids.Next(), row.ItemId, 1, row.EnchantLevel));
         }
     }
 

@@ -41,6 +41,23 @@ public sealed class InventoryActionPacketHandler
         // InventoryUpdate + EntityDespawn fan out via NetBridge.
     }
 
+    public async Task OnRequestItemListAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        string? error = await _world.ExecuteAsync(zoneSession, new RequestItemListCommand(), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Item list resync failed.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnDestroyAsync(
         NetConnection conn,
         ZoneSession zoneSession,

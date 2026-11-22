@@ -199,7 +199,6 @@ public sealed partial class ZoneWorld
                     changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, other));
                 }
 
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = [.. changes] });
                 NetBridge?.FanoutAugmentVariationResult([session.ObjectId], new VariationResultMsg
                 {
                     Option1 = opt1,
@@ -254,7 +253,6 @@ public sealed partial class ZoneWorld
                 Take(inventory, ShopTrade.AdenaItemId, fee, changes);
                 inventory.ClearAugmentation(target);
                 changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, target));
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = [.. changes] });
                 NetBridge?.FanoutAugmentCancelResult([session.ObjectId], new VariationCancelResultMsg { RefundAdena = 1 });
                 NetBridge?.FanoutAugmentPutCancelItemResult([session.ObjectId], new VariationCancelItemMsg
                 {

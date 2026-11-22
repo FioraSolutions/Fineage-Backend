@@ -36,7 +36,7 @@ public sealed class TradeLedgerTests
         var sellerBag = LedgerAccount.Inventory(sellerEntity.ObjectId);
         var buyerBag = LedgerAccount.Inventory(buyerEntity.ObjectId);
         var kinds = kit.Ledger.Entries.Select(entry => entry.Transaction.Kind).ToList();
-        Assert.Equal([LedgerTxKind.Adjustment, LedgerTxKind.Adjustment, LedgerTxKind.TradeSettle], kinds);
+        Assert.Equal([LedgerTxKind.GmGrant, LedgerTxKind.Adjustment, LedgerTxKind.TradeSettle], kinds);
         var settle = kit.Ledger.Entries[^1].Transaction;
         Assert.Equal((sellerEntity.ObjectId, buyerEntity.ObjectId), (settle.CausedBy, settle.Reference));
         Assert.Equal(
@@ -52,7 +52,7 @@ public sealed class TradeLedgerTests
         var ledger = kit.World.LedgerForTests;
         Assert.Equal(buyerBag, ledger.OwnerOf(piece.ObjectId));
         Assert.Equal(sellerStackBefore + 200, ledger.HoldingsOf(sellerBag).CountOf(stackItem));
-        Assert.Contains(kit.Ledger.Entries[1].Transaction.Postings,
+        Assert.Contains(kit.Ledger.Entries[0].Transaction.Postings,
             posting => posting.Account == buyerBag && posting.ItemId == Adena && posting.Amount == 500);
         Assert.Equal(sellerEntity.Inventory.CountOf(stackItem), ledger.HoldingsOf(sellerBag).CountOf(stackItem));
         Assert.Equal(buyerEntity.Inventory.CountOf(stackItem), ledger.HoldingsOf(buyerBag).CountOf(stackItem));

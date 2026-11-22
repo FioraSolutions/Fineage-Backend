@@ -29,5 +29,10 @@ public sealed partial class ZoneWorld
                 return player.ClassId;
             },
             classId => classId);
+        if (player.Session != null)
+        {
+            player.Inventory.DiscardChanges();
+            SaveInventory(player.Session, player.Inventory);
+        }
     }
 }

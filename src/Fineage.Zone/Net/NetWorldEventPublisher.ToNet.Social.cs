@@ -30,9 +30,40 @@ sealed partial class NetWorldEventPublisher
                 Option2 = row.Option2
             };
         }
-        var payload = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
+        var encoded = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
+        var payload = InventoryVersionTail.Append(encoded, update.Version);
         foreach (int watcher in watcherObjectIds)
             _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
+    }
+
+    void IWorldEventPublisher.FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list)
+    {
+        var src = list.Items ?? [];
+        var rows = new ItemListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new ItemListEntryNet
+            {
+                ObjectId = row.ObjectId,
+                ItemId = row.ItemId,
+                Count = row.Count,
+                EnchantLevel = row.EnchantLevel,
+                EquippedSlot = row.EquippedSlot,
+                BodySlot = row.BodySlot ?? "",
+                Kind = row.Kind ?? "",
+                Icon = row.Icon ?? "",
+                WeaponType = row.WeaponType ?? "",
+                ArmorType = row.ArmorType ?? "",
+                Option1 = row.Option1,
+                Option2 = row.Option2
+            };
+        }
+
+        var encoded = NetCodec.EncodeItemList(new ItemListNetMsg { Items = rows });
+        var payload = InventoryVersionTail.Append(encoded, list.Version);
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySendCritical(watcher, NetOpcode.ItemList, payload);
     }
 
     void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status)
