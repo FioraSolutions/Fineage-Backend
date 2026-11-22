@@ -79,8 +79,6 @@ internal sealed class ZoneCommandIngress
 
         queues!.Depth++;
         RecordQueueDepth(submission.Command.IngressClass, queues.Depth);
-        FineageTelemetry.CommandQueueWaitMilliseconds.Record(WaitMs(submission.SubmittedAtTicks),
-            new KeyValuePair<string, object?>("class", submission.Command.IngressClass.ToString().ToLowerInvariant()));
 
         switch (submission.Command.IngressClass)
         {
@@ -145,6 +143,12 @@ internal sealed class ZoneCommandIngress
                     _roundRobinCursor++;
                     continue;
                 }
+
+                double waitMs = WaitMs(next.SubmittedAtTicks);
+                FineageTelemetry.CommandQueueWaitMilliseconds.Record(waitMs,
+                    new KeyValuePair<string, object?>("class", next.Command.IngressClass.ToString().ToLowerInvariant()));
+                FineageTelemetry.CommandTimelineMilliseconds.Record(waitMs,
+                    new KeyValuePair<string, object?>("phase", "submit_to_dequeue"));
 
                 taken.Add(next);
                 remaining -= cost;

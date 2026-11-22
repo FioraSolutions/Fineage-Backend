@@ -90,8 +90,10 @@ public sealed class MetricsSummaryTests
         Assert.Contains("fineage_outbound_dropped_total{endpoint=\"zone\"} 1\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"in\"} 1.5\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"out\"} 2.5\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"10\"} 1\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"20\"} 2\n", text);
+        string leBeforeTwo = MetricsText.DurationBoundsMs[8].ToString("0.###", CultureInfo.InvariantCulture);
+        string leTwo = MetricsText.DurationBoundsMs[9].ToString("0.###", CultureInfo.InvariantCulture);
+        Assert.Contains($"fineage_handler_ms_bucket{{endpoint=\"zone\",le=\"{leBeforeTwo}\"}} 1\n", text);
+        Assert.Contains($"fineage_handler_ms_bucket{{endpoint=\"zone\",le=\"{leTwo}\"}} 2\n", text);
         Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"+Inf\"} 2\n", text);
         Assert.Contains("fineage_handler_ms_sum{endpoint=\"zone\"} 13.5\n", text);
         Assert.Contains("fineage_handler_ms_count{endpoint=\"zone\"} 2\n", text);

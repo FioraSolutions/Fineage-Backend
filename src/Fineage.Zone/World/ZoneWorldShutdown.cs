@@ -13,7 +13,7 @@ public sealed partial class ZoneWorld
     {
         ShutdownSaveOnlinePlayers();
         CloseCommandIngress("zone shutdown");
-        _fanoutDispatcher.DrainPendingSync();
+        _fanoutDispatcher.WaitUntilIdle(TimeSpan.FromSeconds(30));
         _fanoutDispatcher.Dispose();
     }
 

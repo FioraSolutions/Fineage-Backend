@@ -5,57 +5,86 @@ using Fineage.Protocol.Telemetry;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Encodes and delivers sealed world fan-out batches off the simulation thread: one worker preserves global batch
-/// order; each batch's sends run sequentially. <see cref="RunSynchronouslyAfterPending"/> is for paths that must stay
-/// strictly after prior batches (immediate handler fan-out).
+/// Delivers sealed world fan-out batches off the simulation thread. PR2 adds connection stripes; PR1 uses one
+/// bounded queue and worker with observable depth/age.
 /// </summary>
 internal sealed class FanoutDispatcher : IDisposable
 {
-    readonly Channel<SealedWorldFanoutBatch> _queue = Channel.CreateUnbounded<SealedWorldFanoutBatch>(
-        new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
-    readonly object _gate = new();
+    const int BatchQueueCapacity = 8192;
+
+    readonly Channel<SealedWorldFanoutBatch> _queue = Channel.CreateBounded<SealedWorldFanoutBatch>(
+        new BoundedChannelOptions(BatchQueueCapacity)
+        {
+            SingleReader = true,
+            SingleWriter = false,
+            FullMode = BoundedChannelFullMode.Wait,
+            AllowSynchronousContinuations = false
+        });
     readonly Task _worker;
     readonly CancellationTokenSource _cts = new();
     int _closed;
-    ManualResetEventSlim _idle = new(true);
+    int _inFlight;
+    int _pending;
+    long _oldestEnqueueTicks;
+    Exception? _propagated;
+
+    /// <summary>Tests: rethrow the first fan-out send failure from <see cref="WaitUntilIdle"/>.</summary>
+    internal bool FailFast;
 
     public FanoutDispatcher()
     {
         _worker = Task.Run(ProcessAsync);
     }
 
-    /// <summary>Non-blocking. Returns false when the dispatcher is closed.</summary>
+    /// <summary>Non-blocking enqueue. Returns false when the queue is full or the dispatcher is closed.</summary>
     public bool TryEnqueue(SealedWorldFanoutBatch batch)
     {
         if (Volatile.Read(ref _closed) != 0)
             return false;
-        _idle.Reset();
-        return _queue.Writer.TryWrite(batch);
-    }
 
-    /// <summary>Runs <paramref name="send"/> after every batch already queued finishes (blocks the caller).</summary>
-    public void RunSynchronouslyAfterPending(Action send)
-    {
-        ArgumentNullException.ThrowIfNull(send);
-        lock (_gate)
+        long now = Stopwatch.GetTimestamp();
+        if (batch.EnqueuedAtTimestamp > 0)
+            FanoutTelemetry.RecordEnqueue(now);
+
+        if (!_queue.Writer.TryWrite(batch))
         {
-            DrainPendingLocked();
-            send();
+            FineageTelemetry.FanoutQueueOverflow.Add(1);
+            FanoutTelemetry.RecordQueueDepth(_queue.Reader.CanCount ? _queue.Reader.Count : BatchQueueCapacity);
+            return false;
         }
+
+        Interlocked.Increment(ref _pending);
+        FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
+        if (batch.EnqueuedAtTimestamp > 0)
+        {
+            long prevOldest = Volatile.Read(ref _oldestEnqueueTicks);
+            if (prevOldest == 0 || batch.EnqueuedAtTimestamp < prevOldest)
+                Interlocked.Exchange(ref _oldestEnqueueTicks, batch.EnqueuedAtTimestamp);
+        }
+
+        return true;
     }
 
-    /// <summary>Test and shutdown: process every queued batch on the calling thread.</summary>
-    public void DrainPendingSync()
+    /// <summary>Test and shutdown: wait until the worker queue and in-flight batch are empty.</summary>
+    public void WaitUntilIdle(TimeSpan? timeout = null)
     {
-        lock (_gate)
-            DrainPendingLocked();
-    }
+        var limit = timeout ?? TimeSpan.FromSeconds(60);
+        var sw = Stopwatch.StartNew();
+        var spin = new SpinWait();
+        while (sw.Elapsed < limit)
+        {
+            int depth = _queue.Reader.CanCount ? _queue.Reader.Count : 0;
+            if (depth == 0 && Volatile.Read(ref _inFlight) == 0 && Volatile.Read(ref _pending) == 0)
+            {
+                if (_propagated != null)
+                    throw new InvalidOperationException("fan-out delivery failed", _propagated);
+                return;
+            }
+            spin.SpinOnce();
+        }
 
-    void DrainPendingLocked()
-    {
-        while (_queue.Reader.TryRead(out var batch))
-            ExecuteBatch(batch);
-        _idle.Set();
+        throw new TimeoutException(
+            $"fan-out dispatcher did not drain within {limit.TotalSeconds:0}s (depth={_queue.Reader.Count}, inFlight={Volatile.Read(ref _inFlight)})");
     }
 
     async Task ProcessAsync()
@@ -64,10 +93,18 @@ internal sealed class FanoutDispatcher : IDisposable
         {
             await foreach (var batch in _queue.Reader.ReadAllAsync(_cts.Token).ConfigureAwait(false))
             {
-                lock (_gate)
+                FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
+                Volatile.Write(ref _oldestEnqueueTicks, 0);
+                Interlocked.Increment(ref _inFlight);
+                try
+                {
                     ExecuteBatch(batch);
-                if (!_queue.Reader.TryPeek(out _))
-                    _idle.Set();
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _inFlight);
+                    Interlocked.Decrement(ref _pending);
+                }
             }
         }
         catch (OperationCanceledException)
@@ -78,30 +115,50 @@ internal sealed class FanoutDispatcher : IDisposable
     void ExecuteBatch(SealedWorldFanoutBatch batch)
     {
         long started = Stopwatch.GetTimestamp();
-        foreach (var (name, send) in batch.Sends())
+        double queueAgeMs = batch.EnqueuedAtTimestamp > 0 ? ElapsedMs(batch.EnqueuedAtTimestamp, started) : 0;
+        if (queueAgeMs > 0)
+            FineageTelemetry.FanoutQueueAgeMilliseconds.Record(queueAgeMs);
+
+        bool commandBatch = batch.EnqueuedAtTimestamp > 0;
+        if (commandBatch)
+            CommandFanoutTimingContext.BeginCommandBatch(batch.EnqueuedAtTimestamp);
+        try
         {
-            try
+            int events = 0;
+            foreach (var (name, send) in batch.Sends())
             {
-                send();
+                try
+                {
+                    send();
+                    events++;
+                }
+                catch (Exception ex)
+                {
+                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
+                    ZoneLog.Warn($"world fan-out {name} failed: {ex}");
+                    if (FailFast)
+                        _propagated ??= ex;
+                }
             }
-            catch (Exception ex)
-            {
-                FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
-                ZoneLog.Warn($"world fan-out {name} failed: {ex}");
-            }
+
+            FineageTelemetry.FanoutEventsPerBatch.Record(events);
+        }
+        finally
+        {
+            if (commandBatch)
+                CommandFanoutTimingContext.EndCommandBatch();
         }
 
-        double drainMs = ElapsedMs(started);
-        FineageTelemetry.TickStepFanoutDrainMilliseconds.Record(drainMs);
-        if (batch.EnqueuedAtTimestamp > 0)
-        {
-            double wireMs = ElapsedMs(batch.EnqueuedAtTimestamp);
-            FineageTelemetry.CommandToWireMilliseconds.Record(wireMs);
-        }
+        double processMs = ElapsedMs(started);
+        FineageTelemetry.FanoutBatchProcessMilliseconds.Record(processMs);
+        FineageTelemetry.TickStepFanoutDrainMilliseconds.Record(processMs);
     }
 
-    static double ElapsedMs(long fromTimestamp) =>
-        (Stopwatch.GetTimestamp() - fromTimestamp) * 1000.0 / Stopwatch.Frequency;
+    static double ElapsedMs(long fromTimestamp, long? toTimestamp = null)
+    {
+        long to = toTimestamp ?? Stopwatch.GetTimestamp();
+        return (to - fromTimestamp) * 1000.0 / Stopwatch.Frequency;
+    }
 
     public void Dispose()
     {
@@ -109,9 +166,49 @@ internal sealed class FanoutDispatcher : IDisposable
             return;
         _queue.Writer.TryComplete();
         _cts.Cancel();
+        try
+        {
+            WaitUntilIdle(TimeSpan.FromSeconds(10));
+        }
+        catch (TimeoutException)
+        {
+            ZoneLog.Warn("fan-out dispatcher did not drain completely during shutdown");
+        }
+
         try { _worker.Wait(TimeSpan.FromSeconds(5)); } catch { /* ignore */ }
-        DrainPendingSync();
         _cts.Dispose();
-        _idle.Dispose();
+    }
+}
+
+/// <summary>Records fan-out queue depth and oldest-batch age for Prometheus export.</summary>
+internal static class FanoutTelemetry
+{
+    static readonly object Gate = new();
+    static int _depth;
+    static long _oldestEnqueueTicks;
+
+    public static void RecordEnqueue(long enqueueTicks)
+    {
+        lock (Gate)
+        {
+            if (_oldestEnqueueTicks == 0 || enqueueTicks < _oldestEnqueueTicks)
+                _oldestEnqueueTicks = enqueueTicks;
+        }
+    }
+
+    public static void RecordQueueDepth(int depth)
+    {
+        int clamped = Math.Max(0, depth);
+        Interlocked.Exchange(ref _depth, clamped);
+        FineageTelemetry.FanoutQueueDepth.Record(clamped);
+
+        long oldest;
+        lock (Gate)
+            oldest = _oldestEnqueueTicks;
+        if (oldest > 0)
+        {
+            double ageMs = (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency;
+            FineageTelemetry.FanoutQueueAgeMilliseconds.Record(Math.Max(0, ageMs));
+        }
     }
 }

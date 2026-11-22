@@ -110,10 +110,17 @@ public sealed class WorldFanoutOutboxTests
         fanout.Begin();
         bridge.FanoutAttackStance([1], 7, true);
         fanout.Seal();
+        fanout.Drain();
         bridge.FanoutAttackStance([1], 8, true);
+        fanout.Drain();
 
         Assert.Equal(["stance 7", "stance 8"], rec.Sent);
-        Assert.Throws<InvalidOperationException>(() => bridge.FanoutAttackStance([1], FakePublisher.Throws, true));
+        var failed = Assert.Throws<InvalidOperationException>(() =>
+        {
+            bridge.FanoutAttackStance([1], FakePublisher.Throws, true);
+            fanout.Drain();
+        });
+        Assert.Contains("fan-out delivery failed", failed.Message);
     }
 
     [Fact]
@@ -176,7 +183,8 @@ public sealed class WorldFanoutOutboxTests
     static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox()
     {
         var inner = DispatchProxy.Create<IWorldEventPublisher, FakePublisher>();
-        var fanout = new WorldFanoutSequencer(new FanoutDispatcher());
+        var dispatcher = new FanoutDispatcher { FailFast = true };
+        var fanout = new WorldFanoutSequencer(dispatcher);
         return (new OutboxingWorldEventPublisher(inner, fanout), (FakePublisher)(object)inner, fanout);
     }
 

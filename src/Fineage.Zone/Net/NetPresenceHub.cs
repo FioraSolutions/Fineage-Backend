@@ -1,5 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
+using Fineage.Protocol.Telemetry;
+using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
 
@@ -81,7 +83,11 @@ public sealed class NetPresenceHub
     {
         if (!TryGet(objectId, out var conn, out _))
             return;
-        conn.TrySend(opcode, payload);
+        if (!conn.TrySend(opcode, payload))
+            return;
+
+        if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+            FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
     }
 
     /// <summary>

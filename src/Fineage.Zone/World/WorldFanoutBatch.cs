@@ -19,6 +19,8 @@ internal sealed class WorldFanoutBatch
 {
     readonly List<Entry?> _entries = [];
     readonly Dictionary<ReplaceKey, int> _replaceable = [];
+    readonly Dictionary<AudienceKey, AudienceSnapshotId> _audiences = new();
+    ulong _nextAudienceId = 1;
 
     int _superseded;
 
@@ -35,7 +37,7 @@ internal sealed class WorldFanoutBatch
         where T : class
     {
         Array.Sort(audience);
-        var audienceId = AudienceSnapshotRegistry.Register(audience);
+        var audienceId = RegisterAudience(audience);
         AddReplaceable(payload, new Replace(new ReplaceKey(kind, subjectId, audienceId),
             (older, newer) => merge((T)older, (T)newer), latest => bind((T)latest)));
     }
@@ -89,4 +91,31 @@ internal sealed class WorldFanoutBatch
     sealed record Replace(ReplaceKey Key, Func<object, object, object> Merge, Func<object, Action> Bind);
 
     readonly record struct ReplaceKey(PresenceCoalesceKind Kind, int SubjectId, AudienceSnapshotId Audience);
+
+    AudienceSnapshotId RegisterAudience(int[] sortedWatcherIds)
+    {
+        var key = new AudienceKey(sortedWatcherIds);
+        if (_audiences.TryGetValue(key, out var id))
+            return id;
+        id = new AudienceSnapshotId(_nextAudienceId++);
+        _audiences[key] = id;
+        return id;
+    }
+
+    readonly struct AudienceKey(int[] ids) : IEquatable<AudienceKey>
+    {
+        readonly int[] _ids = ids;
+
+        public bool Equals(AudienceKey other) => _ids.AsSpan().SequenceEqual(other._ids);
+
+        public override bool Equals(object? obj) => obj is AudienceKey other && Equals(other);
+
+        public override int GetHashCode()
+        {
+            var hash = new HashCode();
+            foreach (int id in _ids)
+                hash.Add(id);
+            return hash.ToHashCode();
+        }
+    }
 }

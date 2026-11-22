@@ -60,7 +60,7 @@ public sealed partial class ZoneWorld
     internal void RunStepForTest()
     {
         StepSimulation();
-        _fanoutDispatcher.DrainPendingSync();
+        _fanoutDispatcher.WaitUntilIdle();
     }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>

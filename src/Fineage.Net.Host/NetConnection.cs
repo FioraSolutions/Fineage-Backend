@@ -1,8 +1,10 @@
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using Fineage.Net.Contract;
+using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Net.Host;
 
@@ -19,6 +21,7 @@ public sealed class NetConnection : IAsyncDisposable
     readonly NetworkStream _stream;
     readonly Channel<PacketEnvelope> _inbox;
     readonly Channel<PacketEnvelope> _outbound;
+    readonly Channel<byte> _pumpWake;
     readonly CommandDeduper _deduper = new();
     readonly string _endpoint;
     readonly Task _pump;
@@ -44,6 +47,12 @@ public sealed class NetConnection : IAsyncDisposable
         _outbound = Channel.CreateBounded<PacketEnvelope>(new BoundedChannelOptions(Math.Max(8, outboundCapacity))
         {
             FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = true,
+            SingleWriter = false
+        });
+        _pumpWake = Channel.CreateBounded<byte>(new BoundedChannelOptions(1)
+        {
+            FullMode = BoundedChannelFullMode.DropWrite,
             SingleReader = true,
             SingleWriter = false
         });
@@ -167,6 +176,7 @@ public sealed class NetConnection : IAsyncDisposable
 
         var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
         _coalescedReplaceable[key] = envelope;
+        _pumpWake.Writer.TryWrite(1);
         return true;
     }
 
@@ -223,9 +233,21 @@ public sealed class NetConnection : IAsyncDisposable
 
         if (batch.Count == 0)
             return;
+        long started = Stopwatch.GetTimestamp();
+        int frameBytes = batch.Sum(e => PacketEnvelope.HeaderSize + e.Payload.Length);
         await NetFraming.WriteManyAsync(_stream, batch, CancellationToken.None).ConfigureAwait(false);
+        RecordSocketWrite(started, frameBytes, batch.Count);
         foreach (PacketEnvelope envelope in batch)
             NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+    }
+
+    void RecordSocketWrite(long startedAt, int bytes, int frames)
+    {
+        double ms = (Stopwatch.GetTimestamp() - startedAt) * 1000.0 / Stopwatch.Frequency;
+        var endpoint = new KeyValuePair<string, object?>("endpoint", _endpoint);
+        FineageTelemetry.SocketWriteMilliseconds.Record(ms, endpoint);
+        FineageTelemetry.SocketWriteBytes.Record(bytes, endpoint);
+        FineageTelemetry.SocketWriteFrames.Record(frames, endpoint);
     }
 
     /// <summary>
@@ -256,11 +278,30 @@ public sealed class NetConnection : IAsyncDisposable
     {
         try
         {
-            await foreach (PacketEnvelope envelope in _outbound.Reader.ReadAllAsync().ConfigureAwait(false))
+            while (Volatile.Read(ref _closed) == 0)
             {
-                await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
-                NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
-                await WriteCoalescedToStreamAsync().ConfigureAwait(false);
+                Task outboundWait = _outbound.Reader.WaitToReadAsync().AsTask();
+                Task wakeWait = _pumpWake.Reader.WaitToReadAsync().AsTask();
+                await Task.WhenAny(outboundWait, wakeWait).ConfigureAwait(false);
+
+                while (_outbound.Reader.TryRead(out PacketEnvelope? envelope) && envelope != null)
+                {
+                    long started = Stopwatch.GetTimestamp();
+                    await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
+                    RecordSocketWrite(started, PacketEnvelope.HeaderSize + envelope.Payload.Length, 1);
+                    NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+                    await WriteCoalescedToStreamAsync().ConfigureAwait(false);
+                }
+
+                while (_pumpWake.Reader.TryRead(out _))
+                {
+                }
+
+                if (!_coalescedReplaceable.IsEmpty)
+                    await WriteCoalescedToStreamAsync().ConfigureAwait(false);
+
+                if (_outbound.Reader.Completion.IsCompleted)
+                    break;
             }
         }
         catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)

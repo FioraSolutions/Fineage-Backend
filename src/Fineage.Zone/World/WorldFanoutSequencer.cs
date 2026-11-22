@@ -63,7 +63,7 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
         Volatile.Write(ref _recording, new WorldFanoutBatch());
     }
 
-    /// <param name="commandCommitTimestamp">When &gt; 0, records <c>fineage.command_to_wire_ms</c> for this batch.</param>
+  /// <param name="commandCommitTimestamp">When &gt; 0, marks this batch for command→mailbox timing.</param>
     public void Seal(long commandCommitTimestamp = 0)
     {
         if (_depth == 0)
@@ -73,13 +73,22 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
         var batch = _recording!;
         Volatile.Write(ref _recording, null);
         var seq = new WorldEventSequence(_tick, _phase, _sequence++);
-        _dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp));
+        if (!_dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp)))
+            throw new InvalidOperationException("fan-out dispatcher queue is full");
     }
 
-    /// <summary>Test hook: process every sealed batch synchronously.</summary>
-    public void Drain() => _dispatcher.DrainPendingSync();
+    /// <summary>Test hook: wait until the dispatcher worker finishes pending batches.</summary>
+    public void Drain() => _dispatcher.WaitUntilIdle();
 
-    public void SendNow(Action send) => _dispatcher.RunSynchronouslyAfterPending(send);
+    /// <summary>Enqueues a single immediate send without draining the queue on the simulation thread.</summary>
+    public void SendNow(Action send)
+    {
+        var batch = new WorldFanoutBatch();
+        batch.AddOrdered("immediate", send);
+        var seq = new WorldEventSequence(_tick, _phase, _sequence++);
+        if (!_dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, 0)))
+            throw new InvalidOperationException("fan-out dispatcher queue is full");
+    }
 
     sealed class RegionRecording(WorldFanoutSequencer owner, WorldFanoutBatch batch) : IDisposable
     {
