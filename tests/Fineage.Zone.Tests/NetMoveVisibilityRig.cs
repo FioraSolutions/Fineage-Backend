@@ -84,15 +84,24 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
 
     public void StepTicks(int count) => _driver.Step(count);
 
-    /// <summary>Advances the simulation by whole scheduler steps (multiples of <see cref="ZoneSimulationSettings.StepMilliseconds"/>).</summary>
-    public async Task AdvanceAsync(int totalMs, int stepMs = 200)
+    /// <summary>
+    /// Combat-period slices for long-running TCP observer tests (mob/player fights). Move/visibility smokes use
+    /// <see cref="StepTicks"/> for full scheduler steps instead.
+    /// </summary>
+    public async Task AdvanceAsync(int totalMs, int stepMs = 100)
     {
-        if (totalMs % stepMs != 0)
-            throw new ArgumentException($"totalMs must be a multiple of {stepMs}.", nameof(totalMs));
-        if (stepMs % ZoneSimulationSettings.StepMilliseconds != 0)
-            throw new ArgumentException($"stepMs must be a multiple of {ZoneSimulationSettings.StepMilliseconds}.", nameof(stepMs));
-        StepTicks(totalMs / ZoneSimulationSettings.StepMilliseconds);
-        await Task.CompletedTask;
+        if (totalMs < 0)
+            throw new ArgumentOutOfRangeException(nameof(totalMs));
+        if (stepMs <= 0)
+            throw new ArgumentOutOfRangeException(nameof(stepMs));
+        long wallUnixMs = _clock.Now.ToUnixTimeMilliseconds();
+        for (int done = 0; done < totalMs; done += stepMs)
+        {
+            int slice = Math.Min(stepMs, totalMs - done);
+            wallUnixMs += slice;
+            _clock.Now = DateTimeOffset.FromUnixTimeMilliseconds(wallUnixMs);
+            await World.RunPlayerCombatTickAsync(Ct);
+        }
     }
 
     public async ValueTask DisposeAsync()
