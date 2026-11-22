@@ -9,12 +9,24 @@ namespace Fineage.Zone.Net;
 /// Maps live Zone object ids to Net connections for presence fanout
 /// (MoveState / EntitySpawn / EntityDespawn). The hub is the only fan-out path: ZoneSession carries no stream.
 /// </summary>
-public sealed class NetPresenceHub
+public sealed class NetPresenceHub : IAsyncDisposable
 {
     readonly object _gate = new();
     readonly Dictionary<int, Entry> _byObjectId = [];
+    readonly NetFanoutStripes _stripes = new();
+    readonly bool _ownsStripes = true;
 
     readonly record struct Entry(NetConnection Conn, EntityId EntityId);
+
+    /// <summary>Tests and custom wiring may inject stripe routing.</summary>
+    public NetPresenceHub(NetFanoutStripes? stripes = null)
+    {
+        if (stripes != null)
+        {
+            _stripes = stripes;
+            _ownsStripes = false;
+        }
+    }
 
     public void Register(int objectId, NetConnection conn, EntityId entityId)
     {
@@ -83,11 +95,8 @@ public sealed class NetPresenceHub
     {
         if (!TryGet(objectId, out var conn, out _))
             return;
-        if (!conn.TrySend(opcode, payload))
-            return;
-
-        if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
-            FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
+        _stripes.EnqueueTrySend(conn, opcode, payload);
+        RecordCommandToMailboxes();
     }
 
     /// <summary>
@@ -98,8 +107,17 @@ public sealed class NetPresenceHub
     {
         if (!TryGet(objectId, out var conn, out _))
             return;
-        _ = conn.SendAsync(opcode, payload);
+        _stripes.EnqueueCritical(conn, opcode, payload);
+        RecordCommandToMailboxes();
     }
+
+    static void RecordCommandToMailboxes()
+    {
+        if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+            FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
+    }
+
+    public ValueTask DisposeAsync() => _ownsStripes ? _stripes.DisposeAsync() : ValueTask.CompletedTask;
 
     public void TryBroadcast(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
     {
