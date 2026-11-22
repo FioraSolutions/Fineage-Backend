@@ -19,4 +19,4 @@ actionWeights:
   party: 0.03
   teleport: 0.03
   pvp: 0.04
-  relog: 0.02
+  relog: 0
