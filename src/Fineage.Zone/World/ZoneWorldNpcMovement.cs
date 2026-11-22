@@ -17,36 +17,51 @@ public sealed partial class ZoneWorld
         AdvanceMove(npc, now);
         npc.MovePath.Clear();
         npc.MoveSegmentDirty = false;
-        int destX = wantX, destY = wantY, destZ;
+        if (npc.PathfindPending)
+        {
+            npc.PathfindPending = false;
+            DequeueNpcPathfind(npc.ObjectId);
+        }
+
+        int destX = wantX, destY = wantY, destZ = wantZ;
         if (_geo.HasGeo(npc.X, npc.Y))
         {
             npc.Z = _geo.GetHeight(npc.X, npc.Y, npc.Z);
             (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out bool blocked);
-            if (blocked && _geo.FindPath(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ) is { Count: > 0 } path)
+            if (blocked)
             {
-                ZoneLog.Info($"[geo] npc path obj={npc.ObjectId} from={npc.X},{npc.Y},{npc.Z} want={wantX},{wantY} nodes={path.Count}");
-                (destX, destY, destZ) = path[0];
-                for (int i = 1; i < path.Count; i++)
-                    npc.MovePath.Enqueue(path[i]);
+                if (TryNpcPathCacheOnly(npc.X, npc.Y, wantX, wantY, out var cached) && cached.Count > 0)
+                {
+                    (destX, destY, destZ) = cached[0];
+                    for (int i = 1; i < cached.Count; i++)
+                        npc.MovePath.Enqueue(cached[i]);
+                }
+                else
+                {
+                    RequestNpcGeoPath(npc, wantX, wantY, wantZ);
+                    return;
+                }
             }
-            else if (blocked)
-                ZoneLog.Info($"[geo] npc move blocked obj={npc.ObjectId} want={wantX},{wantY} stop={destX},{destY},{destZ}");
         }
         else
-        {
             destZ = SanitizeDestZ(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ);
+
+        CommitNpcMoveStart(npc, destX, destY, destZ, now);
+    }
+
+    void SuspendIdleNpcMove(ZoneEntity npc)
+    {
+        if (npc.PathfindPending)
+        {
+            npc.PathfindPending = false;
+            DequeueNpcPathfind(npc.ObjectId);
         }
 
-        if (ClipDoors(npc, ref destX, ref destY, ref destZ))
-            npc.MovePath.Clear();
-
-        npc.MoveDestX = destX;
-        npc.MoveDestY = destY;
-        npc.MoveDestZ = destZ;
-        npc.MoveCarryX = npc.MoveCarryY = 0;
-        npc.MoveLastTickMs = now;
-        SetMoveActive(npc, npc.X != destX || npc.Y != destY);
-        BroadcastNpcMove(npc, destX, destY, destZ);
+        if (!npc.MoveActive)
+            return;
+        SetMoveActive(npc, false);
+        npc.MovePath.Clear();
+        npc.MoveSegmentDirty = false;
     }
 
     /// <summary>
@@ -307,9 +322,16 @@ public sealed partial class ZoneWorld
                 e.MovePath.Clear();
                 continue;
             }
+            if (e.Kind == ZoneEntityKind.Npc && !NpcRegionAwake(e))
+            {
+                SuspendIdleNpcMove(e);
+                continue;
+            }
+
+            if (e.PathfindPending)
+                continue;
             AdvanceMove(e, now);
-            long rdx = e.X - e.AoiRefreshX, rdy = e.Y - e.AoiRefreshY;
-            if (!e.MoveActive || rdx * rdx + rdy * rdy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+            if (ShouldRefreshKnownlistAfterMove(e))
                 RefreshNpcWatchers(e);
             if (e.MoveSegmentDirty)
             {
@@ -336,32 +358,35 @@ public sealed partial class ZoneWorld
     /// </summary>
     void RefreshNpcWatchers(ZoneEntity npc)
     {
-        npc.AoiRefreshX = npc.X;
-        npc.AoiRefreshY = npc.Y;
-        foreach (var player in Players())
+        StampKnownlistRefreshAnchor(npc);
+        foreach (int playerId in WatcherPlayerIds(npc.ObjectId).ToArray())
         {
-            if (player.Session == null)
+            if (!_byId.TryGetValue(playerId, out var player) || player.Session == null)
                 continue;
-            bool known = player.Knownlist.Contains(npc.ObjectId);
-            if (!known)
-            {
-                if (!VisibleTo(player.ObjectId, npc.ObjectId))
-                    continue;
-                player.Knownlist.Add(npc.ObjectId);
-                TrackWatcher(player.ObjectId, npc.ObjectId);
-                TrackThink(npc);
-                NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
-                ZoneLog.Info($"[aoi] npc enter npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
-            }
-            else if (player.InstanceId != npc.InstanceId ||
-                     (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
+            if (player.InstanceId != npc.InstanceId ||
+                (!_aoi.StillKnown(player.ObjectId, npc.ObjectId) && !CombatPinned(player, npc)))
             {
                 player.Knownlist.Remove(npc.ObjectId);
                 UntrackWatcher(player.ObjectId, npc.ObjectId);
                 NetBridge?.FanoutKnownlistDiff(player.ObjectId, [], [npc.ObjectId]);
                 ReleaseThink(npc);
-                ZoneLog.Info($"[aoi] npc leave npc={npc.ObjectId} watcher={player.ObjectId} at={npc.X},{npc.Y}");
             }
+        }
+
+        foreach (int id in _aoi.GetVisible(npc.ObjectId))
+        {
+            if (id == npc.ObjectId)
+                continue;
+            if (!_byId.TryGetValue(id, out var player) || player.Kind != ZoneEntityKind.Player || player.Session == null)
+                continue;
+            if (player.Knownlist.Contains(npc.ObjectId))
+                continue;
+            if (!VisibleTo(player.ObjectId, npc.ObjectId))
+                continue;
+            player.Knownlist.Add(npc.ObjectId);
+            TrackWatcher(player.ObjectId, npc.ObjectId);
+            TrackThink(npc);
+            NetBridge?.FanoutKnownlistDiff(player.ObjectId, [npc.ObjectId], []);
         }
     }
 }

@@ -97,6 +97,7 @@ public sealed partial class ZoneWorld
             MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);
+        NoteNpcSpawned();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         AttachWalkingRoute(entity);
     }

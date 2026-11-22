@@ -235,6 +235,15 @@ sealed class ZoneEntityMovePayload
     public bool MoveSegmentDirty { get; set; }
     public int AoiRefreshX { get; set; }
     public int AoiRefreshY { get; set; }
+    /// <summary>AOI grid cell of the last knownlist refresh (<see cref="Interest.GridAoi.CellKeyAt"/>).</summary>
+    public long AoiRefreshCell { get; set; }
+    /// <summary>Grid cell where <see cref="Geo.GeoEngine.GetHeight"/> was last applied during a move.</summary>
+    public long MoveGeoHeightCell { get; set; }
+    /// <summary>A* path not ready yet; resolved by the <c>npc.paths</c> stage before movement runs.</summary>
+    public bool PathfindPending { get; set; }
+    public int PathWantX { get; set; }
+    public int PathWantY { get; set; }
+    public int PathWantZ { get; set; }
 }
 
 /// <summary>Player skill / abnormal / shortcut fields composed off <see cref="ZoneEntity"/> (#353).</summary>

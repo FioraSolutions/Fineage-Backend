@@ -224,6 +224,42 @@ sealed partial class ZoneEntity
         set => EnsureMove().AoiRefreshY = value;
     }
 
+    public long AoiRefreshCell
+    {
+        get => Move?.AoiRefreshCell ?? 0;
+        set => EnsureMove().AoiRefreshCell = value;
+    }
+
+    public long MoveGeoHeightCell
+    {
+        get => Move?.MoveGeoHeightCell ?? 0;
+        set => EnsureMove().MoveGeoHeightCell = value;
+    }
+
+    public bool PathfindPending
+    {
+        get => Move?.PathfindPending ?? false;
+        set => EnsureMove().PathfindPending = value;
+    }
+
+    public int PathWantX
+    {
+        get => Move?.PathWantX ?? 0;
+        set => EnsureMove().PathWantX = value;
+    }
+
+    public int PathWantY
+    {
+        get => Move?.PathWantY ?? 0;
+        set => EnsureMove().PathWantY = value;
+    }
+
+    public int PathWantZ
+    {
+        get => Move?.PathWantZ ?? 0;
+        set => EnsureMove().PathWantZ = value;
+    }
+
     ZoneEntityMovePayload EnsureMove() => Move ??= new ZoneEntityMovePayload();
 
     public ZoneSession? Session { get; init; }

@@ -20,6 +20,9 @@ public sealed class GridAoi : IAoi
 
     public int CellSize => _cellSize;
 
+    /// <summary>Stable spatial hash cell for <paramref name="x"/>,<paramref name="y"/> (used to gate knownlist refresh while moving).</summary>
+    public long CellKeyAt(int x, int y) => CellKey(x, y);
+
     public void Enter(int objectId, int x, int y)
     {
         Leave(objectId);

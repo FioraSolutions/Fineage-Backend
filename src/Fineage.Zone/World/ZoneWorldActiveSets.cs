@@ -17,16 +17,20 @@ public sealed partial class ZoneWorld
             _byId.CountOf(ActiveSets.WithAbnormals));
 
     /// <summary>Counts included in simulation overrun warnings.</summary>
+    int _spawnedNpcCount;
+
+    internal void NoteNpcSpawned() => _spawnedNpcCount++;
+
+    internal void NoteNpcDespawned()
+    {
+        if (_spawnedNpcCount > 0)
+            _spawnedNpcCount--;
+    }
+
     internal (int TotalNpcs, int ThinkingNpcs, int PlayerRegions) TickNpcDiagnostics()
     {
-        int npcs = 0;
-        foreach (var entity in _byId.Values)
-        {
-            if (entity.Kind == ZoneEntityKind.Npc)
-                npcs++;
-        }
-
-        return (npcs, _byId.CountOf(ActiveSets.Thinking), _playerActiveRegions.Count);
+        RefreshPlayerActiveRegions();
+        return (_spawnedNpcCount, _byId.CountOf(ActiveSets.Thinking), _playerActiveRegions.Count);
     }
 
     /// <summary>Members of <paramref name="set"/> by owning region, then object id; safe to mutate the set while iterating.</summary>
@@ -94,8 +98,24 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>AttackableThinkTaskManager.add</c>: only attackables in an active region
-    /// (a player can see them) or stuck beyond two drift radii.
+    /// Mobius awake predicate: player-active tile (or neighbor), a live watcher, combat/return home,
+    /// or drifted far enough that AI must return.
+    /// </summary>
+    bool NpcRegionAwake(ZoneEntity npc)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc)
+            return true;
+        if (AnyLivePlayerWatching(npc.ObjectId))
+            return true;
+        if (npc.AggroTargetId > 0 || npc.ReturningHome)
+            return true;
+        if (DriftedBeyondDouble(npc))
+            return true;
+        return IsPlayerRegionActive(_byId.OwnerOf(npc).Region);
+    }
+
+    /// <summary>
+    /// Mobius <c>AttackableThinkTaskManager.add</c>: only attackables in an awake region or otherwise needing AI.
     /// </summary>
     void TrackThink(ZoneEntity npc)
     {
@@ -105,8 +125,7 @@ public sealed partial class ZoneWorld
             return;
         if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
             return;
-        var region = _byId.OwnerOf(npc).Region;
-        if (!IsPlayerRegionActive(region) && !AnyLivePlayerWatching(npc.ObjectId) && !DriftedBeyondDouble(npc))
+        if (!NpcRegionAwake(npc))
             return;
         long now = NowUnixMs();
         if (AnyLivePlayerWatching(npc.ObjectId))

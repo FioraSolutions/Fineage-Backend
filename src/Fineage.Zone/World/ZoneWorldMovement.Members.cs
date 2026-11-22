@@ -10,8 +10,7 @@ public sealed partial class ZoneWorld
     /// <summary>Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).</summary>
     void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack)
     {
-        e.AoiRefreshX = e.X;
-        e.AoiRefreshY = e.Y;
+        StampKnownlistRefreshAnchor(e);
         var before = new HashSet<int>(e.Knownlist);
         ReconcileKnownlist(e, ack);
         if (NetBridge == null || e.Session == null)
@@ -27,7 +26,6 @@ public sealed partial class ZoneWorld
             return;
         added?.Sort();
         removed?.Sort();
-        ZoneLog.Info($"[aoi] move refresh obj={e.ObjectId} at={e.X},{e.Y} +{added?.Count ?? 0} -{removed?.Count ?? 0}");
         var addedList = (IReadOnlyList<int>?)added ?? [];
         NetBridge.FanoutKnownlistDiff(e.ObjectId, addedList, (IReadOnlyList<int>?)removed ?? []);
         FanoutMoveSyncToNewWatchers(e, addedList, ack != null);
@@ -71,10 +69,11 @@ public sealed partial class ZoneWorld
         float speed = MoveSpeedOf(e);
         double step = speed * dt / 1000.0;
         double dx = e.MoveDestX - e.X, dy = e.MoveDestY - e.Y;
-        double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist >= 1)
+        double distSq = dx * dx + dy * dy;
+        if (distSq >= 1)
             e.Heading = ZoneCombat.HeadingFrom(e.X, e.Y, e.MoveDestX, e.MoveDestY);
-        if ((dist <= step || dist < 1) && e.MovePath.Count > 0)
+        double stepSq = step * step;
+        if ((distSq <= stepSq || distSq < 1) && e.MovePath.Count > 0)
         {
             // Reached a geo-path waypoint: snap to it and start the next leg (leftover distance is dropped, ≤1 tick).
             e.X = e.MoveDestX;
@@ -89,7 +88,7 @@ public sealed partial class ZoneWorld
             }
             e.MoveSegmentDirty = true;
         }
-        else if (dist <= step || dist < 1)
+        else if (distSq <= stepSq || distSq < 1)
         {
             e.MoveCarryX = e.MoveCarryY = 0;
             e.X = e.MoveDestX;
@@ -99,6 +98,7 @@ public sealed partial class ZoneWorld
         }
         else
         {
+            double dist = Math.Sqrt(distSq);
             double k = step / dist;
             double nx = e.X + e.MoveCarryX + dx * k, ny = e.Y + e.MoveCarryY + dy * k;
             int ix = (int)Math.Round(nx), iy = (int)Math.Round(ny);
@@ -107,13 +107,14 @@ public sealed partial class ZoneWorld
             e.X = ix;
             e.Y = iy;
             e.Z += (int)Math.Round((e.MoveDestZ - e.Z) * k);
-            if (_geo.HasGeo(e.X, e.Y))
-                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+            ApplyMoveGeoHeight(e);
         }
         MoveAoi(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
+        {
             SyncSession(e, e.Session);
-        UpdateMoveEnvironment(e);
+            UpdateMoveEnvironment(e);
+        }
     }
 
     /// <summary>
@@ -191,5 +192,17 @@ public sealed partial class ZoneWorld
         s.X = e.X;
         s.Y = e.Y;
         s.Z = e.Z;
+    }
+
+    /// <summary>GetHeight only when the mover enters a new grid cell; interpolation covers ticks inside a cell.</summary>
+    void ApplyMoveGeoHeight(ZoneEntity e)
+    {
+        if (!_geo.HasGeo(e.X, e.Y))
+            return;
+        long cell = AoiCellKeyAt(e.X, e.Y);
+        if (cell != 0 && cell == e.MoveGeoHeightCell)
+            return;
+        e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+        e.MoveGeoHeightCell = cell;
     }
 }

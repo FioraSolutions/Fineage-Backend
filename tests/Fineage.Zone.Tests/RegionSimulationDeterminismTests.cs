@@ -22,7 +22,7 @@ public sealed class RegionSimulationDeterminismTests
 
     static readonly string[] LegacyCombatOrder =
     [
-        "commands", "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
+        "commands", "movement.player", "arena", "npc.paths", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
         "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
         "wedding-teleport", "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
         "force-charge-decay", "ground-expiry", "environment.zones", "punishment", "door-auto-close", "cursed-weapons"
