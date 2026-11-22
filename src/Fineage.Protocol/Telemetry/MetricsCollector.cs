@@ -20,6 +20,9 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _enterFrames = new();
     readonly DurationHistogram _enterBytes = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _commandQueueWaitByClass = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _ticksSkipped;
     long _regionHandoffs;
@@ -93,6 +96,9 @@ public sealed class MetricsCollector : IDisposable
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
                     .ToList(),
+                CommandTimelinePhases = FreezeLabeled(_commandTimelinePhases),
+                CommandApplyByName = FreezeLabeled(_commandApplyByName),
+                CommandQueueWaitByClass = FreezeLabeled(_commandQueueWaitByClass),
                 Endpoints = endpoints
             };
         }
@@ -219,6 +225,13 @@ public sealed class MetricsCollector : IDisposable
                     _enterPlan.Record(value);
                     break;
                 case "fineage.command.apply_ms":
+                    CommandApply(CommandOf(tags)).Duration.Record(value);
+                    break;
+                case "fineage.command.timeline.ms":
+                    CommandTimeline(PhaseOf(tags)).Duration.Record(value);
+                    break;
+                case "fineage.command.queue.wait.ms":
+                    CommandQueueWait(IngressClassOf(tags)).Duration.Record(value);
                     break;
                 case "fineage.enter.self_projection_ms":
                     _enterSelf.Record(value);
@@ -248,16 +261,29 @@ public sealed class MetricsCollector : IDisposable
         }
     }
 
-    MutableStage Stage(string stage)
+    MutableStage Stage(string stage) => LabeledStage(_stages, stage);
+
+    MutableStage CommandTimeline(string phase) => LabeledStage(_commandTimelinePhases, phase);
+
+    MutableStage CommandApply(string command) => LabeledStage(_commandApplyByName, command);
+
+    MutableStage CommandQueueWait(string ingressClass) => LabeledStage(_commandQueueWaitByClass, ingressClass);
+
+    static MutableStage LabeledStage(Dictionary<string, MutableStage> map, string key)
     {
-        if (!_stages.TryGetValue(stage, out MutableStage? row))
+        if (!map.TryGetValue(key, out MutableStage? row))
         {
             row = new MutableStage();
-            _stages.Add(stage, row);
+            map.Add(key, row);
         }
 
         return row;
     }
+
+    static List<StageMetrics> FreezeLabeled(Dictionary<string, MutableStage> map) =>
+        map.OrderBy(pair => pair.Key, StringComparer.Ordinal)
+            .Select(pair => pair.Value.Freeze(pair.Key))
+            .ToList();
 
     static string StageOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
     {
@@ -271,6 +297,12 @@ public sealed class MetricsCollector : IDisposable
     }
 
     static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "move_kind");
+
+    static string CommandOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "command");
+
+    static string IngressClassOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "class");
+
+    static string PhaseOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "phase");
 
     static string Tag(ReadOnlySpan<KeyValuePair<string, object?>> tags, string name)
     {
