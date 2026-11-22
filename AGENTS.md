@@ -10,6 +10,7 @@ C#/.NET server (Login TCP/HTTP, Zone). Land via PR into **`dev`**; merge when CI
 4. **Use the extracted reference catalog first** (client repo `l2-unity/Docs/interlude-ref/`, `l2-unity/Docs/ui-original/`; Mobius data in `ref/`). Do not re-extract or guess what is already catalogued; if something is missing, add it to the catalog with the extraction script.
 5. **Interlude only.** Nothing from later chronicles (data, animations, effects, skills).
 6. Every PR description states the root cause and which shared mechanism was changed. PRs that patch a single case of a general problem will be rejected.
+7. **Lossless extraction from originals.** When extracting anything from the original Interlude client or server data (xdat, .usk/.ukx/.utx, .dat, nwindow.dll, Mobius data), dump EVERY property of EVERY object into docs/interlude-ref (or the backend equivalent) as a full lossless dump. Never keep only the fields you currently need. Derived tables are views over the full dump. Every extraction also updates a gap report listing original fields and features Fineage doesn't use or support yet, with affected counts. Don't commit original binaries.
 
 ## Parity
 
