@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
         if (hit.Combat != null)
         {
-            ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            ZoneHotPathLogs.MobSkillHit(hit.Combat.SkillId, hit.Level, target.ObjectId, damage);
             // Mobius Player.sendDamageMessage after a damage skill: the caster sees its own number.
             if (damage > 0)
                 QueueAttackerDamageLine(player, target, damage);

@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
         // Mobius Creature.abortCast → broadcastPacket(MagicSkillCanceled): everyone who saw the cast start stops it.
         if (NetBridge != null && ActorAudience(player) is { Count: > 0 } watchers)
             NetBridge.FanoutMagicSkillCanceled(watchers, player.ObjectId);
-        ZoneLog.Info($"[cast] abort obj={player.ObjectId} skill={skill} reason={reason}");
+        ZoneHotPathLogs.CastAbort(player.ObjectId, skill, reason);
         return true;
     }
 
@@ -131,7 +131,7 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");
+        ZoneHotPathLogs.SkillEffect(hit.SkillId, hit.Level, target!.ObjectId);
         FanoutSkillLaunched(player, hit.SkillId, hit.Level, target);
         effect(target, now);
     }

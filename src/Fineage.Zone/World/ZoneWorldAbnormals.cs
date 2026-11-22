@@ -90,10 +90,9 @@ public sealed partial class ZoneWorld
             mAtkMod);
 
         bool landed = ZoneCombat.RollDebuffLand(Rng(_combatRandom, target), chance);
-        ZoneLog.Info(
-            $"[debuff-land] skill={template.SkillId} lv={levelData.Level} ml={levelData.MagicLevel} " +
-            $"rate={template.ActivateRate} trait={template.Trait} traitMod={traitMod:F3} mAtkMod={mAtkMod:F3} " +
-            $"chance={chance:F1} landed={landed} atk={attacker?.ObjectId ?? 0} tgt={target.ObjectId}");
+        ZoneHotPathLogs.DebuffLand(
+            template.SkillId, levelData.Level, levelData.MagicLevel, template.ActivateRate, template.Trait,
+            traitMod, mAtkMod, chance, landed, attacker?.ObjectId ?? 0, target.ObjectId);
         if (!landed)
         {
             if (attacker?.Session != null)

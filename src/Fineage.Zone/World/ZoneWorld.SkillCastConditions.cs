@@ -101,7 +101,7 @@ public sealed partial class ZoneWorld
         readonly long _now = world.NowUnixMs();
 
         public override void LogUnsupported(string message) =>
-            ZoneLog.Warn($"skill={skillId} lv={skillLevel} {message}");
+            ZoneHotPathLogs.SkillCastUnsupported(skillId, skillLevel, message);
         public override int SkillLevel => skillLevel;
         public override bool UsingKinds(string[] kinds) => ConditionUsingItemType.Matches(player.Inventory, kinds);
         public override bool UsingSlot(string[] slots) => ConditionUsingItemType.MatchesSlot(player.Inventory, slots);

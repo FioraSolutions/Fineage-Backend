@@ -89,7 +89,7 @@ public sealed partial class ZoneWorld
             npc.Running = false;
             FanoutMoveType(npc);
         }
-        ZoneLog.Info($"[npc] return home obj={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY}");
+        ZoneHotPathLogs.NpcReturnHome(npc.ObjectId, npc.X, npc.Y, npc.HomeX, npc.HomeY);
         StartNpcMove(npc, npc.HomeX, npc.HomeY, npc.HomeZ, now);
     }
 
@@ -298,7 +298,7 @@ public sealed partial class ZoneWorld
             npc.RegenCarryMp = 0;
             FanoutVitals(npc, StatusFor(npc));
         }
-        ZoneLog.Info($"[aggro] leash reset npc={npc.ObjectId} from={npc.X},{npc.Y} home={npc.HomeX},{npc.HomeY} restore={restoreLife}");
+        ZoneHotPathLogs.AggroLeashReset(npc.ObjectId, npc.X, npc.Y, npc.HomeX, npc.HomeY, restoreLife);
         ReturnHome(npc, NowUnixMs());
         return true;
     }
