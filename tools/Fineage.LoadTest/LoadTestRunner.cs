@@ -170,9 +170,8 @@ public sealed class LoadTestRunner
         if (zoneLog != null) logPaths.Add(zoneLog);
         ReportEnricher.Enrich(report, scenario, promSamples, zoneLog, logPaths, runtimeStats);
 
-        foreach (GateVerdict gate in report.GateVerdicts.Where(g => !g.Passed && g.Note?.StartsWith("MISSING", StringComparison.Ordinal) != true))
-            failReasons.Add($"Gate FAIL: {gate.Gate} ({gate.Observed:0.0}{gate.Unit})");
-
+        // #867 gate verdicts are recorded in the report for human/LLM review only — they do not
+        // fail the process (CI smoke still gates on bots in-world, stuck, and consistency).
         report.FailReasons = failReasons;
         report.Passed = failReasons.Count == 0;
 

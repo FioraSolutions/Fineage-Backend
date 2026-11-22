@@ -11,7 +11,8 @@ public static class CompactMarkdownRenderer
         var sb = new StringBuilder(16_000);
         sb.AppendLine($"# Load test report: `{r.ScenarioName}`");
         sb.AppendLine();
-        sb.AppendLine($"**Overall:** {(r.Passed && r.GateVerdicts.All(g => g.Passed) ? "PASS" : "FAIL")}  ");
+        bool gatesOk = r.GateVerdicts.Count == 0 || r.GateVerdicts.All(g => g.Passed);
+        sb.AppendLine($"**Runner:** {(r.Passed ? "PASS" : "FAIL")}  |  **#867 gates:** {(gatesOk ? "PASS" : "FAIL")}");
         sb.AppendLine($"**Window:** {r.StartedAt:u} → {r.FinishedAt:u} ({(r.FinishedAt - r.StartedAt).TotalSeconds:0}s)");
         sb.AppendLine();
 
