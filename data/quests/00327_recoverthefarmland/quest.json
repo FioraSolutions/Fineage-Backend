@@ -1563,6 +1563,62 @@
         1855
       ],
       "htmlFile": "30597-event-30314-06-154.htm"
+    },
+    {
+      "npcId": 20495,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20496,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20497,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20498,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20499,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20500,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20501,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }

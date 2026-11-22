@@ -201,6 +201,57 @@
         }
       ],
       "htmlFile": "30069-event-30069-13-014.htm"
+    },
+    {
+      "npcId": 20205,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5895,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20206,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5895,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
+    },
+    {
+      "npcId": 20225,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5895,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20,
+          "condAtLimit": 2
+        }
+      ]
     }
   ]
 }

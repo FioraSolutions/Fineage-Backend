@@ -1271,6 +1271,14 @@
       "when": "absent",
       "event": "32047-28c",
       "htmlFile": "32041-event-32047-28c-146.htm"
+    },
+    {
+      "npcId": 27318,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }
