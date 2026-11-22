@@ -9,6 +9,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Private sell store (#275): open → list → buy → auto-close when empty.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetPrivateStoreTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

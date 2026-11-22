@@ -10,6 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Records every <see cref="IWorldEventPublisher"/> call (method name + args) for Net fanout assertions.</summary>
+[Trait("Category", "Integration")]
 public class NetBridgeRecorder : DispatchProxy
 {
     public readonly List<(string Method, object?[] Args)> Calls = [];

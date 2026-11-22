@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// the merchant stubs. Ported off the V2 wire; the world is driven through <see cref="WorldBench"/> and the pages
 /// read from the recorded <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NpcHtmlTests
 {
     const int MerchantObjectId = 61000;

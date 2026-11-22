@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <c>RequestAcquireSkillInfo</c> with <c>AcquireSkillInfo</c>, and <c>RequestAcquireSkill</c> buys the row
 /// (SP taken, skill learned, refreshed SkillList + a new AcquireSkillList without the bought row).
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetAcquireSkillTests
 {
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Elf, NetBridgeRecorder Rec)> SetupAsync()

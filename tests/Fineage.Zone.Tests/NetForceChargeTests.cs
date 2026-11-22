@@ -12,6 +12,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Sonic Focus charges and Sonic Blaster <c>player charges="2"</c> gate.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetForceChargeTests
 {
     const int MobId = 9_300_080;

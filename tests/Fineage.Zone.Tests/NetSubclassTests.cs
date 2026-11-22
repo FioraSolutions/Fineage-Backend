@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// <c>setActiveClass</c> / <c>modifySubClass</c>: add at 75+, a level-40 slot per subclass, separate level / exp / SP /
 /// skills, switching back and forth, the master filter, the three-slot cap and persistence of the class state.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetSubclassTests
 {
     const int Gladiator = 2, Warlord = 3, Paladin = 5, DarkAvenger = 6, TreasureHunter = 8, Hawkeye = 9;

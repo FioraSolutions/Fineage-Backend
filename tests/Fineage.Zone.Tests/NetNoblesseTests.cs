@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Block G1 noblesse after Mobius <c>Player.setNoble</c> and Q247 Possessor of a Precious Soul 4: the flag,
 /// the noble skill tree, the UserInfo tail, the clan rank floor, persistence, and the quest that grants it.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetNoblesseTests
 {
     const int Caradine = 31740, LadyOfTheLake = 31745, Hannavalt = 30109;

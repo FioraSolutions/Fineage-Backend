@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// (<c>target.isAutoAttackable(player) ? player.getLevel() - target.getLevel() : 0</c>) plus the target's
 /// <c>StatusUpdate</c> MAX_HP/CUR_HP, and the action table's next-target / panel-attack rows reach the world.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetTargetSelectTests
 {
     const int MobId = 9_300_001;

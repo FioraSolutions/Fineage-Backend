@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// character created before the starter kit existed is granted it exactly once. Ported off the V2 wire; the
 /// assertions read the sheet <see cref="NetEnterWorldProjector"/> builds for the client.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetInventoryPersistTests
 {
     const int Adena = 57;

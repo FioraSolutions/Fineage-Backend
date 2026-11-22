@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>A respawned mob inside view must reach Net clients right away (EntitySpawn via knownlist diff).</summary>
+[Trait("Category", "Integration")]
 public sealed class NetRespawnVisibilityTests
 {
     [Fact]

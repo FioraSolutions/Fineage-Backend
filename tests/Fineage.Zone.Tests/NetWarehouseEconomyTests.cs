@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// B6 warehouse economy invariants: deposit/withdraw must not invent a second move of the same stack
 /// (double-spend / over-count). Complements the fee/weight/persist coverage in <see cref="NetNpcServiceTests"/>.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetWarehouseEconomyTests
 {
     const int KeeperObjectId = 61001;

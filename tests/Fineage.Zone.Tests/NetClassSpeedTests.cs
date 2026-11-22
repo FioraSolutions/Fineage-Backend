@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <c>FuncMoveSpeed.java:34-45</c>). Human Fighter DEX 30 → ×1.1, Human Mystic DEX 21 → ×1.01
 /// (<c>data/stat-bonuses.json</c> = <c>statBonus.xml</c>) — the wire value is not the raw template number.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetClassSpeedTests
 {
     [Theory]
