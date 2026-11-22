@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.DimensionalRift;
@@ -112,19 +113,43 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// After the <c>commands</c> stage: seal and send the fan-out those commands caused, flush any inventory they
-    /// dirtied, and complete their handler replies so the rest of the step does not block on combat and regen. Must run
-    /// only inside a <see cref="RunStep"/> body while a fan-out batch is recording.
+    /// After the <c>commands</c> stage: commit the economy those commands dirtied, seal and send their fan-out, then
+    /// complete replies. A failed ledger commit does not tell those characters success. Returns
+    /// (flush, fanout seal+drain, reply completion) milliseconds. Must run only inside a <see cref="RunStep"/> body
+    /// while a fan-out batch is recording.
     /// </summary>
-    void ReleaseAppliedCommandReplies()
+    (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies()
     {
-        FlushDirtyInventories();
+        long flushStart = Stopwatch.GetTimestamp();
+        bool committed = FlushDirtyInventories();
+        if (!committed)
+            _ingress.FailUncommitted(UncommittedEconomicCharacters(), EconomyCommitFailed);
+        double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
+
+        long sealStart = Stopwatch.GetTimestamp();
         _fanout.Seal();
         _fanout.Drain();
+        double sealMs = RecordCommandPhase(PhaseSeal, sealStart);
+
+        long replyStart = Stopwatch.GetTimestamp();
         var applied = _ingress.TakeApplied();
         if (applied.Count > 0)
             ZoneCommandIngress.Complete(applied);
         _fanout.Begin();
+        double replyMs = RecordCommandPhase(PhaseReply, replyStart);
+        return (flushMs, sealMs, replyMs);
+    }
+
+    HashSet<int> UncommittedEconomicCharacters()
+    {
+        var ids = new HashSet<int>(_dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count);
+        foreach (int id in _dirtyInventories.Keys)
+            ids.Add(id);
+        foreach (int id in _dirtyWarehouses.Keys)
+            ids.Add(id);
+        foreach (int id in _dirtyFreight.Keys)
+            ids.Add(id);
+        return ids;
     }
 
     /// <summary>

@@ -37,7 +37,8 @@ public sealed partial class ZoneWorld
         Func<ZoneEntity, Fineage.Zone.Net.EnterSnapshot> commit,
         CancellationToken ct)
     {
-        CharacterRecord? stored = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
+        var prepared = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
+        CharacterRecord? stored = prepared.Stored;
         var selfPrepareTask = Task.Run(() => Fineage.Zone.Net.EnterSelfPrepare.FromStored(stored, _game.Items, _itemIds), ct);
         bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
@@ -49,7 +50,7 @@ public sealed partial class ZoneWorld
             entered = await OnSimulationAsync(session, "enter", () =>
             {
                 CharacterRecord? enterStored = stored;
-                if (!TryPrepareSameSessionReenter(session, ref enterStored))
+                if (!TryPrepareSameSessionReenter(session, ref enterStored, prepared.CharacterEpoch, prepared.PetEpoch))
                     return null;
                 if (!TryEnter(session, enterStored, out int known, out int x, out int y, out int z, out var evicted))
                     return null;
@@ -62,6 +63,9 @@ public sealed partial class ZoneWorld
         finally
         {
             session.PendingEnterSelfPrepare = null;
+            string? syncIo = _syncIo.ConsumeSummary();
+            if (syncIo != null)
+                ZoneLog.Info($"enter object={session.ObjectId} sync-io on simulation thread: {syncIo}");
         }
 
         if (entered == null)
@@ -80,6 +84,8 @@ public sealed partial class ZoneWorld
         {
             foreach (var snapshot in entered.Evicted)
                 PersistUnlinkSnapshot(snapshot);
+            foreach (var snapshot in entered.Evicted)
+                DrainCharacterSnapshots(snapshot.Session.ObjectId);
         }
 
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
@@ -87,13 +93,25 @@ public sealed partial class ZoneWorld
         return entered.Projection;
     }
 
-    async Task<CharacterRecord?> PrepareEnterCharacterAsync(ZoneSession session, CancellationToken ct)
+    readonly record struct EnterStoreRead(CharacterRecord? Stored, long CharacterEpoch, long PetEpoch);
+
+    async Task<EnterStoreRead> PrepareEnterCharacterAsync(ZoneSession session, CancellationToken ct)
     {
-        if (_accounts == null || session.ObjectId <= 0)
-            return null;
-        return await Task.Run(
-            () => _accounts.FindById(session.Account, session.ObjectId),
-            ct).ConfigureAwait(false);
+        var accounts = _accounts;
+        if (accounts == null || session.ObjectId <= 0)
+            return default;
+        return await Task.Run(() =>
+        {
+            // Off the simulation thread: a leave or kick may still be sitting in the snapshot queue.
+            _snapshots.DrainOwner(CharacterPersistWorker.CharacterDomain, session.ObjectId, TimeSpan.FromSeconds(2));
+            _snapshots.DrainDomain(CharacterPersistWorker.PetDomain, TimeSpan.FromSeconds(2));
+            long characterEpoch = _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, session.ObjectId);
+            long petEpoch = _snapshots.DomainEpoch(CharacterPersistWorker.PetDomain);
+            return new EnterStoreRead(
+                accounts.FindById(session.Account, session.ObjectId),
+                characterEpoch,
+                petEpoch);
+        }, ct).ConfigureAwait(false);
     }
 
     public Task LeaveAsync(ZoneSession session, CancellationToken ct) => LeaveAsync<object>(session, null, ct);
@@ -118,6 +136,9 @@ public sealed partial class ZoneWorld
             return projection;
 
         PersistUnlinkSnapshot(snapshot.Value);
+        // The worker owns non-economic writes. This wait is on the leave caller, not the simulation thread,
+        // so a following enter reads the position, vitals and quests that just left the world.
+        DrainCharacterSnapshots(session.ObjectId);
 
         _sevenSigns.Engine.Save();
         _bosses.Schedule.Save();

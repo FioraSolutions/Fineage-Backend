@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
@@ -20,6 +21,7 @@ public sealed partial class ZoneWorld
         int pending = _ledger.PendingFlushCount;
         if (pending == 0)
             return true;
+        long started = Stopwatch.GetTimestamp();
         try
         {
             _ledger.Flush();
@@ -27,9 +29,14 @@ public sealed partial class ZoneWorld
         }
         catch (Exception ex)
         {
-            ZoneLog.Warn($"auditable economy ledger flush failed pending={pending}: {ex.Message}");
+            ZoneLog.Warn(
+                $"auditable economy ledger flush failed pending={pending}: {ex.GetType().Name}: {ex.Message}");
             FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
             return false;
+        }
+        finally
+        {
+            _syncIo.Record("ILedgerJournal.Flush", Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
     }
 }

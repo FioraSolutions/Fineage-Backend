@@ -24,6 +24,7 @@ public sealed class MetricsCollector : IDisposable
     long _ticksSkipped;
     long _regionHandoffs;
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _persistSnapshots = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
     int _online;
     int _commandIngressQueued;
@@ -77,6 +78,9 @@ public sealed class MetricsCollector : IDisposable
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 LedgerFlushFailures = _ledgerFlushFailures,
+                PersistSnapshots = _persistSnapshots
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 Stages = _stages
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
@@ -141,6 +145,10 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.ledger.flush_failures":
                     _ledgerFlushFailures += value;
+                    break;
+                case "fineage.persist.snapshots":
+                    string result = Tag(tags, "result");
+                    _persistSnapshots[result] = _persistSnapshots.GetValueOrDefault(result) + value;
                     break;
             }
         }
@@ -242,11 +250,13 @@ public sealed class MetricsCollector : IDisposable
         return "";
     }
 
-    static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "move_kind");
+
+    static string Tag(ReadOnlySpan<KeyValuePair<string, object?>> tags, string name)
     {
         foreach (KeyValuePair<string, object?> tag in tags)
         {
-            if (tag.Key == "move_kind" && tag.Value is string value)
+            if (tag.Key == name && tag.Value is string value)
                 return value;
         }
 

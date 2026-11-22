@@ -50,6 +50,7 @@ public sealed partial class ZoneWorld
 
     const long PresenceSaveIntervalMs = 3000;
     readonly System.Collections.Concurrent.ConcurrentDictionary<int, long> _lastPresenceSaveMs = new();
+    readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTimeOffset> _pendingPresenceAccess = new();
 
     /// <summary>Throttled save of the move destination so a Zone restart mid-session keeps the player's spot.</summary>
     void MaybeSavePresenceOnMove(ZoneSession session)
@@ -64,14 +65,21 @@ public sealed partial class ZoneWorld
         SavePresence(session, session.X, session.Y, session.Z, touchAccess: false);
     }
 
-    void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess) =>
-        _persist.SavePresence(
-            session.Account,
-            session.ObjectId,
-            x,
-            y,
-            z,
-            touchAccess ? DateTimeOffset.UtcNow : null);
+    void SavePresence(ZoneSession session, int x, int y, int z, bool touchAccess)
+    {
+        // A presence snapshot replaces any older one of the same kind, so it has to carry the access time too.
+        // A later move that omitted it would drop the enter's last-access write.
+        DateTimeOffset? access = null;
+        if (touchAccess)
+        {
+            access = DateTimeOffset.UtcNow;
+            _pendingPresenceAccess[session.ObjectId] = access.Value;
+        }
+        else if (_pendingPresenceAccess.TryGetValue(session.ObjectId, out var known))
+            access = known;
+
+        _persist.SavePresence(session.Account, session.ObjectId, x, y, z, access);
+    }
 
     PlayerInventory LoadInventory(ZoneSession session, CharacterRecord? stored = null)
     {
@@ -102,44 +110,67 @@ public sealed partial class ZoneWorld
         _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
     }
 
-    /// <summary>Flush inventory/warehouse rows queued while <see cref="InventoryPersistDeferred"/> was set.</summary>
-    void FlushDirtyInventories()
+    /// <summary>
+    /// Ledger first, then inventory, warehouse and freight. False means a commit failed and the rows that did not
+    /// land stay dirty; callers must not report economic success for those characters.
+    /// </summary>
+    bool FlushDirtyInventories()
     {
         if (!TryFlushLedger())
         {
             ZoneLog.Warn("inventory persist blocked: auditable economy ledger flush failed");
-            return;
+            return false;
         }
 
-        if (_dirtyInventories.Count > 0)
+        bool committed = true;
+        committed &= CommitDirty(_dirtyInventories, (_, pair) =>
+            CommitStore("inventory replace", pair.Session, () =>
+                _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory)));
+        committed &= CommitDirty(_dirtyWarehouses, (_, player) =>
+            player.Session == null || ReplaceWarehouseNow(player.Session, player));
+        committed &= CommitDirty(_dirtyFreight, (_, player) =>
+            player.Session == null || ReplaceFreightNow(player.Session, player));
+        return committed;
+    }
+
+    /// <summary>
+    /// Writes each dirty row. Rows that land are removed; a refusal or a thrown store error stays queued and is logged.
+    /// </summary>
+    static bool CommitDirty<T>(Dictionary<int, T> dirty, Func<int, T, bool> commit)
+    {
+        if (dirty.Count == 0)
+            return true;
+        var done = new List<int>();
+        bool ok = true;
+        foreach (var (id, row) in dirty)
         {
-            foreach (var (_, pair) in _dirtyInventories)
-                _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory);
-            _dirtyInventories.Clear();
+            if (commit(id, row))
+                done.Add(id);
+            else
+                ok = false;
         }
 
-        if (_dirtyWarehouses.Count > 0)
+        foreach (int id in done)
+            dirty.Remove(id);
+        return ok;
+    }
+
+    bool CommitStore(string what, ZoneSession session, Func<bool> write)
+    {
+        try
         {
-            foreach (var player in _dirtyWarehouses.Values)
-            {
-                if (player.Session == null)
-                    continue;
-                ReplaceWarehouseNow(player.Session, player);
-            }
-
-            _dirtyWarehouses.Clear();
+            if (write())
+                return true;
+            ZoneLog.Warn(
+                $"{what} refused account={session.Account} character={session.ObjectId}: store returned false");
+            return false;
         }
-
-        if (_dirtyFreight.Count == 0)
-            return;
-        foreach (var player in _dirtyFreight.Values)
+        catch (Exception ex)
         {
-            if (player.Session == null)
-                continue;
-            ReplaceFreightNow(player.Session, player);
+            ZoneLog.Warn(
+                $"{what} failed account={session.Account} character={session.ObjectId}: {ex.GetType().Name}: {ex.Message}");
+            return false;
         }
-
-        _dirtyFreight.Clear();
     }
 
     /// <summary>

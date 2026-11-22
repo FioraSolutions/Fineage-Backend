@@ -109,6 +109,10 @@ public static class FineageTelemetry
     public static readonly Counter<long> LedgerFlushFailures =
         Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
 
+    /// <summary>Non-economic character snapshots. Tag <c>result</c> is written, coalesced, refused, or failed.</summary>
+    public static readonly Counter<long> PersistSnapshots =
+        Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");
+
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
         ObservePacketRates,

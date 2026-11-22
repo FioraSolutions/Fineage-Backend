@@ -11,21 +11,38 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryFlushPlayerPersistBarrier(int objectId, ZoneSession session, ZoneEntity live)
     {
-        if (live.Inventory != null)
-            PersistInventoryNow(session, live.Inventory);
-        if (_dirtyWarehouses.Remove(objectId, out var warehousePlayer))
-            ReplaceWarehouseNow(session, warehousePlayer);
-        if (_dirtyFreight.Remove(objectId, out var freightPlayer))
-            ReplaceFreightNow(session, freightPlayer);
-
         if (_ledger.PendingFlushCount > 0 && !TryFlushLedger())
         {
             ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy ledger flush failed");
             return false;
         }
 
-        if (_dirtyInventories.Remove(objectId, out var dirty))
-            _persist.ReplaceItemsFromInventory(dirty.Session.Account, dirty.Session.ObjectId, dirty.Inventory);
+        if (live.Inventory != null && !PersistInventoryNow(session, live.Inventory))
+            return false;
+        if (_dirtyWarehouses.TryGetValue(objectId, out var warehousePlayer))
+        {
+            if (!ReplaceWarehouseNow(session, warehousePlayer))
+                return false;
+            _dirtyWarehouses.Remove(objectId);
+        }
+
+        if (_dirtyFreight.TryGetValue(objectId, out var freightPlayer))
+        {
+            if (!ReplaceFreightNow(session, freightPlayer))
+                return false;
+            _dirtyFreight.Remove(objectId);
+        }
+
+        if (_dirtyInventories.TryGetValue(objectId, out var dirty))
+        {
+            if (!CommitStore(
+                    "inventory replace",
+                    dirty.Session,
+                    () => _persist.ReplaceItemsFromInventory(dirty.Session.Account, dirty.Session.ObjectId, dirty.Inventory)))
+                return false;
+            _dirtyInventories.Remove(objectId);
+        }
+
         return true;
     }
 
@@ -35,12 +52,16 @@ public sealed partial class ZoneWorld
         _dirtyWarehouses.Remove(objectId);
         _dirtyFreight.Remove(objectId);
         _lastPresenceSaveMs.TryRemove(objectId, out _);
+        _pendingPresenceAccess.TryRemove(objectId, out _);
     }
 
-    void PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
+    bool PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
-        _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
+        return CommitStore(
+            "inventory replace",
+            session,
+            () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory));
     }
 
     void ReloadCharacterRecord(ZoneSession session, ref CharacterRecord? stored)
@@ -50,11 +71,36 @@ public sealed partial class ZoneWorld
         stored = _accounts.FindById(session.Account, session.ObjectId);
     }
 
+    /// <summary>
+    /// Waits until this character's snapshots and every pet snapshot have been written. False when that wait times out;
+    /// the timeout itself is logged by the worker.
+    /// </summary>
+    bool DrainCharacterSnapshots(int objectId) =>
+        _snapshots.DrainOwner(CharacterPersistWorker.CharacterDomain, objectId, TimeSpan.FromSeconds(2))
+        && _snapshots.DrainDomain(CharacterPersistWorker.PetDomain, TimeSpan.FromSeconds(2));
+
+    bool CharacterStoreMoved(int objectId, long characterEpoch, long petEpoch) =>
+        _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, objectId) != characterEpoch
+        || _snapshots.HasPending(CharacterPersistWorker.CharacterDomain, objectId)
+        || _snapshots.DomainEpoch(CharacterPersistWorker.PetDomain) != petEpoch
+        || _snapshots.HasPendingDomain(CharacterPersistWorker.PetDomain);
+
     /// <summary>Flush + reload durable state, then detach without double-writing the same snapshot.</summary>
-    bool TryPrepareSameSessionReenter(ZoneSession session, ref CharacterRecord? stored)
+    bool TryPrepareSameSessionReenter(
+        ZoneSession session,
+        ref CharacterRecord? stored,
+        long characterEpoch,
+        long petEpoch)
     {
         if (!session.InWorld)
+        {
+            if (!CharacterStoreMoved(session.ObjectId, characterEpoch, petEpoch))
+                return true;
+            if (!DrainCharacterSnapshots(session.ObjectId))
+                return false;
+            ReloadCharacterRecord(session, ref stored);
             return true;
+        }
         if (!TryGetLivePlayer(session, out var live))
         {
             ZoneLog.Warn($"same-session re-enter aborted object {session.ObjectId}: no live player for bound session");
@@ -63,6 +109,9 @@ public sealed partial class ZoneWorld
         }
 
         if (!TryFlushPlayerPersistBarrier(session.ObjectId, session, live))
+            return false;
+        // Non-economic snapshots are written off the simulation thread. Reload must see the latest of them.
+        if (!DrainCharacterSnapshots(session.ObjectId))
             return false;
         ReloadCharacterRecord(session, ref stored);
         if (!TryDetachPlayer(session, capturePersist: false, out _, out _))
@@ -73,7 +122,19 @@ public sealed partial class ZoneWorld
 
     internal bool HasDeferredInventoryForTests(int objectId) => _dirtyInventories.ContainsKey(objectId);
 
-    internal void FlushDirtyInventoriesForTests() => FlushDirtyInventories();
+    internal bool FlushDirtyInventoriesForTests() => FlushDirtyInventories();
+
+    internal void StartCharacterSnapshotsForTests() => _snapshots.Start();
+
+    internal void PauseCharacterSnapshotsForTests() => _snapshots.PauseForTests();
+
+    internal void ResumeCharacterSnapshotsForTests() => _snapshots.ResumeForTests();
+
+    internal void DrainCharacterSnapshotsForTests() => _snapshots.Drain(TimeSpan.FromSeconds(5));
+
+    internal void StopCharacterSnapshotsForTests() => _snapshots.Stop(TimeSpan.FromSeconds(5));
+
+    internal int CharacterSnapshotWriterThreadForTests => _snapshots.LastWriterThreadId;
 
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory) =>
         _dirtyInventories[session.ObjectId] = (session, inventory);

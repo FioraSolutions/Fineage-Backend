@@ -68,6 +68,8 @@ public sealed class MetricsSnapshot
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
+    public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
@@ -187,6 +189,20 @@ public static class MetricsText
             foreach (var pair in snapshot.LedgerAdjustments)
             {
                 sb.Append("fineage_ledger_adjustments_total{move_kind=\"")
+                    .Append(Escape(pair.Key))
+                    .Append("\"} ")
+                    .Append(pair.Value.ToString(CultureInfo.InvariantCulture))
+                    .Append('\n');
+            }
+        }
+
+        if (snapshot.PersistSnapshots.Count > 0)
+        {
+            AppendHelp(sb, "fineage_persist_snapshots_total", "Non-economic character snapshots");
+            sb.Append("# TYPE fineage_persist_snapshots_total counter\n");
+            foreach (var pair in snapshot.PersistSnapshots)
+            {
+                sb.Append("fineage_persist_snapshots_total{result=\"")
                     .Append(Escape(pair.Key))
                     .Append("\"} ")
                     .Append(pair.Value.ToString(CultureInfo.InvariantCulture))

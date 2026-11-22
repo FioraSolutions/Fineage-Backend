@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
         if (_simulation != null)
             return;
         _affinity.Drive();
+        _snapshots.Start();
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
         _ = Task.Run(() => StepWatchdogAsync(shutdown));
     }
@@ -117,6 +118,7 @@ public sealed partial class ZoneWorld
         finally
         {
             ShutdownSaveOnlinePlayers();
+            _snapshots.Stop(TimeSpan.FromSeconds(5));
             FlushLedgerOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }
