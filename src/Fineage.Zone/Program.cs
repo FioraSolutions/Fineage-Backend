@@ -89,8 +89,9 @@ var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNo
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
 bool includeEnabledMaps = includeEnabledMapsBoot;
 var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
+var raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
 var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
-    ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments);
+    ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
@@ -127,6 +128,7 @@ Console.WriteLine("[ZONE] Seven Signs period, cabal, and seal-stone scores are s
 Console.WriteLine("[ZONE] Olympiad registration and points are stored as olympiad.json in the state directory.");
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");
 Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored as boss-schedule.json in the state directory.");
+Console.WriteLine("[ZONE] Raid boss points ranking totals are stored as raid-boss-points-store.json in the state directory.");
 Console.WriteLine("[ZONE] GM punishments are stored as punishments.json; audit lines append to gm-audit.jsonl in the state directory.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");

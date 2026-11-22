@@ -234,6 +234,7 @@ public sealed partial class ZoneWorld
         IRegionExecutor? regionExecutor = null,
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
@@ -398,6 +399,7 @@ public sealed partial class ZoneWorld
         _wedding = new WeddingActor(accounts?.ListWeddingCouples(), accounts?.NextWeddingCoupleId ?? 1);
         SpawnCastleDoors();
         InitPunishment(punishments);
+        InitRaidBossPoints(raidBossPoints);
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

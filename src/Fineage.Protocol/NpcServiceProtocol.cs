@@ -125,6 +125,9 @@ public static class NpcServiceIntent
     /// <summary>Mobius <c>OlympiadManager</c> <c>OlympiadDesc</c> / <c>OlympiadNoble</c> / <c>Olympiad</c> (Block G2).</summary>
     public const string Olympiad = "olympiad";
 
+    /// <summary>Raid boss points ranking page (Mobius <c>RaidBossPointsManager</c> leaderboard HTML).</summary>
+    public const string RaidBossRanking = "raid-boss-ranking";
+
     /// <summary>Mobius <c>WyvernManagerInstance</c> <c>RideWyvern</c>: rent wyvern for castle lord with B crystals.</summary>
     public const string WyvernRide = "wyvern-ride";
 
