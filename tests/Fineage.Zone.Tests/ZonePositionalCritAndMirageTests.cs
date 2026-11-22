@@ -16,6 +16,7 @@ namespace Fineage.Zone.Tests;
 /// <item>Mirage (445) <c>TriggerSkillByDamage</c> → <c>TargetCancel</c> (5144) cancelling the attacker's target.</item>
 /// </list>
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class ZonePositionalCritAndMirageTests
 {
     const int FocusChance = 356;

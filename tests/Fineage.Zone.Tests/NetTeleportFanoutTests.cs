@@ -16,6 +16,7 @@ namespace Fineage.Zone.Tests;
 /// Net teleport feedback: a revive or gatekeeper relocation has to reach the moving client and
 /// every peer that had it in view, or the client keeps rendering the old spot.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetTeleportFanoutTests
 {
     [Fact]

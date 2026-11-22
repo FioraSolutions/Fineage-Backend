@@ -14,6 +14,7 @@ namespace Fineage.Zone.Tests;
 /// return, the knockout that is not a death, the damage-decided timeout, opponent-only targeting, the monthly hero
 /// pick with gate pass settlement and ranking, the Monument of Heroes, and the manager pages.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetOlympiadArenaTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);

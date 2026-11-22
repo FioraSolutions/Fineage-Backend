@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class NetPresenceHubTests
 {
     [Fact]

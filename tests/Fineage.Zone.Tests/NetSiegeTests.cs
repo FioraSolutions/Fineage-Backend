@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// the capture that moves ownership. The world runs on <see cref="WorldBench"/>, so these assert the recorded
 /// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout instead of frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetSiegeTests
 {
     [Fact]

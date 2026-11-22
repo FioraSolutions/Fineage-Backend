@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// gremlin, lock movement while casting, and pull aggro. Ported off the V2 wire; the assertions read the sheet the
 /// Net enter projector builds and the recorded <see cref="IWorldEventPublisher"/> combat fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetSkillTests
 {
     const int SquiresSword = 2369;

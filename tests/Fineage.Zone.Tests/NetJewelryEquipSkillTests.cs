@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Mobius jewelry item_skill (Ring of Queen Ant 6660 → skill 3562): GearSkills + SkillList fanout + combat mods.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetJewelryEquipSkillTests
 {
     const int RingOfQueenAnt = 6660;

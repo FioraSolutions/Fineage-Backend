@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// peers (blink, expiry), PvP vs PK kills, red name, karma persistence and burn. Players stand outside every peace
 /// polygon; the world clock only moves through <see cref="NetMoveVisibilityRig.AdvanceAsync"/>.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPvpPkWireTests
 {
     const int X = 49000, Y = 50000, Z = -3000;

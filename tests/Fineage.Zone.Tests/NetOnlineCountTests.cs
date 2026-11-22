@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// The public online count is what Login shows on the server list, so it has to follow a Net
 /// enter/leave cycle and survive a disconnect without a leave frame.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetOnlineCountTests
 {
     [Fact]

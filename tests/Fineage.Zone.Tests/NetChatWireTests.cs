@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Chat over real Net sessions: the whisper target tail, and local say heard identically by everyone near.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetChatWireTests
 {
     const int X = 49000, Y = 50000, Z = -3000;

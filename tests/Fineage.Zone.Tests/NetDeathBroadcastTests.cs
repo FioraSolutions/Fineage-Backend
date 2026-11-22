@@ -8,6 +8,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius Creature.doDie → broadcastPacket(Die): every player who knows the mob sees it die; late observers see a corpse.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetDeathBroadcastTests
 {
     const int MobId = 9_300_001;

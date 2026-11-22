@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Read-loop guards the Net zone listener inherited from the retired V2 transport: a client that stops
 /// talking and a client that floods both lose the connection instead of holding a slot forever.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetZoneGuardTests
 {
     [Fact]

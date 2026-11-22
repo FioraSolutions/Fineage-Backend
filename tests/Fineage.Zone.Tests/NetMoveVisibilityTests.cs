@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// <see cref="NetMoveVisibilityMailboxTests"/> with stepped simulation and the recorder mailbox.
 /// </summary>
 [Collection(nameof(NetMoveVisibilityCollection))]
+[Trait("Category", "Integration")]
 public sealed class NetMoveVisibilityTests
 {
     static CancellationTokenSource Timeout(int seconds = 30) => new(TimeSpan.FromSeconds(seconds));
