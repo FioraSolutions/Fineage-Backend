@@ -28,7 +28,8 @@ public sealed class LoadTestRunner
         var metricsTask = Task.Run(async () =>
         {
             var sampler = new ServerMetricsSampler();
-            return await sampler.SampleZoneDuringAsync(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(scenario.DurationSeconds + scenario.RampUpSeconds), ct);
+            var samples = await sampler.SampleZoneDuringAsync(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(scenario.DurationSeconds + scenario.RampUpSeconds), ct);
+            return (samples, sampler.RawScrapes);
         }, ct);
 
         for (int i = 0; i < scenario.BotCount; i++)
@@ -62,7 +63,23 @@ public sealed class LoadTestRunner
             await Task.Delay(250, ct);
         }
 
-        List<PrometheusSample> promSamples = await metricsTask;
+        (List<PrometheusSample> promSamples, List<string> rawScrapes) = await metricsTask;
+        string? peakMetrics = null;
+        if (promSamples.Count > 0 && rawScrapes.Count == promSamples.Count)
+        {
+            int peakIdx = 0;
+            long peakQ = 0;
+            for (int i = 0; i < promSamples.Count; i++)
+            {
+                if (promSamples[i].CommandIngressQueued > peakQ)
+                {
+                    peakQ = promSamples[i].CommandIngressQueued;
+                    peakIdx = i;
+                }
+            }
+
+            peakMetrics = rawScrapes[peakIdx];
+        }
         foreach (var bot in bots)
             await bot.DisposeAsync();
 
@@ -125,7 +142,8 @@ public sealed class LoadTestRunner
             ClientRttP95Ms = p95,
             ClientRttP99Ms = p99,
             ClientRttMaxMs = Math.Max(max, stats.Count > 0 ? stats.Max(s => s.RttMaxMs) : 0),
-            Server = PrometheusAggregate.FromSamples(promSamples),
+            Server = PrometheusAggregate.FromSamples(promSamples, peakMetrics),
+            PeakMetricsText = peakMetrics,
             ZoneProcess = proc,
             LogIssues = logIssues,
             Passed = failReasons.Count == 0,

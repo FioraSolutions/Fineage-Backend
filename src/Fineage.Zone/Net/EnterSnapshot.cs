@@ -35,6 +35,7 @@ sealed class KnownPresenceSlot
     public bool GroundItem { get; init; }
     public DropItemNetMsg? Drop { get; init; }
     public EntitySpawnMsg? Spawn { get; init; }
+    public NpcPresenceCapture? Npc { get; init; }
     public EntityKindNet Kind { get; init; }
     public IReadOnlyList<PresenceWireSlot> FollowUps { get; init; } = [];
     public byte[]? RelationToEntrant { get; init; }

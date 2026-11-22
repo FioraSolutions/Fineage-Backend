@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Simulation;
 
@@ -29,6 +31,8 @@ public sealed partial class ZoneWorld
     {
         using var commandScope = _syncIo.CommandScope();
         bool applied = false;
+        long applyStart = Stopwatch.GetTimestamp();
+        var applyMsByCommand = new Dictionary<string, double>(StringComparer.Ordinal);
         foreach (var submission in _ingress.TakeQueued())
         {
             // Cancelled by its connection before this tick: it never happened.
@@ -37,6 +41,7 @@ public sealed partial class ZoneWorld
 
             string? error = null;
             Exception? failure = null;
+            long oneStart = Stopwatch.GetTimestamp();
             try
             {
                 error = submission.Command.Apply(this, submission.Session, tick);
@@ -48,11 +53,25 @@ public sealed partial class ZoneWorld
                 ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
             }
 
+            double oneMs = Stopwatch.GetElapsedTime(oneStart).TotalMilliseconds;
+            string name = submission.Command.Name;
+            applyMsByCommand[name] = applyMsByCommand.GetValueOrDefault(name) + oneMs;
+            FineageTelemetry.CommandApplyMilliseconds.Record(oneMs, new KeyValuePair<string, object?>("command", name));
+
             if (submission.Command.Logged)
                 _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
                     failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
             _ingress.Record(submission, error, failure);
             applied = true;
+        }
+
+        double totalMs = Stopwatch.GetElapsedTime(applyStart).TotalMilliseconds;
+        if (totalMs >= 100 && applyMsByCommand.Count > 0)
+        {
+            string breakdown = string.Join(", ",
+                applyMsByCommand.OrderByDescending(pair => pair.Value).Take(8)
+                    .Select(pair => $"{pair.Key}={pair.Value.ToString("F1", CultureInfo.InvariantCulture)}ms"));
+            ZoneLog.Warn($"commands stage tick={tick.Tick} total={totalMs.ToString("F1", CultureInfo.InvariantCulture)}ms: {breakdown}");
         }
 
         if (applied)

@@ -8,6 +8,8 @@ public sealed class MetricsCollector : IDisposable
     readonly object _gate = new();
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
+    readonly DurationHistogram _enterTry = new();
+    readonly DurationHistogram _enterTryAoiBind = new();
     readonly DurationHistogram _enterPlan = new();
     readonly DurationHistogram _enterSelf = new();
     readonly DurationHistogram _enterKnownSnapshot = new();
@@ -57,6 +59,8 @@ public sealed class MetricsCollector : IDisposable
                 PlayersOnline = _online,
                 CommandIngressQueued = _commandIngressQueued,
                 Tick = _tick.Freeze(),
+                EnterTry = _enterTry.Freeze(),
+                EnterTryAoiBind = _enterTryAoiBind.Freeze(),
                 EnterPlan = _enterPlan.Freeze(),
                 EnterSelf = _enterSelf.Freeze(),
                 EnterKnownSnapshot = _enterKnownSnapshot.Freeze(),
@@ -177,8 +181,16 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.tick.stage.ms":
                     Stage(StageOf(tags)).Duration.Record(value);
                     break;
+                case "fineage.enter.try_ms":
+                    _enterTry.Record(value);
+                    break;
+                case "fineage.enter.try_aoi_bind_ms":
+                    _enterTryAoiBind.Record(value);
+                    break;
                 case "fineage.enter.plan_ms":
                     _enterPlan.Record(value);
+                    break;
+                case "fineage.command.apply_ms":
                     break;
                 case "fineage.enter.self_projection_ms":
                     _enterSelf.Record(value);

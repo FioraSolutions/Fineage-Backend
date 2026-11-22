@@ -1,3 +1,4 @@
+using Fineage.Zone.Net;
 
 namespace Fineage.Zone;
 
@@ -53,6 +54,9 @@ public sealed class ZoneSession
     /// EnterWorld tail when the client sends one. Defaults to <c>en</c>.
     /// </summary>
     public string Language { get; private set; } = Fineage.Game.L10n.PlayerLocale.Default;
+
+    /// <summary>Off-thread item list for the in-flight enter burst; cleared after CommitEnter.</summary>
+    internal EnterSelfPrepare? PendingEnterSelfPrepare { get; set; }
 
     public bool Bound => ObjectId != 0;
 
