@@ -56,6 +56,7 @@
     <Content Include="..\..\data\l10n\**\*.*" Link="data\l10n\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\geodata-regions.json" Link="data\geodata-regions.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\gm-teleports.json" Link="data\gm-teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\village-masters.json" Link="data\village-masters.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\wedding.json" Link="data\wedding.json" CopyToOutputDirectory="PreserveNewest" />
@@ -81,6 +82,7 @@
     <Content Include="..\..\data\event-drops.json" Link="data\event-drops.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\cursed-weapons.json" Link="data\cursed-weapons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\npc-scripts.json" Link="data\npc-scripts.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-minions.json" Link="data\npc-minions.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\soul-crystals.json" Link="data\soul-crystals.json" CopyToOutputDirectory="PreserveNewest" />

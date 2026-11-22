@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class SayRulesTests
 {
     [Fact]
@@ -51,6 +52,7 @@ public sealed class SayRulesTests
 /// server does not carry. These used to be asserted by reading V2 MessagePack frames off a MemoryStream;
 /// they now assert the Net fanout the client actually receives.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetChatTests
 {
     static readonly DateTimeOffset Now = new(2026, 10, 28, 0, 0, 0, TimeSpan.Zero);

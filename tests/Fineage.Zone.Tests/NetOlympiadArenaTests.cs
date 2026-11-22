@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Olympiad;
@@ -13,6 +14,7 @@ namespace Fineage.Zone.Tests;
 /// return, the knockout that is not a death, the damage-decided timeout, opponent-only targeting, the monthly hero
 /// pick with gate pass settlement and ranking, the Monument of Heroes, and the manager pages.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetOlympiadArenaTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
@@ -28,6 +30,9 @@ public sealed class NetOlympiadArenaTests
 
     static string LastHtml(WorldBench bench) =>
         Assert.IsType<NpcHtmlMsg>(bench.Rec.Of("FanoutNpcHtml").Last()[1]).Html;
+
+    static SystemMessageMsg LastSystem(WorldBench bench) =>
+        Assert.IsType<SystemMessageMsg>(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Last()[1]);
 
     [Fact]
     public void Timeout_goes_to_the_side_that_dealt_more_damage()
@@ -344,16 +349,123 @@ public sealed class NetOlympiadArenaTests
         Assert.Contains("MonumentOfHeroes 6611", LastHtml(heroBench));
         Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes 6619"));
         Assert.Equal(1, h.Inventory.CountOf(6619));
+        var olympiad = LedgerAccount.Of(SystemAccount.Olympiad);
+        var bag = LedgerAccount.Inventory(h.ObjectId);
+        Assert.Contains(heroBench.Ledger.Entries, e =>
+            e.Transaction is { Kind: LedgerTxKind.OlympiadGrant, Reference: 6619 }
+            && e.Transaction.Postings.Any(p => p.Account == bag && p.ItemId == 6619 && p.Amount > 0)
+            && e.Transaction.Postings.Any(p => p.Account == olympiad && p.ItemId == 6619 && p.Amount < 0));
+
+        heroBench.Rec.Calls.Clear();
         Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes 6611"));
         Assert.Equal(0, h.Inventory.CountOf(6611));
+        Assert.Equal(OlympiadProtocol.HeroWeaponAlready, LastSystem(heroBench).Id);
+        Assert.Contains("cannot have another", LastSystem(heroBench).Text, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(heroBench.Ledger.Entries, e => e.Transaction.Reference == 6611);
+
+        heroBench.Rec.Calls.Clear();
+        Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroWeapon"));
+        Assert.Contains("cannot have another", LastHtml(heroBench), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(OlympiadProtocol.HeroWeaponAlready, LastSystem(heroBench).Id);
+
         Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroCirclet"));
         Assert.Null(await h.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroCirclet"));
         Assert.Equal(1, h.Inventory.CountOf(OlympiadProtocol.HeroCirclet));
+        Assert.Contains(heroBench.Ledger.Entries, e =>
+            e.Transaction is { Kind: LedgerTxKind.OlympiadGrant, Reference: OlympiadProtocol.HeroCirclet });
 
         // Relog keeps the claimed status.
         await heroBench.World.LeaveAsync(h.Session, CancellationToken.None);
         var back = await heroBench.EnterAsync("hero", "Hero");
         Assert.True(back.Player.Hero);
         Assert.Equal(1, back.Player.KnownSkills[395]);
+    }
+
+    /// <summary>
+    /// Mobius <c>Hero.computeNewHeroes</c> strips hero items online; weapon eligibility is bag-only (no weekly flag in
+    /// <c>Hero.java</c>).
+    /// </summary>
+    [Fact]
+    public async Task Period_end_revokes_hero_gear_and_weapon_menu_follows_the_bag_not_a_weekly_flag()
+    {
+        var when = Evening;
+        var store = new MemoryOlympiadStore();
+        var board = new OlympiadBoard(Evening, new OlympiadSettings(), store);
+        var bench = new WorldBench(clock: () => when, olympiad: board);
+        var incumbent = await bench.EnterAsync("oldhero", "OldHero", classId: Duelist, level: 78);
+        var snap = store.Load();
+        snap.Cycle = 5;
+        snap.Period = OlympiadProtocol.PeriodCompetition;
+        snap.OlympiadEndUnixMs = when.AddHours(1).ToUnixTimeMilliseconds();
+        snap.Heroes =
+        [
+            new OlympiadHeroRow
+            {
+                CharacterId = incumbent.ObjectId,
+                ClassId = Duelist,
+                Name = "OldHero",
+                Claimed = true,
+                Count = 2
+            }
+        ];
+        snap.Nobles =
+        [
+            Row(incumbent.ObjectId + 1, "Successor", Dreadnought, points: 30, done: 10, won: 6)
+        ];
+        store.Save(snap);
+        board = new OlympiadBoard(Evening, new OlympiadSettings(), store);
+        bench = new WorldBench(clock: () => when, olympiad: board);
+        incumbent = await bench.EnterAsync("oldhero", "OldHero", classId: Duelist, level: 78);
+        Assert.True(incumbent.Player.Hero);
+
+        var monument = bench.World.SpawnFolkForTests(31690, incumbent.Player.X + 20, incumbent.Player.Y, incumbent.Player.Z);
+        bench.World.TrySetNoble(incumbent.ObjectId, true);
+        Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes 6619"));
+        Assert.Equal(1, incumbent.Inventory.CountOf(6619));
+        Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroCirclet"));
+        Assert.Equal(1, incumbent.Inventory.CountOf(OlympiadProtocol.HeroCirclet));
+        var bow = incumbent.Inventory.Items.Single(i => i.ItemId == 6619);
+        incumbent.Inventory.Equip(bow);
+        Assert.True(bow.IsEquipped);
+
+        when = when.AddHours(2);
+        await bench.World.AdvanceOlympiadAsync(CancellationToken.None);
+
+        Assert.False(incumbent.Player.Hero);
+        Assert.False(bench.World.Olympiad.IsHero(incumbent.ObjectId));
+        Assert.Equal(0, incumbent.Inventory.CountOf(6619));
+        Assert.Equal(0, incumbent.Inventory.CountOf(OlympiadProtocol.HeroCirclet));
+        Assert.DoesNotContain(
+            incumbent.Inventory.Items,
+            i => i.ItemId is >= OlympiadProtocol.FirstHeroWeapon and <= OlympiadProtocol.LastHeroWeapon);
+
+        bench.Rec.Calls.Clear();
+        Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroWeapon"));
+        Assert.Contains("You must become a Hero first", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
+
+        // Same era, new unclaimed pick: weapon eligibility is whatever is in the bag (Mobius has no weekly weapon flag).
+        snap = store.Load();
+        snap.Heroes =
+        [
+            new OlympiadHeroRow
+            {
+                CharacterId = incumbent.ObjectId,
+                ClassId = Duelist,
+                Name = "OldHero",
+                Claimed = false,
+                Count = 3
+            }
+        ];
+        store.Save(snap);
+        board = new OlympiadBoard(when, new OlympiadSettings(), store);
+        bench = new WorldBench(clock: () => when, olympiad: board);
+        incumbent = await bench.EnterAsync("oldhero", "OldHero");
+        monument = bench.World.SpawnFolkForTests(31690, incumbent.Player.X + 20, incumbent.Player.Y, incumbent.Player.Z);
+        Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroReceive"));
+        Assert.True(incumbent.Player.Hero);
+
+        bench.Rec.Calls.Clear();
+        Assert.Null(await incumbent.BypassAsync(monument.ObjectId, "Script MonumentOfHeroes HeroWeapon"));
+        Assert.Contains("MonumentOfHeroes 6611", LastHtml(bench));
     }
 }

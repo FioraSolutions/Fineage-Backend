@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 [Collection("Zone pipeline OTEL telemetry")]
+[Trait("Category", "Integration")]
 public sealed class NetOnlineTelemetryTests
 {
     [Fact]

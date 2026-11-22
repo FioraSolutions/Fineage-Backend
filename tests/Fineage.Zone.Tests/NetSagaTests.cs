@@ -6,6 +6,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Saga of the Duelist (73) through zone: owned summons, despawn timers, the Halisha guard and the class change.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSagaTests
 {
     const int Saga = 73;

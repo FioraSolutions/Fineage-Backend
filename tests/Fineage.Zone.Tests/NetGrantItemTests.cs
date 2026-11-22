@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// leave, and is refused before the character entered the world. Ported off the V2 wire; the assertions read the
 /// recorded <see cref="IWorldEventPublisher"/> fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetGrantItemTests
 {
     const int Adena = 57;

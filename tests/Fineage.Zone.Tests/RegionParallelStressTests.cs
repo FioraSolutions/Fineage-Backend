@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// traffic — that must finish every step, never fail a stage and keep the region directory and watcher index
 /// consistent. A hung step is reported by the step watchdog naming the stage and region bodies in flight.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class RegionParallelStressTests
 {
     const int FirstMobId = 9_830_001;

@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius <c>RequestActionUse</c> over Net: 0 = sit/stand (<c>ChangeWaitType</c>), 12–14 = a social gesture
 /// (<c>SocialAction</c>). Both are broadcast to self and every peer holding the actor in view.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetActionUseTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) KitWithBridge()

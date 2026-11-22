@@ -9,6 +9,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius doAttack / doCast: no line of sight → SysMsg 181 "Cannot see target.", no swing, attack intention dropped.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetPlayerLosTests
 {
     const int MobId = 9_200_101;

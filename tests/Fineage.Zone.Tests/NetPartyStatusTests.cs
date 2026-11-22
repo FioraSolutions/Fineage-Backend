@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Interlude party window feeds: PartySmallWindowUpdate (bars), PartySpelled (member effects) and
 /// PartyMemberPosition (map dots, AOI-independent), plus trade teardown when the pair drifts apart.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPartyStatusTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

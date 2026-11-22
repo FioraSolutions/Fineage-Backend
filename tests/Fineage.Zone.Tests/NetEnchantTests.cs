@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// chosen target and answers with <c>EnchantResult</c> plus the bag <c>InventoryUpdate</c>, and cancel answers
 /// with the cancel result. The roll itself is the same V2 code path, so these tests only assert the Net fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEnchantTests
 {
     // Saber is enchantable; 955 is the normal D weapon scroll from the V2 enchant tests.

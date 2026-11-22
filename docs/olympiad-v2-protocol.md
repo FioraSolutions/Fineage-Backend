@@ -226,6 +226,7 @@ The move is `MoveToAck` **1004**, the same path as a dungeon teleport.
 | 177 | Countdown. Params are kind and seconds. |
 | 178 | Points earned or lost. Params are name, amount, and `earned` or `lost`. |
 | 179 | Win, tie, or a cancelled match. Param is the winner name, `tie`, or `cancel`. |
+| 180 | Hero already holds a Monument Infinity weapon (duplicate grant refused). |
 
 174 and 175 go to every player in the world. 177–179 go to the two participants.
 
