@@ -107,6 +107,28 @@ public sealed class SpoilSweepSkillTests
     }
 
     [Fact]
+    public async Task Spoil_festival_302_spoils_attackables_in_area()
+    {
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var mobs = kit.World.AttackablesForTest(2);
+        Assert.Equal(2, mobs.Count);
+        var (a, b) = (mobs[0], mobs[1]);
+        // Place second mob within default AREA affect range (200) of the primary.
+        b.X = a.X + 80;
+        b.Y = a.Y;
+        b.Z = a.Z;
+        b.Level = 1;
+        a.Level = 1;
+        var (session, player) = await kit.EnterAsync(classId: 54, race: 4, x: a.X + 10, y: a.Y, z: a.Z);
+        player.KnownSkills[302] = 1;
+        player.CurMp = 500;
+
+        Assert.Null(await Cast(kit, session, 302, a.ObjectId));
+        Assert.Equal(player.ObjectId, a.SpoilerObjectId);
+        Assert.Equal(player.ObjectId, b.SpoilerObjectId);
+    }
+
+    [Fact]
     public async Task Sweep_adena_splits_among_in_range_party()
     {
         var (kit, s, p, mob) = await SetupAsync();

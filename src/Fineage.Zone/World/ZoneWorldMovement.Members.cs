@@ -110,7 +110,7 @@ public sealed partial class ZoneWorld
             if (_geo.HasGeo(e.X, e.Y))
                 e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
         }
-        _aoi.Move(e.ObjectId, e.X, e.Y);
+        MoveAoi(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
             SyncSession(e, e.Session);
         UpdateMoveEnvironment(e);

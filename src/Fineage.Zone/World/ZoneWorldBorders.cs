@@ -131,10 +131,12 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Aggression reads its region and the border snapshots only; it stays sequential until AI soaks parallel.</summary>
+    /// <summary>Aggression reads its region and the border snapshots only; it may run on the parallel executor.</summary>
     sealed class AggressionStage(ZoneWorld world) : IRegionStage
     {
         public string Name => "aggression";
+
+        public bool Parallel => true;
 
         public void Collect(TickContext tick, RegionWorkCollector work) => world.CollectAggression(work);
 

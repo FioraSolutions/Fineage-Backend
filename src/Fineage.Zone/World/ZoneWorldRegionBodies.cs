@@ -61,6 +61,20 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Global AOI grid update. Region bodies defer it to <see cref="RegionBodyScope.Commit"/> so parallel stages do not
+    /// race on <see cref="Interest.GridAoi"/>; commit runs on the scheduler thread in ascending region order.
+    /// </summary>
+    void MoveAoi(int objectId, int x, int y)
+    {
+        if (RegionBodyScope.Of(this) is { } scope)
+            scope.ScheduleAoiMove(objectId, x, y);
+        else
+            MoveAoiNow(objectId, x, y);
+    }
+
+    internal void MoveAoiNow(int objectId, int x, int y) => _aoi.Move(objectId, x, y);
+
+    /// <summary>
     /// Parallel region bodies draw from their own region's streams; an injected <see cref="Random"/> is one generator
     /// every region shares, which only a sequential executor may use.
     /// </summary>
@@ -107,6 +121,7 @@ public sealed partial class ZoneWorld
         readonly WorldFanoutBatch _fanout = new();
         readonly List<Action> _deferred = [];
         readonly List<ZoneRegionMessage> _messages = [];
+        readonly Dictionary<int, (int X, int Y)> _aoiMoves = [];
 
         public static RegionBodyScope? Of(ZoneWorld world) =>
             t_current is { } scope && ReferenceEquals(scope._world, world) ? scope : null;
@@ -138,9 +153,17 @@ public sealed partial class ZoneWorld
 
         public void Post(ZoneRegionMessage message) => _messages.Add(message);
 
+        internal void ScheduleAoiMove(int objectId, int x, int y) => _aoiMoves[objectId] = (x, y);
+
         public void Commit()
         {
             _world._fanout.AbsorbRegion(_fanout);
+            foreach (int id in _aoiMoves.Keys.Order())
+            {
+                var (x, y) = _aoiMoves[id];
+                _world.MoveAoiNow(id, x, y);
+            }
+
             foreach (var write in _deferred)
                 write();
             foreach (var message in _messages)

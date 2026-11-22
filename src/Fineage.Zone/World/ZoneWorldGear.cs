@@ -74,6 +74,8 @@ public sealed partial class ZoneWorld
             return TryUseSoulCrystal(session, player, item);
         if (MercTicketIsSiegeGuardItem(item.ItemId))
             return TryUseMercTicket(session, player, item);
+        if (_game.TransferSkillTrees.IsKnownCertificate(item.ItemId))
+            return TryUseTransferCertificate(session, player, item);
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))

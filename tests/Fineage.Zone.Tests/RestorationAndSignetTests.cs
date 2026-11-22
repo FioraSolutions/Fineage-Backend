@@ -23,6 +23,8 @@ public sealed class RestorationAndSignetTests
     const int BattleSymbol = 8875;
     const int ChestKeyGrade5 = 6669;
     const int SignetNpc = 13024;
+    const int DebuffSignetNpc = 13028;
+    const int DebuffSignetSkill = 5145;
     const int BattleForce = 5104;
 
     static (NetTestKit Kit, ZoneSession S, ZoneEntity P) Enter(NetTestKit? kit = null)
@@ -183,6 +185,18 @@ public sealed class RestorationAndSignetTests
         Assert.Contains(p.Abnormals, a => a.Id == 5129);
         Assert.DoesNotContain(far.Abnormals, a => a.Id == 5129);
         _ = s;
+    }
+
+    [Fact]
+    public void Debuff_signet_pulses_abnormal_on_attackable_npcs_in_range()
+    {
+        var (kit, _, p) = Enter();
+        var mob = kit.World.SpawnMonsterForTests(20001, p.X + 50, p.Y, p.Z);
+        Assert.NotNull(kit.World.SpawnSignetForTest(p, DebuffSignetNpc));
+
+        kit.World.TickSignetsForTest(kit.Now.AddSeconds(6).ToUnixTimeMilliseconds());
+
+        Assert.Contains(mob.Abnormals, a => a.Id == DebuffSignetSkill);
     }
 
     static ZoneEntity? SignetOf(NetTestKit kit, ZoneEntity owner) =>

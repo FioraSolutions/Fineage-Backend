@@ -32,6 +32,8 @@ public sealed partial class ZoneWorld
     IRegionStage _abnormalsStage;
     IRegionStage _aggressionStage;
     IRegionStage _randomWalkStage;
+    IRegionStage _playerMovementStage;
+    IRegionStage _npcMovementStage;
 
     internal RegionTickScheduler SimulationTicks => _simulationTicks;
 
@@ -155,7 +157,8 @@ public sealed partial class ZoneWorld
 
     [MemberNotNull(nameof(_simulationClock), nameof(_regions), nameof(_byId), nameof(_simulationObserver),
         nameof(_simulationTicks), nameof(_regenPlayersStage), nameof(_regenNpcsStage), nameof(_abnormalsStage),
-        nameof(_aggressionStage), nameof(_randomWalkStage), nameof(_borders))]
+        nameof(_aggressionStage), nameof(_randomWalkStage), nameof(_playerMovementStage), nameof(_npcMovementStage),
+        nameof(_borders))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
         _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
@@ -171,6 +174,8 @@ public sealed partial class ZoneWorld
             parallel: true);
         _aggressionStage = new AggressionStage(this);
         _randomWalkStage = new RandomWalkStage(this);
+        _playerMovementStage = new PlayerMovementStage(this);
+        _npcMovementStage = new NpcMovementStage(this);
 
         int slow = ZoneSimulationSettings.SlowPeriodTicks;
         // Every region body runs in a RegionBodyScope, so the executor cannot change the outcome; it only decides
@@ -181,9 +186,9 @@ public sealed partial class ZoneWorld
         ticks.AddWorldStage(CommandsStage, ApplyCommands);
 
         // Every step: the former 200 ms combat loop, in its original order.
-        ticks.AddWorldStage("movement.player", tick => TickPlayerMovement(tick.NowUnixMs));
+        ticks.AddRegionStage(_playerMovementStage);
         ticks.AddWorldStage("arena", _ => TickArenaZones());
-        ticks.AddWorldStage("movement.npc", tick => TickNpcMovement(tick.NowUnixMs));
+        ticks.AddRegionStage(_npcMovementStage);
         ticks.AddRegionStage(_randomWalkStage);
         ticks.AddWorldStage("pending-hits", tick => TickPendingHits(tick.NowUnixMs));
         ticks.AddWorldStage("melee-hits", tick => TickMeleeHits(tick.NowUnixMs));
