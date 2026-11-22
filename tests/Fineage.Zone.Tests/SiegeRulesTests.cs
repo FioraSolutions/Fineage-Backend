@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public class SiegeRulesTests
 {
     static readonly DateTimeOffset Now = new(2026, 10, 28, 12, 0, 0, TimeSpan.Zero);

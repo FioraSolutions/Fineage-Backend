@@ -99,6 +99,7 @@ publish/
 !data/xp-percent-lost.json
 !data/item-skills.json
 !data/map-regions.json
+!data/geodata-regions.json
 !data/clan-hall-spawns.json
 !data/clan-hall-functions.json
 !data/clan-hall-item-create.json

@@ -72,6 +72,7 @@ public sealed class BypassRegistry
         registry.Register(new TerritoryBypassHandler());
         registry.Register(new TeleportBypassHandler());
         registry.Register(new NoblesSelectBypassHandler());
+        registry.Register(new RequestNoblessBypassHandler());
         registry.Register(new OlympiadBypassHandler());
         registry.Register(new WarehouseBypassHandler());
         registry.Register(new FreightBypassHandler());

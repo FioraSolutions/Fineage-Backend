@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Move visibility without loopback sockets: commands, stepped simulation, recorder assertions.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetMoveVisibilityMailboxTests
 {
     static int Count(NetBridgeRecorder rec) => rec.Calls.Count;

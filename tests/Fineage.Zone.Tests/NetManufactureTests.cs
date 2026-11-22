@@ -9,6 +9,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Manufacture shop (#283): open workshop → list → make wooden arrows for a fee.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetManufactureTests
 {
     const int RecipeListId = 1;

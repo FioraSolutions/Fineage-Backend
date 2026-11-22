@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// runs on <see cref="WorldBench"/>, so these assert the recorded
 /// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetDungeonTests
 {
     static readonly DateTimeOffset Start = new(2026, 10, 26, 18, 0, 0, TimeSpan.Zero);

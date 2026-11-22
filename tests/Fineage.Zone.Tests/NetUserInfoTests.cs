@@ -7,6 +7,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Net UserInfo (Mobius status window sheet + paperdoll) and remote CharInfo paperdoll.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetUserInfoTests
 {
     [Fact]

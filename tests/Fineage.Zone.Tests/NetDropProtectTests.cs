@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius death loot: DropProtection (killer/party only for 15 s, others get SysMsg 145), ItemsAutoDestroy
 /// (600 s, herbs 60 s), randDropLim ±70 scatter around the corpse.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetDropProtectTests
 {
     static List<DropItemMsg> Drops(NetBridgeRecorder rec) =>

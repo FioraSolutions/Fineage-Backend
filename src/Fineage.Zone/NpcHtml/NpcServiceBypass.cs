@@ -213,6 +213,14 @@ public sealed class NoblesSelectBypassHandler : IBypassHandler
     public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.NoblesSelect);
 }
 
+/// <summary>Interlude village master <c>RequestNobless</c> (Q247 gate ready → pay SP/adena, <c>setNoble</c>).</summary>
+public sealed class RequestNoblessBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["RequestNobless"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.RequestNobless);
+}
+
 /// <summary>Grand Olympiad Manager / Monument of Heroes pages (Block G2): the whole command rides in the service arg.</summary>
 public sealed class OlympiadBypassHandler : IBypassHandler
 {

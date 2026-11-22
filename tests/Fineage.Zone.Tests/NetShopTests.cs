@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// plus every refusal that must not move adena. The retired V2 suite drove these through MessagePack frames;
 /// here the world is the driver and the recorded <see cref="IWorldEventPublisher"/> traffic is the client.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetShopTests
 {
     internal const int MerchantObjectId = 61000;

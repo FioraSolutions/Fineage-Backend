@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// admin report gate. The world runs on <see cref="WorldBench"/>, so these assert the recorded
 /// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetOlympiadTests
 {
     static readonly DateTimeOffset Evening = new(2026, 10, 28, 18, 30, 0, TimeSpan.Zero);
