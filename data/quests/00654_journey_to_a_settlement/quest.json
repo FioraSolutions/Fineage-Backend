@@ -95,6 +95,22 @@
         }
       ],
       "htmlFile": "31453-event-31453-07-005.htm"
+    },
+    {
+      "npcId": 21294,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 21295,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }

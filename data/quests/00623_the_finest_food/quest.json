@@ -3,7 +3,11 @@
   "name": "The Finest Food",
   "repeatable": true,
   "abortable": true,
-  "questItems": [],
+  "questItems": [
+    7199,
+    7200,
+    7201
+  ],
   "dialogs": [
     {
       "npcId": 31521,
@@ -87,6 +91,60 @@
         }
       ],
       "htmlFile": "31521-event-31521-06-005.htm"
+    },
+    {
+      "npcId": 21315,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7199,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21316,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7199,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21318,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7199,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 100,
+          "condAtLimit": 2
+        }
+      ],
+      "party": true
     }
   ]
 }
