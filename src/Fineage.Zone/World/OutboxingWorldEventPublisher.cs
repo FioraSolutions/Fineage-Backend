@@ -560,6 +560,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutMonRaceInfo), () => inner.FanoutMonRaceInfo(watcherObjectIdsCopy, packet));
     }
 
+    void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutVehicleInfo), () => inner.FanoutVehicleInfo(watcherObjectIdsCopy, info));
+    }
+
+    void IWorldEventPublisher.FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutVehicleDeparture), () => inner.FanoutVehicleDeparture(watcherObjectIdsCopy, departure));
+    }
+
     void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
