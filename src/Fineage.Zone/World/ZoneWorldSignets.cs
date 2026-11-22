@@ -1,6 +1,8 @@
+using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -118,13 +120,22 @@ public sealed partial class ZoneWorld
         if (owner == null)
             return;
         var template = _game.Skills.Find(skill.SkillId);
-        if (template == null)
+        SkillLevelData? levelData = null;
+        if (template != null)
         {
-            ZoneLog.Info($"[signet] missing skill catalog id={skill.SkillId} npc={signet.NpcId}");
+            if (!template.TryLevelData(skill.Level, out var found))
+                return;
+            levelData = found;
+        }
+
+        bool catalogAbnormal = template is { AppliesAbnormal: true } && levelData != null;
+        bool supportAbnormal = skill.AbnormalTimeSeconds > 0;
+        if (!catalogAbnormal && !supportAbnormal)
+        {
+            if (template == null)
+                ZoneLog.Info($"[signet] missing skill catalog id={skill.SkillId} npc={signet.NpcId}");
             return;
         }
-        if (!template.TryLevelData(skill.Level, out var levelData))
-            return;
 
         int range = skill.AffectRange > 0 ? skill.AffectRange : 200;
         FanoutNpcMagicSkillUse(signet, signet, skill.SkillId, skill.Level, 0, 0);
@@ -142,7 +153,7 @@ public sealed partial class ZoneWorld
             if (entity.Kind == ZoneEntityKind.Npc && !entity.Attackable)
                 continue;
 
-            if (skill.Power > 0 && entity.Kind == ZoneEntityKind.Npc)
+            if (skill.Power > 0 && entity.Kind == ZoneEntityKind.Npc && levelData != null)
             {
                 double mAtk = Math.Max(1d, owner.Kind == ZoneEntityKind.Player ? PlayerStats(owner).MAtk : owner.MAtk);
                 double mDef = entity.MDef > 0 ? entity.MDef : entity.Level * 30d;
@@ -154,12 +165,28 @@ public sealed partial class ZoneWorld
                     DamageNpcBy(owner, entity, damage, now);
             }
 
-            if (template.AppliesAbnormal &&
+            if (catalogAbnormal && template != null && levelData != null &&
                 ApplyAbnormalFromSkill(template, levelData, entity, now, attacker: owner))
+                hits++;
+            else if (supportAbnormal && ApplySignetSupportAbnormal(skill, entity, now, template?.AbnormalType))
                 hits++;
         }
         ZoneLog.Info($"[signet] hostile pulse {skill.SkillId} lv{skill.Level} npc={signet.NpcId} range={range} " +
                      $"landed={hits}");
+    }
+
+    /// <summary>npc-ai-support debuff pulses when the skill id is not in <c>skills.json</c> yet.</summary>
+    bool ApplySignetSupportAbnormal(NpcAiSupportSkill skill, ZoneEntity target, long now, string? abnormalType)
+    {
+        int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
+        string slot = skill.Slot.Length > 0 ? skill.Slot : abnormalType ?? "";
+        if (!ZoneAbnormals.Apply(
+                target.Abnormals, skill.SkillId, abnormal, skill.AbnormalTimeSeconds, now, skill.Level, slot))
+            return false;
+        if (target.Abnormals.Count > 0)
+            _byId.Join(target, ActiveSets.WithAbnormals);
+        FanoutAbnormal(target);
+        return true;
     }
 
     /// <summary>Test hook: run the signet aura timers now.</summary>
