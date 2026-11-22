@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Block C clan window over Net (Mobius CT_0 rules): sub-unit invites, academy graduation, ranks and privileges,
 /// titles, crests, wars (war kills are PvP, not PK), clan hall auctions and the leader delegation at restart.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPledgeTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

@@ -238,4 +238,10 @@ sealed partial class NetWorldEventPublisher
         foreach (int watcher in watcherObjectIds)
             _presence.TrySend(watcher, NetOpcode.MonRaceInfo, payload);
     }
+
+    void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, VehicleInfoNetMsg info) =>
+        SendAll(watcherObjectIds, NetOpcode.VehicleInfo, NetCodec.EncodeVehicleInfo(info));
+
+    void IWorldEventPublisher.FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, VehicleDepartureNetMsg departure) =>
+        SendAll(watcherObjectIds, NetOpcode.VehicleDeparture, NetCodec.EncodeVehicleDeparture(departure));
 }

@@ -10,7 +10,9 @@ using Fineage.Zone.Bosses;
 using Fineage.Zone.Net;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Punishment;
+using Fineage.Zone.Geo;
 using Fineage.Zone.SevenSigns;
+using Fineage.Zone.World;
 
 if (args.Contains("--selftest"))
 {
@@ -90,8 +92,19 @@ var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNo
 bool includeEnabledMaps = includeEnabledMapsBoot;
 var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
 var raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
-var world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
-    ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);
+ZoneWorld world;
+try
+{
+    _ = GeoEngine.LoadDefault();
+    world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
+        ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);
+}
+catch (InvalidOperationException ex)
+{
+    Console.Error.WriteLine($"[ZONE] {ex.Message}");
+    Environment.ExitCode = 1;
+    return;
+}
 world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);

@@ -213,6 +213,7 @@ public class LoginServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public async Task Acceptance_RegistersHumanAndReturnsZoneToken()
     {
         var result = await LoginAcceptance.RunAsync();

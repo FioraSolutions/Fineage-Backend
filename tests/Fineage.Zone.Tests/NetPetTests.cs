@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Pets after Mobius CT 0: collar summon (refusals, 5 s cast), stats per level, meal meter and food, exp share and
 /// level-up shown on the collar, pet bag (give / take / pick up), death penalty, resurrection, decay, persistence.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPetTests
 {
     const int WolfCollar = 2375, WolfFood = 2515, Wolf = 12077, PetScroll = 6387;

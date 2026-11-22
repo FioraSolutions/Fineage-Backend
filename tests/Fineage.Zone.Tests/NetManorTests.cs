@@ -16,6 +16,7 @@ namespace Fineage.Zone.Tests;
 /// opens them, a farmer buys seeds from the manor manager, sows a monster (the party and watchers see the cast), harvests
 /// the corpse and sells the crop for reward items; leftover crops mature in the clan warehouse at the next refresh.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetManorTests
 {
     const int Gludio = 1;

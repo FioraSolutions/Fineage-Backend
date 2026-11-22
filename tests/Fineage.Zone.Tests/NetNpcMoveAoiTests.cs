@@ -5,6 +5,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>A walking/chasing NPC revalidates who sees it: Net EntityDespawn when it leaves view, EntitySpawn when it enters.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetNpcMoveAoiTests
 {
     static void Arrive(NetTestKit kit, ZoneEntity npc, int x, int y)

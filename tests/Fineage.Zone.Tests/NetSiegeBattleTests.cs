@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Seal of Ruler on the holy artifact, headquarters in the HQ zone with the castle / HQ restart, gates that break and
 /// come back, siege relation bits, and the chamberlain functions (tax, treasury, door upgrade, crown).
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetSiegeBattleTests
 {
     const int Gludio = 1;

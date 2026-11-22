@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// <see cref="IWorldEventPublisher"/> fanout: the pledge status, the roster, the invite, the join result,
 /// and the system lines that carry the rejection codes.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetClanTests
 {
     /// <summary>Mobius <c>Config.ALT_CLAN_CREATE_LEVEL</c>: the create path refuses anything under it.</summary>
