@@ -251,6 +251,7 @@ public sealed partial class ZoneWorld
         if (Rng(_combatRandom, npc).Next(100) >= npc.NpcSpiritShotChance)
             return false;
         npc.NpcSpiritShotLeft--;
+        FanoutNpcShotGlow(npc, soul: false);
         return true;
     }
 
