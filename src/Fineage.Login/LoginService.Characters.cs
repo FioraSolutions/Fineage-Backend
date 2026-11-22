@@ -48,6 +48,8 @@ public sealed partial class LoginService
         long adena = Math.Max(0, _create.StartingAdena ?? _game.StarterKits.MobiusStartingAdena);
         if (adena > 0)
             inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);
+        if (inventory.Items.Count == 0)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, $"Starter kit for class {classId} is empty.");
         var kit = CharacterInventory.Rows(inventory);
         var now = _clock();
         int level = Math.Max(1, _create.StartingLevel);
@@ -98,13 +100,8 @@ public sealed partial class LoginService
     /// <summary>Null on success; otherwise a create failure message (ledger reconciliation is not a silent fallback).</summary>
     string? RecordStarterKitLedger(int characterId, int classId, PlayerInventory inventory)
     {
-        if (inventory.Items.Count == 0)
-            return $"Starter kit for class {classId} is empty.";
         if (_ledger == null || _ledgerIds == null)
-        {
-            _warn($"starter kit for character {characterId} class {classId} was not posted: login has no economy ledger.");
             return null;
-        }
         try
         {
             var result = StarterKitLedger.RecordCreateGrant(_ledger, _ledgerIds, characterId, classId, inventory, _clock().ToUnixTimeMilliseconds());
