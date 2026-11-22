@@ -1,3 +1,5 @@
+using Fineage.Accounts;
+
 namespace Fineage.LoadTest.Models;
 
 public sealed class LoadScenario
@@ -15,8 +17,12 @@ public sealed class LoadScenario
     public string LoginHost { get; set; } = "127.0.0.1";
     public int LoginPort { get; set; } = 9106;
     public int ZonePort { get; set; } = 9777;
-    public int ClassId { get; set; } = 25;
-    public int Race { get; set; } = 1;
+    public int ClassId { get; set; } = 0;
+    public int Race { get; set; } = HumanClasses.RaceHuman;
+    /// <summary>Mobius skill id for load combat skill actions. 0 = <see cref="ResolveCombatSkillId"/>.</summary>
+    public int CombatSkillId { get; set; }
+    /// <summary>When true, the run fails if no UseSkill→MagicSkillUse oracle samples were collected.</summary>
+    public bool RequireSkillLatencySamples { get; set; }
     public Dictionary<string, double> ActionWeights { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
         ["move"] = 0.30,
@@ -35,6 +41,19 @@ public sealed class LoadScenario
 
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
     public int AoiCellSize { get; set; } = 3000;
+
+    /// <summary>Instant offensive skill known at level 1 for the scenario class (Mobius autoGet).</summary>
+    public int ResolveCombatSkillId()
+    {
+        if (CombatSkillId > 0)
+            return CombatSkillId;
+        return ClassId switch
+        {
+            HumanClasses.Mystic or 25 or 38 => 1177, // Wind Strike
+            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3, // Power Strike (level ≥ 5)
+            _ => 1177
+        };
+    }
 
     /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
     public string? Extends { get; set; }

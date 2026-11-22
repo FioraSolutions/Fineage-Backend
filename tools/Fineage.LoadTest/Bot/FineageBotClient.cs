@@ -249,12 +249,15 @@ public sealed class FineageBotClient : IAsyncDisposable
                     {
                         if (_observation.TryPickAttackTarget(out int target))
                         {
+                            int skillId = Scenario.ResolveCombatSkillId();
+                            await ZoneWriteAsync(NetOpcode.SelectTarget,
+                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
                             await SendTrackedAsync(
                                 NetOpcode.UseSkill,
-                                NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }),
+                                NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),
                                 ct,
                                 targetObjectId: target,
-                                skillId: 3);
+                                skillId: skillId);
                         }
 
                         break;

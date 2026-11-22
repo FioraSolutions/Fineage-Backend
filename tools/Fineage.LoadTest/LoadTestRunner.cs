@@ -140,6 +140,9 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
+        if (scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
+            failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
+
         RuntimeCounterStats? runtimeStats = null;
         if (runtimeSampler != null)
         {

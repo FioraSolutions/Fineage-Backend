@@ -14,6 +14,7 @@ export FINEAGE_LOGIN_LOADTEST_PASSWORD="${FINEAGE_LOGIN_LOADTEST_PASSWORD:-loadt
 export FINEAGE_LOGIN_METRICS_PORT="${FINEAGE_LOGIN_METRICS_PORT:-9464}"
 export FINEAGE_ZONE_METRICS_PORT="${FINEAGE_ZONE_METRICS_PORT:-9465}"
 export FINEAGE_BUILD_CONFIGURATION="${FINEAGE_BUILD_CONFIGURATION:-Release}"
+export FINEAGE_STARTING_LEVEL="${FINEAGE_STARTING_LEVEL:-5}"
 
 SCENARIO="${ROOT}/tools/Fineage.LoadTest/scenarios/bots-50-town.yaml"
 LOADTEST_DLL="${ROOT}/tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll"
@@ -93,6 +94,8 @@ def pick(r):
         "clientCombatFanoutMaxMs": h.get("ClientCombatFanoutMaxMs", c.get("SteadyBroadcastLatencyMaxMs", 0)),
         "attackSampleCount": c.get("AttackSampleCount", 0),
         "skillSampleCount": c.get("SkillSampleCount", 0),
+        "attackTimeoutCount": c.get("AttackTimeoutCount", 0),
+        "skillTimeoutCount": c.get("SkillTimeoutCount", 0),
         "legacyCommandFanoutP99Ms": c.get("BroadcastLatencyP99Ms", 0),
     }
 
@@ -105,6 +108,8 @@ for k, row in runs.items():
         failures.append(f"{k}: stuck={row['botsStuck']}")
     if row["botsInWorld"] < 50:
         failures.append(f"{k}: inWorld={row['botsInWorld']}/50")
+    if row["skillSampleCount"] == 0:
+        failures.append(f"{k}: skillSampleCount=0")
 
 if runs["w0"]["botsInWorld"] != runs["w4"]["botsInWorld"]:
     failures.append(f"oracle: inWorld {runs['w0']['botsInWorld']} vs {runs['w4']['botsInWorld']}")
