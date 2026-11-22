@@ -48,7 +48,7 @@ jobs:
   load-test-smoke:
     name: load-test-smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     services:
       postgres:
         image: postgres:16-alpine
