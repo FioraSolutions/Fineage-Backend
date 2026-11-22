@@ -85,8 +85,11 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
             u => () => inner.FanoutAbnormalStatusUpdate(watchers, u));
     }
 
-    void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed) =>
-        Emit(nameof(IWorldEventPublisher.FanoutKnownlistDiff), inner.PrepareKnownlistDiff(selfObjectId, [.. added], [.. removed]));
+    void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
+    {
+        // Knownlist drain reads live world to encode spawns; must not run on the fan-out worker (PR1 single queue).
+        inner.PrepareKnownlistDiff(selfObjectId, [.. added], [.. removed])();
+    }
 
     void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
         Emit(nameof(IWorldEventPublisher.FanoutCharInfo), inner.PrepareCharInfo([.. watcherObjectIds], objectId));
