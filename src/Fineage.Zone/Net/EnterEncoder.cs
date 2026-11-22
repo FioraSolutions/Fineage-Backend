@@ -108,6 +108,7 @@ static class EnterEncoder
             NetOpcode.QuestList => NetCodec.EncodeQuestList(NetZoneServer.ToNetQuestList((QuestListMsg)slot.Message!)),
             NetOpcode.PledgeStatus => NetCodec.EncodePledgeStatus(NetZoneServer.ToNetPledgeStatus((PledgeStatusChangedMsg)slot.Message!)),
             NetOpcode.PledgeMemberList => NetCodec.EncodePledgeMemberList(NetZoneServer.ToNetPledgeMemberList((PledgeMemberListMsg)slot.Message!)),
+            NetOpcode.ClientSetTime => NetCodec.EncodeClientSetTime((ClientSetTimeNetMsg)slot.Message!),
             NetOpcode.SystemMessage => NetCodec.EncodeSystemMessage((SystemMessageNetMsg)slot.Message!),
             _ => throw new InvalidOperationException($"enter encode unsupported opcode {slot.Opcode}")
         };

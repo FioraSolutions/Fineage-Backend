@@ -223,6 +223,7 @@ public sealed partial class ZoneWorld
 
         // Phase 0: player commands submitted since the last step.
         ticks.AddWorldStage(CommandsStage, ApplyCommands);
+        ticks.AddWorldStage("game-time", tick => TickClientGameTime(tick.WallUnixMs));
 
         // Every step: the former 200 ms combat loop, in its original order.
         ticks.AddRegionStage(_playerMovementStage);

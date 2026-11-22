@@ -65,6 +65,7 @@ sealed partial class SessionLifecyclePacketHandler
             var packets = NetEnterWorldProjector.FromEntityCore(entity, self, nowMs, pAtkSpd);
             selfSlots.Add(new EnterSelfSlot(NetOpcode.EntitySpawn, packets.Spawn));
             selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerStats, packets.Stats));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.ClientSetTime, _world.BuildClientSetTimeNet(nowMs)));
             if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
                 selfSlots.Add(new EnterSelfSlot(NetOpcode.UserInfo, userInfo));
             var items = zoneSession.PendingEnterSelfPrepare?.Items;
