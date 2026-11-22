@@ -20,13 +20,6 @@ public sealed class LoadTestRunner
         if (target == "mobius")
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
 
-        int budgetSeconds = Math.Max(
-            300,
-            scenario.RampUpSeconds + scenario.DurationSeconds + scenario.BotCount * 3 + 120);
-        using var budgetCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        budgetCts.CancelAfter(TimeSpan.FromSeconds(budgetSeconds));
-        ct = budgetCts.Token;
-
         var started = DateTimeOffset.UtcNow;
         var peers = new BotPeerDirectory();
         var bots = new List<FineageBotClient>();
