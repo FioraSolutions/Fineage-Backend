@@ -24,7 +24,11 @@ static class NetEnterWorldProjector
         var core = FromEntityCore(entity, self, nowUnixMs, playerPAtkSpd);
         if (entity.Inventory == null)
             throw new InvalidOperationException($"Player {entity.ObjectId} has no inventory.");
-        return core with { Items = BuildItems(entity.Inventory) };
+        return core with
+        {
+            Items = BuildItems(entity.Inventory),
+            Skills = BuildSkills(entity, nowUnixMs)
+        };
     }
 
     /// <summary>Spawn, stats, and skills only — item list is built off the simulation thread during enter encode.</summary>
