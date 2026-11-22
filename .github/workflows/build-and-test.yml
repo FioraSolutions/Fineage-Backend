@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FAST_TEST_FILTER: Category!=Slow&Category!=Integration&Category!=Load&Category!=perf
+  FAST_TEST_FILTER: 'Category!=Slow&Category!=Integration&Category!=Load&Category!=perf'
   RUN_HEAVY: >-
     ${{ github.event_name == 'schedule' ||
         github.event_name == 'workflow_dispatch' ||
