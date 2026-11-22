@@ -390,28 +390,28 @@ namespace Fineage.Net.Contract
         public const ushort CursedWeaponList = 0x03DB;
         /// <summary>Zone → client: Mobius ExCursedWeaponLocation (wire 0xFE 0x46).</summary>
         public const ushort CursedWeaponLocation = 0x03DC;
-        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkillInfo</c>.</summary>
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkillInfo</c> (wire 0xD0 0x06). ExClientPackets.java:88.</summary>
         public const ushort RequestEnchantSkillInfo = 0x03DD;
-        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkill</c>.</summary>
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkill</c> (wire 0xD0 0x07). ExClientPackets.java:89.</summary>
         public const ushort RequestEnchantSkill = 0x03DE;
-        /// <summary>Zone → client: Mobius <c>ExEnchantSkillList</c>.</summary>
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillList</c> (wire 0xFE 0x17). ServerPackets.java:241.</summary>
         public const ushort EnchantSkillList = 0x03DF;
-        /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c> (wire 0xFE 0x18). ServerPackets.java:242.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
-        /// <summary>Client → zone: Mobius <c>RequestExAskJoinMPCC</c> (target player name).</summary>
-        public const ushort CommandChannelAskRequest = 0x03E1;
-        /// <summary>Client → zone: Mobius <c>RequestExAcceptJoinMPCC</c> (1 accept, 0 decline).</summary>
-        public const ushort CommandChannelAcceptRequest = 0x03E2;
-        /// <summary>Client → zone: Mobius <c>RequestExOustFromMPCC</c> (party leader name to oust).</summary>
-        public const ushort CommandChannelOustRequest = 0x03E3;
-        /// <summary>Zone → client: Mobius <c>ExAskJoinMPCC</c>.</summary>
-        public const ushort CommandChannelAskJoin = 0x03E4;
-        /// <summary>Zone → client: Mobius <c>ExOpenMPCC</c>.</summary>
-        public const ushort CommandChannelOpen = 0x03E5;
-        /// <summary>Zone → client: Mobius <c>ExCloseMPCC</c>.</summary>
-        public const ushort CommandChannelClose = 0x03E6;
-        /// <summary>Zone → client: Mobius <c>ExMultiPartyCommandChannelInfo</c>.</summary>
-        public const ushort CommandChannelInfo = 0x03E7;
+        /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
+        public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
+        /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
+        public const ushort CommandChannelAcceptRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0E));
+        /// <summary>Client → zone: <c>RequestExOustFromMPCC</c> (wire 0xD0 0x0F). ExClientPackets.java:97.</summary>
+        public const ushort CommandChannelOustRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0F));
+        /// <summary>Zone → client: <c>ExAskJoinMPCC</c> (wire 0xFE 0x27). ServerPackets.java:257.</summary>
+        public const ushort CommandChannelAskJoin = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x27));
+        /// <summary>Zone → client: <c>ExOpenMPCC</c> (wire 0xFE 0x25). ServerPackets.java:255.</summary>
+        public const ushort CommandChannelOpen = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x25));
+        /// <summary>Zone → client: <c>ExCloseMPCC</c> (wire 0xFE 0x26). ServerPackets.java:256.</summary>
+        public const ushort CommandChannelClose = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x26));
+        /// <summary>Zone → client: <c>ExMultiPartyCommandChannelInfo</c> (wire 0xFE 0x30). ServerPackets.java:265.</summary>
+        public const ushort CommandChannelInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x30));
         /// <summary>
         /// Zone → client: Mobius <c>AgitDecoInfo</c>.
         /// <c>ServerPackets.AGIT_DECO_INFO(0xF7)</c>,
