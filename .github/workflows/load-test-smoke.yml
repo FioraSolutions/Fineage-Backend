@@ -17,18 +17,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  RUN_HEAVY: >-
-    ${{ github.event_name == 'schedule' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-        (github.event_name == 'pull_request' && github.base_ref == 'main') ||
-        (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
-          contains(github.event.pull_request.labels.*.name, 'perf')) }}
-
 jobs:
   skipped:
-    if: ${{ env.RUN_HEAVY != 'true' }}
+    if: >-
+      ${{ !(
+          github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf'))
+        ) }}
     name: load-test-smoke-skipped
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +35,13 @@ jobs:
 
   load-test-smoke:
     name: load-test-smoke
-    if: ${{ env.RUN_HEAVY == 'true' }}
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     services:
       postgres:

@@ -19,13 +19,6 @@ concurrency:
 
 env:
   FAST_TEST_FILTER: 'Category!=Slow&Category!=Integration&Category!=Load&Category!=perf'
-  RUN_HEAVY: >-
-    ${{ github.event_name == 'schedule' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-        (github.event_name == 'pull_request' && github.base_ref == 'main') ||
-        (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
-          contains(github.event.pull_request.labels.*.name, 'perf')) }}
 
 jobs:
   fast-unit-tests:
@@ -68,12 +61,24 @@ jobs:
 
   integration-tests:
     name: integration-postgres
-    if: ${{ env.RUN_HEAVY == 'true' }}
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     uses: ./.github/workflows/dotnet-test-with-postgres.yml
 
   zone-simulation-perf:
     name: zone-simulation-perf
-    if: ${{ env.RUN_HEAVY == 'true' }}
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +97,13 @@ jobs:
 
   zone-parallel-regions:
     name: zone-parallel-regions
-    if: ${{ env.RUN_HEAVY == 'true' }}
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     env:
       FINEAGE_ZONE_REGION_WORKERS: '4'
@@ -113,7 +124,13 @@ jobs:
 
   load-test-smoke:
     name: load-test-smoke
-    if: ${{ env.RUN_HEAVY == 'true' }}
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     services:
