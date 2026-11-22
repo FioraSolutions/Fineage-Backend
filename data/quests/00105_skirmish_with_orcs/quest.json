@@ -160,7 +160,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -176,7 +177,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -192,7 +194,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -208,7 +211,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -216,15 +220,16 @@
       "npcId": 27064,
       "hook": "kill",
       "when": "started",
-      "cond": 1,
+      "cond": 3,
       "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 1844,
+          "itemId": 1845,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 4
         }
       ]
     },
@@ -240,7 +245,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -256,7 +262,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     },
@@ -272,7 +279,8 @@
           "itemId": 1844,
           "count": 1,
           "chance": 1.0,
-          "limit": 0
+          "limit": 1,
+          "condAtLimit": 2
         }
       ]
     }
