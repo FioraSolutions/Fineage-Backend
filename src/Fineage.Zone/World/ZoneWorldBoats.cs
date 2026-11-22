@@ -14,7 +14,7 @@ public sealed partial class ZoneWorld
 
     void BootstrapBoats()
     {
-        if (!_allowAmbientBoats || BoatCatalog.Count == 0)
+        if (!_allowAmbientBoats || !BoatSettings.Enabled || BoatCatalog.Count == 0)
             return;
         foreach (var def in BoatCatalog.All)
         {
@@ -59,7 +59,7 @@ public sealed partial class ZoneWorld
 
     void TickBoats(long now)
     {
-        if (!_allowAmbientBoats)
+        if (!_allowAmbientBoats || !BoatSettings.Enabled)
             return;
         foreach (var (_, rt) in _boatRuntime)
         {
