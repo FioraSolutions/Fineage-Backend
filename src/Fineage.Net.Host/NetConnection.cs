@@ -17,6 +17,8 @@ namespace Fineage.Net.Host;
 /// </summary>
 public sealed class NetConnection : IAsyncDisposable
 {
+    static long _nextConnectionId;
+
     readonly TcpClient _client;
     readonly NetworkStream _stream;
     readonly Channel<PacketEnvelope> _inbox;
@@ -29,6 +31,8 @@ public sealed class NetConnection : IAsyncDisposable
     int _closed;
 
     readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
+
+    public ulong ConnectionId { get; } = (ulong)Interlocked.Increment(ref _nextConnectionId);
 
     public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net", int outboundCapacity = DefaultOutboundCapacity)
     {
@@ -132,7 +136,11 @@ public sealed class NetConnection : IAsyncDisposable
     /// Fanout path: queue without waiting. A full queue drops the frame and counts it, so one stalled client
     /// cannot back-pressure the world tick.
     /// </summary>
-    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0)
+    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0) =>
+        TrySendFromStripe(opcode, payload, requestSequence);
+
+    /// <summary>Called from <see cref="NetFanoutStripes"/> stripe workers (PR2).</summary>
+    internal bool TrySendFromStripe(ushort opcode, byte[] payload, uint requestSequence = 0)
     {
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
