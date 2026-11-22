@@ -2,6 +2,7 @@ using System.Reflection;
 using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Zone;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.Net;
 using Fineage.Zone.World;
@@ -92,7 +93,8 @@ internal sealed class NetTestKit
         Fineage.Zone.Bosses.BossSchedule? bosses = null,
         ZoneRates? rates = null,
         Func<DateTimeOffset>? clock = null,
-        bool allowAmbientBoats = true)
+        bool allowAmbientBoats = true,
+        ZoneGameTime? gameTime = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         IRegionExecutor resolvedExecutor = regionExecutor ??
@@ -103,7 +105,7 @@ internal sealed class NetTestKit
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
             simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,
-            bosses: bosses, ledgerJournal: Ledger, rates: rates, allowAmbientBoats: allowAmbientBoats);
+            bosses: bosses, ledgerJournal: Ledger, rates: rates, allowAmbientBoats: allowAmbientBoats, gameTime: gameTime);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

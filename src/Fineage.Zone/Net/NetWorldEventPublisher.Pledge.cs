@@ -35,6 +35,9 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, AgitDecoInfoNetMsg deco) =>
         SendAll(watcherObjectIds, NetOpcode.AgitDecoInfo, NetCodec.EncodeAgitDecoInfo(deco));
 
+    void IWorldEventPublisher.FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, ClientSetTimeNetMsg time) =>
+        SendAll(watcherObjectIds, NetOpcode.ClientSetTime, NetCodec.EncodeClientSetTime(time));
+
     void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, DoorStatusNetMsg door) =>
         SendAll(watcherObjectIds, NetOpcode.DoorStatus, NetCodec.EncodeDoorStatus(door));
 

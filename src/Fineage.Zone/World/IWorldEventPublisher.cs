@@ -207,6 +207,9 @@ interface IWorldEventPublisher
 
     void FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco);
 
+    /// <summary>Mobius <c>ClientSetTime</c> (<see cref="Fineage.Net.Contract.NetOpcode.ClientSetTime"/>).</summary>
+    void FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClientSetTimeNetMsg time);
+
     /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
     void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
 

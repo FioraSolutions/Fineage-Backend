@@ -398,6 +398,11 @@ namespace Fineage.Net.Contract
         public const ushort EnchantSkillList = 0x03DF;
         /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c> (wire 0xFE 0x18). ServerPackets.java:242.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
+        /// <summary>
+        /// Zone → client: Mobius <c>ClientSetTime</c> (wire <c>0xEC</c>).
+        /// <c>ClientSetTime.java</c> — <c>writeD(gameMinutes)</c>, <c>writeD(6)</c>.
+        /// </summary>
+        public const ushort ClientSetTime = 0x03E1;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
@@ -427,7 +432,6 @@ namespace Fineage.Net.Contract
         public const ushort AgitDecoInfo = 0xF7;
 
         // Boat packets use the Mobius CT_0 Interlude ids from ServerPackets.java.
-        // 0x03E1 is not a boat opcode. AgitDecoInfo is already 0xF7 above.
 
         /// <summary>ServerPackets.java:101 <c>VEHICLE_INFO(0x59)</c>. Layout: VehicleInfo.java:47-52.</summary>
         public const ushort VehicleInfo = 0x59;

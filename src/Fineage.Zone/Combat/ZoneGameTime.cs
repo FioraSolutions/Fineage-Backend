@@ -23,6 +23,21 @@ public sealed class ZoneGameTime
         return new ZoneGameTime(midnight.ToUnixTimeMilliseconds());
     }
 
+    /// <summary>
+    /// Mobius <c>GameTimeController.getGameTime()</c> — client clock minutes since the reference midnight
+    /// (one IG minute every 10 s real time; <c>ClientSetTime</c> field 1).
+    /// </summary>
+    public int ClientGameMinutes(long unixMsNow)
+    {
+        long elapsed = unixMsNow - _referenceMidnightUnixMs;
+        return (int)(elapsed / MillisPerRealMinute);
+    }
+
+    /// <summary>Mobius <c>ClientSetTime</c> field 2 — IG days per real day.</summary>
+    public const int ClientClockSpeed = IgDaysPerRealDay;
+
+    static long MillisPerRealMinute => MillisPerIgDay / (24L * 60L);
+
     /// <summary>IG minutes into the current IG day (0..1439), matching Mobius <c>_gameTime</c>.</summary>
     public int GameMinutes(long unixMsNow)
     {
