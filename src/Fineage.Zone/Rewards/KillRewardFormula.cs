@@ -3,7 +3,8 @@ namespace Fineage.Zone.Rewards;
 /// <summary>
 /// Mobius <c>Attackable.calculateExpAndSp</c> (<c>Attackable.java:1347</c>) and the party pool from
 /// <c>Party.distributeXpAndSp</c> (<c>Party.java:712</c>) — exp/SP are a share of the monster reward, not a lump
-/// sum for the last hit.
+/// sum for the last hit. Interlude Fineage has no vitality runtime; Mobius party kills may call
+/// <c>updateVitalityPoints</c> — that path is intentionally not ported.
 /// </summary>
 public static class KillRewardFormula
 {
