@@ -194,6 +194,42 @@
         }
       ],
       "htmlFile": "30088-event-30088-10-018.htm"
+    },
+    {
+      "npcId": 20560,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7528,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10,
+          "condAtLimit": 5
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 20561,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7528,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10,
+          "condAtLimit": 5
+        }
+      ],
+      "party": true
     }
   ]
 }

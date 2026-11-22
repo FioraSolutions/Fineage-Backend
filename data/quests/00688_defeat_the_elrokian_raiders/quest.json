@@ -94,6 +94,23 @@
       "event": "32105-11",
       "hasItem": 8785,
       "htmlFile": "32105-event-32105-11-008.htm"
+    },
+    {
+      "npcId": 22214,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8785,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

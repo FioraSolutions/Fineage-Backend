@@ -340,6 +340,38 @@
         }
       ],
       "htmlFile": "30721-event-31149-11-028.htm"
+    },
+    {
+      "npcId": 20965,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6322,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21090,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6322,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

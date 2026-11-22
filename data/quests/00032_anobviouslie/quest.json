@@ -253,6 +253,23 @@
         }
       ],
       "htmlFile": "30120-event-rabbit-024.htm"
+    },
+    {
+      "npcId": 20135,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7166,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 20
+        }
+      ],
+      "party": true
     }
   ]
 }

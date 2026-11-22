@@ -1001,6 +1001,22 @@
         }
       ],
       "htmlFile": "31349-event-31531-02-089.htm"
+    },
+    {
+      "npcId": 27218,
+      "hook": "kill",
+      "when": "started",
+      "cond": 7,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7158,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }
