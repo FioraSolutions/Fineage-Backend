@@ -24,6 +24,9 @@ internal sealed class FanoutDispatcher : IDisposable
     /// <summary>Tests: rethrow the first fan-out send failure from <see cref="WaitUntilIdle"/>.</summary>
     internal bool FailFast;
 
+    /// <summary>Tests with <see cref="DispatchProxy"/> Net bridges: deliver batches on the simulation thread.</summary>
+    internal bool DeliverSynchronously;
+
     /// <summary>Tests: worker blocks before dequeuing batches (channel stays full).</summary>
     internal ManualResetEventSlim? HoldWorkerBeforeReadForTest;
 
@@ -58,6 +61,12 @@ internal sealed class FanoutDispatcher : IDisposable
         long now = Stopwatch.GetTimestamp();
         if (batch.EnqueuedAtTimestamp > 0)
             FanoutTelemetry.RecordEnqueue(now);
+
+        if (DeliverSynchronously)
+        {
+            ExecuteBatch(batch);
+            return;
+        }
 
         try
         {

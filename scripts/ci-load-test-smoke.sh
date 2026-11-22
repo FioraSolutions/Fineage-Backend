@@ -130,6 +130,8 @@ if [[ "${CI_LOAD_TEST_SIEGE:-0}" == "1" ]]; then
 fi
 
 echo "load-test smoke OK; summary at $SUMMARY"
-for tag in bots-100-w0 bots-100-w4; do
-  [[ -f "$REPORT_ROOT/$tag/load-test-report.md" ]] && echo "  $REPORT_ROOT/$tag/load-test-report.md"
+for tag in bots-50-town-w0 bots-50-town-w4; do
+  if [[ -f "$REPORT_ROOT/$tag/load-test-report.md" ]]; then
+    echo "  $REPORT_ROOT/$tag/load-test-report.md"
+  fi
 done

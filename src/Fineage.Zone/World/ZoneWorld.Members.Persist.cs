@@ -192,7 +192,11 @@ public sealed partial class ZoneWorld
         }
 
         if (outermost)
+        {
             FlushDirtyInventories();
+            AwaitTestFanoutDelivery();
+        }
+
         return result;
     }
 }

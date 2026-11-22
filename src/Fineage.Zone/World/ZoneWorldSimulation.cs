@@ -108,11 +108,14 @@ public sealed partial class ZoneWorld
 
                 return 0;
             });
+
+            AwaitTestFanoutDelivery();
         }
         finally
         {
             if (outermost)
             {
+                AwaitTestFanoutDelivery();
                 var stranded = _ingress.TakeApplied();
                 if (stranded.Count > 0)
                     ZoneCommandIngress.Complete(stranded);
@@ -137,6 +140,8 @@ public sealed partial class ZoneWorld
         long sealStart = Stopwatch.GetTimestamp();
         _fanout.Seal(sealStart);
         double sealMs = RecordCommandPhase(PhaseSeal, sealStart);
+
+        AwaitTestFanoutDelivery();
 
         long replyStart = Stopwatch.GetTimestamp();
         var applied = _ingress.TakeApplied();
