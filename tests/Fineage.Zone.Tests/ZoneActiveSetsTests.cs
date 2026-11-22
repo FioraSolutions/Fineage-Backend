@@ -8,16 +8,10 @@ namespace Fineage.Zone.Tests;
 /// </summary>
 public sealed class ZoneActiveSetsTests
 {
-    static void DisableAmbientRoutes()
-    {
-        Environment.SetEnvironmentVariable("FINEAGE_ALLOW_BOATS", "false");
-    }
-
     [Fact]
     public async Task Idle_world_combat_tick_keeps_active_sets_empty()
     {
-        DisableAmbientRoutes();
-        var kit = new WorldBench(combatRandom: new MissRandomWalk());
+        var kit = new WorldBench(combatRandom: new MissRandomWalk(), allowAmbientBoats: false);
         // Spawned NPCs from the default map sit idle with empty registries.
         var before = kit.World.ActiveSetCounts;
         Assert.Equal(0, before.Moving);
@@ -38,8 +32,7 @@ public sealed class ZoneActiveSetsTests
     [Fact]
     public async Task Moving_npc_enters_and_leaves_moving_registry()
     {
-        DisableAmbientRoutes();
-        var kit = new NetTestKit(combatRandom: new MissRandomWalk());
+        var kit = new NetTestKit(combatRandom: new MissRandomWalk(), allowAmbientBoats: false);
         Assert.True(kit.World.TryGetEntityById(50001, out var npc));
         long t0 = kit.Now.ToUnixTimeMilliseconds();
         kit.World.SetMoveActive(npc!, true);

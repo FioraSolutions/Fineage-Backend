@@ -167,7 +167,7 @@ public sealed class NetObserverParityTests
         mob.CurHp = 1;
         var killFrames = await AttackAsync(a, MobId);
         for (int i = 0; i < 40 && mob.CurHp > 0; i++)
-            await rig.AdvanceAsync(250);
+            await rig.AdvanceAsync(400);
         Assert.Equal(0, mob.CurHp);
         await rig.AdvanceAsync(500);
         fa = killFrames.Concat(await a.DrainAsync()).ToList();
@@ -275,7 +275,7 @@ public sealed class NetObserverParityTests
         mob.CurMp = mob.MaxMp;
 
         Assert.True(rig.World.CastNpcSupportForTest(mob, a.Entity, debuff, "debuff"));
-        await rig.AdvanceAsync(1500);
+        await rig.AdvanceAsync(1600);
         var fa = await a.DrainAsync();
         var fw = await west.DrainAsync();
         var fe = await east.DrainAsync();

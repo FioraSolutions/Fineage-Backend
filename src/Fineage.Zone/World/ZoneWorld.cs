@@ -182,6 +182,7 @@ public sealed partial class ZoneWorld
         SevenSignsEngine? sevenSigns = null,
         SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = false,
+        bool allowAmbientBoats = true,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
         DimensionalRiftCatalog? dimensionalRift = null,
@@ -269,6 +270,7 @@ public sealed partial class ZoneWorld
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
         _includeEnabledMaps = includeEnabledMaps;
+        _allowAmbientBoats = allowAmbientBoats;
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();

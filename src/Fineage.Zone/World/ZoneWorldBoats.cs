@@ -6,6 +6,7 @@ namespace Fineage.Zone.World;
 /// <summary>Mobius <c>BoatManager</c> + vehicle scripts: boats move on schedules; passengers/boarding use vehicle packets later.</summary>
 public sealed partial class ZoneWorld
 {
+    readonly bool _allowAmbientBoats;
     readonly Lazy<BoatCatalog> _boatCatalog = new(BoatCatalog.LoadDefault);
     readonly Dictionary<int, BoatRuntime> _boatRuntime = [];
 
@@ -13,7 +14,7 @@ public sealed partial class ZoneWorld
 
     void BootstrapBoats()
     {
-        if (!BoatSettings.Enabled || BoatCatalog.Count == 0)
+        if (!_allowAmbientBoats || BoatCatalog.Count == 0)
             return;
         foreach (var def in BoatCatalog.All)
         {
@@ -58,7 +59,7 @@ public sealed partial class ZoneWorld
 
     void TickBoats(long now)
     {
-        if (!BoatSettings.Enabled)
+        if (!_allowAmbientBoats)
             return;
         foreach (var (_, rt) in _boatRuntime)
         {
