@@ -336,14 +336,14 @@ public sealed partial class NetZoneServer
                             await _movement.OnStopMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         default:
-                            await RejectAsync(conn, "unknown_opcode", $"opcode 0x{envelope.Opcode:X4}", ct)
+                            await RejectAsync(conn, "unknown_opcode", NetOpcodeTable.DescribeUnknown(envelope.Opcode), ct)
                                 .ConfigureAwait(false);
                             break;
                     }
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode=0x{envelope.Opcode:X4}: {ex}");
+                    ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex}");
                     await RejectAsync(conn, "handler_error", "An internal error occurred.", ct).ConfigureAwait(false);
                 }
             }
