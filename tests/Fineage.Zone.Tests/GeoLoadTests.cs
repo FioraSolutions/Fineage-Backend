@@ -40,7 +40,6 @@ public sealed class GeoLoadTests
         string? priorRequired = Environment.GetEnvironmentVariable(GeoSettings.RequiredVariable);
         string? priorDir = Environment.GetEnvironmentVariable(GeoSettings.DirVariable);
         string? priorRegions = Environment.GetEnvironmentVariable(GeoSettings.RequiredRegionsVariable);
-        GeoEngine.ResetLoadDefaultCacheForTests();
         try
         {
             Environment.SetEnvironmentVariable(GeoSettings.RequiredVariable, required);
@@ -53,7 +52,6 @@ public sealed class GeoLoadTests
             Environment.SetEnvironmentVariable(GeoSettings.RequiredVariable, priorRequired);
             Environment.SetEnvironmentVariable(GeoSettings.DirVariable, priorDir);
             Environment.SetEnvironmentVariable(GeoSettings.RequiredRegionsVariable, priorRegions);
-            GeoEngine.ResetLoadDefaultCacheForTests();
         }
     }
 

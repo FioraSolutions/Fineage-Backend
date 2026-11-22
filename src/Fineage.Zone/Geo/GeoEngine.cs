@@ -25,20 +25,10 @@ public sealed partial class GeoEngine
 
     public static readonly GeoEngine Empty = new();
 
-    static GeoEngine? _cachedDefault;
-
     public int RegionCount => _regions.Count;
     public string? Directory { get; private set; }
 
-    internal static void ResetLoadDefaultCacheForTests() => _cachedDefault = null;
-
-    public static GeoEngine LoadDefault()
-    {
-        if (_cachedDefault != null)
-            return _cachedDefault;
-        _cachedDefault = LoadDefaultUncached();
-        return _cachedDefault;
-    }
+    public static GeoEngine LoadDefault() => LoadDefaultUncached();
 
     static GeoEngine LoadDefaultUncached()
     {
@@ -60,7 +50,7 @@ public sealed partial class GeoEngine
             return new GeoEngine();
         }
 
-        var requiredRegions = GeoSettings.RequiredRegionNames();
+        var requiredRegions = GeoSettings.RequiredRegionNames(required);
         if (required && requiredRegions.Count > 0)
             LogMissingRequiredRegionFiles(dir, requiredRegions, fatal: true);
 

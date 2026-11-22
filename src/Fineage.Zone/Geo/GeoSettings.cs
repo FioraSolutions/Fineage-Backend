@@ -14,7 +14,7 @@ public static class GeoSettings
 
     public static bool Required => ReadBool(RequiredVariable, defaultValue: false);
 
-    public static IReadOnlyList<string> RequiredRegionNames()
+    public static IReadOnlyList<string> RequiredRegionNames(bool required)
     {
         string? text = Environment.GetEnvironmentVariable(RequiredRegionsVariable);
         if (!string.IsNullOrWhiteSpace(text))
@@ -26,7 +26,16 @@ public static class GeoSettings
 
         string? manifest = FindRegionsManifestPath();
         if (manifest == null)
+        {
+            if (required)
+            {
+                throw new InvalidOperationException(
+                    $"[geo] {RequiredVariable}=1 but data/{RegionsManifestFile} was not found and {RequiredRegionsVariable} is unset.");
+            }
+
+            ZoneLog.Warn($"[geo] data/{RegionsManifestFile} was not found; region list is not checked.");
             return [];
+        }
 
         try
         {
@@ -36,19 +45,26 @@ public static class GeoSettings
                 var list = new List<string>();
                 foreach (var el in regions.EnumerateArray())
                 {
-                    if (el.ValueKind == JsonValueKind.String && el.GetString() is { } name && name.Length > 0)
-                        list.Add(name.Trim());
+                    if (el.ValueKind != JsonValueKind.String || el.GetString() is not { Length: > 0 } name)
+                        throw new InvalidDataException($"[geo] {manifest} regions must be non-empty strings.");
+                    list.Add(name.Trim());
                 }
 
+                if (list.Count == 0)
+                    throw new InvalidDataException($"[geo] {manifest} regions is empty.");
                 return list;
             }
         }
+        catch (InvalidDataException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            ZoneLog.Warn($"[geo] could not read {manifest}: {ex.Message}");
+            throw new InvalidDataException($"[geo] could not read {manifest}: {ex.Message}", ex);
         }
 
-        return [];
+        throw new InvalidDataException($"[geo] {manifest} needs a regions array.");
     }
 
     static string? FindRegionsManifestPath()
@@ -75,7 +91,8 @@ public static class GeoSettings
         {
             "1" or "true" or "TRUE" or "yes" or "YES" or "on" or "ON" => true,
             "0" or "false" or "FALSE" or "no" or "NO" or "off" or "OFF" => false,
-            _ => defaultValue,
+            _ => throw new InvalidOperationException(
+                $"{name} must be 1/0, true/false, yes/no, or on/off."),
         };
     }
 }
