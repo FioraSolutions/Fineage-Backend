@@ -91,8 +91,6 @@ public sealed partial class ZoneWorld
                 return;
 
             player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
             Relocate(player, x, y, z);
             SelfUserInfo(player);
             SaveVitals(session, player);
@@ -157,8 +155,6 @@ public sealed partial class ZoneWorld
                 return;
 
             player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
             Relocate(player, loc.X, loc.Y, loc.Z);
             SelfUserInfo(player);
             SaveVitals(session, player);

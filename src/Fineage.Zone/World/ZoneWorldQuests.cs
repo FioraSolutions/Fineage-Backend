@@ -400,8 +400,6 @@ public sealed partial class ZoneWorld
             {
                 Changes = outcome.Items.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
             };
-            if (NetBridge != null)
-                NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
             SaveInventory(session, player.Inventory);
         }
 

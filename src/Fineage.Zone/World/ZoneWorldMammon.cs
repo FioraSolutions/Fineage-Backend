@@ -171,14 +171,13 @@ public sealed partial class ZoneWorld
             {
                 var changes = new List<InventoryUpdateEntryMsg>();
                 Take(inventory, SevenSignsProtocol.AncientAdenaItemId, amount, changes);
-                if (changes.Count > 0)
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                 GiveItem(session, inventory, SevenSignsProtocol.AdenaItemId, amount);
                 ZoneLog.Info($"[mammon] aa->adena object={player.ObjectId} amount={amount}");
                 SendHtml(session, player, npc, Page("blkmrkt_5.htm"));
                 return true;
             },
             _ => amount);
+        SaveInventory(session, inventory);
         return null;
     }
 }

@@ -17,32 +17,15 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        if (live.Inventory != null && !PersistInventoryNow(session, live.Inventory))
+        if (live.Inventory != null)
+            _dirtyInventories[objectId] = (session, live.Inventory);
+        if (!FlushDirtyInventories())
+        {
+            ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
             return false;
-        if (_dirtyWarehouses.TryGetValue(objectId, out var warehousePlayer))
-        {
-            if (!ReplaceWarehouseNow(session, warehousePlayer))
-                return false;
-            _dirtyWarehouses.Remove(objectId);
         }
 
-        if (_dirtyFreight.TryGetValue(objectId, out var freightPlayer))
-        {
-            if (!ReplaceFreightNow(session, freightPlayer))
-                return false;
-            _dirtyFreight.Remove(objectId);
-        }
-
-        if (_dirtyInventories.TryGetValue(objectId, out var dirty))
-        {
-            if (!CommitStore(
-                    "inventory replace",
-                    dirty.Session,
-                    () => _persist.ReplaceItemsFromInventory(dirty.Session.Account, dirty.Session.ObjectId, dirty.Inventory)))
-                return false;
-            _dirtyInventories.Remove(objectId);
-        }
-
+        live.Inventory?.DiscardChanges();
         return true;
     }
 
@@ -58,10 +41,11 @@ public sealed partial class ZoneWorld
     bool PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
-        return CommitStore(
-            "inventory replace",
-            session,
-            () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory));
+        _dirtyInventories[session.ObjectId] = (session, inventory);
+        if (!FlushDirtyInventories())
+            return false;
+        inventory.DiscardChanges();
+        return true;
     }
 
     void ReloadCharacterRecord(ZoneSession session, ref CharacterRecord? stored)

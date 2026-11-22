@@ -67,7 +67,6 @@ public sealed partial class ZoneWorld
         var invUpdate = removedEntirely
             ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
             : InventoryMessages.Update(InventoryChange.Modify, item);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         SaveInventory(session, player.Inventory);
         return true;
     }

@@ -283,7 +283,6 @@ public sealed partial class ZoneWorld
             if (item.IsEquipped)
                 inventory.Unequip(item);
             inventory.Remove(item);
-            NetBridge?.FanoutInventoryUpdate([player.ObjectId], InventoryMessages.Update(InventoryChange.Remove, item));
         }
         SaveInventory(session, inventory);
         RefreshGearSkills(player);

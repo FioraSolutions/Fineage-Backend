@@ -62,6 +62,8 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(row.Option1);
                 w.WriteInt32(row.Option2);
             }
+
+            // The inventory version is not part of this body. See InventoryVersionTail.
         });
 
         public static InventoryUpdateNetMsg DecodeInventoryUpdate(ReadOnlySpan<byte> p)

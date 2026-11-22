@@ -59,9 +59,8 @@ public sealed partial class ZoneWorld
         {
             return null;
         }
-        var update = InventoryMessages.Modify([arrow]);
         if (player.Session != null)
-            NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
+            SaveInventory(player.Session, bag);
         return arrow;
     }
 
@@ -87,8 +86,7 @@ public sealed partial class ZoneWorld
                 return arrow.ItemId;
             },
             id => id);
-        var update = InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, arrow);
-        NetBridge?.FanoutInventoryUpdate([player.ObjectId], update);
+        SaveInventory(player.Session, bag);
         if (left == 0)
         {
             ZoneLog.Info($"bow object={player.ObjectId} arrows exhausted item={arrow.ItemId}");

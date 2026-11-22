@@ -331,7 +331,7 @@ public sealed class NetEquipRulesTests
         Assert.Null(await Give(actor, Adena, 5));
         var added = LastInventory(bench.Rec);
         var row = Assert.Single(added.Changes);
-        Assert.Equal(InventoryChange.Add, row.Change);
+        Assert.Equal(InventoryChange.Modify, row.Change);
         Assert.Equal(Adena, row.ItemId);
         Assert.Equal(15, row.Count);
         Assert.Equal(-1, row.EquippedSlot);

@@ -86,13 +86,27 @@ public sealed partial class ZoneWorld
         if (stored == null || stored.Items == null)
             return new PlayerInventory(_game.Items, _itemIds);
 
-        // Drop unknown templates with a log — Restore already skips them so EnterWorld stays up.
+        var known = new List<StoredItem>(stored.Items.Count);
         foreach (var row in stored.Items)
         {
-            if (!_game.Items.TryGet(row.ItemId, out _))
-                ZoneLog.Info($"inventory skip unknown item={row.ItemId} object={row.ObjectId} char={session.ObjectId}");
+            if (_game.Items.TryGet(row.ItemId, out _))
+            {
+                known.Add(row);
+                continue;
+            }
+
+            ZoneLog.Warn(
+                $"inventory drop unknown template char={session.ObjectId} item={row.ItemId} objectId={row.ObjectId} count={row.Count}");
         }
-        return CharacterInventory.Restore(_game.Items, _itemIds, stored.Items);
+
+        var inventory = CharacterInventory.Restore(_game.Items, _itemIds, known);
+        foreach (var collapsed in inventory.CollapsedStacks)
+        {
+            ZoneLog.Warn(
+                $"inventory merge duplicate stack char={session.ObjectId} item={collapsed.ItemId} droppedObjectId={collapsed.DroppedObjectId} keptObjectId={collapsed.KeptObjectId} count={collapsed.Count}");
+        }
+
+        return inventory;
     }
 
     void SaveInventory(ZoneSession session, PlayerInventory inventory)
@@ -101,18 +115,28 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
+        _dirtyInventories[session.ObjectId] = (session, inventory);
         if (InventoryPersistDeferred)
-        {
-            _dirtyInventories[session.ObjectId] = (session, inventory);
             return;
-        }
+        FlushDirtyInventories();
+    }
 
-        _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
+    /// <summary>One InventoryUpdate for every journal row, after the bag write has succeeded.</summary>
+    void PublishCommittedInventory(ZoneSession session, PlayerInventory inventory)
+    {
+        var changes = inventory.DrainChanges();
+        if (changes.Count == 0 || NetBridge == null)
+            return;
+        int version = inventory.BumpVersion();
+        NetBridge.FanoutInventoryUpdate(
+            [session.ObjectId],
+            InventoryMessages.FromPending(changes, version));
     }
 
     /// <summary>
     /// Ledger first, then inventory, warehouse and freight. False means a commit failed and the rows that did not
-    /// land stay dirty; callers must not report economic success for those characters.
+    /// land stay dirty; callers must not report economic success for those characters. InventoryUpdate goes out only
+    /// for a bag whose snapshot write returned success.
     /// </summary>
     bool FlushDirtyInventories()
     {
@@ -124,8 +148,13 @@ public sealed partial class ZoneWorld
 
         bool committed = true;
         committed &= CommitDirty(_dirtyInventories, (_, pair) =>
-            CommitStore("inventory replace", pair.Session, () =>
-                _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory)));
+        {
+            if (!CommitStore("inventory replace", pair.Session, () =>
+                    _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory)))
+                return false;
+            PublishCommittedInventory(pair.Session, pair.Inventory);
+            return true;
+        });
         committed &= CommitDirty(_dirtyWarehouses, (_, player) =>
             player.Session == null || ReplaceWarehouseNow(player.Session, player));
         committed &= CommitDirty(_dirtyFreight, (_, player) =>

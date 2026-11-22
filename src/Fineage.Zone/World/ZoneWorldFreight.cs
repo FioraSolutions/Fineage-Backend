@@ -17,7 +17,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Freight != null)
             return;
-        var freight = new PrivateWarehouse(_game.Items);
+        var freight = new PrivateWarehouse(_game.Items, _itemIds);
         var rows = stored?.Freight;
         if (rows == null && player.Session is { } session)
         {
@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
 
         if (rows != null)
             freight.Restore(rows.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("freight", player.ObjectId, freight);
         player.Freight = freight;
     }
 
@@ -44,9 +45,10 @@ public sealed partial class ZoneWorld
         }
 
         var stored = _accounts?.FindById(account, recipientId);
-        var freight = new PrivateWarehouse(_game.Items);
+        var freight = new PrivateWarehouse(_game.Items, _itemIds);
         if (stored?.Freight != null)
             freight.Restore(stored.Freight.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("freight", recipientId, freight);
         return freight;
     }
 

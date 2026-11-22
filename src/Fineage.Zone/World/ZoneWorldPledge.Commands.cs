@@ -363,10 +363,6 @@ public sealed partial class ZoneWorld
                 touches.Add(new Fineage.Game.Quests.BagTouch(before.Contains(piece.ObjectId)
                     ? Fineage.Game.Quests.BagTouchKind.Modify
                     : Fineage.Game.Quests.BagTouchKind.Add, piece));
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg
-            {
-                Changes = touches.Select(t => InventoryMessages.ChangeRow((int)t.Kind, t.Item)).ToArray()
-            });
             SaveInventory(session, inventory);
         }
         FanUserInfo(player);

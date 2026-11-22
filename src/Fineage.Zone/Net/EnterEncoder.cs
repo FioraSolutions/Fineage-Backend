@@ -75,18 +75,24 @@ static class EnterEncoder
         return frames;
     }
 
+    static byte[] EncodeItemList(EnterSelfSlot slot)
+    {
+        var message = slot.Message switch
+        {
+            ItemListNetMsg ready => ready,
+            PlayerInventory inventory => NetEnterWorldProjector.BuildItems(inventory),
+            _ => throw new InvalidOperationException("enter ItemList slot requires ItemListNetMsg or PlayerInventory")
+        };
+        return InventoryVersionTail.Append(NetCodec.EncodeItemList(message), message.Version);
+    }
+
     static byte[] EncodeSelf(EnterSelfSlot slot, int objectId) =>
         slot.Opcode switch
         {
             NetOpcode.EntitySpawn => NetCodec.EncodeEntitySpawn((EntitySpawnMsg)slot.Message!),
             NetOpcode.PlayerStats => NetCodec.EncodePlayerStats((Fineage.Net.Contract.PlayerStatsMsg)slot.Message!),
             NetOpcode.UserInfo => NetCodec.EncodeUserInfo(NetZoneServer.ToNetUserInfo((UserInfoMsg)slot.Message!)),
-            NetOpcode.ItemList => NetCodec.EncodeItemList(slot.Message switch
-            {
-                ItemListNetMsg ready => ready,
-                PlayerInventory inventory => NetEnterWorldProjector.BuildItems(inventory),
-                _ => throw new InvalidOperationException("enter ItemList slot requires ItemListNetMsg or PlayerInventory")
-            }),
+            NetOpcode.ItemList => EncodeItemList(slot),
             NetOpcode.SkillList => NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(slot.Message switch
             {
                 SkillListMsg list => list,

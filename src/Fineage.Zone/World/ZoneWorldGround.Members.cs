@@ -14,10 +14,7 @@ public sealed partial class ZoneWorld
     {
         if (looter.Inventory == null || looter.Session == null || count <= 0)
             return;
-        bool merged = looter.Inventory.FindByItemId(itemId) != null;
-        var added = looter.Inventory.Add(itemId, count);
-        var invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
+        looter.Inventory.Add(itemId, count);
         SaveInventory(looter.Session, looter.Inventory);
         if (notifyObtained)
             NotifyObtained(looter.Session, itemId, count);
@@ -96,11 +93,6 @@ public sealed partial class ZoneWorld
         move.Post(bag, item.ItemId, -count, PiecesOf([item]));
         move.Post(LedgerAccount.Of(SystemAccount.Destroyed), item.ItemId, count);
         move.Commit(LedgerHoldingsOf);
-
-        var invUpdate = removedEntirely
-            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
-            : InventoryMessages.Update(InventoryChange.Modify, item);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{count} all={removedEntirely}");
         return null;
@@ -144,8 +136,10 @@ public sealed partial class ZoneWorld
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
             // hid the slot on drag puts it back without a relog.
             ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.");
-            var keep = InventoryMessages.Update(InventoryChange.Modify, item);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], keep);
+            bool pending = player.Inventory.HasPendingChanges;
+            player.Inventory.NoteRefresh(item);
+            if (!pending)
+                PublishCommittedInventory(session, player.Inventory);
             ZoneLog.Info($"drop-bag refused far object={session.ObjectId} item={item.ItemId} player={player.X},{player.Y},{player.Z} at={dropX},{dropY},{dropZ}");
             return "range";
         }
@@ -165,13 +159,6 @@ public sealed partial class ZoneWorld
 
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
-
-        InventoryUpdateMsg invUpdate = removedEntirely
-            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
-            : InventoryMessages.Update(InventoryChange.Modify, item);
-
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
 
         var watchers = new List<ZoneEntity> { player };
         foreach (var other in Players())
@@ -194,7 +181,17 @@ public sealed partial class ZoneWorld
             piece: item.Template.Stackable ? null : item,
             reserveObjectId: item.Template.Stackable ? groundId : null);
         if (ground == null)
+        {
+            if (removedEntirely)
+                player.Inventory.Reinsert(item, count);
+            else
+                player.Inventory.RestoreCount(item, item.Count + count);
+            player.Inventory.DiscardChanges();
+            ZoneLog.Warn(
+                $"drop aborted: ground spawn failed char={session.ObjectId} item={itemId} objectId={objectId} count={count}");
             return "bad_request";
+        }
+
         move.Commit(LedgerHoldingsOf);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");

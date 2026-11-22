@@ -222,12 +222,10 @@ public sealed partial class ZoneWorld
 
         if (customerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([customer.ObjectId], new InventoryUpdateMsg { Changes = customerChanges.ToArray() });
             SelfUserInfo(customer);
         }
         if (makerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([maker.ObjectId], new InventoryUpdateMsg { Changes = makerChanges.ToArray() });
             SelfUserInfo(maker);
         }
 

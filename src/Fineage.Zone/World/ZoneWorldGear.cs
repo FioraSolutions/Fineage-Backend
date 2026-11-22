@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.Inventory;
 
@@ -107,10 +108,12 @@ public sealed partial class ZoneWorld
             if (item.IsEquipped)
                 RechargeAutoShots(player);
         }
-        if (!PublishGear(session, player, before))
+        if (PaperdollChanges(player.Inventory, before).Count == 0)
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
+        if (!PublishGear(session, player, before))
+            return "bad_request";
         if (item.IsEquipped)
             OnCursedWeaponEquipped(session, player, item);
         ZoneLog.Info($"gear object={session.ObjectId} use={objectId} equipped={item.IsEquipped}");
@@ -137,10 +140,12 @@ public sealed partial class ZoneWorld
             player.SpiritshotCharge = 0;
             player.FishShotCharged = false;
         }
-        if (!PublishGear(session, player, before))
+        if (PaperdollChanges(player.Inventory, before).Count == 0)
             return "bad_request";
 
         SaveInventory(session, player.Inventory);
+        if (!PublishGear(session, player, before))
+            return "bad_request";
         ZoneLog.Info($"gear object={session.ObjectId} unequip slot={paperdollSlot} item={liveItem.ObjectId}");
         return null;
     }
@@ -154,12 +159,16 @@ public sealed partial class ZoneWorld
         if (GearRules.GrantError(itemId, count, MaxGrantCount, _game.Items.TryGet(itemId, out _)) is { } giveError)
             return giveError;
 
-        var added = player.Inventory.Add(itemId, count);
-        // Net clients only read the PacketEnvelope path, so the V2 frame alone would leave the bag
-        // stale for an admin GiveItem.
-        NetBridge?.FanoutInventoryUpdate(
-            [session.ObjectId],
-            InventoryMessages.Update(InventoryChange.Add, added));
+        RecordBagChange(
+            player,
+            LedgerTxKind.GmGrant,
+            GmGrantSource,
+            () =>
+            {
+                player.Inventory.Add(itemId, count);
+                return count;
+            },
+            static given => given);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"give object={session.ObjectId} item={itemId} count={count}");
         return null;
@@ -180,34 +189,25 @@ public sealed partial class ZoneWorld
         if (itemId <= 0 || count <= 0 || !_game.Items.TryGet(itemId, out _))
             return "bad_request";
 
-        var touched = new List<Fineage.Game.ItemInstance>();
-        int left = count;
-        while (left > 0)
-        {
-            int chunk = Math.Min(left, MaxGrantCount);
-            touched.Add(player.Inventory.Add(itemId, chunk));
-            left -= chunk;
-        }
-
-        if (touched.Count > 0)
-        {
-            // A stackable row merges into one instance, so fan out distinct object ids only.
-            var changes = new List<InventoryUpdateEntryMsg>(touched.Count);
-            var seen = new HashSet<int>();
-            foreach (var item in touched)
+        RecordBagChange(
+            player,
+            LedgerTxKind.GmGrant,
+            GmGrantSource,
+            () =>
             {
-                if (!seen.Add(item.ObjectId))
-                    continue;
-                changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, item));
-            }
+                int left = count;
+                while (left > 0)
+                {
+                    int chunk = Math.Min(left, MaxGrantCount);
+                    player.Inventory.Add(itemId, chunk);
+                    left -= chunk;
+                }
 
-            NetBridge?.FanoutInventoryUpdate(
-                [session.ObjectId],
-                new InventoryUpdateMsg { Changes = changes.ToArray() });
-        }
-
+                return count;
+            },
+            static given => given);
+        SaveInventory(session, player.Inventory);
         ZoneLog.Info($"admin give object={session.ObjectId} item={itemId} count={count}");
-        RefreshWeightPenaltyAfterInventoryChange(session);
         return null;
     }
 

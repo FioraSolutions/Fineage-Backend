@@ -169,14 +169,12 @@ public sealed partial class ZoneWorld
         if (requestorChanges.Count > 0)
         {
             var inv = new InventoryUpdateMsg { Changes = requestorChanges.ToArray() };
-            NetBridge?.FanoutInventoryUpdate([requestor.ObjectId], inv);
             SelfUserInfo(requestor);
         }
 
         if (partnerChanges.Count > 0)
         {
             var inv = new InventoryUpdateMsg { Changes = partnerChanges.ToArray() };
-            NetBridge?.FanoutInventoryUpdate([partner.ObjectId], inv);
             SelfUserInfo(partner);
         }
 

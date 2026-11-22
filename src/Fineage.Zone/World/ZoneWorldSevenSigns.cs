@@ -128,7 +128,6 @@ public sealed partial class ZoneWorld
                 if (changes.Count > 0)
                 {
                     var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
                     SaveInventory(session, inventory);
                 }
 
@@ -168,7 +167,6 @@ public sealed partial class ZoneWorld
                 if (changes.Count > 0)
                 {
                     var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
                     SaveInventory(session, inventory);
                 }
 
@@ -222,7 +220,6 @@ public sealed partial class ZoneWorld
                 Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
                 Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
                 if (changes.Count > 0)
-                    NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                 GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
                 return (string?)null;
             },

@@ -27,6 +27,9 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(row.Option1);
                 w.WriteInt32(row.Option2);
             }
+
+            // The inventory version is not part of this body. The zone appends one little-endian int32
+            // (InventoryVersionTail) so a client that re-encodes with this method sees exactly four extra bytes.
         });
 
         public static ItemListNetMsg DecodeItemList(ReadOnlySpan<byte> p)
@@ -58,6 +61,8 @@ namespace Fineage.Net.Contract
                 }
             }
 
+            // A trailing int32 is the inventory version. It is not consumed here: Encode(Decode(payload))
+            // must equal the body, and the four extra bytes stay a tail.
             return new ItemListNetMsg { Items = rows };
         }
 

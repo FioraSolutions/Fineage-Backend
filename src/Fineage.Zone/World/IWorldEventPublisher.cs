@@ -82,6 +82,9 @@ interface IWorldEventPublisher
     /// <summary>Mobius InventoryUpdate to watchers. Called on the simulation thread.</summary>
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update);
 
+    /// <summary>Full ItemList resync. Called on the simulation thread after a gap or <c>RequestItemList</c>.</summary>
+    void FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list);
+
     /// <summary>Mobius CreatureSay to watchers. Called on the simulation thread.</summary>
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say);
 

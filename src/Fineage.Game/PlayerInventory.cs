@@ -41,16 +41,7 @@ public sealed partial class PlayerInventory
 
     public IReadOnlyList<ItemInstance> Items => _items;
 
-    public ItemInstance? Find(int objectId)
-    {
-        foreach (var item in _items)
-        {
-            if (item.ObjectId == objectId)
-                return item;
-        }
-
-        return null;
-    }
+    public ItemInstance? Find(int objectId) => _byObject.GetValueOrDefault(objectId);
 
     public int CountOf(int itemId)
     {

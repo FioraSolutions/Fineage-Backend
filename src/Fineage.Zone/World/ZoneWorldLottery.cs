@@ -254,8 +254,6 @@ public sealed partial class ZoneWorld
                 long adena = ticket != null && Lottery.Check(ticket.Serial) is { } win ? win.Adena : 0;
                 SelfLine(session, LotteryProtocol.Disappeared, $"{item.Template.Name} has disappeared.", item.Template.Name);
                 int left = inventory.TakeOne(item);
-                NetBridge?.FanoutInventoryUpdate([player.ObjectId],
-                    InventoryMessages.Update(left > 0 ? InventoryChange.Modify : InventoryChange.Remove, item));
                 if (adena > 0)
                 {
                     GiveItem(session, inventory, LotteryProtocol.AdenaItemId, (int)Math.Min(int.MaxValue, adena));

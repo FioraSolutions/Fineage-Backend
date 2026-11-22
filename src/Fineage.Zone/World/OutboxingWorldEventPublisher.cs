@@ -157,6 +157,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutInventoryUpdate), () => inner.FanoutInventoryUpdate(watcherObjectIdsCopy, update));
     }
 
+    void IWorldEventPublisher.FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutItemList), () => inner.FanoutItemList(watcherObjectIdsCopy, list));
+    }
+
     void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];

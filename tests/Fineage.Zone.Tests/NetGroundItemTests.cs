@@ -21,6 +21,8 @@ public sealed class NetGroundItemTests
         var kit = new NetTestKit();
         var (session, player) = await kit.EnterAsync();
         player.Inventory!.Add(Adena, 1000);
+        // The fixture add is not an action. Drop it from the journal so the action under test publishes only its own rows.
+        player.Inventory.DiscardChanges();
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
         return (kit, session, player, rec);

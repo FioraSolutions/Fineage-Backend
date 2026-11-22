@@ -178,24 +178,9 @@ public sealed partial class ZoneWorld
 
     void SendTouches(ZoneSession session, ShopMutation mutation)
     {
-        if (mutation.Touches.Count == 0)
-            return;
-        var changes = new InventoryUpdateEntryMsg[mutation.Touches.Count];
-        for (int i = 0; i < changes.Length; i++)
-        {
-            var touch = mutation.Touches[i];
-            int kind = touch.Kind switch
-            {
-                ShopTouchKind.Add => InventoryChange.Add,
-                ShopTouchKind.Remove => InventoryChange.Remove,
-                _ => InventoryChange.Modify
-            };
-            changes[i] = InventoryMessages.ChangeRow(kind, touch.Item);
-        }
-
-        var invUpdate = new InventoryUpdateMsg { Changes = changes };
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+        // The bag journal publishes one InventoryUpdate from SaveInventory after the shop move commits.
+        _ = session;
+        _ = mutation;
     }
 
     void SendComplete(ZoneSession session)

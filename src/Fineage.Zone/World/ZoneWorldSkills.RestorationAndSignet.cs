@@ -112,8 +112,6 @@ public sealed partial class ZoneWorld
                     granted.Add(stack);
             }
             foreach (var stack in granted)
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-                    InventoryMessages.Update(InventoryChange.Add, stack));
             foreach (var item in group.Items)
             {
                 string name = _game.Items.TryGet(item.Id, out var type) ? type.Name : item.Id.ToString();

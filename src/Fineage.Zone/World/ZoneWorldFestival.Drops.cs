@@ -16,9 +16,6 @@ public sealed partial class ZoneWorld
         int count = Math.Max(1, npc.FestivalOfferingBonus);
         var added = leader.Inventory.Add(_festivalCatalog.OfferingItemId, count);
         instance.OfferingScore += count * _festivalCatalog.OfferingValue;
-        NetBridge?.FanoutInventoryUpdate(
-            [leader.Session.ObjectId],
-            InventoryMessages.Update(InventoryChange.Add, added));
         SaveInventory(leader.Session, leader.Inventory);
     }
 }

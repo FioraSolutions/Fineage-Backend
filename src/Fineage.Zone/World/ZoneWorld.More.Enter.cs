@@ -189,9 +189,10 @@ public sealed partial class ZoneWorld
         var inventory = LoadInventory(session, stored);
         bool applyStarterKit = NeedsStarterInventory(stored);
         var vitals = LoadVitals(session, stored);
-        var warehouse = new PrivateWarehouse(_game.Items);
+        var warehouse = new PrivateWarehouse(_game.Items, _itemIds);
         if (stored?.Warehouse != null)
             warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("warehouse", session.ObjectId, warehouse);
         RememberPenalties(session, stored);
         var entity = new ZoneEntity
         {
@@ -259,6 +260,8 @@ public sealed partial class ZoneWorld
         _byId[entity.ObjectId] = entity;
         if (applyStarterKit)
             ApplyStarterKitLedger(entity);
+        // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.
+        entity.Inventory?.EstablishCursor();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
         _chat.Entered(entity.ObjectId, entity.Name);

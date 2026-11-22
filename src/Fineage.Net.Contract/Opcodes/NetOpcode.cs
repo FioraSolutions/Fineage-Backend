@@ -398,5 +398,11 @@ namespace Fineage.Net.Contract
         public const ushort EnchantSkillList = 0x03DF;
         /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
+        /// <summary>
+        /// Client → zone: ask for a fresh <see cref="ItemList"/>. Empty body.
+        /// This is the Fineage envelope opcode the client sends (RequestInventoryResync), the next world id
+        /// after <see cref="EnchantSkillInfo"/>. It is not the retail Interlude C2S byte 0x14.
+        /// </summary>
+        public const ushort RequestItemList = 0x03E1;
     }
 }

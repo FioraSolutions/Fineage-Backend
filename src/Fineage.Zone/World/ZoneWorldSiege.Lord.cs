@@ -219,8 +219,6 @@ public sealed partial class ZoneWorld
     {
         int before = inventory.CountOf(itemId);
         var stack = inventory.Add(itemId, count);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId],
-            InventoryMessages.Update(before == 0 ? InventoryChange.Add : InventoryChange.Modify, stack));
         SaveInventory(session, inventory);
     }
 
