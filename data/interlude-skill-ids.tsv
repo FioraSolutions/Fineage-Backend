@@ -1,0 +1,2701 @@
+id	name	levels
+1	Triple Slash	37
+2	Confusion	19
+3	Power Strike	9
+4	Dash	2
+5	Double Sonic Slash	31
+6	Sonic Blaster	37
+7	Sonic Storm	28
+8	Sonic Focus	7
+9	Sonic Buster	34
+10	Summon Storm Cubic	8
+11	Trick	12
+12	Switch	14
+13	Summon Siege Golem	1
+15	Charm	52
+16	Mortal Blow	24
+17	Force Burst	34
+18	Aura of Hate	37
+19	Double Shot	37
+21	Poison Recovery	3
+22	Summon Vampiric Cubic	7
+24	Burst Shot	31
+25	Summon Mechanic Golem	9
+27	Unlock	14
+28	Aggression	49
+29	Iron Punch	24
+30	Backstab	37
+33	Summon Phantom Cubic	8
+34	Bandage	3
+35	Force Storm	28
+36	Whirlwind	37
+42	Sweeper	1
+44	Remedy	3
+45	Divine Heal	9
+46	Life Scavenge	15
+48	Thunder Storm	37
+49	Holy Strike	26
+50	Focused Force	7
+51	Lure	1
+54	Force Blaster	49
+56	Power Shot	24
+58	Elemental Heal	55
+60	Fake Death	1
+61	Cure Bleeding	3
+65	Horror	13
+67	Summon Life Cubic	7
+69	Sacrifice	25
+70	Drain Health	53
+72	Iron Will	3
+75	Detect Insect Weakness	1
+76	Bear Spirit Totem	1
+77	Attack Aura	2
+78	War Cry	2
+80	Detect Beast Weakness	1
+81	Punch of Doom	3
+82	Majesty	3
+83	Wolf Spirit Totem	1
+84	Poison Blade Dance	3
+86	Reflect Damage	3
+87	Detect Animal Weakness	1
+88	Detect Dragon Weakness	1
+91	Defense Aura	2
+92	Shield Stun	52
+94	Rage	2
+95	Cripple	20
+96	Bleed	6
+97	Sanctuary	11
+98	Sword Symphony	5
+99	Rapid Shot	2
+100	Stun Attack	15
+101	Stunning Shot	40
+102	Entangle	16
+103	Corpse Plague	4
+104	Detect Plant Weakness	1
+105	Freezing Strike	24
+106	Veil	14
+107	Holy Aura	9
+109	Ogre Spirit Totem	1
+110	Ultimate Defense	2
+111	Ultimate Evasion	2
+112	Deflect Arrow	4
+113	Long Shot	2
+115	Power Break	17
+116	Howl	14
+118	Magician's Movement	1
+120	Stunning Fist	15
+121	Battle Roar	6
+122	Hex	15
+123	Spirit Barrier	3
+127	Hamstring	14
+129	Poison	5
+130	Thrill Fight	2
+131	Hawk Eye	3
+134	Toughness	1
+137	Critical Chance	3
+139	Guts	3
+141	Weapon Mastery	3
+142	Armor Mastery	5
+143	Cubic Mastery	2
+144	Dual Weapon Mastery	37
+146	Anti Magic	45
+147	Magic Resistance	51
+148	Vital Force	8
+150	Weight Limit	3
+153	Shield Mastery	4
+163	Spellcraft	1
+164	Quick Recovery	3
+165	Trade	5
+168	Boost Attack Speed	3
+169	Quick Step	2
+171	Esprit	8
+172	Create Item	9
+173	Acrobatics	2
+176	Frenzy	3
+181	Revival	1
+190	Fatal Strike	37
+191	Focus Mind	6
+193	Critical Power	6
+194	Lucky	1
+195	Breath Boost	2
+196	Holy Blade	1
+197	Holy Armor	2
+198	Boost Evasion	3
+205	Blunt Mastery	45
+208	Bow Mastery	52
+209	Dagger Mastery	45
+210	Fist Mastery	45
+211	Boost HP	10
+212	Fast HP Recovery	8
+213	Boost Mana	8
+214	Mana Recovery	1
+216	Polearm Mastery	45
+217	Sword Blunt Mastery	45
+221	Silent Move	1
+222	Fist Fury	1
+223	Sting	49
+225	Acrobatic Move	3
+226	Relax	1
+227	Light Armor Mastery	50
+228	Fast Spell Casting	3
+229	Fast Mana Recovery	7
+230	Sprint	2
+231	Heavy Armor Mastery	50
+232	Heavy Armor Mastery	52
+233	Light Armor Mastery	47
+234	Robe Mastery	41
+235	Robe Mastery	41
+236	Light Armor Mastery	41
+239	Expertise D	5
+244	Armor Mastery	3
+245	Wild Sweep	15
+246	Seal of Ruler	1
+247	Build Headquarters	1
+248	Crystallize	5
+249	Weapon Mastery	42
+250	Weapon Mastery	42
+251	Robe Mastery	45
+252	Light Armor Mastery	45
+253	Heavy Armor Mastery	43
+254	Spoil	11
+255	Power Smash	15
+256	Accuracy	1
+257	Sword Blunt Mastery	45
+258	Light Armor Mastery	33
+259	Heavy Armor Mastery	33
+260	Hammer Crush	37
+261	Triple Sonic Slash	22
+262	Holy Blessing	37
+263	Deadly Blow	37
+264	Song of Earth	1
+265	Song of Life	1
+266	Song of Water	1
+267	Song of Warding	1
+268	Song of Wind	1
+269	Song of Hunter	1
+270	Song of Invocation	1
+271	Dance of the Warrior	1
+272	Dance of Inspiration	1
+273	Dance of the Mystic	1
+274	Dance of Fire	1
+275	Dance of Fury	1
+276	Dance of Concentration	1
+277	Dance of Light	1
+278	Summon Viper Cubic	6
+279	Lightning Strike	5
+280	Burning Fist	37
+281	Soul Breaker	37
+282	Puma Spirit Totem	1
+283	Summon Dark Panther	7
+284	Hurricane Assault	40
+285	Higher Mana Gain	27
+286	Provoke	3
+287	Lionheart	3
+288	Guard Stance	4
+289	Life Leech	15
+290	Final Frenzy	14
+291	Final Fortress	11
+292	Bison Spirit Totem	1
+293	Two-handed Weapon Mastery	20
+294	Shadow Sense	1
+295	Iron Body	1
+296	Chameleon Rest	1
+297	Duelist Spirit	2
+298	Rabbit Spirit Totem	1
+299	Summon Wild Hog Cannon	1
+301	Summon Big Boom	5
+302	Spoil Festival	9
+303	Soul of Sagittarius	4
+304	Song of Vitality	1
+305	Song of Vengeance	1
+306	Song of Flame Guard	1
+307	Dance of Aqua Guard	1
+308	Song of Storm Guard	1
+309	Dance of Earth Guard	1
+310	Dance of the Vampire	1
+311	Dance of Protection	1
+312	Vicious Stance	20
+313	Snipe	8
+314	Fatal Counter	16
+315	Crush of Doom	16
+316	Aegis	1
+317	Focus Attack	5
+318	Aegis Stance	1
+319	Agile Movement	2
+320	Wrath	10
+321	Blinding Blow	10
+322	Shield Fortress	6
+323	Quiver of Arrow: Grade A	1
+324	Quiver of Arrow: Grade S	1
+325	Strider Siege Assault	1
+326	Build Advanced Headquarters	1
+327	Wyvern Aegis	1
+328	Wisdom	1
+329	Health	1
+330	Skill Mastery	1
+331	Skill Mastery	1
+332	Extra Inventory	1
+333	Extra Sales Slots	1
+334	Focus Skill Mastery	1
+335	Fortitude	1
+336	Arcane Wisdom	1
+337	Arcane Power	1
+338	Arcane Agility	1
+339	Parry Stance	1
+340	Riposte Stance	1
+341	Touch of Life	1
+342	Touch of Death	1
+343	Lethal Shot	1
+344	Lethal Blow	1
+345	Sonic Rage	1
+346	Raging Force	1
+347	Earthquake	1
+348	Spoil Crush	1
+349	Song of Renewal	1
+350	Physical Mirror	1
+351	Magical Mirror	1
+352	Shield Bash	1
+353	Shield Slam	1
+354	Hamstring Shot	1
+355	Focus Death	1
+356	Focus Chance	1
+357	Focus Power	1
+358	Bluff	1
+359	Eye of Hunter	1
+360	Eye of Slayer	1
+361	Shock Blast	1
+362	Armor Crush	1
+363	Song of Meditation	1
+364	Song of Champion	1
+365	Siren's Dance	1
+366	Dance of Shadows	1
+367	Dance of Medusa	1
+368	Vengeance	1
+369	Evade Shot	1
+370	Clan Vitality	3
+371	Clan Spirituality	3
+372	Clan Essence	3
+373	Clan Lifeblood	3
+374	Clan Morale	3
+375	Clan Clarity	3
+376	Clan Might	3
+377	Clan Aegis	3
+378	Clan Empowerment	3
+379	Clan Magic Protection	3
+380	Clan Guidance	3
+381	Clan Agility	3
+382	Clan Withstand-Attack	3
+383	Clan Shield Boost	3
+384	Clan Cyclonic Resistance	3
+385	Clan Magmatic Resistance	3
+386	Clan Fortitude	3
+387	Clan Freedom	3
+388	Clan Vigilance	3
+389	Clan March	3
+390	Clan Luck	3
+391	Clan Imperium	1
+392		1
+393		1
+394		1
+395	Heroic Miracle	1
+396	Heroic Berserker	1
+397		1
+398		1
+399		1
+400	Tribunal	10
+401	Judgment	10
+402	Arrest	10
+403	Shackle	10
+404	Mass Shackling	5
+405	Banish Undead	10
+406	Angelic Icon	3
+407	Psycho Symphony	10
+408	Demonic Blade Dance	10
+409	Critical Blow	10
+410	Mortal Strike	3
+411	Stealth	3
+412	Sand Bomb	10
+413	Rapid Fire	8
+414	Dead Eye	8
+415	Spirit of Sagittarius	3
+416	Blessing of Sagittarius	3
+417	Pain of Sagittarius	5
+418	Quiver of Holding	3
+419	Summon Treasure Key	4
+420	Zealot	3
+421	Fell Swoop	5
+422	Polearm Accuracy	3
+423	Infernal Form	3
+424	War Frenzy	3
+425	Hawk Spirit Totem	1
+426	Battle Force	1
+427	Spell Force	1
+428	Inner Rhythm	1
+429	Knighthood	1
+430	Master of Combat	1
+431	Archery	1
+432	Assassination	1
+433	Arcane Roar	1
+434	Necromancy	1
+435	Summon Lore	1
+436	Divine Lore	1
+437	Song of Silence	1
+438	Soul of the Phoenix	1
+439	Shield of Revenge	1
+440	Braveheart	1
+441	Force Meditation	1
+442	Sonic Barrier	1
+443	Force Barrier	1
+444	Festive Sweeper	1
+445	Mirage	1
+446	Dodge	1
+447	Counterattack	1
+448	Summon Swoop Cannon	1
+449	Summon Attractive Cubic	4
+450	Banish Seraph	10
+451	Sonic Move	2
+452	Shock Stomp	5
+453	Escape Shackle	1
+454	Symbol of Defense	1
+455	Symbol of Noise	1
+456	Symbol of Resistance	1
+457	Symbol of Honor	1
+458	Symbol of Energy	1
+459	Symbol of the Sniper	1
+460	Symbol of the Assassin	1
+461	Break Duress	2
+1001	Soul Cry	10
+1002	Flame Chant	3
+1003	Pa'agrian Gift	3
+1004	The Wisdom of Pa'agrio	3
+1005	Blessings of Pa'agrio	3
+1006	Chant of Fire	3
+1007	Chant of Battle	3
+1008	The Glory of Pa'agrio	3
+1009	Chant of Shielding	3
+1010	Soul Shield	3
+1011	Heal	18
+1012	Cure Poison	3
+1013	Recharge	32
+1015	Battle Heal	15
+1016	Resurrection	9
+1018	Purify	3
+1020	Vitalize	27
+1027	Group Heal	15
+1028	Might of Heaven	19
+1031	Disrupt Undead	8
+1032	Invigor	3
+1033	Resist Poison	3
+1034	Repose	13
+1035	Mental Shield	4
+1036	Magic Barrier	2
+1040	Shield	3
+1042	Hold Undead	12
+1043	Holy Weapon	1
+1044	Regeneration	3
+1045	Blessed Body	6
+1047	Mana Regeneration	4
+1048	Blessed Soul	6
+1049	Requiem	14
+1050	Return	2
+1056	Cancellation	12
+1059	Empower	3
+1062	Berserker Spirit	2
+1064	Silence	14
+1068	Might	3
+1069	Sleep	42
+1071	Surrender To Water	14
+1072	Sleeping Cloud	5
+1073	Kiss of Eva	2
+1074	Surrender To Wind	14
+1075	Peace	15
+1077	Focus	3
+1078	Concentration	6
+1083	Surrender To Fire	17
+1085	Acumen	3
+1086	Haste	2
+1087	Agility	3
+1090	Life Drain	6
+1092	Fear	19
+1095	Venom	5
+1096	Seal of Chaos	16
+1097	Dreaming Spirit	20
+1099	Seal of Slow	15
+1100	Chill Flame	2
+1101	Blaze Quake	2
+1102	Aura Sink	6
+1104	Seal of Winter	14
+1105	Madness	18
+1107	Frost Flame	2
+1108	Seal of Flame	4
+1111	Summon Kat the Cat	18
+1126	Servitor Recharge	34
+1127	Servitor Heal	45
+1128	Summon Shadow	18
+1129	Summon Reanimated Man	7
+1139	Servitor Magic Shield	2
+1140	Servitor Physical Shield	3
+1141	Servitor Haste	2
+1144	Servitor Wind Walk	2
+1145	Bright Servitor	3
+1146	Mighty Servitor	3
+1147	Vampiric Touch	6
+1148	Death Spike	13
+1151	Corpse Life Drain	16
+1154	Summon Corrupted Man	6
+1155	Corpse Burst	15
+1156	Forget	13
+1157	Body To Mind	5
+1159	Curse Death Link	22
+1160	Slow	15
+1163	Curse Discord	14
+1164	Curse: Weakness	19
+1167	Poisonous Cloud	6
+1168	Curse: Poison	7
+1169	Curse Fear	14
+1170	Anchor	13
+1171	Blazing Circle	19
+1172	Aura Burn	8
+1174	Frost Wall	22
+1175	Aqua Swirl	8
+1176	Tempest	15
+1177	Wind Strike	5
+1178	Twister	8
+1181	Flame Strike	3
+1182	Resist Aqua	3
+1183	Freezing Shackle	4
+1184	Ice Bolt	6
+1189	Resist Wind	3
+1191	Resist Fire	3
+1201	Dryad Root	33
+1204	Wind Walk	2
+1206	Wind Shackle	19
+1208	Seal of Binding	17
+1209	Seal of Poison	6
+1210	Seal of Gloom	4
+1213	Seal of Mirage	13
+1216	Self Heal	1
+1217	Greater Heal	33
+1218	Greater Battle Heal	33
+1219	Greater Group Heal	33
+1220	Blaze	8
+1222	Curse Chaos	15
+1223	Surrender To Earth	15
+1224	Surrender To Poison	17
+1225	Summon Mew the Cat	18
+1226	Summon Boxer the Unicorn	18
+1227	Summon Mirage the Unicorn	18
+1228	Summon Silhouette	18
+1229	Chant of Life	18
+1230	Prominence	28
+1231	Aura Flare	28
+1232	Blazing Skin	3
+1233	Decay	4
+1234	Vampiric Claw	28
+1235	Hydro Blast	28
+1236	Frost Bolt	19
+1237	Ice Dagger	17
+1238	Freezing Skin	3
+1239	Hurricane	28
+1240	Guidance	3
+1242	Death Whisper	3
+1243	Bless Shield	6
+1244	Freezing Flame	4
+1245	Steal Essence	14
+1246	Seal of Silence	12
+1247	Seal of Scourge	14
+1248	Seal of Suspension	12
+1249	The Vision of Pa'agrio	3
+1250	Under the Protection of Pa'agrio	3
+1251	Chant of Fury	2
+1252	Chant of Evasion	3
+1253	Chant of Rage	3
+1254	Mass Resurrection	6
+1255	Party Recall	2
+1256	The Heart of Pa'agrio	13
+1257	Decrease Weight	3
+1258	Restore Life	4
+1259	Resist Shock	4
+1260	The Tact of Pa'agrio	3
+1261	The Rage of Pa'agrio	2
+1262	Transfer Pain	5
+1263	Curse Gloom	13
+1264	Solar Spark	3
+1265	Solar Flare	14
+1266	Shadow Spark	3
+1267	Shadow Flare	14
+1268	Vampiric Rage	4
+1269	Curse Disease	9
+1271	Benediction	1
+1272	Word of Fear	13
+1273	Serenade of Eva	13
+1274	Energy Bolt	4
+1275	Aura Bolt	14
+1276	Summon Kai the Cat	14
+1277	Summon Merrow the Unicorn	14
+1278	Summon Soulless	14
+1279	Summon Binding Cubic	9
+1280	Summon Aqua Cubic	9
+1281	Summon Spark Cubic	9
+1282	Pa'agrian Haste	2
+1283	Soul Guard	13
+1284	Chant of Revenge	3
+1285	Seed of Fire	1
+1286	Seed of Water	1
+1287	Seed of Wind	1
+1288	Aura Symphony	1
+1289	Inferno	1
+1290	Blizzard	1
+1291	Demon Wind	1
+1292	Elemental Assault	1
+1293	Elemental Symphony	1
+1294	Elemental Storm	1
+1295	Aqua Splash	9
+1296	Rain of Fire	9
+1297	Clear Mind	6
+1298	Mass Slow	14
+1299	Servitor Empowerment	2
+1300	Servitor Cure	3
+1301	Servitor Blessing	1
+1303	Wild Magic	2
+1304	Advanced Block	3
+1305	The Honor of Pa'agrio	5
+1306	Ritual of Life	6
+1307	Prayer	3
+1308	Chant of Predator	3
+1309	Chant of Eagle	3
+1310	Chant of Vampire	4
+1311	Body of Avatar	6
+1312	Fishing	1
+1313	Pumping	27
+1314	Reeling	27
+1315	Fishing Expertise	27
+1316	Fishing Expertise -C-Grade	1
+1317	Fishing Expertise -B-Grade	1
+1318	Fishing Expertise -A-Grade	1
+1319	Fishing Expertise -S-Grade	1
+1320	Create Common Item	9
+1321	Dwarven Craft	1
+1322	Common Craft	1
+1323	Noblesse Blessing	1
+1324	Summon CP Potion	1
+1325	Fortune of Noblesse	1
+1326	Harmony of Noblesse	1
+1327	Symphony of Noblesse	1
+1328	Mass Summon Storm Cubic	8
+1329	Mass Summon Aqua Cubic	9
+1330	Mass Summon Phantom Cubic	8
+1331	Summon Feline Queen	10
+1332	Summon Unicorn Seraphim	10
+1333	Summon Nightshade	10
+1334	Summon Cursed Man	7
+1335	Balance Life	1
+1336	Curse of Doom	1
+1337	Curse of Abyss	1
+1338	Arcane Chaos	1
+1339	Fire Vortex	1
+1340	Ice Vortex	1
+1341	Wind Vortex	1
+1342	Light Vortex	1
+1343	Dark Vortex	1
+1344	Mass Warrior Bane	1
+1345	Mass Mage Bane	1
+1346	Warrior Servitor	1
+1347	Wizard Servitor	1
+1348	Assassin Servitor	1
+1349	Final Servitor	1
+1350	Warrior Bane	1
+1351	Mage Bane	1
+1352	Elemental Protection	1
+1353	Divine Protection	1
+1354	Arcane Protection	1
+1355	Prophecy of Water	1
+1356	Prophecy of Fire	1
+1357	Prophecy of Wind	1
+1358	Block Shield	1
+1359	Block Wind Walk	1
+1360	Mass Block Shield	1
+1361	Mass Block Wind Walk	1
+1362	Chant of Spirit	1
+1363	Chant of Victory	1
+1364	The Eye of Pa'agrio	1
+1365	The Soul of Pa'agrio	1
+1366	Seal of Despair	1
+1367	Seal of Disease	1
+1368	Expand Dwarven Craft	8
+1369	Expand Common Craft	8
+1370	Expand Trade	8
+1371	Expand Storage	8
+1372	Expand Inventory	8
+1373	Strider Mastery	1
+1374	Heroic Valor	1
+1375	Heroic Grandeur	1
+1376	Heroic Dread	1
+1377		1
+1378		1
+1379		1
+1380	Betray	10
+1381	Mass Fear	5
+1382	Mass Gloom	5
+1383	Mass Surrender to Fire	5
+1384	Mass Surrender to Water	5
+1385	Mass Surrender to Wind	5
+1386	Arcane Disruption	10
+1387	Summon Cursed Bones	3
+1388	Greater Might	3
+1389	Greater Shield	3
+1390	War Chant	3
+1391	Earth Chant	3
+1392	Holy Resistance	3
+1393	Unholy Resistance	3
+1394	Trance	10
+1395	Erase	10
+1396	Magical Backfire	10
+1397	Clarity	3
+1398	Mana Burn	10
+1399	Mana Storm	5
+1400	Turn Undead	10
+1401	Major Heal	11
+1402	Major Group Heal	5
+1403	Summon Friend	1
+1404	Word of Invitation	1
+1405	Divine Inspiration	4
+1406	Summon Feline King	1
+1407	Summon Magnus the Unicorn	1
+1408	Summon Spectral Lord	1
+1409	Cleanse	1
+1410	Salvation	1
+1411	Mystic Immunity	1
+1412	Spell Turning	1
+1413	Magnus' Chant	1
+1414	Victories of Pa'agrio	1
+1415	Pa'agrio's Emblem	1
+1416	Pa'agrio's Fist	1
+1417	Aura Flash	5
+1418	Celestial Shield	1
+1419	Volcano	1
+1420	Cyclone	1
+1421	Raging Waves	1
+1422	Day of Doom	1
+1423	Gehenna	1
+1424	Anti-Summoning Field	1
+1425	Purification Field	1
+1426	Miracle	1
+1427	Flames of Invincibility	1
+1428	Mass Recharge	1
+1429	Gate Chant	1
+1430	Invocation	5
+2001	Red Potion	1
+2002	Healing Drug	1
+2003	Squash Seed	1
+2004	Large Squash Seed	1
+2005	Pollen	1
+2006	Scroll: Enchant Weapon (Grade A)	1
+2007	Scroll: Enchant Armor (Grade A)	1
+2008	Item - Beast Spirit Shot	1
+2009	Item - Beast Blessed Spirit Shot	1
+2010	Endeavor Potion	1
+2011	Haste Potion	1
+2012	Potion of Alacrity	1
+2013	Scroll of Escape	1
+2014	Scroll of Resurrection	1
+2015	Scroll: Enchant Weapon (Grade B)	1
+2016	Scroll: Enchant Armor (Grade B)	1
+2017	Scroll: Enchant Weapon (Grade C)	1
+2018	Scroll: Enchant Armor (Grade C)	1
+2019	Scroll: Enchant Weapon (Grade D)	1
+2020	Scroll: Enchant Armor (Grade D)	1
+2021	Scroll: Enchant Weapon (Grade S)	1
+2022	Scroll: Enchant Armor (Grade S)	1
+2023	Elven Firework	1
+2024	Firework	1
+2025	Large Firework	1
+2026	Scroll: Enchant Weapon (Grade S)	1
+2027	Scroll: Enchant Weapon (Grade A)	1
+2028	Scroll: Enchant Weapon (Grade B)	1
+2029	Scroll: Enchant Weapon (Grade C)	1
+2030	Scroll: Enchant Weapon (Grade D)	1
+2031	Lesser Healing Potion	1
+2032	Healing Potion	1
+2033	Item - Beast Soul Shot	1
+2034	Greater Haste Potion	1
+2035	Greater Swift Attack Potion	1
+2036	Blessed Scroll of Escape	2
+2037	Greater Healing Potion	1
+2038	Quick Healing Potion	1
+2039	Soulshot: No Grade	1
+2040	Scroll of Escape: Clan Hall	1
+2041	Scroll of Escape: Castle	1
+2042	Antidote	1
+2043	Greater Antidote	1
+2044	Bandage	1
+2045	Emergency Dressing	1
+2046	Wolves' Necklace	1
+2047	Spiritshot: No Grade	1
+2048	Wolves' Food	1
+2049	Blessed Scroll of Resurrection	1
+2050	Scroll of Guidance	1
+2051	Scroll of Death Whisper	1
+2052	Scroll of Focus	1
+2053	Scroll of Greater Acumen	1
+2054	Scroll of Haste	1
+2055	Scroll of Agility	1
+2056	Scroll of Mystic Empower	1
+2057	Scroll of Might	1
+2058	Scroll of Wind Walk	1
+2059	Scroll of Shield	1
+2060	Healing Medicine	1
+2061	Blessed Spiritshot: No Grade	1
+2062		1
+2063	Hatchling Food	1
+2064	Scroll of Mana Regeneration	1
+2065	Box Key	8
+2066	Item - Theme Sound Crystal	1
+2067	Item - Theme Sound Crystal	1
+2068	Item - Race Sound Crystal	1
+2069	Item - Race Sound Crystal	1
+2070	Item - Race Sound Crystal	1
+2071	Item - Race Sound Crystal	1
+2072	Item - Race Sound Crystal	1
+2073	Item - Theme Sound Crystal	1
+2074	Potion of Critical Escape	1
+2075	Decrease Hate Scroll	1
+2076	Bless of Eva	1
+2077	Potion of Revenge	1
+2078	Compressed Package of Soulshots: No Grade	1
+2079	Compressed Package of Soulshots: D-grade	1
+2080	Compressed Package of Soulshots: C-grade	1
+2081	Compressed Package of Soulshots: B-grade	1
+2082	Compressed Package of Soulshots: A-grade	1
+2083	Compressed Package of Soulshots: S-grade	1
+2084	Compressed Package of Spiritshots: No Grade	1
+2085	Compressed Package of Spiritshots: D-grade	1
+2086	Compressed Package of Spiritshots: C-grade	1
+2087	Compressed Package of Spiritshots: B-grade	1
+2088	Compressed Package of Spiritshots: A-grade	1
+2089	Compressed Package of Spiritshots: S-grade	1
+2090	Compressed Package of Blessed Spiritshots: No Grade	1
+2091	Compressed Package of Blessed Spiritshots: D-grade	1
+2092	Compressed Package of Blessed Spiritshots: C-grade	1
+2093	Compressed Package of Blessed Spiritshots: B-grade	1
+2094	Compressed Package of Blessed Spiritshots: A-grade	1
+2095	Compressed Package of Blessed Spiritshots: S-grade	1
+2096	Soul Crystal	1
+2097	Sowing	3
+2098	Harvesting	1
+2099	Escape: 5 minutes	1
+2100	Escape: 1 second	1
+2101	Feed: General Strider	1
+2102	Feed: Clan Hall Strider	1
+2103	Mystery Potion	1
+2104	Greater Compressed Package of Soulshots: No-grade	1
+2105	Greater Compressed Package of Soulshots: D-grade	1
+2106	Greater Compressed Package of Soulshots: C-grade	1
+2107	Greater Compressed Package of Soulshots: B-grade	1
+2108	Greater Compressed Package of Soulshots: A-grade	1
+2109	Greater Compressed Package of Soulshots: S-grade	1
+2110	Greater Compressed Package of Spiritshots: No-grade	1
+2111	Greater Compressed Package of Spiritshots: D-grade	1
+2112	Greater Compressed Package of Spiritshots: C-grade	1
+2113	Greater Compressed Package of Spiritshots: B-grade	1
+2114	Greater Compressed Package of Spiritshots: A-grade	1
+2115	Greater Compressed Package of Spiritshots: S-grade	1
+2116	Greater Compressed Package of Blessed Spiritshots: No-grade	1
+2117	Greater Compressed Package of Blessed Spiritshots: D-grade	1
+2118	Greater Compressed Package of Blessed Spiritshots: C-grade	1
+2119	Greater Compressed Package of Blessed Spiritshots: B-grade	1
+2120	Greater Compressed Package of Blessed Spiritshots: A-grade	1
+2121	Greater Compressed Package of Blessed Spiritshots: S-grade	1
+2122	Facelifting Potion	1
+2123	Facelifting Potion	1
+2124	Facelifting Potion	1
+2125	Dye Potion	1
+2126	Dye Potion	1
+2127	Dye Potion	1
+2128	Dye Potion	1
+2129	Hair Style Change Potion	1
+2130	Hair Style Change Potion	1
+2131	Hair Style Change Potion	1
+2132	Hair Style Change Potion	1
+2133	Hair Style Change Potion	1
+2134	Hair Style Change Potion	1
+2135	Hair Style Change Potion	1
+2136	Rice Cake	1
+2137	Summon Regular Tree	1
+2138	Summon Special Tree	1
+2139	Special Tree Recovery Bonus	1
+2140	Item - Carol Sound Crystal	1
+2141	Item - Carol Sound Crystal	1
+2142	Item - Carol Sound Crystal	1
+2143	Item - Carol Sound Crystal	1
+2144	Item - Carol Sound Crystal	1
+2145	Item - Carol Sound Crystal	1
+2146	Item - Carol Sound Crystal	1
+2147	Item - Carol Sound Crystal	1
+2148	Item - Carol Sound Crystal	1
+2149	Item - Carol Sound Crystal	1
+2150	Soulshot: D-Grade	1
+2151	Soulshot: C-Grade	1
+2152	Soulshot: B-Grade	1
+2153	Soulshot: A-Grade	1
+2154	Soulshot: S-Grade	1
+2155	Spiritshot: D-Grade	1
+2156	Spiritshot: C-Grade	1
+2157	Spiritshot: B-Grade	1
+2158	Spiritshot: A-Grade	1
+2159	Spiritshot: S-Grade	1
+2160	Blessed Spiritshot: D-Grade	1
+2161	Blessed Spiritshot: C-Grade	1
+2162	Blessed Spiritshot: B-Grade	1
+2163	Blessed Spiritshot: A-Grade	1
+2164	Blessed Spiritshot: S-Grade	1
+2165	Energy Stone	1
+2166	CP Gauge Potion	2
+2167	Scroll of SP	3
+2168	Raid Blessing	6
+2169	Magic Haste Potion	2
+2170	Scroll: Cancel Sleep	1
+2171	Spellbook Paper	1
+2172	Scroll of Giants	1
+2173	Book of Giants	1
+2174	Ingredient Bag	3
+2175	Ingredient Box	1
+2176	Ancient Papyrus	4
+2177	Blessed Scroll of Escape: Clan Hall	1
+2178	Blessed Scroll of Escape: Castle	1
+2179	Blessed Scroll of Resurrection: Pet	1
+2180	Feed: Castle Strider	1
+2181	Item - Fishing Shot	1
+2182	Item - Fishing Shot	1
+2183	Item - Fishing Shot	1
+2184	Item - Fishing Shot	1
+2185	Item - Fishing Shot	1
+2186	Item - Fishing Shot	1
+2187	Item - Special Sound Crystal	1
+2188	Golden Spice	1
+2189	Crystal Spice	1
+2190	Item - Green Fish	9
+2191	Item - Jade Fish	9
+2192	Item - Blue Fish	9
+2193	Item - Yellow Fish	9
+2194	Item - Orange Fish	9
+2195	Item - Violet Fish	9
+2196	Item - Red Fish	9
+2197	Item - White Fish	9
+2198	Item - Black Fish	9
+2199	Item - Green Treasure Box	3
+2200	Item - Jade Treasure Box	3
+2201	Item - Blue Treasure Box	3
+2202	Item - Yellow Treasure Box	3
+2203	Item - Orange Treasure Box	3
+2204	Item - Violet Treasure Box	3
+2205	Item - Red Treasure Box	3
+2206	Item - White Treasure Box	3
+2207	Item - Black Treasure Box	3
+2208	Item - Blessed Scroll of Enchant Armor	1
+2209	Item - Blessed Scroll of Enchant Armor	1
+2210	Item - Blessed Scroll of Enchant Armor	1
+2211	Item - Blessed Scroll of Enchant Armor	1
+2212	Item - Blessed Scroll of Enchant Armor	1
+2213	Escape - Talking Island Village	21
+2214	Scroll of Escape to Giran Castle Town	10
+2215	Item - Quest Special Box	4
+2216	Item - Quest Special Fish	4
+2217	Item - Quest Treasure Box	5
+2218	Item - Quest Sac	3
+2219	Item - Quest Sac	2
+2220	Item - Easy Green Fish	9
+2221	Item - Easy Jade Fish	9
+2222	Item - Easy Blue Fish	9
+2223	Item - Easy Yellow Fish	9
+2224	Item - Easy Orange Fish	9
+2225	Item - Easy Violet Fish	9
+2226	Item - Easy Red Fish	9
+2227	Item - Easy White Fish	9
+2228	Item - Easy Black Fish	9
+2229	Treasure Chest Key - 1	8
+2230	Item - Theme Sound Crystal	1
+2231	Amulet: Protection of Valakas	1
+2232	Amulet: Slay Valakas	1
+2233	Amulet: Flames of Valakas	1
+2234	Disrupting Arrow	1
+2235	Anteroom Door Key	1
+2236	Chapel Door Key	1
+2237	Altar Door Key	1
+2238	Room of Splendor Key	1
+2239	Petrifaction Scroll	1
+2240	Hot Spring Nectar	1
+2241	Hot Spring Mineral Water	1
+2242	Hot Spring Fountain Water	1
+2243	Hot Spring Sulfur	1
+2244	Herb of Life	1
+2245	Herb of Mana	1
+2246	Herb of Power	1
+2247	Herb of Magic	1
+2248	Bless of Fire	1
+2249	Bless of Water	1
+2250	Bless of Wind	1
+2251	Bless of Earth	1
+2252	Bless of Darkness	1
+2253	Bless of Sacredness	1
+2254	Crystal of Fire	3
+2255	Crystal of Water	3
+2256	Crystal of Wind	3
+2257	Crystal of Earth	3
+2258	Crystal of Darkness	3
+2259	Crystal of Sacredness	3
+2260	Key of Riddles	1
+2261	Item - Hard Green Fish	9
+2262	Item - Hard Jade Fish	9
+2263	Item - Hard Blue Fish	9
+2264	Item - Hard Yellow Fish	9
+2265	Item - Hard Orange Fish	9
+2266	Item - Hard Violet Fish	9
+2267	Item - Hard Red Fish	9
+2268	Item - Hard White Fish	9
+2269	Item - Hard Black Fish	9
+2270	Item - Adventurer Box	7
+2271	Item - Hot Spring Fish	1
+2272	Item - Fight Song Crystal	1
+2273	Item - Red Devil Support Box	1
+2274	Fisherman's Potion – Green	8
+2275	Fisherman's Recovery Potion	1
+2276	Dewdrop of Destruction	1
+2277	Event Gift Box	6
+2278	Superior Herb of Life	3
+2279	Superior Herb of Mana	3
+2280	Herb of Power	1
+2281	Herb of Magic	1
+2282	Herb of Atk. Spd.	1
+2283	Herb of Casting Spd.	1
+2284	Herb of Critical Attack	1
+2285	Herb of Speed	1
+2286	Scroll: Recovery (Grade S)	6
+2287	Elixir of Life (Grade S)	6
+2288	Elixir of Mental Strength (Grade S)	6
+2289	Elixir of CP (Grade S)	6
+2290	Coffer of Shadows	1
+2291	Facelifting Potion	1
+2292	Facelifting Potion	1
+2293	Facelifting Potion	1
+2294	Dye Potion	1
+2295	Dye Potion	1
+2296	Dye Potion	1
+2297	Dye Potion	1
+2298	Hair Style Change Potion	1
+2299	Hair Style Change Potion	1
+2300	Hair Style Change Potion	1
+2301	Hair Style Change Potion	1
+2302	Hair Style Change Potion	1
+2303	Hair Style Change Potion	1
+2304	Hair Style Change Potion	1
+2305	Primeval Potion	1
+2306	Red Primeval Crystal	3
+2307	Remove Petrification Scroll	1
+2308	Event Item	36
+2309	Pig Chest	1
+2310	Scroll of Guidance - Event Use	1
+2311	Scroll of Death Whisper - Event Use	1
+2312	Scroll of Focus - Event Use	1
+2313	Scroll of Acumen - Event Use	1
+2314	Scroll of Haste - Event Use	1
+2315	Scroll of Agility - Event Use	1
+2316	Scroll of Empower - Event Use	1
+2317	Scroll of Might - Event Use	1
+2318	Scroll of Wind Walk - Event Use	1
+2319	Scroll of Shield - Event Use	1
+2320	Blessed Scroll of Escape - Event Use	1
+2321	Blessed Scroll of Resurrection - Event Use	1
+2322	Chest Key - For Events Only	1
+2323	Red Sage's Stone	1
+2324	Blue Sage's Stone	1
+2325	Orange Sage's Stone	1
+2326	Black Sage's Stone	1
+2327	White Sage's Stone	1
+2328	Green Sage's Stone	1
+3001	int_1	1
+3002	int_2	1
+3003	str_2	1
+3004	maxmp_5	1
+3005	Bleed	1
+3006	Equip Set Items	1
+3007	Special Ability: Guidance	6
+3008	Special Ability: Guidance	6
+3009	Special Ability: Evasion	6
+3010	Special Ability: Focus	7
+3011	Special Ability: Focus	6
+3012	Special Ability: Anger	6
+3013	Special Ability: Health	5
+3014	Special Ability: Mana Up	3
+3016	Special Ability: Critical Stun	6
+3018	Special Ability: Back Blow	6
+3019	Special Ability: Back Blow	6
+3020	Special Ability: Critical Bleed	6
+3021	Special Ability: Critical Bleed	6
+3022	Special Ability: Critical Drain	6
+3023	Special Ability: Critical Damage	6
+3024	Special Ability: Critical Poison	6
+3025	Special Ability: Critical Anger	6
+3026	Special Ability: Critical Anger	6
+3027	Special Ability: Rsk. Focus	6
+3028	Special Ability: Rsk. Evasion	6
+3029	Special Ability: Rsk. Evasion	6
+3030	Special Ability: Rsk. Evasion	6
+3031	Special Ability: Rsk. Evasion	6
+3032	Special Ability: Rsk. Haste	6
+3033	Special Ability: Rsk. Haste	6
+3034	Special Ability: Rsk. Haste	6
+3035	Special Ability: Mighty Mortal	6
+3036	Special Ability: Haste	6
+3037	Special Ability: Haste	6
+3038	Special Ability: Haste	6
+3039	Special Ability: Crt. Drain	7
+3040	Special Ability: Critical Poison	6
+3041	Special Ability: Critical Poison	6
+3042	Special Ability: Critical Damage	20
+3043	Special Ability: Critical Damage	6
+3044	Special Ability: Focus	20
+3045	Special Ability: Haste	20
+3046	Special Ability: Guidance	20
+3047	Special Ability: Acumen	3
+3048	Special Ability: Conversion	3
+3049	Magic Damage: Increase Critical	2
+3050	Special Ability: Focus	2
+3051	Special Ability: Focus	2
+3052	Special Ability: Critical Bleed	2
+3053	Special Ability: Critical Bleed	2
+3054	Special Ability: Critical Bleed	2
+3055	Special Ability: Critical Bleed	2
+3056	Special Ability: Rsk. Haste	3
+3057	Special Ability: Anger	3
+3058	Special Ability: Anger	2
+3059	Special Ability: Critical Drain	2
+3060	Special Ability: Critical Drain	2
+3061	Special Ability: Critical Poison	3
+3062	Special Ability: Critical Poison	2
+3063	Special Ability: Back Blow	2
+3064	Special Ability: Guidance	1
+3065	Special Ability: Guidance	1
+3066	Special Ability: Critical Damage	3
+3067	Special Ability: Critical Damage	2
+3068	Special Ability: Haste	3
+3069	Special Ability: Risky Evasion	1
+3070	Special Ability: Critical Stun	3
+3071	Special Ability: Rsk. Focus	2
+3072	Special Ability: Empower	2
+3073	Special Ability: Magic Power	2
+3074	Special Ability: Magic Silence	2
+3075	Special Ability: Magic Paralyze	2
+3076	Special Ability: Empower	6
+3077	Special Ability: Magic Power	6
+3078	Special Ability: Magic Silence	6
+3079	Special Ability: Magic Paralyze	6
+3080	Item Skill: Aggression	10
+3081	Item Skill: Charm	10
+3082	Item Skill: Mana Burn	10
+3083	Item Skill: Slow	10
+3084	Item Skill: Winter	10
+3085	Item Skill: Stun	10
+3086	Item Skill: Hold	10
+3087	Item Skill: Sleep	10
+3088	Item Skill: Paralyze	10
+3089	Item Skill: Medusa	10
+3090	Item Skill: Fear	10
+3091	Item Skill: Poison	10
+3092	Item Skill: Bleed	10
+3093	Item Skill: Silence	10
+3094	Item Skill: Doom	10
+3095	Item Skill: Mana Burn	10
+3096	Item Skill: Slow	10
+3097	Item Skill: Winter	10
+3098	Item Skill: Stun	10
+3099	Item Skill: Hold	10
+3100	Item Skill: Sleep	10
+3101	Item Skill: Paralyze	10
+3102	Item Skill: Medusa	10
+3103	Item Skill: Fear	10
+3104	Item Skill: Poison	10
+3105	Item Skill: Bleed	10
+3106	Item Skill: Silence	10
+3107	Item Skill: Doom	10
+3108	Item Skill: Aggression Up	10
+3109	Item Skill: Aggression Down	10
+3110	Item Skill: Mana Burn	10
+3111	Item Skill: Slow	10
+3112	Item Skill: Winter	10
+3113	Item Skill: Stun	10
+3114	Item Skill: Hold	10
+3115	Item Skill: Sleep	10
+3116	Item Skill: Paralyze	10
+3117	Item Skill: Medusa	10
+3118	Item Skill: Fear	10
+3119	Item Skill: Poison	10
+3120	Item Skill: Bleed	10
+3121	Item Skill: Silence	10
+3122	Item Skill: Doom	10
+3123	Item Skill: Heal	10
+3124	Item Skill: Blessed Body	10
+3125	Item Skill: Battle Roar	10
+3126	Item Skill: Prayer	10
+3127	Item Skill: Recharge	10
+3128	Item Skill: Blessed Soul	10
+3129	Item Skill: Mana Gain	10
+3130	Item Skill: Ritual	10
+3131	Item Skill: Cheer	10
+3132	Item Skill: Might	10
+3133	Item Skill: Empower	10
+3134	Item Skill: Duel Might	10
+3135	Item Skill: Shield	10
+3136	Item Skill: Magic Barrier	10
+3137	Item Skill: Duel Weakness	10
+3138	Item Skill: Heal Empower	10
+3139	Item Skill: Agility	10
+3140	Item Skill: Guidance	10
+3141	Item Skill: Focus	10
+3142	Item Skill: Wild Magic	10
+3143	Item Skill: Kiss of Eva	10
+3144	Item Skill: Acrobatics	10
+3145	Item Skill: Iron Body	10
+3146	Item Skill: Recall	1
+3147	Item Skill: Recall	1
+3148	Item Skill: Vampiric Rage	10
+3149	Item Skill: Aggression	10
+3150	Item Skill: Charm	10
+3151	Item Skill: Peace	10
+3152	Item Skill: Trick	10
+3153	Item Skill: Vampiric Touch	10
+3154	Item Skill: Mana Burn	10
+3155	Item Skill: Unlock	10
+3156	Item Skill: Firework	1
+3157	Item Skill: Large Firework	1
+3158	Item Skill: Celestial Shield	1
+3159	Item Skill: Stealth	3
+3160	Item Skill: Resurrection	9
+3161	Item Skill: Skill Clarity	3
+3162	Item Skill: Spell Clarity	3
+3163	Item Skill: Music Clarity	3
+3164	Item Skill: Clarity	3
+3165	Item Skill: Prominence	10
+3167	Item Skill: Hydro Blast	10
+3168	Item Skill: Hurricane	10
+3169	Item Skill: Stone	10
+3170	Item Skill: Solar Flare	10
+3171	Item Skill: Shadow Flare	10
+3172	Item Skill: Aura Flare	10
+3173	Item Skill: Prominence	10
+3174	Item Skill: Hydro Blast	10
+3175	Item Skill: Hurricane	10
+3176	Item Skill: Stone	10
+3177	Item Skill: Solar Flare	10
+3178	Item Skill: Shadow Flare	10
+3179	Item Skill: Aura Flare	10
+3180	Item Skill: Prominence	10
+3181	Item Skill: Hydro Blast	10
+3182	Item Skill: Hurricane	10
+3183	Item Skill: Stone	10
+3184	Item Skill: Solar Flare	10
+3185	Item Skill: Shadow Flare	10
+3186	Item Skill: Aura Flare	10
+3187	Item Skill: Slow	10
+3188	Item Skill: Winter	10
+3189	Item Skill: Stun	10
+3190	Item Skill: Hold	10
+3191	Item Skill: Sleep	10
+3192	Item Skill: Paralyze	10
+3193	Item Skill: Medusa	10
+3194	Item Skill: Fear	10
+3195	Item Skill: Poison	10
+3196	Item Skill: Bleed	10
+3197	Item Skill: Silence	10
+3198	Item Skill: Doom	10
+3199	Item Skill: Skill Refresh	3
+3200	Item Skill: Spell Refresh	3
+3201	Item Skill: Music Refresh	3
+3202	Item Skill: Refresh	3
+3203	Item Skill: Mystery Skill	1
+3204	Item Skill: Reflect Damage	3
+3205	Item Skill: Party Recall	2
+3206	Item Skill: Music	10
+3207	Item Skill: Heal	10
+3208	Item Skill: Blessed Body	10
+3209	Item Skill: Prayer	10
+3210	Item Skill: Recharge	10
+3211	Item Skill: Blessed Soul	10
+3212	Item Skill: Mana Gain	10
+3213	Item Skill: Ritual	10
+3214	Item Skill: Cheer	10
+3215	Item Skill: Might	10
+3216	Item Skill: Empower	10
+3217	Item Skill: Duel Might	10
+3218	Item Skill: Shield	10
+3219	Item Skill: Magic Barrier	10
+3220	Item Skill: Duel Weakness	10
+3221	Item Skill: Agility	10
+3222	Item Skill: Guidance	10
+3223	Item Skill: Focus	10
+3224	Item Skill: Wild Magic	10
+3225	Item Skill: Charm	10
+3226	Item Skill: Slow	10
+3227	Item Skill: Winter	10
+3228	Item Skill: Stun	10
+3229	Item Skill: Hold	10
+3230	Item Skill: Sleep	10
+3231	Item Skill: Paralyze	10
+3232	Item Skill: Medusa	10
+3233	Item Skill: Fear	10
+3234	Item Skill: Poison	10
+3235	Item Skill: Bleed	10
+3236	Item Skill: Silence	10
+3237	Item Skill: Doom	10
+3238	Item Skill: Prayer	10
+3239	Item Skill: Mana Gain	10
+3240	Item Skill: Might	10
+3241	Item Skill: Empower	10
+3243	Item Skill: Duel Might	10
+3244	Item Skill: Shield	10
+3245	Item Skill: Magic Barrier	10
+3246	Item Skill: Heal Empower	10
+3247	Item Skill: Agility	10
+3248	Item Skill: Guidance	10
+3249	Item Skill: Focus	10
+3250	Item Skill: Wild Magic	10
+3251	Item Skill: Weight Limit	10
+3252	Item Skill: Kiss of Eva	10
+3253	Item Skill: Acrobatics	10
+3254	Item Skill: Iron Body	10
+3255	Item Skill: Skill Clarity	3
+3256	Item Skill: Spell Clarity	3
+3257	Item Skill: Music Clarity	3
+3258	Item Skill: Clarity	3
+3259	Item Skill: Reflect Damage	3
+3260	Forgiveness	1
+3261	Happiness	1
+3262	Pardon	1
+3263	Blessed Resurrection	1
+3264	Blessed Escape	1
+3265	Mysterious Ability	1
+3266	Large Fireworks Ability	1
+3500	Wooden Set	1
+3501	Devotion Set	1
+3502	Mithril Heavy Armor Set	1
+3503	Reinforced Leather Set	1
+3504	Knowledge Set	1
+3505	Manticore Set	1
+3506	Brigandine Set	1
+3507	Elven Mithril Set	1
+3508	Mithril Light Armor Set	1
+3509	Chain Mail Set	1
+3510	Karmian Set	1
+3511	Plated Leather Set	1
+3512	Composite Heavy Armor Set	1
+3513	Demon's Set	1
+3514	Theca Leather Light Armor Set	1
+3515	Drake Leather Set	1
+3516	Full Plate Set	1
+3517	Divine Set	1
+3518	Zubei's Heavy Armor Set	1
+3519	Avadon Breastplate Heavy Armor Set	1
+3520	Zubei's Leather Shirt Light Armor Set	1
+3521	Avadon Light Armor Set	1
+3522	Tunic of Zubei Robe Set	1
+3523	Avadon Robe Set	1
+3524	Blue Wolf Heavy Armor Set	1
+3525	Doom Heavy Armor Set	1
+3526	Blue Wolf Light Armor Set	1
+3527	Doom Light Armor Set	1
+3528	Blue Wolf Robe Set	1
+3529	Doom Robe Set	1
+3530	Dark Crystal Breastplate Heavy Armor Set	1
+3531	Tallum Heavy Armor Set	1
+3532	Dark Crystal Light Armor Set	1
+3533	Tallum Light Armor Set	1
+3534	Tallum Robe Set	1
+3535	Dark Crystal Robe Set	1
+3536	Nightmare Heavy Armor Set	1
+3537	Majestic Heavy Armor Set	1
+3538	Nightmarish Leather Light Armor Set	1
+3539	Majestic Light Armor Set	1
+3540	Nightmare Robe Set	1
+3541	Majestic Robe Set	1
+3542	Special Ability: Critical Damage	6
+3543	Equipped with Shield	1
+3544	Equipped with Shield	1
+3545	Equipped with Shield	1
+3546	Equipped with Shield	1
+3547	Equipped with Shield	1
+3548	Equipped with Shield	1
+3549	Equipped with Shield	1
+3550	Equipped with Shield	1
+3551	Equipped with Shield	1
+3552	Special Ability: PvP Damage	2
+3553	Imperial Crusader Heavy Armor Set	1
+3554	Equipped with Shield	1
+3555	Draconic Light Armor Set	1
+3556	Major Arcana Robe Set	1
+3557	Necklace of Valakas	1
+3558	Earring of Antharas	1
+3559	Earring of Zaken	1
+3560	Earring of Orfen	1
+3561	Ring of Baium	1
+3562	Ring of Ant Queen	1
+3563	Ring of Core	1
+3564	Special Ability: Haste	1
+3565	Special Ability: Focus	1
+3566	Special Ability: Focus	1
+3567	Special Ability: Focus	2
+3568	Special Ability: HP Drain	1
+3569	Special Ability: HP Regeneration	1
+3570	Special Ability: Robust Health	1
+3571	Special Ability: Crt. Stun	1
+3572	Special Ability: Crt. Damage	1
+3573	Special Ability: Guidance	1
+3574	Special Ability: Crt. Slow	1
+3575	Special Ability: Empower Option	1
+3576	Special Ability: MP Regeneration	1
+3577	Special Ability: Magic Hold	1
+3578	Special Ability: Infinity Blade	1
+3579	Decrease P. Def.	1
+3580	Special Ability: Infinity Axe	1
+3581	Discord	1
+3582	Special Ability: Infinity Cleaver	1
+3583	Special Ability: Infinity Crusher	1
+3584	Shock	1
+3585	Infinity Wing	1
+3586	Physical Skill Restraint	1
+3587	Special Ability: Infinity Fang	1
+3588	Shock	1
+3589	Special Ability: Infinity Stinger	1
+3590	Silence	1
+3591	Special Ability: Infinity Spear	1
+3592	Dispell	1
+3593	Special Ability: Infinity Bow	1
+3594	Slow	1
+3595	Special Ability: Infinity Scepter	1
+3596	Full Recover	1
+3597	Special Ability: Infinity Rod	1
+3598	Full Recover	1
+3599	Polearm Multi-attack	1
+3600	Special Ability: Anger	9
+3601	Special Ability: Haste	9
+3602	Special Ability: Guidance	9
+3603	Demon Sword Zariche	10
+3604	Frintezza's Necklace	1
+3605	Clan Oath Heavy Armor Set	1
+3606	Clan Oath Light Armor Set	1
+3607	Clan Oath Robe Set	1
+3608	Apella Heavy Armor Set	1
+3609	Apella Light Armor Set	1
+3610	Apella Robe Set	1
+3611	Enchant Heavy Armor (Grade D)	1
+3612	Enchant Light Armor (Grade D)	1
+3613	Enchant Robe (Grade D)	1
+3614	Enchant Heavy Armor (Grade C)	1
+3615	Enchant Light Armor (Grade C)	1
+3616	Enchant Robe (Grade C)	1
+3617	Enchant Heavy Armor (Grade B)	1
+3618	Enchant Light Armor (Grade B)	1
+3619	Enchant Robe (Grade B)	1
+3620	Enchant Heavy Armor (Grade A)	1
+3621	Enchant Light Armor (Grade A)	1
+3622	Enchant Robe (Grade A)	1
+3623	Enchant Heavy Armor (Grade S)	1
+3624	Enchant Light Armor (Grade S)	1
+3625	Enchant Robe (Grade S)	1
+3626	Kabokula	1
+3627	Tapirawa	1
+3628	Shabonoba	1
+3629	Blood Sword Akamanah	10
+3630	Void Burst	1
+3631	Void Flow	1
+3632	Clan Gate	1
+3633	Residential Shock Immunity	2
+4001	NPC Windstrike	12
+4002	NPC HP Drain	12
+4003	Golem Body	1
+4004	Fragile Skull	1
+4005	Floating Target	1
+4006	Burning Wood	1
+4007	Immortal Life	1
+4008	Insect Skin	1
+4009	Resist Fire	5
+4010	Resist Water	5
+4011	Resist Wind	5
+4012	Resist Earth	5
+4013	Resistance to Fire, Vulnerable to Water	1
+4014	Resistance to Water, Vulnerable to Fire	1
+4015	Resistance to Wind, Vulnerable to Earth	1
+4016	Resistance to Earth, Vulnerable to Wind	1
+4017	Queen Ant Brandish	1
+4018	Decrease Speed	1
+4019	Decrease Speed	1
+4020	Heal Queen Ant1	1
+4021	Queen Ant	1
+4022	Body of Nurse Ant	1
+4023	Body of Royal Guard Ant	1
+4024	Heal Queen Ant2	1
+4025	Master Recharge	12
+4026	Gludio Flame	1
+4027	Gludio Heal	1
+4028	NPC Might	3
+4029	NPC Shield	3
+4030	NPC Clan Might	3
+4031	NPC Clan Aegis	3
+4032	NPC Strike	12
+4033	NPC Burn	12
+4034	Decrease Speed	12
+4035	Poison	12
+4036	Poison	12
+4037	Decrease P.Atk	3
+4038	Decrease Atk.Speed	5
+4039	NPC MP Drain	12
+4040	NPC Bow Attack	12
+4041	Cruma Blaze	2
+4042	Nurka Blaze	1
+4043	Partisan Flame	1
+4044	Partisan Heal	1
+4045	Resist Full Magic Attack	1
+4046	Sleep	12
+4047	Hold	12
+4048	NPC Dash	3
+4049	Cubic DD	8
+4050	Cubic Drain	7
+4051	Cubic Heal	20
+4052	Poison	6
+4053	Decrease P.Atk	8
+4054	Decrease P. Def	8
+4055	Decrease Atk.Speed	8
+4056	Immortal Attack	1
+4057	Insect Weak Point	1
+4058	Plant Weak Point	1
+4059	Animal Weak Point	1
+4060	Beast Weak Point	1
+4061	Dragon Weak Point	1
+4062	Orfen	1
+4063	Paralysis	1
+4064	Paralysis	1
+4065	NPC Heal	12
+4066	NPC Twister	12
+4067	NPC Mortal Blow	12
+4068	Mech Cannon	12
+4069	NPC Curve Beam Cannon	12
+4070	Decrease Atk.Speed	1
+4071	Resist Bow Weapons	5
+4072	Shock	12
+4073	Shock	12
+4074	NPC Haste	2
+4075	Shock	12
+4076	Decrease Speed	3
+4077	NPC Aura Burn	12
+4078	NPC Flamestrike	12
+4079	Siege Hammer	1
+4080	Dark Heal	1
+4081	Pretending to steal	1
+4082	Poison of Death	1
+4083	Die! You fool!	1
+4084	Resist Physical Attack	10
+4085	Critical Power	1
+4086	Critical Chance	1
+4087	NPC Blaze	12
+4088	Bleed	12
+4089	NPC Bear Spirit Totem	1
+4090	NPC Wolf Spirit Totem	1
+4091	NPC Ogre Spirit Totem	1
+4092	NPC Puma Spirit Totem	1
+4093	Evasion	1
+4094	NPC Cancel Magic	12
+4095	Damage Shield	1
+4096	NPC Hawkeye	3
+4097	NPC Chant of Life	12
+4098	Silence	12
+4099	NPC Berserk	2
+4100	NPC Prominence	12
+4101	NPC Spinning Slash	12
+4102	Surrender To Fire	3
+4103	NPC Ultimate Evasion	2
+4104	Flame	12
+4105	NPC Straight Beam Cannon	12
+4106	Antharas Shock	1
+4107	Antharas Shock	1
+4108	Antharas Terror	1
+4109	Curse of Antharas	1
+4110	Breath Attack	2
+4111	Antharas Fossilization	1
+4112	Ordinary Attack	1
+4113	Animal doing ordinary attack	1
+4114	Aden Flame	1
+4115	Aden Heal	1
+4116	Resist M. Atk.	10
+4117	Paralysis	12
+4118	Paralysis	12
+4119	Decrease Accuracy	3
+4120	Shock	12
+4121	Summoned Monster Magic Protection	12
+4122	Antharas	1
+4123	Hostile Feeling	12
+4124	NPC Spear Attack	12
+4125	Antharas Regeneration	1
+4126	Reduction in recovery time	1
+4127	Baium: General Attack	1
+4128	Wind Of Force	1
+4129	Earthquake	1
+4130	Striking of Thunderbolt	1
+4131	Shock	1
+4132	Spear: Pound the Ground	1
+4133	Angel Heal	1
+4134	Seal Skill	1
+4135	Baium Heal	1
+4136	Baium's Gift	1
+4137	Hydro Screw	12
+4138	NPC AE - Corpse Burst	12
+4139	Boom Attack	12
+4140	Contract Payment	12
+4141	NPC Wind Fist	12
+4142	NPC Fast Wind Fist	12
+4143	Treasure Bomb	10
+4144	Mimic Strong Attack	80
+4145	Decrease P. Atk.	3
+4146	Decrease P. Def.	3
+4147	Area Dispel	7
+4148	Poison	12
+4149	Bleed	12
+4150	Flame	12
+4151	NPC Windstrike - Magic	12
+4152	NPC HP Drain - Magic	12
+4153	Decrease Speed	12
+4154	NPC MP Drain - Magic	12
+4155	NPC Twister - Magic	12
+4156	NPC Curve Beam Cannon - Magic	12
+4157	NPC Blaze - Magic	12
+4158	NPC Prominence - Magic	12
+4159	NPC Straight Beam Cannon - Magic	12
+4160	NPC Aura Burn - Magic	12
+4161	Summon PC	1
+4162	Decrease Atk. Speed	3
+4163	NPC Self Damage Shield	12
+4164	Paralysis	9
+4165	Icy Air	9
+4166	Shock	9
+4167	Curse of Fairy Mimyu	1
+4168	BOSS Strike	12
+4169	Shock	12
+4170	BOSS Mortal Blow	12
+4171	BOSS Spinning Slash	12
+4172	Shock	12
+4173	BOSS Might	12
+4174	BOSS Shield	12
+4175	BOSS Haste	12
+4176	BOSS Reflect Damage	12
+4177	BOSS Cancel Magic	12
+4178	BOSS Flamestrike	12
+4179	BOSS Strike	12
+4180	Shock	12
+4181	BOSS Mortal Blow	12
+4182	Poison	12
+4183	Decrease P.Atk	12
+4184	Decrease Atk.Speed	12
+4185	Sleep	12
+4186	Hold	12
+4187	Decrease Speed	12
+4188	Bleed	12
+4189	Paralysis	12
+4190	Decrease MP	12
+4191	BOSS Windstrike	12
+4192	BOSS HP Drain	12
+4193	BOSS Life Drain	12
+4194	BOSS Aura Burn	12
+4195	BOSS Twister	12
+4196	Decrease Speed	12
+4197	Hold	12
+4198	Poison	12
+4199	Decrease P.Atk	12
+4200	Decrease Atk.Speed	12
+4201	Sleep	12
+4202	Hold	12
+4203	Decrease Speed	12
+4204	Bleed	12
+4205	Paralysis	12
+4206	Decrease MP	12
+4207	BOSS Power Shot	12
+4208	Shock	12
+4209	BOSS Heal	12
+4210	BOSS Chant of Life	12
+4211	BOSS Might	12
+4212	BOSS Shield	12
+4213	BOSS Haste	12
+4214	BOSS Reflect Damage	12
+4215	Raid Curse	1
+4216	Scatter Enemy	1
+4217		1
+4218	Absorb HP MP	1
+4219	Hold	1
+4220	Deadly Dual-Sword Weapon	1
+4221	Deadly Dual-Sword Weapon: Range Attack	1
+4222	Instant Move	1
+4223	Face Chance: Night to Day	1
+4224	Face Chance: Day to Night	1
+4225	Resist Shock Attacks	5
+4226	Ban Heal	1
+4227	Zaken Regeneration	1
+4228	NPC Double Dagger Attack	12
+4229	NPC Double Wind Fist	12
+4230	Wild Cannon	1
+4231	NPC Spit Attack	12
+4232	NPC AE Strike	12
+4233	Vampiric Attack	1
+4234	BOSS Spear Attack	12
+4235		1
+4236	Decrease Heal	1
+4237	Decrease Speed	1
+4238	Increase Re-use Time	1
+4239	Antharas Regeneration	1
+4240	Antharas Regeneration	1
+4241	Antharas Regeneration	1
+4242	Zaken Regeneration	1
+4243	Venomous Poison	1
+4244	NPC Wild Sweep	12
+4245	Mimic of Wrath	1
+4246	Strong in activity magic DOT	1
+4247	NPC Windstrike - Slow	12
+4248	NPC HP Drain - Slow	12
+4249	Decrease Speed	12
+4250	NPC Twister - Slow	12
+4251	NPC Curve Beam Cannon - Slow	12
+4252	NPC Flamestrike - Slow	12
+4253	NPC Blaze - Slow	12
+4254	NPC Prominence - Slow	12
+4255	NPC Straight Beam Cannon - Slow	12
+4256	100% stun resistance.	1
+4257	NPC Hydroblast - Magic	12
+4258	Hinder Strider	1
+4259	Toxic Smoke	12
+4260	Steal Blood	12
+4261	Mega Storm Strike	12
+4262	Holiday Wind Walk	2
+4263	Holiday Haste	1
+4264	Holiday Empower	1
+4265	Holiday Might	3
+4266	Holiday Shield	3
+4267	Grade Penalty	10
+4268	Danger Area	1
+4269	Block All Chat	1
+4270	Weight Penalty	4
+4271	Increase Force	7
+4272	Greater Resist Bow Attack	1
+4273	Resist Daggers	5
+4274	Blunt Weapon Weak Point	5
+4275	Sacred Attack Weak Point	5
+4276	Bow Weapon Weak Point	5
+4277	Resist Poison Attacks	5
+4278	Dark Attack	1
+4279	Fire Attack Weak Point	5
+4280	Water Attack Weak Point	5
+4281	Wind Attack Weak Point	5
+4282	Earth Attack Weak Point	5
+4283	Greater Resist Magic Attack	1
+4284	Resist Bleed Attacks	5
+4285	Resist Sleep Attacks	5
+4286	Greater Resist Sleep	1
+4287	Resist Hold Attacks	5
+4288	Greater Resist Hold	1
+4289	Wyvern Breath	1
+4290	Race	1
+4291	Race	1
+4292	Race	1
+4293	Race	1
+4294	Race	1
+4295	Race	1
+4296	Race	1
+4297	Race	1
+4298	Race	1
+4299	Race	1
+4300	Race	1
+4301	Race	1
+4302	Race	1
+4303	Strong Type	1
+4304	Strong Type	1
+4305	Strong Type	1
+4306	Strong Type	1
+4307	Strong Type	1
+4308	Strong Type	1
+4309	Strong Type	1
+4310	Strong Type	1
+4311	Feeble Type	1
+4312	Heavy Armor	1
+4313	Light Armor	1
+4314	BOSS Holy Light Burst	12
+4315	Hold	12
+4316	BOSS Lilim Drain	12
+4317	Increase Rage Might	5
+4318	Ultimate Buff	1
+4319	Paralysis	1
+4320	Poison	12
+4321	Decrease P. Def	1
+4322	Wind Walk for Beginners	1
+4323	Shield for Beginners	1
+4324	Blessed Body for Beginners	1
+4325	Vampiric Rage for Beginners	1
+4326	Regeneration for Beginners	1
+4327	Haste for Beginners	1
+4328	Blessed Soul for Beginners	1
+4329	Acumen for Beginners	1
+4330	Concentration for Beginners	1
+4331	Empower for Beginners	1
+4332	Mental Aegis	1
+4333	Resist Dark Attack	5
+4334	SSQ Cancel	1
+4335	Sacred Attack	1
+4336	Dark Attack Weak Point	5
+4337	Resist Sacred Attack	5
+4338	Life Cubic for Beginners	1
+4339	Mimir's Elixir	1
+4340	Ultimate Buff, 2nd	1
+4341	Ultimate Buff, 3rd	1
+4342	Wind Walk	2
+4343	Decrease Weight	3
+4344	Shield	3
+4345	Might	3
+4346	Mental Shield	4
+4347	Blessed Body	6
+4348	Blessed Soul	6
+4349	Magic Barrier	2
+4350	Resist Shock	4
+4351	Concentration	6
+4352	Berserker Spirit	2
+4353	Bless Shield	6
+4354	Vampiric Rage	4
+4355	Acumen	3
+4356	Empower	3
+4357	Haste	2
+4358	Guidance	3
+4359	Focus	3
+4360	Death Whisper	3
+4361	Curse of Destruction	2
+4362	Curse of Destruction	2
+4363	Curse of Destruction	1
+4364	Blessing of Prophecy	2
+4365	Blessing of Revelations	2
+4366	Blessing of Prophecy	1
+4367	Clan Hall Manager Buff	1
+4368	Clan Hall Manager Buff	1
+4369	Clan Hall Manager Buff	1
+4370	Clan Hall Manager Buff	1
+4371	Clan Hall Manager Buff	1
+4372	Clan Hall Manager Buff	1
+4373	Clan Hall Manager Buff	1
+4374	Clan Hall Manager Buff	1
+4375	Clan Hall Manager Buff	1
+4376	Strong Resistance to P. Atk.	1
+4377	Wield Temper	12
+4378	NPC Self-Damage Shield	12
+4379	Resist Spear Weapons	5
+4380	Arena: CP Recovery	1
+4381	Magic Skill Block	1
+4382	Curse of Lake Ghost	12
+4383	NPC Hate Stone	1
+4384	Scapegoat's Grace	1
+4385	Scapegoat's Grace	1
+4386	Scapegoat's Grace	1
+4387	Scapegoat's Grace	1
+4388	Resist Paralysis Attacks	5
+4389	Resist Mental Attacks	5
+4390	NPC Abnormal Immunity	1
+4391	Wind Walk	2
+4392	Shield	3
+4393	Might	3
+4394	Blessed Body	6
+4395	Blessed Soul	6
+4396	Magic Barrier	2
+4397	Berserker Spirit	2
+4398	Bless Shield	6
+4399	Vampiric Rage	4
+4400	Acumen	3
+4401	Empower	3
+4402	Haste	2
+4403	Guidance	3
+4404	Focus	3
+4405	Death Whisper	3
+4406	Agility	3
+4407	Strong Type Monster	2
+4408	HP Increase (12x)	20
+4409	MP Increase (12x)	20
+4410	Ultra Strong P. Atk.	22
+4411	Ultra Strong M. Atk.	22
+4412	Ultra Strong P. Def.	22
+4413	Ultra Strong M. Def.	22
+4414	Heavy Armor Type	3
+4415	Dual-Sword Weapons	20
+4416	Undead	24
+4417	Animals	38
+4418	Fire Attacks	5
+4419	Water Attacks	5
+4420	Wind Attacks	5
+4421	Earth Attacks	5
+4422	Dark Attacks	5
+4423	Sacred Attacks	5
+4424	Resist Hand-to-hand Weapons	5
+4425	Resist Blunt Weapons	5
+4426	Resist Dual-Sword Weapons	5
+4427	Resist Swords	5
+4428	Resist Two-handed Weapons	5
+4429	Greater Resist Fire Attacks	5
+4430	Greater Resist Water Attacks	5
+4431	Greater Resist Wind Attacks	5
+4432	Greater Resist Earth Attacks	5
+4433	Greater Resist Sacred Attacks	5
+4434	Greater Resist Dark Attacks	5
+4435	Greater Resist Shock	5
+4436	Greater Resist Poison	5
+4437	Greater Resist Bleeding	5
+4438	Greater Resist Sleep	5
+4439	Greater Resist Hold	5
+4440	Greater Resist Paralysis	5
+4441	Greater Resist Mental Derangement	5
+4442	Greater Resist Hand-to-hand Weapons	5
+4443	Greater Resist Blunt Weapons	5
+4444	Greater Resist Bow Weapons	5
+4445	Greater Resist Spear Weapons	5
+4446	Greater Resist Dual-Sword Weapons	5
+4447	Greater Resist Swords	5
+4448	Greater Resist Daggers	5
+4449	Greater Resist Two-handed Weapons	5
+4450	Shock Attack Weak Point	5
+4451	Poison Attack Weak Point	5
+4452	Bleed Attack Weak Point	5
+4453	Sleep Attack Weak Point	5
+4454	Hold Attack Weak Point	5
+4455	Paralysis Attack Weak Point	5
+4456	Mental Attack Weak Point	5
+4457	Hand-to-hand Weapon Weak Point	5
+4458	Spear Weapon Weak Point	5
+4459	Dual-Sword Weapon Weak Point	5
+4460	Sword Weak Point	5
+4461	Dagger Weak Point	5
+4462	Two-handed Weapon Weak Point	5
+4463	Surrender To Water	3
+4464	Surrender To Wind	3
+4465	Surrender To Earth	3
+4466	Surrender To Darkness	3
+4467	Surrender To Light	3
+4468	Area Buff - Wind Walk	2
+4469	Potion Drinking	1
+4470	NPC Spoils	1
+4471	NPC Anger	12
+4472	NPC Strike Golem	12
+4473	Shock	12
+4474	Area Heal - Per	5
+4475	Perfect Resist Bleeding	1
+4476	Silent Move	5
+4477	NPC Frost Wall	12
+4478	Ice Fairy Aqua Splash	1
+4479	Ice Fairy Resist Cold	1
+4480	Ice Fairy Curse Gloom	1
+4481	Ice Fairy Hex	1
+4482	Ice Fairy Silence	1
+4483	Hold	12
+4484	Eating Follower Heal	1
+4485	Eating Follower	1
+4486	Decrease P. Def	12
+4487	Decrease M. Def.	12
+4488	Hold	12
+4489	NPC Death MP Bomb	12
+4490	NPC Holy Wall	12
+4491	Holy Weapon	12
+4492	Enlarging Head Curse	12
+4493	NPC Debuff Shield Slow	12
+4494	Raid Boss	1
+4495	BOSS Power Shot	12
+4496	Shock	12
+4497	Treasure Chest - Level 21	1
+4498	Treasure Chest - Level 22	1
+4499	Treasure Chest - Level 25	1
+4500	Treasure Chest - Level 27	1
+4501	Treasure Chest - Level 29	1
+4502	Treasure Chest - Level 31	1
+4503	Treasure Chest - Level 32	1
+4504	Treasure Chest - Level 33	1
+4505	Treasure Chest - Level 35	1
+4506	Treasure Chest - Level 39	1
+4507	Treasure Chest - Level 42	1
+4508	Treasure Chest - Level 43	1
+4509	Treasure Chest - Level 45	1
+4510	Treasure Chest - Level 47	1
+4511	Treasure Chest - Level 49	1
+4512	Treasure Chest - Level 52	1
+4513	Squash - Level up	1
+4514	Squash - Poisoned	1
+4515	Raid Curse	1
+4516	Orfen Heal	1
+4517	Quest - BOSS Defend	1
+4518	Quest - BOSS Rampage	1
+4519	Quest - BOSS Defend	1
+4520	Quest - BOSS Rampage	1
+4521	Quest - BOSS Resist non Bow Weapon	1
+4522	Eye of Assassin	1
+4523	Quest - BOSS Evasion	1
+4524	Quest - BOSS Bluff	1
+4525	Quest - BOSS Defend	1
+4526	Quest - BOSS Summon	1
+4527	Quest - BOSS Inc HP to Summoned	1
+4528	Quest - BOSS Movement to Summoned	1
+4529	Quest - Summoned Explosion	1
+4530	Quest - Summoned HP Heal	1
+4531	Quest - Summoned MP Heal	1
+4532	Quest - BOSS Reflect	1
+4533	Dance of Resistance	1
+4534	Dance of Nihil	1
+4535	Dance of Weakness	1
+4536	Song of Seduce	1
+4537	Song of Sweet Whisper	1
+4538	Song of Temptation	1
+4539	Curse of Vague	1
+4540	Curse of Weakness	1
+4541	Curse of Nihil	1
+4542	Quest - Henchman 90% Sleep and Shock Weakness	1
+4543	Quest - BOSS Shock Weakness	1
+4544	Quest - BOSS Weakness	3
+4545	Quest - BOSS Reflect	1
+4546	Quest - Commune to Slate	1
+4547	Gaze of Watcher	1
+4548	Quest - Dispel Watcher Gaze	1
+4549	Quest - Unsealed Altar	1
+4550	Quest - Cursed Altar	1
+4551	Hot Springs Rheumatism	10
+4552	Hot Springs Cholera	10
+4553	Hot Springs Flu	10
+4554	Hot Spring Malaria	10
+4555	NPC Resist Mutant	1
+4556	Dispel Hot Spring Disease A_D	1
+4557	Dispel Hot Spring Disease B_D	1
+4558	Dispel Hot Spring Disease C_D	1
+4559	Hot Spring Illusion	1
+4560	NPC Fire Burn	12
+4561	NPC Fire Burn - Magic	12
+4562	NPC Solar Flare	12
+4563	NPC Solar Flare - Magic	12
+4564	NPC Solar Flare - Slow	12
+4565	NPC Eruption	12
+4566	NPC Eruption - Magic	12
+4567	NPC Eruption - Slow	12
+4568	NPC AE Solar Flare	12
+4569	NPC AE Solar Flare - Magic	12
+4570	NPC AE Solar Flare - Slow	12
+4571	NPC Blazing Circle	12
+4572	NPC Triple Sonic Slash	12
+4573	NPC Sonic Blaster	12
+4574	NPC Sonic Storm	12
+4575	NPC Clan Buff - Haste	2
+4576	NPC Clan Buff - Damage Shield	3
+4577	Decrease Accuracy	12
+4578	Petrification	1
+4579	Bleed	12
+4580	Decrease P.Atk	12
+4581	Hold	12
+4582	Poison	12
+4583	Decrease Speed	12
+4584	Reducing P. Def Shock	12
+4585	NPC Clan Buff - Berserk Might	3
+4586	Decrease Evasion	12
+4587	Decrease P.Atk	12
+4588	NPC Clan Buff - Berserk Haste	2
+4589	Decrease Speed	12
+4590	Decrease Speed	12
+4591	Decrease Speed	12
+4592	Decrease P. Def	12
+4593	Decrease P. Def	12
+4594	Decrease P. Def	12
+4595	NPC Clan Buff - Acumen Shield	3
+4596	Bleed	12
+4597	Bleed	12
+4598	Bleed	12
+4599	Decrease Speed	12
+4600	Reducing P. Def Shock	12
+4601	NPC Clan Buff - Acumen Focus	3
+4602	Decrease P.Atk	12
+4603	Decrease P.Atk	12
+4604	Decrease P.Atk	12
+4605	Surrender To Fire	12
+4606	Poison	12
+4607	Magma Attack	1
+4608	NPC Clan Buff - Berserk	2
+4609	NPC Clan Buff - Vampiric Rage	4
+4610	NPC Clan Buff - Focus	3
+4611	NPC Clan Buff - Death Whisper	3
+4612	NPC Wide Wild Sweep	12
+4613	NPC Clan Heal	12
+4614	NPC Death Bomb	12
+4615	Bleed	12
+4616	Fake Petrificiation	1
+4617	Dispel Petrification	1
+4618	NPC Cancel PC Target	1
+4619	NPC Dispel Sleep	1
+4620	Paralysis	12
+4621	NPC AE - 80% HP Drain	12
+4622	NPC AE - 80% HP Drain - Magic	12
+4623	NPC AE - 80% HP Drain - Slow	12
+4624	Decrease HP Regeneration Rate	12
+4625	Decrease Speed	12
+4626	NPC Buff - Physical Barrier	12
+4627	NPC Buff - Magical Barrier	12
+4628	Mysterious Aura	1
+4629	NPC MR - HP Drain	12
+4630	NPC MR - Twister	12
+4631	NPC Buff - Acumen Shield WildMagic	3
+4632	NPC Buff - Acumen Empower WildMagic	3
+4633	NPC Buff - Acumen Empower Berserk	3
+4634	NPC Buff - Acumen Empower DamageShield	3
+4635	NPC Buff - Acumen Berserk WildMagic	3
+4636	NPC Buff - Acumen Berserk DamageShield	3
+4637	NPC Buff - Acumen WildMagic DamageShield	3
+4638	NPC Clan Buff - Acumen Empower WildMagic	3
+4639	NPC Clan Buff - Acumen Empower Berserk	3
+4640	Sleep	12
+4641	NPC Super Strike	12
+4642	NPC Fast Spell Casting	3
+4643	Decrease Speed	12
+4644	Area Buff - Haste	2
+4645	Area Buff - Focus	3
+4646	Area Buff - Death Whisper	3
+4647	Area Buff - Might	3
+4648	Area Buff - Shield	3
+4649	Poison	12
+4650	NPC AE - Dispel Hold	1
+4651	NPC AE - Dispel Slow	3
+4652	NPC AE - Dispel Silence	1
+4653	NPC Corpse Life Drain	12
+4654	NPC Death Link	12
+4655	NPC Death Link - Magic	12
+4656	NPC Death Link - Slow	12
+4657	Hold	12
+4658	Hold	12
+4659	Hold	12
+4660	Sleep	12
+4661	Sleep	12
+4662	Sleep	12
+4663	NPC Hate	1
+4664	NPC 100% HP Drain	12
+4665	NPC 100% HP Drain - Magic	12
+4666	NPC 100% HP Drain - Slow	12
+4667	NPC Strong 100% HP Drain	12
+4668	NPC Strong 100% HP Drain - Magic	12
+4669	NPC Strong 100% HP Drain - Slow	12
+4670	Short Shock	12
+4671	AV - Teleport	1
+4672	NPC Corpse Remove	1
+4673	NPC Dispel Offensive Buff	12
+4674	NPC Dispel Defensive Buff	12
+4675	NPC Dispel Fighter Buff	12
+4676	NPC Dispel Mage Offensive Buff	12
+4677	NPC Dispel Fighter Defensive Buff	12
+4678	NPC Dispel Mage Defensive Buff	12
+4679	Valakas	1
+4680	Valakas Lava Skin	1
+4681	Valakas Trample	1
+4682	Valakas Trample	1
+4683	Valakas Dragon Breath	1
+4684	Valakas Dragon Breath	1
+4685	Valakas Tail Stomp	1
+4686	Valakas Tail Stomp	1
+4687	Valakas Tail Stomp	1
+4688	Valakas Shock	1
+4689	Valakas Fear	2
+4690	Valakas Meteor Storm	1
+4691	Valakas Regeneration	4
+4692	Quest BOSS Big Body	1
+4693	Quest BOSS Dispel Big Body	1
+4694	Ultimate Debuff	1
+4695	Ultimate Debuff	1
+4696	Ultimate Debuff	1
+4697	NPC Monster Hate	12
+4698	Area Buff - HP Regeneration	12
+4699	Blessing of Queen	13
+4700	Gift of Queen	13
+4701	Cure of Queen	13
+4702	Blessing of Seraphim	13
+4703	Gift of Seraphim	13
+4704	Cure of Seraphim	13
+4705	Curse of Shade	13
+4706	Mass Curse of Shade	13
+4707	Shade Sacrifice	13
+4708	Cursed Strike	10
+4709	Cursed Blow	10
+4710	Wild Stun	12
+4711	Wild Defense	12
+4712	Bright Burst	12
+4713	Bright Heal	12
+4714	Twilight Dragon	1
+4715	Wind Dragon	1
+4716	Star Dragon	1
+4717	Heal Trick	12
+4718	Greater Heal Trick	12
+4719	BOSS Strike	12
+4720	BOSS Strike	12
+4721	BOSS Strike	12
+4722	BOSS Strike	12
+4723	BOSS Strike	12
+4724	Shock	12
+4725	Shock	12
+4726	Shock	12
+4727	Shock	12
+4728	Shock	12
+4729	BOSS Mortal Blow	12
+4730	BOSS Mortal Blow	12
+4731	BOSS Mortal Blow	12
+4732	BOSS Mortal Blow	12
+4733	BOSS Mortal Blow	12
+4734	BOSS Spinning Slash	12
+4735	BOSS Spinning Slash	12
+4736	BOSS Spinning Slash	12
+4737	BOSS Spinning Slash	12
+4738	BOSS Spinning Slash	12
+4739	BOSS Strike	12
+4740	BOSS Strike	12
+4741	BOSS Strike	12
+4742	BOSS Strike	12
+4743	BOSS Strike	12
+4744	Shock	12
+4745	Shock	12
+4746	Shock	12
+4747	Shock	12
+4748	Shock	12
+4749	BOSS Mortal Blow	12
+4750	BOSS Mortal Blow	12
+4751	BOSS Mortal Blow	12
+4752	BOSS Mortal Blow	12
+4753	BOSS Mortal Blow	12
+4754	BOSS Power Shot	12
+4755	BOSS Power Shot	12
+4756	BOSS Power Shot	12
+4757	BOSS Power Shot	12
+4758	BOSS Power Shot	12
+4759	Shock	12
+4760	Shock	12
+4761	Shock	12
+4762	Shock	12
+4763	Shock	12
+4764	BOSS Power Shot	12
+4765	BOSS Power Shot	12
+4766	BOSS Power Shot	12
+4767	BOSS Power Shot	12
+4768	BOSS Power Shot	12
+4769	Shock	12
+4770	Shock	12
+4771	Shock	12
+4772	Shock	12
+4773	Shock	12
+4774	BOSS Spear Attack	12
+4775	BOSS Spear Attack	12
+4776	BOSS Spear Attack	12
+4777	BOSS Spear Attack	12
+4778	BOSS Spear Attack	12
+4779	BOSS Heal	12
+4780	BOSS Heal	12
+4781	BOSS Heal	12
+4782	BOSS Heal	12
+4783	BOSS Heal	12
+4784	BOSS Chant of Life	12
+4785	BOSS Chant of Life	12
+4786	BOSS Chant of Life	12
+4787	BOSS Chant of Life	12
+4788	BOSS Chant of Life	12
+4789	NPC High Level	10
+4790	Raid Boss - Level 23	1
+4791	Raid Boss - Level 30	1
+4792	Raid Boss - Level 42	1
+4793	Raid Boss - Level 55	1
+4794	Raid Boss - Level 50	1
+4795	Raid Boss - Level 60	1
+4796	Raid Boss - Level 25	1
+4797	Raid Boss - Level 34	1
+4798	Raid Boss - Level 34	1
+4799	Raid Boss - Level 49	1
+4800	Raid Boss - Level 53	1
+4801	Raid Boss - Level 58	1
+4802	Raid Boss - Level 70	1
+4803	Raid Boss - Level 28	1
+4804	Raid Boss - Level 35	1
+4805	Raid Boss - Level 47	1
+4806	Raid Boss - Level 49	1
+4807	Raid Boss - Level 51	1
+4808	Raid Boss - Level 65	1
+4809	Raid Boss - Level 75	1
+4810	Raid Boss - Level 45	1
+4811	Raid Boss - Level 24	1
+4812	Raid Boss - Level 35	1
+4813	Raid Boss - Level 40	1
+4814	Raid Boss - Level 52	1
+4815	Raid Boss - Level 55	1
+4816	Raid Boss - Level 69	1
+4817	Raid Boss - Level 25	1
+4818	Raid Boss - Level 30	1
+4819	Raid Boss - Level 39	1
+4820	Raid Boss - Level 44	1
+4821	Raid Boss - Level 43	1
+4822	Raid Boss - Level 59	1
+4823	Raid Boss - Level 70	1
+4824	Raid Boss - Level 29	1
+4825	Raid Boss - Level 35	1
+4826	Raid Boss - Level 44	1
+4827	Raid Boss - Level 45	1
+4828	Raid Boss - Level 55	1
+4829	Raid Boss - Level 60	1
+4830	Raid Boss - Level 74	1
+4831	Raid Boss - Level 30	1
+4832	Raid Boss - Level 40	1
+4833	Raid Boss - Level 35	1
+4834	Raid Boss - Level 50	1
+4835	Raid Boss - Level 56	1
+4836	Raid Boss - Level 65	1
+4837	Raid Boss - Level 79	1
+4838	Raid Boss - Level 24	1
+4839	Raid Boss - Level 33	1
+4840	Raid Boss - Level 50	1
+4841	Raid Boss - Level 40	1
+4842	Raid Boss - Level 55	1
+4843	Raid Boss - Level 65	1
+4844	Raid Boss - Level 78	1
+4845	Raid Boss - Level 21	1
+4846	Raid Boss - Level 25	1
+4847	Raid Boss - Level 35	1
+4848	Raid Boss - Level 40	1
+4849	Raid Boss - Level 48	1
+4850	Raid Boss - Level 54	1
+4851	Raid Boss - Level 60	1
+4852	Raid Boss - Level 70	1
+4853	Raid Boss - Level 25	1
+4854	Raid Boss - Level 30	1
+4855	Raid Boss - Level 38	1
+4856	Raid Boss - Level 45	1
+4857	Raid Boss - Level 55	1
+4858	Raid Boss - Level 60	1
+4859	Raid Boss - Level 59	1
+4860	Raid Boss - Level 35	1
+4861	Raid Boss - Level 30	1
+4862	Raid Boss - Level 34	1
+4863	Raid Boss - Level 43	1
+4864	Raid Boss - Level 40	1
+4865	Raid Boss - Level 36	1
+4866	Raid Boss - Level 40	1
+4867	Raid Boss - Level 50	1
+4868	Raid Boss - Level 73	1
+4869	Raid Boss - Level 35	1
+4870	Raid Boss - Level 62	1
+4871	Raid Boss - Level 75	1
+4872	Raid Boss - Level 57	1
+4873	Raid Boss - Level 69	1
+4874	Raid Boss - Level 60	1
+4875	Raid Boss - Level 72	1
+4876	Raid Boss - Level 59	1
+4877	Raid Boss - Level 55	1
+4878	Raid Boss - Level 75	1
+4879	Raid Boss - Level 78	1
+4880	Raid Boss - Level 72	1
+4881	Raid Boss - Level 75	1
+4882	Raid Boss - Level 70	1
+4883	Raid Boss - Level 65	1
+4884	Raid Boss - Level 60	1
+4885	Raid Boss - Level 55	1
+4886	Raid Boss - Level 45	1
+4887	Raid Boss - Level 67	1
+4888	Raid Boss - Level 75	1
+4889	Raid Boss - Level 70	1
+4890	Raid Boss - Level 28	1
+4891	Raid Boss - Level 50	1
+4892	Raid Boss - Level 75	1
+4893	Raid Boss - Level 50	1
+4894	Raid Boss - Level 55	1
+4895	Raid Boss - Level 70	1
+4896	Raid Boss - Level 75	1
+4897	Raid Boss - Level 80	1
+4898	Raid Boss - Level 80	1
+4899	Raid Boss - Level 20	1
+4900	Raid Boss - Level 78	1
+4901	Raid Boss - Level 78	1
+4902	Raid Boss - Level 74	1
+4903	Raid Boss - Level 80	1
+4904	Raid Boss - Level 84	1
+4905	Raid Boss - Level 87	1
+4906	Raid Boss - Level 87	1
+4907	Raid Boss - Level 80	1
+4908	Raid Boss - Level 84	1
+4909	Raid Boss - Level 87	1
+4910	Raid Boss - Level 87	1
+4911	Raid Boss - Level 85	1
+4912	Raid Boss - Level 66	1
+4913	Raid Boss - Level 70	1
+4914	Raid Boss - Level 71	1
+4915	Raid Boss - Level 28	1
+4916	Raid Boss - Level 38	1
+4917	Raid Boss - Level 48	1
+4918	Raid Boss - Level 58	1
+4919	Raid Boss - Level 68	1
+4920	Raid Boss - Level 78	1
+4921	Raid Boss - Level 81	1
+4922	Raid Boss - Level 81	1
+4923	Raid Boss - Level 81	1
+4924	Raid Boss - Level 81	1
+4925	Raid Boss - Level 30	1
+4926	Raid Boss - Level 35	1
+4927	Raid Boss - Level 21	1
+4928	Raid Boss - Level 26	1
+4929	Raid Boss - Level 23	1
+4930	Raid Boss - Level 26	1
+4931	Raid Boss - Level 23	1
+4932	Raid Boss - Level 25	1
+4933	Raid Boss - Level 20	1
+4934	Raid Boss - Level 21	1
+4935	Raid Boss - Level 20	1
+4936	Raid Boss - Level 21	1
+4937	Raid Boss - Level 34	1
+4938	Raid Boss - Level 36	1
+4939	Raid Boss - Level 35	1
+4940	Raid Boss - Level 33	1
+4941	Raid Boss - Level 32	1
+4942	Raid Boss - Level 38	1
+4943	Raid Boss - Level 45	1
+4944	Raid Boss - Level 35	1
+4945	Raid Boss - Level 32	1
+4946	Raid Boss - Level 33	1
+4947	Raid Boss - Level 60	1
+4948	Raid Boss - Level 40	1
+4949	Raid Boss - Level 47	1
+4950	Raid Boss - Level 40	1
+4951	Raid Boss - Level 44	1
+4952	Raid Boss - Level 48	1
+4953	Raid Boss - Level 61	1
+4954	Raid Boss - Level 25	1
+4955	Raid Boss - Level 55	1
+4956	Raid Boss - Level 45	1
+4957	Raid Boss - Level 44	1
+4958	Raid Boss - Level 45	1
+4959	Raid Boss - Level 65	1
+4960	Raid Boss - Level 71	1
+4961	Raid Boss - Level 79	1
+4962	Raid Boss - Level 70	1
+4963	Raid Boss - Level 49	1
+4964	Raid Boss - Level 51	1
+4965	Raid Boss - Level 56	1
+4966	Raid Boss - Level 64	1
+4967	Raid Boss - Level 66	1
+4968	Raid Boss - Level 52	1
+4969	Raid Boss - Level 55	1
+4970	Raid Boss - Level 65	1
+4971	Raid Boss - Level 53	1
+4972	Raid Boss - Level 50	1
+4973	Raid Boss - Level 40	1
+4974	Raid Boss - Level 40	1
+4975	Raid Boss - Level 55	1
+4976	Raid Boss - Level 52	1
+4977	Raid Boss - Level 45	1
+4978	Raid Boss - Level 81	1
+4979	Raid Boss - Level 82	1
+4980	Raid Boss - Level 83	1
+4981	Raid Boss - Level 84	1
+4982	Raid Boss - Level 85	1
+4983	Raid Boss - Level 25	1
+4984	Raid Boss - Level 44	1
+4985	Raid Boss - Level 70	1
+4986	Raid Boss - Level 72	1
+4987	Raid Boss - Level 74	1
+4988	Raid Boss - Level 76	1
+4989	Npc - Hot Spring Nectar	1
+4990	Npc - Hot Spring Mineral	1
+4991	Hot Spring Sulfur	1
+4992	Shock	1
+4993	Venom - Strike	1
+4994	Venom - Sonic Storm	1
+4995	Venom - Teleport	1
+4996	Venom - Range Teleport	1
+4997	Lidia - Regen	1
+4998	Lidia - Twister	1
+4999	Lidia - Range Life Drain	1
+5000	Alfred - Super Strike	1
+5001	Alfred - Life Drain	1
+5002	Giselle - Vampiric Rage	1
+5003	Giselle - Tempest	1
+5004	Dimensional Shock	1
+5005	Frintezza's Ghost Summoning	1
+5006	Frintezza's Melody	1
+5007	Frintezza's Healing Rhapsody	5
+5008	Frintezza's Concert Hall Melody	5
+5009	Frintezza's Ghostly Fighter	1
+5010	Frintezza's Ghostly Mage	1
+5011	Frintezza's Bomber Ghost	1
+5012	Breath of Scarlet	1
+5013	Frintezza Ghost Drain	1
+5014	Frintezza's Daemon Attack	3
+5015	Frintezza's Daemon Charge	6
+5016	Yoke of Scarlet	1
+5017	Frintezza's Daemon Morph	1
+5018	Frintezza's Daemon Field	2
+5019	Frintezza's Daemon Drain	1
+5020	Forced Action	1
+5021	Inspiration of Einhasad	12
+5022	Decrease Speed	12
+5023	Hold	12
+5024	Decrease Atk.Speed	12
+5025	Raid Boss - Level 30	1
+5026	Raid Boss - Level 39	1
+5027	Raid Boss - Level 37	1
+5028	Raid Boss - Level 53	1
+5029	Raid Boss - Level 52	1
+5030	Raid Boss - Level 59	1
+5031	Raid Boss - Level 80	1
+5032	Raid Boss - Level 87	1
+5033	Raid Boss - Level 87	1
+5034	Raid Boss - Level 73	1
+5035	Raid Boss - Level 76	1
+5036	Raid Boss - Level 60	1
+5037	Decrease Casting Speed	3
+5038	Summon PVP Penalty	16
+5039	NPC - Ultra Bomb	1
+5040	NPC - Healing Potion	12
+5041	Charm of Courage	1
+5042	NPC Dispel Bomb	12
+5043	NPC Super Sonic Blaster	12
+5044	NPC Ultimate Defense	2
+5045	Castle Power Strike	12
+5046	Castle Power Shot	12
+5047	Castle Spinning Slash	12
+5048	Castle Burst Shot	12
+5049	Castle Blow	12
+5050	Castle DD Fire	12
+5051	Castle Self AE Fire	12
+5052	Castle Long AE Fire	12
+5053	Castle DD Water	12
+5054	Castle Self AE Water	12
+5055	Castle Long AE Water	12
+5056	Castle DD Wind	12
+5057	Castle Self AE Wind	12
+5058	Castle Long AE Wind	12
+5059	Castle DD Earth	12
+5060	Castle Self AE Earth	12
+5061	Castle Long AE Earth	12
+5062	Castle DD Holy	12
+5063	Castle Self AE Holy	12
+5064	Castle Long AE Holy	12
+5065	Castle DD Unholy	12
+5066	Castle Self AE Unholy	12
+5067	Castle Long AE Unholy	12
+5068	Decrease Speed	12
+5069	Decrease Atk.Spd.	12
+5070	Decrease Casting Spd	12
+5071	Decrease P.Atk	12
+5072	Decrease M. Atk.	12
+5073	Quest Trap - Power Shot	12
+5074	The Victor of War	1
+5075	The Vanquished of War	1
+5076	Death Penalty	15
+5077	NPC Remove Death Penalty	1
+5078	Frintezza Critical Power	1
+5079	NPC Focused Haste	1
+5080	NPC Mighty Haste	1
+5081	Silence	4
+5082	NPC Spinning, Slashing Trick	4
+5083	Shock	4
+5084	NPC Blinding Blow	4
+5085	Anesthesia	1
+5086	Deadly Poison	1
+5087	Berserk	2
+5088	Signal	1
+5089	Representation - Enter the Sailren Nest Quest	1
+5090	Sailren Production	1
+5091	Sailren Production 2	1
+5092	Antharas Terror	1
+5093	Antharas Meteor	1
+5094	Antharas Subordinate Suicide	1
+5095	Antharas Subordinate Melee Attack	1
+5096	Antharas Subordinate Remote Attack	1
+5097	Antharas Subordinate Suicide (Narrow Range)	1
+5098	Capture Penalty	2
+5099	Cancel Capture A	1
+5100	Cancel Capture B	1
+5101	Cancel Capture C	1
+5102	Cancel All Capture	1
+5103	Production - Clan / Transfer	1
+5104	Battle Force	3
+5105	Spell Force	3
+5106	Capture A State	4
+5107	Capture B State	4
+5108	Capture C State	4
+5109	Production - Clan Gate	1
+5110	Cannon Fodder	1
+5111	Big Bang	1
+5112	Shock	12
+5113	Castle Self AE Dispell Buff	12
+5114	Hold	12
+5115	Cubic Hate	4
+5116	Hold	4
+5117	Stun	1
+5118	Cancel Sailren Use	1
+5119	Bleed	1
+5120	Shock	1
+5121	Production - Corpse Revival	1
+5122	Sailren Use Might	1
+5123	Maximum Defense	1
+5124	Anti-Music	1
+5125	Maximum Resist Status	1
+5126	Maximum Recovery	1
+5127	Recover Force	1
+5128	Maximum Archery	1
+5129	Smokescreen	1
+5130	Volcano	1
+5131	Tsunami	1
+5132	Cyclone	1
+5133	Gehenna	1
+5134	Anti-Summoning Field	1
+5135	Slash	1
+5136	Spin Slash	1
+5137	Hold of King	1
+5138	Whiplash	1
+5139	Tidal Wave	1
+5140	Force Curse	1
+5141	Dicing Death	1
+5142	Corpse Kaboom	1
+5143	Sailren Use Blow	1
+5144	Mirage	1
+5145	Day of Doom	1
+5146	Heal	10
+5147	Blessed Body	10
+5148	Prayer	10
+5149	Recharge	10
+5150	Blessed Soul	10
+5151	Mana Gain	10
+5152	Ritual	10
+5153	Cheer	10
+5154	Might	10
+5156	Empower	10
+5157	Duel Might	10
+5158	Shield	10
+5159	Magic Barrier	10
+5160	Duel Weakness	10
+5161	Agility	10
+5162	Guidance	10
+5163	Focus	10
+5164	Wild Magic	10
+5165	Charm	10
+5166	Slow	10
+5167	Winter	10
+5168	Stun	10
+5169	Hold	10
+5170	Sleep	10
+5171	Paralyze	10
+5172	Medusa	10
+5173	Fear	10
+5174	Poison	10
+5175	Bleed	10
+5176	Silence	10
+5177	Doom	10
+5178	NPC Burn	1
+5179	Raid Boss - Level 86	1
+5180	Raid Boss - Level 87	1
+5181	Raid Boss - Level 87	1
+5182	Blessing of Protection	1
+5183	Production: Dimensional Shock	1
+5184	Production: Valakas Dragon Breath	1
+5185	Production: Magic-type Guard	1
+5186	Pet Haste	1
+5187	Pet Vampiric Rage	1
+5188	Pet Regeneration	1
+5189	Pet Blessed Body	1
+5190	Pet Blessed Soul	1
+5191	Pet Guidance	1
+5192	Pet Wind Walk	1
+5193	Pet Acumen	1
+5194	Pet Empower	1
+5195	Pet Greater Heal	3
+5196	Pet Wind Shackle	3
+5197	Pet Hex	3
+5198	Pet Slow	3
+5199	Pet Curse Gloom	3
+5200	Pet Recharge	3
+5201	Pet Concentration	2
+5202	NPC Ranged Stun	12
+5203	NPC Ranged Fear	12
+5204	Production-First Gigantic Pig Combination	1
+5205	Boss Regeneration	1
+5206	Decrease Speed	1
+5207	Decrease Atk. Spd.	1
+5208	Golden Pig Wind Walk	1
+5209	Golden Pig Shield	1
+5210	Golden Pig Blessed Body	1
+5211	Golden Pig Vampiric Rage	1
+5212	Golden Pig Regeneration	1
+5213	Golden Pig Haste	1
+5214	Golden Pig Blessed Soul	1
+5215	Golden Pig Acumen	1
+5216	Golden Pig Concentration	1
+5217	Golden Pig Empower	1
+5218	Production: Event Teleport	1
+5219	Huge Pig Stun	1
+5220	Huge Pig Fear	1
+7000	NPC Default	1
+7001	Dispel Buff	1
+7002	Dispel Debuff	1
+7003	Dispel All	1
+7004	Dispel Petrification	2
+7005	Greater Chant of Vampire	4
+7006	The Love of Pa'agrio	13
+7007	Greater Seal of Flame	4
+7008	not_used	1
+7009	not_used	1
+7010	not_used	1
+7011	not_used	1
+7012	not_used	1
+7013	not_used	1
+7014	Test - Critical Damage Up	1
+7015	Test - Critical Damage Down	1
+7016	Test - Critical Damage Up	1
+7017	Test - Critical Damage Down	1
+7018	Test - Critical Rate Up	1
+7019	Test - Critical Rate Down	1
+7020	Test - Critical Rate Up	1
+7021	Test - Critical Rate Down	1
+7022	Test - Find Hidden Door	1
+7023	not_used	1
+7024	not_used	1
+7025	not_used	1
+7026	not_used	1
+7027	not_used	1
+7028	For Stationary NPCs	1
+7029	Super Haste	4
+7030	Summon King Bugbear	1
+7031	Summon Skeleton Royal Guard	1
+7032	Summon Hunter Gargoyle	1
+7033	Test Flame Strike	1
+7034	Test Aqua Splash	1
+7035	Display - Swoop Cannon	1
+7036	Display - Valakas	1
+7037	Display - Tyrannosaurus Capture	1
+7038	Channeling DD Test: Short	1
+7039	Channeling DD Test: Middle	1
+7040	Channeling DD Test: Long	1
+7041	Master's Blessing - Focus	1
+7042	Master's Blessing - Death Whisper	1
+7043	Master's Blessing - Haste	1
+7044	Master's Blessing - Guidance	1
+7045	Master's Blessing - Blessed Body	1
+7046	Master's Blessing - Blessed Soul	1
+7047	Master's Blessing - Agility	1
+7048	Master's Blessing - Acumen	1
+7049	Master's Blessing - Decrease Weight	1
+7050	Master's Blessing - Might	1
+7051	Master's Blessing - Shield	1
+7052	Master's Blessing - Magic Barrier	1
+7053	Master's Blessing - Vampiric Rage	1
+7054	Master's Blessing - Empower	1
+7055	Master's Blessing - Wind Walk	1
+7056	Master's Blessing - Berserker Spirit	1
+7057	Master's Blessing - Greater Might	1
+7058	Master's Blessing - Greater Shield	1
+7059	Master's Blessing - Wild Magic	1
+7060	Master's Blessing - Clarity	1
+7061	Master's Blessing - Prophecy of Water	1
+7062	Master's Blessing - Prophecy of Fire	1
+7063	Master's Blessing - Prophecy of Wind	1
+7064	Master's Blessing - Chant of Victory	1
+10000	Mana Drug	1
+10001	Mana Potion	1
+49900	Gold Wyvern	1
+49991	Twilight Dragon	1
+49992	Wind Dragon	1
+100000	Ghost Walking	1

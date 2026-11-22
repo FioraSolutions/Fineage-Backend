@@ -1,5 +1,5 @@
 {
-  "reference": "Mobius transferSkillTree from transferSkillTree.xml (CT2.5 rows; pomanders match CT0 Interlude healer trainers).",
+  "reference": "Holy Pomander transfer rows for CT_0 Interlude healer trainers (Bishop 16, Elven Elder 30, Shillien Elder 43). High Five-only skills removed.",
   "certificates": [
     {
       "itemId": 15307,
@@ -147,20 +147,6 @@
         {
           "skillId": 1397,
           "level": 3,
-          "getLevel": 76,
-          "certificateItemId": 15307,
-          "count": 1
-        },
-        {
-          "skillId": 1531,
-          "level": 7,
-          "getLevel": 76,
-          "certificateItemId": 15307,
-          "count": 1
-        },
-        {
-          "skillId": 1539,
-          "level": 4,
           "getLevel": 76,
           "certificateItemId": 15307,
           "count": 1
@@ -320,20 +306,6 @@
         {
           "skillId": 1418,
           "level": 1,
-          "getLevel": 76,
-          "certificateItemId": 15308,
-          "count": 1
-        },
-        {
-          "skillId": 1531,
-          "level": 7,
-          "getLevel": 76,
-          "certificateItemId": 15308,
-          "count": 1
-        },
-        {
-          "skillId": 1539,
-          "level": 4,
           "getLevel": 76,
           "certificateItemId": 15308,
           "count": 1

@@ -81,6 +81,26 @@ public sealed partial class GameData
             : TransferSkillTreeCatalog.Empty;
         var skillEnchants = LoadSkillEnchants(Path.Combine(dataDirectory, SkillEnchantCatalog.FileName));
         var recipes = RecipeCatalog.Load(Path.Combine(dataDirectory, RecipeCatalog.FileName));
+        var whitelistPath = Path.Combine(dataDirectory, InterludeSkillWhitelist.FileName);
+        if (File.Exists(whitelistPath))
+        {
+            var whitelist = InterludeSkillWhitelist.Load(whitelistPath);
+            var violations = InterludeSkillReferenceValidator.ViolationsUnderDataDirectory(dataDirectory, whitelist);
+            if (violations.Count > 0)
+            {
+                throw new InvalidDataException(
+                    "Game data references skills that are not in CT_0 Interlude: "
+                    + string.Join("; ", violations));
+            }
+
+            foreach (var skill in skills.Skills)
+            {
+                if (!whitelist.Contains(skill.SkillId))
+                    throw new InvalidDataException(
+                        $"skills.json skillId={skill.SkillId} ({skill.Name}) is not in {InterludeSkillWhitelist.FileName}.");
+            }
+        }
+
         return new GameData(items, kits, classes, quests, skills, skillTrees, transferSkillTrees, skillEnchants, recipes);
     }
 
