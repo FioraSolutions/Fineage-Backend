@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// grade penalty a higher crystal brings. Ported off the V2 wire: the deny code is the world's own return value and
 /// the paperdoll / penalty sheet is read from the recorded <see cref="IWorldEventPublisher"/> traffic.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEquipRestrictionTests
 {
     const int HumanSword = 425;

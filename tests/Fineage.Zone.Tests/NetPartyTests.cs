@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// Party lifecycle over Net: invite, accept, the roster fanout, kick, and the empty list that closes the last
 /// member's window. Every case drives the public <c>TryParty*</c> entry points and asserts the bridge fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPartyTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

@@ -8,6 +8,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Self-craft (#281): learn recipe scroll → book → make wooden arrows.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetCraftTests
 {
     const int RecipeListId = 1;

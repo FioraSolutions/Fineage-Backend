@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius ArmorSetListener: completing a set grants temporary skills and fans out SkillList
 /// so the client shows the set passive icon.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetArmorSetSkillListTests
 {
     // Dark Crystal Robe set (armor-sets.json id 44): chest 2407 + head 512 + gloves 5767 + feet 5779

@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Every Interlude Say2 channel with several sessions in the world (Mobius CT_0 chat handlers): who hears the
 /// line, what the speaker gets back, block list / message refusal, chat ban, level and hero gates.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetChatChannelTests
 {
     static readonly DateTimeOffset T0 = new(2026, 11, 16, 0, 0, 0, TimeSpan.Zero);

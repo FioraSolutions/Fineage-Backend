@@ -10,6 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius <c>&lt;target race="UNDEAD"/&gt;</c> on Holy Strike (49): living humanoid mob refuses with SysMsg 113.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSkillCastConditionTests
 {
     const int HolyStrike = 49;

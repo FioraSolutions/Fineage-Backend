@@ -6,6 +6,7 @@ using Xunit;
 namespace Fineage.Login.Tests;
 
 /// <summary>Requires local docker-compose postgres (FINEAGE_DATABASE_URL or defaults); each run uses its own schema.</summary>
+[Trait("Category", "Integration")]
 public sealed class PostgresLedgerJournalTests
 {
     static readonly LedgerAccount Shop = LedgerAccount.Of(SystemAccount.NpcShop);

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class NpcTemplateSpawnTests
 {
     const int MobiusTemplateCount = 6520;

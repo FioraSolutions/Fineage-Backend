@@ -1,0 +1,67 @@
+{
+  "reference": "Mobius CT 0 Interlude named Quest/Script bypass scripts (data/html) and ai/others actors wired in Fineage. Pipelines map to ZoneWorldNpcScripts dispatch — not the hundreds of generic ai/** combat scripts.",
+  "priorityMigrated": {
+    "town_event_npcs": [
+      {
+        "scriptId": "OracleTeleport",
+        "pipeline": "oracle_teleport",
+        "npcIds": [31127, 31128, 31129, 31130, 31131, 31137, 31138, 31139, 31140, 31141],
+        "note": "Seven Signs festival guides — Dimensional/Return script events"
+      },
+      {
+        "scriptId": "NewbieHelper",
+        "pipeline": "newbie_helper",
+        "npcIds": [30598, 30599, 30600, 30601, 30602],
+        "note": "First-talk beginner kit (TryNewbieHelperGift); travel via NewbieTravelToken bypass"
+      },
+      {
+        "scriptId": "RaidbossInfo",
+        "pipeline": "raid_boss_info",
+        "npcIds": [31775, 31776],
+        "note": "Adventurer guild raid ranking HTML — stub until ranking actor lands"
+      },
+      {
+        "scriptId": "TeleportToRaceTrack",
+        "pipeline": "monster_race_teleport",
+        "npcIds": [30995, 30256, 30320],
+        "note": "Free teleport to Dion monster derby track (data/monster-race.json)"
+      }
+    ],
+    "raid_gates": [
+      {
+        "scriptId": "DungeonGatekeeper",
+        "pipeline": "dungeon_gate",
+        "note": "Catacomb/necropolis Gatekeeper Ziggurats — DungeonEnterRequest + DungeonAccess rules, not Script bypass"
+      }
+    ]
+  },
+  "scripts": [
+    { "id": "AllianceMaster", "pipeline": "pledge", "status": "implemented", "mobiusRef": "village_master/AllianceMaster" },
+    { "id": "ClanMaster", "pipeline": "pledge", "status": "implemented", "mobiusRef": "village_master/ClanMaster" },
+    { "id": "DarkElfChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DarkElfChange1" },
+    { "id": "DarkElfChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DarkElfChange2" },
+    { "id": "DwarfBlacksmithChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DwarfBlacksmithChange1" },
+    { "id": "DwarfBlacksmithChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DwarfBlacksmithChange2" },
+    { "id": "DwarfWarehouseChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DwarfWarehouseChange1" },
+    { "id": "DwarfWarehouseChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/DwarfWarehouseChange2" },
+    { "id": "ElfHumanClericChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/ElfHumanClericChange2" },
+    { "id": "ElfHumanFighterChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/ElfHumanFighterChange1" },
+    { "id": "ElfHumanFighterChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/ElfHumanFighterChange2" },
+    { "id": "ElfHumanWizardChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/ElfHumanWizardChange1" },
+    { "id": "ElfHumanWizardChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/ElfHumanWizardChange2" },
+    { "id": "FirstClassTransferTalk", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/FirstClassTransferTalk" },
+    { "id": "MonumentOfHeroes", "pipeline": "monument_of_heroes", "status": "implemented", "mobiusRef": "ai/others/MonumentOfHeroes" },
+    { "id": "NewbieTravelToken", "pipeline": "newbie_travel", "status": "implemented", "mobiusRef": "ai/others/NewbieTravelToken" },
+    { "id": "NewbieHelper", "pipeline": "newbie_helper", "status": "implemented", "mobiusRef": "ai/others/NewbieHelper" },
+    { "id": "NpcLocationInfo", "pipeline": "stub", "status": "stub", "mobiusRef": "custom/NpcLocationInfo" },
+    { "id": "NoblesseTeleport", "pipeline": "noblesse_teleport", "status": "implemented", "mobiusRef": "teleporter/NoblesseTeleport" },
+    { "id": "OracleTeleport", "pipeline": "oracle_teleport", "status": "implemented", "mobiusRef": "ai/others/OracleTeleport" },
+    { "id": "OrcChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange1" },
+    { "id": "OrcChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange2" },
+    { "id": "RaidbossInfo", "pipeline": "raid_boss_info", "status": "stub", "mobiusRef": "ai/others/RaidbossInfo" },
+    { "id": "ShadowWeapons", "pipeline": "stub", "status": "stub", "mobiusRef": "ai/others/ShadowWeapons" },
+    { "id": "SymbolMaker", "pipeline": "symbol_maker", "status": "implemented", "mobiusRef": "ai/others/SymbolMaker" },
+    { "id": "TeleportToRaceTrack", "pipeline": "monster_race_teleport", "status": "implemented", "mobiusRef": "ai/others/TeleportToRaceTrack" },
+    { "id": "Wedding", "pipeline": "wedding", "status": "implemented", "mobiusRef": "ai/others/Wedding" }
+  ]
+}

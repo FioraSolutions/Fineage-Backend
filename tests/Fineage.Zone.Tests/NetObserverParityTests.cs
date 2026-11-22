@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// damage, "hit you for", miss / crit / shield) reach only the attacker or the victim. The clock only moves through
 /// <see cref="NetMoveVisibilityRig.AdvanceAsync"/>.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetObserverParityTests
 {
     const int X = 49000, Y = 50000, Z = -3000;

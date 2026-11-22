@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// Net enter projects the live <see cref="ZoneEntity"/> after TryEnter — race/inventory/skills
 /// come from world join, not a parallel store re-read with Human defaults.
 /// </summary>
+[Trait("Category", "Integration")]
 public class NetEnterWorldProjectorTests
 {
     [Fact]
