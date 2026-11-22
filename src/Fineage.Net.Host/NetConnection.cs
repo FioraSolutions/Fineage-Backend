@@ -60,34 +60,13 @@ public sealed class NetConnection : IAsyncDisposable
     {
         try
         {
-            while (!ct.IsCancellationRequested)
-            {
-                PacketEnvelope? envelope;
-                try
-                {
-                    envelope = await NetFraming.ReadAsync(_stream, ct).ConfigureAwait(false);
-                }
-                catch (InvalidOperationException)
-                {
-                    break;
-                }
-
-                if (envelope == null)
-                    break;
-
-                if (envelope.Major != PacketEnvelope.ProtocolMajor)
-                    continue;
-
-                if (envelope.Payload.Length > PacketEnvelope.MaxPayloadBytes)
-                    continue;
-
-                if (!_deduper.TryAccept(envelope.RequestSequence))
-                    continue;
-
-                NetTelemetry.FrameIn(_endpoint, envelope.Payload.Length);
-
-                await _inbox.Writer.WriteAsync(envelope, ct).ConfigureAwait(false);
-            }
+            await NetInboundPipe.ReadFramesAsync(_stream, AcceptFrameAsync, ct).ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
         }
         catch (OperationCanceledException)
         {
@@ -95,13 +74,25 @@ public sealed class NetConnection : IAsyncDisposable
         catch (IOException)
         {
         }
-        catch (ObjectDisposedException)
-        {
-        }
         finally
         {
             _inbox.Writer.TryComplete();
         }
+    }
+
+    ValueTask AcceptFrameAsync(PacketEnvelope envelope, CancellationToken ct)
+    {
+        if (envelope.Major != PacketEnvelope.ProtocolMajor)
+            return ValueTask.CompletedTask;
+
+        if (envelope.Payload.Length > PacketEnvelope.MaxPayloadBytes)
+            return ValueTask.CompletedTask;
+
+        if (!_deduper.TryAccept(envelope.RequestSequence))
+            return ValueTask.CompletedTask;
+
+        NetTelemetry.FrameIn(_endpoint, envelope.Payload.Length);
+        return _inbox.Writer.WriteAsync(envelope, ct);
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Buffers.Binary;
 using System.IO;
 using System.Threading;
@@ -39,46 +40,138 @@ namespace Fineage.Net.Contract
         public static bool TryDecode(ReadOnlySpan<byte> frameBody, out PacketEnvelope envelope, out string? error)
         {
             envelope = null!;
+            ReadOnlySpan<byte> header = frameBody.Length >= PacketEnvelope.HeaderSize
+                ? frameBody.Slice(0, PacketEnvelope.HeaderSize)
+                : frameBody;
+            if (!TryReadHeader(header, frameBody.Length, out byte major, out byte minor, out ushort opcode, out ushort flags, out uint sequence, out int payloadLength, out error))
+                return false;
+
+            byte[] payload = payloadLength == 0
+                ? Array.Empty<byte>()
+                : frameBody.Slice(PacketEnvelope.HeaderSize, payloadLength).ToArray();
+            envelope = CreateEnvelope(major, minor, opcode, flags, sequence, payload);
+            return true;
+        }
+
+        /// <summary>
+        /// Pulls one frame from <paramref name="buffer"/>, which may hold a partial frame or several frames.
+        /// </summary>
+        /// <remarks>
+        /// A partial frame returns false with <paramref name="error"/> null and <paramref name="consumed"/> at
+        /// <paramref name="buffer"/>'s start. The caller advances with consumed at that start and examined at the
+        /// buffer end, so the bytes stay for the next read. A complete frame copies its payload out (the pipe
+        /// buffer is reused) and sets <paramref name="consumed"/> just after the frame. A length that can never
+        /// form a frame returns false with <paramref name="error"/> set.
+        /// </remarks>
+        public static bool TryReadFrame(ReadOnlySequence<byte> buffer, out PacketEnvelope? envelope, out string? error, out SequencePosition consumed)
+        {
+            envelope = null;
             error = null;
-            if (frameBody.Length < PacketEnvelope.HeaderSize)
+            consumed = buffer.Start;
+            if (buffer.Length < 4)
+                return false;
+
+            Span<byte> lenBytes = stackalloc byte[4];
+            buffer.Slice(0, 4).CopyTo(lenBytes);
+            uint total = BinaryPrimitives.ReadUInt32LittleEndian(lenBytes);
+            if (total < PacketEnvelope.HeaderSize || total > PacketEnvelope.MaxFrameBytes)
+            {
+                error = "bad_frame_length";
+                return false;
+            }
+
+            long frameLength = 4L + total;
+            if (buffer.Length < frameLength)
+                return false;
+
+            if (!TryDecodeBody(buffer.Slice(4, total), out PacketEnvelope decoded, out error))
+                return false;
+
+            envelope = decoded;
+            consumed = buffer.GetPosition(frameLength);
+            return true;
+        }
+
+        static bool TryDecodeBody(ReadOnlySequence<byte> body, out PacketEnvelope envelope, out string? error)
+        {
+            if (body.IsSingleSegment)
+                return TryDecode(body.FirstSpan, out envelope, out error);
+
+            envelope = null!;
+            if (body.Length < PacketEnvelope.HeaderSize)
             {
                 error = "short_header";
                 return false;
             }
 
-            byte major = frameBody[0];
-            byte minor = frameBody[1];
-            ushort opcode = BinaryPrimitives.ReadUInt16LittleEndian(frameBody.Slice(2));
-            ushort flags = BinaryPrimitives.ReadUInt16LittleEndian(frameBody.Slice(4));
-            uint seq = BinaryPrimitives.ReadUInt32LittleEndian(frameBody.Slice(6));
-            uint payloadLen = BinaryPrimitives.ReadUInt32LittleEndian(frameBody.Slice(10));
+            Span<byte> header = stackalloc byte[PacketEnvelope.HeaderSize];
+            body.Slice(0, PacketEnvelope.HeaderSize).CopyTo(header);
+            if (!TryReadHeader(header, body.Length, out byte major, out byte minor, out ushort opcode, out ushort flags, out uint sequence, out int payloadLength, out error))
+                return false;
+
+            byte[] payload = payloadLength == 0 ? Array.Empty<byte>() : new byte[payloadLength];
+            if (payloadLength > 0)
+                body.Slice(PacketEnvelope.HeaderSize, payloadLength).CopyTo(payload);
+            envelope = CreateEnvelope(major, minor, opcode, flags, sequence, payload);
+            return true;
+        }
+
+        static bool TryReadHeader(
+            ReadOnlySpan<byte> header,
+            long bodyLength,
+            out byte major,
+            out byte minor,
+            out ushort opcode,
+            out ushort flags,
+            out uint sequence,
+            out int payloadLength,
+            out string? error)
+        {
+            major = 0;
+            minor = 0;
+            opcode = 0;
+            flags = 0;
+            sequence = 0;
+            payloadLength = 0;
+            error = null;
+            if (header.Length < PacketEnvelope.HeaderSize || bodyLength < PacketEnvelope.HeaderSize)
+            {
+                error = "short_header";
+                return false;
+            }
+
+            major = header[0];
+            minor = header[1];
+            opcode = BinaryPrimitives.ReadUInt16LittleEndian(header.Slice(2));
+            flags = BinaryPrimitives.ReadUInt16LittleEndian(header.Slice(4));
+            sequence = BinaryPrimitives.ReadUInt32LittleEndian(header.Slice(6));
+            uint payloadLen = BinaryPrimitives.ReadUInt32LittleEndian(header.Slice(10));
             if (payloadLen > PacketEnvelope.MaxPayloadBytes)
             {
                 error = "oversized";
                 return false;
             }
 
-            if (frameBody.Length != PacketEnvelope.HeaderSize + (int)payloadLen)
+            if (bodyLength != PacketEnvelope.HeaderSize + payloadLen)
             {
                 error = "length_mismatch";
                 return false;
             }
 
-            var payload = payloadLen == 0
-                ? Array.Empty<byte>()
-                : frameBody.Slice(PacketEnvelope.HeaderSize, (int)payloadLen).ToArray();
+            payloadLength = (int)payloadLen;
+            return true;
+        }
 
-            envelope = new PacketEnvelope
+        static PacketEnvelope CreateEnvelope(byte major, byte minor, ushort opcode, ushort flags, uint sequence, byte[] payload) =>
+            new()
             {
                 Major = major,
                 Minor = minor,
                 Opcode = opcode,
                 Flags = flags,
-                RequestSequence = seq,
+                RequestSequence = sequence,
                 Payload = payload
             };
-            return true;
-        }
 
         public static async Task<PacketEnvelope?> ReadAsync(Stream stream, CancellationToken ct)
         {
