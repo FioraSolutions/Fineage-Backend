@@ -7,9 +7,9 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 248 |
-| partial | 86 |
-| stub | 10 |
+| implemented | 251 |
+| partial | 93 |
+| stub | 0 |
 | missing | 0 |
 | **total Mobius quests** | **344** |
 
@@ -39,10 +39,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | hand-ported |
 | 19 | Go to the Pastureland! | 63+ | story / newbie | implemented | hand-ported |
 | 20 | Bring Up With Love | 65+ | story / newbie | implemented | auto-port |
-| 21 | Hidden Truth | 63+ | story / newbie | stub | 54 dialog(s), no start; timers; auto-port |
+| 21 | Hidden Truth | 63+ | story / newbie | partial | quest spawns missing; timers; auto-port |
 | 22 | Tragedy in von Hellmann Forest | 63+ | story / newbie | partial | no kill: 6/6 mobs; no completion; timers; auto-port |
-| 23 | Lidia's Heart | 64+ | story / newbie | stub | 51 dialog(s), no start; timers; auto-port |
-| 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | stub | 71 dialog(s), no start; auto-port |
+| 23 | Lidia's Heart | 64+ | story / newbie | partial | quest spawns missing; timers; auto-port |
+| 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | implemented | auto-port |
 | 25 | Hiding Behind the Truth | 66+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
 | 27 | Chest caught with a bait of wind | 27+ | fishing | implemented | hand-ported |
 | 28 | Chest caught with a bait of icy air | 36+ | fishing | implemented | hand-ported |
@@ -119,7 +119,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 117 | The Ocean of Distant Stars | 39+ | story / newbie | partial | no kill: 2/2 mobs; auto-port |
 | 118 | To Lead and Be Led | 19+ | story / newbie | partial | no completion; auto-port |
 | 119 | Last Imperial Prince | 74+ | repeatable | partial | no talk: 32009; auto-port |
-| 120 | Pavel's Research | 50+ | repeatable | stub | 114 dialog(s), no start; auto-port |
+| 120 | Pavel's Research | 50+ | repeatable | implemented | auto-port |
 | 121 | Pavel the Giant | 46+ | story / newbie | implemented | auto-port |
 | 122 | Ominous News | 20+ | story / newbie | implemented | auto-port |
 | 123 | The Leader and the Follower | 19+ | story / newbie | partial | no completion; auto-port |
@@ -222,9 +222,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 330 | Adept of Taste | 24+ | repeatable | partial | no kill: 9/11 mobs; auto-port |
 | 331 | Arrow of Vengeance | 32+ | repeatable | implemented | auto-port |
 | 333 | Hunt of the Black Lion | 25+ | repeatable | implemented | auto-port |
-| 334 | The Wishing Potion |  | repeatable | stub | 54 dialog(s), no start; auto-port |
-| 335 | Song of the Hunter | 35+ | repeatable | stub | 107 dialog(s), no start; auto-port |
-| 336 | Coins of Magic | 40+ | repeatable | stub | 42 dialog(s), no start; auto-port |
+| 334 | The Wishing Potion |  | repeatable | partial | no talk: 30742,30743; quest spawns missing; auto-port |
+| 335 | Song of the Hunter | 35+ | repeatable | partial | no kill: 73/81 mobs; quest spawns missing; auto-port |
+| 336 | Coins of Magic | 40+ | repeatable | implemented | auto-port |
 | 337 | Audience with the Land Dragon | 50+ | boss entry | partial | no kill: 11/19 mobs; quest spawns missing; auto-port |
 | 338 | Alligator Hunter | 40+ | repeatable | implemented | hand-ported |
 | 340 | Subjugation of Lizardmen | 17+ | repeatable | partial | no kill: 4/7 mobs; quest spawns missing; auto-port |
@@ -295,8 +295,8 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | implemented | hand-ported |
 | 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
-| 501 | Proof of Clan Alliance | 3–39 | clan | stub | 40 dialog(s), no start; timers; auto-port |
-| 503 | Pursuit of Clan Ambition! |  | clan | stub | 64 dialog(s), no start; auto-port |
+| 501 | Proof of Clan Alliance | 3–39 | clan | partial | quest spawns missing; timers; auto-port |
+| 503 | Pursuit of Clan Ambition! |  | clan | partial | quest spawns missing; auto-port |
 | 504 | Competition for the Bandit Stronghold |  | clan | implemented | hand-ported |
 | 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
 | 508 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
@@ -321,7 +321,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 617 | Gather the Flames | 74+ | repeatable | implemented | hand-ported |
 | 618 | Into the Flame | 60+ | repeatable | partial | no kill: 12/12 mobs; auto-port |
 | 619 | Relics of the Old Empire | 74+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
-| 620 | Four Goblets | 74+ | repeatable | stub | 51 dialog(s), no start; auto-port |
+| 620 | Four Goblets | 74+ | repeatable | partial | teleport missing; auto-port |
 | 621 | Egg Delivery | 68+ | repeatable | partial | no talk: 31544,31545,31546,31547; auto-port |
 | 622 | Specialty Liquor Delivery | 68+ | repeatable | partial | no talk: 31543,31544,31545,31546; auto-port |
 | 623 | The Finest Food | 71+ | repeatable | partial | no kill: 3/3 mobs; auto-port |

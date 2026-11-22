@@ -1,0 +1,218 @@
+{
+  "id": 335,
+  "name": "Song of the Hunter",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    3693,
+    3696,
+    3697,
+    3698
+  ],
+  "dialogs": [
+    {
+      "npcId": 30744,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30744-talk-000.htm"
+    },
+    {
+      "npcId": 30744,
+      "hook": "event",
+      "when": "absent",
+      "event": "30744_03",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3693,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30744-event-30744_03-001.htm"
+    },
+    {
+      "npcId": 30744,
+      "hook": "event",
+      "when": "started",
+      "event": "30744_16",
+      "cond": 1,
+      "atLeast": {
+        "3696": 20
+      },
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            3696
+          ]
+        },
+        {
+          "op": "give_adena",
+          "count": 20000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30744-event-30744_16-c1-002.htm"
+    },
+    {
+      "npcId": 30745,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30745-talk-003.htm"
+    },
+    {
+      "npcId": 30746,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30746-talk-004.htm"
+    },
+    {
+      "npcId": 27140,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27141,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27142,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27144,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27145,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27146,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27147,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27148,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3696,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}
