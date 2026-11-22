@@ -29,8 +29,9 @@ public sealed record BossDefinition(
     public bool HasRespawnWindow => RespawnMinMillis > 0 || RespawnMaxMillis > 0;
 
     /// <summary>
-    /// Mobius <c>raidboss_spawnlist</c> / <c>grandboss_data</c> rows the world schedule owns: imported
-    /// coordinates and a respawn window. Instance, rift, and script bosses sit at 0,0,0 or delay 0.
+    /// Mobius world spawn list row: an imported point. Instance, rift, and script bosses
+    /// (Four Sepulchers Halisha, Frintezza, Anakazel, Dr Chaos) are stored at 0,0,0.
+    /// A zero raid delay still has a world point (Venom) and comes back on process start.
     /// </summary>
-    public bool IsWorldScheduledSpawn => HasRespawnWindow && (X != 0 || Y != 0 || Z != 0);
+    public bool HasWorldSpawnPoint => X != 0 || Y != 0 || Z != 0;
 }

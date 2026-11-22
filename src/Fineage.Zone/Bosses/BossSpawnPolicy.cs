@@ -11,39 +11,30 @@ public interface IBossSpawnPolicy
 }
 
 /// <summary>
-/// Smoke hosts: <c>enabled: true</c> rows that are also on the Mobius world spawn list
-/// (coordinates + respawn window).
+/// Smoke hosts: <c>enabled: true</c> rows that have a Mobius world spawn point.
 /// </summary>
 public sealed class DatapackBossSpawnPolicy : IBossSpawnPolicy
 {
     public static readonly DatapackBossSpawnPolicy Instance = new();
 
     public bool ShouldSpawn(BossDefinition definition) =>
-        definition.Enabled && definition.IsWorldScheduledSpawn;
+        definition.Enabled && definition.HasWorldSpawnPoint;
 }
 
 /// <summary>
-/// Hosted default: retail bosses from <c>raidbosses.json</c> when whole-world maps are on. Single-map /
-/// smoke worlds spawn only <c>enabled</c> rows that also lie inside <see cref="ZoneMapFilter.BoundsList"/> when set.
+/// Same gate as spawn maps: an enabled row with a world point, inside
+/// <see cref="ZoneMapFilter.BoundsList"/> when that filter is set. Empty bounds keep every such row.
+/// Single-map hosts still require an explicit box so a smoke world does not materialize the catalog.
 /// </summary>
 public sealed class MapFilteredBossSpawnPolicy(bool includeEnabledMaps) : IBossSpawnPolicy
 {
     public bool ShouldSpawn(BossDefinition definition)
     {
-        if (!definition.IsWorldScheduledSpawn)
+        if (!definition.Enabled || !definition.HasWorldSpawnPoint)
             return false;
-
-        if (!includeEnabledMaps)
-        {
-            if (!definition.Enabled)
-                return false;
-            var bounds = ZoneMapFilter.BoundsList;
-            return bounds.Count > 0 && ZoneMapFilter.Contains(bounds, definition.X, definition.Y);
-        }
-
-        if (definition.Enabled)
-            return true;
-        var regional = ZoneMapFilter.BoundsList;
-        return regional.Count > 0 && ZoneMapFilter.Contains(regional, definition.X, definition.Y);
+        var bounds = ZoneMapFilter.BoundsList;
+        if (!includeEnabledMaps && bounds.Count == 0)
+            return false;
+        return ZoneMapFilter.Contains(bounds, definition.X, definition.Y);
     }
 }

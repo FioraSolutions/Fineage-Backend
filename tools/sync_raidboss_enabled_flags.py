@@ -15,7 +15,7 @@ def is_script_only(row: dict) -> bool:
         or row.get("respawnRandomHours")
     )
     at_origin = row.get("x", 0) == 0 and row.get("y", 0) == 0 and row.get("z", 0) == 0
-    # Matches BossDefinition.IsWorldScheduledSpawn: rift/instance rows without a world point.
+    # Matches BossDefinition.HasWorldSpawnPoint: rift/instance rows stay at the origin.
     return not has_window and at_origin
 
 

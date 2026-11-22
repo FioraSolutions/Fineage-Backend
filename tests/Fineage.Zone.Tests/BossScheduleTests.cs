@@ -131,7 +131,7 @@ public sealed class BossScheduleTests
 
         var restarted = Schedule(clock, raidEnabled: true, grandEnabled: false, store);
         Assert.Equal(BossLifeStatus.Alive, View(restarted, ZeroId).Status);
-        Assert.DoesNotContain(restarted.StartupOrders(), order => order.NpcId == ZeroId);
+        Assert.Contains(restarted.StartupOrders(), order => order.NpcId == ZeroId);
     }
 
     [Fact]

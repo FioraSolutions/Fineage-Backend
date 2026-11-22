@@ -7,14 +7,14 @@ namespace Fineage.Zone.Tests;
 /// <summary>Issue #795: retail raid/grand rows spawn at imported coords with schedule windows.</summary>
 public sealed class RaidBossRegionalSpawnTests
 {
-    const int WorldScheduledCount = 210;
+    const int WorldScheduledCount = 211;
 
     [Fact]
     public void Catalog_marks_retail_rows_with_coords_and_respawn_window()
     {
         var catalog = BossCatalog.LoadDefault();
         Assert.Equal(223, catalog.Bosses.Count);
-        Assert.Equal(WorldScheduledCount, catalog.Bosses.Count(b => b.IsWorldScheduledSpawn));
+        Assert.Equal(WorldScheduledCount, catalog.Bosses.Count(b => b.Enabled && b.HasWorldSpawnPoint));
         Assert.Equal(216, catalog.Bosses.Count(b => b.Enabled));
     }
 
@@ -68,37 +68,24 @@ public sealed class RaidBossRegionalSpawnTests
     }
 
     [Fact]
-    public void Bounds_filter_includes_disabled_rows_for_the_region()
+    public void Bounds_filter_keeps_enabled_rows_inside_the_box()
     {
         var catalog = BossCatalog.LoadDefault();
         var kutus = catalog.Get(25_001);
-        var disabledRetail = new BossDefinition(
-            kutus.NpcId,
-            kutus.Kind,
-            enabled: false,
-            kutus.ObjectId,
-            kutus.Name,
-            kutus.Title,
-            kutus.NpcType,
-            kutus.X,
-            kutus.Y,
-            kutus.Z,
-            kutus.Heading,
-            kutus.Attackable,
-            kutus.MaxHp,
-            kutus.MaxMp,
-            kutus.RunSpeed,
-            kutus.WalkSpeed,
-            kutus.RespawnMinMillis,
-            kutus.RespawnMaxMillis,
-            kutus.InitialStatus);
+        Assert.Equal(-54_416, kutus.X);
+        Assert.Equal(146_480, kutus.Y);
+        var disabledRetail = kutus with { Enabled = false };
+        var antharas = catalog.Get(29_019);
         var policy = new MapFilteredBossSpawnPolicy(includeEnabledMaps: true);
 
         try
         {
-            Environment.SetEnvironmentVariable("FINEAGE_ZONE_BOUNDS", "-135000,200000,-40000,275000");
+            // The old box started at Y 200000, which is north of Kutus (Y 146480), so the
+            // disabled-row assert was false for a point the box never contained.
+            Environment.SetEnvironmentVariable("FINEAGE_ZONE_BOUNDS", "-80000,100000,-40000,180000");
             Assert.True(policy.ShouldSpawn(kutus));
-            Assert.True(policy.ShouldSpawn(disabledRetail));
+            Assert.False(policy.ShouldSpawn(disabledRetail));
+            Assert.False(policy.ShouldSpawn(antharas));
             Assert.False(policy.ShouldSpawn(catalog.Get(25_333)));
         }
         finally

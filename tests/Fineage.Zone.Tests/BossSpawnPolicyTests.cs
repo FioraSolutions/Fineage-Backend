@@ -24,17 +24,18 @@ public sealed class BossSpawnPolicyTests
 
         var halisha = catalog.Get(25_339);
         Assert.True(halisha.Enabled);
-        Assert.False(halisha.IsWorldScheduledSpawn);
+        Assert.False(halisha.HasWorldSpawnPoint);
         Assert.False(policy.ShouldSpawn(halisha));
 
         var venom = catalog.Get(29_054);
         Assert.True(venom.Enabled);
-        Assert.False(venom.IsWorldScheduledSpawn);
-        Assert.False(policy.ShouldSpawn(venom));
+        Assert.True(venom.HasWorldSpawnPoint);
+        Assert.False(venom.HasRespawnWindow);
+        Assert.True(policy.ShouldSpawn(venom));
 
         var frintezza = catalog.Get(29_045);
         Assert.True(frintezza.Enabled);
-        Assert.False(frintezza.IsWorldScheduledSpawn);
+        Assert.False(frintezza.HasWorldSpawnPoint);
         Assert.False(policy.ShouldSpawn(frintezza));
     }
 

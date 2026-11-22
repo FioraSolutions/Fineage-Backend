@@ -8,7 +8,7 @@ namespace Fineage.Zone.Bosses;
 /// Loads <c>data/raidbosses.json</c>. Stats come from <see cref="NpcCatalog"/>.
 /// Object ids occupy [80001, <see cref="PlayerInventory.FirstObjectId"/>).
 /// <see cref="BossDefinition.Enabled"/> follows Mobius retail on; script-only rift/instance rows stay off.
-/// Live placement uses <see cref="BossDefinition.IsWorldScheduledSpawn"/> (imported loc + respawn window).
+/// Live placement uses <see cref="BossDefinition.HasWorldSpawnPoint"/> (imported loc, not the origin).
 /// </summary>
 public sealed class BossCatalog
 {
