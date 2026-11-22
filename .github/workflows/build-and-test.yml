@@ -68,12 +68,12 @@ jobs:
 
   integration-tests:
     name: integration-postgres
-    if: env.RUN_HEAVY == 'true'
+    if: ${{ env.RUN_HEAVY == 'true' }}
     uses: ./.github/workflows/dotnet-test-with-postgres.yml
 
   zone-simulation-perf:
     name: zone-simulation-perf
-    if: env.RUN_HEAVY == 'true'
+    if: ${{ env.RUN_HEAVY == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +92,7 @@ jobs:
 
   zone-parallel-regions:
     name: zone-parallel-regions
-    if: env.RUN_HEAVY == 'true'
+    if: ${{ env.RUN_HEAVY == 'true' }}
     runs-on: ubuntu-latest
     env:
       FINEAGE_ZONE_REGION_WORKERS: '4'
@@ -113,7 +113,7 @@ jobs:
 
   load-test-smoke:
     name: load-test-smoke
-    if: env.RUN_HEAVY == 'true'
+    if: ${{ env.RUN_HEAVY == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     services:

@@ -27,9 +27,16 @@ env:
           contains(github.event.pull_request.labels.*.name, 'perf')) }}
 
 jobs:
+  skipped:
+    if: ${{ env.RUN_HEAVY != 'true' }}
+    name: load-test-smoke-skipped
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Load-test smoke skipped (dev PR fast gate)."
+
   load-test-smoke:
     name: load-test-smoke
-    if: env.RUN_HEAVY == 'true'
+    if: ${{ env.RUN_HEAVY == 'true' }}
     runs-on: ubuntu-latest
     services:
       postgres:
