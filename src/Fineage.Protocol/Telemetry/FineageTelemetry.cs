@@ -37,6 +37,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundDropped =
         Meter.CreateCounter<long>("fineage.outbound.dropped", description: "Frames dropped because a session outbound queue was full");
 
+    public static readonly Counter<long> FanoutDropped =
+        Meter.CreateCounter<long>("fineage.fanout.dropped", description: "Fanout frames dropped under stripe/outbound backpressure (tag opcode_group)");
+
     public static readonly Counter<long> OutboundReliableOverflow =
         Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
 

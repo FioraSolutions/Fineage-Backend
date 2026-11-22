@@ -177,7 +177,12 @@ public sealed class NetConnection : IAsyncDisposable
         {
             if (_stripeBatch.Count >= _maxStripeBatchPending)
             {
-                NetTelemetry.OutboundDropped(_endpoint);
+                NetFanoutDropTelemetry.RecordStripeBatchFull(
+                    ConnectionId,
+                    _endpoint,
+                    envelope.Opcode,
+                    _stripeBatch.Count,
+                    _outbound.Reader.Count);
                 return false;
             }
 

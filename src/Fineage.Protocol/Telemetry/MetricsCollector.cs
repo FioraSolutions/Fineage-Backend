@@ -25,6 +25,7 @@ public sealed class MetricsCollector : IDisposable
     long _regionHandoffs;
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _persistSnapshots = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _fanoutDropped = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
     int _persistPending;
     double _persistOldestAgeMs;
@@ -83,6 +84,9 @@ public sealed class MetricsCollector : IDisposable
                 PersistPending = _persistPending,
                 PersistOldestAgeMs = _persistOldestAgeMs,
                 PersistSnapshots = _persistSnapshots
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
+                FanoutDropped = _fanoutDropped
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 Stages = _stages
@@ -153,6 +157,12 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.persist.snapshots":
                     string result = Tag(tags, "result");
                     _persistSnapshots[result] = _persistSnapshots.GetValueOrDefault(result) + value;
+                    break;
+                case "fineage.fanout.dropped":
+                    string group = Tag(tags, "opcode_group");
+                    if (group.Length == 0)
+                        group = "other";
+                    _fanoutDropped[group] = _fanoutDropped.GetValueOrDefault(group) + value;
                     break;
             }
         }
