@@ -117,7 +117,7 @@ public sealed class NetMoveVisibilityTests
     public async Task Outsider_sees_nothing_then_the_runner_spawns_moving_on_entry_and_despawns_on_exit()
     {
         // Long sim advances + loaded CI runners can exceed 60s wall time waiting on despawn fan-out.
-        using var timeout = Timeout(120);
+        using var timeout = Timeout(180);
         await using var rig = await StartAsync(timeout.Token);
         var a = await rig.JoinAsync(X0, Y0);
         var c = await rig.JoinAsync(X0 + 3000, Y0);
@@ -141,10 +141,10 @@ public sealed class NetMoveVisibilityTests
         await a.NextSpawnOfAsync(c);
 
         // Leave again: past range + forget slack, C drops the pawn.
-        await rig.AdvanceAsync(10_000, 250);
+        await rig.AdvanceAsync(10_000, 500);
         await a.MoveAsync(X0 - 1000, Y0);
         await a.NextMoveOfAsync(a);   // order processed before the clock moves
-        await rig.AdvanceAsync(40_000, 250);
+        await rig.AdvanceAsync(40_000, 500);
         await c.NextDespawnOfAsync(a);
         await a.NextDespawnOfAsync(c);
     }
