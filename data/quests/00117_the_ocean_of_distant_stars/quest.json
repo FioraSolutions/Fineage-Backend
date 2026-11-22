@@ -344,6 +344,40 @@
         }
       ],
       "htmlFile": "32053-event-32052-07-026.htm"
+    },
+    {
+      "npcId": 22023,
+      "hook": "kill",
+      "when": "started",
+      "cond": 7,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8495,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 22024,
+      "hook": "kill",
+      "when": "started",
+      "cond": 7,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8495,
+          "count": 1,
+          "chance": 0.2,
+          "limit": 1
+        }
+      ],
+      "party": true
     }
   ]
 }

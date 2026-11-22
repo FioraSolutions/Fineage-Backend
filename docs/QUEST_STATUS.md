@@ -7,8 +7,8 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 251 |
-| partial | 93 |
+| implemented | 264 |
+| partial | 80 |
 | stub | 0 |
 | missing | 0 |
 | **total Mobius quests** | **344** |
@@ -39,27 +39,27 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | hand-ported |
 | 19 | Go to the Pastureland! | 63+ | story / newbie | implemented | hand-ported |
 | 20 | Bring Up With Love | 65+ | story / newbie | implemented | auto-port |
-| 21 | Hidden Truth | 63+ | story / newbie | partial | quest spawns missing; timers; auto-port |
+| 21 | Hidden Truth | 63+ | story / newbie | partial | quest spawns missing; timers; hand-ported |
 | 22 | Tragedy in von Hellmann Forest | 63+ | story / newbie | partial | no kill: 6/6 mobs; no completion; timers; auto-port |
-| 23 | Lidia's Heart | 64+ | story / newbie | partial | quest spawns missing; timers; auto-port |
-| 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | implemented | auto-port |
-| 25 | Hiding Behind the Truth | 66+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
+| 23 | Lidia's Heart | 64+ | story / newbie | partial | quest spawns missing; timers; hand-ported |
+| 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | implemented | hand-ported |
+| 25 | Hiding Behind the Truth | 66+ | repeatable | implemented | auto-port |
 | 27 | Chest caught with a bait of wind | 27+ | fishing | implemented | hand-ported |
 | 28 | Chest caught with a bait of icy air | 36+ | fishing | implemented | hand-ported |
 | 29 | Chest caught with a bait of earth | 48+ | fishing | implemented | hand-ported |
 | 30 | Chest caught with a bait of fire | 60+ | fishing | implemented | hand-ported |
 | 31 | Secret Buried in the Swamp | 66+ | story / newbie | partial | no talk: 31661,31662,31663,31664; auto-port |
-| 32 | An Obvious Lie | 45+ | story / newbie | partial | no kill: 1/1 mobs; auto-port |
+| 32 | An Obvious Lie | 45+ | story / newbie | implemented | auto-port |
 | 33 | Make a Pair of Dress Shoes | 60+ | story / newbie | implemented | auto-port |
-| 34 | In Search of Cloth | 60+ | story / newbie | partial | no kill: 2/2 mobs; auto-port |
-| 35 | Find Glittering Jewelry | 60+ | story / newbie | partial | no kill: 1/1 mobs; auto-port |
-| 36 | Make a Sewing Kit | 60+ | story / newbie | partial | no kill: 1/1 mobs; auto-port |
+| 34 | In Search of Cloth | 60+ | story / newbie | implemented | auto-port |
+| 35 | Find Glittering Jewelry | 60+ | story / newbie | implemented | auto-port |
+| 36 | Make a Sewing Kit | 60+ | story / newbie | implemented | auto-port |
 | 37 | Make Formal Wear | 60+ | story / newbie | partial | no completion; auto-port |
 | 38 | Dragon Fangs | 19+ | story / newbie | partial | no completion; auto-port |
 | 39 | Red-Eyed Invaders | 20+ | story / newbie | implemented | auto-port |
-| 42 | Help the Uncle! | 25+ | story / newbie | partial | no kill: 2/2 mobs; auto-port |
-| 43 | Help the Sister! | 26+ | story / newbie | partial | no kill: 2/2 mobs; auto-port |
-| 44 | Help the Son! | 24+ | story / newbie | partial | no kill: 3/3 mobs; auto-port |
+| 42 | Help the Uncle! | 25+ | story / newbie | implemented | auto-port |
+| 43 | Help the Sister! | 26+ | story / newbie | implemented | auto-port |
+| 44 | Help the Son! | 24+ | story / newbie | implemented | auto-port |
 | 45 | To Talking Island | 3+ | story / newbie | implemented | hand-ported |
 | 46 | Once More In the Arms of the Mother Tree | 3+ | story / newbie | implemented | hand-ported |
 | 47 | Into the Dark Forest | 3+ | story / newbie | implemented | hand-ported |
@@ -102,7 +102,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 100 | Saga of the Maestro |  | 3rd class (Saga) | implemented | saga engine (QuestCatalog.Sagas + _sagas.json); simplified: no skill casts, helper NPC chat timers |
 | 101 | Sword of Solidarity | 9+ | story / newbie | implemented | hand-ported |
 | 102 | Sea of Spores Fever | 12+ | story / newbie | implemented | hand-ported |
-| 103 | Spirit of Craftsman | 11+ | story / newbie | partial | no kill: 1/5 mobs; auto-port |
+| 103 | Spirit of Craftsman | 11+ | story / newbie | implemented | auto-port |
 | 104 | Spirit of Mirrors | 10+ | story / newbie | implemented | hand-ported |
 | 105 | Skirmish with the Orcs | 10+ | story / newbie | partial | no kill: 6/8 mobs; hand-ported |
 | 106 | Forgotten Truth | 10+ | story / newbie | implemented | hand-ported |
@@ -116,10 +116,10 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 114 | Resurrection of an Old Manager | 49+ | story / newbie | partial | no kill: 1/1 mobs; timers; auto-port |
 | 115 | The Other Side of Truth | 53+ | repeatable | partial | quest spawns missing; timers; auto-port |
 | 116 | Beyond the Hills of Winter | 30+ | story / newbie | implemented | auto-port |
-| 117 | The Ocean of Distant Stars | 39+ | story / newbie | partial | no kill: 2/2 mobs; auto-port |
+| 117 | The Ocean of Distant Stars | 39+ | story / newbie | implemented | auto-port |
 | 118 | To Lead and Be Led | 19+ | story / newbie | partial | no completion; auto-port |
 | 119 | Last Imperial Prince | 74+ | repeatable | partial | no talk: 32009; auto-port |
-| 120 | Pavel's Research | 50+ | repeatable | implemented | auto-port |
+| 120 | Pavel's Research | 50+ | repeatable | implemented | hand-ported |
 | 121 | Pavel the Giant | 46+ | story / newbie | implemented | auto-port |
 | 122 | Ominous News | 20+ | story / newbie | implemented | auto-port |
 | 123 | The Leader and the Follower | 19+ | story / newbie | partial | no completion; auto-port |
@@ -147,7 +147,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 168 | Deliver Supplies | 3+ | story / newbie | implemented | hand-ported |
 | 169 | Offspring of Nightmares | 15+ | story / newbie | implemented | hand-ported |
 | 170 | Dangerous Seduction | 21+ | story / newbie | implemented | hand-ported |
-| 171 | Acts of Evil | 27+ | story / newbie | partial | no kill: 5/8 mobs; quest spawns missing; auto-port |
+| 171 | Acts of Evil | 27+ | story / newbie | partial | quest spawns missing; auto-port |
 | 211 | Trial of the Challenger | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 212 | Trial of Duty | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 213 | Trial of the Seeker | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
@@ -172,7 +172,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 232 | Test of the Lord | 39+ | 2nd class (Trial/Test) | implemented | timers; hand-ported |
 | 233 | Test of the War Spirit | 39+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 234 | Fate's Whisper | 75+ | subclass prerequisite | implemented | hand-ported |
-| 235 | Mimir's Elixir | 75+ | subclass prerequisite | partial | no kill: 2/2 mobs; auto-port |
+| 235 | Mimir's Elixir | 75+ | subclass prerequisite | implemented | auto-port |
 | 241 | Possessor of a Precious Soul - 1 | 50+ | noblesse | implemented | hand-ported |
 | 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | partial | quest spawns missing; timers; hand-ported |
 | 246 | Possessor of a Precious Soul - 3 | 65+ | noblesse | implemented | hand-ported |
@@ -193,7 +193,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 272 | Wrath of Ancestors | 5+ | repeatable | implemented | hand-ported |
 | 273 | Invaders of the Holy Land | 6+ | repeatable | implemented | hand-ported |
 | 274 | Skirmish with the Werewolves | 9+ | repeatable | implemented | hand-ported |
-| 275 | Dark Winged Spies | 11+ | repeatable | partial | no kill: 1/2 mobs; quest spawns missing; hand-ported |
+| 275 | Dark Winged Spies | 11+ | repeatable | partial | quest spawns missing; hand-ported |
 | 276 | Totem of the Hestui | 15+ | repeatable | implemented | hand-ported |
 | 277 | Gatekeeper's Offering | 15+ | repeatable | implemented | hand-ported |
 | 291 | Revenge of the Redbonnet | 4+ | repeatable | implemented | hand-ported |
@@ -222,9 +222,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 330 | Adept of Taste | 24+ | repeatable | partial | no kill: 9/11 mobs; auto-port |
 | 331 | Arrow of Vengeance | 32+ | repeatable | implemented | auto-port |
 | 333 | Hunt of the Black Lion | 25+ | repeatable | implemented | auto-port |
-| 334 | The Wishing Potion |  | repeatable | partial | no talk: 30742,30743; quest spawns missing; auto-port |
-| 335 | Song of the Hunter | 35+ | repeatable | partial | no kill: 73/81 mobs; quest spawns missing; auto-port |
-| 336 | Coins of Magic | 40+ | repeatable | implemented | auto-port |
+| 334 | The Wishing Potion |  | repeatable | partial | no talk: 30742,30743; quest spawns missing; hand-ported |
+| 335 | Song of the Hunter | 35+ | repeatable | partial | no kill: 73/81 mobs; quest spawns missing; hand-ported |
+| 336 | Coins of Magic | 40+ | repeatable | implemented | hand-ported |
 | 337 | Audience with the Land Dragon | 50+ | boss entry | partial | no kill: 11/19 mobs; quest spawns missing; auto-port |
 | 338 | Alligator Hunter | 40+ | repeatable | implemented | hand-ported |
 | 340 | Subjugation of Lizardmen | 17+ | repeatable | partial | no kill: 4/7 mobs; quest spawns missing; auto-port |
@@ -294,9 +294,9 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 422 | Repent Your Sins | 20+ | repeatable | partial | no talk: 30300,30597,30612,30718; no kill: 3/4 mobs; hand-ported |
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | implemented | hand-ported |
-| 432 | Birthday Party Song | 31+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
-| 501 | Proof of Clan Alliance | 3–39 | clan | partial | quest spawns missing; timers; auto-port |
-| 503 | Pursuit of Clan Ambition! |  | clan | partial | quest spawns missing; auto-port |
+| 432 | Birthday Party Song | 31+ | repeatable | implemented | auto-port |
+| 501 | Proof of Clan Alliance | 3–39 | clan | partial | quest spawns missing; timers; hand-ported |
+| 503 | Pursuit of Clan Ambition! |  | clan | partial | quest spawns missing; hand-ported |
 | 504 | Competition for the Bandit Stronghold |  | clan | implemented | hand-ported |
 | 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
 | 508 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
@@ -321,7 +321,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 617 | Gather the Flames | 74+ | repeatable | implemented | hand-ported |
 | 618 | Into the Flame | 60+ | repeatable | partial | no kill: 12/12 mobs; auto-port |
 | 619 | Relics of the Old Empire | 74+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
-| 620 | Four Goblets | 74+ | repeatable | partial | teleport missing; auto-port |
+| 620 | Four Goblets | 74+ | repeatable | partial | teleport missing; hand-ported |
 | 621 | Egg Delivery | 68+ | repeatable | partial | no talk: 31544,31545,31546,31547; auto-port |
 | 622 | Specialty Liquor Delivery | 68+ | repeatable | partial | no talk: 31543,31544,31545,31546; auto-port |
 | 623 | The Finest Food | 71+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
@@ -361,5 +361,5 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 661 | Making the Harvest Grounds Safe | 21+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
 | 662 | A Game of Cards | 61+ | repeatable | partial | no kill: 40/40 mobs; auto-port |
 | 663 | Seductive Whispers | 50+ | repeatable | partial | no kill: 27/27 mobs; auto-port |
-| 688 | Defeat the Elrokian Raiders! | 75+ | repeatable | partial | no kill: 1/1 mobs; auto-port |
+| 688 | Defeat the Elrokian Raiders! | 75+ | repeatable | implemented | auto-port |
 | 999 | T0 Tutorial | 10+ | tutorial | implemented | timers; hand-ported |
