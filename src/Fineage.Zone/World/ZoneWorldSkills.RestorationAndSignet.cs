@@ -111,7 +111,6 @@ public sealed partial class ZoneWorld
                 if (stack != null)
                     granted.Add(stack);
             }
-            foreach (var stack in granted)
             foreach (var item in group.Items)
             {
                 string name = _game.Items.TryGet(item.Id, out var type) ? type.Name : item.Id.ToString();

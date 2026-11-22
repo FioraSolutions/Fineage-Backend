@@ -74,10 +74,13 @@ public sealed partial class ZoneWorld
     {
         if (player.Freight == null)
             return;
-        _dirtyFreight[session.ObjectId] = player;
-        if (InventoryPersistDeferred)
-            return;
-        TryCommitDirtyEconomy(discardWithoutPublish: null);
+        lock (_economyLock)
+        {
+            _dirtyFreight[session.ObjectId] = player;
+            if (InventoryPersistDeferred)
+                return;
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
+        }
     }
 
     void PersistFreightStacks(string account, int characterId, PrivateWarehouse freight)
@@ -90,7 +93,8 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        _dirtyOfflineFreight.Add(new EconomyBagWrite(account, characterId) { Freight = stored });
+        lock (_economyLock)
+            _dirtyOfflineFreight.Add(new EconomyBagWrite(account, characterId) { Freight = stored });
     }
 
     string? OpenPackageDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc)

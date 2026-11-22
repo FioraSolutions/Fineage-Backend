@@ -126,10 +126,7 @@ public sealed partial class ZoneWorld
                     return error;
 
                 if (changes.Count > 0)
-                {
-                    var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
                     SaveInventory(session, inventory);
-                }
 
                 return (string?)null;
             },
@@ -165,10 +162,7 @@ public sealed partial class ZoneWorld
                 Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
                 Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
                 if (changes.Count > 0)
-                {
-                    var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
                     SaveInventory(session, inventory);
-                }
 
                 return (string?)null;
             },
@@ -219,7 +213,6 @@ public sealed partial class ZoneWorld
                 Take(inventory, SevenSignsProtocol.BlueSealStoneId, request.BlueStones, changes);
                 Take(inventory, SevenSignsProtocol.GreenSealStoneId, request.GreenStones, changes);
                 Take(inventory, SevenSignsProtocol.RedSealStoneId, request.RedStones, changes);
-                if (changes.Count > 0)
                 GiveItem(session, inventory, SevenSignsProtocol.AncientAdenaItemId, reward);
                 return (string?)null;
             },

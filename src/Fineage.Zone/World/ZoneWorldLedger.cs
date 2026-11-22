@@ -116,10 +116,13 @@ public sealed partial class ZoneWorld
     /// </summary>
     IReadOnlyList<StoredItem>? QueuedFreight(int characterId)
     {
-        for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
+        lock (_economyLock)
         {
-            if (_dirtyOfflineFreight[i].CharacterId == characterId)
-                return _dirtyOfflineFreight[i].Freight;
+            for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
+            {
+                if (_dirtyOfflineFreight[i].CharacterId == characterId)
+                    return _dirtyOfflineFreight[i].Freight;
+            }
         }
 
         return null;

@@ -116,13 +116,16 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
-        _dirtyInventories[session.ObjectId] = (session, inventory);
-        if (InventoryPersistDeferred)
-            return;
+        lock (_economyLock)
+        {
+            _dirtyInventories[session.ObjectId] = (session, inventory);
+            if (InventoryPersistDeferred)
+                return;
 
-        // Economic item rows stay on this caller, in the same transaction as the ledger.
-        // InventoryUpdate is sent only after that commit returns.
-        TryCommitDirtyEconomy(discardWithoutPublish: null);
+            // Economic item rows stay on this caller, in the same transaction as the ledger.
+            // InventoryUpdate is sent only after that commit returns.
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
+        }
     }
 
     /// <summary>One InventoryUpdate for every journal row, after the bag write has succeeded.</summary>
@@ -144,9 +147,12 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool FlushDirtyInventories()
     {
-        if (!HasDirtyEconomy())
-            return true;
-        return TryCommitDirtyEconomy(discardWithoutPublish: null);
+        lock (_economyLock)
+        {
+            if (!HasDirtyEconomy())
+                return true;
+            return TryCommitDirtyEconomy(discardWithoutPublish: null);
+        }
     }
 
     bool HasDirtyEconomy() =>
@@ -161,6 +167,12 @@ public sealed partial class ZoneWorld
     /// is a character who is leaving: the bag is saved and the journal is dropped, with no InventoryUpdate.
     /// </summary>
     bool TryCommitDirtyEconomy(int? discardWithoutPublish)
+    {
+        lock (_economyLock)
+            return CommitDirtyEconomy(discardWithoutPublish);
+    }
+
+    bool CommitDirtyEconomy(int? discardWithoutPublish)
     {
         var bags = CollectDirtyBags();
         long started = System.Diagnostics.Stopwatch.GetTimestamp();
