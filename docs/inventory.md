@@ -41,17 +41,16 @@ Object ids come from the zone `ItemObjectIdAllocator`. The bag and every warehou
 `ZoneWorld.SaveInventory` / `FlushDirtyInventories` is the only commit. Order:
 
 1. Validate and apply on the inventory (the caller's mutation, already journaled).
-2. Flush the auditable economy ledger.
-3. Replace the character's item rows.
-4. Drain the journal, bump the inventory version by one, and send one `InventoryUpdate`.
+2. In one database transaction, insert the pending ledger rows and replace the dirty bags, warehouses, and freight holds. The transaction commits both or neither.
+3. After that commit returns, drain the journal, bump the inventory version by one, and send one `InventoryUpdate`.
 
-A failed ledger flush or a failed item write leaves the bag dirty, does not publish, and logs the character id, account, item count, and the exception. `FlushDirtyInventories` publishes only the characters whose snapshot write succeeded and leaves the rest dirty. Hand-built `FanoutInventoryUpdate` calls are gone. `FanInventory` now persists and publishes the journal for the callers that still pass the old row list.
+A failed commit leaves the bags dirty, puts the ledger rows back in the journal buffer, does not publish, and logs the character id, account, item count, and the exception. Hand-built `FanoutInventoryUpdate` calls are gone. `FanInventory` now persists and publishes the journal for the callers that still pass the old row list.
 
-The leave barrier flushes the ledger first, then writes the bag, and discards the journal so the next enter is an `ItemList` rather than a second copy of the same adds.
+The leave barrier uses that same transaction for the leaving character and any other dirty economic rows, then discards the leaving journal so the next enter is an `ItemList` rather than a second copy of the same adds. Other characters in that commit are told with `InventoryUpdate` only after the commit returns.
 
-### What is still two database transactions
+Economic item writes stay on the caller that commits them. A persistence worker may move non-economic snapshots off the simulation thread. It must not move this commit, and it must not send `InventoryUpdate` before the commit returns.
 
-The ledger journal and the item snapshot use different connections (`PostgresLedgerJournal` and `PostgresAccountStore`). A process crash between the two commits can leave the journal ahead of `character_items`. The in-memory order is fixed: the client is not told until both writes have returned success. Closing the crash window means one Postgres transaction for the journal insert and the item replace. Issue #867 (persistence off the simulation thread) must not move the item snapshot off this commit or send `InventoryUpdate` before `TryPersistInventory` returns. Non-economic writes may still move.
+The memory journal stores an entry at `Append`, so a process that never reaches Postgres has no second durable write to roll back. The Postgres journal keeps entries buffered until `CommitEconomy` inserts them on the same connection and the same transaction as `character_items`.
 
 Unknown templates are not skipped. Bag load logs `inventory drop unknown template` with character, item id, object id, and count, and does not restore that row. A missing template on `ReplaceFromStored` or warehouse restore throws, naming the item id and object id. A collapsed duplicate stack is logged with both object ids.
 
@@ -63,7 +62,7 @@ This matches the client in [FioraSolutions/Fineage#1667](https://github.com/Fior
 |---|---|---|---|
 | `ItemList` | zone → client | `0x030A` | the existing item-list body, then the version tail |
 | `InventoryUpdate` | zone → client | `0x0315` | the existing inventory-update body, then the version tail |
-| `RequestItemList` | client → zone | `0x03E1` | empty |
+| `RequestItemList` | client → zone | `0x000F` | empty |
 
 Each row is unchanged: object id, item id, count, enchant, equipped slot, body slot, kind, icon, weapon type, armor type, then option1 and option2 (8 bytes). Equip and unequip are modify rows (the slot, or -1). A remove row has count 0 and the paperdoll slot the piece left.
 
@@ -97,11 +96,17 @@ The cursor is per character and is not stored. A new process starts it at 0, whi
 
 On a gap, an unknown change code, or an unreadable tail, the client sends `RequestItemList`.
 
-| | This server | Retail Interlude |
-|---|---|---|
-| Opcode | Fineage envelope `0x03E1` | C2S `0x14` |
-| Body | empty | empty |
-| Reply | `ItemList` (`0x030A`) at the current cursor, cursor not incremented | `ItemList` |
+| | This server |
+|---|---|
+| Opcode | `0x000F` |
+| Body | empty. The handler does not read it. |
+| Reply | `ItemList` (`0x030A`) at the current cursor. The cursor is not incremented. |
 
-`0x03E1` is the opcode the client in #1667 sends (`RequestInventoryResync`). It is the next world opcode after `EnchantSkillInfo` (`0x03E0`). This socket does not accept the retail byte `0x14` as that request. The server name of `0x03E1` is `RequestItemList`.
+`0x000F` is the Interlude C2S opcode. Mobius CT_0 Interlude `ClientPackets` registers it as:
+
+```java
+REQUEST_ITEM_LIST(0x0F, RequestItemList::new, ConnectionState.IN_GAME),
+```
+
+That line is in `L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/ClientPackets.java`. Checked against the public tree at commit `dd4850671e3f21ba05a98b4d29b62558a74a096a` (https://github.com/tichopad/L2J_Mobius). On that same table `USE_ITEM` is `0x14`. `RequestItemList.readImpl` is empty. Later chronicles moved this request to `0x14` and used `0x0F` for movement; that table is not Interlude. The invented `0x03E1` opcode is not accepted.
 

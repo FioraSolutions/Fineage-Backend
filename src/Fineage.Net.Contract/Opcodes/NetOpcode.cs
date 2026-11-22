@@ -399,10 +399,11 @@ namespace Fineage.Net.Contract
         /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c>.</summary>
         public const ushort EnchantSkillInfo = 0x03E0;
         /// <summary>
-        /// Client → zone: ask for a fresh <see cref="ItemList"/>. Empty body.
-        /// This is the Fineage envelope opcode the client sends (RequestInventoryResync), the next world id
-        /// after <see cref="EnchantSkillInfo"/>. It is not the retail Interlude C2S byte 0x14.
+        /// Client → zone: Interlude C2S <c>RequestItemList</c>, opcode <c>0x0F</c>, empty body.
+        /// Mobius CT_0 Interlude <c>ClientPackets.REQUEST_ITEM_LIST(0x0F, RequestItemList::new)</c>
+        /// (<c>L2J_Mobius_CT_0_Interlude/.../network/ClientPackets.java</c>). On that table <c>0x14</c> is
+        /// <c>UseItem</c>, not the item-list request. The reply is <see cref="ItemList"/> at the current cursor.
         /// </summary>
-        public const ushort RequestItemList = 0x03E1;
+        public const ushort RequestItemList = 0x000F;
     }
 }

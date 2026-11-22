@@ -242,9 +242,16 @@ public sealed partial class ZoneWorld
         var session = snapshot.Session;
         var entity = snapshot.Entity;
         if (entity.Inventory != null)
-            _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, entity.Inventory);
-        SaveWarehouse(session, entity);
-        SaveFreight(session, entity);
+            _dirtyInventories[session.ObjectId] = (session, entity.Inventory);
+        if (entity.Warehouse != null)
+            _dirtyWarehouses[session.ObjectId] = entity;
+        if (entity.Freight != null)
+            _dirtyFreight[session.ObjectId] = entity;
+        if (_dirtyInventories.ContainsKey(session.ObjectId)
+            || _dirtyWarehouses.ContainsKey(session.ObjectId)
+            || _dirtyFreight.ContainsKey(session.ObjectId)
+            || _dirtyOfflineFreight.Count > 0)
+            TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
         SaveEffects(session, entity);

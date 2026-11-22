@@ -40,7 +40,6 @@ public sealed partial class ZoneWorld
         var prepared = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
         CharacterRecord? stored = prepared.Stored;
         var selfPrepareTask = Task.Run(() => Fineage.Zone.Net.EnterSelfPrepare.FromStored(stored, _game.Items, _itemIds), ct);
-        bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
         session.PendingEnterSelfPrepare = await selfPrepareTask.ConfigureAwait(false);
         EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered;
@@ -70,15 +69,6 @@ public sealed partial class ZoneWorld
 
         if (entered == null)
             return null;
-
-        if (persistStarterBackfill &&
-            TryGetLivePlayer(session, out var backfillPlayer) &&
-            backfillPlayer.Inventory != null)
-        {
-            await Task.Run(
-                () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, backfillPlayer.Inventory),
-                ct).ConfigureAwait(false);
-        }
 
         if (entered.Evicted is { Count: > 0 })
         {

@@ -11,15 +11,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryFlushPlayerPersistBarrier(int objectId, ZoneSession session, ZoneEntity live)
     {
-        if (_ledger.PendingFlushCount > 0 && !TryFlushLedger())
-        {
-            ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy ledger flush failed");
-            return false;
-        }
-
         if (live.Inventory != null)
             _dirtyInventories[objectId] = (session, live.Inventory);
-        if (!FlushDirtyInventories())
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
         {
             ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
             return false;
@@ -42,7 +36,7 @@ public sealed partial class ZoneWorld
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
         _dirtyInventories[session.ObjectId] = (session, inventory);
-        if (!FlushDirtyInventories())
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
             return false;
         inventory.DiscardChanges();
         return true;
