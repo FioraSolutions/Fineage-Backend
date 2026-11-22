@@ -134,7 +134,7 @@ public sealed class NetChatTests
         rec.Calls.Clear();
 
         DateTimeOffset now = Now;
-        int[] types = [ChatProtocol.Gm, ChatProtocol.Announcement, ChatProtocol.Boat, ChatProtocol.Friend, ChatProtocol.Msn,
+        int[] types = [ChatProtocol.Gm, ChatProtocol.Announcement, ChatProtocol.Boat, ChatProtocol.Msn,
             ChatProtocol.CriticalAnnounce, 99];
         foreach (int type in types)
         {

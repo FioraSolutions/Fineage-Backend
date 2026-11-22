@@ -131,6 +131,8 @@ public sealed partial class ZoneWorld
                 return null;
             case ChatProtocol.Tell:
                 return Whisper(speaker, target, text, nowMs);
+            case ChatProtocol.Friend:
+                return FriendChat(speaker, target, text, nowMs);
             case ChatProtocol.Party:
                 if (_party.Of(speaker.ObjectId) is not { } party)
                     return Plain("chat.not_party", "You are not in a party.");
@@ -248,6 +250,36 @@ public sealed partial class ZoneWorld
     /// blocking the speaker or in message refusal → 176. Receiver sees the speaker's name, the speaker sees
     /// <c>-&gt;Receiver</c>.
     /// </summary>
+    /// <summary>Mobius ChatFriend: online friend by name; blocked peers rejected.</summary>
+    SystemMessageMsg? FriendChat(ZoneEntity speaker, string target, string text, long nowMs)
+    {
+        if (target.Length == 0)
+            return Plain("chat.friend_target", "Select a friend to chat with.");
+        var receiver = OnlinePlayerNamed(target);
+        if (receiver?.Session == null || !receiver.Session.InWorld)
+            return new SystemMessageMsg
+            {
+                Id = ChatProtocol.PlayerNotOnline,
+                Key = "chat.not_online",
+                Params = [],
+                Text = "That player is not online."
+            };
+        if (!Lists(speaker).Friends.ContainsKey(receiver.ObjectId))
+            return Plain("chat.not_friend", "That player is not on your friend list.");
+        if (receiver.Session.ChatBannedUntilUnixMs > nowMs || IsBlocked(receiver, speaker) || IsBlocked(speaker, receiver))
+            return new SystemMessageMsg
+            {
+                Id = ChatProtocol.MessageRefusal,
+                Key = "chat.refusal",
+                Params = [],
+                Text = "That person is in message refusal mode."
+            };
+
+        NetBridge?.FanoutCreatureSay([receiver.ObjectId], Line(speaker, ChatProtocol.Friend, text));
+        NetBridge?.FanoutCreatureSay([speaker.ObjectId], Line(speaker, ChatProtocol.Friend, text, "->" + receiver.Name));
+        return null;
+    }
+
     SystemMessageMsg? Whisper(ZoneEntity speaker, string target, string text, long nowMs)
     {
         if (target.Length == 0)

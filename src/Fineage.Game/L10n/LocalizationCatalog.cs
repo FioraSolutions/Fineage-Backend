@@ -7,7 +7,7 @@ namespace Fineage.Game.L10n;
 /// <summary>
 /// One lookup for every player-facing string: key + locale, then <see cref="PlayerLocale.Default"/>.
 /// A miss in the requested locale logs a warning that names the key and the locale, then serves English.
-/// A miss in English too logs an error that names the key and returns the key.
+/// A miss in English too logs an error that names the key and returns empty text (or the shipped English default when supplied to <see cref="Resolve"/>).
 /// HTML, system strings, and names are the same table. Locales are folders under <c>data/l10n</c>.
 /// </summary>
 public sealed class LocalizationCatalog
@@ -119,12 +119,15 @@ public sealed class LocalizationCatalog
         }
 
         _log.Missing(key);
-        return key;
+        return english ?? "";
     }
 
-    public string Format(string key, string? locale, params object?[] args)
+    public string Format(string key, string? locale, params object?[] args) =>
+        Format(key, locale, english: null, args);
+
+    public string Format(string key, string? locale, string? english, params object?[] args)
     {
-        string template = Get(key, locale);
+        string template = Resolve(key, locale, english);
         if (args == null || args.Length == 0)
             return template;
         return string.Format(CultureInfo.InvariantCulture, template, args);
