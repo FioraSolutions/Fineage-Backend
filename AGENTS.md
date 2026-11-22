@@ -20,6 +20,12 @@ Server business logic must match L2J Mobius CT0 Interlude (`ref/mobius-ct0-inter
 
 Zone tick budget is 200 ms; local playtests run the **Debug** build, so performance work must hold in Debug (fix algorithms, not build flags).
 
+## CI (dev PRs)
+
+**Merge gate on PRs into `dev`:** `build-and-test` (solution test + Postgres), `format-check`, and correctness tests only — no load or zone perf jobs by default.
+
+**Perf / load workflows** (`load-test-smoke`, `zone-simulation-perf`, `zone-parallel-regions`) run on PRs into `main`, push to `main`, nightly UTC schedule on `dev`, `workflow_dispatch`, or on a `dev` PR labeled **`perf`**. Issue **#867** perf-chain PRs must add the `perf` label to get load-test gate numbers in CI.
+
 ## Model selection
 
 | Work | Model |

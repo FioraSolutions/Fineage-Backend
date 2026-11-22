@@ -3,16 +3,33 @@ name: load-test-smoke
 on:
   pull_request:
     branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   push:
-    branches: [main, 'cursor/**']
+    branches: [main]
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: loadtest-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+env:
+  RUN_PERF: >-
+    ${{ github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+        (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+          contains(github.event.pull_request.labels.*.name, 'perf')) }}
 
 jobs:
   load-test-smoke:
     name: load-test-smoke
+    if: env.RUN_PERF == 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -43,6 +60,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Build stack
         run: |

@@ -3,12 +3,28 @@ name: build-and-test
 on:
   pull_request:
     branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   push:
-    branches: [main, 'cursor/**']
+    branches: [main, dev]
+  schedule:
+  - cron: '0 1 * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+env:
+  RUN_PERF: >-
+    ${{ github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+        (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+          contains(github.event.pull_request.labels.*.name, 'perf')) }}
 
 jobs:
   build-and-test:
@@ -17,6 +33,7 @@ jobs:
 
   zone-simulation-perf:
     name: zone-simulation-perf
+    if: env.RUN_PERF == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,12 +42,17 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Zone simulation perf tests
         run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter "Category=perf" -- xUnit.ParallelizeTestCollections=false
 
   zone-parallel-regions:
     name: zone-parallel-regions
+    if: env.RUN_PERF == 'true'
     runs-on: ubuntu-latest
     env:
       FINEAGE_ZONE_REGION_WORKERS: '4'
@@ -41,12 +63,17 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Zone parallel region tests
         run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter FullyQualifiedName~RegionParallelWorldTests
 
   load-test-smoke:
     name: load-test-smoke
+    if: env.RUN_PERF == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     services:
@@ -74,6 +101,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Make smoke script executable
         run: chmod +x scripts/ci-load-test-smoke.sh
