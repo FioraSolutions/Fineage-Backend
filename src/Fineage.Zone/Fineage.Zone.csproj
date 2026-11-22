@@ -2,6 +2,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Fineage.Zone</RootNamespace>
+    <!-- PR10 #867: Server GC + tiered PGO for long-lived simulation (DATAS stays on; no DOTNET_GCDynamicAdaptationMode=0). -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Fineage.Zone.Tests" />
