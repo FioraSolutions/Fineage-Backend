@@ -23,6 +23,7 @@ data/*
 !data/mobius-quest-dialogs/
 !data/mobius-quest-dialogs/**
 !data/skills.json
+!data/interlude-skill-ids.tsv
 !data/skill-combat.json
 !data/skill-stat-effects.json
 !data/skill-passives.json
