@@ -102,25 +102,25 @@ public sealed class NetChatTests
     }
 
     [Fact]
-    public async Task Shout_reaches_the_whole_zone_including_outside_interest()
+    public async Task Shout_reaches_the_speakers_map_region_outside_local_interest()
     {
         var kit = new NetTestKit(aoi: new RangeAoi(300));
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        var (origin, _) = await kit.EnterAsync(x: 0, y: 0);
-        var (close, _) = await kit.EnterAsync(x: 100, y: 0);
-        var (hidden, _) = await kit.EnterAsync(x: 1_000, y: 0);
+        var (origin, _) = await kit.EnterAsync(level: ChatProtocol.ShoutMinLevel, x: NetTestKit.ElfX, y: NetTestKit.ElfY);
+        var (close, _) = await kit.EnterAsync(x: NetTestKit.ElfX + 100, y: NetTestKit.ElfY);
+        var (outsideAoiSameRegion, _) = await kit.EnterAsync(x: NetTestKit.ElfX + 6000, y: NetTestKit.ElfY);
 
         Assert.Null(await kit.World.TrySayAsync(origin, "local", ChatProtocol.All, Now, CancellationToken.None));
         Assert.True(Hears(Says(rec), close.ObjectId, "local"));
-        Assert.False(HearsAny(Says(rec), hidden.ObjectId));
+        Assert.False(HearsAny(Says(rec), outsideAoiSameRegion.ObjectId));
 
         rec.Calls.Clear();
-        Assert.Null(await kit.World.TrySayAsync(origin, "zone", ChatProtocol.Shout, Now.AddSeconds(1), CancellationToken.None));
+        Assert.Null(await kit.World.TrySayAsync(origin, "region", ChatProtocol.Shout, Now.AddSeconds(1), CancellationToken.None));
 
-        Assert.True(Hears(Says(rec), close.ObjectId, "zone"));
-        Assert.True(Hears(Says(rec), hidden.ObjectId, "zone"));
+        Assert.True(Hears(Says(rec), close.ObjectId, "region"));
+        Assert.True(Hears(Says(rec), outsideAoiSameRegion.ObjectId, "region"));
         Assert.All(Says(rec), s => Assert.Equal(ChatProtocol.Shout, s.Line.ChatType));
     }
 

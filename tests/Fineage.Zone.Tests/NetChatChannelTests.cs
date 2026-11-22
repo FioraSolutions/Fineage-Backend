@@ -103,6 +103,11 @@ public sealed class NetChatChannelTests
         Assert.Null(await kit.World.TrySayAsync(low, "cheap", ChatProtocol.Trade, T0.AddSeconds(8), Ct));
         Assert.Empty(Says(rec));
         Assert.Equal("Players can use Trade chat after Lv. 20.", Assert.Single(LinesTo(rec, lowEntity)).Text);
+
+        rec.Calls.Clear();
+        Assert.Null(await kit.World.TrySayAsync(low, "too young", ChatProtocol.Shout, T0.AddSeconds(10), Ct));
+        Assert.Empty(Says(rec));
+        Assert.Equal("Players can Shout after Lv. 20.", Assert.Single(LinesTo(rec, lowEntity)).Text);
     }
 
     [Fact]
