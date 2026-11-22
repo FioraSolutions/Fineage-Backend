@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// The sorted-merge knownlist diff must emit the same frames as the previous OrderBy implementation.
 /// </summary>
+[Collection(nameof(KnownlistPlanDiffCollection))]
 public sealed class KnownlistPlanDiffTests(ITestOutputHelper output)
 {
     const int Adena = 57;
