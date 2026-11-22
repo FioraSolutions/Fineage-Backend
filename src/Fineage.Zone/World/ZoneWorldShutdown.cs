@@ -13,6 +13,8 @@ public sealed partial class ZoneWorld
     {
         ShutdownSaveOnlinePlayers();
         CloseCommandIngress("zone shutdown");
+        _fanoutDispatcher.DrainPendingSync();
+        _fanoutDispatcher.Dispose();
     }
 
     /// <summary>Waits for the background simulation loop to finish (including its shutdown save).</summary>

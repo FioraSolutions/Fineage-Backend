@@ -37,6 +37,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundDropped =
         Meter.CreateCounter<long>("fineage.outbound.dropped", description: "Frames dropped because a session outbound queue was full");
 
+    public static readonly Counter<long> OutboundReliableOverflow =
+        Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
+
     public static readonly Counter<long> PacketsRejected =
         Meter.CreateCounter<long>("fineage.packets.rejected", description: "Packets refused before normal handling (rate limit, unknown opcode, wrong port)");
 
@@ -87,6 +90,26 @@ public static class FineageTelemetry
 
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
+
+    public static readonly Histogram<double> TickStepFanoutDrainMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.step.fanout_drain.ms", unit: "ms",
+            description: "Wall time to deliver one sealed world fan-out batch");
+
+    public static readonly Histogram<double> CommandToWireMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command_to_wire.ms", unit: "ms",
+            description: "Command apply commit to fan-out batch delivered");
+
+    public static readonly Histogram<int> CommandQueueDepth =
+        Meter.CreateHistogram<int>("fineage.command.queue.depth", unit: "{command}",
+            description: "Queued commands per ingress class (tag class)");
+
+    public static readonly Histogram<double> CommandQueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
+            description: "Time a command waited in ingress before apply (tag class)");
+
+    public static readonly Histogram<double> CommandApplyMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.apply.ms", unit: "ms",
+            description: "Command apply wall time on the simulation thread (tag kind)");
 
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");

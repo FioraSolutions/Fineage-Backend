@@ -37,10 +37,12 @@ public sealed class GridAoi : IAoi
         set.Add(objectId);
     }
 
+    public bool AtCell(int objectId, int x, int y) =>
+        _entityCell.TryGetValue(objectId, out long prev) && prev == CellKey(x, y);
+
     public void Move(int objectId, int x, int y)
     {
-        long key = CellKey(x, y);
-        if (_entityCell.TryGetValue(objectId, out long prev) && prev == key)
+        if (AtCell(objectId, x, y))
             return;
         Enter(objectId, x, y);
     }

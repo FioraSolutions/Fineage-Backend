@@ -137,6 +137,18 @@ export FINEAGE_BUILD_CONFIGURATION=Release
 
 **Regression:** `RegionParallelWorldTests`, `RegionParallelStressTests`, and `RegionSimulationDeterminismTests` pass with the parallel movement/AI stages.
 
+## Command-commit fan-out dispatcher (Nov 22) — local baseline
+
+Branch `cursor/command-fanout-dispatcher-2d42`: replaces end-of-step synchronous `WorldFanoutSequencer.Drain()` (PR #852) with **sealed batches enqueued at command commit** to `FanoutDispatcher`, classed ingress (`FINEAGE_ZONE_COMMAND_APPLY_BUDGET`), `AudienceSnapshotId`, expanded histogram buckets, and `fineage_command_to_wire_ms`.
+
+| Scenario | Workers | Before (dev CI #855) command→fanout p99 | After (this branch) | Notes |
+| --- | ---: | ---: | ---: | --- |
+| bots-50-town | 0 | ~2833 ms (load-test oracle) | _CI pending_ | `./scripts/ci-load-test-smoke.sh` + `bots-50-town` after PR |
+| bots-50-town | 4 | — | _CI pending_ | same |
+| Unit oracle | — | — | `RegionSimulationDeterminismTests` pass (11) | full `RegionParallelStressTests` still run in CI |
+
+**Expected movement:** command handler replies complete after flush + enqueue (not after full step drain); tick `commands` stage p99 should drop vs #852’s end-of-step drain regression (p50 ~580 ms reported).
+
 ## Prioritized bugs / follow-ups
 
 | P | Issue | Repro |

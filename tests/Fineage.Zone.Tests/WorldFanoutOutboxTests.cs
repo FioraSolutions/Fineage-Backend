@@ -119,8 +119,8 @@ public sealed class WorldFanoutOutboxTests
     [Fact]
     public void Seal_without_begin_is_rejected()
     {
-        var fanout = new WorldFanoutSequencer();
-        Assert.Throws<InvalidOperationException>(fanout.Seal);
+        var fanout = new WorldFanoutSequencer(new FanoutDispatcher());
+        Assert.Throws<InvalidOperationException>(() => fanout.Seal());
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public sealed class WorldFanoutOutboxTests
     static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox()
     {
         var inner = DispatchProxy.Create<IWorldEventPublisher, FakePublisher>();
-        var fanout = new WorldFanoutSequencer();
+        var fanout = new WorldFanoutSequencer(new FanoutDispatcher());
         return (new OutboxingWorldEventPublisher(inner, fanout), (FakePublisher)(object)inner, fanout);
     }
 

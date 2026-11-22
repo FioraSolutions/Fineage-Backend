@@ -56,8 +56,12 @@ public sealed partial class ZoneWorld
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
     });
 
-    /// <summary>Test hook: one full scheduler step with fan-out and persistence, same as <see cref="StepSimulation"/>.</summary>
-    internal void RunStepForTest() => StepSimulation();
+    /// <summary>Test hook: one full scheduler step, then waits for async fan-out to finish.</summary>
+    internal void RunStepForTest()
+    {
+        StepSimulation();
+        _fanoutDispatcher.DrainPendingSync();
+    }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
     internal void RunStepForTest(Action body)
@@ -83,11 +87,11 @@ public sealed partial class ZoneWorld
     {
         using var turn = _affinity.Step();
         bool outermost = _fanout.Recording == null;
-        IReadOnlyList<ZoneCommandIngress.Applied> answered = [];
         try
         {
             WithDeferredInventoryPersist(() =>
             {
+                _fanout.ConfigureSequence(_simulationTicks.Tick, 0);
                 _fanout.Begin();
                 try
                 {
@@ -96,8 +100,6 @@ public sealed partial class ZoneWorld
                 finally
                 {
                     _fanout.Seal();
-                    if (outermost)
-                        answered = _ingress.TakeApplied();
                 }
 
                 return 0;
@@ -105,9 +107,12 @@ public sealed partial class ZoneWorld
         }
         finally
         {
-            _fanout.Drain();
-            if (answered.Count > 0)
-                ZoneCommandIngress.Complete(answered);
+            if (outermost)
+            {
+                var stranded = _ingress.TakeApplied();
+                if (stranded.Count > 0)
+                    ZoneCommandIngress.Complete(stranded);
+            }
         }
     }
 
@@ -119,8 +124,8 @@ public sealed partial class ZoneWorld
     void ReleaseAppliedCommandReplies()
     {
         FlushDirtyInventories();
-        _fanout.Seal();
-        _fanout.Drain();
+        long commitAt = System.Diagnostics.Stopwatch.GetTimestamp();
+        _fanout.Seal(commitAt);
         var applied = _ingress.TakeApplied();
         if (applied.Count > 0)
             ZoneCommandIngress.Complete(applied);

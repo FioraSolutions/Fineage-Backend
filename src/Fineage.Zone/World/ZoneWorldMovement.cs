@@ -1,6 +1,7 @@
 using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
+using Fineage.Zone.Interest;
 using Fineage.Zone.Movement;
 using Fineage.Zone.Simulation;
 
@@ -71,7 +72,24 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
-        ReconcileKnownlist(entity, ack);
+        if (NetBridge is { } bridge && ack != null && _aoi is GridAoi grid &&
+            grid.AtCell(entity.ObjectId, destX, destY))
+        {
+            if (_knownlistDiffActive)
+            {
+                _knownlistDiffAfter.Clear();
+                _knownlistDiffAfter.UnionWith(entity.Knownlist);
+            }
+
+            bridge.FanoutMoveState(
+                [entity.ObjectId],
+                entity.ObjectId,
+                ack.OriginX, ack.OriginY, ack.OriginZ,
+                ack.DestX, ack.DestY, ack.DestZ,
+                entity.Running);
+        }
+        else
+            ReconcileKnownlist(entity, ack, _knownlistDiffActive ? _knownlistDiffAfter : null);
         entity.AoiRefreshX = curX;
         entity.AoiRefreshY = curY;
 

@@ -48,7 +48,12 @@ public sealed class MetricsSummaryTests
         var snapshot = new MetricsSnapshot
         {
             PlayersOnline = 2,
-            Tick = new HistogramMetrics { Sum = 4.5, Count = 2, CumulativeBuckets = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2] },
+            Tick = new HistogramMetrics
+            {
+                Sum = 4.5,
+                Count = 2,
+                CumulativeBuckets = MetricsText.DurationBoundsMs.Select((_, i) => (long)(i >= 4 ? 2 : i >= 3 ? 1 : 0)).Concat([2L]).ToArray()
+            },
             Endpoints =
             [
                 new EndpointMetrics
@@ -67,7 +72,7 @@ public sealed class MetricsSummaryTests
                     {
                         Sum = 13.5,
                         Count = 2,
-                        CumulativeBuckets = [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2]
+                        CumulativeBuckets = MetricsText.DurationBoundsMs.Select((_, i) => (long)(i >= 9 ? 2 : i >= 8 ? 1 : 0)).Concat([2L]).ToArray()
                     }
                 }
             ]
@@ -85,8 +90,8 @@ public sealed class MetricsSummaryTests
         Assert.Contains("fineage_outbound_dropped_total{endpoint=\"zone\"} 1\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"in\"} 1.5\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"out\"} 2.5\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"1\"} 0\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"2\"} 1\n", text);
+        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"10\"} 1\n", text);
+        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"20\"} 2\n", text);
         Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"+Inf\"} 2\n", text);
         Assert.Contains("fineage_handler_ms_sum{endpoint=\"zone\"} 13.5\n", text);
         Assert.Contains("fineage_handler_ms_count{endpoint=\"zone\"} 2\n", text);

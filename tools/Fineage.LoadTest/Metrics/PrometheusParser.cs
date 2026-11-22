@@ -13,6 +13,9 @@ public sealed class PrometheusSample
     public double TickP95 { get; init; }
     public double TickP99 { get; init; }
     public double TickMax { get; init; }
+    public double StepFanoutDrainP99Ms { get; init; }
+    public double CommandToWireP99Ms { get; init; }
+    public double CommandToMailboxesP99Ms { get; init; }
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long CommandIngressQueued { get; init; }
@@ -58,6 +61,10 @@ public static class PrometheusParser
             TickP95 = Quantile(buckets, tickCount, 0.95),
             TickP99 = Quantile(buckets, tickCount, 0.99),
             TickMax = EstimateMax(buckets, tickSum, tickCount),
+            StepFanoutDrainP99Ms = ParseSingletonHistogram(text, "fineage_tick_step_fanout_drain_ms")?.P99 ?? 0,
+            CommandToMailboxesP99Ms = ParseSingletonHistogram(text, "fineage_command_to_mailboxes_ms")?.P99
+                ?? ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
+            CommandToWireP99Ms = ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
             TickOverruns = ParseLong(text, "fineage_tick_overruns_total"),
             TicksSkipped = ParseLong(text, "fineage_tick_skipped_total"),
             CommandIngressQueued = ParseLong(text, "fineage_command_ingress_queued"),

@@ -143,7 +143,7 @@ public sealed class NetConnection : IAsyncDisposable
         if (_outbound.Writer.TryWrite(envelope))
             return true;
 
-        NetTelemetry.OutboundDropped(_endpoint);
+        NetTelemetry.ReliableOverflow(_endpoint);
         return false;
     }
 
@@ -166,13 +166,6 @@ public sealed class NetConnection : IAsyncDisposable
             return false;
 
         var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
-
-        if (_outbound.Writer.TryWrite(envelope))
-        {
-            _coalescedReplaceable.TryRemove(key, out _);
-            return true;
-        }
-
         _coalescedReplaceable[key] = envelope;
         return true;
     }
@@ -212,19 +205,27 @@ public sealed class NetConnection : IAsyncDisposable
     /// </summary>
     async Task WriteCoalescedToStreamAsync()
     {
+        if (_coalescedReplaceable.IsEmpty)
+            return;
+        var batch = new List<PacketEnvelope>(_coalescedReplaceable.Count);
         foreach (KeyValuePair<CoalesceReplaceableKey, PacketEnvelope> entry in _coalescedReplaceable.ToArray())
         {
             if (!_coalescedReplaceable.TryRemove(entry.Key, out PacketEnvelope? envelope))
                 continue;
-            // A newer frame may have landed for the same entity after ToArray; prefer the latest.
             if (_coalescedReplaceable.TryGetValue(entry.Key, out PacketEnvelope? newer))
             {
                 envelope = newer;
                 _coalescedReplaceable.TryRemove(entry.Key, out _);
             }
-            await NetFraming.WriteAsync(_stream, envelope, CancellationToken.None).ConfigureAwait(false);
-            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+
+            batch.Add(envelope);
         }
+
+        if (batch.Count == 0)
+            return;
+        await NetFraming.WriteManyAsync(_stream, batch, CancellationToken.None).ConfigureAwait(false);
+        foreach (PacketEnvelope envelope in batch)
+            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
     }
 
     /// <summary>

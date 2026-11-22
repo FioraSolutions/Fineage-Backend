@@ -18,6 +18,10 @@ public abstract record ZoneCommand : ISimulationCommand
     /// <summary>Player input is logged and replayed; requests (<see cref="ZoneRequest{T}"/>) are neither.</summary>
     internal virtual bool Logged => true;
 
+    internal virtual ZoneCommandClass IngressClass => ZoneCommandClass.Gameplay;
+
+    internal virtual int ApplyCost => 2;
+
     /// <summary>Applies the command for <paramref name="session"/>; returns the rejection reason, or null.</summary>
     internal abstract string? Apply(ZoneWorld world, ZoneSession session, TickContext tick);
 
@@ -52,6 +56,8 @@ public abstract record ZoneCommand : ISimulationCommand
 
 public sealed record MoveCommand(int DestX, int DestY, int DestZ) : ZoneCommand
 {
+    internal override ZoneCommandClass IngressClass => ZoneCommandClass.Interactive;
+    internal override int ApplyCost => 1;
     internal int ResultX { get; private set; }
     internal int ResultY { get; private set; }
     internal int ResultZ { get; private set; }
@@ -68,6 +74,9 @@ public sealed record MoveCommand(int DestX, int DestY, int DestZ) : ZoneCommand
 
 public sealed record StopMoveCommand : ZoneCommand
 {
+    internal override ZoneCommandClass IngressClass => ZoneCommandClass.Interactive;
+    internal override int ApplyCost => 1;
+
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick)
     {
         world.StopMove(session);
@@ -78,6 +87,9 @@ public sealed record StopMoveCommand : ZoneCommand
 /// <summary>The client's reported position; refused (with the drift) when it is too far from the server's.</summary>
 public sealed record ValidatePositionCommand(int ClientX, int ClientY, int ClientZ) : ZoneCommand
 {
+    internal override ZoneCommandClass IngressClass => ZoneCommandClass.Interactive;
+    internal override int ApplyCost => 1;
+
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         world.ValidateClientPosition(session, ClientX, ClientY, ClientZ, out int dxy, out int dz)
             ? $"position drift dxy={dxy} dz={dz}"

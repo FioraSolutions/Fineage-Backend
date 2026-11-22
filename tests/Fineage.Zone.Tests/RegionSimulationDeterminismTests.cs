@@ -100,7 +100,7 @@ public sealed class RegionSimulationDeterminismTests
         var expected = new List<string>();
         for (int step = 1; step <= 2 * ZoneSimulationSettings.SlowPeriodTicks; step++)
         {
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
             expected.AddRange(LegacyCombatOrder);
             if (step % ZoneSimulationSettings.SlowPeriodTicks == 0)
                 expected.AddRange(LegacySimulationOrder);

@@ -1,27 +1,24 @@
+using System.Diagnostics;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Keeps world fan-out in step order. A step records into a batch and seals it into the queue when its body
-/// returns; every send, batched or immediate, then goes through one send lock that drains sealed batches first. A
-/// handler that emits right after a step therefore never overtakes that step's traffic. Sends must not take a world
-/// turn: the step holding it may be waiting for the send lock.
+/// Keeps world fan-out in step order. A step records into a batch and seals it into the <see cref="FanoutDispatcher"/>
+/// when its body returns; immediate sends wait until prior sealed batches are delivered.
 /// </summary>
-internal sealed class WorldFanoutSequencer
+internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
 {
     [ThreadStatic] static RegionRecording? t_region;
 
-    readonly object _sendLock = new();
-    readonly Queue<WorldFanoutBatch> _sealed = new();
+    readonly FanoutDispatcher _dispatcher = dispatcher;
     WorldFanoutBatch? _recording;
     int _recordingThread;
     int _depth;
+    long _tick;
+    byte _phase;
+    ulong _sequence;
 
-    /// <summary>
-    /// The open batch when the calling thread is inside a recorded step, otherwise null. Inside a region body that is
-    /// the region's own batch (<see cref="RecordRegion"/>), on whichever thread the body runs.
-    /// </summary>
     public WorldFanoutBatch? Recording
     {
         get
@@ -33,10 +30,13 @@ internal sealed class WorldFanoutSequencer
         }
     }
 
-    /// <summary>
-    /// For the duration of a region body on the calling thread: fan-out records into <paramref name="batch"/>, which
-    /// the scheduler thread folds into the step's batch at the barrier (<see cref="AbsorbRegion"/>).
-    /// </summary>
+    public void ConfigureSequence(long tick, byte phase)
+    {
+        _tick = tick;
+        _phase = phase;
+        _sequence = 0;
+    }
+
     public IDisposable RecordRegion(WorldFanoutBatch batch)
     {
         if (t_region != null)
@@ -46,7 +46,6 @@ internal sealed class WorldFanoutSequencer
         return recording;
     }
 
-    /// <summary>On the scheduler thread at the barrier: appends a region's fan-out to the step's batch.</summary>
     public void AbsorbRegion(WorldFanoutBatch region)
     {
         if (region.Count == 0)
@@ -56,7 +55,6 @@ internal sealed class WorldFanoutSequencer
         step.Absorb(region);
     }
 
-    /// <summary>At the start of a step. Nested steps join the outer batch.</summary>
     public void Begin()
     {
         if (_depth++ > 0)
@@ -65,8 +63,8 @@ internal sealed class WorldFanoutSequencer
         Volatile.Write(ref _recording, new WorldFanoutBatch());
     }
 
-    /// <summary>When the step's body returns: queues the batch behind earlier ones.</summary>
-    public void Seal()
+    /// <param name="commandCommitTimestamp">When &gt; 0, records <c>fineage.command_to_wire_ms</c> for this batch.</param>
+    public void Seal(long commandCommitTimestamp = 0)
     {
         if (_depth == 0)
             throw new InvalidOperationException("world fan-out batch sealed without a matching Begin");
@@ -74,29 +72,14 @@ internal sealed class WorldFanoutSequencer
             return;
         var batch = _recording!;
         Volatile.Write(ref _recording, null);
-        lock (_sealed)
-            _sealed.Enqueue(batch);
+        var seq = new WorldEventSequence(_tick, _phase, _sequence++);
+        _dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp));
     }
 
-    /// <summary>After sealing: sends every sealed batch in queue order.</summary>
-    public void Drain()
-    {
-        lock (_sendLock)
-            DrainLocked();
-    }
+    /// <summary>Test hook: process every sealed batch synchronously.</summary>
+    public void Drain() => _dispatcher.DrainPendingSync();
 
-    /// <summary>
-    /// A send outside a recorded step (handlers, admin): runs after every sealed batch. Its own exception reaches the
-    /// caller, as before batching.
-    /// </summary>
-    public void SendNow(Action send)
-    {
-        lock (_sendLock)
-        {
-            DrainLocked();
-            send();
-        }
-    }
+    public void SendNow(Action send) => _dispatcher.RunSynchronouslyAfterPending(send);
 
     sealed class RegionRecording(WorldFanoutSequencer owner, WorldFanoutBatch batch) : IDisposable
     {
@@ -109,33 +92,6 @@ internal sealed class WorldFanoutSequencer
             if (!ReferenceEquals(t_region, this))
                 throw new InvalidOperationException("region fan-out recording closed out of order");
             t_region = null;
-        }
-    }
-
-    void DrainLocked()
-    {
-        while (true)
-        {
-            WorldFanoutBatch batch;
-            lock (_sealed)
-            {
-                if (!_sealed.TryDequeue(out batch!))
-                    return;
-            }
-
-            foreach (var (name, send) in batch.Sends())
-            {
-                try
-                {
-                    send();
-                }
-                catch (Exception ex)
-                {
-                    // One failed frame must not drop the rest of the step's traffic, like stage isolation.
-                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
-                    ZoneLog.Warn($"world fan-out {name} failed: {ex}");
-                }
-            }
         }
     }
 }
