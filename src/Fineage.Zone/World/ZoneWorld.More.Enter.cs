@@ -38,9 +38,12 @@ public sealed partial class ZoneWorld
         CancellationToken ct)
     {
         CharacterRecord? stored = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
+        var selfPrepareTask = Task.Run(() => Fineage.Zone.Net.EnterSelfPrepare.FromStored(stored, _game.Items, _itemIds), ct);
         bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
+        session.PendingEnterSelfPrepare = await selfPrepareTask.ConfigureAwait(false);
         EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered;
+        try
         {
             using var enterScope = _syncIo.EnterScope();
             entered = await OnSimulationAsync(session, "enter", () =>
@@ -56,6 +59,11 @@ public sealed partial class ZoneWorld
                 return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
             }, ct).ConfigureAwait(false);
         }
+        finally
+        {
+            session.PendingEnterSelfPrepare = null;
+        }
+
         if (entered == null)
             return null;
 
@@ -136,6 +144,7 @@ public sealed partial class ZoneWorld
         out int enterZ,
         out List<UnlinkPersistSnapshot>? pendingUnlink)
     {
+        using var tryTimer = Fineage.Zone.Net.EnterMetrics.MeasureTryEnter();
         known = 0;
         enterX = enterY = enterZ = 0;
         pendingUnlink = null;
@@ -241,20 +250,10 @@ public sealed partial class ZoneWorld
 
         // The enter sequence itself (UserInfo, ItemList, SkillList, spawns) is Net-only and lives in
         // NetZoneServer.OnEnterAsync; the knownlist is still built here because the sim owns it.
-        foreach (var other in OrderedVisible(entity.ObjectId))
-        {
-            entity.Knownlist.Add(other.ObjectId);
-            TrackWatcher(entity.ObjectId, other.ObjectId);
-            if (other.Session != null)
-            {
-                other.Knownlist.Add(entity.ObjectId);
-                TrackWatcher(other.ObjectId, entity.ObjectId);
-            }
-            else
-                TrackThink(other);
-        }
+        BindKnownlistOnEnter(entity);
 
-        RefreshPlayerActiveRegions();
+        // Region activation + NPC think scheduling runs on the combat/AI tick (see CollectNpcThink); skipping it here
+        // avoids O(active-region NPCs) TrackThink work inside request:enter during bot ramp.
 
         AnnounceClanEnter(entity);
         FriendPlayerEnteredWorld(entity);
@@ -263,6 +262,27 @@ public sealed partial class ZoneWorld
         CheckCursedWeaponOnEnter(entity);
         known = entity.Knownlist.Count;
         return true;
+    }
+
+    void BindKnownlistOnEnter(ZoneEntity entity)
+    {
+        using var aoiTimer = Fineage.Zone.Net.EnterMetrics.MeasureTryAoiBind();
+        foreach (int id in _aoi.GetVisible(entity.ObjectId))
+        {
+            if (!_byId.TryGetValue(id, out var other) || other.InstanceId != entity.InstanceId)
+                continue;
+            if (other.Kind == ZoneEntityKind.Player && other.Session is not { InWorld: true })
+                continue;
+            entity.Knownlist.Add(id);
+            TrackWatcher(entity.ObjectId, id);
+            if (other.Session != null)
+            {
+                other.Knownlist.Add(entity.ObjectId);
+                TrackWatcher(id, entity.ObjectId);
+            }
+            else
+                TrackThink(other);
+        }
     }
 
 }

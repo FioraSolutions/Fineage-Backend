@@ -6,6 +6,10 @@ namespace Fineage.Zone.Net;
 
 static class EnterMetrics
 {
+    public static IDisposable MeasureTryEnter() => new PhaseTimer(FineageTelemetry.EnterTryMilliseconds);
+
+    public static IDisposable MeasureTryAoiBind() => new PhaseTimer(FineageTelemetry.EnterTryAoiBindMilliseconds);
+
     public static IDisposable MeasurePlan() => new PhaseTimer(FineageTelemetry.EnterPlanMilliseconds);
 
     public static IDisposable MeasureSelfProjection() => new PhaseTimer(FineageTelemetry.EnterSelfProjectionMilliseconds);

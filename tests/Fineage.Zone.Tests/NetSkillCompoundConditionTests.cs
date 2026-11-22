@@ -39,8 +39,8 @@ public sealed class NetSkillCompoundConditionTests
 
         int mp = player.CurMp;
         Assert.Null(await kit.World.TrySkillUseAsync(session, CrushOfDoom, MobObjectId, CancellationToken.None));
-        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+, m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
         Assert.Equal(mp, player.CurMp);
     }
 }

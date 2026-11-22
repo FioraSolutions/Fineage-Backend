@@ -38,8 +38,8 @@ public sealed class NetSkillCastConditionTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, HumanoidMob, CancellationToken.None));
         int mp = player.CurMp;
         Assert.Null(await kit.World.TrySkillUseAsync(session, HolyStrike, HumanoidMob, CancellationToken.None));
-        Assert.True(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
-            .Any(m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms));
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+, m => ((SystemMessageMsg)m[1]!).Id == ZoneWorld.SysMsgUnsuitableTerms);
         Assert.Equal(mp, player.CurMp);
     }
 

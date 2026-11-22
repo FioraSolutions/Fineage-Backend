@@ -60,13 +60,18 @@ sealed partial class SessionLifecyclePacketHandler
 
         using (EnterMetrics.MeasureSelfProjection())
         {
-            var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), _playerSpawnPAtkSpd(entity));
+            long nowMs = _clock().ToUnixTimeMilliseconds();
+            int pAtkSpd = _playerSpawnPAtkSpd(entity);
+            var packets = NetEnterWorldProjector.FromEntityCore(entity, self, nowMs, pAtkSpd);
             selfSlots.Add(new EnterSelfSlot(NetOpcode.EntitySpawn, packets.Spawn));
             selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerStats, packets.Stats));
             if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
                 selfSlots.Add(new EnterSelfSlot(NetOpcode.UserInfo, userInfo));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.ItemList, packets.Items));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, packets.Skills));
+            var items = zoneSession.PendingEnterSelfPrepare?.Items;
+            selfSlots.Add(items != null
+                ? new EnterSelfSlot(NetOpcode.ItemList, items)
+                : new EnterSelfSlot(NetOpcode.ItemList, entity.Inventory!));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, EnterSkillCapture.From(entity, nowMs)));
             selfSlots.Add(new EnterSelfSlot(NetOpcode.ShortCutInit, _world.BuildShortcutInit(zoneSession)));
             if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
                 selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerActionState, actionState));
@@ -140,9 +145,22 @@ sealed partial class SessionLifecyclePacketHandler
                 continue;
             }
 
-            var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
             var followUps = NetEnterWorldProjector.PlanPresenceFollowUps(other, otherId, _world);
             byte[]? relation = _world.SpawnRelationFrame(other, entity);
+            if (other.Kind == ZoneEntityKind.Npc)
+            {
+                rows.Add(new KnownPresenceSlot
+                {
+                    SourceObjectId = other.ObjectId,
+                    Kind = EntityKindNet.Npc,
+                    Npc = NetEnterWorldProjector.CaptureNpcPresence(other, otherId),
+                    FollowUps = followUps,
+                    RelationToEntrant = relation
+                });
+                continue;
+            }
+
+            var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
             rows.Add(new KnownPresenceSlot
             {
                 SourceObjectId = other.ObjectId,

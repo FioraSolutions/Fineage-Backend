@@ -110,24 +110,45 @@ export FINEAGE_BUILD_CONFIGURATION=Release
 | P2 | High `packets_rejected` under combat spam (synthetic targets) | 50-bot smoke, attack-weighted scenario |
 | P3 | Load-test RTT percentile helper under-reports p50 when samples are sparse | See `ReportWriter.ClientRtt` — cosmetic report issue |
 
-## Enter burst offload (Nov 22) — `request:enter` off simulation thread
+## Enter burst offload (Nov 22) — `request:enter` on the commands stage
 
-**Before (profiling on `dev`, `bots-50-town`, ~34k NPCs):** `commands` stage **p99 650–826 ms** during bot ramp (microprofile); enter did full NetCodec for each known entity + peer fan-out inside `request:enter` on the simulation thread.
+**Profile baseline (`dev`, `bots-50-town`, ~34k NPCs in world):** `commands` stage **p99 650–826 ms** during bot ramp (microprofile).
 
-**After (PR #861, Release, local Postgres, `bots-50-town`, same VM as agent):**
+**Mechanism:** `request:enter` is a `ZoneRequest` drained in the **`commands` stage** (not the handler thread). `PrepareEnter` (async store read) → sim `TryEnter` + `CommitEnter` → off-thread `EncodeAndDispatchEnter`.
 
-| Workers | `commands` stage p99 (ms) | `fineage_enter_plan_ms` p99 | `fineage_enter_known_encode_ms` p99 | `fineage_enter_peer_fanout_ms` p99 | Cmd→fanout p50 | Cmd→fanout p99 |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0 | 1000 | 1000 | 5 | 0.5 | 483 | 2756 |
-| 4 | 1000 | 1000 | 5 | 0.5 | 441 | 2833 |
+### Per-phase histograms @ peak command-ingress scrape (50 enters, finer buckets)
 
-**Same VM / `dev` @ 2509972 (pre-split) control, workers 0:** `commands` p99 **1000** (histogram top bucket); cmd→fanout p50 **532**, p99 **2816** — no `fineage_enter_*` metrics yet.
+Workers **0**, `local-logs/bots-50-town-diag-v3/w0/report.json` (`metrics-peak.txt` beside it):
 
-Interpretation: Prometheus stage histograms still top at **1000 ms** on this soak, so `commands` p99 does **not** yet beat the 650–826 ms profile baseline numerically. The split **does** move known-list NetCodec off-thread (`fineage_enter_known_encode_ms` p99 **5 ms**) and trims cmd→fanout p50 ~8% (532→483, w0). Sim-side `CommitEnter` remains O(known) message build for ~34k NPCs (`fineage_enter_plan_ms` p99 still **1000**).
+| Metric | mean (ms) | p50 (ms) | p99 (ms) | count |
+| --- | ---: | ---: | ---: | ---: |
+| `fineage_enter_try_ms` (TryEnter + hydration) | 5.0 | 1 | **250** | 50 |
+| `fineage_enter_try_aoi_bind_ms` | 0.1 | 0.5 | 2 | 50 |
+| `fineage_enter_self_projection_ms` (CommitEnter self) | 10.4 | 0.5 | **650** | 50 |
+| `fineage_enter_known_snapshot_ms` | 0.2 | 0.5 | 2 | 50 |
+| `fineage_enter_known_encode_ms` (off-thread) | 0.1 | 0.5 | 5 | 50 |
+| `fineage_enter_peer_fanout_ms` (off-thread) | 0.0 | 0.5 | 0.5 | 50 |
+| `fineage_tick_stage_ms` stage=`commands` (all ticks @ scrape) | 3.2 | 0.5 | 25 | 378 |
 
-Source: `local-logs/bots-50-town-bench-v2/w{0,4}/report.json` (agent VM 2026-11-22); control `/tmp/fineage-dev-bench-50/w0/report.json`.
+**Slow-tick evidence (zone log):** `commands stage … total=732ms: request:enter=731.9ms` — lock/wait is **not** dominant; a single enter request consumes the commands slice.
 
-Mechanism: `PrepareEnter` (async store read) → `CommitEnter` (sim `EnterSnapshot`) → `EncodeAndDispatchEnter` (worker + NPC spawn cache). Histogram buckets extended to 3000 ms for scrape resolution.
+**Interpretation**
+
+- Coarse scrape “commands p99” across the whole soak **under-reports** enter spikes (many fast ticks dilute the histogram); use **per-enter histograms** + zone slow-tick lines.
+- After known-list **encode offload** + **NPC spawn build on encoder thread** + **AOI bind without `OrderedVisible` sort**, known snapshot/encode are **~2–5 ms** p99; the residual cost is **`TryEnter` hydration (~250 ms p99)** and **`CommitEnter` self packets (~650 ms p99)** (quests/clan/skills/stats), not NetCodec for ~34k NPCs.
+- **Cmd→fanout p50** vs pre-split control: **483 ms** (w0) vs **532 ms** (~9% better); merge gate on **`commands` per-enter still &gt; 650 ms** (732 ms worst tick) — **do not merge** until a follow-up trims sim-side `TryEnter` / self projection.
+
+Later iteration (`bots-50-town-diag-v4`): item-list prebuild off-thread; worst enter log **~724 ms** — still above gate.
+
+**After sim trim (`bots-50-town-diag-v6`, worker 0):** skip `RefreshPlayerActiveRegions` inside `TryEnter` (NPC think tick already refreshes regions); build **ItemList** + **SkillList** on the enter encoder thread. Zone slow-tick log worst `request:enter` **495.3 ms** (`commands` total **495.3 ms**) — meets the **&lt; 650 ms** merge gate on per-enter evidence.
+
+| Run | Worst `request:enter` (zone log) |
+| --- | ---: |
+| diag-v3 (pre-trim) | ~732 ms |
+| diag-v5 (region skip + item encode offload) | 651.7 ms |
+| diag-v6 (+ skill encode offload) | **494.5 ms** |
+
+Source artifacts: `local-logs/bots-50-town-diag-v3/` … `diag-v6/`; helper: `scripts/print-enter-phase-stats.py <report.json>`.
 
 ## Reproduce smoke
 

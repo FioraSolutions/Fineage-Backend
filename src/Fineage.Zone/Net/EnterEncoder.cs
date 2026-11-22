@@ -1,3 +1,4 @@
+using Fineage.Game;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 
@@ -32,7 +33,9 @@ static class EnterEncoder
                     continue;
                 }
 
-                var spawn = row.Spawn!;
+                EntitySpawnMsg spawn = row.Npc is { } npc
+                    ? NetEnterWorldProjector.BuildNpcSpawn(npc)
+                    : row.Spawn!;
                 byte[] encoded = row.Kind == EntityKindNet.Npc
                     ? NpcEnterSpawnCache.EncodeNpcSpawn(spawn)
                     : NetCodec.EncodeEntitySpawn(spawn);
@@ -78,8 +81,18 @@ static class EnterEncoder
             NetOpcode.EntitySpawn => NetCodec.EncodeEntitySpawn((EntitySpawnMsg)slot.Message!),
             NetOpcode.PlayerStats => NetCodec.EncodePlayerStats((Fineage.Net.Contract.PlayerStatsMsg)slot.Message!),
             NetOpcode.UserInfo => NetCodec.EncodeUserInfo(NetZoneServer.ToNetUserInfo((UserInfoMsg)slot.Message!)),
-            NetOpcode.ItemList => NetCodec.EncodeItemList((ItemListNetMsg)slot.Message!),
-            NetOpcode.SkillList => NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList((SkillListMsg)slot.Message!)),
+            NetOpcode.ItemList => NetCodec.EncodeItemList(slot.Message switch
+            {
+                ItemListNetMsg ready => ready,
+                PlayerInventory inventory => NetEnterWorldProjector.BuildItems(inventory),
+                _ => throw new InvalidOperationException("enter ItemList slot requires ItemListNetMsg or PlayerInventory")
+            }),
+            NetOpcode.SkillList => NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(slot.Message switch
+            {
+                SkillListMsg list => list,
+                EnterSkillCapture capture => capture.ToSkillListMsg(),
+                _ => throw new InvalidOperationException("enter SkillList slot requires SkillListMsg or EnterSkillCapture")
+            })),
             NetOpcode.ShortCutInit => NetCodec.EncodeShortCutInit(SessionLifecyclePacketHandler.ToNetShortcutInit((ShortCutInitMsg)slot.Message!)),
             NetOpcode.PlayerActionState => NetCodec.EncodePlayerActionState((PlayerActionStateNetMsg)slot.Message!),
             NetOpcode.AbnormalStatusUpdate => NetCodec.EncodeAbnormalStatusUpdate(

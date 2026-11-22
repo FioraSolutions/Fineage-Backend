@@ -49,6 +49,15 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> EnterTryMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.try_ms", unit: "ms", description: "TryEnter world join on the simulation thread");
+
+    public static readonly Histogram<double> EnterTryAoiBindMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.try_aoi_bind_ms", unit: "ms", description: "TryEnter knownlist/AOI bind on the simulation thread");
+
+    public static readonly Histogram<double> CommandApplyMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.apply_ms", unit: "ms", description: "Single command apply duration (tag command)");
+
     public static readonly Histogram<double> EnterPlanMilliseconds =
         Meter.CreateHistogram<double>("fineage.enter.plan_ms", unit: "ms", description: "Enter commit planning on the simulation thread");
 

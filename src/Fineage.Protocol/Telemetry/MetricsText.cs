@@ -51,6 +51,8 @@ public sealed class MetricsSnapshot
     public int PlayersOnline { get; init; }
     public int CommandIngressQueued { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
+    public HistogramMetrics EnterTry { get; init; } = new();
+    public HistogramMetrics EnterTryAoiBind { get; init; } = new();
     public HistogramMetrics EnterPlan { get; init; } = new();
     public HistogramMetrics EnterSelf { get; init; } = new();
     public HistogramMetrics EnterKnownSnapshot { get; init; } = new();
@@ -72,7 +74,10 @@ public sealed class MetricsSnapshot
 
 public static class MetricsText
 {
-    public static readonly double[] DurationBoundsMs = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500, 2000, 3000];
+    public static readonly double[] DurationBoundsMs =
+    [
+        0.5, 1, 2, 5, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500, 2000, 3000
+    ];
 
     public static TrafficTotals Totals(MetricsSnapshot snapshot)
     {
@@ -243,6 +248,8 @@ public static class MetricsText
 
     static void AppendEnterHistograms(StringBuilder sb, MetricsSnapshot snapshot)
     {
+        AppendSingletonHistogram(sb, "fineage_enter_try_ms", "TryEnter world join on the simulation thread", snapshot.EnterTry);
+        AppendSingletonHistogram(sb, "fineage_enter_try_aoi_bind_ms", "TryEnter knownlist AOI bind on the simulation thread", snapshot.EnterTryAoiBind);
         AppendSingletonHistogram(sb, "fineage_enter_plan_ms", "Enter commit planning on the simulation thread", snapshot.EnterPlan);
         AppendSingletonHistogram(sb, "fineage_enter_self_projection_ms", "Enter self packet projection on the simulation thread", snapshot.EnterSelf);
         AppendSingletonHistogram(sb, "fineage_enter_known_snapshot_ms", "Enter knownlist snapshot on the simulation thread", snapshot.EnterKnownSnapshot);
