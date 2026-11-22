@@ -1,0 +1,125 @@
+{
+  "id": 120,
+  "name": "Pavel's Research",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    8290,
+    8058,
+    8059,
+    8060,
+    8291,
+    8292,
+    854
+  ],
+  "dialogs": [
+    {
+      "npcId": 32046,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "32046-talk-000.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 50,
+      "htmlFile": "32046-talk-001.htm"
+    },
+    {
+      "npcId": 32046,
+      "hook": "event",
+      "when": "absent",
+      "event": "32046-06",
+      "minLevel": 50,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "32046-event-32046-06-002.htm"
+    },
+    {
+      "npcId": 32041,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32041-talk-c1-003.htm"
+    },
+    {
+      "npcId": 32041,
+      "hook": "event",
+      "when": "started",
+      "event": "32041-03",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        }
+      ],
+      "htmlFile": "32041-event-32041-03-c1-004.htm"
+    },
+    {
+      "npcId": 32041,
+      "hook": "event",
+      "when": "started",
+      "event": "32041-32",
+      "hasItem": 8292,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 8292,
+          "count": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 854,
+          "count": 1
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "32041-event-32041-32-005.htm"
+    },
+    {
+      "npcId": 32047,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "htmlFile": "32047-talk-c1-006.htm"
+    },
+    {
+      "npcId": 32042,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32042-talk-007.htm"
+    },
+    {
+      "npcId": 32043,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32043-talk-008.htm"
+    },
+    {
+      "npcId": 32044,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32044-talk-009.htm"
+    },
+    {
+      "npcId": 32045,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32045-talk-010.htm"
+    }
+  ]
+}
