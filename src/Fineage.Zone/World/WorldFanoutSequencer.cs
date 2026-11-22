@@ -73,8 +73,7 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
         var batch = _recording!;
         Volatile.Write(ref _recording, null);
         var seq = new WorldEventSequence(_tick, _phase, _sequence++);
-        if (!_dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp)))
-            throw new InvalidOperationException("fan-out dispatcher queue is full");
+        _dispatcher.Enqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp));
     }
 
     /// <summary>Test hook: wait until the dispatcher worker finishes pending batches.</summary>
@@ -86,8 +85,7 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
         var batch = new WorldFanoutBatch();
         batch.AddOrdered("immediate", send);
         var seq = new WorldEventSequence(_tick, _phase, _sequence++);
-        if (!_dispatcher.TryEnqueue(new SealedWorldFanoutBatch(batch, seq, 0)))
-            throw new InvalidOperationException("fan-out dispatcher queue is full");
+        _dispatcher.Enqueue(new SealedWorldFanoutBatch(batch, seq, 0));
     }
 
     sealed class RegionRecording(WorldFanoutSequencer owner, WorldFanoutBatch batch) : IDisposable

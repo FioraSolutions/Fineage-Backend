@@ -121,7 +121,7 @@ public static class FineageTelemetry
 
     public static readonly Counter<long> FanoutQueueOverflow =
         Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
-            description: "Sealed fan-out batches refused because the dispatcher queue is full");
+            description: "Sealed fan-out batches rejected because the dispatcher is closed or shutting down");
 
     public static readonly Histogram<double> SocketWriteMilliseconds =
         Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",

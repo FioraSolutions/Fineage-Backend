@@ -10,16 +10,9 @@ namespace Fineage.Zone.World;
 /// </summary>
 internal sealed class FanoutDispatcher : IDisposable
 {
-    const int BatchQueueCapacity = 8192;
+    const int DefaultBatchQueueCapacity = 8192;
 
-    readonly Channel<SealedWorldFanoutBatch> _queue = Channel.CreateBounded<SealedWorldFanoutBatch>(
-        new BoundedChannelOptions(BatchQueueCapacity)
-        {
-            SingleReader = true,
-            SingleWriter = false,
-            FullMode = BoundedChannelFullMode.Wait,
-            AllowSynchronousContinuations = false
-        });
+    readonly Channel<SealedWorldFanoutBatch> _queue;
     readonly Task _worker;
     readonly CancellationTokenSource _cts = new();
     int _closed;
@@ -31,26 +24,54 @@ internal sealed class FanoutDispatcher : IDisposable
     /// <summary>Tests: rethrow the first fan-out send failure from <see cref="WaitUntilIdle"/>.</summary>
     internal bool FailFast;
 
-    public FanoutDispatcher()
+    /// <summary>Tests: worker blocks before dequeuing batches (channel stays full).</summary>
+    internal ManualResetEventSlim? HoldWorkerBeforeReadForTest;
+
+    public FanoutDispatcher(int batchQueueCapacity = DefaultBatchQueueCapacity)
     {
+        if (batchQueueCapacity < 1)
+            throw new ArgumentOutOfRangeException(nameof(batchQueueCapacity));
+
+        _queue = Channel.CreateBounded<SealedWorldFanoutBatch>(
+            new BoundedChannelOptions(batchQueueCapacity)
+            {
+                SingleReader = true,
+                SingleWriter = false,
+                FullMode = BoundedChannelFullMode.Wait,
+                AllowSynchronousContinuations = false
+            });
         _worker = Task.Run(ProcessAsync);
     }
 
-    /// <summary>Non-blocking enqueue. Returns false when the queue is full or the dispatcher is closed.</summary>
-    public bool TryEnqueue(SealedWorldFanoutBatch batch)
+    /// <summary>
+    /// Enqueues a sealed batch. Blocks the caller when the queue is full (backpressure). Throws when the
+    /// dispatcher is closed so the batch is never silently dropped.
+    /// </summary>
+    public void Enqueue(SealedWorldFanoutBatch batch)
     {
         if (Volatile.Read(ref _closed) != 0)
-            return false;
+        {
+            RejectUnrecoverable(batch, "dispatcher is closed");
+            throw RejectException(batch, "dispatcher is closed");
+        }
 
         long now = Stopwatch.GetTimestamp();
         if (batch.EnqueuedAtTimestamp > 0)
             FanoutTelemetry.RecordEnqueue(now);
 
-        if (!_queue.Writer.TryWrite(batch))
+        try
         {
-            FineageTelemetry.FanoutQueueOverflow.Add(1);
-            FanoutTelemetry.RecordQueueDepth(_queue.Reader.CanCount ? _queue.Reader.Count : BatchQueueCapacity);
-            return false;
+            _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
+        }
+        catch (ChannelClosedException ex)
+        {
+            RejectUnrecoverable(batch, "channel closed");
+            throw RejectException(batch, "channel closed", ex);
+        }
+        catch (OperationCanceledException ex) when (_cts.IsCancellationRequested)
+        {
+            RejectUnrecoverable(batch, "dispatcher shut down");
+            throw RejectException(batch, "dispatcher shut down", ex);
         }
 
         Interlocked.Increment(ref _pending);
@@ -61,9 +82,19 @@ internal sealed class FanoutDispatcher : IDisposable
             if (prevOldest == 0 || batch.EnqueuedAtTimestamp < prevOldest)
                 Interlocked.Exchange(ref _oldestEnqueueTicks, batch.EnqueuedAtTimestamp);
         }
-
-        return true;
     }
+
+    static void RejectUnrecoverable(SealedWorldFanoutBatch batch, string reason)
+    {
+        FineageTelemetry.FanoutQueueOverflow.Add(1);
+        ZoneLog.Error(
+            $"fan-out dispatcher rejected batch tick={batch.Sequence.Tick} phase={batch.Sequence.Phase} seq={batch.Sequence.Sequence}: {reason}");
+    }
+
+    static InvalidOperationException RejectException(SealedWorldFanoutBatch batch, string reason, Exception? inner = null) =>
+        new(
+            $"fan-out dispatcher rejected batch tick={batch.Sequence.Tick} phase={batch.Sequence.Phase} seq={batch.Sequence.Sequence}: {reason}",
+            inner);
 
     /// <summary>Test and shutdown: wait until the worker queue and in-flight batch are empty.</summary>
     public void WaitUntilIdle(TimeSpan? timeout = null)
@@ -91,8 +122,13 @@ internal sealed class FanoutDispatcher : IDisposable
     {
         try
         {
-            await foreach (var batch in _queue.Reader.ReadAllAsync(_cts.Token).ConfigureAwait(false))
+            while (!_cts.IsCancellationRequested)
             {
+                HoldWorkerBeforeReadForTest?.Wait(_cts.Token);
+                if (!await _queue.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
+                    break;
+                while (_queue.Reader.TryRead(out var batch))
+                {
                 FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
                 Volatile.Write(ref _oldestEnqueueTicks, 0);
                 Interlocked.Increment(ref _inFlight);
@@ -104,6 +140,7 @@ internal sealed class FanoutDispatcher : IDisposable
                 {
                     Interlocked.Decrement(ref _inFlight);
                     Interlocked.Decrement(ref _pending);
+                }
                 }
             }
         }
