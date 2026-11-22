@@ -383,7 +383,7 @@ public static class MetricsText
         AppendHelp(sb, metric, help);
         sb.Append("# TYPE ").Append(metric).Append(" histogram\n");
         foreach (StageMetrics row in rows)
-            AppendHistogramSamples(sb, metric, $"{labelName}=\"{Escape(row.Stage)}\"", row.Duration);
+            AppendHistogramSamples(sb, metric, $"{labelName}=\"{Escape(row.Stage)}\"", row.Duration, DurationBoundsMs);
     }
 
     static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)
