@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
     /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
     void ApplyCommands(TickContext tick)
     {
+        using var commandScope = _syncIo.CommandScope();
         bool applied = false;
         foreach (var submission in _ingress.TakeQueued())
         {

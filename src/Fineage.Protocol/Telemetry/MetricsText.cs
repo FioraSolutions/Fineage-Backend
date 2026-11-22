@@ -51,6 +51,15 @@ public sealed class MetricsSnapshot
     public int PlayersOnline { get; init; }
     public int CommandIngressQueued { get; init; }
     public HistogramMetrics Tick { get; init; } = new();
+    public HistogramMetrics EnterPlan { get; init; } = new();
+    public HistogramMetrics EnterSelf { get; init; } = new();
+    public HistogramMetrics EnterKnownSnapshot { get; init; } = new();
+    public HistogramMetrics EnterKnownEncode { get; init; } = new();
+    public HistogramMetrics EnterPeerFanout { get; init; } = new();
+    public HistogramMetrics EnterKnownEntities { get; init; } = new();
+    public HistogramMetrics EnterKnownPlayers { get; init; } = new();
+    public HistogramMetrics EnterFrames { get; init; } = new();
+    public HistogramMetrics EnterBytes { get; init; } = new();
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
@@ -187,6 +196,7 @@ public static class MetricsText
             .Append('\n');
 
         AppendStages(sb, snapshot.Stages);
+        AppendEnterHistograms(sb, snapshot);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
         sb.Append("# TYPE fineage_zone_online gauge\n");
         sb.Append("fineage_zone_online ").Append(snapshot.PlayersOnline.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -229,6 +239,28 @@ public static class MetricsText
             string labels = "endpoint=\"" + Escape(endpoint.Endpoint) + "\"";
             AppendHistogramSamples(sb, name, labels, endpoint.Handler);
         }
+    }
+
+    static void AppendEnterHistograms(StringBuilder sb, MetricsSnapshot snapshot)
+    {
+        AppendSingletonHistogram(sb, "fineage_enter_plan_ms", "Enter commit planning on the simulation thread", snapshot.EnterPlan);
+        AppendSingletonHistogram(sb, "fineage_enter_self_projection_ms", "Enter self packet projection on the simulation thread", snapshot.EnterSelf);
+        AppendSingletonHistogram(sb, "fineage_enter_known_snapshot_ms", "Enter knownlist snapshot on the simulation thread", snapshot.EnterKnownSnapshot);
+        AppendSingletonHistogram(sb, "fineage_enter_known_encode_ms", "Enter knownlist NetCodec work off the simulation thread", snapshot.EnterKnownEncode);
+        AppendSingletonHistogram(sb, "fineage_enter_peer_fanout_ms", "Enter peer fan-out encoding off the simulation thread", snapshot.EnterPeerFanout);
+        AppendSingletonHistogram(sb, "fineage_enter_known_entities", "Known entities per enter", snapshot.EnterKnownEntities);
+        AppendSingletonHistogram(sb, "fineage_enter_known_players", "Known players per enter", snapshot.EnterKnownPlayers);
+        AppendSingletonHistogram(sb, "fineage_enter_frames", "Outbound frames per enter burst", snapshot.EnterFrames);
+        AppendSingletonHistogram(sb, "fineage_enter_bytes", "Outbound bytes per enter burst", snapshot.EnterBytes);
+    }
+
+    static void AppendSingletonHistogram(StringBuilder sb, string name, string help, HistogramMetrics histogram)
+    {
+        if (histogram.Count == 0)
+            return;
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" histogram\n");
+        AppendHistogramSamples(sb, name, "", histogram);
     }
 
     static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)

@@ -49,6 +49,33 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> EnterPlanMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.plan_ms", unit: "ms", description: "Enter commit planning on the simulation thread");
+
+    public static readonly Histogram<double> EnterSelfProjectionMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.self_projection_ms", unit: "ms", description: "Enter self packet projection on the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownSnapshotMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.known_snapshot_ms", unit: "ms", description: "Enter knownlist snapshot on the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownEncodeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.known_encode_ms", unit: "ms", description: "Enter knownlist NetCodec work off the simulation thread");
+
+    public static readonly Histogram<double> EnterPeerFanoutMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.peer_fanout_ms", unit: "ms", description: "Enter peer fan-out encoding off the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownEntities =
+        Meter.CreateHistogram<double>("fineage.enter.known_entities", unit: "{entity}", description: "Known entities per enter");
+
+    public static readonly Histogram<double> EnterKnownPlayers =
+        Meter.CreateHistogram<double>("fineage.enter.known_players", unit: "{player}", description: "Known players per enter");
+
+    public static readonly Histogram<double> EnterFrames =
+        Meter.CreateHistogram<double>("fineage.enter.frames", unit: "{frame}", description: "Outbound frames per enter burst");
+
+    public static readonly Histogram<double> EnterBytes =
+        Meter.CreateHistogram<double>("fineage.enter.bytes", unit: "By", description: "Outbound bytes per enter burst");
+
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
 

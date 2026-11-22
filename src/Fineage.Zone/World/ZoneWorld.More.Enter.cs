@@ -18,34 +18,27 @@ using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Game.Economy;
 using Fineage.Game.Services;
+using Fineage.Zone.Net;
 
 namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
     public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct) =>
-        await EnterAsync(session, static _ => EnterAccepted, ct).ConfigureAwait(false) != null;
-
-    static readonly object EnterAccepted = new();
+        await EnterWithSnapshotAsync(session, static _ => Fineage.Zone.Net.EnterSnapshot.ForTestEnter(), ct).ConfigureAwait(false) != null;
 
     sealed record EnterOutcome<T>(T Projection, int Known, int X, int Y, int Z, List<UnlinkPersistSnapshot>? Evicted);
 
     /// <summary>
-    /// Loads the character, enters it on the simulation thread and, in the same step, runs <paramref name="project"/>
-    /// on the new player, so what the client is sent describes the world it entered. Null when the enter is refused.
+    /// PrepareEnter (async store read) → CommitEnter (simulation thread) → returns immutable enter snapshot.
     /// </summary>
-    internal async Task<T?> EnterAsync<T>(ZoneSession session, Func<ZoneEntity, T> project, CancellationToken ct)
-        where T : class
+    internal async Task<Fineage.Zone.Net.EnterSnapshot?> EnterWithSnapshotAsync(
+        ZoneSession session,
+        Func<ZoneEntity, Fineage.Zone.Net.EnterSnapshot> commit,
+        CancellationToken ct)
     {
-        // Durable character state and the starter-kit backfill are Postgres round-trips: they stay on the caller.
-        CharacterRecord? stored = null;
-        if (_accounts != null && session.ObjectId > 0)
-        {
-            stored = await Task.Run(
-                () => _accounts.FindById(session.Account, session.ObjectId),
-                ct).ConfigureAwait(false);
-        }
-
+        using var enterScope = _syncIo.EnterScope();
+        CharacterRecord? stored = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
         bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
         var entered = await OnSimulationAsync(session, "enter", () =>
@@ -58,7 +51,7 @@ public sealed partial class ZoneWorld
             CountOnlinePlayers();
             if (!TryGetLivePlayer(session, out var player))
                 throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
-            return new EnterOutcome<T>(project(player), known, x, y, z, evicted);
+            return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
         }, ct).ConfigureAwait(false);
         if (entered == null)
             return null;
@@ -81,6 +74,15 @@ public sealed partial class ZoneWorld
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
         ZoneLog.EnterWorld(session, entered.Known);
         return entered.Projection;
+    }
+
+    async Task<CharacterRecord?> PrepareEnterCharacterAsync(ZoneSession session, CancellationToken ct)
+    {
+        if (_accounts == null || session.ObjectId <= 0)
+            return null;
+        return await Task.Run(
+            () => _accounts.FindById(session.Account, session.ObjectId),
+            ct).ConfigureAwait(false);
     }
 
     public Task LeaveAsync(ZoneSession session, CancellationToken ct) => LeaveAsync<object>(session, null, ct);

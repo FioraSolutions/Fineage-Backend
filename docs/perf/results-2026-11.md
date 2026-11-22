@@ -110,6 +110,19 @@ export FINEAGE_BUILD_CONFIGURATION=Release
 | P2 | High `packets_rejected` under combat spam (synthetic targets) | 50-bot smoke, attack-weighted scenario |
 | P3 | Load-test RTT percentile helper under-reports p50 when samples are sparse | See `ReportWriter.ClientRtt` — cosmetic report issue |
 
+## Enter burst offload (Nov 22) — `request:enter` off simulation thread
+
+**Before (profiling on `dev`, `bots-50-town`, ~34k NPCs, sequential regions):** `commands` stage **p99 650–826 ms** during bot ramp; enter planning did NetCodec for every known entity and peer fan-out inside `request:enter` on the simulation thread.
+
+**After (this change, Release build, same scenario — VM has no Docker/Postgres here; numbers from CI `load-test-smoke` + `bots-50-town` local gate):**
+
+| Workers | `commands` p99 (ms) | `fineage_enter_plan_ms` p99 | `fineage_enter_known_encode_ms` p99 | Command→fanout p50 (ms) | Command→fanout p99 (ms) |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | _CI_ | _CI_ | _CI_ | _CI_ | _CI_ |
+| 4 | _CI_ | _CI_ | _CI_ | _CI_ | _CI_ |
+
+Mechanism: `PrepareEnter` loads `CharacterRecord` off-thread → `CommitEnter` (sim) builds immutable `EnterSnapshot` + AOI/knownlist → `EncodeAndDispatchEnter` runs NetCodec on a worker with shared NPC spawn payload cache. Prometheus: `fineage_enter_*` histograms on zone `GET /metrics`.
+
 ## Reproduce smoke
 
 ```bash

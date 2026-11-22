@@ -18,6 +18,7 @@ public sealed class PrometheusSample
     public long PacketsErrored { get; init; }
     public long PacketsRejected { get; init; }
     public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
+    public Dictionary<string, double> EnterP99Ms { get; init; } = new(StringComparer.Ordinal);
     public long OutboundDropped { get; init; }
     public long BytesOut { get; init; }
     public long BytesIn { get; init; }
@@ -57,6 +58,7 @@ public static class PrometheusParser
             PacketsRejected = ParseCounterSum(text, "fineage_packets_rejected_total"),
             PacketsErrored = ParseCounterSum(text, "fineage_packets_errored_total"),
             TickStageP99Ms = ParseStageQuantiles(text, 0.99),
+            EnterP99Ms = ParseUnlabeledQuantiles(text, "fineage_enter_", 0.99),
             OutboundDropped = ParseCounterSum(text, "fineage_outbound_dropped_total"),
             BytesOut = ParseCounterSum(text, "fineage_bytes_out_total"),
             BytesIn = ParseCounterSum(text, "fineage_bytes_in_total"),
@@ -131,6 +133,47 @@ public static class PrometheusParser
         foreach (Match m in Regex.Matches(text, $"^{Regex.Escape(metric)}.*\\s+(\\d+)", RegexOptions.Multiline))
             sum += long.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture);
         return sum;
+    }
+
+    static Dictionary<string, double> ParseUnlabeledQuantiles(string text, string prefix, double q)
+    {
+        var counts = new Dictionary<string, long>(StringComparer.Ordinal);
+        var bucketsByMetric = new Dictionary<string, SortedDictionary<double, long>>(StringComparer.Ordinal);
+        foreach (Match match in Regex.Matches(
+                     text,
+                     @"fineage_enter_[a-z_]+_bucket\{le=""([^""]+)""\}\s+(\d+)",
+                     RegexOptions.Multiline))
+        {
+            string line = match.Value;
+            int nameStart = line.IndexOf("fineage_enter_", StringComparison.Ordinal);
+            int nameEnd = line.IndexOf("_bucket", StringComparison.Ordinal);
+            if (nameStart < 0 || nameEnd < 0)
+                continue;
+            string metric = line[nameStart..nameEnd];
+            double le = match.Groups[1].Value == "+Inf"
+                ? double.PositiveInfinity
+                : double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            long cum = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+            if (!bucketsByMetric.TryGetValue(metric, out var buckets))
+                bucketsByMetric[metric] = buckets = [];
+            buckets[le] = cum;
+        }
+
+        foreach (Match match in Regex.Matches(
+                     text,
+                     @"(fineage_enter_[a-z_]+)_count\s+(\d+)",
+                     RegexOptions.Multiline))
+            counts[match.Groups[1].Value] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+
+        var result = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (var (metric, buckets) in bucketsByMetric)
+        {
+            long count = counts.GetValueOrDefault(metric);
+            if (count > 0)
+                result[metric] = Quantile(buckets, count, q);
+        }
+
+        return result;
     }
 
     static double ParseDouble(string text, string pattern)

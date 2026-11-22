@@ -8,6 +8,15 @@ public sealed class MetricsCollector : IDisposable
     readonly object _gate = new();
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
+    readonly DurationHistogram _enterPlan = new();
+    readonly DurationHistogram _enterSelf = new();
+    readonly DurationHistogram _enterKnownSnapshot = new();
+    readonly DurationHistogram _enterKnownEncode = new();
+    readonly DurationHistogram _enterPeerFanout = new();
+    readonly DurationHistogram _enterKnownEntities = new();
+    readonly DurationHistogram _enterKnownPlayers = new();
+    readonly DurationHistogram _enterFrames = new();
+    readonly DurationHistogram _enterBytes = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _ticksSkipped;
@@ -48,6 +57,15 @@ public sealed class MetricsCollector : IDisposable
                 PlayersOnline = _online,
                 CommandIngressQueued = _commandIngressQueued,
                 Tick = _tick.Freeze(),
+                EnterPlan = _enterPlan.Freeze(),
+                EnterSelf = _enterSelf.Freeze(),
+                EnterKnownSnapshot = _enterKnownSnapshot.Freeze(),
+                EnterKnownEncode = _enterKnownEncode.Freeze(),
+                EnterPeerFanout = _enterPeerFanout.Freeze(),
+                EnterKnownEntities = _enterKnownEntities.Freeze(),
+                EnterKnownPlayers = _enterKnownPlayers.Freeze(),
+                EnterFrames = _enterFrames.Freeze(),
+                EnterBytes = _enterBytes.Freeze(),
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
@@ -158,6 +176,33 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.tick.stage.ms":
                     Stage(StageOf(tags)).Duration.Record(value);
+                    break;
+                case "fineage.enter.plan_ms":
+                    _enterPlan.Record(value);
+                    break;
+                case "fineage.enter.self_projection_ms":
+                    _enterSelf.Record(value);
+                    break;
+                case "fineage.enter.known_snapshot_ms":
+                    _enterKnownSnapshot.Record(value);
+                    break;
+                case "fineage.enter.known_encode_ms":
+                    _enterKnownEncode.Record(value);
+                    break;
+                case "fineage.enter.peer_fanout_ms":
+                    _enterPeerFanout.Record(value);
+                    break;
+                case "fineage.enter.known_entities":
+                    _enterKnownEntities.Record(value);
+                    break;
+                case "fineage.enter.known_players":
+                    _enterKnownPlayers.Record(value);
+                    break;
+                case "fineage.enter.frames":
+                    _enterFrames.Record(value);
+                    break;
+                case "fineage.enter.bytes":
+                    _enterBytes.Record(value);
                     break;
             }
         }

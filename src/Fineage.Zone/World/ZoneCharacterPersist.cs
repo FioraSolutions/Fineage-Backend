@@ -9,14 +9,23 @@ namespace Fineage.Zone.World;
 /// Reads stay on <c>_accounts</c>; all character-domain saves funnel here so call sites do not
 /// repeat null checks or invent parallel persist helpers.
 /// </summary>
-sealed class ZoneCharacterPersist(IAccountStore? accounts)
+sealed class ZoneCharacterPersist(IAccountStore? accounts, Action<string>? reportSyncIo = null)
 {
     readonly IAccountStore? _accounts = accounts;
+    readonly Action<string>? _reportSyncIo = reportSyncIo;
 
     public bool Enabled => _accounts != null;
 
-    public void SavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
+    void Guard(string operation)
+    {
+        _reportSyncIo?.Invoke(operation);
+    }
+
+    public void SavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)
+    {
+        Guard(nameof(SavePresence));
         _accounts?.TrySavePresence(account, characterId, x, y, z, lastAccess);
+    }
 
     public void SaveVitals(string account, int characterId, int hp, int mp, int cp) =>
         _accounts?.TrySaveVitals(account, characterId, hp, mp, cp);
@@ -35,7 +44,11 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts)
         int cp) =>
         _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp);
 
-    public StoredPet? FindPet(int controlObjectId) => _accounts?.FindPet(controlObjectId);
+    public StoredPet? FindPet(int controlObjectId)
+    {
+        Guard(nameof(FindPet));
+        return _accounts?.FindPet(controlObjectId);
+    }
 
     public void SavePet(StoredPet pet) => _accounts?.SavePet(pet);
 
