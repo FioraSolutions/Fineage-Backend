@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <c>SignsPriest</c> 7/9/17/18): Merchant and Blacksmith of Mammon follow the seals, the strict rule gates their talk,
 /// their shops are the Ancient Adena multisells (sealed armor release included), and Ancient Adena trades both ways.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetMammonTests
 {
     const int AA = SevenSignsProtocol.AncientAdenaItemId;

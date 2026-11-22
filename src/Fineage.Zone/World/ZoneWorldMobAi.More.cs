@@ -158,8 +158,13 @@ public sealed partial class ZoneWorld
 
     void BroadcastNpcMove(ZoneEntity npc, int destX, int destY, int destZ)
     {
-        var netWatchers = NetWatchersOfPeers(npc);
+        if (npc.IsBoat)
+        {
+            BroadcastBoatMove(npc, destX, destY, destZ);
+            return;
+        }
 
+        var netWatchers = NetWatchersOfPeers(npc);
         if (netWatchers is { Count: > 0 } && NetBridge != null)
         {
             NetBridge.FanoutMoveState(

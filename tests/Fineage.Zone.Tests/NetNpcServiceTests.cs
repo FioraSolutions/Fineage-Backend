@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// loaded-map gate, and the private warehouse fee/weight/persistence rules. Ported off the V2 wire; the world is
 /// driven through <see cref="WorldBench"/> and every result read from the recorded Net fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetNpcServiceTests
 {
     const int GateObjectId = 61000;

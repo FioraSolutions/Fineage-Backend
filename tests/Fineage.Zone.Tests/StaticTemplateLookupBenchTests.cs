@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// <summary>
 /// Startup template and opcode tables are frozen. Lookups must agree with a Dictionary and must not allocate.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class StaticTemplateLookupBenchTests(ITestOutputHelper output)
 {
     const int LookupPasses = 200;

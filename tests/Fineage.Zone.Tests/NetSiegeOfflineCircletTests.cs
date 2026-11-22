@@ -11,6 +11,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius <c>CastleManager.removeCirclet</c>: circlets and the lord crown leave every member's bag, including offline.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSiegeOfflineCircletTests
 {
     const int Gludio = 1;

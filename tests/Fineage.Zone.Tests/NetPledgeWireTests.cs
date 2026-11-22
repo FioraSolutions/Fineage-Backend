@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Clan window over the real Net wire with several sessions: <see cref="NetOpcode.PledgeCommand"/> answers, and the
 /// clan war colour (<see cref="NetOpcode.RelationChanged"/>) that rides after a player's spawn when two war enemies meet.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPledgeWireTests
 {
     static async Task<int> ClanAsync(NetMoveVisibilityRig rig, NetMoveVisibilityRig.Player p, string name)

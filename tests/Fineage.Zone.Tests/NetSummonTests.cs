@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Servitors after Mobius CT 0: summon skill (crystals, one at a time), visibility with the owner tail, orders,
 /// combat credit to the owner, exp multiplier, lifetime / upkeep, death, PvP through the summon.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetSummonTests
 {
     const int SummonKat = 1111;            // Kat the Cat lv1: 3 × D crystal, 1200 s, exp ×0.7

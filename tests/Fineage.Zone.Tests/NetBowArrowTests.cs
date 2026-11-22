@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius bow ammunition (audit <c>D12</c>): <c>Creature.canUseRangeWeapon</c> equips an arrow of the bow's grade from
 /// the bag or refuses the shot with SysMsg 112, and <c>doAttackHitByBow</c> burns one arrow per shot, hit or miss.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetBowArrowTests
 {
     const int MobId = 9_400_001;

@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// suite walked a full Hello/Auth/EnterWorld handshake before every step; the quest engine does not care about the
 /// transport, so this drives the world and reads the recorded Net fanout instead.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetQuestTests
 {
     const int RoxxyIndex = 0;

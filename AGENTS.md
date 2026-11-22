@@ -20,6 +20,12 @@ Server business logic must match L2J Mobius CT0 Interlude (`ref/mobius-ct0-inter
 
 Zone tick budget is 200 ms; local playtests run the **Debug** build, so performance work must hold in Debug (fix algorithms, not build flags).
 
+## CI (dev PRs)
+
+**Merge gate on PRs into `dev` (target &lt;5 min wall clock):** NuGet restore/cache, `dotnet build`, `format-check`, and **fast unit tests** only (`Category!=Slow&Category!=Integration&Category!=Load&Category!=perf`), with test projects in parallel matrix jobs. No Postgres, load smoke, or zone perf on ordinary dev PRs.
+
+**Heavy jobs** (Postgres full suite, `load-test-smoke`, `zone-simulation-perf`, `zone-parallel-regions`) run on push to `main`, PRs into `main`, nightly `0 1 * * *` UTC, `workflow_dispatch`, or a `dev` PR labeled **`perf`**. Issue **#867** perf-chain PRs must add the `perf` label to get load-test numbers in CI.
+
 ## Model selection
 
 | Work | Model |

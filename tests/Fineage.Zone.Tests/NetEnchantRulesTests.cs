@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// and the paperdoll. The Net transport cases live in <see cref="NetEnchantTests"/>; these assert the outcome
 /// through <see cref="IWorldEventPublisher"/> instead of reading MessagePack frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEnchantRulesTests
 {
     const int Saber = 123;

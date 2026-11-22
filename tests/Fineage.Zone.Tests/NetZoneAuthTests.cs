@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Zone handoff auth on Net: one auth per session, a blank account is a bad request, and an expired or
 /// forged handoff token never binds a character. These used to be asserted through the V2 listener.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetZoneAuthTests
 {
     [Fact]
