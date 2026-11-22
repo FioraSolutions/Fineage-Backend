@@ -105,22 +105,29 @@ public sealed class WorldFanoutOutboxTests
     [Fact]
     public void A_send_outside_a_step_waits_for_sealed_batches_and_surfaces_its_own_failure()
     {
-        var (bridge, rec, fanout) = Outbox();
+        var (bridge, rec, fanout) = Outbox(failFast: true);
 
         fanout.Begin();
         bridge.FanoutAttackStance([1], 7, true);
         fanout.Seal();
+        fanout.Drain();
         bridge.FanoutAttackStance([1], 8, true);
+        fanout.Drain();
 
         Assert.Equal(["stance 7", "stance 8"], rec.Sent);
-        Assert.Throws<InvalidOperationException>(() => bridge.FanoutAttackStance([1], FakePublisher.Throws, true));
+        var failed = Assert.Throws<InvalidOperationException>(() =>
+        {
+            bridge.FanoutAttackStance([1], FakePublisher.Throws, true);
+            fanout.Drain();
+        });
+        Assert.Contains("fan-out delivery failed", failed.Message);
     }
 
     [Fact]
     public void Seal_without_begin_is_rejected()
     {
-        var fanout = new WorldFanoutSequencer();
-        Assert.Throws<InvalidOperationException>(fanout.Seal);
+        var fanout = new WorldFanoutSequencer(new FanoutDispatcher());
+        Assert.Throws<InvalidOperationException>(() => fanout.Seal());
     }
 
     [Fact]
@@ -173,10 +180,11 @@ public sealed class WorldFanoutOutboxTests
         Values = [.. attributes.Select(a => a.Value)]
     };
 
-    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox()
+    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox(bool failFast = false)
     {
         var inner = DispatchProxy.Create<IWorldEventPublisher, FakePublisher>();
-        var fanout = new WorldFanoutSequencer();
+        var dispatcher = new FanoutDispatcher { FailFast = failFast };
+        var fanout = new WorldFanoutSequencer(dispatcher);
         return (new OutboxingWorldEventPublisher(inner, fanout), (FakePublisher)(object)inner, fanout);
     }
 

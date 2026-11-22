@@ -306,7 +306,7 @@ public sealed class RegionParallelStressTests
                 await kit.World.LeaveAsync(players[5].Session, CancellationToken.None);
 
             kit.Now = kit.Now.AddMilliseconds(step % 9 == 0 ? 450 : 200);
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
             foreach (var reply in replies)
                 _ = await reply;
         }

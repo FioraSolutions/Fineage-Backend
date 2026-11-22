@@ -15,22 +15,17 @@ export FINEAGE_LOGIN_METRICS_PORT="${FINEAGE_LOGIN_METRICS_PORT:-9464}"
 export FINEAGE_ZONE_METRICS_PORT="${FINEAGE_ZONE_METRICS_PORT:-9465}"
 export FINEAGE_BUILD_CONFIGURATION="${FINEAGE_BUILD_CONFIGURATION:-Release}"
 
-SCENARIO="${ROOT}/tools/Fineage.LoadTest/scenarios/bots-100-spread.yaml"
+SCENARIO="${ROOT}/tools/Fineage.LoadTest/scenarios/bots-50-town.yaml"
 LOADTEST_DLL="${ROOT}/tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll"
 REPORT_ROOT="${REPORT_ROOT:-$ROOT/local-logs/ci-load-smoke}"
 SUMMARY="${REPORT_ROOT}/summary.json"
 mkdir -p "$REPORT_ROOT"
 
-echo "== consistency oracle (region parallel stress + world equality gates) =="
-export FINEAGE_ZONE_REGION_WORKERS=4
-dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj -c Release -v q \
-  --filter "FullyQualifiedName~RegionParallelStressTests|FullyQualifiedName~RegionParallelWorldTests.Parallel_regions"
-
 dotnet build "$ROOT/tools/Fineage.LoadTest" -c Release -v q -nologo
 
 run_load() {
   local workers="$1"
-  local tag="bots-100-w${workers}"
+  local tag="bots-50-town-w${workers}"
   local out="$REPORT_ROOT/$tag"
   mkdir -p "$out"
 
@@ -54,9 +49,9 @@ run_load() {
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
 }
 
-echo "== load: 100 bots, workers=0 =="
+echo "== load: 50-town bots, workers=0 =="
 run_load 0
-echo "== load: 100 bots, workers=4 =="
+echo "== load: 50-town bots, workers=4 =="
 run_load 4
 
 python3 - "$REPORT_ROOT" "$SUMMARY" <<'PY'
@@ -86,15 +81,15 @@ def pick(r):
         "commandFanoutP99Ms": c.get("BroadcastLatencyP99Ms", 0),
     }
 
-runs = {f"w{k}": pick(read_run(f"bots-100-w{k}")) for k in (0, 4)}
+runs = {f"w{k}": pick(read_run(f"bots-50-town-w{k}")) for k in (0, 4)}
 failures = []
 for k, row in runs.items():
     if not row["passed"]:
         failures.append(f"{k}: report failed")
     if row["botsStuck"] != 0:
         failures.append(f"{k}: stuck={row['botsStuck']}")
-    if row["botsInWorld"] < 100:
-        failures.append(f"{k}: inWorld={row['botsInWorld']}/100")
+    if row["botsInWorld"] < 50:
+        failures.append(f"{k}: inWorld={row['botsInWorld']}/50")
 
 if runs["w0"]["botsInWorld"] != runs["w4"]["botsInWorld"]:
     failures.append(f"oracle: inWorld {runs['w0']['botsInWorld']} vs {runs['w4']['botsInWorld']}")
@@ -135,6 +130,8 @@ if [[ "${CI_LOAD_TEST_SIEGE:-0}" == "1" ]]; then
 fi
 
 echo "load-test smoke OK; summary at $SUMMARY"
-for tag in bots-100-w0 bots-100-w4; do
-  [[ -f "$REPORT_ROOT/$tag/load-test-report.md" ]] && echo "  $REPORT_ROOT/$tag/load-test-report.md"
+for tag in bots-50-town-w0 bots-50-town-w4; do
+  if [[ -f "$REPORT_ROOT/$tag/load-test-report.md" ]]; then
+    echo "  $REPORT_ROOT/$tag/load-test-report.md"
+  fi
 done

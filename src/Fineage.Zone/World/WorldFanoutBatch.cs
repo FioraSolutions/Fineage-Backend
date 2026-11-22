@@ -19,6 +19,8 @@ internal sealed class WorldFanoutBatch
 {
     readonly List<Entry?> _entries = [];
     readonly Dictionary<ReplaceKey, int> _replaceable = [];
+    readonly Dictionary<AudienceKey, AudienceSnapshotId> _audiences = new();
+    ulong _nextAudienceId = 1;
 
     int _superseded;
 
@@ -32,9 +34,13 @@ internal sealed class WorldFanoutBatch
     /// <param name="merge">Folds the superseded payload into the new one (StatusUpdate keeps attributes the new write omits).</param>
     public void AddReplaceable<T>(
         PresenceCoalesceKind kind, int subjectId, int[] audience, T payload, Func<T, T, T> merge, Func<T, Action> bind)
-        where T : class =>
-        AddReplaceable(payload, new Replace(new ReplaceKey(kind, subjectId, new AudienceKey(audience)),
+        where T : class
+    {
+        Array.Sort(audience);
+        var audienceId = RegisterAudience(audience);
+        AddReplaceable(payload, new Replace(new ReplaceKey(kind, subjectId, audienceId),
             (older, newer) => merge((T)older, (T)newer), latest => bind((T)latest)));
+    }
 
     /// <summary>
     /// Appends a region's batch as if its writes had been made here in order: ordered sends keep their position and
@@ -84,7 +90,17 @@ internal sealed class WorldFanoutBatch
 
     sealed record Replace(ReplaceKey Key, Func<object, object, object> Merge, Func<object, Action> Bind);
 
-    readonly record struct ReplaceKey(PresenceCoalesceKind Kind, int SubjectId, AudienceKey Audience);
+    readonly record struct ReplaceKey(PresenceCoalesceKind Kind, int SubjectId, AudienceSnapshotId Audience);
+
+    AudienceSnapshotId RegisterAudience(int[] sortedWatcherIds)
+    {
+        var key = new AudienceKey(sortedWatcherIds);
+        if (_audiences.TryGetValue(key, out var id))
+            return id;
+        id = new AudienceSnapshotId(_nextAudienceId++);
+        _audiences[key] = id;
+        return id;
+    }
 
     readonly struct AudienceKey(int[] ids) : IEquatable<AudienceKey>
     {

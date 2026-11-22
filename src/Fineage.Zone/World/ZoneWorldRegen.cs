@@ -132,6 +132,7 @@ public sealed partial class ZoneWorld
             _simulationTicks.RunNow(_regenPlayersStage, now);
             _simulationTicks.RunNow(_regenNpcsStage, now);
         });
+        _fanoutDispatcher.WaitUntilIdle();
         await Task.CompletedTask.ConfigureAwait(false);
     }
 

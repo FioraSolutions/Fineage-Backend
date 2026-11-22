@@ -32,14 +32,14 @@ public sealed class ZoneCommandIngressTests
 
         var select = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
         var cancel = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
         Assert.Null(await select);
         Assert.Null(await cancel);
         Assert.Equal(0, session.SelectedTargetId);
 
         var cancelFirst = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
         var selectLast = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
         await Task.WhenAll(cancelFirst, selectLast);
         Assert.Equal(peer.ObjectId, session.SelectedTargetId);
     }
@@ -53,7 +53,7 @@ public sealed class ZoneCommandIngressTests
 
         var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), cts.Token);
         cts.Cancel();
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => reply);
         Assert.Equal(0, session.SelectedTargetId);
@@ -66,29 +66,28 @@ public sealed class ZoneCommandIngressTests
         var (kit, session, peer, _) = await SetupAsync();
         var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
         Assert.False(reply.IsCompleted);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
         Assert.True(reply.IsCompleted);
     }
 
     [Fact]
-    public async Task A_reply_arrives_after_the_fanout_of_the_step_that_applied_it()
+    public async Task A_reply_completes_when_the_command_batch_is_committed_and_fanout_drains_in_step_order()
     {
         var (kit, session, peer, recorder) = await SetupAsync();
-        int before = CallCount(recorder);
+        lock (recorder.Calls)
+            recorder.Calls.Clear();
 
-        int seenByReply = -1;
-        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None)
-            .ContinueWith(t =>
-            {
-                seenByReply = CallCount(recorder);
-                return t.Result;
-            }, TaskScheduler.Default);
-        kit.World.StepSimulation();
-        int afterStep = CallCount(recorder);
-
+        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+        Assert.False(reply.IsCompleted);
+        kit.World.RunStepForTest();
+        Assert.True(reply.IsCompleted);
         Assert.Null(await reply);
-        Assert.True(afterStep > before, "selecting a target fans out to the player");
-        Assert.InRange(seenByReply, before + 1, afterStep);
+
+        lock (recorder.Calls)
+        {
+            Assert.Contains(recorder.Calls,
+                c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && Equals(c.Args[1], peer.ObjectId));
+        }
     }
 
     [Fact]
@@ -119,7 +118,7 @@ public sealed class ZoneCommandIngressTests
         var far = kit.World.ExecuteAsync(session, new ValidatePositionCommand(session.X + 2_000, session.Y, session.Z),
             CancellationToken.None);
         Assert.False(far.IsCompleted);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
 
         Assert.Null(await close);
         Assert.Matches("^position drift dxy=\\d+ dz=\\d+$", await far);
@@ -166,12 +165,6 @@ public sealed class ZoneCommandIngressTests
         }
 
         return levels;
-    }
-
-    static int CallCount(NetBridgeRecorder recorder)
-    {
-        lock (recorder.Calls)
-            return recorder.Calls.Count;
     }
 
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Peer, NetBridgeRecorder Recorder)> SetupAsync()

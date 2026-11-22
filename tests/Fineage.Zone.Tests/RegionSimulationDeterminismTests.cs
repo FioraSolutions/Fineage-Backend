@@ -100,7 +100,7 @@ public sealed class RegionSimulationDeterminismTests
         var expected = new List<string>();
         for (int step = 1; step <= 2 * ZoneSimulationSettings.SlowPeriodTicks; step++)
         {
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
             expected.AddRange(LegacyCombatOrder);
             if (step % ZoneSimulationSettings.SlowPeriodTicks == 0)
                 expected.AddRange(LegacySimulationOrder);
@@ -228,6 +228,7 @@ public sealed class RegionSimulationDeterminismTests
                 Assert.True(kit.World.ApplyAbnormalFromSkillForTest(bleed, bleedLevel, mob));
         }
 
+        kit.World.WaitForFanoutIdle();
         lock (recorder.Calls)
             recorder.Calls.Clear();
         int[] tracked = [.. new[] { west.ObjectId, east.ObjectId }.Concat(Enumerable.Range(FirstMobId, MobCount)).Order()];

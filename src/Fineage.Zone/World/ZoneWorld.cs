@@ -27,6 +27,7 @@ using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
+using System.Reflection;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.CursedWeapons;
 
@@ -239,6 +240,7 @@ public sealed partial class ZoneWorld
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
+        _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
         InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
@@ -464,11 +466,36 @@ public sealed partial class ZoneWorld
     internal IWorldEventPublisher? NetBridge
     {
         get => _netBridge;
-        set => _netBridge = value == null ? null : new OutboxingWorldEventPublisher(value, _fanout);
+        set
+        {
+            _netBridge = value == null ? null : new OutboxingWorldEventPublisher(value, _fanout);
+            bool recording = value != null && IsRecordingNetBridge(value);
+            _awaitFanoutBeforeCommandComplete = recording;
+            _fanoutDispatcher.DeliverSynchronously = recording;
+        }
     }
 
     IWorldEventPublisher? _netBridge;
-    readonly WorldFanoutSequencer _fanout = new();
+    bool _awaitFanoutBeforeCommandComplete;
+
+    static bool IsRecordingNetBridge(IWorldEventPublisher bridge)
+    {
+        for (var t = bridge.GetType(); t != null; t = t.BaseType)
+        {
+            if (t == typeof(DispatchProxy))
+                return true;
+        }
+
+        return false;
+    }
+
+    internal void AwaitTestFanoutDelivery()
+    {
+        if (_awaitFanoutBeforeCommandComplete)
+            _fanoutDispatcher.WaitUntilIdle();
+    }
+    readonly FanoutDispatcher _fanoutDispatcher = new();
+    readonly WorldFanoutSequencer _fanout;
 
     /// <summary>
     /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).

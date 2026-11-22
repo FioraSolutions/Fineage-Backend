@@ -97,12 +97,15 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, HashSet<int>? captureAfter = null)
     {
-        var before = new HashSet<int>(entity.Knownlist);
+        _reconcileBefore.Clear();
+        _reconcileBefore.UnionWith(entity.Knownlist);
+        var before = _reconcileBefore;
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
-        var after = new HashSet<int>();
+        var after = captureAfter ?? _reconcileAfter;
+        after.Clear();
         CollectVisible(entity, after);
         foreach (int id in before)
         {

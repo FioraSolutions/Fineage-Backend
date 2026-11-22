@@ -24,7 +24,8 @@ public sealed class NetOutboundQueueTests
         {
             InstrumentPublished = (instrument, l) =>
             {
-                if (instrument.Meter.Name == FineageTelemetry.MeterName && instrument.Name == "fineage.outbound.dropped")
+                if (instrument.Meter.Name == FineageTelemetry.MeterName &&
+                    instrument.Name is "fineage.outbound.dropped" or "fineage.outbound.reliable_overflow")
                     l.EnableMeasurementEvents(instrument);
             }
         };

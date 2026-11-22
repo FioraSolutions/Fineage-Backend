@@ -80,7 +80,8 @@ public static class MetricsText
 {
     public static readonly double[] DurationBoundsMs =
     [
-        0.5, 1, 2, 5, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 650, 800, 1000, 1500, 2000, 3000
+        0.5, 1, 2, 5, 10, 20, 25, 40, 50, 60, 80, 100, 120, 150, 180, 200, 220, 250, 300, 400, 500, 650, 750, 800,
+        1000, 1500, 2000, 3000, 5000, 10000
     ];
 
     public static TrafficTotals Totals(MetricsSnapshot snapshot)

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -194,8 +195,38 @@ namespace Fineage.Net.Contract
 
         public static async Task WriteAsync(Stream stream, PacketEnvelope envelope, CancellationToken ct)
         {
-            byte[] frame = Encode(envelope);
-            await stream.WriteAsync(frame, ct).ConfigureAwait(false);
+            await WriteManyAsync(stream, [envelope], ct).ConfigureAwait(false);
+        }
+
+        public static async Task WriteManyAsync(Stream stream, IReadOnlyList<PacketEnvelope> envelopes, CancellationToken ct)
+        {
+            if (envelopes.Count == 0)
+                return;
+            if (envelopes.Count == 1)
+            {
+                byte[] frame = Encode(envelopes[0]);
+                await stream.WriteAsync(frame, ct).ConfigureAwait(false);
+                await stream.FlushAsync(ct).ConfigureAwait(false);
+                return;
+            }
+
+            int totalBytes = 0;
+            var frames = new byte[envelopes.Count][];
+            for (int i = 0; i < envelopes.Count; i++)
+            {
+                frames[i] = Encode(envelopes[i]);
+                totalBytes += frames[i].Length;
+            }
+
+            var batch = new byte[totalBytes];
+            int offset = 0;
+            for (int i = 0; i < frames.Length; i++)
+            {
+                Buffer.BlockCopy(frames[i], 0, batch, offset, frames[i].Length);
+                offset += frames[i].Length;
+            }
+
+            await stream.WriteAsync(batch, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
         }
 

@@ -40,7 +40,7 @@ public sealed partial class ZoneWorld
         using var commandScope = _syncIo.CommandScope();
         bool applied = false;
         long dequeueStart = Stopwatch.GetTimestamp();
-        var queued = _ingress.TakeQueued();
+        var queued = _ingress.TakeQueued(ZoneSimulationSettings.CommandApplyBudget);
         RecordCommandPhase(PhaseDequeue, dequeueStart);
 
         long applyStart = Stopwatch.GetTimestamp();
@@ -68,7 +68,10 @@ public sealed partial class ZoneWorld
             double oneMs = Stopwatch.GetElapsedTime(oneStart).TotalMilliseconds;
             string name = submission.Command.Name;
             applyMsByCommand[name] = applyMsByCommand.GetValueOrDefault(name) + oneMs;
-            FineageTelemetry.CommandApplyMilliseconds.Record(oneMs, new KeyValuePair<string, object?>("command", name));
+            FineageTelemetry.CommandApplyMilliseconds.Record(oneMs,
+                new KeyValuePair<string, object?>("command", name));
+            FineageTelemetry.CommandTimelineMilliseconds.Record(oneMs,
+                new KeyValuePair<string, object?>("phase", "dequeue_to_apply"));
 
             if (submission.Command.Logged)
                 _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,

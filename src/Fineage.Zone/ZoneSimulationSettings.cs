@@ -68,6 +68,12 @@ public static class ZoneSimulationSettings
         return workers;
     }
 
+    /// <summary>
+    /// Per-step command apply budget in deterministic cost units (<c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET</c>, default
+    /// 48). Zero means unlimited.
+    /// </summary>
+    public static int CommandApplyBudget => ReadInt("FINEAGE_ZONE_COMMAND_APPLY_BUDGET", 48, min: 0, max: 10_000);
+
     public static IRegionExecutor RegionExecutor(int workers) =>
         workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);
 

@@ -125,6 +125,7 @@ public sealed partial class ZoneWorld
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
         RunStep(now => _simulationTicks.RunNow(_abnormalsStage, now));
+        _fanoutDispatcher.WaitUntilIdle();
         return Task.CompletedTask;
     }
 

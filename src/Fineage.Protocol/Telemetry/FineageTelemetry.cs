@@ -37,6 +37,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundDropped =
         Meter.CreateCounter<long>("fineage.outbound.dropped", description: "Frames dropped because a session outbound queue was full");
 
+    public static readonly Counter<long> OutboundReliableOverflow =
+        Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
+
     public static readonly Counter<long> PacketsRejected =
         Meter.CreateCounter<long>("fineage.packets.rejected", description: "Packets refused before normal handling (rate limit, unknown opcode, wrong port)");
 
@@ -87,6 +90,58 @@ public static class FineageTelemetry
 
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
+
+    public static readonly Histogram<double> TickStepFanoutDrainMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.step.fanout_drain.ms", unit: "ms",
+            description: "Wall time to deliver one sealed world fan-out batch");
+
+    public static readonly Histogram<double> CommandToMailboxesMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command_to_mailboxes.ms", unit: "ms",
+            description: "Command apply commit to first outbound mailbox enqueue for that batch");
+
+    public static readonly Histogram<double> CommandTimelineMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.timeline.ms", unit: "ms",
+            description: "Command lifecycle segment duration (tag phase)");
+
+    public static readonly Histogram<int> FanoutQueueDepth =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.depth", unit: "{batch}",
+            description: "Sealed fan-out batches waiting on the dispatcher worker");
+
+    public static readonly Histogram<double> FanoutQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest batch still waiting on the fan-out dispatcher");
+
+    public static readonly Histogram<double> FanoutBatchProcessMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.batch_process.ms", unit: "ms",
+            description: "Dispatcher worker time to execute one sealed batch");
+
+    public static readonly Histogram<int> FanoutEventsPerBatch =
+        Meter.CreateHistogram<int>("fineage.fanout.events_per_batch", unit: "{event}",
+            description: "Send actions executed per sealed batch");
+
+    public static readonly Counter<long> FanoutQueueOverflow =
+        Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
+            description: "Sealed fan-out batches rejected because the dispatcher is closed or shutting down");
+
+    public static readonly Histogram<double> SocketWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",
+            description: "TCP socket write duration for one outbound frame batch (tag endpoint)");
+
+    public static readonly Histogram<int> SocketWriteBytes =
+        Meter.CreateHistogram<int>("fineage.socket_write.bytes", unit: "By",
+            description: "Bytes written in one socket write (tag endpoint)");
+
+    public static readonly Histogram<int> SocketWriteFrames =
+        Meter.CreateHistogram<int>("fineage.socket_write.frames", unit: "{frame}",
+            description: "Frames combined in one socket write (tag endpoint)");
+
+    public static readonly Histogram<int> CommandQueueDepth =
+        Meter.CreateHistogram<int>("fineage.command.queue.depth", unit: "{command}",
+            description: "Queued commands per ingress class (tag class)");
+
+    public static readonly Histogram<double> CommandQueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
+            description: "Time a command waited in ingress before apply (tag class)");
 
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
