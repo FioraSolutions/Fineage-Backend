@@ -191,6 +191,12 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.persist.pending":
                     _persistPending = value;
                     break;
+                case "fineage.socket_write.bytes":
+                    Row(EndpointOf(tags)).SocketWriteBytes.Record(value);
+                    break;
+                case "fineage.socket_write.frames":
+                    Row(EndpointOf(tags)).SocketWriteFrames.Record(value);
+                    break;
             }
         }
     }
@@ -256,6 +262,21 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.enter.bytes":
                     _enterBytes.Record(value);
+                    break;
+                case "fineage.tick.step.fanout_drain.ms":
+                    _tickStepFanoutDrain.Record(value);
+                    break;
+                case "fineage.command_to_mailboxes.ms":
+                    _commandToMailboxes.Record(value);
+                    break;
+                case "fineage.fanout.batch_process.ms":
+                    _fanoutBatchProcess.Record(value);
+                    break;
+                case "fineage.fanout.queue.oldest_age.ms":
+                    _fanoutQueueAge.Record(value);
+                    break;
+                case "fineage.socket_write.ms":
+                    Row(EndpointOf(tags)).SocketWriteMs.Record(value);
                     break;
             }
         }
@@ -351,6 +372,9 @@ public sealed class MetricsCollector : IDisposable
         public long ConnectionsRejected;
         public long OutboundDropped;
         public DurationHistogram Handler { get; } = new();
+        public DurationHistogram SocketWriteMs { get; } = new();
+        public BoundedCountHistogram SocketWriteBytes { get; } = new(MetricsText.SocketWriteByteBounds);
+        public BoundedCountHistogram SocketWriteFrames { get; } = new(MetricsText.SocketWriteFrameBounds);
 
         public EndpointMetrics Freeze(string endpoint) => new()
         {
@@ -364,7 +388,10 @@ public sealed class MetricsCollector : IDisposable
             PacketsErrored = PacketsErrored,
             ConnectionsRejected = ConnectionsRejected,
             OutboundDropped = OutboundDropped,
-            Handler = Handler.Freeze()
+            Handler = Handler.Freeze(),
+            SocketWriteMs = SocketWriteMs.Freeze(),
+            SocketWriteBytes = SocketWriteBytes.Freeze(),
+            SocketWriteFrames = SocketWriteFrames.Freeze()
         };
     }
 
@@ -394,6 +421,45 @@ public sealed class MetricsCollector : IDisposable
             _sum += value;
             _count++;
             double[] bounds = MetricsText.DurationBoundsMs;
+            int index = bounds.Length;
+            for (int i = 0; i < bounds.Length; i++)
+            {
+                if (value <= bounds[i])
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            _buckets[index]++;
+        }
+
+        public HistogramMetrics Freeze()
+        {
+            var cumulative = new long[_buckets.Length];
+            long running = 0;
+            for (int i = 0; i < _buckets.Length; i++)
+            {
+                running += _buckets[i];
+                cumulative[i] = running;
+            }
+
+            return new HistogramMetrics { Sum = _sum, Count = _count, CumulativeBuckets = cumulative };
+        }
+    }
+
+    sealed class BoundedCountHistogram(double[] bounds)
+    {
+        readonly long[] _buckets = new long[bounds.Length + 1];
+        double _sum;
+        long _count;
+
+        public void Record(int value)
+        {
+            if (value < 0)
+                return;
+            _sum += value;
+            _count++;
             int index = bounds.Length;
             for (int i = 0; i < bounds.Length; i++)
             {

@@ -4,7 +4,14 @@ using Fineage.Protocol.Telemetry;
 
 namespace Fineage.LoadTest.Metrics;
 
-public sealed record HistogramStats(double Sum, long Count, double Mean, double P50, double P99);
+public sealed record HistogramStats(
+    double Sum,
+    long Count,
+    double Mean,
+    double P50,
+    double P95,
+    double P99,
+    double Max);
 
 public sealed class PrometheusSample
 {
@@ -40,8 +47,10 @@ public static class PrometheusParser
 {
     static readonly double[] Bounds = MetricsText.DurationBoundsMs;
 
-    public static PrometheusSample Parse(string text)
+    public static PrometheusSample Parse(string text, DateTimeOffset scrapedAt = default)
     {
+        if (scrapedAt == default)
+            scrapedAt = DateTimeOffset.UtcNow;
         var buckets = new SortedDictionary<double, long>();
         long tickCount = ParseLong(text, "fineage_tick_ms_count");
         double tickSum = ParseDouble(text, "fineage_tick_ms_sum");
@@ -55,11 +64,11 @@ public static class PrometheusParser
 
         return new PrometheusSample
         {
-            ScrapedAt = DateTimeOffset.UtcNow,
+            ScrapedAt = scrapedAt,
             TickP50 = Quantile(buckets, tickCount, 0.50),
             TickP95 = Quantile(buckets, tickCount, 0.95),
             TickP99 = Quantile(buckets, tickCount, 0.99),
-            TickMax = EstimateMax(buckets, tickSum, tickCount),
+            TickMax = MaxFromHistogram(buckets, tickCount, tickSum),
             StepFanoutDrainP99Ms = ParseSingletonHistogram(text, "fineage_tick_step_fanout_drain_ms")?.P99 ?? 0,
             CommandToMailboxesP99Ms = ParseSingletonHistogram(text, "fineage_command_to_mailboxes_ms")?.P99
                 ?? ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
@@ -132,18 +141,112 @@ public static class PrometheusParser
     {
         if (count <= 0)
             return 0;
-        long rank = (long)Math.Ceiling(q * count);
-        foreach (var (le, cum) in cumulative)
-        {
-            if (cum >= rank)
-                return double.IsPositiveInfinity(le) ? Bounds[^1] : le;
-        }
-
-        return 0;
+        ToBoundsAndCumulative(cumulative, out var bounds, out var cum);
+        return HistogramMath.Quantile(bounds, cum, count, q);
     }
 
-    static double EstimateMax(SortedDictionary<double, long> cumulative, double sum, long count) =>
-        count > 0 ? Math.Max(sum / count * 4, Quantile(cumulative, count, 0.99)) : 0;
+    static double MaxFromHistogram(SortedDictionary<double, long> cumulative, long count, double sum)
+    {
+        if (count <= 0)
+            return 0;
+        ToBoundsAndCumulative(cumulative, out var bounds, out var cum);
+        double fromBuckets = HistogramMath.MaxEstimate(bounds, cum, count);
+        double mean = sum / count;
+        return Math.Max(fromBuckets, mean);
+    }
+
+    static void ToBoundsAndCumulative(SortedDictionary<double, long> cumulative, out List<double> bounds, out List<long> cum)
+    {
+        bounds = [];
+        cum = [];
+        foreach (var (le, c) in cumulative)
+        {
+            if (double.IsPositiveInfinity(le))
+                break;
+            bounds.Add(le);
+            cum.Add(c);
+        }
+    }
+
+    public static HistogramStats? HistogramDelta(string beforeText, string afterText, string metric) =>
+        HistogramDeltaAggregateLabeled(beforeText, afterText, metric);
+
+    public static HistogramStats? HistogramDeltaAggregateLabeled(string beforeText, string afterText, string metric)
+    {
+        var labelSets = new HashSet<string>(StringComparer.Ordinal);
+        string countPattern = $@"^{Regex.Escape(metric)}_count(?:\{{([^}}]+)\}})?\s+(\d+)";
+        foreach (Match match in Regex.Matches(afterText, countPattern, RegexOptions.Multiline))
+            labelSets.Add(match.Groups[1].Success ? match.Groups[1].Value : "");
+
+        if (labelSets.Count == 0)
+            return null;
+
+        var merged = new SortedDictionary<double, long>();
+        long totalCount = 0;
+        double totalSum = 0;
+        foreach (string labels in labelSets)
+        {
+            var before = ParseHistogramBuckets(beforeText, metric, labels);
+            var after = ParseHistogramBuckets(afterText, metric, labels);
+            if (before is not { } b || after is not { } a)
+                continue;
+            if (!HistogramMath.TryDelta(b.Buckets, a.Buckets, out var delta))
+                continue;
+            long count = HistogramMath.DeltaCount(delta);
+            if (count <= 0)
+                continue;
+            totalCount += count;
+            totalSum += HistogramMath.DeltaSum(a.Sum, b.Sum);
+            foreach (var (le, n) in delta)
+                merged[le] = merged.GetValueOrDefault(le) + n;
+        }
+
+        if (totalCount <= 0)
+            return null;
+        return StatsFromBuckets(merged, totalSum, totalCount);
+    }
+
+    static (SortedDictionary<double, long> Buckets, double Sum, long Count)? ParseHistogramBuckets(string text, string metric, string labels = "")
+    {
+        var buckets = new SortedDictionary<double, long>();
+        string labelPrefix = labels.Length == 0 ? "" : Regex.Escape(labels) + ",";
+        string bucketPattern = $@"^{Regex.Escape(metric)}_bucket\{{{labelPrefix}le=""([^""]+)""\}}\s+(\d+)";
+        foreach (Match match in Regex.Matches(text, bucketPattern, RegexOptions.Multiline))
+        {
+            double le = match.Groups[1].Value == "+Inf"
+                ? double.PositiveInfinity
+                : double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            buckets[le] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
+
+        string countPattern = labels.Length == 0
+            ? $@"^{Regex.Escape(metric)}_count\s+(\d+)"
+            : $@"^{Regex.Escape(metric)}_count\{{{Regex.Escape(labels)}\}}\s+(\d+)";
+        string sumPattern = labels.Length == 0
+            ? $@"^{Regex.Escape(metric)}_sum\s+([0-9.eE+\-]+)"
+            : $@"^{Regex.Escape(metric)}_sum\{{{Regex.Escape(labels)}\}}\s+([0-9.eE+\-]+)";
+        var countMatch = Regex.Match(text, countPattern, RegexOptions.Multiline);
+        var sumMatch = Regex.Match(text, sumPattern, RegexOptions.Multiline);
+        if (!countMatch.Success || buckets.Count == 0)
+            return null;
+        return (Buckets: buckets,
+            Sum: sumMatch.Success ? double.Parse(sumMatch.Groups[1].Value, CultureInfo.InvariantCulture) : 0,
+            Count: long.Parse(countMatch.Groups[1].Value, CultureInfo.InvariantCulture));
+    }
+
+    static HistogramStats StatsFromBuckets(SortedDictionary<double, long> buckets, double sum, long count)
+    {
+        ToBoundsAndCumulative(buckets, out var bounds, out var cum);
+        double mean = count > 0 ? sum / count : 0;
+        return new HistogramStats(
+            sum,
+            count,
+            mean,
+            HistogramMath.Quantile(bounds, cum, count, 0.50),
+            HistogramMath.Quantile(bounds, cum, count, 0.95),
+            HistogramMath.Quantile(bounds, cum, count, 0.99),
+            HistogramMath.MaxEstimate(bounds, cum, count));
+    }
 
     static long ParseLong(string text, string metric)
     {
@@ -290,6 +393,6 @@ public static class PrometheusParser
             return null;
         long count = long.Parse(countMatch.Groups[1].Value, CultureInfo.InvariantCulture);
         double sum = sumMatch.Success ? double.Parse(sumMatch.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
-        return new HistogramStats(sum, count, count > 0 ? sum / count : 0, Quantile(buckets, count, 0.50), Quantile(buckets, count, 0.99));
+        return StatsFromBuckets(buckets, sum, count);
     }
 }

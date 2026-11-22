@@ -120,6 +120,10 @@ public static class HonestLoadSummaryBuilder
                 var socketWrites = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_socket_write_ms");
                 var framesPerWrite = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_socket_write_frames");
                 long fanoutDropped = PrometheusParser.CounterDeltaSum(rawScrapes[first], rawScrapes[last], "fineage_fanout_dropped_total");
+                if (isSteady && socketWrites == null)
+                    errors.Add("steady_socket_write_histogram_delta_unavailable");
+                if (isSteady && framesPerWrite == null)
+                    errors.Add("steady_socket_write_frames_histogram_delta_unavailable");
 
                 if (tick != null)
                 {

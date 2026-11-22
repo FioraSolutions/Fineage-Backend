@@ -37,6 +37,9 @@ public sealed class EndpointMetrics
     public long ConnectionsRejected { get; init; }
     public long OutboundDropped { get; init; }
     public HistogramMetrics Handler { get; init; } = new();
+    public HistogramMetrics SocketWriteMs { get; init; } = new();
+    public HistogramMetrics SocketWriteBytes { get; init; } = new();
+    public HistogramMetrics SocketWriteFrames { get; init; } = new();
 }
 
 public sealed class StageMetrics
@@ -88,6 +91,12 @@ public static class MetricsText
         0.5, 1, 2, 5, 10, 20, 25, 40, 50, 60, 80, 100, 120, 150, 180, 200, 220, 250, 300, 400, 500, 650, 750, 800,
         1000, 1500, 2000, 3000, 5000, 10000
     ];
+
+    public static readonly double[] SocketWriteFrameBounds =
+        [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 24, 32, 48, 64];
+
+    public static readonly double[] SocketWriteByteBounds =
+        [128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536];
 
     public static TrafficTotals Totals(MetricsSnapshot snapshot)
     {
@@ -191,10 +200,26 @@ public static class MetricsText
         sb.Append("# TYPE fineage_packets_per_second gauge\n");
         sb.Append("fineage_packets_per_second{direction=\"in\"} ").Append(Num(inPacketsPerSecond)).Append('\n');
         sb.Append("fineage_packets_per_second{direction=\"out\"} ").Append(Num(outPacketsPerSecond)).Append('\n');
-        AppendHistogram(sb, "fineage_handler_ms", "Packet handler duration", snapshot.Endpoints);
+        AppendHistogram(sb, "fineage_handler_ms", "Packet handler duration", snapshot.Endpoints, static e => e.Handler, DurationBoundsMs);
+        AppendHistogram(sb, "fineage_socket_write_ms", "TCP socket write duration for one outbound frame batch",
+            snapshot.Endpoints, static e => e.SocketWriteMs, DurationBoundsMs);
+        AppendHistogram(sb, "fineage_socket_write_bytes", "Bytes written in one socket write",
+            snapshot.Endpoints, static e => e.SocketWriteBytes, SocketWriteByteBounds);
+        AppendHistogram(sb, "fineage_socket_write_frames", "Frames combined in one socket write",
+            snapshot.Endpoints, static e => e.SocketWriteFrames, SocketWriteFrameBounds);
         AppendHelp(sb, "fineage_tick_ms", "Zone simulation tick duration");
         sb.Append("# TYPE fineage_tick_ms histogram\n");
-        AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick);
+        AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick, DurationBoundsMs);
+        AppendSingletonHistogram(sb, "fineage_tick_step_fanout_drain_ms",
+            "Fan-out batch execution duration on the dispatcher worker", snapshot.TickStepFanoutDrain);
+        AppendSingletonHistogram(sb, "fineage_command_to_mailboxes_ms",
+            "Command commit to first outbound mailbox enqueue in a fan-out batch", snapshot.CommandToMailboxes);
+        AppendSingletonHistogram(sb, "fineage_fanout_batch_process_ms",
+            "Wall time to execute one sealed fan-out batch on the dispatcher worker", snapshot.FanoutBatchProcess);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_oldest_age_ms",
+            "Age of the oldest batch waiting in the fan-out dispatcher queue", snapshot.FanoutQueueOldestAge);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
+            "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -283,16 +308,37 @@ public static class MetricsText
                 .Append(value(endpoint).ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
-    static void AppendHistogram(StringBuilder sb, string name, string help, IReadOnlyList<EndpointMetrics> endpoints)
+    static void AppendHistogram(
+        StringBuilder sb,
+        string name,
+        string help,
+        IReadOnlyList<EndpointMetrics> endpoints,
+        Func<EndpointMetrics, HistogramMetrics> histogram,
+        double[] bounds)
     {
         if (!HasEndpoint(endpoints))
+            return;
+        bool any = false;
+        foreach (EndpointMetrics endpoint in endpoints)
+        {
+            if (histogram(endpoint).Count > 0)
+            {
+                any = true;
+                break;
+            }
+        }
+
+        if (!any)
             return;
         AppendHelp(sb, name, help);
         sb.Append("# TYPE ").Append(name).Append(" histogram\n");
         foreach (EndpointMetrics endpoint in endpoints)
         {
+            HistogramMetrics h = histogram(endpoint);
+            if (h.Count == 0)
+                continue;
             string labels = "endpoint=\"" + Escape(endpoint.Endpoint) + "\"";
-            AppendHistogramSamples(sb, name, labels, endpoint.Handler);
+            AppendHistogramSamples(sb, name, labels, h, bounds);
         }
     }
 
@@ -317,7 +363,7 @@ public static class MetricsText
             return;
         AppendHelp(sb, name, help);
         sb.Append("# TYPE ").Append(name).Append(" histogram\n");
-        AppendHistogramSamples(sb, name, "", histogram);
+        AppendHistogramSamples(sb, name, "", histogram, DurationBoundsMs);
     }
 
     static void AppendLabeledStageHistograms(
@@ -342,7 +388,7 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_stage_ms", "Zone simulation stage duration");
         sb.Append("# TYPE fineage_tick_stage_ms histogram\n");
         foreach (StageMetrics stage in stages)
-            AppendHistogramSamples(sb, "fineage_tick_stage_ms", "stage=\"" + Escape(stage.Stage) + "\"", stage.Duration);
+            AppendHistogramSamples(sb, "fineage_tick_stage_ms", "stage=\"" + Escape(stage.Stage) + "\"", stage.Duration, DurationBoundsMs);
         AppendHelp(sb, "fineage_tick_stage_failures_total", "Simulation stage or region bodies that threw");
         sb.Append("# TYPE fineage_tick_stage_failures_total counter\n");
         foreach (StageMetrics stage in stages)
@@ -350,20 +396,20 @@ public static class MetricsText
                 .Append(stage.Failures.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
-    static void AppendHistogramSamples(StringBuilder sb, string name, string labels, HistogramMetrics histogram)
+    static void AppendHistogramSamples(StringBuilder sb, string name, string labels, HistogramMetrics histogram, double[] bounds)
     {
         long[] buckets = histogram.CumulativeBuckets;
-        for (int i = 0; i < DurationBoundsMs.Length; i++)
+        for (int i = 0; i < bounds.Length; i++)
         {
             long cumulative = i < buckets.Length ? buckets[i] : 0;
             sb.Append(name).Append("_bucket{");
             if (labels.Length > 0)
                 sb.Append(labels).Append(',');
-            sb.Append("le=\"").Append(DurationBoundsMs[i].ToString("0.###", CultureInfo.InvariantCulture)).Append("\"} ")
+            sb.Append("le=\"").Append(bounds[i].ToString("0.###", CultureInfo.InvariantCulture)).Append("\"} ")
                 .Append(cumulative.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }
 
-        long inf = buckets.Length > DurationBoundsMs.Length ? buckets[DurationBoundsMs.Length] : (buckets.Length > 0 ? buckets[^1] : 0);
+        long inf = buckets.Length > bounds.Length ? buckets[bounds.Length] : (buckets.Length > 0 ? buckets[^1] : 0);
         sb.Append(name).Append("_bucket{");
         if (labels.Length > 0)
             sb.Append(labels).Append(',');
