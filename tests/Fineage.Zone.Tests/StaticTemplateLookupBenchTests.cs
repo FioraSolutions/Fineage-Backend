@@ -149,6 +149,7 @@ public sealed class StaticTemplateLookupBenchTests(ITestOutputHelper output)
     {
         for (int i = 0; i < 2; i++)
             build();
+        PinAllocationBaseline();
         var sw = new Stopwatch();
         long start = GC.GetAllocatedBytesForCurrentThread();
         sw.Restart();
@@ -159,6 +160,13 @@ public sealed class StaticTemplateLookupBenchTests(ITestOutputHelper output)
         return new Sample(bytes / BuildRepeats, sw.Elapsed.TotalNanoseconds / BuildRepeats);
     }
 
+    static void PinAllocationBaseline()
+    {
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+        GC.WaitForPendingFinalizers();
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+    }
+
     static Sample MeasureLookup(int[] keys, Func<int, bool> lookup)
     {
         for (int i = 0; i < 4; i++)
@@ -166,6 +174,8 @@ public sealed class StaticTemplateLookupBenchTests(ITestOutputHelper output)
             for (int k = 0; k < keys.Length; k++)
                 lookup(keys[k]);
         }
+
+        PinAllocationBaseline();
 
         int hits = 0;
         var sw = new Stopwatch();
