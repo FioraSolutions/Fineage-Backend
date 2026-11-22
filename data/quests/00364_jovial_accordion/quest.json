@@ -313,6 +313,18 @@
         }
       ],
       "htmlFile": "30959-event-30957-02-022.htm"
+    },
+    {
+      "npcId": 30060,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30060-talk-023.htm"
+    },
+    {
+      "npcId": 30075,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30075-talk-024.htm"
     }
   ]
 }

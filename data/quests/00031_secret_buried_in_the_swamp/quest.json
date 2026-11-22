@@ -166,6 +166,30 @@
         }
       ],
       "htmlFile": "31555-event-31555-08-015.htm"
+    },
+    {
+      "npcId": 31661,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31661-talk-016.htm"
+    },
+    {
+      "npcId": 31662,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31662-talk-017.htm"
+    },
+    {
+      "npcId": 31663,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31663-talk-018.htm"
+    },
+    {
+      "npcId": 31664,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31664-talk-019.htm"
     }
   ]
 }

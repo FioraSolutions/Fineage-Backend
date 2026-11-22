@@ -39,7 +39,7 @@ def sync_register_quest_items(quest: dict, src: str, consts: dict[str, int]) -> 
     for m in re.finditer(r"registerQuestItems\s*\(([^)]+)\)", src):
         for tok in re.findall(r"[A-Z0-9_]+|\d+", m.group(1)):
             iid = resolve_item(tok, consts)
-            if iid is not None and iid not in seen:
+            if iid is not None and iid not in seen and iid in known_items():
                 items.append(iid)
                 seen.add(iid)
     quest["questItems"] = items
