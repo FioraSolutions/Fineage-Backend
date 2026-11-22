@@ -65,6 +65,11 @@ public sealed class MetricsSnapshot
     public HistogramMetrics EnterKnownPlayers { get; init; } = new();
     public HistogramMetrics EnterFrames { get; init; } = new();
     public HistogramMetrics EnterBytes { get; init; } = new();
+    public HistogramMetrics TickStepFanoutDrain { get; init; } = new();
+    public HistogramMetrics CommandToMailboxes { get; init; } = new();
+    public HistogramMetrics FanoutBatchProcess { get; init; } = new();
+    public HistogramMetrics FanoutQueueOldestAge { get; init; } = new();
+    public HistogramMetrics FanoutQueueDepth { get; init; } = new();
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }

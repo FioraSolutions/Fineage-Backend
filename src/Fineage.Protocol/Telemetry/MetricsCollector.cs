@@ -19,6 +19,11 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _enterKnownPlayers = new();
     readonly DurationHistogram _enterFrames = new();
     readonly DurationHistogram _enterBytes = new();
+    readonly DurationHistogram _tickStepFanoutDrain = new();
+    readonly DurationHistogram _commandToMailboxes = new();
+    readonly DurationHistogram _fanoutBatchProcess = new();
+    readonly DurationHistogram _fanoutQueueAge = new();
+    readonly DurationHistogram _fanoutQueueDepth = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
@@ -77,6 +82,11 @@ public sealed class MetricsCollector : IDisposable
                 EnterKnownPlayers = _enterKnownPlayers.Freeze(),
                 EnterFrames = _enterFrames.Freeze(),
                 EnterBytes = _enterBytes.Freeze(),
+                TickStepFanoutDrain = _tickStepFanoutDrain.Freeze(),
+                CommandToMailboxes = _commandToMailboxes.Freeze(),
+                FanoutBatchProcess = _fanoutBatchProcess.Freeze(),
+                FanoutQueueOldestAge = _fanoutQueueAge.Freeze(),
+                FanoutQueueDepth = _fanoutQueueDepth.Freeze(),
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
