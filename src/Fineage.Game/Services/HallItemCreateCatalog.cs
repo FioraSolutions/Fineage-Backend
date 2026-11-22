@@ -20,19 +20,19 @@ public sealed class HallItemCreateCatalog
 
     public IReadOnlyList<MultiSellListDefinition> Lists { get; }
 
-    public static readonly HallItemCreateCatalog Empty = new([]);
-
     public static HallItemCreateCatalog LoadDefault()
     {
-        var path = TeleportCatalog.FindFile(FileName);
-        return path == null ? Empty : Parse(File.ReadAllText(path));
+        var path = TeleportCatalog.FindFile(FileName)
+            ?? throw new FileNotFoundException($"Could not find data/{FileName}.");
+        return Parse(File.ReadAllText(path), path);
     }
 
-    public static HallItemCreateCatalog Parse(string json)
+    public static HallItemCreateCatalog Parse(string json, string source = FileName)
     {
-        var file = JsonSerializer.Deserialize<FileDto>(json, JsonOptions);
-        if (file?.Lists == null || file.Lists.Count == 0)
-            return Empty;
+        var file = JsonSerializer.Deserialize<FileDto>(json, JsonOptions)
+            ?? throw new InvalidDataException($"{source} is empty.");
+        if (file.Lists == null || file.Lists.Count == 0)
+            throw new InvalidDataException($"{source} has no clan hall item-creation lists.");
 
         var lists = new List<MultiSellListDefinition>();
         foreach (var row in file.Lists)

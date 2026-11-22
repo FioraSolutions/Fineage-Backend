@@ -188,7 +188,10 @@ public sealed partial class ZoneWorld
             return PledgeProtocol.BadArgument;
         int listId = HallFunctionProtocol.ItemCreateListId(hall.Id, fn.Level);
         if (!_multisells.TryGet(listId, out _))
+        {
+            ZoneLog.Info($"[hall-item-create] missing multisell list id={listId} hall={hall.Id} level={fn.Level} file=data/{HallItemCreateCatalog.FileName}");
             return PledgeProtocol.Conditions;
+        }
         return OpenMultiSell(session, player, npc, listId, inventoryOnly: false);
     }
 
@@ -373,7 +376,19 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    bool PlayerInsideHallArea(int hallId, int x, int y) => HallAtPosition(x, y) == hallId;
+    /// <summary>Player is inside a hall when they are within <see cref="HallDoorAreaRadius"/> of one of that hall's doors.</summary>
+    internal const int HallDoorAreaRadius = 1200;
+
+    bool PlayerInsideHallArea(int hallId, int x, int y)
+    {
+        foreach (var door in Doors.ForClanHall(hallId))
+        {
+            if (ZoneCombat.Within(x, y, door.X, door.Y, HallDoorAreaRadius))
+                return true;
+        }
+
+        return false;
+    }
 
     void SyncHallRegenForClan(ZoneClan clan)
     {

@@ -27,15 +27,17 @@ public sealed partial class ZoneWorld
 
     int HallAtPosition(int x, int y)
     {
-        const int radius = 1200;
         int found = 0;
         long best = long.MaxValue;
-        foreach (var door in Doors.All.Where(d => d.ClanHallId > 0))
+        long limit = (long)HallDoorAreaRadius * HallDoorAreaRadius;
+        foreach (var door in Doors.All)
         {
+            if (door.ClanHallId <= 0)
+                continue;
             long dx = door.X - x;
             long dy = door.Y - y;
             long dist = dx * dx + dy * dy;
-            if (dist > (long)radius * radius || dist >= best)
+            if (dist > limit || dist >= best)
                 continue;
             best = dist;
             found = door.ClanHallId;
@@ -44,25 +46,36 @@ public sealed partial class ZoneWorld
         return found;
     }
 
-    AgitDecoInfoNetMsg BuildAgitDecoInfo(ClanHallSave hall)
+    bool TryBuildAgitDecoInfo(ClanHallSave hall, out AgitDecoInfoNetMsg deco)
     {
-        HallCatalog.TryGet(hall.Id, out var info);
-        return new AgitDecoInfoNetMsg
+        if (!HallCatalog.TryGet(hall.Id, out var info))
+        {
+            ZoneLog.Info($"[agit-deco] clan hall id={hall.Id} missing from data/clan-halls.json");
+            deco = null!;
+            return false;
+        }
+
+        deco = new AgitDecoInfoNetMsg
         {
             HallId = hall.Id,
-            DecoBytes = Clan.AgitDecoInfo.Encode(hall, info?.Grade ?? 0)
+            DecoBytes = Clan.AgitDecoInfo.Encode(hall, info.Grade)
         };
+        return true;
     }
 
-    void SendAgitDecoInfo(ZoneSession session, ClanHallSave hall) =>
-        NetBridge?.FanoutAgitDecoInfo([session.ObjectId], BuildAgitDecoInfo(hall));
+    void SendAgitDecoInfo(ZoneSession session, ClanHallSave hall)
+    {
+        if (NetBridge == null || !TryBuildAgitDecoInfo(hall, out var deco))
+            return;
+        NetBridge.FanoutAgitDecoInfo([session.ObjectId], deco);
+    }
 
     void BroadcastAgitDecoInHall(ClanHallSave hall)
     {
         var watchers = PlayersInsideHall(hall.Id);
-        if (watchers.Count == 0 || NetBridge == null)
+        if (watchers.Count == 0 || NetBridge == null || !TryBuildAgitDecoInfo(hall, out var deco))
             return;
-        NetBridge.FanoutAgitDecoInfo(watchers, BuildAgitDecoInfo(hall));
+        NetBridge.FanoutAgitDecoInfo(watchers, deco);
     }
 
     List<int> PlayersInsideHall(int hallId)

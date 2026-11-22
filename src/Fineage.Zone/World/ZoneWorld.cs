@@ -329,10 +329,9 @@ public sealed partial class ZoneWorld
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
         _serviceRandom = Streams(serviceRandom, RandomPurpose.Service);
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
-        var baseMultisells = multisells ?? MultiSellCatalog.LoadDefault();
-        _multisells = multisells != null
-            ? baseMultisells
-            : HallItemCreateCatalog.MergeInto(baseMultisells, HallItemCreateCatalog.LoadDefault());
+        _multisells = HallItemCreateCatalog.MergeInto(
+            multisells ?? MultiSellCatalog.LoadDefault(),
+            HallItemCreateCatalog.LoadDefault());
         _shopStock = new ShopStock(_buyLists);
         ILedgerJournal journal = ledgerJournal
             ?? (accounts != null

@@ -22,6 +22,7 @@
     <Content Include="..\..\data\pledge-skills.json" Link="data\pledge-skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-halls.json" Link="data\clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-hall-functions.json" Link="data\clan-hall-functions.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\clan-hall-item-create.json" Link="data\clan-hall-item-create.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-hall-spawns.json" Link="data\clan-hall-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\siegable-clan-halls.json" Link="data\siegable-clan-halls.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\castles.json" Link="data\castles.json" CopyToOutputDirectory="PreserveNewest" />
