@@ -46765,6 +46765,15 @@
       "weight": 30
     },
     {
+      "id": 5232,
+      "name": "White Fabric",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 5233,
       "name": "Keshanberk*Keshanberk",
       "kind": "weapon",
