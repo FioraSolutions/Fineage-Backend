@@ -122,6 +122,9 @@ public static class NpcServiceIntent
     /// <summary>Mobius <c>Teleporter showNoblesSelect</c>: nobles_select.htm for a noble, not_nobles.htm otherwise.</summary>
     public const string NoblesSelect = "nobles-select";
 
+    /// <summary>Interlude village master <c>RequestNobless</c> (Q247 gate; Mobius CT0 has no Java handler).</summary>
+    public const string RequestNobless = "request-nobless";
+
     /// <summary>Mobius <c>OlympiadManager</c> <c>OlympiadDesc</c> / <c>OlympiadNoble</c> / <c>Olympiad</c> (Block G2).</summary>
     public const string Olympiad = "olympiad";
 

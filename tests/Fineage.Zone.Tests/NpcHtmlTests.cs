@@ -131,6 +131,7 @@ public sealed class NpcHtmlTests
         Assert.Equal("OTHER", registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceArg);
         Assert.Equal(0, registry.Find("teleport OTHER 0")!.Handle(call with { Command = "teleport OTHER 0" }).ServiceId);
         Assert.Equal(NpcServiceIntent.NoblesSelect, registry.Find("showNoblesSelect")!.Handle(call with { Command = "showNoblesSelect" }).Service);
+        Assert.Equal(NpcServiceIntent.RequestNobless, registry.Find("RequestNobless")!.Handle(call with { Command = "RequestNobless" }).Service);
         var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
         Assert.Equal(3, exchange.MultiSellListId);
         Assert.True(exchange.MultiSellInventoryOnly);
