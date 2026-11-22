@@ -110,7 +110,7 @@
       "htmlFile": "30842-event-30842-03-012.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31520,
       "hook": "event",
       "when": "absent",
       "event": "31520-02",
@@ -128,7 +128,7 @@
       "htmlFile": "30842-event-31520-02-013.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31521,
       "hook": "event",
       "when": "absent",
       "event": "31521-02",
@@ -146,7 +146,7 @@
       "htmlFile": "30842-event-31521-02-014.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31627,
       "hook": "event",
       "when": "absent",
       "event": "31627-02",
@@ -156,7 +156,7 @@
       "htmlFile": "30842-event-31627-02-015.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31521,
       "hook": "event",
       "when": "absent",
       "event": "31521-05",
@@ -174,7 +174,7 @@
       "htmlFile": "30842-event-31521-05-016.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31520,
       "hook": "event",
       "when": "absent",
       "event": "31520-05",
@@ -184,7 +184,7 @@
       "htmlFile": "30842-event-31520-05-017.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31520,
       "hook": "event",
       "when": "absent",
       "event": "31520-08",
@@ -196,14 +196,19 @@
       "htmlFile": "30842-event-31520-08-018.htm"
     },
     {
-      "npcId": 30842,
+      "npcId": 31520,
       "hook": "event",
       "when": "absent",
       "event": "31520-12",
       "lacksItems": [
         7113
       ],
-      "htmlFile": "30842-event-31520-12-019.htm"
+      "htmlFile": "30842-event-31520-12-019.htm",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ]
     }
   ]
 }

@@ -80,7 +80,7 @@
       "htmlFile": "31540-event-31540-05-007.htm"
     },
     {
-      "npcId": 31540,
+      "npcId": 31271,
       "hook": "event",
       "when": "absent",
       "event": "31271-02",
@@ -93,7 +93,7 @@
       "htmlFile": "31540-event-31271-02-008.htm"
     },
     {
-      "npcId": 31540,
+      "npcId": 31271,
       "hook": "event",
       "when": "absent",
       "event": "31271-05",

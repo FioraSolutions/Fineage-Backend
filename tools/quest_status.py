@@ -122,7 +122,7 @@ def parse_mobius(path: str) -> dict:
         features.append("timers")
     if re.search(r"setClassId|setBaseClass|changeClass", src):
         features.append("class change")
-    if "teleToLocation" in src:
+    if re.search(r"player\.teleToLocation", src):
         features.append("teleport")
     if re.search(r"getRandomPartyMember|getParty\(\)", src):
         features.append("party")
@@ -236,7 +236,7 @@ def main() -> None:
                     notes.append(f"no kill: {len(miss_kill)}/{len(mo['kill'])} mobs")
                 if "complete" not in pk["ops"] and not pk["repeatable"]:
                     notes.append("no completion")
-                if "spawns" in mo["features"] and "spawn_npc" not in pk["ops"]:
+                if "spawns" in mo["features"] and "spawn_npc" not in pk["ops"] and "summon" not in pk["ops"]:
                     notes.append("quest spawns missing")
                 if "class change" in mo["features"]:
                     notes.append("class change missing")

@@ -50,6 +50,40 @@
         }
       ],
       "htmlFile": "31328-event-31328-09-002.htm"
+    },
+    {
+      "npcId": 22138,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8068,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 22175,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8068,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

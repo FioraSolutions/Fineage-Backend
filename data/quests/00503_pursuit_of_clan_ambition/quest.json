@@ -32,6 +32,24 @@
         {
           "op": "set_cond",
           "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 30759,
+          "x": 160665,
+          "y": 21209,
+          "z": -3710,
+          "despawnSec": 300,
+          "owned": true
+        },
+        {
+          "op": "summon",
+          "npcId": 30758,
+          "x": 160665,
+          "y": 21291,
+          "z": -3710,
+          "despawnSec": 300,
+          "owned": true
         }
       ],
       "htmlFile": "30760-event-30760-08-001.htm"

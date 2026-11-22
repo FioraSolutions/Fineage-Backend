@@ -57,11 +57,20 @@ def parse_int_consts(src: str) -> dict[str, int]:
     return out
 
 
-def resolve_ids(tok: str, consts: dict[str, int]) -> list[int]:
+def parse_int_arrays(src: str) -> dict[str, list[int]]:
+    out: dict[str, list[int]] = {}
+    for m in re.finditer(r"int\[\]\s+([A-Z0-9_]+)\s*=\s*\{([^}]*)\}", src):
+        out[m.group(1)] = [int(x) for x in re.findall(r"\b\d{4,6}\b", m.group(2))]
+    return out
+
+
+def resolve_ids(tok: str, consts: dict[str, int], arrays: dict[str, list[int]] | None = None) -> list[int]:
     if tok.isdigit():
         return [int(tok)]
     if tok in consts:
         return [consts[tok]]
+    if arrays and tok in arrays:
+        return list(arrays[tok])
     return []
 
 
@@ -69,8 +78,15 @@ def mobius_kill_ids(script: str) -> list[int]:
     src = mobius_java(script)
     consts = parse_int_consts(src)
     ids: set[int] = set()
+    for m in re.finditer(r"addKillId\s*\(\s*(\w+)\.keySet\s*\(\s*\)\s*\)", src):
+        map_name = m.group(1)
+        for put in re.finditer(rf"{re.escape(map_name)}\.put\(\s*(\d+)", src):
+            ids.add(int(put.group(1)))
     for m in re.finditer(r"addKillId\s*\(([^)]*)\)", src):
-        for tok in re.split(r"[,\s]+", m.group(1).strip()):
+        arg = m.group(1).strip()
+        if ".keySet()" in arg:
+            continue
+        for tok in re.split(r"[,\s]+", arg):
             if not tok or tok == "DROP.keySet()":
                 continue
             for i in resolve_ids(tok, consts):
@@ -79,17 +95,24 @@ def mobius_kill_ids(script: str) -> list[int]:
     for m in re.finditer(r"for\s*\(\s*int\s+id\s*=\s*(\d+)\s*;\s*id\s*<=\s*(\d+)", src):
         lo, hi = int(m.group(1)), int(m.group(2))
         ids.update(range(lo, hi + 1))
+    java_path = QROOT / script / f"{script}.java"
+    if java_path.is_file():
+        sys.path.insert(0, str(ROOT / "tools"))
+        from quest_status import parse_mobius
+
+        ids.update(parse_mobius(str(java_path))["kill"])
     return sorted(ids)
 
 
 def mobius_talk_ids(script: str) -> list[int]:
     src = mobius_java(script)
     consts = parse_int_consts(src)
+    arrays = parse_int_arrays(src)
     ids: set[int] = set()
     for fn in ("addStartNpc", "addTalkId"):
         for m in re.finditer(fn + r"\s*\(([^)]*)\)", src):
             for tok in re.split(r"[,\s]+", m.group(1).strip()):
-                for i in resolve_ids(tok, consts):
+                for i in resolve_ids(tok, consts, arrays):
                     if i >= 30000 or i < 18000:
                         ids.add(i)
     return sorted(ids)

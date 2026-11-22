@@ -635,21 +635,21 @@
       "htmlFile": "30864-event-30864-25-052.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 31001,
       "hook": "event",
       "when": "absent",
       "event": "31001-02",
       "htmlFile": "30864-event-31001-02-053.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 30144,
       "hook": "event",
       "when": "absent",
       "event": "30144-02",
       "htmlFile": "30864-event-30144-02-054.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 30645,
       "hook": "event",
       "when": "absent",
       "event": "30645-02",
@@ -675,6 +675,27 @@
         {
           "op": "set_cond",
           "cond": 2
+        },
+        {
+          "op": "summon",
+          "npcId": 27184,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27182,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27183,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30864-event-30864-04-056.htm"

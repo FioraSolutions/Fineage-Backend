@@ -45,6 +45,23 @@ def sync_register_quest_items(quest: dict, src: str, consts: dict[str, int]) -> 
     quest["questItems"] = items
 
 
+def parse_item_chance_maps(src: str, consts: dict[str, int]) -> tuple[dict[int, tuple[int, float, int]], str | None]:
+    """MOBS.put(mob, new ItemChanceHolder(ITEM, chance, limit))."""
+    rates: dict[int, tuple[int, float, int]] = {}
+    item_id: int | None = None
+    for m in re.finditer(
+        r"\w+\.put\(\s*(\d+)\s*,\s*new\s+ItemChanceHolder\(\s*([A-Z0-9_]+|\d+)\s*,\s*([\d.]+)\s*,\s*(\d+)",
+        src,
+    ):
+        mob = int(m.group(1))
+        iid = resolve_item(m.group(2), consts)
+        if iid is None:
+            continue
+        rates[mob] = (iid, float(m.group(3)), int(m.group(4)))
+        item_id = iid
+    return rates, item_id
+
+
 def parse_mob_drop_tables(src: str, consts: dict[str, int]) -> tuple[dict[int, float], str | None]:
     item_name = None
     m = re.search(r"giveItemRandomly\s*\([^,]+,\s*[^,]+,\s*([A-Z0-9_]+)", extract_on_kill(src))
@@ -245,8 +262,27 @@ def wire_quest(qid: int, dry_run: bool = False) -> str:
     missing = sorted(want - have)
     if not missing:
         return f"{qid}: no missing kill ids"
+    chance_map, map_item = parse_item_chance_maps(src, consts)
+    if chance_map:
+        body = extract_on_kill(src)
+        cond = 1
+        m = re.search(r"getRandomPartyMemberState\s*\(\s*\w+\s*,\s*(-?\d+)\s*,\s*(\d+)", body)
+        if m:
+            cond = int(m.group(2)) if int(m.group(1)) < 0 else int(m.group(1))
+        party = bool(re.search(r"getRandomPartyMember", body))
+        rows = []
+        for npc in missing:
+            if npc not in chance_map:
+                rows.append({"npcId": npc, "hook": "kill", "when": "started", "cond": cond, "html": "", "ops": []})
+                continue
+            iid, chance, limit = chance_map[npc]
+            op = drop_ops(iid, chance, limit)
+            row = {"npcId": npc, "hook": "kill", "when": "started", "cond": cond, "html": "", "ops": op}
+            if party:
+                row["party"] = True
+            rows.append(row)
     rates, table_item = parse_mob_drop_tables(src, consts)
-    if rates and table_item and table_item.isdigit():
+    if not chance_map and rates and table_item and table_item.isdigit():
         body = extract_on_kill(src)
         cond = 1
         m = re.search(r"getRandomPartyMemberState\s*\(\s*\w+\s*,\s*(-?\d+)\s*,\s*(\d+)", body)
@@ -254,7 +290,7 @@ def wire_quest(qid: int, dry_run: bool = False) -> str:
             cond = int(m.group(2)) if int(m.group(1)) < 0 else int(m.group(1))
         party = bool(re.search(r"getRandomPartyMember", body))
         rows = kill_rows_per_mob(missing, rates, int(table_item), cond, party)
-    else:
+    elif not chance_map:
         profile = parse_kill_profile(script)
         if profile is None:
             rows = [

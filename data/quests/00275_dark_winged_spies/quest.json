@@ -58,6 +58,13 @@
         {
           "op": "set_cond",
           "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 27043,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30567-event-30567-03-003.htm"
