@@ -12,20 +12,22 @@ namespace Fineage.Zone.World;
 /// Policy, applied uniformly (not per call site):
 /// <list type="bullet">
 /// <item>One queue per (domain, owner id). Different kinds stay in enqueue order. A newer snapshot of the
-/// same kind replaces an older one that has not started writing (coalesce). In-flight writes are not replaced.</item>
-/// <item>A store <c>false</c> is a refusal: logged once, not retried, not reported as success.</item>
-/// <item>A thrown write is retried up to <see cref="MaxAttempts"/> (delays 0 / 20 / 80 / 200 ms). Each attempt
-/// logs the exception. If a newer same-kind snapshot arrived, the failed one is coalesced and the newer one is
-/// written instead. After the last attempt the snapshot is dropped and logged; nothing is substituted.</item>
+/// same kind replaces an older one that has not started writing (coalesce). In-flight writes are not replaced.
+/// Memory stays bounded: at most one pending snapshot per owner and kind, plus the one write in flight.</item>
+/// <item>A failed write (thrown or <c>false</c>) stays pending. The latest snapshot of that kind is retried with
+/// capped exponential backoff. Nothing is dropped. Every failure is logged with the owner id, kind, attempt and
+/// exception.</item>
+/// <item>Logout and shutdown steal the pending snapshots and write them on the caller, skipping the backoff.
+/// A failure there is logged with the id and the snapshot stays pending while the process is still up.</item>
 /// <item>Currency, items, warehouse, freight and the economy ledger do not use this worker.</item>
 /// </list>
 /// </remarks>
 sealed class CharacterPersistWorker
 {
-    public const int MaxAttempts = 4;
+    public const int RetryBaseMs = 20;
+    public const int RetryCapMs = 5_000;
     internal const string CharacterDomain = "character";
     internal const string PetDomain = "pet";
-    static readonly int[] RetryDelayMs = [0, 20, 80, 200];
 
     readonly object _gate = new();
     readonly Dictionary<(string Domain, int OwnerId), List<PersistWork>> _pending = new();
@@ -56,7 +58,31 @@ sealed class CharacterPersistWorker
         get
         {
             lock (_gate)
-                return _pendingCount;
+                return _pendingCount + _inFlight;
+        }
+    }
+
+    /// <summary>Age of the oldest snapshot that has not landed, or 0 when nothing is pending.</summary>
+    public double OldestAgeMilliseconds
+    {
+        get
+        {
+            lock (_gate)
+            {
+                long oldest = long.MaxValue;
+                if (_inFlightWork != null)
+                    oldest = _inFlightWork.EnqueuedAt;
+                foreach (var queue in _pending.Values)
+                {
+                    foreach (var work in queue)
+                    {
+                        if (work.EnqueuedAt < oldest)
+                            oldest = work.EnqueuedAt;
+                    }
+                }
+
+                return oldest == long.MaxValue ? 0 : Stopwatch.GetElapsedTime(oldest).TotalMilliseconds;
+            }
         }
     }
 
@@ -64,6 +90,8 @@ sealed class CharacterPersistWorker
 
     public void Start()
     {
+        FineageTelemetry.PersistPendingCount = () => PendingCount;
+        FineageTelemetry.PersistOldestAgeMs = () => OldestAgeMilliseconds;
         if (_store == null)
             return;
         lock (_gate)
@@ -80,10 +108,13 @@ sealed class CharacterPersistWorker
         }
     }
 
-    /// <summary>Writes every queued snapshot, then stops the thread. Leftovers after <paramref name="budget"/> are logged.</summary>
-    public void Stop(TimeSpan budget)
+    /// <summary>
+    /// Writes every pending snapshot on this thread, skipping backoff, then stops the worker.
+    /// Anything still pending failed that write and is logged with its id.
+    /// </summary>
+    public void Stop()
     {
-        Drain(budget);
+        FlushSync(domain: null, ownerId: null);
         lock (_gate)
         {
             _running = 0;
@@ -92,6 +123,48 @@ sealed class CharacterPersistWorker
 
         _thread?.Join(TimeSpan.FromSeconds(2));
         _thread = null;
+        lock (_gate)
+            LogLeftoversLocked("persist shutdown left snapshot");
+    }
+
+    /// <summary>
+    /// Writes the matching snapshots on the caller, including ones still inside their backoff. A failure is logged
+    /// and the latest snapshot stays pending. <paramref name="domain"/> null matches every domain;
+    /// <paramref name="ownerId"/> null matches every owner in that domain.
+    /// </summary>
+    public bool FlushSync(string? domain, int? ownerId)
+    {
+        List<PersistWork> batch;
+        lock (_gate)
+        {
+            while (InFlightMatches(domain, ownerId))
+                Monitor.Wait(_gate, 50);
+            batch = StealMatchingLocked(domain, ownerId);
+        }
+
+        bool ok = true;
+        foreach (var work in batch)
+        {
+            if (ApplyOnce(work))
+            {
+                lock (_gate)
+                    NoteEpochLocked(work);
+                continue;
+            }
+
+            ok = false;
+            if (HasNewerSameKind(work))
+            {
+                _warn(
+                    $"persist snapshot coalesced after failure domain={work.Domain} character={work.OwnerId} kind={work.Kind} attempt={work.Attempts}");
+                FineageTelemetry.PersistSnapshots.Add(1, Result("coalesced"));
+                continue;
+            }
+
+            RequeueFront(work);
+        }
+
+        return ok;
     }
 
     public void Enqueue(string domain, int ownerId, string kind, string account, Func<IAccountStore, bool> apply)
@@ -103,6 +176,7 @@ sealed class CharacterPersistWorker
         lock (_gate)
         {
             work.Version = _nextVersion++;
+            work.EnqueuedAt = Stopwatch.GetTimestamp();
             var key = (domain, ownerId);
             if (!_pending.TryGetValue(key, out var queue))
             {
@@ -180,7 +254,7 @@ sealed class CharacterPersistWorker
         return true;
     }
 
-    /// <summary>How many of this owner's snapshots have finished (written, refused, or dropped).</summary>
+    /// <summary>How many of this owner's snapshots have been written.</summary>
     public long OwnerEpoch(string domain, int ownerId)
     {
         lock (_gate)
@@ -238,13 +312,13 @@ sealed class CharacterPersistWorker
             {
                 while (Volatile.Read(ref _paused) == 1 && _running == 1)
                     Monitor.Wait(_gate, 50);
+                if (_running == 0)
+                    break;
 
-                work = TakeOldestLocked();
+                work = TakeReadyLocked(out int waitMs);
                 if (work == null)
                 {
-                    if (_running == 0)
-                        break;
-                    Monitor.Wait(_gate, 50);
+                    Monitor.Wait(_gate, waitMs);
                     continue;
                 }
 
@@ -252,17 +326,23 @@ sealed class CharacterPersistWorker
                 _inFlightWork = work;
             }
 
+            bool landed = false;
             try
             {
-                Write(work);
+                landed = ApplyOnce(work);
+                if (landed)
+                {
+                    lock (_gate)
+                        NoteEpochLocked(work);
+                }
+                else
+                    RequeueFront(work);
             }
             finally
             {
                 lock (_gate)
                 {
                     _inFlight--;
-                    if (work != null)
-                        NoteEpochLocked(work);
                     _inFlightWork = null;
                     Monitor.PulseAll(_gate);
                 }
@@ -270,15 +350,24 @@ sealed class CharacterPersistWorker
         }
     }
 
-    PersistWork? TakeOldestLocked()
+    PersistWork? TakeReadyLocked(out int waitMs)
     {
+        long now = Stopwatch.GetTimestamp();
         (string Domain, int OwnerId) bestKey = default;
         PersistWork? best = null;
+        long soonest = long.MaxValue;
         foreach (var (key, queue) in _pending)
         {
             if (queue.Count == 0)
                 continue;
             var head = queue[0];
+            if (head.NotBefore > now)
+            {
+                if (head.NotBefore < soonest)
+                    soonest = head.NotBefore;
+                continue;
+            }
+
             if (best == null || head.Version < best.Version)
             {
                 best = head;
@@ -287,7 +376,12 @@ sealed class CharacterPersistWorker
         }
 
         if (best == null)
+        {
+            waitMs = soonest == long.MaxValue ? 250 : WaitMilliseconds(soonest);
             return null;
+        }
+
+        waitMs = 0;
         var queueOf = _pending[bestKey];
         queueOf.RemoveAt(0);
         _pendingCount--;
@@ -296,57 +390,95 @@ sealed class CharacterPersistWorker
         return best;
     }
 
-    void Write(PersistWork work)
+    bool ApplyOnce(PersistWork work)
     {
         if (_store == null)
-            return;
-        Exception? last = null;
-        for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+            return false;
+        work.Attempts++;
+        try
         {
-            if (attempt > 1)
+            long started = Stopwatch.GetTimestamp();
+            LastWriterThreadId = Environment.CurrentManagedThreadId;
+            bool accepted = work.Apply(_store);
+            FineageTelemetry.StageMilliseconds.Record(
+                Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                new KeyValuePair<string, object?>("stage", "persist.snapshot"));
+            if (!accepted)
             {
-                if (HasNewerSameKind(work))
-                {
-                    _warn(
-                        $"persist snapshot coalesced after failure domain={work.Domain} owner={work.OwnerId} kind={work.Kind} account={work.Account} version={work.Version}: {last!.GetType().Name}: {last.Message}");
-                    FineageTelemetry.PersistSnapshots.Add(1, Result("coalesced"));
-                    return;
-                }
-
-                Thread.Sleep(RetryDelayMs[attempt - 1]);
+                LogFailure(work, "store returned false");
+                return false;
             }
 
-            try
-            {
-                long started = Stopwatch.GetTimestamp();
-                LastWriterThreadId = Environment.CurrentManagedThreadId;
-                bool accepted = work.Apply(_store);
-                FineageTelemetry.StageMilliseconds.Record(
-                    Stopwatch.GetElapsedTime(started).TotalMilliseconds,
-                    new KeyValuePair<string, object?>("stage", "persist.snapshot"));
-                if (!accepted)
-                {
-                    _warn(
-                        $"persist snapshot refused domain={work.Domain} owner={work.OwnerId} kind={work.Kind} account={work.Account} version={work.Version}: store returned false");
-                    FineageTelemetry.PersistSnapshots.Add(1, Result("refused"));
-                    return;
-                }
+            FineageTelemetry.PersistSnapshots.Add(1, Result("written"));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogFailure(work, $"{ex.GetType().Name}: {ex.Message}");
+            return false;
+        }
+    }
 
-                FineageTelemetry.PersistSnapshots.Add(1, Result("written"));
+    void RequeueFront(PersistWork work)
+    {
+        int delay = RetryDelayMs(work.Attempts);
+        lock (_gate)
+        {
+            if (QueueHasNewerLocked(work))
+            {
+                _warn(
+                    $"persist snapshot coalesced after failure domain={work.Domain} character={work.OwnerId} kind={work.Kind} attempt={work.Attempts}");
+                FineageTelemetry.PersistSnapshots.Add(1, Result("coalesced"));
                 return;
             }
-            catch (Exception ex)
+
+            work.NotBefore = Stopwatch.GetTimestamp() + (long)(delay / 1000d * Stopwatch.Frequency);
+            var key = (work.Domain, work.OwnerId);
+            if (!_pending.TryGetValue(key, out var queue))
             {
-                last = ex;
-                _warn(
-                    $"persist snapshot failed domain={work.Domain} owner={work.OwnerId} kind={work.Kind} account={work.Account} version={work.Version} attempt={attempt}/{MaxAttempts}: {ex.GetType().Name}: {ex.Message}");
+                queue = [];
+                _pending.Add(key, queue);
             }
+
+            queue.Insert(0, work);
+            _pendingCount++;
+            Monitor.PulseAll(_gate);
+        }
+    }
+
+    bool QueueHasNewerLocked(PersistWork work)
+    {
+        if (!_pending.TryGetValue((work.Domain, work.OwnerId), out var queue))
+            return false;
+        foreach (var queued in queue)
+        {
+            if (queued.Kind == work.Kind && queued.Version > work.Version)
+                return true;
         }
 
-        _error(
-            $"persist snapshot dropped domain={work.Domain} owner={work.OwnerId} kind={work.Kind} account={work.Account} version={work.Version} after {MaxAttempts} attempts: {last!.GetType().Name}: {last.Message}");
-        FineageTelemetry.PersistSnapshots.Add(1, Result("failed"));
+        return false;
     }
+
+    static int RetryDelayMs(int attempts)
+    {
+        int shift = Math.Min(Math.Max(attempts - 1, 0), 16);
+        long delay = (long)RetryBaseMs << shift;
+        return delay > RetryCapMs ? RetryCapMs : (int)delay;
+    }
+
+    static int WaitMilliseconds(long notBefore)
+    {
+        double ms = -Stopwatch.GetElapsedTime(notBefore).TotalMilliseconds;
+        if (ms < 1)
+            return 1;
+        if (ms > 250)
+            return 250;
+        return (int)ms;
+    }
+
+    void LogFailure(PersistWork work, string reason) =>
+        _error(
+            $"persist snapshot failed domain={work.Domain} character={work.OwnerId} kind={work.Kind} attempt={work.Attempts}: {reason}");
 
     bool HasNewerSameKind(PersistWork work)
     {
@@ -390,18 +522,55 @@ sealed class CharacterPersistWorker
     bool InFlightIs((string Domain, int OwnerId) key) =>
         _inFlightWork != null && _inFlightWork.Domain == key.Domain && _inFlightWork.OwnerId == key.OwnerId;
 
+    bool InFlightMatches(string? domain, int? ownerId)
+    {
+        var work = _inFlightWork;
+        if (work == null)
+            return false;
+        if (domain != null && work.Domain != domain)
+            return false;
+        return ownerId == null || work.OwnerId == ownerId;
+    }
+
+    List<PersistWork> StealMatchingLocked(string? domain, int? ownerId)
+    {
+        var batch = new List<PersistWork>();
+        var empty = new List<(string Domain, int OwnerId)>();
+        foreach (var (key, queue) in _pending)
+        {
+            if (domain != null && key.Domain != domain)
+                continue;
+            if (ownerId != null && key.OwnerId != ownerId)
+                continue;
+            for (int i = queue.Count - 1; i >= 0; i--)
+            {
+                batch.Add(queue[i]);
+                queue.RemoveAt(i);
+                _pendingCount--;
+            }
+
+            if (queue.Count == 0)
+                empty.Add(key);
+        }
+
+        foreach (var key in empty)
+            _pending.Remove(key);
+        batch.Sort(static (a, b) => a.Version.CompareTo(b.Version));
+        return batch;
+    }
+
     void LogLeftoversLocked(string reason)
     {
         foreach (var (key, queue) in _pending)
         {
             foreach (var work in queue)
                 _error(
-                    $"{reason} domain={key.Domain} owner={key.OwnerId} kind={work.Kind} account={work.Account} version={work.Version}");
+                    $"{reason} domain={key.Domain} character={key.OwnerId} kind={work.Kind} attempt={work.Attempts}");
         }
 
         if (_inFlightWork != null)
             _error(
-                $"{reason} in-flight domain={_inFlightWork.Domain} owner={_inFlightWork.OwnerId} kind={_inFlightWork.Kind} account={_inFlightWork.Account} version={_inFlightWork.Version}");
+                $"{reason} in-flight domain={_inFlightWork.Domain} character={_inFlightWork.OwnerId} kind={_inFlightWork.Kind} attempt={_inFlightWork.Attempts}");
     }
 
     static KeyValuePair<string, object?> Result(string result) => new("result", result);
@@ -413,6 +582,9 @@ sealed class CharacterPersistWorker
         public string Kind { get; } = kind;
         public string Account { get; } = account;
         public long Version { get; set; }
+        public int Attempts { get; set; }
+        public long EnqueuedAt { get; set; }
+        public long NotBefore { get; set; }
         public Func<IAccountStore, bool> Apply { get; } = apply;
     }
 }

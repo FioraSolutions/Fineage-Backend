@@ -118,7 +118,7 @@ public sealed partial class ZoneWorld
         finally
         {
             ShutdownSaveOnlinePlayers();
-            _snapshots.Stop(TimeSpan.FromSeconds(5));
+            _snapshots.Stop();
             FlushLedgerOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }

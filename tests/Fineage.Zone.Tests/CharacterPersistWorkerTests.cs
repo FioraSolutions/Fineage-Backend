@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using Fineage.Accounts;
 using Fineage.Game.Economy;
@@ -31,7 +32,7 @@ public sealed class CharacterPersistWorkerTests
 
         worker.ResumeForTests();
         worker.Drain(TimeSpan.FromSeconds(5));
-        worker.Stop(TimeSpan.FromSeconds(2));
+        worker.Stop();
 
         var saved = store.FindById(created.Account, created.Id);
         Assert.Equal(7, saved!.X);
@@ -58,7 +59,7 @@ public sealed class CharacterPersistWorkerTests
 
         worker.ResumeForTests();
         worker.Drain(TimeSpan.FromSeconds(5));
-        worker.Stop(TimeSpan.FromSeconds(2));
+        worker.Stop();
 
         var saved = store.FindById(created.Account, created.Id)!;
         Assert.Equal(4, saved.Level);
@@ -68,28 +69,65 @@ public sealed class CharacterPersistWorkerTests
     }
 
     [Fact]
-    public void A_failed_snapshot_is_retried_then_dropped_with_the_exception()
+    public void A_failed_snapshot_stays_pending_and_the_recovered_store_matches_the_latest()
     {
         var store = MemoryAccountStore.InMemory();
         var created = Character(store, "cara", "Cara");
-        var flaky = FlakyPresenceStore.Wrap(store, CharacterPersistWorker.MaxAttempts);
-        var warnings = new List<string>();
+        var flaky = FlakyPresenceStore.Wrap(store, failures: int.MaxValue);
         var errors = new List<string>();
-        var worker = new CharacterPersistWorker(flaky.Proxy, warnings.Add, errors.Add);
+        var worker = new CharacterPersistWorker(flaky.Proxy, errors.Add, errors.Add);
         var persist = new ZoneCharacterPersist(flaky.Proxy, worker);
         worker.Start();
 
-        persist.SavePresence(created.Account, created.Id, 3, 4, 5, null);
-        worker.Drain(TimeSpan.FromSeconds(5));
-        worker.Stop(TimeSpan.FromSeconds(2));
+        persist.SavePresence(created.Account, created.Id, 1, 2, 3, null);
+        var until = Stopwatch.GetTimestamp() + Stopwatch.Frequency * 2;
+        while (flaky.Attempts < 1 && Stopwatch.GetTimestamp() < until)
+            Thread.Sleep(5);
+        Assert.True(flaky.Attempts >= 1, "the store failure was not attempted");
 
-        Assert.Equal(CharacterPersistWorker.MaxAttempts, flaky.Attempts);
-        Assert.Equal(CharacterPersistWorker.MaxAttempts, warnings.Count);
-        Assert.Contains(warnings, line => line.Contains("presence update failed: disk full", StringComparison.Ordinal));
+        persist.SavePresence(created.Account, created.Id, 7, 8, 9, null);
+        flaky.FailuresLeft = 0;
+        Assert.True(worker.Drain(TimeSpan.FromSeconds(5)));
+        worker.Stop();
+
+        var saved = store.FindById(created.Account, created.Id);
+        Assert.Equal(7, saved!.X);
+        Assert.Equal(8, saved.Y);
+        Assert.Equal(9, saved.Z);
         Assert.Contains(errors, line =>
-            line.Contains("dropped", StringComparison.Ordinal)
-            && line.Contains("presence update failed: disk full", StringComparison.Ordinal));
-        Assert.NotEqual(3, store.FindById(created.Account, created.Id)!.X);
+            line.Contains($"character={created.Id}", StringComparison.Ordinal)
+            && line.Contains("kind=SavePresence", StringComparison.Ordinal)
+            && line.Contains("attempt=1", StringComparison.Ordinal)
+            && line.Contains("IOException: presence update failed: disk full", StringComparison.Ordinal));
+        Assert.DoesNotContain(errors, line => line.Contains("dropped", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Pending_count_and_oldest_age_stay_visible_until_the_snapshot_lands()
+    {
+        var store = MemoryAccountStore.InMemory();
+        var created = Character(store, "dara", "Dara");
+        var worker = new CharacterPersistWorker(store);
+        var persist = new ZoneCharacterPersist(store, worker);
+        worker.Start();
+        worker.PauseForTests();
+        persist.SavePresence(created.Account, created.Id, 4, 5, 6, null);
+        Thread.Sleep(40);
+
+        Assert.Equal(1, worker.PendingCount);
+        Assert.True(worker.OldestAgeMilliseconds >= 30);
+        using var collector = new MetricsCollector();
+        var snapshot = collector.Snapshot();
+        Assert.Equal(1, snapshot.PersistPending);
+        Assert.True(snapshot.PersistOldestAgeMs >= 30);
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains("fineage_persist_pending 1\n", text, StringComparison.Ordinal);
+        Assert.Contains("fineage_persist_oldest_age_ms ", text, StringComparison.Ordinal);
+
+        worker.ResumeForTests();
+        worker.Stop();
+        Assert.Equal(4, store.FindById(created.Account, created.Id)!.X);
+        Assert.Equal(0, worker.PendingCount);
     }
 
     [Fact]

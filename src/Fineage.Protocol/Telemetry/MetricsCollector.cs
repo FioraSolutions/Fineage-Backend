@@ -26,6 +26,8 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _persistSnapshots = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
+    int _persistPending;
+    double _persistOldestAgeMs;
     int _online;
     int _commandIngressQueued;
 
@@ -78,6 +80,8 @@ public sealed class MetricsCollector : IDisposable
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 LedgerFlushFailures = _ledgerFlushFailures,
+                PersistPending = _persistPending,
+                PersistOldestAgeMs = _persistOldestAgeMs,
                 PersistSnapshots = _persistSnapshots
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
@@ -168,6 +172,9 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.command.ingress.queued":
                     _commandIngressQueued = value;
                     break;
+                case "fineage.persist.pending":
+                    _persistPending = value;
+                    break;
             }
         }
     }
@@ -180,6 +187,9 @@ public sealed class MetricsCollector : IDisposable
         {
             switch (instrument.Name)
             {
+                case "fineage.persist.oldest_age_ms":
+                    _persistOldestAgeMs = value;
+                    break;
                 case "fineage.handler.ms":
                     Row(EndpointOf(tags)).Handler.Record(value);
                     break;

@@ -79,6 +79,11 @@ public sealed partial class ZoneWorld
         _snapshots.DrainOwner(CharacterPersistWorker.CharacterDomain, objectId, TimeSpan.FromSeconds(2))
         && _snapshots.DrainDomain(CharacterPersistWorker.PetDomain, TimeSpan.FromSeconds(2));
 
+    /// <summary>Logout / evict: write this character and any pet snapshots on the caller. Failures stay queued.</summary>
+    bool FlushCharacterSnapshots(int objectId) =>
+        _snapshots.FlushSync(CharacterPersistWorker.CharacterDomain, objectId)
+        && _snapshots.FlushSync(CharacterPersistWorker.PetDomain, ownerId: null);
+
     bool CharacterStoreMoved(int objectId, long characterEpoch, long petEpoch) =>
         _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, objectId) != characterEpoch
         || _snapshots.HasPending(CharacterPersistWorker.CharacterDomain, objectId)
@@ -132,7 +137,7 @@ public sealed partial class ZoneWorld
 
     internal void DrainCharacterSnapshotsForTests() => _snapshots.Drain(TimeSpan.FromSeconds(5));
 
-    internal void StopCharacterSnapshotsForTests() => _snapshots.Stop(TimeSpan.FromSeconds(5));
+    internal void StopCharacterSnapshotsForTests() => _snapshots.Stop();
 
     internal int CharacterSnapshotWriterThreadForTests => _snapshots.LastWriterThreadId;
 

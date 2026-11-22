@@ -68,6 +68,8 @@ public sealed class MetricsSnapshot
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
+    public int PersistPending { get; init; }
+    public double PersistOldestAgeMs { get; init; }
     public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
@@ -224,6 +226,12 @@ public static class MetricsText
         AppendHelp(sb, "fineage_command_ingress_queued", "Player commands waiting for the next simulation drain");
         sb.Append("# TYPE fineage_command_ingress_queued gauge\n");
         sb.Append("fineage_command_ingress_queued ").Append(snapshot.CommandIngressQueued.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_persist_pending", "Character and pet snapshots waiting to be written, including the one in flight");
+        sb.Append("# TYPE fineage_persist_pending gauge\n");
+        sb.Append("fineage_persist_pending ").Append(snapshot.PersistPending.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_persist_oldest_age_ms", "Age of the oldest character or pet snapshot that has not been written");
+        sb.Append("# TYPE fineage_persist_oldest_age_ms gauge\n");
+        sb.Append("fineage_persist_oldest_age_ms ").Append(Num(snapshot.PersistOldestAgeMs)).Append('\n');
         return sb.ToString();
     }
 

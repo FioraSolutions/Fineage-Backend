@@ -109,9 +109,34 @@ public static class FineageTelemetry
     public static readonly Counter<long> LedgerFlushFailures =
         Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
 
-    /// <summary>Non-economic character snapshots. Tag <c>result</c> is written, coalesced, refused, or failed.</summary>
+    /// <summary>Non-economic character snapshots. Tag <c>result</c> is written or coalesced.</summary>
     public static readonly Counter<long> PersistSnapshots =
         Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");
+
+    public static readonly ObservableGauge<int> PersistPending = Meter.CreateObservableGauge(
+        "fineage.persist.pending",
+        ObservePersistPending,
+        unit: "{snapshot}",
+        description: "Character and pet snapshots waiting to be written, including the one in flight");
+
+    public static readonly ObservableGauge<double> PersistOldestAge = Meter.CreateObservableGauge(
+        "fineage.persist.oldest_age_ms",
+        ObservePersistOldestAge,
+        unit: "ms",
+        description: "Age of the oldest character or pet snapshot that has not been written");
+
+    public static Func<int>? PersistPendingCount { get; set; }
+    public static Func<double>? PersistOldestAgeMs { get; set; }
+
+    static IEnumerable<Measurement<int>> ObservePersistPending()
+    {
+        yield return new Measurement<int>(PersistPendingCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<double>> ObservePersistOldestAge()
+    {
+        yield return new Measurement<double>(PersistOldestAgeMs?.Invoke() ?? 0);
+    }
 
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",

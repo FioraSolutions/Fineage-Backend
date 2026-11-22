@@ -85,7 +85,7 @@ public sealed partial class ZoneWorld
             foreach (var snapshot in entered.Evicted)
                 PersistUnlinkSnapshot(snapshot);
             foreach (var snapshot in entered.Evicted)
-                DrainCharacterSnapshots(snapshot.Session.ObjectId);
+                FlushCharacterSnapshots(snapshot.Session.ObjectId);
         }
 
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
@@ -136,9 +136,9 @@ public sealed partial class ZoneWorld
             return projection;
 
         PersistUnlinkSnapshot(snapshot.Value);
-        // The worker owns non-economic writes. This wait is on the leave caller, not the simulation thread,
-        // so a following enter reads the position, vitals and quests that just left the world.
-        DrainCharacterSnapshots(session.ObjectId);
+        // Logout writes the pending snapshots on this caller, skipping backoff, so the leave does not return
+        // while they are still only queued. A failure is logged with the character id and stays pending.
+        FlushCharacterSnapshots(session.ObjectId);
 
         _sevenSigns.Engine.Save();
         _bosses.Schedule.Save();
