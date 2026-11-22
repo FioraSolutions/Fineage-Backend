@@ -91,18 +91,25 @@ public sealed class ZoneRandomWalkTests
         var mob = new SpawnNpcDefinition(
             id, 20001, "Gremlin", player.X + 50_000, player.Y, player.Z, 0,
             true, 80, 80f, 40f, 30, 0, NpcType: "Monster", Level: 1);
+        var clock = new MutableClock { Now = ManualSimulationDriver.FixedStartUtc };
         var world = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["far"] = new("far", true, [mob])
         }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi(), combatRandom: new MobiusWalkRoll(),
+        clock: () => clock.Now,
         ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));
 
-        await world.RunCombatTickAsync(CancellationToken.None);
+        Assert.True(world.TryGetEntityById(id, out var before));
+        Assert.False(before.MoveActive);
+        var driver = new ManualSimulationDriver(world, clock);
+        driver.Step(1);
         Assert.True(world.TryGetEntityById(id, out var after));
         Assert.False(after.MoveActive);
+        Assert.Equal(before.X, after.X);
+        Assert.Equal(before.Y, after.Y);
     }
 
     [Fact]

@@ -46,17 +46,18 @@ public sealed class DayNightSpawnTests
                 ])
         });
 
-        var clock = new SteppedClock(DateTimeOffset.FromUnixTimeMilliseconds(dayMs));
+        var clock = new SteppedClock(ManualSimulationDriver.FixedStartUtc.AddMilliseconds(dayMs - refMs));
         var world = new ZoneWorld(
             spawnCatalog: catalog,
             clock: () => clock.Now,
             gameTime: gameTime,
-            spawnRandom: new Random(1));
+            spawnRandom: new Random(1),
+            allowAmbientBoats: false);
 
         Assert.Contains(DayMobId, world.NpcObjectIds);
         Assert.DoesNotContain(NightMobId, world.NpcObjectIds);
 
-        clock.Set(DateTimeOffset.FromUnixTimeMilliseconds(nightMs));
+        clock.Set(ManualSimulationDriver.FixedStartUtc.AddMilliseconds(nightMs - refMs));
         world.AdvanceSpawnsForTests();
 
         Assert.Contains(NightMobId, world.NpcObjectIds);

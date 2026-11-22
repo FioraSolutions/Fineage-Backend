@@ -27,18 +27,17 @@ public sealed partial class ZoneWorld
     {
         move.Observe(ground, holdings);
         var destroyed = LedgerAccount.Of(SystemAccount.Destroyed);
-        foreach (var (itemId, count) in holdings.Counts)
+        foreach (int itemId in holdings.Counts.Keys.Union(holdings.Instances.Values).Distinct().Order())
         {
+            long count = holdings.CountOf(itemId);
             if (count == 0)
                 continue;
-            move.Post(ground, itemId, -count);
+            var pieces = holdings.Instances.Where(pair => pair.Value == itemId).Select(pair => pair.Key).ToList();
+            if (pieces.Count != 0)
+                move.Post(ground, itemId, -count, pieces);
+            else
+                move.Post(ground, itemId, -count);
             move.Post(destroyed, itemId, count);
-        }
-
-        foreach (var (instanceId, itemId) in holdings.Instances)
-        {
-            move.Post(ground, itemId, -1, [instanceId]);
-            move.Post(destroyed, itemId, 1, [instanceId]);
         }
     }
 }
