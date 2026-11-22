@@ -30,9 +30,9 @@ public sealed class NetConnection : IAsyncDisposable
     readonly ConcurrentDictionary<CoalesceReplaceableKey, PacketEnvelope> _coalescedReplaceable = new();
     readonly object _stripeBatchLock = new();
     readonly List<PacketEnvelope> _stripeBatch = [];
+    readonly int _maxStripeBatchPending;
     int _closed;
 
-    const int StripeBatchFlushCount = 8;
     const int MaxCoalescedReplaceableEntries = 256;
 
     readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
@@ -65,6 +65,7 @@ public sealed class NetConnection : IAsyncDisposable
             SingleReader = true,
             SingleWriter = false
         });
+        _maxStripeBatchPending = Math.Max(8, outboundCapacity);
         _pump = PumpAsync();
     }
 
@@ -174,39 +175,63 @@ public sealed class NetConnection : IAsyncDisposable
     {
         lock (_stripeBatchLock)
         {
-            _stripeBatch.Add(envelope);
-            if (_stripeBatch.Count < StripeBatchFlushCount)
-                return true;
-            return FlushStripeBatchLocked();
-        }
-    }
-
-    bool FlushStripeBatchLocked()
-    {
-        bool anyAccepted = false;
-        for (int i = 0; i < _stripeBatch.Count; i++)
-        {
-            if (_outbound.Writer.TryWrite(_stripeBatch[i]))
-                anyAccepted = true;
-            else
+            if (_stripeBatch.Count >= _maxStripeBatchPending)
             {
-                NetTelemetry.ReliableOverflow(_endpoint);
-                _stripeBatch.RemoveRange(0, i);
-                return anyAccepted;
+                NetFanoutDropTelemetry.RecordStripeBatchFull(
+                    ConnectionId,
+                    _endpoint,
+                    envelope.Opcode,
+                    _stripeBatch.Count,
+                    _outbound.Reader.Count);
+                return false;
             }
+
+            _stripeBatch.Add(envelope);
         }
 
-        _stripeBatch.Clear();
-        return anyAccepted;
+        _pumpWake.Writer.TryWrite(1);
+        return true;
     }
 
-    internal void FlushStripeBatch()
+    internal void FlushStripeBatch() => WriteStripeBatchToStream(TakeStripeBatch());
+
+    List<PacketEnvelope> TakeStripeBatch()
     {
         lock (_stripeBatchLock)
         {
-            if (_stripeBatch.Count > 0)
-                FlushStripeBatchLocked();
+            if (_stripeBatch.Count == 0)
+                return [];
+            var batch = new List<PacketEnvelope>(_stripeBatch);
+            _stripeBatch.Clear();
+            return batch;
         }
+    }
+
+    void WriteStripeBatchToStream(List<PacketEnvelope> batch)
+    {
+        if (batch.Count == 0)
+            return;
+
+        long started = Stopwatch.GetTimestamp();
+        int frameBytes = batch.Sum(e => PacketEnvelope.HeaderSize + e.Payload.Length);
+        NetFraming.WriteManyAsync(_stream, batch, CancellationToken.None).GetAwaiter().GetResult();
+        RecordSocketWrite(started, frameBytes, batch.Count);
+        foreach (PacketEnvelope envelope in batch)
+            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
+    }
+
+    async Task WriteStripeBatchToStreamAsync()
+    {
+        var batch = TakeStripeBatch();
+        if (batch.Count == 0)
+            return;
+
+        long started = Stopwatch.GetTimestamp();
+        int frameBytes = batch.Sum(e => PacketEnvelope.HeaderSize + e.Payload.Length);
+        await NetFraming.WriteManyAsync(_stream, batch, CancellationToken.None).ConfigureAwait(false);
+        RecordSocketWrite(started, frameBytes, batch.Count);
+        foreach (PacketEnvelope envelope in batch)
+            NetTelemetry.FrameOut(_endpoint, envelope.Payload.Length);
     }
 
     /// <summary>
@@ -352,7 +377,7 @@ public sealed class NetConnection : IAsyncDisposable
                 {
                 }
 
-                FlushStripeBatch();
+                await WriteStripeBatchToStreamAsync().ConfigureAwait(false);
 
                 if (!_coalescedReplaceable.IsEmpty)
                     await WriteCoalescedToStreamAsync().ConfigureAwait(false);

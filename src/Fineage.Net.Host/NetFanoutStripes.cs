@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Channels;
 using Fineage.Protocol.Telemetry;
 
@@ -39,16 +40,24 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         if (Volatile.Read(ref _closed) != 0)
             return;
         int stripe = StripeIndex(handle.Connection.ConnectionId);
+        long waitStarted = Stopwatch.GetTimestamp();
         try
         {
             _stripes[stripe].Writer.WriteAsync(item, _cts.Token).AsTask().GetAwaiter().GetResult();
         }
         catch (ChannelClosedException)
         {
+            return;
         }
         catch (OperationCanceledException) when (_cts.IsCancellationRequested)
         {
+            return;
         }
+
+        double waitMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;
+        FineageTelemetry.FanoutStripeEnqueueWaitMilliseconds.Record(
+            waitMs,
+            new KeyValuePair<string, object?>("stripe", stripe));
     }
 
     int StripeIndex(ulong connectionId) => (int)(connectionId % (ulong)_stripes.Length);

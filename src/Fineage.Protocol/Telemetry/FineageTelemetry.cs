@@ -37,6 +37,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundDropped =
         Meter.CreateCounter<long>("fineage.outbound.dropped", description: "Frames dropped because a session outbound queue was full");
 
+    public static readonly Counter<long> FanoutDropped =
+        Meter.CreateCounter<long>("fineage.fanout.dropped", description: "Fanout frames dropped under stripe/outbound backpressure (tag opcode_group)");
+
     public static readonly Counter<long> OutboundReliableOverflow =
         Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
 
@@ -110,6 +113,14 @@ public static class FineageTelemetry
     public static readonly Histogram<double> FanoutQueueAgeMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
             description: "Age of the oldest batch still waiting on the fan-out dispatcher");
+
+    public static readonly Histogram<double> FanoutDispatcherEnqueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.dispatcher.enqueue_wait.ms", unit: "ms",
+            description: "Time the simulation thread blocked enqueueing a sealed fan-out batch");
+
+    public static readonly Histogram<double> FanoutStripeEnqueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.stripe.enqueue_wait.ms", unit: "ms",
+            description: "Time a stripe worker blocked enqueueing one connection fan-out frame (tag stripe)");
 
     public static readonly Histogram<double> FanoutBatchProcessMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.batch_process.ms", unit: "ms",

@@ -72,6 +72,8 @@ public sealed class MetricsSnapshot
     public double PersistOldestAgeMs { get; init; }
     public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> FanoutDropped { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
@@ -166,6 +168,20 @@ public static class MetricsText
         AppendCounter(sb, "fineage_bytes_in_total", "Inbound packet bytes, including the frame header", snapshot.Endpoints, static e => e.BytesIn);
         AppendCounter(sb, "fineage_bytes_out_total", "Outbound packet bytes, including the frame header", snapshot.Endpoints, static e => e.BytesOut);
         AppendCounter(sb, "fineage_outbound_dropped_total", "Frames dropped because a session outbound queue was full", snapshot.Endpoints, static e => e.OutboundDropped);
+        if (snapshot.FanoutDropped.Count > 0)
+        {
+            AppendHelp(sb, "fineage_fanout_dropped_total", "Fanout frames dropped under stripe/outbound backpressure");
+            sb.Append("# TYPE fineage_fanout_dropped_total counter\n");
+            foreach (KeyValuePair<string, long> pair in snapshot.FanoutDropped)
+            {
+                sb.Append("fineage_fanout_dropped_total{opcode_group=\"")
+                    .Append(Escape(pair.Key))
+                    .Append("\"} ")
+                    .Append(pair.Value.ToString(CultureInfo.InvariantCulture))
+                    .Append('\n');
+            }
+        }
+
         AppendCounter(sb, "fineage_packets_rejected_total", "Packets refused before normal handling", snapshot.Endpoints, static e => e.PacketsRejected);
         AppendCounter(sb, "fineage_packets_errored_total", "Packets that produced an error response or failed while handling", snapshot.Endpoints, static e => e.PacketsErrored);
         AppendHelp(sb, "fineage_packets_per_second", "Packet rate over the most recent summary or scrape window");

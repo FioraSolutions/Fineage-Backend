@@ -68,6 +68,7 @@ internal sealed class FanoutDispatcher : IDisposable
             return;
         }
 
+        long waitStarted = Stopwatch.GetTimestamp();
         try
         {
             _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
@@ -83,6 +84,8 @@ internal sealed class FanoutDispatcher : IDisposable
             throw RejectException(batch, "dispatcher shut down", ex);
         }
 
+        double enqueueWaitMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;
+        FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(enqueueWaitMs);
         Interlocked.Increment(ref _pending);
         FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
         if (batch.EnqueuedAtTimestamp > 0)
