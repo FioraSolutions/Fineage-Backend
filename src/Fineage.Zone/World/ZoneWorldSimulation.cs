@@ -188,6 +188,7 @@ public sealed partial class ZoneWorld
         // Every step: the former 200 ms combat loop, in its original order.
         ticks.AddRegionStage(_playerMovementStage);
         ticks.AddWorldStage("arena", _ => TickArenaZones());
+        ticks.AddWorldStage("npc.paths", TickNpcPathfindStage);
         ticks.AddRegionStage(_npcMovementStage);
         ticks.AddRegionStage(_randomWalkStage);
         ticks.AddWorldStage("pending-hits", tick => TickPendingHits(tick.NowUnixMs));

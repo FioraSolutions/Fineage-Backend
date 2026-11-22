@@ -49,8 +49,7 @@ public sealed partial class ZoneWorld
 
         if (!wasMoving)
             return;
-        long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
-        if (!e.MoveActive || dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+        if (ShouldRefreshKnownlistAfterMove(e))
             AtBarrier(() => RefreshMovingKnownlist(e, null));
     }
 
@@ -73,9 +72,16 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        if (e.Kind == ZoneEntityKind.Npc && !NpcRegionAwake(e))
+        {
+            SuspendIdleNpcMove(e);
+            return;
+        }
+
+        if (e.PathfindPending)
+            return;
         AdvanceMove(e, now);
-        long rdx = e.X - e.AoiRefreshX, rdy = e.Y - e.AoiRefreshY;
-        if (!e.MoveActive || rdx * rdx + rdy * rdy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+        if (ShouldRefreshKnownlistAfterMove(e))
             AtBarrier(() => RefreshNpcWatchers(e));
         if (e.MoveSegmentDirty)
         {

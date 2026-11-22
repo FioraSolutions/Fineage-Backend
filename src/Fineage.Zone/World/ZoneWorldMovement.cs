@@ -156,6 +156,29 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal const int AoiRefreshDistance = 250;
 
+    long AoiCellKeyAt(int x, int y) => _aoi is Interest.GridAoi grid ? grid.CellKeyAt(x, y) : 0;
+
+    /// <summary>
+    /// Grid AOI: refresh knownlist when the mover crosses a cell (Mobius region revalidate). Range AOI (tests): distance gate.
+    /// </summary>
+    bool ShouldRefreshKnownlistAfterMove(ZoneEntity e)
+    {
+        if (!e.MoveActive)
+            return true;
+        if (_aoi is Interest.GridAoi)
+            return AoiCellKeyAt(e.X, e.Y) != e.AoiRefreshCell;
+        long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
+        return dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance;
+    }
+
+    void StampKnownlistRefreshAnchor(ZoneEntity e)
+    {
+        e.AoiRefreshX = e.X;
+        e.AoiRefreshY = e.Y;
+        if (_aoi is Interest.GridAoi)
+            e.AoiRefreshCell = AoiCellKeyAt(e.X, e.Y);
+    }
+
     void TickPlayerMovement(long now)
     {
         if (_byId.CountOf(ActiveSets.Moving) == 0)
@@ -197,9 +220,7 @@ public sealed partial class ZoneWorld
             }
             if (!wasMoving)
                 continue;
-            long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
-            // Refresh on distance travelled, and once on arrival so the final position is exact.
-            if (!e.MoveActive || dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+            if (ShouldRefreshKnownlistAfterMove(e))
                 RefreshMovingKnownlist(e, null);
         }
     }

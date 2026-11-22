@@ -69,6 +69,41 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 
 **Honest caveat:** Without a classic protocol adapter, we cannot produce apples-to-apples bot RTT or tick tables against Mobius. Fineage numbers above are from the shared bot tool; Mobius remains a documented fetch/build path only for this iteration.
 
+## NPC movement hot path (Nov 22) — region sleep + deferred paths
+
+**Symptom (Debug playtest, 1 player in Giran Death Pass, ~34k NPCs):** simulation tick **260–410 ms** (budget 200 ms); **`movement.npc` 180–300 ms**; **`random-walk` ~12 ms**; **`thinking` ~2729** with **`playerRegions=9`**.
+
+**Profile / root causes:**
+
+| Cost | Before |
+| --- | --- |
+| `RefreshNpcWatchers` | Full `Players()` scan per moving NPC every **250** L2 units |
+| `AdvanceMove` | `GetHeight` every tick; `sqrt` per step; environment hooks on NPCs |
+| Inactive regions | Idle wanderers in `Moving` set still advanced every tick off-screen |
+| Pathfinding | `FindPath` inline inside `StartNpcMove` on the movement/think thread |
+| Diagnostics | `TickNpcDiagnostics` scanned all `_byId` NPCs on overrun logs |
+
+**Mobius-aligned runtime (this change):**
+
+- **`NpcRegionAwake`**: one predicate (player-active tile + neighbours, live watcher, aggro/return-home, drifted beyond 2× `MaxDriftRange`).
+- **Sleep:** `SuspendNpcRegion` stops think + idle movement (state/XY preserved); combat/chase/return-home/watched mobs stay awake.
+- **Movement registry only:** stages iterate `ActiveSets.Moving` / `Thinking`, not the full spawn table.
+- **`npc.paths` stage (before `movement.npc`):** MoveCheck on order; blocked legs enqueue A* with **48/tick budget** + LRU waypoint cache; no inline `FindPath` in `StartNpcMove`.
+- **Incremental move:** grid-cell knownlist refresh; watcher-index AOI updates; geo height only on cell change; no per-tick `Players()` scan.
+
+**`ZoneHuntingMovementPerfTests` (full enabled maps, player at Death Pass, 300 samples after 120-step warm-up):**
+
+| Configuration | Tick p50 | Tick p99 | `movement.npc` p50 | `movement.npc` p99 | `random-walk` p99 | NPCs |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Debug** (primary gate) | 6.6 ms | **7.8 ms** | 0.05 ms | **0.10 ms** | 0.65 ms | 34 133 |
+| **Release** (secondary) | 3.4 ms | **5.7 ms** | 0.05 ms | **0.11 ms** | 0.49 ms | 34 133 |
+
+Debug budgets enforced in CI perf job: tick p99 **&lt; 50 ms**, `movement.npc` p99 **&lt; 15 ms** (Release: **&lt; 20 ms** / **&lt; 5 ms**).
+
+**Behavior locks:** `ZoneNpcRegionSleepBehaviorTests` (teleport into sleeping tile → mobs at spawn, then fight; chase within forget range while aggroed; drifted return-home).
+
+`run-local-net.sh` stays **Debug** for playtest logs (`BUILD_CFG=${FINEAGE_BUILD_CONFIGURATION:-Debug}` unchanged).
+
 ## Zone parallel stages (Nov 22) — movement + AI
 
 **Scheduler / directory (builds on PR #843):** region bodies may call `Relocated` on entities they own; global `GridAoi` updates from movement defer to `RegionBodyScope.Commit` (ascending region order) so parallel stages do not race the shared spatial hash. Knownlist and fan-out side effects from movement defer via `AtBarrier` to the same commit.

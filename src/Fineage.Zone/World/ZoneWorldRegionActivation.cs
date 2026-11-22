@@ -67,7 +67,10 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void OnRegionDeactivated(RegionId region)
+    void OnRegionDeactivated(RegionId region) => SuspendNpcRegion(region);
+
+    /// <summary>Mobius inactive region: pause think + idle movement; combat / watched mobs stay awake.</summary>
+    void SuspendNpcRegion(RegionId region)
     {
         if (!_byId.TryGetContainer(region, out var container))
             return;
@@ -75,6 +78,25 @@ public sealed partial class ZoneWorld
         {
             if (_byId.TryGetValue(id, out var npc) && npc.Kind == ZoneEntityKind.Npc)
                 ReleaseThink(npc);
+        }
+
+        foreach (int id in container.Snapshot(ActiveSets.Moving))
+        {
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc)
+                continue;
+            if (NpcRegionAwake(npc))
+                continue;
+            SuspendIdleNpcMove(npc);
+        }
+
+        foreach (int id in container.Members)
+        {
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || !npc.PathfindPending)
+                continue;
+            if (NpcRegionAwake(npc))
+                continue;
+            npc.PathfindPending = false;
+            DequeueNpcPathfind(npc.ObjectId);
         }
     }
 
