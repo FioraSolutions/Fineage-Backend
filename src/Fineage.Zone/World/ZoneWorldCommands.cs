@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
     /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
     void ApplyCommands(TickContext tick)
     {
+        bool applied = false;
         foreach (var submission in _ingress.TakeQueued())
         {
             // Cancelled by its connection before this tick: it never happened.
@@ -50,7 +51,11 @@ public sealed partial class ZoneWorld
                 _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
                     failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
             _ingress.Record(submission, error, failure);
+            applied = true;
         }
+
+        if (applied)
+            ReleaseAppliedCommandReplies();
     }
 
     /// <summary>

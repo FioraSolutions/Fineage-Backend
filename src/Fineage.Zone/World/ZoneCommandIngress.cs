@@ -2,9 +2,10 @@ namespace Fineage.Zone.World;
 
 /// <summary>
 /// Player commands on their way into the simulation. Handlers submit from I/O threads and await the reply; the
-/// <c>commands</c> stage takes everything submitted so far at the start of a step, in submission order. The step that
-/// applied them takes their replies when it seals its fan-out (<see cref="TakeApplied"/>) and completes them after its
-/// inventory writes and fan-out drain: a handler's answer never overtakes what its command caused.
+/// <c>commands</c> stage takes everything submitted so far at the start of a step, in submission order. After that
+/// stage, <see cref="ZoneWorld.ReleaseAppliedCommandReplies"/> seals and drains the fan-out the commands caused, flushes
+/// any inventory they dirtied, and completes their replies so handlers are not blocked on the rest of the step; any
+/// commands left for a nested step are completed when that step seals (see <see cref="TakeApplied"/>).
 /// </summary>
 internal sealed class ZoneCommandIngress
 {

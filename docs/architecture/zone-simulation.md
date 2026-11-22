@@ -182,8 +182,9 @@ sequenceDiagram
   owning region. Reads that need world state (enter-world projection) become request messages answered at the next
   tick. Since step 6 every gameplay handler submits a `ZoneCommand` (`World/ZoneCommands*.cs`) through
   `ZoneWorld.ExecuteAsync` into `ZoneCommandIngress`; the `commands` world stage, first at period 1, applies them in
-  submission order (phase 0). The handler awaits the outcome, which completes only after the applying step's
-  persistence flush and fan-out drain, so a reply never overtakes the frames or writes it caused. A submission
+  submission order (phase 0). The handler awaits the outcome, which completes after the fan-out and inventory flush
+  the command caused (released at the end of the `commands` stage, before later stages run), so a reply never overtakes
+  those frames or writes. A submission
   cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
   tick it stopped at.
 - **One owner (step 12).** `ZoneWorld._gate` is gone. Once the simulation loop or a command pump drives the world,
