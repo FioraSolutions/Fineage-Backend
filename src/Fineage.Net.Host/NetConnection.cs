@@ -33,6 +33,7 @@ public sealed class NetConnection : IAsyncDisposable
     int _closed;
 
     const int StripeBatchFlushCount = 8;
+    const int MaxCoalescedReplaceableEntries = 256;
 
     readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
 
@@ -149,11 +150,25 @@ public sealed class NetConnection : IAsyncDisposable
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
 
+        if (IsMailboxBarrierOpcode(opcode))
+            PrepareMailboxBarrierSend();
+
         if (TryCoalescedSend(opcode, envelope))
             return true;
 
         return EnqueueStripeBatch(envelope);
     }
+
+    /// <summary>PR4: flush replaceable stash and stripe batch before spawn/despawn/inventory (ordering barrier).</summary>
+    internal void PrepareMailboxBarrierSend()
+    {
+        FlushCoalescedOutbound();
+        FlushStripeBatch();
+    }
+
+    static bool IsMailboxBarrierOpcode(ushort opcode) =>
+        opcode is NetOpcode.EntitySpawn or NetOpcode.EntityDespawn or NetOpcode.EntityDie
+            or NetOpcode.InventoryUpdate or NetOpcode.DropItem or NetOpcode.TeleportToLocation;
 
     bool EnqueueStripeBatch(PacketEnvelope envelope)
     {
@@ -214,6 +229,8 @@ public sealed class NetConnection : IAsyncDisposable
 
         var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
         _coalescedReplaceable[key] = envelope;
+        if (_coalescedReplaceable.Count > MaxCoalescedReplaceableEntries)
+            FlushCoalescedOutbound();
         _pumpWake.Writer.TryWrite(1);
         return true;
     }

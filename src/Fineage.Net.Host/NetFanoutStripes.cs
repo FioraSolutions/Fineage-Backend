@@ -73,7 +73,10 @@ public sealed class NetFanoutStripes : IAsyncDisposable
     static void Dispatch(WorkItem item)
     {
         if (item.Critical)
+        {
+            item.Handle.Connection.PrepareMailboxBarrierSend();
             _ = item.Handle.Connection.SendAsync(item.Opcode, item.Payload);
+        }
         else
             item.Handle.Connection.TrySendFromStripe(item.Opcode, item.Payload);
     }
