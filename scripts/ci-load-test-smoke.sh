@@ -72,15 +72,17 @@ def read_run(tag):
 
 def pick(r):
     s = r.get("Server") or {}
+    c = r.get("Consistency") or {}
     return {
         "regionWorkers": r["RegionWorkers"],
         "passed": r["Passed"],
         "botsInWorld": r["BotsInWorld"],
         "botsStuck": r["BotsStuck"],
         "botsDisconnected": r["BotsDisconnected"],
+        "tickP95Ms": s.get("TickP95Ms", 0),
         "tickP99Ms": s.get("TickP99Ms", 0),
         "commandsStageP99Ms": s.get("CommandsStageP99Ms", 0),
-        "clientRttP99Ms": r.get("ClientRttP99Ms", 0),
+        "commandFanoutP99Ms": c.get("BroadcastLatencyP99Ms", 0),
     }
 
 runs = {f"w{k}": pick(read_run(f"bots-100-w{k}")) for k in (0, 4)}

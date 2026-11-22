@@ -86,10 +86,12 @@ Fresh Postgres + `./scripts/run-local-net.sh` after prior bot runs **without** a
 
 GitHub Actions job `load-test-smoke` (`build-and-test.yml`) runs on PRs: `RegionParallelStressTests` / parallel-world oracle, then `bots-100-spread` at `FINEAGE_ZONE_REGION_WORKERS` **0** and **4** via `scripts/ci-load-test-smoke.sh`. Set `CI_LOAD_TEST_SIEGE=1` on the job to add `bots-500-siege` (0 and 4) when the runner budget allows.
 
-| Workers | In world | Stuck | Tick p99 (ms) | `commands` stage p99 (ms) | Command→fanout p99 (client RTT, ms) |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 0 | *(from `local-logs/ci-load-smoke/summary.json` on green CI)* | | | | |
-| 4 | *(same artifact)* | | | | |
+| Workers | In world | Stuck | Tick p95 (ms) | Tick p99 (ms) | `commands` stage p99 (ms) | Command→fanout p99 (ms) |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 100 | 0 | 100 | 1000 | 1000 | 2833 |
+| 4 | 100 | 0 | 100 | 1000 | 1000 | 2818 |
+
+_Source: GitHub Actions `load-test-smoke` artifact `summary.json` from PR #855 run [44962713883](https://github.com/FioraSolutions/Fineage-Backend/actions/runs/44962713883) (`bots-100-spread`, workers 0 then 4). Tick and `commands` p99 hit the Prometheus histogram top bucket (1000 ms) during the 30 s bot ramp; steady tick p50 was 25 ms (w0) vs 10 ms (w4). Consistency oracle: 4950 pairwise checks, 0 stuck, 100/100 in world._
 
 Local reproduction:
 
