@@ -213,7 +213,7 @@ internal static partial class ZoneHotPathLogs
         double traitMod, double mAtkMod, double chance, bool landed, int attackerId, int targetId) =>
         DebuffLand(Log, skillId, level, magicLevel, activateRate, trait, traitMod, mAtkMod, chance, landed, attackerId, targetId);
 
-  // --- AI ---
+    // --- AI ---
     [LoggerMessage(EventId = 3300, Level = LogLevel.Information,
         Message = "[skill] hit {SkillId} lv{Level} target={TargetId} damage={Damage}")]
     static partial void MobSkillHit(ILogger logger, int skillId, int level, int targetId, int damage);
