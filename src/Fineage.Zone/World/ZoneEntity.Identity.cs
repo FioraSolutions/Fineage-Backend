@@ -78,6 +78,12 @@ sealed partial class ZoneEntity
         set => EnsureIdentity().HideoutId = value;
     }
 
+    public int InClanHallZoneId
+    {
+        get => Identity?.InClanHallZoneId ?? 0;
+        set => EnsureIdentity().InClanHallZoneId = value;
+    }
+
     public double HallRegenHpMult
     {
         get => Identity?.HallRegenHpMult ?? 1d;

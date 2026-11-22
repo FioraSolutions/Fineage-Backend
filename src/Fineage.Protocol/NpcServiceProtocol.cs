@@ -156,4 +156,5 @@ public static class NpcServiceIntent
     public const string HallSupport = "hall-support";
     public const string HallTeleport = "hall-teleport";
     public const string HallDeco = "hall-deco";
+    public const string HallItemCreate = "hall-item-create";
 }

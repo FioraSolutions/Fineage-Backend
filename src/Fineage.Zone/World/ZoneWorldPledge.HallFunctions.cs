@@ -72,6 +72,7 @@ public sealed partial class ZoneWorld
             {
                 if (_clan.TryGet(hall.OwnerClanId, out var clan))
                     SyncHallRegenForClan(clan);
+                BroadcastAgitDecoInHall(hall);
             }
         }
     }
@@ -166,8 +167,32 @@ public sealed partial class ZoneWorld
             NpcServiceIntent.HallLease => TryHallLeaseBypass(session, player, clan, hall, reply.ServiceArg),
             NpcServiceIntent.HallSupport => TryHallSupport(session, player, clan, hall, npc, reply.ServiceArg),
             NpcServiceIntent.HallTeleport => TryHallTeleport(session, player, clan, hall, npc, reply.ServiceArg),
+            NpcServiceIntent.HallItemCreate => TryHallItemCreate(session, player, clan, hall, npc, reply.ServiceArg),
             _ => "bad_request"
         };
+    }
+
+    string? TryHallItemCreate(ZoneSession session, ZoneEntity player, ZoneClan clan, ClanHallSave hall, ZoneEntity npc, string command)
+    {
+        if (!HasPriv(clan, player.ObjectId, PledgeProtocol.PrivHallFunctions))
+            return NotAuthorized(session);
+        var fn = FindHallFunction(hall, HallFunctionProtocol.FuncItemCreate);
+        if (fn is not { Level: > 0 })
+            return PledgeProtocol.Conditions;
+        var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 3
+            || !parts[0].Equals("functions", StringComparison.OrdinalIgnoreCase)
+            || !parts[1].Equals("item_creation", StringComparison.OrdinalIgnoreCase)
+            || !int.TryParse(parts[2], out int hallToken)
+            || hallToken != hall.Id)
+            return PledgeProtocol.BadArgument;
+        int listId = HallFunctionProtocol.ItemCreateListId(hall.Id, fn.Level);
+        if (!_multisells.TryGet(listId, out _))
+        {
+            ZoneLog.Info($"[hall-item-create] missing multisell list id={listId} hall={hall.Id} level={fn.Level} file=data/{HallItemCreateCatalog.FileName}");
+            return PledgeProtocol.Conditions;
+        }
+        return OpenMultiSell(session, player, npc, listId, inventoryOnly: false);
     }
 
     string? TryHallFunctionBypass(ZoneSession session, ZoneEntity player, ZoneClan clan, ClanHallSave hall, string command)
@@ -261,6 +286,8 @@ public sealed partial class ZoneWorld
             SyncHallDeco(hall);
             SaveHalls();
             SyncHallRegenForClan(clan);
+            BroadcastAgitDecoInHall(hall);
+            SendAgitDecoInfo(session, hall);
             return null;
         }
 
@@ -283,6 +310,8 @@ public sealed partial class ZoneWorld
         SyncHallDeco(hall);
         SaveHalls();
         SyncHallRegenForClan(clan);
+        BroadcastAgitDecoInHall(hall);
+        SendAgitDecoInfo(session, hall);
         SelfLine(session, 0, "The clan hall function has been activated.");
         return null;
     }
@@ -347,12 +376,14 @@ public sealed partial class ZoneWorld
         return true;
     }
 
+    /// <summary>Player is inside a hall when they are within <see cref="HallDoorAreaRadius"/> of one of that hall's doors.</summary>
+    internal const int HallDoorAreaRadius = 1200;
+
     bool PlayerInsideHallArea(int hallId, int x, int y)
     {
-        const int radius = 1200;
         foreach (var door in Doors.ForClanHall(hallId))
         {
-            if (ZoneCombat.Within(x, y, door.X, door.Y, radius))
+            if (ZoneCombat.Within(x, y, door.X, door.Y, HallDoorAreaRadius))
                 return true;
         }
 
@@ -425,6 +456,15 @@ public sealed partial class ZoneWorld
             return Halls(NowUnixMs()).TryGetValue(hallId, out var hall)
                 ? FindHallFunction(hall, type)
                 : null;
+    }
+
+    internal string? HallItemCreateCommandForTest(ZoneSession session, ZoneEntity player, ZoneEntity npc, string command)
+    {
+        using (_affinity.Step())
+        {
+            var reply = BypassReply.ServiceCall(NpcServiceIntent.HallItemCreate, command);
+            return TryHallManagerService(session, player, npc, reply);
+        }
     }
 
     internal void SetHallWarehouseAdenaForTest(int clanId, int adena)

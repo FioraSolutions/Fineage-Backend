@@ -119,6 +119,7 @@ public sealed partial class ZoneWorld
             case NpcServiceIntent.HallLease:
             case NpcServiceIntent.HallSupport:
             case NpcServiceIntent.HallTeleport:
+            case NpcServiceIntent.HallItemCreate:
                 return TryHallManagerService(session, player, npc, reply);
             default:
                 return "bad_request";

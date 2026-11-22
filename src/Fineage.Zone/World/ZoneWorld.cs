@@ -11,6 +11,7 @@ using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
 using Fineage.Game.Shops;
+using Fineage.Game.Services;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
@@ -24,7 +25,6 @@ using Fineage.Zone.Punishment;
 using Fineage.Zone.Fishing;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
-using Fineage.Game.Services;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
@@ -331,7 +331,9 @@ public sealed partial class ZoneWorld
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
         _serviceRandom = Streams(serviceRandom, RandomPurpose.Service);
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
-        _multisells = multisells ?? MultiSellCatalog.LoadDefault();
+        _multisells = HallItemCreateCatalog.MergeInto(
+            multisells ?? MultiSellCatalog.LoadDefault(),
+            HallItemCreateCatalog.LoadDefault());
         _shopStock = new ShopStock(_buyLists);
         ILedgerJournal journal = ledgerJournal
             ?? (accounts != null

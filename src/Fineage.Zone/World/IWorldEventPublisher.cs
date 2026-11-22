@@ -202,6 +202,8 @@ interface IWorldEventPublisher
     /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called on the simulation thread.</summary>
     void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
 
+    void FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco);
+
     /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
     void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
 
