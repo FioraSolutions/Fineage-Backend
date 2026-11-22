@@ -25,14 +25,17 @@ sealed partial class SessionLifecyclePacketHandler
         var enter = NetCodec.DecodeEnterWorld(envelope.Payload);
         _world.ApplyPlayerLanguage(zoneSession, enter.Language);
 
-        var burst = await _world.EnterAsync(zoneSession, entity => PlanEnter(zoneSession, self, entity), ct)
+        var snapshot = await _world.EnterWithSnapshotAsync(
+                zoneSession, entity => CommitEnter(zoneSession, self, entity), ct)
             .ConfigureAwait(false);
-        if (burst == null)
+        if (snapshot == null)
         {
             Console.Error.WriteLine($"[ZONE] enter rejected enter_failed account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name}");
             await _reject(conn, "enter_failed", "Could not enter world.", ct).ConfigureAwait(false);
             return;
         }
+
+        var burst = await EnterEncoder.EncodeAndDispatchAsync(snapshot, ct).ConfigureAwait(false);
 
         Console.WriteLine($"[ZONE] enter ok account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name} obj={zoneSession.ObjectId}");
         await NetFrame.SendAsync(conn, _presence, burst, ct).ConfigureAwait(false);
@@ -45,88 +48,115 @@ sealed partial class SessionLifecyclePacketHandler
     }
 
     /// <summary>
-    /// On the simulation thread, in the step the player entered: the enter burst for the player's connection, then
-    /// its spawn for the peers that see it.
+    /// On the simulation thread: immutable enter snapshot for off-thread encoding. No NetCodec on known entities.
     /// </summary>
-    List<NetFrame> PlanEnter(ZoneSession zoneSession, EntityId self, ZoneEntity entity)
+    EnterSnapshot CommitEnter(ZoneSession zoneSession, EntityId self, ZoneEntity entity)
     {
-        var frames = new List<NetFrame>();
-        void Self(ushort opcode, byte[] payload) => frames.Add(NetFrame.ToSelf(opcode, payload));
+        using var _ = EnterMetrics.MeasurePlan();
+        var selfSlots = new List<EnterSelfSlot>();
+        IReadOnlyList<KnownPresenceSlot> known;
+        EntitySpawnMsg selfRemote;
+        int knownPlayers;
 
-        // Single source of truth: ZoneEntity after TryEnter (inventory, vitals, AutoSkills already applied).
-        var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), _playerSpawnPAtkSpd(entity));
-        Self(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(packets.Spawn));
-        Self(NetOpcode.PlayerStats, NetCodec.EncodePlayerStats(packets.Stats));
-        // Mobius enter: UserInfo (full sheet + paperdoll) before ItemList so the status window and model are dressed.
-        if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
-            Self(NetOpcode.UserInfo, NetCodec.EncodeUserInfo(NetZoneServer.ToNetUserInfo(userInfo)));
-        Self(NetOpcode.ItemList, NetCodec.EncodeItemList(packets.Items));
-        Self(NetOpcode.SkillList, NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(packets.Skills)));
-        // Mobius EnterWorld: ShortCutInit after ItemList / SkillList so item and skill icons resolve.
-        Self(NetOpcode.ShortCutInit, NetCodec.EncodeShortCutInit(ToNetShortcutInit(_world.BuildShortcutInit(zoneSession))));
-        if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
-            Self(NetOpcode.PlayerActionState, NetCodec.EncodePlayerActionState(actionState));
-        // Mobius updateEffectIcons: restored buffs (character_skills_save) must land before EtcStatusUpdate.
-        if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
-            Self(NetOpcode.AbnormalStatusUpdate, NetCodec.EncodeAbnormalStatusUpdate(ToNetAbnormal(abnormals)));
-        // Mobius EnterWorld:401 sends EtcStatusUpdate after ItemList/ShortCutInit and after updateEffectIcons, so the
-        // overload icon appears on an otherwise fully-dressed status bar.
-        if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
-            Self(NetOpcode.EtcStatusUpdate, NetCodec.EncodeEtcStatusUpdate(NetZoneServer.ToNetEtcStatus(etcStatus, zoneSession.ObjectId)));
-        // Journal on enter so the quest tabs are filled before the player presses the menu button.
-        Self(NetOpcode.QuestList, NetCodec.EncodeQuestList(NetZoneServer.ToNetQuestList(_world.NetQuestList(zoneSession))));
-        // Mobius EnterWorld:561 — a returning clan member gets the pledge sheet and roster up front,
-        // otherwise the clan window is blank until some later clan action fans a status out.
-        if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
+        using (EnterMetrics.MeasureSelfProjection())
         {
-            Self(NetOpcode.PledgeStatus, NetCodec.EncodePledgeStatus(NetZoneServer.ToNetPledgeStatus(clanStatus)));
-            Self(NetOpcode.PledgeMemberList, NetCodec.EncodePledgeMemberList(NetZoneServer.ToNetPledgeMemberList(clanMembers)));
+            var packets = NetEnterWorldProjector.FromEntity(entity, self, _clock().ToUnixTimeMilliseconds(), _playerSpawnPAtkSpd(entity));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.EntitySpawn, packets.Spawn));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerStats, packets.Stats));
+            if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.UserInfo, userInfo));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.ItemList, packets.Items));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, packets.Skills));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.ShortCutInit, _world.BuildShortcutInit(zoneSession)));
+            if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerActionState, actionState));
+            if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.AbnormalStatusUpdate, abnormals));
+            if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.EtcStatusUpdate, etcStatus));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.QuestList, _world.NetQuestList(zoneSession)));
+            if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
+            {
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeStatus, clanStatus));
+                selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeMemberList, clanMembers));
+            }
+
+            var welcome = _world.Localize(zoneSession, SayRules.Welcome(zoneSession.Name));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.SystemMessage, new SystemMessageNetMsg
+            {
+                Id = welcome.Id,
+                Text = welcome.Text,
+                Params = welcome.Params ?? []
+            }));
+
+            selfRemote = NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity));
         }
 
-        var welcome = _world.Localize(zoneSession, SayRules.Welcome(zoneSession.Name));
-        Self(NetOpcode.SystemMessage, NetCodec.EncodeSystemMessage(new SystemMessageNetMsg
-        {
-            Id = welcome.Id,
-            Text = welcome.Text,
-            Params = welcome.Params ?? []
-        }));
+        List<PeerFanoutSlot> peerFanout;
+        using (EnterMetrics.MeasureKnownSnapshot())
+            (known, peerFanout) = SnapshotKnownPresence(zoneSession, entity);
 
+        knownPlayers = known.Count(row => row is { GroundItem: false, Kind: EntityKindNet.Player });
+
+        return new EnterSnapshot
+        {
+            SessionObjectId = zoneSession.ObjectId,
+            Self = selfSlots,
+            SelfRemoteSpawn = selfRemote,
+            Known = known,
+            PeerFanout = peerFanout,
+            KnownEntityCount = known.Count,
+            KnownPlayerCount = knownPlayers
+        };
+    }
+
+    (List<KnownPresenceSlot> Known, List<PeerFanoutSlot> Peers) SnapshotKnownPresence(ZoneSession zoneSession, ZoneEntity entity)
+    {
         var known = _world.SnapshotKnownEntities(zoneSession);
+        var rows = new List<KnownPresenceSlot>(known.Count);
+        var peers = new List<PeerFanoutSlot>();
         foreach (var other in known)
         {
             var otherId = _ids.AllocateOrGet(other.ObjectId);
             if (other.Kind == ZoneEntityKind.GroundItem)
             {
-                Self(NetOpcode.DropItem, NetCodec.EncodeDropItem(new DropItemNetMsg
+                rows.Add(new KnownPresenceSlot
                 {
-                    DropperObjectId = 0,
-                    EntityValue = otherId.Value,
-                    EntityGeneration = otherId.Generation,
-                    ItemId = other.GroundItemId,
-                    X = other.X,
-                    Y = other.Y,
-                    Z = other.Z,
-                    Stackable = other.GroundStackable,
-                    Count = other.GroundCount
-                }));
+                    SourceObjectId = other.ObjectId,
+                    GroundItem = true,
+                    Drop = new DropItemNetMsg
+                    {
+                        DropperObjectId = 0,
+                        EntityValue = otherId.Value,
+                        EntityGeneration = otherId.Generation,
+                        ItemId = other.GroundItemId,
+                        X = other.X,
+                        Y = other.Y,
+                        Z = other.Z,
+                        Stackable = other.GroundStackable,
+                        Count = other.GroundCount
+                    }
+                });
                 continue;
             }
 
             var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
-            Self(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(remote));
-            // Late join: a peer mid-run / seated is shown in that state, not idle at a stale spot.
-            foreach (var (opcode, payload) in NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId, _world))
-                Self(opcode, payload);
-            // Clan war / alliance colours for the pawn just shown (Mobius RelationChanged after CharInfo).
-            if (_world.SpawnRelationFrame(other, entity) is { } relation)
-                Self(NetOpcode.RelationChanged, relation);
+            var followUps = NetEnterWorldProjector.PlanPresenceFollowUps(other, otherId, _world);
+            byte[]? relation = _world.SpawnRelationFrame(other, entity);
+            rows.Add(new KnownPresenceSlot
+            {
+                SourceObjectId = other.ObjectId,
+                Kind = remote.Kind,
+                Spawn = remote,
+                FollowUps = followUps,
+                RelationToEntrant = relation
+            });
+
+            if (other.Kind == ZoneEntityKind.Player)
+                peers.Add(new PeerFanoutSlot(other.ObjectId, _world.SpawnRelationFrame(entity, other)));
         }
 
-        var selfRemote = NetCodec.EncodeEntitySpawn(
-            NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity)));
-        NetEnterSpawnRecord.AppendPeerSpawns(frames, entity, self, selfRemote, known, _world);
-
-        return frames;
+        return (rows, peers);
     }
 
     public async Task LeaveAsync(ZoneSession zoneSession, EntityId self, int registeredObjectId, NetConnection conn)
@@ -166,6 +196,9 @@ sealed partial class SessionLifecyclePacketHandler
         if (registeredObjectId != 0)
             _presence.Unregister(registeredObjectId, conn);
     }
+
+    internal EnterSnapshot CommitEnterForTest(ZoneSession zoneSession, EntityId self, ZoneEntity entity) =>
+        CommitEnter(zoneSession, self, entity);
 
     static void RequireHello(NetConnection conn)
     {

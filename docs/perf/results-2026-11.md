@@ -110,6 +110,25 @@ export FINEAGE_BUILD_CONFIGURATION=Release
 | P2 | High `packets_rejected` under combat spam (synthetic targets) | 50-bot smoke, attack-weighted scenario |
 | P3 | Load-test RTT percentile helper under-reports p50 when samples are sparse | See `ReportWriter.ClientRtt` — cosmetic report issue |
 
+## Enter burst offload (Nov 22) — `request:enter` off simulation thread
+
+**Before (profiling on `dev`, `bots-50-town`, ~34k NPCs):** `commands` stage **p99 650–826 ms** during bot ramp (microprofile); enter did full NetCodec for each known entity + peer fan-out inside `request:enter` on the simulation thread.
+
+**After (PR #861, Release, local Postgres, `bots-50-town`, same VM as agent):**
+
+| Workers | `commands` stage p99 (ms) | `fineage_enter_plan_ms` p99 | `fineage_enter_known_encode_ms` p99 | `fineage_enter_peer_fanout_ms` p99 | Cmd→fanout p50 | Cmd→fanout p99 |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 1000 | 1000 | 5 | 0.5 | 483 | 2756 |
+| 4 | 1000 | 1000 | 5 | 0.5 | 441 | 2833 |
+
+**Same VM / `dev` @ 2509972 (pre-split) control, workers 0:** `commands` p99 **1000** (histogram top bucket); cmd→fanout p50 **532**, p99 **2816** — no `fineage_enter_*` metrics yet.
+
+Interpretation: Prometheus stage histograms still top at **1000 ms** on this soak, so `commands` p99 does **not** yet beat the 650–826 ms profile baseline numerically. The split **does** move known-list NetCodec off-thread (`fineage_enter_known_encode_ms` p99 **5 ms**) and trims cmd→fanout p50 ~8% (532→483, w0). Sim-side `CommitEnter` remains O(known) message build for ~34k NPCs (`fineage_enter_plan_ms` p99 still **1000**).
+
+Source: `local-logs/bots-50-town-bench-v2/w{0,4}/report.json` (agent VM 2026-11-22); control `/tmp/fineage-dev-bench-50/w0/report.json`.
+
+Mechanism: `PrepareEnter` (async store read) → `CommitEnter` (sim `EnterSnapshot`) → `EncodeAndDispatchEnter` (worker + NPC spawn cache). Histogram buckets extended to 3000 ms for scrape resolution.
+
 ## Reproduce smoke
 
 ```bash

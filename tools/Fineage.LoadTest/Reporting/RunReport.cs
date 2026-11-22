@@ -54,6 +54,12 @@ public sealed class PrometheusAggregate
     /// <summary>Max sampled p99 of the <c>commands</c> simulation stage (server-side).</summary>
     public double CommandsStageP99Ms { get; init; }
 
+    public double EnterPlanP99Ms { get; init; }
+    public double EnterKnownEncodeP99Ms { get; init; }
+    public double EnterSelfProjectionP99Ms { get; init; }
+    public double EnterKnownSnapshotP99Ms { get; init; }
+    public double EnterPeerFanoutP99Ms { get; init; }
+
     /// <summary>Peak p99 across stages for keys present in any scrape (load-test diagnostics).</summary>
     public IReadOnlyDictionary<string, double> StageP99MsPeak { get; init; } =
         new Dictionary<string, double>(StringComparer.Ordinal);
@@ -88,8 +94,21 @@ public sealed class PrometheusAggregate
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples),
             CommandsStageP99Ms = stagePeak.GetValueOrDefault("commands"),
-            StageP99MsPeak = stagePeak
+            StageP99MsPeak = stagePeak,
+            EnterPlanP99Ms = EnterPeak(samples, "fineage_enter_plan_ms"),
+            EnterSelfProjectionP99Ms = EnterPeak(samples, "fineage_enter_self_projection_ms"),
+            EnterKnownSnapshotP99Ms = EnterPeak(samples, "fineage_enter_known_snapshot_ms"),
+            EnterKnownEncodeP99Ms = EnterPeak(samples, "fineage_enter_known_encode_ms"),
+            EnterPeerFanoutP99Ms = EnterPeak(samples, "fineage_enter_peer_fanout_ms")
         };
+    }
+
+    static double EnterPeak(IReadOnlyList<PrometheusSample> samples, string metric)
+    {
+        double peak = 0;
+        foreach (var sample in samples)
+            peak = Math.Max(peak, sample.EnterP99Ms.GetValueOrDefault(metric));
+        return peak;
     }
 
     static double PerPlayerBytes(IReadOnlyList<PrometheusSample> samples)
