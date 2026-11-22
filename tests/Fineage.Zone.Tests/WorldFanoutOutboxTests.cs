@@ -105,7 +105,7 @@ public sealed class WorldFanoutOutboxTests
     [Fact]
     public void A_send_outside_a_step_waits_for_sealed_batches_and_surfaces_its_own_failure()
     {
-        var (bridge, rec, fanout) = Outbox();
+        var (bridge, rec, fanout) = Outbox(failFast: true);
 
         fanout.Begin();
         bridge.FanoutAttackStance([1], 7, true);
@@ -180,10 +180,10 @@ public sealed class WorldFanoutOutboxTests
         Values = [.. attributes.Select(a => a.Value)]
     };
 
-    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox()
+    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox(bool failFast = false)
     {
         var inner = DispatchProxy.Create<IWorldEventPublisher, FakePublisher>();
-        var dispatcher = new FanoutDispatcher { FailFast = true };
+        var dispatcher = new FanoutDispatcher { FailFast = failFast };
         var fanout = new WorldFanoutSequencer(dispatcher);
         return (new OutboxingWorldEventPublisher(inner, fanout), (FakePublisher)(object)inner, fanout);
     }
