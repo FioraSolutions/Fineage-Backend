@@ -14,7 +14,7 @@ public sealed class LocalizationCatalogTests
             ("en", new Dictionary<string, string> { ["chat.welcome"] = "Welcome, {0}." }),
             ("ru", new Dictionary<string, string> { ["chat.welcome"] = "Добро пожаловать, {0}." }));
 
-        Assert.Equal("Добро пожаловать, Aria.", catalog.Format("chat.welcome", "RU", "Aria"));
+        Assert.Equal("Добро пожаловать, Aria.", catalog.Format("chat.welcome", "RU", english: null, "Aria"));
         Assert.Empty(log.Events);
     }
 
