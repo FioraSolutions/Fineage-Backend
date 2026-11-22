@@ -194,6 +194,17 @@ public sealed partial class QuestMachine
                     plan.Sounds.Add(QuestSounds.Finish);
                     plan.Lines.Add(Line(QuestNotice.Completed, $"{quest.Name} is complete.", quest.Name));
                     break;
+                case ExitOp:
+                    if (!Started(plan))
+                    {
+                        failure = Fail(QuestFailure.State, "That quest has not been started.", quest.Id, "");
+                        return false;
+                    }
+
+                    plan.Delete = true;
+                    WipeQuestItems(quest, inventory, plan);
+                    plan.Sounds.Add(QuestSounds.GiveUp);
+                    break;
                 case DropItemOp drop:
                     {
                         if (!Started(plan))
