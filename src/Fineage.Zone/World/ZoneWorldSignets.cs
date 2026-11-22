@@ -118,12 +118,13 @@ public sealed partial class ZoneWorld
         if (owner == null)
             return;
         var template = _game.Skills.Find(skill.SkillId);
-        SkillLevelData? levelData = template != null && template.TryLevelData(skill.Level, out var ld) ? ld : null;
-        if (template == null && skill.AbnormalTimeSeconds <= 0 && skill.Power <= 0)
+        if (template == null)
         {
             ZoneLog.Info($"[signet] missing skill catalog id={skill.SkillId} npc={signet.NpcId}");
             return;
         }
+        if (!template.TryLevelData(skill.Level, out var levelData))
+            return;
 
         int range = skill.AffectRange > 0 ? skill.AffectRange : 200;
         FanoutNpcMagicSkillUse(signet, signet, skill.SkillId, skill.Level, 0, 0);
@@ -141,7 +142,7 @@ public sealed partial class ZoneWorld
             if (entity.Kind == ZoneEntityKind.Npc && !entity.Attackable)
                 continue;
 
-            if (skill.Power > 0 && entity.Kind == ZoneEntityKind.Npc && levelData != null)
+            if (skill.Power > 0 && entity.Kind == ZoneEntityKind.Npc)
             {
                 double mAtk = Math.Max(1d, owner.Kind == ZoneEntityKind.Player ? PlayerStats(owner).MAtk : owner.MAtk);
                 double mDef = entity.MDef > 0 ? entity.MDef : entity.Level * 30d;
@@ -153,22 +154,9 @@ public sealed partial class ZoneWorld
                     DamageNpcBy(owner, entity, damage, now);
             }
 
-            if (template != null && levelData != null && template.AppliesAbnormal &&
+            if (template.AppliesAbnormal &&
                 ApplyAbnormalFromSkill(template, levelData, entity, now, attacker: owner))
-            {
                 hits++;
-                continue;
-            }
-
-            if (template == null && skill.AbnormalTimeSeconds > 0)
-            {
-                int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
-                string slot = skill.Slot.Length > 0 ? skill.Slot : "MULTI_DEBUFF";
-                ZoneAbnormals.Apply(entity.Abnormals, skill.SkillId, abnormal, skill.AbnormalTimeSeconds, now,
-                    skill.Level, slot);
-                FanoutAbnormal(entity);
-                hits++;
-            }
         }
         ZoneLog.Info($"[signet] hostile pulse {skill.SkillId} lv{skill.Level} npc={signet.NpcId} range={range} " +
                      $"landed={hits}");
