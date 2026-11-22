@@ -12,6 +12,14 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     const string CommandsStage = "commands";
+    const string PhaseDequeue = "commands.ingress_dequeue";
+    const string PhaseApply = "commands.apply";
+    const string PhaseFlush = "commands.flush_dirty_inventory";
+    const string PhaseSeal = "commands.fanout_seal";
+    const string PhaseReply = "commands.reply_completion";
+
+    /// <summary>Client-visible failure when the ledger commit did not land. Success is not reported in that case.</summary>
+    internal const string EconomyCommitFailed = "economy_commit_failed: auditable economy commit failed";
 
     readonly ZoneCommandIngress _ingress = new();
     SimulationLog? _commandLog;
@@ -31,9 +39,13 @@ public sealed partial class ZoneWorld
     {
         using var commandScope = _syncIo.CommandScope();
         bool applied = false;
+        long dequeueStart = Stopwatch.GetTimestamp();
+        var queued = _ingress.TakeQueued();
+        RecordCommandPhase(PhaseDequeue, dequeueStart);
+
         long applyStart = Stopwatch.GetTimestamp();
         var applyMsByCommand = new Dictionary<string, double>(StringComparer.Ordinal);
-        foreach (var submission in _ingress.TakeQueued())
+        foreach (var submission in queued)
         {
             // Cancelled by its connection before this tick: it never happened.
             if (submission.Reply.Task.IsCompleted)
@@ -65,17 +77,35 @@ public sealed partial class ZoneWorld
             applied = true;
         }
 
-        double totalMs = Stopwatch.GetElapsedTime(applyStart).TotalMilliseconds;
-        if (totalMs >= 100 && applyMsByCommand.Count > 0)
+        double applyMs = RecordCommandPhase(PhaseApply, applyStart);
+        double flushMs = 0, sealMs = 0, replyMs = 0;
+        if (applied)
+            (flushMs, sealMs, replyMs) = ReleaseAppliedCommandReplies();
+
+        string? syncIo = _syncIo.ConsumeSummary();
+        if (syncIo != null)
+            ZoneLog.Info($"commands tick={tick.Tick} sync-io on simulation thread: {syncIo}");
+
+        double totalMs = applyMs + flushMs + sealMs + replyMs;
+        if (totalMs >= 100 && (applyMsByCommand.Count > 0 || flushMs + sealMs + replyMs > 0))
         {
             string breakdown = string.Join(", ",
                 applyMsByCommand.OrderByDescending(pair => pair.Value).Take(8)
                     .Select(pair => $"{pair.Key}={pair.Value.ToString("F1", CultureInfo.InvariantCulture)}ms"));
-            ZoneLog.Warn($"commands stage tick={tick.Tick} total={totalMs.ToString("F1", CultureInfo.InvariantCulture)}ms: {breakdown}");
+            ZoneLog.Warn(
+                $"commands stage tick={tick.Tick} total={totalMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"apply={applyMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"flush_dirty_inventory={flushMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"fanout_seal={sealMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"reply_completion={replyMs.ToString("F1", CultureInfo.InvariantCulture)}ms: {breakdown}");
         }
+    }
 
-        if (applied)
-            ReleaseAppliedCommandReplies();
+    static double RecordCommandPhase(string phase, long started)
+    {
+        double ms = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        FineageTelemetry.StageMilliseconds.Record(ms, new KeyValuePair<string, object?>("stage", phase));
+        return ms;
     }
 
     /// <summary>

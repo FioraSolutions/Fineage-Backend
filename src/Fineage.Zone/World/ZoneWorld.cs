@@ -130,6 +130,7 @@ public sealed partial class ZoneWorld
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
     readonly SimulationSyncIoGuard _syncIo;
+    readonly CharacterPersistWorker _snapshots;
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
     /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
@@ -261,7 +262,8 @@ public sealed partial class ZoneWorld
         _dropRandom = Streams(dropRandom, RandomPurpose.Drop);
         _syncIo = new SimulationSyncIoGuard(_affinity);
         _accounts = accounts == null ? null : SimulationGuardedAccountStore.Wrap(accounts, _syncIo);
-        _persist = new ZoneCharacterPersist(_accounts, op => _syncIo.Report($"ZoneCharacterPersist.{op}"));
+        _snapshots = new CharacterPersistWorker(_accounts);
+        _persist = new ZoneCharacterPersist(_accounts, _snapshots);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();

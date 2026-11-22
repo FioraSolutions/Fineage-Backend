@@ -67,4 +67,44 @@ public sealed class CharacterPresenceTests
         Assert.Equal(movedX, second.X);
         Assert.Equal(movedX, store.FindById(ticket.Account, ticket.CharacterId)!.X);
     }
+
+    [Fact]
+    public async Task Hosted_leave_waits_until_the_snapshot_is_readable()
+    {
+        var store = MemoryAccountStore.InMemory();
+        var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
+        var ticket = login.Play("alice", "secret1", "Aria", HumanClasses.Fighter).Value!;
+        var world = new ZoneWorld(accounts: store, spawnRandom: new Random(3),
+            ledgerJournal: new MemoryLedgerJournal());
+        world.StartCharacterSnapshotsForTests();
+        world.PauseCharacterSnapshotsForTests();
+        try
+        {
+            var session = new ZoneSession();
+            session.Bind(ticket.CharacterId, ticket.Account, ticket.CharacterName, ticket.ClassId);
+            Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
+            int movedX = session.X + 80;
+            Assert.Null(await world.TryMoveAsync(session, movedX, session.Y, session.Z, CancellationToken.None));
+            Assert.NotEqual(movedX, store.FindById(ticket.Account, ticket.CharacterId)!.X);
+
+            var release = Task.Run(async () =>
+            {
+                await Task.Delay(100);
+                world.ResumeCharacterSnapshotsForTests();
+            });
+            await world.LeaveAsync(session, CancellationToken.None);
+            await release;
+            var saved = store.FindById(ticket.Account, ticket.CharacterId);
+            Assert.Equal(movedX, saved!.X);
+            Assert.NotEqual(default, saved.LastAccess);
+
+            Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
+            Assert.Equal(movedX, session.X);
+        }
+        finally
+        {
+            world.ResumeCharacterSnapshotsForTests();
+            world.StopCharacterSnapshotsForTests();
+        }
+    }
 }

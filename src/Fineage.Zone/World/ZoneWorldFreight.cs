@@ -81,10 +81,10 @@ public sealed partial class ZoneWorld
         ReplaceFreightNow(session, player);
     }
 
-    void ReplaceFreightNow(ZoneSession session, ZoneEntity player)
+    bool ReplaceFreightNow(ZoneSession session, ZoneEntity player)
     {
         if (player.Freight == null)
-            return;
+            return true;
         var stacks = player.Freight.Items;
         var stored = new StoredItem[stacks.Count];
         for (int i = 0; i < stacks.Count; i++)
@@ -93,7 +93,10 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        _persist.ReplaceFreight(session.Account, session.ObjectId, stored);
+        return CommitStore(
+            "freight replace",
+            session,
+            () => _persist.ReplaceFreight(session.Account, session.ObjectId, stored));
     }
 
     void PersistFreightStacks(string account, int characterId, PrivateWarehouse freight)
@@ -106,7 +109,9 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        _persist.ReplaceFreight(account, characterId, stored);
+        if (!_persist.ReplaceFreight(account, characterId, stored))
+            ZoneLog.Warn(
+                $"freight replace refused account={account} character={characterId}: store returned false");
     }
 
     string? OpenPackageDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc)

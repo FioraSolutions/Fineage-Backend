@@ -79,6 +79,28 @@ internal sealed class ZoneCommandIngress
         }
     }
 
+    /// <summary>
+    /// Commands whose character still has an uncommitted economic snapshot are not told success. An existing
+    /// rejection or exception is left as it is.
+    /// </summary>
+    public void FailUncommitted(IReadOnlySet<int> characterIds, string error)
+    {
+        ArgumentNullException.ThrowIfNull(characterIds);
+        ArgumentException.ThrowIfNullOrEmpty(error);
+        lock (_lock)
+        {
+            for (int i = 0; i < _applied.Count; i++)
+            {
+                var row = _applied[i];
+                if (row.Error != null || row.Failure != null)
+                    continue;
+                if (!characterIds.Contains(row.Submission.Session.ObjectId))
+                    continue;
+                _applied[i] = row with { Error = error };
+            }
+        }
+    }
+
     public static void Complete(IReadOnlyList<Applied> applied)
     {
         foreach (var (submission, error, failure) in applied)
