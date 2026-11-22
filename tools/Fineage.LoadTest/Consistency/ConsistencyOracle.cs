@@ -20,8 +20,10 @@ public static class ConsistencyOracle
     public static ConsistencyReport Analyze(
         IReadOnlyList<FineageBotClient> bots,
         LoadScenario scenario,
-        int aoiCellSize = AoiCellSize)
+        int aoiCellSize = AoiCellSize,
+        DateTimeOffset? runStarted = null)
     {
+        DateTimeOffset steadyAfter = runStarted?.AddSeconds(scenario.RampUpSeconds) ?? DateTimeOffset.MinValue;
         int watch = aoiCellSize * 2;
         var issues = new List<ConsistencyIssue>();
         var roster = BuildRoster(bots, scenario);
@@ -165,14 +167,19 @@ public static class ConsistencyOracle
             CheckCombatFanout(bot, roster, watch, issues);
         CheckVisibilityLeaks(bots, roster, watch, issues);
 
-        var latencies = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutLatenciesMs).OrderBy(v => v).ToList();
+        var samples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples).ToList();
+        var latencies = samples.Select(s => s.Milliseconds).OrderBy(v => v).ToList();
+        var steady = samples.Where(s => s.ObservedAt >= steadyAfter).Select(s => s.Milliseconds).OrderBy(v => v).ToList();
         return new ConsistencyReport
         {
             Issues = issues,
             PairwiseObserversCompared = pairs,
             BroadcastLatencyP50Ms = Percentile(latencies, 0.5),
             BroadcastLatencyP95Ms = Percentile(latencies, 0.95),
-            BroadcastLatencyP99Ms = Percentile(latencies, 0.99)
+            BroadcastLatencyP99Ms = Percentile(latencies, 0.99),
+            BroadcastLatencyMaxMs = latencies.Count > 0 ? latencies[^1] : 0,
+            SteadyBroadcastLatencyP99Ms = Percentile(steady, 0.99),
+            SteadyBroadcastLatencyMaxMs = steady.Count > 0 ? steady[^1] : 0
         };
     }
 

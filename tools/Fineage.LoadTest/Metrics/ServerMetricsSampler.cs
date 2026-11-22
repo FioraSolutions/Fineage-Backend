@@ -23,7 +23,7 @@ public sealed class ServerMetricsSampler
             if (text != null)
             {
                 RawScrapes.Add(text);
-                samples.Add(PrometheusParser.Parse(text));
+                samples.Add(PrometheusParser.Parse(text, DateTimeOffset.UtcNow));
             }
             try
             {

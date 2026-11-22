@@ -9,24 +9,12 @@ namespace Fineage.Zone.Net;
 /// Maps live Zone object ids to Net connections for presence fanout
 /// (MoveState / EntitySpawn / EntityDespawn). The hub is the only fan-out path: ZoneSession carries no stream.
 /// </summary>
-public sealed class NetPresenceHub : IAsyncDisposable
+public sealed class NetPresenceHub
 {
     readonly object _gate = new();
     readonly Dictionary<int, Entry> _byObjectId = [];
-    readonly NetFanoutStripes _stripes = new();
-    readonly bool _ownsStripes = true;
 
-    readonly record struct Entry(ConnectionHandle Handle, EntityId EntityId);
-
-    /// <summary>Tests and custom wiring may inject stripe routing.</summary>
-    public NetPresenceHub(NetFanoutStripes? stripes = null)
-    {
-        if (stripes != null)
-        {
-            _stripes = stripes;
-            _ownsStripes = false;
-        }
-    }
+    readonly record struct Entry(NetConnection Conn, EntityId EntityId);
 
     public void Register(int objectId, NetConnection conn, EntityId entityId)
     {
@@ -34,7 +22,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
         if (objectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(objectId));
         lock (_gate)
-            _byObjectId[objectId] = new Entry(new ConnectionHandle(objectId, entityId.Generation, conn), entityId);
+            _byObjectId[objectId] = new Entry(conn, entityId);
     }
 
     /// <summary>
@@ -48,8 +36,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(owner);
         lock (_gate)
         {
-            if (!_byObjectId.TryGetValue(objectId, out var entry) ||
-                !ReferenceEquals(entry.Handle.Connection, owner))
+            if (!_byObjectId.TryGetValue(objectId, out var entry) || !ReferenceEquals(entry.Conn, owner))
                 return false;
             _byObjectId.Remove(objectId);
             return true;
@@ -69,7 +56,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
         {
             if (_byObjectId.TryGetValue(objectId, out var entry))
             {
-                conn = entry.Handle.Connection;
+                conn = entry.Conn;
                 entityId = entry.EntityId;
                 return true;
             }
@@ -94,10 +81,13 @@ public sealed class NetPresenceHub : IAsyncDisposable
     /// </summary>
     public void TrySend(int objectId, ushort opcode, byte[] payload)
     {
-        if (!TryResolveHandle(objectId, out var handle))
+        if (!TryGet(objectId, out var conn, out _))
             return;
-        _stripes.EnqueueTrySend(handle, opcode, payload);
-        RecordCommandToMailboxes();
+        if (!conn.TrySend(opcode, payload))
+            return;
+
+        if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+            FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
     }
 
     /// <summary>
@@ -106,34 +96,10 @@ public sealed class NetPresenceHub : IAsyncDisposable
     /// </summary>
     public void TrySendCritical(int objectId, ushort opcode, byte[] payload)
     {
-        if (!TryResolveHandle(objectId, out var handle))
+        if (!TryGet(objectId, out var conn, out _))
             return;
-        _stripes.EnqueueCritical(handle, opcode, payload);
-        RecordCommandToMailboxes();
+        _ = conn.SendAsync(opcode, payload);
     }
-
-    bool TryResolveHandle(int objectId, out ConnectionHandle handle)
-    {
-        lock (_gate)
-        {
-            if (_byObjectId.TryGetValue(objectId, out var entry) && entry.Handle.Matches(entry.EntityId))
-            {
-                handle = entry.Handle;
-                return true;
-            }
-        }
-
-        handle = default;
-        return false;
-    }
-
-    static void RecordCommandToMailboxes()
-    {
-        if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
-            FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
-    }
-
-    public ValueTask DisposeAsync() => _ownsStripes ? _stripes.DisposeAsync() : ValueTask.CompletedTask;
 
     public void TryBroadcast(IEnumerable<int> objectIds, ushort opcode, byte[] payload)
     {

@@ -19,6 +19,11 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _enterKnownPlayers = new();
     readonly DurationHistogram _enterFrames = new();
     readonly DurationHistogram _enterBytes = new();
+    readonly DurationHistogram _tickStepFanoutDrain = new();
+    readonly DurationHistogram _commandToMailboxes = new();
+    readonly DurationHistogram _fanoutBatchProcess = new();
+    readonly DurationHistogram _fanoutQueueAge = new();
+    readonly DurationHistogram _fanoutQueueDepth = new();
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _ticksSkipped;
@@ -73,6 +78,11 @@ public sealed class MetricsCollector : IDisposable
                 EnterKnownPlayers = _enterKnownPlayers.Freeze(),
                 EnterFrames = _enterFrames.Freeze(),
                 EnterBytes = _enterBytes.Freeze(),
+                TickStepFanoutDrain = _tickStepFanoutDrain.Freeze(),
+                CommandToMailboxes = _commandToMailboxes.Freeze(),
+                FanoutBatchProcess = _fanoutBatchProcess.Freeze(),
+                FanoutQueueOldestAge = _fanoutQueueAge.Freeze(),
+                FanoutQueueDepth = _fanoutQueueDepth.Freeze(),
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
@@ -154,6 +164,9 @@ public sealed class MetricsCollector : IDisposable
                     string result = Tag(tags, "result");
                     _persistSnapshots[result] = _persistSnapshots.GetValueOrDefault(result) + value;
                     break;
+                case "fineage.fanout.queue.depth":
+                    _fanoutQueueDepth.Record(value);
+                    break;
             }
         }
     }
@@ -233,6 +246,18 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.enter.bytes":
                     _enterBytes.Record(value);
+                    break;
+                case "fineage.tick.step.fanout_drain.ms":
+                    _tickStepFanoutDrain.Record(value);
+                    break;
+                case "fineage.command_to_mailboxes.ms":
+                    _commandToMailboxes.Record(value);
+                    break;
+                case "fineage.fanout.batch_process.ms":
+                    _fanoutBatchProcess.Record(value);
+                    break;
+                case "fineage.fanout.queue.oldest_age.ms":
+                    _fanoutQueueAge.Record(value);
                     break;
             }
         }

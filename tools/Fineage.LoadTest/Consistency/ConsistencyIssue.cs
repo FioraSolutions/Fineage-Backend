@@ -29,5 +29,8 @@ public sealed class ConsistencyReport
     public double BroadcastLatencyP50Ms { get; init; }
     public double BroadcastLatencyP95Ms { get; init; }
     public double BroadcastLatencyP99Ms { get; init; }
+    public double BroadcastLatencyMaxMs { get; init; }
+    public double SteadyBroadcastLatencyP99Ms { get; init; }
+    public double SteadyBroadcastLatencyMaxMs { get; init; }
     public bool Passed => Issues.Count == 0;
 }

@@ -62,6 +62,11 @@ public sealed class MetricsSnapshot
     public HistogramMetrics EnterKnownPlayers { get; init; } = new();
     public HistogramMetrics EnterFrames { get; init; } = new();
     public HistogramMetrics EnterBytes { get; init; } = new();
+    public HistogramMetrics TickStepFanoutDrain { get; init; } = new();
+    public HistogramMetrics CommandToMailboxes { get; init; } = new();
+    public HistogramMetrics FanoutBatchProcess { get; init; } = new();
+    public HistogramMetrics FanoutQueueOldestAge { get; init; } = new();
+    public HistogramMetrics FanoutQueueDepth { get; init; } = new();
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
@@ -176,6 +181,16 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_ms", "Zone simulation tick duration");
         sb.Append("# TYPE fineage_tick_ms histogram\n");
         AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick);
+        AppendSingletonHistogram(sb, "fineage_tick_step_fanout_drain_ms",
+            "Fan-out batch execution duration on the dispatcher worker", snapshot.TickStepFanoutDrain);
+        AppendSingletonHistogram(sb, "fineage_command_to_mailboxes_ms",
+            "Command commit to first outbound mailbox enqueue in a fan-out batch", snapshot.CommandToMailboxes);
+        AppendSingletonHistogram(sb, "fineage_fanout_batch_process_ms",
+            "Wall time to execute one sealed fan-out batch on the dispatcher worker", snapshot.FanoutBatchProcess);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_oldest_age_ms",
+            "Age of the oldest batch waiting in the fan-out dispatcher queue", snapshot.FanoutQueueOldestAge);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
+            "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');

@@ -117,7 +117,7 @@ public sealed class LoadTestRunner
 
         ProcessSample? proc = zonePid is > 0 ? new ProcessMetricsSampler().SamplePid(zonePid.Value) : null;
 
-        var consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize);
+        var consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize, started);
         var hardIssues = consistency.Issues.Where(i => ConsistencyOracle.IsHardFailure(i.Kind)).ToList();
         if (consistency.Issues.Count > 0)
         {
@@ -168,7 +168,8 @@ public sealed class LoadTestRunner
         var logPaths = new List<string>();
         if (loginLog != null) logPaths.Add(loginLog);
         if (zoneLog != null) logPaths.Add(zoneLog);
-        ReportEnricher.Enrich(report, scenario, promSamples, zoneLog, logPaths, runtimeStats);
+        var clientSamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
+        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, clientSamples, zoneLog, logPaths, runtimeStats);
 
         // #867 gate verdicts are recorded in the report for human/LLM review only — they do not
         // fail the process (CI smoke still gates on bots in-world, stuck, and consistency).

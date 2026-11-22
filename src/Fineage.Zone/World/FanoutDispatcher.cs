@@ -198,7 +198,6 @@ internal sealed class FanoutDispatcher : IDisposable
         double processMs = ElapsedMs(started);
         FineageTelemetry.FanoutBatchProcessMilliseconds.Record(processMs);
         FineageTelemetry.TickStepFanoutDrainMilliseconds.Record(processMs);
-        batch.ReleaseScratchResources();
     }
 
     static double ElapsedMs(long fromTimestamp, long? toTimestamp = null)

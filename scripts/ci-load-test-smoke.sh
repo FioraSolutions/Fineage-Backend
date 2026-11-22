@@ -69,16 +69,22 @@ def read_run(tag):
 def pick(r):
     s = r.get("Server") or {}
     c = r.get("Consistency") or {}
+    h = (r.get("Honest") or {}).get("SteadyState") or {}
     return {
         "regionWorkers": r["RegionWorkers"],
         "passed": r["Passed"],
         "botsInWorld": r["BotsInWorld"],
         "botsStuck": r["BotsStuck"],
         "botsDisconnected": r["BotsDisconnected"],
-        "tickP95Ms": s.get("TickP95Ms", 0),
-        "tickP99Ms": s.get("TickP99Ms", 0),
-        "commandsStageP99Ms": s.get("CommandsStageP99Ms", 0),
-        "commandFanoutP99Ms": c.get("BroadcastLatencyP99Ms", 0),
+        "tickP95Ms": h.get("TickP95Ms", s.get("TickP95Ms", 0)),
+        "tickP99Ms": h.get("TickP99Ms", s.get("TickP99Ms", 0)),
+        "tickMaxMs": h.get("TickMaxMs", 0),
+        "commandsStageP99Ms": h.get("CommandsStageP99Ms", s.get("CommandsStageP99Ms", 0)),
+        "commandToMailboxesP99Ms": h.get("CommandToMailboxesP99Ms", 0),
+        "fanoutDrainP99Ms": h.get("FanoutDrainP99Ms", 0),
+        "clientCombatFanoutP99Ms": h.get("ClientCombatFanoutP99Ms", c.get("SteadyBroadcastLatencyP99Ms", 0)),
+        "clientCombatFanoutMaxMs": h.get("ClientCombatFanoutMaxMs", c.get("SteadyBroadcastLatencyMaxMs", 0)),
+        "legacyCommandFanoutP99Ms": c.get("BroadcastLatencyP99Ms", 0),
     }
 
 runs = {f"w{k}": pick(read_run(f"bots-50-town-w{k}")) for k in (0, 4)}

@@ -17,8 +17,6 @@ namespace Fineage.Net.Host;
 /// </summary>
 public sealed class NetConnection : IAsyncDisposable
 {
-    static long _nextConnectionId;
-
     readonly TcpClient _client;
     readonly NetworkStream _stream;
     readonly Channel<PacketEnvelope> _inbox;
@@ -28,16 +26,9 @@ public sealed class NetConnection : IAsyncDisposable
     readonly string _endpoint;
     readonly Task _pump;
     readonly ConcurrentDictionary<CoalesceReplaceableKey, PacketEnvelope> _coalescedReplaceable = new();
-    readonly object _stripeBatchLock = new();
-    readonly List<PacketEnvelope> _stripeBatch = [];
     int _closed;
 
-    const int StripeBatchFlushCount = 8;
-    const int MaxCoalescedReplaceableEntries = 256;
-
     readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
-
-    public ulong ConnectionId { get; } = (ulong)Interlocked.Increment(ref _nextConnectionId);
 
     public NetConnection(TcpClient client, int inboxCapacity, string endpoint = "net", int outboundCapacity = DefaultOutboundCapacity)
     {
@@ -141,72 +132,19 @@ public sealed class NetConnection : IAsyncDisposable
     /// Fanout path: queue without waiting. A full queue drops the frame and counts it, so one stalled client
     /// cannot back-pressure the world tick.
     /// </summary>
-    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0) =>
-        TrySendFromStripe(opcode, payload, requestSequence);
-
-    /// <summary>Called from <see cref="NetFanoutStripes"/> stripe workers (PR2).</summary>
-    internal bool TrySendFromStripe(ushort opcode, byte[] payload, uint requestSequence = 0)
+    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0)
     {
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
 
-        if (IsMailboxBarrierOpcode(opcode))
-            PrepareMailboxBarrierSend();
-
         if (TryCoalescedSend(opcode, envelope))
             return true;
 
-        return EnqueueStripeBatch(envelope);
-    }
+        if (_outbound.Writer.TryWrite(envelope))
+            return true;
 
-    /// <summary>PR4: flush replaceable stash and stripe batch before spawn/despawn/inventory (ordering barrier).</summary>
-    internal void PrepareMailboxBarrierSend()
-    {
-        FlushCoalescedOutbound();
-        FlushStripeBatch();
-    }
-
-    static bool IsMailboxBarrierOpcode(ushort opcode) =>
-        opcode is NetOpcode.EntitySpawn or NetOpcode.EntityDespawn or NetOpcode.EntityDie
-            or NetOpcode.InventoryUpdate or NetOpcode.DropItem or NetOpcode.TeleportToLocation;
-
-    bool EnqueueStripeBatch(PacketEnvelope envelope)
-    {
-        lock (_stripeBatchLock)
-        {
-            _stripeBatch.Add(envelope);
-            if (_stripeBatch.Count < StripeBatchFlushCount)
-                return true;
-            return FlushStripeBatchLocked();
-        }
-    }
-
-    bool FlushStripeBatchLocked()
-    {
-        bool anyAccepted = false;
-        for (int i = 0; i < _stripeBatch.Count; i++)
-        {
-            if (_outbound.Writer.TryWrite(_stripeBatch[i]))
-                anyAccepted = true;
-            else
-            {
-                NetTelemetry.ReliableOverflow(_endpoint);
-                _stripeBatch.RemoveRange(0, i);
-                return anyAccepted;
-            }
-        }
-
-        _stripeBatch.Clear();
-        return anyAccepted;
-    }
-
-    internal void FlushStripeBatch()
-    {
-        lock (_stripeBatchLock)
-        {
-            if (_stripeBatch.Count > 0)
-                FlushStripeBatchLocked();
-        }
+        NetTelemetry.ReliableOverflow(_endpoint);
+        return false;
     }
 
     /// <summary>
@@ -229,8 +167,6 @@ public sealed class NetConnection : IAsyncDisposable
 
         var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
         _coalescedReplaceable[key] = envelope;
-        if (_coalescedReplaceable.Count > MaxCoalescedReplaceableEntries)
-            FlushCoalescedOutbound();
         _pumpWake.Writer.TryWrite(1);
         return true;
     }
@@ -351,8 +287,6 @@ public sealed class NetConnection : IAsyncDisposable
                 while (_pumpWake.Reader.TryRead(out _))
                 {
                 }
-
-                FlushStripeBatch();
 
                 if (!_coalescedReplaceable.IsEmpty)
                     await WriteCoalescedToStreamAsync().ConfigureAwait(false);

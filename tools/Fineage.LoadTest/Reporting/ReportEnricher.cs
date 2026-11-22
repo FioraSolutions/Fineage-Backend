@@ -1,3 +1,4 @@
+using Fineage.LoadTest.Bot;
 using Fineage.LoadTest.Metrics;
 using Fineage.LoadTest.Models;
 
@@ -9,6 +10,8 @@ public static class ReportEnricher
         RunReport report,
         LoadScenario scenario,
         IReadOnlyList<PrometheusSample> promSamples,
+        IReadOnlyList<string> rawScrapes,
+        IEnumerable<BotObservationLog.EntityTracker.LatencySample> clientSamples,
         string? zoneLogPath,
         IEnumerable<string> logPaths,
         RuntimeCounterStats? runtime)
@@ -18,6 +21,8 @@ public static class ReportEnricher
         report.RampUpSeconds = scenario.RampUpSeconds;
         report.LatencyTable = LatencyTableBuilder.FromPeakMetrics(report.PeakMetricsText, zoneLogPath);
         report.MissingExpectedMetrics = ExpectedMetricsCatalog.MissingFrom(report.PeakMetricsText);
+        report.Honest = HonestLoadSummaryBuilder.Build(
+            promSamples, rawScrapes, report.StartedAt, scenario.RampUpSeconds, clientSamples);
         report.TimeSeriesWindows = TimeSeriesSummaryBuilder.Build(promSamples);
         report.TimeSeriesBacklogTrend = TimeSeriesSummaryBuilder.BacklogTrend(report.TimeSeriesWindows);
         report.Runtime = runtime;

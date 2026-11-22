@@ -175,7 +175,10 @@ public sealed class FineageBotClient : IAsyncDisposable
             {
                 var spawn = NetCodec.DecodeEntitySpawn(payload);
                 if (spawn.IsSelf)
+                {
                     _selfEntity = spawn.EntityValue;
+                    _observation.SetSelfEntity(spawn.EntityValue);
+                }
             }
         }
     }

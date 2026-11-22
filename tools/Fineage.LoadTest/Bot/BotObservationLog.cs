@@ -38,6 +38,9 @@ public sealed class BotObservationLog
     public void RecordCommandSent(ushort opcode, DateTimeOffset at) =>
         _tracker.NoteLocalCommand(opcode, at);
 
+    public void SetSelfEntity(ulong entityValue) =>
+        _tracker.SetSelfEntity(entityValue);
+
     public int VisibleNpcObjectId()
     {
         lock (_stateGate)
@@ -54,9 +57,15 @@ public sealed class BotObservationLog
         long _spawnOrdinal;
         readonly List<PendingBroadcast> _pendingCombat = [];
         readonly List<double> _commandToFanoutMs = [];
+        readonly List<LatencySample> _commandToFanoutSamples = [];
+        ulong _selfEntityValue;
 
         public IReadOnlyDictionary<ulong, TrackedEntity> Entities => _byValue;
         public IReadOnlyList<double> CommandToFanoutLatenciesMs => _commandToFanoutMs;
+
+        public IReadOnlyList<LatencySample> CommandToFanoutSamples => _commandToFanoutSamples;
+
+        public void SetSelfEntity(ulong entityValue) => _selfEntityValue = entityValue;
 
         public EntityTracker Clone()
         {
@@ -65,6 +74,8 @@ public sealed class BotObservationLog
                 t._byValue[k] = v with { };
             t._spawnOrdinal = _spawnOrdinal;
             t._commandToFanoutMs.AddRange(_commandToFanoutMs);
+            t._commandToFanoutSamples.AddRange(_commandToFanoutSamples);
+            t._selfEntityValue = _selfEntityValue;
             return t;
         }
 
@@ -157,13 +168,15 @@ public sealed class BotObservationLog
                 case NetOpcode.AttackState:
                     {
                         var a = NetCodec.DecodeAttackState(payload);
-                        ClosePendingCombat(at, a.AttackerValue);
+                        if (_selfEntityValue != 0 && a.AttackerValue == _selfEntityValue)
+                            ClosePendingCombat(at);
                         break;
                     }
                 case NetOpcode.MagicSkillUse:
                     {
                         var c = NetCodec.DecodeMagicSkillUse(payload);
-                        ClosePendingCombat(at, (ulong)(uint)c.CasterObjectId);
+                        if (_selfEntityValue != 0 && (ulong)(uint)c.CasterObjectId == (ulong)(uint)_selfEntityValue)
+                            ClosePendingCombat(at);
                         break;
                     }
                 case NetOpcode.SocialAction:
@@ -180,7 +193,7 @@ public sealed class BotObservationLog
             }
         }
 
-        void ClosePendingCombat(DateTimeOffset at, ulong actorValue)
+        void ClosePendingCombat(DateTimeOffset at)
         {
             for (int i = _pendingCombat.Count - 1; i >= 0; i--)
             {
@@ -193,7 +206,9 @@ public sealed class BotObservationLog
 
                 if (p.Opcode is NetOpcode.AttackRequest or NetOpcode.UseSkill)
                 {
-                    _commandToFanoutMs.Add((at - p.SentAt).TotalMilliseconds);
+                    double ms = (at - p.SentAt).TotalMilliseconds;
+                    _commandToFanoutMs.Add(ms);
+                    _commandToFanoutSamples.Add(new LatencySample(ms, at));
                     _pendingCombat.RemoveAt(i);
                     break;
                 }
@@ -202,9 +217,11 @@ public sealed class BotObservationLog
 
         public void NoteLocalCommand(ushort opcode, DateTimeOffset at)
         {
-            if (opcode is NetOpcode.AttackRequest or NetOpcode.UseSkill or NetOpcode.MoveInput)
+            if (opcode is NetOpcode.AttackRequest or NetOpcode.UseSkill)
                 _pendingCombat.Add(new PendingBroadcast(opcode, at));
         }
+
+        public readonly record struct LatencySample(double Milliseconds, DateTimeOffset ObservedAt);
 
         public int PickAttackableNpc(int seed)
         {
