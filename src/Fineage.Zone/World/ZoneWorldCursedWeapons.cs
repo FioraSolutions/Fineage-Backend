@@ -328,9 +328,6 @@ public sealed partial class ZoneWorld
             return;
         player.Inventory.Remove(item);
         SaveInventory(player.Session, player.Inventory);
-        NetBridge?.FanoutInventoryUpdate(
-            [player.ObjectId],
-            InventoryMessages.Update(InventoryChange.Remove, item));
     }
 
     void CheckCursedWeaponOnEnter(ZoneEntity player)

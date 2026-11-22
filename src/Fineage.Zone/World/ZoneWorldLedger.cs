@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
     const long LedgerIdempotencyMilliseconds = 60 * 60 * 1000;
 
     readonly EconomyLedger _ledger;
+    readonly ILedgerJournal _journal;
     readonly LedgerTxSequence _ledgerIds = new();
 
     internal EconomyLedger LedgerForTests => _ledger;
@@ -58,7 +59,9 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Freight } freightAccount =>
             _byId.TryGetValue(freightAccount.OwnerId, out var freightOwner) && freightOwner.Freight != null
                 ? HoldingsOf(freightOwner.Freight)
-                : HoldingsFromStored(_accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight ?? []),
+                : HoldingsFromStored(QueuedFreight(freightAccount.OwnerId)
+                    ?? _accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight
+                    ?? []),
         { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
             HoldingsOf(_clan.TryGet(account.OwnerId, out var clan)
                 ? ClanWarehouseOf(clan)!
@@ -90,6 +93,24 @@ public sealed partial class ZoneWorld
         }
 
         return holdings;
+    }
+
+    /// <summary>
+    /// Freight for a character who is not in the world is queued until the economy commit. Reconciliation has to
+    /// see that queue: the store row is written in the same transaction as the ledger insert, which is after this.
+    /// </summary>
+    IReadOnlyList<StoredItem>? QueuedFreight(int characterId)
+    {
+        lock (_economyLock)
+        {
+            for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
+            {
+                if (_dirtyOfflineFreight[i].CharacterId == characterId)
+                    return _dirtyOfflineFreight[i].Freight;
+            }
+        }
+
+        return null;
     }
 
     static LedgerHoldings HoldingsOf(PlayerInventory inventory) => LedgerInventoryChange.HoldingsFrom(inventory);

@@ -40,7 +40,6 @@ public sealed partial class ZoneWorld
         var prepared = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
         CharacterRecord? stored = prepared.Stored;
         var selfPrepareTask = Task.Run(() => Fineage.Zone.Net.EnterSelfPrepare.FromStored(stored, _game.Items, _itemIds), ct);
-        bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
         session.PendingEnterSelfPrepare = await selfPrepareTask.ConfigureAwait(false);
         EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered;
@@ -70,15 +69,6 @@ public sealed partial class ZoneWorld
 
         if (entered == null)
             return null;
-
-        if (persistStarterBackfill &&
-            TryGetLivePlayer(session, out var backfillPlayer) &&
-            backfillPlayer.Inventory != null)
-        {
-            await Task.Run(
-                () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, backfillPlayer.Inventory),
-                ct).ConfigureAwait(false);
-        }
 
         if (entered.Evicted is { Count: > 0 })
         {
@@ -189,9 +179,10 @@ public sealed partial class ZoneWorld
         var inventory = LoadInventory(session, stored);
         bool applyStarterKit = NeedsStarterInventory(stored);
         var vitals = LoadVitals(session, stored);
-        var warehouse = new PrivateWarehouse(_game.Items);
+        var warehouse = new PrivateWarehouse(_game.Items, _itemIds);
         if (stored?.Warehouse != null)
             warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("warehouse", session.ObjectId, warehouse);
         RememberPenalties(session, stored);
         var entity = new ZoneEntity
         {
@@ -259,6 +250,8 @@ public sealed partial class ZoneWorld
         _byId[entity.ObjectId] = entity;
         if (applyStarterKit)
             ApplyStarterKitLedger(entity);
+        // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.
+        entity.Inventory?.EstablishCursor();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
         _chat.Entered(entity.ObjectId, entity.Name);

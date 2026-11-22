@@ -339,7 +339,8 @@ static class NetEnterWorldProjector
             };
         }
 
-        return new ItemListNetMsg { Items = rows };
+        inventory.DiscardChanges();
+        return new ItemListNetMsg { Items = rows, Version = v2.Version };
     }
 
     /// <summary>

@@ -87,8 +87,6 @@ public sealed partial class ZoneWorld
 
         if (!RecordConsumeOne(player, item, item.ItemId, out bool removedEntirely))
             return InventoryProtocol.Blocked;
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-            removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
         SaveInventory(session, player.Inventory!);
 
         var post = new HiredSiegeGuard

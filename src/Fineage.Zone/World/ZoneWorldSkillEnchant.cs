@@ -112,7 +112,6 @@ public sealed partial class ZoneWorld
                             {
                                 Changes = touches.Select(t => InventoryMessages.ChangeRow((int)t.Kind, t.Item)).ToArray()
                             };
-                            NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
                             SaveInventory(session, player.Inventory!);
                         }
 

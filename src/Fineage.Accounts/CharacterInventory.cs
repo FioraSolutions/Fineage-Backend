@@ -57,16 +57,25 @@ public static class CharacterInventory
         ArgumentNullException.ThrowIfNull(items);
         Validate(items);
         var inventory = new PlayerInventory(catalog, ids);
-        foreach (var row in items)
+        inventory.SuppressChanges();
+        try
         {
-            // Stale / not-yet-imported templates must not abort EnterWorld (handler_error on 0x0303).
-            if (!catalog.TryGet(row.ItemId, out _))
-                continue;
-            ItemInstance instance = row.ObjectId > 0
-                ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2, row.Option1, row.Option2)
-                : inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
-            if (row.EquippedSlot >= 0 && instance.Template.Equippable)
-                inventory.Equip(instance);
+            foreach (var row in items)
+            {
+                if (!catalog.TryGet(row.ItemId, out _))
+                    throw new InvalidOperationException(
+                        $"Item {row.ItemId} object {row.ObjectId} has no template.");
+                ItemInstance instance = row.ObjectId > 0
+                    ? inventory.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel, row.CustomType1, row.CustomType2, row.Option1, row.Option2)
+                    : inventory.Add(row.ItemId, row.Count, row.EnchantLevel);
+                if (row.EquippedSlot >= 0 && instance.Template.Equippable)
+                    inventory.Equip(instance);
+            }
+        }
+        finally
+        {
+            inventory.ResumeChanges();
+            inventory.DiscardChanges();
         }
 
         return inventory;

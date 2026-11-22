@@ -44,13 +44,12 @@ public sealed partial class ZoneWorld
             LedgerAccount.Of(SystemAccount.DropSource),
             () =>
             {
-                var added = looter.Inventory.Add(itemId, count);
-                var update = InventoryMessages.Update(InventoryChange.Add, added);
-                NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], update);
+                looter.Inventory.Add(itemId, count);
                 touched.Add(looter.ObjectId);
                 return true;
             },
             _ => npcId);
+        SaveInventory(looter.Session, looter.Inventory);
     }
 
     bool CanReceiveSweep(ZoneEntity player, List<Fineage.Zone.Drops.DropStack> stacks)

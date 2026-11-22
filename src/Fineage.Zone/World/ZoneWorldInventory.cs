@@ -36,14 +36,24 @@ public sealed partial class ZoneWorld
             () =>
             {
                 var added = player.Inventory.Add(itemId, count);
-                NetBridge?.FanoutInventoryUpdate(
-                    [session.ObjectId],
-                    InventoryMessages.Update(InventoryChange.Add, added));
                 RefreshWeightPenaltyAfterInventoryChange(session);
                 ZoneLog.Info($"grant object={session.ObjectId} item={itemId} count={count}");
                 return count;
             },
             _ => itemId);
+        SaveInventory(session, player.Inventory);
+        return null;
+    }
+
+    /// <summary>Full bag snapshot at the current version. Does not bump the version.</summary>
+    internal string? TrySendItemList(ZoneSession session)
+    {
+        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+            return "world";
+        var list = InventoryMessages.ItemList(player.Inventory);
+        player.Inventory.DiscardChanges();
+        NetBridge?.FanoutItemList([session.ObjectId], list);
+        ZoneLog.Info($"inventory resync char={session.ObjectId} version={list.Version} rows={list.Items.Length}");
         return null;
     }
 }

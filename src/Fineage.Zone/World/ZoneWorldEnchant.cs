@@ -230,7 +230,6 @@ public sealed partial class ZoneWorld
                     changes.Add(InventoryMessages.ChangeRow(InventoryChange.Modify, other));
                 }
 
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = [.. changes] });
                 NetBridge?.FanoutEnchantResult([session.ObjectId], new EnchantResultMsg
                 {
                     Result = resultCode,

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 
 namespace Fineage.Accounts;
@@ -139,6 +140,55 @@ public sealed partial class MemoryAccountStore
             Save();
             return true;
         }
+    }
+
+    public void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentNullException.ThrowIfNull(bags);
+        if (entries.Count > 0)
+            throw new InvalidOperationException(
+                $"memory account store cannot commit {entries.Count} ledger entries; those entries stay in the memory journal until a database commit writes them with the bags");
+        if (bags.Count == 0)
+            return;
+
+        // Apply every container, and put the previous rows back if a later write throws.
+        var undo = new List<Action>();
+        try
+        {
+            foreach (var bag in bags)
+            {
+                var current = FindById(bag.Account, bag.CharacterId)
+                    ?? throw new InvalidOperationException(
+                        $"item replace failed character={bag.CharacterId} account={bag.Account}: character missing");
+                ReplaceContainer(bag.Account, bag.CharacterId, bag.Inventory, current.Items, TryReplaceItems, undo);
+                ReplaceContainer(bag.Account, bag.CharacterId, bag.Warehouse, current.Warehouse, TryReplaceWarehouse, undo);
+                ReplaceContainer(bag.Account, bag.CharacterId, bag.Freight, current.Freight, TryReplaceFreight, undo);
+            }
+        }
+        catch
+        {
+            for (int i = undo.Count - 1; i >= 0; i--)
+                undo[i]();
+            throw;
+        }
+    }
+
+    void ReplaceContainer(
+        string account,
+        int characterId,
+        IReadOnlyList<StoredItem>? next,
+        IReadOnlyList<StoredItem>? previous,
+        Func<string, int, IReadOnlyList<StoredItem>, bool> replace,
+        List<Action> undo)
+    {
+        if (next == null)
+            return;
+        var prior = previous ?? [];
+        if (!replace(account, characterId, next))
+            throw new InvalidOperationException(
+                $"item replace failed character={characterId} account={account} items={next.Count}");
+        undo.Add(() => replace(account, characterId, prior));
     }
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)

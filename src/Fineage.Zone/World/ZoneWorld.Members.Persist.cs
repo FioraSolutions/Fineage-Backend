@@ -1,3 +1,4 @@
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Geo;
 using Fineage.Game;
 using Fineage.Game.Quests;
@@ -86,13 +87,27 @@ public sealed partial class ZoneWorld
         if (stored == null || stored.Items == null)
             return new PlayerInventory(_game.Items, _itemIds);
 
-        // Drop unknown templates with a log — Restore already skips them so EnterWorld stays up.
+        var known = new List<StoredItem>(stored.Items.Count);
         foreach (var row in stored.Items)
         {
-            if (!_game.Items.TryGet(row.ItemId, out _))
-                ZoneLog.Info($"inventory skip unknown item={row.ItemId} object={row.ObjectId} char={session.ObjectId}");
+            if (_game.Items.TryGet(row.ItemId, out _))
+            {
+                known.Add(row);
+                continue;
+            }
+
+            ZoneLog.Warn(
+                $"inventory drop unknown template char={session.ObjectId} item={row.ItemId} objectId={row.ObjectId} count={row.Count}");
         }
-        return CharacterInventory.Restore(_game.Items, _itemIds, stored.Items);
+
+        var inventory = CharacterInventory.Restore(_game.Items, _itemIds, known);
+        foreach (var collapsed in inventory.CollapsedStacks)
+        {
+            ZoneLog.Warn(
+                $"inventory merge duplicate stack char={session.ObjectId} item={collapsed.ItemId} droppedObjectId={collapsed.DroppedObjectId} keptObjectId={collapsed.KeptObjectId} count={collapsed.Count}");
+        }
+
+        return inventory;
     }
 
     void SaveInventory(ZoneSession session, PlayerInventory inventory)
@@ -101,76 +116,175 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
-        if (InventoryPersistDeferred)
+        lock (_economyLock)
         {
             _dirtyInventories[session.ObjectId] = (session, inventory);
-            return;
-        }
+            if (InventoryPersistDeferred)
+                return;
 
-        _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory);
+            // Economic item rows stay on this caller, in the same transaction as the ledger.
+            // InventoryUpdate is sent only after that commit returns.
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
+        }
+    }
+
+    /// <summary>One InventoryUpdate for every journal row, after the bag write has succeeded.</summary>
+    void PublishCommittedInventory(ZoneSession session, PlayerInventory inventory)
+    {
+        var changes = inventory.DrainChanges();
+        if (changes.Count == 0 || NetBridge == null)
+            return;
+        int version = inventory.BumpVersion();
+        NetBridge.FanoutInventoryUpdate(
+            [session.ObjectId],
+            InventoryMessages.FromPending(changes, version));
     }
 
     /// <summary>
-    /// Ledger first, then inventory, warehouse and freight. False means a commit failed and the rows that did not
-    /// land stay dirty; callers must not report economic success for those characters.
+    /// The pending ledger rows and every dirty bag, warehouse, and freight hold commit in one transaction on this
+    /// caller. False leaves those rows dirty and does not publish. InventoryUpdate goes out only after the commit
+    /// returns, and only for a bag that is still in the world.
     /// </summary>
     bool FlushDirtyInventories()
     {
-        if (!TryFlushLedger())
+        lock (_economyLock)
         {
-            ZoneLog.Warn("inventory persist blocked: auditable economy ledger flush failed");
-            return false;
+            if (!HasDirtyEconomy())
+                return true;
+            return TryCommitDirtyEconomy(discardWithoutPublish: null);
         }
-
-        bool committed = true;
-        committed &= CommitDirty(_dirtyInventories, (_, pair) =>
-            CommitStore("inventory replace", pair.Session, () =>
-                _persist.ReplaceItemsFromInventory(pair.Session.Account, pair.Session.ObjectId, pair.Inventory)));
-        committed &= CommitDirty(_dirtyWarehouses, (_, player) =>
-            player.Session == null || ReplaceWarehouseNow(player.Session, player));
-        committed &= CommitDirty(_dirtyFreight, (_, player) =>
-            player.Session == null || ReplaceFreightNow(player.Session, player));
-        return committed;
     }
+
+    bool HasDirtyEconomy() =>
+        _ledger.PendingFlushCount > 0
+        || _dirtyInventories.Count > 0
+        || _dirtyWarehouses.Count > 0
+        || _dirtyFreight.Count > 0
+        || _dirtyOfflineFreight.Count > 0;
 
     /// <summary>
-    /// Writes each dirty row. Rows that land are removed; a refusal or a thrown store error stays queued and is logged.
+    /// Commits every dirty economic container with the pending ledger entries. <paramref name="discardWithoutPublish"/>
+    /// is a character who is leaving: the bag is saved and the journal is dropped, with no InventoryUpdate.
     /// </summary>
-    static bool CommitDirty<T>(Dictionary<int, T> dirty, Func<int, T, bool> commit)
+    bool TryCommitDirtyEconomy(int? discardWithoutPublish)
     {
-        if (dirty.Count == 0)
-            return true;
-        var done = new List<int>();
-        bool ok = true;
-        foreach (var (id, row) in dirty)
-        {
-            if (commit(id, row))
-                done.Add(id);
-            else
-                ok = false;
-        }
-
-        foreach (int id in done)
-            dirty.Remove(id);
-        return ok;
+        lock (_economyLock)
+            return CommitDirtyEconomy(discardWithoutPublish);
     }
 
-    bool CommitStore(string what, ZoneSession session, Func<bool> write)
+    bool CommitDirtyEconomy(int? discardWithoutPublish)
     {
+        var bags = CollectDirtyBags();
+        long started = System.Diagnostics.Stopwatch.GetTimestamp();
         try
         {
-            if (write())
-                return true;
-            ZoneLog.Warn(
-                $"{what} refused account={session.Account} character={session.ObjectId}: store returned false");
-            return false;
+            _journal.CommitWith(entries =>
+            {
+                if (_accounts == null)
+                    return;
+                _accounts.CommitEconomy(entries, bags);
+            });
         }
         catch (Exception ex)
         {
-            ZoneLog.Warn(
-                $"{what} failed account={session.Account} character={session.ObjectId}: {ex.GetType().Name}: {ex.Message}");
+            int pending = _ledger.PendingFlushCount;
+            ZoneLog.Warn($"auditable economy commit failed pending={pending}: {ex.GetType().Name}: {ex.Message}");
+            FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
+            foreach (var bag in bags)
+            {
+                int items = bag.Inventory?.Count ?? bag.Warehouse?.Count ?? bag.Freight?.Count ?? 0;
+                ZoneLog.Warn(
+                    $"inventory persist failed char={bag.CharacterId} account={bag.Account} items={items}: {ex.GetType().Name}: {ex.Message}");
+            }
+
             return false;
         }
+        finally
+        {
+            _syncIo.Record(
+                "IAccountStore.CommitEconomy",
+                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+        }
+
+        var published = new List<int>();
+        foreach (var (objectId, pair) in _dirtyInventories)
+        {
+            try
+            {
+                if (discardWithoutPublish == objectId)
+                    pair.Inventory.DiscardChanges();
+                else
+                    PublishCommittedInventory(pair.Session, pair.Inventory);
+                published.Add(objectId);
+            }
+            catch (Exception ex)
+            {
+                ZoneLog.Warn(
+                    $"inventory publish failed char={objectId} account={pair.Session.Account} items={pair.Inventory.Items.Count}: {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        foreach (int objectId in published)
+            _dirtyInventories.Remove(objectId);
+        _dirtyWarehouses.Clear();
+        _dirtyFreight.Clear();
+        _dirtyOfflineFreight.Clear();
+        return true;
+    }
+
+    List<EconomyBagWrite> CollectDirtyBags()
+    {
+        var byId = new Dictionary<int, EconomyBagWrite>();
+        foreach (var (objectId, pair) in _dirtyInventories)
+        {
+            byId[objectId] = new EconomyBagWrite(pair.Session.Account, objectId)
+            {
+                Inventory = CharacterInventory.Rows(pair.Inventory),
+            };
+        }
+
+        foreach (var (objectId, player) in _dirtyWarehouses)
+        {
+            if (player.Session == null || player.Warehouse == null)
+                continue;
+            BagFor(byId, player.Session.Account, objectId).Warehouse = WarehouseRows(player.Warehouse);
+        }
+
+        foreach (var (objectId, player) in _dirtyFreight)
+        {
+            if (player.Session == null || player.Freight == null)
+                continue;
+            BagFor(byId, player.Session.Account, objectId).Freight = WarehouseRows(player.Freight);
+        }
+
+        foreach (var extra in _dirtyOfflineFreight)
+        {
+            if (extra.Freight == null)
+                continue;
+            BagFor(byId, extra.Account, extra.CharacterId).Freight = extra.Freight;
+        }
+
+        return byId.Values.ToList();
+    }
+
+    static EconomyBagWrite BagFor(Dictionary<int, EconomyBagWrite> byId, string account, int objectId)
+    {
+        if (!byId.TryGetValue(objectId, out var bag))
+            byId[objectId] = bag = new EconomyBagWrite(account, objectId);
+        return bag;
+    }
+
+    static StoredItem[] WarehouseRows(PrivateWarehouse warehouse)
+    {
+        var stacks = warehouse.Items;
+        var stored = new StoredItem[stacks.Count];
+        for (int i = 0; i < stacks.Count; i++)
+        {
+            var stack = stacks[i];
+            stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
+        }
+
+        return stored;
     }
 
     /// <summary>

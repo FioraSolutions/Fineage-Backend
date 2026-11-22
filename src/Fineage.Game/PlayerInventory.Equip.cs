@@ -103,16 +103,8 @@ public sealed partial class PlayerInventory
         var found = Find(objectId);
         if (found == null || found.IsEquipped || found.Count < count)
             return false;
-        if (found.Count == count)
-        {
-            found.Count = 0;
-            _items.Remove(found);
-            item = found;
-            removed = true;
-            return true;
-        }
-
-        found.Count -= count;
+        if (!Reduce(found, count, refuseIfEquipped: true, out removed))
+            return false;
         item = found;
         return true;
     }
@@ -124,24 +116,21 @@ public sealed partial class PlayerInventory
         if (count < 1)
             return false;
 
-        var found = FindByItemId(itemId);
+        var found = foundTemplateStack(itemId);
         if (found == null || found.Count < count)
             return false;
-
-        if (found.Count == count)
-        {
-            if (found.IsEquipped)
-                Unequip(found);
-            found.Count = 0;
-            _items.Remove(found);
-            stack = found;
-            removed = true;
-            return true;
-        }
-
-        found.Count -= count;
+        if (!Reduce(found, count, refuseIfEquipped: false, out removed))
+            return false;
         stack = found;
         return true;
+    }
+
+    ItemInstance? foundTemplateStack(int itemId)
+    {
+        var plain = FindPlainStack(itemId);
+        if (plain != null)
+            return plain;
+        return FindByItemId(itemId);
     }
 
     public void Unequip(int objectId) => Unequip(Require(objectId));
@@ -218,6 +207,7 @@ public sealed partial class PlayerInventory
             _equipped[index] = null;
             if (old.EquippedSlot == slot)
                 old.EquippedSlot = null;
+            Note(ChangeModify, old, old.Count, SlotOf(old));
             if (slot == PaperdollSlot.RHand && old.Template.WeaponType is WeaponType.Bow or WeaponType.FishingRod)
                 Place(PaperdollSlot.LHand, null);
         }
@@ -230,6 +220,7 @@ public sealed partial class PlayerInventory
 
         _equipped[index] = item;
         item.EquippedSlot = slot;
+        Note(ChangeModify, item, item.Count, (int)slot);
     }
 
     static bool OffhandFits(ItemInstance weapon, ItemInstance offhand) =>

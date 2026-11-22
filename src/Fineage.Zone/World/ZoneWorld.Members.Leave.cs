@@ -11,46 +11,29 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryFlushPlayerPersistBarrier(int objectId, ZoneSession session, ZoneEntity live)
     {
-        if (_ledger.PendingFlushCount > 0 && !TryFlushLedger())
+        lock (_economyLock)
         {
-            ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy ledger flush failed");
-            return false;
-        }
-
-        if (live.Inventory != null && !PersistInventoryNow(session, live.Inventory))
-            return false;
-        if (_dirtyWarehouses.TryGetValue(objectId, out var warehousePlayer))
-        {
-            if (!ReplaceWarehouseNow(session, warehousePlayer))
+            if (live.Inventory != null)
+                _dirtyInventories[objectId] = (session, live.Inventory);
+            if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
+            {
+                ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
                 return false;
-            _dirtyWarehouses.Remove(objectId);
+            }
         }
 
-        if (_dirtyFreight.TryGetValue(objectId, out var freightPlayer))
-        {
-            if (!ReplaceFreightNow(session, freightPlayer))
-                return false;
-            _dirtyFreight.Remove(objectId);
-        }
-
-        if (_dirtyInventories.TryGetValue(objectId, out var dirty))
-        {
-            if (!CommitStore(
-                    "inventory replace",
-                    dirty.Session,
-                    () => _persist.ReplaceItemsFromInventory(dirty.Session.Account, dirty.Session.ObjectId, dirty.Inventory)))
-                return false;
-            _dirtyInventories.Remove(objectId);
-        }
-
+        live.Inventory?.DiscardChanges();
         return true;
     }
 
     void ClearDeferredPersistRows(int objectId)
     {
-        _dirtyInventories.Remove(objectId);
-        _dirtyWarehouses.Remove(objectId);
-        _dirtyFreight.Remove(objectId);
+        lock (_economyLock)
+        {
+            _dirtyInventories.Remove(objectId);
+            _dirtyWarehouses.Remove(objectId);
+            _dirtyFreight.Remove(objectId);
+        }
         _lastPresenceSaveMs.TryRemove(objectId, out _);
         _pendingPresenceAccess.TryRemove(objectId, out _);
     }
@@ -58,10 +41,14 @@ public sealed partial class ZoneWorld
     bool PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
-        return CommitStore(
-            "inventory replace",
-            session,
-            () => _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, inventory));
+        lock (_economyLock)
+        {
+            _dirtyInventories[session.ObjectId] = (session, inventory);
+            if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
+                return false;
+        }
+        inventory.DiscardChanges();
+        return true;
     }
 
     void ReloadCharacterRecord(ZoneSession session, ref CharacterRecord? stored)
@@ -125,7 +112,11 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    internal bool HasDeferredInventoryForTests(int objectId) => _dirtyInventories.ContainsKey(objectId);
+    internal bool HasDeferredInventoryForTests(int objectId)
+    {
+        lock (_economyLock)
+            return _dirtyInventories.ContainsKey(objectId);
+    }
 
     internal bool FlushDirtyInventoriesForTests() => FlushDirtyInventories();
 
@@ -141,6 +132,9 @@ public sealed partial class ZoneWorld
 
     internal int CharacterSnapshotWriterThreadForTests => _snapshots.LastWriterThreadId;
 
-    internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory) =>
-        _dirtyInventories[session.ObjectId] = (session, inventory);
+    internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
+    {
+        lock (_economyLock)
+            _dirtyInventories[session.ObjectId] = (session, inventory);
+    }
 }

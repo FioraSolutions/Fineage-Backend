@@ -139,9 +139,11 @@ public sealed partial class ZoneWorld
     int _deferInventoryPersistDepth;
 
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
+    readonly object _economyLock = new();
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
+    readonly List<EconomyBagWrite> _dirtyOfflineFreight = [];
     readonly bool _npcRegen;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
@@ -342,6 +344,7 @@ public sealed partial class ZoneWorld
                     "ILedgerJournal is required when IAccountStore is configured. Production hosts pass " +
                     "accounts.OpenLedgerJournal(); tests must pass new MemoryLedgerJournal().")
                 : new MemoryLedgerJournal());
+        _journal = journal;
         _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);
