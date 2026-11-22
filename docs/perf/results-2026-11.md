@@ -141,11 +141,13 @@ export FINEAGE_BUILD_CONFIGURATION=Release
 
 Branch `cursor/command-fanout-dispatcher-2d42`: replaces end-of-step synchronous `WorldFanoutSequencer.Drain()` (PR #852) with **sealed batches enqueued at command commit** to `FanoutDispatcher`, classed ingress (`FINEAGE_ZONE_COMMAND_APPLY_BUDGET`), `AudienceSnapshotId`, expanded histogram buckets, and `fineage_command_to_wire_ms`.
 
-| Scenario | Workers | Before (dev CI #855) command→fanout p99 | After (this branch) | Notes |
+| Scenario | Workers | Before (dev CI #855) command→fanout p99 | After (#862 CI run 45000441053) | Notes |
 | --- | ---: | ---: | ---: | --- |
-| bots-50-town | 0 | ~2833 ms (load-test oracle) | _CI pending_ | `./scripts/ci-load-test-smoke.sh` + `bots-50-town` after PR |
-| bots-50-town | 4 | — | _CI pending_ | same |
-| Unit oracle | — | — | `RegionSimulationDeterminismTests` pass (11) | full `RegionParallelStressTests` still run in CI |
+| bots-50-town | 0 | ~2833 ms (`bots-100-spread`) | **2932 ms** | tick p99 1500; `commands` stage p99 1500 |
+| bots-50-town | 4 | ~2818 ms | **2540 ms** | tick p99 750; `commands` stage p99 750 |
+| Unit oracle | — | — | `RegionParallelStressTests` + determinism **pass** (CI `zone-parallel-regions`) | 50/50 in world, 0 stuck both workers |
+
+**Merge gate (#862):** command→fanout p99 is **not** in the 100–200 ms target and workers=0 is **not** clearly below the ~2833 ms baseline → **no squash-merge yet**; investigate command→wire vs load-test oracle next.
 
 **Expected movement:** command handler replies complete after flush + enqueue (not after full step drain); tick `commands` stage p99 should drop vs #852’s end-of-step drain regression (p50 ~580 ms reported).
 
