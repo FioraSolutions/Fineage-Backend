@@ -327,6 +327,30 @@
           "limit": 0
         }
       ]
+    },
+    {
+      "npcId": 30623,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30623-talk-026.htm"
+    },
+    {
+      "npcId": 30704,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30704-talk-027.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30756-talk-028.htm"
+    },
+    {
+      "npcId": 30857,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30857-talk-029.htm"
     }
   ]
 }

@@ -60,6 +60,62 @@
           "op": "give_item",
           "itemId": 3678,
           "count": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 27136,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 30742,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27135,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27153,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 30743,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27154,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27155,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27138,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30738-event-30738-03-002.htm"
@@ -400,6 +456,18 @@
       "when": "started",
       "cond": 3,
       "html": ""
+    },
+    {
+      "npcId": 30742,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30742-talk-024.htm"
+    },
+    {
+      "npcId": 30743,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30743-talk-025.htm"
     }
   ]
 }

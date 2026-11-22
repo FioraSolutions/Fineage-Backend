@@ -567,6 +567,23 @@
           "condAtLimit": 2
         }
       ]
+    },
+    {
+      "npcId": 22079,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8100,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

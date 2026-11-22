@@ -119,6 +119,12 @@
       "cond": 1,
       "html": "",
       "ops": []
+    },
+    {
+      "npcId": 30092,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30092-talk-011.htm"
     }
   ]
 }

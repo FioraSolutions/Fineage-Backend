@@ -571,6 +571,27 @@
         {
           "op": "set_cond",
           "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 27171,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27172,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27167,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30753-event-30753-05-060.htm"
@@ -599,7 +620,7 @@
       "htmlFile": "30753-event-30753-09-061.htm"
     },
     {
-      "npcId": 30753,
+      "npcId": 30754,
       "hook": "event",
       "when": "absent",
       "event": "30754-03",
@@ -617,7 +638,7 @@
       "htmlFile": "30753-event-30754-03-062.htm"
     },
     {
-      "npcId": 30753,
+      "npcId": 30755,
       "hook": "event",
       "when": "absent",
       "event": "30755-05",
@@ -635,14 +656,14 @@
       "htmlFile": "30753-event-30755-05-063.htm"
     },
     {
-      "npcId": 30753,
+      "npcId": 30498,
       "hook": "event",
       "when": "absent",
       "event": "30498-02",
       "htmlFile": "30753-event-30498-02-064.htm"
     },
     {
-      "npcId": 30753,
+      "npcId": 30678,
       "hook": "event",
       "when": "absent",
       "event": "30678-01a",
@@ -798,6 +819,30 @@
     },
     {
       "npcId": 27172,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 27165,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 27166,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 27167,
       "hook": "kill",
       "when": "started",
       "cond": 1,

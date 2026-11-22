@@ -117,7 +117,7 @@
       "htmlFile": "30088-event-30088-03-013.htm"
     },
     {
-      "npcId": 30088,
+      "npcId": 30294,
       "hook": "event",
       "when": "absent",
       "event": "30294-02",
@@ -143,7 +143,7 @@
       "htmlFile": "30088-event-30088-06-015.htm"
     },
     {
-      "npcId": 30088,
+      "npcId": 30165,
       "hook": "event",
       "when": "absent",
       "event": "30165-02",
@@ -156,7 +156,7 @@
       "htmlFile": "30088-event-30165-02-016.htm"
     },
     {
-      "npcId": 30088,
+      "npcId": 30165,
       "hook": "event",
       "when": "absent",
       "event": "30165-05",

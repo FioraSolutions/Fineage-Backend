@@ -1117,6 +1117,12 @@
       "when": "any",
       "event": "30417-07",
       "htmlFile": "30417-07.htm"
+    },
+    {
+      "npcId": 30311,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30311-talk-064.htm"
     }
   ]
 }

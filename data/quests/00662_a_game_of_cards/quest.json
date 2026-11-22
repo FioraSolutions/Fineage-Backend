@@ -111,6 +111,366 @@
       "when": "absent",
       "event": "30845-11",
       "htmlFile": "30845-event-30845-11-009.htm"
+    },
+    {
+      "npcId": 18001,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20672,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20673,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20674,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20677,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20955,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20958,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20959,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20961,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20962,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20965,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20966,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20968,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20972,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20973,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21002,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21004,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21006,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21008,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21010,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21109,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21112,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21114,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21116,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21278,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21279,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21280,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21281,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21286,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21287,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21288,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21289,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21508,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21510,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21513,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21515,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21520,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21526,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21530,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 21535,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [],
+      "party": true
     }
   ]
 }

@@ -178,6 +178,13 @@
         {
           "op": "set_cond",
           "cond": 3
+        },
+        {
+          "op": "summon",
+          "npcId": 31684,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "31559-03.htm"

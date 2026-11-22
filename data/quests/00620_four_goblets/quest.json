@@ -10826,6 +10826,51 @@
           "limit": 0
         }
       ]
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "started",
+      "event": "EXIT",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": 169590,
+          "y": -90218,
+          "z": -2914
+        }
+      ],
+      "htmlFile": "31453-event-EXIT-424.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "started",
+      "event": "TELEPORT_TO_4S",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": 178298,
+          "y": -84574,
+          "z": -7216
+        }
+      ],
+      "htmlFile": "31453-event-TELEPORT_TO_4S-425.htm"
+    },
+    {
+      "npcId": 31453,
+      "hook": "event",
+      "when": "started",
+      "event": "TELEPORT_TO_IT",
+      "ops": [
+        {
+          "op": "teleport",
+          "x": 186942,
+          "y": -75602,
+          "z": -2834
+        }
+      ],
+      "htmlFile": "31453-event-TELEPORT_TO_IT-426.htm"
     }
   ]
 }

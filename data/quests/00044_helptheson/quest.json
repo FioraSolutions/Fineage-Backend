@@ -124,7 +124,7 @@
       "htmlFile": "30827-event-30827-06-010.htm"
     },
     {
-      "npcId": 30827,
+      "npcId": 30505,
       "hook": "event",
       "when": "absent",
       "event": "30505-02",

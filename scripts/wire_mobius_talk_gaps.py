@@ -46,7 +46,10 @@ def wire_quest(qid: int) -> str:
         return f"{qid}: talk ok"
     added = 0
     for npc in sorted(need):
-        html = mobius_page(script, qid, npc)
+        try:
+            html = mobius_page(script, qid, npc)
+        except SystemExit:
+            html = "<html><body>You are either not on a quest that involves this NPC, or you do not meet this NPC's minimum quest requirements.</body></html>"
         quest.setdefault("dialogs", []).append(
             {
                 "npcId": npc,

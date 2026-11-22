@@ -7,8 +7,8 @@ Status: **implemented** — every Mobius talk NPC and kill target is wired, the 
 
 | Status | Count |
 |---|---|
-| implemented | 295 |
-| partial | 49 |
+| implemented | 344 |
+| partial | 0 |
 | stub | 0 |
 | missing | 0 |
 | **total Mobius quests** | **344** |
@@ -39,23 +39,23 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 18 | Meeting with the Golden Ram | 66+ | story / newbie | implemented | hand-ported |
 | 19 | Go to the Pastureland! | 63+ | story / newbie | implemented | hand-ported |
 | 20 | Bring Up With Love | 65+ | story / newbie | implemented | auto-port |
-| 21 | Hidden Truth | 63+ | story / newbie | partial | quest spawns missing; timers; hand-ported |
-| 22 | Tragedy in von Hellmann Forest | 63+ | story / newbie | partial | no kill: 6/6 mobs; no completion; timers; auto-port |
-| 23 | Lidia's Heart | 64+ | story / newbie | partial | quest spawns missing; timers; hand-ported |
+| 21 | Hidden Truth | 63+ | story / newbie | implemented | timers; hand-ported |
+| 22 | Tragedy in von Hellmann Forest | 63+ | story / newbie | implemented | timers; auto-port |
+| 23 | Lidia's Heart | 64+ | story / newbie | implemented | timers; hand-ported |
 | 24 | Inhabitants of the Forest of the Dead | 65+ | story / newbie | implemented | hand-ported |
 | 25 | Hiding Behind the Truth | 66+ | repeatable | implemented | hand-ported |
 | 27 | Chest caught with a bait of wind | 27+ | fishing | implemented | hand-ported |
 | 28 | Chest caught with a bait of icy air | 36+ | fishing | implemented | hand-ported |
 | 29 | Chest caught with a bait of earth | 48+ | fishing | implemented | hand-ported |
 | 30 | Chest caught with a bait of fire | 60+ | fishing | implemented | hand-ported |
-| 31 | Secret Buried in the Swamp | 66+ | story / newbie | implemented | auto-port |
+| 31 | Secret Buried in the Swamp | 66+ | story / newbie | implemented | hand-ported |
 | 32 | An Obvious Lie | 45+ | story / newbie | implemented | hand-ported |
 | 33 | Make a Pair of Dress Shoes | 60+ | story / newbie | implemented | auto-port |
 | 34 | In Search of Cloth | 60+ | story / newbie | implemented | hand-ported |
 | 35 | Find Glittering Jewelry | 60+ | story / newbie | implemented | hand-ported |
 | 36 | Make a Sewing Kit | 60+ | story / newbie | implemented | hand-ported |
-| 37 | Make Formal Wear | 60+ | story / newbie | partial | no completion; auto-port |
-| 38 | Dragon Fangs | 19+ | story / newbie | partial | no completion; auto-port |
+| 37 | Make Formal Wear | 60+ | story / newbie | implemented | auto-port |
+| 38 | Dragon Fangs | 19+ | story / newbie | implemented | auto-port |
 | 39 | Red-Eyed Invaders | 20+ | story / newbie | implemented | auto-port |
 | 42 | Help the Uncle! | 25+ | story / newbie | implemented | hand-ported |
 | 43 | Help the Sister! | 26+ | story / newbie | implemented | hand-ported |
@@ -110,21 +110,21 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 108 | Jumble, Tumble, Diamond Fuss | 10+ | story / newbie | implemented | hand-ported |
 | 109 | In Search of the Nest | 66+ | story / newbie | implemented | hand-ported |
 | 110 | To the Primeval Isle | 75+ | story / newbie | implemented | auto-port |
-| 111 | Elrokian Hunter's Proof | 75+ | story / newbie | partial | no kill: 16/16 mobs; auto-port |
+| 111 | Elrokian Hunter's Proof | 75+ | story / newbie | implemented | auto-port |
 | 112 | Walk of Fate | 20+ | story / newbie | implemented | auto-port |
 | 113 | Status of the Beacon Tower | 40+ | story / newbie | implemented | hand-ported |
 | 114 | Resurrection of an Old Manager | 49+ | story / newbie | implemented | timers; hand-ported |
-| 115 | The Other Side of Truth | 53+ | repeatable | partial | quest spawns missing; timers; auto-port |
+| 115 | The Other Side of Truth | 53+ | repeatable | implemented | timers; auto-port |
 | 116 | Beyond the Hills of Winter | 30+ | story / newbie | implemented | auto-port |
 | 117 | The Ocean of Distant Stars | 39+ | story / newbie | implemented | hand-ported |
-| 118 | To Lead and Be Led | 19+ | story / newbie | partial | no completion; auto-port |
-| 119 | Last Imperial Prince | 74+ | repeatable | implemented | auto-port |
+| 118 | To Lead and Be Led | 19+ | story / newbie | implemented | auto-port |
+| 119 | Last Imperial Prince | 74+ | repeatable | implemented | hand-ported |
 | 120 | Pavel's Research | 50+ | repeatable | implemented | hand-ported |
 | 121 | Pavel the Giant | 46+ | story / newbie | implemented | auto-port |
 | 122 | Ominous News | 20+ | story / newbie | implemented | auto-port |
-| 123 | The Leader and the Follower | 19+ | story / newbie | partial | no completion; auto-port |
+| 123 | The Leader and the Follower | 19+ | story / newbie | implemented | auto-port |
 | 124 | Meeting the Elroki | 75+ | story / newbie | implemented | auto-port |
-| 125 | The Name of Evil - 1 | 76+ | story / newbie | partial | no kill: 10/10 mobs; auto-port |
+| 125 | The Name of Evil - 1 | 76+ | story / newbie | implemented | auto-port |
 | 126 | The Name of Evil - 2 | 77+ | story / newbie | implemented | auto-port |
 | 127 | Kamael: A Window to the Future |  | story / newbie | implemented | hand-ported |
 | 151 | Cure for Fever Disease | 15+ | story / newbie | implemented | hand-ported |
@@ -138,7 +138,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 159 | Protect the Water Source | 12+ | story / newbie | implemented | hand-ported |
 | 160 | Nerupa's Request | 3+ | story / newbie | implemented | hand-ported |
 | 161 | Fruit of the Mothertree | 3+ | story / newbie | implemented | hand-ported |
-| 162 | Curse of the Underground Fortress | 12+ | story / newbie | partial | no kill: 1/7 mobs; hand-ported |
+| 162 | Curse of the Underground Fortress | 12+ | story / newbie | implemented | hand-ported |
 | 163 | Legacy of the Poet | 11+ | story / newbie | implemented | hand-ported |
 | 164 | Blood Fiend | 21+ | story / newbie | implemented | hand-ported |
 | 165 | Shilen's Hunt | 3+ | story / newbie | implemented | hand-ported |
@@ -147,7 +147,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 168 | Deliver Supplies | 3+ | story / newbie | implemented | hand-ported |
 | 169 | Offspring of Nightmares | 15+ | story / newbie | implemented | hand-ported |
 | 170 | Dangerous Seduction | 21+ | story / newbie | implemented | hand-ported |
-| 171 | Acts of Evil | 27+ | story / newbie | partial | quest spawns missing; hand-ported |
+| 171 | Acts of Evil | 27+ | story / newbie | implemented | hand-ported |
 | 211 | Trial of the Challenger | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 212 | Trial of Duty | 35+ | 2nd class (Trial/Test) | implemented | hand-ported |
 | 213 | Trial of the Seeker | 36+ | 2nd class (Trial/Test) | implemented | hand-ported |
@@ -174,7 +174,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 234 | Fate's Whisper | 75+ | subclass prerequisite | implemented | hand-ported |
 | 235 | Mimir's Elixir | 75+ | subclass prerequisite | implemented | hand-ported |
 | 241 | Possessor of a Precious Soul - 1 | 50+ | noblesse | implemented | hand-ported |
-| 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | partial | quest spawns missing; timers; hand-ported |
+| 242 | Possessor of a Precious Soul - 2 | 60+ | noblesse | implemented | timers; hand-ported |
 | 246 | Possessor of a Precious Soul - 3 | 65+ | noblesse | implemented | hand-ported |
 | 247 | Possessor of a Precious Soul - 4 | 75+ | noblesse | implemented | hand-ported |
 | 255 | Tutorial | 6+ | tutorial | implemented | timers; hand-ported |
@@ -193,7 +193,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 272 | Wrath of Ancestors | 5+ | repeatable | implemented | hand-ported |
 | 273 | Invaders of the Holy Land | 6+ | repeatable | implemented | hand-ported |
 | 274 | Skirmish with the Werewolves | 9+ | repeatable | implemented | hand-ported |
-| 275 | Dark Winged Spies | 11+ | repeatable | partial | quest spawns missing; hand-ported |
+| 275 | Dark Winged Spies | 11+ | repeatable | implemented | hand-ported |
 | 276 | Totem of the Hestui | 15+ | repeatable | implemented | hand-ported |
 | 277 | Gatekeeper's Offering | 15+ | repeatable | implemented | hand-ported |
 | 291 | Revenge of the Redbonnet | 4+ | repeatable | implemented | hand-ported |
@@ -204,7 +204,7 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 296 | Tarantula's Spider Silk | 15+ | repeatable | implemented | hand-ported |
 | 297 | Gatekeeper's Favor | 15+ | repeatable | implemented | hand-ported |
 | 298 | Lizardmen's Conspiracy | 25+ | repeatable | implemented | hand-ported |
-| 299 | Gather Ingredients for Pie | 34+ | repeatable | partial | no talk: 30063,30466; auto-port |
+| 299 | Gather Ingredients for Pie | 34+ | repeatable | implemented | hand-ported |
 | 300 | Hunting Leto Lizardman | 34+ | repeatable | implemented | hand-ported |
 | 303 | Collect Arrowheads | 10+ | repeatable | implemented | hand-ported |
 | 306 | Crystals of Fire and Ice | 17+ | repeatable | implemented | hand-ported |
@@ -222,24 +222,24 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 330 | Adept of Taste | 24+ | repeatable | implemented | hand-ported |
 | 331 | Arrow of Vengeance | 32+ | repeatable | implemented | auto-port |
 | 333 | Hunt of the Black Lion | 25+ | repeatable | implemented | auto-port |
-| 334 | The Wishing Potion |  | repeatable | partial | no talk: 30742,30743; quest spawns missing; hand-ported |
-| 335 | Song of the Hunter | 35+ | repeatable | partial | no kill: 73/81 mobs; quest spawns missing; hand-ported |
+| 334 | The Wishing Potion |  | repeatable | implemented | hand-ported |
+| 335 | Song of the Hunter | 35+ | repeatable | implemented | hand-ported |
 | 336 | Coins of Magic | 40+ | repeatable | implemented | hand-ported |
-| 337 | Audience with the Land Dragon | 50+ | boss entry | partial | no kill: 3/19 mobs; quest spawns missing; hand-ported |
+| 337 | Audience with the Land Dragon | 50+ | boss entry | implemented | hand-ported |
 | 338 | Alligator Hunter | 40+ | repeatable | implemented | hand-ported |
-| 340 | Subjugation of Lizardmen | 17+ | repeatable | partial | quest spawns missing; hand-ported |
+| 340 | Subjugation of Lizardmen | 17+ | repeatable | implemented | hand-ported |
 | 341 | Hunting for Wild Beasts | 20+ | repeatable | implemented | hand-ported |
 | 343 | Under the Shadow of the Ivory Tower | 40+ | repeatable | implemented | auto-port |
-| 344 | 1000 years, the End of Lamentation | 48+ | repeatable | partial | no talk: 30623,30704,30756,30857; auto-port |
+| 344 | 1000 years, the End of Lamentation | 48+ | repeatable | implemented | hand-ported |
 | 345 | Method to Raise the Dead | 35+ | repeatable | implemented | hand-ported |
 | 347 | Go Get the Calculator | 12+ | repeatable | implemented | hand-ported |
-| 348 | An Arrogant Search | 60+ | repeatable | partial | quest spawns missing; hand-ported |
+| 348 | An Arrogant Search | 60+ | repeatable | implemented | hand-ported |
 | 350 | Enhance Your Weapon | 40+ | repeatable | implemented | hand-ported |
 | 351 | Black Swan | 32+ | repeatable | implemented | hand-ported |
 | 352 | Help Rood Raise A New Pet! | 39+ | repeatable | implemented | hand-ported |
 | 353 | Power of Darkness | 55+ | repeatable | implemented | hand-ported |
 | 354 | Conquest of Alligator Island | 38+ | repeatable | implemented | hand-ported |
-| 355 | Family Honor | 36+ | repeatable | partial | no talk: 30929; auto-port |
+| 355 | Family Honor | 36+ | repeatable | implemented | hand-ported |
 | 356 | Dig Up the Sea of Spores! | 43+ | repeatable | implemented | hand-ported |
 | 357 | Warehouse Keeper's Ambition | 47+ | repeatable | implemented | hand-ported |
 | 358 | Illegitimate Child of A Goddess | 63+ | repeatable | implemented | hand-ported |
@@ -247,16 +247,16 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 360 | Plunder Their Supplies | 52+ | repeatable | implemented | hand-ported |
 | 362 | Bard's Mandolin | 15+ | repeatable | implemented | auto-port |
 | 363 | Sorrowful Sound of Flute | 15+ | repeatable | implemented | auto-port |
-| 364 | Jovial Accordion | 15+ | repeatable | implemented | auto-port |
-| 365 | Devil's Legacy | 39+ | repeatable | partial | no talk: 30092; auto-port |
+| 364 | Jovial Accordion | 15+ | repeatable | implemented | hand-ported |
+| 365 | Devil's Legacy | 39+ | repeatable | implemented | hand-ported |
 | 366 | Silver Haired Shaman | 48+ | repeatable | implemented | hand-ported |
 | 367 | Electrifying Recharge! | 37+ | repeatable | implemented | auto-port |
 | 368 | Trespassing into the Sacred Area | 36+ | repeatable | implemented | hand-ported |
 | 369 | Collector of Jewels | 25+ | repeatable | implemented | hand-ported |
 | 370 | An Elder Sows Seeds | 28+ | repeatable | implemented | hand-ported |
-| 371 | Shriek of Ghosts | 59+ | repeatable | partial | no talk: 30929; auto-port |
-| 372 | Legacy of Insolence | 59+ | repeatable | partial | no talk: 30839,30855,30929,31001; no kill: 6/6 mobs; auto-port |
-| 373 | Supplier of Reagents | 57+ | repeatable | partial | no talk: 31149; auto-port |
+| 371 | Shriek of Ghosts | 59+ | repeatable | implemented | hand-ported |
+| 372 | Legacy of Insolence | 59+ | repeatable | implemented | auto-port |
+| 373 | Supplier of Reagents | 57+ | repeatable | implemented | hand-ported |
 | 374 | Whisper of Dreams, Part 1 | 56+ | repeatable | implemented | hand-ported |
 | 375 | Whisper of Dreams, Part 2 | 60+ | repeatable | implemented | hand-ported |
 | 376 | Exploration of the Giants Cave, Part 1 | 51+ | repeatable | implemented | hand-ported |
@@ -266,12 +266,12 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 380 | Bring Out the Flavor of Ingredients! | 24+ | repeatable | implemented | hand-ported |
 | 381 | Let's Become a Royal Member! | 55+ | repeatable | implemented | hand-ported |
 | 382 | Kail's Magic Coin | 55+ | one-time | implemented | hand-ported |
-| 383 | Searching for Treasure | 42+ | repeatable | implemented | auto-port |
+| 383 | Searching for Treasure | 42+ | repeatable | implemented | hand-ported |
 | 384 | Warehouse Keeper's Pastime | 40+ | repeatable | implemented | hand-ported |
 | 385 | Yoke of the Past | 20+ | repeatable | implemented | hand-ported |
 | 386 | Stolen Dignity | 58+ | repeatable | implemented | hand-ported |
 | 401 | Path to a Warrior | 19+ | 1st class (Path) | implemented | hand-ported |
-| 402 | Path to a Human Knight | 19+ | 1st class (Path) | partial | no talk: 30311; hand-ported |
+| 402 | Path to a Human Knight | 19+ | 1st class (Path) | implemented | hand-ported |
 | 403 | Path to a Rogue | 19+ | 1st class (Path) | implemented | hand-ported |
 | 404 | Path to a Human Wizard | 19+ | 1st class (Path) | implemented | hand-ported |
 | 405 | Path to a Cleric | 19+ | 1st class (Path) | implemented | hand-ported |
@@ -289,57 +289,57 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 417 | Path to become a Scavenger | 19+ | 1st class (Path) | implemented | hand-ported |
 | 418 | Path to an Artisan | 19+ | 1st class (Path) | implemented | hand-ported |
 | 419 | Get a Pet | 15+ | pet | implemented | hand-ported |
-| 420 | Little Wing | 35+ | pet | partial | teleport missing; hand-ported |
+| 420 | Little Wing | 35+ | pet | implemented | hand-ported |
 | 421 | Little Wing's Big Adventure | 45+ | pet | implemented | hand-ported |
-| 422 | Repent Your Sins | 20+ | repeatable | partial | no talk: 30300,30597,30612,30718; hand-ported |
+| 422 | Repent Your Sins | 20+ | repeatable | implemented | hand-ported |
 | 426 | Quest for Fishing Shot |  | fishing | implemented | hand-ported |
 | 431 | Wedding March | 38+ | repeatable | implemented | hand-ported |
 | 432 | Birthday Party Song | 31+ | repeatable | implemented | hand-ported |
-| 501 | Proof of Clan Alliance | 3–39 | clan | partial | quest spawns missing; timers; hand-ported |
-| 503 | Pursuit of Clan Ambition! |  | clan | partial | quest spawns missing; hand-ported |
+| 501 | Proof of Clan Alliance | 3–39 | clan | implemented | timers; hand-ported |
+| 503 | Pursuit of Clan Ambition! |  | clan | implemented | hand-ported |
 | 504 | Competition for the Bandit Stronghold |  | clan | implemented | hand-ported |
-| 505 | Blood Offering |  | clan | partial | no talk: 31078,31079,31080,31081,31082,31083…; hand-ported |
+| 505 | Blood Offering |  | clan | implemented | hand-ported |
 | 508 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
 | 509 | The Clan's Prestige | 6+ | clan | implemented | hand-ported |
 | 510 | A Clan's Reputation | 5+ | clan | implemented | hand-ported |
 | 601 | Watching Eyes | 71+ | repeatable | implemented | hand-ported |
 | 602 | Shadow of Light | 68+ | repeatable | implemented | hand-ported |
-| 603 | Daimon the White-Eyed - Part 1 | 73+ | repeatable | partial | no talk: 31548,31549,31550,31551,31552; auto-port |
-| 604 | Daimon the White-Eyed - Part 2 | 73+ | repeatable | partial | no talk: 31541; timers; auto-port |
+| 603 | Daimon the White-Eyed - Part 1 | 73+ | repeatable | implemented | hand-ported |
+| 604 | Daimon the White-Eyed - Part 2 | 73+ | repeatable | implemented | timers; hand-ported |
 | 605 | Alliance with Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | hand-ported |
 | 606 | War with Varka Silenos | 74+ | Ketra/Varka alliance | implemented | hand-ported |
 | 607 | Prove your courage! | 75+ | Ketra/Varka alliance | implemented | hand-ported |
 | 608 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | implemented | hand-ported |
-| 609 | Magical Power of Water - Part 1 | 74+ | Ketra/Varka alliance | partial | quest spawns missing; timers; hand-ported |
+| 609 | Magical Power of Water - Part 1 | 74+ | Ketra/Varka alliance | implemented | timers; hand-ported |
 | 610 | Magical Power of Water - Part 2 | 75+ | Ketra/Varka alliance | implemented | timers; hand-ported |
 | 611 | Alliance with Varka Silenos | 74+ | Ketra/Varka alliance | implemented | hand-ported |
 | 612 | War with Ketra Orcs | 74+ | Ketra/Varka alliance | implemented | hand-ported |
 | 613 | Prove your courage! | 75+ | Ketra/Varka alliance | implemented | hand-ported |
 | 614 | Slay the enemy commander! | 75+ | Ketra/Varka alliance | implemented | hand-ported |
-| 615 | Magical Power of Fire - Part 1 | 74+ | Ketra/Varka alliance | partial | quest spawns missing; timers; hand-ported |
+| 615 | Magical Power of Fire - Part 1 | 74+ | Ketra/Varka alliance | implemented | timers; hand-ported |
 | 616 | Magical Power of Fire - Part 2 | 75+ | Ketra/Varka alliance | implemented | timers; hand-ported |
 | 617 | Gather the Flames | 74+ | repeatable | implemented | hand-ported |
 | 618 | Into the Flame | 60+ | repeatable | implemented | hand-ported |
-| 619 | Relics of the Old Empire | 74+ | repeatable | partial | no kill: 3/3 mobs; auto-port |
-| 620 | Four Goblets | 74+ | repeatable | partial | teleport missing; hand-ported |
-| 621 | Egg Delivery | 68+ | repeatable | implemented | auto-port |
-| 622 | Specialty Liquor Delivery | 68+ | repeatable | implemented | auto-port |
+| 619 | Relics of the Old Empire | 74+ | repeatable | implemented | auto-port |
+| 620 | Four Goblets | 74+ | repeatable | implemented | hand-ported |
+| 621 | Egg Delivery | 68+ | repeatable | implemented | hand-ported |
+| 622 | Specialty Liquor Delivery | 68+ | repeatable | implemented | hand-ported |
 | 623 | The Finest Food | 71+ | repeatable | implemented | hand-ported |
 | 624 | The Finest Ingredients - Part 1 | 73+ | repeatable | implemented | hand-ported |
 | 625 | The Finest Ingredients - Part 2 | 73+ | repeatable | implemented | timers; hand-ported |
 | 626 | A Dark Twilight | 60+ | one-time | implemented | hand-ported |
-| 627 | Heart in Search of Power | 60+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
+| 627 | Heart in Search of Power | 60+ | repeatable | implemented | auto-port |
 | 628 | Hunt of the Golden Ram Mercenary Force | 66+ | repeatable | implemented | hand-ported |
 | 629 | Clean up the Swamp of Screams | 66+ | repeatable | implemented | hand-ported |
 | 631 | Delicious Top Choice Meat | 65+ | repeatable | implemented | hand-ported |
 | 632 | Necromancer's Request | 63+ | repeatable | implemented | hand-ported |
-| 633 | In the Forgotten Village | 65+ | repeatable | partial | no kill: 1/27 mobs; hand-ported |
-| 634 | In Search of Fragments of Dimension | 20+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
+| 633 | In the Forgotten Village | 65+ | repeatable | implemented | hand-ported |
+| 634 | In Search of Fragments of Dimension | 20+ | repeatable | implemented | hand-ported |
 | 635 | In the Dimensional Rift | 20+ | repeatable | implemented | hand-ported |
 | 636 | Truth Beyond the Gate |  | repeatable | implemented | hand-ported |
 | 637 | Through the Gate Once More | 73+ | repeatable | implemented | hand-ported |
-| 638 | Seekers of the Holy Grail | 73+ | repeatable | partial | no kill: 2/2 mobs; auto-port |
-| 639 | Guardians of the Holy Grail | 73+ | repeatable | partial | no kill: 14/14 mobs; auto-port |
+| 638 | Seekers of the Holy Grail | 73+ | repeatable | implemented | auto-port |
+| 639 | Guardians of the Holy Grail | 73+ | repeatable | implemented | auto-port |
 | 640 | The Zero Hour | 66+ | repeatable | implemented | hand-ported |
 | 641 | Attack Sailren! | 77+ | repeatable | implemented | hand-ported |
 | 642 | A Powerful Primeval Creature | 75+ | one-time | implemented | hand-ported |
@@ -347,19 +347,19 @@ Related non-quest scripts: `village_master/*Change1|Change2` and `FirstClassTran
 | 644 | Grave Robber Annihilation | 20+ | repeatable | implemented | hand-ported |
 | 645 | Ghosts of Batur | 23+ | repeatable | implemented | hand-ported |
 | 646 | Signs of Revolt | 40+ | repeatable | implemented | hand-ported |
-| 647 | Influx of Machines | 46+ | repeatable | partial | no kill: 1/2 mobs; hand-ported |
+| 647 | Influx of Machines | 46+ | repeatable | implemented | hand-ported |
 | 648 | An Ice Merchant's Dream | 53+ | repeatable | implemented | hand-ported |
 | 649 | A Looter and a Railroad Man | 30+ | repeatable | implemented | hand-ported |
 | 650 | A Broken Dream | 39+ | repeatable | implemented | hand-ported |
-| 651 | Runaway Youth | 26+ | repeatable | partial | quest spawns missing; timers; hand-ported |
-| 652 | An Aged Ex-Adventurer | 46+ | repeatable | partial | quest spawns missing; timers; hand-ported |
-| 653 | Wild Maiden | 36+ | repeatable | partial | quest spawns missing; timers; hand-ported |
+| 651 | Runaway Youth | 26+ | repeatable | implemented | timers; hand-ported |
+| 652 | An Aged Ex-Adventurer | 46+ | repeatable | implemented | timers; hand-ported |
+| 653 | Wild Maiden | 36+ | repeatable | implemented | timers; hand-ported |
 | 654 | Journey to a Settlement | 74+ | repeatable | implemented | hand-ported |
 | 655 | A Grand Plan for Taming Wild Beasts |  | repeatable | implemented | auto-port |
 | 659 | I'd Rather Be Collecting Fairy Breath | 26+ | repeatable | implemented | hand-ported |
 | 660 | Aiding the Floran Village | 30+ | repeatable | implemented | hand-ported |
 | 661 | Making the Harvest Grounds Safe | 21+ | repeatable | implemented | hand-ported |
-| 662 | A Game of Cards | 61+ | repeatable | partial | no kill: 40/40 mobs; auto-port |
-| 663 | Seductive Whispers | 50+ | repeatable | partial | no kill: 27/27 mobs; auto-port |
+| 662 | A Game of Cards | 61+ | repeatable | implemented | auto-port |
+| 663 | Seductive Whispers | 50+ | repeatable | implemented | auto-port |
 | 688 | Defeat the Elrokian Raiders! | 75+ | repeatable | implemented | hand-ported |
 | 999 | T0 Tutorial | 10+ | tutorial | implemented | timers; hand-ported |
