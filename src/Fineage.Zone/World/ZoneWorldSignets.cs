@@ -120,11 +120,16 @@ public sealed partial class ZoneWorld
         var template = _game.Skills.Find(skill.SkillId);
         if (template == null)
         {
-            ZoneLog.Info($"[signet] missing skill catalog id={skill.SkillId} npc={signet.NpcId}");
+            ZoneLog.Info($"[signet] missing skills.json catalog id={skill.SkillId} level={skill.Level} " +
+                         $"signetNpcId={signet.NpcId} source=npc-ai-support");
             return;
         }
         if (!template.TryLevelData(skill.Level, out var levelData))
+        {
+            ZoneLog.Info($"[signet] skills.json id={skill.SkillId} missing levelData for level={skill.Level} " +
+                         $"signetNpcId={signet.NpcId} source=npc-ai-support");
             return;
+        }
 
         int range = skill.AffectRange > 0 ? skill.AffectRange : 200;
         FanoutNpcMagicSkillUse(signet, signet, skill.SkillId, skill.Level, 0, 0);
