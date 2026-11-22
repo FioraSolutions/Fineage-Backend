@@ -272,6 +272,30 @@
         }
       ],
       "htmlFile": "31521-event-31584-02-018.htm"
+    },
+    {
+      "npcId": 31544,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31544-talk-019.htm"
+    },
+    {
+      "npcId": 31545,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31545-talk-020.htm"
+    },
+    {
+      "npcId": 31546,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31546-talk-021.htm"
+    },
+    {
+      "npcId": 31547,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31547-talk-022.htm"
     }
   ]
 }

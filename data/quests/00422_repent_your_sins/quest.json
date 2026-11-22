@@ -182,6 +182,54 @@
           "limit": 0
         }
       ]
+    },
+    {
+      "npcId": 20193,
+      "hook": "kill",
+      "when": "started",
+      "cond": 6,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4326,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20494,
+      "hook": "kill",
+      "when": "started",
+      "cond": 6,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4326,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20561,
+      "hook": "kill",
+      "when": "started",
+      "cond": 6,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4326,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

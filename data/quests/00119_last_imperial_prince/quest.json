@@ -122,6 +122,12 @@
         }
       ],
       "htmlFile": "31453-event-32009-04-012.htm"
+    },
+    {
+      "npcId": 32009,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32009-talk-013.htm"
     }
   ]
 }

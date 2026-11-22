@@ -170,6 +170,14 @@
         }
       ],
       "htmlFile": "31683-event-31541-02-012.htm"
+    },
+    {
+      "npcId": 25290,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }
