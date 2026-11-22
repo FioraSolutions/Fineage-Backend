@@ -3,7 +3,10 @@ using Fineage.Protocol;
 
 namespace Fineage.Zone.Clan;
 
-/// <summary>Mobius <c>AgitDecoInfo</c> decoration bytes from hall function levels and hall grade.</summary>
+/// <summary>
+/// Mobius <c>AgitDecoInfo.writeImpl</c> decoration bytes (after the hall id).
+/// L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/serverpackets/AgitDecoInfo.java:44-186.
+/// </summary>
 public static class AgitDecoInfo
 {
     public static byte[] Encode(ClanHallSave hall, int grade)

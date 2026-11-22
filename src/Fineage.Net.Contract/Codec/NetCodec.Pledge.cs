@@ -258,6 +258,11 @@ namespace Fineage.Net.Contract
             return new ClanHallListNetMsg { Halls = halls };
         }
 
+        /// <summary>
+        /// Deco byte count in Mobius <c>AgitDecoInfo.writeImpl</c>
+        /// (L2J_Mobius_CT_0_Interlude/.../serverpackets/AgitDecoInfo.java:44-186):
+        /// HP, MP, MP, EXP, teleport, crystal 0, curtains, item-create, support, support, front, item-create.
+        /// </summary>
         public const int AgitDecoByteCount = 12;
 
         public static byte[] EncodeAgitDecoInfo(AgitDecoInfoNetMsg m) => Write(w =>
@@ -268,8 +273,6 @@ namespace Fineage.Net.Contract
             w.WriteInt32(m.HallId);
             foreach (byte b in deco)
                 w.WriteByte(b);
-            w.WriteInt32(0);
-            w.WriteInt32(0);
         });
 
         public static AgitDecoInfoNetMsg DecodeAgitDecoInfo(ReadOnlySpan<byte> p)
@@ -279,8 +282,6 @@ namespace Fineage.Net.Contract
             var deco = new byte[AgitDecoByteCount];
             for (int i = 0; i < AgitDecoByteCount; i++)
                 deco[i] = r.ReadByte();
-            _ = r.ReadInt32();
-            _ = r.ReadInt32();
             return new AgitDecoInfoNetMsg { HallId = hallId, DecoBytes = deco };
         }
     }
