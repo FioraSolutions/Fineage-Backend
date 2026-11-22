@@ -39,6 +39,7 @@ public sealed partial class NetZoneServer
     readonly CombatPacketHandler _combat;
     readonly InventoryActionPacketHandler _inventoryActions;
     readonly SkillLearnPacketHandler _skillLearn;
+    readonly SkillEnchantPacketHandler _skillEnchant;
     readonly RecipePacketHandler _recipes;
     readonly ChatPacketHandler _chat;
     readonly WorldEventPacketHandler _worldEvents;
@@ -84,6 +85,7 @@ public sealed partial class NetZoneServer
         _combat = new CombatPacketHandler(_world, RejectAsync);
         _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
         _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
+        _skillEnchant = new SkillEnchantPacketHandler(_world, RejectAsync);
         _recipes = new RecipePacketHandler(_world, RejectAsync);
         _chat = new ChatPacketHandler(_world, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
