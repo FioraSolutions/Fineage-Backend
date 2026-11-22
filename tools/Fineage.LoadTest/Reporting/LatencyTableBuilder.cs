@@ -1,0 +1,121 @@
+using System.Text.RegularExpressions;
+using Fineage.LoadTest.Metrics;
+
+namespace Fineage.LoadTest.Reporting;
+
+public sealed class MetricLatencyRow
+{
+    public required string Name { get; init; }
+    public string Source { get; init; } = "prometheus";
+    public double P50Ms { get; init; }
+    public double P95Ms { get; init; }
+    public double P99Ms { get; init; }
+    public double MaxMs { get; init; }
+    public long Count { get; init; }
+}
+
+public static class LatencyTableBuilder
+{
+    static readonly string[] PreferredStageOrder =
+    [
+        "commands",
+        "movement.player",
+        "movement.npc",
+        "regen.players",
+        "regen.npcs",
+        "abnormals",
+        "aggression",
+        "random-walk"
+    ];
+
+    public static List<MetricLatencyRow> FromPeakMetrics(string? peakMetrics, string? zoneLogPath)
+    {
+        var rows = new List<MetricLatencyRow>();
+        if (peakMetrics != null)
+        {
+            rows.Add(RowFromHistogram(peakMetrics, "fineage_tick_ms", "tick"));
+            foreach (string stage in PreferredStageOrder)
+            {
+                if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_tick_stage_ms", "stage", stage) is { } hs)
+                    rows.Add(FromStats($"tick_stage/{stage}", hs));
+            }
+
+            foreach (Match match in Regex.Matches(
+                         peakMetrics,
+                         @"fineage_tick_stage_ms_count\{stage=""([^""]+)""\}\s+(\d+)",
+                         RegexOptions.Multiline))
+            {
+                string stage = match.Groups[1].Value;
+                if (PreferredStageOrder.Contains(stage, StringComparer.Ordinal))
+                    continue;
+                if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_tick_stage_ms", "stage", stage) is { } extra)
+                    rows.Add(FromStats($"tick_stage/{stage}", extra));
+            }
+
+            string[] singletons =
+            [
+                "fineage_enter_try_ms",
+                "fineage_enter_plan_ms",
+                "fineage_enter_self_projection_ms",
+                "fineage_enter_known_encode_ms",
+                "fineage_enter_peer_fanout_ms",
+                "fineage_command_to_mailboxes_ms",
+                "fineage_fanout_batch_process_ms",
+                "fineage_fanout_queue_oldest_age_ms",
+                "fineage_outbound_queue_oldest_age_ms",
+                "fineage_socket_write_ms"
+            ];
+            foreach (string metric in singletons)
+            {
+                if (PrometheusParser.ParseSingletonHistogram(peakMetrics, metric) is { } hs)
+                    rows.Add(FromStats(metric.Replace("fineage_", "", StringComparison.Ordinal), hs));
+            }
+
+            foreach (string label in new[] { "submit_to_dequeue", "dequeue_to_apply" })
+            {
+                if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_timeline_ms", "phase", label) is { } tl)
+                    rows.Add(FromStats($"command.timeline/{label}", tl));
+            }
+
+            if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_apply_ms", "command", "request:enter") is { } enter)
+                rows.Add(FromStats("command_apply/request:enter", enter));
+        }
+
+        foreach (var (command, maxMs) in ZoneSlowCommandLogParser.WorstCommandMs(zoneLogPath))
+        {
+            rows.Add(new MetricLatencyRow
+            {
+                Name = $"zone_log/{command}",
+                Source = "zone_log_slow_commands",
+                MaxMs = maxMs,
+                P99Ms = maxMs,
+                P95Ms = maxMs,
+                P50Ms = maxMs,
+                Count = ZoneSlowCommandLogParser.OccurrenceCount(zoneLogPath, command)
+            });
+        }
+
+        return rows;
+    }
+
+    static MetricLatencyRow RowFromHistogram(string text, string metric, string display)
+    {
+        var hs = PrometheusParser.ParseSingletonHistogram(text, metric);
+        return hs == null
+            ? new MetricLatencyRow { Name = display, Source = "prometheus" }
+            : FromStats(display, hs);
+    }
+
+    static MetricLatencyRow FromStats(string name, HistogramStats hs) => new()
+    {
+        Name = name,
+        Source = "prometheus",
+        P50Ms = hs.P50,
+        P99Ms = hs.P99,
+        P95Ms = EstimateP95(hs),
+        MaxMs = hs.Count > 0 ? Math.Max(hs.Mean * 4, hs.P99) : 0,
+        Count = hs.Count
+    };
+
+    static double EstimateP95(HistogramStats hs) => hs.P50 + (hs.P99 - hs.P50) * 0.7;
+}

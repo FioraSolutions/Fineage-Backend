@@ -53,6 +53,8 @@ run_one() {
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
   cp -f "$out/report.json" "$REPORT_ROOT/${tag}.json" 2>/dev/null || true
   cp -f "$out/report.md" "$REPORT_ROOT/${tag}.md" 2>/dev/null || true
+  cp -f "$out/load-test-report.md" "$REPORT_ROOT/${tag}-load-test-report.md" 2>/dev/null || true
+  echo "load-test-report: $out/load-test-report.md"
 }
 
 if [[ "$MATRIX" == "smoke" ]]; then

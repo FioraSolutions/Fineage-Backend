@@ -13,4 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="../../tools/Fineage.LoadTest/Fineage.LoadTest.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -25,12 +25,26 @@ public sealed class RunReport
     public string? PeakMetricsText { get; init; }
     public ProcessSample? ZoneProcess { get; init; }
     public List<LogIssue> LogIssues { get; init; } = [];
-    public bool Passed { get; init; }
-    public List<string> FailReasons { get; init; } = [];
+    public bool Passed { get; set; }
+    public List<string> FailReasons { get; set; } = [];
     public List<string> Bugs { get; init; } = [];
     public ConsistencyReport? Consistency { get; init; }
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset FinishedAt { get; init; }
+
+    public RunEnvironmentInfo? Environment { get; set; }
+    public int DurationSeconds { get; set; }
+    public int RampUpSeconds { get; set; }
+    public List<MetricLatencyRow> LatencyTable { get; set; } = [];
+    public List<string> MissingExpectedMetrics { get; set; } = [];
+    public List<TimeSeriesWindow> TimeSeriesWindows { get; set; } = [];
+    public string? TimeSeriesBacklogTrend { get; set; }
+    public RuntimeCounterStats? Runtime { get; set; }
+    public StructuredLogSummary? StructuredLogs { get; set; }
+    public List<GateVerdict> GateVerdicts { get; set; } = [];
+    public double? CommandToMailboxesP99Ms { get; set; }
+    public double? FanoutQueueOldestAgeP99Ms { get; set; }
+    public long? ReliableOverflowTotal { get; set; }
 }
 
 public sealed class PrometheusAggregate
@@ -194,12 +208,16 @@ public static class ReportWriter
 
         string jsonPath = Path.Combine(directory, "report.json");
         string mdPath = Path.Combine(directory, "report.md");
-        File.WriteAllText(jsonPath, System.Text.Json.JsonSerializer.Serialize(report,
-            new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
-        File.WriteAllText(mdPath, ToMarkdown(report));
+        string json = System.Text.Json.JsonSerializer.Serialize(report,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        string md = CompactMarkdownRenderer.Render(report);
+        File.WriteAllText(jsonPath, json);
+        File.WriteAllText(mdPath, md);
+        File.WriteAllText(Path.Combine(directory, "load-test-report.json"), json);
+        File.WriteAllText(Path.Combine(directory, "load-test-report.md"), md);
     }
 
-    static string ToMarkdown(RunReport r)
+    static string ToMarkdownLegacy(RunReport r)
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"# Load test: {r.ScenarioName}");

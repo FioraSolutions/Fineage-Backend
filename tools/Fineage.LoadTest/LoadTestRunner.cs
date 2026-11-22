@@ -25,6 +25,10 @@ public sealed class LoadTestRunner
         var bots = new List<FineageBotClient>();
         var stats = new List<BotStats>();
 
+        RuntimeCountersSampler? runtimeSampler = zonePid is > 0 ? new RuntimeCountersSampler(zonePid.Value) : null;
+        if (runtimeSampler != null)
+            await runtimeSampler.StartAsync(ct);
+
         var metricsTask = Task.Run(async () =>
         {
             var sampler = new ServerMetricsSampler();
@@ -125,7 +129,14 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
-        return new RunReport
+        RuntimeCounterStats? runtimeStats = null;
+        if (runtimeSampler != null)
+        {
+            runtimeStats = await runtimeSampler.StopAndSummarizeAsync();
+            await runtimeSampler.DisposeAsync();
+        }
+
+        var report = new RunReport
         {
             ScenarioName = scenario.Name,
             Target = target,
@@ -153,5 +164,17 @@ public sealed class LoadTestRunner
             StartedAt = started,
             FinishedAt = DateTimeOffset.UtcNow
         };
+
+        var logPaths = new List<string>();
+        if (loginLog != null) logPaths.Add(loginLog);
+        if (zoneLog != null) logPaths.Add(zoneLog);
+        ReportEnricher.Enrich(report, scenario, promSamples, zoneLog, logPaths, runtimeStats);
+
+        // #867 gate verdicts are recorded in the report for human/LLM review only — they do not
+        // fail the process (CI smoke still gates on bots in-world, stuck, and consistency).
+        report.FailReasons = failReasons;
+        report.Passed = failReasons.Count == 0;
+
+        return report;
     }
 }
