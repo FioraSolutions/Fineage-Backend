@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius <c>PlayerStat.addLevel</c>: crossing an exp row runs <c>rewardSkills()</c>, so the freshly unlocked skill
 /// reaches the client in a new SkillList, and the level-up SocialAction / SystemMessage 96 / StatusUpdate follow.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetLevelUpTests
 {
     [Fact]

@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// damage line in system chat, and watchers do not. Carried over from the V2-era dev test when the feature moved
 /// to Net fanout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetCombatDamageChatTests
 {
     const int MobId = 9_300_001;

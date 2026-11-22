@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class NetFriendChatTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

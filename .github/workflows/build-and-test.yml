@@ -3,20 +3,82 @@ name: build-and-test
 on:
   pull_request:
     branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
   push:
-    branches: [main, 'cursor/**']
+    branches: [main, dev]
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  FAST_TEST_FILTER: 'Category!=Slow&Category!=Integration&Category!=Load&Category!=perf'
+
 jobs:
-  build-and-test:
-    name: build-and-test
+  fast-unit-tests:
+    name: unit-${{ matrix.id }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: game
+            project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
+          - id: net
+            project: tests/Fineage.Net.Tests/Fineage.Net.Tests.csproj
+          - id: login
+            project: tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj
+          - id: zone
+            project: tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Restore and build
+        run: dotnet build ${{ matrix.project }} --configuration Release
+
+      - name: Fast unit tests
+        run: >-
+          dotnet test ${{ matrix.project }}
+          --configuration Release
+          --no-build
+          --verbosity minimal
+          --filter "${{ env.FAST_TEST_FILTER }}"
+
+  integration-tests:
+    name: integration-postgres
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     uses: ./.github/workflows/dotnet-test-with-postgres.yml
 
   zone-simulation-perf:
     name: zone-simulation-perf
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,12 +87,23 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Zone simulation perf tests
         run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter "Category=perf" -- xUnit.ParallelizeTestCollections=false
 
   zone-parallel-regions:
     name: zone-parallel-regions
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     env:
       FINEAGE_ZONE_REGION_WORKERS: '4'
@@ -41,12 +114,23 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Zone parallel region tests
         run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter FullyQualifiedName~RegionParallelWorldTests
 
   load-test-smoke:
     name: load-test-smoke
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     services:
@@ -74,6 +158,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
 
       - name: Make smoke script executable
         run: chmod +x scripts/ci-load-test-smoke.sh

@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// re-sent; near drops land a ground item visible to the dropper; pickups merge stacks as Modify (client applies
 /// without relog) and far pickups run in first.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetGroundItemTests
 {
     const int Adena = 57;

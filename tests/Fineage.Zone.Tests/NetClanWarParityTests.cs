@@ -6,6 +6,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius CT_0 clan wars: cooldown, death XP, mutual-war PvP/reputation, relation bits, surrender.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetClanWarParityTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

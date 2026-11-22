@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// CharInfo, offensive actions only in attack stance on a valid target, max count / use-up, debuff land, Life Cubic
 /// heal, mass summon on the party, lifetime, death and logout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetCubicTests
 {
     const int StormSkill = 10, LifeSkill = 67, ViperSkill = 278, BindingSkill = 1279, MassStormSkill = 1328, Mastery = 143;

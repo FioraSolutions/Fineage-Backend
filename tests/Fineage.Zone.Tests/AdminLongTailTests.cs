@@ -9,6 +9,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 [Collection("Zone admin gate")]
+[Trait("Category", "Integration")]
 public sealed class AdminLongTailTests : IDisposable
 {
     readonly string? _prevEnv;

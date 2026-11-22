@@ -6,6 +6,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Friends + block (#285): invite → accept → list → block → delete.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetFriendTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

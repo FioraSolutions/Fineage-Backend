@@ -9,6 +9,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Shared cast-condition pipelines: item consume at hit, charge spend at cast start.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSkillConditionPipelineTests
 {
     const int StormCubic = 10;

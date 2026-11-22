@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// when a social gesture is allowed, what sitting does to gait and pending orders, trade teardown on death,
 /// party leader hand-over and the roster refresh that keeps party HP/MP bars live.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetInteractionRulesTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()

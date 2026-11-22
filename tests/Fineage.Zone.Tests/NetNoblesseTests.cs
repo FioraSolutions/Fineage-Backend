@@ -1,5 +1,7 @@
 using Fineage.Accounts;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
+using Fineage.Game.Shops;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.World;
@@ -11,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Block G1 noblesse after Mobius <c>Player.setNoble</c> and Q247 Possessor of a Precious Soul 4: the flag,
 /// the noble skill tree, the UserInfo tail, the clan rank floor, persistence, and the quest that grants it.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetNoblesseTests
 {
     const int Caradine = 31740, LadyOfTheLake = 31745, Hannavalt = 30109;
@@ -91,6 +94,54 @@ public sealed class NetNoblesseTests
         Assert.Equal(QuestPhase.Completed, p.Player.Quests.Find(247)!.Phase);
         Assert.Contains(bench.Rec.Of("FanoutSocialAction"), c => (int)c[2]! == 3);
         Assert.True(p.SavedRecord().Noble);
+    }
+
+    [Fact]
+    public async Task RequestNobless_at_village_master_after_Q247_gate_pays_and_grants()
+    {
+        var bench = new WorldBench();
+        const int certificationSp = 93836;
+        const int certificationAdena = certificationSp * 10;
+        var p = await bench.EnterAsync(classId: 2, level: 76,
+            items: [new StoredItem(CaradinesLetter3, 1, -1), new StoredItem(ShopTrade.AdenaItemId, certificationAdena, -1)]);
+        var master = bench.World.SpawnFolkForTests(Hannavalt, p.Player.X + 30, p.Player.Y, p.Player.Z);
+        var caradine = bench.World.SpawnFolkForTests(Caradine, p.Player.X + 20, p.Player.Y, p.Player.Z);
+
+        Assert.Null(await p.BypassAsync(master.ObjectId, "Subclass 4 5"));
+        p.Player.Level = 75;
+        p.Player.Sp = certificationSp + 1;
+        Assert.Null(await p.QuestEvent(caradine.ObjectId, 247, "31740-03"));
+        p.Player.Quests.Find(247)!.Set("cond", NoblesseGrant.GateReadyCond.ToString());
+
+        int spBefore = p.Player.Sp;
+        int adenaBefore = p.Inventory.CountOf(ShopTrade.AdenaItemId);
+        Assert.Null(await p.BypassAsync(master.ObjectId, "RequestNobless"));
+
+        Assert.True(p.Player.Noble);
+        Assert.Equal(1, p.Inventory.CountOf(NoblesseTiara));
+        Assert.Equal(QuestPhase.Completed, p.Player.Quests.Find(247)!.Phase);
+        Assert.Equal(spBefore - certificationSp, p.Player.Sp);
+        Assert.Equal(adenaBefore - certificationAdena, p.Inventory.CountOf(ShopTrade.AdenaItemId));
+
+        var bag = LedgerAccount.Inventory(p.Player.ObjectId);
+        var questsAcct = LedgerAccount.Of(SystemAccount.Quests);
+        var tx = bench.Ledger.Entries.Select(e => e.Transaction)
+            .Last(t => t.Kind == LedgerTxKind.QuestReward && t.Reference == NoblesseGrant.GateQuestId);
+        Assert.Equal(p.Player.ObjectId, tx.CausedBy);
+        Assert.Contains(tx.Postings, post => post.Account == bag && post.ItemId == ShopTrade.AdenaItemId && post.Amount == -certificationAdena);
+        Assert.Contains(tx.Postings, post => post.Account == questsAcct && post.ItemId == ShopTrade.AdenaItemId && post.Amount == certificationAdena);
+        Assert.Contains(tx.Postings, post => post.Account == bag && post.ItemId == NoblesseTiara && post.Amount == 1);
+    }
+
+    [Fact]
+    public async Task RequestNobless_refuses_before_Q247_gate()
+    {
+        var bench = new WorldBench();
+        var p = await bench.EnterAsync(classId: 2, level: 76);
+        var master = bench.World.SpawnFolkForTests(Hannavalt, p.Player.X + 30, p.Player.Y, p.Player.Z);
+        Assert.Null(await p.BypassAsync(master.ObjectId, "RequestNobless"));
+        Assert.Contains("gate quest", LastHtml(bench), StringComparison.OrdinalIgnoreCase);
+        Assert.False(p.Player.Noble);
     }
 
     [Fact]

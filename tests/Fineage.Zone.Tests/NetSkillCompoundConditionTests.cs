@@ -10,6 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius compound <c>&lt;and&gt;</c> cast trees on the shared <see cref="SkillCastConditionEvaluator"/> path.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSkillCompoundConditionTests
 {
     const int CrushOfDoom = 315;

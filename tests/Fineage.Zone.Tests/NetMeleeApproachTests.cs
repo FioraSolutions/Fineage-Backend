@@ -12,6 +12,7 @@ namespace Fineage.Zone.Tests;
 /// Mobius moveToPawn on the Net path: RequestAttack on a far mob runs the pawn in (timed move, MoveState to self),
 /// ValidatePosition along the run is not corrected onto the mob, and the first swing fires on arrival.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetMeleeApproachTests
 {
     const int MobId = 9_200_001;
