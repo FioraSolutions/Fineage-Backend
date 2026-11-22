@@ -28,7 +28,7 @@ public sealed class PrometheusSample
 
 public static class PrometheusParser
 {
-    static readonly double[] Bounds = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000];
+    static readonly double[] Bounds = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500, 2000, 3000];
 
     public static PrometheusSample Parse(string text)
     {

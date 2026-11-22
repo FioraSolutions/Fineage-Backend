@@ -141,8 +141,7 @@ sealed partial class SessionLifecyclePacketHandler
             }
 
             var remote = NetEnterWorldProjector.BuildPresenceSpawn(other, otherId, _playerSpawnPAtkSpd(other));
-            var followUps = NetEnterWorldProjector.BuildPresenceFollowUps(other, otherId, _world)
-                .ConvertAll(t => new PresenceWireSlot(t.Opcode, t.Payload));
+            var followUps = NetEnterWorldProjector.PlanPresenceFollowUps(other, otherId, _world);
             byte[]? relation = _world.SpawnRelationFrame(other, entity);
             rows.Add(new KnownPresenceSlot
             {

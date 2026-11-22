@@ -40,6 +40,6 @@ sealed class KnownPresenceSlot
     public byte[]? RelationToEntrant { get; init; }
 }
 
-readonly record struct PresenceWireSlot(ushort Opcode, byte[] Payload);
+readonly record struct PresenceWireSlot(ushort Opcode, object? Message, byte[]? Payload = null);
 
 readonly record struct PeerFanoutSlot(int PeerObjectId, byte[]? RelationPayload);

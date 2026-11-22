@@ -37,22 +37,25 @@ public sealed partial class ZoneWorld
         Func<ZoneEntity, Fineage.Zone.Net.EnterSnapshot> commit,
         CancellationToken ct)
     {
-        using var enterScope = _syncIo.EnterScope();
         CharacterRecord? stored = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
         bool persistStarterBackfill = stored is { Items: null } && _accounts != null;
 
-        var entered = await OnSimulationAsync(session, "enter", () =>
+        EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered;
         {
-            CharacterRecord? enterStored = stored;
-            if (!TryPrepareSameSessionReenter(session, ref enterStored))
-                return null;
-            if (!TryEnter(session, enterStored, out int known, out int x, out int y, out int z, out var evicted))
-                return null;
-            CountOnlinePlayers();
-            if (!TryGetLivePlayer(session, out var player))
-                throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
-            return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
-        }, ct).ConfigureAwait(false);
+            using var enterScope = _syncIo.EnterScope();
+            entered = await OnSimulationAsync(session, "enter", () =>
+            {
+                CharacterRecord? enterStored = stored;
+                if (!TryPrepareSameSessionReenter(session, ref enterStored))
+                    return null;
+                if (!TryEnter(session, enterStored, out int known, out int x, out int y, out int z, out var evicted))
+                    return null;
+                CountOnlinePlayers();
+                if (!TryGetLivePlayer(session, out var player))
+                    throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
+                return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
+            }, ct).ConfigureAwait(false);
+        }
         if (entered == null)
             return null;
 

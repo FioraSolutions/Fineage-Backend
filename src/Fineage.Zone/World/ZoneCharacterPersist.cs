@@ -16,19 +16,31 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts, Action<string>? repor
 
     public bool Enabled => _accounts != null;
 
-    void Guard(string operation)
+    void Guard(string operation) => _reportSyncIo?.Invoke($"ZoneCharacterPersist.{operation}");
+
+    void Write(string operation, Action body)
     {
-        _reportSyncIo?.Invoke(operation);
+        Guard(operation);
+        body();
     }
 
-    public void SavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)
+    T? Read<T>(string operation, Func<T?> body) where T : class
     {
-        Guard(nameof(SavePresence));
-        _accounts?.TrySavePresence(account, characterId, x, y, z, lastAccess);
+        Guard(operation);
+        return body();
     }
+
+    bool WriteBool(string operation, Func<bool> body)
+    {
+        Guard(operation);
+        return body();
+    }
+
+    public void SavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
+        Write(nameof(SavePresence), () => _accounts?.TrySavePresence(account, characterId, x, y, z, lastAccess));
 
     public void SaveVitals(string account, int characterId, int hp, int mp, int cp) =>
-        _accounts?.TrySaveVitals(account, characterId, hp, mp, cp);
+        Write(nameof(SaveVitals), () => _accounts?.TrySaveVitals(account, characterId, hp, mp, cp));
 
     public void SaveProgress(
         string account,
@@ -42,62 +54,60 @@ sealed class ZoneCharacterPersist(IAccountStore? accounts, Action<string>? repor
         int mp,
         int maxCp,
         int cp) =>
-        _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp);
+        Write(nameof(SaveProgress), () =>
+            _accounts?.TrySaveProgress(account, characterId, level, exp, sp, maxHp, hp, maxMp, mp, maxCp, cp));
 
-    public StoredPet? FindPet(int controlObjectId)
-    {
-        Guard(nameof(FindPet));
-        return _accounts?.FindPet(controlObjectId);
-    }
+    public StoredPet? FindPet(int controlObjectId) =>
+        Read(nameof(FindPet), () => _accounts?.FindPet(controlObjectId));
 
-    public void SavePet(StoredPet pet) => _accounts?.SavePet(pet);
+    public void SavePet(StoredPet pet) => Write(nameof(SavePet), () => _accounts?.SavePet(pet));
 
-    public void DeletePet(int controlObjectId) => _accounts?.DeletePet(controlObjectId);
+    public void DeletePet(int controlObjectId) => Write(nameof(DeletePet), () => _accounts?.DeletePet(controlObjectId));
 
     public void SaveClass(string account, int characterId, int classId) =>
-        _accounts?.TrySaveClass(account, characterId, classId);
+        Write(nameof(SaveClass), () => _accounts?.TrySaveClass(account, characterId, classId));
 
     public void SaveClassState(string account, int characterId, CharacterClassState state) =>
-        _accounts?.TrySaveClassState(account, characterId, state);
+        Write(nameof(SaveClassState), () => _accounts?.TrySaveClassState(account, characterId, state));
 
     public void SaveDeathPenalty(string account, int characterId, int level) =>
-        _accounts?.TrySaveDeathPenalty(account, characterId, level);
+        Write(nameof(SaveDeathPenalty), () => _accounts?.TrySaveDeathPenalty(account, characterId, level));
 
     public void SaveHenna(string account, int characterId, int dye1, int dye2, int dye3) =>
-        _accounts?.TrySaveHenna(account, characterId, dye1, dye2, dye3);
+        Write(nameof(SaveHenna), () => _accounts?.TrySaveHenna(account, characterId, dye1, dye2, dye3));
 
     public void SaveKarmaPk(string account, int characterId, int karma, int pkKills, int pvpKills) =>
-        _accounts?.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills);
+        Write(nameof(SaveKarmaPk), () => _accounts?.TrySaveKarmaPk(account, characterId, karma, pkKills, pvpKills));
 
     public void ReplaceItems(string account, int characterId, IReadOnlyList<StoredItem> items) =>
-        _accounts?.TryReplaceItems(account, characterId, items);
+        Write(nameof(ReplaceItems), () => _accounts?.TryReplaceItems(account, characterId, items));
 
     public void ReplaceWarehouse(string account, int characterId, IReadOnlyList<StoredItem> items) =>
-        _accounts?.TryReplaceWarehouse(account, characterId, items);
+        Write(nameof(ReplaceWarehouse), () => _accounts?.TryReplaceWarehouse(account, characterId, items));
 
     public void ReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items) =>
-        _accounts?.TryReplaceFreight(account, characterId, items);
+        Write(nameof(ReplaceFreight), () => _accounts?.TryReplaceFreight(account, characterId, items));
 
     public void ReplaceQuests(string account, int characterId, IReadOnlyList<QuestSaveRow> quests) =>
-        _accounts?.TryReplaceQuests(account, characterId, quests);
+        Write(nameof(ReplaceQuests), () => _accounts?.TryReplaceQuests(account, characterId, quests));
 
     public void ReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills) =>
-        _accounts?.TryReplaceLearnedSkills(account, characterId, skills);
+        Write(nameof(ReplaceLearnedSkills), () => _accounts?.TryReplaceLearnedSkills(account, characterId, skills));
 
     public void ReplaceKnownRecipes(string account, int characterId, IReadOnlyList<int> recipeIds) =>
-        _accounts?.TryReplaceKnownRecipes(account, characterId, recipeIds);
+        Write(nameof(ReplaceKnownRecipes), () => _accounts?.TryReplaceKnownRecipes(account, characterId, recipeIds));
 
     public void ReplaceFriends(string account, int characterId, IReadOnlyList<StoredSocial> friends) =>
-        _accounts?.TryReplaceFriends(account, characterId, friends);
+        Write(nameof(ReplaceFriends), () => _accounts?.TryReplaceFriends(account, characterId, friends));
 
     public void ReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
-        _accounts?.TryReplaceBlocked(account, characterId, blocked, blockAll);
+        Write(nameof(ReplaceBlocked), () => _accounts?.TryReplaceBlocked(account, characterId, blocked, blockAll));
 
     public bool ReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts) =>
-        _accounts != null && _accounts.TryReplaceShortcuts(account, characterId, shortcuts);
+        WriteBool(nameof(ReplaceShortcuts), () => _accounts != null && _accounts.TryReplaceShortcuts(account, characterId, shortcuts));
 
     public void ReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects) =>
-        _accounts?.TryReplaceEffects(account, characterId, effects);
+        Write(nameof(ReplaceEffects), () => _accounts?.TryReplaceEffects(account, characterId, effects));
 
     public void ReplaceItemsFromInventory(string account, int characterId, PlayerInventory inventory) =>
         ReplaceItems(account, characterId, CharacterInventory.Rows(inventory));

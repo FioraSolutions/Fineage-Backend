@@ -40,8 +40,9 @@ static class EnterEncoder
                 bytes += encoded.Length;
                 foreach (var follow in row.FollowUps)
                 {
-                    frames.Add(NetFrame.ToSelf(follow.Opcode, follow.Payload));
-                    bytes += follow.Payload.Length;
+                    byte[] payload = EnterWire.EncodePresence(follow);
+                    frames.Add(NetFrame.ToSelf(follow.Opcode, payload));
+                    bytes += payload.Length;
                 }
 
                 if (row.RelationToEntrant is { } relation)

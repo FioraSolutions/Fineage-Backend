@@ -258,9 +258,9 @@ public sealed partial class ZoneWorld
         _game = game ?? GameData.LoadDefault();
         _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);
         _dropRandom = Streams(dropRandom, RandomPurpose.Drop);
-        _accounts = accounts;
         _syncIo = new SimulationSyncIoGuard(_affinity);
-        _persist = new ZoneCharacterPersist(accounts, op => _syncIo.Report($"ZoneCharacterPersist.{op}"));
+        _accounts = accounts == null ? null : SimulationGuardedAccountStore.Wrap(accounts, _syncIo);
+        _persist = new ZoneCharacterPersist(_accounts, op => _syncIo.Report($"ZoneCharacterPersist.{op}"));
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();

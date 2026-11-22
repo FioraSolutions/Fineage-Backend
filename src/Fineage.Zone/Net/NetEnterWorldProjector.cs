@@ -44,18 +44,17 @@ static class NetEnterWorldProjector
     /// (Mobius <c>Creature.sendInfo</c>): a running pawn gets <c>MoveState</c> toward its live destination,
     /// a sitting player gets <c>ChangeWaitType</c> sitting. The spawn itself carries neither.
     /// </summary>
-    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld? world = null)
+    public static List<PresenceWireSlot> PlanPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld world)
     {
         ArgumentNullException.ThrowIfNull(entity);
-        var frames = new List<(ushort, byte[])>(2);
-        // Castle gates / walls: open, HP and attackable state (a broken gate is dead but still stands open).
-        if (entity.SiegeNpc is { Role: SiegeNpcRole.Door } && world?.DoorStatusFrame(entity) is { } door)
-            frames.Add((NetOpcode.DoorStatus, door));
+        var slots = new List<PresenceWireSlot>(2);
+        if (entity.SiegeNpc is { Role: SiegeNpcRole.Door } && world.DoorStatusFrame(entity) is { } door)
+            slots.Add(new(NetOpcode.DoorStatus, null, door));
         if (entity.Dead)
-            return frames;
+            return slots;
         if (entity.MoveActive)
         {
-            frames.Add((NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+            slots.Add(new(NetOpcode.MoveState, new MoveStateMsg
             {
                 EntityValue = id.Value,
                 EntityGeneration = id.Generation,
@@ -66,11 +65,11 @@ static class NetEnterWorldProjector
                 DestY = entity.MoveDestY,
                 DestZ = entity.MoveDestZ,
                 Running = entity.Running
-            })));
+            }));
         }
         if (entity.Kind == ZoneEntityKind.Player && entity.Sitting)
         {
-            frames.Add((NetOpcode.ChangeWaitType, NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg
+            slots.Add(new(NetOpcode.ChangeWaitType, new ChangeWaitTypeNetMsg
             {
                 EntityValue = id.Value,
                 EntityGeneration = id.Generation,
@@ -78,14 +77,20 @@ static class NetEnterWorldProjector
                 X = entity.X,
                 Y = entity.Y,
                 Z = entity.Z
-            })));
+            }));
         }
-        // Mobius Creature.sendInfo → updateAbnormalEffect: a player walking into AOI sees the buffs / debuffs
-        // (visual effects) already on the pawn, exactly what the watchers that were there all along see.
-        if (world != null && world.TryBuildPresenceAbnormal(entity, out var abnormal))
-            frames.Add((NetOpcode.AbnormalStatusUpdate,
-                NetCodec.EncodeAbnormalStatusUpdate(SessionLifecyclePacketHandler.ToNetAbnormal(abnormal))));
-        return frames;
+        if (world.TryBuildPresenceAbnormal(entity, out var abnormal))
+            slots.Add(new(NetOpcode.AbnormalStatusUpdate, abnormal));
+        return slots;
+    }
+
+    public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld? world = null)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        if (world == null)
+            return [];
+        return PlanPresenceFollowUps(entity, id, world)
+            .ConvertAll(slot => (slot.Opcode, EnterWire.EncodePresence(slot)));
     }
 
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>
