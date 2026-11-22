@@ -1,3 +1,6 @@
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Xunit;
@@ -52,6 +55,33 @@ public class FramingAndDedupTests
         Assert.False(d.TryAccept(3000));
         Assert.True(d.TryAccept(3001));
         Assert.True(d.TryAccept(0));
+    }
+
+    [Fact]
+    public async Task WriteMany_roundtrips_multiple_frames()
+    {
+        var envelopes = new[]
+        {
+            new PacketEnvelope { Opcode = NetOpcode.Hello, RequestSequence = 1, Payload = [1, 2, 3] },
+            new PacketEnvelope { Opcode = NetOpcode.HelloAck, RequestSequence = 2, Payload = [] },
+            new PacketEnvelope { Opcode = NetOpcode.Reject, RequestSequence = 9, Flags = 3, Payload = [9] },
+        };
+
+        using var stream = new MemoryStream();
+        await NetFraming.WriteManyAsync(stream, envelopes, CancellationToken.None);
+
+        stream.Position = 0;
+        for (int i = 0; i < envelopes.Length; i++)
+        {
+            var read = await NetFraming.ReadAsync(stream, CancellationToken.None);
+            Assert.NotNull(read);
+            Assert.Equal(envelopes[i].Opcode, read.Opcode);
+            Assert.Equal(envelopes[i].RequestSequence, read.RequestSequence);
+            Assert.Equal(envelopes[i].Flags, read.Flags);
+            Assert.Equal(envelopes[i].Payload, read.Payload);
+        }
+
+        Assert.Null(await NetFraming.ReadAsync(stream, CancellationToken.None));
     }
 
     [Fact]
