@@ -110,5 +110,43 @@ namespace Fineage.Net.Contract
         public int CrystalCount { get; set; }
     }
 
+    public sealed class EnchantSkillListEntryNet
+    {
+        public int SkillId { get; set; }
+        public int NextLevel { get; set; }
+        public int Sp { get; set; }
+        public long Exp { get; set; }
+    }
+
+    public sealed class EnchantSkillListNetMsg
+    {
+        public EnchantSkillListEntryNet[] Skills { get; set; } = System.Array.Empty<EnchantSkillListEntryNet>();
+    }
+
+    public sealed class EnchantSkillRequirementNet
+    {
+        public int Type { get; set; }
+        public int ItemId { get; set; }
+        public int Count { get; set; }
+        public int Unk { get; set; }
+    }
+
+    public sealed class EnchantSkillInfoNetMsg
+    {
+        public int SkillId { get; set; }
+        public int Level { get; set; }
+        public int SpCost { get; set; }
+        public long ExpCost { get; set; }
+        public int Rate { get; set; }
+        public EnchantSkillRequirementNet[] Requirements { get; set; } = System.Array.Empty<EnchantSkillRequirementNet>();
+    }
+
+    /// <summary>Client → zone: Mobius <c>RequestExEnchantSkillInfo</c> / <c>RequestExEnchantSkill</c>.</summary>
+    public sealed class EnchantSkillRequestNetMsg
+    {
+        public int SkillId { get; set; }
+        public int SkillLevel { get; set; }
+    }
+
     /// <summary>Client → zone: Mobius <c>RequestCreatePledge</c> (the clan name).</summary>
 }

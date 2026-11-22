@@ -124,7 +124,11 @@ public sealed partial class ZoneWorld
         if (template != null)
         {
             if (!template.TryLevelData(skill.Level, out var found))
+            {
+                ZoneLog.Info($"[signet] skills.json id={skill.SkillId} missing levelData for level={skill.Level} " +
+                             $"signetNpcId={signet.NpcId} source=npc-ai-support");
                 return;
+            }
             levelData = found;
         }
 

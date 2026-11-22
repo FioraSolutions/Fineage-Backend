@@ -82,6 +82,20 @@ sealed partial class NetWorldEventPublisher
             _presence.TrySend(watcher, NetOpcode.AcquireSkillInfo, payload);
     }
 
+    void IWorldEventPublisher.FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list)
+    {
+        var payload = NetCodec.EncodeEnchantSkillList(ToNetEnchantSkillList(list));
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.EnchantSkillList, payload);
+    }
+
+    void IWorldEventPublisher.FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info)
+    {
+        var payload = NetCodec.EncodeEnchantSkillInfo(ToNetEnchantSkillInfo(info));
+        foreach (int watcher in watcherObjectIds)
+            _presence.TrySend(watcher, NetOpcode.EnchantSkillInfo, payload);
+    }
+
     static AcquireSkillListNetMsg ToNetAcquireSkillList(Fineage.Protocol.AcquireSkillListMsg list)
     {
         var src = list.Skills ?? [];
@@ -122,6 +136,50 @@ sealed partial class NetWorldEventPublisher
             Level = info.Level,
             SpCost = info.SpCost,
             SkillType = info.SkillType,
+            Requirements = reqs
+        };
+    }
+
+    static EnchantSkillListNetMsg ToNetEnchantSkillList(Fineage.Protocol.EnchantSkillListMsg list)
+    {
+        var src = list.Skills ?? [];
+        var rows = new EnchantSkillListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            rows[i] = new EnchantSkillListEntryNet
+            {
+                SkillId = src[i].SkillId,
+                NextLevel = src[i].NextLevel,
+                Sp = src[i].Sp,
+                Exp = src[i].Exp
+            };
+        }
+
+        return new EnchantSkillListNetMsg { Skills = rows };
+    }
+
+    static EnchantSkillInfoNetMsg ToNetEnchantSkillInfo(Fineage.Protocol.EnchantSkillInfoMsg info)
+    {
+        var src = info.Requirements ?? [];
+        var reqs = new EnchantSkillRequirementNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            reqs[i] = new EnchantSkillRequirementNet
+            {
+                Type = src[i].Type,
+                ItemId = src[i].ItemId,
+                Count = src[i].Count,
+                Unk = src[i].Unk
+            };
+        }
+
+        return new EnchantSkillInfoNetMsg
+        {
+            SkillId = info.SkillId,
+            Level = info.Level,
+            SpCost = info.SpCost,
+            ExpCost = info.ExpCost,
+            Rate = info.Rate,
             Requirements = reqs
         };
     }

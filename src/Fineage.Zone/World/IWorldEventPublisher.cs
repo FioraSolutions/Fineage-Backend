@@ -159,6 +159,12 @@ interface IWorldEventPublisher
     /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called on the simulation thread.</summary>
     void FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info);
 
+    /// <summary>Mobius <c>ExEnchantSkillList</c>: trainer enchant offers.</summary>
+    void FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list);
+
+    /// <summary>Mobius <c>ExEnchantSkillInfo</c>: enchant confirmation page for one route.</summary>
+    void FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info);
+
     /// <summary>Mobius EnchantResult to the enchanter. Called on the simulation thread.</summary>
     void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result);
 

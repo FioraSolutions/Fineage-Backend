@@ -204,6 +204,41 @@ public sealed class AcquireSkillInfoMsg
     public AcquireSkillRequirementMsg[] Requirements { get; set; } = [];
 }
 
+/// <summary>One row in <see cref="EnchantSkillListMsg"/> (Mobius <c>ExEnchantSkillList</c>).</summary>
+public sealed class EnchantSkillListEntryMsg
+{
+    public int SkillId { get; set; }
+    public int NextLevel { get; set; }
+    public int Sp { get; set; }
+    public long Exp { get; set; }
+}
+
+/// <summary>Trainer enchant offers (Zone → client). Net encodes as <c>ExEnchantSkillList</c>.</summary>
+public sealed class EnchantSkillListMsg
+{
+    public EnchantSkillListEntryMsg[] Skills { get; set; } = [];
+}
+
+/// <summary>One requirement row for <see cref="EnchantSkillInfoMsg"/>.</summary>
+public sealed class EnchantSkillRequirementMsg
+{
+    public int Type { get; set; }
+    public int ItemId { get; set; }
+    public int Count { get; set; }
+    public int Unk { get; set; }
+}
+
+/// <summary>Confirmation page for one enchant route (Zone → client). Net encodes as <c>ExEnchantSkillInfo</c>.</summary>
+public sealed class EnchantSkillInfoMsg
+{
+    public int SkillId { get; set; }
+    public int Level { get; set; }
+    public int SpCost { get; set; }
+    public long ExpCost { get; set; }
+    public int Rate { get; set; }
+    public EnchantSkillRequirementMsg[] Requirements { get; set; } = [];
+}
+
 /// <summary>Opcode <see cref="MsgType.MagicSkillUse"/> (1066).</summary>
 public sealed class MagicSkillUseMsg
 {

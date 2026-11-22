@@ -30,3 +30,55 @@ jobs:
 
       - name: Zone parallel region tests
         run: dotnet test tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj --configuration Release --verbosity normal --filter FullyQualifiedName~RegionParallelWorldTests
+
+  load-test-smoke:
+    name: load-test-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      FINEAGE_DATABASE_URL: >-
+        Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+      CI_LOAD_TEST_SIEGE: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Make smoke script executable
+        run: chmod +x scripts/ci-load-test-smoke.sh
+
+      - name: Load test smoke (100 bots, workers 0 and 4)
+        run: ./scripts/ci-load-test-smoke.sh
+
+      - name: Upload load-test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-smoke
+          path: local-logs/ci-load-smoke/
+          retention-days: 14
+
+      - name: Summarize metrics
+        if: always()
+        run: |
+          if [ -f local-logs/ci-load-smoke/summary.json ]; then
+            echo '### Load test smoke' >> "$GITHUB_STEP_SUMMARY"
+            cat local-logs/ci-load-smoke/summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi
