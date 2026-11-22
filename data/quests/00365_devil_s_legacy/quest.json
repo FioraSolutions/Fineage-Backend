@@ -87,6 +87,38 @@
       "when": "absent",
       "event": "REWARD",
       "htmlFile": "30095-event-REWARD-006.htm"
+    },
+    {
+      "npcId": 20836,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20845,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 21629,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 21630,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }

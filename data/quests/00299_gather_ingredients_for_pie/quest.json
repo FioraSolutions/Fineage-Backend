@@ -121,6 +121,40 @@
       "when": "absent",
       "event": "30620-14",
       "htmlFile": "30620-event-30620-14-006.htm"
+    },
+    {
+      "npcId": 20934,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7138,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 20935,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7138,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }
