@@ -50,6 +50,7 @@ run_load() {
     --zone-pid "$zone_pid" \
     --region-workers "$workers"
 
+  echo "load-test-report: $out/load-test-report.md"
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
 }
 
@@ -134,3 +135,6 @@ if [[ "${CI_LOAD_TEST_SIEGE:-0}" == "1" ]]; then
 fi
 
 echo "load-test smoke OK; summary at $SUMMARY"
+for tag in bots-100-w0 bots-100-w4; do
+  [[ -f "$REPORT_ROOT/$tag/load-test-report.md" ]] && echo "  $REPORT_ROOT/$tag/load-test-report.md"
+done

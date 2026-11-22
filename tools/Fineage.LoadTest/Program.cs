@@ -40,7 +40,8 @@ Console.CancelKeyPress += (_, e) =>
 var runner = new LoadTestRunner();
 var report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token);
 ReportWriter.Write(report, reportDir);
-Console.WriteLine($"Report: {reportDir} ({(report.Passed ? "PASS" : "FAIL")})");
+string mdPath = Path.Combine(reportDir, "load-test-report.md");
+Console.WriteLine($"Report: {mdPath} ({(report.Passed ? "PASS" : "FAIL")})");
 Environment.ExitCode = report.Passed ? 0 : 2;
 
 static string? Arg(string[] args, string name)

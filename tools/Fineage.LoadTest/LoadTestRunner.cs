@@ -25,6 +25,10 @@ public sealed class LoadTestRunner
         var bots = new List<FineageBotClient>();
         var stats = new List<BotStats>();
 
+        RuntimeCountersSampler? runtimeSampler = zonePid is > 0 ? new RuntimeCountersSampler(zonePid.Value) : null;
+        if (runtimeSampler != null)
+            await runtimeSampler.StartAsync(ct);
+
         var metricsTask = Task.Run(async () =>
         {
             var sampler = new ServerMetricsSampler();
@@ -125,7 +129,14 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
-        return new RunReport
+        RuntimeCounterStats? runtimeStats = null;
+        if (runtimeSampler != null)
+        {
+            runtimeStats = await runtimeSampler.StopAndSummarizeAsync();
+            await runtimeSampler.DisposeAsync();
+        }
+
+        var report = new RunReport
         {
             ScenarioName = scenario.Name,
             Target = target,
@@ -153,5 +164,18 @@ public sealed class LoadTestRunner
             StartedAt = started,
             FinishedAt = DateTimeOffset.UtcNow
         };
+
+        var logPaths = new List<string>();
+        if (loginLog != null) logPaths.Add(loginLog);
+        if (zoneLog != null) logPaths.Add(zoneLog);
+        ReportEnricher.Enrich(report, scenario, promSamples, zoneLog, logPaths, runtimeStats);
+
+        foreach (GateVerdict gate in report.GateVerdicts.Where(g => !g.Passed && g.Note?.StartsWith("MISSING", StringComparison.Ordinal) != true))
+            failReasons.Add($"Gate FAIL: {gate.Gate} ({gate.Observed:0.0}{gate.Unit})");
+
+        report.FailReasons = failReasons;
+        report.Passed = failReasons.Count == 0;
+
+        return report;
     }
 }

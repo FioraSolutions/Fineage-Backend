@@ -73,7 +73,7 @@ YAML files under `tools/Fineage.LoadTest/scenarios/` control:
 - **Process:** RSS / VmHWM via `/proc` for the zone PID passed to `--zone-pid`.
 - **Logs:** `local-logs/login-net.log`, `local-logs/zone-net.log` scanned for exceptions, stage failures, ledger, desync, deadlock, timeout, `handler_error`.
 
-Each run writes `report.json` and `report.md` under `--report-dir`. The report **fails** when log signals or disconnect/stuck thresholds trip.
+Each run writes **`load-test-report.md`** (LLM-ready, capped at ~30 KiB) and **`load-test-report.json`** under `--report-dir` (aliases: `report.md` / `report.json`). The markdown includes run header (git, build, machine, GC env), peak-scrape latency tables, 10s time-series windows, optional `dotnet-counters` runtime stats, structured Error/Warning counts, bot/oracle stats, **#867 gate verdicts**, and an explicit list of **missing** Prometheus names expected after PR #862. CI (`scripts/ci-load-test-smoke.sh`) prints `load-test-report: …/load-test-report.md` after each run and uploads `local-logs/ci-load-smoke/` as the `load-test-smoke` artifact.
 
 ## L2J Mobius comparison
 

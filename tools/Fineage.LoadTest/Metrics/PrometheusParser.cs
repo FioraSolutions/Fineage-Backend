@@ -8,6 +8,7 @@ public sealed record HistogramStats(double Sum, long Count, double Mean, double 
 
 public sealed class PrometheusSample
 {
+    public DateTimeOffset ScrapedAt { get; init; } = DateTimeOffset.UtcNow;
     public double TickP50 { get; init; }
     public double TickP95 { get; init; }
     public double TickP99 { get; init; }
@@ -27,6 +28,10 @@ public sealed class PrometheusSample
     public long BytesIn { get; init; }
     public long LedgerAdjustments { get; init; }
     public long LedgerFlushFailures { get; init; }
+    public double FanoutQueueDepth { get; init; }
+    public double FanoutQueueOldestAgeMs { get; init; }
+    public double CommandToMailboxesP99Ms { get; init; }
+    public long ReliableOverflowTotal { get; init; }
 }
 
 public static class PrometheusParser
@@ -48,6 +53,7 @@ public static class PrometheusParser
 
         return new PrometheusSample
         {
+            ScrapedAt = DateTimeOffset.UtcNow,
             TickP50 = Quantile(buckets, tickCount, 0.50),
             TickP95 = Quantile(buckets, tickCount, 0.95),
             TickP99 = Quantile(buckets, tickCount, 0.99),
@@ -66,8 +72,18 @@ public static class PrometheusParser
             BytesOut = ParseCounterSum(text, "fineage_bytes_out_total"),
             BytesIn = ParseCounterSum(text, "fineage_bytes_in_total"),
             LedgerAdjustments = ParseCounterSum(text, "fineage_ledger_adjustments_total"),
-            LedgerFlushFailures = ParseLong(text, "fineage_ledger_flush_failures_total")
+            LedgerFlushFailures = ParseLong(text, "fineage_ledger_flush_failures_total"),
+            FanoutQueueDepth = ParseDouble(text, "fineage_fanout_queue_depth"),
+            FanoutQueueOldestAgeMs = ParseSingletonP99(text, "fineage_fanout_queue_oldest_age_ms"),
+            CommandToMailboxesP99Ms = ParseSingletonP99(text, "fineage_command_to_mailboxes_ms"),
+            ReliableOverflowTotal = ParseCounterSum(text, "fineage_reliable_overflow_total")
         };
+    }
+
+    static double ParseSingletonP99(string text, string metric)
+    {
+        var hs = ParseSingletonHistogram(text, metric);
+        return hs?.P99 ?? 0;
     }
 
     /// <summary>Per-stage quantile from <c>fineage_tick_stage_ms</c> histograms in a single scrape.</summary>
@@ -129,6 +145,8 @@ public static class PrometheusParser
         var m = Regex.Match(text, $"^{Regex.Escape(metric)}\\s+(\\d+)", RegexOptions.Multiline);
         return m.Success ? long.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
     }
+
+    public static long ParseCounterSumStatic(string text, string metric) => ParseCounterSum(text, metric);
 
     static long ParseCounterSum(string text, string metric)
     {
