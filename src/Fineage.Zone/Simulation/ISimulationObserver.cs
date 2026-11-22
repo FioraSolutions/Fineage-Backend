@@ -52,14 +52,13 @@ sealed class ZoneSimulationObserver : ISimulationObserver
     public void StageFailed(StageFailure failure)
     {
         FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", failure.Stage));
-        ZoneLog.Warn($"simulation stage failed: {failure}\n{failure.Error}");
+        ZoneHotPathLogs.SimulationStageFailed(failure.Stage, failure.Scope, failure.Tick, failure.Error);
     }
 
     public void TicksSkipped(TickContext tick, long skipped)
     {
         FineageTelemetry.TicksSkipped.Add(skipped);
-        ZoneLog.Warn(
-            $"simulation skipped {skipped} tick(s) before tick {tick.Tick}: the step ran {tick.WallUnixMs - tick.NowUnixMs} ms into its interval; their stages run once now");
+        ZoneHotPathLogs.SimulationTicksSkipped(skipped, tick.Tick, tick.WallUnixMs - tick.NowUnixMs);
     }
 
     public void EntitiesHandedOff(TickContext tick, IReadOnlyList<RegionTransfer> transfers) =>
@@ -67,7 +66,7 @@ sealed class ZoneSimulationObserver : ISimulationObserver
 
     public void StepCompleted(TickContext tick, TimeSpan elapsed, TimeSpan budget)
     {
-        if (elapsed > budget)
+        if (elapsed > budget && ZoneHotPathLogs.SimulationWarningEnabled)
         {
             FineageTelemetry.TickOverruns.Add(1);
             string slowest = string.Join(", ", _stepStages
@@ -81,17 +80,18 @@ sealed class ZoneSimulationObserver : ISimulationObserver
                 counts = $"; npcs total={total} thinking={thinking} playerRegions={regions}";
             }
 
-            ZoneLog.Warn(
-                $"simulation tick {tick.Tick} took {elapsed.TotalMilliseconds:F1} ms, over its {budget.TotalMilliseconds:F0} ms step; slowest: {slowest}{counts}");
+            ZoneHotPathLogs.SimulationTickOverrun(
+                tick.Tick, elapsed.TotalMilliseconds, budget.TotalMilliseconds, slowest, counts);
         }
 
         bool wallBehind = tick.NowUnixMs - tick.WallUnixMs >= budget.TotalMilliseconds;
-        if (wallBehind != _wallBehind)
+        if (wallBehind != _wallBehind && ZoneHotPathLogs.SimulationWarningEnabled)
         {
             _wallBehind = wallBehind;
-            ZoneLog.Warn(wallBehind
-                ? $"wall clock is {tick.NowUnixMs - tick.WallUnixMs} ms behind simulation tick {tick.Tick}; the simulation keeps its fixed step until the wall clock catches up"
-                : $"wall clock caught up with simulation tick {tick.Tick}");
+            if (wallBehind)
+                ZoneHotPathLogs.SimulationWallBehind(tick.NowUnixMs - tick.WallUnixMs, tick.Tick);
+            else
+                ZoneHotPathLogs.SimulationWallCaughtUp(tick.Tick);
         }
 
         _stepStages.Clear();

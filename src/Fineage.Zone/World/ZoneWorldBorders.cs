@@ -105,7 +105,7 @@ public sealed partial class ZoneWorld
                 // Mobius isAggressiveTowards → me.isAggressive() && GeoEngine.canSeeTarget(me, target).
                 if (!CanSeePoint(npc, p.X, p.Y, p.Z))
                     continue;
-                ZoneLog.Info($"[aggro] npc={npc.ObjectId} ({npc.Name}) aggro on player={p.ObjectId} range={aggroRange}");
+                ZoneHotPathLogs.AggroOnPlayer(npc.ObjectId, npc.Name, p.ObjectId, aggroRange);
                 Post(new HateMessage(npc.ObjectId, p.ObjectId, 1));
                 break;
             }
@@ -124,7 +124,7 @@ public sealed partial class ZoneWorld
                     continue;
                 if (!CanSeePoint(npc, monster.X, monster.Y, monster.Z))
                     continue;
-                ZoneLog.Info($"[aggro] guard={npc.ObjectId} ({npc.Name}) aggro on monster={monster.ObjectId} range={aggroRange}");
+                ZoneHotPathLogs.GuardAggroMonster(npc.ObjectId, npc.Name, monster.ObjectId, aggroRange);
                 Post(new HateMessage(npc.ObjectId, monster.ObjectId, 1, AllowNpcAttacker: true));
                 break;
             }

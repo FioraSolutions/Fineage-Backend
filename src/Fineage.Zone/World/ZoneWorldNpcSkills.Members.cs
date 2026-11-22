@@ -22,8 +22,7 @@ public sealed partial class ZoneWorld
                     return;
                 int before = target.CurHp;
                 target.CurHp = Math.Min(target.MaxHp, target.CurHp + skill.Amount);
-                ZoneLog.Info(
-                    $"[npc-support] heal {skill.SkillId} npc={caster.NpcId} {before}->{target.CurHp} (+{skill.Amount})");
+                ZoneHotPathLogs.NpcSupportHeal(skill.SkillId, caster.NpcId, before, target.CurHp, skill.Amount);
                 break;
             case NpcSupportKind.Buff:
             case NpcSupportKind.Debuff:
@@ -55,8 +54,7 @@ public sealed partial class ZoneWorld
                 if (kind is NpcSupportKind.Immobilize or NpcSupportKind.Silence)
                     StopTimedMove(target);
                 FanoutAbnormal(target);
-                ZoneLog.Info(
-                    $"[npc-support] {kind} {skill.SkillId} lv{skill.Level} slot={slot} on={target.ObjectId}");
+                ZoneHotPathLogs.NpcSupportBuff(kind.ToString(), skill.SkillId, skill.Level, slot, target.ObjectId);
                 break;
         }
     }
@@ -117,7 +115,7 @@ public sealed partial class ZoneWorld
         npc.CastingUntilMs = now + hitTime + Math.Max(0, combat.CoolTimeMs);
         SetPendingHit(npc, new PendingSkillHit(player.ObjectId, 0, now + hitTime, combat, level));
         npc.NextMobAttackMs = npc.CastingUntilMs;
-        ZoneLog.Info($"[npc-skill] cast {ai.SkillId} lv{level} npc={npc.NpcId} → player={player.ObjectId} hit={hitTime}ms");
+        ZoneHotPathLogs.NpcSkillCast(ai.SkillId, level, npc.NpcId, player.ObjectId, hitTime);
         if (hitTime == 0)
             ResolveNpcPendingHit(npc, now);
         return true;
@@ -159,7 +157,7 @@ public sealed partial class ZoneWorld
 
         FanoutSkillLaunched(npc, hit.Combat.SkillId, hit.Level, target);
         int damage = RollNpcSkillDamage(npc, target, hit.Combat, hit.Level);
-        ZoneLog.Info($"[npc-skill] hit {hit.Combat.SkillId} lv{hit.Level} damage={damage}");
+        ZoneHotPathLogs.NpcSkillHit(hit.Combat.SkillId, hit.Level, damage);
         // Mobius onCreatureDamageReceived → TriggerSkillByDamage runs before the summon branch splits the victim kinds.
         if (damage > 0 && target.Kind == ZoneEntityKind.Player)
             RunDamageTriggers(target, npc, damage);

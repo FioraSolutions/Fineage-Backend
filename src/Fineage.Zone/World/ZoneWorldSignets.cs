@@ -47,7 +47,7 @@ public sealed partial class ZoneWorld
             var support = _npcAiSupport.Get(signet.NpcId);
             if (support == null)
             {
-                ZoneLog.Info($"[signet] missing npc-ai-support row npcId={signet.NpcId}");
+                ZoneHotPathLogs.SignetMissingAiSupport(signet.NpcId);
                 continue;
             }
             if (support.Value.Buff is { Count: > 0 } buffs)
@@ -109,8 +109,7 @@ public sealed partial class ZoneWorld
                 skill.Level, slot);
             FanoutAbnormal(target);
         }
-        ZoneLog.Info($"[signet] pulse {skill.SkillId} lv{skill.Level} npc={signet.NpcId} range={range} " +
-                     $"hit={targets.Count}");
+        ZoneHotPathLogs.SignetPulse(skill.SkillId, skill.Level, signet.NpcId, range, targets.Count);
     }
 
     /// <summary>Mobius EffectPoint debuff scopes: pulse debuffs / damage on attackable NPCs inside <c>affectRange</c>.</summary>
@@ -125,8 +124,7 @@ public sealed partial class ZoneWorld
         {
             if (!template.TryLevelData(skill.Level, out var found))
             {
-                ZoneLog.Info($"[signet] skills.json id={skill.SkillId} missing levelData for level={skill.Level} " +
-                             $"signetNpcId={signet.NpcId} source=npc-ai-support");
+                ZoneHotPathLogs.SignetMissingSkillLevel(skill.SkillId, skill.Level, signet.NpcId);
                 return;
             }
             levelData = found;
@@ -137,7 +135,7 @@ public sealed partial class ZoneWorld
         if (!catalogAbnormal && !supportAbnormal)
         {
             if (template == null)
-                ZoneLog.Info($"[signet] missing skill catalog id={skill.SkillId} npc={signet.NpcId}");
+                ZoneHotPathLogs.SignetMissingSkillCatalog(skill.SkillId, signet.NpcId);
             return;
         }
 
@@ -175,8 +173,7 @@ public sealed partial class ZoneWorld
             else if (supportAbnormal && ApplySignetSupportAbnormal(skill, entity, now, template?.AbnormalType))
                 hits++;
         }
-        ZoneLog.Info($"[signet] hostile pulse {skill.SkillId} lv{skill.Level} npc={signet.NpcId} range={range} " +
-                     $"landed={hits}");
+        ZoneHotPathLogs.SignetHostilePulse(skill.SkillId, skill.Level, signet.NpcId, range, hits);
     }
 
     /// <summary>npc-ai-support debuff pulses when the skill id is not in <c>skills.json</c> yet.</summary>

@@ -52,8 +52,7 @@ public sealed partial class ZoneWorld
         npc.NextMobAttackMs = npc.CastingUntilMs;
         int range = skill.AffectRange > 0 ? skill.AffectRange : 150;
         int creditId = hateTarget.ObjectId;
-        ZoneLog.Info(
-            $"[npc-suicide] cast {skill.SkillId} lv{skill.Level} npc={npc.NpcId} power={skill.Power} range={range} hit={hitTime}ms");
+        ZoneHotPathLogs.NpcSuicideCast(skill.SkillId, skill.Level, npc.NpcId, skill.Power, range, hitTime);
 
         // Pending on self so mid-cast hate-target death still detonates (Mobius activateSkill → doDie).
         SetPendingHit(npc, new PendingSkillHit(npc.ObjectId, 0, now + hitTime, null, skill.Level)
@@ -371,8 +370,7 @@ public sealed partial class ZoneWorld
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
             Apply = (Action<ZoneEntity, long>)((t, at) => ApplyNpcSupportEffect(npc, t, skill, kind, at))
         });
-        ZoneLog.Info(
-            $"[npc-support] cast {kind} {skill.SkillId} lv{skill.Level} npc={npc.NpcId} → {target.ObjectId} hit={hitTime}ms");
+        ZoneHotPathLogs.NpcSupportCast(kind.ToString(), skill.SkillId, skill.Level, npc.NpcId, target.ObjectId, hitTime);
         if (hitTime == 0)
             ResolveNpcPendingHit(npc, now);
         return true;

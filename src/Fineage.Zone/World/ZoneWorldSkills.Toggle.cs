@@ -92,7 +92,7 @@ public sealed partial class ZoneWorld
         // Mobius: a toggle is applied straight away (no distance/land roll) and lasts until it is switched off.
         ApplyToggleAbnormal(player, template, levelData, level, now, request.SkillId);
         StartToggleSideEffects(player, request.SkillId, now);
-        ZoneLog.Info($"[toggle] on skill={request.SkillId} lv{level} mp={player.CurMp}/{player.MaxMp} initial={initial}");
+        ZoneHotPathLogs.ToggleOn(request.SkillId, level, player.CurMp, player.MaxMp, initial);
         return null;
     }
 
@@ -200,7 +200,7 @@ public sealed partial class ZoneWorld
 
         if (skillId == ToggleFakeDeath && player.FakeDeath)
             StopFakeDeath(player, wakeNotice: sendAbort);
-        ZoneLog.Info($"[toggle] off skill={skillId} reason={reason} obj={player.ObjectId}");
+        ZoneHotPathLogs.ToggleOff(skillId, reason, player.ObjectId);
         return null;
     }
 
@@ -236,7 +236,7 @@ public sealed partial class ZoneWorld
         FanoutWaitType(player, ActionProtocol.WaitStopFakeDeath);
         FanoutRevive(player);
         if (wakeNotice && player.Session != null)
-            ZoneLog.Info($"[fakedeath] wake obj={player.ObjectId}");
+            ZoneHotPathLogs.FakeDeathWake(player.ObjectId);
     }
 
     /// <summary>
@@ -341,7 +341,7 @@ public sealed partial class ZoneWorld
 
             player.CurMp = Math.Max(0, player.CurMp - (int)perTick);
             FanoutVitals(player, CasterMpStatus(player));
-            ZoneLog.Info($"[toggle] tick skill={entry.Id} mp={player.CurMp}/{player.MaxMp} cost={perTick:F2}");
+            ZoneHotPathLogs.ToggleTick(entry.Id, player.CurMp, player.MaxMp, perTick);
         }
 
         return false;
