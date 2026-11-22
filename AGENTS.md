@@ -21,4 +21,11 @@ Zone tick budget is 200 ms; local playtests run the **Debug** build, so performa
 
 ## Model selection
 
-Composer (`composer-2.5`) by default; Kimi K3 Pro (`kimi-k3`) only for hard architectural problems. No Claude models.
+| Work | Model |
+|------|--------|
+| Light (small UI tweaks, docs, merges, sync) | **Composer** (`composer-2.5`) |
+| Medium-light (simple contained fixes, tests, CI fixes) | **DeepSeek V4.1 Flash** (`deepseek-v41-flash-1017`) |
+| Medium (contained bugfixes, features inside existing architecture) | **Grok** (`grok-4.7`) |
+| Hard (architecture, problems the above cannot solve) | **Kimi K3** (`kimi-k3`) |
+
+Do not use Claude models (token budget).
