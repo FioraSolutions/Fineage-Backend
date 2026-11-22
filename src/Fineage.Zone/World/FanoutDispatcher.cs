@@ -129,18 +129,18 @@ internal sealed class FanoutDispatcher : IDisposable
                     break;
                 while (_queue.Reader.TryRead(out var batch))
                 {
-                FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
-                Volatile.Write(ref _oldestEnqueueTicks, 0);
-                Interlocked.Increment(ref _inFlight);
-                try
-                {
-                    ExecuteBatch(batch);
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _inFlight);
-                    Interlocked.Decrement(ref _pending);
-                }
+                    FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
+                    Volatile.Write(ref _oldestEnqueueTicks, 0);
+                    Interlocked.Increment(ref _inFlight);
+                    try
+                    {
+                        ExecuteBatch(batch);
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref _inFlight);
+                        Interlocked.Decrement(ref _pending);
+                    }
                 }
             }
         }

@@ -63,7 +63,7 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
         Volatile.Write(ref _recording, new WorldFanoutBatch());
     }
 
-  /// <param name="commandCommitTimestamp">When &gt; 0, marks this batch for command→mailbox timing.</param>
+    /// <param name="commandCommitTimestamp">When &gt; 0, marks this batch for command→mailbox timing.</param>
     public void Seal(long commandCommitTimestamp = 0)
     {
         if (_depth == 0)

@@ -33,7 +33,6 @@ public sealed class PrometheusSample
     public long LedgerFlushFailures { get; init; }
     public double FanoutQueueDepth { get; init; }
     public double FanoutQueueOldestAgeMs { get; init; }
-    public double CommandToMailboxesP99Ms { get; init; }
     public long ReliableOverflowTotal { get; init; }
 }
 
@@ -82,7 +81,6 @@ public static class PrometheusParser
             LedgerFlushFailures = ParseLong(text, "fineage_ledger_flush_failures_total"),
             FanoutQueueDepth = ParseDouble(text, "fineage_fanout_queue_depth"),
             FanoutQueueOldestAgeMs = ParseSingletonP99(text, "fineage_fanout_queue_oldest_age_ms"),
-            CommandToMailboxesP99Ms = ParseSingletonP99(text, "fineage_command_to_mailboxes_ms"),
             ReliableOverflowTotal = ParseCounterSum(text, "fineage_reliable_overflow_total")
         };
     }

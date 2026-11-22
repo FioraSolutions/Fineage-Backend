@@ -44,7 +44,7 @@ public sealed class FanoutDispatcherBackpressureTests
         Assert.Contains("tick=42", ex.Message);
         Assert.Contains("phase=3", ex.Message);
         Assert.Contains("seq=99", ex.Message);
-        Assert.Empty(delivered.Where(n => n == 99));
+        Assert.DoesNotContain(delivered, n => n == 99);
     }
 
     static SealedWorldFanoutBatch Batch(ulong sequence, Action send)
