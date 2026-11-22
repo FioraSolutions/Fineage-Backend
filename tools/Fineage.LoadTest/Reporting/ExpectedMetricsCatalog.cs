@@ -34,7 +34,8 @@ public static class ExpectedMetricsCatalog
         "fineage_reliable_overflow_total",
         "fineage_socket_write_ms",
         "fineage_socket_write_bytes",
-        "fineage_frames_per_socket_write",
+        "fineage_socket_write_frames",
+        "fineage_fanout_dropped_total",
         "fineage_outbound_dropped_total"
     ];
 
