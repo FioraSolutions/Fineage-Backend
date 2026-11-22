@@ -60,7 +60,8 @@ internal sealed class WorldBench
         Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
         Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
         Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
-        PunishmentManager? punishments = null)
+        PunishmentManager? punishments = null,
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
@@ -112,7 +113,8 @@ internal sealed class WorldBench
             regionExecutor: resolvedExecutor,
             simulationObserver: simulationObserver,
             ledgerJournal: Ledger,
-            punishments: punishments);
+            punishments: punishments,
+            raidBossPoints: raidBossPoints);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
     }

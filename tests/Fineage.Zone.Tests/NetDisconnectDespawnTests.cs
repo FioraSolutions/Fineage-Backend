@@ -8,6 +8,7 @@ namespace Fineage.Zone.Tests;
 /// <c>EntityDespawn</c> to the knownlist on the leave path, and the observer must not get a second
 /// remove for the same entity afterwards.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetDisconnectDespawnTests
 {
     [Fact]

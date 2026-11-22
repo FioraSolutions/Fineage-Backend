@@ -37,6 +37,7 @@ public sealed class EconomyCommitTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
     public void Item_replace_failure_rolls_back_the_ledger_row_and_the_bag()
     {
         string? baseUrl = ConnectionString();

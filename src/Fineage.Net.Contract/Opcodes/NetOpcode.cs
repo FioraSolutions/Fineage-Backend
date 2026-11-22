@@ -405,5 +405,51 @@ namespace Fineage.Net.Contract
         /// <c>UseItem</c>, not the item-list request. The reply is <see cref="ItemList"/> at the current cursor.
         /// </summary>
         public const ushort RequestItemList = 0x000F;
+        /// <summary>
+        /// Zone → client: Mobius <c>AgitDecoInfo</c>.
+        /// <c>ServerPackets.AGIT_DECO_INFO(0xF7)</c>,
+        /// L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/ServerPackets.java:223.
+        /// </summary>
+        public const ushort AgitDecoInfo = 0xF7;
+
+        // Boat packets use the Mobius CT_0 Interlude ids from ServerPackets.java.
+        // 0x03E1 is not a boat opcode. AgitDecoInfo is already 0xF7 above.
+
+        /// <summary>ServerPackets.java:101 <c>VEHICLE_INFO(0x59)</c>. Layout: VehicleInfo.java:47-52.</summary>
+        public const ushort VehicleInfo = 0x59;
+        /// <summary>ServerPackets.java:102 <c>VEHICLE_DEPARTURE(0x5A)</c>. Layout: VehicleDeparture.java:49-55.</summary>
+        public const ushort VehicleDeparture = 0x5A;
+        /// <summary>ServerPackets.java:103 <c>VEHICLE_CHECK_LOCATION(0x5B)</c>. Layout: VehicleCheckLocation.java:39-44.</summary>
+        public const ushort VehicleCheckLocation = 0x5B;
+        /// <summary>ServerPackets.java:104 <c>GET_ON_VEHICLE(0x5C)</c>. Layout: GetOnVehicle.java:48-53.</summary>
+        public const ushort GetOnVehicle = 0x5C;
+        /// <summary>ServerPackets.java:105 <c>GET_OFF_VEHICLE(0x5D)</c>. Layout: GetOffVehicle.java:53-58.</summary>
+        public const ushort GetOffVehicle = 0x5D;
+        /// <summary>ServerPackets.java:120 <c>MOVE_TO_LOCATION_IN_VEHICLE(0x71)</c>. Layout: MoveToLocationInVehicle.java:51-59.</summary>
+        public const ushort MoveToLocationInVehicle = 0x71;
+        /// <summary>ServerPackets.java:121 <c>STOP_MOVE_IN_VEHICLE(0x72)</c>. Layout: StopMoveInVehicle.java:46-52.</summary>
+        public const ushort StopMoveInVehicle = 0x72;
+        /// <summary>ServerPackets.java:122 <c>VALIDATE_LOCATION_IN_VEHICLE(0x73)</c>. Layout: ValidateLocationInVehicle.java:47-53.</summary>
+        public const ushort ValidateLocationInVehicle = 0x73;
+        /// <summary>ServerPackets.java:172 <c>VEHICLE_START(0xC0)</c>. Layout: VehicleStarted.java:45-47.</summary>
+        public const ushort VehicleStarted = 0xC0;
+
+        /// <summary>
+        /// Mobius <c>ClientPackets.java</c>. A separate registry from the constants above:
+        /// Interlude uses <c>0x5C</c> for both server <c>GET_ON_VEHICLE</c> and client
+        /// <c>REQUEST_MOVE_TO_LOCATION_IN_VEHICLE</c>, and <c>0x5D</c> for both
+        /// <c>GET_OFF_VEHICLE</c> and <c>CANNOT_MOVE_ANYMORE_IN_VEHICLE</c>.
+        /// </summary>
+        public static class ClientPackets
+        {
+            /// <summary>ClientPackets.java:85 <c>REQUEST_GET_ON_VEHICLE(0x42)</c>. readImpl RequestGetOnVehicle.java:40-43.</summary>
+            public const ushort RequestGetOnVehicle = 0x42;
+            /// <summary>ClientPackets.java:86 <c>REQUEST_GET_OFF_VEHICLE(0x43)</c>. readImpl RequestGetOffVehicle.java:36-42.</summary>
+            public const ushort RequestGetOffVehicle = 0x43;
+            /// <summary>ClientPackets.java:106 <c>REQUEST_MOVE_TO_LOCATION_IN_VEHICLE(0x5C)</c>. readImpl RequestMoveToLocationInVehicle.java:45-53.</summary>
+            public const ushort RequestMoveToLocationInVehicle = 0x5C;
+            /// <summary>ClientPackets.java:107 <c>CANNOT_MOVE_ANYMORE_IN_VEHICLE(0x5D)</c>. readImpl CannotMoveAnymoreInVehicle.java:35-42.</summary>
+            public const ushort CannotMoveAnymoreInVehicle = 0x5D;
+        }
     }
 }

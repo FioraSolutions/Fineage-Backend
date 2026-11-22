@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// displaces, and the bag/paperdoll rows the client receives. Ported off the V2 wire; the same rules are
 /// asserted through <see cref="IWorldEventPublisher"/>, which is what a real client renders.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEquipRulesTests
 {
     const int Sword = 1;

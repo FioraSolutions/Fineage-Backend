@@ -21,6 +21,9 @@ public sealed partial class ZoneWorld
         itemId == OlympiadProtocol.HeroCirclet ||
         itemId is >= OlympiadProtocol.FirstHeroWeapon and <= OlympiadProtocol.LastHeroWeapon;
 
+    static bool HasHeroWeapon(PlayerInventory? inventory) =>
+        inventory?.Items.Any(i => i.ItemId is >= OlympiadProtocol.FirstHeroWeapon and <= OlympiadProtocol.LastHeroWeapon) == true;
+
     string? OlympiadPage(ZoneEntity player, string file) =>
         TryPage(player.Session?.Language, "olympiad/" + file, out var html) ? html : null;
 
@@ -203,7 +206,9 @@ public sealed partial class ZoneWorld
                     SendHtml(session, player, npc, Monument("not_a_hero.htm") ?? "");
                     return null;
                 }
-                bool hasWeapon = player.Inventory?.Items.Any(i => i.ItemId is >= OlympiadProtocol.FirstHeroWeapon and <= OlympiadProtocol.LastHeroWeapon) == true;
+                bool hasWeapon = HasHeroWeapon(player.Inventory);
+                if (hasWeapon)
+                    SelfLine(session, OlympiadProtocol.HeroWeaponAlready, OlympiadProtocol.HeroWeaponAlreadyText);
                 SendHtml(session, player, npc, Monument(hasWeapon ? "already_have_weapon.htm" : "weapon_list.htm") ?? "");
                 return null;
             case "HeroCirclet":
@@ -222,9 +227,16 @@ public sealed partial class ZoneWorld
             default:
                 if (!int.TryParse(scriptEvent, out int weaponId) || weaponId is < OlympiadProtocol.FirstHeroWeapon or > OlympiadProtocol.LastHeroWeapon)
                     return "bad_request";
-                // Mobius gives the weapon without re-checking; one Infinity weapon per hero is the page's promise.
-                if (!player.Hero || player.Inventory!.Items.Any(i => i.ItemId is >= OlympiadProtocol.FirstHeroWeapon and <= OlympiadProtocol.LastHeroWeapon))
+                if (!player.Hero)
+                {
+                    SendHtml(session, player, npc, Monument("not_a_hero.htm") ?? "");
                     return null;
+                }
+                if (HasHeroWeapon(player.Inventory))
+                {
+                    SelfLine(session, OlympiadProtocol.HeroWeaponAlready, OlympiadProtocol.HeroWeaponAlreadyText);
+                    return null;
+                }
                 GrantHeroItem(session, player, weaponId);
                 return null;
         }

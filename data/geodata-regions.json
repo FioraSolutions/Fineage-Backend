@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "comment": "Interlude starter continents + origin tile 20_18. Run scripts/fetch-geodata.sh with these names (or a full-world list) into data/geodata.",
+  "regions": [
+    "16_24",
+    "16_25",
+    "17_24",
+    "17_25",
+    "18_24",
+    "18_25",
+    "20_18",
+    "20_19",
+    "20_20",
+    "21_16",
+    "21_18",
+    "21_19",
+    "21_20",
+    "21_21",
+    "21_22",
+    "21_23",
+    "21_24",
+    "21_25",
+    "22_22",
+    "22_23"
+  ]
+}

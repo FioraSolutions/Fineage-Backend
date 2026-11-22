@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Block D alliances over Net (Mobius CT_0 rules): create at clan level 5, invite / accept, the 3-clan limit,
 /// war refusal, leave / expel / dissolve penalties, the 8x12 crest, alliance info, relation bits and the $ chat.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetAllianceTests
 {
     static readonly CancellationToken Ct = default;

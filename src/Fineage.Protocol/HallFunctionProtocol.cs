@@ -16,4 +16,8 @@ public static class HallFunctionProtocol
     public const long HallLeasePeriodMs = 604800000L;
 
     public const int ManagerRange = 250;
+
+    public const int ItemCreateListLevelScale = 100_000;
+
+    public static int ItemCreateListId(int hallId, int level) => hallId + level * ItemCreateListLevelScale;
 }

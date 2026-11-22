@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// the enter burst, so the clan window is filled before the player can open it. The world builds both from its clan
 /// cache; the Net server writes them right after the journal.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetClanEnterTests
 {
     [Fact]

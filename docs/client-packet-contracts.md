@@ -45,9 +45,11 @@ Reference for **blocked or not-yet-emitted** Interlude S2C/C2S layouts the retai
 ## Boats (ship routes)
 
 **Server feature:** `BoatManager`, `Boat` actor, `BoatAI`, routes from datapack.  
-**Fineage today:** not implemented.
+**Fineage today:** `ZoneWorldBoats` route simulation. Net opcodes are the Mobius CT_0 Interlude ids (`ServerPackets.java` / `ClientPackets.java`), not a free `0x03xx` slot. `0x03E1` collides with `AgitDecoInfo`; Mobius `AGIT_DECO_INFO` is `0xF7` (`ServerPackets.java:223`).
 
 ### `VehicleInfo` — S2C `0x59`
+
+`ServerPackets.java:101`. `VehicleInfo.java:47-52`.
 
 | Field | Type | Notes |
 |-------|------|--------|
@@ -59,6 +61,8 @@ Sent on boat spawn / enter range; also on stop (speed 0) in Mobius `BoatAI`.
 
 ### `VehicleDeparture` — S2C `0x5A`
 
+`ServerPackets.java:102`. `VehicleDeparture.java:49-55`.
+
 | Field | Type | Notes |
 |-------|------|--------|
 | `boatObjectId` | int32 | |
@@ -68,17 +72,19 @@ Sent on boat spawn / enter range; also on stop (speed 0) in Mobius `BoatAI`.
 
 ### `VehicleCheckLocation` — S2C `0x5B`
 
-Boat position correction (read Mobius `VehicleCheckLocation.java` when implementing).
+`ServerPackets.java:103`. `VehicleCheckLocation.java:39-44`: `boatObjectId`, `x`, `y`, `z`, `heading` (int32 each).
 
 ### `GetOnVehicle` — S2C `0x5C`
 
-Player seated on boat (object ids + seat offsets).
+`ServerPackets.java:104`. `GetOnVehicle.java:48-53`: `playerObjectId`, `boatObjectId`, `x`, `y`, `z`.
 
 ### `GetOffVehicle` — S2C `0x5D`
 
-Player left boat at disembark point.
+`ServerPackets.java:105`. `GetOffVehicle.java:53-58`: `playerObjectId`, `boatObjectId`, `x`, `y`, `z`.
 
 ### `MoveToLocationInVehicle` — S2C `0x71`
+
+`ServerPackets.java:120`. `MoveToLocationInVehicle.java:51-59`.
 
 | Field | Type | Notes |
 |-------|------|--------|
@@ -89,24 +95,26 @@ Player left boat at disembark point.
 
 ### `StopMoveInVehicle` — S2C `0x72`
 
-Player stop inside boat.
+`ServerPackets.java:121`. `StopMoveInVehicle.java:46-52`: `playerObjectId`, `boatObjectId`, `x`, `y`, `z`, `heading`.
 
 ### `ValidateLocationInVehicle` — S2C `0x73`
 
-Position validate while on boat.
+`ServerPackets.java:122`. `ValidateLocationInVehicle.java:47-53`: `playerObjectId`, `boatObjectId`, `x`, `y`, `z`, `heading`.
 
 ### `VehicleStarted` — S2C `0xC0`
 
-Boat run state (depart/arrive).
+`ServerPackets.java:172`. `VehicleStarted.java:45-47`: `boatObjectId`, `state`.
 
 ### C2S (client → server)
 
-| Opcode | Name | Role |
-|--------|------|------|
-| `0x42` | `RequestGetOnVehicle` | Board at dock |
-| `0x43` | `RequestGetOffVehicle` | Leave at dock |
-| `0x5C` | `RequestMoveToLocationInVehicle` | Move intent on deck |
-| `0x5D` | `CannotMoveAnymoreInVehicle` | Arrival at deck waypoint |
+Client ids live in `NetOpcode.ClientPackets` because `0x5C` and `0x5D` are also server packets.
+
+| Opcode | Name | Mobius | Fields |
+|--------|------|--------|--------|
+| `0x42` | `RequestGetOnVehicle` | `ClientPackets.java:85`, `RequestGetOnVehicle.java:40-43` | `boatObjectId`, `x`, `y`, `z` |
+| `0x43` | `RequestGetOffVehicle` | `ClientPackets.java:86`, `RequestGetOffVehicle.java:36-42` | `boatObjectId`, `x`, `y`, `z` |
+| `0x5C` | `RequestMoveToLocationInVehicle` | `ClientPackets.java:106`, `RequestMoveToLocationInVehicle.java:45-53` | `boatObjectId`, `destX`, `destY`, `destZ`, `originX`, `originY`, `originZ` |
+| `0x5D` | `CannotMoveAnymoreInVehicle` | `ClientPackets.java:107`, `CannotMoveAnymoreInVehicle.java:35-42` | `boatObjectId`, `x`, `y`, `z`, `heading` |
 
 ---
 

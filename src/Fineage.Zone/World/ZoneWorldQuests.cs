@@ -160,6 +160,12 @@ public sealed partial class ZoneWorld
 
         if (outcome.Ok || outcome.Lines.Count > 0 || outcome.JournalChanged)
             Publish(session, player, outcome, npc.ObjectId, npc.NpcId);
+        if (eventName == null && !outcome.Ok && outcome.Lines.Count == 0 && !outcome.JournalChanged)
+        {
+            SendNpcPage(session, player, npc, 0);
+            return null;
+        }
+
         return outcome.Ok ? null : FailureCode(outcome.Failure);
     }
 

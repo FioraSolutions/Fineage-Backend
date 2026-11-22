@@ -37,6 +37,7 @@ public sealed partial class ZoneWorld
         var masters = VillageMasters;
         if (!masters.Knows(script))
         {
+            LogNpcScriptMiss(script, npc.NpcId, evt, "not listed in village-masters.json");
             SendHtml(session, player, npc, QuestBypassHandler.Unavailable);
             return null;
         }
@@ -47,7 +48,11 @@ public sealed partial class ZoneWorld
             ? masters.Talk(script, npc.NpcId, who)
             : masters.Event(script, npc.NpcId, evt, who, inventory.CountOf);
         if (result == null)
-            return null; // Mobius: script returned no page.
+        {
+            LogNpcScriptMiss(script, npc.NpcId, evt, "village_master script returned no page for this NPC");
+            SendHtml(session, player, npc, QuestBypassHandler.Unavailable);
+            return null;
+        }
 
         if (result.Change is { } change && !ApplyClassChange(session, player, change, result.RewardItemId, result.RewardCount))
             return "bad_request";

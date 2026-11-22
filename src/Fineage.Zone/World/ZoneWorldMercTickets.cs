@@ -168,7 +168,8 @@ public sealed partial class ZoneWorld
         {
             if (++spawned > limit)
                 break;
-            var placement = new CastlePlacement(post.NpcId, post.X, post.Y, post.Z, post.Heading);
+            int respawn = MercTickets.Find(post.ItemId)?.RespawnSeconds ?? 0;
+            var placement = new CastlePlacement(post.NpcId, post.X, post.Y, post.Z, post.Heading, respawn);
             SpawnSiegeGuard(run, data, placement, ClosestTower(data, placement));
         }
     }

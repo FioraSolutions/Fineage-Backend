@@ -24,6 +24,8 @@ public sealed class ClanHallManagerBypassHandler : IBypassHandler
         {
             "manage" when call.Command.Contains(" deco ", StringComparison.OrdinalIgnoreCase) =>
                 BypassReply.ServiceCall(NpcServiceIntent.HallDeco, call.Command),
+            "functions" when call.Command.Contains("item_creation", StringComparison.OrdinalIgnoreCase) =>
+                BypassReply.ServiceCall(NpcServiceIntent.HallItemCreate, call.Command),
             "manage" => BypassReply.ServiceCall(NpcServiceIntent.HallFunction, call.Command),
             "manage_vault" => BypassReply.ServiceCall(NpcServiceIntent.HallLease, call.Command),
             "support" => BypassReply.ServiceCall(NpcServiceIntent.HallSupport, call.Command),

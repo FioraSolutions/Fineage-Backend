@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// are refused before the world sees them, and what a malformed body does. Net has to answer the same codes,
 /// because the client only speaks Net.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetZoneBoundaryTests
 {
     [Fact]

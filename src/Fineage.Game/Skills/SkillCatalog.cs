@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Text.Json;
 
 namespace Fineage.Game.Skills;
@@ -14,14 +15,12 @@ public sealed class SkillCatalog
         AllowTrailingCommas = true
     };
 
-    readonly Dictionary<int, SkillDefinition> _byId;
+    readonly FrozenDictionary<int, SkillDefinition> _byId;
 
     SkillCatalog(IReadOnlyList<SkillDefinition> skills)
     {
         Skills = skills;
-        _byId = new Dictionary<int, SkillDefinition>(skills.Count);
-        foreach (var skill in skills)
-            _byId.Add(skill.SkillId, skill);
+        _byId = skills.ToFrozenDictionary(static skill => skill.SkillId);
     }
 
     public IReadOnlyList<SkillDefinition> Skills { get; }

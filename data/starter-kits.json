@@ -1,5 +1,6 @@
 {
-  "reference": "Synced from Mobius CT0 Interlude ref/mobius-ct0-interlude/data/stats/initialEquipment.xml. Equipped rows use item bodySlot via PlayerInventory.Equip.",
+  "reference": "Synced from Mobius CT0 Interlude ref/mobius-ct0-interlude/data/stats/initialEquipment.xml. Equipped rows use item bodySlot via PlayerInventory.Equip. Starting adena matches Mobius dist/game/config/Player.ini StartingAdena.",
+  "mobiusStartingAdena": 0,
   "kits": [
     {
       "classId": 0,

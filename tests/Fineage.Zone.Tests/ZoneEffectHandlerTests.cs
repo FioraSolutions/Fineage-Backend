@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Generic Mobius-named instant effect handlers (GetAgro / TargetMe, HpDrain, Life Scavenge, CpDamPercent,
 /// Lethal, RunAway, PolearmSingleTarget). Classification is by effect name, never by skill id.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class ZoneEffectHandlerTests
 {
     const int Aggression = 28;

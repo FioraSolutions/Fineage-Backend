@@ -1,0 +1,85 @@
+{
+  "id": 14,
+  "name": "Whereabouts of the Archaeologist",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    7253
+  ],
+  "dialogs": [
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 73,
+      "htmlFile": "31263-talk-000.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 74,
+      "htmlFile": "31263-talk-001.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "event",
+      "when": "absent",
+      "event": "31263-2",
+      "minLevel": 74,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "give_item",
+          "itemId": 7253,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        }
+      ],
+      "htmlFile": "31263-event-31263-2-002.htm"
+    },
+    {
+      "npcId": 31263,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31263-talk-003.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "talk",
+      "when": "started",
+      "hasItem": 7253,
+      "htmlFile": "31538-talk-004.htm"
+    },
+    {
+      "npcId": 31538,
+      "hook": "event",
+      "when": "started",
+      "event": "31538-1",
+      "hasItem": 7253,
+      "ops": [
+        {
+          "op": "take_item",
+          "itemId": 7253,
+          "count": 1
+        },
+        {
+          "op": "give_adena",
+          "count": 113228
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31538-event-31538-1-005.htm"
+    }
+  ]
+}

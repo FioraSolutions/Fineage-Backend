@@ -205,6 +205,8 @@ interface IWorldEventPublisher
     /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called on the simulation thread.</summary>
     void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
 
+    void FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco);
+
     /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
     void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
 
@@ -257,6 +259,12 @@ interface IWorldEventPublisher
 
     /// <summary>Interlude MonRaceInfo (0xDD) to derby track watchers.</summary>
     void FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet);
+
+    /// <summary>Interlude <c>VehicleInfo</c> (0x59) for a boat actor. Called on the simulation thread.</summary>
+    void FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info);
+
+    /// <summary>Interlude <c>VehicleDeparture</c> (0x5A) when a boat leg starts. Called on the simulation thread.</summary>
+    void FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure);
 
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 

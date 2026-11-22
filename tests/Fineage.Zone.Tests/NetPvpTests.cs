@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// <c>isAutoAttackable(Player)</c> is the real gate: a player is attackable while PvP-flagged or carrying karma, and
 /// the swing rolls against that player's own P.Def / evasion / shield.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPvpTests
 {
     const int MobId = 9_400_001;
