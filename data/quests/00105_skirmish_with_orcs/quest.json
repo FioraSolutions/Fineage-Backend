@@ -237,16 +237,16 @@
       "npcId": 27065,
       "hook": "kill",
       "when": "started",
-      "cond": 1,
+      "cond": 3,
       "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 1844,
+          "itemId": 1845,
           "count": 1,
           "chance": 1.0,
           "limit": 1,
-          "condAtLimit": 2
+          "condAtLimit": 4
         }
       ]
     },
@@ -254,16 +254,16 @@
       "npcId": 27067,
       "hook": "kill",
       "when": "started",
-      "cond": 1,
+      "cond": 3,
       "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 1844,
+          "itemId": 1845,
           "count": 1,
           "chance": 1.0,
           "limit": 1,
-          "condAtLimit": 2
+          "condAtLimit": 4
         }
       ]
     },
@@ -271,16 +271,16 @@
       "npcId": 27068,
       "hook": "kill",
       "when": "started",
-      "cond": 1,
+      "cond": 3,
       "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 1844,
+          "itemId": 1845,
           "count": 1,
           "chance": 1.0,
           "limit": 1,
-          "condAtLimit": 2
+          "condAtLimit": 4
         }
       ]
     }
