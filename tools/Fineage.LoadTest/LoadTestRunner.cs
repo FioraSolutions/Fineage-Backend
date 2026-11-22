@@ -29,13 +29,6 @@ public sealed class LoadTestRunner
         if (runtimeSampler != null)
             await runtimeSampler.StartAsync(ct);
 
-        var metricsTask = Task.Run(async () =>
-        {
-            var sampler = new ServerMetricsSampler();
-            var samples = await sampler.SampleZoneDuringAsync(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(scenario.DurationSeconds + scenario.RampUpSeconds), ct);
-            return (samples, sampler.RawScrapes);
-        }, ct);
-
         for (int i = 0; i < scenario.BotCount; i++)
         {
             var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
@@ -60,14 +53,31 @@ public sealed class LoadTestRunner
             }
         }
 
-        var behaviorEnd = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(scenario.DurationSeconds);
-        while (DateTimeOffset.UtcNow < behaviorEnd && !ct.IsCancellationRequested)
-        {
-            await Task.WhenAll(bots.Where(b => !b.Stats.Disconnected).Select(b => b.RunBehaviorTickAsync(bots, ct)));
-            await Task.Delay(250, ct);
-        }
+        DateTimeOffset behaviorStart = DateTimeOffset.UtcNow;
+        DateTimeOffset steadyStateStarted = behaviorStart.AddSeconds(scenario.RampUpSeconds);
+        DateTimeOffset behaviorEnd = behaviorStart + TimeSpan.FromSeconds(scenario.DurationSeconds);
+        int scrapeSeconds = scenario.DurationSeconds + scenario.RampUpSeconds + 10;
 
+        var metricsCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var metricsTask = Task.Run(async () =>
+        {
+            var sampler = new ServerMetricsSampler();
+            var samples = await sampler.SampleZoneDuringAsync(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(scrapeSeconds),
+                metricsCts.Token);
+            return (samples, sampler.RawScrapes);
+        }, ct);
+
+        var behaviorLoops = bots
+            .Where(b => !b.Stats.Disconnected)
+            .Select(b => b.RunBehaviorLoopAsync(bots, behaviorEnd, TimeSpan.FromMilliseconds(250), ct))
+            .ToArray();
+        await Task.WhenAll(behaviorLoops);
+
+        metricsCts.Cancel();
         (List<PrometheusSample> promSamples, List<string> rawScrapes) = await metricsTask;
+
         string? peakMetrics = null;
         if (promSamples.Count > 0 && rawScrapes.Count == promSamples.Count)
         {
@@ -84,6 +94,7 @@ public sealed class LoadTestRunner
 
             peakMetrics = rawScrapes[peakIdx];
         }
+
         foreach (var bot in bots)
             await bot.DisposeAsync();
 
@@ -117,7 +128,7 @@ public sealed class LoadTestRunner
 
         ProcessSample? proc = zonePid is > 0 ? new ProcessMetricsSampler().SamplePid(zonePid.Value) : null;
 
-        var consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize);
+        var consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize, steadyStateStarted);
         var hardIssues = consistency.Issues.Where(i => ConsistencyOracle.IsHardFailure(i.Kind)).ToList();
         if (consistency.Issues.Count > 0)
         {
@@ -162,16 +173,18 @@ public sealed class LoadTestRunner
             Bugs = bugs,
             Consistency = consistency,
             StartedAt = started,
+            SteadyStateStartedAt = steadyStateStarted,
             FinishedAt = DateTimeOffset.UtcNow
         };
 
         var logPaths = new List<string>();
         if (loginLog != null) logPaths.Add(loginLog);
         if (zoneLog != null) logPaths.Add(zoneLog);
-        ReportEnricher.Enrich(report, scenario, promSamples, zoneLog, logPaths, runtimeStats);
+        var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples);
+        var skillSamples = bots.SelectMany(b => b.ObservationLog.Tracker.SkillFanoutSamples);
+        var legacySamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
+        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples, zoneLog, logPaths, runtimeStats);
 
-        // #867 gate verdicts are recorded in the report for human/LLM review only — they do not
-        // fail the process (CI smoke still gates on bots in-world, stuck, and consistency).
         report.FailReasons = failReasons;
         report.Passed = failReasons.Count == 0;
 

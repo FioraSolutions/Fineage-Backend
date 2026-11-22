@@ -153,6 +153,9 @@ public static class PrometheusParser
 
     public static long ParseCounterSumStatic(string text, string metric) => ParseCounterSum(text, metric);
 
+    public static long CounterDeltaSum(string beforeText, string afterText, string metric) =>
+        Math.Max(0, ParseCounterSum(afterText, metric) - ParseCounterSum(beforeText, metric));
+
     static long ParseCounterSum(string text, string metric)
     {
         long sum = 0;
@@ -208,7 +211,39 @@ public static class PrometheusParser
         return m.Success ? double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
     }
 
+    public static HistogramStats? LabeledHistogramDelta(
+        string beforeText,
+        string afterText,
+        string metric,
+        string labelName,
+        string labelValue)
+    {
+        var before = ParseLabeledHistogramBuckets(beforeText, metric, labelName, labelValue);
+        var after = ParseLabeledHistogramBuckets(afterText, metric, labelName, labelValue);
+        if (before is not { } b || after is not { } a)
+            return null;
+        if (!HistogramMath.TryDelta(b.Buckets, a.Buckets, out var delta))
+            return null;
+        long count = HistogramMath.DeltaCount(delta);
+        if (count <= 0)
+            return null;
+        double sum = HistogramMath.DeltaSum(a.Sum, b.Sum);
+        return StatsFromBuckets(delta, sum, count);
+    }
+
     public static HistogramStats? ParseLabeledHistogram(string text, string metric, string labelName, string labelValue)
+    {
+        var parsed = ParseLabeledHistogramBuckets(text, metric, labelName, labelValue);
+        if (parsed is not { } p)
+            return null;
+        return StatsFromBuckets(p.Buckets, p.Sum, p.Count);
+    }
+
+    static (SortedDictionary<double, long> Buckets, double Sum, long Count)? ParseLabeledHistogramBuckets(
+        string text,
+        string metric,
+        string labelName,
+        string labelValue)
     {
         var buckets = new SortedDictionary<double, long>();
         string bucketPattern =
@@ -223,7 +258,13 @@ public static class PrometheusParser
 
         string sumPattern = $@"^{Regex.Escape(metric)}_sum\{{{Regex.Escape(labelName)}=""{Regex.Escape(labelValue)}""\}}\s+([0-9.eE+\-]+)";
         string countPattern = $@"^{Regex.Escape(metric)}_count\{{{Regex.Escape(labelName)}=""{Regex.Escape(labelValue)}""\}}\s+(\d+)";
-        return FinishHistogram(text, buckets, sumPattern, countPattern);
+        var sumMatch = Regex.Match(text, sumPattern, RegexOptions.Multiline);
+        var countMatch = Regex.Match(text, countPattern, RegexOptions.Multiline);
+        if (!countMatch.Success || buckets.Count == 0)
+            return null;
+        return (Buckets: buckets,
+            Sum: sumMatch.Success ? double.Parse(sumMatch.Groups[1].Value, CultureInfo.InvariantCulture) : 0,
+            Count: long.Parse(countMatch.Groups[1].Value, CultureInfo.InvariantCulture));
     }
 
     public static HistogramStats? ParseSingletonHistogram(string text, string metric)

@@ -22,6 +22,8 @@ public sealed class FineageBotClient : IAsyncDisposable
     readonly BotPeerDirectory _peers;
     Task? _receiveTask;
     CancellationTokenSource _receiveCts = new();
+    ushort _lastRecvOpcode;
+    ushort _lastSentOpcode;
     int _spawnX;
     int _spawnY;
     int _spawnZ;
@@ -81,6 +83,7 @@ public sealed class FineageBotClient : IAsyncDisposable
             try
             {
                 var (opcode, payload) = await ZoneReadFrameAsync(ct);
+                _lastRecvOpcode = opcode;
                 _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
                 if (opcode == NetOpcode.Reject)
                     _stats.LastError = NetCodec.DecodeReject(payload).Code;
@@ -91,10 +94,35 @@ public sealed class FineageBotClient : IAsyncDisposable
             }
             catch (Exception ex)
             {
+                LoadTestDisconnectLog.LogBotDisconnect(
+                    BotId,
+                    SelfObjectId,
+                    _lastSentOpcode,
+                    _lastRecvOpcode,
+                    ex);
                 _stats.LastError = ex.Message;
                 _stats.Disconnected = true;
                 break;
             }
+        }
+    }
+
+    public async Task RunBehaviorLoopAsync(
+        IReadOnlyList<FineageBotClient> fleet,
+        DateTimeOffset behaviorEnd,
+        TimeSpan slotPeriod,
+        CancellationToken ct)
+    {
+        var nextSlot = DateTimeOffset.UtcNow;
+        while (!ct.IsCancellationRequested && DateTimeOffset.UtcNow < behaviorEnd && !_stats.Disconnected)
+        {
+            await RunBehaviorTickAsync(fleet, ct);
+            nextSlot += slotPeriod;
+            var delay = nextSlot - DateTimeOffset.UtcNow;
+            if (delay > TimeSpan.Zero)
+                await Task.Delay(delay, ct);
+            else
+                Interlocked.Increment(ref _stats.MissedBehaviorSlots);
         }
     }
 
@@ -204,24 +232,31 @@ public sealed class FineageBotClient : IAsyncDisposable
                     break;
                 case "attack":
                     {
-                        int target = _observation.VisibleNpcObjectId();
-                        if (target == 0)
-                            target = _observation.VisibleNpcObjectId();
-                        if (target > 0)
+                        if (_observation.TryPickAttackTarget(out int target))
                         {
                             await ZoneWriteAsync(NetOpcode.SelectTarget,
                                 NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-                            await SendTrackedAsync(NetOpcode.AttackRequest,
-                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }), ct);
+                            await SendTrackedAsync(
+                                NetOpcode.AttackRequest,
+                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
+                                ct,
+                                targetObjectId: target);
                         }
 
                         break;
                     }
                 case "skill":
                     {
-                        int target = _observation.VisibleNpcObjectId();
-                        await SendTrackedAsync(NetOpcode.UseSkill,
-                            NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }), ct);
+                        if (_observation.TryPickAttackTarget(out int target))
+                        {
+                            await SendTrackedAsync(
+                                NetOpcode.UseSkill,
+                                NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = 3, TargetObjectId = target, CtrlPressed = false }),
+                                ct,
+                                targetObjectId: target,
+                                skillId: 3);
+                        }
+
                         break;
                     }
                 case "say":
@@ -292,9 +327,15 @@ public sealed class FineageBotClient : IAsyncDisposable
         }
     }
 
-    async Task SendTrackedAsync(ushort opcode, byte[] payload, CancellationToken ct)
+    async Task SendTrackedAsync(
+        ushort opcode,
+        byte[] payload,
+        CancellationToken ct,
+        int targetObjectId = 0,
+        int skillId = 0)
     {
-        _observation.RecordCommandSent(opcode, DateTimeOffset.UtcNow);
+        _lastSentOpcode = opcode;
+        _observation.RecordCommandSent(opcode, DateTimeOffset.UtcNow, targetObjectId, skillId);
         await ZoneWriteAsync(opcode, payload, ct);
     }
 

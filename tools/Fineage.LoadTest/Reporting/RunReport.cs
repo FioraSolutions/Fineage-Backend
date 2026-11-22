@@ -30,6 +30,7 @@ public sealed class RunReport
     public List<string> Bugs { get; init; } = [];
     public ConsistencyReport? Consistency { get; init; }
     public DateTimeOffset StartedAt { get; init; }
+    public DateTimeOffset SteadyStateStartedAt { get; init; }
     public DateTimeOffset FinishedAt { get; init; }
 
     public RunEnvironmentInfo? Environment { get; set; }

@@ -90,13 +90,20 @@ public sealed class NetConnection : IAsyncDisposable
         catch (OperationCanceledException)
         {
         }
-        catch (IOException)
+        catch (Exception ex) when (ex is IOException or SocketException)
         {
+            NetDisconnectDiagnostics.Log("read", ConnectionId, _endpoint, ex, _outbound.Reader.Count, StripeBatchDepth());
         }
         finally
         {
             _inbox.Writer.TryComplete();
         }
+    }
+
+    int StripeBatchDepth()
+    {
+        lock (_stripeBatchLock)
+            return _stripeBatch.Count;
     }
 
     ValueTask AcceptFrameAsync(PacketEnvelope envelope, CancellationToken ct)
@@ -386,9 +393,10 @@ public sealed class NetConnection : IAsyncDisposable
                     break;
             }
         }
-        catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
+        catch (Exception ex) when (ex is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
         {
-            /* peer gone, or a frame that cannot be written: the accept loop tears the connection down */
+            if (ex is IOException or SocketException)
+                NetDisconnectDiagnostics.Log("pump", ConnectionId, _endpoint, ex, _outbound.Reader.Count, StripeBatchDepth());
         }
         finally
         {

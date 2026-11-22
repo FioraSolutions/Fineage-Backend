@@ -14,6 +14,7 @@ public sealed class BotStats
     public long RttSamples;
     public double RttSumMs;
     public double RttMaxMs;
+    public long MissedBehaviorSlots;
     public DateTimeOffset? LastActionAt;
 
     public double RttAvgMs => RttSamples == 0 ? 0 : RttSumMs / RttSamples;
