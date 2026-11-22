@@ -21,6 +21,19 @@ static class NetEnterWorldProjector
 
     public static EnterPackets FromEntity(ZoneEntity entity, EntityId self, long nowUnixMs, int playerPAtkSpd = 0)
     {
+        var core = FromEntityCore(entity, self, nowUnixMs, playerPAtkSpd);
+        if (entity.Inventory == null)
+            throw new InvalidOperationException($"Player {entity.ObjectId} has no inventory.");
+        return core with
+        {
+            Items = BuildItems(entity.Inventory),
+            Skills = BuildSkills(entity, nowUnixMs)
+        };
+    }
+
+    /// <summary>Spawn, stats, and skills only — item list is built off the simulation thread during enter encode.</summary>
+    public static EnterPackets FromEntityCore(ZoneEntity entity, EntityId self, long nowUnixMs, int playerPAtkSpd = 0)
+    {
         ArgumentNullException.ThrowIfNull(entity);
         if (entity.Kind != ZoneEntityKind.Player)
             throw new ArgumentException("Net enter requires a player entity.", nameof(entity));
@@ -31,8 +44,8 @@ static class NetEnterWorldProjector
         return new EnterPackets(
             BuildSpawn(entity, self, isSelf: true, playerPAtkSpd),
             BuildStats(entity, self, maxCp),
-            BuildItems(entity.Inventory),
-            BuildSkills(entity, nowUnixMs));
+            new ItemListNetMsg { Items = [] },
+            new SkillListMsg { Skills = [] });
     }
 
     /// <summary>Remote peer appearance (Mobius CharInfo) for Net knownlist.</summary>
@@ -105,45 +118,69 @@ static class NetEnterWorldProjector
         };
     }
 
-    public static EntitySpawnMsg BuildNpcSpawn(ZoneEntity entity, EntityId id)
+    public static NpcPresenceCapture CaptureNpcPresence(ZoneEntity entity, EntityId id)
     {
         ArgumentNullException.ThrowIfNull(entity);
         if (entity.Kind != ZoneEntityKind.Npc)
             throw new ArgumentException("Npc spawn requires an NPC entity.", nameof(entity));
 
-        return new EntitySpawnMsg
-        {
-            EntityValue = id.Value,
-            EntityGeneration = id.Generation,
-            Kind = EntityKindNet.Npc,
-            IsSelf = false,
-            Name = entity.Name,
-            TemplateId = entity.NpcId,
-            ClassId = 0,
-            Race = 0,
-            Sex = 0,
-            X = entity.X,
-            Y = entity.Y,
-            Z = entity.Z,
-            Heading = entity.Heading,
-            RunSpeed = entity.RunSpeed,
-            WalkSpeed = entity.WalkSpeed,
-            Running = entity.Running,
-            Attackable = entity.Attackable,
-            Dead = entity.CurHp <= 0,
-            Level = entity.Level,
-            MaxHp = entity.MaxHp,
-            PAtkSpd = entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd,
-            CurHp = entity.CurHp,
-            // Mobius SummonInfo / PetInfo: title is the owner's name; the tail ties the pawn to its owner.
-            Title = entity.Summon != null ? entity.Title : "",
-            SummonKind = entity.Summon?.Kind ?? SummonKindNet.None,
-            OwnerObjectId = entity.Summon?.OwnerObjectId ?? 0,
-            // Mobius NpcInfo rhand/lhand: the client picks the attack/locomotion clip from the weapon type.
-            Rhand = entity.Rhand,
-            Lhand = entity.Lhand
-        };
+        return new NpcPresenceCapture(
+            id.Value,
+            id.Generation,
+            entity.Name,
+            entity.NpcId,
+            entity.X,
+            entity.Y,
+            entity.Z,
+            entity.Heading,
+            entity.RunSpeed,
+            entity.WalkSpeed,
+            entity.Running,
+            entity.Attackable,
+            entity.Level,
+            entity.MaxHp,
+            entity.CurHp,
+            entity.PAtkSpd > 0 ? entity.PAtkSpd : ZoneCombat.DefaultNpcPAtkSpd,
+            entity.Summon != null ? entity.Title : "",
+            entity.Summon?.Kind ?? SummonKindNet.None,
+            entity.Summon?.OwnerObjectId ?? 0,
+            entity.Rhand,
+            entity.Lhand);
     }
+
+    public static EntitySpawnMsg BuildNpcSpawn(NpcPresenceCapture npc) => new()
+    {
+        EntityValue = npc.EntityValue,
+        EntityGeneration = npc.EntityGeneration,
+        Kind = EntityKindNet.Npc,
+        IsSelf = false,
+        Name = npc.Name,
+        TemplateId = npc.TemplateId,
+        ClassId = 0,
+        Race = 0,
+        Sex = 0,
+        X = npc.X,
+        Y = npc.Y,
+        Z = npc.Z,
+        Heading = npc.Heading,
+        RunSpeed = npc.RunSpeed,
+        WalkSpeed = npc.WalkSpeed,
+        Running = npc.Running,
+        Attackable = npc.Attackable,
+        Dead = npc.CurHp <= 0,
+        Level = npc.Level,
+        MaxHp = npc.MaxHp,
+        PAtkSpd = npc.PAtkSpd,
+        CurHp = npc.CurHp,
+        Title = npc.Title,
+        SummonKind = npc.SummonKind,
+        OwnerObjectId = npc.OwnerObjectId,
+        Rhand = npc.Rhand,
+        Lhand = npc.Lhand
+    };
+
+    public static EntitySpawnMsg BuildNpcSpawn(ZoneEntity entity, EntityId id) =>
+        BuildNpcSpawn(CaptureNpcPresence(entity, id));
 
     static EntitySpawnMsg BuildSpawn(ZoneEntity entity, EntityId id, bool isSelf, int pAtkSpd = 0) =>
         new()
@@ -202,7 +239,7 @@ static class NetEnterWorldProjector
             MaxCp = entity.MaxCp > 0 ? entity.MaxCp : maxCp
         };
 
-    static ItemListNetMsg BuildItems(PlayerInventory inventory)
+    public static ItemListNetMsg BuildItems(PlayerInventory inventory)
     {
         var v2 = InventoryMessages.ItemList(inventory);
         var rows = new ItemListEntryNet[v2.Items.Length];

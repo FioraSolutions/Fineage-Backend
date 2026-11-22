@@ -17,7 +17,7 @@ public sealed class LoginBanPunishmentTests : IDisposable
     LoginService Service() => new(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), () => _now, accountBans: AccountBanGate.ForPath(PunishmentsPath));
     static void WriteBan(string path, string account, string reason)
     {
-        var snapshot = new PunishmentSnapshot { Rows = [ new PunishmentRow { Key = account, Affect = PunishmentAffect.Account, Type = PunishmentType.Ban, Reason = reason } ] };
+        var snapshot = new PunishmentSnapshot { Rows = [new PunishmentRow { Key = account, Affect = PunishmentAffect.Account, Type = PunishmentType.Ban, Reason = reason }] };
         File.WriteAllText(path, JsonSerializer.Serialize(snapshot, JsonPunishmentStore.JsonOptions));
     }
     [Fact]

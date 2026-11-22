@@ -22,6 +22,7 @@ public sealed class RunReport
     public double ClientRttP99Ms { get; init; }
     public double ClientRttMaxMs { get; init; }
     public PrometheusAggregate? Server { get; init; }
+    public string? PeakMetricsText { get; init; }
     public ProcessSample? ZoneProcess { get; init; }
     public List<LogIssue> LogIssues { get; init; } = [];
     public bool Passed { get; init; }
@@ -59,12 +60,17 @@ public sealed class PrometheusAggregate
     public double EnterSelfProjectionP99Ms { get; init; }
     public double EnterKnownSnapshotP99Ms { get; init; }
     public double EnterPeerFanoutP99Ms { get; init; }
+    public double EnterTryP99Ms { get; init; }
+    public double EnterTryAoiBindP99Ms { get; init; }
+    public double CommandsStageP50Ms { get; init; }
+    public double CommandsStageMeanMs { get; init; }
+    public Dictionary<string, HistogramStats> EnterPhaseStats { get; init; } = new(StringComparer.Ordinal);
 
     /// <summary>Peak p99 across stages for keys present in any scrape (load-test diagnostics).</summary>
     public IReadOnlyDictionary<string, double> StageP99MsPeak { get; init; } =
         new Dictionary<string, double>(StringComparer.Ordinal);
 
-    public static PrometheusAggregate FromSamples(IReadOnlyList<PrometheusSample> samples)
+    public static PrometheusAggregate FromSamples(IReadOnlyList<PrometheusSample> samples, string? peakMetricsText = null)
     {
         if (samples.Count == 0)
             return new PrometheusAggregate();
@@ -74,6 +80,11 @@ public sealed class PrometheusAggregate
             foreach (var (stage, p99) in sample.TickStageP99Ms)
                 stagePeak[stage] = Math.Max(p99, stagePeak.GetValueOrDefault(stage));
         }
+
+        var enterStats = ParseEnterPhaseStats(peakMetricsText);
+        HistogramStats? commands = peakMetricsText == null
+            ? null
+            : PrometheusParser.ParseLabeledHistogram(peakMetricsText, "fineage_tick_stage_ms", "stage", "commands");
 
         return new PrometheusAggregate
         {
@@ -99,8 +110,39 @@ public sealed class PrometheusAggregate
             EnterSelfProjectionP99Ms = EnterPeak(samples, "fineage_enter_self_projection_ms"),
             EnterKnownSnapshotP99Ms = EnterPeak(samples, "fineage_enter_known_snapshot_ms"),
             EnterKnownEncodeP99Ms = EnterPeak(samples, "fineage_enter_known_encode_ms"),
-            EnterPeerFanoutP99Ms = EnterPeak(samples, "fineage_enter_peer_fanout_ms")
+            EnterPeerFanoutP99Ms = EnterPeak(samples, "fineage_enter_peer_fanout_ms"),
+            EnterTryP99Ms = EnterPeak(samples, "fineage_enter_try_ms"),
+            EnterTryAoiBindP99Ms = EnterPeak(samples, "fineage_enter_try_aoi_bind_ms"),
+            CommandsStageP50Ms = commands?.P50 ?? 0,
+            CommandsStageMeanMs = commands?.Mean ?? 0,
+            EnterPhaseStats = enterStats
         };
+    }
+
+    static Dictionary<string, HistogramStats> ParseEnterPhaseStats(string? peakMetricsText)
+    {
+        var map = new Dictionary<string, HistogramStats>(StringComparer.Ordinal);
+        if (peakMetricsText == null)
+            return map;
+        string[] metrics =
+        [
+            "fineage_enter_try_ms",
+            "fineage_enter_try_aoi_bind_ms",
+            "fineage_enter_plan_ms",
+            "fineage_enter_self_projection_ms",
+            "fineage_enter_known_snapshot_ms",
+            "fineage_enter_known_encode_ms",
+            "fineage_enter_peer_fanout_ms"
+        ];
+        foreach (string metric in metrics)
+        {
+            if (PrometheusParser.ParseSingletonHistogram(peakMetricsText, metric) is { } stats)
+                map[metric] = stats;
+        }
+
+        if (PrometheusParser.ParseLabeledHistogram(peakMetricsText, "fineage_tick_stage_ms", "stage", "commands") is { } commands)
+            map["fineage_tick_stage_ms/commands"] = commands;
+        return map;
     }
 
     static double EnterPeak(IReadOnlyList<PrometheusSample> samples, string metric)
@@ -147,6 +189,9 @@ public static class ReportWriter
     public static void Write(RunReport report, string directory)
     {
         Directory.CreateDirectory(directory);
+        if (report.PeakMetricsText != null)
+            File.WriteAllText(Path.Combine(directory, "metrics-peak.txt"), report.PeakMetricsText);
+
         string jsonPath = Path.Combine(directory, "report.json");
         string mdPath = Path.Combine(directory, "report.md");
         File.WriteAllText(jsonPath, System.Text.Json.JsonSerializer.Serialize(report,

@@ -1,7 +1,10 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Fineage.Protocol.Telemetry;
 
 namespace Fineage.LoadTest.Metrics;
+
+public sealed record HistogramStats(double Sum, long Count, double Mean, double P50, double P99);
 
 public sealed class PrometheusSample
 {
@@ -28,7 +31,7 @@ public sealed class PrometheusSample
 
 public static class PrometheusParser
 {
-    static readonly double[] Bounds = [0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 1500, 2000, 3000];
+    static readonly double[] Bounds = MetricsText.DurationBoundsMs;
 
     public static PrometheusSample Parse(string text)
     {
@@ -180,5 +183,49 @@ public static class PrometheusParser
     {
         var m = Regex.Match(text, $"^{pattern}\\s+([0-9.]+)", RegexOptions.Multiline);
         return m.Success ? double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
+    }
+
+    public static HistogramStats? ParseLabeledHistogram(string text, string metric, string labelName, string labelValue)
+    {
+        var buckets = new SortedDictionary<double, long>();
+        string bucketPattern =
+            $@"^{Regex.Escape(metric)}_bucket\{{{Regex.Escape(labelName)}=""{Regex.Escape(labelValue)}"",le=""([^""]+)""\}}\s+(\d+)";
+        foreach (Match match in Regex.Matches(text, bucketPattern, RegexOptions.Multiline))
+        {
+            double le = match.Groups[1].Value == "+Inf"
+                ? double.PositiveInfinity
+                : double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            buckets[le] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
+
+        string sumPattern = $@"^{Regex.Escape(metric)}_sum\{{{Regex.Escape(labelName)}=""{Regex.Escape(labelValue)}""\}}\s+([0-9.eE+\-]+)";
+        string countPattern = $@"^{Regex.Escape(metric)}_count\{{{Regex.Escape(labelName)}=""{Regex.Escape(labelValue)}""\}}\s+(\d+)";
+        return FinishHistogram(text, buckets, sumPattern, countPattern);
+    }
+
+    public static HistogramStats? ParseSingletonHistogram(string text, string metric)
+    {
+        var buckets = new SortedDictionary<double, long>();
+        string bucketPattern = $@"^{Regex.Escape(metric)}_bucket\{{le=""([^""]+)""\}}\s+(\d+)";
+        foreach (Match match in Regex.Matches(text, bucketPattern, RegexOptions.Multiline))
+        {
+            double le = match.Groups[1].Value == "+Inf"
+                ? double.PositiveInfinity
+                : double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            buckets[le] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
+
+        return FinishHistogram(text, buckets, $@"^{Regex.Escape(metric)}_sum\s+([0-9.eE+\-]+)", $@"^{Regex.Escape(metric)}_count\s+(\d+)");
+    }
+
+    static HistogramStats? FinishHistogram(string text, SortedDictionary<double, long> buckets, string sumPattern, string countPattern)
+    {
+        var sumMatch = Regex.Match(text, sumPattern, RegexOptions.Multiline);
+        var countMatch = Regex.Match(text, countPattern, RegexOptions.Multiline);
+        if (!countMatch.Success || buckets.Count == 0)
+            return null;
+        long count = long.Parse(countMatch.Groups[1].Value, CultureInfo.InvariantCulture);
+        double sum = sumMatch.Success ? double.Parse(sumMatch.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
+        return new HistogramStats(sum, count, count > 0 ? sum / count : 0, Quantile(buckets, count, 0.50), Quantile(buckets, count, 0.99));
     }
 }
