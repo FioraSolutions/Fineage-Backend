@@ -1,11 +1,12 @@
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Fineage.Accounts;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// <see cref="DispatchProxy"/> over <see cref="IAccountStore"/> that reports sync I/O on the simulation thread
-/// during enter/command scopes.
+/// <see cref="DispatchProxy"/> over <see cref="IAccountStore"/> that times sync calls on the simulation thread.
 /// </summary>
 static class SimulationGuardedAccountStore
 {
@@ -30,8 +31,22 @@ static class SimulationGuardedAccountStore
         protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
             ArgumentNullException.ThrowIfNull(targetMethod);
-            _guard.Report($"IAccountStore.{targetMethod.Name}");
-            return targetMethod.Invoke(_inner, args);
+            long started = Stopwatch.GetTimestamp();
+            try
+            {
+                return targetMethod.Invoke(_inner, args);
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                return null;
+            }
+            finally
+            {
+                _guard.Record(
+                    $"IAccountStore.{targetMethod.Name}",
+                    Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+            }
         }
     }
 }

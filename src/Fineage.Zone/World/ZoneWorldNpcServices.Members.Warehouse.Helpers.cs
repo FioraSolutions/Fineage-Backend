@@ -126,10 +126,10 @@ public sealed partial class ZoneWorld
         ReplaceWarehouseNow(session, player);
     }
 
-    void ReplaceWarehouseNow(ZoneSession session, ZoneEntity player)
+    bool ReplaceWarehouseNow(ZoneSession session, ZoneEntity player)
     {
         if (player.Warehouse == null)
-            return;
+            return true;
         var stacks = player.Warehouse.Items;
         var stored = new StoredItem[stacks.Count];
         for (int i = 0; i < stacks.Count; i++)
@@ -138,7 +138,10 @@ public sealed partial class ZoneWorld
             stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
         }
 
-        _persist.ReplaceWarehouse(session.Account, session.ObjectId, stored);
+        return CommitStore(
+            "warehouse replace",
+            session,
+            () => _persist.ReplaceWarehouse(session.Account, session.ObjectId, stored));
     }
 
     static int ReadTeleportOffset()

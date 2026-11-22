@@ -220,6 +220,10 @@ public sealed partial class QuestMachine
 
         if (dialog.Cond is int cond && (state == null || state.Cond != cond))
             return false;
+        if (dialog.MinCond > 0 && (state == null || state.Cond < dialog.MinCond))
+            return false;
+        if (dialog.MaxCond > 0 && (state == null || state.Cond > dialog.MaxCond))
+            return false;
         if (dialog.WhenVar != null)
         {
             if (state == null || state.Get(dialog.WhenVar) != dialog.WhenValue)

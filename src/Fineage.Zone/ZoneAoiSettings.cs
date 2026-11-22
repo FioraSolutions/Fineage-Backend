@@ -4,6 +4,7 @@ using Fineage.Zone.Bosses;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Punishment;
+using Fineage.Zone.RaidBossPoints;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 
@@ -49,7 +50,8 @@ public static class ZoneAoiSettings
         BossSchedule? bosses = null,
         OlympiadBoard? olympiad = null,
         ILedgerJournal? ledgerJournal = null,
-        PunishmentManager? punishments = null)
+        PunishmentManager? punishments = null,
+        RaidBossPointsManager? raidBossPoints = null)
     {
         if (aoi != null)
         {
@@ -62,7 +64,8 @@ public static class ZoneAoiSettings
                 bosses: bosses,
                 olympiad: olympiad,
                 ledgerJournal: ledgerJournal,
-                punishments: punishments);
+                punishments: punishments,
+                raidBossPoints: raidBossPoints);
         }
 
         int cell = AoiCellSize;
@@ -77,13 +80,14 @@ public static class ZoneAoiSettings
                 bosses: bosses,
                 olympiad: olympiad,
                 ledgerJournal: ledgerJournal,
-                punishments: punishments);
+                punishments: punishments,
+                raidBossPoints: raidBossPoints);
         }
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

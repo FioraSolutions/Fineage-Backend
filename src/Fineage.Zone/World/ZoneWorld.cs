@@ -11,6 +11,7 @@ using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
 using Fineage.Game.Shops;
+using Fineage.Game.Services;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
@@ -24,7 +25,6 @@ using Fineage.Zone.Punishment;
 using Fineage.Zone.Fishing;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
-using Fineage.Game.Services;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
 using Fineage.Zone.Simulation;
@@ -130,6 +130,7 @@ public sealed partial class ZoneWorld
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
     readonly SimulationSyncIoGuard _syncIo;
+    readonly CharacterPersistWorker _snapshots;
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
     /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
@@ -233,6 +234,7 @@ public sealed partial class ZoneWorld
         IRegionExecutor? regionExecutor = null,
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
         _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
@@ -262,7 +264,8 @@ public sealed partial class ZoneWorld
         _dropRandom = Streams(dropRandom, RandomPurpose.Drop);
         _syncIo = new SimulationSyncIoGuard(_affinity);
         _accounts = accounts == null ? null : SimulationGuardedAccountStore.Wrap(accounts, _syncIo);
-        _persist = new ZoneCharacterPersist(_accounts, op => _syncIo.Report($"ZoneCharacterPersist.{op}"));
+        _snapshots = new CharacterPersistWorker(_accounts);
+        _persist = new ZoneCharacterPersist(_accounts, _snapshots);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
@@ -330,7 +333,9 @@ public sealed partial class ZoneWorld
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
         _serviceRandom = Streams(serviceRandom, RandomPurpose.Service);
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
-        _multisells = multisells ?? MultiSellCatalog.LoadDefault();
+        _multisells = HallItemCreateCatalog.MergeInto(
+            multisells ?? MultiSellCatalog.LoadDefault(),
+            HallItemCreateCatalog.LoadDefault());
         _shopStock = new ShopStock(_buyLists);
         ILedgerJournal journal = ledgerJournal
             ?? (accounts != null
@@ -395,6 +400,7 @@ public sealed partial class ZoneWorld
         _wedding = new WeddingActor(accounts?.ListWeddingCouples(), accounts?.NextWeddingCoupleId ?? 1);
         SpawnCastleDoors();
         InitPunishment(punishments);
+        InitRaidBossPoints(raidBossPoints);
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// ticket for 2000 adena (the price joins the jackpot), the weekly draw pays by matched numbers and carries the rest
 /// over, and a ticket of a finished lottery is turned in for its prize.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetLotteryTests
 {
     const int Ticket = LotteryProtocol.TicketItemId;

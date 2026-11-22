@@ -2,6 +2,7 @@ using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.World;
 using Xunit;
+using Fineage.Game.Shops;
 
 namespace Fineage.Zone.Tests;
 
@@ -100,5 +101,39 @@ public sealed class HallFunctionTests
         long end = bench.World.HallFunctionForTest(HallId, HallFunctionProtocol.FuncRestoreMp)!.EndUnixMs;
         bench.World.TickHallFunctionsForTest(end + 1);
         Assert.Null(bench.World.HallFunctionForTest(HallId, HallFunctionProtocol.FuncRestoreMp));
+    }
+
+    [Fact]
+    public async Task Item_creation_opens_ledger_multisell_when_function_active()
+    {
+        var multisells = MultiSellCatalog.From(
+        [
+            new MultiSellListDefinition(
+                HallFunctionProtocol.ItemCreateListId(HallId, 1),
+                applyTaxes: false,
+                maintainEnchantment: false,
+                [ManagerNpcId],
+                [new MultiSellEntry(1, [new MultiSellPart(57, 50)], [new MultiSellPart(1060, 1)])])
+        ]);
+        var bench = new WorldBench(mapId: "gludin", multisells: multisells);
+        var leader = await bench.EnterAsync("itemlord", "ItemLord");
+        var clan = bench.Store.InsertClan(new ClanRecord(
+            0, "ItemClan", 4, leader.Ticket.CharacterId, 0, 0, 0,
+            [new ClanMemberRecord(leader.Ticket.CharacterId, "itemlord", "ItemLord", HumanClasses.Fighter, 40, 0)]),
+            new CharacterClanState("itemlord", leader.Ticket.CharacterId, 0, 0, 0));
+        Assert.True(bench.World.ReloadClansForTests());
+        bench.World.SetClanHallOwnerForTests(HallId, clan!.Id);
+        bench.World.AddClanWarehouseItemForTest(clan.Id, PledgeProtocol.AdenaItemId, 500_000);
+
+        var npc = ManagerNpc(-84495, 155208);
+        bench.World.PlaceForTests(npc);
+        leader.MoveTo(-84495, 155208, -3150);
+        Assert.Null(bench.World.HallFunctionCommandForTest(
+            leader.Session, leader.Player, npc, "manage other item 1"));
+        Assert.NotNull(bench.World.HallFunctionForTest(HallId, HallFunctionProtocol.FuncItemCreate));
+
+        Assert.Null(bench.World.HallItemCreateCommandForTest(
+            leader.Session, leader.Player, npc, "functions item_creation 28"));
+        Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutMultiSellList)));
     }
 }

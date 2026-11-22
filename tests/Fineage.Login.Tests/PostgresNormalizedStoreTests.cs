@@ -8,6 +8,7 @@ using Fineage.Accounts;
 namespace Fineage.Login.Tests;
 
 /// <summary>Requires local docker-compose postgres (FINEAGE_DATABASE_URL or defaults).</summary>
+[Trait("Category", "Integration")]
 public class PostgresNormalizedStoreTests
 {
     static string? ConnectionString()

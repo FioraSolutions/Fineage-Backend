@@ -16,6 +16,7 @@ namespace Fineage.Zone.Tests;
 /// dressed status bar. Fineage adds <c>EntitySpawn</c>/<c>PlayerStats</c> in front because its client needs the entity
 /// identity and the live stat sheet before it can render any of them.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEnterWorldOrderTests
 {
     [Fact]

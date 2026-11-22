@@ -10,6 +10,7 @@ C#/.NET server (Login TCP/HTTP, Zone). Land via PR into **`dev`**; merge when CI
 4. **Use the extracted reference catalog first** (client repo `l2-unity/Docs/interlude-ref/`, `l2-unity/Docs/ui-original/`; Mobius data in `ref/`). Do not re-extract or guess what is already catalogued; if something is missing, add it to the catalog with the extraction script.
 5. **Interlude only.** Nothing from later chronicles (data, animations, effects, skills).
 6. Every PR description states the root cause and which shared mechanism was changed. PRs that patch a single case of a general problem will be rejected.
+7. **Lossless extraction from originals.** When extracting anything from the original Interlude client or server data (xdat, .usk/.ukx/.utx, .dat, nwindow.dll, Mobius data), dump EVERY property of EVERY object into docs/interlude-ref (or the backend equivalent) as a full lossless dump. Never keep only the fields you currently need. Derived tables are views over the full dump. Every extraction also updates a gap report listing original fields and features Fineage doesn't use or support yet, with affected counts. Don't commit original binaries.
 
 ## Parity
 
@@ -18,6 +19,12 @@ Server business logic must match L2J Mobius CT0 Interlude (`ref/mobius-ct0-inter
 ## Performance
 
 Zone tick budget is 200 ms; local playtests run the **Debug** build, so performance work must hold in Debug (fix algorithms, not build flags).
+
+## CI (dev PRs)
+
+**Merge gate on PRs into `dev` (target &lt;5 min wall clock):** NuGet restore/cache, `dotnet build`, `format-check`, and **fast unit tests** only (`Category!=Slow&Category!=Integration&Category!=Load&Category!=perf`), with test projects in parallel matrix jobs. No Postgres, load smoke, or zone perf on ordinary dev PRs.
+
+**Heavy jobs** (Postgres full suite, `load-test-smoke`, `zone-simulation-perf`, `zone-parallel-regions`) run on push to `main`, PRs into `main`, nightly `0 1 * * *` UTC, `workflow_dispatch`, or a `dev` PR labeled **`perf`**. Issue **#867** perf-chain PRs must add the `perf` label to get load-test numbers in CI.
 
 ## Model selection
 

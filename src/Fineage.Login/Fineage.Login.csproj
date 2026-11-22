@@ -2,6 +2,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Fineage.Login</RootNamespace>
+    <!-- ASP.NET defaults to server GC; keep tiered PGO explicit for parity with Zone (#867 PR10). -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Fineage.Login.Tests" />

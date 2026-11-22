@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
         if (_simulation != null)
             return;
         _affinity.Drive();
+        _snapshots.Start();
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
         _ = Task.Run(() => StepWatchdogAsync(shutdown));
     }
@@ -68,7 +69,7 @@ public sealed partial class ZoneWorld
                 {
                     last = report;
                     FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
-                    ZoneLog.Error(report);
+                    ZoneHotPathLogs.SimulationWatchdog(report);
                 }
             }
         }
@@ -102,7 +103,7 @@ public sealed partial class ZoneWorld
                     // Stage bodies are isolated by the scheduler; what reaches here is the deferred Postgres flush or an observer fault.
                     // Movement, combat and regen all live on this loop, so one bad save must not end it.
                     FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step"));
-                    ZoneLog.Warn($"simulation step tick={_simulationTicks.Tick} failed outside stage isolation: {ex}");
+                    ZoneHotPathLogs.SimulationStepFailedOutsideStages(_simulationTicks.Tick, ex);
                 }
                 finally
                 {
@@ -117,6 +118,7 @@ public sealed partial class ZoneWorld
         finally
         {
             ShutdownSaveOnlinePlayers();
+            _snapshots.Stop();
             FlushLedgerOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }

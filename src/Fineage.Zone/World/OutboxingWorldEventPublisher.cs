@@ -418,6 +418,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Emit(nameof(IWorldEventPublisher.FanoutClanHallList), () => inner.FanoutClanHallList(watcherObjectIdsCopy, halls));
     }
 
+    void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutAgitDecoInfo), () => inner.FanoutAgitDecoInfo(watcherObjectIdsCopy, deco));
+    }
+
     void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door)
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
@@ -555,6 +561,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     {
         int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         Emit(nameof(IWorldEventPublisher.FanoutMonRaceInfo), () => inner.FanoutMonRaceInfo(watcherObjectIdsCopy, packet));
+    }
+
+    void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutVehicleInfo), () => inner.FanoutVehicleInfo(watcherObjectIdsCopy, info));
+    }
+
+    void IWorldEventPublisher.FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure)
+    {
+        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
+        Emit(nameof(IWorldEventPublisher.FanoutVehicleDeparture), () => inner.FanoutVehicleDeparture(watcherObjectIdsCopy, departure));
     }
 
     void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask)

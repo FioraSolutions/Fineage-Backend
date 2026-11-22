@@ -41,13 +41,16 @@ public sealed partial class ZoneWorld
             if (blocked && _geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
             {
                 // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
-                ZoneLog.Info($"[geo] path obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY} nodes={path.Count} {string.Join(' ', path.Select(p => $"{p.X},{p.Y},{p.Z}"))}");
+                ZoneHotPathLogs.GeoPath(
+                    entity.ObjectId, entity.X, entity.Y, entity.Z, move.DestX, move.DestY, path.Count);
                 (destX, destY, destZ) = path[0];
                 for (int i = 1; i < path.Count; i++)
                     entity.MovePath.Enqueue(path[i]);
             }
             else if (blocked)
-                ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
+                ZoneHotPathLogs.GeoMoveBlocked(
+                    entity.ObjectId, entity.X, entity.Y, entity.Z,
+                    move.DestX, move.DestY, move.DestZ, destX, destY, destZ);
         }
         else
         {

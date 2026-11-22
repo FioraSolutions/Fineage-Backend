@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// The client opens the window on the menu button, so a journal that only arrives on request left the tabs
 /// empty whenever the reply lost the race with the click.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetQuestJournalTests
 {
     [Fact]

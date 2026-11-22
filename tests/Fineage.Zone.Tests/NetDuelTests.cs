@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Duels after Mobius CT 0: ask / answer, canDuel refusals, countdown, fight to 1 HP without flag / karma, surrender,
 /// timeout, cancel on interference / distance / logout, party duel arena, cubic targeting, wire.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetDuelTests
 {
     const int X = 46045, Y = 41251, Z = -3440;

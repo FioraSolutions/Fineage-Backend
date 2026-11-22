@@ -37,6 +37,7 @@ def main() -> None:
             "npcId": npc_ids[i],
             "castleId": castle,
             "maxPerType": max_type[i],
+            "respawnSeconds": 0,
         })
     dawn_min = 6175  # first dawn ticket block in Mobius tables
     out = {

@@ -8,6 +8,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius Quest.onKill reaches the killer on Net: quest drop lands in the bag (InventoryUpdate).</summary>
+[Trait("Category", "Integration")]
 public sealed class NetQuestKillTests
 {
     [Fact]
@@ -29,6 +30,7 @@ public sealed class NetQuestKillTests
 }
 
 /// <summary>Mobius getRandomPartyMemberState: Q316 kill credit goes to one eligible party member within ALT_PARTY_RANGE.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetQuestPartyKillTests
 {
     static void Start316(Fineage.Zone.World.ZoneEntity p) =>
@@ -89,6 +91,7 @@ public sealed class NetQuestPartyKillTests
 }
 
 /// <summary>Mobius Quest.onAttack: Q234 Fate's Whisper reddens the Pipette Knife on a hit against Baium.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetQuestAttackTests
 {
     [Fact]
@@ -111,6 +114,7 @@ public sealed class NetQuestAttackTests
 }
 
 /// <summary>Ketra / Varka: raid heads go to every party member (executeForEachPlayer); killing an ally costs the mark.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetKetraVarkaTests
 {
     [Fact]
@@ -149,6 +153,7 @@ public sealed class NetKetraVarkaTests
 }
 
 /// <summary>Quest 350: Soul Crystal absorb at half HP, then the kill steps the crystal up (Mobius levelSoulCrystals).</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSoulCrystalTests
 {
     static ZoneEntity Mob(int npcId, int hp) =>

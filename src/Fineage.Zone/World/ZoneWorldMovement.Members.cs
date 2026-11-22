@@ -150,7 +150,7 @@ public sealed partial class ZoneWorld
     {
         if (!RefreshRunSpeed(entity))
             return;
-        ZoneLog.Info($"[speed] obj={entity.ObjectId} run={entity.RunSpeed} base={entity.BaseRunSpeed}");
+        ZoneHotPathLogs.MoveSpeedRefreshed(entity.ObjectId, entity.RunSpeed, entity.BaseRunSpeed);
         FanoutNetMoveType(entity);
     }
 
@@ -165,7 +165,7 @@ public sealed partial class ZoneWorld
         e.InWater = inWater;
         // Mobius onEnter/onExit recomputes the live speed for the new base pair: refresh first, then tell watchers.
         RefreshRunSpeed(e);
-        ZoneLog.Info($"[water] obj={e.ObjectId} {(inWater ? "enter" : "exit")} at={e.X},{e.Y},{e.Z} speed={MoveSpeedOf(e)}");
+        ZoneHotPathLogs.WaterState(e.ObjectId, inWater, e.X, e.Y, e.Z, MoveSpeedOf(e));
         FanoutNetMoveType(e);
     }
 
@@ -180,7 +180,8 @@ public sealed partial class ZoneWorld
         var door = Doors.FirstBlocking(e.X, e.Y, e.Z, destX, destY, destZ, out int sx, out int sy, out int sz);
         if (door == null)
             return false;
-        ZoneLog.Info($"[door] move blocked obj={e.ObjectId} door={door.Id}:{door.Name} from={e.X},{e.Y},{e.Z} want={destX},{destY},{destZ} stop={sx},{sy},{sz}");
+        ZoneHotPathLogs.DoorMoveBlocked(
+            e.ObjectId, door.Id, door.Name, e.X, e.Y, e.Z, destX, destY, destZ, sx, sy, sz);
         destX = sx;
         destY = sy;
         destZ = _geo.HasGeo(sx, sy) ? _geo.GetHeight(sx, sy, sz) : sz;

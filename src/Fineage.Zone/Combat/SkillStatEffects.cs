@@ -20,7 +20,7 @@ public static class SkillStatEffects
         Func<string[], bool>? wearingSlot = null) =>
         catalog.Collect(
             abnormals.Select(a => new SkillStatSource(a.Id, a.SkillLevel, a.Value)),
-            static id => ZoneLog.Warn($"skill-stat-effects missing skillId={id} — abnormal has no combat mods"),
+            static id => ZoneHotPathLogs.SkillStatEffectsMissing(id),
             position,
             wearing,
             wearingSlot);

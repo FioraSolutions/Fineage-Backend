@@ -111,6 +111,11 @@ public sealed partial class ZoneWorld
                 SendHtml(session, player, npc, festival);
             return;
         }
+        if (page == 0 && RaidBossRankingFirstPage(player, npc, out var raidRanking))
+        {
+            SendHtml(session, player, npc, raidRanking!);
+            return;
+        }
         SendHtml(session, player, npc, _pages.ReadNpc(session.Language, npc.NpcType, npc.NpcId, page));
     }
 

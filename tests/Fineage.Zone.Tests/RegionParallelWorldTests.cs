@@ -17,6 +17,7 @@ namespace Fineage.Zone.Tests;
 /// sequential run and a recorded command log exactly; aggression sees players across a region edge through the
 /// border snapshots, one step late.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class RegionParallelWorldTests
 {
     const int FirstMobId = 9_810_001;

@@ -1,3 +1,4 @@
+using System.Buffers;
 using Fineage.Game;
 using Fineage.Accounts;
 using Fineage.Net.Contract;
@@ -53,21 +54,76 @@ static class NetEnterWorldProjector
         BuildSpawn(entity, id, isSelf: false, playerPAtkSpd);
 
     /// <summary>
+    /// Door status, an in-progress move, sitting, and the live abnormal list. Callers stage them in a pooled buffer of
+    /// <see cref="MaxPresenceFollowUps"/> slots. A wider set is a catalog bug and throws.
+    /// </summary>
+    public const int MaxPresenceFollowUps = 4;
+
+    /// <summary>
     /// State frames that must follow an <c>EntitySpawn</c> so a late joiner sees the pawn as it really is
     /// (Mobius <c>Creature.sendInfo</c>): a running pawn gets <c>MoveState</c> toward its live destination,
     /// a sitting player gets <c>ChangeWaitType</c> sitting. The spawn itself carries neither.
     /// </summary>
     public static List<PresenceWireSlot> PlanPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld world)
     {
+        var rented = ArrayPool<PresenceWireSlot>.Shared.Rent(MaxPresenceFollowUps);
+        try
+        {
+            int count = WritePresenceFollowUps(rented.AsSpan(0, MaxPresenceFollowUps), entity, id, world);
+            var list = new List<PresenceWireSlot>(count);
+            for (int i = 0; i < count; i++)
+                list.Add(rented[i]);
+            return list;
+        }
+        finally
+        {
+            rented.AsSpan(0, MaxPresenceFollowUps).Clear();
+            ArrayPool<PresenceWireSlot>.Shared.Return(rented);
+        }
+    }
+
+    /// <summary>
+    /// Writes the same follow-ups as <see cref="PlanPresenceFollowUps"/> into <paramref name="destination"/> and returns
+    /// how many were written. The destination is not cleared past that count.
+    /// </summary>
+    public static int WritePresenceFollowUps(Span<PresenceWireSlot> destination, ZoneEntity entity, EntityId id, ZoneWorld world)
+    {
         ArgumentNullException.ThrowIfNull(entity);
-        var slots = new List<PresenceWireSlot>(2);
+        ArgumentNullException.ThrowIfNull(world);
+        int count = 0;
         if (entity.SiegeNpc is { Role: SiegeNpcRole.Door } && world.DoorStatusFrame(entity) is { } door)
-            slots.Add(new(NetOpcode.DoorStatus, null, door));
+            AddFollowUp(destination, ref count, new(NetOpcode.DoorStatus, null, door), entity);
         if (entity.Dead)
-            return slots;
+            return count;
+        if (entity.IsBoat)
+        {
+            AddFollowUp(destination, ref count, new(NetOpcode.VehicleInfo, new VehicleInfoNetMsg
+            {
+                BoatObjectId = entity.ObjectId,
+                X = entity.X,
+                Y = entity.Y,
+                Z = entity.Z,
+                Heading = entity.Heading
+            }), entity);
+            if (entity.MoveActive)
+            {
+                AddFollowUp(destination, ref count, new(NetOpcode.VehicleDeparture, new VehicleDepartureNetMsg
+                {
+                    BoatObjectId = entity.ObjectId,
+                    MoveSpeed = (int)(entity.Running ? entity.RunSpeed : entity.WalkSpeed),
+                    RotationSpeed = ZoneWorld.DefaultBoatRotationSpeed,
+                    DestX = entity.MoveDestX,
+                    DestY = entity.MoveDestY,
+                    DestZ = entity.MoveDestZ
+                }), entity);
+            }
+
+            return count;
+        }
+
         if (entity.MoveActive)
         {
-            slots.Add(new(NetOpcode.MoveState, new MoveStateMsg
+            AddFollowUp(destination, ref count, new(NetOpcode.MoveState, new MoveStateMsg
             {
                 EntityValue = id.Value,
                 EntityGeneration = id.Generation,
@@ -78,11 +134,11 @@ static class NetEnterWorldProjector
                 DestY = entity.MoveDestY,
                 DestZ = entity.MoveDestZ,
                 Running = entity.Running
-            }));
+            }), entity);
         }
         if (entity.Kind == ZoneEntityKind.Player && entity.Sitting)
         {
-            slots.Add(new(NetOpcode.ChangeWaitType, new ChangeWaitTypeNetMsg
+            AddFollowUp(destination, ref count, new(NetOpcode.ChangeWaitType, new ChangeWaitTypeNetMsg
             {
                 EntityValue = id.Value,
                 EntityGeneration = id.Generation,
@@ -90,11 +146,19 @@ static class NetEnterWorldProjector
                 X = entity.X,
                 Y = entity.Y,
                 Z = entity.Z
-            }));
+            }), entity);
         }
         if (world.TryBuildPresenceAbnormal(entity, out var abnormal))
-            slots.Add(new(NetOpcode.AbnormalStatusUpdate, abnormal));
-        return slots;
+            AddFollowUp(destination, ref count, new(NetOpcode.AbnormalStatusUpdate, abnormal), entity);
+        return count;
+    }
+
+    static void AddFollowUp(Span<PresenceWireSlot> destination, ref int count, PresenceWireSlot slot, ZoneEntity entity)
+    {
+        if ((uint)count >= (uint)destination.Length)
+            throw new InvalidOperationException(
+                $"presence follow-ups for objectId={entity.ObjectId} exceeded the {destination.Length}-slot buffer");
+        destination[count++] = slot;
     }
 
     public static List<(ushort Opcode, byte[] Payload)> BuildPresenceFollowUps(ZoneEntity entity, EntityId id, ZoneWorld? world = null)
@@ -102,8 +166,20 @@ static class NetEnterWorldProjector
         ArgumentNullException.ThrowIfNull(entity);
         if (world == null)
             return [];
-        return PlanPresenceFollowUps(entity, id, world)
-            .ConvertAll(slot => (slot.Opcode, EnterWire.EncodePresence(slot)));
+        var rented = ArrayPool<PresenceWireSlot>.Shared.Rent(MaxPresenceFollowUps);
+        try
+        {
+            int count = WritePresenceFollowUps(rented.AsSpan(0, MaxPresenceFollowUps), entity, id, world);
+            var encoded = new List<(ushort Opcode, byte[] Payload)>(count);
+            for (int i = 0; i < count; i++)
+                encoded.Add((rented[i].Opcode, EnterWire.EncodePresence(rented[i])));
+            return encoded;
+        }
+        finally
+        {
+            rented.AsSpan(0, MaxPresenceFollowUps).Clear();
+            ArrayPool<PresenceWireSlot>.Shared.Return(rented);
+        }
     }
 
     /// <summary>Player or NPC presence packet for Net knownlist (Mobius CharInfo / NpcInfo).</summary>

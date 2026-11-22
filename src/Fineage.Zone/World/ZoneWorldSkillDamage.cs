@@ -47,7 +47,7 @@ public sealed partial class ZoneWorld
         player.CastingUntilMs = now + hitTime + coolTime;
         var pending = new PendingSkillHit(target.ObjectId, 0, now + hitTime, combat, level);
         SetPendingHit(player, ArmCastResources(player, pending, template, levelData));
-        ZoneLog.Info($"[skill] cast {skillId} lv{level} kind={combat.Kind} hit={hitTime}ms cool={coolTime}ms reuse={reuse}ms");
+        ZoneHotPathLogs.SkillCast(skillId, level, combat.Kind.ToString(), hitTime, coolTime, reuse);
         if (hitTime == 0)
             ResolvePendingHit(player, now);
         return null;
@@ -145,7 +145,7 @@ public sealed partial class ZoneWorld
         if ((blow == BlowEffect.Backstab && front) ||
             !ZoneCombat.RollBlowSuccess(Rng(_combatRandom, player), combat.BlowChance, dex, front, behind, ps.BlowRate))
         {
-            ZoneLog.Info($"[skill] blow {combat.SkillId} failed front={front} behind={behind}");
+            ZoneHotPathLogs.SkillBlowFailed(combat.SkillId, front, behind);
             return 0;
         }
         var attackTraits = AttackTraitCatalog.FromAbnormals(player.Abnormals.Select(a => (a.Id, a.SkillLevel)));

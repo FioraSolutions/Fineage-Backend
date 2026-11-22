@@ -80,6 +80,8 @@ public static class FineageLogging
         }
     }
 
+    public static ILogger GetLogger(string category) => Factory.CreateLogger(category);
+
     static ILoggerFactory Build(string? levelText, string? formatText)
     {
         LogLevel level = ParseLevel(levelText);

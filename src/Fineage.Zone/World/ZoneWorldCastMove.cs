@@ -33,7 +33,7 @@ public sealed partial class ZoneWorld
         StopTimedMove(player);
         if (session != null)
             SyncSession(player, session);
-        ZoneLog.Info($"[cast] stop-move obj={player.ObjectId} at={player.X},{player.Y}");
+        ZoneHotPathLogs.CastStopMove(player.ObjectId, player.X, player.Y);
         FanoutStopInPlace(player);
     }
 
@@ -73,7 +73,7 @@ public sealed partial class ZoneWorld
         player.Intent.PendingCastTargetId = request.TargetObjectId > 0 ? request.TargetObjectId : session.SelectedTargetId;
         player.Intent.PendingCastCtrlPressed = request.CtrlPressed;
         player.Intent.PendingCastAtUnixMs = player.CastingUntilMs;
-        ZoneLog.Info($"[cast] queued skill={request.SkillId} obj={player.ObjectId} at={player.CastingUntilMs}");
+        ZoneHotPathLogs.CastQueued(request.SkillId, player.ObjectId, player.CastingUntilMs);
     }
 
     /// <summary>PlayerAI.onIntentionMoveTo while casting: saveNextIntention(MOVE_TO) and run it after the cast.</summary>

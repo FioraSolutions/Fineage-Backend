@@ -118,6 +118,10 @@ public sealed partial class QuestCatalog
             throw new InvalidDataException($"{where} quest {questId} has a step with no npcId.");
         if (dialog.Cond is < 0 or > 255)
             throw new InvalidDataException($"{where} quest {questId} cond must be 0..255.");
+        if (dialog.MinCond is < 0 or > 255 || dialog.MaxCond is < 0 or > 255)
+            throw new InvalidDataException($"{where} quest {questId} minCond/maxCond must be 0..255.");
+        if (dialog.MaxCond > 0 && dialog.MinCond > dialog.MaxCond)
+            throw new InvalidDataException($"{where} quest {questId} minCond is above maxCond.");
 
         var ops = new List<QuestOp>();
         foreach (var op in dialog.Ops ?? [])
@@ -185,6 +189,8 @@ public sealed partial class QuestCatalog
             dialog.InRiftPeace,
             dialog.InRift,
             Math.Max(0, dialog.MaxStarted),
+            dialog.MinCond,
+            dialog.MaxCond,
             htmlKey);
     }
 

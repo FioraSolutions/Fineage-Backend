@@ -10,6 +10,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius skill &lt;conditions&gt;&lt;using kind="DAGGER"/&gt;: Mortal Blow without a dagger → SysMsg 113, no cast.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetSkillWeaponConditionTests
 {
     const int MobId = 9_200_201;

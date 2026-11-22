@@ -10,6 +10,7 @@ namespace Fineage.Zone.Tests;
 /// Trade lifecycle over Net: ask, accept, offer, double confirm, exchange. Replaces the V2 wire fixture
 /// <c>ZoneTradeSharedTests</c>; every step asserts the bridge fanout the Net client receives.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetTradeTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()
