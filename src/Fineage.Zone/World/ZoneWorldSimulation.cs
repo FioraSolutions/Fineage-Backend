@@ -56,6 +56,9 @@ public sealed partial class ZoneWorld
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
     });
 
+    /// <summary>Test/diagnostics: wait until every sealed fan-out batch has been delivered.</summary>
+    internal void WaitForFanoutIdle() => _fanoutDispatcher.WaitUntilIdle();
+
     /// <summary>Test hook: one full scheduler step, then waits for async fan-out to finish.</summary>
     internal void RunStepForTest()
     {

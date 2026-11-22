@@ -228,6 +228,7 @@ public sealed class RegionSimulationDeterminismTests
                 Assert.True(kit.World.ApplyAbnormalFromSkillForTest(bleed, bleedLevel, mob));
         }
 
+        kit.World.WaitForFanoutIdle();
         lock (recorder.Calls)
             recorder.Calls.Clear();
         int[] tracked = [.. new[] { west.ObjectId, east.ObjectId }.Concat(Enumerable.Range(FirstMobId, MobCount)).Order()];

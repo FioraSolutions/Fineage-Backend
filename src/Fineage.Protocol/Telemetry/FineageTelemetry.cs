@@ -143,10 +143,6 @@ public static class FineageTelemetry
         Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
             description: "Time a command waited in ingress before apply (tag class)");
 
-    public static readonly Histogram<double> CommandApplyMilliseconds =
-        Meter.CreateHistogram<double>("fineage.command.apply.ms", unit: "ms",
-            description: "Command apply wall time on the simulation thread (tag kind)");
-
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
 

@@ -60,6 +60,7 @@ public sealed partial class ZoneWorld
     internal async Task RunPlayerCombatTickAsync(CancellationToken ct)
     {
         RunStep(now => _simulationTicks.RunPeriod(1, now));
+        _fanoutDispatcher.WaitUntilIdle();
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
