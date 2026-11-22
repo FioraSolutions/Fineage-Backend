@@ -28,7 +28,11 @@ public sealed class NetConnection : IAsyncDisposable
     readonly string _endpoint;
     readonly Task _pump;
     readonly ConcurrentDictionary<CoalesceReplaceableKey, PacketEnvelope> _coalescedReplaceable = new();
+    readonly object _stripeBatchLock = new();
+    readonly List<PacketEnvelope> _stripeBatch = [];
     int _closed;
+
+    const int StripeBatchFlushCount = 8;
 
     readonly record struct CoalesceReplaceableKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
 
@@ -148,11 +152,46 @@ public sealed class NetConnection : IAsyncDisposable
         if (TryCoalescedSend(opcode, envelope))
             return true;
 
-        if (_outbound.Writer.TryWrite(envelope))
-            return true;
+        return EnqueueStripeBatch(envelope);
+    }
 
-        NetTelemetry.ReliableOverflow(_endpoint);
-        return false;
+    bool EnqueueStripeBatch(PacketEnvelope envelope)
+    {
+        lock (_stripeBatchLock)
+        {
+            _stripeBatch.Add(envelope);
+            if (_stripeBatch.Count < StripeBatchFlushCount)
+                return true;
+            return FlushStripeBatchLocked();
+        }
+    }
+
+    bool FlushStripeBatchLocked()
+    {
+        bool anyAccepted = false;
+        for (int i = 0; i < _stripeBatch.Count; i++)
+        {
+            if (_outbound.Writer.TryWrite(_stripeBatch[i]))
+                anyAccepted = true;
+            else
+            {
+                NetTelemetry.ReliableOverflow(_endpoint);
+                _stripeBatch.RemoveRange(0, i);
+                return anyAccepted;
+            }
+        }
+
+        _stripeBatch.Clear();
+        return anyAccepted;
+    }
+
+    internal void FlushStripeBatch()
+    {
+        lock (_stripeBatchLock)
+        {
+            if (_stripeBatch.Count > 0)
+                FlushStripeBatchLocked();
+        }
     }
 
     /// <summary>
@@ -295,6 +334,8 @@ public sealed class NetConnection : IAsyncDisposable
                 while (_pumpWake.Reader.TryRead(out _))
                 {
                 }
+
+                FlushStripeBatch();
 
                 if (!_coalescedReplaceable.IsEmpty)
                     await WriteCoalescedToStreamAsync().ConfigureAwait(false);

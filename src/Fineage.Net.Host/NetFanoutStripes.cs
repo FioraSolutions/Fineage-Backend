@@ -24,23 +24,21 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     public int StripeCount => _stripes.Length;
 
-    public void EnqueueTrySend(NetConnection connection, ushort opcode, byte[] payload)
+    public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload)
     {
-        ArgumentNullException.ThrowIfNull(connection);
-        Enqueue(connection, new WorkItem(connection, opcode, payload, Critical: false));
+        Enqueue(handle, new WorkItem(handle, opcode, payload, Critical: false));
     }
 
-    public void EnqueueCritical(NetConnection connection, ushort opcode, byte[] payload)
+    public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload)
     {
-        ArgumentNullException.ThrowIfNull(connection);
-        Enqueue(connection, new WorkItem(connection, opcode, payload, Critical: true));
+        Enqueue(handle, new WorkItem(handle, opcode, payload, Critical: true));
     }
 
-    void Enqueue(NetConnection connection, WorkItem item)
+    void Enqueue(ConnectionHandle handle, WorkItem item)
     {
         if (Volatile.Read(ref _closed) != 0)
             return;
-        int stripe = StripeIndex(connection.ConnectionId);
+        int stripe = StripeIndex(handle.Connection.ConnectionId);
         try
         {
             _stripes[stripe].Writer.WriteAsync(item, _cts.Token).AsTask().GetAwaiter().GetResult();
@@ -75,9 +73,9 @@ public sealed class NetFanoutStripes : IAsyncDisposable
     static void Dispatch(WorkItem item)
     {
         if (item.Critical)
-            _ = item.Connection.SendAsync(item.Opcode, item.Payload);
+            _ = item.Handle.Connection.SendAsync(item.Opcode, item.Payload);
         else
-            item.Connection.TrySendFromStripe(item.Opcode, item.Payload);
+            item.Handle.Connection.TrySendFromStripe(item.Opcode, item.Payload);
     }
 
     public async ValueTask DisposeAsync()
@@ -91,7 +89,7 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         _cts.Dispose();
     }
 
-    readonly record struct WorkItem(NetConnection Connection, ushort Opcode, byte[] Payload, bool Critical = false);
+    readonly record struct WorkItem(ConnectionHandle Handle, ushort Opcode, byte[] Payload, bool Critical = false);
 
     sealed class Stripe
     {

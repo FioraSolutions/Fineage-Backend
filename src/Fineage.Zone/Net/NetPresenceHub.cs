@@ -16,7 +16,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
     readonly NetFanoutStripes _stripes = new();
     readonly bool _ownsStripes = true;
 
-    readonly record struct Entry(NetConnection Conn, EntityId EntityId);
+    readonly record struct Entry(ConnectionHandle Handle, EntityId EntityId);
 
     /// <summary>Tests and custom wiring may inject stripe routing.</summary>
     public NetPresenceHub(NetFanoutStripes? stripes = null)
@@ -34,7 +34,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
         if (objectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(objectId));
         lock (_gate)
-            _byObjectId[objectId] = new Entry(conn, entityId);
+            _byObjectId[objectId] = new Entry(new ConnectionHandle(objectId, entityId.Generation, conn), entityId);
     }
 
     /// <summary>
@@ -48,7 +48,8 @@ public sealed class NetPresenceHub : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(owner);
         lock (_gate)
         {
-            if (!_byObjectId.TryGetValue(objectId, out var entry) || !ReferenceEquals(entry.Conn, owner))
+            if (!_byObjectId.TryGetValue(objectId, out var entry) ||
+                !ReferenceEquals(entry.Handle.Connection, owner))
                 return false;
             _byObjectId.Remove(objectId);
             return true;
@@ -68,7 +69,7 @@ public sealed class NetPresenceHub : IAsyncDisposable
         {
             if (_byObjectId.TryGetValue(objectId, out var entry))
             {
-                conn = entry.Conn;
+                conn = entry.Handle.Connection;
                 entityId = entry.EntityId;
                 return true;
             }
@@ -93,9 +94,9 @@ public sealed class NetPresenceHub : IAsyncDisposable
     /// </summary>
     public void TrySend(int objectId, ushort opcode, byte[] payload)
     {
-        if (!TryGet(objectId, out var conn, out _))
+        if (!TryResolveHandle(objectId, out var handle))
             return;
-        _stripes.EnqueueTrySend(conn, opcode, payload);
+        _stripes.EnqueueTrySend(handle, opcode, payload);
         RecordCommandToMailboxes();
     }
 
@@ -105,10 +106,25 @@ public sealed class NetPresenceHub : IAsyncDisposable
     /// </summary>
     public void TrySendCritical(int objectId, ushort opcode, byte[] payload)
     {
-        if (!TryGet(objectId, out var conn, out _))
+        if (!TryResolveHandle(objectId, out var handle))
             return;
-        _stripes.EnqueueCritical(conn, opcode, payload);
+        _stripes.EnqueueCritical(handle, opcode, payload);
         RecordCommandToMailboxes();
+    }
+
+    bool TryResolveHandle(int objectId, out ConnectionHandle handle)
+    {
+        lock (_gate)
+        {
+            if (_byObjectId.TryGetValue(objectId, out var entry) && entry.Handle.Matches(entry.EntityId))
+            {
+                handle = entry.Handle;
+                return true;
+            }
+        }
+
+        handle = default;
+        return false;
     }
 
     static void RecordCommandToMailboxes()
