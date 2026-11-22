@@ -36,7 +36,7 @@ public static class ChatProtocol
     public const int Hero = 17;
     public const int CriticalAnnounce = 18;
 
-    /// <summary>Normal say radius in world units (2D). Shout ignores this and uses the whole zone.</summary>
+    /// <summary>Normal say radius in world units (2D). Shout uses the speaker's map region (Mobius getMapRegionLocId).</summary>
     public const int LocalRange = 1250;
 
     /// <summary>
