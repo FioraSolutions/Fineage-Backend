@@ -9,6 +9,4 @@ internal sealed class SealedWorldFanoutBatch(WorldFanoutBatch source, WorldEvent
     public int Count => source.Count;
 
     public IEnumerable<(string Name, Action Send)> Sends() => source.Sends();
-
-    internal void ReleaseScratchResources() => source.ReleaseAudienceScratch();
 }

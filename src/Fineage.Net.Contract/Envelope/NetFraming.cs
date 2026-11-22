@@ -16,38 +16,26 @@ namespace Fineage.Net.Contract
     {
         public static byte[] Encode(PacketEnvelope envelope)
         {
-            var frame = new byte[EncodedFrameByteCount(envelope)];
-            EncodeInto(envelope, frame);
-            return frame;
-        }
-
-        /// <summary>4-byte length prefix + header + payload.</summary>
-        public static int EncodedFrameByteCount(PacketEnvelope envelope) =>
-            4 + PacketEnvelope.HeaderSize + envelope.Payload.Length;
-
-        public static void EncodeInto(PacketEnvelope envelope, Span<byte> destination)
-        {
             if (envelope.Payload.Length > PacketEnvelope.MaxPayloadBytes)
                 throw new InvalidOperationException("payload too large");
 
             int total = PacketEnvelope.HeaderSize + envelope.Payload.Length;
-            if (destination.Length < 4 + total)
-                throw new ArgumentException("destination too small", nameof(destination));
-
-            BinaryPrimitives.WriteUInt32LittleEndian(destination, (uint)total);
+            var frame = new byte[4 + total];
+            BinaryPrimitives.WriteUInt32LittleEndian(frame.AsSpan(0, 4), (uint)total);
             int o = 4;
-            destination[o++] = envelope.Major;
-            destination[o++] = envelope.Minor;
-            BinaryPrimitives.WriteUInt16LittleEndian(destination.Slice(o), envelope.Opcode);
+            frame[o++] = envelope.Major;
+            frame[o++] = envelope.Minor;
+            BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(o), envelope.Opcode);
             o += 2;
-            BinaryPrimitives.WriteUInt16LittleEndian(destination.Slice(o), envelope.Flags);
+            BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(o), envelope.Flags);
             o += 2;
-            BinaryPrimitives.WriteUInt32LittleEndian(destination.Slice(o), envelope.RequestSequence);
+            BinaryPrimitives.WriteUInt32LittleEndian(frame.AsSpan(o), envelope.RequestSequence);
             o += 4;
-            BinaryPrimitives.WriteUInt32LittleEndian(destination.Slice(o), (uint)envelope.Payload.Length);
+            BinaryPrimitives.WriteUInt32LittleEndian(frame.AsSpan(o), (uint)envelope.Payload.Length);
             o += 4;
             if (envelope.Payload.Length > 0)
-                envelope.Payload.CopyTo(destination.Slice(o));
+                Buffer.BlockCopy(envelope.Payload, 0, frame, o, envelope.Payload.Length);
+            return frame;
         }
 
         public static bool TryDecode(ReadOnlySpan<byte> frameBody, out PacketEnvelope envelope, out string? error)
@@ -223,27 +211,23 @@ namespace Fineage.Net.Contract
             }
 
             int totalBytes = 0;
+            var frames = new byte[envelopes.Count][];
             for (int i = 0; i < envelopes.Count; i++)
-                totalBytes += EncodedFrameByteCount(envelopes[i]);
-
-            byte[] rented = ArrayPool<byte>.Shared.Rent(totalBytes);
-            try
             {
-                int offset = 0;
-                for (int i = 0; i < envelopes.Count; i++)
-                {
-                    int n = EncodedFrameByteCount(envelopes[i]);
-                    EncodeInto(envelopes[i], rented.AsSpan(offset, n));
-                    offset += n;
-                }
+                frames[i] = Encode(envelopes[i]);
+                totalBytes += frames[i].Length;
+            }
 
-                await stream.WriteAsync(rented.AsMemory(0, totalBytes), ct).ConfigureAwait(false);
-                await stream.FlushAsync(ct).ConfigureAwait(false);
-            }
-            finally
+            var batch = new byte[totalBytes];
+            int offset = 0;
+            for (int i = 0; i < frames.Length; i++)
             {
-                ArrayPool<byte>.Shared.Return(rented);
+                Buffer.BlockCopy(frames[i], 0, batch, offset, frames[i].Length);
+                offset += frames[i].Length;
             }
+
+            await stream.WriteAsync(batch, ct).ConfigureAwait(false);
+            await stream.FlushAsync(ct).ConfigureAwait(false);
         }
 
         static async Task<bool> ReadExactAsync(Stream stream, byte[] buffer, CancellationToken ct)

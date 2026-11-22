@@ -29,8 +29,7 @@ internal sealed class WorldFanoutBatch
     /// <summary>Writes superseded so far, including those superseded inside absorbed region batches.</summary>
     public int Coalesced { get; private set; }
 
-    public void AddOrdered(string name, Action send) =>
-        _entries.Add(new Entry(FanoutKindMapping.FromEmitName(name), name, send, null, null));
+    public void AddOrdered(string name, Action send) => _entries.Add(new Entry(name, send, null, null));
 
     /// <param name="merge">Folds the superseded payload into the new one (StatusUpdate keeps attributes the new write omits).</param>
     public void AddReplaceable<T>(
@@ -75,8 +74,7 @@ internal sealed class WorldFanoutBatch
         }
 
         _replaceable[key] = _entries.Count;
-        _entries.Add(new Entry(FanoutKindMapping.FromPresence(key.Kind), $"{key.Kind} subject={key.SubjectId}",
-            replace.Bind(payload), payload, replace));
+        _entries.Add(new Entry($"{key.Kind} subject={key.SubjectId}", replace.Bind(payload), payload, replace));
     }
 
     public IEnumerable<(string Name, Action Send)> Sends()
@@ -84,17 +82,11 @@ internal sealed class WorldFanoutBatch
         foreach (var entry in _entries)
         {
             if (entry != null)
-                yield return (entry.DebugName ?? entry.Kind.ToString(), entry.Send);
+                yield return (entry.Name, entry.Send);
         }
     }
 
-    internal void ReleaseAudienceScratch()
-    {
-        _audiences.Clear();
-        _replaceable.Clear();
-    }
-
-    sealed record Entry(FanoutKind Kind, string? DebugName, Action Send, object? Payload, Replace? Replace);
+    sealed record Entry(string Name, Action Send, object? Payload, Replace? Replace);
 
     sealed record Replace(ReplaceKey Key, Func<object, object, object> Merge, Func<object, Action> Bind);
 
