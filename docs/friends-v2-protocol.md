@@ -6,7 +6,8 @@
 
 | In | Out |
 |----|-----|
-| Invite by name (online), answer, delete, list + online flag | Friend chat channel (type 12) |
+| Invite by name (online), answer, delete, list + online flag | — |
+| Friend chat (Say type **12**): online mutual friends, block/refusal respected | Client UI |
 | Block / unblock / list / block-all | FriendListExtended UI |
 | Persist friends + blocked on character JSON mirror | Normalized `character_friends` table |
 | Online/offline notify via `FriendUpdate` | Cross-zone multi-instance |
