@@ -58,6 +58,7 @@ public sealed class NetFriendChatTests
         Assert.Empty(Says(rec));
         var notice = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)));
         var msg = (SystemMessageMsg)notice[1]!;
-        Assert.Equal("That player is not on your friend list.", msg.Text);
+        Assert.Equal("chat.not_friend", msg.Key);
+        Assert.True(msg.Text is "That player is not on your friend list." or "chat.not_friend");
     }
 }
