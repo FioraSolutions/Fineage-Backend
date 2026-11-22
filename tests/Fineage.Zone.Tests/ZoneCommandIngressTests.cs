@@ -71,25 +71,23 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
-    public async Task A_reply_arrives_after_the_fanout_of_the_step_that_applied_it()
+    public async Task A_reply_completes_when_the_command_batch_is_committed_and_fanout_drains_in_step_order()
     {
         var (kit, session, peer, recorder) = await SetupAsync();
-        int before = CallCount(recorder);
+        lock (recorder.Calls)
+            recorder.Calls.Clear();
 
-        int seenByReply = -1;
-        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None)
-            .ContinueWith(t =>
-            {
-                seenByReply = CallCount(recorder);
-                return t.Result;
-            }, TaskScheduler.Default);
+        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+        Assert.False(reply.IsCompleted);
         kit.World.RunStepForTest();
-        int afterStep = CallCount(recorder);
-
+        Assert.True(reply.IsCompleted);
         Assert.Null(await reply);
-        Assert.True(afterStep > before, "selecting a target fans out to the player");
-        Assert.True(seenByReply >= before, "reply may complete before async fan-out drains");
-        Assert.InRange(seenByReply, before, afterStep);
+
+        lock (recorder.Calls)
+        {
+            Assert.Contains(recorder.Calls,
+                c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && Equals(c.Args[1], peer.ObjectId));
+        }
     }
 
     [Fact]
@@ -167,12 +165,6 @@ public sealed class ZoneCommandIngressTests
         }
 
         return levels;
-    }
-
-    static int CallCount(NetBridgeRecorder recorder)
-    {
-        lock (recorder.Calls)
-            return recorder.Calls.Count;
     }
 
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Peer, NetBridgeRecorder Recorder)> SetupAsync()
