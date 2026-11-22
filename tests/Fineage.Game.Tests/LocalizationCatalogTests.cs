@@ -42,7 +42,7 @@ public sealed class LocalizationCatalogTests
 
         string text = catalog.Get("chat.missing", "ru");
 
-        Assert.Equal("chat.missing", text);
+        Assert.Equal("", text);
         Assert.Equal(
             [("fallback", "chat.missing", "ru"), ("missing", "chat.missing", "en")],
             log.Events);
@@ -54,8 +54,25 @@ public sealed class LocalizationCatalogTests
         var log = new ListLocalizationLog();
         var catalog = LocalizationCatalog.Empty(log);
 
-        Assert.Equal("chat.missing", catalog.Get("chat.missing", "en"));
+        Assert.Equal("", catalog.Get("chat.missing", "en"));
         Assert.Equal([("missing", "chat.missing", "en")], log.Events);
+    }
+
+    [Fact]
+    public void Format_prefers_the_catalog_over_shipped_english()
+    {
+        var log = new ListLocalizationLog();
+        var catalog = LocalizationCatalog.FromTables(
+            log,
+            ("en", new Dictionary<string, string>
+            {
+                ["chat.not_friend"] = "That player is not on your friend list."
+            }));
+
+        Assert.Equal(
+            "That player is not on your friend list.",
+            catalog.Format("chat.not_friend", "en", "stale fallback", Array.Empty<object?>()));
+        Assert.Empty(log.Events);
     }
 
     [Fact]

@@ -12,6 +12,8 @@
   "chat.not_petition": "You are currently not in a petition chat.",
   "chat.not_online": "That player is not online.",
   "chat.refusal": "That person is in message refusal mode.",
+  "chat.not_friend": "That player is not on your friend list.",
+  "chat.friend_target": "Select a friend to chat with.",
   "combat.hit_target": "You hit {0} for {1} damage.",
   "combat.hit_you": "{0} hit you for {1} damage.",
   "combat.avoided": "You have avoided {0}'s attack.",
