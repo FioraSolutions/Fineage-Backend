@@ -221,6 +221,30 @@ public sealed class MetricsCollectorTests
         Assert.Contains("# TYPE fineage_tick_skipped_total counter\n", text);
         Assert.Contains("# TYPE fineage_region_handoffs_total counter\n", text);
     }
+
+    [Fact]
+    public void Collector_exports_command_timeline_apply_and_queue_wait_histograms()
+    {
+        using var collector = new MetricsCollector();
+        FineageTelemetry.CommandTimelineMilliseconds.Record(12,
+            new KeyValuePair<string, object?>("phase", "submit_to_dequeue"));
+        FineageTelemetry.CommandTimelineMilliseconds.Record(4.5,
+            new KeyValuePair<string, object?>("phase", "dequeue_to_apply"));
+        FineageTelemetry.CommandApplyMilliseconds.Record(4.5,
+            new KeyValuePair<string, object?>("command", "MoveInput"));
+        FineageTelemetry.CommandQueueWaitMilliseconds.Record(8,
+            new KeyValuePair<string, object?>("class", "player"));
+
+        MetricsSnapshot snapshot = collector.Snapshot();
+        Assert.Equal(2, snapshot.CommandTimelinePhases.Count);
+        Assert.Single(snapshot.CommandApplyByName, r => r.Stage == "MoveInput");
+        Assert.Single(snapshot.CommandQueueWaitByClass, r => r.Stage == "player");
+
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains("fineage_command_timeline_ms_count{phase=\"submit_to_dequeue\"} 1\n", text);
+        Assert.Contains("fineage_command_apply_ms_count{command=\"MoveInput\"} 1\n", text);
+        Assert.Contains("fineage_command_queue_wait_ms_count{class=\"player\"} 1\n", text);
+    }
 }
 
 public sealed class PrometheusEndpointTests

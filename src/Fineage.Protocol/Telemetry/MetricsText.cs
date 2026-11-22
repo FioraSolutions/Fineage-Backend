@@ -75,6 +75,9 @@ public sealed class MetricsSnapshot
     public IReadOnlyDictionary<string, long> FanoutDropped { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
+    public IReadOnlyList<StageMetrics> CommandTimelinePhases { get; init; } = [];
+    public IReadOnlyList<StageMetrics> CommandApplyByName { get; init; } = [];
+    public IReadOnlyList<StageMetrics> CommandQueueWaitByClass { get; init; } = [];
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
 
@@ -235,6 +238,12 @@ public static class MetricsText
             .Append(snapshot.LedgerFlushFailures.ToString(CultureInfo.InvariantCulture))
             .Append('\n');
 
+        AppendLabeledStageHistograms(sb, "fineage_command_timeline_ms", "phase",
+            "Elapsed time between command lifecycle phases", snapshot.CommandTimelinePhases);
+        AppendLabeledStageHistograms(sb, "fineage_command_apply_ms", "command",
+            "Single command apply duration", snapshot.CommandApplyByName);
+        AppendLabeledStageHistograms(sb, "fineage_command_queue_wait_ms", "class",
+            "Ingress queue wait before dequeue", snapshot.CommandQueueWaitByClass);
         AppendStages(sb, snapshot.Stages);
         AppendEnterHistograms(sb, snapshot);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
@@ -309,6 +318,21 @@ public static class MetricsText
         AppendHelp(sb, name, help);
         sb.Append("# TYPE ").Append(name).Append(" histogram\n");
         AppendHistogramSamples(sb, name, "", histogram);
+    }
+
+    static void AppendLabeledStageHistograms(
+        StringBuilder sb,
+        string metric,
+        string labelName,
+        string help,
+        IReadOnlyList<StageMetrics> rows)
+    {
+        if (rows.Count == 0)
+            return;
+        AppendHelp(sb, metric, help);
+        sb.Append("# TYPE ").Append(metric).Append(" histogram\n");
+        foreach (StageMetrics row in rows)
+            AppendHistogramSamples(sb, metric, $"{labelName}=\"{Escape(row.Stage)}\"", row.Duration);
     }
 
     static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)
