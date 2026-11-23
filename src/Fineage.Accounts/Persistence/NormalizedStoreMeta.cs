@@ -35,6 +35,29 @@ static class NormalizedStoreMeta
         BumpSequence(conn, tx, "clan_id_seq", counters.NextClanId - 1);
     }
 
+    /// <summary>
+    /// Returns the first id of a contiguous block of <paramref name="count"/> item ids. The UPSERT takes the row lock,
+    /// so concurrent callers in different processes get disjoint blocks. <paramref name="floor"/> is the caller's own
+    /// known next id (never hand out below it).
+    /// </summary>
+    public static long ReserveItemObjectIds(NpgsqlConnection conn, NpgsqlTransaction tx, long floor, int count)
+    {
+        floor = Math.Max(floor, PlayerInventory.FirstObjectId);
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText =
+            """
+            INSERT INTO store_meta (key, value_bigint) VALUES ('next_item_object_id', @floor + @n)
+            ON CONFLICT (key) DO UPDATE SET value_bigint = GREATEST(store_meta.value_bigint, @floor) + @n
+            RETURNING value_bigint - @n
+            """;
+        cmd.Parameters.AddWithValue("floor", floor);
+        cmd.Parameters.AddWithValue("n", (long)count);
+        long first = Convert.ToInt64(cmd.ExecuteScalar());
+        BumpSequence(conn, tx, "item_object_id_seq", first + count - 1);
+        return first;
+    }
+
     static long ReadMeta(NpgsqlConnection conn, string key, long fallback)
     {
         using var cmd = conn.CreateCommand();
