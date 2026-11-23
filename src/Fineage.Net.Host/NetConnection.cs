@@ -122,18 +122,12 @@ public sealed class NetConnection : IAsyncDisposable
         }
         catch (Exception ex) when (ex is IOException or SocketException)
         {
-            NetDisconnectDiagnostics.Log("read", ConnectionId, _endpoint, ex, _outbound.Reader.Count, StripeBatchDepth());
+            NetDisconnectDiagnostics.Log("read", ConnectionId, _endpoint, ex, _batches.Reader.Count);
         }
         finally
         {
             _inbox.Writer.TryComplete();
         }
-    }
-
-    int StripeBatchDepth()
-    {
-        lock (_stripeBatchLock)
-            return _stripeBatch.Count;
     }
 
     ValueTask AcceptFrameAsync(PacketEnvelope envelope, CancellationToken ct)
@@ -432,7 +426,7 @@ public sealed class NetConnection : IAsyncDisposable
         catch (Exception ex) when (ex is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
         {
             if (ex is IOException or SocketException)
-                NetDisconnectDiagnostics.Log("pump", ConnectionId, _endpoint, ex, _outbound.Reader.Count, StripeBatchDepth());
+                NetDisconnectDiagnostics.Log("pump", ConnectionId, _endpoint, ex, _batches.Reader.Count);
         }
         finally
         {
