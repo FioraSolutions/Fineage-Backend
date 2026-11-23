@@ -120,8 +120,8 @@ public sealed class NetShopTests
     public async Task Giran_buy_list_shows_base_tax_and_owner_tax()
     {
         var clock = new MutableClock();
-        WorldBench bench = Flat(clock, Kit((Adena, 1000)), mapId: "giran");
-        BenchPlayer actor = await bench.EnterAsync("taxed", "Taxed");
+        WorldBench bench = Flat(clock, Kit((Adena, 1000)), mapId: "giran", x: GiranTownX, y: GiranTownY, z: GiranTownZ);
+        BenchPlayer actor = await bench.EnterAsync("taxed", "Taxed", x: GiranTownX, y: GiranTownY, z: GiranTownZ);
 
         var castle = bench.World.FindCastle(3);
         Assert.NotNull(castle);
@@ -214,8 +214,13 @@ public sealed class NetShopTests
         Assert.Equal(1500, LastBalance(bench.Rec).Adena);
     }
 
-    internal static WorldBench Flat(MutableClock clock, GameData game, string mapId = "shop_flat", ulong? seed = null) =>
-        new(game, clock: () => clock.Now, spawns: MerchantSpawns(mapId), mapId: mapId,
+    /// <summary>Giran Castle Town, inside the town zone whose tax castle is Giran (3).</summary>
+    internal const int GiranTownX = 77170, GiranTownY = 147550, GiranTownZ = -3550;
+
+    internal static WorldBench Flat(
+        MutableClock clock, GameData game, string mapId = "shop_flat", ulong? seed = null,
+        int x = Spawns.HumanStartX, int y = Spawns.HumanStartY, int z = Spawns.HumanStartZ) =>
+        new(game, clock: () => clock.Now, spawns: MerchantSpawns(mapId, x, y, z), mapId: mapId,
             buyLists: BuyLists(), multisells: MultiLists(), simulationSeed: seed);
 
     static WorldBench Limited(MutableClock clock) =>
@@ -226,8 +231,8 @@ public sealed class NetShopTests
     static StoredItem[] Bag(params (int ItemId, int Count)[] rows) =>
         rows.Select(row => new StoredItem(row.ItemId, row.Count, -1)).ToArray();
 
-    static Fineage.Zone.Spawns.SpawnCatalog MerchantSpawns(string mapId) =>
-        Spawns.Merchant(MerchantObjectId, MerchantNpcId, mapId: mapId);
+    static Fineage.Zone.Spawns.SpawnCatalog MerchantSpawns(string mapId, int x = Spawns.HumanStartX, int y = Spawns.HumanStartY, int z = Spawns.HumanStartZ) =>
+        Spawns.Merchant(MerchantObjectId, MerchantNpcId, x, y, z, mapId: mapId);
 
     /// <summary>The fighter's starter kit, so <see cref="WorldBench.EnterAsync"/> builds the bag from it.</summary>
     internal static GameData Kit(params (int ItemId, int Count)[] rows) =>

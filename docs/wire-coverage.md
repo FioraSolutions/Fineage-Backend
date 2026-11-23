@@ -426,7 +426,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | no | no |  |  |
 | 0xf1 | CAMERA_MODE | CameraMode | no | no |  |  |
 | 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | no | no |  | SpecialXMas item |
-| 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate |  |
+| 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate | danger area follows an enabled EffectZone (`showDangerIcon`) |
 | 0xf4 | SHORT_BUFF_STATUS_UPDATE | ShortBuffStatusUpdate | partial | yes | AbnormalStatusUpdate |  |
 | 0xf5 | SSQ_STATUS | SSQStatus | yes | yes | SevenSignsStatus |  |
 | 0xf7 | AGIT_DECO_INFO | AgitDecoInfo | yes | yes | AgitDecoInfo |  |
@@ -472,7 +472,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xfe/0x2e | EX_STORAGE_MAX_COUNT | ExStorageMaxCount | partial | yes | InventoryUpdate | slot caps are server-side |
 | 0xfe/0x30 | EX_MULTI_PARTY_COMMAND_CHANNEL_INFO | ExMultiPartyCommandChannelInfo | yes | contract | CommandChannelInfo |  |
 | 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | no | no |  |  |
-| 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | no zone-compass packet |
+| 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | zone rules are server-side (`ZoneTypeRegistry`); compass byte is still not sent |
 | 0xfe/0x33 | EX_GET_BOSS_RECORD | ExGetBossRecord | yes | yes | BossStatus |  |
 | 0xfe/0x34 | EX_ASK_JOIN_PARTY_ROOM | ExAskJoinPartyRoom | no | no |  |  |
 | 0xfe/0x35 | EX_LIST_PARTY_MATCHING_WAITING_ROOM | ExListPartyMatchingWaitingRoom | no | no |  |  |

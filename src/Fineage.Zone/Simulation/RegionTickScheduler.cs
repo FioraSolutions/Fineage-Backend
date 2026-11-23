@@ -147,6 +147,28 @@ public sealed class RegionTickScheduler
     }
 
     /// <summary>
+    /// Runs the registered stage named <paramref name="name"/> as tick <see cref="Tick"/> + 1 without advancing
+    /// <see cref="Tick"/>. The live loop admits queued commands during the wait for the next step at the same tick
+    /// time phase 0 of that step uses, so a command does not sit until the tick boundary. The stage logs the
+    /// upcoming tick; replay still applies the command on the step that follows it.
+    /// </summary>
+    public void RunAhead(string name, long wallUnixMs)
+    {
+        var entry = _stages.FirstOrDefault(s => s.Name == name)
+            ?? throw new InvalidOperationException($"Simulation stage '{name}' is not registered on this scheduler.");
+        long ahead = Tick + 1;
+        var tick = new TickContext(ahead, Clock.TimeOf(ahead), wallUnixMs);
+        List<StageFailure> failures = [];
+        using (Clock.Pin(tick))
+            failures.AddRange(entry.Run(this, tick));
+        Report(failures);
+        if (failures.Count > 0)
+            throw new AggregateException(
+                $"Stage '{name}' failed ahead of tick {ahead} in {failures.Count} scope(s): {string.Join("; ", failures)}",
+                failures.Select(f => f.Error));
+    }
+
+    /// <summary>
     /// Runs every stage registered with <paramref name="periodTicks"/>, in registration order, after
     /// <see cref="Resume"/>, at the resulting tick (test and admin hooks for one cadence). Failures are reported and
     /// rethrown.

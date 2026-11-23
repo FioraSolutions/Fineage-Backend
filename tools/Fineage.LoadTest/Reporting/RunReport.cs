@@ -44,9 +44,23 @@ public sealed class RunReport
     public StructuredLogSummary? StructuredLogs { get; set; }
     public List<GateVerdict> GateVerdicts { get; set; } = [];
     public double? CommandToMailboxesP99Ms { get; set; }
+    /// <summary>Server histogram <c>fineage_command_timeline_ms{phase=submit_to_mailbox}</c>.</summary>
+    public double? SubmitToMailboxP99Ms { get; set; }
+    /// <summary>Server histogram <c>fanout_enqueue_to_mailbox</c> (formerly mislabeled command→mailboxes).</summary>
+    public double? FanoutEnqueueToMailboxP99Ms { get; set; }
     public double? FanoutQueueOldestAgeP99Ms { get; set; }
+    public double? TickTrueMaxMs { get; set; }
+    public double? WatchdogStallMaxMs { get; set; }
+    public long WatchdogStalls { get; set; }
+    public long FanoutDropped { get; set; }
     public long? ReliableOverflowTotal { get; set; }
     public HonestLoadSummary? Honest { get; set; }
+
+    /// <summary>Longest tick freeze or step-watchdog stall seen in the run, in seconds.</summary>
+    public double SimulationStallSeconds { get; set; }
+
+    /// <summary>Tick-freeze episodes over the stall limit. A step-watchdog hit counts as one when the tick series did not.</summary>
+    public int SimulationStallCount { get; set; }
 }
 
 public sealed class PrometheusAggregate
@@ -54,7 +68,11 @@ public sealed class PrometheusAggregate
     public double TickP50Ms { get; init; }
     public double TickP95Ms { get; init; }
     public double TickP99Ms { get; init; }
+    /// <summary><c>fineage_tick_max_ms</c>. Not the histogram bucket ceiling.</summary>
     public double TickMaxMs { get; init; }
+
+    /// <summary>Upper edge of the histogram bucket that held the longest finished tick. Not the duration.</summary>
+    public double TickHistogramCeilingMs { get; init; }
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long CommandIngressQueuedMax { get; init; }
@@ -64,6 +82,8 @@ public sealed class PrometheusAggregate
     public long PacketsErrored { get; init; }
     public int ZoneOnlineMax { get; init; }
     public long OutboundDropped { get; init; }
+    public long CommandCoalesced { get; init; }
+    public long CommandRejected { get; init; }
     public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
@@ -107,7 +127,8 @@ public sealed class PrometheusAggregate
             TickP50Ms = Percentile(samples.Select(s => s.TickP50), 0.5),
             TickP95Ms = Percentile(samples.Select(s => s.TickP95), 0.95),
             TickP99Ms = Percentile(samples.Select(s => s.TickP99), 0.99),
-            TickMaxMs = samples.Max(s => s.TickMax),
+            TickMaxMs = samples.Max(s => s.TickTrueMaxMs),
+            TickHistogramCeilingMs = samples.Max(s => s.TickMax),
             TickOverruns = samples.Max(s => s.TickOverruns),
             TicksSkipped = samples.Max(s => s.TicksSkipped),
             CommandIngressQueuedMax = samples.Max(s => s.CommandIngressQueued),
@@ -117,6 +138,8 @@ public sealed class PrometheusAggregate
             PacketsErrored = samples.Max(s => s.PacketsErrored),
             ZoneOnlineMax = samples.Max(s => s.ZoneOnline),
             OutboundDropped = samples.Max(s => s.OutboundDropped),
+            CommandCoalesced = samples.Max(s => s.CommandCoalesced),
+            CommandRejected = samples.Max(s => s.CommandRejected),
             TickStageP99Ms = MergeStageP99(samples),
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples),

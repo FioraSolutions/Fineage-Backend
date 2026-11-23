@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Fineage.LoadTest.Metrics;
 
@@ -43,6 +42,7 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
     readonly int _pid;
     Task? _reader;
     CancellationTokenSource? _cts;
+    string? _csvPath;
 
     public RuntimeCountersSampler(int pid) => _pid = pid;
 
@@ -61,6 +61,7 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         }
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        _csvPath = Path.Combine(Path.GetTempPath(), $"fineage-gc-{_pid}-{Guid.NewGuid():N}.csv");
         string counters =
             "System.Runtime[cpu-usage,alloc-rate,gc-heap-size,gen-0-gc-count,gen-1-gc-count,gen-2-gc-count," +
             "threadpool-queue-length,threadpool-thread-count,monitor-lock-contention-count,time-in-gc]";
@@ -73,10 +74,11 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
                     FileName = "dotnet-counters",
                     ArgumentList =
                     {
-                        "monitor",
+                        "collect",
                         "-p", _pid.ToString(CultureInfo.InvariantCulture),
-                        "--counters", counters,
-                        "--interval", "1"
+                        "--format", "csv",
+                        "-o", _csvPath,
+                        "--counters", counters
                     },
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -115,19 +117,26 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         }
     }
 
-    static readonly Regex CsvRx = new(
-        @"^(?<name>[^,]+),\s*(?<value>-?[0-9.]+)",
-        RegexOptions.Compiled);
+    public void ApplyCsv(string csv)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            _unavailable ??= $"MISSING: GC CSV at {_csvPath} is empty";
+            return;
+        }
+
+        foreach (string raw in csv.Split('\n'))
+            ParseLine(raw.Trim());
+        if (_cpuSamples.Count == 0 && _gcHeapMb.Count == 0 && _allocMb.Count == 0)
+            _unavailable ??= $"MISSING: GC CSV at {_csvPath} has no System.Runtime rows";
+    }
 
     void ParseLine(string line)
     {
-        if (!line.Contains(','))
+        if (line.Length == 0 || line.StartsWith("Timestamp", StringComparison.OrdinalIgnoreCase))
             return;
-        var m = CsvRx.Match(line.Trim());
-        if (!m.Success)
-            return;
-        string name = m.Groups["name"].Value.Trim();
-        if (!double.TryParse(m.Groups["value"].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double v))
+        string? name = CanonicalCounter(line);
+        if (name == null || LastNumber(line) is not { } v)
             return;
 
         switch (name)
@@ -142,16 +151,13 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
                 _gcHeapMb.Add(v);
                 break;
             case "gen-0-gc-count":
-                if (_gen0Start < 0) _gen0Start = (long)v;
-                _gen0End = (long)v;
+                NoteGen(rate: IsIntervalIncrement(line), ref _gen0Start, ref _gen0End, v);
                 break;
             case "gen-1-gc-count":
-                if (_gen1Start < 0) _gen1Start = (long)v;
-                _gen1End = (long)v;
+                NoteGen(rate: IsIntervalIncrement(line), ref _gen1Start, ref _gen1End, v);
                 break;
             case "gen-2-gc-count":
-                if (_gen2Start < 0) _gen2Start = (long)v;
-                _gen2End = (long)v;
+                NoteGen(rate: IsIntervalIncrement(line), ref _gen2Start, ref _gen2End, v);
                 break;
             case "threadpool-queue-length":
                 _tpQueue.Add(v);
@@ -168,6 +174,63 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         }
     }
 
+    static bool IsIntervalIncrement(string line) =>
+        line.Contains("Count /", StringComparison.Ordinal) || line.Contains("/ 1 sec", StringComparison.Ordinal);
+
+    static void NoteGen(bool rate, ref long start, ref long end, double value)
+    {
+        long n = (long)Math.Round(value);
+        if (rate)
+        {
+            if (start < 0)
+                start = 0;
+            end += n;
+            return;
+        }
+
+        if (start < 0)
+            start = n;
+        end = n;
+    }
+
+    static string? CanonicalCounter(string line)
+    {
+        if (line.Contains("CPU Usage", StringComparison.OrdinalIgnoreCase) || line.Contains("cpu-usage", StringComparison.Ordinal))
+            return "cpu-usage";
+        if (line.Contains("Allocation Rate", StringComparison.OrdinalIgnoreCase) || line.Contains("alloc-rate", StringComparison.Ordinal))
+            return "alloc-rate";
+        if (line.Contains("GC Heap Size", StringComparison.OrdinalIgnoreCase) || line.Contains("gc-heap-size", StringComparison.Ordinal))
+            return "gc-heap-size";
+        if (line.Contains("gen-0-gc-count", StringComparison.Ordinal) || line.Contains("Gen 0 GC Count", StringComparison.OrdinalIgnoreCase))
+            return "gen-0-gc-count";
+        if (line.Contains("gen-1-gc-count", StringComparison.Ordinal) || line.Contains("Gen 1 GC Count", StringComparison.OrdinalIgnoreCase))
+            return "gen-1-gc-count";
+        if (line.Contains("gen-2-gc-count", StringComparison.Ordinal) || line.Contains("Gen 2 GC Count", StringComparison.OrdinalIgnoreCase))
+            return "gen-2-gc-count";
+        if (line.Contains("threadpool-queue-length", StringComparison.Ordinal) || line.Contains("ThreadPool Queue Length", StringComparison.OrdinalIgnoreCase))
+            return "threadpool-queue-length";
+        if (line.Contains("threadpool-thread-count", StringComparison.Ordinal) || line.Contains("ThreadPool Thread Count", StringComparison.OrdinalIgnoreCase))
+            return "threadpool-thread-count";
+        if (line.Contains("monitor-lock-contention-count", StringComparison.Ordinal) || line.Contains("Monitor Lock Contention", StringComparison.OrdinalIgnoreCase))
+            return "monitor-lock-contention-count";
+        if (line.Contains("time-in-gc", StringComparison.Ordinal) || line.Contains("% Time in GC", StringComparison.OrdinalIgnoreCase))
+            return "time-in-gc";
+        return null;
+    }
+
+    static double? LastNumber(string line)
+    {
+        string[] parts = line.Split(',');
+        for (int i = parts.Length - 1; i >= 0; i--)
+        {
+            string token = parts[i].Trim().Trim('"');
+            if (double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+                return value;
+        }
+
+        return null;
+    }
+
     public async Task<RuntimeCounterStats> StopAndSummarizeAsync()
     {
         try
@@ -175,7 +238,17 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
             _cts?.Cancel();
             if (_process is { HasExited: false })
             {
-                _process.Kill(entireProcessTree: true);
+                try
+                {
+                    Process.Start("kill", $"-INT {_process.Id}")?.WaitForExit(1000);
+                }
+                catch
+                {
+                    // kill(1) missing: fall through to Kill
+                }
+
+                if (!_process.HasExited)
+                    _process.Kill(entireProcessTree: true);
                 await _process.WaitForExitAsync();
             }
         }
@@ -184,7 +257,30 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
             // ignore
         }
 
-        if (_unavailable != null)
+        if (_csvPath != null && File.Exists(_csvPath))
+        {
+            string csv = await File.ReadAllTextAsync(_csvPath);
+            ApplyCsv(csv);
+        }
+        else if (_unavailable == null)
+        {
+            _unavailable = $"MISSING: dotnet-counters CSV was not written ({_csvPath ?? "no path"})";
+        }
+
+        return BuildStats(includeProcFallback: true);
+    }
+
+    /// <summary>Parse a <c>dotnet-counters collect --format csv</c> file. Used by the report and by tests.</summary>
+    public static RuntimeCounterStats ParseCsv(string csv)
+    {
+        var sampler = new RuntimeCountersSampler(0) { _csvPath = "fixture.csv" };
+        sampler.ApplyCsv(csv);
+        return sampler.BuildStats(includeProcFallback: false);
+    }
+
+    RuntimeCounterStats BuildStats(bool includeProcFallback)
+    {
+        if (includeProcFallback && _unavailable != null && _cpuSamples.Count == 0)
         {
             var procFallback = ProcCpuSampler.Sample(_pid);
             return new RuntimeCounterStats
@@ -199,8 +295,8 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
 
         return new RuntimeCounterStats
         {
-            Source = _cpuSamples.Count > 0 ? "dotnet-counters" : "dotnet-counters (no samples)",
-            UnavailableReason = _cpuSamples.Count == 0 ? "monitor produced no parseable samples" : null,
+            Source = _cpuSamples.Count > 0 ? "dotnet-counters csv" : "dotnet-counters csv (no samples)",
+            UnavailableReason = _cpuSamples.Count == 0 ? _unavailable ?? $"MISSING: no parseable rows in {_csvPath}" : null,
             CpuPercentMin = Min(_cpuSamples),
             CpuPercentAvg = Avg(_cpuSamples),
             CpuPercentMax = Max(_cpuSamples),

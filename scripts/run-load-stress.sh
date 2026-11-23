@@ -29,6 +29,7 @@ for n in $LEVELS; do
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
   ./scripts/run-local-net.sh start
   ZONE_PID="$(cat local-logs/zone-net.pid 2>/dev/null || echo 0)"
+  set +e
   dotnet "$LT" \
     --scenario "$ROOT/tools/Fineage.LoadTest/scenarios/$scenario" \
     --spawn-layout spread \
@@ -37,9 +38,18 @@ for n in $LEVELS; do
     --login-log "$ROOT/local-logs/login-net.log" \
     --zone-log "$ROOT/local-logs/zone-net.log" \
     --zone-pid "$ZONE_PID" \
-    --region-workers "$FINEAGE_ZONE_REGION_WORKERS" \
-    || true
+    --region-workers "$FINEAGE_ZONE_REGION_WORKERS"
+  status=$?
+  set -e
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
+  if [[ ! -f "$out/load-test-report.md" ]]; then
+    echo "FAIL: load test runner wrote no report under $out" >&2
+    exit 1
+  fi
+  if [[ "$status" -ne 0 ]]; then
+    echo "FAIL: load test exit $status ($out/load-test-report.md)" >&2
+    exit "$status"
+  fi
 done
 
 echo "Stress reports: $REPORT_ROOT"

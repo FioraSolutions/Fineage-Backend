@@ -81,6 +81,11 @@ public sealed partial class ZoneWorld
 
         if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
+        if (ZoneRules.Query(player.X, player.Y, player.Z, player.Race).BlocksRestart)
+        {
+            ZoneLog.Error($"[zone] NoRestartZone refused village restart obj={player.ObjectId} at {player.X},{player.Y},{player.Z}");
+            return DeathProtocol.NoRestart;
+        }
 
         ClearReviveOffer(player);
         var (x, y, z) = TownDestination(player);

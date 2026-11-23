@@ -23,6 +23,7 @@ public sealed partial class ZoneWorld
         UpdateSwampState(e);
         UpdateNoLandingState(e);
         UpdateDamageZoneMembership(e);
+        UpdateRuleZoneState(e);
     }
 
     void UpdateSwampState(ZoneEntity e)
@@ -83,6 +84,7 @@ public sealed partial class ZoneWorld
 
     void TickEnvironmentZones(long nowUnixMs)
     {
+        TickRuleZones(nowUnixMs);
         if (Damage.Count == 0 && NoLanding.Count == 0)
             return;
 
