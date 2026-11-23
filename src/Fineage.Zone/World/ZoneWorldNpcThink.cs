@@ -23,6 +23,7 @@ public sealed partial class ZoneWorld
     }
     readonly List<int> _thinkUrgent = [];
     readonly List<int> _thinkReschedule = [];
+    [ThreadStatic] static List<int>? t_thinkReschedule;
     readonly object _thinkRescheduleLock = new();
     readonly HashSet<int> _privatesPending = [];
     readonly object _privatesPendingLock = new();
@@ -50,13 +51,16 @@ public sealed partial class ZoneWorld
 
     void ThinkActiveInRegion(RegionId region, IReadOnlyList<int> npcIds, long now)
     {
-        int drift = ZoneNpcSettings.MaxDriftRange;
+        int drift = _maxDriftRange;
         long driftSq = (long)drift * drift;
+        // One lock per region body instead of one per NPC.
+        var reschedule = t_thinkReschedule ??= [];
+        reschedule.Clear();
         foreach (int id in npcIds)
         {
             if (!_byId.TryGetValue(id, out var npc))
                 continue;
-            bool reschedule = (npc.ActiveSets & ActiveSets.Thinking) != 0;
+            bool thinking = (npc.ActiveSets & ActiveSets.Thinking) != 0;
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
             {
                 DequeueThink(npc);
@@ -65,14 +69,14 @@ public sealed partial class ZoneWorld
             }
             if (npc.WalkingRouteName != null || npc.IsBoat)
             {
-                if (reschedule)
-                    QueueThinkReschedule(id);
+                if (thinking)
+                    reschedule.Add(id);
                 continue;
             }
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
             {
-                if (reschedule)
-                    QueueThinkReschedule(id);
+                if (thinking)
+                    reschedule.Add(id);
                 continue;
             }
 
@@ -81,7 +85,7 @@ public sealed partial class ZoneWorld
             bool idle = !IsThinkJob(npc);
             if (idle && now < npc.NextThinkMs)
             {
-                QueueThinkReschedule(id);
+                reschedule.Add(id);
                 continue;
             }
             if (idle)
@@ -89,12 +93,35 @@ public sealed partial class ZoneWorld
 
             ThinkActiveNpc(npc, now, drift, driftSq);
             if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
-                QueueThinkReschedule(id);
+                reschedule.Add(id);
+        }
+
+        if (reschedule.Count > 0)
+        {
+            lock (_thinkRescheduleLock)
+                _thinkReschedule.AddRange(reschedule);
+            reschedule.Clear();
         }
     }
 
-    static bool IsThinkJob(ZoneEntity npc) =>
-        npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome || npc.LeaderObjectId != 0;
+    bool IsThinkJob(ZoneEntity npc) =>
+        npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome || (npc.LeaderObjectId != 0 && MinionOutOfReach(npc));
+
+    /// <summary>
+    /// A minion is a think job only while it is outside its follow offset of a live leader
+    /// (<see cref="TryFollowLeader"/>). Within reach it thinks on the idle cadence like Mobius' 1 s AI task;
+    /// treating every minion as a job made each one think every 200 ms tick.
+    /// </summary>
+    bool MinionOutOfReach(ZoneEntity npc)
+    {
+        if (!_byId.TryGetValue(npc.LeaderObjectId, out var leader) || leader.CurHp <= 0)
+            return false;
+        int offset = npc.RaidMinion ? 500 : 200;
+        long dx = npc.X - (long)leader.X;
+        long dy = npc.Y - (long)leader.Y;
+        // A walking leader drags its minions every tick; a resting one leaves them on the idle cadence.
+        return leader.MoveActive || dx * dx + dy * dy > (long)offset * offset || npc.Running != leader.Running;
+    }
 
     /// <summary>
     /// A chase, a walk home, or a minion follow is due on the next think, not when its idle bucket comes around.
@@ -121,6 +148,8 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        // A noted job is due now, even when IsThinkJob does not hold yet (a minion whose leader is about to move).
+        npc.NextThinkMs = 0;
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             TrackThink(npc);
         else
@@ -139,11 +168,14 @@ public sealed partial class ZoneWorld
             _privatesPending.Clear();
         }
 
+        int before = _byId.Count;
         foreach (int id in pending)
         {
             if (_byId.TryGetValue(id, out var master) && master.CurHp > 0)
                 SpawnPrivates(master);
         }
+
+        ZoneLog.Info($"npc privates: spawned for {pending.Length} master(s), entities {before} -> {_byId.Count}");
     }
 
     void QueueThinkReschedule(int objectId)

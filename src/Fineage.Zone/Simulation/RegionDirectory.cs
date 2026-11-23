@@ -532,11 +532,14 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     /// Entities <paramref name="region"/> owns within <paramref name="radius"/> (2D) of the point, ascending ids: the
     /// live half of a region body's spatial query (the other half reads the neighbours' border snapshots).
     /// </summary>
+    [ThreadStatic] static List<int>? t_ownedNearScratch;
+
     public void OwnedNear(RegionId region, int x, int y, int radius, List<T> into)
     {
         if (!_regions.TryGetValue(region, out var container))
             return;
-        var ids = new List<int>();
+        var ids = t_ownedNearScratch ??= [];
+        ids.Clear();
         container.CollectCells(SpatialCells.Of(x - radius, CellSize), SpatialCells.Of(y - radius, CellSize),
             SpatialCells.Of(x + radius, CellSize), SpatialCells.Of(y + radius, CellSize), ids);
         ids.Sort();

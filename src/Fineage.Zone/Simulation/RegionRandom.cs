@@ -13,7 +13,8 @@ public interface IRegionRandom
 /// </summary>
 public sealed class SeededRegionRandom : IRegionRandom
 {
-    readonly Dictionary<RegionId, SimulationRandom> _streams = [];
+    // Read on every draw by every region body: lock-free lookup; a stream is created once per region.
+    readonly System.Collections.Concurrent.ConcurrentDictionary<RegionId, SimulationRandom> _streams = new();
     readonly ulong _worldSeed;
     readonly RandomPurpose _purpose;
 
@@ -25,16 +26,10 @@ public sealed class SeededRegionRandom : IRegionRandom
 
     public Random For(RegionId region)
     {
-        lock (_streams)
-        {
-            if (!_streams.TryGetValue(region, out var stream))
-            {
-                stream = new SimulationRandom(SimulationRandom.StreamSeed(_worldSeed, _purpose, region));
-                _streams[region] = stream;
-            }
-
+        if (_streams.TryGetValue(region, out var stream))
             return stream;
-        }
+        // GetOrAdd may build a spare stream under a race; only the stored one is ever drawn from.
+        return _streams.GetOrAdd(region, id => new SimulationRandom(SimulationRandom.StreamSeed(_worldSeed, _purpose, id)));
     }
 }
 

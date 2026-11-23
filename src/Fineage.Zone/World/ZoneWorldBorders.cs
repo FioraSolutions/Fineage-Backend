@@ -53,8 +53,26 @@ public sealed partial class ZoneWorld
         if (_bordersPublished && !_byId.BordersPending)
             return;
         _borders.Publish(tick.Tick, _byId.BorderMembers(BorderReach)
-            .Select(r => (r.Region, (IReadOnlyList<ZonePresence>)r.Members.ConvertAll(PresenceOf))));
+            .Select(r => (r.Region, BorderPresence(r.Region, r.Members))));
         _bordersPublished = true;
+    }
+
+    readonly Dictionary<RegionId, (List<ZoneEntity> Members, IReadOnlyList<ZonePresence> Presence)> _borderPresence = [];
+
+    /// <summary>
+    /// A clean region hands back the same member list; when it holds no player its presences cannot have changed
+    /// (no member relocated, and <see cref="ZonePresence.AggroTarget"/> is false for every non-player), so the
+    /// previous conversion is reused. Any republish used to re-convert every border entity of every region.
+    /// </summary>
+    IReadOnlyList<ZonePresence> BorderPresence(RegionId region, List<ZoneEntity> members)
+    {
+        if (_borderPresence.TryGetValue(region, out var cached) && ReferenceEquals(cached.Members, members)
+            && !members.Exists(static m => m.Kind == ZoneEntityKind.Player))
+            return cached.Presence;
+
+        IReadOnlyList<ZonePresence> presence = members.ConvertAll(PresenceOf);
+        _borderPresence[region] = (members, presence);
+        return presence;
     }
 
     void CollectAggression(RegionWorkCollector work)
