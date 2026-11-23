@@ -10,9 +10,14 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     readonly HashSet<RegionId> _playerActiveRegions = [];
+    readonly Queue<int> _regionWakeQueue = [];
+    readonly HashSet<int> _regionWakeQueued = [];
 
     /// <summary>Regions with at least one player in range of their tile (test/diagnostics).</summary>
     internal IReadOnlyCollection<RegionId> PlayerActiveRegions => _playerActiveRegions;
+
+    /// <summary>NPCs waiting for a budgeted <see cref="TrackThink"/> after their tile woke (tests/diagnostics).</summary>
+    internal int PendingRegionWakeCount => _regionWakeQueue.Count;
 
     /// <summary>How far past a tile edge we still activate neighbours (one map tile).</summary>
     const int RegionActivationPad = GridRegionPartition.MapTileSize;
@@ -63,7 +68,39 @@ public sealed partial class ZoneWorld
         foreach (int id in container.Members.ToArray())
         {
             if (_byId.TryGetValue(id, out var entity))
-                TrackThink(entity);
+                QueueRegionWake(entity);
+        }
+    }
+
+    void QueueRegionWake(ZoneEntity npc)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
+            return;
+        if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+            return;
+        if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
+            return;
+        if (!_regionWakeQueued.Add(npc.ObjectId))
+            return;
+        _regionWakeQueue.Enqueue(npc.ObjectId);
+    }
+
+    /// <summary>Drains the wake queue once per combat tick before random-walk collect.</summary>
+    void DrainRegionWakeBudget()
+    {
+        int budget = ZoneSimulationSettings.RegionWakeBudgetPerTick;
+        while (budget > 0 && _regionWakeQueue.Count > 0)
+        {
+            int id = _regionWakeQueue.Dequeue();
+            _regionWakeQueued.Remove(id);
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
+            if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
+                continue;
+            if (!NpcRegionAwake(npc))
+                continue;
+            TrackThink(npc);
+            budget--;
         }
     }
 

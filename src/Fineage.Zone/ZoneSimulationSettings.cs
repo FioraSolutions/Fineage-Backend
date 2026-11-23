@@ -106,6 +106,13 @@ public static class ZoneSimulationSettings
     /// </summary>
     public static int EnterLoadConcurrency => ReadIntStrict("FINEAGE_ZONE_ENTER_LOAD_CONCURRENCY", 8, min: 1, max: 256);
 
+    /// <summary>
+    /// How many NPCs may join the think set per step when player tiles wake regions
+    /// (<c>FINEAGE_ZONE_REGION_WAKE_BUDGET</c>, default 128).
+    /// </summary>
+    public static int RegionWakeBudgetPerTick =>
+        ReadInt("FINEAGE_ZONE_REGION_WAKE_BUDGET", 128, min: 1, max: 10_000);
+
     public static IRegionExecutor RegionExecutor(int workers) =>
         workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);
 
