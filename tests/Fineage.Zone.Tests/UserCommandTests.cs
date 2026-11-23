@@ -14,7 +14,7 @@ public sealed class UserCommandTests
     {
         var back = NetCodec.DecodeBypassUserCmd(NetCodec.EncodeBypassUserCmd(new BypassUserCmdNetMsg { CommandId = UserCommandProtocol.Unstuck }));
         Assert.Equal(UserCommandProtocol.Unstuck, back.CommandId);
-        Assert.Equal(0x03E2, NetOpcode.BypassUserCmd);
+        Assert.Equal(0x03E4, NetOpcode.BypassUserCmd);
     }
 
     [Fact]

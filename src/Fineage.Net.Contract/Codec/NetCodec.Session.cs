@@ -103,6 +103,18 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeRestartResponse(RestartResponseMsg m) => Write(w =>
+        {
+            w.WriteByte((byte)(m.Ok ? 1 : 0));
+            w.WriteString(m.Code);
+        });
+
+        public static RestartResponseMsg DecodeRestartResponse(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new RestartResponseMsg { Ok = r.ReadByte() != 0, Code = r.ReadString() };
+        }
+
         public static byte[] EncodeListCharacters(ListCharactersMsg _) => Array.Empty<byte>();
 
         public static ListCharactersMsg DecodeListCharacters(ReadOnlySpan<byte> _) => new();
