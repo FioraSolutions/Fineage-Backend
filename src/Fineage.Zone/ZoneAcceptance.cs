@@ -244,8 +244,13 @@ public static class ZoneAcceptance
                 if (envelope.Opcode == expected)
                     return envelope;
 
-                Require(envelope.Opcode != NetOpcode.Reject,
-                    $"unexpected reject while waiting for 0x{expected:X4}: {NetCodec.DecodeReject(envelope.Payload).Code}");
+                // Decode only a real Reject. The message argument of Require would run for every skipped
+                // fanout frame, and those payloads are not reject text.
+                if (envelope.Opcode == NetOpcode.Reject)
+                {
+                    string code = NetCodec.DecodeReject(envelope.Payload).Code;
+                    Require(false, $"unexpected reject while waiting for 0x{expected:X4}: {code}");
+                }
             }
         }
 
