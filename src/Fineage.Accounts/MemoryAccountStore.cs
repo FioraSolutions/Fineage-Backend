@@ -38,8 +38,18 @@ public sealed partial class MemoryAccountStore : IAccountStore
         set => _afterSaveSnapshot = value;
     }
 
-    /// <summary>When false, mutations skip <see cref="AfterSaveSnapshot"/> (Postgres hot paths).</summary>
-    public bool EmitSnapshots { get; set; } = true;
+    /// <summary>
+    /// When false, mutations on the current thread skip <see cref="AfterSaveSnapshot"/> and do not serialize the
+    /// store at all (Postgres hot paths). Per thread: the flag used to be one shared field flipped outside the store
+    /// lock, so one thread's silent mutation could silence or un-silence another thread's.
+    /// </summary>
+    public bool EmitSnapshots
+    {
+        get => !t_silent;
+        set => t_silent = !value;
+    }
+
+    [ThreadStatic] static bool t_silent;
 
     public static MemoryAccountStore InMemory() => new();
 

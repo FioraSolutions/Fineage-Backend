@@ -525,6 +525,12 @@ public sealed partial class ZoneWorld
     /// Mobius <c>doAttackHitByPole</c>: up to <c>AtkCountMax - 1</c> extra targets in melee reach,
     /// skipped entirely while <c>PolearmSingleTarget</c> (Focus Attack) is on the bar.
     /// </summary>
+    /// <summary>
+    /// Mobius polearm splash: up to <c>AtkCountMax - 1</c> extra targets in reach. Candidates come from the
+    /// attacker's visible set (a splash target must be visible anyway) in ascending object id, and reach uses the
+    /// swing's own <paramref name="ps"/>. This used to walk every entity in the world and rebuild the attacker's full
+    /// stat line per candidate: ~38k stat rebuilds per pole swing at 200 players, the 200-300 ms attack ticks.
+    /// </summary>
     void QueuePoleSplashHits(ZoneEntity player, ZoneEntity primary, PlayerCombatStats ps, bool soulshot, long due)
     {
         if (ps.Weapon != WeaponType.Pole || HasPolearmSingleTarget(player))
@@ -532,14 +538,23 @@ public sealed partial class ZoneWorld
         int extra = Math.Max(0, ps.AtkCountMax - 1);
         if (extra <= 0)
             return;
+        var visible = t_splashCandidates ??= [];
+        visible.Clear();
+        _aoi.CollectVisible(player.ObjectId, visible);
+        visible.Sort();
+        int attackerRadius = CollisionRadiusOf(player);
         int queued = 0;
-        foreach (var entity in _byId.Values)
+        foreach (int id in visible)
         {
             if (queued >= extra)
                 break;
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
             if (ReferenceEquals(entity, primary) || ReferenceEquals(entity, player))
                 continue;
             if (entity.Dead || entity.CurHp <= 0)
+                continue;
+            if (!SameInstance(player.ObjectId, entity.ObjectId))
                 continue;
             if (!IsAttackable(player, entity))
                 continue;
@@ -547,9 +562,8 @@ public sealed partial class ZoneWorld
                 (!PlayerAutoAttackable(player, entity) || (player.Session != null &&
                     PeacePlayableRefused(player.Session, player, entity, notify: false))))
                 continue;
-            if (!ZoneCombat.Within(player.X, player.Y, entity.X, entity.Y, AttackReachAgainst(player, entity)))
-                continue;
-            if (!VisibleTo(player.ObjectId, entity.ObjectId))
+            int reach = ZoneCombat.AttackReach(ps.AttackRange, attackerRadius, CollisionRadiusOf(entity));
+            if (!ZoneCombat.Within(player.X, player.Y, entity.X, entity.Y, reach))
                 continue;
             var (damage, flags) = RollPlayerMelee(player, ps, entity, soulshot);
             QueueAttackerDamageLine(player, entity, damage, flags);
@@ -558,6 +572,7 @@ public sealed partial class ZoneWorld
         }
     }
 
+    [ThreadStatic] static List<int>? t_splashCandidates;
 
     /// <summary>
     /// Mobius Confuse (instant): chance-gated CONFUSED slot, then the victim attacks a random nearby creature.

@@ -108,10 +108,17 @@ public static class ZoneSimulationSettings
 
     /// <summary>
     /// How many NPCs may join the think set per step when player tiles wake regions
-    /// (<c>FINEAGE_ZONE_REGION_WAKE_BUDGET</c>, default 128).
+    /// (<c>FINEAGE_ZONE_REGION_WAKE_BUDGET</c>, default 256). Set but not an integer in 1..10000 throws.
     /// </summary>
     public static int RegionWakeBudgetPerTick =>
-        ReadInt("FINEAGE_ZONE_REGION_WAKE_BUDGET", 128, min: 1, max: 10_000);
+        ReadIntStrict("FINEAGE_ZONE_REGION_WAKE_BUDGET", 256, min: 1, max: 10_000);
+
+    /// <summary>
+    /// How many minion masters may spawn their privates per step (<c>FINEAGE_ZONE_PRIVATES_SPAWN_BUDGET</c>, default 16).
+    /// The rest wait in FIFO order for the next step. Set but not an integer in 1..10000 throws.
+    /// </summary>
+    public static int PrivatesSpawnBudgetPerTick =>
+        ReadIntStrict("FINEAGE_ZONE_PRIVATES_SPAWN_BUDGET", 16, min: 1, max: 10_000);
 
     public static IRegionExecutor RegionExecutor(int workers) =>
         workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);

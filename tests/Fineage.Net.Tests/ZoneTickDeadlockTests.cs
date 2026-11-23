@@ -77,7 +77,8 @@ public sealed class ZoneTickDeadlockTests
         byte[] heavy = new byte[40_000];
 
         var elapsed = Stopwatch.StartNew();
-        for (int n = 0; n < 8; n++)
+        // 40 x 40 KB is past the 1 MiB hard limit even if the stripe worker keeps up with the producer.
+        for (int n = 0; n < 40; n++)
             stripes.EnqueueCritical(slowHandle, NetOpcode.SystemMessage, heavy);
         stripes.EnqueueTrySend(healthyHandle, NetOpcode.SystemMessage, [7]);
         elapsed.Stop();
@@ -117,7 +118,8 @@ public sealed class ZoneTickDeadlockTests
     [Fact]
     public void Second_reliable_batch_rejects_while_the_first_is_queued_or_in_flight()
     {
-        var mailbox = new OutboundMailbox(maxFrames: 4096, maxBytes: 64 * 1024, connectionId: 1, endpoint: "inflight");
+        // Soft == hard: the second 40 KB reliable frame has nowhere to go while the first is queued or in flight.
+        var mailbox = new OutboundMailbox(maxFrames: 4096, maxBytes: 64 * 1024, connectionId: 1, endpoint: "inflight", hardBytes: 64 * 1024);
         Assert.Equal(MailboxAdmit.Accepted, mailbox.TryAdmitBatch([Heavy()], forceWholeBatch: false));
         Assert.Equal(MailboxAdmit.Rejected, mailbox.TryAdmitBatch([Heavy()], forceWholeBatch: false));
 
@@ -133,7 +135,7 @@ public sealed class ZoneTickDeadlockTests
     [Fact]
     public void One_caller_batch_over_the_byte_cap_is_kept_when_nothing_is_held()
     {
-        var mailbox = new OutboundMailbox(maxFrames: 4096, maxBytes: 64 * 1024, connectionId: 2, endpoint: "one-burst");
+        var mailbox = new OutboundMailbox(maxFrames: 4096, maxBytes: 64 * 1024, connectionId: 2, endpoint: "one-burst", hardBytes: 64 * 1024);
         var batch = new[] { Heavy(), Heavy(), Heavy() };
         Assert.Equal(MailboxAdmit.Accepted, mailbox.TryAdmitBatch(batch, forceWholeBatch: false));
         var drained = new List<PacketEnvelope>();

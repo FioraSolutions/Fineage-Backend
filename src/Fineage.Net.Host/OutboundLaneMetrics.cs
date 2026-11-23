@@ -19,6 +19,13 @@ static class OutboundLaneMetrics
     public static void Evicted(OutboundLane lane, int count = 1) =>
         FineageTelemetry.OutboundLaneEvicted.Add(count, Tag(lane));
 
+    /// <summary>Bytes removed by coalescing (movement) or shedding (visual) to keep a mailbox inside its budget.</summary>
+    public static void Shed(OutboundLane lane, int bytes)
+    {
+        if (bytes > 0)
+            FineageTelemetry.OutboundShedBytes.Add(bytes, Tag(lane));
+    }
+
     /// <summary>Movement and visual eviction can be hot. Snapshot replace and reliable overflow log on their own.</summary>
     public static void LogLimited(string message)
     {

@@ -9,8 +9,18 @@ public readonly record struct LedgerAdjustmentNotice(
 /// <summary>Ledger alignment policy: logging, metrics, and optional strict refusal.</summary>
 public static class LedgerAdjustments
 {
-    /// <summary>When true, any alignment adjustment throws instead of posting to the journal.</summary>
-    public static bool Strict { get; set; }
+    /// <summary>
+    /// When true, any alignment adjustment on the current async flow throws instead of posting to the journal.
+    /// Scoped to the flow (<see cref="AsyncLocal{T}"/>): as one process-wide flag, a test that turned it on made
+    /// adjustments in every other test running in parallel throw.
+    /// </summary>
+    public static bool Strict
+    {
+        get => StrictFlow.Value;
+        set => StrictFlow.Value = value;
+    }
+
+    static readonly AsyncLocal<bool> StrictFlow = new();
 
     public static event Action<LedgerAdjustmentNotice>? Adjusted;
 
