@@ -1,10 +1,9 @@
-using Fineage.Accounts;
 using Fineage.Game;
 
-namespace Fineage.Login;
+namespace Fineage.Accounts;
 
-/// <summary>Vitals and paperdoll shown on CharSelect, like Mobius CharSelectionInfo. Falls back to class level-1 maxima when nothing is saved.</summary>
-readonly record struct CharSelectStats(
+/// <summary>Vitals and paperdoll shown on CharSelect. Falls back to class level-1 maxima when nothing is saved.</summary>
+public readonly record struct CharSelectStats(
     int CurHp,
     int MaxHp,
     int CurMp,

@@ -16,7 +16,7 @@ public sealed class CrystallizeTests
             new CrystallizeItemRequestMsg { ObjectId = 42, Count = 3 }));
         Assert.Equal(42, back.ObjectId);
         Assert.Equal(3, back.Count);
-        Assert.Equal(0x03E3, NetOpcode.RequestCrystallizeItem);
+        Assert.Equal(0x03E5, NetOpcode.RequestCrystallizeItem);
     }
 
     [Fact]
