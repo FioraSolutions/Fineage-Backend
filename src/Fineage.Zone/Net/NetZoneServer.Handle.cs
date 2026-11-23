@@ -53,6 +53,10 @@ public sealed partial class NetZoneServer
                         case NetOpcode.EnterWorld:
                             await _session.OnEnterAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestRestart:
+                            await _session.OnRestartAsync(conn, zoneSession, self, registeredObjectId, ct).ConfigureAwait(false);
+                            registeredObjectId = 0;
+                            break;
                         case NetOpcode.MoveInput:
                             await _movement.OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;

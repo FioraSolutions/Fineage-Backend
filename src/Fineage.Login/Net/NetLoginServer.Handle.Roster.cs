@@ -206,42 +206,38 @@ public sealed partial class NetLoginServer
 
     CharacterSummaryNet ToSummary(CharacterRecord c, int slot, DateTimeOffset? now = null, int? lastPlayedId = null)
     {
-        now ??= _clock();
-        lastPlayedId ??= 0;
-        var point = c.HasPosition
-            ? new Fineage.Protocol.ClassSpawn.Point(c.X, c.Y, c.Z)
-            : ClassTemplates.Preview(c.ClassId);
-        var stats = CharSelectStats.For(c);
-        int deleteSeconds = c.DeleteSecondsLeft(now.Value);
-        return new CharacterSummaryNet
-        {
-            CharacterId = c.Id,
-            Slot = slot,
-            Name = c.Name,
-            ClassId = c.ClassId,
-            Race = c.Race,
-            Sex = c.Sex,
-            Level = c.Level <= 0 ? 1 : c.Level,
-            Hp = stats.CurHp,
-            MaxHp = stats.MaxHp,
-            Mp = stats.CurMp,
-            MaxMp = stats.MaxMp,
-            HairStyle = c.HairStyle,
-            HairColor = c.HairColor,
-            Face = c.Face,
-            PendingDelete = deleteSeconds > 0 || c.IsPendingDelete,
-            X = point.X,
-            Y = point.Y,
-            Z = point.Z,
-            DeleteSecondsLeft = deleteSeconds,
-            IsLastPlayed = c.Id == lastPlayedId.Value,
-            CurCp = stats.CurCp,
-            MaxCp = stats.MaxCp,
-            Exp = c.Exp,
-            Sp = c.Sp,
-            Karma = c.Karma,
-            WeaponItemId = stats.WeaponItemId,
-            Paperdoll = stats.Paperdoll
-        };
+        var row = LobbyRoster.Row(c, slot, now ?? _clock(), lastPlayedId ?? 0);
+        return ToNet(row);
     }
+
+    internal static CharacterSummaryNet ToNet(LobbyCharacterRow row) => new()
+    {
+        CharacterId = row.CharacterId,
+        Slot = row.Slot,
+        Name = row.Name,
+        ClassId = row.ClassId,
+        Race = row.Race,
+        Sex = row.Sex,
+        Level = row.Level,
+        Hp = row.Hp,
+        MaxHp = row.MaxHp,
+        Mp = row.Mp,
+        MaxMp = row.MaxMp,
+        HairStyle = row.HairStyle,
+        HairColor = row.HairColor,
+        Face = row.Face,
+        PendingDelete = row.PendingDelete,
+        X = row.X,
+        Y = row.Y,
+        Z = row.Z,
+        DeleteSecondsLeft = row.DeleteSecondsLeft,
+        IsLastPlayed = row.IsLastPlayed,
+        CurCp = row.CurCp,
+        MaxCp = row.MaxCp,
+        Exp = row.Exp,
+        Sp = row.Sp,
+        Karma = row.Karma,
+        WeaponItemId = row.WeaponItemId,
+        Paperdoll = row.Paperdoll
+    };
 }
