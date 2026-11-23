@@ -361,6 +361,8 @@ sealed class ZoneNpcAggroPayload
     public long LastAiTickMs { get; set; }
     /// <summary>Mobius <c>AttackableThinkTaskManager</c> next <c>thinkActive</c> at this unix ms.</summary>
     public long NextThinkMs { get; set; }
+    /// <summary>Wheel slot this NPC is queued in. −1 none, −2 the every-tick job list.</summary>
+    public int ThinkWheelSlot { get; set; } = -1;
     /// <summary>Last geo <c>getValidLocation</c> for idle wander, keyed to <see cref="WanderGeoFromX"/>/<see cref="WanderGeoFromY"/>.</summary>
     public int WanderGeoFromX { get; set; }
     public int WanderGeoFromY { get; set; }

@@ -7,30 +7,42 @@ namespace Fineage.Zone.World;
 /// <summary>Mobius <c>AttackableThinkTaskManager</c>: per-NPC <c>thinkActive</c> on a fixed interval in player-active regions.</summary>
 public sealed partial class ZoneWorld
 {
+    /// <summary>One slot per simulation step. The idle interval is 1 s, so 16 slots cover a short stall without wrapping onto a live bucket.</summary>
+    const int ThinkWheelSlots = 16;
+    /// <summary>Sentinel <see cref="ZoneEntity.ThinkWheelSlot"/> for a chase, return, or minion that is due every step.</summary>
+    const int ThinkUrgentSlot = -2;
+
+    readonly List<int>[] _thinkWheel = CreateThinkWheel();
+
+    static List<int>[] CreateThinkWheel()
+    {
+        var wheel = new List<int>[ThinkWheelSlots];
+        for (int i = 0; i < wheel.Length; i++)
+            wheel[i] = [];
+        return wheel;
+    }
+    readonly List<int> _thinkUrgent = [];
+    readonly List<int> _thinkReschedule = [];
+    readonly object _thinkRescheduleLock = new();
+    long _thinkDrainedThroughMs = long.MinValue;
+
     /// <summary>Combat-tick test hook: the same prep + think the region stage runs in production.</summary>
     internal void RunNpcThinkTick(long now)
     {
-        RefreshPlayerActiveRegions();
-        DrainRegionWakeBudget();
-        TickWalkingRoutes(now);
-        TickBoats(now);
-        if (_byId.CountOf(ActiveSets.Thinking) == 0)
-            return;
         var work = new RegionWorkCollector();
-        _byId.Collect(ActiveSets.Thinking, work);
+        CollectNpcThink(new TickContext(0, now, now), work);
         foreach (var batch in work.Drain())
             ThinkActiveInRegion(batch.Region, batch.ObjectIds, now);
     }
 
     void CollectNpcThink(TickContext tick, RegionWorkCollector work)
     {
+        ReapThinkReschedule();
         RefreshPlayerActiveRegions();
         DrainRegionWakeBudget();
         TickWalkingRoutes(tick.NowUnixMs);
         TickBoats(tick.NowUnixMs);
-        if (_byId.CountOf(ActiveSets.Thinking) == 0)
-            return;
-        _byId.Collect(ActiveSets.Thinking, work);
+        CollectDueThinks(tick.NowUnixMs, work);
     }
 
     void ThinkActiveInRegion(RegionId region, IReadOnlyList<int> npcIds, long now)
@@ -41,26 +53,210 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var npc))
                 continue;
+            bool reschedule = (npc.ActiveSets & ActiveSets.Thinking) != 0;
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
             {
+                DequeueThink(npc);
                 _byId.Leave(npc, ActiveSets.Thinking);
                 continue;
             }
             if (npc.WalkingRouteName != null || npc.IsBoat)
+            {
+                if (reschedule)
+                    QueueThinkReschedule(id);
                 continue;
+            }
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
+            {
+                if (reschedule)
+                    QueueThinkReschedule(id);
                 continue;
+            }
 
-            if (now < npc.NextThinkMs)
+            // The interval gates idle wander. A chase, a walk home, or a minion following its leader
+            // is already a job and does not wait for the phase.
+            bool idle = !IsThinkJob(npc);
+            if (idle && now < npc.NextThinkMs)
+            {
+                QueueThinkReschedule(id);
                 continue;
-            npc.NextThinkMs = now + RandomWalkThinkIntervalMs;
+            }
+            if (idle)
+                npc.NextThinkMs = now + RandomWalkThinkIntervalMs;
 
             ThinkActiveNpc(npc, now, drift, driftSq);
+            if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
+                QueueThinkReschedule(id);
+        }
+    }
+
+    static bool IsThinkJob(ZoneEntity npc) =>
+        npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome || npc.LeaderObjectId != 0;
+
+    /// <summary>
+    /// A chase, a walk home, or a minion follow is due on the next think, not when its idle bucket comes around.
+    /// From a region body this only records the id; the scheduler thread owns the wheel.
+    /// </summary>
+    /// <summary>Tests: force the next think collection to run AI for this NPC.</summary>
+    internal void BumpNpcThinkForTests(ZoneEntity npc)
+    {
+        using (_affinity.Step())
+        {
+            npc.NextThinkMs = 0;
+            if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
+                TrackThink(npc);
+            else
+                EnqueueThink(npc);
+        }
+    }
+
+    internal void NoteNpcThinkJob(ZoneEntity npc)
+    {
+        if (RegionBodyScope.Of(this) != null)
+        {
+            QueueThinkReschedule(npc.ObjectId);
+            return;
+        }
+
+        if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
+            TrackThink(npc);
+        else
+            EnqueueThink(npc);
+    }
+
+    void QueueThinkReschedule(int objectId)
+    {
+        lock (_thinkRescheduleLock)
+            _thinkReschedule.Add(objectId);
+    }
+
+    void ReapThinkReschedule()
+    {
+        int[] pending;
+        lock (_thinkRescheduleLock)
+        {
+            if (_thinkReschedule.Count == 0)
+                return;
+            pending = _thinkReschedule.ToArray();
+            _thinkReschedule.Clear();
+        }
+
+        foreach (int id in pending)
+        {
+            if (!_byId.TryGetValue(id, out var npc) || (npc.ActiveSets & ActiveSets.Thinking) == 0)
+                continue;
+            EnqueueThink(npc);
+        }
+    }
+
+    void EnqueueThink(ZoneEntity npc)
+    {
+        DequeueThink(npc);
+        if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
+            return;
+        long now = NowUnixMs();
+        if (IsThinkJob(npc) || npc.NextThinkMs <= now)
+        {
+            _thinkUrgent.Add(npc.ObjectId);
+            npc.ThinkWheelSlot = ThinkUrgentSlot;
+            return;
+        }
+
+        int slot = ThinkSlot(npc.NextThinkMs);
+        _thinkWheel[slot].Add(npc.ObjectId);
+        npc.ThinkWheelSlot = slot;
+    }
+
+    void DequeueThink(ZoneEntity npc)
+    {
+        int slot = npc.ThinkWheelSlot;
+        if (slot < 0 && slot != ThinkUrgentSlot)
+            return;
+        if (slot == ThinkUrgentSlot)
+            _thinkUrgent.Remove(npc.ObjectId);
+        else if ((uint)slot < (uint)ThinkWheelSlots)
+            _thinkWheel[slot].Remove(npc.ObjectId);
+        npc.ThinkWheelSlot = -1;
+    }
+
+    static int ThinkSlot(long unixMs)
+    {
+        int step = ZoneSimulationSettings.StepMilliseconds;
+        if (step < 1)
+            step = 1;
+        long quot = Math.DivRem(unixMs, step, out long rem);
+        if (rem < 0)
+            quot--;
+        int slot = (int)(quot % ThinkWheelSlots);
+        return slot < 0 ? slot + ThinkWheelSlots : slot;
+    }
+
+    /// <summary>
+    /// Drains the buckets whose window has closed by <paramref name="now"/>, plus every job.
+    /// An idle NPC is visited on the step its phase falls in, not on every step the region stays awake.
+    /// </summary>
+    void CollectDueThinks(long now, RegionWorkCollector work)
+    {
+        int step = ZoneSimulationSettings.StepMilliseconds;
+        if (step < 1)
+            step = 1;
+        if (_thinkDrainedThroughMs == long.MinValue)
+            _thinkDrainedThroughMs = now - step;
+
+        long cursor = _thinkDrainedThroughMs;
+        int guard = 0;
+        while (cursor + step <= now && guard < ThinkWheelSlots)
+        {
+            cursor += step;
+            guard++;
+            DrainThinkSlot(ThinkSlot(cursor - step), now, work);
+        }
+
+        if (guard >= ThinkWheelSlots && cursor + step <= now)
+        {
+            for (int slot = 0; slot < ThinkWheelSlots; slot++)
+                DrainThinkSlot(slot, now, work);
+            cursor = now;
+        }
+
+        _thinkDrainedThroughMs = cursor;
+        DrainThinkList(_thinkUrgent, now, work);
+    }
+
+    void DrainThinkSlot(int slot, long now, RegionWorkCollector work) =>
+        DrainThinkList(_thinkWheel[slot], now, work);
+
+    void DrainThinkList(List<int> slot, long now, RegionWorkCollector work)
+    {
+        if (slot.Count == 0)
+            return;
+        var batch = slot.ToArray();
+        slot.Clear();
+        foreach (int id in batch)
+        {
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
+            npc.ThinkWheelSlot = -1;
+            if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
+                continue;
+            if (!IsThinkJob(npc) && npc.NextThinkMs > now)
+            {
+                EnqueueThink(npc);
+                continue;
+            }
+
+            if (_byId.TryOwnerOf(npc.ObjectId, out var owner))
+                work.Add(owner.Region, id);
+            else
+                EnqueueThink(npc);
         }
     }
 
     void ThinkActiveNpc(ZoneEntity npc, long now, int drift, long driftSq)
     {
+        // Privates spawn on the master's own think phase. Doing it in TrackThink put every
+        // minion fan-out on the tick the region woke.
+        SpawnPrivates(npc);
         if (npc.GlobalAggro != 0)
             npc.GlobalAggro += npc.GlobalAggro < 0 ? 1 : -1;
         if (npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome)

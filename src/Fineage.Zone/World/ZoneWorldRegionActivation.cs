@@ -137,11 +137,13 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Stagger the first think so active mobs do not pile into one tick.</summary>
+    /// <summary>
+    /// One phase in <c>(now, now + interval]</c>. A uniform draw keeps each mob on the same step slice
+    /// across later intervals instead of piling onto an activation tick.
+    /// </summary>
     void ScheduleNextThink(ZoneEntity npc, long now)
     {
-        int spread = RandomWalkThinkIntervalMs / 2;
-        npc.NextThinkMs = now + spread + RndBound(npc, Math.Max(1, spread));
+        npc.NextThinkMs = now + 1 + RndBound(npc, RandomWalkThinkIntervalMs);
     }
 
     internal const int RandomWalkThinkIntervalMs = 1000;
