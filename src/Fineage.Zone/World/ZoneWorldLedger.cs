@@ -101,7 +101,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     IReadOnlyList<StoredItem>? QueuedFreight(int characterId)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
             {

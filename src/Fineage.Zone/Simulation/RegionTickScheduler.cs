@@ -32,6 +32,7 @@ public sealed class RegionTickScheduler
     readonly IRegionScopes _scopes;
     readonly ConcurrentDictionary<long, RegionBodyTrace> _inFlight = new();
     long _inFlightSeq;
+    string? _currentWork;
 
     [ThreadStatic] static RegionId? t_body;
 
@@ -44,6 +45,14 @@ public sealed class RegionTickScheduler
     /// </summary>
     public IReadOnlyList<RegionBodyTrace> InFlightRegionBodies =>
         _inFlight.Values.OrderBy(t => t.Stage, StringComparer.Ordinal).ThenBy(t => t.Region).ToList();
+
+    /// <summary>
+    /// The stage slice the scheduler thread is in: the stage name, then <c>collect</c>, <c>scopes</c>,
+    /// <c>barrier</c>, or <c>commit</c> for a region stage. Null between stages. The step watchdog reads it.
+    /// </summary>
+    public string? CurrentWork => Volatile.Read(ref _currentWork);
+
+    internal void NoteWork(string? work) => Volatile.Write(ref _currentWork, work);
 
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
     /// <param name="executor">Runs the regions of stages that allow it (<see cref="IRegionStage.Parallel"/>).</param>
@@ -231,6 +240,7 @@ public sealed class RegionTickScheduler
         {
             long started = Stopwatch.GetTimestamp();
             StageFailure[] failures = [];
+            owner.NoteWork(Name);
             try
             {
                 run(tick);
@@ -240,6 +250,7 @@ public sealed class RegionTickScheduler
                 failures = [new StageFailure(Name, tick.Tick, "world", ex)];
             }
 
+            owner.NoteWork(null);
             owner._observer.StageCompleted(Name, tick, 1, 0, Stopwatch.GetElapsedTime(started));
             return failures;
         }
@@ -252,6 +263,7 @@ public sealed class RegionTickScheduler
         public override IReadOnlyList<StageFailure> Run(RegionTickScheduler owner, TickContext tick)
         {
             long started = Stopwatch.GetTimestamp();
+            owner.NoteWork(Name + " collect");
             try
             {
                 Stage.Collect(tick, owner._collector);
@@ -259,12 +271,14 @@ public sealed class RegionTickScheduler
             catch (Exception ex)
             {
                 owner._collector.Drain();
+                owner.NoteWork(null);
                 owner._observer.StageCompleted(Name, tick, 0, 0, Stopwatch.GetElapsedTime(started));
                 return [new StageFailure(Name, tick.Tick, "collect", ex)];
             }
 
             var work = owner._collector.Drain();
             var scopes = new IRegionScope[work.Count];
+            owner.NoteWork(Name + " scopes");
             try
             {
                 for (int i = 0; i < work.Count; i++)
@@ -272,6 +286,7 @@ public sealed class RegionTickScheduler
             }
             catch (Exception ex)
             {
+                owner.NoteWork(null);
                 owner._observer.StageCompleted(Name, tick, 0, 0, Stopwatch.GetElapsedTime(started));
                 return [new StageFailure(Name, tick.Tick, "scopes", ex)];
             }
@@ -279,6 +294,7 @@ public sealed class RegionTickScheduler
             // One slot per region keeps the failure order deterministic under the parallel executor.
             var errors = new Exception?[work.Count];
             var executor = Stage.Parallel ? owner._executor : SequentialRegionExecutor.Instance;
+            owner.NoteWork(Name + " barrier");
             executor.Run(work.Count, i =>
             {
                 var outer = t_body;
@@ -306,6 +322,7 @@ public sealed class RegionTickScheduler
 
             var failures = new List<StageFailure>();
             int entities = 0;
+            owner.NoteWork(Name + " commit");
             for (int i = 0; i < work.Count; i++)
             {
                 entities += work[i].ObjectIds.Count;
@@ -321,6 +338,7 @@ public sealed class RegionTickScheduler
                 }
             }
 
+            owner.NoteWork(null);
             owner._observer.StageCompleted(Name, tick, work.Count, entities, Stopwatch.GetElapsedTime(started));
             return failures;
         }

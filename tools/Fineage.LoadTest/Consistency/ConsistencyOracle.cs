@@ -158,13 +158,14 @@ public static class ConsistencyOracle
             }
         }
 
-        var snapshots = new Dictionary<int, IReadOnlyList<ObservedFrame>>(bots.Count);
-        foreach (var bot in bots)
-            snapshots[bot.BotId] = bot.ObservationLog.Snapshot();
+        // One pass over each bot's frame log. The combat check used to call Snapshot()
+        // (a full ToArray) from inside the per-watcher scan, which allocated until the
+        // report never got written after a 200-bot run.
+        var combat = IndexCombat(bots);
 
         foreach (var bot in bots)
-            CheckCombatFanout(bot, roster, watch, issues, snapshots);
-        CheckVisibilityLeaks(bots, roster, watch, issues, snapshots);
+            CheckCombatFanout(bot, roster, watch, issues, combat);
+        CheckVisibilityLeaks(bots, roster, watch, issues, combat);
 
         var samples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples).ToList();
         var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples).ToList();
@@ -192,49 +193,102 @@ public static class ConsistencyOracle
         };
     }
 
+    /// <summary>Attack and skill sightings decoded once per bot. Timestamps stay in log order.</summary>
+    sealed class CombatIndex
+    {
+        public List<(DateTimeOffset At, ulong Attacker)> Attacks { get; } = new();
+        public Dictionary<ulong, List<DateTimeOffset>> AttacksByAttacker { get; } = new();
+        public List<(DateTimeOffset At, int Actor, ushort Opcode)> Sightings { get; } = new();
+    }
+
+    static Dictionary<int, CombatIndex> IndexCombat(IReadOnlyList<FineageBotClient> bots)
+    {
+        var index = new Dictionary<int, CombatIndex>(bots.Count);
+        foreach (var bot in bots)
+        {
+            var ix = new CombatIndex();
+            foreach (var frame in bot.ObservationLog.Snapshot())
+            {
+                if (frame.Opcode == NetOpcode.AttackState)
+                {
+                    var attack = NetCodec.DecodeAttackState(frame.Payload);
+                    if (attack.Damage == 0 && attack.Flags != 0)
+                        continue;
+                    ix.Attacks.Add((frame.At, attack.AttackerValue));
+                    if (!ix.AttacksByAttacker.TryGetValue(attack.AttackerValue, out var times))
+                    {
+                        times = new List<DateTimeOffset>();
+                        ix.AttacksByAttacker[attack.AttackerValue] = times;
+                    }
+
+                    times.Add(frame.At);
+                    ix.Sightings.Add((frame.At, (int)attack.AttackerValue, frame.Opcode));
+                }
+                else if (frame.Opcode == NetOpcode.MagicSkillUse)
+                {
+                    ix.Sightings.Add((frame.At, NetCodec.DecodeMagicSkillUse(frame.Payload).CasterObjectId, frame.Opcode));
+                }
+            }
+
+            index[bot.BotId] = ix;
+        }
+
+        return index;
+    }
+
+    static bool SawAttackNear(List<DateTimeOffset> times, DateTimeOffset at)
+    {
+        long window = TimeSpan.FromMilliseconds(2500).Ticks;
+        long target = at.UtcTicks;
+        int lo = 0;
+        int hi = times.Count - 1;
+        int lower = times.Count;
+        while (lo <= hi)
+        {
+            int mid = lo + ((hi - lo) / 2);
+            if (times[mid].UtcTicks >= target - window)
+            {
+                lower = mid;
+                hi = mid - 1;
+            }
+            else
+            {
+                lo = mid + 1;
+            }
+        }
+
+        return lower < times.Count && times[lower].UtcTicks <= target + window;
+    }
+
     static void CheckCombatFanout(
         FineageBotClient observer,
         List<BotRosterEntry> roster,
         int watch,
         List<ConsistencyIssue> issues,
-        Dictionary<int, IReadOnlyList<ObservedFrame>> snapshots)
+        Dictionary<int, CombatIndex> combat)
     {
         int combatIssues = issues.Count(i => i.Kind == ConsistencyKind.MissingCombatFanout);
         if (combatIssues >= 25)
             return;
 
-        var events = new List<(DateTimeOffset At, ulong Attacker)>();
-        foreach (var frame in snapshots[observer.BotId])
+        var attacks = combat[observer.BotId].Attacks;
+        int eventCount = Math.Min(40, attacks.Count);
+        for (int e = 0; e < eventCount; e++)
         {
-            if (frame.Opcode != NetOpcode.AttackState)
-                continue;
-            var a = NetCodec.DecodeAttackState(frame.Payload);
-            if (a.Damage == 0 && a.Flags != 0)
-                continue;
-            events.Add((frame.At, a.AttackerValue));
-            if (events.Count >= 40)
-                break;
-        }
-
-        foreach (var (at, attackerVal) in events)
-        {
+            var (at, attackerVal) = attacks[e];
             int attackerOid = (int)attackerVal;
             var attackerEntry = roster.FirstOrDefault(r => r.ObjectId == attackerOid);
             if (attackerEntry == null)
                 continue;
 
-            foreach (var w in roster.Where(r => r.BotId != observer.BotId))
+            foreach (var w in roster)
             {
+                if (w.BotId == observer.BotId)
+                    continue;
                 if (Distance(w.X, w.Y, attackerEntry.X, attackerEntry.Y) > watch)
                     continue;
-                bool saw = snapshots[w.BotId].Any(f =>
-                {
-                    if (f.Opcode != NetOpcode.AttackState)
-                        return false;
-                    if (NetCodec.DecodeAttackState(f.Payload).AttackerValue != attackerVal)
-                        return false;
-                    return Math.Abs((f.At - at).TotalMilliseconds) <= 2500;
-                });
+                bool saw = combat[w.BotId].AttacksByAttacker.TryGetValue(attackerVal, out var times)
+                    && SawAttackNear(times, at);
                 if (!saw)
                 {
                     issues.Add(new ConsistencyIssue
@@ -257,20 +311,15 @@ public static class ConsistencyOracle
         List<BotRosterEntry> roster,
         int watch,
         List<ConsistencyIssue> issues,
-        Dictionary<int, IReadOnlyList<ObservedFrame>> snapshots)
+        Dictionary<int, CombatIndex> combat)
     {
         foreach (var bot in bots)
         {
             var entry = roster.FirstOrDefault(r => r.BotId == bot.BotId);
             if (entry == null)
                 continue;
-            foreach (var frame in snapshots[bot.BotId])
+            foreach (var (_, actorOid, opcode) in combat[bot.BotId].Sightings)
             {
-                if (frame.Opcode != NetOpcode.AttackState && frame.Opcode != NetOpcode.MagicSkillUse)
-                    continue;
-                int actorOid = frame.Opcode == NetOpcode.AttackState
-                    ? (int)NetCodec.DecodeAttackState(frame.Payload).AttackerValue
-                    : NetCodec.DecodeMagicSkillUse(frame.Payload).CasterObjectId;
                 var actor = roster.FirstOrDefault(r => r.ObjectId == actorOid);
                 if (actor == null)
                     continue;
@@ -282,7 +331,7 @@ public static class ConsistencyOracle
                         Kind = ConsistencyKind.VisibilityLeak,
                         ObserverBotId = bot.BotId,
                         SubjectObjectId = actorOid,
-                        Detail = $"{frame.Opcode} from distance {dist} (> {watch * 2})"
+                        Detail = $"{opcode} from distance {dist} (> {watch * 2})"
                     });
                 }
             }

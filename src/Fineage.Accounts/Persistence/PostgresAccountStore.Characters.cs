@@ -150,35 +150,34 @@ public sealed partial class PostgresAccountStore
 
         // One connection and one transaction: the ledger insert and every item replace commit together.
         // The in-memory store is not touched here. FindById reads character_items, so a rollback leaves both views.
-        lock (_persistGate)
+        // This write does not take _persistGate. Logout snapshot writers queue on that gate; the simulation
+        // thread's economy commit must not sit behind them. Postgres row locks order two writers of one character.
+        using var conn = _dataSource.OpenConnection();
+        using var tx = conn.BeginTransaction();
+        if (entries.Count > 0)
+            PostgresLedgerJournal.Write(conn, tx, entries);
+        foreach (var bag in bags)
         {
-            using var conn = _dataSource.OpenConnection();
-            using var tx = conn.BeginTransaction();
-            if (entries.Count > 0)
-                PostgresLedgerJournal.Write(conn, tx, entries);
-            foreach (var bag in bags)
+            if (bag.Inventory != null)
             {
-                if (bag.Inventory != null)
-                {
-                    CharacterInventory.Validate(bag.Inventory);
-                    NormalizedStoreWriter.ReplaceInventory(conn, tx, bag.CharacterId, bag.Inventory);
-                }
-
-                if (bag.Warehouse != null)
-                {
-                    CharacterInventory.Validate(bag.Warehouse);
-                    NormalizedStoreWriter.ReplaceWarehouse(conn, tx, bag.CharacterId, bag.Warehouse);
-                }
-
-                if (bag.Freight != null)
-                {
-                    CharacterInventory.Validate(bag.Freight);
-                    NormalizedStoreWriter.ReplaceFreight(conn, tx, bag.CharacterId, bag.Freight);
-                }
+                CharacterInventory.Validate(bag.Inventory);
+                NormalizedStoreWriter.ReplaceInventory(conn, tx, bag.CharacterId, bag.Inventory);
             }
 
-            tx.Commit();
+            if (bag.Warehouse != null)
+            {
+                CharacterInventory.Validate(bag.Warehouse);
+                NormalizedStoreWriter.ReplaceWarehouse(conn, tx, bag.CharacterId, bag.Warehouse);
+            }
+
+            if (bag.Freight != null)
+            {
+                CharacterInventory.Validate(bag.Freight);
+                NormalizedStoreWriter.ReplaceFreight(conn, tx, bag.CharacterId, bag.Freight);
+            }
         }
+
+        tx.Commit();
     }
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
