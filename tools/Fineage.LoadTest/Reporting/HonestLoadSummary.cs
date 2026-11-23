@@ -9,6 +9,25 @@ public sealed class HonestLoadSummary
     public List<string> DataErrors { get; init; } = [];
     public HonestWindow Warmup { get; init; } = new();
     public HonestWindow SteadyState { get; init; } = new();
+    /// <summary>Tick histogram over the whole run (final cumulative scrape), ramp included.</summary>
+    public TickWindowStats? TickOverall { get; init; }
+    /// <summary>Tick histogram delta from (first scrape with every bot in-world) + settle seconds to the last scrape.</summary>
+    public TickWindowStats? TickSteady { get; init; }
+}
+
+/// <summary>Tick quantiles for one window. <see cref="MaxMs"/> is exact when <see cref="MaxExact"/>, else the highest non-empty bucket ceiling.</summary>
+public sealed record TickWindowStats
+{
+    public DateTimeOffset From { get; init; }
+    public DateTimeOffset To { get; init; }
+    public string Rule { get; init; } = "";
+    public long Ticks { get; init; }
+    public double MeanMs { get; init; }
+    public double P50Ms { get; init; }
+    public double P99Ms { get; init; }
+    public double P999Ms { get; init; }
+    public double MaxMs { get; init; }
+    public bool MaxExact { get; init; }
 }
 
 public sealed record HonestWindow
@@ -61,12 +80,107 @@ public static class HonestLoadSummaryBuilder
         var warmupLegacy = legacyClientSamples.Where(s => s.ObservedAt < steadyAfter).Select(s => s.Milliseconds).OrderBy(v => v).ToList();
         var steadyLegacy = legacyClientSamples.Where(s => s.ObservedAt >= steadyAfter).Select(s => s.Milliseconds).OrderBy(v => v).ToList();
 
+        var (tickOverall, tickSteady) = BuildTickWindows(samples, rawScrapes, errors);
+
         return new HonestLoadSummary
         {
             DataErrors = errors,
+            TickOverall = tickOverall,
+            TickSteady = tickSteady,
             Warmup = FillClient(warmup, warmupAttack, warmupSkill, warmupLegacy),
             SteadyState = FillClient(steady, steadyAttack, steadySkill, steadyLegacy)
         };
+    }
+
+    /// <summary>Seconds after every bot is in-world before the steady tick window opens.</summary>
+    public const int SteadySettleSeconds = 30;
+
+    static (TickWindowStats? Overall, TickWindowStats? Steady) BuildTickWindows(
+        IReadOnlyList<PrometheusSample> samples,
+        IReadOnlyList<string> rawScrapes,
+        List<string> errors)
+    {
+        if (samples.Count == 0 || rawScrapes.Count != samples.Count)
+        {
+            errors.Add("tick_windows_unavailable: scrape samples and raw scrapes differ");
+            return (null, null);
+        }
+
+        int last = samples.Count - 1;
+        var all = PrometheusParser.ParseSingletonHistogram(rawScrapes[last], "fineage_tick_ms");
+        TickWindowStats? overall = all == null ? null : new TickWindowStats
+        {
+            From = samples[0].ScrapedAt,
+            To = samples[last].ScrapedAt,
+            Rule = "whole run, ramp included",
+            Ticks = all.Count,
+            MeanMs = all.Mean,
+            P50Ms = all.P50,
+            P99Ms = all.P99,
+            P999Ms = all.P999,
+            MaxMs = samples[last].TickTrueMaxMs > 0 ? samples[last].TickTrueMaxMs : all.Max,
+            MaxExact = samples[last].TickTrueMaxMs > 0
+        };
+        if (all == null)
+            errors.Add("tick_overall_histogram_unavailable");
+
+        int peakOnline = samples.Max(s => s.ZoneOnline);
+        int inWorld = -1;
+        for (int i = 0; i < samples.Count; i++)
+        {
+            if (peakOnline > 0 && samples[i].ZoneOnline >= peakOnline)
+            {
+                inWorld = i;
+                break;
+            }
+        }
+
+        if (inWorld < 0)
+        {
+            errors.Add("tick_steady_unavailable: fineage_zone_online never reported");
+            return (overall, null);
+        }
+
+        DateTimeOffset steadyFrom = samples[inWorld].ScrapedAt.AddSeconds(SteadySettleSeconds);
+        int first = -1;
+        for (int i = inWorld; i < samples.Count; i++)
+        {
+            if (samples[i].ScrapedAt >= steadyFrom)
+            {
+                first = i;
+                break;
+            }
+        }
+
+        if (first < 0 || first >= last)
+        {
+            errors.Add("tick_steady_unavailable: run ended before every bot was in-world + settle");
+            return (overall, null);
+        }
+
+        var delta = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_tick_ms");
+        if (delta == null)
+        {
+            errors.Add("tick_steady_histogram_delta_unavailable");
+            return (overall, null);
+        }
+
+        // The tick max gauge is a lifetime max: when it rose inside the window its final value is the window max.
+        bool exact = samples[last].TickTrueMaxMs > samples[first].TickTrueMaxMs;
+        var steady = new TickWindowStats
+        {
+            From = samples[first].ScrapedAt,
+            To = samples[last].ScrapedAt,
+            Rule = $"from first scrape with zone online = {peakOnline} ({samples[inWorld].ScrapedAt:HH:mm:ss}Z) + {SteadySettleSeconds} s",
+            Ticks = delta.Count,
+            MeanMs = delta.Mean,
+            P50Ms = delta.P50,
+            P99Ms = delta.P99,
+            P999Ms = delta.P999,
+            MaxMs = exact ? samples[last].TickTrueMaxMs : delta.Max,
+            MaxExact = exact
+        };
+        return (overall, steady);
     }
 
     static HonestWindow FillClient(

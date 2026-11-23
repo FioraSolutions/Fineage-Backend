@@ -45,6 +45,7 @@ public sealed partial class NetZoneServer
                             {
                                 if (registeredObjectId != 0 && registeredObjectId != zoneSession.ObjectId)
                                     _presence.Unregister(registeredObjectId, conn);
+                                conn.SetPeerLabel($"account={zoneSession.Account} char={zoneSession.Name}");
                                 _presence.Register(zoneSession.ObjectId, conn, self);
                                 registeredObjectId = zoneSession.ObjectId;
                             }

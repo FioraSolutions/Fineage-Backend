@@ -12,6 +12,23 @@ public sealed class RegionDirectoryTests
     static RegionId Cell(int x, int y = 0, int instance = 0) => new(instance, x, y);
 
     [Fact]
+    public void Dropping_an_emptied_region_drops_its_border_cache_and_a_recreated_region_republishes()
+    {
+        var directory = new RegionDirectory<Member>(Cells);
+        directory.Add(1, new Member(1, 990, 10));
+        var first = directory.BorderMembers(50).ToList();
+        Assert.Single(first);
+        Assert.Equal(1, directory.BorderCacheCount);
+
+        Assert.True(directory.Remove(1));
+        Assert.Equal(0, directory.BorderCacheCount);
+
+        directory.Add(2, new Member(2, 980, 20));
+        var again = directory.BorderMembers(50).ToList();
+        Assert.Equal(2, Assert.Single(Assert.Single(again).Members).ObjectId);
+    }
+
+    [Fact]
     public void Entities_are_owned_by_the_region_of_their_position()
     {
         var directory = new RegionDirectory<Member>(Cells);

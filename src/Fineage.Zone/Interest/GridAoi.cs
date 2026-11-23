@@ -63,8 +63,17 @@ public sealed class GridAoi : IAoi
         if (!_entityCell.TryGetValue(objectId, out long key))
             return [];
 
-        Unpack(key, out int gx, out int gy);
         var visible = new List<int>();
+        CollectVisible(objectId, visible);
+        return visible;
+    }
+
+    public void CollectVisible(int objectId, List<int> visible)
+    {
+        if (!_entityCell.TryGetValue(objectId, out long key))
+            return;
+
+        Unpack(key, out int gx, out int gy);
         for (int dy = -1; dy <= 1; dy++)
         {
             for (int dx = -1; dx <= 1; dx++)
@@ -78,8 +87,6 @@ public sealed class GridAoi : IAoi
                 }
             }
         }
-
-        return visible;
     }
 
     public bool StillKnown(int objectId, int otherId)

@@ -16,6 +16,9 @@ public interface IAoi
     /// <summary>Other ids visible to <paramref name="objectId"/>. Does not include itself.</summary>
     IReadOnlyCollection<int> GetVisible(int objectId);
 
+    /// <summary>Appends what <see cref="GetVisible"/> returns to <paramref name="into"/> without allocating a result.</summary>
+    void CollectVisible(int objectId, List<int> into) => into.AddRange(GetVisible(objectId));
+
     /// <summary>
     /// Mobius knownlist hysteresis (distanceToWatch &lt; distanceToForget): an id already known stays known
     /// until it is past the forget radius, so chase/approach jitter at the edge never sends DeleteObject.

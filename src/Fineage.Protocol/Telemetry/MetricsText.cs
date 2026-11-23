@@ -69,6 +69,8 @@ public sealed class MetricsSnapshot
     public HistogramMetrics CommandToMailboxes { get; init; } = new();
     public HistogramMetrics FanoutBatchProcess { get; init; } = new();
     public HistogramMetrics FanoutQueueOldestAge { get; init; } = new();
+    public HistogramMetrics FanoutDispatchWait { get; init; } = new();
+    public HistogramMetrics FanoutEnqueueToSocketWrite { get; init; } = new();
     public HistogramMetrics FanoutQueueDepth { get; init; } = new();
     public HistogramMetrics FanoutEventsPerBatch { get; init; } = new();
     public HistogramMetrics FanoutRecipientsPerEvent { get; init; } = new();
@@ -80,12 +82,18 @@ public sealed class MetricsSnapshot
     public long FanoutCoalesced { get; init; }
     public long ReliableOverflow { get; init; }
     public long TickOverruns { get; init; }
+    public long FanoutBacklogSoftExceeded { get; init; }
+    public long FanoutBacklogEmergency { get; init; }
+    public long OutboundSlowClientDisconnect { get; init; }
+    public long OutboundShedBytes { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
     public int PersistPending { get; init; }
+    public IReadOnlyDictionary<string, int> ActivationBacklog { get; init; } = new Dictionary<string, int>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, int> ActivationBacklogMax { get; init; } = new Dictionary<string, int>(StringComparer.Ordinal);
     public double PersistOldestAgeMs { get; init; }
     public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
@@ -257,6 +265,10 @@ public static class MetricsText
             "Wall time to execute one sealed fan-out batch on the dispatcher worker", snapshot.FanoutBatchProcess);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_oldest_age_ms",
             "Age of the oldest batch waiting in the fan-out dispatcher queue", snapshot.FanoutQueueOldestAge);
+        AppendSingletonHistogram(sb, "fineage_fanout_dispatch_wait_ms",
+            "Per batch: dispatcher hand-off until the worker picks it up", snapshot.FanoutDispatchWait);
+        AppendSingletonHistogram(sb, "fineage_fanout_enqueue_to_socket_write_ms",
+            "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts", snapshot.FanoutEnqueueToSocketWrite);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
             "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth, CountBounds);
         AppendSingletonHistogram(sb, "fineage_fanout_events_per_batch",
@@ -288,6 +300,14 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendCounter(sb, "fineage_fanout_backlog_soft_exceeded_total",
+            "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit", snapshot.FanoutBacklogSoftExceeded);
+        AppendCounter(sb, "fineage_fanout_backlog_emergency_total",
+            "Sealed fan-out batches enqueued while the dispatcher backlog was above its hard limit", snapshot.FanoutBacklogEmergency);
+        AppendCounter(sb, "fineage_outbound_slow_client_disconnect_total",
+            "Connections closed because their outbound mailbox stayed above the hard byte limit", snapshot.OutboundSlowClientDisconnect);
+        AppendCounter(sb, "fineage_outbound_shed_bytes_total",
+            "Low-priority outbound bytes dropped or coalesced away to keep a mailbox inside its byte budget", snapshot.OutboundShedBytes);
         AppendHelp(sb, "fineage_tick_skipped_total", "Simulation ticks a late step jumped over");
         sb.Append("# TYPE fineage_tick_skipped_total counter\n");
         sb.Append("fineage_tick_skipped_total ").Append(snapshot.TicksSkipped.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -382,6 +402,8 @@ public static class MetricsText
         AppendHelp(sb, "fineage_persist_pending", "Character and pet snapshots waiting to be written, including the one in flight");
         sb.Append("# TYPE fineage_persist_pending gauge\n");
         sb.Append("fineage_persist_pending ").Append(snapshot.PersistPending.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendKindGauge(sb, "fineage_npc_activation_backlog", "NPC work waiting for its per-tick budget", snapshot.ActivationBacklog);
+        AppendKindGauge(sb, "fineage_npc_activation_backlog_max", "Largest per-tick-budget NPC backlog since start", snapshot.ActivationBacklogMax);
         AppendHelp(sb, "fineage_persist_oldest_age_ms", "Age of the oldest character or pet snapshot that has not been written");
         sb.Append("# TYPE fineage_persist_oldest_age_ms gauge\n");
         sb.Append("fineage_persist_oldest_age_ms ").Append(Num(snapshot.PersistOldestAgeMs)).Append('\n');
@@ -552,6 +574,22 @@ public static class MetricsText
             sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
                 .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }
+    }
+
+    static void AppendCounter(StringBuilder sb, string name, string help, long value)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" counter\n");
+        sb.Append(name).Append(' ').Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+    }
+
+    static void AppendKindGauge(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, int> byKind)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" gauge\n");
+        foreach (var pair in byKind.OrderBy(p => p.Key, StringComparer.Ordinal))
+            sb.Append(name).Append("{kind=\"").Append(pair.Key).Append("\"} ")
+                .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
     static void AppendHelp(StringBuilder sb, string name, string help)

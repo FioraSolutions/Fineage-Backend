@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Collection("Zone tick budget env")]
 public sealed class ZoneRegionWakeBudgetTests
 {
     [Fact]

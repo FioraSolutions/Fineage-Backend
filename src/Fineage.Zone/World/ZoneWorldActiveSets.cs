@@ -157,11 +157,11 @@ public sealed partial class ZoneWorld
         _byId.Leave(npc, ActiveSets.Thinking);
     }
 
-    static bool DriftedBeyondMaxRange(ZoneEntity npc)
+    bool DriftedBeyondMaxRange(ZoneEntity npc)
     {
         if (!npc.HomeSet)
             return false;
-        int limit = ZoneNpcSettings.MaxDriftRange;
+        int limit = _maxDriftRange;
         long dx = npc.X - (long)npc.HomeX;
         long dy = npc.Y - (long)npc.HomeY;
         return dx * dx + dy * dy > (long)limit * limit;
