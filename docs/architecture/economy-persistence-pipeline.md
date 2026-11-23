@@ -14,12 +14,12 @@ External architecture review (sections 6–7): `CheckCommit` alone is not enough
 |-------|----------------|
 | Validate / mutate | Handlers call `CheckCommit`, apply bag/ground changes, `LedgerMove.Commit` (in-memory journal). |
 | Steal | `TryCommitDirtyEconomy` takes dirty bags under `_economyLock`. |
-| Durable commit | **`EconomyPersistWorker`** (`fineage-economy-persist` thread) runs `ILedgerJournal.CommitWith` + `CommitEconomy`. Simulation waits on completion **without** holding the economy lock and **without** executing SQL on the simulation thread. |
+| Durable commit | **`EconomyPersistService`** (`fineage-economy-persist` thread) runs `ILedgerJournal.CommitWith` + `CommitEconomy`. The simulation thread only `TryEnqueue`s; completions drain at step boundaries (or off-tick callers wait on their own thread). |
 | Publish | After successful commit, `PublishStolenEconomy` sends `InventoryUpdate`. |
 
-Disable async persist for diagnosis: `FINEAGE_ECONOMY_ASYNC_PERSIST=0`.
-
 Non-economic character snapshots remain on [`CharacterPersistWorker`](../../src/Fineage.Zone/World/CharacterPersistWorker.cs) — same “one writer per concern” policy.
+
+The simulation thread never blocks on durable commit: `TryEnqueue` only. A full bounded queue rejects with `persist_queue_full`. Characters with a batch in flight reject new ledger moves with `persist_busy`. Command replies and `InventoryUpdate` publish only after the worker posts a completion drained on the simulation thread.
 
 ### Metrics
 
@@ -31,7 +31,7 @@ Non-economic character snapshots remain on [`CharacterPersistWorker`](../../src/
 ## Target model (next PRs)
 
 1. **Reserve** on the simulation thread: lock adena/slots/accounts for the operation id (`LedgerTxId` idempotency).
-2. **Durable commit** on `EconomyPersistWorker` (unchanged path).
+2. **Durable commit** on `EconomyPersistService` (unchanged path).
 3. **Apply / publish** only after worker completion (deferred client success until durable — trade/shop/private store first).
 4. **Fault matrix** (integration tests): crash before/after COMMIT, disconnect before reply, duplicate request, last-item race, double-spend adena, Postgres down — expect **0 dupes** and **0 ledger divergence** via reconciliation.
 5. **World reconciliation**: `EconomyWorldReconciler` extends ledger checks with live ground stacks, stores, and warehouse parity (audit E5–E7 closed).

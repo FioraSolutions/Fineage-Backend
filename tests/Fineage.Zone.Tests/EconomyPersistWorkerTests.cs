@@ -8,7 +8,7 @@ namespace Fineage.Zone.Tests;
 public sealed class EconomyPersistWorkerTests
 {
     [Fact]
-    public void Commit_runs_on_persist_worker_not_simulation_thread()
+    public async Task Commit_runs_on_persist_worker_not_simulation_thread()
     {
         var gate = new BlockingAccountStore();
         var bench = new WorldBench(accounts: gate.Store);
@@ -20,35 +20,32 @@ public sealed class EconomyPersistWorkerTests
         bench.World.StageDeferredInventoryForTest(session, new PlayerInventory(bench.Game.Items));
 
         int simThread = Environment.CurrentManagedThreadId;
-        var flush = Task.Run(() => bench.World.FlushDirtyInventoriesForTests());
+        var flush = Task.Run(() =>
+        {
+            Assert.True(bench.World.FlushDirtyInventoriesForTests());
+            return bench.World.DrainEconomyPersistForTests();
+        });
         Assert.True(gate.Entered.Wait(TimeSpan.FromSeconds(10)));
         Assert.NotEqual(simThread, gate.WorkerThreadId);
-        Assert.NotEqual(simThread, bench.World.EconomyPersistWriterThreadForTests);
 
         gate.Release.Set();
-        Assert.True(flush.GetAwaiter().GetResult());
+        Assert.True(await flush);
+        Assert.NotEqual(simThread, bench.World.EconomyPersistWriterThreadForTests);
         bench.World.StopEconomyPersistForTests();
     }
 
     [Fact]
-    public void Async_disabled_uses_inline_commit()
+    public void Blocking_wait_on_simulation_thread_throws()
     {
-        var prior = Environment.GetEnvironmentVariable("FINEAGE_ECONOMY_ASYNC_PERSIST");
-        try
+        var bench = new WorldBench();
+        bench.World.StartEconomyPersistForTests();
+        bench.World.DriveForTest();
+        bench.World.RunStepForTest(() =>
         {
-            Environment.SetEnvironmentVariable("FINEAGE_ECONOMY_ASYNC_PERSIST", "0");
-            var bench = new WorldBench();
-            Assert.Equal(AddAccountStatus.Created, bench.Store.TryAddAccount("a", "h", "s", 1, null));
-            Assert.Equal(CreateCharacterStatus.Ok, bench.Store.TryAddCharacter("a", "A", 0, 0, 0, out var created));
-            var session = new ZoneSession();
-            session.Bind(created!.Id, "a", "A", 0);
-            bench.World.StageDeferredInventoryForTest(session, new PlayerInventory(bench.Game.Items));
-            Assert.True(bench.World.FlushDirtyInventoriesForTests());
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("FINEAGE_ECONOMY_ASYNC_PERSIST", prior);
-        }
+            Assert.Throws<InvalidOperationException>(() =>
+                bench.World.EconomyPersistBlockingWaitForTests());
+        });
+        bench.World.StopEconomyPersistForTests();
     }
 
     sealed class BlockingAccountStore

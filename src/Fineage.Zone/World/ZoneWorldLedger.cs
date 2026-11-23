@@ -32,6 +32,8 @@ public sealed partial class ZoneWorld
     /// <summary>A move at the step's tick, numbered after the tick's earlier moves.</summary>
     LedgerMove BeginLedgerMove(LedgerTxKind kind, int causedBy, int reference)
     {
+        if (causedBy > 0 && _economyPersist?.Reservations.IsReserved(causedBy) == true)
+            throw new InvalidOperationException(EconomyPersistService.PersistBusyReject);
         if (RegionBodyScope.Of(this) != null)
             throw new InvalidOperationException(
                 $"{kind} from a region body: ledger moves are numbered on the scheduler thread; defer it with AtBarrier");

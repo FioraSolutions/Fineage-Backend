@@ -118,6 +118,7 @@ internal sealed class WorldBench
             raidBossPoints: raidBossPoints);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
+        World.StartEconomyPersistForTests();
     }
 
     public GameData Game { get; }

@@ -69,6 +69,12 @@ public sealed partial class ZoneWorld
     {
         StepSimulation();
         _fanoutDispatcher.WaitUntilIdle();
+        if (_economyPersist != null && !_affinity.OnStep)
+        {
+            _economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this);
+            using (_affinity.Step())
+                _economyPersist.DrainCompletions(this);
+        }
     }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
@@ -101,6 +107,7 @@ public sealed partial class ZoneWorld
         {
             WithDeferredInventoryPersist(() =>
             {
+                _economyPersist?.DrainCompletions(this);
                 _fanout.ConfigureSequence(_simulationTicks.Tick, 0);
                 _fanout.Begin();
                 try
@@ -138,8 +145,11 @@ public sealed partial class ZoneWorld
     /// </summary>
     (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies(List<CommandSubmitMark>? submits = null)
     {
+        _economyPersist?.DrainCompletions(this);
+
         long flushStart = Stopwatch.GetTimestamp();
-        bool committed = FlushDirtyInventories();
+        var applied = _ingress.TakeApplied();
+        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied);
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
         if (uncommitted != null)
@@ -158,8 +168,7 @@ public sealed partial class ZoneWorld
         AwaitTestFanoutDelivery();
 
         long replyStart = Stopwatch.GetTimestamp();
-        var applied = _ingress.TakeApplied();
-        if (applied.Count > 0)
+        if (committed && applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
             ZoneCommandIngress.Complete(applied);
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);

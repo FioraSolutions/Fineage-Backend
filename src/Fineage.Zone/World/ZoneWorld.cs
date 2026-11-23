@@ -132,7 +132,7 @@ public sealed partial class ZoneWorld
     readonly WorldAffinity _affinity = new();
     readonly SimulationSyncIoGuard _syncIo;
     readonly CharacterPersistWorker _snapshots;
-    readonly EconomyPersistWorker? _economyPersist;
+    EconomyPersistService? _economyPersist;
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
     /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
@@ -348,7 +348,7 @@ public sealed partial class ZoneWorld
                     "accounts.OpenLedgerJournal(); tests must pass new MemoryLedgerJournal().")
                 : new MemoryLedgerJournal());
         _journal = journal;
-        _economyPersist = _accounts == null ? null : new EconomyPersistWorker(_accounts, journal);
+        _economyPersist = new EconomyPersistService(_accounts, journal, _affinity);
         _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);

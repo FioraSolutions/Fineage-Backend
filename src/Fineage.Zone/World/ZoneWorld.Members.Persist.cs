@@ -127,7 +127,10 @@ public sealed partial class ZoneWorld
         // InventoryUpdate is sent only after that commit returns. The write itself is outside the lock:
         // logout commits must not hold it across SQL while the simulation step's flush waits for it.
         if (commitNow)
+        {
             TryCommitDirtyEconomy(discardWithoutPublish: null);
+            AwaitEconomyPersistOffStep();
+        }
     }
 
     /// <summary>One InventoryUpdate for every journal row, after the bag write has succeeded.</summary>
@@ -162,7 +165,12 @@ public sealed partial class ZoneWorld
     /// The dirty maps are stolen under <see cref="_economyLock"/> and the SQL runs after the lock is released, so a
     /// logout commit cannot pin the simulation step's flush behind that write.
     /// </summary>
-    bool TryCommitDirtyEconomy(int? discardWithoutPublish)
+    bool TryCommitDirtyEconomy(int? discardWithoutPublish) =>
+        TryCommitDirtyEconomy(discardWithoutPublish, heldReplies: null);
+
+    bool TryCommitDirtyEconomy(
+        int? discardWithoutPublish,
+        IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies)
     {
         EconomyPersistBatch stolen;
         using (_economyLock.Enter())
@@ -175,51 +183,28 @@ public sealed partial class ZoneWorld
         if (_affinity.OnStep)
             NotePhase("economy-commit");
 
-        if (!WriteStolenEconomy(stolen))
+        if (_economyPersist == null)
+            throw new InvalidOperationException("economy persist service is not configured");
+
+        var result = _economyPersist.TryEnqueue(
+            stolen,
+            discardWithoutPublish,
+            heldReplies,
+            RestoreDirtyEconomy);
+
+        if (result is EconomyFlushResult.QueueFull or EconomyFlushResult.ReservationConflict)
         {
-            RestoreDirtyEconomy(stolen);
+            LogEconomyCommitFailure(stolen);
             return false;
         }
 
-        PublishStolenEconomy(stolen, discardWithoutPublish);
         return true;
     }
 
-    bool WriteStolenEconomy(EconomyPersistBatch stolen)
-    {
-        if (_economyPersist != null && EconomyPersistWorker.AsyncEnabled)
-        {
-            bool ok = _economyPersist.CommitAndWait(
-                stolen,
-                TimeSpan.FromMilliseconds(EconomyPersistWorker.DefaultWaitMs));
-            if (!ok)
-                LogEconomyCommitFailure(stolen);
-            return ok;
-        }
+    internal void PublishStolenEconomyInternal(EconomyPersistBatch stolen, int? discardWithoutPublish) =>
+        PublishStolenEconomy(stolen, discardWithoutPublish);
 
-        long started = System.Diagnostics.Stopwatch.GetTimestamp();
-        try
-        {
-            _journal.CommitWith(entries =>
-            {
-                if (_accounts == null)
-                    return;
-                _accounts.CommitEconomy(entries, stolen.Bags);
-            });
-            return true;
-        }
-        catch (Exception ex)
-        {
-            LogEconomyCommitFailure(stolen, ex);
-            return false;
-        }
-        finally
-        {
-            _syncIo.Record(
-                "IAccountStore.CommitEconomy",
-                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds);
-        }
-    }
+    internal void RestoreDirtyEconomyInternal(EconomyPersistBatch stolen) => RestoreDirtyEconomy(stolen);
 
     void LogEconomyCommitFailure(EconomyPersistBatch stolen, Exception? ex = null)
     {
@@ -367,9 +352,28 @@ public sealed partial class ZoneWorld
         if (outermost)
         {
             FlushDirtyInventories();
+            AwaitEconomyPersistOffStep();
             AwaitTestFanoutDelivery();
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Off-tick API paths wait for queued durable commits on the caller thread. The simulation step never calls this;
+    /// it drains completions at step boundaries instead.
+    /// </summary>
+    void AwaitEconomyPersistOffStep() => _ = AwaitEconomyPersistOffStepBlocking();
+
+    bool AwaitEconomyPersistOffStepBlocking()
+    {
+        if (_economyPersist == null || _affinity.OnStep)
+            return true;
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, nameof(AwaitEconomyPersistOffStepBlocking));
+        if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this))
+            return false;
+        using (_affinity.Step())
+            _economyPersist.DrainCompletions(this);
+        return true;
     }
 }

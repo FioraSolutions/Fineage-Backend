@@ -108,6 +108,7 @@ internal sealed class NetTestKit
             simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,
             bosses: bosses, ledgerJournal: Ledger, rates: rates, allowAmbientBoats: allowAmbientBoats, gameTime: gameTime,
             skillEffects: skillEffects);
+        World.StartEconomyPersistForTests();
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

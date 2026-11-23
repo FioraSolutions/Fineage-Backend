@@ -23,6 +23,12 @@ public sealed partial class ZoneWorld
             return false;
         }
 
+        if (!AwaitEconomyPersistOffStepBlocking())
+        {
+            ZoneLog.Warn($"player persist timed out object {objectId}: economy batches still pending");
+            return false;
+        }
+
         live.Inventory?.DiscardChanges();
         return true;
     }
@@ -145,6 +151,21 @@ public sealed partial class ZoneWorld
     internal void StopEconomyPersistForTests() => _economyPersist?.Stop();
 
     internal int EconomyPersistWriterThreadForTests => _economyPersist?.LastWriterThreadId ?? 0;
+
+    internal bool DrainEconomyPersistForTests()
+    {
+        if (_economyPersist == null)
+            return true;
+        if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(10), this))
+            return false;
+        DriveForTest();
+        using (_affinity.Step())
+            _economyPersist.DrainCompletions(this);
+        return true;
+    }
+
+    internal void EconomyPersistBlockingWaitForTests() =>
+        _economyPersist?.WaitForAllBatches(TimeSpan.FromSeconds(1), this);
 
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {

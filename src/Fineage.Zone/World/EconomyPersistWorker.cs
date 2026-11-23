@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
 using Fineage.Accounts;
@@ -7,29 +8,34 @@ using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
 
-/// <summary>
-/// Background writer for durable economy commits (ledger journal + bag projections). The simulation thread steals
-/// dirty state under the economy lock and enqueues an immutable batch; this worker is the only thread that runs
-/// <see cref="ILedgerJournal.CommitWith"/> with <see cref="IAccountStore.CommitEconomy"/> for those batches.
-/// </summary>
-/// <remarks>
-/// Character snapshots use <see cref="CharacterPersistWorker"/> on a separate thread with the same durability policy.
-/// There is a single persistence path for economy rows: this worker, not <c>Task.Run</c> on the pool.
-/// </remarks>
-sealed class EconomyPersistWorker : IDisposable
+internal enum EconomyFlushResult
 {
-    public const int DefaultQueueCapacity = 64;
-    public const int DefaultWaitMs = 30_000;
+    NoWork,
+    Queued,
+    QueueFull,
+    ReservationConflict,
+}
 
-    public static bool AsyncEnabled =>
-        !string.Equals(Environment.GetEnvironmentVariable("FINEAGE_ECONOMY_ASYNC_PERSIST"), "0", StringComparison.Ordinal);
+/// <summary>
+/// Non-blocking economy durable commits. Simulation only <see cref="TryEnqueue"/>; completions are drained on the
+/// simulation thread via <see cref="DrainCompletions"/>.
+/// </summary>
+internal sealed class EconomyPersistService
+{
+    internal const string EconomyCommitFailed = "economy_commit_failed: auditable economy commit failed";
+    public const int DefaultQueueCapacity = 64;
+
+    public const string PersistBusyReject = "persist_busy";
+    public const string PersistQueueFullReject = "persist_queue_full";
 
     readonly IAccountStore? _store;
     readonly ILedgerJournal _journal;
+    readonly WorldAffinity _affinity;
+    readonly EconomyReservation _reservations;
     readonly Channel<EconomyPersistWork> _queue;
+    readonly ConcurrentQueue<EconomyPersistCompletion> _completions = new();
+    readonly ConcurrentDictionary<ulong, PendingBatch> _pending = new();
     readonly Action<string> _warn;
-    readonly Action<string> _error;
-    readonly object _drainGate = new();
     Thread? _thread;
     int _running;
     int _inFlight;
@@ -37,14 +43,16 @@ sealed class EconomyPersistWorker : IDisposable
     long _oldestEnqueueTimestamp;
     long _nextBatchId;
 
-    public EconomyPersistWorker(IAccountStore? store, ILedgerJournal journal, int capacity = DefaultQueueCapacity)
+    public EconomyPersistService(IAccountStore? store, ILedgerJournal journal, WorldAffinity affinity)
     {
         ArgumentNullException.ThrowIfNull(journal);
+        ArgumentNullException.ThrowIfNull(affinity);
         _store = store;
         _journal = journal;
+        _affinity = affinity;
+        _reservations = new EconomyReservation();
         _warn = ZoneLog.Warn;
-        _error = ZoneLog.Error;
-        _queue = Channel.CreateBounded<EconomyPersistWork>(new BoundedChannelOptions(Math.Max(1, capacity))
+        _queue = Channel.CreateBounded<EconomyPersistWork>(new BoundedChannelOptions(DefaultQueueCapacity)
         {
             FullMode = BoundedChannelFullMode.Wait,
             SingleReader = true,
@@ -52,28 +60,22 @@ sealed class EconomyPersistWorker : IDisposable
         });
     }
 
+    public EconomyReservation Reservations => _reservations;
+
     public bool IsRunning => Volatile.Read(ref _running) == 1;
 
-    public int PendingCount
-    {
-        get
-        {
-            lock (_drainGate)
-                return _queued + _inFlight;
-        }
-    }
+    public int PendingCount => _queued + _inFlight;
+
+    public bool HasAwaitingHeldReplies => !_pending.IsEmpty;
 
     public double OldestAgeMilliseconds
     {
         get
         {
-            lock (_drainGate)
-            {
-                if (PendingCount == 0)
-                    return 0;
-                long oldest = _oldestEnqueueTimestamp;
-                return oldest == 0 ? 0 : Stopwatch.GetElapsedTime(oldest).TotalMilliseconds;
-            }
+            if (PendingCount == 0)
+                return 0;
+            long oldest = Volatile.Read(ref _oldestEnqueueTimestamp);
+            return oldest == 0 ? 0 : Stopwatch.GetElapsedTime(oldest).TotalMilliseconds;
         }
     }
 
@@ -83,102 +85,139 @@ sealed class EconomyPersistWorker : IDisposable
     {
         FineageTelemetry.EconomyPersistPendingCount = () => PendingCount;
         FineageTelemetry.EconomyPersistOldestAgeMs = () => OldestAgeMilliseconds;
-        if (_store == null || !AsyncEnabled)
+        if (_running == 1)
             return;
-        lock (_drainGate)
+        _running = 1;
+        _thread = new Thread(Loop)
         {
-            if (_running == 1)
-                return;
-            _running = 1;
-            _thread = new Thread(Loop)
-            {
-                IsBackground = true,
-                Name = "fineage-economy-persist",
-            };
-            _thread.Start();
-        }
+            IsBackground = true,
+            Name = "fineage-economy-persist",
+        };
+        _thread.Start();
     }
 
     public void Stop()
     {
-        FlushSync();
-        lock (_drainGate)
-        {
-            _running = 0;
-            _queue.Writer.TryComplete();
-        }
-
+        DrainWorkerOnCallerThread();
+        _running = 0;
+        _queue.Writer.TryComplete();
         _thread?.Join(TimeSpan.FromSeconds(5));
         _thread = null;
     }
 
-    /// <summary>Steals no state; drains every queued commit on the caller (logout / shutdown).</summary>
-    public void FlushSync()
-    {
-        if (_store == null)
-            return;
-        while (TryTakeHead(out var work))
-        {
-            bool ok = Apply(work);
-            work.Completion.TrySetResult(ok);
-        }
-    }
-
-    /// <summary>
-    /// Enqueues one stolen batch and blocks the caller until the worker finishes or <paramref name="wait"/> expires.
-    /// SQL runs on the worker thread; the caller must not hold the economy lock while waiting.
-    /// </summary>
-    public bool CommitAndWait(EconomyPersistBatch batch, TimeSpan wait)
+    /// <summary>Enqueue without blocking. Never call from the simulation thread with a blocking follow-up.</summary>
+    public EconomyFlushResult TryEnqueue(
+        EconomyPersistBatch batch,
+        int? discardWithoutPublish,
+        IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies,
+        Action<EconomyPersistBatch> restore)
     {
         ArgumentNullException.ThrowIfNull(batch);
-        if (_store == null)
-            return true;
-        if (!AsyncEnabled || Volatile.Read(ref _running) == 0)
-            return ApplyDirect(batch);
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "TryEnqueue");
 
+        var charIds = CharacterIdsOf(batch);
+        if (!_reservations.TryReserve(charIds))
+        {
+            restore(batch);
+            return EconomyFlushResult.ReservationConflict;
+        }
+
+        ulong batchId = (ulong)Interlocked.Increment(ref _nextBatchId);
         var work = new EconomyPersistWork
         {
-            BatchId = (ulong)Interlocked.Increment(ref _nextBatchId),
+            BatchId = batchId,
             Batch = batch,
             EnqueuedAt = Stopwatch.GetTimestamp(),
         };
 
-        lock (_drainGate)
+        if (!_queue.Writer.TryWrite(work))
         {
-            _queued++;
-            if (_oldestEnqueueTimestamp == 0)
-                _oldestEnqueueTimestamp = work.EnqueuedAt;
+            _reservations.Release(charIds);
+            restore(batch);
+            return EconomyFlushResult.QueueFull;
         }
 
-        try
-        {
-            _queue.Writer.WriteAsync(work).AsTask().GetAwaiter().GetResult();
-        }
-        catch (ChannelClosedException)
-        {
-            lock (_drainGate)
-            {
-                _queued = Math.Max(0, _queued - 1);
-                NoteQueueDrainedLocked();
-            }
+        Interlocked.Increment(ref _queued);
+        if (_oldestEnqueueTimestamp == 0)
+            Volatile.Write(ref _oldestEnqueueTimestamp, work.EnqueuedAt);
 
-            return ApplyDirect(batch);
-        }
-
-        if (!work.Completion.Task.Wait(wait))
-        {
-            _error($"economy persist wait timed out batch={work.BatchId} bags={batch.Bags.Count}");
-            FineageTelemetry.EconomyPersistFailures.Add(1, new KeyValuePair<string, object?>("reason", "wait_timeout"));
-            return false;
-        }
-
-        return work.Completion.Task.Result;
+        _pending[batchId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), charIds);
+        return EconomyFlushResult.Queued;
     }
 
-    bool ApplyDirect(EconomyPersistBatch batch)
+    public int DrainCompletions(ZoneWorld world)
     {
-        var work = new EconomyPersistWork { Batch = batch, BatchId = 0, EnqueuedAt = Stopwatch.GetTimestamp() };
-        return Apply(work);
+        int drained = 0;
+        while (_completions.TryDequeue(out var completion))
+        {
+            drained++;
+            Finish(world, completion);
+        }
+
+        return drained;
+    }
+
+    /// <summary>Logout / shutdown: wait for batches on a non-simulation caller.</summary>
+    public bool WaitForAllBatches(TimeSpan budget, ZoneWorld world)
+    {
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "WaitForAllBatches");
+        long deadline = Stopwatch.GetTimestamp() + (long)(budget.TotalSeconds * Stopwatch.Frequency);
+        while (PendingCount > 0 || !_pending.IsEmpty)
+        {
+            DrainCompletions(world);
+            if (Stopwatch.GetTimestamp() >= deadline)
+                return false;
+            Thread.Sleep(5);
+        }
+
+        return true;
+    }
+
+    void Finish(ZoneWorld world, EconomyPersistCompletion completion)
+    {
+        if (!_pending.TryRemove(completion.BatchId, out var pending))
+            return;
+
+        _reservations.Release(pending.CharacterIds);
+        if (completion.Success)
+        {
+            world.PublishStolenEconomyInternal(pending.Batch, pending.DiscardWithoutPublish);
+            if (pending.HeldReplies is { Count: > 0 })
+                ZoneCommandIngress.Complete(pending.HeldReplies);
+        }
+        else
+        {
+            world.RestoreDirtyEconomyInternal(pending.Batch);
+            if (pending.HeldReplies is { Count: > 0 })
+            {
+                var uncommitted = UncommittedOf(pending.HeldReplies);
+                world.CommandIngress.FailUncommitted(uncommitted, EconomyCommitFailed);
+            }
+        }
+    }
+
+    static HashSet<int> UncommittedOf(List<ZoneCommandIngress.Applied> held)
+    {
+        var ids = new HashSet<int>();
+        foreach (var applied in held)
+            ids.Add(applied.Submission.Session.ObjectId);
+        return ids;
+    }
+
+    static List<int> CharacterIdsOf(EconomyPersistBatch batch)
+    {
+        var ids = new HashSet<int>();
+        foreach (var (objectId, _, _) in batch.Inventories)
+            ids.Add(objectId);
+        foreach (var (objectId, _) in batch.Warehouses)
+            ids.Add(objectId);
+        foreach (var (objectId, _) in batch.Freight)
+            ids.Add(objectId);
+        foreach (var bag in batch.OfflineFreight)
+            ids.Add(bag.CharacterId);
+        foreach (var bag in batch.Bags)
+            ids.Add(bag.CharacterId);
+        return ids.ToList();
     }
 
     void Loop()
@@ -189,25 +228,14 @@ sealed class EconomyPersistWorker : IDisposable
             {
                 while (_queue.Reader.TryRead(out var work))
                 {
-                    lock (_drainGate)
-                    {
-                        _queued = Math.Max(0, _queued - 1);
-                        _inFlight++;
-                        if (_queued == 0)
-                            NoteQueueDrainedLocked();
-                    }
+                    Interlocked.Decrement(ref _queued);
+                    Interlocked.Increment(ref _inFlight);
+                    if (_queued == 0)
+                        Volatile.Write(ref _oldestEnqueueTimestamp, 0);
 
-                    bool ok = false;
-                    try
-                    {
-                        ok = Apply(work);
-                    }
-                    finally
-                    {
-                        lock (_drainGate)
-                            _inFlight--;
-                        work.Completion.TrySetResult(ok);
-                    }
+                    bool ok = Apply(work);
+                    _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
+                    Interlocked.Decrement(ref _inFlight);
                 }
             }
         }
@@ -216,16 +244,24 @@ sealed class EconomyPersistWorker : IDisposable
         }
     }
 
-    bool TryTakeHead(out EconomyPersistWork work) => _queue.Reader.TryRead(out work!);
+    void DrainWorkerOnCallerThread()
+    {
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "DrainWorkerOnCallerThread");
+        while (_queue.Reader.TryRead(out var work))
+        {
+            bool ok = Apply(work);
+            _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
+        }
+    }
 
     bool Apply(EconomyPersistWork work)
     {
-        if (_store == null)
-            return true;
         long started = Stopwatch.GetTimestamp();
         try
         {
             LastWriterThreadId = Environment.CurrentManagedThreadId;
+            if (_store == null)
+                return true;
             _journal.CommitWith(entries => _store.CommitEconomy(entries, work.Batch.Bags));
             FineageTelemetry.EconomyPersistBatches.Add(1, new KeyValuePair<string, object?>("result", "written"));
             FineageTelemetry.StageMilliseconds.Record(
@@ -238,25 +274,30 @@ sealed class EconomyPersistWorker : IDisposable
             _warn(
                 $"economy persist failed batch={work.BatchId} bags={work.Batch.Bags.Count}: {ex.GetType().Name}: {ex.Message}");
             FineageTelemetry.EconomyPersistFailures.Add(1, new KeyValuePair<string, object?>("reason", ex.GetType().Name));
+            FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", 0));
             return false;
         }
     }
-
-    void NoteQueueDrainedLocked()
-    {
-        if (_queued == 0 && _inFlight == 0)
-            _oldestEnqueueTimestamp = 0;
-    }
-
-    public void Dispose() => Stop();
 
     sealed class EconomyPersistWork
     {
         public ulong BatchId { get; init; }
         public required EconomyPersistBatch Batch { get; init; }
         public long EnqueuedAt { get; init; }
-        public TaskCompletionSource<bool> Completion { get; } =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
+    readonly record struct EconomyPersistCompletion(ulong BatchId, bool Success);
+
+    sealed class PendingBatch(
+        EconomyPersistBatch batch,
+        int? discardWithoutPublish,
+        List<ZoneCommandIngress.Applied>? heldReplies,
+        List<int> characterIds)
+    {
+        public EconomyPersistBatch Batch { get; } = batch;
+        public int? DiscardWithoutPublish { get; } = discardWithoutPublish;
+        public List<ZoneCommandIngress.Applied>? HeldReplies { get; } = heldReplies;
+        public List<int> CharacterIds { get; } = characterIds;
     }
 }
 

@@ -54,7 +54,8 @@ public sealed class ZoneConsistencyRegressionTests
         Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));
 
         using var metrics = new MetricsCollector();
-        bench.World.FlushDirtyInventoriesForTests();
+        Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        Assert.True(bench.World.DrainEconomyPersistForTests());
 
         Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
         Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));

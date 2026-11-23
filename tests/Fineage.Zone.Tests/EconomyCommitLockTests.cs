@@ -16,26 +16,31 @@ public sealed class EconomyCommitLockTests
     {
         var gate = new BlockingAccountStore();
         var bench = new WorldBench(accounts: gate.Store);
+        bench.World.StartEconomyPersistForTests();
         Assert.Equal(AddAccountStatus.Created, gate.Store.TryAddAccount("loadbot", "hash", "salt", 1, null));
         Assert.Equal(CreateCharacterStatus.Ok, gate.Store.TryAddCharacter("loadbot", "Bot", 0, 0, 0, out var created));
         var session = new ZoneSession();
         session.Bind(created!.Id, "loadbot", "Bot", 0);
         bench.World.StageDeferredInventoryForTest(session, new PlayerInventory(bench.Game.Items));
 
-        var logout = Task.Run(() => bench.World.FlushDirtyInventoriesForTests());
+        var logout = Task.Run(() =>
+        {
+            Assert.True(bench.World.FlushDirtyInventoriesForTests());
+            return bench.World.DrainEconomyPersistForTests();
+        });
         var entered = Task.Run(() => gate.Entered.Wait(TimeSpan.FromSeconds(10)));
         Assert.True(await entered, "logout commit did not reach the store");
 
-        // The step's end-of-tick flush. It must return while logout is still inside CommitEconomy.
         var stepFlush = Task.Run(() => bench.World.FlushDirtyInventoriesForTests());
         var finished = await Task.WhenAny(stepFlush, Task.Delay(500));
         Assert.True(
             finished == stepFlush,
-            "the step flush waited on the economy lock while logout SQL was still inside CommitEconomy");
+            "the step flush blocked while logout SQL was still inside CommitEconomy");
 
         gate.Release.Set();
         Assert.True(await logout);
         Assert.True(await stepFlush);
+        bench.World.StopEconomyPersistForTests();
     }
 
     sealed class BlockingAccountStore
