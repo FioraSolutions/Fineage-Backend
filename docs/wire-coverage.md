@@ -16,6 +16,8 @@ The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scrip
 
 **In-scope gaps:** server not fully implemented (partial+no) **150**, of which server absent (**no**) **57**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
 
+Geodata LOS and pathfinding are server-side region files (`scripts/fetch-geodata.sh`). They have no retail packet of their own.
+
 `BlockBuffSlot`, `NoblesseBless` and `ProtectionBlessing` are server-side effect rules. They have no retail packet of their own; the buff bar is the existing abnormal update.
 
 Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `ServerPackets`.

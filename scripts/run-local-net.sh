@@ -223,8 +223,8 @@ fi
 export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
 # Documented boot loads the manifest region pack so LOS and pathfinding are on.
-# The perf profile refuses to start when a manifest region is missing.
-# FINEAGE_GEODATA_REQUIRED=0 is the explicit stub opt-out for a test that cannot fetch.
+# A missing region file fails the boot. FINEAGE_GEODATA_REQUIRED=0 is the explicit
+# stub opt-out (the older smoke and ramp scripts still pass it).
 case "${FINEAGE_GEODATA_REQUIRED:-1}" in
   0|false|FALSE|no|NO|off|OFF) export FINEAGE_GEODATA_REQUIRED=0 ;;
   *)

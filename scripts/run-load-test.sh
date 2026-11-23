@@ -32,7 +32,7 @@ run_one() {
 
   export FINEAGE_ZONE_REGION_WORKERS="$workers"
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
-  ./scripts/run-local-net.sh start
+  FINEAGE_GEODATA_REQUIRED=0 ./scripts/run-local-net.sh start
 
   ZONE_PID="$(cat local-logs/zone-net.pid 2>/dev/null || true)"
   export FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX FINEAGE_LOGIN_LOADTEST_PASSWORD
