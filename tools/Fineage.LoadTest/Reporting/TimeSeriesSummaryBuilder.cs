@@ -42,7 +42,7 @@ public static class TimeSeriesSummaryBuilder
                 WindowEnd = wEnd,
                 TickP99Ms = inWindow.Max(s => s.TickP99),
                 CommandsStageP99Ms = inWindow.Max(s => s.TickStageP99Ms.GetValueOrDefault("commands")),
-                CommandToMailboxesP99Ms = inWindow.Max(s => s.SubmitToMailboxP99Ms),
+                CommandToMailboxesP99Ms = inWindow.Max(s => s.CommandToMailboxesP99Ms),
                 SubmitToMailboxP99Ms = inWindow.Max(s => s.SubmitToMailboxP99Ms),
                 FanoutEnqueueToMailboxP99Ms = inWindow.Max(s => s.FanoutEnqueueToMailboxP99Ms),
                 FanoutQueueAgeP99Ms = inWindow.Max(s => s.FanoutQueueOldestAgeMs),

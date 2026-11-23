@@ -33,31 +33,31 @@ public static class PerformanceGates
             Note = tickP99 <= 0 ? "no scrape data" : null
         });
 
-        // #867's "command→mailboxes" limit was calibrated on fanout_enqueue_to_mailbox (single-digit ms).
-        // submit_to_mailbox includes waiting for the next tick, so that 150ms number does not apply to it.
-        double fanoutEnqueue = report.FanoutEnqueueToMailboxP99Ms ?? 0;
+        // #867 command→mailboxes is fineage_command_to_mailboxes_ms (commit to first mailbox enqueue).
+        // It is not the client consistency oracle and not submit_to_mailbox, which includes the tick wait.
+        double cmdMailboxes = report.CommandToMailboxesP99Ms ?? 0;
         if (CommandToMailboxesP99ByScenario.TryGetValue(scenario, out double cmdLimit))
         {
-            bool missingFanout = fanoutEnqueue <= 0;
+            bool missingCmd = cmdMailboxes <= 0;
             verdicts.Add(new GateVerdict
             {
-                Gate = $"fanout_enqueue→mailbox p99 <= {cmdLimit:0} ms ({scenario})",
+                Gate = $"command→mailboxes p99 <= {cmdLimit:0} ms ({scenario})",
                 Limit = cmdLimit,
-                Observed = fanoutEnqueue,
+                Observed = cmdMailboxes,
                 Unit = "ms",
-                Passed = !missingFanout && fanoutEnqueue <= cmdLimit,
-                Note = missingFanout
-                    ? "MISSING: fineage_command_timeline_ms phase=fanout_enqueue_to_mailbox (server histogram; the client consistency oracle is not this gate)"
-                    : "server fanout_enqueue_to_mailbox, the series #867 called command→mailboxes; not the client consistency oracle"
+                Passed = !missingCmd && cmdMailboxes <= cmdLimit,
+                Note = missingCmd
+                    ? "MISSING: fineage_command_to_mailboxes_ms (server histogram; the client consistency oracle is not this gate)"
+                    : "server fineage_command_to_mailboxes_ms, not the client consistency oracle"
             });
         }
         else
         {
             verdicts.Add(new GateVerdict
             {
-                Gate = "fanout_enqueue→mailbox p99 (no scenario gate defined)",
+                Gate = "command→mailboxes p99 (no scenario gate defined)",
                 Limit = null,
-                Observed = fanoutEnqueue,
+                Observed = cmdMailboxes,
                 Unit = "ms",
                 Passed = true,
                 Note = $"scenario `{scenario}` has no mapped #867 gate; see bots-50-town … bots-1000-town"

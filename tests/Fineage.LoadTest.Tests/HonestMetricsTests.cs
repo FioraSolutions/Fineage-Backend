@@ -66,6 +66,9 @@ public class HonestMetricsTests
         Assert.False(gate.Passed);
         Assert.Contains("MISSING", gate.Note);
         Assert.Contains("oracle", gate.Note, StringComparison.OrdinalIgnoreCase);
+        var command = Assert.Single(gates, g => g.Gate.Contains("command→mailboxes"));
+        Assert.False(command.Passed);
+        Assert.Contains("fineage_command_to_mailboxes_ms", command.Note);
     }
 
     [Fact]

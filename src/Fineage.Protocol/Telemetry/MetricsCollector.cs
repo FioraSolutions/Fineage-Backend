@@ -43,6 +43,10 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _persistSnapshots = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _fanoutDropped = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _laneBlocked = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _laneFull = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _laneCoalesced = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _laneEvicted = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
     int _persistPending;
     double _persistOldestAgeMs;
@@ -128,6 +132,10 @@ public sealed class MetricsCollector : IDisposable
                 FanoutDropped = _fanoutDropped
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
+                OutboundLaneBlocked = FreezeLane(_laneBlocked),
+                OutboundLaneFull = FreezeLane(_laneFull),
+                OutboundLaneCoalesced = FreezeLane(_laneCoalesced),
+                OutboundLaneEvicted = FreezeLane(_laneEvicted),
                 Stages = _stages
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .Select(pair => pair.Value.Freeze(pair.Key))
@@ -236,6 +244,18 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.step.watchdog.stalls":
                     _watchdogStalls = value;
+                    break;
+                case "fineage.outbound.lane.blocked":
+                    AddLane(_laneBlocked, Tag(tags, "lane"), value);
+                    break;
+                case "fineage.outbound.lane.full":
+                    AddLane(_laneFull, Tag(tags, "lane"), value);
+                    break;
+                case "fineage.outbound.lane.coalesced":
+                    AddLane(_laneCoalesced, Tag(tags, "lane"), value);
+                    break;
+                case "fineage.outbound.lane.evicted":
+                    AddLane(_laneEvicted, Tag(tags, "lane"), value);
                     break;
             }
         }
@@ -427,6 +447,17 @@ public sealed class MetricsCollector : IDisposable
     static string IngressClassOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "class");
 
     static string PhaseOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "phase");
+
+    static void AddLane(Dictionary<string, long> counts, string lane, long value)
+    {
+        if (lane.Length == 0)
+            lane = "reliable";
+        counts[lane] = counts.GetValueOrDefault(lane) + value;
+    }
+
+    static Dictionary<string, long> FreezeLane(Dictionary<string, long> counts) =>
+        counts.OrderBy(pair => pair.Key, StringComparer.Ordinal)
+            .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
 
     static string Tag(ReadOnlySpan<KeyValuePair<string, object?>> tags, string name)
     {

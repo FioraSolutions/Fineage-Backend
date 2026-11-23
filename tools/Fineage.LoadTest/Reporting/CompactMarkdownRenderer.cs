@@ -1,4 +1,5 @@
 using System.Text;
+using Fineage.LoadTest.Metrics;
 
 namespace Fineage.LoadTest.Reporting;
 
@@ -13,6 +14,7 @@ public static class CompactMarkdownRenderer
         sb.AppendLine();
         bool gatesOk = r.GateVerdicts.Count == 0 || r.GateVerdicts.All(g => g.Passed);
         sb.AppendLine($"**Runner:** {(r.Passed ? "PASS" : "FAIL")}  |  **#867 gates:** {(gatesOk ? "PASS" : "FAIL")}");
+        sb.AppendLine($"**Simulation stall:** {r.SimulationStallSeconds:0.0}s (count {r.SimulationStallCount}, limit {SimulationHangGate.StallLimit.TotalSeconds:0}s)");
         sb.AppendLine($"**Window:** {r.StartedAt:u} → {r.FinishedAt:u} ({(r.FinishedAt - r.StartedAt).TotalSeconds:0}s)");
         sb.AppendLine();
 
@@ -104,11 +106,31 @@ public static class CompactMarkdownRenderer
                 $"watchdog stalls **{r.WatchdogStalls}** max **{r.WatchdogStallMaxMs:0.0}** ms; ingress max **{r.Server.CommandIngressQueuedMax}**.");
             sb.AppendLine($"- Outbound drops (`fineage_outbound_dropped_total`): **{r.Server.OutboundDropped}**");
             sb.AppendLine($"- Fanout drops (`fineage_fanout_dropped_total`): **{r.FanoutDropped}**");
+            AppendOutboundLanes(sb, r.PeakMetricsText);
             sb.AppendLine($"- Ingress coalesced (`fineage_command_coalesced_total`): **{r.Server.CommandCoalesced}**");
             sb.AppendLine($"- Ingress rejected (`fineage_command_rejected_total`): **{r.Server.CommandRejected}**");
         }
 
         sb.AppendLine();
+    }
+
+    static void AppendOutboundLanes(StringBuilder sb, string? peak)
+    {
+        foreach (string kind in new[] { "blocked", "full", "coalesced", "evicted" })
+        {
+            string metric = $"fineage_outbound_lane_{kind}_total";
+            if (string.IsNullOrEmpty(peak))
+            {
+                sb.AppendLine($"- Outbound lane {kind} (`{metric}`): MISSING peak scrape");
+                continue;
+            }
+
+            var lanes = PrometheusParser.LabeledCounter(peak, metric);
+            string body = lanes.Count == 0
+                ? "0"
+                : string.Join(", ", lanes.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
+            sb.AppendLine($"- Outbound lane {kind} (`{metric}`): {body}");
+        }
     }
 
     static void AppendTimeSeries(StringBuilder sb, RunReport r)

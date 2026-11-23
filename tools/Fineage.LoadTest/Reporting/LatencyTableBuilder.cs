@@ -60,6 +60,18 @@ public static class LatencyTableBuilder
                     rows.Add(FromStats($"command.timeline/{label}", tl));
             }
 
+            foreach (string metric in new[]
+                     {
+                         "fineage_command_to_mailboxes_ms",
+                         "fineage_fanout_dispatcher_enqueue_wait_ms",
+                         "fineage_fanout_stripe_enqueue_wait_ms",
+                         "fineage_fanout_batch_process_ms"
+                     })
+            {
+                if (PrometheusParser.ParseSingletonHistogram(peakMetrics, metric) is { } hs)
+                    rows.Add(FromStats(metric.Replace("fineage_", "", StringComparison.Ordinal), hs));
+            }
+
             if (PrometheusParser.ParseSingletonHistogram(peakMetrics, "fineage_command_queue_depth") is { } depth)
                 rows.Add(FromStats("command_queue_depth", depth));
             if (PrometheusParser.ParseSingletonHistogram(peakMetrics, "fineage_command_queue_age_ms") is { } age)
@@ -92,8 +104,6 @@ public static class LatencyTableBuilder
                 "fineage_enter_self_projection_ms",
                 "fineage_enter_known_encode_ms",
                 "fineage_enter_peer_fanout_ms",
-                "fineage_command_to_mailboxes_ms",
-                "fineage_fanout_batch_process_ms",
                 "fineage_outbound_queue_oldest_age_ms",
                 "fineage_socket_write_ms"
             ];

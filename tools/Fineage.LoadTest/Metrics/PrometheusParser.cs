@@ -86,7 +86,7 @@ public static class PrometheusParser
             TickMax = MaxFromHistogram(buckets, tickCount, tickSum),
             TickTrueMaxMs = ParseDouble(text, "fineage_tick_max_ms"),
             StepFanoutDrainP99Ms = ParseSingletonHistogram(text, "fineage_tick_step_fanout_drain_ms")?.P99 ?? 0,
-            CommandToMailboxesP99Ms = Phase(text, "submit_to_mailbox")?.P99 ?? 0,
+            CommandToMailboxesP99Ms = ParseSingletonHistogram(text, "fineage_command_to_mailboxes_ms")?.P99 ?? 0,
             SubmitToMailboxP99Ms = Phase(text, "submit_to_mailbox")?.P99 ?? 0,
             SubmitToMailboxP999Ms = Phase(text, "submit_to_mailbox")?.P999 ?? 0,
             FanoutEnqueueToMailboxP99Ms = Phase(text, "fanout_enqueue_to_mailbox")?.P99
@@ -285,6 +285,20 @@ public static class PrometheusParser
     {
         var m = Regex.Match(text, $"^{Regex.Escape(metric)}\\s+(\\d+)", RegexOptions.Multiline);
         return m.Success ? long.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
+    }
+
+    public static Dictionary<string, long> LabeledCounter(string text, string metric)
+    {
+        var values = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (Match match in Regex.Matches(
+                     text,
+                     $@"^{Regex.Escape(metric)}\{{lane=""([^""]+)""\}}\s+(\d+)",
+                     RegexOptions.Multiline))
+        {
+            values[match.Groups[1].Value] = long.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
+        }
+
+        return values;
     }
 
     public static long ParseCounterSumStatic(string text, string metric) => ParseCounterSum(text, metric);

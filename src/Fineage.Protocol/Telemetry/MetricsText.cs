@@ -91,6 +91,14 @@ public sealed class MetricsSnapshot
         new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyDictionary<string, long> FanoutDropped { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneBlocked { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneFull { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneCoalesced { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneEvicted { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandTimelinePhases { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandApplyByName { get; init; } = [];
@@ -269,6 +277,14 @@ public static class MetricsText
             "Replaceable fan-out writes superseded before send", snapshot.FanoutCoalesced);
         AppendCounterLine(sb, "fineage_reliable_overflow_total",
             "Reliable frames refused because a session outbound queue was full", snapshot.ReliableOverflow);
+        AppendLane(sb, "fineage_outbound_lane_blocked_total",
+            "Producer found a full fan-out stripe and did not wait", snapshot.OutboundLaneBlocked);
+        AppendLane(sb, "fineage_outbound_lane_full_total",
+            "Mailbox budget refused a frame or snapshot", snapshot.OutboundLaneFull);
+        AppendLane(sb, "fineage_outbound_lane_coalesced_total",
+            "Movement frame replaced a pending one for the same entity", snapshot.OutboundLaneCoalesced);
+        AppendLane(sb, "fineage_outbound_lane_evicted_total",
+            "Stale mailbox frame discarded", snapshot.OutboundLaneEvicted);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -523,6 +539,19 @@ public static class MetricsText
         if (labels.Length == 0)
             return;
         sb.Append('{').Append(labels).Append('}');
+    }
+
+    static void AppendLane(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, long> counts)
+    {
+        if (counts.Count == 0)
+            return;
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" counter\n");
+        foreach (KeyValuePair<string, long> pair in counts)
+        {
+            sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
+                .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        }
     }
 
     static void AppendHelp(StringBuilder sb, string name, string help)

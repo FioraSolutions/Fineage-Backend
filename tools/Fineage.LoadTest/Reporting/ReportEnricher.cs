@@ -43,7 +43,7 @@ public static class ReportEnricher
         {
             var peak = PrometheusParser.Parse(report.PeakMetricsText);
             report.SubmitToMailboxP99Ms = peak.SubmitToMailboxP99Ms;
-            report.CommandToMailboxesP99Ms = peak.SubmitToMailboxP99Ms;
+            report.CommandToMailboxesP99Ms = peak.CommandToMailboxesP99Ms;
             report.FanoutEnqueueToMailboxP99Ms = peak.FanoutEnqueueToMailboxP99Ms;
             if (PrometheusParser.ParseSingletonHistogram(report.PeakMetricsText, "fineage_fanout_queue_oldest_age_ms") is { } f)
                 report.FanoutQueueOldestAgeP99Ms = f.P99;
@@ -57,10 +57,9 @@ public static class ReportEnricher
         }
 
         if (report.SubmitToMailboxP99Ms is null or 0 && promSamples.Count > 0)
-        {
             report.SubmitToMailboxP99Ms = promSamples.Max(s => s.SubmitToMailboxP99Ms);
-            report.CommandToMailboxesP99Ms = report.SubmitToMailboxP99Ms;
-        }
+        if (report.CommandToMailboxesP99Ms is null or 0 && promSamples.Count > 0)
+            report.CommandToMailboxesP99Ms = promSamples.Max(s => s.CommandToMailboxesP99Ms);
 
         if (report.FanoutEnqueueToMailboxP99Ms is null or 0 && promSamples.Count > 0)
             report.FanoutEnqueueToMailboxP99Ms = promSamples.Max(s => s.FanoutEnqueueToMailboxP99Ms);

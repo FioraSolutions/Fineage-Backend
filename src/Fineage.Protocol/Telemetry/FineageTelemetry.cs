@@ -43,6 +43,18 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundReliableOverflow =
         Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
 
+    public static readonly Counter<long> OutboundLaneBlocked =
+        Meter.CreateCounter<long>("fineage.outbound.lane.blocked", description: "Producer found a full fan-out stripe and did not wait (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneFull =
+        Meter.CreateCounter<long>("fineage.outbound.lane.full", description: "Mailbox budget refused a frame or snapshot (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneCoalesced =
+        Meter.CreateCounter<long>("fineage.outbound.lane.coalesced", description: "Movement frame replaced a pending one for the same entity (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneEvicted =
+        Meter.CreateCounter<long>("fineage.outbound.lane.evicted", description: "Stale mailbox frame discarded (snapshot replace, visual drop, movement eviction) (tag lane)");
+
     public static readonly Counter<long> PacketsRejected =
         Meter.CreateCounter<long>("fineage.packets.rejected", description: "Packets refused before normal handling (rate limit, unknown opcode, wrong port)");
 
