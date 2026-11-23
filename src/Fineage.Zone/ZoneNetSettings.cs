@@ -4,6 +4,10 @@ namespace Fineage.Zone;
 public static class ZoneNetSettings
 {
     public const int DefaultMaxConnections = 2048;
+    /// <summary>
+    /// Minimum outbound frame budget. The mailbox is also bounded by bytes (one socket write, 64 KiB).
+    /// The effective frame cap is large enough that minimum-sized frames fill that byte budget first.
+    /// </summary>
     public const int DefaultOutboundQueue = 32;
     // Room for an enter-world burst plus a busy player looping move/validate; a flood is an order of magnitude above.
     public const int DefaultMaxMessagesPerSecond = 1000;

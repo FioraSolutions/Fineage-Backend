@@ -1,3 +1,5 @@
+using Fineage.Net.Host;
+
 namespace Fineage.Zone.Net;
 
 /// <summary>Frames encoded from world state on the simulation thread and sent later without touching the world.</summary>
@@ -11,12 +13,26 @@ sealed class PreparedFrames(NetPresenceHub presence)
 
     public void Send()
     {
-        foreach (var (objectId, opcode, payload, critical) in _frames)
+        if (_frames.Count == 0)
+            return;
+
+        // One snapshot per connection, in the order the frames were prepared. A spawn burst is not
+        // one critical enqueue per NPC frame.
+        var order = new List<int>();
+        var groups = new Dictionary<int, List<OutboundFrame>>();
+        foreach (var (objectId, opcode, payload, _) in _frames)
         {
-            if (critical)
-                presence.TrySendCritical(objectId, opcode, payload);
-            else
-                presence.TrySend(objectId, opcode, payload);
+            if (!groups.TryGetValue(objectId, out List<OutboundFrame>? batch))
+            {
+                batch = new List<OutboundFrame>();
+                groups.Add(objectId, batch);
+                order.Add(objectId);
+            }
+
+            batch.Add(new OutboundFrame(opcode, payload));
         }
+
+        for (int i = 0; i < order.Count; i++)
+            presence.SubmitSnapshot(order[i], groups[order[i]]);
     }
 }

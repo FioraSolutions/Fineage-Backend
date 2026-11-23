@@ -8,12 +8,11 @@ namespace Fineage.Net.Host;
 
 /// <summary>
 /// One accepted Net socket.
-/// Inbound envelopes land in a bounded <see cref="Inbox"/>. Outbound envelopes share one mailbox:
-/// a single wake, replaceable frames collapsed until an ordering barrier, and a queue bounded by
-/// frame count and bytes. The pump takes one snapshot and writes it with one <c>WriteManyAsync</c>.
-/// Fanout callers that must not block use <see cref="TrySend"/> and count a <c>fineage.outbound.dropped</c>
-/// instead of blocking the simulation tick. Stripe delivery uses <see cref="SubmitOrderedBatch"/>, which waits
-/// for room and does not drop reliable frames.
+/// Inbound envelopes land in a bounded <see cref="Inbox"/>. Outbound envelopes share one mailbox.
+/// Producers never block on it: movement coalesces, knownlist snapshots replace a pending burst,
+/// visuals drop when stale, and a reliable frame that does not fit closes this connection.
+/// The pump writes whenever the mailbox is non-empty and only then waits for a wake, so a missed
+/// edge cannot leave queued bytes sitting while the socket is idle.
 /// </summary>
 public sealed class NetConnection : IAsyncDisposable
 {
@@ -34,6 +33,7 @@ public sealed class NetConnection : IAsyncDisposable
     readonly string _endpoint;
     readonly Task _pump;
     int _closed;
+    int _failed;
     int _boundObjectId;
     uint _boundGeneration;
 
@@ -59,12 +59,13 @@ public sealed class NetConnection : IAsyncDisposable
             SingleReader = true,
             SingleWriter = false
         });
-        _mailbox = new OutboundMailbox(
+        // Frame cap and byte cap describe the same budget: a mailbox of tiny frames must be able to
+        // fill MaxBytesPerBatch before the frame count reports full. outboundCapacity raises that floor.
+        int byteBudget = MaxBytesPerBatch;
+        int frameBudget = Math.Max(
             Math.Max(8, outboundCapacity),
-            MaxBytesPerBatch,
-            ConnectionId,
-            endpoint,
-            WakePump);
+            Math.Max(1, byteBudget / PacketEnvelope.HeaderSize));
+        _mailbox = new OutboundMailbox(frameBudget, byteBudget, ConnectionId, endpoint);
         _pump = PumpAsync();
     }
 
@@ -140,7 +141,7 @@ public sealed class NetConnection : IAsyncDisposable
     }
 
     /// <summary>
-    /// Queues <paramref name="payload"/> and waits up to 2s for room. Used by request/reply paths that must not lose a frame.
+    /// Queues <paramref name="payload"/> without waiting. A reliable frame that does not fit closes this connection.
     /// </summary>
     public Task SendAsync(
         ushort opcode, byte[] payload, uint requestSequence = 0, CancellationToken ct = default, long mailboxAtTimestamp = 0)
@@ -153,19 +154,13 @@ public sealed class NetConnection : IAsyncDisposable
         if (mailboxAtTimestamp > 0)
             envelope.MailboxQueuedAtTimestamp = mailboxAtTimestamp;
 
-        if (!_mailbox.TryEnqueue(envelope, waitMilliseconds: 2000))
-        {
-            NetTelemetry.OutboundDropped(_endpoint);
-            return Task.CompletedTask;
-        }
-
-        WakePump();
+        Admit(envelope, reliableOverflowCloses: true);
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Non-blocking enqueue. A full mailbox drops a reliable frame, counts it, and logs the opcode.
-    /// Replaceable presence frames collapse until an ordering barrier. Stripe delivery does not use this path.
+    /// Non-blocking enqueue. Movement coalesces, visuals may drop, and a reliable frame that does not fit
+    /// closes this connection. The caller never waits on the mailbox or the socket.
     /// </summary>
     public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0, long mailboxAtTimestamp = 0)
     {
@@ -174,19 +169,13 @@ public sealed class NetConnection : IAsyncDisposable
         if (mailboxAtTimestamp > 0)
             envelope.MailboxQueuedAtTimestamp = mailboxAtTimestamp;
 
-        if (!_mailbox.TryEnqueue(envelope, waitMilliseconds: 0))
-        {
-            NetTelemetry.OutboundDropped(_endpoint);
-            return false;
-        }
-
-        WakePump();
-        return true;
+        return Admit(envelope, reliableOverflowCloses: true) == MailboxAdmit.Accepted;
     }
 
     /// <summary>
-    /// Stripe path: queue every frame in order and wait for room. Reliable frames are not dropped.
-    /// One wake covers the whole batch. A closed connection logs and returns.
+    /// Stripe path: queue every frame in order and return. Does not wait for room.
+    /// A reliable frame that does not fit closes this connection; the stripe worker moves on.
+    /// One wake covers the whole batch.
     /// </summary>
     internal void SubmitOrderedBatch(List<OutboundFrame> frames)
     {
@@ -200,22 +189,92 @@ public sealed class NetConnection : IAsyncDisposable
             return;
         }
 
+        var envelopes = new List<PacketEnvelope>(frames.Count);
+        Collect(frames, envelopes);
+        if (envelopes.Count == 0)
+            return;
+
+        MailboxAdmit admit = _mailbox.TryAdmitBatch(envelopes, forceWholeBatch: false);
+        if (admit == MailboxAdmit.Accepted)
+            WakePump();
+        else if (admit == MailboxAdmit.Rejected)
+            FailOutbound(
+                $"reliable batch of {envelopes.Count} frames does not fit the outbound budget ({MaxBytesPerBatch} bytes)");
+    }
+
+    /// <summary>Knownlist / appearance burst. Merges into the pending snapshot and returns. Never waits.</summary>
+    internal void SubmitSnapshot(List<OutboundFrame> frames)
+    {
+        if (frames.Count == 0)
+            return;
+
+        if (Volatile.Read(ref _closed) != 0)
+        {
+            NetHostLog.Error(
+                $"connectionId={ConnectionId} endpoint={_endpoint} rejected knownlist snapshot of {frames.Count} frames: connection is closed");
+            return;
+        }
+
+        var envelopes = new List<PacketEnvelope>(frames.Count);
+        Collect(frames, envelopes);
+        if (envelopes.Count == 0)
+            return;
+
+        if (_mailbox.TryMergeSnapshot(envelopes) == MailboxAdmit.Accepted)
+            WakePump();
+    }
+
+    /// <summary>
+    /// The outbound budget for this connection is exhausted, or the stripe could not take a reliable batch.
+    /// Close the socket and keep going. The world tick must not wait on this client.
+    /// </summary>
+    internal void FailOutbound(string reason)
+    {
+        if (Interlocked.Exchange(ref _failed, 1) != 0)
+            return;
+
+        int queued = _mailbox.QueuedFrames;
+        NetHostLog.Error(
+            $"connectionId={ConnectionId} endpoint={_endpoint} outbound overflow: {reason} (queuedFrames={queued}). Closing the connection so a slow client cannot stall the world.");
+        Volatile.Write(ref _closed, 1);
+        _mailbox.Close();
+        WakePump();
+        try { _stream.Dispose(); } catch { /* the read loop and the pump observe the closed socket */ }
+    }
+
+    MailboxAdmit Admit(PacketEnvelope envelope, bool reliableOverflowCloses)
+    {
+        MailboxAdmit admit = _mailbox.TryAppend(envelope);
+        if (admit == MailboxAdmit.Accepted)
+        {
+            WakePump();
+            return admit;
+        }
+
+        if (admit == MailboxAdmit.Closed)
+            return admit;
+
+        NetTelemetry.OutboundDropped(_endpoint);
+        if (admit == MailboxAdmit.Rejected)
+        {
+            NetTelemetry.ReliableOverflow(_endpoint);
+            if (reliableOverflowCloses)
+                FailOutbound($"reliable opcode={envelope.Opcode} does not fit the outbound budget ({MaxBytesPerBatch} bytes)");
+        }
+
+        return admit;
+    }
+
+    void Collect(List<OutboundFrame> frames, List<PacketEnvelope> envelopes)
+    {
         for (int i = 0; i < frames.Count; i++)
         {
             if (!TryEnvelope(frames[i].Opcode, frames[i].Payload, 0, out PacketEnvelope envelope))
                 continue;
             if (frames[i].MailboxAtTimestamp > 0)
                 envelope.MailboxQueuedAtTimestamp = frames[i].MailboxAtTimestamp;
-
-            if (!_mailbox.TryEnqueue(envelope, waitMilliseconds: Timeout.Infinite))
-            {
-                NetHostLog.Error(
-                    $"connectionId={ConnectionId} endpoint={_endpoint} rejected ordered opcode={frames[i].Opcode} at frame {i} of {frames.Count}: outbound mailbox did not accept it");
-                return;
-            }
+            envelopes.Add(envelope);
         }
-
-        WakePump();
     }
 
     void RecordSocketWrite(long startedAt, int bytes, int frames)
@@ -276,29 +335,34 @@ public sealed class NetConnection : IAsyncDisposable
 
     async Task PumpAsync()
     {
+        // Level-triggered. The previous loop waited on a capacity-1 wake, drained that edge, then wrote.
+        // A producer blocked in Monitor.Wait called the wake while still holding the mailbox lock; the pump
+        // could consume the edge, block on that same lock, and then find nothing new to write. After PulseAll
+        // the producer enqueued the frame that had been waiting, and no later wake was posted if every
+        // producer was already inside Wait and the simulation thread was stuck on the stripe WriteAsync.
+        // The socket engine then sat in WaitForSocketEvents with a full mailbox. Taking until the mailbox
+        // is empty, and only then waiting, makes a dropped edge harmless: the next wake or the next loop
+        // observes the queued frames.
         var combined = new List<PacketEnvelope>(MaxFramesPerBatch);
         try
         {
             while (true)
             {
-                if (Volatile.Read(ref _closed) != 0)
-                {
-                    combined.Clear();
-                    _mailbox.Take(combined);
-                    if (combined.Count > 0)
-                        await WriteCombinedAsync(combined).ConfigureAwait(false);
-                    break;
-                }
-
-                await _pumpWake.Reader.WaitToReadAsync().ConfigureAwait(false);
-                while (_pumpWake.Reader.TryRead(out _))
-                {
-                }
-
                 combined.Clear();
-                _mailbox.Take(combined);
-                if (combined.Count > 0)
-                    await WriteCombinedAsync(combined).ConfigureAwait(false);
+                if (_mailbox.Take(combined) == 0)
+                {
+                    if (Volatile.Read(ref _closed) != 0)
+                        break;
+                    if (!await _pumpWake.Reader.WaitToReadAsync().ConfigureAwait(false))
+                        break;
+                    while (_pumpWake.Reader.TryRead(out _))
+                    {
+                    }
+
+                    continue;
+                }
+
+                await WriteCombinedAsync(combined).ConfigureAwait(false);
             }
         }
         catch (Exception ex) when (ex is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
@@ -311,8 +375,7 @@ public sealed class NetConnection : IAsyncDisposable
             try
             {
                 combined.Clear();
-                _mailbox.Take(combined);
-                if (combined.Count > 0)
+                if (_mailbox.Take(combined) > 0)
                     await WriteCombinedAsync(combined).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException)
@@ -326,8 +389,7 @@ public sealed class NetConnection : IAsyncDisposable
         if (frames.Count == 0)
             return;
 
-        // The producer already splits at MaxFrames/MaxBytes. A drain can still hold several of those batches;
-        // write them as one socket buffer when they fit, otherwise in bound-sized pieces.
+        // A taken snapshot can be larger than one socket write. Split at the frame and byte bounds.
         int offset = 0;
         while (offset < frames.Count)
         {
@@ -359,6 +421,7 @@ public sealed class NetConnection : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        Interlocked.Exchange(ref _failed, 1);
         if (Interlocked.Exchange(ref _closed, 1) != 0)
             return;
 
