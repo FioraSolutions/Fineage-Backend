@@ -10,12 +10,19 @@ public static class BotSpawn
         {
             "spread" => Spread(scenario, index),
             "siege" => Siege(scenario, index),
+            "economy" => EconomyHub(scenario, index),
             _ => Town(scenario, index)
         };
     }
 
     static (int x, int y, int z) Town(LoadScenario s, int index) =>
         (s.SpawnX + (index % 7) * 12, s.SpawnY + (index / 7) * 12, s.SpawnZ);
+
+    static (int x, int y, int z) EconomyHub(LoadScenario s, int index)
+    {
+        var hub = s.Economy ?? new EconomyHammerConfig { Enabled = true };
+        return (hub.HubX + (index % 7) * 12, hub.HubY + (index / 7) * 12, hub.HubZ);
+    }
 
     static (int x, int y, int z) Spread(LoadScenario s, int index)
     {

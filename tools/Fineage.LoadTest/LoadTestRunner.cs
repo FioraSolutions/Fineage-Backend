@@ -17,6 +17,23 @@ public sealed class LoadTestRunner
         int? zonePid,
         CancellationToken ct)
     {
+        if (scenario.Economy is { Enabled: true })
+        {
+            if (!string.Equals(Environment.GetEnvironmentVariable("FINEAGE_LOADTEST_ECONOMY_HAMMER"), "1",
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "economy hammer scenarios require FINEAGE_LOADTEST_ECONOMY_HAMMER=1 on the Zone process " +
+                    "(dwarf manufacturers + customer materials provisioning).");
+            }
+
+            if (scenario.BotCount < scenario.Economy.ManufacturerModulo)
+            {
+                throw new InvalidOperationException(
+                    $"economy hammer needs at least {scenario.Economy.ManufacturerModulo} bots for manufacture roles; got {scenario.BotCount}.");
+            }
+        }
+
         if (target == "mobius")
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
 
@@ -235,6 +252,24 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
+        EconomyConsistencyReport? economyReport = null;
+        if (scenario.Economy is { Enabled: true })
+        {
+            var logPathsEarly = new List<string>();
+            if (loginLog != null) logPathsEarly.Add(loginLog);
+            if (zoneLog != null) logPathsEarly.Add(zoneLog);
+            economyReport = EconomyConsistencyOracle.Analyze(bots, scenario, promSamples, logPathsEarly);
+            var economyHard = economyReport.Issues.Where(i => EconomyConsistencyOracle.IsHardFailure(i.Kind)).ToList();
+            if (economyHard.Count > 0)
+                failReasons.Add($"Economy oracle (hard): {economyHard.Count} issue(s).");
+            foreach (var issue in economyHard.Take(10))
+            {
+                bugs.Add(issue.BotId is int bid
+                    ? $"P0 economy {issue.Kind}: bot={bid} oid={issue.ObjectId} {issue.Detail}"
+                    : $"P0 economy {issue.Kind}: {issue.Detail}");
+            }
+        }
+
         if (oracleRan && scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
             failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
         // Teardown, or an oracle that outlasts the watchdog, can cross the limit after the first read.
@@ -277,6 +312,7 @@ public sealed class LoadTestRunner
             FailReasons = failReasons,
             Bugs = bugs,
             Consistency = consistency,
+            Economy = economyReport,
             StartedAt = started,
             SteadyStateStartedAt = steadyStateStarted,
             FinishedAt = DateTimeOffset.UtcNow

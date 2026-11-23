@@ -55,7 +55,8 @@ public static class ExpectedMetricsCatalog
     public static readonly string[] Persistence =
     [
         "fineage_ledger_adjustments_total",
-        "fineage_ledger_flush_failures_total"
+        "fineage_ledger_flush_failures_total",
+        "fineage_ledger_invariant_violations_total"
     ];
 
     public static IReadOnlyList<string> All =>

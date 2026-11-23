@@ -371,6 +371,7 @@ public sealed partial class ZoneWorld
         RiftSanitizeLogin(entity);
         SyncPunishmentsOnEnter(session, entity, enterNow);
         CheckCursedWeaponOnEnter(entity);
+        TryProvisionLoadTestEconomyHammer(session, entity);
         known = entity.Knownlist.Count;
         return true;
     }

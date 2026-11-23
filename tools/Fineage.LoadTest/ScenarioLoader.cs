@@ -54,6 +54,9 @@ public static class ScenarioLoader
             }
         }
 
+        if (child.Economy == null && parent.Economy != null)
+            child.Economy = parent.Economy;
+
         return child;
     }
 }

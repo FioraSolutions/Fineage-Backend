@@ -63,4 +63,19 @@ public sealed class LoadScenario
 
     /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
     public string? Extends { get; set; }
+
+    /// <summary>Full-economy hammer (#955): P2P trade, shops, stores, manufacture, manor, warehouse.</summary>
+    public EconomyHammerConfig? Economy { get; set; }
+
+    public (int classId, int race) ResolveClassAndRace(int botId)
+    {
+        if (Economy is { Enabled: true } eco)
+        {
+            int mod = Math.Abs(botId) % eco.ManufacturerModulo;
+            if (mod == eco.ManufacturerRemainder)
+                return (eco.ManufacturerClassId, eco.ManufacturerRace);
+        }
+
+        return (ClassId, Race);
+    }
 }

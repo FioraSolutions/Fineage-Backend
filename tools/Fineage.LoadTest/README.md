@@ -35,6 +35,14 @@ dotnet tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll \
 
 Each bot records inbound zone frames (spawn/despawn, move, status, combat, social). After the scenario, `ConsistencyOracle` cross-checks observers in AOI for ghosts, missing peer spawns, HP/position skew, combat fanout gaps, and visibility leaks. Results land in `report.json` / `report.md` under `consistency`.
 
+## Economy hammer (#955)
+
+`scenarios/bots-economy-hammer.yaml` drives NPC shop buy/sell, warehouse deposit, P2P trade (adena), private sell/buy stores, manufacture listings, manor seed purchase, and drop/pickup. Flows use Mobius CT0 Interlude wire messages and exercise the auditable economy ledger.
+
+After the run, `EconomyConsistencyOracle` fails hard on unexplained zone `reject` codes, zone log ledger/invariant lines, `fineage_ledger_invariant_violations_total`, or `fineage_ledger_flush_failures_total` (when `economy.requireLedgerInvariant` is true).
+
+Start Zone with `FINEAGE_LOADTEST_ECONOMY_HAMMER=1` so dwarf manufacturers (bot id % 6 == 0) and manufacture customers (bot id % 6 == 1) are provisioned on enter.
+
 ## Safety
 
 Run only against **local** `./scripts/run-local-net.sh`. Do not point bots at public hosts.

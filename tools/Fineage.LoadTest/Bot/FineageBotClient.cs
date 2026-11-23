@@ -7,7 +7,7 @@ using Fineage.Net.Host;
 
 namespace Fineage.LoadTest.Bot;
 
-public sealed class FineageBotClient : IAsyncDisposable
+public sealed partial class FineageBotClient : IAsyncDisposable
 {
     TcpClient _login = new();
     TcpClient _zone = new();
@@ -20,6 +20,7 @@ public sealed class FineageBotClient : IAsyncDisposable
     readonly BotStats _stats;
     readonly BotObservationLog _observation;
     readonly BotPeerDirectory _peers;
+    readonly BotBagTracker _bag = new();
     Task? _receiveTask;
     CancellationTokenSource _receiveCts = new();
     ushort _lastRecvOpcode;
@@ -38,7 +39,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         Account = $"{scenario.AccountPrefix}{botId:D5}";
         CharacterName = $"Bot{botId:D4}";
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
-        _observation = new BotObservationLog(botId);
+        _observation = new BotObservationLog(botId, _bag);
     }
 
     public int BotId { get; }
@@ -47,7 +48,10 @@ public sealed class FineageBotClient : IAsyncDisposable
     public string CharacterName { get; }
     public BotStats Stats => _stats;
     public BotObservationLog ObservationLog => _observation;
+    public BotBagTracker Bag => _bag;
     public int SelfObjectId => (int)_selfEntity;
+    internal Random Rng => _rng;
+    internal BotPeerDirectory Peers => _peers;
 
     ulong _selfEntity;
 
@@ -86,7 +90,12 @@ public sealed class FineageBotClient : IAsyncDisposable
                 _lastRecvOpcode = opcode;
                 _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
                 if (opcode == NetOpcode.Reject)
-                    _stats.LastError = NetCodec.DecodeReject(payload).Code;
+                {
+                    string code = NetCodec.DecodeReject(payload).Code;
+                    _stats.LastError = code;
+                    if (Scenario.Economy is { Enabled: true })
+                        _stats.RecordEconomyReject(code);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -151,12 +160,13 @@ public sealed class FineageBotClient : IAsyncDisposable
 
         if (roster.Characters.Length == 0)
         {
+            var (classId, race) = Scenario.ResolveClassAndRace(BotId);
             await LoginExchangeAsync(NetOpcode.CreateCharacter,
                 NetCodec.EncodeCreateCharacter(new CreateCharacterMsg
                 {
                     Name = CharacterName,
-                    ClassId = Scenario.ClassId,
-                    Race = Scenario.Race,
+                    ClassId = classId,
+                    Race = race,
                     Sex = HumanClasses.SexMale
                 }),
                 NetOpcode.CreateResult, ct);
@@ -217,6 +227,16 @@ public sealed class FineageBotClient : IAsyncDisposable
         var sw = Stopwatch.StartNew();
         try
         {
+            if (action.StartsWith("economy_", StringComparison.Ordinal))
+            {
+                await BotEconomyFlows.RunActionAsync(this, action, fleet, ct);
+                Interlocked.Increment(ref _stats.ActionsAttempted);
+                _stats.LastActionAt = DateTimeOffset.UtcNow;
+                sw.Stop();
+                _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
+                return;
+            }
+
             switch (action)
             {
                 case "move":
@@ -342,7 +362,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         await ZoneWriteAsync(opcode, payload, ct);
     }
 
-    int? VisiblePlayerObjectId()
+    public int? VisiblePlayerObjectId()
     {
         var tracker = _observation.Tracker;
         foreach (var ent in tracker.Entities.Values)
@@ -428,9 +448,21 @@ public sealed class FineageBotClient : IAsyncDisposable
 
     string PickAction()
     {
+        IEnumerable<KeyValuePair<string, double>> weights = Scenario.ActionWeights;
+        if (Scenario.Economy is { Enabled: true } eco)
+        {
+            int mod = Math.Abs(BotId) % eco.ManufacturerModulo;
+            weights = weights.Where(pair => pair.Key switch
+            {
+                "economy_manufacture_maker" => mod == eco.ManufacturerRemainder,
+                "economy_manufacture_customer" => mod == 1,
+                _ => true
+            });
+        }
+
         double roll = _rng.NextDouble();
         double acc = 0;
-        foreach (var (name, weight) in Scenario.ActionWeights)
+        foreach (var (name, weight) in weights)
         {
             acc += weight;
             if (roll <= acc)

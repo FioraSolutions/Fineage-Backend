@@ -113,6 +113,19 @@ public sealed class EconomyLedger : IEconomyLedger
         }
     }
 
+    /// <summary>Every account that currently holds journal value, for invariant scans.</summary>
+    public IReadOnlyList<(LedgerAccount Account, LedgerHoldings Holdings)> NonEmptyAccounts()
+    {
+        lock (_sync)
+        {
+            return _balances
+                .Where(pair => !pair.Value.IsEmpty)
+                .OrderBy(pair => pair.Key)
+                .Select(pair => (pair.Key, pair.Value.Copy()))
+                .ToList();
+        }
+    }
+
     /// <summary>Ground stack accounts that still hold journal value.</summary>
     public IReadOnlyList<LedgerAccount> NonEmptyGroundAccounts()
     {
