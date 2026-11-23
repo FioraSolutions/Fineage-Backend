@@ -47,6 +47,12 @@ public sealed class RunReport
     public double? FanoutQueueOldestAgeP99Ms { get; set; }
     public long? ReliableOverflowTotal { get; set; }
     public HonestLoadSummary? Honest { get; set; }
+
+    /// <summary>Longest tick freeze or step-watchdog stall seen in the run, in seconds.</summary>
+    public double SimulationStallSeconds { get; set; }
+
+    /// <summary>Tick-freeze episodes over the stall limit. A step-watchdog hit counts as one when the tick series did not.</summary>
+    public int SimulationStallCount { get; set; }
 }
 
 public sealed class PrometheusAggregate

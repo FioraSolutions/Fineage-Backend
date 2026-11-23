@@ -13,6 +13,7 @@ public static class CompactMarkdownRenderer
         sb.AppendLine();
         bool gatesOk = r.GateVerdicts.Count == 0 || r.GateVerdicts.All(g => g.Passed);
         sb.AppendLine($"**Runner:** {(r.Passed ? "PASS" : "FAIL")}  |  **#867 gates:** {(gatesOk ? "PASS" : "FAIL")}");
+        sb.AppendLine($"**Simulation stall:** {r.SimulationStallSeconds:0.0}s (count {r.SimulationStallCount}, limit {SimulationHangGate.StallLimit.TotalSeconds:0}s)");
         sb.AppendLine($"**Window:** {r.StartedAt:u} → {r.FinishedAt:u} ({(r.FinishedAt - r.StartedAt).TotalSeconds:0}s)");
         sb.AppendLine();
 
