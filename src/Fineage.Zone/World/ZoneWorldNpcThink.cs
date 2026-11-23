@@ -97,6 +97,19 @@ public sealed partial class ZoneWorld
     /// A chase, a walk home, or a minion follow is due on the next think, not when its idle bucket comes around.
     /// From a region body this only records the id; the scheduler thread owns the wheel.
     /// </summary>
+    /// <summary>Tests: force the next think collection to run AI for this NPC.</summary>
+    internal void BumpNpcThinkForTests(ZoneEntity npc)
+    {
+        using (_affinity.Step())
+        {
+            npc.NextThinkMs = 0;
+            if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
+                TrackThink(npc);
+            else
+                EnqueueThink(npc);
+        }
+    }
+
     internal void NoteNpcThinkJob(ZoneEntity npc)
     {
         if (RegionBodyScope.Of(this) != null)

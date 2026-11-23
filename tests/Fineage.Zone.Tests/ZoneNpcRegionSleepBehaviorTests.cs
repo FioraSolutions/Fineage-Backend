@@ -90,6 +90,7 @@ public sealed class ZoneNpcRegionSleepBehaviorTests
         Assert.True(world.TryGetEntityById(mobId, out var mob));
         world.SetAggroTarget(mob, player.ObjectId);
         mob.AttackTimeoutAtMs = long.MaxValue;
+        world.NoteNpcThinkJob(mob);
 
         world.TeleportPlayerForTests(player.Session!, mob.X - 2_500, y0, z);
         int xBefore = mob.X;
@@ -124,7 +125,7 @@ public sealed class ZoneNpcRegionSleepBehaviorTests
         mob.HomeX = homeX;
         mob.HomeY = homeY;
         mob.HomeZ = z;
-        mob.NextThinkMs = 0;
+        world.BumpNpcThinkForTests(mob);
 
         await world.RunCombatTickAsync(CancellationToken.None);
         Assert.True(mob.ReturningHome || mob.MoveActive);
