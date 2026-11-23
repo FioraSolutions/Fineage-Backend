@@ -59,6 +59,9 @@ public sealed partial class ZoneWorld
             while (true)
             {
                 await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
+                long startedNow = Volatile.Read(ref _stepStartedTimestamp);
+                if (startedNow != 0)
+                    FineageTelemetry.NoteTickRunning(Stopwatch.GetElapsedTime(startedNow).TotalMilliseconds);
                 string? report = StepWatchdogReport();
                 if (report == null)
                 {
@@ -67,8 +70,17 @@ public sealed partial class ZoneWorld
                 }
                 if (report != last)
                 {
+                    bool newStall = last == null;
                     last = report;
-                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
+                    if (newStall)
+                    {
+                        FineageTelemetry.NoteWatchdogEpisode();
+                        FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
+                    }
+
+                    long started = Volatile.Read(ref _stepStartedTimestamp);
+                    if (started != 0)
+                        FineageTelemetry.NoteWatchdogStall(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
                     ZoneHotPathLogs.SimulationWatchdog(report);
                 }
             }
@@ -79,8 +91,15 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Below this gap the next tick is close enough that phase 0 of the step itself admits the queue. A slice
+    /// any shorter trips the timebox's "deadline already passed" path.
+    /// </summary>
+    const int AdmissionGapMs = 5;
+
+    /// <summary>
     /// The live clock: starts at the current tick (the world may have been built a while ago), then wakes on each tick
-    /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart.
+    /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart. A queued
+    /// command wakes the same loop early and is admitted through <see cref="AdmitQueuedCommands"/> before that boundary.
     /// </summary>
     async Task SimulationLoopAsync(CancellationToken ct)
     {
@@ -90,8 +109,17 @@ public sealed partial class ZoneWorld
         {
             while (true)
             {
+                ct.ThrowIfCancellationRequested();
                 long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
-                await Task.Delay(TimeSpan.FromMilliseconds(wait), ct).ConfigureAwait(false);
+                if (wait >= AdmissionGapMs && _ingress.QueuedDepth > 0)
+                {
+                    AdmitQueuedCommands(wait);
+                    continue;
+                }
+
+                if (wait > 0 && !await WaitForTickOrCommandAsync(wait, ct).ConfigureAwait(false))
+                    continue;
+
                 long started = Stopwatch.GetTimestamp();
                 Volatile.Write(ref _stepStartedTimestamp, started);
                 try
@@ -108,8 +136,9 @@ public sealed partial class ZoneWorld
                 finally
                 {
                     Volatile.Write(ref _stepStartedTimestamp, 0L);
+                    FineageTelemetry.ClearTickRunning();
                 }
-                FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+                FineageTelemetry.NoteTickDuration(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
         catch (OperationCanceledException)

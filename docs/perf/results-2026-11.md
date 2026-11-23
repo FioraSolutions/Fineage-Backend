@@ -297,6 +297,51 @@ Mini-dump `clrstack -all` is the same cycle on both:
 
 The 200-bot runner still printed PASS (200/200 in world, 0 disconnects, 0 stuck, 19900 consistency checks, 0 issues) because the wedge landed as the 90 s behavior window ended. The 1000-bot runner never flushed a report; after the zone was stopped it kept a thread at ~137% CPU and ~2.5 GiB RSS, and it was killed so the soak could be closed. Server numbers for 1000 are the Prometheus scrape and the counters/trace taken before the watchdog line.
 
+## Command ingress scheduler (Nov 23, Debug)
+
+Before numbers are the post-audit Debug run (PR #913): one global 48-cost apply budget (~240 cost/s) against ~800 commands/s at 200 bots. After numbers are this branch before the outbound-lane merge, still Debug, 4 cores, sequential regions, `aoi=grid:3000`, `outboundQ=512`, zone GC **Server**. Histogram p99 is the cumulative scrape. `submit→mailbox` is end-to-end; `fanout_enqueue→mailbox` is the series the old report called cmd→mailboxes. The 200-bot column wedged on the outbound mailbox wait that #914 later removed; those figures are bucket upper bounds.
+
+| | bots-50-town before | bots-50-town after | bots-200-town before | bots-200-town after |
+| --- | ---: | ---: | ---: | ---: |
+| tick p50 / p99 | 15.7 / 65.4 | 16.7 / 58.6 | 16.1 / 49.2 | 40 / 80 (bucket) |
+| tick histogram max / true max | 1500 / (not recorded) | 1500 / **1131** | 1500 / (not recorded) | 10000 bucket / **1884** |
+| submit→dequeue p99 (mean, n) | 624 (363, 700) | **218** (p50 189, 19352) | 2193 (1615, 13312) | **220** (175, 81658) |
+| dequeue→apply p99 | 38.7 | **1.9** | 28.7 | **2.0** |
+| fanout_enqueue→mailbox p99 | 3.9 | 4.6 | 14.8 | 20 (n=644) |
+| submit→mailbox p99 / p99.9 | (not recorded) | **220 / 243** | (not recorded) | **220 / 250** |
+| commands stage p99 | 40.2 | 39.4 | 38.3 | 60 (bucket) |
+| queue depth p99 / age p99 | (not recorded) | 1 / 205 | (not recorded) | 1 / 200 |
+| coalesced / rejected | (not recorded) | 0 / 0 | (not recorded) | 0 / 0 |
+| outbound drops / fanout drops | 0 / 0 | 0 / 0 | 7 / 0 | 0 / 0 |
+| watchdog stalls | (not recorded) | 0 | (not recorded) | **1** (step never returned) |
+| client oracle p50 / p99 | 600.5 / 2608.5 | 406 / 2457 | 705 / 2870 | (runner killed while wedged) |
+| real CPU % avg / max | <10% of 4 cores | **4.8 / 39.8** | <10% of 4 cores | **4.6 / 46.5** |
+| zone RSS | 601 MiB | 570 MiB | (wedged) | 470 MiB (HWM 651) |
+| result | PASS | runner PASS | wedged | **wedged** after ~90s of behavior |
+
+50 bots: ramp 20s + 90s, enter concurrency 16, all 50 in world, 0 disconnects. The 1131 ms true max is one `request:enter` (910 ms) inside the apply slice; the timebox does not preempt a command already running.
+
+200 bots: ramp 60s + 90s, all 200 entered. Behavior then stuck with no region bodies in flight. That hang is the mailbox wait #914 removed. Ingress during the healthy window no longer queued for seconds: submit→dequeue p99 is one tick (220 ms) instead of 2193 ms.
+
+## Intra-tick command admission (Nov 23, Debug)
+
+Commands were applied only in phase 0 of the next 200 ms step, so submit→mailbox p99 sat at one tick (220 ms on the merged scheduler head) even though commit→mailbox was already 15.5 ms. The live loop now runs the same `commands` stage as soon as a command is queued, pinned to the upcoming tick and stopped at that boundary.
+
+Both columns are Debug bots-200-town, 4 cores, sequential regions. Before is the merged scheduler head `5fab546c` (the run that wedged; histograms are the frozen scrape). After is this branch, from `load-test-report.md` (runner PASS, #867 gates PASS).
+
+| | before (`5fab546c`) | after (intra-tick admission) |
+| --- | ---: | ---: |
+| tick p50 / p99 / true max | 29.0 / 81.2 / **1420.8** | 16.0 / 42.9 / **378.5** |
+| submit→dequeue p99 | 210.8 | **19.3** |
+| command→mailboxes p99 (180 ms gate) | 15.5 | **24.2** |
+| submit→mailbox p99 | 219.9 | **36.4** |
+| dequeue→apply p99 | 1.3 | **1.4** |
+| outbound lanes blocked / full / coalesced / evicted | 0 / 0 / movement 1197 / 0 | 0 / 0 / movement 2135 / 0 |
+| real CPU % avg / max | 10.6 / 38.0 before the stall | 6.4 / 34.4 (13.2 / 34.4 before the stall) |
+| zone RSS (HWM) | 505 MiB (576) | 504 MiB (619) |
+
+The zone step still stuck once, after the behavior window, with no region bodies in flight (watchdog 180.9 s in the zone log). The runner sampled that log before the watchdog crossed 30 s and printed stall 4.8 s, count 0.
+
 ## Reproduce smoke
 
 ```bash

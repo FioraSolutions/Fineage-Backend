@@ -169,8 +169,43 @@ public sealed class NetPresenceHub : IAsyncDisposable
     }
 
     /// <summary>
-    /// Critical presence (spawn/despawn/inventory). Same handle path as <see cref="TrySend"/>; the stripe
-    /// waits for mailbox room instead of dropping the frame.
+    /// Appearance burst (knownlist, char info). One stripe enqueue per connection. A pending snapshot is
+    /// replaced when the mailbox budget cannot hold both. The caller does not wait.
+    /// </summary>
+    internal void SubmitSnapshot(int objectId, List<OutboundFrame> frames)
+    {
+        if (frames.Count == 0)
+            return;
+        if (!TryResolve(objectId, frames[0].Opcode, out ConnectionHandle handle))
+            return;
+
+        long stamp = CommandFanoutTimingContext.MailboxStamp();
+        if (stamp > 0)
+        {
+            for (int i = 0; i < frames.Count; i++)
+            {
+                OutboundFrame frame = frames[i];
+                if (frame.MailboxAtTimestamp == 0)
+                    frames[i] = frame with { MailboxAtTimestamp = stamp };
+                CommandFanoutTimingContext.NoteRecipient(frame.Payload.Length);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < frames.Count; i++)
+                CommandFanoutTimingContext.NoteRecipient(frames[i].Payload.Length);
+        }
+
+        if (!FanoutDeliveryScope.TryBufferSnapshot(_stripes, handle, frames))
+        {
+            _stripes.EnqueueSnapshot(handle, frames);
+            RecordCommandToMailboxes();
+        }
+    }
+
+    /// <summary>
+    /// Critical presence (spawn/despawn/inventory). Same non-blocking handle path as <see cref="TrySend"/>.
+    /// A reliable frame that does not fit closes that connection; it does not stall the tick.
     /// </summary>
     public void TrySendCritical(int objectId, ushort opcode, byte[] payload)
     {

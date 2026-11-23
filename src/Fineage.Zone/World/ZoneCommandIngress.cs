@@ -1,40 +1,149 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
 
+/// <summary>Submit timestamp carried on the sealed fan-out batch so mailbox delivery can record submit→mailbox.</summary>
+internal readonly record struct CommandSubmitMark(long CorrelationId, long SubmittedAtTicks);
+
 /// <summary>
-/// Player commands on their way into the simulation. Three ingress classes (interactive, gameplay, lifecycle) with
-/// fair round-robin across sessions, strict FIFO within a session, and a per-step apply budget measured in
-/// deterministic command cost units. Interactive ingress coalesces unapplied <see cref="MoveCommand"/> per session.
+/// One ordered queue per player and a deficit round-robin over ready players. The quantum is command cost
+/// units, so a flooding player cannot take the tick away from everyone else, and commands from one player
+/// stay in submission order. Consecutive pending movement commands collapse to the latest; a non-movement
+/// command between them is a boundary. The apply budget is wall-clock
+/// (<see cref="ZoneSimulationSettings.CommandApplyBudgetFraction"/> of the step, plus banked unused time while
+/// a backlog remains) clamped to the tick deadline. <c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET</c> is an optional
+/// extra cost-unit cap, not the default scheduler.
+/// Region-parallel apply is out of scope: every player queue is still drained on the simulation thread.
+/// A later shard can only split ready players after this scheduler remains the single admission point,
+/// so one player is never applied by two threads.
 /// </summary>
 internal sealed class ZoneCommandIngress
 {
-    const int DefaultQueueCapacity = 512;
+    internal const string CoalescedReason = "coalesced: superseded by a later movement command";
 
     readonly object _lock = new();
     readonly SemaphoreSlim _submitted = new(0, int.MaxValue);
-    readonly Dictionary<int, SessionQueues> _sessions = new();
-    readonly List<int> _roundRobin = [];
-    int _roundRobinCursor;
-    List<Applied> _applied = [];
+    readonly Dictionary<int, PlayerQueue> _players = new();
+    readonly List<int> _active = [];
+    readonly CommandApplyTimebox _timebox;
+    readonly int _queueDepthLimit;
+    readonly int _maxAgeMs;
+    readonly int _quantum;
+    readonly int _costCap;
+    readonly double _stepMs;
+    int _cursor;
+    bool _visitCharged;
+    bool _cycleStarved;
     long _sequence;
     string? _closed;
-    int _lifecycleDepth;
+    int _depth;
+    int _coalescedThisTick;
+    long _sliceStartTicks;
+    long _clockTicks;
+    bool _clockSet;
 
-    internal sealed record Submission(long Sequence, ZoneSession Session, ZoneCommand Command, TaskCompletionSource<string?> Reply, long SubmittedAtTicks);
+    internal ZoneCommandIngress(IngressLimits? limits = null)
+    {
+        limits ??= IngressLimits.FromSettings();
+        _queueDepthLimit = limits.QueueDepthLimit;
+        _maxAgeMs = limits.MaxAgeMs;
+        _quantum = limits.Quantum;
+        _costCap = limits.CostCap;
+        _stepMs = limits.StepMs;
+        _timebox = new CommandApplyTimebox(limits.NominalBudgetMs, limits.StepMs);
+    }
+
+    /// <summary>Test clock. Unset uses <see cref="Stopwatch.GetTimestamp"/>.</summary>
+    internal long? ClockForTest
+    {
+        get
+        {
+            lock (_lock)
+                return _clockSet ? _clockTicks : null;
+        }
+        set
+        {
+            lock (_lock)
+            {
+                if (value is { } ticks)
+                {
+                    _clockTicks = ticks;
+                    _clockSet = true;
+                }
+                else
+                {
+                    _clockSet = false;
+                }
+            }
+        }
+    }
+
+    internal sealed record IngressLimits(
+        int QueueDepthLimit,
+        int MaxAgeMs,
+        int Quantum,
+        int CostCap,
+        double NominalBudgetMs,
+        double StepMs)
+    {
+        public static IngressLimits FromSettings()
+        {
+            int? cost = ZoneSimulationSettings.CommandApplyCostCapOverride;
+            return new IngressLimits(
+                ZoneSimulationSettings.CommandQueueDepthLimit,
+                ZoneSimulationSettings.CommandQueueMaxAgeMs,
+                ZoneSimulationSettings.CommandDrrQuantum,
+                cost is null or 0 ? int.MaxValue : cost.Value,
+                ZoneSimulationSettings.CommandApplyNominalMilliseconds,
+                ZoneSimulationSettings.StepMilliseconds);
+        }
+    }
+
+    internal readonly record struct ApplySlice(long DeadlineTimestamp, int CostRemaining);
+
+    internal sealed record Submission(
+        long CorrelationId,
+        ZoneSession Session,
+        ZoneCommand Command,
+        TaskCompletionSource<string?> Reply,
+        long SubmittedAtTicks);
 
     internal readonly record struct Applied(Submission Submission, string? Error, Exception? Failure);
 
-    sealed class SessionQueues
+    sealed class PlayerQueue
     {
-        public readonly Queue<Submission> Interactive = new();
-        public readonly Queue<Submission> Gameplay = new();
-        public readonly Queue<Submission> Lifecycle = new();
-        public Submission? PendingMove;
-        public long PendingMoveSequence;
-        public int Depth;
+        public readonly List<Submission> Items = [];
+        public int Deficit;
+        public long OldestTicks;
+        public int Count => Items.Count;
+        public Submission Head => Items[0];
+        public Submission Tail => Items[^1];
+
+        public void Enqueue(Submission submission)
+        {
+            if (Items.Count == 0)
+                OldestTicks = submission.SubmittedAtTicks;
+            Items.Add(submission);
+        }
+
+        public Submission DequeueHead()
+        {
+            var head = Items[0];
+            Items.RemoveAt(0);
+            if (Items.Count > 0)
+                OldestTicks = Items[0].SubmittedAtTicks;
+            return head;
+        }
+
+        public Submission ReplaceTail(Submission newer)
+        {
+            var old = Items[^1];
+            Items[^1] = newer;
+            if (Items.Count == 1)
+                OldestTicks = newer.SubmittedAtTicks;
+            return old;
+        }
     }
 
     public Task<string?> Submit(ZoneSession session, ZoneCommand command, CancellationToken ct)
@@ -42,21 +151,30 @@ internal sealed class ZoneCommandIngress
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(command);
         var reply = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        long now = Stopwatch.GetTimestamp();
+        Submission? coalesced = null;
+        string? refusal;
         lock (_lock)
         {
             if (_closed != null)
-                return Task.FromException<string?>(new InvalidOperationException(
-                    $"command {command.Name} for object {session.ObjectId} refused: {_closed}"));
+            {
+                refusal = $"command {command.Name} for object {session.ObjectId} refused: {_closed}";
+                ZoneLog.Warn(refusal);
+                return Task.FromException<string?>(new ZoneIngressRefusal(refusal));
+            }
 
-            var submission = new Submission(++_sequence, session, command, reply, now);
-            if (!EnqueueLocked(session.ObjectId, submission))
-                return Task.FromException<string?>(new InvalidOperationException(
-                    $"command {command.Name} for object {session.ObjectId} refused: ingress overloaded for {command.IngressClass}"));
+            var submission = new Submission(++_sequence, session, command, reply, NowTicks());
+            if (!EnqueueLocked(submission, out coalesced, out refusal))
+            {
+                ZoneLog.Warn(refusal!);
+                FineageTelemetry.CommandRejected.Add(1, new KeyValuePair<string, object?>("reason", ReasonTag(refusal!)));
+                return Task.FromException<string?>(new ZoneIngressRefusal(refusal!));
+            }
 
             if (_submitted.CurrentCount == 0)
                 _submitted.Release();
         }
+
+        coalesced?.Reply.TrySetResult(CoalescedReason);
 
         if (ct.CanBeCanceled)
         {
@@ -68,166 +186,212 @@ internal sealed class ZoneCommandIngress
         return reply.Task;
     }
 
-    bool EnqueueLocked(int sessionId, Submission submission)
+    bool EnqueueLocked(Submission submission, out Submission? coalesced, out string? refusal)
     {
-        ref var queues = ref CollectionsMarshal.GetValueRefOrAddDefault(_sessions, sessionId, out bool exists);
-        if (!exists)
+        coalesced = null;
+        refusal = null;
+        int sessionId = submission.Session.ObjectId;
+        if (!_players.TryGetValue(sessionId, out var queue))
         {
-            queues = new SessionQueues();
-            _roundRobin.Add(sessionId);
+            queue = new PlayerQueue();
+            _players.Add(sessionId, queue);
         }
 
-        queues!.Depth++;
-        RecordQueueDepth(submission.Command.IngressClass, queues.Depth);
-
-        switch (submission.Command.IngressClass)
+        if (queue.Count > 0)
         {
-            case ZoneCommandClass.Interactive when submission.Command is MoveCommand move:
-                queues.PendingMove = submission with { Command = move };
-                queues.PendingMoveSequence = submission.Sequence;
-                return true;
-            case ZoneCommandClass.Interactive:
-                if (AtCapacity(queues.Interactive))
-                    return RefuseEnqueue(queues);
-                queues.Interactive.Enqueue(submission);
-                return true;
-            case ZoneCommandClass.Lifecycle:
-                if (AtCapacity(queues.Lifecycle))
-                    return RefuseEnqueue(queues);
-                queues.Lifecycle.Enqueue(submission);
-                _lifecycleDepth++;
-                return true;
-            case ZoneCommandClass.Gameplay:
-                if (AtCapacity(queues.Gameplay))
-                    return RefuseEnqueue(queues);
-                queues.Gameplay.Enqueue(submission);
-                return true;
-            default:
-                throw new InvalidOperationException($"command {submission.Command.GetType().Name} has no ingress class");
+            double ageMs = AgeMs(queue.OldestTicks, submission.SubmittedAtTicks);
+            if (ageMs > _maxAgeMs && !IsConsecutiveMovement(queue.Tail.Command, submission.Command))
+            {
+                refusal = $"command {submission.Command.Name} for object {sessionId} refused: " +
+                          $"rejected: queue age {ageMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms exceeds {_maxAgeMs}ms";
+                return false;
+            }
         }
+
+        if (queue.Count > 0 && IsConsecutiveMovement(queue.Tail.Command, submission.Command))
+        {
+            coalesced = queue.ReplaceTail(submission);
+            _coalescedThisTick++;
+            FineageTelemetry.CommandCoalesced.Add(1);
+            SamplePlayerLocked(queue);
+            return true;
+        }
+
+        if (queue.Count >= _queueDepthLimit)
+        {
+            refusal = $"command {submission.Command.Name} for object {sessionId} refused: " +
+                      $"rejected: queue depth {queue.Count} is at the limit {_queueDepthLimit}";
+            return false;
+        }
+
+        bool wasEmpty = queue.Count == 0;
+        queue.Enqueue(submission);
+        _depth++;
+        if (wasEmpty)
+            _active.Add(sessionId);
+        SamplePlayerLocked(queue);
+        return true;
     }
 
-    static bool AtCapacity(Queue<Submission> queue) => queue.Count >= DefaultQueueCapacity;
+    static bool IsConsecutiveMovement(ZoneCommand older, ZoneCommand newer) =>
+        older.IsCoalesceableMovement && newer.IsCoalesceableMovement;
 
-    bool RefuseEnqueue(SessionQueues queues)
-    {
-        queues.Depth--;
-        return false;
-    }
+    static string ReasonTag(string refusal) =>
+        refusal.Contains("queue age", StringComparison.Ordinal) ? "queue_age"
+        : refusal.Contains("queue depth", StringComparison.Ordinal) ? "queue_depth"
+        : "closed";
 
-    /// <summary>Takes the next commands for the step up to <paramref name="budgetCost"/> units.</summary>
-    public IReadOnlyList<Submission> TakeQueued(int budgetCost)
+    /// <summary>Opens the wall-clock slice for this step. <paramref name="stepStartedTimestamp"/> is 0 outside the live loop.</summary>
+    internal ApplySlice BeginApply(long stepStartedTimestamp)
     {
         lock (_lock)
         {
-            if (_sessions.Count == 0)
-                return [];
-
-            var taken = new List<Submission>();
-            int remaining = budgetCost <= 0 ? int.MaxValue : budgetCost;
-            int guard = 0;
-            while (remaining > 0 && _roundRobin.Count > 0 && guard++ < 100_000)
+            _cycleStarved = false;
+            SampleAllLocked();
+            bool backlog = _depth > 0;
+            double grantMs = _timebox.GrantMilliseconds(backlog);
+            long now = NowTicks();
+            _sliceStartTicks = now;
+            long budgetEnd = now + MillisecondsToTicks(grantMs);
+            long tickEnd = stepStartedTimestamp > 0
+                ? stepStartedTimestamp + MillisecondsToTicks(_stepMs)
+                : budgetEnd;
+            if (stepStartedTimestamp > 0 && now >= tickEnd)
             {
-                if (_roundRobinCursor >= _roundRobin.Count)
-                    _roundRobinCursor = 0;
-                int sessionId = _roundRobin[_roundRobinCursor];
-                if (!_sessions.TryGetValue(sessionId, out var queues) || queues.Depth == 0)
+                double ageMs = TicksToMs(now - stepStartedTimestamp);
+                ZoneLog.Error(
+                    $"command ingress tick deadline already passed at step start (step age {ageMs.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}ms, step {_stepMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms); " +
+                    $"applying the nominal {_timebox.NominalMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms budget so the per-player queues cannot stall");
+                tickEnd = now + MillisecondsToTicks(_timebox.NominalMs);
+            }
+
+            long deadline = Math.Min(budgetEnd, tickEnd);
+            return new ApplySlice(deadline, _costCap);
+        }
+    }
+
+    /// <summary>Deficit round-robin: one command, or false when the slice or the ready set is exhausted.</summary>
+    internal bool TryTake(ApplySlice slice, ref int costRemaining, out Submission submission)
+    {
+        lock (_lock)
+        {
+            submission = null!;
+            if (_cycleStarved || NowTicks() >= slice.DeadlineTimestamp)
+                return false;
+
+            // One quantum per player per call. A second pass would credit a player who already could not send.
+            int advances = 0;
+            int advanceLimit = Math.Max(1, _active.Count);
+            while (_active.Count > 0 && advances < advanceLimit)
+            {
+                if (_cursor >= _active.Count)
+                    _cursor = 0;
+                int sessionId = _active[_cursor];
+                if (!_players.TryGetValue(sessionId, out var queue) || queue.Count == 0)
                 {
-                    _roundRobin.RemoveAt(_roundRobinCursor);
+                    RemoveActiveAtCursor();
                     continue;
                 }
 
-                Submission? next = DequeueOneLocked(queues, remaining, out int cost);
-                if (next == null)
+                if (!_visitCharged)
                 {
-                    _roundRobinCursor++;
+                    queue.Deficit += _quantum;
+                    _visitCharged = true;
+                }
+
+                int cost = Math.Max(1, queue.Head.Command.ApplyCost);
+                if (cost > queue.Deficit || cost > costRemaining)
+                {
+                    AdvanceCursor();
+                    advances++;
                     continue;
                 }
 
-                double waitMs = WaitMs(next.SubmittedAtTicks);
+                submission = queue.DequeueHead();
+                queue.Deficit -= cost;
+                costRemaining -= cost;
+                _depth--;
+                double waitMs = AgeMs(submission.SubmittedAtTicks, NowTicks());
                 FineageTelemetry.CommandQueueWaitMilliseconds.Record(waitMs,
-                    new KeyValuePair<string, object?>("class", next.Command.IngressClass.ToString().ToLowerInvariant()));
+                    new KeyValuePair<string, object?>("class", submission.Command.IngressClass.ToString().ToLowerInvariant()));
                 FineageTelemetry.CommandTimelineMilliseconds.Record(waitMs,
                     new KeyValuePair<string, object?>("phase", "submit_to_dequeue"));
 
-                taken.Add(next);
-                remaining -= cost;
-                queues.Depth--;
-                _roundRobinCursor++;
-                if (queues.Depth == 0)
+                if (queue.Count == 0)
                 {
-                    _sessions.Remove(sessionId);
-                    _roundRobin.Remove(sessionId);
-                    if (_roundRobinCursor > 0)
-                        _roundRobinCursor--;
+                    queue.Deficit = 0;
+                    _players.Remove(sessionId);
+                    RemoveActiveAtCursor();
                 }
+                else if (Math.Max(1, queue.Head.Command.ApplyCost) > queue.Deficit)
+                {
+                    AdvanceCursor();
+                }
+
+                return true;
             }
 
-            return taken;
+            _cycleStarved = _active.Count > 0;
+            return false;
         }
     }
 
-    Submission? DequeueOneLocked(SessionQueues queues, int remainingBudget, out int cost)
+    internal void FinishApply()
     {
-        if (queues.PendingMove is { } move)
+        int coalesced;
+        lock (_lock)
         {
-            cost = move.Command.ApplyCost;
-            if (cost > remainingBudget && remainingBudget != int.MaxValue)
-            {
-                cost = 0;
-                return null;
-            }
-
-            queues.PendingMove = null;
-            return move;
+            double usedMs = TicksToMs(NowTicks() - _sliceStartTicks);
+            _timebox.Account(usedMs);
+            coalesced = _coalescedThisTick;
+            _coalescedThisTick = 0;
+            if (_depth > 0 && _submitted.CurrentCount == 0)
+                _submitted.Release();
         }
 
-        if (queues.Interactive.Count > 0)
-        {
-            var s = queues.Interactive.Dequeue();
-            cost = s.Command.ApplyCost;
-            if (cost > remainingBudget && remainingBudget != int.MaxValue)
-            {
-                queues.Interactive.Enqueue(s);
-                cost = 0;
-                return null;
-            }
-
-            return s;
-        }
-
-        if (queues.Lifecycle.Count > 0)
-        {
-            var s = queues.Lifecycle.Dequeue();
-            cost = s.Command.ApplyCost;
-            if (cost > remainingBudget && remainingBudget != int.MaxValue)
-            {
-                queues.Lifecycle.Enqueue(s);
-                cost = 0;
-                return null;
-            }
-
-            _lifecycleDepth--;
-            return s;
-        }
-
-        if (queues.Gameplay.Count > 0)
-        {
-            var s = queues.Gameplay.Dequeue();
-            cost = s.Command.ApplyCost;
-            if (cost > remainingBudget && remainingBudget != int.MaxValue)
-            {
-                queues.Gameplay.Enqueue(s);
-                cost = 0;
-                return null;
-            }
-
-            return s;
-        }
-
-        cost = 0;
-        return null;
+        if (coalesced > 0)
+            ZoneLog.Info($"command ingress coalesced {coalesced} movement command(s): {CoalescedReason}");
     }
+
+    void AdvanceCursor()
+    {
+        _cursor++;
+        _visitCharged = false;
+    }
+
+    void RemoveActiveAtCursor()
+    {
+        _active.RemoveAt(_cursor);
+        _visitCharged = false;
+        if (_cursor >= _active.Count)
+            _cursor = 0;
+    }
+
+    void SampleAllLocked()
+    {
+        double maxAge = 0;
+        foreach (var queue in _players.Values)
+        {
+            if (queue.Count == 0)
+                continue;
+            double age = AgeMs(queue.OldestTicks, NowTicks());
+            if (age > maxAge)
+                maxAge = age;
+            SamplePlayerLocked(queue, age);
+        }
+
+        FineageTelemetry.NoteCommandQueueAge(maxAge);
+    }
+
+    void SamplePlayerLocked(PlayerQueue queue, double? ageMs = null)
+    {
+        FineageTelemetry.CommandQueueDepth.Record(queue.Count);
+        double age = ageMs ?? (queue.Count == 0 ? 0 : AgeMs(queue.OldestTicks, NowTicks()));
+        if (queue.Count > 0)
+            FineageTelemetry.CommandQueueAgeMilliseconds.Record(age);
+    }
+
+    List<Applied> _applied = [];
 
     public void Record(Submission submission, string? error, Exception? failure)
     {
@@ -247,10 +411,6 @@ internal sealed class ZoneCommandIngress
         }
     }
 
-    /// <summary>
-    /// Commands whose character still has an uncommitted economic snapshot are not told success. An existing
-    /// rejection or exception is left as it is.
-    /// </summary>
     public void FailUncommitted(IReadOnlySet<int> characterIds, string error)
     {
         ArgumentNullException.ThrowIfNull(characterIds);
@@ -289,16 +449,16 @@ internal sealed class ZoneCommandIngress
         get
         {
             lock (_lock)
-                return _sessions.Values.Sum(q => q.Depth);
+                return _depth;
         }
     }
 
-    internal int LifecycleDepth
+    internal double BankedApplyMsForTest
     {
         get
         {
             lock (_lock)
-                return _lifecycleDepth;
+                return _timebox.CreditMs;
         }
     }
 
@@ -309,31 +469,47 @@ internal sealed class ZoneCommandIngress
         {
             _closed = reason;
             stranded = [];
-            foreach (var queues in _sessions.Values)
+            foreach (var queue in _players.Values)
             {
-                if (queues.PendingMove is { } move)
-                    stranded.Add(move);
-                while (queues.Interactive.TryDequeue(out var s))
-                    stranded.Add(s);
-                while (queues.Gameplay.TryDequeue(out var s))
-                    stranded.Add(s);
-                while (queues.Lifecycle.TryDequeue(out var s))
-                    stranded.Add(s);
+                while (queue.Count > 0)
+                    stranded.Add(queue.DequeueHead());
             }
 
-            _sessions.Clear();
-            _roundRobin.Clear();
+            _players.Clear();
+            _active.Clear();
+            _depth = 0;
         }
 
         foreach (var submission in stranded)
-            submission.Reply.TrySetException(new InvalidOperationException(
+            submission.Reply.TrySetException(new ZoneIngressRefusal(
                 $"command {submission.Command.Name} for object {submission.Session.ObjectId} was not applied: {reason}"));
     }
 
-    static double WaitMs(long submittedAtTicks) =>
-        Math.Max(0, (Stopwatch.GetTimestamp() - submittedAtTicks) * 1000.0 / Stopwatch.Frequency);
+    long NowTicks()
+    {
+        if (_clockSet)
+            return _clockTicks;
+        return Stopwatch.GetTimestamp();
+    }
 
-    static void RecordQueueDepth(ZoneCommandClass cls, int depth) =>
-        FineageTelemetry.CommandQueueDepth.Record(depth,
-            new KeyValuePair<string, object?>("class", cls.ToString().ToLowerInvariant()));
+    double AgeMs(long submittedAtTicks, long nowTicks) =>
+        Math.Max(0, TicksToMs(nowTicks - submittedAtTicks));
+
+    static long MillisecondsToTicks(double ms) =>
+        (long)(ms * Stopwatch.Frequency / 1000.0);
+
+    static double TicksToMs(long ticks) => ticks * 1000.0 / Stopwatch.Frequency;
+}
+
+/// <summary>Ingress refused the command before it was applied. <see cref="Coalesced"/> is a superseded movement.</summary>
+internal sealed class ZoneIngressRefusal : InvalidOperationException
+{
+    public ZoneIngressRefusal(string reason) : base(reason)
+    {
+        Reason = reason;
+    }
+
+    public string Reason { get; }
+
+    public bool Coalesced => Reason.StartsWith("coalesced:", StringComparison.Ordinal);
 }

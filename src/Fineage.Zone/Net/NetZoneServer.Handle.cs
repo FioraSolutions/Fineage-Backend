@@ -356,6 +356,16 @@ public sealed partial class NetZoneServer
                             break;
                     }
                 }
+                catch (ZoneIngressRefusal ex) when (ex.Coalesced)
+                {
+                    // The latest movement command is still queued. Nothing to send for the one it replaced.
+                }
+                catch (ZoneIngressRefusal ex)
+                {
+                    ZoneLog.Warn(
+                        $"command refused session={zoneSession.WireSessionId} opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex.Reason}");
+                    await RejectAsync(conn, "ingress_refused", ex.Reason, ct).ConfigureAwait(false);
+                }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex}");

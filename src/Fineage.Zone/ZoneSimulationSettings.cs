@@ -69,10 +69,36 @@ public static class ZoneSimulationSettings
     }
 
     /// <summary>
-    /// Per-step command apply budget in deterministic cost units (<c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET</c>, default
-    /// 48). Zero means unlimited.
+    /// Fraction of the simulation step the command stage may spend before it borrows banked time
+    /// (<c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET_FRACTION</c>, default 0.35). The stage may spend unused credit from
+    /// earlier steps when a per-player backlog remains, and it always stops at the tick deadline.
     /// </summary>
-    public static int CommandApplyBudget => ReadInt("FINEAGE_ZONE_COMMAND_APPLY_BUDGET", 48, min: 0, max: 10_000);
+    public static double CommandApplyBudgetFraction =>
+        ReadDouble("FINEAGE_ZONE_COMMAND_APPLY_BUDGET_FRACTION", 0.35, min: 0.05, max: 1);
+
+    /// <summary>Nominal command-stage wall budget in milliseconds: the fraction times the step.</summary>
+    public static double CommandApplyNominalMilliseconds =>
+        StepMilliseconds * CommandApplyBudgetFraction;
+
+    /// <summary>
+    /// Optional extra cost-unit cap per step (<c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET</c>).
+    /// Unset, or <c>0</c>: no cost cap; the wall-clock timebox is the budget.
+    /// A positive integer: also stop after that many command cost units in the step.
+    /// Text that is not an integer throws; it is not ignored and it does not fall back to the old default of 48.
+    /// </summary>
+    public static int? CommandApplyCostCapOverride => ReadOptionalInt("FINEAGE_ZONE_COMMAND_APPLY_BUDGET", min: 0, max: 1_000_000);
+
+    /// <summary>Deficit round-robin quantum in command cost units (<c>FINEAGE_ZONE_COMMAND_DRR_QUANTUM</c>, default 8).</summary>
+    public static int CommandDrrQuantum => ReadIntStrict("FINEAGE_ZONE_COMMAND_DRR_QUANTUM", 8, min: 1, max: 10_000);
+
+    /// <summary>Per-player ingress queue depth (<c>FINEAGE_ZONE_COMMAND_QUEUE_DEPTH</c>, default 64).</summary>
+    public static int CommandQueueDepthLimit => ReadIntStrict("FINEAGE_ZONE_COMMAND_QUEUE_DEPTH", 64, min: 1, max: 100_000);
+
+    /// <summary>
+    /// Reject a non-coalesced command when the player's oldest pending command is older than this
+    /// (<c>FINEAGE_ZONE_COMMAND_QUEUE_MAX_AGE_MS</c>, default 2000).
+    /// </summary>
+    public static int CommandQueueMaxAgeMs => ReadIntStrict("FINEAGE_ZONE_COMMAND_QUEUE_MAX_AGE_MS", 2000, min: 1, max: 120_000);
 
     public static IRegionExecutor RegionExecutor(int workers) =>
         workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);
@@ -86,5 +112,39 @@ public static class ZoneSimulationSettings
         if (string.IsNullOrWhiteSpace(text) || !int.TryParse(text, out int value))
             return fallback;
         return Math.Clamp(value, min, max);
+    }
+
+    /// <summary>Unset uses <paramref name="fallback"/>. Set but not an integer, or outside the range, throws naming the variable.</summary>
+    static int ReadIntStrict(string name, int fallback, int min, int max)
+    {
+        string? text = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(text))
+            return fallback;
+        if (!int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) || value < min || value > max)
+            throw new InvalidOperationException(
+                $"{name}='{text}' must be an integer from {min} to {max}.");
+        return value;
+    }
+
+    static int? ReadOptionalInt(string name, int min, int max)
+    {
+        string? text = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+        if (!int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) || value < min || value > max)
+            throw new InvalidOperationException(
+                $"{name}='{text}' must be an integer from {min} to {max} (0 = no cost cap; the wall-clock timebox still applies).");
+        return value;
+    }
+
+    static double ReadDouble(string name, double fallback, double min, double max)
+    {
+        string? text = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrWhiteSpace(text))
+            return fallback;
+        if (!double.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out double value) || value < min || value > max)
+            throw new InvalidOperationException(
+                $"{name}='{text}' must be a number from {min.ToString(CultureInfo.InvariantCulture)} to {max.ToString(CultureInfo.InvariantCulture)}.");
+        return value;
     }
 }

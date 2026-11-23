@@ -10,16 +10,29 @@ readonly record struct NetFrame(int PeerObjectId, ushort Opcode, byte[] Payload)
 {
     public static NetFrame ToSelf(ushort opcode, byte[] payload) => new(0, opcode, payload);
 
-    /// <summary>Sends <paramref name="frames"/> in order; a peer that is no longer connected is skipped.</summary>
-    public static async Task SendAsync(
+    /// <summary>
+    /// Queues <paramref name="frames"/> without waiting on the mailbox. Frames for this connection are one
+    /// ordered batch. A peer that is no longer connected is skipped.
+    /// </summary>
+    public static Task SendAsync(
         NetConnection conn, NetPresenceHub presence, IEnumerable<NetFrame> frames, CancellationToken ct)
     {
-        foreach (var frame in frames)
+        if (ct.IsCancellationRequested)
+            return Task.FromCanceled(ct);
+
+        var self = new List<OutboundFrame>();
+        foreach (NetFrame frame in frames)
         {
+            if (ct.IsCancellationRequested)
+                break;
             if (frame.PeerObjectId == 0)
-                await conn.SendAsync(frame.Opcode, frame.Payload, ct: ct).ConfigureAwait(false);
+                self.Add(new OutboundFrame(frame.Opcode, frame.Payload));
             else
-                await presence.SendAsync(frame.PeerObjectId, frame.Opcode, frame.Payload, ct).ConfigureAwait(false);
+                presence.TrySendCritical(frame.PeerObjectId, frame.Opcode, frame.Payload);
         }
+
+        if (self.Count > 0)
+            conn.SubmitOrderedBatch(self);
+        return Task.CompletedTask;
     }
 }

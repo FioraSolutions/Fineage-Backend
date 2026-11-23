@@ -182,7 +182,16 @@ sequenceDiagram
   owning region. Reads that need world state (enter-world projection) become request messages answered at the next
   tick. Since step 6 every gameplay handler submits a `ZoneCommand` (`World/ZoneCommands*.cs`) through
   `ZoneWorld.ExecuteAsync` into `ZoneCommandIngress`; the `commands` world stage, first at period 1, applies them in
-  submission order (phase 0). The handler awaits the outcome, which completes after the fan-out and inventory flush
+  per-player submission order (phase 0). The live loop also runs that same stage while it is waiting for the next
+  tick, as soon as a command is queued, pinned to the upcoming tick's time and stopped at that tick boundary, and
+  seals the slice's fan-out before the rest of the tick. Phase 0 of the step applies whatever arrived after the last
+  slice. Ready players share each slice through deficit round-robin (quantum in command cost units); deficit carries
+  from one slice into the next, so the admission point stays the one ingress. The wall-clock budget is
+  `FINEAGE_ZONE_COMMAND_APPLY_BUDGET_FRACTION` of the step (default 0.35);
+  unused time is banked and may be borrowed while a backlog remains, and the stage still stops at the tick deadline.
+  `FINEAGE_ZONE_COMMAND_APPLY_BUDGET`, when set, is an extra cost-unit cap (0 or unset = no cost cap). It is not a
+  fixed 48-unit global queue. Consecutive pending movement commands from one player collapse to the latest; a
+  non-movement command is a boundary. The handler awaits the outcome, which completes after the fan-out and inventory flush
   the command caused (released at the end of the `commands` stage, before later stages run), so a reply never overtakes
   those frames or writes. A submission
   cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the

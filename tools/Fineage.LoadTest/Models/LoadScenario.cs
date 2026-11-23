@@ -42,6 +42,12 @@ public sealed class LoadScenario
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
     public int AoiCellSize { get; set; } = 3000;
 
+    /// <summary>
+    /// How many bots may <c>ConnectAndEnterAsync</c> at once. 0 uses 16.
+    /// <c>FINEAGE_LOADTEST_ENTER_CONCURRENCY</c> overrides this.
+    /// </summary>
+    public int EnterConcurrency { get; set; } = 16;
+
     /// <summary>Instant offensive skill known at level 1 for the scenario class (Mobius autoGet).</summary>
     public int ResolveCombatSkillId()
     {

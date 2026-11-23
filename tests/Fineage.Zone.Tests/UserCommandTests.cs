@@ -33,10 +33,10 @@ public sealed class UserCommandTests
     {
         var kit = new WorldBench();
         var me = await kit.EnterAsync();
-        var region = MapRegionCatalog.LoadDefault().At(me.Player.X, me.Player.Y);
-        Assert.NotNull(region);
         me.MoveTo(me.Player.X + 100, me.Player.Y + 100, me.Player.Z);
         int originX = me.Player.X;
+        int originY = me.Player.Y;
+        int originZ = me.Player.Z;
 
         Assert.Null(await kit.World.TryUserCommandAsync(me.Session, UserCommandProtocol.Unstuck, CancellationToken.None));
         Assert.Equal(originX, me.Player.X);
@@ -48,7 +48,16 @@ public sealed class UserCommandTests
             row => Assert.IsType<SystemMessageMsg>(row[1]).Id == UserCommandProtocol.UnstuckFiveMinutes);
 
         await kit.World.CompleteCastForTestAsync(me.Session);
-        Assert.Contains(region!.RespawnPoints, p => p.X == me.Player.X && p.Y == me.Player.Y && p.Z == me.Player.Z && p.Kind == "normal");
+        var regions = MapRegionCatalog.LoadDefault();
+        var rules = kit.World.ZoneRules.Query(originX, originY, originZ, me.Player.Race);
+        var town = !string.IsNullOrEmpty(rules.RespawnPoint)
+            ? regions.ByName(rules.RespawnPoint) ?? regions.At(originX, originY) ?? regions.Fallback
+            : regions.At(originX, originY) ?? regions.Fallback;
+        var race = Fineage.Zone.Geo.ZoneTypes.ZoneRaces.Name(me.Player.Race);
+        if (race != null && town.BannedRace.TryGetValue(race, out var banned) && !string.IsNullOrEmpty(banned))
+            town = regions.ByName(banned) ?? town;
+        Assert.Contains(town.RespawnPoints, p =>
+            !p.IsChaotic && p.Kind == "normal" && p.X == me.Player.X && p.Y == me.Player.Y && p.Z == me.Player.Z);
     }
 
     [Fact]
