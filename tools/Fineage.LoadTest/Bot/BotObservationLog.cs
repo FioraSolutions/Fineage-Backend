@@ -17,9 +17,80 @@ public sealed class BotObservationLog
 
     readonly ConcurrentQueue<ObservedFrame> _frames = new();
     readonly object _stateGate = new();
+    readonly BotBagTracker? _bag;
     EntityTracker _tracker = new();
+    TradeAskNetMsg? _lastTradeAsk;
+    PrivateStoreListSellNetMsg? _lastPrivateStoreListSell;
+    int _frameCount;
 
     public IReadOnlyList<ObservedFrame> Snapshot() => _frames.ToArray();
+    public int FrameCount => Volatile.Read(ref _frameCount);
+    public TradeAskNetMsg? LastTradeAsk => _lastTradeAsk;
+    public PrivateStoreListSellNetMsg? LastPrivateStoreListSell => _lastPrivateStoreListSell;
+
+    public bool ContainsOpcodeAfter(int afterFrame, params ushort[] opcodes)
+    {
+        int i = 0;
+        foreach (var frame in _frames)
+        {
+            if (++i <= afterFrame)
+                continue;
+            foreach (ushort opcode in opcodes)
+            {
+                if (frame.Opcode == opcode)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool ContainsRejectAfter(int afterFrame, out string? code)
+    {
+        code = null;
+        int i = 0;
+        foreach (var frame in _frames)
+        {
+            if (++i <= afterFrame)
+                continue;
+            if (frame.Opcode != NetOpcode.Reject)
+                continue;
+            code = NetCodec.DecodeReject(frame.Payload).Code;
+            return true;
+        }
+
+        return false;
+    }
+
+    public int? TryPickNearestGroundItem(int selfObjectId, int maxRange)
+    {
+        lock (_stateGate)
+        {
+            if (!_tracker.Entities.TryGetValue(_tracker.SelfEntityValue, out var self))
+                return null;
+            int best = 0;
+            int bestDist = int.MaxValue;
+            foreach (var ent in _tracker.Entities.Values)
+            {
+                if (ent.Despawned || ent.Kind != EntityKindNet.Item)
+                    continue;
+                int dist = Distance(self.X, self.Y, ent.X, ent.Y);
+                if (dist > maxRange || dist >= bestDist)
+                    continue;
+                bestDist = dist;
+                best = ent.ObjectId;
+            }
+
+            return best > 0 ? best : null;
+        }
+    }
+
+    static int Distance(int x1, int y1, int x2, int y2)
+    {
+        long dx = x1 - x2;
+        long dy = y1 - y2;
+        return (int)Math.Sqrt(dx * dx + dy * dy);
+    }
 
     public EntityTracker Tracker
     {
@@ -34,8 +105,26 @@ public sealed class BotObservationLog
     {
         var copy = payload.ToArray();
         _frames.Enqueue(new ObservedFrame(at, opcode, copy));
+        Interlocked.Increment(ref _frameCount);
         lock (_stateGate)
+        {
             _tracker.Apply(opcode, copy, at);
+            switch (opcode)
+            {
+                case NetOpcode.ItemList:
+                    _bag?.ApplyItemList(NetCodec.DecodeItemList(copy));
+                    break;
+                case NetOpcode.InventoryUpdate:
+                    _bag?.ApplyInventoryUpdate(NetCodec.DecodeInventoryUpdate(copy));
+                    break;
+                case NetOpcode.TradeAsk:
+                    _lastTradeAsk = NetCodec.DecodeTradeAsk(copy);
+                    break;
+                case NetOpcode.PrivateStoreListSell:
+                    _lastPrivateStoreListSell = NetCodec.DecodePrivateStoreListSell(copy);
+                    break;
+            }
+        }
     }
 
     public void RecordCommandSent(ushort opcode, DateTimeOffset at, int targetObjectId = 0, int skillId = 0)
@@ -66,7 +155,11 @@ public sealed class BotObservationLog
         }
     }
 
-    public BotObservationLog(int botId) => BotId = botId;
+    public BotObservationLog(int botId, BotBagTracker? bag = null)
+    {
+        BotId = botId;
+        _bag = bag;
+    }
 
     /// <summary>Fleet index. Wire identity is the <c>IsSelf</c> spawn, not this id.</summary>
     public int BotId { get; }
@@ -84,6 +177,7 @@ public sealed class BotObservationLog
         readonly List<LatencySample> _skillSamples = [];
         readonly List<LatencySample> _legacyCommandToFanoutSamples = [];
         ulong _selfEntityValue;
+        public ulong SelfEntityValue => _selfEntityValue;
         int _attackSampleCount;
         int _skillSampleCount;
         int _attackTimeoutCount;

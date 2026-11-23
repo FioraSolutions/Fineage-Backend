@@ -8,7 +8,7 @@ using Fineage.Net.Host;
 
 namespace Fineage.LoadTest.Bot;
 
-public sealed class FineageBotClient : IAsyncDisposable
+public sealed partial class FineageBotClient : IAsyncDisposable
 {
     TcpClient _login = new();
     TcpClient _zone = new();
@@ -21,6 +21,7 @@ public sealed class FineageBotClient : IAsyncDisposable
     readonly BotStats _stats;
     readonly BotObservationLog _observation;
     readonly BotPeerDirectory _peers;
+    readonly BotBagTracker _bag = new();
     Task? _receiveTask;
     CancellationTokenSource _receiveCts = new();
     ushort _lastRecvOpcode;
@@ -46,7 +47,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         Account = $"{scenario.AccountPrefix}{botId:D5}";
         CharacterName = $"Bot{botId:D4}";
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
-        _observation = new BotObservationLog(botId);
+        _observation = new BotObservationLog(botId, _bag);
         if (scenario.IsGatekeeperTraveler(botId))
         {
             if (gatekeepers == null)
@@ -68,7 +69,10 @@ public sealed class FineageBotClient : IAsyncDisposable
     public string CharacterName { get; }
     public BotStats Stats => _stats;
     public BotObservationLog ObservationLog => _observation;
+    public BotBagTracker Bag => _bag;
     public int SelfObjectId => (int)_selfEntity;
+    internal Random Rng => _rng;
+    internal BotPeerDirectory Peers => _peers;
 
     ulong _selfEntity;
 
@@ -107,8 +111,14 @@ public sealed class FineageBotClient : IAsyncDisposable
                 _lastRecvOpcode = opcode;
                 _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
                 _traveler?.OnFrame(opcode, payload);
+                await MaybeAcceptPartyInviteAsync(opcode, payload);
                 if (opcode == NetOpcode.Reject)
-                    _stats.LastError = NetCodec.DecodeReject(payload).Code;
+                {
+                    string code = NetCodec.DecodeReject(payload).Code;
+                    _stats.LastError = code;
+                    if (Scenario.Economy is { Enabled: true })
+                        _stats.RecordEconomyReject(code);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -231,7 +241,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         }
     }
 
-    public async Task RunBehaviorTickAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
+    async Task RunLegacyMixedBehaviorTickAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
     {
         if (_zoneStream == null || _stats.Disconnected)
             return;
@@ -246,7 +256,33 @@ public sealed class FineageBotClient : IAsyncDisposable
         var sw = Stopwatch.StartNew();
         try
         {
-            switch (action)
+            if (action.StartsWith("economy_", StringComparison.Ordinal))
+            {
+                await BotEconomyFlows.RunActionAsync(this, action, fleet, ct);
+                Interlocked.Increment(ref _stats.ActionsAttempted);
+                _stats.LastActionAt = DateTimeOffset.UtcNow;
+                sw.Stop();
+                _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
+                return;
+            }
+
+            await RunLegacyActionAsync(action, fleet, ct);
+            Interlocked.Increment(ref _stats.ActionsAttempted);
+            _stats.LastActionAt = DateTimeOffset.UtcNow;
+            sw.Stop();
+            _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            Interlocked.Increment(ref _stats.ActionsFailed);
+            _stats.LastError = ex.Message;
+            _stats.Disconnected = true;
+        }
+    }
+
+    async Task RunLegacyActionAsync(string action, IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
+    {
+        switch (action)
             {
                 case "move":
                     int dx = _rng.Next(-400, 400);
@@ -336,18 +372,6 @@ public sealed class FineageBotClient : IAsyncDisposable
                     await RelogAsync(fleet, ct);
                     break;
             }
-
-            Interlocked.Increment(ref _stats.ActionsAttempted);
-            _stats.LastActionAt = DateTimeOffset.UtcNow;
-            sw.Stop();
-            _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            Interlocked.Increment(ref _stats.ActionsFailed);
-            _stats.LastError = ex.Message;
-            _stats.Disconnected = true;
-        }
     }
 
     /// <summary>Gatekeeper travellers run only the travel loop; see <see cref="GatekeeperTraveler"/>.</summary>
@@ -372,7 +396,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         }
     }
 
-    async Task SendTrackedAsync(
+    internal async Task SendTrackedAsync(
         ushort opcode,
         byte[] payload,
         CancellationToken ct,
@@ -384,7 +408,7 @@ public sealed class FineageBotClient : IAsyncDisposable
         await ZoneWriteAsync(opcode, payload, ct);
     }
 
-    int? VisiblePlayerObjectId()
+    public int? VisiblePlayerObjectId()
     {
         var tracker = _observation.Tracker;
         foreach (var ent in tracker.Entities.Values)

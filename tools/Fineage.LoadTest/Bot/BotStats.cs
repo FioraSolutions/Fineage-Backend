@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Fineage.LoadTest.Travel;
 
 namespace Fineage.LoadTest.Bot;
@@ -21,7 +22,19 @@ public sealed class BotStats
     /// <summary>Set for gatekeeper travellers only.</summary>
     public TravelStats? Travel;
 
+    public long EconomyFlowsAttempted;
+    public long EconomyFlowsSucceeded;
+    public ConcurrentDictionary<string, int> EconomyRejectCounts { get; } = new(StringComparer.OrdinalIgnoreCase);
+    public ConcurrentBag<string> EconomyFlowFailures { get; } = [];
+
     public double RttAvgMs => RttSamples == 0 ? 0 : RttSumMs / RttSamples;
+
+    public void RecordEconomyReject(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            code = "unknown";
+        EconomyRejectCounts.AddOrUpdate(code, 1, static (_, n) => n + 1);
+    }
 
     public void RecordRtt(double ms)
     {

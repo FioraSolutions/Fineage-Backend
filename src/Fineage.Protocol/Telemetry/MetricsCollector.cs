@@ -48,6 +48,7 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, long> _laneCoalesced = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _laneEvicted = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
+    long _ledgerInvariantViolations;
     int _persistPending;
     double _persistOldestAgeMs;
     int _online;
@@ -124,6 +125,7 @@ public sealed class MetricsCollector : IDisposable
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 LedgerFlushFailures = _ledgerFlushFailures,
+                LedgerInvariantViolations = _ledgerInvariantViolations,
                 PersistPending = _persistPending,
                 PersistOldestAgeMs = _persistOldestAgeMs,
                 PersistSnapshots = _persistSnapshots
@@ -213,6 +215,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.ledger.flush_failures":
                     _ledgerFlushFailures += value;
+                    break;
+                case "fineage.ledger.invariant_violations":
+                    _ledgerInvariantViolations += value;
                     break;
                 case "fineage.persist.snapshots":
                     string result = Tag(tags, "result");

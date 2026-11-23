@@ -4,6 +4,14 @@ namespace Fineage.LoadTest.Reporting;
 public static class PerformanceGates
 {
     public const double TickP99GateMs = 200;
+    public const double HeavyPlayTickP99GateMs = 50;
+
+    static readonly Dictionary<string, double> TickP99ByScenario = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["perf-aoe-train"] = HeavyPlayTickP99GateMs,
+        ["perf-aoe-multiparty"] = HeavyPlayTickP99GateMs,
+        ["perf-aoe-combined"] = HeavyPlayTickP99GateMs
+    };
 
     static readonly Dictionary<string, double> CommandToMailboxesP99ByScenario = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -23,15 +31,37 @@ public static class PerformanceGates
         string scenario = report.ScenarioName;
 
         double tickP99 = report.Server?.TickP99Ms ?? 0;
+        double tickLimit = TickP99ByScenario.TryGetValue(scenario, out double heavyLimit) ? heavyLimit : TickP99GateMs;
         verdicts.Add(new GateVerdict
         {
-            Gate = "tick p99 <= 200 ms",
-            Limit = TickP99GateMs,
+            Gate = $"tick p99 <= {tickLimit:0} ms ({scenario})",
+            Limit = tickLimit,
             Observed = tickP99,
             Unit = "ms",
-            Passed = tickP99 <= TickP99GateMs || tickP99 <= 0,
+            Passed = tickP99 <= tickLimit || tickP99 <= 0,
             Note = tickP99 <= 0 ? "no scrape data" : null
         });
+        double tickP50 = report.Server?.TickP50Ms ?? 0;
+        double tickMax = report.TickTrueMaxMs ?? report.Server?.TickMaxMs ?? 0;
+        if (TickP99ByScenario.ContainsKey(scenario))
+        {
+            verdicts.Add(new GateVerdict
+            {
+                Gate = "heavy-play tick p50 (informative)",
+                Limit = null,
+                Observed = tickP50,
+                Unit = "ms",
+                Passed = true
+            });
+            verdicts.Add(new GateVerdict
+            {
+                Gate = "heavy-play tick max (informative)",
+                Limit = null,
+                Observed = tickMax,
+                Unit = "ms",
+                Passed = true
+            });
+        }
 
         // #867 command→mailboxes is fineage_command_to_mailboxes_ms (commit to first mailbox enqueue).
         // It is not the client consistency oracle and not submit_to_mailbox, which includes the tick wait.

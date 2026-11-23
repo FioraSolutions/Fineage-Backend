@@ -1,0 +1,16 @@
+# Perf #951 + #955/#957 — multi-party AoE plus economy-hammer background and ~20% town teleports.
+name: perf-aoe-combined
+extends: bots-economy-hammer.yaml
+botCount: 72
+rampUpSeconds: 40
+durationSeconds: 180
+spawnLayout: aoe-multiparty
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+heavyPlay:
+  mode: aoe-combined
+  partySize: 9
+  partyCount: 4
+  skillRotation: [36, 48]
+  economyTeleportWeight: 0.20

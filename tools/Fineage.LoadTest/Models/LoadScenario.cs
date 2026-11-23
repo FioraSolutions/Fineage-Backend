@@ -83,19 +83,27 @@ public sealed class LoadScenario
     /// </summary>
     public int EnterConcurrency { get; set; } = 16;
 
-    /// <summary>Instant offensive skill known at level 1 for the scenario class (Mobius autoGet).</summary>
+    /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
+    public string? Extends { get; set; }
+
+    /// <summary>Full-economy hammer (#955): P2P trade, shops, stores, manufacture, manor, warehouse.</summary>
+    public EconomyHammerConfig? Economy { get; set; }
+
+    /// <summary>Structured AoE / party fan-out scenarios (#951).</summary>
+    public HeavyPlayConfig? HeavyPlay { get; set; }
+
     public int ResolveCombatSkillId()
     {
         if (CombatSkillId > 0)
             return CombatSkillId;
+        if (HeavyPlay?.SkillRotation is { Length: > 0 })
+            return HeavyPlay.SkillRotation[0];
         return ClassId switch
         {
-            HumanClasses.Mystic or 25 or 38 => 1177, // Wind Strike
-            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3, // Power Strike (level ≥ 5)
+            HumanClasses.Mystic or 25 or 38 => 1177,
+            48 => 36,
+            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3,
             _ => 1177
         };
     }
-
-    /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
-    public string? Extends { get; set; }
 }

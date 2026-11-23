@@ -347,6 +347,8 @@ public sealed partial class ZoneWorld
         UpdateRuleZoneState(entity);
         if (loaded.ApplyStarterKit)
             ApplyStarterKitLedger(entity);
+        if (LoadTestCombatProfileNeeded(entity))
+            TryApplyLoadTestCombatProfile(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.
         entity.Inventory?.EstablishCursor();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);

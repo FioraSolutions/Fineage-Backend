@@ -32,6 +32,7 @@ public sealed class RunReport
     public List<string> FailReasons { get; set; } = [];
     public List<string> Bugs { get; init; } = [];
     public ConsistencyReport? Consistency { get; init; }
+    public EconomyConsistencyReport? Economy { get; set; }
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset SteadyStateStartedAt { get; init; }
     public DateTimeOffset FinishedAt { get; init; }
@@ -315,6 +316,24 @@ public static class ReportWriter
             int n = 1;
             foreach (string bug in r.Bugs)
                 sb.AppendLine($"{n++}. {bug}");
+        }
+
+        if (r.Economy != null)
+        {
+            sb.AppendLine();
+            sb.AppendLine("## Economy oracle (auditable ledger)");
+            sb.AppendLine($"- Flows attempted / succeeded: **{r.Economy.EconomyFlowsAttempted}** / **{r.Economy.EconomyFlowsSucceeded}**");
+            sb.AppendLine($"- Ledger invariant violations (metric peak): **{r.Economy.LedgerInvariantViolations}**");
+            sb.AppendLine($"- Explained economy rejects: **{r.Economy.ExplainedEconomyRejects}**");
+            sb.AppendLine($"- Issues: **{r.Economy.Issues.Count}**");
+            if (r.Economy.Issues.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("| kind | bot | oid | detail |");
+                sb.AppendLine("| --- | ---: | ---: | --- |");
+                foreach (var issue in r.Economy.Issues.Take(30))
+                    sb.AppendLine($"| {issue.Kind} | {issue.BotId} | {issue.ObjectId} | {issue.Detail.Replace('|', '/')} |");
+            }
         }
 
         if (r.Consistency != null)

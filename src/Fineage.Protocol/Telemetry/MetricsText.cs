@@ -85,6 +85,7 @@ public sealed class MetricsSnapshot
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
+    public long LedgerInvariantViolations { get; init; }
     public int PersistPending { get; init; }
     public double PersistOldestAgeMs { get; init; }
     public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
@@ -326,6 +327,11 @@ public static class MetricsText
         sb.Append("# TYPE fineage_ledger_flush_failures_total counter\n");
         sb.Append("fineage_ledger_flush_failures_total ")
             .Append(snapshot.LedgerFlushFailures.ToString(CultureInfo.InvariantCulture))
+            .Append('\n');
+        AppendHelp(sb, "fineage_ledger_invariant_violations_total", "Auditable economy ledger invariant violations");
+        sb.Append("# TYPE fineage_ledger_invariant_violations_total counter\n");
+        sb.Append("fineage_ledger_invariant_violations_total ")
+            .Append(snapshot.LedgerInvariantViolations.ToString(CultureInfo.InvariantCulture))
             .Append('\n');
 
         AppendLabeledStageHistograms(sb, "fineage_command_timeline_ms", "phase",
