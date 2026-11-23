@@ -9,19 +9,19 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list)
     {
         var payload = NetCodec.EncodeBuyList(ToNetBuyList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.BuyList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.BuyList, payload);
     }
 
     void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SellListMsg list)
     {
         var payload = NetCodec.EncodeSellList(ToNetSellList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.SellList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.SellList, payload);
     }
 
     void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list)
     {
         var payload = NetCodec.EncodeMultiSellList(ToNetMultiSellList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.MultiSellList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MultiSellList, payload);
     }
 
     void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance)
@@ -36,19 +36,19 @@ sealed partial class NetWorldEventPublisher
             BaseTaxPercent = balance.BaseTaxPercent,
             CastleTaxPercent = balance.CastleTaxPercent
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShopBalance, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShopBalance, payload);
     }
 
     void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list)
     {
         var payload = NetCodec.EncodeWarehouseDepositList(ToNetWarehouseDepositList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.WarehouseDepositList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.WarehouseDepositList, payload);
     }
 
     void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list)
     {
         var payload = NetCodec.EncodeWarehouseWithdrawList(ToNetWarehouseWithdrawList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.WarehouseWithdrawList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.WarehouseWithdrawList, payload);
     }
 
     static BuyListNetMsg ToNetBuyList(Fineage.Protocol.BuyListMsg buy)

@@ -9,13 +9,13 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status)
     {
         var payload = NetCodec.EncodePledgeStatus(ToNetPledgeStatus(status));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PledgeStatus, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PledgeStatus, payload);
     }
 
     void IWorldEventPublisher.FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list)
     {
         var payload = NetCodec.EncodePledgeMemberList(ToNetPledgeMemberList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PledgeMemberList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PledgeMemberList, payload);
     }
 
     void IWorldEventPublisher.FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask)
@@ -28,13 +28,13 @@ sealed partial class NetWorldEventPublisher
             ClanName = ask.ClanName ?? "",
             PledgeType = ask.PledgeType
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.ClanAskJoin, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ClanAskJoin, payload);
     }
 
     void IWorldEventPublisher.FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanJoinResultMsg result)
     {
         var payload = NetCodec.EncodeClanJoinResult(new ClanJoinResultNetMsg { Response = result.Response });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.ClanJoinResult, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ClanJoinResult, payload);
     }
 
     internal static PledgeStatusNetMsg ToNetPledgeStatus(Fineage.Protocol.PledgeStatusChangedMsg status) => new()

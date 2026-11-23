@@ -14,13 +14,13 @@ sealed partial class NetWorldEventPublisher
             RequestorName = ask.RequestorName ?? "",
             ItemDistribution = ask.ItemDistribution
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyAskJoin, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyAskJoin, payload);
     }
 
     void IWorldEventPublisher.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyJoinResultMsg result)
     {
         var payload = NetCodec.EncodePartyJoinResult(new PartyJoinResultNetMsg { Response = result.Response });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyJoinResult, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyJoinResult, payload);
     }
 
     void IWorldEventPublisher.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberListMsg list)
@@ -49,7 +49,7 @@ sealed partial class NetWorldEventPublisher
             PartyId = list.PartyId,
             Members = members
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberList, payload);
     }
 
     void IWorldEventPublisher.FanoutPartyMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberUpdateMsg u)
@@ -66,7 +66,7 @@ sealed partial class NetWorldEventPublisher
             CurCp = u.CurCp,
             MaxCp = u.MaxCp
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberUpdate, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberUpdate, payload);
     }
 
     void IWorldEventPublisher.FanoutPartySpelled(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update)
@@ -83,7 +83,7 @@ sealed partial class NetWorldEventPublisher
                 Visual = effects[i].Visual ?? ""
             };
         var payload = NetCodec.EncodePartySpelled(new AbnormalStatusUpdateNetMsg { ObjectId = update.ObjectId, Effects = rows });
-                    _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.PartySpelled, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.PartySpelled, payload);
     }
 
     void IWorldEventPublisher.FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions)
@@ -93,6 +93,6 @@ sealed partial class NetWorldEventPublisher
         for (int i = 0; i < src.Length; i++)
             rows[i] = new PartyMemberPositionEntryNet { ObjectId = src[i].ObjectId, X = src[i].X, Y = src[i].Y, Z = src[i].Z };
         var payload = NetCodec.EncodePartyMemberPosition(new PartyMemberPositionNetMsg { Members = rows });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberPosition, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PartyMemberPosition, payload);
     }
 }

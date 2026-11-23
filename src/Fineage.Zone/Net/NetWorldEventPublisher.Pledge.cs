@@ -7,7 +7,7 @@ sealed partial class NetWorldEventPublisher
 {
     void SendAll(IReadOnlyList<int> watchers, ushort opcode, byte[] payload)
     {
-                    _presence.TryBroadcast(watchers, opcode, payload);
+        _presence.TryBroadcast(watchers, opcode, payload);
     }
 
     void IWorldEventPublisher.FanoutCrestData(IReadOnlyList<int> watcherObjectIds, CrestDataNetMsg crest) =>

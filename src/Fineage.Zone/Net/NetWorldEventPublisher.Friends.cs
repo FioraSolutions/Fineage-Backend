@@ -12,13 +12,13 @@ sealed partial class NetWorldEventPublisher
         {
             RequestorName = ask.RequestorName ?? ""
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendInviteAsk, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendInviteAsk, payload);
     }
 
     void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list)
     {
         var payload = NetCodec.EncodeFriendList(ToNetFriendList(list));
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendList, payload);
     }
 
     void IWorldEventPublisher.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendUpdateMsg update)
@@ -30,7 +30,7 @@ sealed partial class NetWorldEventPublisher
             Name = update.Name ?? "",
             Online = update.Online
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendUpdate, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.FriendUpdate, payload);
     }
 
     void IWorldEventPublisher.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BlockListMsg list)
@@ -51,7 +51,7 @@ sealed partial class NetWorldEventPublisher
             BlockAll = list.BlockAll,
             Blocked = rows
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.BlockList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.BlockList, payload);
     }
 
     static FriendListNetMsg ToNetFriendList(Fineage.Protocol.FriendListMsg list)

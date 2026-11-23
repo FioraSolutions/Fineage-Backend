@@ -166,7 +166,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             WalkSpeed = walkSpeed,
             InWater = inWater
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.ChangeMoveType, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ChangeMoveType, payload);
     }
 
     void IWorldEventPublisher.FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
@@ -181,7 +181,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             Z = z,
             Heading = heading
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PositionCorrection, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PositionCorrection, payload);
     }
 
     void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
@@ -189,18 +189,18 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         var id = _ids.AllocateOrGet(objectId);
         var payload = NetCodec.EncodeAttackStance(new AttackStanceNetMsg { EntityValue = id.Value, EntityGeneration = id.Generation });
         ushort opcode = inStance ? NetOpcode.AutoAttackStart : NetOpcode.AutoAttackStop;
-                    _presence.TryBroadcast(watcherObjectIds, opcode, payload);
+        _presence.TryBroadcast(watcherObjectIds, opcode, payload);
     }
 
     void IWorldEventPublisher.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
     {
         var payload = NetCodec.EncodeAutoSoulShot(new AutoSoulShotNetMsg { ItemId = itemId, Enabled = enabled });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.AutoSoulShot, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AutoSoulShot, payload);
     }
 
     void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info)
     {
         var payload = NetCodec.EncodeUserInfo(ToNetUserInfo(info));
-                    _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.UserInfo, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.UserInfo, payload);
     }
 }
