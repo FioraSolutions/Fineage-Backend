@@ -73,8 +73,15 @@ public sealed class ZoneApproachPathTests
 
         Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
 
+        // The attack tick must not search. The shared path budget produces the detour.
+        if (player.PathfindPending)
+        {
+            kit.Now = kit.Now.AddMilliseconds(Fineage.Zone.ZoneSimulationSettings.StepMilliseconds);
+            kit.World.RunStepForTest();
+        }
+
         Assert.True(player.MoveActive);
-        Assert.True(player.MovePath.Count > 0, "straight line hits the wall — FindPath must queue detour waypoints");
+        Assert.True(player.MovePath.Count > 0, "straight line hits the wall — the path budget must queue detour waypoints");
         long eta = player.Intent.ApproachArriveUnixMs - kit.Now.ToUnixTimeMilliseconds();
         Assert.True(eta >= straightMs,
             $"path ETA {eta}ms should be at least straight {straightMs}ms (detour is longer)");
