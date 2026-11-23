@@ -19,14 +19,15 @@ public static class EconomyConsistencyOracle
     /// Normal refusals when many players contend for the same people and items: the target is already in a
     /// party or a trade, is out of trade range, the drop was picked up first, sit/social while fighting, the
     /// target died between pick and hit, a private store closed, sold out, moved away or is busy with another buyer,
-    /// a cast raced its own reuse or a target that just died, the castle manor offers no seed this period. Counted per code, never a failure. A code outside both sets
+    /// a cast raced its own reuse or a target that just died, the castle manor offers no seed this period, the partner closed the trade window (moved, teleported or
+    /// cancelled) before this side's add/confirm arrived (<c>trade</c> = no open trade session). Counted per code, never a failure. A code outside both sets
     /// (for example <c>skill_unknown</c> or <c>unknown_opcode</c>) is a harness or server bug and fails the run.
     /// </summary>
     public static readonly IReadOnlySet<string> ExpectedDomainRejectCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "party_busy", "party_leader", "trade_busy", "trade_range", "pickup", "action_blocked", "target", "attack",
         "store_busy", "store_range", "store_closed", "store_item", "store_adena", "store_combat",
-        "skill_reuse", "skill_target", "manor_product"
+        "skill_reuse", "skill_target", "manor_product", "trade"
     };
 
     public enum RejectClass
