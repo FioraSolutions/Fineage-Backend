@@ -103,16 +103,25 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             return;
 
         // One submission per connection, frames in the order the stripe observed them.
+        // The generation check is per item: a stale handle drained in the same cycle as the
+        // rebound connection must not discard the live frames.
         var groups = new Dictionary<ulong, List<OutboundFrame>>(pending.Count);
-        var order = new List<ConnectionHandle>(pending.Count);
+        var order = new List<NetConnection>(pending.Count);
         foreach (WorkItem item in pending)
         {
-            ulong id = item.Handle.Connection.ConnectionId;
-            if (!groups.TryGetValue(id, out List<OutboundFrame>? frames))
+            NetConnection connection = item.Handle.Connection;
+            if (!connection.IsBoundTo(item.Handle))
+            {
+                NetHostLog.Error(
+                    $"stale connection handle objectId={item.Handle.ObjectId} generation={item.Handle.EntityGeneration} connectionId={connection.ConnectionId}: live binding does not match");
+                continue;
+            }
+
+            if (!groups.TryGetValue(connection.ConnectionId, out List<OutboundFrame>? frames))
             {
                 frames = new List<OutboundFrame>(item.Frames.Length);
-                groups.Add(id, frames);
-                order.Add(item.Handle);
+                groups.Add(connection.ConnectionId, frames);
+                order.Add(connection);
             }
 
             OutboundFrame[] batch = item.Frames;
@@ -120,18 +129,8 @@ public sealed class NetFanoutStripes : IAsyncDisposable
                 frames.Add(batch[i]);
         }
 
-        foreach (ConnectionHandle handle in order)
-        {
-            NetConnection connection = handle.Connection;
-            if (!connection.IsBoundTo(handle))
-            {
-                NetHostLog.Error(
-                    $"stale connection handle objectId={handle.ObjectId} generation={handle.EntityGeneration} connectionId={connection.ConnectionId}: live binding does not match");
-                continue;
-            }
-
+        foreach (NetConnection connection in order)
             connection.SubmitOrderedBatch(groups[connection.ConnectionId]);
-        }
     }
 
     public async ValueTask DisposeAsync()

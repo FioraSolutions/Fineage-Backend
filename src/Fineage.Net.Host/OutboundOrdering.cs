@@ -3,9 +3,9 @@ using Fineage.Net.Contract;
 namespace Fineage.Net.Host;
 
 /// <summary>
-/// One ordering table for the per-connection mailbox (issue #867 PR3/PR4).
-/// Replaceable presence frames collapse only until an ordering barrier; barriers are lifecycle frames
-/// that the client must observe in place (spawn, despawn, death, inventory, drop, teleport).
+/// One ordering table for the per-connection mailbox (issue #867 PR4).
+/// Replaceable presence frames collapse in place until an ordering barrier. Barriers are lifecycle
+/// frames the client must observe in place (spawn, despawn, death, inventory, drop, teleport).
 /// </summary>
 public static class OutboundOrdering
 {
