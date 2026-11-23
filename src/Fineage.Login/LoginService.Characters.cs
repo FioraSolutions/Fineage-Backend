@@ -243,20 +243,8 @@ public sealed partial class LoginService
     }
 
     /// <summary>Character id with the greatest <see cref="CharacterRecord.LastAccess"/>, or 0 when nobody has played.</summary>
-    public static int LastPlayedId(IReadOnlyList<CharacterRecord> characters)
-    {
-        ArgumentNullException.ThrowIfNull(characters);
-        CharacterRecord? best = null;
-        foreach (var character in characters)
-        {
-            if (character.LastAccess == default)
-                continue;
-            if (best == null || character.LastAccess >= best.LastAccess)
-                best = character;
-        }
-
-        return best?.Id ?? 0;
-    }
+    public static int LastPlayedId(IReadOnlyList<CharacterRecord> characters) =>
+        LobbyRoster.LastPlayedId(characters);
 
     CharacterRecord? Resolve(string account, int characterId, string? name, int slot, DateTimeOffset now)
     {
