@@ -407,6 +407,12 @@ namespace Fineage.Net.Contract
         public const ushort RequestRestart = 0x03E2;
         /// <summary>Zone → client: retail <c>RestartResponse</c> (wire 0x5f). Followed by <see cref="CharacterRoster"/> when ok.</summary>
         public const ushort RestartResponse = 0x03E3;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestBypassUserCmd</c> (retail wire <c>0xaa</c>).
+        /// Body is one int, the Interlude user-command id.
+        /// 0x03E2 and 0x03E3 are the lobby restart pair.
+        /// </summary>
+        public const ushort BypassUserCmd = 0x03E4;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
