@@ -143,7 +143,13 @@ public sealed partial class ZoneWorld
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            // The first frame is often inside the BCL (Dictionary.TryInsert); name the first Fineage frame too and
+            // keep the whole trace in the log so a load-path race can be found from one run.
             string frame = ex.StackTrace?.Split('\n', 2)[0].Trim() ?? "";
+            string? ours = ex.StackTrace?.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Contains(" Fineage.", StringComparison.Ordinal));
+            if (ours != null && ours != frame)
+                frame = $"{frame} <- {ours}";
+            ZoneLog.Error($"enter load failed character={session.ObjectId}: {ex}");
             return new EnteringPlayer
             {
                 Failure = $"enter refused: character {session.ObjectId} load failed: {ex.GetType().Name}: {ex.Message}"

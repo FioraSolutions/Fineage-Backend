@@ -47,8 +47,11 @@ public sealed partial class FineageBotClient
     /// <summary>NPC the fighter is auto-attacking; 0 when it needs a new one.</summary>
     internal int FightTargetObjectId { get; set; }
 
-    /// <summary>Fighter ticks since enter; drives the skill cadence.</summary>
+    /// <summary>Fighter ticks since enter; drives the skill rotation order.</summary>
     internal int FightTicks { get; set; }
+
+    /// <summary>When the fighter last sent AttackRequest (re-sent after a cast, which drops auto-attack).</summary>
+    internal DateTimeOffset LastAttackSentAt { get; set; }
 
     internal async Task MaybeAcceptPartyInviteAsync(ushort opcode, byte[] payload)
     {

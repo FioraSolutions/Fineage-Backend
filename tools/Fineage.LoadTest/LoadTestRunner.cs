@@ -203,7 +203,17 @@ public sealed class LoadTestRunner
             failReasons.Add($"Many bots stuck: {stuck}/{scenario.BotCount}");
 
         if (disconnected > 0)
+        {
             bugs.Add($"P2: {disconnected} bots disconnected during {scenario.Name} — check rate limits and handoff TTL.");
+            foreach (var group in bots.Where(b => b.Stats.Disconnected)
+                         .GroupBy(b => b.Stats.LastError ?? "(no error recorded)")
+                         .OrderByDescending(g => g.Count())
+                         .Take(5))
+            {
+                string error = group.Key.Length > 200 ? group.Key[..200] : group.Key;
+                bugs.Add($"P2:   {group.Count()} disconnected bot(s) last error: {error} (bots {string.Join(",", group.Select(b => b.BotId).Take(8))})");
+            }
+        }
         if (promSamples.Count > 0 && promSamples.Max(s => s.TickP99) > 500)
             bugs.Add($"P1: tick p99 exceeded 500ms (max {promSamples.Max(s => s.TickP99):0}ms) under {scenario.BotCount} bots.");
 

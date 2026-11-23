@@ -144,6 +144,13 @@ public sealed class BotObservationLog
     int _lastPickedTarget;
     public int LastPickedTargetDistance { get; private set; }
 
+    /// <summary>True while a sent <paramref name="commandOpcode"/> still waits for its server response (TTL 3 s).</summary>
+    public bool HasPendingCommand(ushort commandOpcode, DateTimeOffset now)
+    {
+        lock (_stateGate)
+            return _tracker.HasPending(commandOpcode, now);
+    }
+
     public bool IsSkillReady(int skillId, DateTimeOffset now)
     {
         lock (_stateGate)
@@ -213,6 +220,18 @@ public sealed class BotObservationLog
         public int AttackSampleCount => _attackSampleCount;
         readonly Dictionary<int, DateTimeOffset> _skillReadyAt = new();
 
+        public bool HasPending(ushort commandOpcode, DateTimeOffset now)
+        {
+            ExpirePending(now);
+            foreach (var p in _pendingCombat)
+            {
+                if (p.CommandOpcode == commandOpcode)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>False until the reuse announced by this bot's last MagicSkillUse for <paramref name="skillId"/> has passed.</summary>
         public bool IsSkillReady(int skillId, DateTimeOffset now) =>
             !_skillReadyAt.TryGetValue(skillId, out var ready) || now >= ready;
@@ -254,6 +273,10 @@ public sealed class BotObservationLog
             t._attackTimeoutCount = _attackTimeoutCount;
             t._skillTimeoutCount = _skillTimeoutCount;
             t._lastCommandTargetDistance = _lastCommandTargetDistance;
+            t._killsBySelf = _killsBySelf;
+            t._deathsSeen = _deathsSeen;
+            foreach (var (skill, ready) in _skillReadyAt)
+                t._skillReadyAt[skill] = ready;
             return t;
         }
 

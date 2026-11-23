@@ -5,8 +5,8 @@ namespace Fineage.LoadTest.Bot;
 
 public static class HeavyPlayBehavior
 {
-    /// <summary>One skill from the rotation every this many fighter ticks; the ticks between let auto-attack swing.</summary>
-    public const int SkillEveryTicks = 3;
+    /// <summary>Resend AttackRequest this long after the last one when no swing or cast is in flight.</summary>
+    public static readonly TimeSpan AttackResendAfter = TimeSpan.FromSeconds(2);
 
     /// <summary>
     /// Runs one heavy-play tick. Returns false for roles that use the scenario's weighted mix
@@ -36,66 +36,76 @@ public static class HeavyPlayBehavior
     }
 
     /// <summary>
-    /// A fighter plays like a player farming a pack: one AttackRequest per target (the server keeps
-    /// auto-attacking, approaching and swinging, until the target dies), an AoE skill from the rotation every
-    /// <see cref="SkillEveryTicks"/> ticks once its reuse (from the server's MagicSkillUse) has passed, and a new
-    /// target only when the old one died or left view.
-    /// With nothing in reach it walks to its spawn-layout point (party corner or train center).
+    /// A fighter plays like a player farming a pack, one command in flight at a time (behaviour slots are 250 ms,
+    /// far faster than a cast): pick the nearest live NPC and AttackRequest it; while a cast or the first swing is
+    /// pending, do nothing; otherwise cast the next rotation skill whose reuse (from the server's MagicSkillUse)
+    /// has passed, or re-send AttackRequest (a cast drops auto-attack) every <see cref="AttackResendAfter"/>.
+    /// A new target only after EntityDie or despawn. With nothing in reach, walk to the spawn-layout point.
     /// </summary>
     internal static async Task RunFighterTickAsync(FineageBotClient bot, CancellationToken ct)
     {
         var hp = bot.Scenario.HeavyPlay!;
+        var now = DateTimeOffset.UtcNow;
         int tick = bot.FightTicks++;
         int target = bot.FightTargetObjectId;
-        if (!bot.ObservationLog.IsLiveAttackTarget(target))
+        var log = bot.ObservationLog;
+        if (!log.IsLiveAttackTarget(target))
         {
-            if (!bot.ObservationLog.TryPickAttackTarget(out target))
+            if (!log.TryPickAttackTarget(out target))
             {
                 bot.FightTargetObjectId = 0;
-                await bot.SendTrackedAsync(NetOpcode.MoveInput,
-                    NetCodec.EncodeMoveInput(new MoveInputMsg
-                    {
-                        DestX = bot.SpawnX + bot.Rng.Next(-120, 120),
-                        DestY = bot.SpawnY + bot.Rng.Next(-120, 120),
-                        DestZ = bot.SpawnZ
-                    }), ct);
+                if (tick % 8 == 0)
+                {
+                    await bot.SendTrackedAsync(NetOpcode.MoveInput,
+                        NetCodec.EncodeMoveInput(new MoveInputMsg
+                        {
+                            DestX = bot.SpawnX + bot.Rng.Next(-120, 120),
+                            DestY = bot.SpawnY + bot.Rng.Next(-120, 120),
+                            DestZ = bot.SpawnZ
+                        }), ct);
+                }
+
                 return;
             }
 
             bot.FightTargetObjectId = target;
             await bot.ZoneWritePublicAsync(NetOpcode.SelectTarget,
                 NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-            await bot.SendTrackedAsync(
-                NetOpcode.AttackRequest,
-                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
-                ct,
-                targetObjectId: target);
+            await SendAttackAsync(bot, target, now, ct);
             return;
         }
 
-        if (tick % SkillEveryTicks != 0)
+        if (log.HasPendingCommand(NetOpcode.UseSkill, now) || log.HasPendingCommand(NetOpcode.AttackRequest, now))
             return;
 
         int[] skills = hp.SkillRotation.Length > 0 ? hp.SkillRotation : [36];
-        int start = (tick / SkillEveryTicks) % skills.Length;
-        var now = DateTimeOffset.UtcNow;
-        int skillId = 0;
-        for (int i = 0; i < skills.Length && skillId == 0; i++)
+        int start = tick % skills.Length;
+        for (int i = 0; i < skills.Length; i++)
         {
-            int candidate = skills[(start + i) % skills.Length];
-            if (bot.ObservationLog.IsSkillReady(candidate, now))
-                skillId = candidate;
+            int skillId = skills[(start + i) % skills.Length];
+            if (!log.IsSkillReady(skillId, now))
+                continue;
+            await bot.SendTrackedAsync(
+                NetOpcode.UseSkill,
+                NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),
+                ct,
+                targetObjectId: target,
+                skillId: skillId);
+            return;
         }
 
-        if (skillId == 0)
-            return; // every rotation skill is on reuse; auto-attack keeps swinging
+        if (now - bot.LastAttackSentAt >= AttackResendAfter)
+            await SendAttackAsync(bot, target, now, ct);
+    }
 
+    static async Task SendAttackAsync(FineageBotClient bot, int target, DateTimeOffset now, CancellationToken ct)
+    {
+        bot.LastAttackSentAt = now;
         await bot.SendTrackedAsync(
-            NetOpcode.UseSkill,
-            NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),
+            NetOpcode.AttackRequest,
+            NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
             ct,
-            targetObjectId: target,
-            skillId: skillId);
+            targetObjectId: target);
     }
 
     public static async Task FormPartiesAsync(IReadOnlyList<FineageBotClient> fleet, LoadScenario scenario, CancellationToken ct)
