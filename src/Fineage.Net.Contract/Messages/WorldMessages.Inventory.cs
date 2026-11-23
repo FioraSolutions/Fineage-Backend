@@ -99,6 +99,13 @@ namespace Fineage.Net.Contract
         public int Count { get; set; } = 1;
     }
 
+    /// <summary>Client → zone: Mobius <c>RequestCrystallizeItem</c> (retail 0x72). Object id and count.</summary>
+    public sealed class CrystallizeItemRequestMsg
+    {
+        public int ObjectId { get; set; }
+        public int Count { get; set; } = 1;
+    }
+
     public sealed class UseItemNetMsg
     {
         public int ObjectId { get; set; }

@@ -78,6 +78,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.DestroyItemRequest:
                             await _inventoryActions.OnDestroyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestCrystallizeItem:
+                            await _inventoryActions.OnCrystallizeAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.RequestItemList:
                             await _inventoryActions.OnRequestItemListAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;

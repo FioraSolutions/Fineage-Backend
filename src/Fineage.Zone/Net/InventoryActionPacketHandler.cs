@@ -81,6 +81,28 @@ public sealed class InventoryActionPacketHandler
         // InventoryUpdate fans out from ZoneWorldGround.
     }
 
+    public async Task OnCrystallizeAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeCrystallizeItemRequest(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new CrystallizeItemCommand(request.ObjectId, request.Count),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Crystallize failed.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnDropAsync(
         NetConnection conn,
         ZoneSession zoneSession,
