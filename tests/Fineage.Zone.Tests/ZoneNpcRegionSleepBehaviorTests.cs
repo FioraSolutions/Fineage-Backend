@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Login;
+using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Game.Economy;
@@ -31,6 +32,7 @@ public sealed class ZoneNpcRegionSleepBehaviorTests
             accounts: store,
             spawnCatalog: map,
             activeMapId: "sleep",
+            geo: GeoEngine.Empty,
             ledgerJournal: new MemoryLedgerJournal());
         var session = new ZoneSession();
         session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);

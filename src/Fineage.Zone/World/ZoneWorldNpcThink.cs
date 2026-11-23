@@ -154,7 +154,8 @@ public sealed partial class ZoneWorld
         DequeueThink(npc);
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             return;
-        if (IsThinkJob(npc))
+        long now = NowUnixMs();
+        if (IsThinkJob(npc) || npc.NextThinkMs <= now)
         {
             _thinkUrgent.Add(npc.ObjectId);
             npc.ThinkWheelSlot = ThinkUrgentSlot;

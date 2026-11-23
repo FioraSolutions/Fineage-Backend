@@ -113,7 +113,8 @@ public sealed partial class ZoneWorld
             return true;
         if (npc.AggroTargetId > 0 || npc.ReturningHome)
             return true;
-        if (DriftedBeyondDouble(npc))
+        // Same threshold as AttackableAI thinkActive returnHome (MaxDriftRange), not 2×.
+        if (DriftedBeyondMaxRange(npc))
             return true;
         return IsPlayerRegionActive(_byId.OwnerOf(npc).Region);
     }
@@ -147,7 +148,7 @@ public sealed partial class ZoneWorld
     {
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             return;
-        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondDouble(npc))
+        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondMaxRange(npc))
             return;
         if (AnyLivePlayerWatching(npc.ObjectId))
             return;
@@ -156,11 +157,11 @@ public sealed partial class ZoneWorld
         _byId.Leave(npc, ActiveSets.Thinking);
     }
 
-    bool DriftedBeyondDouble(ZoneEntity npc)
+    static bool DriftedBeyondMaxRange(ZoneEntity npc)
     {
         if (!npc.HomeSet)
             return false;
-        int limit = ZoneNpcSettings.MaxDriftRange * 2;
+        int limit = ZoneNpcSettings.MaxDriftRange;
         long dx = npc.X - (long)npc.HomeX;
         long dy = npc.Y - (long)npc.HomeY;
         return dx * dx + dy * dy > (long)limit * limit;
