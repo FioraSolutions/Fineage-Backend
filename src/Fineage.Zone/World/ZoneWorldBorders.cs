@@ -136,6 +136,7 @@ public sealed partial class ZoneWorld
     {
         public string Name => "aggression";
 
+        // The body wakes only its own region's NPCs; the hate it raises travels as HateMessage to the barrier.
         public bool Parallel => true;
 
         public void Collect(TickContext tick, RegionWorkCollector work) => world.CollectAggression(work);

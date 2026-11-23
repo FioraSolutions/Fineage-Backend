@@ -309,10 +309,12 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Interlude RequestAttack: in range -> swing; out of range -> server moveToPawn (run to the target,
-    /// MoveToAck to self + watchers) and the swing fires from <see cref="TickAutoAttacks"/> on arrival.
+    /// MoveToAck to self + watchers) and the swing fires from <see cref="TickAutoAttack"/> on arrival.
     /// <paramref name="approachMs"/> is the travel time when an approach was started, else 0.
+    /// <paramref name="advanceMoves"/> is false from the auto-attack region body, where the movement stages
+    /// already settled every mover at this tick and a real advance would relocate inside a body.
     /// </summary>
-    string? TryAttack(ZoneSession session, int requestedTargetId, out long approachMs, bool forced)
+    string? TryAttack(ZoneSession session, int requestedTargetId, out long approachMs, bool forced, bool advanceMoves = true)
     {
         approachMs = 0;
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
@@ -374,9 +376,18 @@ public sealed partial class ZoneWorld
         if (!VisibleTo(player.ObjectId, targetId))
             return "attack";
         long nowMove = NowUnixMs();
-        AdvanceMove(player, nowMove);
-        if (target.MoveActive)
-            AdvanceMove(target, nowMove);
+        if (advanceMoves)
+        {
+            AdvanceMove(player, nowMove);
+            if (target.MoveActive)
+                AdvanceMove(target, nowMove);
+        }
+        else
+        {
+            AdvanceMoveSettled(player, nowMove);
+            if (target.MoveActive)
+                AdvanceMoveSettled(target, nowMove);
+        }
         var armed = PlayerStats(player);
         // Mobius doAttack: isAttackWeapon false (datapack: the six fishing rods) refuses the swing unless GM.
         if (armed.Weapon == Fineage.Game.WeaponType.FishingRod && !ZoneAdmin.AllowPeaceAttack(player.Name))
@@ -476,9 +487,9 @@ public sealed partial class ZoneWorld
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
         long due = now + (dual ? atk / 4 : atk / 2);
-        _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true));
+        QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true));
         if (dual)
-            _meleeHits.Add(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
+            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
         QueuePoleSplashHits(player, target, ps, soulshot, due);
 
         return null;

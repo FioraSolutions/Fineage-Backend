@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -64,82 +65,95 @@ public sealed partial class ZoneWorld
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
-    void TickAutoAttacks(long now)
+    /// <summary>Players swinging this tick, bucketed by owning region for the auto-attacks region stage.</summary>
+    void CollectAutoAttackers(TickContext tick, RegionWorkCollector work)
     {
-        foreach (var player in Players().ToList())
+        foreach (var player in Players())
         {
-            var session = player.Session;
-            if (session == null || player.Intent.AutoAttackTargetId <= 0)
-                continue;
-            AdvanceMove(player, now); // Net timed approach: measure reach from where the pawn really is now
-            int targetId = player.Intent.AutoAttackTargetId;
-            if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
-            {
-                player.Intent.AutoAttackTargetId = 0;
-                player.Intent.ClearApproach();
-                continue;
-            }
-            if (!VisibleTo(player.ObjectId, targetId))
-            {
-                player.Intent.AutoAttackTargetId = 0;
-                player.Intent.ClearApproach();
-                continue;
-            }
-            if (target.MoveActive)
-                AdvanceMove(target, now);
-            if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
-                HostilePlayableRefused(session, player, target, badSkill: false) ||
-                SiegeFriendRefused(session, player, target) ||
-                PeacePlayableRefused(session, player, target, notify: false))
-            {
-                player.Intent.AutoAttackTargetId = 0;
-                player.Intent.ClearApproach();
-                continue;
-            }
+            if (player.Session != null && player.Intent.AutoAttackTargetId > 0)
+                work.Add(_byId.OwnerOf(player).Region, player.ObjectId);
+        }
+    }
 
-            // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
-            if (player.Intent.ApproachTargetId == targetId && now < player.Intent.ApproachArriveUnixMs)
-            {
-                bool targetMoved = !ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY,
-                    ZoneCombat.ApproachRepathDistance);
-                bool stuckShort = !player.MoveActive
-                    && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
-                if (targetMoved || stuckShort)
-                {
-                    long re = ApproachTarget(player, target, PlayerReach(player, target));
-                    if (re < 0)
-                    {
-                        player.Intent.AutoAttackTargetId = 0;
-                        player.Intent.ClearApproach();
-                        SendActionFailed(player);
-                        continue;
-                    }
-                    player.Intent.NextAutoAttackUnixMs = now + re;
-                }
-                continue;
-            }
+    void AutoAttackEntity(int objectId, long now)
+    {
+        if (_byId.TryGetValue(objectId, out var player) && player.Kind == ZoneEntityKind.Player)
+            TickAutoAttack(player, now);
+    }
 
-            if (now < player.Intent.NextAutoAttackUnixMs)
-                continue;
-            if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
+    void TickAutoAttack(ZoneEntity player, long now)
+    {
+        var session = player.Session;
+        if (session == null || player.Intent.AutoAttackTargetId <= 0)
+            return;
+        AdvanceMoveSettled(player, now); // Net timed approach: measure reach from where the pawn really is now
+        int targetId = player.Intent.AutoAttackTargetId;
+        if (player.Dead || !_byId.TryGetValue(targetId, out var target) || target.CurHp <= 0 || session.SelectedTargetId != targetId)
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+            return;
+        }
+        if (!VisibleTo(player.ObjectId, targetId))
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+            return;
+        }
+        if (target.MoveActive)
+            AdvanceMoveSettled(target, now);
+        if (player.Sitting || IsActionBlocked(player) || IsPhysicallyMuted(player) ||
+            HostilePlayableRefused(session, player, target, badSkill: false) ||
+            SiegeFriendRefused(session, player, target) ||
+            PeacePlayableRefused(session, player, target, notify: false))
+        {
+            player.Intent.AutoAttackTargetId = 0;
+            player.Intent.ClearApproach();
+            return;
+        }
+
+        // Mid-run: repath if the target drifted, or if we stopped short of reach (geo wall / failed path).
+        if (player.Intent.ApproachTargetId == targetId && now < player.Intent.ApproachArriveUnixMs)
+        {
+            bool targetMoved = !ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY,
+                ZoneCombat.ApproachRepathDistance);
+            bool stuckShort = !player.MoveActive
+                && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
+            if (targetMoved || stuckShort)
             {
-                // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
-                long ms = ApproachTarget(player, target, PlayerReach(player, target));
-                if (ms < 0)
+                long re = ApproachTarget(player, target, PlayerReach(player, target));
+                if (re < 0)
                 {
                     player.Intent.AutoAttackTargetId = 0;
                     player.Intent.ClearApproach();
                     SendActionFailed(player);
-                    continue;
+                    return;
                 }
-                player.Intent.NextAutoAttackUnixMs = now + ms;
-                continue;
+                player.Intent.NextAutoAttackUnixMs = now + re;
             }
-            player.Intent.ClearApproach();
-            player.Intent.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
-            if (TryAttack(session, targetId) != null)
-                player.Intent.AutoAttackTargetId = 0;
+            return;
         }
+
+        if (now < player.Intent.NextAutoAttackUnixMs)
+            return;
+        if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
+        {
+            // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
+            long ms = ApproachTarget(player, target, PlayerReach(player, target));
+            if (ms < 0)
+            {
+                player.Intent.AutoAttackTargetId = 0;
+                player.Intent.ClearApproach();
+                SendActionFailed(player);
+                return;
+            }
+            player.Intent.NextAutoAttackUnixMs = now + ms;
+            return;
+        }
+        player.Intent.ClearApproach();
+        player.Intent.NextAutoAttackUnixMs = now + PlayerAttackTimeMs(player.ObjectId);
+        if (TryAttack(session, targetId, out _, forced: true, advanceMoves: false) != null)
+            player.Intent.AutoAttackTargetId = 0;
     }
 
     static StatusUpdateMsg StatusFor(ZoneEntity entity) => new()
@@ -150,6 +164,12 @@ public sealed partial class ZoneWorld
     };
 
     readonly List<PendingMeleeHit> _meleeHits = new();
+
+    /// <summary>
+    /// Queues a swing for <see cref="TickMeleeHits"/>. The list is world bookkeeping: inside a region body the add
+    /// waits for the stage barrier, anywhere else it lands at once.
+    /// </summary>
+    void QueueMeleeHit(PendingMeleeHit hit) => AtBarrier(() => _meleeHits.Add(hit));
 
     void QueueAttackerDamageLine(ZoneEntity attacker, ZoneEntity target, int damage, byte flags = 0)
     {

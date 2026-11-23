@@ -91,7 +91,7 @@ public sealed partial class ZoneWorld
             ResolvePendingHit(player, now);
     }
 
-    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now)
+    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, long now)
     {
         if (!_byId.TryGetValue(hit.TargetId, out var target))
         {
@@ -133,7 +133,8 @@ public sealed partial class ZoneWorld
 
         ZoneHotPathLogs.SkillEffect(hit.SkillId, hit.Level, target!.ObjectId);
         FanoutSkillLaunched(player, hit.SkillId, hit.Level, target);
-        effect(target, now);
+        // The effect (heal, buff, quest effect) may write a target another region owns: it lands at the barrier.
+        Post(new SkillEffectMessage(player.ObjectId, hit, now));
     }
 
     /// <summary>Test: land the caster's in-flight skill now (as if hitTime passed) and flush the caster's frames.</summary>

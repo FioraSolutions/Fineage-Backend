@@ -579,7 +579,7 @@ public sealed partial class ZoneWorld
             TargetZ = target.Z
         };
         FanoutAttack(s, target, attack);
-        _meleeHits.Add(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
+        QueueMeleeHit(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
     }
 
     /// <summary>Ordered skill: run into cast range, then cast it like an NPC attack skill (owner gets the credit).</summary>
