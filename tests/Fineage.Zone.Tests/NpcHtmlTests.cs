@@ -216,8 +216,8 @@ public sealed class NpcHtmlTests
         BenchPlayer actor = await bench.EnterAsync("talker", "Talker");
 
         Assert.Null(await actor.BypassAsync(MerchantObjectId, "TerritoryStatus"));
-        // TerritoryStatus is live now (Mobius castle/lord/tax page); the test merchant's town resolves to Gludio.
-        Assert.Contains("Gludio", LastHtml(bench), StringComparison.Ordinal);
+        // The merchant stands in tax zone oren_2119_001 (domain 4). TerritoryStatus names that castle.
+        Assert.Contains("Oren", LastHtml(bench), StringComparison.Ordinal);
     }
 
     [Fact]

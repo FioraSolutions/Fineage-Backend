@@ -108,11 +108,17 @@ public sealed class ConsumableUseTests
 
         await kit.World.CompleteCastForTestAsync(s);
 
-        var town = MapRegionCatalog.LoadDefault().At(beforeX, beforeY)
-                    ?? MapRegionCatalog.LoadDefault().Fallback;
+        var regions = MapRegionCatalog.LoadDefault();
+        var rules = kit.World.ZoneRules.Query(beforeX, beforeY, p.Z, p.Race);
+        var town = !string.IsNullOrEmpty(rules.RespawnPoint)
+            ? regions.ByName(rules.RespawnPoint) ?? regions.At(beforeX, beforeY) ?? regions.Fallback
+            : regions.At(beforeX, beforeY) ?? regions.Fallback;
         Assert.Contains(town.RespawnPoints, pt =>
             !pt.IsChaotic && pt.Kind == "normal" && pt.X == p.X && pt.Y == p.Y && pt.Z == p.Z);
-        Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
+        bool originIsSpawn = town.RespawnPoints.Any(pt =>
+            !pt.IsChaotic && pt.Kind == "normal" && pt.X == beforeX && pt.Y == beforeY);
+        if (!originIsSpawn)
+            Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
         Assert.Equal(before - 1, p.Inventory!.CountOf(ScrollOfEscape));
         Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation)));
         Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)));

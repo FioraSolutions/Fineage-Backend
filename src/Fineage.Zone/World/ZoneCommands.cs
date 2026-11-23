@@ -20,6 +20,12 @@ public abstract record ZoneCommand : ISimulationCommand
 
     internal virtual ZoneCommandClass IngressClass => ZoneCommandClass.Gameplay;
 
+    /// <summary>
+    /// Consecutive pending commands with this flag set collapse to the latest. A command without it is a boundary:
+    /// movement on either side of it stays in the queue.
+    /// </summary>
+    internal virtual bool IsCoalesceableMovement => false;
+
     internal virtual int ApplyCost => 2;
 
     /// <summary>Applies the command for <paramref name="session"/>; returns the rejection reason, or null.</summary>
@@ -57,6 +63,7 @@ public abstract record ZoneCommand : ISimulationCommand
 public sealed record MoveCommand(int DestX, int DestY, int DestZ) : ZoneCommand
 {
     internal override ZoneCommandClass IngressClass => ZoneCommandClass.Interactive;
+    internal override bool IsCoalesceableMovement => true;
     internal override int ApplyCost => 1;
     internal int ResultX { get; private set; }
     internal int ResultY { get; private set; }

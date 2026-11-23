@@ -26,7 +26,10 @@ public sealed record HonestWindow
     public double ClientAttackFanoutP99EstimateMs { get; init; }
     public double ClientSkillFanoutP95EstimateMs { get; init; }
     public double ClientSkillFanoutP99EstimateMs { get; init; }
+    public double FanoutQueueAgeP99Ms { get; init; }
+    public double FanoutQueueAgeP999Ms { get; init; }
     public long FanoutDroppedTotal { get; init; }
+    public long OutboundDroppedTotal { get; init; }
     public long SocketWriteCountSteady { get; init; }
     public double SocketWriteFramesMeanSteady { get; init; }
     public double ClientCombatFanoutP99EstimateMs { get; init; }
@@ -98,6 +101,10 @@ public static class HonestLoadSummaryBuilder
         if (windowSamples.Count == 0)
             return new HonestWindow();
 
+        double trueMax = windowSamples.Max(s => s.TickTrueMaxMs);
+        if (trueMax <= 0 && windowSamples.Any(s => s.TickMax > 0))
+            errors.Add("fineage_tick_max_ms absent while the tick histogram has a bucket ceiling; that ceiling is not the tick max");
+
         if (isSteady && windowSamples.Count >= 2 && rawScrapes.Count == allSamples.Count)
         {
             int first = SampleIndex(allSamples, windowSamples[0]);
@@ -119,7 +126,9 @@ public static class HonestLoadSummaryBuilder
 
                 var socketWrites = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_socket_write_ms");
                 var framesPerWrite = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_socket_write_frames");
+                var fanoutAge = PrometheusParser.HistogramDelta(rawScrapes[first], rawScrapes[last], "fineage_fanout_queue_oldest_age_ms");
                 long fanoutDropped = PrometheusParser.CounterDeltaSum(rawScrapes[first], rawScrapes[last], "fineage_fanout_dropped_total");
+                long outboundDropped = PrometheusParser.CounterDeltaSum(rawScrapes[first], rawScrapes[last], "fineage_outbound_dropped_total");
                 if (isSteady && socketWrites == null)
                     errors.Add("steady_socket_write_histogram_delta_unavailable");
                 if (isSteady && framesPerWrite == null)
@@ -131,12 +140,15 @@ public static class HonestLoadSummaryBuilder
                     {
                         TickP95Ms = tick.P95,
                         TickP99EstimateMs = tick.P99,
-                        TickMaxEstimateMs = tick.Max,
+                        TickMaxEstimateMs = trueMax,
                         CommandsStageP99EstimateMs = commands?.P99 ?? double.NaN,
                         CommandToMailboxesP99Ms = mail?.P99 ?? double.NaN,
                         FanoutDrainP99Ms = drain?.P99 ?? double.NaN,
                         FanoutBatchProcessP99Ms = batch?.P99 ?? double.NaN,
+                        FanoutQueueAgeP99Ms = fanoutAge?.P99 ?? double.NaN,
+                        FanoutQueueAgeP999Ms = fanoutAge?.P999 ?? double.NaN,
                         FanoutDroppedTotal = fanoutDropped,
+                        OutboundDroppedTotal = outboundDropped,
                         SocketWriteCountSteady = socketWrites?.Count ?? 0,
                         SocketWriteFramesMeanSteady = framesPerWrite?.Mean ?? 0
                     };
@@ -153,7 +165,7 @@ public static class HonestLoadSummaryBuilder
         {
             TickP95Ms = Percentile(windowSamples.Select(s => s.TickP95).OrderBy(v => v).ToList(), 0.95),
             TickP99EstimateMs = Percentile(windowSamples.Select(s => s.TickP99).OrderBy(v => v).ToList(), 0.99),
-            TickMaxEstimateMs = windowSamples.Max(s => s.TickMax),
+            TickMaxEstimateMs = trueMax,
             CommandsStageP99EstimateMs = commandsPeak?.P99 ?? windowSamples.Max(s => s.TickStageP99Ms.GetValueOrDefault("commands")),
             CommandToMailboxesP99Ms = windowSamples.Max(s => s.CommandToMailboxesP99Ms),
             FanoutDrainP99Ms = windowSamples.Max(s => s.StepFanoutDrainP99Ms)

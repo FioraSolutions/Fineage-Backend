@@ -91,10 +91,27 @@ public sealed class MetricsSnapshot
         new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyDictionary<string, long> FanoutDropped { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneBlocked { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneFull { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneCoalesced { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, long> OutboundLaneEvicted { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public IReadOnlyList<StageMetrics> Stages { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandTimelinePhases { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandApplyByName { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandQueueWaitByClass { get; init; } = [];
+    public HistogramMetrics CommandPlayerQueueDepth { get; init; } = new();
+    public HistogramMetrics CommandQueueAge { get; init; } = new();
+    public long CommandCoalesced { get; init; }
+    public IReadOnlyDictionary<string, long> CommandRejected { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public double TickMaxMs { get; init; }
+    public double CommandQueueAgeMaxMs { get; init; }
+    public double WatchdogStallMaxMs { get; init; }
+    public long WatchdogStalls { get; init; }
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
 
@@ -260,6 +277,14 @@ public static class MetricsText
             "Replaceable fan-out writes superseded before send", snapshot.FanoutCoalesced);
         AppendCounterLine(sb, "fineage_reliable_overflow_total",
             "Reliable frames refused because a session outbound queue was full", snapshot.ReliableOverflow);
+        AppendLane(sb, "fineage_outbound_lane_blocked_total",
+            "Producer found a full fan-out stripe and did not wait", snapshot.OutboundLaneBlocked);
+        AppendLane(sb, "fineage_outbound_lane_full_total",
+            "Mailbox budget refused a frame or snapshot", snapshot.OutboundLaneFull);
+        AppendLane(sb, "fineage_outbound_lane_coalesced_total",
+            "Movement frame replaced a pending one for the same entity", snapshot.OutboundLaneCoalesced);
+        AppendLane(sb, "fineage_outbound_lane_evicted_total",
+            "Stale mailbox frame discarded", snapshot.OutboundLaneEvicted);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -309,6 +334,43 @@ public static class MetricsText
             "Single command apply duration", snapshot.CommandApplyByName);
         AppendLabeledStageHistograms(sb, "fineage_command_queue_wait_ms", "class",
             "Ingress queue wait before dequeue", snapshot.CommandQueueWaitByClass);
+        AppendSingletonHistogram(sb, "fineage_command_queue_depth",
+            "Per-player ingress queue depth", snapshot.CommandPlayerQueueDepth, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_command_queue_age_ms",
+            "Age of the oldest command in a player's ingress queue", snapshot.CommandQueueAge);
+        AppendCounterLine(sb, "fineage_command_coalesced_total",
+            "Pending movement commands collapsed into a later movement command", snapshot.CommandCoalesced);
+        if (snapshot.CommandRejected.Count == 0)
+        {
+            AppendCounterLine(sb, "fineage_command_rejected_total",
+                "Commands refused by ingress admission", 0);
+        }
+        else
+        {
+            AppendHelp(sb, "fineage_command_rejected_total", "Commands refused by ingress admission");
+            sb.Append("# TYPE fineage_command_rejected_total counter\n");
+            foreach (var pair in snapshot.CommandRejected)
+            {
+                sb.Append("fineage_command_rejected_total{reason=\"")
+                    .Append(Escape(pair.Key))
+                    .Append("\"} ")
+                    .Append(pair.Value.ToString(CultureInfo.InvariantCulture))
+                    .Append('\n');
+            }
+        }
+
+        AppendHelp(sb, "fineage_tick_max_ms", "Longest simulation step, including one still running. Not a histogram bucket edge.");
+        sb.Append("# TYPE fineage_tick_max_ms gauge\n");
+        sb.Append("fineage_tick_max_ms ").Append(Num(snapshot.TickMaxMs)).Append('\n');
+        AppendHelp(sb, "fineage_command_queue_age_max_ms", "Longest per-player ingress queue age observed");
+        sb.Append("# TYPE fineage_command_queue_age_max_ms gauge\n");
+        sb.Append("fineage_command_queue_age_max_ms ").Append(Num(snapshot.CommandQueueAgeMaxMs)).Append('\n');
+        AppendHelp(sb, "fineage_step_watchdog_stall_max_ms", "Longest watchdog-detected simulation stall");
+        sb.Append("# TYPE fineage_step_watchdog_stall_max_ms gauge\n");
+        sb.Append("fineage_step_watchdog_stall_max_ms ").Append(Num(snapshot.WatchdogStallMaxMs)).Append('\n');
+        AppendHelp(sb, "fineage_step_watchdog_stalls", "Watchdog episodes of a simulation step that had not returned");
+        sb.Append("# TYPE fineage_step_watchdog_stalls gauge\n");
+        sb.Append("fineage_step_watchdog_stalls ").Append(snapshot.WatchdogStalls.ToString(CultureInfo.InvariantCulture)).Append('\n');
         AppendStages(sb, snapshot.Stages);
         AppendEnterHistograms(sb, snapshot);
         AppendHelp(sb, "fineage_zone_online", "Players currently in a zone simulation");
@@ -477,6 +539,19 @@ public static class MetricsText
         if (labels.Length == 0)
             return;
         sb.Append('{').Append(labels).Append('}');
+    }
+
+    static void AppendLane(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, long> counts)
+    {
+        if (counts.Count == 0)
+            return;
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" counter\n");
+        foreach (KeyValuePair<string, long> pair in counts)
+        {
+            sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
+                .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        }
     }
 
     static void AppendHelp(StringBuilder sb, string name, string help)

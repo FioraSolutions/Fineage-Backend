@@ -86,7 +86,7 @@ public sealed partial class ZoneWorld
     {
         if (NetBridge == null || player.Session is not { InWorld: true })
             return;
-        NetBridge.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player));
+        NetBridge.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player, InDangerArea(player)));
     }
 
     /// <summary>Net enter path: the same EtcStatusUpdate a client would get from <c>refreshOverloaded</c>.</summary>
@@ -94,7 +94,7 @@ public sealed partial class ZoneWorld
     {
         if (_byId.TryGetValue(session.ObjectId, out var e) && e.Kind == ZoneEntityKind.Player && e.Inventory != null)
         {
-            status = EtcStatusOf(e);
+            status = EtcStatusOf(e, InDangerArea(e));
             return true;
         }
         status = null!;
@@ -123,12 +123,12 @@ public sealed partial class ZoneWorld
     /// Mobius <c>EtcStatusUpdate</c> body (<c>EtcStatusUpdate.java:32-45</c>). Fields this server does not model yet
     /// (chat ban, danger area, charm of courage) go out as 0 when unmodeled; force charges follow Sonic Focus stacks.
     /// </summary>
-    internal static Fineage.Protocol.EtcStatusUpdateMsg EtcStatusOf(ZoneEntity player) => new()
+    internal static Fineage.Protocol.EtcStatusUpdateMsg EtcStatusOf(ZoneEntity player, bool dangerArea = false) => new()
     {
         Charges = player.ForceCharges,
         WeightPenalty = player.WeightPenaltyLevel,
         ChatBlocked = false,
-        DangerArea = false,
+        DangerArea = dangerArea,
         // Mobius writes 1 when either expertise penalty is above zero, not the level itself.
         GradePenalty = player.WeaponGradePenalty > 0 || player.ArmorGradePenalty > 0,
         CharmOfCourage = false,

@@ -117,7 +117,7 @@ public sealed partial class ZoneWorld
     {
         if (player.Session == null)
             return;
-        NetBridge?.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player));
+        NetBridge?.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player, InDangerArea(player)));
     }
 
     static bool HasFocusEnergy(SkillEffectCatalog.Effect[] rows) =>

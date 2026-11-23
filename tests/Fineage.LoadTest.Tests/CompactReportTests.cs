@@ -25,7 +25,7 @@ public class CompactReportTests
     {
         string peak = File.ReadAllText(FixturePath);
         var rows = LatencyTableBuilder.FromPeakMetrics(peak, zoneLogPath: null);
-        Assert.Contains(rows, r => r.Name == "tick");
+        Assert.Contains(rows, r => r.Name == "tick (histogram)");
         Assert.Contains(rows, r => r.Name == "tick_stage/commands");
     }
 
@@ -55,6 +55,8 @@ public class CompactReportTests
 
         string md = CompactMarkdownRenderer.Render(report);
         Assert.Contains("## Verdict vs #867 gates", md);
+        Assert.Contains("client consistency oracle", md, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Fanout drops", md);
         Assert.Contains("bots-50-town", md);
         Assert.True(System.Text.Encoding.UTF8.GetByteCount(md) <= CompactMarkdownRenderer.TargetMaxBytes);
     }
