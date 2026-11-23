@@ -56,7 +56,7 @@ sealed partial class SessionLifecyclePacketHandler
     /// Self frames from a player that is not in the world yet. Runs off the simulation thread.
     /// UserInfo is built from the entity, not from a directory lookup.
     /// </summary>
-    void ProjectSelf(ZoneSession zoneSession, EntityId self, ZoneEntity entity)
+    void ProjectSelf(ZoneSession zoneSession, EntityId self, ZoneEntity entity, bool dangerArea = false)
     {
         using var _ = EnterMetrics.MeasureSelfProjection();
         long nowMs = _clock().ToUnixTimeMilliseconds();
@@ -80,7 +80,7 @@ sealed partial class SessionLifecyclePacketHandler
         if (_world.TryBuildNetAbnormalStatus(entity, out var abnormals))
             selfSlots.Add(new EnterSelfSlot(NetOpcode.AbnormalStatusUpdate, abnormals));
         if (entity.Inventory != null)
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.EtcStatusUpdate, ZoneWorld.EtcStatusOf(entity)));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.EtcStatusUpdate, ZoneWorld.EtcStatusOf(entity, dangerArea)));
         selfSlots.Add(new EnterSelfSlot(NetOpcode.QuestList, _world.NetQuestList(entity)));
         if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
         {
@@ -108,6 +108,7 @@ sealed partial class SessionLifecyclePacketHandler
             PledgeClass = entity.PledgeClass,
             PartnerId = entity.PartnerId,
             Married = entity.Married,
+            DangerArea = dangerArea,
             RunSpeed = entity.RunSpeed,
             X = entity.X,
             Y = entity.Y,
@@ -123,6 +124,7 @@ sealed partial class SessionLifecyclePacketHandler
     {
         using var _ = EnterMetrics.MeasurePlan();
         var projected = zoneSession.PendingEnterProjection;
+        bool danger = _world.InDangerArea(entity);
         bool matches = projected != null
             && projected.SkillCount == entity.KnownSkills.Count
             && projected.Hero == entity.Hero
@@ -132,12 +134,13 @@ sealed partial class SessionLifecyclePacketHandler
             && projected.PledgeClass == entity.PledgeClass
             && projected.PartnerId == entity.PartnerId
             && projected.Married == entity.Married
+            && projected.DangerArea == danger
             && projected.RunSpeed == entity.RunSpeed
             && projected.X == entity.X
             && projected.Y == entity.Y
             && projected.Z == entity.Z;
         if (!matches)
-            ProjectSelf(zoneSession, self, entity);
+            ProjectSelf(zoneSession, self, entity, danger);
         projected = zoneSession.PendingEnterProjection
             ?? throw new InvalidOperationException(
                 $"enter object={zoneSession.ObjectId} has no self projection");

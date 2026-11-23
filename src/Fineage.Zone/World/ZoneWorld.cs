@@ -377,6 +377,7 @@ public sealed partial class ZoneWorld
             NoLanding = SharedNoLanding.Value;
             MotherTree = SharedMotherTree.Value;
         }
+        InitRuleZones();
         BootstrapSpawns();
         BootstrapBoats();
         BootstrapBosses();

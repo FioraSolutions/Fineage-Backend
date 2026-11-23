@@ -16,6 +16,11 @@ public sealed partial class ZoneWorld
     {
         if (player.Inventory == null || player.Session == null)
             return;
+        if (ZoneRules.Query(player.X, player.Y, player.Z, player.Race).BlocksItemDrop)
+        {
+            ZoneLog.Info($"[zone] NoItemDrop skipped death drop obj={player.ObjectId}");
+            return;
+        }
 
         _byId.TryGetValue(killerObjectId, out var killer);
         bool killerIsNpc = killer is { Kind: ZoneEntityKind.Npc };

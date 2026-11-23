@@ -100,6 +100,67 @@ public sealed class SimulationHangGateTests
     }
 
     [Fact]
+    public void Tick_max_gauge_is_the_stall_when_it_exceeds_the_counter_gap_and_the_limit()
+    {
+        var samples = new List<TickObservation>();
+        for (int i = 0; i < 12; i++)
+            samples.Add(new TickObservation(T0.AddSeconds(i * 5), 100 + i, 45000));
+
+        var counter = SimulationHangGate.Evaluate(samples, T0, T0.AddSeconds(60), TimeSpan.FromSeconds(30));
+        Assert.False(counter.Hung);
+
+        var gauge = SimulationHangGate.FromTickMax(samples, TimeSpan.FromSeconds(30));
+        Assert.True(gauge.Hung);
+        Assert.InRange(gauge.StallSeconds, 44.9, 45.1);
+
+        var combined = SimulationHangGate.Combine(counter, SimulationHangVerdict.Clear, gauge);
+        Assert.True(combined.Hung);
+        Assert.Contains("45.0s", combined.Reason, StringComparison.Ordinal);
+        Assert.Contains("fineage_tick_max_ms", combined.Reason, StringComparison.Ordinal);
+        Assert.Contains("45000.0ms", combined.Reason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Tick_max_under_the_limit_raises_the_printed_duration_without_failing()
+    {
+        var samples = new List<TickObservation>();
+        for (int i = 0; i < 12; i++)
+            samples.Add(new TickObservation(T0.AddSeconds(i * 5), 100 + i, 12000));
+
+        var combined = SimulationHangGate.Combine(
+            SimulationHangGate.Evaluate(samples, T0, T0.AddSeconds(60), TimeSpan.FromSeconds(30)),
+            SimulationHangVerdict.Clear,
+            SimulationHangGate.FromTickMax(samples, TimeSpan.FromSeconds(30)));
+
+        Assert.False(combined.Hung);
+        Assert.Equal(0, combined.StallCount);
+        Assert.InRange(combined.StallSeconds, 11.9, 12.1);
+    }
+
+    [Fact]
+    public void Tick_max_gauge_is_read_from_the_raw_scrape()
+    {
+        const string raw = "fineage_tick_ms_count 42\nfineage_tick_max_ms 4123.5\nfineage_tick_stage_ms_count{stage=\"commands\"} 9\n";
+        var series = SimulationHangGate.FromScrapes([new PrometheusSample { ScrapedAt = T0 }], [raw]);
+
+        Assert.Equal(4123.5, Assert.Single(series).TickMaxMs);
+        Assert.Equal(4123.5, SimulationHangGate.ParseTickMaxMs(raw));
+    }
+
+    [Fact]
+    public void Reported_tick_max_is_the_gauge_not_the_histogram_bucket()
+    {
+        var aggregate = PrometheusAggregate.FromSamples(
+        [
+            new PrometheusSample { ScrapedAt = T0, TickMax = 1500, TickTrueMaxMs = 1234.5 },
+            new PrometheusSample { ScrapedAt = T0.AddSeconds(5), TickMax = 1000, TickTrueMaxMs = 800 }
+        ]);
+
+        Assert.Equal(1234.5, aggregate.TickMaxMs);
+        Assert.Equal(1500, aggregate.TickHistogramCeilingMs);
+    }
+
+    [Fact]
     public void Tick_count_is_read_from_the_raw_scrape()
     {
         var raw = "fineage_tick_stage_ms_count{stage=\"commands\"} 9\nfineage_tick_ms_count 42\n";

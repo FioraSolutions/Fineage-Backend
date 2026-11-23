@@ -44,6 +44,7 @@ sealed class EnterProjection
     public required int PledgeClass { get; init; }
     public required int PartnerId { get; init; }
     public required bool Married { get; init; }
+    public required bool DangerArea { get; init; }
     public required float RunSpeed { get; init; }
     public required int X { get; init; }
     public required int Y { get; init; }

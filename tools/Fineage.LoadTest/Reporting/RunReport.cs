@@ -68,7 +68,11 @@ public sealed class PrometheusAggregate
     public double TickP50Ms { get; init; }
     public double TickP95Ms { get; init; }
     public double TickP99Ms { get; init; }
+    /// <summary><c>fineage_tick_max_ms</c>. Not the histogram bucket ceiling.</summary>
     public double TickMaxMs { get; init; }
+
+    /// <summary>Upper edge of the histogram bucket that held the longest finished tick. Not the duration.</summary>
+    public double TickHistogramCeilingMs { get; init; }
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long CommandIngressQueuedMax { get; init; }
@@ -123,7 +127,8 @@ public sealed class PrometheusAggregate
             TickP50Ms = Percentile(samples.Select(s => s.TickP50), 0.5),
             TickP95Ms = Percentile(samples.Select(s => s.TickP95), 0.95),
             TickP99Ms = Percentile(samples.Select(s => s.TickP99), 0.99),
-            TickMaxMs = samples.Max(s => s.TickMax),
+            TickMaxMs = samples.Max(s => s.TickTrueMaxMs),
+            TickHistogramCeilingMs = samples.Max(s => s.TickMax),
             TickOverruns = samples.Max(s => s.TickOverruns),
             TicksSkipped = samples.Max(s => s.TicksSkipped),
             CommandIngressQueuedMax = samples.Max(s => s.CommandIngressQueued),

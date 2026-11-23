@@ -340,6 +340,9 @@ public sealed partial class ZoneWorld
         // These read the live directory (partner, pledge class). The entity is in it now, and only this thread may read it.
         ApplyWeddingOnEnter(entity);
         SyncClanStanding(entity);
+        // No-restart oust and rule-zone membership are world admission. Oust moves the body before AOI enter.
+        ApplyNoRestartOnLogin(entity, loaded.Stored?.LastAccess);
+        UpdateRuleZoneState(entity);
         if (loaded.ApplyStarterKit)
             ApplyStarterKitLedger(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.

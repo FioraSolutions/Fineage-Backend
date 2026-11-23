@@ -102,7 +102,7 @@ public static class CompactMarkdownRenderer
         {
             sb.AppendLine();
             sb.AppendLine(
-                $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** histogram max **{r.Server.TickMaxMs:0.0}** true max **{r.TickTrueMaxMs:0.0}**; " +
+                $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** max **{r.Server.TickMaxMs:0.0}** (`fineage_tick_max_ms`); histogram bucket ceiling **{r.Server.TickHistogramCeilingMs:0.0}** is not the duration; " +
                 $"watchdog stalls **{r.WatchdogStalls}** max **{r.WatchdogStallMaxMs:0.0}** ms; ingress max **{r.Server.CommandIngressQueuedMax}**.");
             sb.AppendLine($"- Outbound drops (`fineage_outbound_dropped_total`): **{r.Server.OutboundDropped}**");
             sb.AppendLine($"- Fanout drops (`fineage_fanout_dropped_total`): **{r.FanoutDropped}**");
