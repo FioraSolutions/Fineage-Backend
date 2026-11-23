@@ -48,6 +48,8 @@ public static class UserCommandProtocol
     public const int ClanWithAlly = 1200;
     public const int ClanWithoutAlly = 1202;
 
+    public const int PlayerUnstuckSkillId = 2099;
+    public const int GmUnstuckSkillId = 2100;
     public const int PlayerUnstuckMs = 300_000;
     public const int GmUnstuckMs = 1_000;
 }

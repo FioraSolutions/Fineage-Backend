@@ -32,6 +32,9 @@ public static class NpcHtmlPaths
         };
     }
 
+    /// <summary>Mobius <c>data/html/npcdefault.htm</c>: the page of an NPC that has none of its own.</summary>
+    public const string DefaultPage = "npcdefault.htm";
+
     public static string FileName(int npcId, int page) =>
         page <= 0 ? $"{npcId}.htm" : $"{npcId}-{page}.htm";
 
@@ -41,8 +44,8 @@ public static class NpcHtmlPaths
         string file = FileName(npcId, page);
         string folder = Folder(npcType);
         if (string.Equals(folder, "default", StringComparison.Ordinal))
-            return [$"{folder}/{file}", "npcdefault.htm"];
-        return [$"{folder}/{file}", $"default/{file}", "npcdefault.htm"];
+            return [$"{folder}/{file}", DefaultPage];
+        return [$"{folder}/{file}", $"default/{file}", DefaultPage];
     }
 
     /// <summary>Page body for <c>showChatWindow</c>. Missing files use the standard nothing-to-say page.</summary>

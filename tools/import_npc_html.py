@@ -41,6 +41,9 @@ for i in sorted(ids):
 # list + 0-based index. Rewrite each goto by the location name in msg="811;<name>" (Token label -> NOBLES_TOKEN).
 gates = {g["npcId"]: g["lists"] for g in json.loads((ROOT / "data/teleports.json").read_text())["gatekeepers"]}
 GOTO = re.compile(r'npc_%objectId%_goto (\d+)"(\s+msg="811;([^"]+)")?>([^<]*)')
+def norm(text):
+    return re.sub(r"[^0-9a-z]", "", (text or "").lower())
+UNMAPPED = []
 def rewrite_goto(rel, text):
     m = re.match(r"teleporter/(\d+)", rel)
     lists = gates.get(int(m.group(1))) if m else None
@@ -48,15 +51,19 @@ def rewrite_goto(rel, text):
         return text
     def one(g):
         name, label = (g.group(3) or "").strip(), g.group(4)
+        # The msg name and the visible label (before the " - <fee>" suffix) both name the destination; the
+        # datapack spells them with and without apostrophes, so compare letters and digits only.
+        wanted = {norm(name), norm(label.split(" - ")[0])} - {""}
         order = ["NOBLES_TOKEN"] if "Token" in label else ["NORMAL", "NOBLES_ADENA"]
         for want in order:
             for lst in lists:
                 if lst["name"] != want:
                     continue
                 for i, loc in enumerate(lst["locations"]):
-                    if loc["name"] == name:
+                    if norm(loc["name"]) in wanted:
                         return g.group(0).replace(f"_goto {g.group(1)}", f"_teleport {want} {i}", 1)
         print(f"  WARN {rel}: no teleports.json row for goto {g.group(1)} {name!r}")
+        UNMAPPED.append((rel, g.group(1), name, label.strip()))
         return g.group(0)
     return GOTO.sub(one, text)
 
@@ -78,5 +85,18 @@ while queue:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(rewrite_goto(rel, text), encoding="utf-8")
     added.append(rel)
-print(f"npcs={len(ids)} files_seen={len(seen)} added={len(added)}")
+print(f"npcs={len(ids)} files_seen={len(seen)} added={len(added)} unmapped_goto={len(UNMAPPED)}")
+# Gap report: legacy goto links with no data/teleports.json row. The zone refuses `goto` with a logged reason
+# (there is no legacy id table), so each row here is a destination the gatekeeper page offers but Fineage lacks.
+gap = ROOT / "docs/gaps/npc-html-unmapped-goto.tsv"
+if UNMAPPED:
+    gap.parent.mkdir(parents=True, exist_ok=True)
+    rows = {}
+    if gap.exists():
+        for line in gap.read_text(encoding="utf-8").splitlines()[1:]:
+            parts = line.split("\t")
+            rows[(parts[0], parts[1])] = line
+    for rel, gid, name, label in UNMAPPED:
+        rows[(rel, gid)] = "\t".join([rel, gid, name, label])
+    gap.write_text("page\tlegacy_goto_id\tmsg_name\tlabel\n" + "\n".join(rows[k] for k in sorted(rows)) + "\n", encoding="utf-8")
 for r in sorted(added): print(" ", r)

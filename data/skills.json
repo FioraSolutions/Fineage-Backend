@@ -61311,6 +61311,248 @@
       ]
     },
     {
+      "skillId": 2011,
+      "name": "Haste Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 1200,
+      "abnormalType": "SPEED_UP"
+    },
+    {
+      "skillId": 2012,
+      "name": "Potion of Alacrity",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 1200,
+      "abnormalType": "ATTACK_TIME_DOWN"
+    },
+    {
+      "skillId": 2013,
+      "name": "Scroll of Escape",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 20000,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2031,
+      "name": "Lesser Healing Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 10000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ],
+      "abnormalTimeSeconds": 15,
+      "abnormalType": "HP_RECOVER"
+    },
+    {
+      "skillId": 2036,
+      "name": "Blessed Scroll of Escape",
+      "levels": 2,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 200,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2037,
+      "name": "Greater Healing Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 10000,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 15,
+      "abnormalType": "HP_RECOVER"
+    },
+    {
+      "skillId": 2040,
+      "name": "Scroll of Escape: Clan Hall",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 20000,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2042,
+      "name": "Antidote",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2044,
+      "name": "Bandage",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2078,
+      "name": "Compressed Package of Soulshots: No Grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2084,
+      "name": "Compressed Package of Spiritshots: No Grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2090,
+      "name": "Compressed Package of Blessed Spiritshots: No Grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
       "skillId": 2096,
       "name": "Soul Crystal",
       "levels": 1,
@@ -61392,6 +61634,2480 @@
       ],
       "magicType": 2,
       "effectRange": 400
+    },
+    {
+      "skillId": 2099,
+      "name": "Escape: 5 minutes",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 300000,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2100,
+      "name": "Escape: 1 second",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 1000,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2104,
+      "name": "Greater Compressed Package of Soulshots: No-grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2110,
+      "name": "Greater Compressed Package of Spiritshots: No-grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2116,
+      "name": "Greater Compressed Package of Blessed Spiritshots: No-grade",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2169,
+      "name": "Magic Haste Potion",
+      "levels": 2,
+      "passive": false,
+      "operateType": "A2",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 2
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 3
+        }
+      ],
+      "abnormalTimeSeconds": 1200,
+      "abnormalType": "CASTING_TIME_DOWN"
+    },
+    {
+      "skillId": 2170,
+      "name": "Scroll: Cancel Sleep",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "ONE",
+      "castRange": 400,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2177,
+      "name": "Blessed Scroll of Escape: Clan Hall",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 200,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2190,
+      "name": "Item - Green Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2191,
+      "name": "Item - Jade Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2192,
+      "name": "Item - Blue Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2193,
+      "name": "Item - Yellow Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2194,
+      "name": "Item - Orange Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2195,
+      "name": "Item - Violet Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2196,
+      "name": "Item - Red Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2197,
+      "name": "Item - White Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2198,
+      "name": "Item - Black Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2199,
+      "name": "Item - Green Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2200,
+      "name": "Item - Jade Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2201,
+      "name": "Item - Blue Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2202,
+      "name": "Item - Yellow Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2203,
+      "name": "Item - Orange Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2204,
+      "name": "Item - Violet Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2205,
+      "name": "Item - Red Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2206,
+      "name": "Item - White Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2207,
+      "name": "Item - Black Treasure Box",
+      "levels": 3,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2213,
+      "name": "Escape - Talking Island Village",
+      "levels": 21,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 20000,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 10,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 11,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 12,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 13,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 14,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 15,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 16,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 17,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 18,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 19,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 20,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 21,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2220,
+      "name": "Item - Easy Green Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2221,
+      "name": "Item - Easy Jade Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2222,
+      "name": "Item - Easy Blue Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2223,
+      "name": "Item - Easy Yellow Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2224,
+      "name": "Item - Easy Orange Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2225,
+      "name": "Item - Easy Violet Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2226,
+      "name": "Item - Easy Red Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2227,
+      "name": "Item - Easy White Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2228,
+      "name": "Item - Easy Black Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2261,
+      "name": "Item - Hard Green Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2262,
+      "name": "Item - Hard Jade Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2263,
+      "name": "Item - Hard Blue Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2264,
+      "name": "Item - Hard Yellow Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2265,
+      "name": "Item - Hard Orange Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2266,
+      "name": "Item - Hard Violet Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2267,
+      "name": "Item - Hard Red Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2268,
+      "name": "Item - Hard White Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2269,
+      "name": "Item - Hard Black Fish",
+      "levels": 9,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 7,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 8,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 9,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2271,
+      "name": "Item - Hot Spring Fish",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2275,
+      "name": "Fisherman's Recovery Potion",
+      "levels": 1,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
+    },
+    {
+      "skillId": 2286,
+      "name": "Scroll: Recovery (Grade S)",
+      "levels": 6,
+      "passive": false,
+      "operateType": "A1",
+      "targetType": "SELF",
+      "castRange": 40,
+      "hitTimeMs": 0,
+      "reuseDelayMs": 0,
+      "levelData": [
+        {
+          "level": 1,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 2,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 3,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 4,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 5,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        },
+        {
+          "level": 6,
+          "mpConsume": 0,
+          "power": 0,
+          "abnormalLevel": 1
+        }
+      ]
     },
     {
       "skillId": 4019,
