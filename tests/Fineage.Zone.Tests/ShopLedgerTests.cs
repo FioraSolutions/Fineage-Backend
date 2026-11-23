@@ -87,8 +87,8 @@ public sealed class ShopLedgerTests
     public async Task Castle_tax_leaves_the_shop_for_each_treasury_it_was_credited_to()
     {
         var clock = new MutableClock();
-        WorldBench bench = Flat(clock, Kit((Adena, 1000)), mapId: "giran");
-        BenchPlayer actor = await bench.EnterAsync("taxed", "Taxed");
+        WorldBench bench = Flat(clock, Kit((Adena, 1000)), mapId: "giran", x: GiranTownX, y: GiranTownY, z: GiranTownZ);
+        BenchPlayer actor = await bench.EnterAsync("taxed", "Taxed", x: GiranTownX, y: GiranTownY, z: GiranTownZ);
         var bag = LedgerAccount.Inventory(actor.ObjectId);
         var giran = bench.World.FindCastle(3)!;
         var aden = bench.World.FindCastle(5)!;

@@ -15,9 +15,9 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 85 |
+| ✅ done | 86 |
 | 🟡 partial | 8 |
-| ❌ missing | 12 |
+| ❌ missing | 11 |
 | n/a | 3 |
 | **total** | **108** |
 
@@ -37,7 +37,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 6 | Geodata LOS / MoveCheck / path | 🟡 | M | `geoengine/GeoEngine.java` → `Geo/GeoEngine.cs`. Engine is ported; the repo has no `*.l2j` regions. A missing directory is logged and geo is disabled unless `FINEAGE_GEODATA_REQUIRED=1` — #918 |
 | 7 | Doors | ✅ | — | `entity/actor/instance/Door.java` → `ZoneWorldDoors` |
 | 8 | Peace, arena, water, swamp, damage, no-landing, mother tree, jail, siege, fishing, olympiad, HQ | ✅ | — | matching `entity/zone/type/*Zone.java` → `Geo/MoveZones.cs`, `JailZoneCatalog`, `FishingTable`, `OlympiadStadiums`, `ZoneWorldSiege.Structures` |
-| 9 | Remaining zone types | ❌ | M | `NoStoreZone.java`, `NoSummonFriendZone.java`, `NoRestartZone.java`, `EffectZone.java`, `ScriptZone.java`, `TownZone.java`, `RespawnZone.java`, `ConditionZone.java`, `DerbyTrackZone.java`, `ResidenceTeleportZone.java`, `NoBookmark` / tax xml → not loaded. `ZoneWorldWedding.cs` passes `noSummonZone: false` — #917 |
+| 9 | Remaining zone types | ✅ | — | `entity/zone/type/*Zone.java` + `zones/*.xml` → `ZoneTypeRegistry` (`data/zone-types.json`). One profile class per type. Unknown type is logged and skipped. Wedding summon reads the no-summon flag. #917 |
 | 10 | NPC spawns | ✅ | — | `data/spawns` (186 xml) → 189 spawn JSON files, none left `enabled: false` |
 | 11 | Raid / grand boss schedule | 🟡 | S | `RaidBossSpawnManager.java` → `data/raidbosses.json` 216/223 enabled. Anakazel 25333–25338 stay off (script minions). **25512 Gigantic Chaos Golem** is `enabled: false` at 0,0,0 — the import has no coordinates — #926 |
 | 12 | Day/night spawn swap | ✅ | — | `DayNightSpawnManager.java` → `ZoneWorldSpawns.DayNight` |
@@ -170,21 +170,20 @@ These Mobius trees were walked. They do not get their own row when the mechanism
 
 PvE and character leveling first. Siege, olympiad, and clan are last because those stacks are already on `dev`.
 
-1. Zone types that change movement, stores, summon, and death restart (row 9) — #917.
-2. Geodata region files so LOS and paths leave stub mode (row 6) — #918. Loader is #793.
-3. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
-4. User commands, especially Unstuck (row 68) — #920.
-5. Inventory crystallize (row 51) — #921.
-6. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
-7. Logout back to the character lobby (row 4) — #923.
-8. Shop wear preview (row 48) — #924.
-9. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-10. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-11. Macros (row 69) — #927.
-12. Party matching rooms (row 67) — #928.
-13. Community board (row 70) — #929.
-14. Petitions (row 63) — #930.
-15. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+1. Geodata region files so LOS and paths leave stub mode (row 6) — #918. Loader is #793.
+2. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
+3. User commands, especially Unstuck (row 68) — #920.
+4. Inventory crystallize (row 51) — #921.
+5. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
+6. Logout back to the character lobby (row 4) — #923.
+7. Shop wear preview (row 48) — #924.
+8. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+9. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+10. Macros (row 69) — #927.
+11. Party matching rooms (row 67) — #928.
+12. Community board (row 70) — #929.
+13. Petitions (row 63) — #930.
+14. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

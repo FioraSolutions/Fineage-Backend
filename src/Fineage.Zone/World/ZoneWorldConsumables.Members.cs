@@ -9,16 +9,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>
-    /// Mobius <c>MapRegionManager.getTeleToLocation(creature, TOWN)</c>: the town square of the region that owns the
-    /// player's grid cell, or the Talking Island restart when the cell belongs to no region.
-    /// </summary>
-    (int X, int Y, int Z) TownDestination(ZoneEntity player)
-    {
-        var point = _mapRegions.TownRespawn(player.X, player.Y, Rng(_respawnRandom, player));
-        return (point.X, point.Y, point.Z);
-    }
-
     /// <summary>Mobius <c>teleToLocation(CLANHALL)</c> for the clan's owned hideout.</summary>
     (int X, int Y, int Z)? ClanHallDestination(ZoneEntity player)
     {

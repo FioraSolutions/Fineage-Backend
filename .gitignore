@@ -72,6 +72,7 @@ data/*
 !data/damage-zones.json
 !data/no-landing-zones.json
 !data/mother-tree-zones.json
+!data/zone-types.json
 !data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/

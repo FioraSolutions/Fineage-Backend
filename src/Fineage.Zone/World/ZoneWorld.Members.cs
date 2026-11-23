@@ -227,6 +227,7 @@ public sealed partial class ZoneWorld
 
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
+        ForgetRuleZoneState(session.ObjectId);
         PrivateStorePlayerLeftWorld(session.ObjectId);
         FriendPlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);

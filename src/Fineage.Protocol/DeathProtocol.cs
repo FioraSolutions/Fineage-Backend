@@ -44,4 +44,6 @@ public static class DeathProtocol
     public const string NotDead = "revive_not_dead";
     public const string AlreadyDead = "death_already";
     public const string Unsupported = "revive_unsupported";
+    /// <summary>Village restart refused inside a no-restart zone.</summary>
+    public const string NoRestart = "revive_no_restart";
 }

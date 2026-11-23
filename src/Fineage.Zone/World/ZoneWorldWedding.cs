@@ -221,7 +221,7 @@ public sealed partial class ZoneWorld
                 siege,
                 festival: PlayerZoneChecks.IsInFestivalArena(this, activeChar.ObjectId),
                 dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, activeChar.ObjectId),
-                noSummonZone: false,
+                noSummonZone: ZoneRules.Query(activeChar.X, activeChar.Y, activeChar.Z, activeChar.Race).BlocksSummon,
                 grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, activeChar.ObjectId))
             is { } selfErr)
             return SendWeddingLine(activeChar, selfErr);
@@ -241,7 +241,7 @@ public sealed partial class ZoneWorld
                 siegeInProgress: SiegeBlocksPartnerTeleport(partner),
                 festival: PlayerZoneChecks.IsInFestivalArena(this, partner.ObjectId),
                 dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, partner.ObjectId),
-                noSummonZone: false,
+                noSummonZone: ZoneRules.Query(partner.X, partner.Y, partner.Z, partner.Race).BlocksSummon,
                 grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, partner.ObjectId),
                 offline: false)
             is { } partnerErr)

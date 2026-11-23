@@ -248,6 +248,8 @@ public sealed partial class ZoneWorld
         RefreshGradePenalty(entity);
         EnsureFreightLoaded(entity, stored);
         _byId[entity.ObjectId] = entity;
+        ApplyNoRestartOnLogin(entity, stored?.LastAccess);
+        UpdateRuleZoneState(entity);
         if (applyStarterKit)
             ApplyStarterKitLedger(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.

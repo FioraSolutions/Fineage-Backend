@@ -41,5 +41,11 @@ public static class PlayerZoneChecks
         return world.OlympiadObserving(objectId);
     }
 
-    public static bool IsInGrandBossZone(ZoneWorld world, int objectId) => false;
+    public static bool IsInGrandBossZone(ZoneWorld world, int objectId)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        if (!world.TryGetEntityById(objectId, out var entity) || entity.Kind != ZoneEntityKind.Player)
+            return false;
+        return world.ZoneRules.Query(entity.X, entity.Y, entity.Z, entity.Race).InBoss;
+    }
 }
