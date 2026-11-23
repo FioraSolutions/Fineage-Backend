@@ -1,6 +1,5 @@
 using Fineage.Game.Recipes;
 using Fineage.Game.Shops;
-using Fineage.Login;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.World;
@@ -23,8 +22,9 @@ public sealed partial class ZoneWorld
     {
         if (!LoadTestEconomyHammerEnabled)
             return;
-        string? prefix = LoginLoadTestSettings.AccountPrefix;
-        if (prefix == null || player.Session?.Account is not { } account ||
+        string? prefix = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX");
+        if (string.IsNullOrWhiteSpace(prefix) ||
+            player.Session?.Account is not { } account ||
             !account.StartsWith(prefix, StringComparison.Ordinal))
             return;
         if (!TryParseLoadBotId(player.Name, out int botId))
@@ -33,12 +33,12 @@ public sealed partial class ZoneWorld
         int mod = Math.Abs(botId) % 6;
         if (mod == 0)
         {
-            if (player.Race != PrivateStoreProtocol.DwarfRace)
-                throw new InvalidOperationException(
-                    $"load-test economy hammer: bot {botId} must be dwarf race to manufacture (race={player.Race})");
-            if (player.ClassId != 53)
-                throw new InvalidOperationException(
-                    $"load-test economy hammer: bot {botId} manufacturer must be class 53 (class={player.ClassId})");
+            if (player.Race != PrivateStoreProtocol.DwarfRace || player.ClassId != 53)
+            {
+                ZoneLog.Error(
+                    $"load-test economy hammer misconfig: botId={botId} obj={player.ObjectId} needs race={PrivateStoreProtocol.DwarfRace} class=53 got race={player.Race} class={player.ClassId}");
+                return;
+            }
 
             player.LearnedSkills[RecipeCatalog.CreateDwarvenSkillId] = 1;
             RefreshKnownSkillsForTest(player);

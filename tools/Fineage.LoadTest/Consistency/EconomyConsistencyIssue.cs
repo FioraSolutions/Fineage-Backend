@@ -22,7 +22,7 @@ public sealed class EconomyConsistencyReport
     public List<EconomyConsistencyIssue> Issues { get; init; } = [];
     public long LedgerInvariantViolations { get; init; }
     public long LedgerFlushFailures { get; init; }
-    public long ExplainedEconomyRejects { get; init; }
-    public long EconomyFlowsAttempted { get; init; }
-    public long EconomyFlowsSucceeded { get; init; }
+    public long ExplainedEconomyRejects { get; set; }
+    public long EconomyFlowsAttempted { get; set; }
+    public long EconomyFlowsSucceeded { get; set; }
 }

@@ -57,6 +57,9 @@ public static class ScenarioLoader
         if (child.Economy == null && parent.Economy != null)
             child.Economy = parent.Economy;
 
+        if (parent.Economy is { Enabled: true } && child.SpawnLayout is "town" or "")
+            child.SpawnLayout = parent.SpawnLayout;
+
         return child;
     }
 }

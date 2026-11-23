@@ -12,7 +12,9 @@ public static class EconomyConsistencyOracle
     static readonly HashSet<string> ExplainedRejectCodes = new(StringComparer.OrdinalIgnoreCase)
     {
         "world", "range", "bad_request", "closed", "adena", "weight", "slots", "ledger",
-        "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance"
+        "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance",
+        "manor_manager", "manor_period", "store_combat", "store_item", "recipe", "craft",
+        "sit", "mp", "skill", "target"
     };
 
     static readonly Regex LedgerRejectRx = new(
