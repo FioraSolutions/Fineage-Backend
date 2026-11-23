@@ -35,6 +35,6 @@ public sealed class ZoneTickBudgetSettingsTests
     public void Unset_tick_budgets_use_defaults()
     {
         Assert.Equal(16, ZoneSimulationSettings.PrivatesSpawnBudgetPerTick);
-        Assert.Equal(128, ZoneSimulationSettings.RegionWakeBudgetPerTick);
+        Assert.Equal(256, ZoneSimulationSettings.RegionWakeBudgetPerTick);
     }
 }
