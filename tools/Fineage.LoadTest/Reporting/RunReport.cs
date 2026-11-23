@@ -1,6 +1,7 @@
 using Fineage.LoadTest.Bot;
 using Fineage.LoadTest.Consistency;
 using Fineage.LoadTest.Metrics;
+using Fineage.LoadTest.Travel;
 
 namespace Fineage.LoadTest.Reporting;
 
@@ -17,6 +18,8 @@ public sealed class RunReport
     public int BotsStuck { get; init; }
     public long RelogsAttempted { get; init; }
     public long RelogsSucceeded { get; init; }
+    /// <summary>Town-to-town gatekeeper teleports by the travelling share of the fleet.</summary>
+    public TravelSummary GatekeeperTravel { get; init; } = new();
     public double ClientRttP50Ms { get; init; }
     public double ClientRttP95Ms { get; init; }
     public double ClientRttP99Ms { get; init; }

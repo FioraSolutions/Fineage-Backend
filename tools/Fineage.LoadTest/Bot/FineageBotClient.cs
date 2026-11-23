@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using Fineage.Accounts;
 using Fineage.LoadTest.Models;
+using Fineage.LoadTest.Travel;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 
@@ -28,7 +29,14 @@ public sealed class FineageBotClient : IAsyncDisposable
     int _spawnY;
     int _spawnZ;
 
-    public FineageBotClient(LoadScenario scenario, int botId, BotStats stats, BotPeerDirectory peers)
+    readonly GatekeeperTraveler? _traveler;
+
+    public FineageBotClient(
+        LoadScenario scenario,
+        int botId,
+        BotStats stats,
+        BotPeerDirectory peers,
+        GatekeeperDirectory? gatekeepers = null)
     {
         _peers = peers;
         _rng = new Random(botId * 7919 + 17);
@@ -39,7 +47,20 @@ public sealed class FineageBotClient : IAsyncDisposable
         CharacterName = $"Bot{botId:D4}";
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
         _observation = new BotObservationLog(botId);
+        if (scenario.IsGatekeeperTraveler(botId))
+        {
+            if (gatekeepers == null)
+                throw new InvalidOperationException($"bot {botId} is a gatekeeper traveller but no GatekeeperDirectory was loaded");
+            stats.Travel = new TravelStats();
+            _traveler = new GatekeeperTraveler(
+                gatekeepers,
+                botId * 7919 + 31,
+                TimeSpan.FromMilliseconds(scenario.GatekeeperTripCooldownMs),
+                stats.Travel);
+        }
     }
+
+    public bool IsTraveler => _traveler != null;
 
     public int BotId { get; }
     public LoadScenario Scenario { get; }
@@ -85,6 +106,7 @@ public sealed class FineageBotClient : IAsyncDisposable
                 var (opcode, payload) = await ZoneReadFrameAsync(ct);
                 _lastRecvOpcode = opcode;
                 _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
+                _traveler?.OnFrame(opcode, payload);
                 if (opcode == NetOpcode.Reject)
                     _stats.LastError = NetCodec.DecodeReject(payload).Code;
             }
@@ -195,6 +217,7 @@ public sealed class FineageBotClient : IAsyncDisposable
             }
 
             _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
+            _traveler?.OnFrame(opcode, payload);
             if (opcode == NetOpcode.Reject)
                 throw new InvalidOperationException(NetCodec.DecodeReject(payload).Code);
             if (opcode == NetOpcode.SystemMessage)
@@ -212,6 +235,12 @@ public sealed class FineageBotClient : IAsyncDisposable
     {
         if (_zoneStream == null || _stats.Disconnected)
             return;
+
+        if (_traveler != null)
+        {
+            await RunTravelTickAsync(ct);
+            return;
+        }
 
         string action = PickAction();
         var sw = Stopwatch.StartNew();
@@ -306,17 +335,30 @@ public sealed class FineageBotClient : IAsyncDisposable
                 case "relog":
                     await RelogAsync(fleet, ct);
                     break;
-                case "teleport":
-                    await ZoneWriteAsync(NetOpcode.TeleportToLocation,
-                        NetCodec.EncodeTeleportToLocation(new TeleportToLocationNetMsg
-                        {
-                            X = _spawnX,
-                            Y = _spawnY,
-                            Z = _spawnZ
-                        }), ct);
-                    break;
             }
 
+            Interlocked.Increment(ref _stats.ActionsAttempted);
+            _stats.LastActionAt = DateTimeOffset.UtcNow;
+            sw.Stop();
+            _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            Interlocked.Increment(ref _stats.ActionsFailed);
+            _stats.LastError = ex.Message;
+            _stats.Disconnected = true;
+        }
+    }
+
+    /// <summary>Gatekeeper travellers run only the travel loop; see <see cref="GatekeeperTraveler"/>.</summary>
+    async Task RunTravelTickAsync(CancellationToken ct)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            var next = _traveler!.Step(DateTimeOffset.UtcNow);
+            if (next is { } command)
+                await SendTrackedAsync(command.Opcode, command.Payload, ct);
             Interlocked.Increment(ref _stats.ActionsAttempted);
             _stats.LastActionAt = DateTimeOffset.UtcNow;
             sw.Stop();

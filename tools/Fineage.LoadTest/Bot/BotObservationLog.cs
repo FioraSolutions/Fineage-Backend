@@ -205,6 +205,21 @@ public sealed class BotObservationLog
 
                         break;
                     }
+                case NetOpcode.TeleportToLocation:
+                    {
+                        // Gatekeeper/admin/scroll teleports snap the pawn; watchers and the owner both get this.
+                        var t = NetCodec.DecodeTeleportToLocation(payload);
+                        ulong key = (ulong)(uint)t.ObjectId;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = t.X;
+                            e.Y = t.Y;
+                            e.Z = t.Z;
+                            _byValue[key] = e;
+                        }
+
+                        break;
+                    }
                 case NetOpcode.StatusUpdate:
                     {
                         var st = NetCodec.DecodeStatusUpdate(payload);

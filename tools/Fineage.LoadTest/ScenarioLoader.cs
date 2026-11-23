@@ -28,7 +28,27 @@ public static class ScenarioLoader
             scenario = Merge(parent, scenario);
         }
 
+        Validate(scenario);
         return scenario;
+    }
+
+    /// <summary>Behaviors <c>FineageBotClient.RunBehaviorTickAsync</c> implements.</summary>
+    public static readonly IReadOnlySet<string> KnownActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "move", "attack", "skill", "say", "sit", "social", "pickup", "trade", "party", "pvp", "relog"
+    };
+
+    public static void Validate(LoadScenario scenario)
+    {
+        var unknown = scenario.ActionWeights.Keys.Where(k => !KnownActions.Contains(k)).ToList();
+        if (unknown.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"scenario {scenario.Name}: unknown action(s) {string.Join(", ", unknown)}; known: {string.Join(", ", KnownActions)}. " +
+                "Town-to-town teleports are gatekeeperTravelShare, not an action weight.");
+        }
+
+        _ = scenario.ResolvedGatekeeperTravelShare;
     }
 
     static LoadScenario Merge(LoadScenario parent, LoadScenario child)
@@ -43,6 +63,10 @@ public static class ScenarioLoader
             child.SpawnLayout = parent.SpawnLayout;
         if (child.AoiCellSize == 3000 && parent.AoiCellSize != 3000)
             child.AoiCellSize = parent.AoiCellSize;
+        child.GatekeeperTravelShare ??= parent.GatekeeperTravelShare;
+        child.DataDir ??= parent.DataDir;
+        if (child.GatekeeperTripCooldownMs == 3000 && parent.GatekeeperTripCooldownMs != 3000)
+            child.GatekeeperTripCooldownMs = parent.GatekeeperTripCooldownMs;
         if (child.ActionWeights.Count == 0)
             child.ActionWeights = new Dictionary<string, double>(parent.ActionWeights, StringComparer.OrdinalIgnoreCase);
         else

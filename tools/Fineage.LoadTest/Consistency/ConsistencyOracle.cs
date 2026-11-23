@@ -313,17 +313,22 @@ public static class ConsistencyOracle
         List<ConsistencyIssue> issues,
         Dictionary<int, CombatIndex> combat)
     {
+        // Positions at the time of each sighting: a bot that teleported town to town saw combat
+        // in the town it was in then, not where it ended the run.
+        var timelines = bots.ToDictionary(b => b.BotId, b => PositionTimeline.From(b.ObservationLog.Snapshot()));
         foreach (var bot in bots)
         {
             var entry = roster.FirstOrDefault(r => r.BotId == bot.BotId);
             if (entry == null)
                 continue;
-            foreach (var (_, actorOid, opcode) in combat[bot.BotId].Sightings)
+            foreach (var (at, actorOid, opcode) in combat[bot.BotId].Sightings)
             {
                 var actor = roster.FirstOrDefault(r => r.ObjectId == actorOid);
                 if (actor == null)
                     continue;
-                int dist = Distance(entry.X, entry.Y, actor.X, actor.Y);
+                var (ox, oy) = PositionAt(timelines[bot.BotId], at, entry);
+                var (ax, ay) = PositionAt(timelines[actor.BotId], at, actor);
+                int dist = Distance(ox, oy, ax, ay);
                 if (dist > watch * 2)
                 {
                     issues.Add(new ConsistencyIssue
@@ -338,6 +343,9 @@ public static class ConsistencyOracle
         }
     }
 
+    static (int X, int Y) PositionAt(PositionTimeline timeline, DateTimeOffset at, BotRosterEntry fallback) =>
+        timeline.TryAt(at, out int x, out int y) ? (x, y) : (fallback.X, fallback.Y);
+
     static List<BotRosterEntry> BuildRoster(IReadOnlyList<FineageBotClient> bots, LoadScenario scenario)
     {
         var list = new List<BotRosterEntry>();
@@ -349,10 +357,12 @@ public static class ConsistencyOracle
                 continue;
             var (x, y, z) = BotSpawn.Position(scenario, bot.BotId);
             var tracker = bot.ObservationLog.Tracker;
+            // The self pawn the server last placed (spawn, move, teleport) is the truth; the layout
+            // slot is only for a bot that never saw itself. West of x=0 (Talking Island, Gludin) is a real position.
             if (tracker.Entities.TryGetValue((ulong)bot.SelfObjectId, out var self))
             {
-                x = self.X > 0 ? self.X : x;
-                y = self.Y > 0 ? self.Y : y;
+                x = self.X;
+                y = self.Y;
             }
 
             list.Add(new BotRosterEntry(bot.BotId, bot.SelfObjectId, x, y, z, bot, tracker));

@@ -24,6 +24,7 @@ public static class CompactMarkdownRenderer
         AppendRuntime(sb, r);
         AppendLogs(sb, r);
         AppendBots(sb, r);
+        AppendTravel(sb, r);
         AppendGates(sb, r);
         AppendMissingMetrics(sb, r);
 
@@ -250,6 +251,29 @@ public static class CompactMarkdownRenderer
                 $"- Client consistency oracle (labeled separately from server histograms): **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
         }
 
+        sb.AppendLine();
+    }
+
+    static void AppendTravel(StringBuilder sb, RunReport r)
+    {
+        var t = r.GatekeeperTravel;
+        sb.AppendLine("## Gatekeeper travel");
+        if (t.Travellers == 0)
+        {
+            sb.AppendLine("- No travelling bots (gatekeeperTravelShare = 0).");
+            sb.AppendLine();
+            return;
+        }
+
+        sb.AppendLine("| travellers | talks | walk hops | teleports attempted | succeeded | rejected (reason) | unexplained |");
+        sb.AppendLine("| ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        sb.AppendLine($"| {t.Travellers} | {t.Talks} | {t.WalkHops} | {t.Attempted} | {t.Succeeded} | {t.Rejected} | {t.Unexplained} |");
+        foreach (var (reason, count) in t.RejectedByReason.OrderByDescending(kv => kv.Value))
+            sb.AppendLine($"- rejected `{reason}`: {count}");
+        if (t.TalkRangeRetries > 0)
+            sb.AppendLine($"- talk retried after `range` (walked closer): {t.TalkRangeRetries}");
+        foreach (string sample in t.UnexplainedSamples)
+            sb.AppendLine($"- UNEXPLAINED: {sample}");
         sb.AppendLine();
     }
 
