@@ -140,6 +140,9 @@ public sealed partial class ZoneWorld
 
     internal int CharacterSnapshotWriterThreadForTests => _snapshots.LastWriterThreadId;
 
+    internal IEnumerable<ZoneEntity> PlayersForTests() =>
+        _byId.Values.Where(e => e.Kind == ZoneEntityKind.Player);
+
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
         using (_economyLock.Enter())

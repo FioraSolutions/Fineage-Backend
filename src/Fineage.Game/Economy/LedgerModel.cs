@@ -325,7 +325,10 @@ public enum LedgerTxKind
     /// Inventory crystallize: the item leaves the bag and crystals are granted.
     /// <c>Reference</c> is the destroyed item id. Enchant-fail crystals stay on <see cref="Enchant"/>.
     /// </summary>
-    Crystallize = 59
+    Crystallize = 59,
+
+    /// <summary>Festival blood offering granted to the party leader on mob kill in a festival instance.</summary>
+    FestivalBloodOffering = 60,
 }
 
 /// <summary>

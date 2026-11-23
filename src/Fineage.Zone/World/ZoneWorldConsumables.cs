@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
@@ -157,8 +158,17 @@ public sealed partial class ZoneWorld
 
         if (grants != null)
         {
-            foreach (var (itemId, count) in grants)
-                player.Inventory.Add(itemId, count);
+            RecordBagChange(
+                player,
+                LedgerTxKind.Consume,
+                LedgerAccount.Of(SystemAccount.Consumed),
+                () =>
+                {
+                    foreach (var (itemId, count) in grants)
+                        player.Inventory.Add(itemId, count);
+                    return item.ItemId;
+                },
+                _ => item.ItemId);
         }
 
         player.ItemReuseUntilMs[item.ItemId] = now + Math.Max(0, use.ReuseDelayMs);
