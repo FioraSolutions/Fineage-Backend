@@ -29,8 +29,7 @@ sealed partial class NetWorldEventPublisher
             };
         }
         var payload = NetCodec.EncodeBossStatus(new BossStatusNetMsg { Bosses = bosses });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.BossStatus, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.BossStatus, payload);
     }
 
     void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info)
@@ -55,8 +54,7 @@ sealed partial class NetWorldEventPublisher
             EndsUnixMs = info.EndsUnixMs,
             Clans = netClans
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SiegeInfo, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.SiegeInfo, payload);
     }
 
     void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status)
@@ -83,8 +81,7 @@ sealed partial class NetWorldEventPublisher
             StadiumId = status.StadiumId,
             ClassId = status.ClassId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.OlympiadStatus, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.OlympiadStatus, payload);
     }
 
     void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadMatchMsg match)
@@ -102,8 +99,7 @@ sealed partial class NetWorldEventPublisher
             PlayerTwoName = match.PlayerTwoName ?? "",
             InstanceId = match.InstanceId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.OlympiadMatch, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.OlympiadMatch, payload);
     }
 
     void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadCountdownMsg countdown)
@@ -114,8 +110,7 @@ sealed partial class NetWorldEventPublisher
             Kind = countdown.Kind,
             Seconds = countdown.Seconds
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.OlympiadCountdown, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.OlympiadCountdown, payload);
     }
 
     void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result)
@@ -134,8 +129,7 @@ sealed partial class NetWorldEventPublisher
             CompetitionsDoneOne = result.CompetitionsDoneOne,
             CompetitionsDoneTwo = result.CompetitionsDoneTwo
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.OlympiadResult, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.OlympiadResult, payload);
     }
 
     void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status)
@@ -171,8 +165,7 @@ sealed partial class NetWorldEventPublisher
             DuskStrife = status.DuskStrife,
             PreviousWinner = status.PreviousWinner
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SevenSignsStatus, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.SevenSignsStatus, payload);
     }
 
     void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsSkyMsg sky)
@@ -183,8 +176,7 @@ sealed partial class NetWorldEventPublisher
             Period = sky.Period,
             WinningCabal = sky.WinningCabal
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SevenSignsSky, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.SevenSignsSky, payload);
     }
 
     void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered)
@@ -198,8 +190,7 @@ sealed partial class NetWorldEventPublisher
             Inside = entered.Inside,
             Action = entered.Action
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.DungeonEntered, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.DungeonEntered, payload);
     }
 
     void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list)
@@ -208,8 +199,7 @@ sealed partial class NetWorldEventPublisher
         {
             ItemIds = list.ItemIds ?? []
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.CursedWeaponList, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CursedWeaponList, payload);
     }
 
     void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location)
@@ -230,8 +220,7 @@ sealed partial class NetWorldEventPublisher
         }
 
         var payload = NetCodec.EncodeCursedWeaponLocation(new CursedWeaponLocationNetMsg { Rows = netRows });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.CursedWeaponLocation, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CursedWeaponLocation, payload);
     }
 
 }

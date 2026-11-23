@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Channels;
+using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
@@ -174,20 +175,28 @@ internal sealed class FanoutDispatcher : IDisposable
         try
         {
             int events = 0;
-            foreach (var (name, send) in batch.Sends())
+            // One stripe enqueue per connection for the whole sealed batch, instead of one channel item per frame.
+            using (FanoutDeliveryScope scope = FanoutDeliveryScope.Begin())
             {
-                try
+                foreach (var (name, send) in batch.Sends())
                 {
-                    send();
-                    events++;
+                    try
+                    {
+                        send();
+                        events++;
+                    }
+                    catch (Exception ex)
+                    {
+                        FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
+                        ZoneLog.Warn($"world fan-out {name} failed: {ex}");
+                        if (FailFast)
+                            _propagated ??= ex;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
-                    ZoneLog.Warn($"world fan-out {name} failed: {ex}");
-                    if (FailFast)
-                        _propagated ??= ex;
-                }
+
+                int connections = scope.Flush();
+                if (connections > 0 && CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+                    FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
             }
 
             FineageTelemetry.FanoutEventsPerBatch.Record(events);

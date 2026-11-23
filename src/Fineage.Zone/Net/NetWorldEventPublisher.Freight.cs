@@ -13,8 +13,7 @@ sealed partial class NetWorldEventPublisher
         {
             Characters = rows.Select(c => new PackageToListEntryNet { ObjectId = c.ObjectId, Name = c.Name ?? "" }).ToArray()
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PackageToList, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PackageToList, payload);
     }
 
     void IWorldEventPublisher.FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, PackageSendableListMsg list)
@@ -25,7 +24,6 @@ sealed partial class NetWorldEventPublisher
             Adena = list.Adena,
             Items = ToNetWarehouseItemRows(list.Items)
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PackageSendableList, payload);
+                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PackageSendableList, payload);
     }
 }

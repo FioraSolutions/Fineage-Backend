@@ -6,7 +6,7 @@ namespace Fineage.Net.Host;
 
 /// <summary>
 /// Issue #867 PR2: one bounded queue and consumer per connection stripe (ConnectionId % N). Each stripe owns delivery
-/// order for its connections; fan-out no longer runs as one global serial worker.
+/// order for its connections. PR3: a drained burst is one ordered batch per connection, not one channel item per frame.
 /// </summary>
 public sealed class NetFanoutStripes : IAsyncDisposable
 {
@@ -25,20 +25,29 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     public int StripeCount => _stripes.Length;
 
-    public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload)
-    {
-        Enqueue(handle, new WorkItem(handle, opcode, payload, Critical: false));
-    }
+    public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload) =>
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload)]));
 
-    public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload)
+    public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload) =>
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload)]));
+
+    /// <summary>One ordered batch for <paramref name="handle"/>, already grouped by the delivery scope or a stripe drain.</summary>
+    internal void EnqueueBatch(ConnectionHandle handle, List<OutboundFrame> frames)
     {
-        Enqueue(handle, new WorkItem(handle, opcode, payload, Critical: true));
+        if (frames.Count == 0)
+            return;
+        Enqueue(handle, new WorkItem(handle, frames.ToArray()));
     }
 
     void Enqueue(ConnectionHandle handle, WorkItem item)
     {
         if (Volatile.Read(ref _closed) != 0)
+        {
+            NetHostLog.Error(
+                $"fan-out stripes are closed; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
             return;
+        }
+
         int stripe = StripeIndex(handle.Connection.ConnectionId);
         long waitStarted = Stopwatch.GetTimestamp();
         try
@@ -47,10 +56,14 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         }
         catch (ChannelClosedException)
         {
+            NetHostLog.Error(
+                $"fan-out stripe {stripe} is closed; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
             return;
         }
         catch (OperationCanceledException) when (_cts.IsCancellationRequested)
         {
+            NetHostLog.Error(
+                $"fan-out stripe {stripe} shut down; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
             return;
         }
 
@@ -64,14 +77,19 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     async Task ProcessStripeAsync(Stripe stripe)
     {
+        var pending = new List<WorkItem>(8);
         try
         {
             while (!_cts.IsCancellationRequested)
             {
                 if (!await stripe.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
                     break;
+
+                pending.Clear();
                 while (stripe.Reader.TryRead(out WorkItem item))
-                    Dispatch(item);
+                    pending.Add(item);
+
+                DeliverDrain(pending);
             }
         }
         catch (OperationCanceledException) when (_cts.IsCancellationRequested)
@@ -79,15 +97,41 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         }
     }
 
-    static void Dispatch(WorkItem item)
+    static void DeliverDrain(List<WorkItem> pending)
     {
-        if (item.Critical)
+        if (pending.Count == 0)
+            return;
+
+        // One submission per connection, frames in the order the stripe observed them.
+        var groups = new Dictionary<ulong, List<OutboundFrame>>(pending.Count);
+        var order = new List<ConnectionHandle>(pending.Count);
+        foreach (WorkItem item in pending)
         {
-            item.Handle.Connection.PrepareMailboxBarrierSend();
-            _ = item.Handle.Connection.SendAsync(item.Opcode, item.Payload);
+            ulong id = item.Handle.Connection.ConnectionId;
+            if (!groups.TryGetValue(id, out List<OutboundFrame>? frames))
+            {
+                frames = new List<OutboundFrame>(item.Frames.Length);
+                groups.Add(id, frames);
+                order.Add(item.Handle);
+            }
+
+            OutboundFrame[] batch = item.Frames;
+            for (int i = 0; i < batch.Length; i++)
+                frames.Add(batch[i]);
         }
-        else
-            item.Handle.Connection.TrySendFromStripe(item.Opcode, item.Payload);
+
+        foreach (ConnectionHandle handle in order)
+        {
+            NetConnection connection = handle.Connection;
+            if (!connection.IsBoundTo(handle))
+            {
+                NetHostLog.Error(
+                    $"stale connection handle objectId={handle.ObjectId} generation={handle.EntityGeneration} connectionId={connection.ConnectionId}: live binding does not match");
+                continue;
+            }
+
+            connection.SubmitOrderedBatch(groups[connection.ConnectionId]);
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -101,7 +145,7 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         _cts.Dispose();
     }
 
-    readonly record struct WorkItem(ConnectionHandle Handle, ushort Opcode, byte[] Payload, bool Critical = false);
+    readonly record struct WorkItem(ConnectionHandle Handle, OutboundFrame[] Frames);
 
     sealed class Stripe
     {
