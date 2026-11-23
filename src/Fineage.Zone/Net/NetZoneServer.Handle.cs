@@ -386,9 +386,14 @@ public sealed partial class NetZoneServer
         }
     }
 
+    /// <summary>
+    /// The one way a zone handler refuses a client packet: the reject counter, a log line with the code and reason,
+    /// and the <c>Reject</c> frame the client shows. A rejection is never only a counter.
+    /// </summary>
     static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
     {
         NetTelemetry.PacketRejected("zone");
+        ZoneLog.Warn($"reject conn={conn.ConnectionId} code={code}: {message}");
         return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
     }
 }

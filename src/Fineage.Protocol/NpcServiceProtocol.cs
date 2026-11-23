@@ -56,6 +56,18 @@ public static class NpcServiceProtocol
     public const int BuffNone = 208;
     public const int EnchantOpen = 209;
 
+    /// <summary>Stable log/report code for a gatekeeper refusal's system message (load test and zone log share it).</summary>
+    public static string TeleportRefusalCode(int messageId) => messageId switch
+    {
+        NotEnoughAdena => "not_enough_fee",
+        DestinationUnloaded => "destination_unloaded",
+        SiegeBlocked => "siege",
+        UnknownTeleport => "unknown_teleport",
+        NoblesOnly => "nobles_only",
+        KarmaTeleportRefused => "karma",
+        _ => throw new ArgumentOutOfRangeException(nameof(messageId), messageId, "not a gatekeeper refusal message")
+    };
+
     public const string NotEnoughAdenaText = "You do not have enough adena.";
     public const string DestinationUnloadedText = "That destination is not on a loaded map.";
     public const string SiegeBlockedText = "You cannot teleport to a village that is in a siege.";

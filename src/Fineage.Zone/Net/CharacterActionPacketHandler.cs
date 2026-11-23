@@ -68,7 +68,8 @@ public sealed class CharacterActionPacketHandler
             ct).ConfigureAwait(false);
         if (error != null)
         {
-            await _reject(conn, error, "Bypass failed.", ct).ConfigureAwait(false);
+            await _reject(conn, error, $"Bypass '{bypass.Command}' to npc {bypass.NpcObjectId} refused: {error}.", ct)
+                .ConfigureAwait(false);
         }
 
         // A teleport bypass relocates; Relocate already fanned the AOI diff to the jumper and its peers.
