@@ -88,6 +88,8 @@ public sealed class MetricsSnapshot
         new Dictionary<string, long>(StringComparer.Ordinal);
     public long LedgerFlushFailures { get; init; }
     public int PersistPending { get; init; }
+    public IReadOnlyDictionary<string, int> ActivationBacklog { get; init; } = new Dictionary<string, int>(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, int> ActivationBacklogMax { get; init; } = new Dictionary<string, int>(StringComparer.Ordinal);
     public double PersistOldestAgeMs { get; init; }
     public IReadOnlyDictionary<string, long> PersistSnapshots { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
@@ -388,6 +390,8 @@ public static class MetricsText
         AppendHelp(sb, "fineage_persist_pending", "Character and pet snapshots waiting to be written, including the one in flight");
         sb.Append("# TYPE fineage_persist_pending gauge\n");
         sb.Append("fineage_persist_pending ").Append(snapshot.PersistPending.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendKindGauge(sb, "fineage_npc_activation_backlog", "NPC work waiting for its per-tick budget", snapshot.ActivationBacklog);
+        AppendKindGauge(sb, "fineage_npc_activation_backlog_max", "Largest per-tick-budget NPC backlog since start", snapshot.ActivationBacklogMax);
         AppendHelp(sb, "fineage_persist_oldest_age_ms", "Age of the oldest character or pet snapshot that has not been written");
         sb.Append("# TYPE fineage_persist_oldest_age_ms gauge\n");
         sb.Append("fineage_persist_oldest_age_ms ").Append(Num(snapshot.PersistOldestAgeMs)).Append('\n');
@@ -558,6 +562,15 @@ public static class MetricsText
             sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
                 .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }
+    }
+
+    static void AppendKindGauge(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, int> byKind)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" gauge\n");
+        foreach (var pair in byKind.OrderBy(p => p.Key, StringComparer.Ordinal))
+            sb.Append(name).Append("{kind=\"").Append(pair.Key).Append("\"} ")
+                .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
     static void AppendHelp(StringBuilder sb, string name, string help)

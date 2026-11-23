@@ -355,6 +355,31 @@ public static class FineageTelemetry
         unit: "ms",
         description: "Age of the oldest character or pet snapshot that has not been written");
 
+    /// <summary>Ramp-time NPC work deferred by the per-tick budgets (tag <c>kind</c>: privates, region_wake).</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklog = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog",
+        () => ObserveActivationBacklog(max: false),
+        unit: "{item}",
+        description: "NPC work waiting for its per-tick budget (tag kind: privates = minion masters, region_wake = NPCs)");
+
+    /// <summary>Largest backlog seen since start, sampled by the simulation every tick.</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklogMax = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog_max",
+        () => ObserveActivationBacklog(max: true),
+        unit: "{item}",
+        description: "Largest per-tick-budget NPC backlog since start (tag kind)");
+
+    public static Func<NpcActivationBacklogReading>? ActivationBacklog { get; set; }
+
+    static IEnumerable<Measurement<int>> ObserveActivationBacklog(bool max)
+    {
+        var reading = ActivationBacklog?.Invoke() ?? default;
+        yield return new Measurement<int>(
+            max ? reading.PrivatesMax : reading.Privates, new KeyValuePair<string, object?>("kind", "privates"));
+        yield return new Measurement<int>(
+            max ? reading.RegionWakeMax : reading.RegionWake, new KeyValuePair<string, object?>("kind", "region_wake"));
+    }
+
     public static Func<int>? PersistPendingCount { get; set; }
     public static Func<double>? PersistOldestAgeMs { get; set; }
 
@@ -428,3 +453,6 @@ public static class FineageTelemetry
         yield return new Measurement<int>(CommandIngressDepth?.Invoke() ?? 0);
     }
 }
+
+/// <summary>Current and peak NPC activation backlog behind the per-tick budgets.</summary>
+public readonly record struct NpcActivationBacklogReading(int Privates, int RegionWake, int PrivatesMax, int RegionWakeMax);

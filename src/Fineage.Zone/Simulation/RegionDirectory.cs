@@ -671,7 +671,15 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
 
     void DropIfEmpty(RegionContainer region)
     {
-        if (region.EntityCount == 0)
-            _regions.Remove(region.Id);
+        if (region.EntityCount != 0)
+            return;
+        _regions.Remove(region.Id);
+        // A dropped region's cached border list must go with it: it leaked, and a region re-created later
+        // with a clean dirty bit would have published the stale members.
+        _borderCache.Remove(region.Id);
+        _borderDirty.Remove(region.Id);
     }
+
+    /// <summary>Cached border member lists (tests/diagnostics).</summary>
+    internal int BorderCacheCount => _borderCache.Count;
 }

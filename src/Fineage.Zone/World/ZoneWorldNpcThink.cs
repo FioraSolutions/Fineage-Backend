@@ -26,6 +26,11 @@ public sealed partial class ZoneWorld
     [ThreadStatic] static List<int>? t_thinkReschedule;
     readonly object _thinkRescheduleLock = new();
     readonly HashSet<int> _privatesPending = [];
+    readonly Queue<int> _privatesPendingOrder = [];
+    int _privatesBacklog;
+    int _privatesBacklogMax;
+    int _regionWakeBacklog;
+    int _regionWakeBacklogMax;
     readonly object _privatesPendingLock = new();
     long _thinkDrainedThroughMs = long.MinValue;
 
@@ -41,9 +46,9 @@ public sealed partial class ZoneWorld
     void CollectNpcThink(TickContext tick, RegionWorkCollector work)
     {
         ReapThinkReschedule();
-        SpawnPendingPrivates();
         RefreshPlayerActiveRegions();
         DrainRegionWakeBudget();
+        SpawnPendingPrivates();
         TickWalkingRoutes(tick.NowUnixMs);
         TickBoats(tick.NowUnixMs);
         CollectDueThinks(tick.NowUnixMs, work);
@@ -157,25 +162,62 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Scheduler thread: spawns the privates of masters whose think ran inside a region body.</summary>
+    /// <summary>
+    /// Spawns privates for at most <see cref="ZoneSimulationSettings.PrivatesSpawnBudgetPerTick"/> masters, oldest first,
+    /// so a ramp that wakes thousands of masters spreads the entity inserts over many steps instead of one.
+    /// </summary>
     void SpawnPendingPrivates()
     {
-        int[] pending;
+        var batch = t_privatesBatch ??= [];
+        batch.Clear();
         lock (_privatesPendingLock)
         {
-            if (_privatesPending.Count == 0)
-                return;
-            pending = [.. _privatesPending];
-            _privatesPending.Clear();
+            while (batch.Count < _privatesSpawnBudget && _privatesPendingOrder.Count > 0)
+            {
+                int id = _privatesPendingOrder.Dequeue();
+                _privatesPending.Remove(id);
+                batch.Add(id);
+            }
+
+            Volatile.Write(ref _privatesBacklog, _privatesPendingOrder.Count);
         }
 
-        int before = _byId.Count;
-        foreach (int id in pending)
+        foreach (int id in batch)
         {
             if (_byId.TryGetValue(id, out var master) && master.CurHp > 0)
-                SpawnPrivates(master);
+                SpawnPrivatesNow(master);
         }
+    }
 
-        ZoneLog.Info($"npc privates: spawned for {pending.Length} master(s), entities {before} -> {_byId.Count}");
+    [ThreadStatic] static List<int>? t_privatesBatch;
+
+    /// <summary>Publishes the budget backlogs for <c>fineage.npc.activation.backlog</c>; sim thread only.</summary>
+    void NoteActivationBacklog()
+    {
+        int privates = Volatile.Read(ref _privatesBacklog);
+        int wake = _regionWakeQueue.Count;
+        Volatile.Write(ref _regionWakeBacklog, wake);
+        if (privates > _privatesBacklogMax)
+            Volatile.Write(ref _privatesBacklogMax, privates);
+        if (wake > _regionWakeBacklogMax)
+            Volatile.Write(ref _regionWakeBacklogMax, wake);
+    }
+
+    /// <summary>Budget backlogs for telemetry; safe from any thread.</summary>
+    public Fineage.Protocol.Telemetry.NpcActivationBacklogReading ActivationBacklog => new(
+        Volatile.Read(ref _privatesBacklog),
+        Volatile.Read(ref _regionWakeBacklog),
+        Volatile.Read(ref _privatesBacklogMax),
+        Volatile.Read(ref _regionWakeBacklogMax));
+
+    /// <summary>Masters waiting for the privates budget (tests/diagnostics).</summary>
+    internal int PendingPrivatesCount
+    {
+        get
+        {
+            lock (_privatesPendingLock)
+                return _privatesPendingOrder.Count;
+        }
     }
 
     void QueueThinkReschedule(int objectId)

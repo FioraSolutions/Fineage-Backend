@@ -170,23 +170,24 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius <c>Spawn</c> spawns <c>Privates</c> with the master. They are created when the master
     /// enters the think set (the region just became active), not for every master on an empty world.
+    /// This only queues the master: <see cref="SpawnPendingPrivates"/> places the minions on the scheduler
+    /// thread under a per-step budget, so neither a region body nor a ramp burst places entities inline.
     /// </summary>
     void SpawnPrivates(ZoneEntity master)
     {
+        if (master.PrivatesSpawned || !_minions.TryGet(master.NpcId, out _))
+            return;
+        lock (_privatesPendingLock)
+        {
+            if (_privatesPending.Add(master.ObjectId))
+                _privatesPendingOrder.Enqueue(master.ObjectId);
+        }
+    }
+
+    void SpawnPrivatesNow(ZoneEntity master)
+    {
         if (master.PrivatesSpawned)
             return;
-        if (RegionBodyScope.Of(this) != null)
-        {
-            // Placing entities changes region ownership, which only the scheduler thread may do. A parallel
-            // random-walk body used to throw here and abort the rest of its region's think batch every tick.
-            if (_minions.TryGet(master.NpcId, out _))
-            {
-                lock (_privatesPendingLock)
-                    _privatesPending.Add(master.ObjectId);
-            }
-            return;
-        }
-
         master.PrivatesSpawned = true;
         if (!_minions.TryGet(master.NpcId, out var rows))
             return;

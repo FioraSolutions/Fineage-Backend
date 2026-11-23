@@ -105,6 +105,7 @@ public static class CompactMarkdownRenderer
             sb.AppendLine(
                 $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** max **{r.Server.TickMaxMs:0.0}** (`fineage_tick_max_ms`); histogram bucket ceiling **{r.Server.TickHistogramCeilingMs:0.0}** is not the duration; " +
                 $"watchdog stalls **{r.WatchdogStalls}** max **{r.WatchdogStallMaxMs:0.0}** ms; ingress max **{r.Server.CommandIngressQueuedMax}**.");
+            AppendTickWindows(sb, r.Honest);
             sb.AppendLine($"- Outbound drops (`fineage_outbound_dropped_total`): **{r.Server.OutboundDropped}**");
             sb.AppendLine($"- Fanout drops (`fineage_fanout_dropped_total`): **{r.FanoutDropped}**");
             AppendOutboundLanes(sb, r.PeakMetricsText);
@@ -113,6 +114,29 @@ public static class CompactMarkdownRenderer
         }
 
         sb.AppendLine();
+    }
+
+    static void AppendTickWindows(StringBuilder sb, HonestLoadSummary? honest)
+    {
+        sb.AppendLine();
+        sb.AppendLine("| tick window | rule | ticks | mean | p50 | p99 | p99.9 | max |");
+        sb.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        AppendTickWindow(sb, "overall", honest?.TickOverall);
+        AppendTickWindow(sb, "steady-state", honest?.TickSteady);
+        sb.AppendLine();
+    }
+
+    static void AppendTickWindow(StringBuilder sb, string name, TickWindowStats? w)
+    {
+        if (w == null)
+        {
+            sb.AppendLine($"| {name} | MISSING (see data errors) | | | | | | |");
+            return;
+        }
+
+        string max = w.MaxExact ? $"{w.MaxMs:0.0}" : $"<= {w.MaxMs:0.0} (bucket ceiling)";
+        sb.AppendLine(
+            $"| {name} | {w.Rule} | {w.Ticks} | {w.MeanMs:0.0} | {w.P50Ms:0.0} | **{w.P99Ms:0.0}** | {w.P999Ms:0.0} | {max} |");
     }
 
     static void AppendOutboundLanes(StringBuilder sb, string? peak)

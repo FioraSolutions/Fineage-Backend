@@ -52,10 +52,38 @@ public sealed partial class ZoneWorld
         // rebuilding the snapshot walked every region and allocated a presence list per border every 200 ms.
         if (_bordersPublished && !_byId.BordersPending)
             return;
+        _borderSeen.Clear();
         _borders.Publish(tick.Tick, _byId.BorderMembers(BorderReach)
             .Select(r => (r.Region, BorderPresence(r.Region, r.Members))));
         _bordersPublished = true;
+        PruneBorderPresence();
     }
+
+    readonly HashSet<RegionId> _borderSeen = [];
+    readonly List<RegionId> _borderGone = [];
+
+    /// <summary>
+    /// Drops cached conversions for regions the publish no longer yielded (the container emptied and was dropped,
+    /// or the region has no border members any more). Without this every region that ever held a border entity
+    /// kept its member and presence lists alive for the life of the process.
+    /// </summary>
+    void PruneBorderPresence()
+    {
+        if (_borderPresence.Count == _borderSeen.Count)
+            return;
+        _borderGone.Clear();
+        foreach (var region in _borderPresence.Keys)
+        {
+            if (!_borderSeen.Contains(region))
+                _borderGone.Add(region);
+        }
+
+        foreach (var region in _borderGone)
+            _borderPresence.Remove(region);
+    }
+
+    /// <summary>Cached border conversions (tests/diagnostics).</summary>
+    internal int BorderPresenceCacheCount => _borderPresence.Count;
 
     readonly Dictionary<RegionId, (List<ZoneEntity> Members, IReadOnlyList<ZonePresence> Presence)> _borderPresence = [];
 
@@ -66,6 +94,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     IReadOnlyList<ZonePresence> BorderPresence(RegionId region, List<ZoneEntity> members)
     {
+        _borderSeen.Add(region);
         if (_borderPresence.TryGetValue(region, out var cached) && ReferenceEquals(cached.Members, members)
             && !members.Exists(static m => m.Kind == ZoneEntityKind.Player))
             return cached.Presence;

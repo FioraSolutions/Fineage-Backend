@@ -15,8 +15,14 @@ namespace Fineage.Protocol.Telemetry;
 /// </summary>
 public sealed class MetricsCollector : IDisposable
 {
-    const int BufferCapacity = 8192;
-    static readonly TimeSpan DrainInterval = TimeSpan.FromMilliseconds(50);
+    /// <summary>
+    /// 512 slots of ~104 bytes keep each ring under the 85 KB large-object threshold. At 8192 every recording
+    /// thread pinned an ~850 KB reference-holding array on the LOH; with ~100 threads that was tens of MB of
+    /// card-marked old-generation memory every ephemeral GC had to scan. The shorter drain interval keeps the
+    /// smaller ring from filling.
+    /// </summary>
+    const int BufferCapacity = 512;
+    static readonly TimeSpan DrainInterval = TimeSpan.FromMilliseconds(10);
 
     readonly MeterListener _listener = new();
     readonly object _gate = new();
@@ -71,6 +77,8 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, long> _laneEvicted = new(StringComparer.Ordinal);
     long _ledgerFlushFailures;
     int _persistPending;
+    readonly Dictionary<string, int> _activationBacklog = new(StringComparer.Ordinal);
+    readonly Dictionary<string, int> _activationBacklogMax = new(StringComparer.Ordinal);
     double _persistOldestAgeMs;
     int _online;
     int _commandIngressQueued;
@@ -152,6 +160,8 @@ public sealed class MetricsCollector : IDisposable
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 LedgerFlushFailures = _ledgerFlushFailures,
                 PersistPending = _persistPending,
+                ActivationBacklog = new Dictionary<string, int>(_activationBacklog, StringComparer.Ordinal),
+                ActivationBacklogMax = new Dictionary<string, int>(_activationBacklogMax, StringComparer.Ordinal),
                 PersistOldestAgeMs = _persistOldestAgeMs,
                 PersistSnapshots = _persistSnapshots
                     .OrderBy(pair => pair.Key, StringComparer.Ordinal)
@@ -485,6 +495,12 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.command.queue.depth":
                 _commandPlayerQueueDepth.Record(value);
+                break;
+            case "fineage.npc.activation.backlog":
+                _activationBacklog[Tag(tags, "kind")] = value;
+                break;
+            case "fineage.npc.activation.backlog_max":
+                _activationBacklogMax[Tag(tags, "kind")] = value;
                 break;
             case "fineage.persist.pending":
                 _persistPending = value;
