@@ -62,14 +62,32 @@ public sealed partial class ZoneWorld
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var move = BeginLedgerMove(LedgerTxKind.DeathDrop, player.ObjectId, killerObjectId);
         ObserveLedger(move, bag);
-        var invChanges = new List<InventoryUpdateEntryMsg>();
-        bool gearChanged = false;
-        bool droppedWeapon = false;
+
+        var planned = new List<(ItemInstance Item, int GroundId, IReadOnlyList<int> Pieces)>();
         foreach (int objectId in toDrop)
         {
             var item = player.Inventory.Find(objectId);
             if (item == null)
                 continue;
+            IReadOnlyList<int> pieces = item.Template.Stackable ? [] : [item.ObjectId];
+            int groundId = item.Template.Stackable ? _itemIds.Next() : item.ObjectId;
+            PostOntoGroundPlanned(move, bag, groundId, item.ItemId, item.Count, pieces);
+            planned.Add((item, groundId, pieces));
+        }
+
+        if (!move.HasPostings)
+            return;
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"death drop refused for object {player.ObjectId}: ledger rejected the postings");
+            return;
+        }
+
+        bool gearChanged = false;
+        bool droppedWeapon = false;
+        var spawned = new List<(ItemInstance Item, ZoneEntity Ground)>();
+        foreach (var (item, groundId, _) in planned)
+        {
             if (item.IsEquipped)
             {
                 gearChanged = true;
@@ -80,9 +98,6 @@ public sealed partial class ZoneWorld
 
             int itemId = item.ItemId;
             int count = item.Count;
-            invChanges.Add(InventoryMessages.RemoveRow(item, -1));
-            player.Inventory.Remove(item);
-
             var ground = SpawnGroundStack(
                 itemId,
                 count,
@@ -92,25 +107,33 @@ public sealed partial class ZoneWorld
                 player.InstanceId,
                 watchers,
                 dropperObjectId: player.ObjectId,
-                piece: item.Template.Stackable ? null : item);
-            if (ground != null)
-                PostOntoGround(move, bag, ground);
+                piece: item.Template.Stackable ? null : item,
+                reserveObjectId: item.Template.Stackable ? groundId : null);
+            if (ground == null)
+            {
+                foreach (var (_, failedGround) in spawned)
+                    RemoveGroundItem(failedGround);
+                ZoneLog.Warn(
+                    $"die-drop aborted: ground spawn failed char={player.ObjectId} item={itemId} objectId={item.ObjectId} count={count}");
+                return;
+            }
+
+            spawned.Add((item, ground));
             ZoneLog.Info($"die-drop object={player.ObjectId} item={itemId} count={count} karma={player.Karma} pk={player.PkKills}");
         }
 
-        if (move.HasPostings)
-            move.Commit(LedgerHoldingsOf);
+        foreach (var (item, _) in spawned)
+            player.Inventory.Remove(item);
+
+        move.Commit(LedgerHoldingsOf);
         if (droppedWeapon)
         {
             player.SoulshotCharged = false;
             player.SpiritshotCharge = 0;
         }
 
-        if (invChanges.Count > 0)
-        {
-            var update = new InventoryUpdateMsg { Changes = invChanges.ToArray() };
+        if (spawned.Count > 0)
             SaveInventory(player.Session, player.Inventory);
-        }
 
         if (gearChanged)
         {
