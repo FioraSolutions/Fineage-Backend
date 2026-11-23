@@ -1,7 +1,7 @@
 {
   "mapId": "loadtest_aoe_arena",
-  "enabled": true,
-  "comment": "Perf #951: four 55-mob aggressive clusters + center train pack; Gremlin 20001.",
+  "enabled": false,
+  "comment": "Perf #951 (disabled: load with FINEAGE_ZONE_MAPS or FINEAGE_ZONE_EXTRA_MAPS): four 55-mob aggressive clusters + center train pack; Gremlin 20001.",
   "npcs": [
     {
       "objectId": 99000,

@@ -9,7 +9,7 @@ spawnY: 258400
 spawnZ: -3148
 aoiCellSize: 3000
 requireSkillLatencySamples: true
-classId: 48
+classId: 0  # Human Fighter; FINEAGE_ZONE_LOADTEST_COMBAT=1 makes each load-test account a level 77 Warlord (class 3)
 heavyPlay:
   mode: aoe-train
   partySize: 9

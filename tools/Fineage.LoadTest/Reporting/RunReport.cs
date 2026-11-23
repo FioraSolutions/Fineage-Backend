@@ -325,6 +325,10 @@ public static class ReportWriter
             sb.AppendLine($"- Flows attempted / succeeded: **{r.Economy.EconomyFlowsAttempted}** / **{r.Economy.EconomyFlowsSucceeded}**");
             sb.AppendLine($"- Ledger invariant violations (metric peak): **{r.Economy.LedgerInvariantViolations}**");
             sb.AppendLine($"- Explained economy rejects: **{r.Economy.ExplainedEconomyRejects}**");
+            sb.AppendLine($"- Expected domain rejects (contention, not failures): **{r.Economy.ExpectedDomainRejects}**" +
+                (r.Economy.ExpectedDomainRejectsByCode.Count > 0
+                    ? " (" + string.Join(", ", r.Economy.ExpectedDomainRejectsByCode.Select(p => $"{p.Key} {p.Value}")) + ")"
+                    : ""));
             sb.AppendLine($"- Issues: **{r.Economy.Issues.Count}**");
             if (r.Economy.Issues.Count > 0)
             {
@@ -341,6 +345,8 @@ public static class ReportWriter
             sb.AppendLine();
             sb.AppendLine("## Consistency oracle");
             sb.AppendLine($"- Pairwise AOI checks: **{r.Consistency.PairwiseObserversCompared}**");
+            sb.AppendLine($"- Combat: attack samples **{r.Consistency.AttackSampleCount}** (timeouts {r.Consistency.AttackTimeoutCount}), " +
+                $"skill samples **{r.Consistency.SkillSampleCount}** (timeouts {r.Consistency.SkillTimeoutCount}), bot kills **{r.Consistency.BotKillCount}**");
             sb.AppendLine($"- Issues: **{r.Consistency.Issues.Count}** ({(r.Consistency.Passed ? "PASS" : "FAIL")})");
             sb.AppendLine($"- Command→fanout latency ms: p50 **{r.Consistency.BroadcastLatencyP50Ms:0.0}**, p95 **{r.Consistency.BroadcastLatencyP95Ms:0.0}**, p99 **{r.Consistency.BroadcastLatencyP99Ms:0.0}**");
             if (r.Consistency.Issues.Count > 0)

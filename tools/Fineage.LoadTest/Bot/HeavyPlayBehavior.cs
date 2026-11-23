@@ -5,68 +5,66 @@ namespace Fineage.LoadTest.Bot;
 
 public static class HeavyPlayBehavior
 {
+    /// <summary>One skill from the rotation every this many fighter ticks; the ticks between let auto-attack swing.</summary>
+    public const int SkillEveryTicks = 3;
+
+    /// <summary>
+    /// Runs one heavy-play tick. Returns false for roles that use the scenario's weighted mix
+    /// (<see cref="HeavyPlayRole.MixedRandom"/>, <see cref="HeavyPlayRole.EconomyBackground"/>), so economy flows,
+    /// gatekeeper travel and legacy actions all go through <c>RunMixedBehaviorTickAsync</c>.
+    /// </summary>
     public static async Task<bool> TryRunTickAsync(
         FineageBotClient bot,
         IReadOnlyList<FineageBotClient> fleet,
         HeavyPlayRole role,
         CancellationToken ct)
     {
-        if (role == HeavyPlayRole.MixedRandom)
+        if (role is HeavyPlayRole.MixedRandom or HeavyPlayRole.EconomyBackground)
             return false;
-
-        if (role == HeavyPlayRole.EconomyBackground)
-        {
-            string action = bot.PickEconomyOrTeleportAction();
-            if (action.StartsWith("economy_", StringComparison.Ordinal))
-            {
-                await BotEconomyFlows.RunActionAsync(bot, action, fleet, ct);
-                return true;
-            }
-
-            await bot.RunWeightedActionAsync(action, fleet, ct);
-            return true;
-        }
 
         if (HeavyPlayRoles.IsCombatKiller(role))
         {
-            await RunWarlordTickAsync(bot, ct);
+            await RunFighterTickAsync(bot, ct);
             return true;
         }
 
-        // Observers: stay in AOI, minimal commands — maximize inbound combat fan-out.
+        // Train observers: stay in AOI, minimal commands — maximize inbound combat fan-out.
         if (bot.Rng.NextDouble() < 0.08)
             await bot.ZoneWritePublicAsync(NetOpcode.RequestActionUse,
                 NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 12 }), ct);
         return true;
     }
 
-    static async Task RunWarlordTickAsync(FineageBotClient bot, CancellationToken ct)
+    /// <summary>
+    /// A fighter plays like a player farming a pack: one AttackRequest per target (the server keeps
+    /// auto-attacking, approaching and swinging, until the target dies), an AoE skill from the rotation every
+    /// <see cref="SkillEveryTicks"/> ticks once its reuse (from the server's MagicSkillUse) has passed, and a new
+    /// target only when the old one died or left view.
+    /// With nothing in reach it walks to its spawn-layout point (party corner or train center).
+    /// </summary>
+    internal static async Task RunFighterTickAsync(FineageBotClient bot, CancellationToken ct)
     {
         var hp = bot.Scenario.HeavyPlay!;
-        int tick = (int)bot.Stats.ActionsAttempted;
-        int phase = tick % 6;
-        if (phase is 0 or 1)
+        int tick = bot.FightTicks++;
+        int target = bot.FightTargetObjectId;
+        if (!bot.ObservationLog.IsLiveAttackTarget(target))
         {
-            int dx = bot.Rng.Next(-120, 120);
-            int dy = bot.Rng.Next(-120, 120);
-            await bot.SendTrackedAsync(NetOpcode.MoveInput,
-                NetCodec.EncodeMoveInput(new MoveInputMsg
-                {
-                    DestX = bot.SpawnX + dx,
-                    DestY = bot.SpawnY + dy,
-                    DestZ = bot.SpawnZ
-                }), ct);
-            return;
-        }
+            if (!bot.ObservationLog.TryPickAttackTarget(out target))
+            {
+                bot.FightTargetObjectId = 0;
+                await bot.SendTrackedAsync(NetOpcode.MoveInput,
+                    NetCodec.EncodeMoveInput(new MoveInputMsg
+                    {
+                        DestX = bot.SpawnX + bot.Rng.Next(-120, 120),
+                        DestY = bot.SpawnY + bot.Rng.Next(-120, 120),
+                        DestZ = bot.SpawnZ
+                    }), ct);
+                return;
+            }
 
-        if (!bot.ObservationLog.TryPickAttackTarget(out int target))
-            return;
-
-        await bot.ZoneWritePublicAsync(NetOpcode.SelectTarget,
-            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-
-        if (phase is 2 or 3)
-        {
+            bot.FightTargetObjectId = target;
+            await bot.ZoneWritePublicAsync(NetOpcode.SelectTarget,
+                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
             await bot.SendTrackedAsync(
                 NetOpcode.AttackRequest,
                 NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
@@ -75,8 +73,23 @@ public static class HeavyPlayBehavior
             return;
         }
 
+        if (tick % SkillEveryTicks != 0)
+            return;
+
         int[] skills = hp.SkillRotation.Length > 0 ? hp.SkillRotation : [36];
-        int skillId = skills[tick % skills.Length];
+        int start = (tick / SkillEveryTicks) % skills.Length;
+        var now = DateTimeOffset.UtcNow;
+        int skillId = 0;
+        for (int i = 0; i < skills.Length && skillId == 0; i++)
+        {
+            int candidate = skills[(start + i) % skills.Length];
+            if (bot.ObservationLog.IsSkillReady(candidate, now))
+                skillId = candidate;
+        }
+
+        if (skillId == 0)
+            return; // every rotation skill is on reuse; auto-attack keeps swinging
+
         await bot.SendTrackedAsync(
             NetOpcode.UseSkill,
             NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),

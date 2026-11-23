@@ -44,36 +44,11 @@ public sealed partial class FineageBotClient
         await ZoneWriteAsync(opcode, payload, ct);
     }
 
-    internal string PickEconomyOrTeleportAction()
-    {
-        var hp = Scenario.HeavyPlay;
-        double roll = _rng.NextDouble();
-        if (hp != null && roll < hp.EconomyTeleportWeight)
-            return "teleport";
-        return PickAction();
-    }
+    /// <summary>NPC the fighter is auto-attacking; 0 when it needs a new one.</summary>
+    internal int FightTargetObjectId { get; set; }
 
-    internal async Task RunWeightedActionAsync(string action, IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
-    {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        try
-        {
-            if (action.StartsWith("economy_", StringComparison.Ordinal))
-            {
-                await BotEconomyFlows.RunActionAsync(this, action, fleet, ct);
-                return;
-            }
-
-            await RunLegacyActionAsync(action, fleet, ct);
-        }
-        finally
-        {
-            Interlocked.Increment(ref _stats.ActionsAttempted);
-            _stats.LastActionAt = DateTimeOffset.UtcNow;
-            sw.Stop();
-            _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
-        }
-    }
+    /// <summary>Fighter ticks since enter; drives the skill cadence.</summary>
+    internal int FightTicks { get; set; }
 
     internal async Task MaybeAcceptPartyInviteAsync(ushort opcode, byte[] payload)
     {
@@ -93,9 +68,10 @@ public sealed partial class FineageBotClient
                 }),
                 CancellationToken.None);
         }
-        catch
+        catch (Exception ex) when (ex is IOException or ObjectDisposedException or OperationCanceledException)
         {
-            /* disconnect */
+            // The zone socket closed while answering; the receive loop reports the disconnect.
+            _stats.LastError = $"party answer: {ex.GetType().Name}: {ex.Message}";
         }
     }
 }

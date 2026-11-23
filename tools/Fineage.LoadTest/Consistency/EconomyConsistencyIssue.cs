@@ -23,6 +23,9 @@ public sealed class EconomyConsistencyReport
     public long LedgerInvariantViolations { get; init; }
     public long LedgerFlushFailures { get; init; }
     public long ExplainedEconomyRejects { get; set; }
+    /// <summary>Contention refusals (<see cref="EconomyConsistencyOracle.ExpectedDomainRejectCodes"/>); counted, not failed.</summary>
+    public long ExpectedDomainRejects { get; set; }
+    public SortedDictionary<string, long> ExpectedDomainRejectsByCode { get; init; } = new(StringComparer.Ordinal);
     public long EconomyFlowsAttempted { get; set; }
     public long EconomyFlowsSucceeded { get; set; }
 }

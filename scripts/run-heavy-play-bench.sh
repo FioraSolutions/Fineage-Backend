@@ -7,9 +7,14 @@ cd "$ROOT"
 export FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX="${FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX:-loadbot}"
 export FINEAGE_LOGIN_LOADTEST_PASSWORD="${FINEAGE_LOGIN_LOADTEST_PASSWORD:-loadtest-pass-v1}"
 export FINEAGE_ZONE_LOADTEST_COMBAT="${FINEAGE_ZONE_LOADTEST_COMBAT:-1}"
-export FINEAGE_ZONE_MAPS="${FINEAGE_ZONE_MAPS:-loadtest_aoe_arena}"
+# Full world (hub merchant/warehouse/manor NPCs for the economy background) plus the disabled arena map.
+export FINEAGE_ZONE_EXTRA_MAPS="${FINEAGE_ZONE_EXTRA_MAPS:-loadtest_aoe_arena}"
+# Economy flows stand at the hub / manor with TeleportToLocation; the zone accepts it from load-test accounts only.
+export FINEAGE_ZONE_LOADTEST_TELEPORT="${FINEAGE_ZONE_LOADTEST_TELEPORT:-1}"
 export FINEAGE_BUILD_CONFIGURATION="${FINEAGE_BUILD_CONFIGURATION:-Debug}"
 export FINEAGE_STARTING_LEVEL="${FINEAGE_STARTING_LEVEL:-77}"
+# Level 77 pays gatekeeper fees and the economy flows buy from the grocer.
+export FINEAGE_STARTING_ADENA="${FINEAGE_STARTING_ADENA:-5000000}"
 export FINEAGE_ZONE_METRICS_PORT="${FINEAGE_ZONE_METRICS_PORT:-9465}"
 
 REPORT_ROOT="${REPORT_ROOT:-$ROOT/local-logs/loadtest-heavy/$(date -u +%Y%m%dT%H%M%SZ)}"

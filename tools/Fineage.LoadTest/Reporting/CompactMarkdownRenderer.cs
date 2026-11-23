@@ -290,6 +290,26 @@ public static class CompactMarkdownRenderer
                 $"- Client consistency oracle (labeled separately from server histograms): **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
         }
 
+        if (r.Consistency != null && (r.Consistency.AttackSampleCount + r.Consistency.AttackTimeoutCount +
+                                      r.Consistency.SkillSampleCount + r.Consistency.SkillTimeoutCount) > 0)
+        {
+            sb.AppendLine(
+                $"- Combat: attack→AttackState samples **{r.Consistency.AttackSampleCount}** (timeouts {r.Consistency.AttackTimeoutCount}), " +
+                $"skill→MagicSkillUse samples **{r.Consistency.SkillSampleCount}** (timeouts {r.Consistency.SkillTimeoutCount}), " +
+                $"NPC kills by bots **{r.Consistency.BotKillCount}**.");
+        }
+
+        if (r.Economy != null)
+        {
+            sb.AppendLine(
+                $"- Economy: flows **{r.Economy.EconomyFlowsSucceeded}** / {r.Economy.EconomyFlowsAttempted} succeeded; " +
+                $"explained rejects {r.Economy.ExplainedEconomyRejects}; expected domain rejects {r.Economy.ExpectedDomainRejects}" +
+                (r.Economy.ExpectedDomainRejectsByCode.Count > 0
+                    ? " (" + string.Join(", ", r.Economy.ExpectedDomainRejectsByCode.Select(p => $"{p.Key} {p.Value}")) + ")"
+                    : "") +
+                $"; hard issues **{r.Economy.Issues.Count(i => Consistency.EconomyConsistencyOracle.IsHardFailure(i.Kind))}**.");
+        }
+
         sb.AppendLine();
     }
 

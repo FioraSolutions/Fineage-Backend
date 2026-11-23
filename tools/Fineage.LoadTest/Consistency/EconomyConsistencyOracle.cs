@@ -15,6 +15,30 @@ public static class EconomyConsistencyOracle
         "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance"
     };
 
+    /// <summary>
+    /// Normal refusals when many players contend for the same people and items: the target is already in a
+    /// party or a trade, is out of trade range, the drop was picked up first, sit/social while fighting, the
+    /// target died between pick and hit, a private store closed, sold out, moved away or is busy with another buyer. Counted per code, never a failure. A code outside both sets
+    /// (for example <c>skill_unknown</c> or <c>unknown_opcode</c>) is a harness or server bug and fails the run.
+    /// </summary>
+    public static readonly IReadOnlySet<string> ExpectedDomainRejectCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "party_busy", "party_leader", "trade_busy", "trade_range", "pickup", "action_blocked", "target", "attack",
+        "store_busy", "store_range", "store_closed", "store_item", "store_adena", "store_combat"
+    };
+
+    public enum RejectClass
+    {
+        Explained,
+        ExpectedDomain,
+        Unexpected
+    }
+
+    public static RejectClass Classify(string code) =>
+        ExplainedRejectCodes.Contains(code) ? RejectClass.Explained
+        : ExpectedDomainRejectCodes.Contains(code) ? RejectClass.ExpectedDomain
+        : RejectClass.Unexpected;
+
     static readonly Regex LedgerRejectRx = new(
         @"ledger rejected|economy_commit_failed|auditable economy ledger invariant",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -37,8 +61,16 @@ public static class EconomyConsistencyOracle
             report.EconomyFlowsSucceeded += bot.Stats.EconomyFlowsSucceeded;
             foreach (var (code, count) in bot.Stats.EconomyRejectCounts)
             {
-                report.ExplainedEconomyRejects += count;
-                if (!ExplainedRejectCodes.Contains(code))
+                var kind = Classify(code);
+                if (kind == RejectClass.Explained)
+                    report.ExplainedEconomyRejects += count;
+                else if (kind == RejectClass.ExpectedDomain)
+                {
+                    report.ExpectedDomainRejects += count;
+                    report.ExpectedDomainRejectsByCode[code] =
+                        report.ExpectedDomainRejectsByCode.GetValueOrDefault(code) + count;
+                }
+                else
                 {
                     report.Issues.Add(new EconomyConsistencyIssue
                     {

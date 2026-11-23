@@ -55,6 +55,14 @@ public sealed partial class ZoneWorld
             maps.Add(active);
         }
 
+        foreach (string id in ZoneMapFilter.ExtraMaps)
+        {
+            if (!_spawnCatalog.Maps.TryGetValue(id, out var extra))
+                throw new InvalidOperationException($"FINEAGE_ZONE_EXTRA_MAPS references unknown spawn map '{id}'.");
+            if (!maps.Any(m => string.Equals(m.MapId, extra.MapId, StringComparison.Ordinal)))
+                maps.Add(extra);
+        }
+
         var bounds = ZoneMapFilter.BoundsList;
         _spawnPeriodNight = IsNight;
         foreach (var map in maps)

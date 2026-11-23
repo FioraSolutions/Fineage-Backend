@@ -189,7 +189,8 @@ public static class ConsistencyOracle
             AttackSampleCount = bots.Sum(b => b.ObservationLog.Tracker.AttackSampleCount),
             SkillSampleCount = bots.Sum(b => b.ObservationLog.Tracker.SkillSampleCount),
             AttackTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.AttackTimeoutCount),
-            SkillTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.SkillTimeoutCount)
+            SkillTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.SkillTimeoutCount),
+            BotKillCount = bots.Sum(b => b.ObservationLog.Tracker.KillsBySelf)
         };
     }
 

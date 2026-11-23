@@ -68,10 +68,23 @@ public sealed class LoadScenario
     /// Bot <paramref name="botId"/> travels when the running share count steps up at its index, so
     /// exactly round(share × botCount) bots travel, spread evenly over the fleet and the ramp.
     /// </summary>
+    /// <remarks>
+    /// Heavy-play combat bots (party or train slots) never travel; in <c>aoe-combined</c> the share applies to
+    /// the economy background bots only, counted from the first of them.
+    /// </remarks>
     public bool IsGatekeeperTraveler(int botId)
     {
         double share = ResolvedGatekeeperTravelShare;
-        return Math.Floor((botId + 1) * share + 1e-9) > Math.Floor(botId * share + 1e-9);
+        int index = botId;
+        if (HeavyPlay is { IsHeavyPlay: true } hp)
+        {
+            int combat = hp.CombatBotCount;
+            if (botId < combat)
+                return false;
+            index = botId - combat;
+        }
+
+        return Math.Floor((index + 1) * share + 1e-9) > Math.Floor(index * share + 1e-9);
     }
 
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>

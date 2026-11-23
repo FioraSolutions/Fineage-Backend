@@ -7,8 +7,8 @@ public enum HeavyPlayRole
     MixedRandom,
     TrainWarlord,
     TrainObserver,
+    /// <summary>Every party slot fights: pole auto-attack on its own target plus the AoE rotation.</summary>
     PartyWarlord,
-    PartyObserver,
     EconomyBackground
 }
 
@@ -36,8 +36,7 @@ public static class HeavyPlayRoles
         int combatBots = partySize * partyCount;
         if (botId >= combatBots)
             return HeavyPlayRole.MixedRandom;
-        int slot = botId % partySize;
-        return slot == 0 ? HeavyPlayRole.PartyWarlord : HeavyPlayRole.PartyObserver;
+        return HeavyPlayRole.PartyWarlord;
     }
 
     static HeavyPlayRole ResolveCombined(int botId, LoadScenario scenario)

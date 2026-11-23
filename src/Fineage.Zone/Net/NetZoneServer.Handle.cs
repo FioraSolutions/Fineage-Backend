@@ -64,6 +64,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.SelectTarget:
                             await _combat.OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.TeleportToLocation:
+                            await _combat.OnLoadTestTeleportAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TargetCancelRequest:
                             await _combat.OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;

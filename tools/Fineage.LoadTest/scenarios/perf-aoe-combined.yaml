@@ -1,4 +1,7 @@
-# Perf #951 + #955/#957 — multi-party AoE plus economy-hammer background and ~20% town teleports.
+# Perf #951 + #955/#957 — four 9-bot Warlord parties fighting the arena packs, plus economy-hammer
+# background bots (shop/warehouse/trade/store/manor/drop flows); 20% of the background bots run gatekeeper trips.
+# Zone env: FINEAGE_ZONE_LOADTEST_COMBAT=1 FINEAGE_ZONE_LOADTEST_TELEPORT=1 FINEAGE_ZONE_EXTRA_MAPS=loadtest_aoe_arena
+# FINEAGE_STARTING_LEVEL=77 FINEAGE_STARTING_ADENA=5000000 (full world plus the disabled arena map, so the hub NPCs exist).
 name: perf-aoe-combined
 extends: bots-economy-hammer.yaml
 botCount: 72
@@ -13,4 +16,4 @@ heavyPlay:
   partySize: 9
   partyCount: 4
   skillRotation: [36, 48]
-  economyTeleportWeight: 0.20
+gatekeeperTravelShare: 0.20

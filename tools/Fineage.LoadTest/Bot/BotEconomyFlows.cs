@@ -16,7 +16,8 @@ public static class BotEconomyFlows
     {
         var economy = bot.Scenario.Economy;
         if (economy is not { Enabled: true })
-            return;
+            throw new InvalidOperationException(
+                $"scenario {bot.Scenario.Name}: action '{action}' needs economy.enabled: true.");
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(economy.FlowTimeoutSeconds));
@@ -32,7 +33,7 @@ public static class BotEconomyFlows
                     break;
                 case "economy_shop_buy":
                     await bot.TeleportToAsync(economy.HubX, economy.HubY, economy.HubZ, t);
-                    await bot.BypassAsync(economy.MerchantObjectId, "Buy 1", t);
+                    await bot.BypassAsync(economy.MerchantObjectId, $"Buy {economy.ShopBuyListId}", t);
                     await bot.BuyItemAsync(economy.MerchantObjectId, economy.ShopBuyListId,
                         economy.ShopBuyItemId, economy.ShopBuyCount, t);
                     break;
@@ -47,7 +48,7 @@ public static class BotEconomyFlows
 
                     break;
                 case "economy_warehouse":
-                    await bot.TeleportToAsync(economy.HubX, economy.HubY, economy.HubZ, t);
+                    await bot.TeleportToAsync(economy.WarehouseX, economy.WarehouseY, economy.WarehouseZ, t);
                     await bot.BypassAsync(economy.WarehouseObjectId, "DepositP", t);
                     if (bot.Bag.Adena >= economy.WarehouseDepositAdena)
                     {
@@ -77,6 +78,8 @@ public static class BotEconomyFlows
                     await bot.TeleportToAsync(bot.Scenario.SpawnX, bot.Scenario.SpawnY, bot.Scenario.SpawnZ, t);
                     await bot.TryDropAndPickupAsync(t);
                     break;
+                default:
+                    throw new InvalidOperationException($"bot {bot.BotId}: economy action '{action}' has no implementation.");
             }
 
             Interlocked.Increment(ref flowStats.EconomyFlowsSucceeded);

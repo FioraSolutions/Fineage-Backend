@@ -10,24 +10,33 @@ public sealed class EconomyHammerConfig
     /// <summary>Fail the run when ledger invariants, unexplained rejects, or economy log errors appear.</summary>
     public bool RequireLedgerInvariant { get; set; } = true;
 
-    public int HubX { get; set; } = -86300;
-    public int HubY { get; set; } = 243250;
-    public int HubZ { get; set; } = -3717;
+    /// <summary>Next to the Talking Island grocer (<see cref="MerchantObjectId"/> at -84204, 240403).</summary>
+    public int HubX { get; set; } = -84160;
+    public int HubY { get; set; } = 240403;
+    public int HubZ { get; set; } = -3720;
 
-    public int GludioManorX { get; set; } = -14288;
-    public int GludioManorY { get; set; } = 122752;
-    public int GludioManorZ { get; set; } = -3000;
+    /// <summary>Next to the Talking Island warehouse keeper (<see cref="WarehouseObjectId"/> at -81512, 243424).</summary>
+    public int WarehouseX { get; set; } = -81470;
+    public int WarehouseY { get; set; } = 243424;
+    public int WarehouseZ { get; set; } = -3712;
+
+    /// <summary>Next to the Gludio manor manager (<see cref="ManorManagerObjectId"/> at -12172, 122648).</summary>
+    public int GludioManorX { get; set; } = -12130;
+    public int GludioManorY { get; set; } = 122648;
+    public int GludioManorZ { get; set; } = -3088;
     public int GludioCastleId { get; set; } = 1;
 
-    public int MerchantNpcTemplateId { get; set; } = 30001;
-    public int MerchantObjectId { get; set; } = 60023;
+    /// <summary>Talking Island grocer; its buy list 3000400 sells <see cref="ShopBuyItemId"/>.</summary>
+    public int MerchantNpcTemplateId { get; set; } = 30004;
+    public int MerchantObjectId { get; set; } = 60014;
     public int WarehouseNpcTemplateId { get; set; } = 30005;
     public int WarehouseObjectId { get; set; } = 60010;
     public int ManorManagerTemplateId { get; set; } = 35103;
     public int ManorManagerObjectId { get; set; } = 60774;
     public int ManorSeedItemId { get; set; } = 5016;
 
-    public int ShopBuyListId { get; set; } = 1;
+    /// <summary>Full Mobius buy list id (<c>Buy 3000400</c> bypass, RequestBuyItem list id).</summary>
+    public int ShopBuyListId { get; set; } = 3000400;
     public int ShopBuyItemId { get; set; } = 1060;
     public int ShopBuyCount { get; set; } = 1;
 
