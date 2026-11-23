@@ -197,8 +197,20 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    static bool HasBlessing(ZoneEntity entity) =>
-        entity.Abnormals.Any(a => a.Id == PlayableAttackRules.BlessingSkillId);
+    /// <summary>
+    /// Blessing of Protection is the <c>ProtectionBlessing</c> effect on a live abnormal.
+    /// The skill id is not the gate: a catalog row without that effect name does not protect.
+    /// </summary>
+    bool HasBlessing(ZoneEntity entity) =>
+        HasEffectAbnormal(entity, PlayableAttackRules.ProtectionBlessingEffect);
+
+    /// <summary>Test hook: the PlayableAI blessing gate using the live effect, not a skill id.</summary>
+    internal bool ProtectionBlessingRefusesForTest(ZoneEntity attacker, ZoneEntity target) =>
+        PlayableAttackRules.Refused(
+            bothPlayers: true,
+            attacker.Level, target.Level, attacker.Karma, target.Karma,
+            HasBlessing(attacker), HasBlessing(target),
+            attackerCursed: false, targetCursed: false, badSkill: false);
 
     public const int SysMsgPeaceTarget = 85;
     public const int SysMsgEnteredCombatZone = 283;

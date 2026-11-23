@@ -1,8 +1,8 @@
 {
   "effectTypesInDatapack": 112,
   "statusSummary": {
-    "full": 108,
-    "partial": 3,
+    "full": 111,
+    "partial": 0,
     "unsupported": 1
   },
   "missingOrUncataloged": [],
@@ -361,8 +361,8 @@
       "effect": "BlockBuffSlot",
       "instances": 6,
       "skills": 6,
-      "status": "partial",
-      "note": "slot block not enforced on re-buff"
+      "status": "full",
+      "note": ""
     },
     {
       "effect": "ChangeFace",
@@ -704,8 +704,8 @@
       "effect": "NoblesseBless",
       "instances": 1,
       "skills": 1,
-      "status": "partial",
-      "note": "abnormal only; noble blessing consume / death passthrough not wired"
+      "status": "full",
+      "note": ""
     },
     {
       "effect": "RebalanceHP",
@@ -788,8 +788,8 @@
       "effect": "ProtectionBlessing",
       "instances": 1,
       "skills": 1,
-      "status": "partial",
-      "note": "abnormal only; retail protection rules partial"
+      "status": "full",
+      "note": ""
     }
   ],
   "mobiusJavaHandlers": 146,
