@@ -86,4 +86,27 @@ public sealed class LockFreeTelemetryTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new NetFanoutStripes(stripeCount: 65, queueCapacity: 64));
         Assert.Throws<ArgumentOutOfRangeException>(() => new NetFanoutStripes(stripeCount: 2, queueCapacity: 0));
     }
+
+    [Fact]
+    public void Backlog_and_slow_client_counters_reach_the_metrics_text()
+    {
+        using var metrics = new MetricsCollector();
+        var before = metrics.Snapshot();
+        FineageTelemetry.FanoutBacklogSoftExceeded.Add(2);
+        FineageTelemetry.FanoutBacklogEmergency.Add(1);
+        FineageTelemetry.OutboundSlowClientDisconnect.Add(1, new KeyValuePair<string, object?>("endpoint", "zone"));
+        FineageTelemetry.OutboundShedBytes.Add(512, new KeyValuePair<string, object?>("lane", "visual"));
+        var after = metrics.Snapshot();
+
+        // The meter is process-wide: other tests may add too, so check at least this test's increments.
+        Assert.True(after.FanoutBacklogSoftExceeded - before.FanoutBacklogSoftExceeded >= 2);
+        Assert.True(after.FanoutBacklogEmergency - before.FanoutBacklogEmergency >= 1);
+        Assert.True(after.OutboundSlowClientDisconnect - before.OutboundSlowClientDisconnect >= 1);
+        Assert.True(after.OutboundShedBytes - before.OutboundShedBytes >= 512);
+        string text = MetricsText.Prometheus(after, 0, 0);
+        Assert.Contains("fineage_fanout_backlog_soft_exceeded_total ", text);
+        Assert.Contains("fineage_fanout_backlog_emergency_total ", text);
+        Assert.Contains("fineage_outbound_slow_client_disconnect_total ", text);
+        Assert.Contains("fineage_outbound_shed_bytes_total ", text);
+    }
 }

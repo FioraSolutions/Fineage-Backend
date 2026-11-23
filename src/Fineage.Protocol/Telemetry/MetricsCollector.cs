@@ -66,6 +66,10 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandQueueWaitByClass = new(StringComparer.Ordinal);
     long _tickOverruns;
+    long _fanoutBacklogSoftExceeded;
+    long _fanoutBacklogEmergency;
+    long _outboundSlowClientDisconnect;
+    long _outboundShedBytes;
     long _ticksSkipped;
     long _regionHandoffs;
     readonly Dictionary<string, long> _ledgerAdjustments = new(StringComparer.Ordinal);
@@ -153,6 +157,10 @@ public sealed class MetricsCollector : IDisposable
                 FanoutCoalesced = _fanoutCoalesced,
                 ReliableOverflow = _reliableOverflow,
                 TickOverruns = _tickOverruns,
+                FanoutBacklogSoftExceeded = _fanoutBacklogSoftExceeded,
+                FanoutBacklogEmergency = _fanoutBacklogEmergency,
+                OutboundSlowClientDisconnect = _outboundSlowClientDisconnect,
+                OutboundShedBytes = _outboundShedBytes,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
                 LedgerAdjustments = _ledgerAdjustments
@@ -421,6 +429,18 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.tick.overruns":
                 _tickOverruns += value;
+                break;
+            case "fineage.fanout.backlog.soft_exceeded":
+                _fanoutBacklogSoftExceeded += value;
+                break;
+            case "fineage.fanout.backlog.emergency":
+                _fanoutBacklogEmergency += value;
+                break;
+            case "fineage.outbound.slow_client_disconnect":
+                _outboundSlowClientDisconnect += value;
+                break;
+            case "fineage.outbound.shed_bytes":
+                _outboundShedBytes += value;
                 break;
             case "fineage.tick.skipped":
                 _ticksSkipped += value;

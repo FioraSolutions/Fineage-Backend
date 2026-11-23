@@ -82,6 +82,10 @@ public sealed class MetricsSnapshot
     public long FanoutCoalesced { get; init; }
     public long ReliableOverflow { get; init; }
     public long TickOverruns { get; init; }
+    public long FanoutBacklogSoftExceeded { get; init; }
+    public long FanoutBacklogEmergency { get; init; }
+    public long OutboundSlowClientDisconnect { get; init; }
+    public long OutboundShedBytes { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
@@ -296,6 +300,14 @@ public static class MetricsText
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendCounter(sb, "fineage_fanout_backlog_soft_exceeded_total",
+            "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit", snapshot.FanoutBacklogSoftExceeded);
+        AppendCounter(sb, "fineage_fanout_backlog_emergency_total",
+            "Sealed fan-out batches enqueued while the dispatcher backlog was above its hard limit", snapshot.FanoutBacklogEmergency);
+        AppendCounter(sb, "fineage_outbound_slow_client_disconnect_total",
+            "Connections closed because their outbound mailbox stayed above the hard byte limit", snapshot.OutboundSlowClientDisconnect);
+        AppendCounter(sb, "fineage_outbound_shed_bytes_total",
+            "Low-priority outbound bytes dropped or coalesced away to keep a mailbox inside its byte budget", snapshot.OutboundShedBytes);
         AppendHelp(sb, "fineage_tick_skipped_total", "Simulation ticks a late step jumped over");
         sb.Append("# TYPE fineage_tick_skipped_total counter\n");
         sb.Append("fineage_tick_skipped_total ").Append(snapshot.TicksSkipped.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -562,6 +574,13 @@ public static class MetricsText
             sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
                 .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }
+    }
+
+    static void AppendCounter(StringBuilder sb, string name, string help, long value)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" counter\n");
+        sb.Append(name).Append(' ').Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
     static void AppendKindGauge(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, int> byKind)
