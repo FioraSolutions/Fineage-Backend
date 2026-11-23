@@ -25,11 +25,11 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     public int StripeCount => _stripes.Length;
 
-    public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload) =>
-        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload)]));
+    public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload, long mailboxAtTimestamp = 0) =>
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)]));
 
-    public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload) =>
-        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload)]));
+    public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload, long mailboxAtTimestamp = 0) =>
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)]));
 
     /// <summary>One ordered batch for <paramref name="handle"/>, already grouped by the delivery scope or a stripe drain.</summary>
     internal void EnqueueBatch(ConnectionHandle handle, List<OutboundFrame> frames)

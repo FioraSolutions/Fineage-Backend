@@ -64,16 +64,19 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
     }
 
     /// <param name="commandCommitTimestamp">When &gt; 0, marks this batch for command→mailbox timing.</param>
-    public void Seal(long commandCommitTimestamp = 0)
+    /// <returns>Milliseconds spent blocked in the dispatcher enqueue. Nested seals return 0.</returns>
+    public double Seal(long commandCommitTimestamp = 0)
     {
         if (_depth == 0)
             throw new InvalidOperationException("world fan-out batch sealed without a matching Begin");
         if (--_depth > 0)
-            return;
+            return 0;
         var batch = _recording!;
         Volatile.Write(ref _recording, null);
         var seq = new WorldEventSequence(_tick, _phase, _sequence++);
+        long enqueueStart = Stopwatch.GetTimestamp();
         _dispatcher.Enqueue(new SealedWorldFanoutBatch(batch, seq, commandCommitTimestamp));
+        return (Stopwatch.GetTimestamp() - enqueueStart) * 1000.0 / Stopwatch.Frequency;
     }
 
     /// <summary>Test hook: wait until the dispatcher worker finishes pending batches.</summary>

@@ -54,6 +54,8 @@ public sealed partial class ZoneWorld
             string? error = null;
             Exception? failure = null;
             long oneStart = Stopwatch.GetTimestamp();
+            using var commandActivity = FineageTelemetry.Activity.StartActivity("zone.command");
+            commandActivity?.SetTag("command", submission.Command.Name);
             try
             {
                 error = submission.Command.Apply(this, submission.Session, tick);

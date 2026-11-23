@@ -23,7 +23,16 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _commandToMailboxes = new();
     readonly DurationHistogram _fanoutBatchProcess = new();
     readonly DurationHistogram _fanoutQueueAge = new();
-    readonly DurationHistogram _fanoutQueueDepth = new();
+    readonly BoundedCountHistogram _fanoutQueueDepth = new(MetricsText.CountBounds);
+    readonly BoundedCountHistogram _fanoutEventsPerBatch = new(MetricsText.CountBounds);
+    readonly BoundedCountHistogram _fanoutRecipientsPerEvent = new(MetricsText.CountBounds);
+    readonly BoundedCountHistogram _fanoutQueueBytes = new(MetricsText.SocketWriteByteBounds);
+    readonly BoundedCountHistogram _outboundQueueFrames = new(MetricsText.SocketWriteFrameBounds);
+    readonly BoundedCountHistogram _outboundQueueBytes = new(MetricsText.SocketWriteByteBounds);
+    readonly DurationHistogram _outboundQueueAge = new();
+    long _fanoutOverflow;
+    long _fanoutCoalesced;
+    long _reliableOverflow;
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
@@ -87,6 +96,15 @@ public sealed class MetricsCollector : IDisposable
                 FanoutBatchProcess = _fanoutBatchProcess.Freeze(),
                 FanoutQueueOldestAge = _fanoutQueueAge.Freeze(),
                 FanoutQueueDepth = _fanoutQueueDepth.Freeze(),
+                FanoutEventsPerBatch = _fanoutEventsPerBatch.Freeze(),
+                FanoutRecipientsPerEvent = _fanoutRecipientsPerEvent.Freeze(),
+                FanoutQueueBytes = _fanoutQueueBytes.Freeze(),
+                OutboundQueueFrames = _outboundQueueFrames.Freeze(),
+                OutboundQueueBytes = _outboundQueueBytes.Freeze(),
+                OutboundQueueOldestAge = _outboundQueueAge.Freeze(),
+                FanoutOverflow = _fanoutOverflow,
+                FanoutCoalesced = _fanoutCoalesced,
+                ReliableOverflow = _reliableOverflow,
                 TickOverruns = _tickOverruns,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
@@ -180,6 +198,15 @@ public sealed class MetricsCollector : IDisposable
                         group = "other";
                     _fanoutDropped[group] = _fanoutDropped.GetValueOrDefault(group) + value;
                     break;
+                case "fineage.fanout.queue.overflow":
+                    _fanoutOverflow += value;
+                    break;
+                case "fineage.fanout.coalesced":
+                    _fanoutCoalesced += value;
+                    break;
+                case "fineage.outbound.reliable_overflow":
+                    _reliableOverflow += value;
+                    break;
             }
         }
     }
@@ -206,6 +233,24 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.socket_write.frames":
                     Row(EndpointOf(tags)).SocketWriteFrames.Record(value);
+                    break;
+                case "fineage.fanout.queue.depth":
+                    _fanoutQueueDepth.Record(value);
+                    break;
+                case "fineage.fanout.events_per_batch":
+                    _fanoutEventsPerBatch.Record(value);
+                    break;
+                case "fineage.fanout.recipients_per_event":
+                    _fanoutRecipientsPerEvent.Record(value);
+                    break;
+                case "fineage.fanout.queue.bytes":
+                    _fanoutQueueBytes.Record(value);
+                    break;
+                case "fineage.outbound.queue.frames":
+                    _outboundQueueFrames.Record(value);
+                    break;
+                case "fineage.outbound.queue.bytes":
+                    _outboundQueueBytes.Record(value);
                     break;
             }
         }
@@ -284,6 +329,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.fanout.queue.oldest_age.ms":
                     _fanoutQueueAge.Record(value);
+                    break;
+                case "fineage.outbound.queue.oldest_age.ms":
+                    _outboundQueueAge.Record(value);
                     break;
                 case "fineage.socket_write.ms":
                     Row(EndpointOf(tags)).SocketWriteMs.Record(value);

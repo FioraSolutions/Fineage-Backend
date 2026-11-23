@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
 using Fineage.Net.Host;
@@ -16,10 +17,11 @@ internal sealed class FanoutDispatcher : IDisposable
     readonly Channel<SealedWorldFanoutBatch> _queue;
     readonly Task _worker;
     readonly CancellationTokenSource _cts = new();
+    readonly object _enqueueOrder = new();
+    readonly ConcurrentQueue<long> _enqueuedAt = new();
     int _closed;
     int _inFlight;
     int _pending;
-    long _oldestEnqueueTicks;
     Exception? _propagated;
 
     /// <summary>Tests: rethrow the first fan-out send failure from <see cref="WaitUntilIdle"/>.</summary>
@@ -59,10 +61,6 @@ internal sealed class FanoutDispatcher : IDisposable
             throw RejectException(batch, "dispatcher is closed");
         }
 
-        long now = Stopwatch.GetTimestamp();
-        if (batch.EnqueuedAtTimestamp > 0)
-            FanoutTelemetry.RecordEnqueue(now);
-
         if (DeliverSynchronously)
         {
             ExecuteBatch(batch);
@@ -70,31 +68,47 @@ internal sealed class FanoutDispatcher : IDisposable
         }
 
         long waitStarted = Stopwatch.GetTimestamp();
-        try
+        // Push the enqueue timestamp before the channel write, under one lock, so the side queue
+        // stays in the same order as the channel when several threads seal batches.
+        lock (_enqueueOrder)
         {
-            _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
-        }
-        catch (ChannelClosedException ex)
-        {
-            RejectUnrecoverable(batch, "channel closed");
-            throw RejectException(batch, "channel closed", ex);
-        }
-        catch (OperationCanceledException ex) when (_cts.IsCancellationRequested)
-        {
-            RejectUnrecoverable(batch, "dispatcher shut down");
-            throw RejectException(batch, "dispatcher shut down", ex);
+            NoteEnqueued();
+            try
+            {
+                _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
+            }
+            catch (ChannelClosedException ex)
+            {
+                NoteDequeued();
+                RejectUnrecoverable(batch, "channel closed");
+                throw RejectException(batch, "channel closed", ex);
+            }
+            catch (OperationCanceledException ex) when (_cts.IsCancellationRequested)
+            {
+                NoteDequeued();
+                RejectUnrecoverable(batch, "dispatcher shut down");
+                throw RejectException(batch, "dispatcher shut down", ex);
+            }
         }
 
         double enqueueWaitMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;
         FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(enqueueWaitMs);
         Interlocked.Increment(ref _pending);
-        FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
-        if (batch.EnqueuedAtTimestamp > 0)
-        {
-            long prevOldest = Volatile.Read(ref _oldestEnqueueTicks);
-            if (prevOldest == 0 || batch.EnqueuedAtTimestamp < prevOldest)
-                Interlocked.Exchange(ref _oldestEnqueueTicks, batch.EnqueuedAtTimestamp);
-        }
+        PublishQueue();
+    }
+
+    void NoteEnqueued() => _enqueuedAt.Enqueue(Stopwatch.GetTimestamp());
+
+    void NoteDequeued() => _enqueuedAt.TryDequeue(out _);
+
+    void PublishQueue()
+    {
+        int depth = Math.Max(0, _queue.Reader.Count);
+        double ageMs = 0;
+        if (depth > 0 && _enqueuedAt.TryPeek(out long oldest))
+            ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency);
+        FineageTelemetry.FanoutQueueDepth.Record(depth);
+        FineageTelemetry.FanoutQueueAgeMilliseconds.Record(ageMs);
     }
 
     static void RejectUnrecoverable(SealedWorldFanoutBatch batch, string reason)
@@ -142,8 +156,8 @@ internal sealed class FanoutDispatcher : IDisposable
                     break;
                 while (_queue.Reader.TryRead(out var batch))
                 {
-                    FanoutTelemetry.RecordQueueDepth(_queue.Reader.Count);
-                    Volatile.Write(ref _oldestEnqueueTicks, 0);
+                    NoteDequeued();
+                    PublishQueue();
                     Interlocked.Increment(ref _inFlight);
                     try
                     {
@@ -165,13 +179,11 @@ internal sealed class FanoutDispatcher : IDisposable
     void ExecuteBatch(SealedWorldFanoutBatch batch)
     {
         long started = Stopwatch.GetTimestamp();
-        double queueAgeMs = batch.EnqueuedAtTimestamp > 0 ? ElapsedMs(batch.EnqueuedAtTimestamp, started) : 0;
-        if (queueAgeMs > 0)
-            FineageTelemetry.FanoutQueueAgeMilliseconds.Record(queueAgeMs);
-
         bool commandBatch = batch.EnqueuedAtTimestamp > 0;
+        CommandFanoutTimingContext.BeginDelivery();
         if (commandBatch)
             CommandFanoutTimingContext.BeginCommandBatch(batch.EnqueuedAtTimestamp);
+        using var batchActivity = FineageTelemetry.Activity.StartActivity("zone.fanout.batch");
         try
         {
             int events = 0;
@@ -184,9 +196,11 @@ internal sealed class FanoutDispatcher : IDisposable
                     {
                         send();
                         events++;
+                        FineageTelemetry.FanoutRecipientsPerEvent.Record(CommandFanoutTimingContext.TakeRecipients());
                     }
                     catch (Exception ex)
                     {
+                        CommandFanoutTimingContext.TakeRecipients();
                         FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
                         ZoneLog.Warn($"world fan-out {name} failed: {ex}");
                         if (FailFast)
@@ -196,15 +210,23 @@ internal sealed class FanoutDispatcher : IDisposable
 
                 int connections = scope.Flush();
                 if (connections > 0 && CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+                {
                     FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
+                    FineageTelemetry.CommandTimelineMilliseconds.Record(commitToMailboxMs,
+                        new KeyValuePair<string, object?>("phase", "fanout_enqueue_to_mailbox"));
+                }
             }
 
             FineageTelemetry.FanoutEventsPerBatch.Record(events);
+            FineageTelemetry.FanoutQueueBytes.Record(CommandFanoutTimingContext.TakeBytes());
+            if (batch.Coalesced > 0)
+                FineageTelemetry.FanoutCoalesced.Add(batch.Coalesced);
         }
         finally
         {
             if (commandBatch)
                 CommandFanoutTimingContext.EndCommandBatch();
+            CommandFanoutTimingContext.EndDelivery();
         }
 
         double processMs = ElapsedMs(started);
@@ -236,38 +258,5 @@ internal sealed class FanoutDispatcher : IDisposable
 
         try { _worker.Wait(TimeSpan.FromSeconds(5)); } catch { /* ignore */ }
         _cts.Dispose();
-    }
-}
-
-/// <summary>Records fan-out queue depth and oldest-batch age for Prometheus export.</summary>
-internal static class FanoutTelemetry
-{
-    static readonly object Gate = new();
-    static int _depth;
-    static long _oldestEnqueueTicks;
-
-    public static void RecordEnqueue(long enqueueTicks)
-    {
-        lock (Gate)
-        {
-            if (_oldestEnqueueTicks == 0 || enqueueTicks < _oldestEnqueueTicks)
-                _oldestEnqueueTicks = enqueueTicks;
-        }
-    }
-
-    public static void RecordQueueDepth(int depth)
-    {
-        int clamped = Math.Max(0, depth);
-        Interlocked.Exchange(ref _depth, clamped);
-        FineageTelemetry.FanoutQueueDepth.Record(clamped);
-
-        long oldest;
-        lock (Gate)
-            oldest = _oldestEnqueueTicks;
-        if (oldest > 0)
-        {
-            double ageMs = (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency;
-            FineageTelemetry.FanoutQueueAgeMilliseconds.Record(Math.Max(0, ageMs));
-        }
     }
 }

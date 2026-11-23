@@ -215,6 +215,10 @@ public sealed class MetricsCollectorTests
         Assert.True(snapshot.RegionHandoffs >= handoffsBefore + 3);
 
         string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains("fineage_fanout_overflow_total 0\n", text);
+        Assert.Contains("fineage_coalesced_total 0\n", text);
+        Assert.Contains("fineage_reliable_overflow_total 0\n", text);
+        Assert.Contains("fineage_fanout_dropped_total 0\n", text);
         Assert.Contains($"fineage_tick_stage_ms_count{{stage=\"{stage}\"}} 1\n", text);
         Assert.Contains($"fineage_tick_stage_failures_total{{stage=\"{stage}\"}} 2\n", text);
         Assert.Contains("# TYPE fineage_tick_overruns_total counter\n", text);

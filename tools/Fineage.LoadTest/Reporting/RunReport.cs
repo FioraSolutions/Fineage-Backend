@@ -46,7 +46,6 @@ public sealed class RunReport
     public double? CommandToMailboxesP99Ms { get; set; }
     public double? FanoutQueueOldestAgeP99Ms { get; set; }
     public long? ReliableOverflowTotal { get; set; }
-    public HonestLoadSummary? Honest { get; set; }
 }
 
 public sealed class PrometheusAggregate

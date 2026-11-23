@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Bosses;
 using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
@@ -149,8 +150,13 @@ public sealed partial class ZoneWorld
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
 
         long sealStart = Stopwatch.GetTimestamp();
-        _fanout.Seal(sealStart);
+        double enqueueMs = _fanout.Seal(sealStart);
         double sealMs = RecordCommandPhase(PhaseSeal, sealStart);
+        double prepMs = Math.Max(0, sealMs - enqueueMs);
+        FineageTelemetry.CommandTimelineMilliseconds.Record(flushMs + prepMs,
+            new KeyValuePair<string, object?>("phase", "apply_to_seal"));
+        FineageTelemetry.CommandTimelineMilliseconds.Record(enqueueMs,
+            new KeyValuePair<string, object?>("phase", "seal_to_fanout_enqueue"));
 
         AwaitTestFanoutDelivery();
 
