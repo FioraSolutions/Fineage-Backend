@@ -35,6 +35,7 @@ public sealed class NetConnection : IAsyncDisposable
     readonly string _endpoint;
     readonly Task _pump;
     readonly ConcurrentDictionary<CoalesceReplaceableKey, PacketEnvelope> _coalescedReplaceable = new();
+    int _queuedBytes;
     int _closed;
     int _boundObjectId;
     uint _boundGeneration;
@@ -148,10 +149,13 @@ public sealed class NetConnection : IAsyncDisposable
     /// <summary>
     /// Queues <paramref name="payload"/> and waits for room. Used by request/reply paths that must not lose a frame.
     /// </summary>
-    public async Task SendAsync(ushort opcode, byte[] payload, uint requestSequence = 0, CancellationToken ct = default)
+    public async Task SendAsync(
+        ushort opcode, byte[] payload, uint requestSequence = 0, CancellationToken ct = default, long mailboxAtTimestamp = 0)
     {
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return;
+        if (mailboxAtTimestamp > 0)
+            envelope.MailboxQueuedAtTimestamp = mailboxAtTimestamp;
 
         if (OutboundOrdering.IsBarrier(opcode))
             FlushCoalescedBeforeBarrier(wait: false);
@@ -161,6 +165,7 @@ public sealed class NetConnection : IAsyncDisposable
         try
         {
             await _batches.Writer.WriteAsync(new OutboundBatch([envelope]), timeout.Token).ConfigureAwait(false);
+            NoteQueued(envelope);
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
@@ -180,10 +185,12 @@ public sealed class NetConnection : IAsyncDisposable
     /// Non-blocking enqueue. A full batch queue drops the frame, counts it, and logs the opcode.
     /// Replaceable presence frames coalesce instead of dropping. Stripe delivery does not use this path.
     /// </summary>
-    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0)
+    public bool TrySend(ushort opcode, byte[] payload, uint requestSequence = 0, long mailboxAtTimestamp = 0)
     {
         if (!TryEnvelope(opcode, payload, requestSequence, out PacketEnvelope envelope))
             return false;
+        if (mailboxAtTimestamp > 0)
+            envelope.MailboxQueuedAtTimestamp = mailboxAtTimestamp;
 
         if (OutboundOrdering.IsBarrier(opcode))
             FlushCoalescedBeforeBarrier(wait: false);
@@ -192,7 +199,10 @@ public sealed class NetConnection : IAsyncDisposable
             return true;
 
         if (_batches.Writer.TryWrite(new OutboundBatch([envelope])))
+        {
+            NoteQueued(envelope);
             return true;
+        }
 
         NetTelemetry.OutboundDropped(_endpoint);
         NetHostLog.Error(
@@ -231,6 +241,8 @@ public sealed class NetConnection : IAsyncDisposable
         {
             if (!TryEnvelope(frames[i].Opcode, frames[i].Payload, 0, out PacketEnvelope envelope))
                 continue;
+            if (frames[i].MailboxAtTimestamp > 0)
+                envelope.MailboxQueuedAtTimestamp = frames[i].MailboxAtTimestamp;
 
             int size = PacketEnvelope.HeaderSize + envelope.Payload.Length;
             if (chunk.Count > 0 && (chunk.Count >= MaxFramesPerBatch || bytes + size > MaxBytesPerBatch))
@@ -259,7 +271,11 @@ public sealed class NetConnection : IAsyncDisposable
         {
             NetHostLog.Error(
                 $"connectionId={ConnectionId} endpoint={_endpoint} rejected {batch.Frames.Length} ordered frames: outbound batch queue is closed");
+            return;
         }
+
+        for (int i = 0; i < batch.Frames.Length; i++)
+            NoteQueued(batch.Frames[i]);
     }
 
     /// <summary>
@@ -275,7 +291,10 @@ public sealed class NetConnection : IAsyncDisposable
             return false;
 
         var key = new CoalesceReplaceableKey(opcode, entityValue, generation);
+        if (_coalescedReplaceable.TryGetValue(key, out PacketEnvelope? previous))
+            NoteDequeued(previous);
         _coalescedReplaceable[key] = envelope;
+        NoteQueued(envelope);
         if (_coalescedReplaceable.Count > MaxCoalescedReplaceableEntries)
             FlushCoalescedBeforeBarrier(wait: false);
         _pumpWake.Writer.TryWrite(1);
@@ -313,13 +332,20 @@ public sealed class NetConnection : IAsyncDisposable
             {
                 NetHostLog.Error(
                     $"connectionId={ConnectionId} endpoint={_endpoint} lost {frames.Count} coalesced frames before a barrier: outbound batch queue is closed");
+                return;
             }
 
+            for (int i = 0; i < frames.Count; i++)
+                NoteQueued(frames[i]);
             return;
         }
 
         if (_batches.Writer.TryWrite(batch))
+        {
+            for (int i = 0; i < frames.Count; i++)
+                NoteQueued(frames[i]);
             return;
+        }
 
         RestoreCoalesced(frames);
         NetHostLog.Error(
@@ -334,6 +360,7 @@ public sealed class NetConnection : IAsyncDisposable
                 continue;
             var key = new CoalesceReplaceableKey(envelope.Opcode, entityValue, generation);
             _coalescedReplaceable.TryAdd(key, envelope);
+            NoteQueued(envelope);
         }
     }
 
@@ -346,14 +373,51 @@ public sealed class NetConnection : IAsyncDisposable
         {
             if (!_coalescedReplaceable.TryRemove(entry.Key, out PacketEnvelope? envelope))
                 continue;
+            NoteDequeued(envelope);
             if (_coalescedReplaceable.TryGetValue(entry.Key, out PacketEnvelope? newer))
             {
                 envelope = newer;
                 _coalescedReplaceable.TryRemove(entry.Key, out _);
+                NoteDequeued(newer);
             }
 
             destination.Add(envelope);
         }
+    }
+
+    void NoteQueued(PacketEnvelope envelope)
+    {
+        int frameBytes = PacketEnvelope.HeaderSize + envelope.Payload.Length;
+        int queuedBytes = Interlocked.Add(ref _queuedBytes, frameBytes);
+        var endpoint = new KeyValuePair<string, object?>("endpoint", _endpoint);
+        int frames = _batches.Reader.Count + _coalescedReplaceable.Count;
+        FineageTelemetry.OutboundQueueFrames.Record(Math.Max(0, frames), endpoint);
+        FineageTelemetry.OutboundQueueBytes.Record(Math.Max(0, queuedBytes), endpoint);
+    }
+
+    void NoteDequeued(PacketEnvelope envelope)
+    {
+        int frameBytes = PacketEnvelope.HeaderSize + envelope.Payload.Length;
+        int left = Interlocked.Add(ref _queuedBytes, -frameBytes);
+        if (left < 0)
+            Interlocked.Exchange(ref _queuedBytes, 0);
+    }
+
+    void RecordOutboundQueue(IReadOnlyList<PacketEnvelope> writing)
+    {
+        long oldest = 0;
+        foreach (PacketEnvelope envelope in writing)
+        {
+            long stamp = envelope.MailboxQueuedAtTimestamp;
+            if (stamp > 0 && (oldest == 0 || stamp < oldest))
+                oldest = stamp;
+        }
+
+        if (oldest <= 0)
+            return;
+        double ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency);
+        FineageTelemetry.OutboundQueueAgeMilliseconds.Record(ageMs, new KeyValuePair<string, object?>("endpoint", _endpoint));
+        FineageTelemetry.CommandTimelineMilliseconds.Record(ageMs, new KeyValuePair<string, object?>("phase", "mailbox_to_socket_write"));
     }
 
     void RecordSocketWrite(long startedAt, int bytes, int frames)
@@ -452,8 +516,10 @@ public sealed class NetConnection : IAsyncDisposable
             PacketEnvelope[] frames = batch.Frames;
             for (int i = 0; i < frames.Length; i++)
             {
-                if (frames[i] != null)
-                    combined.Add(frames[i]);
+                if (frames[i] == null)
+                    continue;
+                NoteDequeued(frames[i]);
+                combined.Add(frames[i]);
             }
         }
     }
@@ -483,6 +549,8 @@ public sealed class NetConnection : IAsyncDisposable
             for (int i = 0; i < count; i++)
                 slice[i] = frames[offset + i];
 
+            using var writeActivity = FineageTelemetry.Activity.StartActivity("zone.socket.write");
+            RecordOutboundQueue(slice);
             long started = Stopwatch.GetTimestamp();
             await NetFraming.WriteManyAsync(_stream, slice, CancellationToken.None).ConfigureAwait(false);
             RecordSocketWrite(started, bytes, count);

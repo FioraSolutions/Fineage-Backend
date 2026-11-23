@@ -70,6 +70,15 @@ public sealed class MetricsSnapshot
     public HistogramMetrics FanoutBatchProcess { get; init; } = new();
     public HistogramMetrics FanoutQueueOldestAge { get; init; } = new();
     public HistogramMetrics FanoutQueueDepth { get; init; } = new();
+    public HistogramMetrics FanoutEventsPerBatch { get; init; } = new();
+    public HistogramMetrics FanoutRecipientsPerEvent { get; init; } = new();
+    public HistogramMetrics FanoutQueueBytes { get; init; } = new();
+    public HistogramMetrics OutboundQueueFrames { get; init; } = new();
+    public HistogramMetrics OutboundQueueBytes { get; init; } = new();
+    public HistogramMetrics OutboundQueueOldestAge { get; init; } = new();
+    public long FanoutOverflow { get; init; }
+    public long FanoutCoalesced { get; init; }
+    public long ReliableOverflow { get; init; }
     public long TickOverruns { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
@@ -96,6 +105,9 @@ public static class MetricsText
         0.5, 1, 2, 5, 10, 20, 25, 40, 50, 60, 80, 100, 120, 150, 180, 200, 220, 250, 300, 400, 500, 650, 750, 800,
         1000, 1500, 2000, 3000, 5000, 10000
     ];
+
+    public static readonly double[] CountBounds =
+        [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192];
 
     public static readonly double[] SocketWriteFrameBounds =
         [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 24, 32, 48, 64];
@@ -198,6 +210,11 @@ public static class MetricsText
                     .Append('\n');
             }
         }
+        else
+        {
+            AppendCounterLine(sb, "fineage_fanout_dropped_total",
+                "Fanout frames dropped under stripe/outbound backpressure", 0);
+        }
 
         AppendCounter(sb, "fineage_packets_rejected_total", "Packets refused before normal handling", snapshot.Endpoints, static e => e.PacketsRejected);
         AppendCounter(sb, "fineage_packets_errored_total", "Packets that produced an error response or failed while handling", snapshot.Endpoints, static e => e.PacketsErrored);
@@ -224,7 +241,25 @@ public static class MetricsText
         AppendSingletonHistogram(sb, "fineage_fanout_queue_oldest_age_ms",
             "Age of the oldest batch waiting in the fan-out dispatcher queue", snapshot.FanoutQueueOldestAge);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
-            "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth);
+            "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_fanout_events_per_batch",
+            "Send actions executed per sealed batch", snapshot.FanoutEventsPerBatch, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_fanout_recipients_per_event",
+            "Mailbox enqueues performed by one fan-out send", snapshot.FanoutRecipientsPerEvent, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_bytes",
+            "Encoded payload bytes in a sealed batch when it leaves the dispatcher queue", snapshot.FanoutQueueBytes, SocketWriteByteBounds);
+        AppendSingletonHistogram(sb, "fineage_outbound_queue_frames",
+            "Frames waiting on a connection when another frame is queued", snapshot.OutboundQueueFrames, SocketWriteFrameBounds);
+        AppendSingletonHistogram(sb, "fineage_outbound_queue_bytes",
+            "Bytes waiting on a connection when another frame is queued", snapshot.OutboundQueueBytes, SocketWriteByteBounds);
+        AppendSingletonHistogram(sb, "fineage_outbound_queue_oldest_age_ms",
+            "Age of the oldest frame included in one socket write", snapshot.OutboundQueueOldestAge);
+        AppendCounterLine(sb, "fineage_fanout_overflow_total",
+            "Sealed fan-out batches rejected because the dispatcher is closed", snapshot.FanoutOverflow);
+        AppendCounterLine(sb, "fineage_coalesced_total",
+            "Replaceable fan-out writes superseded before send", snapshot.FanoutCoalesced);
+        AppendCounterLine(sb, "fineage_reliable_overflow_total",
+            "Reliable frames refused because a session outbound queue was full", snapshot.ReliableOverflow);
         AppendHelp(sb, "fineage_tick_overruns_total", "Simulation steps that took longer than the fixed step");
         sb.Append("# TYPE fineage_tick_overruns_total counter\n");
         sb.Append("fineage_tick_overruns_total ").Append(snapshot.TickOverruns.ToString(CultureInfo.InvariantCulture)).Append('\n');
@@ -362,13 +397,23 @@ public static class MetricsText
         AppendSingletonHistogram(sb, "fineage_enter_bytes", "Outbound bytes per enter burst", snapshot.EnterBytes);
     }
 
-    static void AppendSingletonHistogram(StringBuilder sb, string name, string help, HistogramMetrics histogram)
+    static void AppendSingletonHistogram(StringBuilder sb, string name, string help, HistogramMetrics histogram) =>
+        AppendSingletonHistogram(sb, name, help, histogram, DurationBoundsMs);
+
+    static void AppendSingletonHistogram(StringBuilder sb, string name, string help, HistogramMetrics histogram, double[] bounds)
     {
         if (histogram.Count == 0)
             return;
         AppendHelp(sb, name, help);
         sb.Append("# TYPE ").Append(name).Append(" histogram\n");
-        AppendHistogramSamples(sb, name, "", histogram, DurationBoundsMs);
+        AppendHistogramSamples(sb, name, "", histogram, bounds);
+    }
+
+    static void AppendCounterLine(StringBuilder sb, string name, string help, long value)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(" counter\n");
+        sb.Append(name).Append(' ').Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
     static void AppendLabeledStageHistograms(

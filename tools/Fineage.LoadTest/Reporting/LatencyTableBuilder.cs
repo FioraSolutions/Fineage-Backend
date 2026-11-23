@@ -71,7 +71,15 @@ public static class LatencyTableBuilder
                     rows.Add(FromStats(metric.Replace("fineage_", "", StringComparison.Ordinal), hs));
             }
 
-            foreach (string label in new[] { "submit_to_dequeue", "dequeue_to_apply" })
+            foreach (string label in new[]
+                     {
+                         "submit_to_dequeue",
+                         "dequeue_to_apply",
+                         "apply_to_seal",
+                         "seal_to_fanout_enqueue",
+                         "fanout_enqueue_to_mailbox",
+                         "mailbox_to_socket_write"
+                     })
             {
                 if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_timeline_ms", "phase", label) is { } tl)
                     rows.Add(FromStats($"command.timeline/{label}", tl));

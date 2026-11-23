@@ -27,13 +27,14 @@ public sealed class FanoutDeliveryScope : IDisposable
     }
 
     /// <summary>True when <paramref name="payload"/> was kept for the active scope instead of hitting the stripe queue.</summary>
-    internal static bool TryBuffer(NetFanoutStripes stripes, ConnectionHandle handle, ushort opcode, byte[] payload)
+    internal static bool TryBuffer(
+        NetFanoutStripes stripes, ConnectionHandle handle, ushort opcode, byte[] payload, long mailboxAtTimestamp = 0)
     {
         var scope = Current.Value;
         if (scope == null || Volatile.Read(ref scope._flushed) != 0)
             return false;
 
-        scope._frames.Add(new Buffered(stripes, handle, opcode, payload));
+        scope._frames.Add(new Buffered(stripes, handle, opcode, payload, mailboxAtTimestamp));
         return true;
     }
 
@@ -61,7 +62,7 @@ public sealed class FanoutDeliveryScope : IDisposable
                 order.Add(key);
             }
 
-            group.Frames.Add(new OutboundFrame(frame.Opcode, frame.Payload));
+            group.Frames.Add(new OutboundFrame(frame.Opcode, frame.Payload, frame.MailboxAtTimestamp));
         }
 
         foreach (GroupKey key in order)
@@ -75,7 +76,8 @@ public sealed class FanoutDeliveryScope : IDisposable
 
     public void Dispose() => Flush();
 
-    readonly record struct Buffered(NetFanoutStripes Stripes, ConnectionHandle Handle, ushort Opcode, byte[] Payload);
+    readonly record struct Buffered(
+        NetFanoutStripes Stripes, ConnectionHandle Handle, ushort Opcode, byte[] Payload, long MailboxAtTimestamp);
 
     readonly record struct GroupKey(NetFanoutStripes Stripes, ulong ConnectionId);
 

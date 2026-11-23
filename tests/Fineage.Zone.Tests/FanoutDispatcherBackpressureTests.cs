@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -45,6 +47,36 @@ public sealed class FanoutDispatcherBackpressureTests
         Assert.Contains("phase=3", ex.Message);
         Assert.Contains("seq=99", ex.Message);
         Assert.DoesNotContain(delivered, n => n == 99);
+    }
+
+    [Fact]
+    public void Queue_age_is_the_batch_still_waiting_not_the_first_batch_ever_enqueued()
+    {
+        var ages = new List<double>();
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == FineageTelemetry.MeterName &&
+                instrument.Name == "fineage.fanout.queue.oldest_age.ms")
+                meterListener.EnableMeasurementEvents(instrument);
+        };
+        listener.SetMeasurementEventCallback<double>((instrument, value, _, _) =>
+        {
+            if (instrument.Name == "fineage.fanout.queue.oldest_age.ms")
+                ages.Add(value);
+        });
+        listener.Start();
+
+        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 4);
+        dispatcher.Enqueue(Batch(1, () => { }));
+        dispatcher.WaitUntilIdle();
+        Thread.Sleep(300);
+        int beforeSecond = ages.Count;
+        dispatcher.Enqueue(Batch(2, () => { }));
+        dispatcher.WaitUntilIdle();
+
+        Assert.True(ages.Count > beforeSecond);
+        Assert.All(ages.Skip(beforeSecond), age => Assert.True(age < 250, $"age {age} ms still includes a drained batch"));
     }
 
     static SealedWorldFanoutBatch Batch(ulong sequence, Action send)

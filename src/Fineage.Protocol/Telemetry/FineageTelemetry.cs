@@ -130,6 +130,30 @@ public static class FineageTelemetry
         Meter.CreateHistogram<int>("fineage.fanout.events_per_batch", unit: "{event}",
             description: "Send actions executed per sealed batch");
 
+    public static readonly Histogram<int> FanoutQueueBytes =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.bytes", unit: "By",
+            description: "Encoded payload bytes in a sealed batch when it leaves the dispatcher queue");
+
+    public static readonly Histogram<int> FanoutRecipientsPerEvent =
+        Meter.CreateHistogram<int>("fineage.fanout.recipients_per_event", unit: "{recipient}",
+            description: "Mailbox enqueues performed by one fan-out send");
+
+    public static readonly Histogram<int> OutboundQueueFrames =
+        Meter.CreateHistogram<int>("fineage.outbound.queue.frames", unit: "{frame}",
+            description: "Frames waiting on a connection when another frame is queued (tag endpoint)");
+
+    public static readonly Histogram<int> OutboundQueueBytes =
+        Meter.CreateHistogram<int>("fineage.outbound.queue.bytes", unit: "By",
+            description: "Bytes waiting on a connection when another frame is queued (tag endpoint)");
+
+    public static readonly Histogram<double> OutboundQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.outbound.queue.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest frame included in one socket write (tag endpoint)");
+
+    public static readonly Counter<long> FanoutCoalesced =
+        Meter.CreateCounter<long>("fineage.fanout.coalesced",
+            description: "Replaceable fan-out writes superseded before send");
+
     public static readonly Counter<long> FanoutQueueOverflow =
         Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
             description: "Sealed fan-out batches rejected because the dispatcher is closed or shutting down");

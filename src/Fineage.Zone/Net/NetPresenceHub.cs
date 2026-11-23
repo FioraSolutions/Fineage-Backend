@@ -194,9 +194,11 @@ public sealed class NetPresenceHub : IAsyncDisposable
 
     void Dispatch(ConnectionHandle handle, ushort opcode, byte[] payload)
     {
-        if (!FanoutDeliveryScope.TryBuffer(_stripes, handle, opcode, payload))
+        long stamp = CommandFanoutTimingContext.MailboxStamp();
+        CommandFanoutTimingContext.NoteRecipient(payload.Length);
+        if (!FanoutDeliveryScope.TryBuffer(_stripes, handle, opcode, payload, stamp))
         {
-            _stripes.EnqueueTrySend(handle, opcode, payload);
+            _stripes.EnqueueTrySend(handle, opcode, payload, stamp);
             RecordCommandToMailboxes();
         }
     }
@@ -204,7 +206,11 @@ public sealed class NetPresenceHub : IAsyncDisposable
     static void RecordCommandToMailboxes()
     {
         if (CommandFanoutTimingContext.TryRecordMailbox(out double commitToMailboxMs))
+        {
             FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
+            FineageTelemetry.CommandTimelineMilliseconds.Record(commitToMailboxMs,
+                new KeyValuePair<string, object?>("phase", "fanout_enqueue_to_mailbox"));
+        }
     }
 
     public ValueTask DisposeAsync() => _ownsStripes ? _stripes.DisposeAsync() : ValueTask.CompletedTask;
