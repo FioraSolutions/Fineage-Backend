@@ -167,7 +167,7 @@ jobs:
         run: chmod +x scripts/ci-load-test-smoke.sh
 
       - name: Load test smoke (100 bots, workers 0 and 4)
-        run: ./scripts/ci-load-test-smoke.sh
+        run: timeout 25m ./scripts/ci-load-test-smoke.sh
 
       - name: Upload load-test reports
         if: always()

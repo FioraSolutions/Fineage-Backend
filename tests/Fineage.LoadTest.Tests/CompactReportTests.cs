@@ -51,7 +51,7 @@ public class CompactReportTests
             BotCount = 50,
             DurationSeconds = 60,
             RampUpSeconds = 10
-        }, [PrometheusParser.Parse(peak)], zoneLogPath: null, [], runtime: null);
+        }, [PrometheusParser.Parse(peak)], [peak], [], [], [], zoneLogPath: null, [], runtime: null);
 
         string md = CompactMarkdownRenderer.Render(report);
         Assert.Contains("## Verdict vs #867 gates", md);
