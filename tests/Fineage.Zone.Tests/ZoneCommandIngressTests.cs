@@ -26,6 +26,35 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
+    public async Task The_live_loop_applies_a_queued_command_before_the_next_tick()
+    {
+        var (kit, session, peer, _) = await SetupAsync();
+        using var cts = new CancellationTokenSource();
+        kit.World.StartSimulation(cts.Token);
+        try
+        {
+            await Task.Delay(30);
+            long tick = kit.World.SimulationTicks.Tick;
+
+            var started = System.Diagnostics.Stopwatch.StartNew();
+            var select = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+            var cancel = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
+            await Task.WhenAny(Task.WhenAll(select, cancel), Task.Delay(TimeSpan.FromMilliseconds(120)));
+
+            Assert.True(select.IsCompletedSuccessfully && cancel.IsCompletedSuccessfully,
+                $"admission waited {started.ElapsedMilliseconds} ms for the next tick");
+            Assert.Null(await select);
+            Assert.Null(await cancel);
+            Assert.Equal(0, session.SelectedTargetId);
+            Assert.Equal(tick, kit.World.SimulationTicks.Tick);
+        }
+        finally
+        {
+            await cts.CancelAsync();
+        }
+    }
+
+    [Fact]
     public async Task Commands_apply_in_submission_order_within_one_step()
     {
         var (kit, session, peer, _) = await SetupAsync();

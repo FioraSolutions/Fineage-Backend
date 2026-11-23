@@ -88,8 +88,15 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
+    /// Below this gap the next tick is close enough that phase 0 of the step itself admits the queue. A slice
+    /// any shorter trips the timebox's "deadline already passed" path.
+    /// </summary>
+    const int AdmissionGapMs = 5;
+
+    /// <summary>
     /// The live clock: starts at the current tick (the world may have been built a while ago), then wakes on each tick
-    /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart.
+    /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart. A queued
+    /// command wakes the same loop early and is admitted through <see cref="AdmitQueuedCommands"/> before that boundary.
     /// </summary>
     async Task SimulationLoopAsync(CancellationToken ct)
     {
@@ -99,8 +106,17 @@ public sealed partial class ZoneWorld
         {
             while (true)
             {
+                ct.ThrowIfCancellationRequested();
                 long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
-                await Task.Delay(TimeSpan.FromMilliseconds(wait), ct).ConfigureAwait(false);
+                if (wait >= AdmissionGapMs && _ingress.QueuedDepth > 0)
+                {
+                    AdmitQueuedCommands(wait);
+                    continue;
+                }
+
+                if (wait > 0 && !await WaitForTickOrCommandAsync(wait, ct).ConfigureAwait(false))
+                    continue;
+
                 long started = Stopwatch.GetTimestamp();
                 Volatile.Write(ref _stepStartedTimestamp, started);
                 try
