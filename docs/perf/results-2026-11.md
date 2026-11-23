@@ -199,6 +199,104 @@ Later iteration (`bots-50-town-diag-v4`): item-list prebuild off-thread; worst e
 
 Source artifacts: `local-logs/bots-50-town-diag-v3/` … `diag-v6/`; helper: `scripts/print-enter-phase-stats.py <report.json>`.
 
+## Post-audit load run (Nov 23) — Debug, after #867
+
+Local Debug soak of the fan-out path after #904 (timeline + honest queue age), #907 (compact `WorldFanoutBatch`), and #912 (one outbound mailbox per connection). #907 and #912 were not on `dev` when the processes started; both merged later the same morning (`84015b44`, `8daf4209`). The measured tree is local commit `b396efbf` (50-bot run: `ba94b966`, same tree with only `FanoutDispatch` whitespace differing). Diff vs the merged mailbox is where queue-depth samples are recorded (`NetConnection` vs inside `OutboundMailbox`); the wait, the pump, and the stripe enqueue are the same.
+
+**Not pushed.** The combination commit stays local. This section is the only change on the results branch.
+
+Machine: 4 cores, 16003 MiB, Ubuntu 24.04, .NET 10.0.15, `FINEAGE_BUILD_CONFIGURATION=Debug`. `DOTNET_GCDynamicAdaptationMode` and `DOTNET_TieredPGO` unset. Zone project sets `ServerGarbageCollection` (thread names are `.NET Server GC`); the load-test report's "Workstation" line only checks the env var and is wrong for this binary. World: 34054 NPCs, sequential regions, `aoi=grid:3000`, `outboundQ=512`. Postgres is the local cluster on 127.0.0.1:5432 (dockerd is down). No `FINEAGE_ZONE_MAPS` / `FINEAGE_ZONE_BOUNDS`.
+
+`bots-200-town.yaml` is not in the repo. The 200-bot run used the `bots-50-town` weights (move 0.22, attack 0.16, skill 0.22, say/sit/pickup 0.06, social 0.05, trade/party/teleport 0.03, pvp 0.04, relog 0), `botCount` 200, ramp 60 s, duration 90 s, class 25. `bots-1000-town` is the repo file: 1000 bots, ramp 90 s, duration 120 s, town, default weights (skill 0.10, relog 0.02) and default class 0.
+
+Percentiles below are linear interpolations inside the Prometheus bucket. A p99 that falls in the `le="0.5"` bucket is written `< 0.5`. The `1500` bucket is the top occupied tick bucket, not a measured maximum beyond it. `fineage_command_to_wire_ms` is not exported on this tree (the load-test parser still looks for it and gets 0). The server phases that replaced it are in the second table. The runner's "command→mailboxes" gate number is the client consistency oracle (`BroadcastLatency`), not `fineage_command_to_mailboxes_ms`.
+
+### Server histograms (end-of-run scrape)
+
+50-bot source is the peak-ingress scrape (`metrics-peak.txt`, 491 completed ticks, run finished PASS). 200 and 1000 are the scrape taken after the simulation step had already wedged (`metrics-stuck.txt`). The wedged tick itself is not in `fineage_tick_ms`: the histogram is recorded only when `StepSimulation` returns. One earlier tick in each run sits in the 1000–1500 ms bucket (`fineage_tick_overruns_total` = 1).
+
+| Scenario | In world | Tick p50 | Tick p99 | Tick max bucket | cmd→mailboxes p99 | Socket write p99 | Fanout queue age p99 | Outbound queue age p99 | Drops | RSS |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| bots-50-town | 50/50 | 15.7 ms | 65.4 ms | 1500 ms (1 sample) | 3.9 ms | < 0.5 ms | < 0.5 ms (max bucket 1 ms) | 4.3 ms | 0 | 601 MiB (HWM 641) |
+| bots-200-town | 200/200 | 16.1 ms | 49.2 ms | 1500 ms (1 sample) | 14.8 ms | < 0.5 ms | < 0.5 ms (35 samples ≥ ~200 ms, max bucket 5000) | 7.0 ms | 7 | 463 MiB at stall (HWM 601) |
+| bots-1000-town | 1000/1000 entered | 20.3 ms | 58.8 ms | 1500 ms (1 sample) | 9.8 ms | < 0.5 ms | < 0.5 ms (33 samples ≥ ~180 ms, max bucket 5000) | 20.9 ms | 0 | ~860 MiB at stall (counter max 863) |
+
+Counts behind those p99s: mailboxes 75 / 719 / 1781; socket writes 10954 / 256885 / 1831259; fanout-age samples 1232 / 6002 / 18848; outbound-age samples 1302 / 90404 / 431533. Fan-out drops and fan-out overflow stayed 0. Packet rejects (synthetic combat targets): 105 / 4191 / not re-counted for 1000. Client consistency oracle, which the gate prints as command→mailboxes: 50-bot p50 600.5 / p99 2608.5 ms; 200-bot p50 704.8 / p99 2870.3 ms; 1000-bot runner never wrote a report.
+
+### Command timeline (same scrapes)
+
+| Phase | 50 p99 | 200 p99 | 1000 p99 |
+| --- | ---: | ---: | ---: |
+| `submit_to_dequeue` | 624 ms (mean 363, n=700) | 2193 ms (mean 1615, n=13312) | 9943 ms (mean 7372, n=21128) |
+| `dequeue_to_apply` | 38.7 ms | 28.7 ms | 36.6 ms |
+| `apply_to_seal` | < 0.5 ms | < 0.5 ms | < 0.5 ms |
+| `seal_to_fanout_enqueue` | < 0.5 ms | < 0.5 ms | < 0.5 ms |
+| `fanout_enqueue_to_mailbox` | 3.9 ms | 14.8 ms | 9.8 ms |
+| `mailbox_to_socket_write` | 4.3 ms | 7.0 ms | 20.9 ms |
+
+`commands` stage p99 on the same scrapes: 40.2 / 38.3 / 39.0 ms (1000: n=6643). `movement.npc` p99 stayed ~4.9 ms at 50 and 200. `enter_try` p99: 32.5 ms (n=50) and 2.0 ms (n=200). Pre-audit worst `request:enter` log line was 494.5 ms; that log line was not re-measured here.
+
+Default command apply budget is 48 cost units per 200 ms tick (`FINEAGE_ZONE_COMMAND_APPLY_BUDGET`). That is the queue the first row is waiting in. Apply after dequeue is a few tens of milliseconds.
+
+### Before this audit (from the tables above, not re-measured)
+
+| | Before | This Debug run |
+| --- | --- | --- |
+| bots-50-town tick p50 / p99 | 25 / 500 ms, RSS 629 MiB, runner PASS | 15.7 / 65.4 ms, RSS 601 MiB, runner PASS |
+| command→fanout p99 | ~2833 ms (CI `bots-100-spread`), 2932 ms (#862 `bots-50-town`) | server `submit_to_dequeue` p99 624 ms at 50 bots; client oracle still 2608 ms. Not the same series as #862's command→fanout histogram |
+| `request:enter` worst log | 494.5 ms | `enter_try` histogram p99 32.5 ms (50) / 2.0 ms (200); no new worst-line capture |
+| bots-1000-town | not completed; ramp exceeded the VM window | 1000/1000 entered (~0.9/s, ~20 min), then the simulation step wedged ~2 min into the 120 s behavior window |
+| command→mailboxes, socket write, dispatcher age, outbound age, alloc/GC | not measured | table above |
+
+### Allocations, GC, CPU, hot methods
+
+`dotnet-counters collect --format csv` for `System.Runtime`, 12–15 s, plus `dotnet-trace collect --providers Microsoft-DotNETCore-SampleProfiler`. The in-process `dotnet-counters monitor` output is not the CSV the load-test parser expects, so the runner reports "no parseable samples"; the numbers here are the separate collect. 50-bot had no CSV (the monitor held the session). Samples are from steady state before the wedge: 200 at 06:58:39Z, 1000 at 07:26:45Z (all 1000 already in town).
+
+| | 200 steady (15 s) | 1000 steady (12 s) |
+| --- | ---: | ---: |
+| alloc rate | avg 36.5 MB/s, max 46.0 | avg 64.1 MB/s, max 195 |
+| GC pause (`pause.time` per 1 s) | avg 1.6 ms, max 7.7 ms | avg 1.9 ms, max 12.8 ms |
+| gen0 / gen2 collections per 1 s | 0.14 / 0.36 | 0.09 / 0.36 |
+| gen2 heap / LOH | 164 MB / 83 MB | 218 MB / 118 MB |
+| committed / working set | ~321 MB / max 461 MB | max 747 MB / max 863 MB |
+| CPU (`cpu.time` user + system) | 0.185 + 0.019 s/s | 0.295 + 0.059 s/s |
+| lock contentions | avg 4.1/s, max 13/s | avg 12.6/s, max 20/s |
+| thread-pool queue length rate | 0 | avg 0.09, one sample 330 |
+
+Per-thread CPU over 15–20 s (`/proc/<pid>/task/*/stat`, no cutoff). 200-bot steady top: character persist 2.3%, four thread-pool workers 1.3–2.1%, BGC 2.1% and 1.1%. 1000-bot steady top: thread-pool worker 5.5%, character persist 5.0%, thread-pool workers 4.4% and 4.0%, BGC 2.4%. Nothing was a single saturated core. Four cores, so the zone was under ~10% of the machine.
+
+Exclusive CPU sample (the rest of the profile is threads parked on the pool):
+
+| Rank | 200-bot steady | 1000-bot steady |
+| ---: | --- | --- |
+| 1 | `LowLevelLifoSemaphore.WaitForSignal` 55.3% | same, 55.7% |
+| 2 | `WaitHandle.WaitOneNoCheck` 17.2% | 17.8% |
+| 3 | `Monitor.Wait` 11.2% | 11.4% |
+| 4 | Missing symbol 5.8% | 6.2% |
+| 5 | `GC.RunFinalizers` 3.3% | `LowLevelLifoSemaphore.Wait` 0.64% |
+| 6–10 | `Thread.PollGC` 0.33%, `Monitor.Enter_Slowpath` 0.20%, `LowLevelLifoSemaphore.Wait` 0.15%, `WorkerThreadStart` 0.12%, `ZoneEntity.get_Kind` 0.10% | `Thread.PollGC` 0.58%, `Monitor.Enter_Slowpath` 0.36%, `WorkerThreadStart` 0.28%, `ZoneWorld.Players` 0.14%, `ZoneEntity.get_Kind` 0.11% |
+
+`ZoneWorld.Players` is also 0.09% exclusive at 200. The managed hot path during these windows is not the tick. The multi-second delays are the command queue and, once the mailbox fills, threads blocked in `Monitor.Wait` rather than burning CPU.
+
+### Why 200 and 1000 did not finish the soak
+
+Both runs got every bot into the world (200 in ~5 min, 1000 in ~20 min). Enter is serial: `LoadTestRunner` awaits `ConnectAndEnterAsync` before starting the next bot, and enter waits for the welcome burst plus a 400 ms quiet window. That is ~0.9 bots/s and is why the pre-audit 1000-bot row died during ramp. This time the enters completed.
+
+The behavior window then killed the zone. First watchdog line:
+
+- 200: `07:00:24Z`, tick `8977085970` already 30.6 s in `StepSimulation`, "no region bodies in flight". Seven log lines just before it: `outbound mailbox is full (frames=512/512 bytes=18143/65536)`, opcode 511, first at `06:59:44Z`.
+- 1000: `07:29:00Z`, tick `8977094550` already 30.7 s, same text. No mailbox-full line; the stripe path waits instead of dropping, and `fineage_outbound_dropped_total` was still 0.
+
+Mini-dump `clrstack -all` is the same cycle on both:
+
+- Simulation thread: `StepSimulation` → `TickSpawns` → `FanoutNewNpc` → known-list diff → `TrySendCritical` → `NetFanoutStripes.Enqueue` → `WriteAsync().GetResult()` (stripe channel full).
+- Fan-out dispatcher: `ExecuteBatch` → `FanoutDeliveryScope.Flush` → `EnqueueBatch` → the same `Enqueue`.
+- All four stripe workers: `ProcessStripeAsync` → `DeliverDrain` → `SubmitOrderedBatch` → `OutboundMailbox.AppendOrdered` → `Wait` (`Timeout.Infinite`, `OutboundMailbox.cs` line 219).
+
+`SubmitOrderedBatch` waits forever for mailbox room. Room only appears when that connection's pump calls `Take`. The 200-bot socket engine thread was idle in `WaitForSocketEvents` at the dump, so the pumps were not blocked inside a socket write at that instant. The pump state was not read back (heap `dumpobj` segfaulted in `dotnet-dump`). What the stacks show is enough to explain the watchdog: the step cannot return while `FanoutNewNpc` is stuck in a synchronous stripe enqueue, and the stripe consumers cannot drain while they sit in an infinite mailbox wait.
+
+The 200-bot runner still printed PASS (200/200 in world, 0 disconnects, 0 stuck, 19900 consistency checks, 0 issues) because the wedge landed as the 90 s behavior window ended. The 1000-bot runner never flushed a report; after the zone was stopped it kept a thread at ~137% CPU and ~2.5 GiB RSS, and it was killed so the soak could be closed. Server numbers for 1000 are the Prometheus scrape and the counters/trace taken before the watchdog line.
+
 ## Reproduce smoke
 
 ```bash
