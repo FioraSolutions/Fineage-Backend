@@ -15,9 +15,9 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 88 |
+| ✅ done | 89 |
 | 🟡 partial | 7 |
-| ❌ missing | 10 |
+| ❌ missing | 9 |
 | n/a | 3 |
 | **total** | **108** |
 
@@ -100,7 +100,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 65 | Clan wars | ✅ | — | `ClanWar` → `ZoneWorldPledge.Wars` |
 | 66 | Alliance | ✅ | — | `Alliance` → `ZoneWorldAlly` |
 | 67 | Party matching rooms | ❌ | M | `RequestAskJoinPartyRoom.java` and `EX_PARTY_ROOM_MEMBER` → no room manager. Chat types exist and then have nowhere to go — #928 |
-| 68 | User commands | ❌ | S | `handlers/chat/commands/user/*.java` (Unstuck, Loc, Time, Mount, Dismount, OlympiadStat, SiegeStatus, PartyInfo, ClanPenalty, ClanWarsList, Channel*) → no `BypassUserCmd` dispatcher — #920 |
+| 68 | User commands | ✅ | — | `handlers/chat/commands/user/*.java` → `UserCommandRegistry` dispatches ids onto teleport, mount, party, clan, channel, olympiad, and siege. Unstuck shares `BeginTownTeleport`. Unknown id is logged — #920 |
 | 69 | Macros | ❌ | S | `RequestMakeMacro.java`, `SendMacroList.java` → no macro store — #927 |
 | 70 | Community board | ❌ | L | `communitybbs/` and `RequestShowBoard.java` → no board — #929 |
 | 71 | PC cafe points and coupons | ❌ | S | `PcCafePointsManager.java`, `RequestPCCafeCouponUse.java` → no points — #933 |
@@ -172,16 +172,15 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 
 1. Geodata region files so LOS and paths leave stub mode (row 6) — #918. Loader is #793.
 2. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
-3. User commands, especially Unstuck (row 68) — #920.
-4. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
-5. Shop wear preview (row 48) — #924.
-6. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-7. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-8. Macros (row 69) — #927.
-9. Party matching rooms (row 67) — #928.
-10. Community board (row 70) — #929.
-11. Petitions (row 63) — #930.
-12. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+3. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
+4. Shop wear preview (row 48) — #924.
+5. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+6. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+7. Macros (row 69) — #927.
+8. Party matching rooms (row 67) — #928.
+9. Community board (row 70) — #929.
+10. Petitions (row 63) — #930.
+11. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

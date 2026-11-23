@@ -10,11 +10,11 @@ The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scrip
 
 | Direction | Packets | Server yes | partial | no | n/a | Client yes | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| C2S | 158 | 103 | 34 | 18 | 3 | 91 | 28 | 36 | 3 |
+| C2S | 158 | 104 | 34 | 17 | 3 | 91 | 28 | 36 | 3 |
 | C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
 | S2C | 270 | 178 | 54 | 31 | 7 | 210 | 6 | 47 | 7 |
 
-**In-scope gaps:** server not fully implemented (partial+no) **151**, of which server absent (**no**) **58**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
+**In-scope gaps:** server not fully implemented (partial+no) **150**, of which server absent (**no**) **57**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
 
 Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `ServerPackets`.
 
@@ -149,7 +149,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xa5 | RequestConfirmSiegeWaitingList | yes | contract | SiegeDefenderAnswerRequest |  |
 | 0xa7 | MultiSellChoose | yes | yes | RequestMultiSellChoose |  |
 | 0xa8 | RequestNetPing | n/a | n/a |  | Fineage Net session, not retail NetPing |
-| 0xaa | BypassUserCmd | no | no |  | no user-command dispatcher (unstuck/loc/time/mount/…) |
+| 0xaa | BypassUserCmd | yes | no | BypassUserCmd | `UserCommandRegistry`. Unity client does not send `BypassUserCmd` / retail 0xaa yet |
 | 0xab | SnoopQuit | n/a | n/a |  | GM snoop is not a Fineage target |
 | 0xac | RequestRecipeBookOpen | yes | yes | RecipeBookOpen |  |
 | 0xad | RequestRecipeBookDestroy | no | no |  | no forget-recipe opcode |

@@ -408,9 +408,14 @@ namespace Fineage.Net.Contract
         /// <summary>Zone → client: retail <c>RestartResponse</c> (wire 0x5f). Followed by <see cref="CharacterRoster"/> when ok.</summary>
         public const ushort RestartResponse = 0x03E3;
         /// <summary>
+        /// Client → zone: Mobius <c>RequestBypassUserCmd</c> (retail wire <c>0xaa</c>).
+        /// Body is one int, the Interlude user-command id.
+        /// 0x03E2 and 0x03E3 are the lobby restart pair.
+        /// </summary>
+        public const ushort BypassUserCmd = 0x03E4;
+        /// <summary>
         /// Client → zone: Mobius <c>RequestCrystallizeItem</c> (retail wire <c>0x72</c>).
-        /// Body is object id and count. 0x03E2 and 0x03E3 are the lobby restart pair.
-        /// 0x03E4 is the parallel user-command opcode.
+        /// Body is object id and count. 0x03E4 is the user-command opcode.
         /// </summary>
         public const ushort RequestCrystallizeItem = 0x03E5;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
