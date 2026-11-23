@@ -23,6 +23,7 @@ public sealed class NetStripeBatchDeliveryTests
         var serverSide = await accept;
         listener.Stop();
         var conn = new NetConnection(serverSide, inboxCapacity: 64, endpoint: "stripe-batch", outboundCapacity);
+        conn.BindPresence(1, 1);
         var frames = new List<PacketEnvelope>();
         _ = Task.Run(async () =>
         {
@@ -110,6 +111,7 @@ public sealed class NetStripeBatchDeliveryTests
         await using var stripes = new NetFanoutStripes(stripeCount: 4, queueCapacity: 64);
         await using (conn)
         {
+            conn.BindPresence(1, 1);
             var handle = new ConnectionHandle(1, 1, conn);
             stripes.EnqueueTrySend(handle, NetOpcode.AttackState, SampleAttackState(42));
             await WaitForFrameCountAsync(frames, 1, cts.Token);
@@ -131,6 +133,7 @@ public sealed class NetStripeBatchDeliveryTests
         await using var stripes = new NetFanoutStripes(stripeCount: 4, queueCapacity: 64);
         await using (conn)
         {
+            conn.BindPresence(2, 1);
             var handle = new ConnectionHandle(2, 1, conn);
             stripes.EnqueueTrySend(handle, NetOpcode.MagicSkillUse, SampleMagicSkillUse(1234));
             await WaitForFrameCountAsync(frames, 1, cts.Token);
@@ -152,6 +155,7 @@ public sealed class NetStripeBatchDeliveryTests
         await using var stripes = new NetFanoutStripes(stripeCount: 1, queueCapacity: 64);
         await using (conn)
         {
+            conn.BindPresence(3, 1);
             var handle = new ConnectionHandle(3, 1, conn);
             stripes.EnqueueTrySend(handle, NetOpcode.AttackState, SampleAttackState(7));
             stripes.EnqueueCritical(handle, NetOpcode.EntitySpawn, new byte[] { 1, 2, 3, 4 });
