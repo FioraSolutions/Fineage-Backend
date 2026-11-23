@@ -72,8 +72,7 @@ public static class PrometheusParser
             StepFanoutDrainP99Ms = ParseSingletonHistogram(text, "fineage_tick_step_fanout_drain_ms")?.P99 ?? 0,
             CommandToMailboxesP99Ms = ParseSingletonHistogram(text, "fineage_command_to_mailboxes_ms")?.P99
                 ?? ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
-            CommandToWireP99Ms = ParseSingletonHistogram(text, "fineage_command_to_mailboxes_ms")?.P99
-                ?? ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
+            CommandToWireP99Ms = ParseSingletonHistogram(text, "fineage_command_to_wire_ms")?.P99 ?? 0,
             TickOverruns = ParseLong(text, "fineage_tick_overruns_total"),
             TicksSkipped = ParseLong(text, "fineage_tick_skipped_total"),
             CommandIngressQueued = ParseLong(text, "fineage_command_ingress_queued"),
