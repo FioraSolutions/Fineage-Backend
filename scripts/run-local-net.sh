@@ -222,6 +222,16 @@ fi
 
 export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
+# Documented boot loads the manifest region pack so LOS and pathfinding are on.
+# Load-test scripts set FINEAGE_GEODATA_REQUIRED=0 to keep the stub clamp.
+case "${FINEAGE_GEODATA_REQUIRED:-1}" in
+  0|false|FALSE|no|NO|off|OFF) export FINEAGE_GEODATA_REQUIRED=0 ;;
+  *)
+    export FINEAGE_GEODATA_REQUIRED=1
+    export FINEAGE_GEODATA_DIR="${FINEAGE_GEODATA_DIR:-$ROOT/data/geodata}"
+    "$ROOT/scripts/fetch-geodata.sh"
+    ;;
+esac
 # Loopback /status so Login's /api/status can report the zone as up.
 export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1
