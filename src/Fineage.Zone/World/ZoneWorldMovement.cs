@@ -38,9 +38,10 @@ public sealed partial class ZoneWorld
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
             (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
-            if (blocked && _geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
+            if (blocked && TryNpcPathCacheOnly(entity.X, entity.Y, move.DestX, move.DestY, out var path) && path.Count > 0)
             {
-                // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
+                // A path computed for this cell pair already. Walk it now; a miss waits for the
+                // shared per-tick A* budget instead of searching inside this step.
                 ZoneHotPathLogs.GeoPath(
                     entity.ObjectId, entity.X, entity.Y, entity.Z, move.DestX, move.DestY, path.Count);
                 (destX, destY, destZ) = path[0];
@@ -48,9 +49,12 @@ public sealed partial class ZoneWorld
                     entity.MovePath.Enqueue(path[i]);
             }
             else if (blocked)
+            {
+                RequestNpcGeoPath(entity, move.DestX, move.DestY, move.DestZ);
                 ZoneHotPathLogs.GeoMoveBlocked(
                     entity.ObjectId, entity.X, entity.Y, entity.Z,
                     move.DestX, move.DestY, move.DestZ, destX, destY, destZ);
+            }
         }
         else
         {

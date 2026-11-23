@@ -54,14 +54,15 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            if (!_byId.TryGetValue(objectId, out var npc) || npc.Kind != ZoneEntityKind.Npc || !npc.PathfindPending)
+            if (!_byId.TryGetValue(objectId, out var npc) || !npc.PathfindPending)
             {
                 npc?.PathfindPending = false;
                 DequeueNpcPathfind(objectId);
                 continue;
             }
 
-            if (!NpcRegionAwake(npc))
+            // Players share the budget. Their blocked approach used to search on the auto-attack tick.
+            if (npc.Kind == ZoneEntityKind.Npc && !NpcRegionAwake(npc))
             {
                 npc.PathfindPending = false;
                 DequeueNpcPathfind(objectId);
@@ -100,7 +101,37 @@ public sealed partial class ZoneWorld
         else
             destZ = SanitizeDestZ(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ);
 
-        CommitNpcMoveStart(npc, destX, destY, destZ, now);
+        if (npc.Kind == ZoneEntityKind.Player && npc.Session != null)
+            ApplyResolvedPlayerPath(npc, destX, destY, destZ);
+        else
+            CommitNpcMoveStart(npc, destX, destY, destZ, now);
+    }
+
+    /// <summary>The budgeted search finished. Replace the MoveCheck clip with the first waypoint.</summary>
+    void ApplyResolvedPlayerPath(ZoneEntity player, int destX, int destY, int destZ)
+    {
+        player.MoveDestX = destX;
+        player.MoveDestY = destY;
+        player.MoveDestZ = destZ;
+        player.MoveCarryX = player.MoveCarryY = 0;
+        player.MoveLastTickMs = NowUnixMs();
+        SetMoveActive(player, player.X != destX || player.Y != destY);
+        if (player.Session != null)
+            SyncSession(player, player.Session);
+        if (player.Intent.ApproachTargetId > 0)
+        {
+            float speed = MoveSpeedOf(player);
+            player.Intent.ApproachArriveUnixMs = NowUnixMs() + RemainingPathTravelMs(player, speed);
+        }
+        if (NetBridge is { } bridge)
+        {
+            bridge.FanoutMoveState(
+                [player.ObjectId],
+                player.ObjectId,
+                player.X, player.Y, player.Z,
+                destX, destY, destZ,
+                player.Running);
+        }
     }
 
     List<(int X, int Y, int Z)>? FindNpcPathCached(int ox, int oy, int oz, int tx, int ty, int tz)
