@@ -6,14 +6,14 @@ static class NetDisconnectDiagnostics
 {
     static long _lastWarnMs;
 
-    public static void Log(string loop, ulong connectionId, string endpoint, Exception ex, int outboundBatches)
+    public static void Log(string loop, ulong connectionId, string endpoint, Exception ex, int outboundFrames)
     {
         if (!ShouldWarn())
             return;
         string socket = ex is SocketException se ? $" socketError={se.SocketErrorCode}" : "";
         Console.Error.WriteLine(
             $"{DateTimeOffset.UtcNow:O} warn: net disconnect loop={loop} connectionId={connectionId} "
-            + $"endpoint={endpoint} outboundBatches={outboundBatches}"
+            + $"endpoint={endpoint} outboundFrames={outboundFrames}"
             + $"{socket} exception={ex.GetType().Name}: {ex}");
     }
 

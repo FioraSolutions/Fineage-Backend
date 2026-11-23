@@ -116,7 +116,7 @@ public sealed class NetConnection : IAsyncDisposable
         }
         catch (Exception ex) when (ex is IOException or SocketException)
         {
-            NetDisconnectDiagnostics.Log("read", ConnectionId, _endpoint, ex, _batches.Reader.Count);
+            NetDisconnectDiagnostics.Log("read", ConnectionId, _endpoint, ex, _mailbox.QueuedFrames);
         }
         finally
         {
@@ -304,7 +304,7 @@ public sealed class NetConnection : IAsyncDisposable
         catch (Exception ex) when (ex is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
         {
             if (ex is IOException or SocketException)
-                NetDisconnectDiagnostics.Log("pump", ConnectionId, _endpoint, ex, _batches.Reader.Count);
+                NetDisconnectDiagnostics.Log("pump", ConnectionId, _endpoint, ex, _mailbox.QueuedFrames);
         }
         finally
         {

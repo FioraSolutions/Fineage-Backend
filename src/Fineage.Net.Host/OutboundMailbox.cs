@@ -103,6 +103,16 @@ sealed class OutboundMailbox
         }
     }
 
+    /// <summary>Ordered frames plus open replaceable frames. The disconnect log reads this from the read loop and the pump.</summary>
+    public int QueuedFrames
+    {
+        get
+        {
+            lock (_gate)
+                return _ordered.Count + _open.Count;
+        }
+    }
+
     public void Close()
     {
         lock (_gate)
