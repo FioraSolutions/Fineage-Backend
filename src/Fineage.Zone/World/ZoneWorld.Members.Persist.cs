@@ -116,16 +116,18 @@ public sealed partial class ZoneWorld
         // here, so the overload level is recomputed exactly when the load changes (pickup, drop, shop, trade,
         // warehouse, enchant, equip/unequip, quest reward, sweep, shots).
         RefreshWeightPenaltyAfterInventoryChange(session);
-        lock (_economyLock)
+        bool commitNow;
+        using (_economyLock.Enter())
         {
             _dirtyInventories[session.ObjectId] = (session, inventory);
-            if (InventoryPersistDeferred)
-                return;
-
-            // Economic item rows stay on this caller, in the same transaction as the ledger.
-            // InventoryUpdate is sent only after that commit returns.
-            TryCommitDirtyEconomy(discardWithoutPublish: null);
+            commitNow = !InventoryPersistDeferred;
         }
+
+        // Economic item rows stay on this caller, in the same transaction as the ledger.
+        // InventoryUpdate is sent only after that commit returns. The write itself is outside the lock:
+        // logout commits must not hold it across SQL while the simulation step's flush waits for it.
+        if (commitNow)
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
     }
 
     /// <summary>One InventoryUpdate for every journal row, after the bag write has succeeded.</summary>
@@ -145,15 +147,7 @@ public sealed partial class ZoneWorld
     /// caller. False leaves those rows dirty and does not publish. InventoryUpdate goes out only after the commit
     /// returns, and only for a bag that is still in the world.
     /// </summary>
-    bool FlushDirtyInventories()
-    {
-        lock (_economyLock)
-        {
-            if (!HasDirtyEconomy())
-                return true;
-            return TryCommitDirtyEconomy(discardWithoutPublish: null);
-        }
-    }
+    bool FlushDirtyInventories() => TryCommitDirtyEconomy(discardWithoutPublish: null);
 
     bool HasDirtyEconomy() =>
         _ledger.PendingFlushCount > 0
@@ -165,16 +159,34 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Commits every dirty economic container with the pending ledger entries. <paramref name="discardWithoutPublish"/>
     /// is a character who is leaving: the bag is saved and the journal is dropped, with no InventoryUpdate.
+    /// The dirty maps are stolen under <see cref="_economyLock"/> and the SQL runs after the lock is released, so a
+    /// logout commit cannot pin the simulation step's flush behind that write.
     /// </summary>
     bool TryCommitDirtyEconomy(int? discardWithoutPublish)
     {
-        lock (_economyLock)
-            return CommitDirtyEconomy(discardWithoutPublish);
+        StolenEconomy stolen;
+        using (_economyLock.Enter())
+        {
+            if (!HasDirtyEconomy())
+                return true;
+            stolen = StealDirtyEconomy();
+        }
+
+        if (_affinity.OnStep)
+            NotePhase("economy-commit");
+
+        if (!WriteStolenEconomy(stolen))
+        {
+            RestoreDirtyEconomy(stolen);
+            return false;
+        }
+
+        PublishStolenEconomy(stolen, discardWithoutPublish);
+        return true;
     }
 
-    bool CommitDirtyEconomy(int? discardWithoutPublish)
+    bool WriteStolenEconomy(StolenEconomy stolen)
     {
-        var bags = CollectDirtyBags();
         long started = System.Diagnostics.Stopwatch.GetTimestamp();
         try
         {
@@ -182,15 +194,16 @@ public sealed partial class ZoneWorld
             {
                 if (_accounts == null)
                     return;
-                _accounts.CommitEconomy(entries, bags);
+                _accounts.CommitEconomy(entries, stolen.Bags);
             });
+            return true;
         }
         catch (Exception ex)
         {
             int pending = _ledger.PendingFlushCount;
             ZoneLog.Warn($"auditable economy commit failed pending={pending}: {ex.GetType().Name}: {ex.Message}");
             FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
-            foreach (var bag in bags)
+            foreach (var bag in stolen.Bags)
             {
                 int items = bag.Inventory?.Count ?? bag.Warehouse?.Count ?? bag.Freight?.Count ?? 0;
                 ZoneLog.Warn(
@@ -205,59 +218,86 @@ public sealed partial class ZoneWorld
                 "IAccountStore.CommitEconomy",
                 System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
+    }
 
-        var published = new List<int>();
-        foreach (var (objectId, pair) in _dirtyInventories)
+    void PublishStolenEconomy(StolenEconomy stolen, int? discardWithoutPublish)
+    {
+        foreach (var (objectId, session, inventory) in stolen.Inventories)
         {
             try
             {
                 if (discardWithoutPublish == objectId)
-                    pair.Inventory.DiscardChanges();
+                    inventory.DiscardChanges();
                 else
-                    PublishCommittedInventory(pair.Session, pair.Inventory);
-                published.Add(objectId);
+                    PublishCommittedInventory(session, inventory);
             }
             catch (Exception ex)
             {
                 ZoneLog.Warn(
-                    $"inventory publish failed char={objectId} account={pair.Session.Account} items={pair.Inventory.Items.Count}: {ex.GetType().Name}: {ex.Message}");
+                    $"inventory publish failed char={objectId} account={session.Account} items={inventory.Items.Count}: {ex.GetType().Name}: {ex.Message}");
             }
         }
+    }
 
-        foreach (int objectId in published)
-            _dirtyInventories.Remove(objectId);
+    StolenEconomy StealDirtyEconomy()
+    {
+        var stolen = new StolenEconomy();
+        foreach (var (objectId, pair) in _dirtyInventories)
+            stolen.Inventories.Add((objectId, pair.Session, pair.Inventory));
+        foreach (var (objectId, player) in _dirtyWarehouses)
+            stolen.Warehouses.Add((objectId, player));
+        foreach (var (objectId, player) in _dirtyFreight)
+            stolen.Freight.Add((objectId, player));
+        stolen.OfflineFreight.AddRange(_dirtyOfflineFreight);
+        _dirtyInventories.Clear();
         _dirtyWarehouses.Clear();
         _dirtyFreight.Clear();
         _dirtyOfflineFreight.Clear();
-        return true;
+        stolen.Bags = BagsOf(stolen);
+        return stolen;
     }
 
-    List<EconomyBagWrite> CollectDirtyBags()
+    void RestoreDirtyEconomy(StolenEconomy stolen)
+    {
+        using (_economyLock.Enter())
+        {
+            foreach (var (objectId, session, inventory) in stolen.Inventories)
+                _dirtyInventories.TryAdd(objectId, (session, inventory));
+            foreach (var (objectId, player) in stolen.Warehouses)
+                _dirtyWarehouses.TryAdd(objectId, player);
+            foreach (var (objectId, player) in stolen.Freight)
+                _dirtyFreight.TryAdd(objectId, player);
+            if (_dirtyOfflineFreight.Count == 0 && stolen.OfflineFreight.Count > 0)
+                _dirtyOfflineFreight.AddRange(stolen.OfflineFreight);
+        }
+    }
+
+    static List<EconomyBagWrite> BagsOf(StolenEconomy stolen)
     {
         var byId = new Dictionary<int, EconomyBagWrite>();
-        foreach (var (objectId, pair) in _dirtyInventories)
+        foreach (var (objectId, session, inventory) in stolen.Inventories)
         {
-            byId[objectId] = new EconomyBagWrite(pair.Session.Account, objectId)
+            byId[objectId] = new EconomyBagWrite(session.Account, objectId)
             {
-                Inventory = CharacterInventory.Rows(pair.Inventory),
+                Inventory = CharacterInventory.Rows(inventory),
             };
         }
 
-        foreach (var (objectId, player) in _dirtyWarehouses)
+        foreach (var (objectId, player) in stolen.Warehouses)
         {
             if (player.Session == null || player.Warehouse == null)
                 continue;
             BagFor(byId, player.Session.Account, objectId).Warehouse = WarehouseRows(player.Warehouse);
         }
 
-        foreach (var (objectId, player) in _dirtyFreight)
+        foreach (var (objectId, player) in stolen.Freight)
         {
             if (player.Session == null || player.Freight == null)
                 continue;
             BagFor(byId, player.Session.Account, objectId).Freight = WarehouseRows(player.Freight);
         }
 
-        foreach (var extra in _dirtyOfflineFreight)
+        foreach (var extra in stolen.OfflineFreight)
         {
             if (extra.Freight == null)
                 continue;
@@ -265,6 +305,15 @@ public sealed partial class ZoneWorld
         }
 
         return byId.Values.ToList();
+    }
+
+    sealed class StolenEconomy
+    {
+        public List<(int ObjectId, ZoneSession Session, PlayerInventory Inventory)> Inventories { get; } = [];
+        public List<(int ObjectId, ZoneEntity Player)> Warehouses { get; } = [];
+        public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
+        public List<EconomyBagWrite> OfflineFreight { get; } = [];
+        public List<EconomyBagWrite> Bags { get; set; } = [];
     }
 
     static EconomyBagWrite BagFor(Dictionary<int, EconomyBagWrite> byId, string account, int objectId)

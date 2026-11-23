@@ -61,7 +61,8 @@ internal sealed class WorldBench
         Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
         Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
-        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null)
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
+        IAccountStore? accounts = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
@@ -74,7 +75,7 @@ internal sealed class WorldBench
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
             Game,
-            accounts: Store,
+            accounts: accounts ?? Store,
             clock: Now,
             geo: geo,
             deathRules: deathRules,

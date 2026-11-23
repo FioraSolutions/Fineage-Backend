@@ -39,7 +39,16 @@ internal sealed class WorldAffinity
         // The scheduler thread holds the turn while a body runs on a worker: waiting for it there never ends.
         if (RegionTickScheduler.CurrentBody is { } body)
             throw new InvalidOperationException($"region {body}'s body cannot take a world turn");
-        Monitor.Enter(_turns);
+        StepWaitRegistry.Push("world-affinity turn");
+        try
+        {
+            Monitor.Enter(_turns);
+        }
+        finally
+        {
+            StepWaitRegistry.Pop("world-affinity turn");
+        }
+
         if (_depth++ == 0)
             Volatile.Write(ref _owner, Environment.CurrentManagedThreadId);
         return new Turn(this);

@@ -117,13 +117,15 @@ public sealed partial class ZoneWorld
     {
         if (player.Warehouse == null)
             return;
-        lock (_economyLock)
+        bool commitNow;
+        using (_economyLock.Enter())
         {
             _dirtyWarehouses[session.ObjectId] = player;
-            if (InventoryPersistDeferred)
-                return;
-            TryCommitDirtyEconomy(discardWithoutPublish: null);
+            commitNow = !InventoryPersistDeferred;
         }
+
+        if (commitNow)
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
     }
 
     static int ReadTeleportOffset()

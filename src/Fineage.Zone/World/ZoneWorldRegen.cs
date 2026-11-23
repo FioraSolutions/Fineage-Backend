@@ -12,6 +12,15 @@ public sealed partial class ZoneWorld
 {
     Task? _simulation;
     long _stepStartedTimestamp;
+    string _stepPhase = "idle";
+
+    internal string StepPhase => Volatile.Read(ref _stepPhase);
+
+    internal string EconomyLockDescription => _economyLock.Describe();
+
+    internal string FanoutQueueDescription => _fanoutDispatcher.DescribeQueue();
+
+    void NotePhase(string phase) => Volatile.Write(ref _stepPhase, phase);
 
     public void StartSimulation(CancellationToken shutdown)
     {
@@ -43,7 +52,8 @@ public sealed partial class ZoneWorld
         string detail = bodies.Count == 0
             ? "no region bodies in flight: a world stage, a collect step or the stage barrier is stuck"
             : "region bodies still running: " + string.Join("; ", bodies);
-        return $"simulation step tick={_simulationTicks.Tick} has run {elapsed.TotalSeconds:F1}s without finishing: {detail}";
+        string work = _simulationTicks.CurrentWork ?? "none";
+        return $"simulation step tick={_simulationTicks.Tick} has run {elapsed.TotalSeconds:F1}s without finishing: {detail}; phase={StepPhase} work={work}";
     }
 
     /// <summary>
@@ -79,6 +89,8 @@ public sealed partial class ZoneWorld
                     if (started != 0)
                         FineageTelemetry.NoteWatchdogStall(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
                     ZoneHotPathLogs.SimulationWatchdog(report);
+                    if (newStall)
+                        ZoneHotPathLogs.SimulationWatchdog(StepHangDiagnostics.Capture(this));
                 }
             }
         }
@@ -100,8 +112,10 @@ public sealed partial class ZoneWorld
             while (true)
             {
                 long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
+                NotePhase("waiting-for-tick");
                 await Task.Delay(TimeSpan.FromMilliseconds(wait), ct).ConfigureAwait(false);
                 long started = Stopwatch.GetTimestamp();
+                NotePhase("step");
                 Volatile.Write(ref _stepStartedTimestamp, started);
                 try
                 {

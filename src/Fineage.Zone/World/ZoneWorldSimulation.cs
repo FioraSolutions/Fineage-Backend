@@ -93,7 +93,9 @@ public sealed partial class ZoneWorld
     /// </summary>
     void RunStep(Action<long> body)
     {
+        NotePhase("acquiring-turn");
         using var turn = _affinity.Step();
+        NotePhase("step-body");
         bool outermost = _fanout.Recording == null;
         try
         {
@@ -107,6 +109,7 @@ public sealed partial class ZoneWorld
                 }
                 finally
                 {
+                    NotePhase("fanout-seal");
                     _fanout.Seal();
                 }
 
@@ -136,14 +139,8 @@ public sealed partial class ZoneWorld
     (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies(List<CommandSubmitMark>? submits = null)
     {
         long flushStart = Stopwatch.GetTimestamp();
-        bool committed;
-        HashSet<int>? uncommitted = null;
-        lock (_economyLock)
-        {
-            committed = FlushDirtyInventories();
-            if (!committed)
-                uncommitted = UncommittedEconomicCharacters();
-        }
+        bool committed = FlushDirtyInventories();
+        HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
         if (uncommitted != null)
             _ingress.FailUncommitted(uncommitted, EconomyCommitFailed);
@@ -171,7 +168,7 @@ public sealed partial class ZoneWorld
 
     HashSet<int> UncommittedEconomicCharacters()
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             var ids = new HashSet<int>(
                 _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineFreight.Count);

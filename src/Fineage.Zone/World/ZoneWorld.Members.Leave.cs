@@ -11,15 +11,16 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryFlushPlayerPersistBarrier(int objectId, ZoneSession session, ZoneEntity live)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             if (live.Inventory != null)
                 _dirtyInventories[objectId] = (session, live.Inventory);
-            if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
-            {
-                ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
-                return false;
-            }
+        }
+
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
+        {
+            ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
+            return false;
         }
 
         live.Inventory?.DiscardChanges();
@@ -28,7 +29,7 @@ public sealed partial class ZoneWorld
 
     void ClearDeferredPersistRows(int objectId)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             _dirtyInventories.Remove(objectId);
             _dirtyWarehouses.Remove(objectId);
@@ -41,12 +42,10 @@ public sealed partial class ZoneWorld
     bool PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
-        lock (_economyLock)
-        {
+        using (_economyLock.Enter())
             _dirtyInventories[session.ObjectId] = (session, inventory);
-            if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
-                return false;
-        }
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
+            return false;
         inventory.DiscardChanges();
         return true;
     }
@@ -114,7 +113,7 @@ public sealed partial class ZoneWorld
 
     internal bool HasDeferredInventoryForTests(int objectId)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
             return _dirtyInventories.ContainsKey(objectId);
     }
 
@@ -134,7 +133,7 @@ public sealed partial class ZoneWorld
 
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
             _dirtyInventories[session.ObjectId] = (session, inventory);
     }
 }

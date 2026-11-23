@@ -245,7 +245,7 @@ public sealed partial class ZoneWorld
     {
         var session = snapshot.Session;
         var entity = snapshot.Entity;
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             if (entity.Inventory != null)
                 _dirtyInventories[session.ObjectId] = (session, entity.Inventory);
@@ -253,12 +253,9 @@ public sealed partial class ZoneWorld
                 _dirtyWarehouses[session.ObjectId] = entity;
             if (entity.Freight != null)
                 _dirtyFreight[session.ObjectId] = entity;
-            if (_dirtyInventories.ContainsKey(session.ObjectId)
-                || _dirtyWarehouses.ContainsKey(session.ObjectId)
-                || _dirtyFreight.ContainsKey(session.ObjectId)
-                || _dirtyOfflineFreight.Count > 0)
-                TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId);
         }
+
+        TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
         SaveEffects(session, entity);

@@ -140,7 +140,7 @@ public sealed partial class ZoneWorld
     int _deferInventoryPersistDepth;
 
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
-    readonly object _economyLock = new();
+    readonly TrackedLock _economyLock = new("economy");
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
