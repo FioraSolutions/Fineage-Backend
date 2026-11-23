@@ -11,24 +11,6 @@ public sealed class FanoutDispatcherBackpressureTests
     [Fact]
     public void Enqueue_never_blocks_or_delivers_inline_past_the_hard_backlog_and_keeps_order()
     {
-        long emergency = 0;
-        long soft = 0;
-        using var listener = new MeterListener();
-        listener.InstrumentPublished = (instrument, meterListener) =>
-        {
-            if (instrument.Meter.Name == FineageTelemetry.MeterName &&
-                instrument.Name is "fineage.fanout.backlog.emergency" or "fineage.fanout.backlog.soft_exceeded")
-                meterListener.EnableMeasurementEvents(instrument);
-        };
-        listener.SetMeasurementEventCallback<long>((instrument, value, _, _) =>
-        {
-            if (instrument.Name == "fineage.fanout.backlog.emergency")
-                Interlocked.Add(ref emergency, value);
-            else
-                Interlocked.Add(ref soft, value);
-        });
-        listener.Start();
-
         var holdWorker = new ManualResetEventSlim(false);
         using var dispatcher = new FanoutDispatcher(softBacklogBatches: 2, hardBacklogBatches: 4)
         {
@@ -61,8 +43,9 @@ public sealed class FanoutDispatcherBackpressureTests
 
         Assert.Equal(0, inlineDeliveries);
         Assert.Equal(Enumerable.Range(1, 10).Select(n => (ulong)n).ToArray(), delivered.ToArray());
-        Assert.Equal(6, Interlocked.Read(ref emergency));
-        Assert.Equal(2, Interlocked.Read(ref soft));
+        // Instance counters, not the process-wide meter: other tests publish to the same instruments in parallel.
+        Assert.Equal(6, dispatcher.EmergencyEnqueues);
+        Assert.Equal(2, dispatcher.SoftExceededEnqueues);
         Assert.NotEqual(0, callerThread);
     }
 

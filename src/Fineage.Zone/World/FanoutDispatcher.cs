@@ -133,11 +133,21 @@ internal sealed class FanoutDispatcher : IDisposable
         PublishQueue();
     }
 
+    long _emergencyEnqueues;
+    long _softExceededEnqueues;
+
+    /// <summary>Enqueues this dispatcher saw above the hard backlog limit (the emergency counter; 0 in normal runs).</summary>
+    public long EmergencyEnqueues => Interlocked.Read(ref _emergencyEnqueues);
+
+    /// <summary>Enqueues this dispatcher saw above the soft backlog limit and at or below the hard one.</summary>
+    public long SoftExceededEnqueues => Interlocked.Read(ref _softExceededEnqueues);
+
     void NoteBacklog(SealedWorldFanoutBatch batch, int backlog)
     {
         long nowMs = Environment.TickCount64;
         if (backlog > _hardBacklog)
         {
+            Interlocked.Increment(ref _emergencyEnqueues);
             FineageTelemetry.FanoutBacklogEmergency.Add(1);
             if (TryRateLimit(ref _lastHardLogMs, nowMs))
                 ZoneLog.Error(
@@ -147,6 +157,7 @@ internal sealed class FanoutDispatcher : IDisposable
             return;
         }
 
+        Interlocked.Increment(ref _softExceededEnqueues);
         FineageTelemetry.FanoutBacklogSoftExceeded.Add(1);
         if (TryRateLimit(ref _lastSoftLogMs, nowMs))
             ZoneLog.Warn(
