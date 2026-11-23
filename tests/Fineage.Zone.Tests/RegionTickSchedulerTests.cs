@@ -9,6 +9,27 @@ public sealed class RegionTickSchedulerTests
     static readonly GridRegionPartition Cells = new(CellSize);
 
     [Fact]
+    public void RunAhead_runs_a_world_stage_at_the_next_tick_and_leaves_the_clock()
+    {
+        var scheduler = Scheduler(SequentialRegionExecutor.Instance);
+        long seenTick = -1;
+        long seenNow = -1;
+        scheduler.AddWorldStage("commands", tick =>
+        {
+            seenTick = tick.Tick;
+            seenNow = tick.NowUnixMs;
+        });
+        scheduler.Step(100);
+        long tick = scheduler.Tick;
+
+        scheduler.RunAhead("commands", wallUnixMs: 150);
+
+        Assert.Equal(tick, scheduler.Tick);
+        Assert.Equal(tick + 1, seenTick);
+        Assert.Equal(scheduler.Clock.TimeOf(tick + 1), seenNow);
+    }
+
+    [Fact]
     public void Region_stage_runs_regions_and_entities_in_ascending_order_whatever_the_collect_order()
     {
         var stage = RecordingStage.At("visit", [(5, 2500, 0), (3, -10, 0), (9, 2100, 0), (1, 10, 900), (7, -10, 50)]);

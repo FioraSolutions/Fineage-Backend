@@ -158,9 +158,13 @@ public static class ConsistencyOracle
             }
         }
 
+        var snapshots = new Dictionary<int, IReadOnlyList<ObservedFrame>>(bots.Count);
         foreach (var bot in bots)
-            CheckCombatFanout(bot, roster, watch, issues);
-        CheckVisibilityLeaks(bots, roster, watch, issues);
+            snapshots[bot.BotId] = bot.ObservationLog.Snapshot();
+
+        foreach (var bot in bots)
+            CheckCombatFanout(bot, roster, watch, issues, snapshots);
+        CheckVisibilityLeaks(bots, roster, watch, issues, snapshots);
 
         var samples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples).ToList();
         var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples).ToList();
@@ -188,14 +192,19 @@ public static class ConsistencyOracle
         };
     }
 
-    static void CheckCombatFanout(FineageBotClient observer, List<BotRosterEntry> roster, int watch, List<ConsistencyIssue> issues)
+    static void CheckCombatFanout(
+        FineageBotClient observer,
+        List<BotRosterEntry> roster,
+        int watch,
+        List<ConsistencyIssue> issues,
+        Dictionary<int, IReadOnlyList<ObservedFrame>> snapshots)
     {
         int combatIssues = issues.Count(i => i.Kind == ConsistencyKind.MissingCombatFanout);
         if (combatIssues >= 25)
             return;
 
         var events = new List<(DateTimeOffset At, ulong Attacker)>();
-        foreach (var frame in observer.ObservationLog.Snapshot())
+        foreach (var frame in snapshots[observer.BotId])
         {
             if (frame.Opcode != NetOpcode.AttackState)
                 continue;
@@ -218,7 +227,7 @@ public static class ConsistencyOracle
             {
                 if (Distance(w.X, w.Y, attackerEntry.X, attackerEntry.Y) > watch)
                     continue;
-                bool saw = w.Client.ObservationLog.Snapshot().Any(f =>
+                bool saw = snapshots[w.BotId].Any(f =>
                 {
                     if (f.Opcode != NetOpcode.AttackState)
                         return false;
@@ -243,14 +252,19 @@ public static class ConsistencyOracle
         }
     }
 
-    static void CheckVisibilityLeaks(IReadOnlyList<FineageBotClient> bots, List<BotRosterEntry> roster, int watch, List<ConsistencyIssue> issues)
+    static void CheckVisibilityLeaks(
+        IReadOnlyList<FineageBotClient> bots,
+        List<BotRosterEntry> roster,
+        int watch,
+        List<ConsistencyIssue> issues,
+        Dictionary<int, IReadOnlyList<ObservedFrame>> snapshots)
     {
         foreach (var bot in bots)
         {
             var entry = roster.FirstOrDefault(r => r.BotId == bot.BotId);
             if (entry == null)
                 continue;
-            foreach (var frame in bot.ObservationLog.Snapshot())
+            foreach (var frame in snapshots[bot.BotId])
             {
                 if (frame.Opcode != NetOpcode.AttackState && frame.Opcode != NetOpcode.MagicSkillUse)
                     continue;

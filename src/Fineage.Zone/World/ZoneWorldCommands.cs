@@ -28,11 +28,73 @@ public sealed partial class ZoneWorld
     internal int CommandIngressQueuedDepth => _ingress.QueuedDepth;
 
     /// <summary>
-    /// Submits <paramref name="command"/> for <paramref name="session"/>. It is applied in phase 0 of the next step at
-    /// the tick time; the task completes with its rejection reason (or null) once that step's fan-out was sent.
+    /// Submits <paramref name="command"/> for <paramref name="session"/>. The live loop applies it through this
+    /// ingress as soon as the thread is between ticks, at the upcoming tick's time; a step's phase 0 applies whatever
+    /// is still queued. The task completes with its rejection reason (or null) once that admission's fan-out was sent.
     /// </summary>
     public Task<string?> ExecuteAsync(ZoneSession session, ZoneCommand command, CancellationToken ct) =>
         _ingress.Submit(session, command, ct);
+
+    /// <summary>
+    /// One admission slice while the loop is waiting for the next tick. Same ingress, same <c>commands</c> stage,
+    /// pinned to tick <c>Tick + 1</c> so the apply time matches the phase 0 that follows. The slice stops at that
+    /// tick boundary. Fan-out for the slice is sealed on its own phase so it does not reuse the step's sequence.
+    /// </summary>
+    void AdmitQueuedCommands(long untilMs)
+    {
+        long now = Stopwatch.GetTimestamp();
+        long stepTicks = (long)(ZoneSimulationSettings.StepMilliseconds * Stopwatch.Frequency / 1000.0);
+        long untilTicks = (long)(untilMs * Stopwatch.Frequency / 1000.0);
+        long syntheticStart = now - Math.Max(0, stepTicks - untilTicks);
+        long wall = _simulationClock.WallUnixMs();
+        Volatile.Write(ref _stepStartedTimestamp, syntheticStart);
+        try
+        {
+            RunStep(_ =>
+            {
+                _fanout.ConfigureSequence(_simulationTicks.Tick + 1, phase: 1);
+                _simulationTicks.RunAhead(CommandsStage, wall);
+            });
+        }
+        catch (Exception ex)
+        {
+            FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "command-admission"));
+            ZoneHotPathLogs.SimulationStepFailedOutsideStages(_simulationTicks.Tick, ex);
+        }
+        finally
+        {
+            Volatile.Write(ref _stepStartedTimestamp, 0L);
+        }
+    }
+
+    /// <summary>
+    /// Waits until the next tick or until a command is queued, whichever comes first.
+    /// Returns true when the tick is due. Returns false when a command should be admitted and the loop should
+    /// look again. Cancelling <paramref name="ct"/> throws.
+    /// </summary>
+    async Task<bool> WaitForTickOrCommandAsync(long waitMs, CancellationToken ct)
+    {
+        using var wake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        Task delay = Task.Delay(TimeSpan.FromMilliseconds(waitMs), wake.Token);
+        Task submitted = _ingress.WaitForSubmissionAsync(wake.Token);
+        Task finished = await Task.WhenAny(delay, submitted).ConfigureAwait(false);
+        wake.Cancel();
+        await ObserveWaitAsync(delay).ConfigureAwait(false);
+        await ObserveWaitAsync(submitted).ConfigureAwait(false);
+        ct.ThrowIfCancellationRequested();
+        return finished == delay && delay.IsCompletedSuccessfully;
+    }
+
+    static async Task ObserveWaitAsync(Task wait)
+    {
+        try
+        {
+            await wait.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
 
     /// <summary>
     /// Phase 0: deficit round-robin over per-player queues, inside the wall-clock apply slice. Ordering is per
