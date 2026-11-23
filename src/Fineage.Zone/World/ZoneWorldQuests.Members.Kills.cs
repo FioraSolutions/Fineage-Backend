@@ -3,6 +3,7 @@ using Fineage.Game;
 using Fineage.Game.Quests;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
 using Fineage.Zone.Rewards;
@@ -27,51 +28,70 @@ public sealed partial class ZoneWorld
     /// </summary>
     void DistributeKillReward(ZoneEntity npc)
     {
-        if (IsTreasureBox(npc.NpcId))
-            return;
-        long rewardExp = npc.RewardExp;
-        int rewardSp = npc.RewardSp;
-        if (rewardExp <= 0 && rewardSp <= 0)
-            return;
-
-        // Mobius: damage above 1 counts, and the attacker has to be in ALT_PARTY_RANGE of the corpse.
-        var damage = new Dictionary<int, long>();
-        long totalDamage = 0;
-        foreach (var (id, dealt) in npc.DamageBy)
+        int attackers = 0;
+        long started = System.Diagnostics.Stopwatch.GetTimestamp();
+        try
         {
-            if (dealt <= 1 || !_byId.TryGetValue(id, out var attacker) || attacker.Kind != ZoneEntityKind.Player ||
-                attacker.Session == null || attacker.Dead)
-                continue;
-            if (!ZoneCombat.Within(npc.X, npc.Y, attacker.X, attacker.Y, QuestPartyRange))
-                continue;
-            damage[id] = dealt;
-            totalDamage += dealt;
-        }
+            if (IsTreasureBox(npc.NpcId))
+                return;
+            long rewardExp = npc.RewardExp;
+            int rewardSp = npc.RewardSp;
+            if (rewardExp <= 0 && rewardSp <= 0)
+                return;
 
-        if (totalDamage <= 0)
-            return;
-
-        int maxLevelDifference = ZoneRewardSettings.MonsterExpMaxLevelDifference;
-        var settled = new HashSet<int>();
-        foreach (var (id, dealt) in damage)
-        {
-            if (settled.Contains(id) || !_byId.TryGetValue(id, out var attacker) || attacker.Session == null)
-                continue;
-
-            if (_party.Of(id) is { } party)
+            // Mobius: damage above 1 counts, and the attacker has to be in ALT_PARTY_RANGE of the corpse.
+            var damage = new Dictionary<int, long>();
+            long totalDamage = 0;
+            foreach (var (id, dealt) in npc.DamageBy)
             {
-                SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled);
-                continue;
+                if (dealt <= 1 || !_byId.TryGetValue(id, out var attacker) || attacker.Kind != ZoneEntityKind.Player ||
+                    attacker.Session == null || attacker.Dead)
+                    continue;
+                if (!ZoneCombat.Within(npc.X, npc.Y, attacker.X, attacker.Y, QuestPartyRange))
+                    continue;
+                damage[id] = dealt;
+                totalDamage += dealt;
             }
 
-            settled.Add(id);
-            var share = KillRewardFormula.CalculateExpAndSp(
-                attacker.Level, npc.Level, rewardExp, rewardSp, dealt, totalDamage, maxLevelDifference);
-            SendKillReward(
-                attacker.Session,
-                attacker,
-                share.Exp * _rates.RateXp * ServitorExpMultiplier(attacker),
-                share.Sp * _rates.RateSp);
+            attackers = damage.Count;
+            if (totalDamage <= 0)
+                return;
+
+            int maxLevelDifference = ZoneRewardSettings.MonsterExpMaxLevelDifference;
+            var settled = new HashSet<int>();
+            foreach (var (id, dealt) in damage)
+            {
+                if (settled.Contains(id) || !_byId.TryGetValue(id, out var attacker) || attacker.Session == null)
+                    continue;
+
+                if (_party.Of(id) is { } party)
+                {
+                    SharePartyKill(party, npc, damage, totalDamage, rewardExp, rewardSp, maxLevelDifference, settled);
+                    continue;
+                }
+
+                settled.Add(id);
+                var share = KillRewardFormula.CalculateExpAndSp(
+                    attacker.Level, npc.Level, rewardExp, rewardSp, dealt, totalDamage, maxLevelDifference);
+                SendKillReward(
+                    attacker.Session,
+                    attacker,
+                    share.Exp * _rates.RateXp * ServitorExpMultiplier(attacker),
+                    share.Sp * _rates.RateSp);
+            }
+        }
+        finally
+        {
+            string kind = npc.NpcType switch
+            {
+                "GrandBoss" => "grand",
+                "RaidBoss" => "raid",
+                _ => "monster"
+            };
+            FineageTelemetry.NoteDeathPath(
+                "reward/" + kind,
+                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                attackers);
         }
     }
 

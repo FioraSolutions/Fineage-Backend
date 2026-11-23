@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Shops;
 using Fineage.Zone.Spawns;
 
@@ -99,6 +100,8 @@ public sealed partial class ZoneWorld
     void TickSpawns()
     {
         long nowMs = NowUnixMs();
+        int spawned = 0;
+        long started = System.Diagnostics.Stopwatch.GetTimestamp();
         while (_spawnDue.Count > 0)
         {
             var first = _spawnDue.Min;
@@ -121,7 +124,18 @@ public sealed partial class ZoneWorld
                 continue;
             MaterializeSpawn(slot.Definition, slot.MapId);
             if (_byId.TryGetValue(slot.Definition.ObjectId, out var npc))
+            {
                 FanoutNewNpc(npc);
+                spawned++;
+            }
+        }
+
+        if (spawned > 0)
+        {
+            FineageTelemetry.NoteDeathPath(
+                "spawn-wave",
+                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                spawned);
         }
     }
 

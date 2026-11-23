@@ -2,6 +2,7 @@ using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Party;
@@ -209,87 +210,101 @@ public sealed partial class ZoneWorld
         int victimLevel = 0,
         bool raid = false,
         bool seeded = false,
-        int lootOwnerObjectId = 0)
+        int lootOwnerObjectId = 0,
+        string deathKind = "monster")
     {
-        if (!_dropCatalog.TryGet(npcId, out var definition))
+        int dropped = 0;
+        long started = System.Diagnostics.Stopwatch.GetTimestamp();
+        try
         {
-            ZoneLog.Info($"drop miss npc={npcId} (no droplist)");
-            return;
-        }
-
-        int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
-        var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
-        int killerLevel = killer?.Level ?? victimLevel;
-        long now = NowUnixMs();
-        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
-        if (killer != null && !seeded)
-            rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
-        // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
-        if (seeded)
-            rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
-        if (rolls.Count == 0)
-            ZoneLog.Info($"drop empty npc={npcId}");
-
-        int dropperId = killer?.ObjectId ?? 0;
-        int ownerId = lootOwnerObjectId != 0
-            ? lootOwnerObjectId
-            : killer?.Session != null
-                ? killer.ObjectId
-                : 0;
-        if (rolls.Count == 0)
-            return;
-
-        var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
-        var source = LedgerAccount.Of(SystemAccount.DropSource);
-        var planned = new List<(DropStack Stack, int Dx, int Dy, int GroundId)>();
-        var autoLoot = new List<(ZoneEntity Looter, DropStack Stack)>();
-        ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
-        foreach (var stack in rolls)
-        {
-            if (!_game.Items.TryGet(stack.ItemId, out var template))
-                continue;
-            bool herb = IsHerb(stack.ItemId);
-            if (autoLooter != null
-                && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
-                && HasRoomForLootStack(autoLooter, stack.ItemId, stack.Count, template.Stackable))
+            if (!_dropCatalog.TryGet(npcId, out var definition))
             {
-                var bag = LedgerAccount.Inventory(autoLooter.ObjectId);
-                ObserveLedger(move, bag);
-                move.Post(source, stack.ItemId, -stack.Count);
-                move.Post(bag, stack.ItemId, stack.Count);
-                autoLoot.Add((autoLooter, stack));
-                continue;
+                ZoneLog.Info($"drop miss npc={npcId} (no droplist)");
+                return;
             }
 
-            int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
-            int groundId = _itemIds.Next();
-            IReadOnlyList<int> pieces = template.Stackable ? [] : [groundId];
-            PostOntoGroundPlanned(move, source, groundId, stack.ItemId, stack.Count, pieces);
-            planned.Add((stack, dx, dy, groundId));
+            int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
+            var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
+            int killerLevel = killer?.Level ?? victimLevel;
+            long now = NowUnixMs();
+            var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
+            if (killer != null && !seeded)
+                rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
+            // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
+            if (seeded)
+                rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
+            if (rolls.Count == 0)
+                ZoneLog.Info($"drop empty npc={npcId}");
+
+            int dropperId = killer?.ObjectId ?? 0;
+            int ownerId = lootOwnerObjectId != 0
+                ? lootOwnerObjectId
+                : killer?.Session != null
+                    ? killer.ObjectId
+                    : 0;
+            if (rolls.Count == 0)
+                return;
+
+            var move = BeginLedgerMove(LedgerTxKind.Loot, dropperId, npcId);
+            var source = LedgerAccount.Of(SystemAccount.DropSource);
+            var planned = new List<(DropStack Stack, int Dx, int Dy, int GroundId)>();
+            var autoLoot = new List<(ZoneEntity Looter, DropStack Stack)>();
+            ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
+            foreach (var stack in rolls)
+            {
+                if (!_game.Items.TryGet(stack.ItemId, out var template))
+                    continue;
+                bool herb = IsHerb(stack.ItemId);
+                if (autoLooter != null
+                    && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
+                    && HasRoomForLootStack(autoLooter, stack.ItemId, stack.Count, template.Stackable))
+                {
+                    var bag = LedgerAccount.Inventory(autoLooter.ObjectId);
+                    ObserveLedger(move, bag);
+                    move.Post(source, stack.ItemId, -stack.Count);
+                    move.Post(bag, stack.ItemId, stack.Count);
+                    autoLoot.Add((autoLooter, stack));
+                    continue;
+                }
+
+                int dx = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+                int dy = dropRng.Next(DeathDropScatter * 2 + 1) - DeathDropScatter;
+                int groundId = _itemIds.Next();
+                IReadOnlyList<int> pieces = template.Stackable ? [] : [groundId];
+                PostOntoGroundPlanned(move, source, groundId, stack.ItemId, stack.Count, pieces);
+                planned.Add((stack, dx, dy, groundId));
+            }
+
+            if (!move.HasPostings)
+                return;
+
+            if (move.CheckCommit() != LedgerRejection.None)
+            {
+                ZoneLog.Warn($"loot refused for npc {npcId}: ledger rejected ground postings");
+                return;
+            }
+
+            foreach (var (looter, stack) in autoLoot)
+                GrantInventoryStack(looter, stack.ItemId, stack.Count, notifyObtained: true);
+
+            foreach (var (stack, dx, dy, groundId) in planned)
+            {
+                SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
+                    ownerObjectId: ownerId,
+                    expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs),
+                    reserveObjectId: groundId);
+            }
+
+            move.Commit(LedgerHoldingsOf);
+            dropped = planned.Count + autoLoot.Count;
         }
-
-        if (!move.HasPostings)
-            return;
-
-        if (move.CheckCommit() != LedgerRejection.None)
+        finally
         {
-            ZoneLog.Warn($"loot refused for npc {npcId}: ledger rejected ground postings");
-            return;
+            FineageTelemetry.NoteDeathPath(
+                "drop/" + deathKind,
+                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                dropped);
         }
-
-        foreach (var (looter, stack) in autoLoot)
-            GrantInventoryStack(looter, stack.ItemId, stack.Count, notifyObtained: true);
-
-        foreach (var (stack, dx, dy, groundId) in planned)
-        {
-            SpawnGroundStack(stack.ItemId, stack.Count, x + dx, y + dy, z, instanceId, watchers, dropperId,
-                ownerObjectId: ownerId,
-                expireAtMs: now + (IsHerb(stack.ItemId) ? HerbAutoDestroyMs : GroundItemAutoDestroyMs),
-                reserveObjectId: groundId);
-        }
-
-        move.Commit(LedgerHoldingsOf);
     }
 
     ZoneEntity? AutoLootRecipient(ZoneEntity? killer, int lootOwnerObjectId)

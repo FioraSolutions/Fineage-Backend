@@ -88,9 +88,9 @@ public sealed partial class ZoneWorld
         if (Damage.Count == 0 && NoLanding.Count == 0)
             return;
 
-        foreach (var entity in _byId.Values)
+        foreach (var entity in Players())
         {
-            if (entity.Kind != ZoneEntityKind.Player || entity.Session == null || entity.CurHp <= 0)
+            if (entity.Session == null || entity.CurHp <= 0)
                 continue;
 
             if (entity.NoLandingDismountAtMs > 0 && nowUnixMs >= entity.NoLandingDismountAtMs)

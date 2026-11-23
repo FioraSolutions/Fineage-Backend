@@ -4,7 +4,7 @@ using Fineage.LoadTest.Reporting;
 
 if (args.Length == 0 || args.Contains("-h") || args.Contains("--help"))
 {
-    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--region-workers N]");
+    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--region-workers N] [--skip-consistency-oracle]");
     return;
 }
 
@@ -22,6 +22,7 @@ string? loginLog = Arg(args, "--login-log");
 string? zoneLog = Arg(args, "--zone-log");
 int regionWorkers = int.TryParse(Arg(args, "--region-workers"), out int rw) ? rw : 0;
 int? zonePid = int.TryParse(Arg(args, "--zone-pid"), out int pid) ? pid : null;
+bool skipConsistencyOracle = args.Contains("--skip-consistency-oracle");
 
 var scenario = ScenarioLoader.Load(scenarioPath);
 if (string.IsNullOrWhiteSpace(scenario.Name))
@@ -41,7 +42,7 @@ var runner = new LoadTestRunner();
 RunReport report;
 try
 {
-    report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token);
+    report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token, skipConsistencyOracle);
 }
 catch (Exception ex)
 {

@@ -7834,6 +7834,35 @@
    }
   },
   {
+   "skillId": 4275,
+   "name": "Sacred Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4276,
    "name": "Bow Weapon Weak Point",
    "levels": 5,
@@ -7862,6 +7891,122 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4279,
+   "name": "Fire Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4280,
+   "name": "Water Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4281,
+   "name": "Wind Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4282,
+   "name": "Earth Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4283,

@@ -222,6 +222,17 @@ fi
 
 export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
+# Documented boot loads the manifest region pack so LOS and pathfinding are on.
+# The perf profile refuses to start when a manifest region is missing.
+# FINEAGE_GEODATA_REQUIRED=0 is the explicit stub opt-out for a test that cannot fetch.
+case "${FINEAGE_GEODATA_REQUIRED:-1}" in
+  0|false|FALSE|no|NO|off|OFF) export FINEAGE_GEODATA_REQUIRED=0 ;;
+  *)
+    export FINEAGE_GEODATA_REQUIRED=1
+    export FINEAGE_GEODATA_DIR="${FINEAGE_GEODATA_DIR:-$ROOT/data/geodata}"
+    "$ROOT/scripts/fetch-geodata.sh"
+    ;;
+esac
 # Loopback /status so Login's /api/status can report the zone as up.
 export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1
@@ -234,7 +245,8 @@ daemonize zone-net \
   "${ZONE_CMD[@]}" --bind 0.0.0.0 --port 9777 --state-dir local-data
 
 ok=0
-for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do
+# Geodata plus the full spawn table can take longer than a stub boot.
+for _ in $(seq 1 90); do
   sleep 1
   if port_open 9106 && port_open 9777; then ok=1; break; fi
 done

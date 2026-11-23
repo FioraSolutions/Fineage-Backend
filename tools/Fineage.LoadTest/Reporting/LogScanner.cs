@@ -35,6 +35,11 @@ public static class LogScanner
                 {
                     if (!rx.IsMatch(line))
                         continue;
+                    // Bots closing TCP on teardown log "exception=IOException: Broken pipe".
+                    // That is the client disconnect, not a server fault. A thrown exception
+                    // that is not a transport close still matches.
+                    if (key == "exception" && IsClientTransportClose(line))
+                        continue;
                     if (!map.TryGetValue(key, out LogIssue? issue))
                     {
                         issue = new LogIssue { Key = key, SampleLine = line.Trim() };
@@ -49,4 +54,8 @@ public static class LogScanner
 
         return map.Values.OrderByDescending(i => i.Count).ToList();
     }
+
+    static bool IsClientTransportClose(string line) =>
+        line.Contains("Broken pipe", StringComparison.Ordinal) ||
+        line.Contains("Connection reset", StringComparison.Ordinal);
 }

@@ -117,7 +117,9 @@ public sealed partial class ZoneWorld
         {
             bool targetMoved = !ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY,
                 ZoneCombat.ApproachRepathDistance);
-            bool stuckShort = !player.MoveActive
+            // A pathfind already queued for this approach is not "stuck". Re-entering here
+            // would ask for another search on every tick.
+            bool stuckShort = !player.MoveActive && !player.PathfindPending
                 && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
             if (targetMoved || stuckShort)
             {

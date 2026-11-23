@@ -1,3 +1,5 @@
+using Fineage.LoadTest.Metrics;
+
 namespace Fineage.LoadTest.Reporting;
 
 /// <summary>Issue #867 SLO gates (Debug build, same workload).</summary>
@@ -12,10 +14,17 @@ public static class PerformanceGates
         ["bots-200-spread"] = 180,
         ["bots-200-town"] = 180,
         ["bots-500-siege"] = 200,
-        ["bots-1000-town"] = 200
+        ["bots-1000-town"] = 200,
+        // Heavy scenarios use the 200-town command budget. A new name must not pass for lack of a row.
+        ["heavy-raid-kutus"] = 180,
+        ["heavy-aoe-pack"] = 180,
+        ["heavy-respawn-wave"] = 180
     };
 
     public const double FanoutQueueAgeP99GateMs = 40;
+
+    /// <summary>request:enter on the tick is the insert. The old on-tick materialization was hundreds of ms.</summary>
+    public const double EnterApplyP99GateMs = 20;
 
     public static IReadOnlyList<GateVerdict> Evaluate(RunReport report)
     {
@@ -29,8 +38,26 @@ public static class PerformanceGates
             Limit = TickP99GateMs,
             Observed = tickP99,
             Unit = "ms",
-            Passed = tickP99 <= TickP99GateMs || tickP99 <= 0,
-            Note = tickP99 <= 0 ? "no scrape data" : null
+            Passed = tickP99 > 0 && tickP99 <= TickP99GateMs,
+            Note = tickP99 <= 0 ? "MISSING: fineage_tick_ms (no scrape data is not a pass)" : null
+        });
+
+        var enter = string.IsNullOrEmpty(report.PeakMetricsText)
+            ? null
+            : PrometheusParser.ParseLabeledHistogram(
+                report.PeakMetricsText, "fineage_command_apply_ms", "command", "request:enter");
+        double enterP99 = enter?.P99 ?? 0;
+        bool missingEnter = enter is not { Count: > 0 };
+        verdicts.Add(new GateVerdict
+        {
+            Gate = "request:enter p99 <= 20 ms",
+            Limit = EnterApplyP99GateMs,
+            Observed = enterP99,
+            Unit = "ms",
+            Passed = !missingEnter && enterP99 <= EnterApplyP99GateMs,
+            Note = missingEnter
+                ? "MISSING: fineage_command_apply_ms{command=\"request:enter\"}"
+                : "insert on the simulation thread; self frames are off the tick"
         });
 
         // #867 command→mailboxes is fineage_command_to_mailboxes_ms (commit to first mailbox enqueue).

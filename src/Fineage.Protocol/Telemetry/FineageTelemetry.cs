@@ -208,6 +208,50 @@ public static class FineageTelemetry
     static long _watchdogStallMaxBits;
     static long _watchdogStallCount;
 
+    public static readonly Histogram<double> DeathPathMilliseconds =
+        Meter.CreateHistogram<double>("fineage.death.path.ms", unit: "ms",
+            description: "Cost of a death reward, drop, area affect, or respawn wave (tag phase)");
+
+    /// <summary>Gauges the heavy scenarios read. A missing phase stays 0 so a scrape can tell "none" from "no metric".</summary>
+    public static readonly string[] DeathPathUnitPhases = ["reward/raid", "drop/raid", "area/player", "spawn-wave"];
+
+    static readonly Dictionary<string, long> _deathPathUnitsBits = new(StringComparer.Ordinal);
+
+    public static void NoteDeathPath(string phase, double milliseconds, int units)
+    {
+        if (!double.IsNaN(milliseconds) && milliseconds >= 0)
+            DeathPathMilliseconds.Record(milliseconds, new KeyValuePair<string, object?>("phase", phase));
+        if (units < 0)
+            return;
+        lock (_deathPathUnitsBits)
+        {
+            _deathPathUnitsBits.TryGetValue(phase, out long bits);
+            double have = BitConverter.Int64BitsToDouble(bits);
+            if (units > have)
+                _deathPathUnitsBits[phase] = BitConverter.DoubleToInt64Bits(units);
+        }
+    }
+
+    public static readonly ObservableGauge<double> DeathPathMaxUnits = Meter.CreateObservableGauge(
+        "fineage.death.path.max_units",
+        ObserveDeathPathUnits,
+        unit: "{unit}",
+        description: "Most attackers, drops, area targets, or spawned NPCs in one death-path sample (tag phase)");
+
+    static IEnumerable<Measurement<double>> ObserveDeathPathUnits()
+    {
+        lock (_deathPathUnitsBits)
+        {
+            foreach (string phase in DeathPathUnitPhases)
+            {
+                _deathPathUnitsBits.TryGetValue(phase, out long bits);
+                yield return new Measurement<double>(
+                    BitConverter.Int64BitsToDouble(bits),
+                    new KeyValuePair<string, object?>("phase", phase));
+            }
+        }
+    }
+
     public static void NoteTickDuration(double milliseconds)
     {
         if (double.IsNaN(milliseconds) || milliseconds < 0)

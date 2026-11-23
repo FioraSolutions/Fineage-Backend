@@ -103,6 +103,9 @@ public sealed class MetricsSnapshot
     public IReadOnlyList<StageMetrics> CommandTimelinePhases { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandApplyByName { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandQueueWaitByClass { get; init; } = [];
+    public IReadOnlyList<StageMetrics> DeathPathByPhase { get; init; } = [];
+    public IReadOnlyDictionary<string, double> DeathPathMaxUnits { get; init; } =
+        new Dictionary<string, double>(StringComparer.Ordinal);
     public HistogramMetrics CommandPlayerQueueDepth { get; init; } = new();
     public HistogramMetrics CommandQueueAge { get; init; } = new();
     public long CommandCoalesced { get; init; }
@@ -332,6 +335,9 @@ public static class MetricsText
             "Elapsed time between command lifecycle phases", snapshot.CommandTimelinePhases);
         AppendLabeledStageHistograms(sb, "fineage_command_apply_ms", "command",
             "Single command apply duration", snapshot.CommandApplyByName);
+        AppendLabeledStageHistograms(sb, "fineage_death_path_ms", "phase",
+            "Death reward, drop, area affect, or respawn-wave cost", snapshot.DeathPathByPhase);
+        AppendDeathPathUnits(sb, snapshot.DeathPathMaxUnits);
         AppendLabeledStageHistograms(sb, "fineage_command_queue_wait_ms", "class",
             "Ingress queue wait before dequeue", snapshot.CommandQueueWaitByClass);
         AppendSingletonHistogram(sb, "fineage_command_queue_depth",
@@ -491,6 +497,29 @@ public static class MetricsText
         sb.Append("# TYPE ").Append(metric).Append(" histogram\n");
         foreach (StageMetrics row in rows)
             AppendHistogramSamples(sb, metric, $"{labelName}=\"{Escape(row.Stage)}\"", row.Duration, DurationBoundsMs);
+    }
+
+    static void AppendDeathPathUnits(StringBuilder sb, IReadOnlyDictionary<string, double> units)
+    {
+        AppendHelp(sb, "fineage_death_path_max_units",
+            "Most attackers, drops, area targets, or spawned NPCs in one death-path sample");
+        sb.Append("# TYPE fineage_death_path_max_units gauge\n");
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (string phase in FineageTelemetry.DeathPathUnitPhases)
+        {
+            seen.Add(phase);
+            double value = units.TryGetValue(phase, out double have) ? have : 0;
+            sb.Append("fineage_death_path_max_units{phase=\"").Append(Escape(phase)).Append("\"} ")
+                .Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        }
+
+        foreach (var pair in units.OrderBy(pair => pair.Key, StringComparer.Ordinal))
+        {
+            if (!seen.Add(pair.Key))
+                continue;
+            sb.Append("fineage_death_path_max_units{phase=\"").Append(Escape(pair.Key)).Append("\"} ")
+                .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        }
     }
 
     static void AppendStages(StringBuilder sb, IReadOnlyList<StageMetrics> stages)

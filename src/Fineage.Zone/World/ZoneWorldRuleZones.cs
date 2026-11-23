@@ -155,9 +155,9 @@ public sealed partial class ZoneWorld
         var pulses = new List<EffectPulse>();
         var effects = ZoneRules.Profile<EffectZoneProfile>();
         var halls = ZoneRules.Profile<ResidenceHallTeleportZoneProfile>();
-        foreach (var entity in _byId.Values)
+        foreach (var entity in Players())
         {
-            if (entity.Kind != ZoneEntityKind.Player || entity.Session == null || entity.CurHp <= 0)
+            if (entity.Session == null || entity.CurHp <= 0)
                 continue;
             TickEffectZones(entity, effects, pulses, nowUnixMs);
             TickHallOust(entity, halls, nowUnixMs);

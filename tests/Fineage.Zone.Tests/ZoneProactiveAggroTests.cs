@@ -40,7 +40,8 @@ public sealed class ZoneProactiveAggroTests
         int aggro = template.AggroRange;
         Assert.Equal(1000, aggro);
 
-        var (world, player) = await EnterWithMobAsync(offsetX: aggro + 50);
+        // Range only. Real geodata at the default spawn can block LOS; the dedicated LOS test covers that.
+        var (world, player) = await EnterWithMobAsync(offsetX: aggro + 50, geo: GeoEngine.Empty);
         await world.RunCombatTickAsync(CancellationToken.None);
 
         Assert.True(world.TryGetEntityById(KabooCaptainObjectId, out var mob));
@@ -54,7 +55,7 @@ public sealed class ZoneProactiveAggroTests
         var catalog = NpcCatalog.LoadDefault();
         int aggro = catalog.Get(KabooCaptainNpcId).AggroRange;
 
-        var (world, player) = await EnterWithMobAsync(offsetX: aggro - 100);
+        var (world, player) = await EnterWithMobAsync(offsetX: aggro - 100, geo: GeoEngine.Empty);
         foreach (int id in new[] { KabooCaptainObjectId })
         {
             if (world.TryGetEntityById(id, out var mob))
@@ -127,8 +128,11 @@ public sealed class ZoneProactiveAggroTests
         }
 
         Assert.Contains(large, s => s.StartsWith("20472 ", StringComparison.Ordinal));
-        Assert.Equal(9, missing.Count);
-        Assert.All(missing, name => Assert.DoesNotContain("Kaboo Orc Fighter Leader", name));
+        // Raid fighters that omitted <ai> are not aggressive (the other 303 set isAggressive=false).
+        // What remains is two non-combat props whose CT0 templates also omit <ai>, so the monster
+        // default (aggressive, aggroRange 0) still applies and they never pass the radius check.
+        missing.Sort(StringComparer.Ordinal);
+        Assert.Equal(["18119 Corpse of Deadman", "20964 Huge Footmark"], missing);
     }
 
     static async Task<(ZoneWorld World, ZoneEntity Player)> EnterWithMobAsync(int offsetX, GeoEngine? geo = null)

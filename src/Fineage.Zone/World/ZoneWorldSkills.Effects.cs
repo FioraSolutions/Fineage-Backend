@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Simulation;
 
@@ -119,10 +120,12 @@ public sealed partial class ZoneWorld
     void ApplyHostileAffect(
         ZoneEntity caster, ZoneEntity? primary, SkillDefinition template, SkillLevelData levelData, int level, long now)
     {
-        if (primary != null && (primary.Dead || primary.CurHp <= 0) && !IsMultiHostileTarget(template))
+        bool multi = IsMultiHostileTarget(template);
+        if (primary != null && (primary.Dead || primary.CurHp <= 0) && !multi)
             return;
+        long started = multi ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
         int effectPoint = template.EffectPointAt(level);
-        var targets = IsMultiHostileTarget(template)
+        var targets = multi
             ? HostileAffectTargets(caster, primary, template).ToList()
             : (primary != null ? new List<ZoneEntity> { primary } : new List<ZoneEntity>());
         foreach (var t in targets)
@@ -136,6 +139,14 @@ public sealed partial class ZoneWorld
             if (IsTurnPassive(template.AbnormalType))
                 PacifyNpc(t, caster, now);
             RunInstantPayloadEffects(caster, t, template.SkillId, level, now);
+        }
+
+        if (multi)
+        {
+            FineageTelemetry.NoteDeathPath(
+                caster.Kind == ZoneEntityKind.Player ? "area/player" : "area/npc",
+                System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds,
+                targets.Count);
         }
     }
 

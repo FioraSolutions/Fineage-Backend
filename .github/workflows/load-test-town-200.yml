@@ -1,0 +1,105 @@
+name: load-test-town-200
+
+# Debug 200-bot town gate on dev. No perf label. Geodata is required by the boot.
+# The client skips the per-frame consistency oracle. A hang, a tick p99 over 200 ms,
+# or a request:enter p99 over 20 ms fails the job. The report is uploaded either way.
+
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  push:
+    branches: [dev]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bots-200-town:
+    name: bots-200-town
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      FINEAGE_DATABASE_URL: Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+      FINEAGE_HANDOFF_SECRET: FineageLoginHandoffV1
+      FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX: loadbot
+      FINEAGE_LOGIN_LOADTEST_PASSWORD: loadtest-pass-v1
+      FINEAGE_LOGIN_METRICS_PORT: 9464
+      FINEAGE_ZONE_METRICS_PORT: 9465
+      FINEAGE_ZONE_REGION_WORKERS: '0'
+      FINEAGE_ZONE_OUTBOUND_QUEUE: '512'
+      FINEAGE_BUILD_CONFIGURATION: Debug
+      FINEAGE_GEODATA_REQUIRED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Build Debug stack and Release load-test client
+        run: |
+          dotnet build src/Fineage.Login -c Debug -v q
+          dotnet build src/Fineage.Zone -c Debug -v q
+          dotnet build tools/Fineage.LoadTest -c Release -v q
+
+      - name: Start Login+Zone
+        run: |
+          ./scripts/run-local-net.sh start
+          grep -q 'whole world (all enabled spawn maps)' local-logs/zone-net.log
+          grep -E '\[geo\] loaded [0-9]+ region' local-logs/zone-net.log
+
+      - name: 200-bot town
+        run: |
+          mkdir -p local-logs/loadtest-ci
+          dotnet tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll run \
+            --scenario tools/Fineage.LoadTest/scenarios/bots-200-town.yaml \
+            --spawn-layout town \
+            --target fineage \
+            --report-dir local-logs/loadtest-ci \
+            --login-log local-logs/login-net.log \
+            --zone-log local-logs/zone-net.log \
+            --zone-pid "$(cat local-logs/zone-net.pid)" \
+            --region-workers 0 \
+            --skip-consistency-oracle
+
+      - name: Stop stack
+        if: always()
+        run: ./scripts/run-local-net.sh stop || true
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: loadtest-bots-200-town
+          path: |
+            local-logs/loadtest-ci/
+            local-logs/zone-net.log
+          if-no-files-found: error

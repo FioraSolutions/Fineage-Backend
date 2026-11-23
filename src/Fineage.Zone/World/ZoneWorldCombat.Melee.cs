@@ -201,7 +201,14 @@ public sealed partial class ZoneWorld
         int lootOwner = raid
             ? RaidLootOwnerObjectId(npc, killer, id => _byId.TryGetValue(id, out var e) ? e : null, _party.Of)
             : killer?.ObjectId ?? 0;
-        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded, lootOwnerObjectId: lootOwner);
+        string deathKind = npc.NpcType switch
+        {
+            "GrandBoss" => "grand",
+            "RaidBoss" => "raid",
+            _ => "monster"
+        };
+        SpawnDeathDrops(dropNpcId, x, y, z, killer, watchers, npc.Level, raid, seeded: npc.Seeded, lootOwnerObjectId: lootOwner,
+            deathKind: deathKind);
         CheckCursedDropOnMobDeath(npc, killer, Rng(_dropRandom, npc));
         // Mobius DecayTaskManager: a seeded corpse gets the same extension as a spoiled one (time to harvest).
         bool spoiled = npc.SpoilerObjectId != 0 || npc.Seeded;

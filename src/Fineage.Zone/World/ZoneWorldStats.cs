@@ -156,7 +156,7 @@ public sealed partial class ZoneWorld
 
     CombatStatMods? FoldLearnedClanAndGearPassives(ZoneEntity player, CombatStatMods? mods)
     {
-        var passiveLevels = PassiveSkillLevels(player);
+        var passiveLevels = CombatPassiveLevels(player);
         return passiveLevels.Count == 0
             ? mods
             : _passives.CollectPassives(
@@ -177,10 +177,32 @@ public sealed partial class ZoneWorld
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
         PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills, player.CursedSkills);
 
+    /// <summary>
+    /// The passive fold used to warn for every known skill absent from <c>skill-passives.json</c>, including actives
+    /// (operateType A1/A2). Only operateType P rows are combat passives. A skill the catalog does not know still
+    /// goes through, so a real passive that never got transcribed still logs.
+    /// </summary>
+    Dictionary<int, int> CombatPassiveLevels(ZoneEntity player)
+    {
+        var merged = PassiveSkillLevels(player);
+        if (merged.Count == 0)
+            return merged;
+        var passives = new Dictionary<int, int>(merged.Count);
+        foreach (var (id, level) in merged)
+        {
+            var skill = _game.Skills.Find(id);
+            if (skill != null && !skill.Passive)
+                continue;
+            passives[id] = level;
+        }
+
+        return passives;
+    }
+
     /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
     internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)
     {
-        return _defenceTraits.Collect(PassiveSkillLevels(player));
+        return _defenceTraits.Collect(CombatPassiveLevels(player));
     }
 
     /// <summary>

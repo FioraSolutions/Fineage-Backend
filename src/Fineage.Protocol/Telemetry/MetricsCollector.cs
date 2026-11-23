@@ -37,6 +37,8 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandQueueWaitByClass = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _deathPathByPhase = new(StringComparer.Ordinal);
+    readonly Dictionary<string, double> _deathPathMaxUnits = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _ticksSkipped;
     long _regionHandoffs;
@@ -143,6 +145,10 @@ public sealed class MetricsCollector : IDisposable
                 CommandTimelinePhases = FreezeLabeled(_commandTimelinePhases),
                 CommandApplyByName = FreezeLabeled(_commandApplyByName),
                 CommandQueueWaitByClass = FreezeLabeled(_commandQueueWaitByClass),
+                DeathPathByPhase = FreezeLabeled(_deathPathByPhase),
+                DeathPathMaxUnits = _deathPathMaxUnits
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 CommandPlayerQueueDepth = _commandPlayerQueueDepth.Freeze(),
                 CommandQueueAge = _commandQueueAge.Freeze(),
                 CommandCoalesced = _commandCoalesced,
@@ -341,6 +347,12 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.command.apply_ms":
                     CommandApply(CommandOf(tags)).Duration.Record(value);
                     break;
+                case "fineage.death.path.ms":
+                    DeathPath(PhaseOf(tags)).Duration.Record(value);
+                    break;
+                case "fineage.death.path.max_units":
+                    NoteDeathPathUnits(PhaseOf(tags), value);
+                    break;
                 case "fineage.command.timeline.ms":
                     CommandTimeline(PhaseOf(tags)).Duration.Record(value);
                     break;
@@ -410,6 +422,15 @@ public sealed class MetricsCollector : IDisposable
     MutableStage CommandTimeline(string phase) => LabeledStage(_commandTimelinePhases, phase);
 
     MutableStage CommandApply(string command) => LabeledStage(_commandApplyByName, command);
+
+    MutableStage DeathPath(string phase) => LabeledStage(_deathPathByPhase, phase);
+
+    void NoteDeathPathUnits(string phase, double units)
+    {
+        if (phase.Length == 0)
+            return;
+        _deathPathMaxUnits[phase] = Math.Max(_deathPathMaxUnits.GetValueOrDefault(phase), units);
+    }
 
     MutableStage CommandQueueWait(string ingressClass) => LabeledStage(_commandQueueWaitByClass, ingressClass);
 

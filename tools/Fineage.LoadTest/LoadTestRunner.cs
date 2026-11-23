@@ -15,7 +15,8 @@ public sealed class LoadTestRunner
         string? loginLog,
         string? zoneLog,
         int? zonePid,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool skipConsistencyOracle = false)
     {
         if (target == "mobius")
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
@@ -210,6 +211,10 @@ public sealed class LoadTestRunner
             consistency = new ConsistencyReport();
             bugs.Add("P0: simulation hang; consistency oracle skipped so the report is written with the stall evidence.");
         }
+        else if (skipConsistencyOracle)
+        {
+            consistency = new ConsistencyReport();
+        }
         else
         {
             try
@@ -292,6 +297,13 @@ public sealed class LoadTestRunner
 
         report.SimulationStallSeconds = hang.StallSeconds;
         report.SimulationStallCount = hang.StallCount;
+        foreach (var gate in report.GateVerdicts)
+        {
+            if (gate.Passed)
+                continue;
+            failReasons.Add($"gate failed: {gate.Gate} observed {gate.Observed:0.##} {gate.Unit}");
+        }
+
         report.FailReasons = failReasons;
         report.Passed = failReasons.Count == 0;
 

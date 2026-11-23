@@ -351,6 +351,7 @@ public sealed partial class ZoneWorld
         entity.Inventory?.EstablishCursor();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
+        NoteInWorldPlayer(entity);
         _chat.Entered(entity.ObjectId, entity.Name);
         session.X = entity.X;
         session.Y = entity.Y;

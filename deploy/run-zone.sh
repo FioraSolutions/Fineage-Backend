@@ -24,6 +24,27 @@ STATE_DIR="${FINEAGE_STATE_DIR:-$ROOT/data}"
 BIND="${FINEAGE_BIND:-0.0.0.0}"
 NET_ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
 
+# Production boot loads region files. Set FINEAGE_GEODATA_REQUIRED=0 only to keep stub geo.
+case "${FINEAGE_GEODATA_REQUIRED:-1}" in
+  0|false|FALSE|no|NO|off|OFF) export FINEAGE_GEODATA_REQUIRED=0 ;;
+  *)
+    export FINEAGE_GEODATA_REQUIRED=1
+    export FINEAGE_GEODATA_DIR="${FINEAGE_GEODATA_DIR:-$ROOT/data/geodata}"
+    FETCH=""
+    for candidate in "$ROOT/fetch-geodata.sh" "$ROOT/../scripts/fetch-geodata.sh"; do
+      if [[ -f "$candidate" ]]; then
+        FETCH="$candidate"
+        break
+      fi
+    done
+    if [[ -z "$FETCH" ]]; then
+      echo "missing fetch-geodata.sh; cannot load region files into $FINEAGE_GEODATA_DIR" >&2
+      exit 1
+    fi
+    bash "$FETCH"
+    ;;
+esac
+
 BIN="$ROOT/zone/Fineage.Zone"
 if [[ ! -x "$BIN" ]]; then
   echo "missing executable: $BIN" >&2

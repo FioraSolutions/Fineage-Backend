@@ -232,6 +232,7 @@ public sealed partial class ZoneWorld
                 _aoi.Enter(objectId, x, y);
                 master.MinionIds.Add(objectId);
                 _byId.Join(entity, ActiveSets.Thinking);
+                QueueThinkReschedule(objectId);
                 FanoutNewNpc(entity);
                 SpawnPrivates(entity);
             }

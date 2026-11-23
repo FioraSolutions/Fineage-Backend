@@ -467,9 +467,9 @@ public sealed partial class ZoneWorld
     List<int> OnlinePlayerObjectIds()
     {
         var list = new List<int>();
-        foreach (var entity in _byId.Values)
+        foreach (var entity in Players())
         {
-            if (entity.Kind == ZoneEntityKind.Player && entity.Session != null)
+            if (entity.Session != null)
                 list.Add(entity.ObjectId);
         }
 

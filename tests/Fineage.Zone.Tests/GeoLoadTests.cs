@@ -62,6 +62,7 @@ public sealed class GeoLoadTests
         {
             var ex = Assert.Throws<InvalidOperationException>(GeoEngine.LoadDefault);
             Assert.Contains(GeoSettings.RequiredVariable, ex.Message, StringComparison.Ordinal);
+            Assert.Contains("20_18.l2j", ex.Message, StringComparison.Ordinal);
         });
     }
 
