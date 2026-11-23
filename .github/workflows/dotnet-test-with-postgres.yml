@@ -13,6 +13,11 @@ jobs:
   test:
     name: dotnet-test-with-postgres
     runs-on: ubuntu-latest
+    # The solution run includes Slow tests. RegionParallelStressTests
+    # Parallel_and_sequential_runs_are_identical_under_soak_scale_churn deadlocks
+    # inside the 24-player enter loop and used to hold this job until the six-hour
+    # runner cap. Blame names the test; the job cap is the backstop.
+    timeout-minutes: 60
     services:
       postgres:
         image: postgres:16-alpine
@@ -43,4 +48,10 @@ jobs:
             Fineage.Backend.slnx
 
       - name: Test
-        run: dotnet test Fineage.Backend.slnx --configuration Release --verbosity ${{ inputs.verbosity }}
+        run: >-
+          dotnet test Fineage.Backend.slnx
+          --configuration Release
+          --verbosity ${{ inputs.verbosity }}
+          --blame-hang
+          --blame-hang-timeout 15m
+          --blame-hang-dump-type none
