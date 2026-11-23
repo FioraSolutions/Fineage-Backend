@@ -11,6 +11,7 @@ public sealed partial class ZoneWorld
     internal void RunNpcThinkTick(long now)
     {
         RefreshPlayerActiveRegions();
+        DrainRegionWakeBudget();
         TickWalkingRoutes(now);
         TickBoats(now);
         if (_byId.CountOf(ActiveSets.Thinking) == 0)
@@ -24,6 +25,7 @@ public sealed partial class ZoneWorld
     void CollectNpcThink(TickContext tick, RegionWorkCollector work)
     {
         RefreshPlayerActiveRegions();
+        DrainRegionWakeBudget();
         TickWalkingRoutes(tick.NowUnixMs);
         TickBoats(tick.NowUnixMs);
         if (_byId.CountOf(ActiveSets.Thinking) == 0)
