@@ -40,7 +40,7 @@ public sealed class BotStats
 
     public void RecordEconomyReject(string code)
     {
-        if (!InEconomyFlow)
+        if (!InEconomyFlow || !Consistency.EconomyConsistencyOracle.IsEconomyFlowReject(code))
             return;
         if (string.IsNullOrWhiteSpace(code))
             code = "unknown";
