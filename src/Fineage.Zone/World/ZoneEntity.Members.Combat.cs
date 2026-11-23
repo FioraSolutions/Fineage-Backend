@@ -125,6 +125,13 @@ sealed partial class ZoneEntity
         set => EnsureAggro().NextThinkMs = value;
     }
 
+    /// <summary>Which think-timer bucket holds this NPC. −1 when it is not queued.</summary>
+    public int ThinkWheelSlot
+    {
+        get => Aggro?.ThinkWheelSlot ?? -1;
+        set => EnsureAggro().ThinkWheelSlot = value;
+    }
+
     internal void SetWanderGeoCache(int fromX, int fromY, int wantX, int wantY, int destX, int destY, int destZ)
     {
         var aggro = EnsureAggro();
