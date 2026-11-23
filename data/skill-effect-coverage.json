@@ -18,8 +18,7 @@
       "status": "full"
     },
     "BlockBuffSlot": {
-      "status": "partial",
-      "note": "slot block not enforced on re-buff"
+      "status": "full"
     },
     "Bluff": {
       "status": "full"
@@ -205,8 +204,7 @@
       "status": "full"
     },
     "NoblesseBless": {
-      "status": "partial",
-      "note": "abnormal only; noble blessing consume / death passthrough not wired"
+      "status": "full"
     },
     "OpenChest": {
       "status": "full"
@@ -242,8 +240,7 @@
       "status": "full"
     },
     "ProtectionBlessing": {
-      "status": "partial",
-      "note": "abnormal only; retail protection rules partial"
+      "status": "full"
     },
     "Pumping": {
       "status": "full"

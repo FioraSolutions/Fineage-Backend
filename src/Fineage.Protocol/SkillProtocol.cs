@@ -26,4 +26,7 @@ public static class SkillProtocol
     public const string Muted = "skill_muted";
     /// <summary>Attack skill is known but missing from skill-combat.json (no silent power stub).</summary>
     public const string NoCombat = "skill_no_combat";
+
+    /// <summary>A datapack effect name is missing or uncataloged. The cast is refused.</summary>
+    public const string EffectMissing = "skill_effect";
 }

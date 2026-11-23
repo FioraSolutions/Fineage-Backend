@@ -94,7 +94,8 @@ internal sealed class NetTestKit
         ZoneRates? rates = null,
         Func<DateTimeOffset>? clock = null,
         bool allowAmbientBoats = true,
-        ZoneGameTime? gameTime = null)
+        ZoneGameTime? gameTime = null,
+        Fineage.Zone.Combat.SkillEffectCatalog? skillEffects = null)
     {
         Store = store ?? MemoryAccountStore.InMemory();
         IRegionExecutor resolvedExecutor = regionExecutor ??
@@ -105,7 +106,8 @@ internal sealed class NetTestKit
             deathRules: deathRules, deathDrop: deathDrop, deathRandom: deathRandom, weights: weights,
             combatRandom: combatRandom, spawnRandom: spawnRandom, dropRandom: dropRandom, regions: regions,
             simulationObserver: simulationObserver, simulationSeed: simulationSeed, regionExecutor: resolvedExecutor,
-            bosses: bosses, ledgerJournal: Ledger, rates: rates, allowAmbientBoats: allowAmbientBoats, gameTime: gameTime);
+            bosses: bosses, ledgerJournal: Ledger, rates: rates, allowAmbientBoats: allowAmbientBoats, gameTime: gameTime,
+            skillEffects: skillEffects);
     }
 
     /// <summary>One stored character row, without entering the world. Use <see cref="EnterAsync(Character)"/> to log in.</summary>

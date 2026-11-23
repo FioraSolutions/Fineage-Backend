@@ -15,8 +15,8 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 89 |
-| 🟡 partial | 7 |
+| ✅ done | 90 |
+| 🟡 partial | 6 |
 | ❌ missing | 9 |
 | n/a | 3 |
 | **total** | **108** |
@@ -50,8 +50,8 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 18 | Physical/magic skill catalog | ✅ | — | skill XML → `data/skill-combat.json`; a missing row refuses the cast |
 | 19 | Blow / lethal | ✅ | — | blow handlers → `ZoneWorldSkills` |
 | 20 | Magic crit / fail | ✅ | — | `Formulas` magic crit → `ZoneWorldSkillDamage` |
-| 21 | Buffs, debuffs, stat funcs, hit-time apply | ✅ | — | `handlers/skill/effects` → `ZoneWorldSkills` `ScheduleEffect`; 108/112 effect names full in `skill-effect-coverage.json` |
-| 22 | BlockBuffSlot family | 🟡 | S | `BlockBuffSlot.java` → coverage catalog marks `BlockBuffSlot` / `BlockAbnormalSlot` partial: the abnormal lands, the slot mutex does not — #922 |
+| 21 | Buffs, debuffs, stat funcs, hit-time apply | ✅ | — | `handlers/skill/effects` → `ZoneWorldSkills` `ScheduleEffect`; 111/112 effect names full in `skill-effect-coverage.json` |
+| 22 | BlockBuffSlot family | ✅ | — | `BlockBuffSlot` / `NoblesseBless` / `ProtectionBlessing` → `ZoneWorldAbnormals` slot block, death consume, `PlayableAttackRules` via the effect name |
 | 23 | Cast conditions | ✅ | — | skill XML `<conditions>` → `SkillCastConditionEvaluator` (37/37 kinds, 189 imported trees) |
 | 24 | Signets 454–460 | ✅ | — | `EffectPoint.java` (Mobius still TODO on the signet case) → `ZoneWorldSignets` pulses from the skill template |
 | 25 | Cast vs movement, damage/stun break | ✅ | — | `Formulas.calcAtkBreak` → `ZoneWorldCastInterrupt`, `MagicSkillCanceled` |
@@ -172,15 +172,14 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 
 1. Geodata region files so LOS and paths leave stub mode (row 6) — #918. Loader is #793.
 2. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
-3. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
-4. Shop wear preview (row 48) — #924.
-5. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-6. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-7. Macros (row 69) — #927.
-8. Party matching rooms (row 67) — #928.
-9. Community board (row 70) — #929.
-10. Petitions (row 63) — #930.
-11. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+3. Shop wear preview (row 48) — #924.
+4. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+5. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+6. Macros (row 69) — #927.
+7. Party matching rooms (row 67) — #928.
+8. Community board (row 70) — #929.
+9. Petitions (row 63) — #930.
+10. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 
