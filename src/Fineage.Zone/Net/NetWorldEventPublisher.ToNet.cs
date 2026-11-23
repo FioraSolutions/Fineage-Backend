@@ -137,7 +137,7 @@ sealed partial class NetWorldEventPublisher
                 ? [new AttackHitNet { Damage = second.Damage, Flags = second.Flags }]
                 : []
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.AttackState, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AttackState, payload);
     }
 
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
@@ -149,13 +149,13 @@ sealed partial class NetWorldEventPublisher
             SkillLevel = skillLevel,
             TargetObjectIds = targetObjectIds
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.MagicSkillLaunched, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MagicSkillLaunched, payload);
     }
 
     void IWorldEventPublisher.FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
         var payload = NetCodec.EncodeMagicSkillCanceled(new MagicSkillCanceledNetMsg { ObjectId = objectId });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.MagicSkillCanceled, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MagicSkillCanceled, payload);
     }
 
     void IWorldEventPublisher.FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs)
@@ -170,7 +170,7 @@ sealed partial class NetWorldEventPublisher
             Z = z,
             DelayMs = delayMs
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.PlaySound, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PlaySound, payload);
     }
 
     void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status)
@@ -182,7 +182,7 @@ sealed partial class NetWorldEventPublisher
             AttributeIds = status.AttributeIds ?? [],
             Values = status.Values ?? []
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.StatusUpdate, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.StatusUpdate, payload);
     }
 
     void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags)
@@ -194,7 +194,7 @@ sealed partial class NetWorldEventPublisher
             KillerObjectId = killerObjectId,
             RestartFlags = restartFlags
         });
-                    _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.EntityDie, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.EntityDie, payload);
     }
 
     void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop)
@@ -211,7 +211,7 @@ sealed partial class NetWorldEventPublisher
             Stackable = drop.Stackable,
             Count = drop.Count
         });
-                    _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.DropItem, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.DropItem, payload);
     }
 
     void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId)
@@ -221,13 +221,13 @@ sealed partial class NetWorldEventPublisher
             EntityValue = (ulong)(uint)objectId,
             EntityGeneration = 1
         });
-                    _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.EntityDespawn, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.EntityDespawn, payload);
     }
 
     void IWorldEventPublisher.FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, MonRaceInfoNetMsg packet)
     {
         var payload = NetCodec.EncodeMonRaceInfo(packet);
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.MonRaceInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MonRaceInfo, payload);
     }
 
     void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, VehicleInfoNetMsg info) =>

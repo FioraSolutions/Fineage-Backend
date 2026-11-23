@@ -13,7 +13,7 @@ sealed partial class NetWorldEventPublisher
             Dwarven = list.Dwarven,
             RecipeIds = list.RecipeIds ?? []
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeBookList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeBookList, payload);
     }
 
     void IWorldEventPublisher.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeItemMakeInfoMsg info)
@@ -25,7 +25,7 @@ sealed partial class NetWorldEventPublisher
             CurrentMp = info.CurrentMp,
             MaxMp = info.MaxMp
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeItemMakeInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeItemMakeInfo, payload);
     }
 
     void IWorldEventPublisher.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopSellListMsg list)
@@ -48,7 +48,7 @@ sealed partial class NetWorldEventPublisher
             BuyerAdena = list.BuyerAdena,
             Items = items
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeShopSellList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeShopSellList, payload);
     }
 
     void IWorldEventPublisher.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopItemInfoMsg info)
@@ -61,6 +61,6 @@ sealed partial class NetWorldEventPublisher
             MaxMp = info.MaxMp,
             Result = info.Result
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeShopItemInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.RecipeShopItemInfo, payload);
     }
 }

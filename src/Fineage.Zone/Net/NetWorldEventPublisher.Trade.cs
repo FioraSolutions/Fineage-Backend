@@ -13,13 +13,13 @@ sealed partial class NetWorldEventPublisher
             RequestorObjectId = ask.RequestorObjectId,
             RequestorName = ask.RequestorName ?? ""
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeAsk, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeAsk, payload);
     }
 
     void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result)
     {
         var payload = NetCodec.EncodeTradeRequestResult(new TradeRequestResultNetMsg { Response = result.Response });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeRequestResult, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeRequestResult, payload);
     }
 
     void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeStartMsg start)
@@ -29,7 +29,7 @@ sealed partial class NetWorldEventPublisher
             PartnerObjectId = start.PartnerObjectId,
             PartnerName = start.PartnerName ?? ""
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeStart, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeStart, payload);
     }
 
     void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeOfferUpdateMsg update)
@@ -42,7 +42,7 @@ sealed partial class NetWorldEventPublisher
             Count = update.Count,
             EnchantLevel = update.EnchantLevel
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeOfferUpdate, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeOfferUpdate, payload);
     }
 
     void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeConfirmStateMsg state)
@@ -52,12 +52,12 @@ sealed partial class NetWorldEventPublisher
             SelfConfirmed = state.SelfConfirmed,
             PartnerConfirmed = state.PartnerConfirmed
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeConfirmState, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeConfirmState, payload);
     }
 
     void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeFinishedMsg finished)
     {
         var payload = NetCodec.EncodeTradeFinished(new TradeFinishedNetMsg { Response = finished.Response });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeFinished, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TradeFinished, payload);
     }
 }

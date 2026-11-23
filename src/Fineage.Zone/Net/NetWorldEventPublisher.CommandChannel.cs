@@ -15,17 +15,17 @@ sealed partial class NetWorldEventPublisher
             RequestorName = ask.RequestorName ?? "",
             RequestorObjectId = ask.RequestorObjectId
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelAskJoin, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelAskJoin, payload);
     }
 
     void IWorldEventPublisher.FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds)
     {
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelOpen, []);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelOpen, []);
     }
 
     void IWorldEventPublisher.FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds)
     {
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelClose, []);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelClose, []);
     }
 
     void IWorldEventPublisher.FanoutCommandChannelInfo(
@@ -51,6 +51,6 @@ sealed partial class NetWorldEventPublisher
             MemberCount = info.MemberCount,
             Parties = rows
         });
-                    _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.CommandChannelInfo, payload);
     }
 }
