@@ -319,7 +319,13 @@ public enum LedgerTxKind
     FishingChampionshipPrize = 57,
 
     /// <summary>Trainer skill enchant SP/EXP fee: <c>Reference</c> is skill id.</summary>
-    TrainerSkillEnchant = 58
+    TrainerSkillEnchant = 58,
+
+    /// <summary>
+    /// Inventory crystallize: the item leaves the bag and crystals are granted.
+    /// <c>Reference</c> is the destroyed item id. Enchant-fail crystals stay on <see cref="Enchant"/>.
+    /// </summary>
+    Crystallize = 59
 }
 
 /// <summary>

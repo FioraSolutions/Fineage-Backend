@@ -10,11 +10,11 @@ The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scrip
 
 | Direction | Packets | Server yes | partial | no | n/a | Client yes | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| C2S | 158 | 101 | 35 | 19 | 3 | 91 | 28 | 36 | 3 |
+| C2S | 158 | 102 | 35 | 18 | 3 | 91 | 28 | 36 | 3 |
 | C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
 | S2C | 270 | 177 | 54 | 32 | 7 | 210 | 6 | 47 | 7 |
 
-**In-scope gaps:** server not fully implemented (partial+no) **154**, of which server absent (**no**) **60**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
+**In-scope gaps:** server not fully implemented (partial+no) **153**, of which server absent (**no**) **59**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
 
 Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `ServerPackets`.
 
@@ -108,7 +108,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x6f | RequestPartyMatchConfig | no | no |  | party matching room |
 | 0x70 | RequestPartyMatchList | no | no |  |  |
 | 0x71 | RequestPartyMatchDetail | no | no |  |  |
-| 0x72 | RequestCrystallizeItem | no | no |  | dwarf crystallize-from-inventory; only enchant-fail crystals exist |
+| 0x72 | RequestCrystallizeItem | yes | no | RequestCrystallizeItem | `CrystallizeRules` + auditable economy ledger. Unity client does not send retail 0x72 yet |
 | 0x73 | RequestPrivateStoreManageSell | yes | contract | SetPrivateStoreSell |  |
 | 0x74 | SetPrivateStoreListSell | yes | contract | SetPrivateStoreSell |  |
 | 0x76 | RequestPrivateStoreQuitSell | yes | yes | PrivateStoreQuit |  |

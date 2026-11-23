@@ -15,9 +15,9 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 85 |
+| ✅ done | 86 |
 | 🟡 partial | 8 |
-| ❌ missing | 12 |
+| ❌ missing | 11 |
 | n/a | 3 |
 | **total** | **108** |
 
@@ -82,7 +82,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 48 | Shop wear / try-on | 🟡 | S | `handlers/bypass/npc/Wear.java` → `StubBypassHandler("Wear")` in `BypassRegistry.cs`. `SHOP_PREVIEW_LIST` is not sent — #924 |
 | 49 | Trade, private store, manufacture | ✅ | — | trade and private-store packets → `ZoneWorldTrade`, `ZoneWorldPrivateStore`, `ZoneWorldManufacture` |
 | 50 | Item enchant | ✅ | — | `RequestEnchantItem.java` → `ZoneWorldEnchant` |
-| 51 | Crystallize from inventory | ❌ | S | `RequestCrystallizeItem.java` → no handler. Enchant-fail crystals in `ZoneWorldEnchant` are a different path — #921 |
+| 51 | Crystallize from inventory | ✅ | — | `RequestCrystallizeItem.java` → `CrystallizeRules` + `LedgerTxKind.Crystallize`. Enchant-fail crystals stay on `ZoneWorldEnchant` — #921 |
 | 52 | Augmentation (life stones) | ✅ | — | `RequestRefine.java` → `AugmentPacketHandler`, `AugmentationCatalog` |
 | 53 | Skill enchant | ✅ | — | `RequestExEnchantSkill.java` → `SkillEnchantService` |
 | 54 | Craft and recipes | 🟡 | S | `RecipeManager.java` → `ZoneWorldCraft`. Forget-recipe (`RequestRecipeBookDestroy`) has no opcode — #935 |
@@ -174,17 +174,16 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 2. Geodata region files so LOS and paths leave stub mode (row 6) — #918. Loader is #793.
 3. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
 4. User commands, especially Unstuck (row 68) — #920.
-5. Inventory crystallize (row 51) — #921.
-6. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
-7. Logout back to the character lobby (row 4) — #923.
-8. Shop wear preview (row 48) — #924.
-9. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-10. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-11. Macros (row 69) — #927.
-12. Party matching rooms (row 67) — #928.
-13. Community board (row 70) — #929.
-14. Petitions (row 63) — #930.
-15. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+5. BlockBuffSlot mutex, plus NoblesseBless and ProtectionBlessing (row 22) — #922.
+6. Logout back to the character lobby (row 4) — #923.
+7. Shop wear preview (row 48) — #924.
+8. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+9. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+10. Macros (row 69) — #927.
+11. Party matching rooms (row 67) — #928.
+12. Community board (row 70) — #929.
+13. Petitions (row 63) — #930.
+14. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

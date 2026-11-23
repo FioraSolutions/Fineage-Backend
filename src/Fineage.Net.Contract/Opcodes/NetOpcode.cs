@@ -403,6 +403,11 @@ namespace Fineage.Net.Contract
         /// <c>ClientSetTime.java</c> — <c>writeD(gameMinutes)</c>, <c>writeD(6)</c>.
         /// </summary>
         public const ushort ClientSetTime = 0x03E1;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestCrystallizeItem</c> (retail wire <c>0x72</c>).
+        /// Body is object id and count. 0x03E2 is the parallel user-command opcode.
+        /// </summary>
+        public const ushort RequestCrystallizeItem = 0x03E3;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
