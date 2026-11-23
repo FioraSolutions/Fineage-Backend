@@ -40,12 +40,17 @@ public static class ScenarioLoader
 
     public static void Validate(LoadScenario scenario)
     {
-        var unknown = scenario.ActionWeights.Keys.Where(k => !KnownActions.Contains(k)).ToList();
-        if (unknown.Count > 0)
+        bool structuredPlay = scenario.Economy is { Enabled: true } ||
+                              scenario.HeavyPlay is { } hp && hp.IsHeavyPlay;
+        if (!structuredPlay)
         {
-            throw new InvalidOperationException(
-                $"scenario {scenario.Name}: unknown action(s) {string.Join(", ", unknown)}; known: {string.Join(", ", KnownActions)}. " +
-                "Town-to-town teleports are gatekeeperTravelShare, not an action weight.");
+            var unknown = scenario.ActionWeights.Keys.Where(k => !KnownActions.Contains(k)).ToList();
+            if (unknown.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"scenario {scenario.Name}: unknown action(s) {string.Join(", ", unknown)}; known: {string.Join(", ", KnownActions)}. " +
+                    "Town-to-town teleports are gatekeeperTravelShare, not an action weight.");
+            }
         }
 
         _ = scenario.ResolvedGatekeeperTravelShare;

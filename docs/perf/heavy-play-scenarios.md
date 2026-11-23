@@ -49,4 +49,4 @@ From `load-test-report.md` (peak Prometheus scrape):
 
 **SLO (Debug):** p99 tick **&lt; 50 ms** on the three `perf-aoe-*` scenarios (#951). Older town-walk gates remain at 200 ms.
 
-Record numbers in the PR that touches each optimization (table: scenario × metric × before × after).
+Recorded numbers: [heavy-play-benchmark-results.md](./heavy-play-benchmark-results.md) (VM **2026-11-23**, before #961–#964 on `dev`). Re-run the bench script after the perf stack merges and append the **after** column there and in PR #965.
