@@ -11,15 +11,16 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryFlushPlayerPersistBarrier(int objectId, ZoneSession session, ZoneEntity live)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             if (live.Inventory != null)
                 _dirtyInventories[objectId] = (session, live.Inventory);
-            if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
-            {
-                ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
-                return false;
-            }
+        }
+
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: objectId))
+        {
+            ZoneLog.Warn($"player persist blocked object {objectId}: auditable economy commit failed");
+            return false;
         }
 
         live.Inventory?.DiscardChanges();
@@ -28,7 +29,7 @@ public sealed partial class ZoneWorld
 
     void ClearDeferredPersistRows(int objectId)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
         {
             _dirtyInventories.Remove(objectId);
             _dirtyWarehouses.Remove(objectId);
@@ -41,12 +42,10 @@ public sealed partial class ZoneWorld
     bool PersistInventoryNow(ZoneSession session, PlayerInventory inventory)
     {
         RefreshWeightPenaltyAfterInventoryChange(session);
-        lock (_economyLock)
-        {
+        using (_economyLock.Enter())
             _dirtyInventories[session.ObjectId] = (session, inventory);
-            if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
-                return false;
-        }
+        if (!TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId))
+            return false;
         inventory.DiscardChanges();
         return true;
     }
@@ -78,43 +77,52 @@ public sealed partial class ZoneWorld
         || _snapshots.HasPendingDomain(CharacterPersistWorker.PetDomain);
 
     /// <summary>Flush + reload durable state, then detach without double-writing the same snapshot.</summary>
-    bool TryPrepareSameSessionReenter(
-        ZoneSession session,
-        ref CharacterRecord? stored,
-        long characterEpoch,
-        long petEpoch)
+    /// <summary>
+    /// True when the off-tick load is still current. A store that moved, or a player still in the world, returns
+    /// false without reading the database. <paramref name="reload"/> is true when the caller should load again
+    /// off the simulation thread (the player was detached, or the store moved). A failed economy commit sets
+    /// <see cref="ZoneSession.EnterRefusal"/> and leaves <paramref name="reload"/> false.
+    /// </summary>
+    bool TryPrepareSameSessionReenter(ZoneSession session, long characterEpoch, long petEpoch, out bool reload)
     {
         if (!session.InWorld)
         {
-            if (!CharacterStoreMoved(session.ObjectId, characterEpoch, petEpoch))
-                return true;
-            if (!DrainCharacterSnapshots(session.ObjectId))
-                return false;
-            ReloadCharacterRecord(session, ref stored);
-            return true;
+            reload = CharacterStoreMoved(session.ObjectId, characterEpoch, petEpoch);
+            return !reload;
         }
+
         if (!TryGetLivePlayer(session, out var live))
         {
-            ZoneLog.Warn($"same-session re-enter aborted object {session.ObjectId}: no live player for bound session");
+            string reason = $"enter refused: character {session.ObjectId} is marked in the world but has no live player";
+            session.EnterRefusal = reason;
+            ZoneLog.Warn(reason);
             session.InWorld = false;
+            reload = false;
             return false;
         }
 
         if (!TryFlushPlayerPersistBarrier(session.ObjectId, session, live))
+        {
+            session.EnterRefusal = $"enter refused: character {session.ObjectId} economy commit failed";
+            reload = false;
             return false;
-        // Non-economic snapshots are written off the simulation thread. Reload must see the latest of them.
-        if (!DrainCharacterSnapshots(session.ObjectId))
-            return false;
-        ReloadCharacterRecord(session, ref stored);
+        }
+
         if (!TryDetachPlayer(session, capturePersist: false, out _, out _))
+        {
+            session.EnterRefusal = $"enter refused: character {session.ObjectId} could not leave before re-enter";
+            reload = false;
             return false;
+        }
+
         ClearDeferredPersistRows(session.ObjectId);
-        return true;
+        reload = true;
+        return false;
     }
 
     internal bool HasDeferredInventoryForTests(int objectId)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
             return _dirtyInventories.ContainsKey(objectId);
     }
 
@@ -134,7 +142,7 @@ public sealed partial class ZoneWorld
 
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
-        lock (_economyLock)
+        using (_economyLock.Enter())
             _dirtyInventories[session.ObjectId] = (session, inventory);
     }
 }

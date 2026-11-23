@@ -75,7 +75,15 @@ internal sealed class FanoutDispatcher : IDisposable
             NoteEnqueued();
             try
             {
-                _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
+                StepWaitRegistry.Push("fanout-dispatcher channel");
+                try
+                {
+                    _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
+                }
+                finally
+                {
+                    StepWaitRegistry.Pop("fanout-dispatcher channel");
+                }
             }
             catch (ChannelClosedException ex)
             {
@@ -122,6 +130,9 @@ internal sealed class FanoutDispatcher : IDisposable
         new(
             $"fan-out dispatcher rejected batch tick={batch.Sequence.Tick} phase={batch.Sequence.Phase} seq={batch.Sequence.Sequence}: {reason}",
             inner);
+
+    internal string DescribeQueue() =>
+        $"fanout channel depth={(_queue.Reader.CanCount ? _queue.Reader.Count : -1)} inFlight={Volatile.Read(ref _inFlight)} pending={Volatile.Read(ref _pending)}";
 
     /// <summary>Test and shutdown: wait until the worker queue and in-flight batch are empty.</summary>
     public void WaitUntilIdle(TimeSpan? timeout = null)

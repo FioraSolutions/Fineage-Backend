@@ -89,8 +89,6 @@ public sealed partial class ZoneWorld
                 slot: slot);
         }
 
-        if (entity.Abnormals.Count > 0)
-            _byId.Join(entity, ActiveSets.WithAbnormals);
         RefreshRunSpeed(entity);
     }
 }

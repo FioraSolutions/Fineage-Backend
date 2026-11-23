@@ -6,6 +6,7 @@ using Fineage.Protocol;
 using Fineage.Zone.Chat;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Interest;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
@@ -24,47 +25,97 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
+    readonly SemaphoreSlim _enterLoads = new(
+        ZoneSimulationSettings.EnterLoadConcurrency,
+        ZoneSimulationSettings.EnterLoadConcurrency);
+
     public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct) =>
         await EnterWithSnapshotAsync(session, static _ => Fineage.Zone.Net.EnterSnapshot.ForTestEnter(), ct).ConfigureAwait(false) != null;
 
     sealed record EnterOutcome<T>(T Projection, int Known, int X, int Y, int Z, List<UnlinkPersistSnapshot>? Evicted);
 
+    /// <summary>A character loaded off the simulation thread, not yet in the world.</summary>
+    internal sealed class EnteringPlayer
+    {
+        public ZoneEntity? Entity { get; init; }
+        public CharacterRecord? Stored { get; init; }
+        public long CharacterEpoch { get; init; }
+        public long PetEpoch { get; init; }
+        public bool ApplyStarterKit { get; init; }
+        public string? Failure { get; init; }
+    }
+
     /// <summary>
-    /// PrepareEnter (async store read) → CommitEnter (simulation thread) → returns immutable enter snapshot.
+    /// Load the character off the simulation thread, let <paramref name="projectOffTick"/> build the self frames
+    /// from that body, then insert it through the command scheduler. The insert is the same
+    /// <c>request:enter</c> admission as every other command.
     /// </summary>
     internal async Task<Fineage.Zone.Net.EnterSnapshot?> EnterWithSnapshotAsync(
         ZoneSession session,
         Func<ZoneEntity, Fineage.Zone.Net.EnterSnapshot> commit,
-        CancellationToken ct)
+        CancellationToken ct,
+        Action<ZoneEntity>? projectOffTick = null)
     {
-        var prepared = await PrepareEnterCharacterAsync(session, ct).ConfigureAwait(false);
-        CharacterRecord? stored = prepared.Stored;
-        var selfPrepareTask = Task.Run(() => Fineage.Zone.Net.EnterSelfPrepare.FromStored(stored, _game.Items, _itemIds), ct);
-
-        session.PendingEnterSelfPrepare = await selfPrepareTask.ConfigureAwait(false);
-        EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered;
-        try
+        session.EnterRefusal = null;
+        EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered = null;
+        for (int attempt = 0; attempt < 2; attempt++)
         {
-            using var enterScope = _syncIo.EnterScope();
-            entered = await OnSimulationAsync(session, "enter", () =>
+            EnteringPlayer loaded = await LoadEnteringPlayerAsync(session, ct).ConfigureAwait(false);
+            if (loaded.Failure != null || loaded.Entity == null)
             {
-                CharacterRecord? enterStored = stored;
-                if (!TryPrepareSameSessionReenter(session, ref enterStored, prepared.CharacterEpoch, prepared.PetEpoch))
-                    return null;
-                if (!TryEnter(session, enterStored, out int known, out int x, out int y, out int z, out var evicted))
-                    return null;
-                CountOnlinePlayers();
-                if (!TryGetLivePlayer(session, out var player))
-                    throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
-                return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
-            }, ct).ConfigureAwait(false);
-        }
-        finally
-        {
-            session.PendingEnterSelfPrepare = null;
-            string? syncIo = _syncIo.ConsumeSummary();
-            if (syncIo != null)
-                ZoneLog.Info($"enter object={session.ObjectId} sync-io on simulation thread: {syncIo}");
+                string reason = loaded.Failure ?? $"enter refused: character {session.ObjectId} load produced no player";
+                session.EnterRefusal = reason;
+                ZoneLog.Warn(reason);
+                return null;
+            }
+
+            session.PendingEnterSelfPrepare = Fineage.Zone.Net.EnterSelfPrepare.FromStored(loaded.Stored, _game.Items, _itemIds);
+            try
+            {
+                projectOffTick?.Invoke(loaded.Entity);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                session.PendingEnterSelfPrepare = null;
+                session.PendingEnterProjection = null;
+                string frame = ex.StackTrace?.Split('\n', 2)[0].Trim() ?? "";
+                string reason = $"enter refused: character {session.ObjectId} self projection failed: {ex.GetType().Name}: {ex.Message}"
+                    + (frame.Length == 0 ? "" : $" ({frame})");
+                session.EnterRefusal = reason;
+                ZoneLog.Warn(reason);
+                return null;
+            }
+            bool stale = false;
+            try
+            {
+                using var enterScope = _syncIo.EnterScope();
+                entered = await OnSimulationAsync(session, "enter", () =>
+                {
+                    if (!TryInsertEnteringPlayer(session, loaded, out int known, out int x, out int y, out int z, out var evicted, out stale))
+                        return null;
+                    CountOnlinePlayers();
+                    if (!TryGetLivePlayer(session, out var player))
+                        throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
+                    return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
+                }, ct).ConfigureAwait(false);
+            }
+            finally
+            {
+                session.PendingEnterSelfPrepare = null;
+                session.PendingEnterProjection = null;
+                string? syncIo = _syncIo.ConsumeSummary();
+                if (syncIo != null)
+                    ZoneLog.Warn($"enter object={session.ObjectId} sync-io on simulation thread: {syncIo}");
+            }
+
+            if (!stale)
+                break;
+            if (attempt == 0)
+                continue;
+            string changed = $"enter refused: character {session.ObjectId} changed while loading";
+            session.EnterRefusal = changed;
+            ZoneLog.Warn(changed);
+            return null;
         }
 
         if (entered == null)
@@ -83,25 +134,127 @@ public sealed partial class ZoneWorld
         return entered.Projection;
     }
 
-    readonly record struct EnterStoreRead(CharacterRecord? Stored, long CharacterEpoch, long PetEpoch);
-
-    async Task<EnterStoreRead> PrepareEnterCharacterAsync(ZoneSession session, CancellationToken ct)
+    async Task<EnteringPlayer> LoadEnteringPlayerAsync(ZoneSession session, CancellationToken ct)
     {
-        var accounts = _accounts;
-        if (accounts == null || session.ObjectId <= 0)
-            return default;
-        return await Task.Run(() =>
+        await _enterLoads.WaitAsync(ct).ConfigureAwait(false);
+        try
         {
-            // Off the simulation thread: a leave or kick may still be sitting in the snapshot queue.
-            _snapshots.DrainOwner(CharacterPersistWorker.CharacterDomain, session.ObjectId, TimeSpan.FromSeconds(2));
-            _snapshots.DrainDomain(CharacterPersistWorker.PetDomain, TimeSpan.FromSeconds(2));
-            long characterEpoch = _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, session.ObjectId);
-            long petEpoch = _snapshots.DomainEpoch(CharacterPersistWorker.PetDomain);
-            return new EnterStoreRead(
-                accounts.FindById(session.Account, session.ObjectId),
-                characterEpoch,
-                petEpoch);
-        }, ct).ConfigureAwait(false);
+            return await Task.Run(() => LoadEnteringPlayer(session), ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            string frame = ex.StackTrace?.Split('\n', 2)[0].Trim() ?? "";
+            return new EnteringPlayer
+            {
+                Failure = $"enter refused: character {session.ObjectId} load failed: {ex.GetType().Name}: {ex.Message}"
+                    + (frame.Length == 0 ? "" : $" ({frame})")
+            };
+        }
+        finally
+        {
+            _enterLoads.Release();
+        }
+    }
+
+    EnteringPlayer LoadEnteringPlayer(ZoneSession session)
+    {
+        if (session.ObjectId <= 0)
+            return new EnteringPlayer { Failure = $"enter refused: character id {session.ObjectId} is not bound" };
+
+        if (_accounts != null)
+        {
+            if (!_snapshots.DrainOwner(CharacterPersistWorker.CharacterDomain, session.ObjectId, TimeSpan.FromSeconds(2))
+                || !_snapshots.DrainDomain(CharacterPersistWorker.PetDomain, TimeSpan.FromSeconds(2)))
+            {
+                return new EnteringPlayer
+                {
+                    Failure = $"enter refused: character {session.ObjectId} snapshots did not drain within 2s"
+                };
+            }
+        }
+
+        long characterEpoch = _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, session.ObjectId);
+        long petEpoch = _snapshots.DomainEpoch(CharacterPersistWorker.PetDomain);
+        CharacterRecord? stored = _accounts?.FindById(session.Account, session.ObjectId);
+        var entity = BuildEnteringPlayer(session, stored);
+        return new EnteringPlayer
+        {
+            Entity = entity,
+            Stored = stored,
+            CharacterEpoch = characterEpoch,
+            PetEpoch = petEpoch,
+            ApplyStarterKit = NeedsStarterInventory(stored)
+        };
+    }
+
+    ZoneEntity BuildEnteringPlayer(ZoneSession session, CharacterRecord? stored)
+    {
+        var spawn = SpawnFor(session, stored);
+        var inventory = LoadInventory(session, stored);
+        var vitals = LoadVitals(session, stored);
+        var warehouse = new PrivateWarehouse(_game.Items, _itemIds);
+        if (stored?.Warehouse != null)
+            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+        LogWarehouseLoad("warehouse", session.ObjectId, warehouse);
+        RememberPenalties(session, stored);
+        var entity = new ZoneEntity
+        {
+            ObjectId = session.ObjectId,
+            Kind = ZoneEntityKind.Player,
+            Name = session.Name,
+            Title = stored?.Title ?? "",
+            X = spawn.X,
+            Y = spawn.Y,
+            Z = spawn.Z,
+            ClassId = session.ClassId,
+            RunSpeed = MoveSpeed(session.ClassId).run,
+            WalkSpeed = MoveSpeed(session.ClassId).walk,
+            Dex = DexOf(session.ClassId),
+            BaseSwimRunSpeed = ZoneCombat.DefaultSwimSpeed,
+            BaseSwimWalkSpeed = ZoneCombat.DefaultSwimSpeed,
+            Running = true,
+            Session = session,
+            Inventory = inventory,
+            MaxHp = vitals.maxHp,
+            CurHp = vitals.hp,
+            MaxMp = vitals.maxMp,
+            CurMp = vitals.mp,
+            MaxCp = vitals.maxCp,
+            CurCp = vitals.cp,
+            Level = vitals.level,
+            Race = vitals.race,
+            Sex = vitals.sex,
+            ClanId = ClanIdFor(session.ObjectId),
+            Warehouse = warehouse,
+            Newbie = stored?.Newbie ?? true,
+            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel),
+            Karma = Math.Max(0, stored?.Karma ?? 0),
+            PkKills = Math.Max(0, stored?.PkKills ?? 0),
+            PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
+        };
+        LoadHenna(entity, stored);
+        LoadClassState(entity, stored);
+        SyncOlympiadNoblesse(entity);
+        LoadQuestProgress(session, entity, stored);
+        LoadLearnedSkills(entity, stored);
+        LoadKnownRecipes(entity, stored);
+        RefreshKnownSkills(entity);
+        if (NeedsStarterInventory(stored))
+            GrantStarterKitBody(entity);
+        RefreshGearSkills(entity);
+        RefreshPlayerMaxima(entity, fanout: false);
+        RestoreStoredEffects(entity, stored);
+        int penalty = WeightPenaltyLevelOf(entity);
+        if (penalty != entity.WeightPenaltyLevel)
+        {
+            entity.WeightPenaltyLevel = penalty;
+            RefreshRunSpeed(entity);
+        }
+
+        LoadShortcuts(entity, stored);
+        RefreshGradePenalty(entity);
+        EnsureFreightLoaded(entity, stored);
+        return entity;
     }
 
     public Task LeaveAsync(ZoneSession session, CancellationToken ct) => LeaveAsync<object>(session, null, ct);
@@ -146,21 +299,27 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    bool TryEnter(
+    bool TryInsertEnteringPlayer(
         ZoneSession session,
-        CharacterRecord? stored,
+        EnteringPlayer loaded,
         out int known,
         out int enterX,
         out int enterY,
         out int enterZ,
-        out List<UnlinkPersistSnapshot>? pendingUnlink)
+        out List<UnlinkPersistSnapshot>? pendingUnlink,
+        out bool stale)
     {
         using var tryTimer = Fineage.Zone.Net.EnterMetrics.MeasureTryEnter();
         known = 0;
         enterX = enterY = enterZ = 0;
         pendingUnlink = null;
-        if (session.ObjectId <= 0)
+        stale = false;
+        var entity = loaded.Entity;
+        if (entity == null || session.ObjectId <= 0)
             return false;
+        if (!TryPrepareSameSessionReenter(session, loaded.CharacterEpoch, loaded.PetEpoch, out stale))
+            return false;
+
         long enterNow = NowUnixMs();
         if (PunishmentBlocksEnter(session, enterNow))
             return false;
@@ -175,82 +334,18 @@ public sealed partial class ZoneWorld
             pendingUnlink = [evicted!.Value];
         }
 
-        var spawn = SpawnFor(session, stored);
-        var inventory = LoadInventory(session, stored);
-        bool applyStarterKit = NeedsStarterInventory(stored);
-        var vitals = LoadVitals(session, stored);
-        var warehouse = new PrivateWarehouse(_game.Items, _itemIds);
-        if (stored?.Warehouse != null)
-            warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
-        LogWarehouseLoad("warehouse", session.ObjectId, warehouse);
-        RememberPenalties(session, stored);
-        var entity = new ZoneEntity
-        {
-            ObjectId = session.ObjectId,
-            Kind = ZoneEntityKind.Player,
-            Name = session.Name,
-            Title = stored?.Title ?? "",
-            X = spawn.X,
-            Y = spawn.Y,
-            Z = spawn.Z,
-            ClassId = session.ClassId,
-            RunSpeed = MoveSpeed(session.ClassId).run,
-            WalkSpeed = MoveSpeed(session.ClassId).walk,
-            Dex = DexOf(session.ClassId),
-            // Mobius player templates always declare baseMoveSpd slowSwim/fastSwim = 50.
-            BaseSwimRunSpeed = ZoneCombat.DefaultSwimSpeed,
-            BaseSwimWalkSpeed = ZoneCombat.DefaultSwimSpeed,
-            Running = true,
-            Session = session,
-            Inventory = inventory,
-            MaxHp = vitals.maxHp,
-            CurHp = vitals.hp,
-            MaxMp = vitals.maxMp,
-            CurMp = vitals.mp,
-            MaxCp = vitals.maxCp,
-            CurCp = vitals.cp,
-            Level = vitals.level,
-            Race = vitals.race,
-            Sex = vitals.sex,
-            ClanId = ClanIdFor(session.ObjectId),
-            Warehouse = warehouse,
-            Newbie = stored?.Newbie ?? true,
-            // Mobius Player.loadCharFromDB:6578 restores _deathPenaltyBuffLevel, so the debuff outlives the session.
-            DeathPenaltyLevel = Math.Clamp(stored?.DeathPenaltyLevel ?? 0, 0, DeathPenalty.MaxLevel),
-            Karma = Math.Max(0, stored?.Karma ?? 0),
-            PkKills = Math.Max(0, stored?.PkKills ?? 0),
-            PvpKills = Math.Max(0, stored?.PvpKills ?? 0)
-        };
-        LoadHenna(entity, stored);
-        LoadClassState(entity, stored);
-        SyncOlympiadNoblesse(entity);
-        LoadQuestProgress(session, entity, stored);
-        LoadLearnedSkills(entity, stored);
-        LoadKnownRecipes(entity, stored);
-        LoadSocialLists(entity, stored);
-        ApplyWeddingOnEnter(entity);
-        RefreshKnownSkills(entity);
-        RefreshGearSkills(entity);
-        RefreshPlayerMaxima(entity, fanout: false);
-        RestoreStoredEffects(entity, stored);
-        // Mobius GameClient:493 / EnterWorld:208 — refreshOverloaded() runs before the first UserInfo, so a character
-        // that logs in while overloaded already carries skill 4270's level and its slowed speeds. This must come after
-        // RefreshKnownSkills: Weight Limit 150 and the armor-set weightLimit/weightPenalty passives are only in
-        // KnownSkills once the skill book is rebuilt, and they change both the limit and the bonus.
-        int penalty = WeightPenaltyLevelOf(entity);
-        if (penalty != entity.WeightPenaltyLevel)
-        {
-            entity.WeightPenaltyLevel = penalty;
-            RefreshRunSpeed(entity); // PlayerStatMods folds 4270, so the live speed needs the level first
-        }
-        LoadShortcuts(entity, stored);
-        SyncClanStanding(entity);
-        RefreshGradePenalty(entity);
-        EnsureFreightLoaded(entity, stored);
         _byId[entity.ObjectId] = entity;
-        ApplyNoRestartOnLogin(entity, stored?.LastAccess);
+        if (entity.Abnormals.Count > 0)
+            _byId.Join(entity, ActiveSets.WithAbnormals);
+        // After any previous session for this id has left: leave unloads the lists, and the new player needs its own.
+        LoadSocialLists(entity, loaded.Stored);
+        // These read the live directory (partner, pledge class). The entity is in it now, and only this thread may read it.
+        ApplyWeddingOnEnter(entity);
+        SyncClanStanding(entity);
+        // No-restart oust and rule-zone membership are world admission. Oust moves the body before AOI enter.
+        ApplyNoRestartOnLogin(entity, loaded.Stored?.LastAccess);
         UpdateRuleZoneState(entity);
-        if (applyStarterKit)
+        if (loaded.ApplyStarterKit)
             ApplyStarterKitLedger(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.
         entity.Inventory?.EstablishCursor();

@@ -100,6 +100,12 @@ public static class ZoneSimulationSettings
     /// </summary>
     public static int CommandQueueMaxAgeMs => ReadIntStrict("FINEAGE_ZONE_COMMAND_QUEUE_MAX_AGE_MS", 2000, min: 1, max: 120_000);
 
+    /// <summary>
+    /// How many character loads may hit the store at once (<c>FINEAGE_ZONE_ENTER_LOAD_CONCURRENCY</c>, default 8).
+    /// The simulation thread does not load; it only inserts a player that was prepared off-tick.
+    /// </summary>
+    public static int EnterLoadConcurrency => ReadIntStrict("FINEAGE_ZONE_ENTER_LOAD_CONCURRENCY", 8, min: 1, max: 256);
+
     public static IRegionExecutor RegionExecutor(int workers) =>
         workers == 0 ? SequentialRegionExecutor.Instance : new ParallelRegionExecutor(workers);
 

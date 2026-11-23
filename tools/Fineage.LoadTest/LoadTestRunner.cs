@@ -202,7 +202,28 @@ public sealed class LoadTestRunner
 
         ProcessSample? proc = zonePid is > 0 ? new ProcessMetricsSampler().SamplePid(zonePid.Value) : null;
 
-        var consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize, steadyStateStarted);
+        ConsistencyReport consistency;
+        bool oracleRan = false;
+        if (hang.Hung)
+        {
+            // A stalled step used to leave the runner inside the per-frame oracle, so the report was never written.
+            consistency = new ConsistencyReport();
+            bugs.Add("P0: simulation hang; consistency oracle skipped so the report is written with the stall evidence.");
+        }
+        else
+        {
+            try
+            {
+                consistency = ConsistencyOracle.Analyze(bots, scenario, scenario.AoiCellSize, steadyStateStarted);
+                oracleRan = true;
+            }
+            catch (Exception ex)
+            {
+                consistency = new ConsistencyReport();
+                runFault ??= ex;
+            }
+        }
+
         var hardIssues = consistency.Issues.Where(i => ConsistencyOracle.IsHardFailure(i.Kind)).ToList();
         if (consistency.Issues.Count > 0)
         {
@@ -214,10 +235,10 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
-        if (scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
+        if (oracleRan && scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
             failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
-        // The oracle can run long enough for a step that stalled at the end of the behavior window to cross
-        // the watchdog limit only after the first read. Read the zone log again so that stall still fails the run.
+        // Teardown, or an oracle that outlasts the watchdog, can cross the limit after the first read.
+        // Read the zone log again so that stall fails the run.
         hang = SimulationHangGate.Combine(hang, SimulationHangGate.FromLogFile(zoneLog));
         if (hang.Hung && hang.Reason != null)
             failReasons.Add(hang.Reason);

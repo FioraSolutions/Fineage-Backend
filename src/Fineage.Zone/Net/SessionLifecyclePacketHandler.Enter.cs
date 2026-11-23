@@ -26,12 +26,17 @@ sealed partial class SessionLifecyclePacketHandler
         _world.ApplyPlayerLanguage(zoneSession, enter.Language);
 
         var snapshot = await _world.EnterWithSnapshotAsync(
-                zoneSession, entity => CommitEnter(zoneSession, self, entity), ct)
+                zoneSession,
+                entity => CommitEnter(zoneSession, self, entity),
+                ct,
+                projectOffTick: entity => ProjectSelf(zoneSession, self, entity))
             .ConfigureAwait(false);
         if (snapshot == null)
         {
-            Console.Error.WriteLine($"[ZONE] enter rejected enter_failed account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name}");
-            await _reject(conn, "enter_failed", "Could not enter world.", ct).ConfigureAwait(false);
+            string reason = zoneSession.EnterRefusal ?? "Could not enter world.";
+            Console.Error.WriteLine(
+                $"[ZONE] enter rejected enter_failed account={zoneSession.Account} char={zoneSession.ObjectId} name={zoneSession.Name}: {reason}");
+            await _reject(conn, "enter_failed", reason, ct).ConfigureAwait(false);
             return;
         }
 
@@ -48,56 +53,100 @@ sealed partial class SessionLifecyclePacketHandler
     }
 
     /// <summary>
-    /// On the simulation thread: immutable enter snapshot for off-thread encoding. No NetCodec on known entities.
+    /// Self frames from a player that is not in the world yet. Runs off the simulation thread.
+    /// UserInfo is built from the entity, not from a directory lookup.
+    /// </summary>
+    void ProjectSelf(ZoneSession zoneSession, EntityId self, ZoneEntity entity, bool dangerArea = false)
+    {
+        using var _ = EnterMetrics.MeasureSelfProjection();
+        long nowMs = _clock().ToUnixTimeMilliseconds();
+        int pAtkSpd = _playerSpawnPAtkSpd(entity);
+        var packets = NetEnterWorldProjector.FromEntityCore(entity, self, nowMs, pAtkSpd);
+        var selfSlots = new List<EnterSelfSlot>
+        {
+            new(NetOpcode.EntitySpawn, packets.Spawn),
+            new(NetOpcode.PlayerStats, packets.Stats),
+            new(NetOpcode.ClientSetTime, _world.BuildClientSetTimeNet(nowMs)),
+            new(NetOpcode.UserInfo, _world.BuildUserInfo(entity))
+        };
+        var items = zoneSession.PendingEnterSelfPrepare?.Items;
+        selfSlots.Add(items != null
+            ? new EnterSelfSlot(NetOpcode.ItemList, items)
+            : new EnterSelfSlot(NetOpcode.ItemList, entity.Inventory!));
+        selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, EnterSkillCapture.From(entity, nowMs)));
+        selfSlots.Add(new EnterSelfSlot(NetOpcode.ShortCutInit, _world.BuildShortcutInit(entity)));
+        if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerActionState, actionState));
+        if (_world.TryBuildNetAbnormalStatus(entity, out var abnormals))
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.AbnormalStatusUpdate, abnormals));
+        if (entity.Inventory != null)
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.EtcStatusUpdate, ZoneWorld.EtcStatusOf(entity, dangerArea)));
+        selfSlots.Add(new EnterSelfSlot(NetOpcode.QuestList, _world.NetQuestList(entity)));
+        if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
+        {
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeStatus, clanStatus));
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeMemberList, clanMembers));
+        }
+
+        var welcome = _world.Localize(zoneSession, SayRules.Welcome(zoneSession.Name));
+        selfSlots.Add(new EnterSelfSlot(NetOpcode.SystemMessage, new SystemMessageNetMsg
+        {
+            Id = welcome.Id,
+            Text = welcome.Text,
+            Params = welcome.Params ?? []
+        }));
+
+        zoneSession.PendingEnterProjection = new EnterProjection
+        {
+            Slots = selfSlots,
+            Remote = NetEnterWorldProjector.BuildRemoteSpawn(entity, self, pAtkSpd),
+            SkillCount = entity.KnownSkills.Count,
+            Hero = entity.Hero,
+            Noble = entity.Noble,
+            ClanId = entity.ClanId,
+            ClanCrestId = entity.ClanCrestId,
+            PledgeClass = entity.PledgeClass,
+            PartnerId = entity.PartnerId,
+            Married = entity.Married,
+            DangerArea = dangerArea,
+            RunSpeed = entity.RunSpeed,
+            X = entity.X,
+            Y = entity.Y,
+            Z = entity.Z
+        };
+    }
+
+    /// <summary>
+    /// On the simulation thread: knownlist snapshot plus the self frames already built off-tick.
+    /// Rebuilds those frames only when admission changed the body they were built from.
     /// </summary>
     EnterSnapshot CommitEnter(ZoneSession zoneSession, EntityId self, ZoneEntity entity)
     {
         using var _ = EnterMetrics.MeasurePlan();
-        var selfSlots = new List<EnterSelfSlot>();
+        var projected = zoneSession.PendingEnterProjection;
+        bool danger = _world.InDangerArea(entity);
+        bool matches = projected != null
+            && projected.SkillCount == entity.KnownSkills.Count
+            && projected.Hero == entity.Hero
+            && projected.Noble == entity.Noble
+            && projected.ClanId == entity.ClanId
+            && projected.ClanCrestId == entity.ClanCrestId
+            && projected.PledgeClass == entity.PledgeClass
+            && projected.PartnerId == entity.PartnerId
+            && projected.Married == entity.Married
+            && projected.DangerArea == danger
+            && projected.RunSpeed == entity.RunSpeed
+            && projected.X == entity.X
+            && projected.Y == entity.Y
+            && projected.Z == entity.Z;
+        if (!matches)
+            ProjectSelf(zoneSession, self, entity, danger);
+        projected = zoneSession.PendingEnterProjection
+            ?? throw new InvalidOperationException(
+                $"enter object={zoneSession.ObjectId} has no self projection");
+
         IReadOnlyList<KnownPresenceSlot> known;
-        EntitySpawnMsg selfRemote;
         int knownPlayers;
-
-        using (EnterMetrics.MeasureSelfProjection())
-        {
-            long nowMs = _clock().ToUnixTimeMilliseconds();
-            int pAtkSpd = _playerSpawnPAtkSpd(entity);
-            var packets = NetEnterWorldProjector.FromEntityCore(entity, self, nowMs, pAtkSpd);
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.EntitySpawn, packets.Spawn));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerStats, packets.Stats));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.ClientSetTime, _world.BuildClientSetTimeNet(nowMs)));
-            if (_world.TryBuildNetUserInfo(zoneSession, out var userInfo))
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.UserInfo, userInfo));
-            var items = zoneSession.PendingEnterSelfPrepare?.Items;
-            selfSlots.Add(items != null
-                ? new EnterSelfSlot(NetOpcode.ItemList, items)
-                : new EnterSelfSlot(NetOpcode.ItemList, entity.Inventory!));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, EnterSkillCapture.From(entity, nowMs)));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.ShortCutInit, _world.BuildShortcutInit(zoneSession)));
-            if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerActionState, actionState));
-            if (_world.TryBuildNetAbnormalStatus(zoneSession, out var abnormals))
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.AbnormalStatusUpdate, abnormals));
-            if (_world.TryBuildNetEtcStatus(zoneSession, out var etcStatus))
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.EtcStatusUpdate, etcStatus));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.QuestList, _world.NetQuestList(zoneSession)));
-            if (_world.TryBuildNetClanSnapshot(zoneSession, out var clanStatus, out var clanMembers))
-            {
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeStatus, clanStatus));
-                selfSlots.Add(new EnterSelfSlot(NetOpcode.PledgeMemberList, clanMembers));
-            }
-
-            var welcome = _world.Localize(zoneSession, SayRules.Welcome(zoneSession.Name));
-            selfSlots.Add(new EnterSelfSlot(NetOpcode.SystemMessage, new SystemMessageNetMsg
-            {
-                Id = welcome.Id,
-                Text = welcome.Text,
-                Params = welcome.Params ?? []
-            }));
-
-            selfRemote = NetEnterWorldProjector.BuildRemoteSpawn(entity, self, _playerSpawnPAtkSpd(entity));
-        }
-
         List<PeerFanoutSlot> peerFanout;
         using (EnterMetrics.MeasureKnownSnapshot())
             (known, peerFanout) = SnapshotKnownPresence(zoneSession, entity);
@@ -107,8 +156,8 @@ sealed partial class SessionLifecyclePacketHandler
         return new EnterSnapshot
         {
             SessionObjectId = zoneSession.ObjectId,
-            Self = selfSlots,
-            SelfRemoteSpawn = selfRemote,
+            Self = projected.Slots,
+            SelfRemoteSpawn = projected.Remote,
             Known = known,
             PeerFanout = peerFanout,
             KnownEntityCount = known.Count,
@@ -216,8 +265,11 @@ sealed partial class SessionLifecyclePacketHandler
             _presence.Unregister(registeredObjectId, conn);
     }
 
-    internal EnterSnapshot CommitEnterForTest(ZoneSession zoneSession, EntityId self, ZoneEntity entity) =>
-        CommitEnter(zoneSession, self, entity);
+    internal EnterSnapshot CommitEnterForTest(ZoneSession zoneSession, EntityId self, ZoneEntity entity)
+    {
+        ProjectSelf(zoneSession, self, entity);
+        return CommitEnter(zoneSession, self, entity);
+    }
 
     static void RequireHello(NetConnection conn)
     {
