@@ -6,7 +6,7 @@ Architecture review §7 requires proving **0 dupes** and **0 ledger divergence**
 |----------|-----------|----------|
 | Crash before COMMIT | `FlakyLedgerJournal` / failed `CommitEconomy` | Dirty bags restored; store unchanged; `EconomyWorldReconciler` clean |
 | Crash after COMMIT | N/A in-process (use integration + kill) | Journal + items durable; restart reload matches ledger |
-| After COMMIT, before apply | Future: deferred publish (#966 phase 2) | No client dup; replay completes |
+| After COMMIT, before apply | `EconomyPersistService` completion queue | Publish only after `DrainCompletions` |
 | Disconnect before reply | Net test timeout | Idempotent retry via `LedgerTxId` |
 | Duplicate request | Resend same command | Second ledger submit rejected or no-op |
 | Last-item race | Two pickups same ground id | One winner; ledger conservation |

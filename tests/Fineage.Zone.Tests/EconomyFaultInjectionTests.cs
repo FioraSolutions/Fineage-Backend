@@ -1,7 +1,9 @@
+using System.Reflection;
 using Fineage.Accounts;
 using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Game.Services;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -28,7 +30,10 @@ public sealed class EconomyFaultInjectionTests
             0,
             [new LedgerPosting(shop, Adena, -1), new LedgerPosting(bag, Adena, 1)])).Ok);
         bench.World.StageDeferredInventoryForTest(player.Session, player.Inventory!);
-        Assert.False(bench.World.FlushDirtyInventoriesForTests());
+        using var metrics = new MetricsCollector();
+        Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
         Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));
         Assert.Equal(5, player.Saved().Sum(row => row.ItemId == Adena ? row.Count : 0));
         EconomyInvariantChecker.AssertHold(bench.World.LedgerForTests);
@@ -41,6 +46,43 @@ public sealed class EconomyFaultInjectionTests
         var player = await bench.EnterAsync(items: [new StoredItem(Adena, 100, -1)]);
         Assert.Null(await bench.World.TryGiveItemAsync(player.Session, Adena, 50, CancellationToken.None));
         Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        EconomyInvariantChecker.AssertHold(bench.World.LedgerForTests);
+    }
+
+    [Fact]
+    public async Task In_flight_batch_blocks_second_enqueue_with_reservation_conflict()
+    {
+        var gate = new BlockingAccountStore();
+        var bench = new WorldBench(accounts: gate.Store);
+        Assert.Equal(AddAccountStatus.Created, gate.Store.TryAddAccount("busy", "hash", "salt", 1, null));
+        Assert.Equal(CreateCharacterStatus.Ok,
+            gate.Store.TryAddCharacter("busy", "Busy", 0, 0, 0, out var created, [new StoredItem(Adena, 1, -1)]));
+        var session = new ZoneSession();
+        session.Bind(created!.Id, "busy", "Busy", 0);
+        bench.World.StageDeferredInventoryForTest(session, new PlayerInventory(bench.Game.Items));
+        var flush = Task.Run(() => Assert.True(bench.World.FlushDirtyInventoriesForTests()));
+        Assert.True(gate.Entered.Wait(TimeSpan.FromSeconds(10)), "first batch did not reach CommitEconomy");
+        bench.World.StageDeferredInventoryForTest(session, new PlayerInventory(bench.Game.Items));
+        Assert.False(bench.World.FlushDirtyInventoriesForTests());
+        gate.Release.Set();
+        await flush;
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+    }
+
+    [Fact]
+    public async Task Postgres_failure_restores_dirty_without_partial_store_write()
+    {
+        var store = new FailingAccountStore();
+        var bench = new WorldBench(accounts: store.Store);
+        var player = await bench.EnterAsync(items: [new StoredItem(Adena, 7, -1)]);
+        Assert.Null(await bench.World.TryGiveItemAsync(player.Session, Adena, 3, CancellationToken.None));
+        Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));
+        using var metrics = new MetricsCollector();
+        Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
+        Assert.Equal(7, player.Saved().Sum(row => row.ItemId == Adena ? row.Count : 0));
         EconomyInvariantChecker.AssertHold(bench.World.LedgerForTests);
     }
 
@@ -90,6 +132,86 @@ public sealed class EconomyFaultInjectionTests
             }
 
             _unflushed = 0;
+        }
+    }
+
+    sealed class BlockingAccountStore
+    {
+        public ManualResetEventSlim Entered { get; } = new(false);
+        public ManualResetEventSlim Release { get; } = new(false);
+        public IAccountStore Store { get; }
+
+        public BlockingAccountStore()
+        {
+            var proxy = DispatchProxy.Create<IAccountStore, Proxy>()!;
+            ((Proxy)(object)proxy).Init(MemoryAccountStore.InMemory(), this);
+            Store = proxy;
+        }
+
+        class Proxy : DispatchProxy
+        {
+            BlockingAccountStore _owner = null!;
+            IAccountStore _inner = null!;
+
+            public void Init(IAccountStore inner, BlockingAccountStore owner)
+            {
+                _inner = inner;
+                _owner = owner;
+            }
+
+            protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+            {
+                ArgumentNullException.ThrowIfNull(targetMethod);
+                if (targetMethod.Name == nameof(IAccountStore.CommitEconomy))
+                {
+                    _owner.Entered.Set();
+                    _owner.Release.Wait();
+                }
+
+                try
+                {
+                    return targetMethod.Invoke(_inner, args);
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException != null)
+                {
+                    throw ex.InnerException;
+                }
+            }
+        }
+    }
+
+    sealed class FailingAccountStore
+    {
+        public IAccountStore Store { get; }
+
+        public FailingAccountStore()
+        {
+            var proxy = DispatchProxy.Create<IAccountStore, Proxy>()!;
+            ((Proxy)(object)proxy).Init(MemoryAccountStore.InMemory());
+            Store = proxy;
+        }
+
+        class Proxy : DispatchProxy
+        {
+            IAccountStore _inner = null!;
+
+            public void Init(IAccountStore inner) => _inner = inner;
+
+            protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+            {
+                ArgumentNullException.ThrowIfNull(targetMethod);
+                if (targetMethod.Name == nameof(IAccountStore.CommitEconomy))
+                    throw new InvalidOperationException("simulated postgres unavailable");
+
+                try
+                {
+                    return targetMethod.Invoke(_inner, args);
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException != null)
+                {
+                    throw ex.InnerException;
+                }
+            }
         }
     }
 }
