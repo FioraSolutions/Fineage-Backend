@@ -12,6 +12,8 @@ enum MailboxAdmit
     Closed
 }
 
+readonly record struct MailboxTaken(int Frames, int Bytes);
+
 /// <summary>
 /// One ordered mailbox per connection. Producers never wait: movement coalesces, a knownlist snapshot
 /// replaces the pending one when the budget cannot hold both, visuals drop when stale, and a reliable
@@ -33,6 +35,11 @@ sealed class OutboundMailbox
     int _orderedBytes;
     int _orderedFrames;
     int _openBytes;
+    // Frames Take already handed to the pump but the socket write has not finished.
+    // They still occupy the budget: the mailbox looks empty while a slow write is in progress,
+    // and the next reliable batch must not be treated as the one empty-queue burst.
+    int _inflightFrames;
+    int _inflightBytes;
     bool _closed;
     bool _loggedClosed;
 
@@ -67,15 +74,21 @@ sealed class OutboundMailbox
     public void Close()
     {
         lock (_gate)
+        {
             _closed = true;
+            _inflightFrames = 0;
+            _inflightBytes = 0;
+        }
     }
 
     public MailboxAdmit TryAppend(PacketEnvelope envelope) => TryAdmitBatch([envelope], forceWholeBatch: false);
 
     /// <summary>
-    /// Admits <paramref name="envelopes"/> without waiting. When the ordered queue is empty, or
-    /// <paramref name="forceWholeBatch"/> is set, the whole batch is kept even if it exceeds the budget;
-    /// the pump splits the socket write. A later batch that does not fit rejects on a reliable frame.
+    /// Admits <paramref name="envelopes"/> without waiting. One burst may exceed the budget when this
+    /// connection is holding nothing (the pump splits the socket write), or when
+    /// <paramref name="forceWholeBatch"/> is set. Bytes already handed to the pump still count, so a
+    /// slow socket write does not make the mailbox look empty. A later batch that does not fit rejects
+    /// on a reliable frame.
     /// </summary>
     public MailboxAdmit TryAdmitBatch(IReadOnlyList<PacketEnvelope> envelopes, bool forceWholeBatch)
     {
@@ -84,7 +97,7 @@ sealed class OutboundMailbox
             if (_closed)
                 return ClosedOnce();
 
-            bool force = forceWholeBatch || _orderedFrames == 0;
+            bool force = forceWholeBatch || (_orderedFrames == 0 && _inflightFrames == 0);
             foreach (PacketEnvelope envelope in envelopes)
             {
                 MailboxAdmit admit = AdmitOne(envelope, force);
@@ -183,12 +196,16 @@ sealed class OutboundMailbox
         }
     }
 
-    /// <summary>Moves the current snapshot to <paramref name="destination"/>. Returns how many frames were taken.</summary>
-    public int Take(List<PacketEnvelope> destination)
+    /// <summary>
+    /// Moves queued frames to <paramref name="destination"/> and counts them as in flight until
+    /// <see cref="ReleaseInflight"/> (the socket write finished).
+    /// </summary>
+    public MailboxTaken Take(List<PacketEnvelope> destination)
     {
         lock (_gate)
         {
             int count = 0;
+            int bytes = _orderedBytes + _openBytes;
             for (int s = 0; s < _ordered.Count; s++)
             {
                 List<PacketEnvelope> frames = _ordered[s].Frames;
@@ -205,16 +222,26 @@ sealed class OutboundMailbox
             _snapshot = null;
 
             for (int i = 0; i < _openOrder.Count; i++)
-            {
                 destination.Add(_open[_openOrder[i]]);
-                count++;
-            }
+            count += _open.Count;
 
             _open.Clear();
             _openOrder.Clear();
             _openBytes = 0;
+            _inflightFrames += count;
+            _inflightBytes += bytes;
             RecordDepth();
-            return count;
+            return new MailboxTaken(count, bytes);
+        }
+    }
+
+    /// <summary>The pump finished writing frames previously returned by <see cref="Take"/>.</summary>
+    public void ReleaseInflight(int frames, int bytes)
+    {
+        lock (_gate)
+        {
+            _inflightFrames = Math.Max(0, _inflightFrames - frames);
+            _inflightBytes = Math.Max(0, _inflightBytes - bytes);
         }
     }
 
@@ -479,9 +506,13 @@ sealed class OutboundMailbox
     {
         if (frames <= 0)
             return true;
-        if (_orderedFrames == 0)
+        // Nothing queued and nothing already in a socket write: one burst may exceed the cap.
+        // The pump splits it. In-flight bytes still count, or a blocked write looks like an empty mailbox
+        // and every later batch is admitted as that one burst.
+        if (_orderedFrames == 0 && _inflightFrames == 0)
             return true;
-        return _orderedFrames + frames <= _maxFrames && _orderedBytes + bytes <= _maxBytes;
+        return _orderedFrames + _inflightFrames + frames <= _maxFrames
+            && _orderedBytes + _inflightBytes + bytes <= _maxBytes;
     }
 
     bool OpenHasRoom(int size)

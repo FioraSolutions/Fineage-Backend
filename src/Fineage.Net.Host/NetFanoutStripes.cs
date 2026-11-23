@@ -120,11 +120,12 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         if (pending.Count == 0)
             return;
 
-        // One submission per connection, frames in the order the stripe observed them.
+        // Each work item is one caller batch, in the order the stripe observed it.
+        // Gluing every item for a connection into one list made an empty mailbox treat the whole
+        // drain as the single over-budget burst: a slow client was closed only when this channel
+        // happened to be full, which depends on the worker keeping up with the producer.
         // The generation check is per item: a stale handle drained in the same cycle as the
         // rebound connection must not discard the live frames.
-        var groups = new Dictionary<GroupKey, List<OutboundFrame>>(pending.Count);
-        var order = new List<GroupKey>(pending.Count);
         foreach (WorkItem item in pending)
         {
             NetConnection connection = item.Handle.Connection;
@@ -135,25 +136,15 @@ public sealed class NetFanoutStripes : IAsyncDisposable
                 continue;
             }
 
-            var key = new GroupKey(connection, item.Snapshot);
-            if (!groups.TryGetValue(key, out List<OutboundFrame>? frames))
-            {
-                frames = new List<OutboundFrame>(item.Frames.Length);
-                groups.Add(key, frames);
-                order.Add(key);
-            }
-
+            var frames = new List<OutboundFrame>(item.Frames.Length);
             OutboundFrame[] batch = item.Frames;
             for (int i = 0; i < batch.Length; i++)
                 frames.Add(batch[i]);
-        }
 
-        foreach (GroupKey key in order)
-        {
-            if (key.Snapshot)
-                key.Connection.SubmitSnapshot(groups[key]);
+            if (item.Snapshot)
+                connection.SubmitSnapshot(frames);
             else
-                key.Connection.SubmitOrderedBatch(groups[key]);
+                connection.SubmitOrderedBatch(frames);
         }
     }
 
@@ -167,8 +158,6 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         await Task.WhenAll(_stripes.Select(s => s.Worker)).ConfigureAwait(false);
         _cts.Dispose();
     }
-
-    readonly record struct GroupKey(NetConnection Connection, bool Snapshot);
 
     readonly record struct WorkItem(ConnectionHandle Handle, OutboundFrame[] Frames, bool Snapshot);
 

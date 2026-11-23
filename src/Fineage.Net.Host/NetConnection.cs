@@ -349,7 +349,8 @@ public sealed class NetConnection : IAsyncDisposable
             while (true)
             {
                 combined.Clear();
-                if (_mailbox.Take(combined) == 0)
+                MailboxTaken taken = _mailbox.Take(combined);
+                if (taken.Frames == 0)
                 {
                     if (Volatile.Read(ref _closed) != 0)
                         break;
@@ -363,6 +364,7 @@ public sealed class NetConnection : IAsyncDisposable
                 }
 
                 await WriteCombinedAsync(combined).ConfigureAwait(false);
+                _mailbox.ReleaseInflight(taken.Frames, taken.Bytes);
             }
         }
         catch (Exception ex) when (ex is IOException or SocketException or OperationCanceledException or ObjectDisposedException or InvalidOperationException)
@@ -375,8 +377,12 @@ public sealed class NetConnection : IAsyncDisposable
             try
             {
                 combined.Clear();
-                if (_mailbox.Take(combined) > 0)
+                MailboxTaken tail = _mailbox.Take(combined);
+                if (tail.Frames > 0)
+                {
                     await WriteCombinedAsync(combined).ConfigureAwait(false);
+                    _mailbox.ReleaseInflight(tail.Frames, tail.Bytes);
+                }
             }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException)
             {
