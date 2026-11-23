@@ -24,6 +24,8 @@ public sealed partial class ZoneWorld
     readonly List<int> _thinkUrgent = [];
     readonly List<int> _thinkReschedule = [];
     readonly object _thinkRescheduleLock = new();
+    readonly HashSet<int> _privatesPending = [];
+    readonly object _privatesPendingLock = new();
     long _thinkDrainedThroughMs = long.MinValue;
 
     /// <summary>Combat-tick test hook: the same prep + think the region stage runs in production.</summary>
@@ -38,6 +40,7 @@ public sealed partial class ZoneWorld
     void CollectNpcThink(TickContext tick, RegionWorkCollector work)
     {
         ReapThinkReschedule();
+        SpawnPendingPrivates();
         RefreshPlayerActiveRegions();
         DrainRegionWakeBudget();
         TickWalkingRoutes(tick.NowUnixMs);
@@ -122,6 +125,25 @@ public sealed partial class ZoneWorld
             TrackThink(npc);
         else
             EnqueueThink(npc);
+    }
+
+    /// <summary>Scheduler thread: spawns the privates of masters whose think ran inside a region body.</summary>
+    void SpawnPendingPrivates()
+    {
+        int[] pending;
+        lock (_privatesPendingLock)
+        {
+            if (_privatesPending.Count == 0)
+                return;
+            pending = [.. _privatesPending];
+            _privatesPending.Clear();
+        }
+
+        foreach (int id in pending)
+        {
+            if (_byId.TryGetValue(id, out var master) && master.CurHp > 0)
+                SpawnPrivates(master);
+        }
     }
 
     void QueueThinkReschedule(int objectId)

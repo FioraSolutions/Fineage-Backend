@@ -69,6 +69,8 @@ public sealed class MetricsSnapshot
     public HistogramMetrics CommandToMailboxes { get; init; } = new();
     public HistogramMetrics FanoutBatchProcess { get; init; } = new();
     public HistogramMetrics FanoutQueueOldestAge { get; init; } = new();
+    public HistogramMetrics FanoutDispatchWait { get; init; } = new();
+    public HistogramMetrics FanoutEnqueueToSocketWrite { get; init; } = new();
     public HistogramMetrics FanoutQueueDepth { get; init; } = new();
     public HistogramMetrics FanoutEventsPerBatch { get; init; } = new();
     public HistogramMetrics FanoutRecipientsPerEvent { get; init; } = new();
@@ -257,6 +259,10 @@ public static class MetricsText
             "Wall time to execute one sealed fan-out batch on the dispatcher worker", snapshot.FanoutBatchProcess);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_oldest_age_ms",
             "Age of the oldest batch waiting in the fan-out dispatcher queue", snapshot.FanoutQueueOldestAge);
+        AppendSingletonHistogram(sb, "fineage_fanout_dispatch_wait_ms",
+            "Per batch: dispatcher hand-off until the worker picks it up", snapshot.FanoutDispatchWait);
+        AppendSingletonHistogram(sb, "fineage_fanout_enqueue_to_socket_write_ms",
+            "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts", snapshot.FanoutEnqueueToSocketWrite);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
             "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth, CountBounds);
         AppendSingletonHistogram(sb, "fineage_fanout_events_per_batch",

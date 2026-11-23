@@ -8,6 +8,10 @@ namespace Fineage.Net.Host;
 /// Issue #867 PR2: one bounded queue and consumer per connection stripe (ConnectionId % N). Each stripe owns delivery
 /// order for its connections. Producers use <see cref="TryWrite"/> only: the simulation thread and the fan-out
 /// dispatcher never block on a full stripe or a full mailbox.
+/// <para>
+/// Each stripe consumer is a dedicated thread woken by <see cref="WorkerWakeup"/>, so per-connection delivery runs
+/// in parallel across stripes and never waits for a thread-pool slot behind the socket pumps.
+/// </para>
 /// </summary>
 public sealed class NetFanoutStripes : IAsyncDisposable
 {
@@ -19,9 +23,10 @@ public sealed class NetFanoutStripes : IAsyncDisposable
     {
         int n = stripeCount ?? NetFanoutStripeSettings.StripeCount;
         int capacity = queueCapacity ?? NetFanoutStripeSettings.QueueCapacityPerStripe;
+        NetFanoutStripeSettings.Validate(n, capacity);
         _stripes = new Stripe[n];
         for (int i = 0; i < n; i++)
-            _stripes[i] = new Stripe(i, capacity, ProcessStripeAsync);
+            _stripes[i] = new Stripe(i, capacity, ProcessStripe);
     }
 
     public int StripeCount => _stripes.Length;
@@ -74,6 +79,7 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             return;
         }
 
+        _stripes[stripe].Wakeup.Signal();
         double waitMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;
         FineageTelemetry.FanoutStripeEnqueueWaitMilliseconds.Record(
             waitMs,
@@ -93,25 +99,25 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     int StripeIndex(ulong connectionId) => (int)(connectionId % (ulong)_stripes.Length);
 
-    async Task ProcessStripeAsync(Stripe stripe)
+    void ProcessStripe(Stripe stripe)
     {
         var pending = new List<WorkItem>(8);
-        try
+        ChannelReader<WorkItem> reader = stripe.Reader;
+        while (!_cts.IsCancellationRequested)
         {
-            while (!_cts.IsCancellationRequested)
+            pending.Clear();
+            while (reader.TryRead(out WorkItem item))
+                pending.Add(item);
+
+            if (pending.Count > 0)
             {
-                if (!await stripe.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
-                    break;
-
-                pending.Clear();
-                while (stripe.Reader.TryRead(out WorkItem item))
-                    pending.Add(item);
-
                 DeliverDrain(pending);
+                continue;
             }
-        }
-        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
-        {
+
+            if (reader.Completion.IsCompleted || stripe.Wakeup.Stopped)
+                break;
+            stripe.Wakeup.Park(() => reader.Count > 0);
         }
     }
 
@@ -163,9 +169,23 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         if (Interlocked.Exchange(ref _closed, 1) != 0)
             return;
         foreach (Stripe stripe in _stripes)
+        {
             stripe.Writer.TryComplete();
+            stripe.Wakeup.Stop();
+        }
+
+        // Workers drain what is queued, then exit on the completed channel.
+        await Task.Run(() =>
+        {
+            foreach (Stripe stripe in _stripes)
+            {
+                if (!stripe.Worker.Join(TimeSpan.FromSeconds(10)))
+                    NetHostLog.Error($"fan-out stripe {stripe.Index} worker did not stop within 10s");
+            }
+        }).ConfigureAwait(false);
         _cts.Cancel();
-        await Task.WhenAll(_stripes.Select(s => s.Worker)).ConfigureAwait(false);
+        foreach (Stripe stripe in _stripes)
+            stripe.Wakeup.Dispose();
         _cts.Dispose();
     }
 
@@ -176,10 +196,13 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         public Channel<WorkItem> Channel { get; }
         public ChannelWriter<WorkItem> Writer => Channel.Writer;
         public ChannelReader<WorkItem> Reader => Channel.Reader;
-        public Task Worker { get; }
+        public Thread Worker { get; }
+        public WorkerWakeup Wakeup { get; } = new();
+        public int Index { get; }
 
-        public Stripe(int index, int capacity, Func<Stripe, Task> loop)
+        public Stripe(int index, int capacity, Action<Stripe> loop)
         {
+            Index = index;
             Channel = System.Threading.Channels.Channel.CreateBounded<WorkItem>(
                 new BoundedChannelOptions(capacity)
                 {
@@ -190,7 +213,8 @@ public sealed class NetFanoutStripes : IAsyncDisposable
                     SingleWriter = false,
                     AllowSynchronousContinuations = false
                 });
-            Worker = Task.Run(() => loop(this));
+            Worker = new Thread(() => loop(this)) { IsBackground = true, Name = $"fanout-stripe-{index}" };
+            Worker.Start();
         }
     }
 }

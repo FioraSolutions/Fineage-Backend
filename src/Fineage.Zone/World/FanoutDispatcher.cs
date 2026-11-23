@@ -1,17 +1,19 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Threading.Channels;
 using Fineage.Net.Host;
 using Fineage.Protocol.Telemetry;
 
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Delivers sealed world fan-out batches off the simulation thread, in seal order, on one worker.
+/// Delivers sealed world fan-out batches off the simulation thread, in seal order, on one dedicated worker thread.
 /// <para>
 /// The simulation thread never waits here and never delivers a batch itself. The hand-off is an unbounded
-/// single-reader channel: <see cref="Enqueue"/> is a short producer-only lock plus <c>TryWrite</c>, which cannot
-/// fail for capacity. Backpressure for slow clients lives where the bytes are, in each connection's byte-bounded
+/// concurrent queue: <see cref="Enqueue"/> is a short producer-only lock plus an enqueue, which cannot fail for
+/// capacity, and a <see cref="WorkerWakeup"/> signal. The worker is its own thread, not a thread-pool continuation:
+/// an async wait put its wake-up behind socket pumps on the pool, which was most of the fan-out queue age under load.
+/// The build stage stays one thread because the world-event publishers keep per-observer state (knownlists,
+/// appearance) that must see batches in seal order; per-connection delivery is parallel on <c>NetFanoutStripes</c>. Backpressure for slow clients lives where the bytes are, in each connection's byte-bounded
 /// <c>OutboundMailbox</c> (shed low-priority frames, then disconnect that client). Everything the worker calls
 /// downstream (stripe <c>TryWrite</c>, mailbox admission) is non-blocking, so the worker can only fall behind on CPU,
 /// never wait on a client.
@@ -31,11 +33,11 @@ internal sealed class FanoutDispatcher : IDisposable
     const string SoftBacklogEnv = "FINEAGE_ZONE_FANOUT_BACKLOG_SOFT";
     const string HardBacklogEnv = "FINEAGE_ZONE_FANOUT_BACKLOG_HARD";
 
-    readonly Channel<SealedWorldFanoutBatch> _queue;
-    readonly Task _worker;
+    readonly ConcurrentQueue<(SealedWorldFanoutBatch Batch, long EnqueuedAt)> _queue = new();
+    readonly WorkerWakeup _wakeup = new();
+    readonly Thread _worker;
     readonly CancellationTokenSource _cts = new();
     readonly object _enqueueOrder = new();
-    readonly ConcurrentQueue<long> _enqueuedAt = new();
     readonly int _softBacklog;
     readonly int _hardBacklog;
     int _closed;
@@ -66,14 +68,8 @@ internal sealed class FanoutDispatcher : IDisposable
             throw new ArgumentOutOfRangeException(nameof(hardBacklogBatches), _hardBacklog,
                 $"fan-out hard backlog ({_hardBacklog}) must be at least the soft backlog ({_softBacklog})");
 
-        _queue = Channel.CreateUnbounded<SealedWorldFanoutBatch>(
-            new UnboundedChannelOptions
-            {
-                SingleReader = true,
-                SingleWriter = false,
-                AllowSynchronousContinuations = false
-            });
-        _worker = Task.Run(ProcessAsync);
+        _worker = new Thread(Process) { IsBackground = true, Name = "fanout-dispatcher" };
+        _worker.Start();
     }
 
     static int ReadLimit(string name, int fallback)
@@ -112,19 +108,15 @@ internal sealed class FanoutDispatcher : IDisposable
 
         long started = Stopwatch.GetTimestamp();
         int backlog;
-        // Producer-only lock: keeps the age side queue in channel order when several threads seal.
+        // Producer-only lock: keeps enqueue order equal to seal order when several threads seal.
         // The worker never takes it, so it cannot make the simulation thread wait on delivery.
         lock (_enqueueOrder)
         {
-            if (!_queue.Writer.TryWrite(batch))
-            {
-                RejectUnrecoverable(batch, "channel completed");
-                throw RejectException(batch, "channel completed");
-            }
-
-            NoteEnqueued();
             backlog = Interlocked.Increment(ref _pending);
+            _queue.Enqueue((batch, started));
         }
+
+        _wakeup.Signal();
 
         double handoffMs = (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency;
         FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(handoffMs);
@@ -179,17 +171,13 @@ internal sealed class FanoutDispatcher : IDisposable
         return $"worker has been on batch tick={Volatile.Read(ref _inFlightTick)} for {ms:0.0} ms";
     }
 
-    void NoteEnqueued() => _enqueuedAt.Enqueue(Stopwatch.GetTimestamp());
-
-    void NoteDequeued() => _enqueuedAt.TryDequeue(out _);
-
     void PublishQueue()
     {
-        // Batches handed over and not yet picked up by the worker (unbounded channels do not count).
+        // Batches handed over and not yet picked up by the worker.
         int depth = Math.Max(0, Volatile.Read(ref _pending) - Volatile.Read(ref _inFlight));
         double ageMs = 0;
-        if (depth > 0 && _enqueuedAt.TryPeek(out long oldest))
-            ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency);
+        if (depth > 0 && _queue.TryPeek(out var oldest))
+            ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest.EnqueuedAt) * 1000.0 / Stopwatch.Frequency);
         FineageTelemetry.FanoutQueueDepth.Record(depth);
         FineageTelemetry.FanoutQueueAgeMilliseconds.Record(ageMs);
     }
@@ -230,32 +218,42 @@ internal sealed class FanoutDispatcher : IDisposable
             $"fan-out dispatcher did not drain within {limit.TotalSeconds:0}s (pending={Volatile.Read(ref _pending)}, inFlight={Volatile.Read(ref _inFlight)}; {DescribeWorker()})");
     }
 
-    async Task ProcessAsync()
+    void Process()
     {
         try
         {
             while (!_cts.IsCancellationRequested)
             {
                 HoldWorkerBeforeReadForTest?.Wait(_cts.Token);
-                if (!await _queue.Reader.WaitToReadAsync(_cts.Token).ConfigureAwait(false))
-                    break;
-                while (_queue.Reader.TryRead(out var batch))
+                if (!_queue.TryDequeue(out var item))
                 {
-                    NoteDequeued();
-                    PublishQueue();
-                    Volatile.Write(ref _inFlightTick, batch.Sequence.Tick);
-                    Volatile.Write(ref _inFlightSinceTimestamp, Stopwatch.GetTimestamp());
-                    Interlocked.Increment(ref _inFlight);
-                    try
-                    {
-                        ExecuteBatch(batch);
-                    }
-                    finally
-                    {
-                        Volatile.Write(ref _inFlightSinceTimestamp, 0);
-                        Interlocked.Decrement(ref _inFlight);
-                        Interlocked.Decrement(ref _pending);
-                    }
+                    if (Volatile.Read(ref _closed) != 0)
+                        break;
+                    _wakeup.Park(() => !_queue.IsEmpty);
+                    continue;
+                }
+
+                FineageTelemetry.FanoutDispatchWaitMilliseconds.Record(ElapsedMs(item.EnqueuedAt));
+                Volatile.Write(ref _inFlightTick, item.Batch.Sequence.Tick);
+                Volatile.Write(ref _inFlightSinceTimestamp, Stopwatch.GetTimestamp());
+                Interlocked.Increment(ref _inFlight);
+                PublishQueue();
+                try
+                {
+                    ExecuteBatch(item.Batch, item.EnqueuedAt);
+                }
+                catch (Exception ex)
+                {
+                    // ExecuteBatch isolates each event; reaching here is a scope/flush fault. Name the batch, keep going.
+                    ZoneLog.Error($"fan-out dispatcher failed batch tick={item.Batch.Sequence.Tick} seq={item.Batch.Sequence.Sequence}: {ex}");
+                    if (FailFast)
+                        _propagated ??= ex;
+                }
+                finally
+                {
+                    Volatile.Write(ref _inFlightSinceTimestamp, 0);
+                    Interlocked.Decrement(ref _inFlight);
+                    Interlocked.Decrement(ref _pending);
                 }
             }
         }
@@ -264,7 +262,7 @@ internal sealed class FanoutDispatcher : IDisposable
         }
     }
 
-    void ExecuteBatch(SealedWorldFanoutBatch batch)
+    void ExecuteBatch(SealedWorldFanoutBatch batch, long enqueuedAt = 0)
     {
         long started = Stopwatch.GetTimestamp();
         bool commandBatch = batch.EnqueuedAtTimestamp > 0;
@@ -276,7 +274,7 @@ internal sealed class FanoutDispatcher : IDisposable
         {
             int events = 0;
             // One stripe enqueue per connection for the whole sealed batch, instead of one channel item per frame.
-            using (FanoutDeliveryScope scope = FanoutDeliveryScope.Begin())
+            using (FanoutDeliveryScope scope = FanoutDeliveryScope.Begin(enqueuedAt))
             {
                 var cursor = batch.OpenCursor();
                 while (cursor.MoveNext())
@@ -353,8 +351,6 @@ internal sealed class FanoutDispatcher : IDisposable
     {
         if (Interlocked.Exchange(ref _closed, 1) != 0)
             return;
-        _queue.Writer.TryComplete();
-        _cts.Cancel();
         try
         {
             WaitUntilIdle(TimeSpan.FromSeconds(10));
@@ -364,7 +360,11 @@ internal sealed class FanoutDispatcher : IDisposable
             ZoneLog.Warn("fan-out dispatcher did not drain completely during shutdown");
         }
 
-        try { _worker.Wait(TimeSpan.FromSeconds(5)); } catch { /* ignore */ }
+        _cts.Cancel();
+        _wakeup.Stop();
+        if (!_worker.Join(TimeSpan.FromSeconds(5)))
+            ZoneLog.Error($"fan-out dispatcher worker did not stop within 5s; {DescribeQueue()}");
+        _wakeup.Dispose();
         _cts.Dispose();
     }
 }

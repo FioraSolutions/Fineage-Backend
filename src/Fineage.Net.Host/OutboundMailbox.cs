@@ -452,7 +452,10 @@ sealed class OutboundMailbox
             // Queue age is measured from the oldest state this frame carries.
             MailboxQueuedAtTimestamp = previous.MailboxQueuedAtTimestamp > 0 && latest.MailboxQueuedAtTimestamp > 0
                 ? Math.Min(previous.MailboxQueuedAtTimestamp, latest.MailboxQueuedAtTimestamp)
-                : Math.Max(previous.MailboxQueuedAtTimestamp, latest.MailboxQueuedAtTimestamp)
+                : Math.Max(previous.MailboxQueuedAtTimestamp, latest.MailboxQueuedAtTimestamp),
+            FanoutEnqueuedAtTimestamp = previous.FanoutEnqueuedAtTimestamp > 0 && latest.FanoutEnqueuedAtTimestamp > 0
+                ? Math.Min(previous.FanoutEnqueuedAtTimestamp, latest.FanoutEnqueuedAtTimestamp)
+                : Math.Max(previous.FanoutEnqueuedAtTimestamp, latest.FanoutEnqueuedAtTimestamp)
         };
     }
 

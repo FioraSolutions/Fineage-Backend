@@ -126,6 +126,14 @@ public static class FineageTelemetry
         Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
             description: "Age of the oldest batch still waiting on the fan-out dispatcher");
 
+    public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
+            description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");
+
+    public static readonly Histogram<double> FanoutEnqueueToSocketWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.enqueue_to_socket_write.ms", unit: "ms",
+            description: "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts");
+
     public static readonly Histogram<double> FanoutDispatcherEnqueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatcher.enqueue_wait.ms", unit: "ms",
             description: "Time the simulation thread spent handing a sealed fan-out batch to the dispatcher (non-blocking; lock + TryWrite)");

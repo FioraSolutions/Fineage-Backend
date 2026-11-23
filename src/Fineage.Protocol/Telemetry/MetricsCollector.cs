@@ -2,10 +2,30 @@ using System.Diagnostics.Metrics;
 
 namespace Fineage.Protocol.Telemetry;
 
+/// <summary>
+/// Aggregates the Fineage meter for Prometheus scrapes.
+/// <para>
+/// Recording never takes a lock: each recording thread appends to its own single-producer ring
+/// (<see cref="ThreadBuffer"/>), and the aggregation below runs only on the drain thread or inside
+/// <see cref="Snapshot"/>, both under <c>_gate</c>. Before this, every counter add and histogram record took one
+/// process-wide lock, so the fan-out worker, the stripe workers and the socket pumps serialized on telemetry.
+/// A ring that fills before the drain thread empties it is drained by its own producer under <c>_gate</c>
+/// (counted in <see cref="BufferFullDrains"/>); values are never dropped.
+/// </para>
+/// </summary>
 public sealed class MetricsCollector : IDisposable
 {
+    const int BufferCapacity = 8192;
+    static readonly TimeSpan DrainInterval = TimeSpan.FromMilliseconds(50);
+
     readonly MeterListener _listener = new();
     readonly object _gate = new();
+    readonly ThreadLocal<ThreadBuffer?> _local = new();
+    readonly List<ThreadBuffer> _buffers = [];
+    readonly KeyValuePair<string, object?>[] _tagScratch = new KeyValuePair<string, object?>[ThreadBuffer.InlineTags];
+    readonly ManualResetEventSlim _stop = new(false);
+    readonly Thread _drainer;
+    long _bufferFullDrains;
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
     readonly DurationHistogram _enterTry = new();
@@ -23,6 +43,8 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _commandToMailboxes = new();
     readonly DurationHistogram _fanoutBatchProcess = new();
     readonly DurationHistogram _fanoutQueueAge = new();
+    readonly DurationHistogram _fanoutDispatchWait = new();
+    readonly DurationHistogram _fanoutEnqueueToSocketWrite = new();
     readonly BoundedCountHistogram _fanoutQueueDepth = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _fanoutEventsPerBatch = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _fanoutRecipientsPerEvent = new(MetricsText.CountBounds);
@@ -72,6 +94,8 @@ public sealed class MetricsCollector : IDisposable
         _listener.SetMeasurementEventCallback<int>(OnInt);
         _listener.SetMeasurementEventCallback<double>(OnDouble);
         _listener.Start();
+        _drainer = new Thread(DrainLoop) { IsBackground = true, Name = "metrics-drain" };
+        _drainer.Start();
     }
 
     public MetricsSnapshot Snapshot()
@@ -79,6 +103,7 @@ public sealed class MetricsCollector : IDisposable
         _listener.RecordObservableInstruments();
         lock (_gate)
         {
+            DrainAllLocked();
             var endpoints = new List<EndpointMetrics>(_rows.Count);
             foreach (KeyValuePair<string, MutableEndpoint> pair in _rows.OrderBy(pair => pair.Key, StringComparer.Ordinal))
             {
@@ -107,6 +132,8 @@ public sealed class MetricsCollector : IDisposable
                 CommandToMailboxes = _commandToMailboxes.Freeze(),
                 FanoutBatchProcess = _fanoutBatchProcess.Freeze(),
                 FanoutQueueOldestAge = _fanoutQueueAge.Freeze(),
+                FanoutDispatchWait = _fanoutDispatchWait.Freeze(),
+                FanoutEnqueueToSocketWrite = _fanoutEnqueueToSocketWrite.Freeze(),
                 FanoutQueueDepth = _fanoutQueueDepth.Freeze(),
                 FanoutEventsPerBatch = _fanoutEventsPerBatch.Freeze(),
                 FanoutRecipientsPerEvent = _fanoutRecipientsPerEvent.Freeze(),
@@ -158,250 +185,431 @@ public sealed class MetricsCollector : IDisposable
         }
     }
 
-    public void Dispose() => _listener.Dispose();
+
+    public long BufferFullDrains => Interlocked.Read(ref _bufferFullDrains);
+
+    public void Dispose()
+    {
+        _stop.Set();
+        _drainer.Join();
+        _listener.Dispose();
+        _stop.Dispose();
+        _local.Dispose();
+    }
 
     void OnLong(Instrument instrument, long value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (!IsOurs(instrument))
-            return;
-        string endpoint = EndpointOf(tags);
-        lock (_gate)
-        {
-            switch (instrument.Name)
-            {
-                case "fineage.connections":
-                    Row(endpoint).Connections += value;
-                    break;
-                case "fineage.connections.rejected":
-                    Row(endpoint).ConnectionsRejected += value;
-                    break;
-                case "fineage.frames.in":
-                    Row(endpoint).FramesIn += value;
-                    break;
-                case "fineage.frames.out":
-                    Row(endpoint).FramesOut += value;
-                    break;
-                case "fineage.bytes.in":
-                    Row(endpoint).BytesIn += value;
-                    break;
-                case "fineage.bytes.out":
-                    Row(endpoint).BytesOut += value;
-                    break;
-                case "fineage.outbound.dropped":
-                    Row(endpoint).OutboundDropped += value;
-                    break;
-                case "fineage.packets.rejected":
-                    Row(endpoint).PacketsRejected += value;
-                    break;
-                case "fineage.packets.errored":
-                    Row(endpoint).PacketsErrored += value;
-                    break;
-                case "fineage.tick.overruns":
-                    _tickOverruns += value;
-                    break;
-                case "fineage.tick.skipped":
-                    _ticksSkipped += value;
-                    break;
-                case "fineage.region.handoffs":
-                    _regionHandoffs += value;
-                    break;
-                case "fineage.tick.stage.failures":
-                    Stage(StageOf(tags)).Failures += value;
-                    break;
-                case "fineage.ledger.adjustments":
-                    _ledgerAdjustments[MoveKindOf(tags)] = _ledgerAdjustments.GetValueOrDefault(MoveKindOf(tags)) + value;
-                    break;
-                case "fineage.ledger.flush_failures":
-                    _ledgerFlushFailures += value;
-                    break;
-                case "fineage.persist.snapshots":
-                    string result = Tag(tags, "result");
-                    _persistSnapshots[result] = _persistSnapshots.GetValueOrDefault(result) + value;
-                    break;
-                case "fineage.fanout.dropped":
-                    string group = Tag(tags, "opcode_group");
-                    if (group.Length == 0)
-                        group = "other";
-                    _fanoutDropped[group] = _fanoutDropped.GetValueOrDefault(group) + value;
-                    break;
-                case "fineage.fanout.queue.overflow":
-                    _fanoutOverflow += value;
-                    break;
-                case "fineage.fanout.coalesced":
-                    _fanoutCoalesced += value;
-                    break;
-                case "fineage.outbound.reliable_overflow":
-                    _reliableOverflow += value;
-                    break;
-                case "fineage.command.coalesced":
-                    _commandCoalesced += value;
-                    break;
-                case "fineage.command.rejected":
-                    string reason = Tag(tags, "reason");
-                    if (reason.Length == 0)
-                        reason = "unspecified";
-                    _commandRejected[reason] = _commandRejected.GetValueOrDefault(reason) + value;
-                    break;
-                case "fineage.step.watchdog.stalls":
-                    _watchdogStalls = value;
-                    break;
-                case "fineage.outbound.lane.blocked":
-                    AddLane(_laneBlocked, Tag(tags, "lane"), value);
-                    break;
-                case "fineage.outbound.lane.full":
-                    AddLane(_laneFull, Tag(tags, "lane"), value);
-                    break;
-                case "fineage.outbound.lane.coalesced":
-                    AddLane(_laneCoalesced, Tag(tags, "lane"), value);
-                    break;
-                case "fineage.outbound.lane.evicted":
-                    AddLane(_laneEvicted, Tag(tags, "lane"), value);
-                    break;
-            }
-        }
+        if (IsOurs(instrument))
+            Buffer().Append(instrument, ThreadBuffer.KindLong, value, 0, tags);
     }
 
     void OnInt(Instrument instrument, int value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (!IsOurs(instrument))
-            return;
-        lock (_gate)
-        {
-            switch (instrument.Name)
-            {
-                case "fineage.zone.online":
-                    _online = value;
-                    break;
-                case "fineage.command.ingress.queued":
-                    _commandIngressQueued = value;
-                    break;
-                case "fineage.command.queue.depth":
-                    _commandPlayerQueueDepth.Record(value);
-                    break;
-                case "fineage.persist.pending":
-                    _persistPending = value;
-                    break;
-                case "fineage.socket_write.bytes":
-                    Row(EndpointOf(tags)).SocketWriteBytes.Record(value);
-                    break;
-                case "fineage.socket_write.frames":
-                    Row(EndpointOf(tags)).SocketWriteFrames.Record(value);
-                    break;
-                case "fineage.fanout.queue.depth":
-                    _fanoutQueueDepth.Record(value);
-                    break;
-                case "fineage.fanout.events_per_batch":
-                    _fanoutEventsPerBatch.Record(value);
-                    break;
-                case "fineage.fanout.recipients_per_event":
-                    _fanoutRecipientsPerEvent.Record(value);
-                    break;
-                case "fineage.fanout.queue.bytes":
-                    _fanoutQueueBytes.Record(value);
-                    break;
-                case "fineage.outbound.queue.frames":
-                    _outboundQueueFrames.Record(value);
-                    break;
-                case "fineage.outbound.queue.bytes":
-                    _outboundQueueBytes.Record(value);
-                    break;
-            }
-        }
+        if (IsOurs(instrument))
+            Buffer().Append(instrument, ThreadBuffer.KindInt, value, 0, tags);
     }
 
     void OnDouble(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (!IsOurs(instrument))
-            return;
+        if (IsOurs(instrument))
+            Buffer().Append(instrument, ThreadBuffer.KindDouble, 0, value, tags);
+    }
+
+    ThreadBuffer Buffer()
+    {
+        ThreadBuffer? buffer = _local.Value;
+        if (buffer != null)
+            return buffer;
+
+        buffer = new ThreadBuffer(this, Thread.CurrentThread);
         lock (_gate)
+            _buffers.Add(buffer);
+        _local.Value = buffer;
+        return buffer;
+    }
+
+    void DrainLoop()
+    {
+        while (!_stop.Wait(DrainInterval))
         {
-            switch (instrument.Name)
+            lock (_gate)
+                DrainAllLocked();
+        }
+
+        lock (_gate)
+            DrainAllLocked();
+    }
+
+    /// <summary>Applies every published measurement; drops rings whose thread has exited once they are empty.</summary>
+    void DrainAllLocked()
+    {
+        for (int i = _buffers.Count - 1; i >= 0; i--)
+        {
+            ThreadBuffer buffer = _buffers[i];
+            DrainLocked(buffer);
+            if (!buffer.Owner.IsAlive && buffer.IsEmpty)
+                _buffers.RemoveAt(i);
+        }
+    }
+
+    void DrainLocked(ThreadBuffer buffer)
+    {
+        long head = buffer.Head;
+        long tail = buffer.PublishedTail;
+        for (long at = head; at < tail; at++)
+        {
+            ref ThreadBuffer.Slot slot = ref buffer.SlotAt(at);
+            ReadOnlySpan<KeyValuePair<string, object?>> tags = slot.Extra ?? TagsOf(ref slot);
+            switch (slot.Kind)
             {
-                case "fineage.persist.oldest_age_ms":
-                    _persistOldestAgeMs = value;
+                case ThreadBuffer.KindLong:
+                    ApplyLong(slot.Instrument!, slot.Long, tags);
                     break;
-                case "fineage.handler.ms":
-                    Row(EndpointOf(tags)).Handler.Record(value);
+                case ThreadBuffer.KindInt:
+                    ApplyInt(slot.Instrument!, (int)slot.Long, tags);
                     break;
-                case "fineage.tick.ms":
-                    _tick.Record(value);
+                case ThreadBuffer.KindDouble:
+                    ApplyDouble(slot.Instrument!, slot.Double, tags);
                     break;
-                case "fineage.tick.stage.ms":
-                    Stage(StageOf(tags)).Duration.Record(value);
-                    break;
-                case "fineage.enter.try_ms":
-                    _enterTry.Record(value);
-                    break;
-                case "fineage.enter.try_aoi_bind_ms":
-                    _enterTryAoiBind.Record(value);
-                    break;
-                case "fineage.enter.plan_ms":
-                    _enterPlan.Record(value);
-                    break;
-                case "fineage.command.apply_ms":
-                    CommandApply(CommandOf(tags)).Duration.Record(value);
-                    break;
-                case "fineage.command.timeline.ms":
-                    CommandTimeline(PhaseOf(tags)).Duration.Record(value);
-                    break;
-                case "fineage.command.queue.wait.ms":
-                    CommandQueueWait(IngressClassOf(tags)).Duration.Record(value);
-                    break;
-                case "fineage.command.queue.age.ms":
-                    _commandQueueAge.Record(value);
-                    break;
-                case "fineage.tick.max_ms":
-                    _tickMaxMs = value;
-                    break;
-                case "fineage.command.queue.age_max_ms":
-                    _commandQueueAgeMaxMs = value;
-                    break;
-                case "fineage.step.watchdog.stall_max_ms":
-                    _watchdogStallMaxMs = value;
-                    break;
-                case "fineage.enter.self_projection_ms":
-                    _enterSelf.Record(value);
-                    break;
-                case "fineage.enter.known_snapshot_ms":
-                    _enterKnownSnapshot.Record(value);
-                    break;
-                case "fineage.enter.known_encode_ms":
-                    _enterKnownEncode.Record(value);
-                    break;
-                case "fineage.enter.peer_fanout_ms":
-                    _enterPeerFanout.Record(value);
-                    break;
-                case "fineage.enter.known_entities":
-                    _enterKnownEntities.Record(value);
-                    break;
-                case "fineage.enter.known_players":
-                    _enterKnownPlayers.Record(value);
-                    break;
-                case "fineage.enter.frames":
-                    _enterFrames.Record(value);
-                    break;
-                case "fineage.enter.bytes":
-                    _enterBytes.Record(value);
-                    break;
-                case "fineage.tick.step.fanout_drain.ms":
-                    _tickStepFanoutDrain.Record(value);
-                    break;
-                case "fineage.command_to_mailboxes.ms":
-                    _commandToMailboxes.Record(value);
-                    break;
-                case "fineage.fanout.batch_process.ms":
-                    _fanoutBatchProcess.Record(value);
-                    break;
-                case "fineage.fanout.queue.oldest_age.ms":
-                    _fanoutQueueAge.Record(value);
-                    break;
-                case "fineage.outbound.queue.oldest_age.ms":
-                    _outboundQueueAge.Record(value);
-                    break;
-                case "fineage.socket_write.ms":
-                    Row(EndpointOf(tags)).SocketWriteMs.Record(value);
-                    break;
+                default:
+                    throw new InvalidOperationException($"metrics ring slot has unknown kind {slot.Kind}");
             }
+
+            slot = default;
+        }
+
+        buffer.Release(tail);
+    }
+
+    ReadOnlySpan<KeyValuePair<string, object?>> TagsOf(ref ThreadBuffer.Slot slot)
+    {
+        if (slot.TagCount == 0)
+            return ReadOnlySpan<KeyValuePair<string, object?>>.Empty;
+        _tagScratch[0] = slot.Tag0;
+        if (slot.TagCount > 1)
+            _tagScratch[1] = slot.Tag1;
+        if (slot.TagCount > 2)
+            _tagScratch[2] = slot.Tag2;
+        if (slot.TagCount > 3)
+            _tagScratch[3] = slot.Tag3;
+        return _tagScratch.AsSpan(0, slot.TagCount);
+    }
+
+    /// <summary>
+    /// Single-producer ring owned by one recording thread. The producer writes a slot and then publishes the tail;
+    /// the consumer (always under the collector gate) reads up to the published tail and then releases the head.
+    /// </summary>
+    sealed class ThreadBuffer(MetricsCollector owner, Thread thread)
+    {
+        public const byte KindLong = 1;
+        public const byte KindInt = 2;
+        public const byte KindDouble = 3;
+        public const int InlineTags = 4;
+
+        public struct Slot
+        {
+            public Instrument? Instrument;
+            public long Long;
+            public double Double;
+            public byte Kind;
+            public byte TagCount;
+            public KeyValuePair<string, object?> Tag0;
+            public KeyValuePair<string, object?> Tag1;
+            public KeyValuePair<string, object?> Tag2;
+            public KeyValuePair<string, object?> Tag3;
+            public KeyValuePair<string, object?>[]? Extra;
+        }
+
+        readonly Slot[] _slots = new Slot[BufferCapacity];
+        long _head;
+        long _tail;
+
+        public Thread Owner { get; } = thread;
+
+        public long Head => Volatile.Read(ref _head);
+
+        public long PublishedTail => Volatile.Read(ref _tail);
+
+        public bool IsEmpty => Volatile.Read(ref _head) == Volatile.Read(ref _tail);
+
+        public ref Slot SlotAt(long at) => ref _slots[at % BufferCapacity];
+
+        public void Release(long head) => Volatile.Write(ref _head, head);
+
+        public void Append(Instrument instrument, byte kind, long longValue, double doubleValue,
+            ReadOnlySpan<KeyValuePair<string, object?>> tags)
+        {
+            long tail = _tail;
+            if (tail - Volatile.Read(ref _head) >= BufferCapacity)
+            {
+                // The drain thread fell behind: this producer empties its own ring under the gate. Rare by design;
+                // a dropped measurement would make the counters lie.
+                Interlocked.Increment(ref owner._bufferFullDrains);
+                lock (owner._gate)
+                    owner.DrainLocked(this);
+            }
+
+            ref Slot slot = ref _slots[tail % BufferCapacity];
+            slot.Instrument = instrument;
+            slot.Kind = kind;
+            slot.Long = longValue;
+            slot.Double = doubleValue;
+            if (tags.Length <= InlineTags)
+            {
+                slot.TagCount = (byte)tags.Length;
+                slot.Extra = null;
+                if (tags.Length > 0)
+                    slot.Tag0 = tags[0];
+                if (tags.Length > 1)
+                    slot.Tag1 = tags[1];
+                if (tags.Length > 2)
+                    slot.Tag2 = tags[2];
+                if (tags.Length > 3)
+                    slot.Tag3 = tags[3];
+            }
+            else
+            {
+                slot.TagCount = 0;
+                slot.Extra = tags.ToArray();
+            }
+
+            Volatile.Write(ref _tail, tail + 1);
+        }
+    }
+
+    void ApplyLong(Instrument instrument, long value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        string endpoint = EndpointOf(tags);
+        switch (instrument.Name)
+        {
+            case "fineage.connections":
+                Row(endpoint).Connections += value;
+                break;
+            case "fineage.connections.rejected":
+                Row(endpoint).ConnectionsRejected += value;
+                break;
+            case "fineage.frames.in":
+                Row(endpoint).FramesIn += value;
+                break;
+            case "fineage.frames.out":
+                Row(endpoint).FramesOut += value;
+                break;
+            case "fineage.bytes.in":
+                Row(endpoint).BytesIn += value;
+                break;
+            case "fineage.bytes.out":
+                Row(endpoint).BytesOut += value;
+                break;
+            case "fineage.outbound.dropped":
+                Row(endpoint).OutboundDropped += value;
+                break;
+            case "fineage.packets.rejected":
+                Row(endpoint).PacketsRejected += value;
+                break;
+            case "fineage.packets.errored":
+                Row(endpoint).PacketsErrored += value;
+                break;
+            case "fineage.tick.overruns":
+                _tickOverruns += value;
+                break;
+            case "fineage.tick.skipped":
+                _ticksSkipped += value;
+                break;
+            case "fineage.region.handoffs":
+                _regionHandoffs += value;
+                break;
+            case "fineage.tick.stage.failures":
+                Stage(StageOf(tags)).Failures += value;
+                break;
+            case "fineage.ledger.adjustments":
+                _ledgerAdjustments[MoveKindOf(tags)] = _ledgerAdjustments.GetValueOrDefault(MoveKindOf(tags)) + value;
+                break;
+            case "fineage.ledger.flush_failures":
+                _ledgerFlushFailures += value;
+                break;
+            case "fineage.persist.snapshots":
+                string result = Tag(tags, "result");
+                _persistSnapshots[result] = _persistSnapshots.GetValueOrDefault(result) + value;
+                break;
+            case "fineage.fanout.dropped":
+                string group = Tag(tags, "opcode_group");
+                if (group.Length == 0)
+                    group = "other";
+                _fanoutDropped[group] = _fanoutDropped.GetValueOrDefault(group) + value;
+                break;
+            case "fineage.fanout.queue.overflow":
+                _fanoutOverflow += value;
+                break;
+            case "fineage.fanout.coalesced":
+                _fanoutCoalesced += value;
+                break;
+            case "fineage.outbound.reliable_overflow":
+                _reliableOverflow += value;
+                break;
+            case "fineage.command.coalesced":
+                _commandCoalesced += value;
+                break;
+            case "fineage.command.rejected":
+                string reason = Tag(tags, "reason");
+                if (reason.Length == 0)
+                    reason = "unspecified";
+                _commandRejected[reason] = _commandRejected.GetValueOrDefault(reason) + value;
+                break;
+            case "fineage.step.watchdog.stalls":
+                _watchdogStalls = value;
+                break;
+            case "fineage.outbound.lane.blocked":
+                AddLane(_laneBlocked, Tag(tags, "lane"), value);
+                break;
+            case "fineage.outbound.lane.full":
+                AddLane(_laneFull, Tag(tags, "lane"), value);
+                break;
+            case "fineage.outbound.lane.coalesced":
+                AddLane(_laneCoalesced, Tag(tags, "lane"), value);
+                break;
+            case "fineage.outbound.lane.evicted":
+                AddLane(_laneEvicted, Tag(tags, "lane"), value);
+                break;
+        }
+    }
+
+    void ApplyInt(Instrument instrument, int value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        switch (instrument.Name)
+        {
+            case "fineage.zone.online":
+                _online = value;
+                break;
+            case "fineage.command.ingress.queued":
+                _commandIngressQueued = value;
+                break;
+            case "fineage.command.queue.depth":
+                _commandPlayerQueueDepth.Record(value);
+                break;
+            case "fineage.persist.pending":
+                _persistPending = value;
+                break;
+            case "fineage.socket_write.bytes":
+                Row(EndpointOf(tags)).SocketWriteBytes.Record(value);
+                break;
+            case "fineage.socket_write.frames":
+                Row(EndpointOf(tags)).SocketWriteFrames.Record(value);
+                break;
+            case "fineage.fanout.queue.depth":
+                _fanoutQueueDepth.Record(value);
+                break;
+            case "fineage.fanout.events_per_batch":
+                _fanoutEventsPerBatch.Record(value);
+                break;
+            case "fineage.fanout.recipients_per_event":
+                _fanoutRecipientsPerEvent.Record(value);
+                break;
+            case "fineage.fanout.queue.bytes":
+                _fanoutQueueBytes.Record(value);
+                break;
+            case "fineage.outbound.queue.frames":
+                _outboundQueueFrames.Record(value);
+                break;
+            case "fineage.outbound.queue.bytes":
+                _outboundQueueBytes.Record(value);
+                break;
+        }
+    }
+
+    void ApplyDouble(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
+    {
+        switch (instrument.Name)
+        {
+            case "fineage.persist.oldest_age_ms":
+                _persistOldestAgeMs = value;
+                break;
+            case "fineage.handler.ms":
+                Row(EndpointOf(tags)).Handler.Record(value);
+                break;
+            case "fineage.tick.ms":
+                _tick.Record(value);
+                break;
+            case "fineage.tick.stage.ms":
+                Stage(StageOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.enter.try_ms":
+                _enterTry.Record(value);
+                break;
+            case "fineage.enter.try_aoi_bind_ms":
+                _enterTryAoiBind.Record(value);
+                break;
+            case "fineage.enter.plan_ms":
+                _enterPlan.Record(value);
+                break;
+            case "fineage.command.apply_ms":
+                CommandApply(CommandOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.command.timeline.ms":
+                CommandTimeline(PhaseOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.command.queue.wait.ms":
+                CommandQueueWait(IngressClassOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.command.queue.age.ms":
+                _commandQueueAge.Record(value);
+                break;
+            case "fineage.tick.max_ms":
+                _tickMaxMs = value;
+                break;
+            case "fineage.command.queue.age_max_ms":
+                _commandQueueAgeMaxMs = value;
+                break;
+            case "fineage.step.watchdog.stall_max_ms":
+                _watchdogStallMaxMs = value;
+                break;
+            case "fineage.enter.self_projection_ms":
+                _enterSelf.Record(value);
+                break;
+            case "fineage.enter.known_snapshot_ms":
+                _enterKnownSnapshot.Record(value);
+                break;
+            case "fineage.enter.known_encode_ms":
+                _enterKnownEncode.Record(value);
+                break;
+            case "fineage.enter.peer_fanout_ms":
+                _enterPeerFanout.Record(value);
+                break;
+            case "fineage.enter.known_entities":
+                _enterKnownEntities.Record(value);
+                break;
+            case "fineage.enter.known_players":
+                _enterKnownPlayers.Record(value);
+                break;
+            case "fineage.enter.frames":
+                _enterFrames.Record(value);
+                break;
+            case "fineage.enter.bytes":
+                _enterBytes.Record(value);
+                break;
+            case "fineage.tick.step.fanout_drain.ms":
+                _tickStepFanoutDrain.Record(value);
+                break;
+            case "fineage.command_to_mailboxes.ms":
+                _commandToMailboxes.Record(value);
+                break;
+            case "fineage.fanout.batch_process.ms":
+                _fanoutBatchProcess.Record(value);
+                break;
+            case "fineage.fanout.dispatch_wait.ms":
+                _fanoutDispatchWait.Record(value);
+                break;
+            case "fineage.fanout.enqueue_to_socket_write.ms":
+                _fanoutEnqueueToSocketWrite.Record(value);
+                break;
+            case "fineage.fanout.queue.oldest_age.ms":
+                _fanoutQueueAge.Record(value);
+                break;
+            case "fineage.outbound.queue.oldest_age.ms":
+                _outboundQueueAge.Record(value);
+                break;
+            case "fineage.socket_write.ms":
+                Row(EndpointOf(tags)).SocketWriteMs.Record(value);
+                break;
         }
     }
 

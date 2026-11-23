@@ -297,6 +297,7 @@ public sealed class NetConnection : IAsyncDisposable
                 continue;
             if (frames[i].MailboxAtTimestamp > 0)
                 envelope.MailboxQueuedAtTimestamp = frames[i].MailboxAtTimestamp;
+            envelope.FanoutEnqueuedAtTimestamp = frames[i].FanoutEnqueuedAtTimestamp;
             envelopes.Add(envelope);
         }
     }
@@ -314,17 +315,25 @@ public sealed class NetConnection : IAsyncDisposable
     void RecordOutboundQueue(IReadOnlyList<PacketEnvelope> writing)
     {
         long oldest = 0;
+        long oldestFanout = 0;
         for (int i = 0; i < writing.Count; i++)
         {
             long stamp = writing[i].MailboxQueuedAtTimestamp;
             if (stamp > 0 && (oldest == 0 || stamp < oldest))
                 oldest = stamp;
+            long fanout = writing[i].FanoutEnqueuedAtTimestamp;
+            if (fanout > 0 && (oldestFanout == 0 || fanout < oldestFanout))
+                oldestFanout = fanout;
         }
 
+        long now = Stopwatch.GetTimestamp();
+        if (oldestFanout > 0)
+            FineageTelemetry.FanoutEnqueueToSocketWriteMilliseconds.Record(
+                Math.Max(0, (now - oldestFanout) * 1000.0 / Stopwatch.Frequency));
         if (oldest <= 0)
             return;
 
-        double ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest) * 1000.0 / Stopwatch.Frequency);
+        double ageMs = Math.Max(0, (now - oldest) * 1000.0 / Stopwatch.Frequency);
         var endpoint = new KeyValuePair<string, object?>("endpoint", _endpoint);
         FineageTelemetry.OutboundQueueAgeMilliseconds.Record(ageMs, endpoint);
         FineageTelemetry.CommandTimelineMilliseconds.Record(

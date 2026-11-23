@@ -175,6 +175,18 @@ public sealed partial class ZoneWorld
     {
         if (master.PrivatesSpawned)
             return;
+        if (RegionBodyScope.Of(this) != null)
+        {
+            // Placing entities changes region ownership, which only the scheduler thread may do. A parallel
+            // random-walk body used to throw here and abort the rest of its region's think batch every tick.
+            if (_minions.TryGet(master.NpcId, out _))
+            {
+                lock (_privatesPendingLock)
+                    _privatesPending.Add(master.ObjectId);
+            }
+            return;
+        }
+
         master.PrivatesSpawned = true;
         if (!_minions.TryGet(master.NpcId, out var rows))
             return;
