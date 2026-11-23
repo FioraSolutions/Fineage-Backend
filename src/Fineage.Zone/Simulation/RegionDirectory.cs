@@ -182,6 +182,9 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     readonly SortedDictionary<RegionId, RegionContainer> _regions = [];
     readonly HashSet<int> _relocated = [];
     readonly HashSet<RegionId> _borderDirty = [];
+
+    /// <summary>True when a region's border list must be rebuilt before the next publish.</summary>
+    public bool BordersPending => _borderDirty.Count > 0;
     readonly Dictionary<RegionId, List<T>> _borderCache = [];
     readonly Action<string>? _requireOwner;
 

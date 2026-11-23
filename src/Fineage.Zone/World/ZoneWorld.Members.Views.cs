@@ -47,17 +47,35 @@ public sealed partial class ZoneWorld
         return visible;
     }
 
-    List<ZoneEntity> Players()
+    /// <summary>Players admitted by enter and dropped by leave. Stages read this instead of scanning every NPC.</summary>
+    readonly List<ZoneEntity> _inWorldPlayers = [];
+
+    void NoteInWorldPlayer(ZoneEntity entity)
     {
-        var players = new List<ZoneEntity>();
-        foreach (var entity in _byId.Values)
+        if (entity.Kind != ZoneEntityKind.Player || entity.Session is not { InWorld: true })
+            return;
+        for (int i = 0; i < _inWorldPlayers.Count; i++)
         {
-            if (entity.Kind == ZoneEntityKind.Player && entity.Session is { InWorld: true })
-                players.Add(entity);
+            if (_inWorldPlayers[i].ObjectId == entity.ObjectId)
+            {
+                _inWorldPlayers[i] = entity;
+                return;
+            }
         }
 
-        return players;
+        _inWorldPlayers.Add(entity);
     }
+
+    void ForgetInWorldPlayer(int objectId)
+    {
+        for (int i = _inWorldPlayers.Count - 1; i >= 0; i--)
+        {
+            if (_inWorldPlayers[i].ObjectId == objectId)
+                _inWorldPlayers.RemoveAt(i);
+        }
+    }
+
+    List<ZoneEntity> Players() => new(_inWorldPlayers);
 
     static List<int> SortedExcept(HashSet<int> source, HashSet<int> other)
     {
