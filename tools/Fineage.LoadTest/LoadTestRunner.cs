@@ -3,6 +3,7 @@ using Fineage.LoadTest.Consistency;
 using Fineage.LoadTest.Metrics;
 using Fineage.LoadTest.Models;
 using Fineage.LoadTest.Reporting;
+using Fineage.LoadTest.Travel;
 
 namespace Fineage.LoadTest;
 
@@ -40,11 +41,14 @@ public sealed class LoadTestRunner
         if (runtimeSampler != null)
             await runtimeSampler.StartAsync(ct);
 
+        var gatekeepers = scenario.ResolvedGatekeeperTravelShare > 0
+            ? GatekeeperDirectory.Load(GatekeeperDirectory.ResolveDataDir(scenario.DataDir))
+            : null;
         for (int i = 0; i < scenario.BotCount; i++)
         {
             var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
             stats.Add(botStats);
-            bots.Add(new FineageBotClient(scenario, i, botStats, peers));
+            bots.Add(new FineageBotClient(scenario, i, botStats, peers, gatekeepers));
         }
 
         int concurrency = ResolveEnterConcurrency(scenario);
@@ -235,6 +239,10 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
+        var travel = TravelSummary.From(stats.Where(s => s.Travel != null).Select(s => s.Travel!));
+        if (travel.FailReason() is { } travelFail)
+            failReasons.Add(travelFail);
+
         if (oracleRan && scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
             failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
         // Teardown, or an oracle that outlasts the watchdog, can cross the limit after the first read.
@@ -265,6 +273,7 @@ public sealed class LoadTestRunner
             BotsStuck = stuck,
             RelogsAttempted = stats.Sum(s => s.RelogsAttempted),
             RelogsSucceeded = stats.Sum(s => s.RelogsSucceeded),
+            GatekeeperTravel = travel,
             ClientRttP50Ms = p50,
             ClientRttP95Ms = p95,
             ClientRttP99Ms = p99,

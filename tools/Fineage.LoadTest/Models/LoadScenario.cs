@@ -34,10 +34,45 @@ public sealed class LoadScenario
         ["pickup"] = 0.08,
         ["trade"] = 0.04,
         ["party"] = 0.04,
-        ["teleport"] = 0.03,
         ["pvp"] = 0.05,
         ["relog"] = 0.02
     };
+
+    /// <summary>Default share of the fleet that travels town to town through gatekeepers.</summary>
+    public const double DefaultGatekeeperTravelShare = 0.2;
+
+    /// <summary>
+    /// Share of bots (0..1) that only travel between towns via gatekeeper teleports instead of
+    /// running <see cref="ActionWeights"/>. Null uses <see cref="DefaultGatekeeperTravelShare"/>; 0 turns travel off.
+    /// </summary>
+    public double? GatekeeperTravelShare { get; set; }
+
+    /// <summary>Pause after a landed teleport before the bot talks to the next gatekeeper.</summary>
+    public int GatekeeperTripCooldownMs { get; set; } = 3000;
+
+    /// <summary>Datapack directory with teleports.json and spawns/ (see <c>GatekeeperDirectory.ResolveDataDir</c>).</summary>
+    public string? DataDir { get; set; }
+
+    public double ResolvedGatekeeperTravelShare
+    {
+        get
+        {
+            double share = GatekeeperTravelShare ?? DefaultGatekeeperTravelShare;
+            if (share is < 0 or > 1 || double.IsNaN(share))
+                throw new InvalidOperationException($"gatekeeperTravelShare must be within 0..1, got {share}");
+            return share;
+        }
+    }
+
+    /// <summary>
+    /// Bot <paramref name="botId"/> travels when the running share count steps up at its index, so
+    /// exactly round(share × botCount) bots travel, spread evenly over the fleet and the ramp.
+    /// </summary>
+    public bool IsGatekeeperTraveler(int botId)
+    {
+        double share = ResolvedGatekeeperTravelShare;
+        return Math.Floor((botId + 1) * share + 1e-9) > Math.Floor(botId * share + 1e-9);
+    }
 
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
     public int AoiCellSize { get; set; } = 3000;
