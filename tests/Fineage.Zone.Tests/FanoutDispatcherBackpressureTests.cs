@@ -82,7 +82,7 @@ public sealed class FanoutDispatcherBackpressureTests
     static SealedWorldFanoutBatch Batch(ulong sequence, Action send)
     {
         var batch = new WorldFanoutBatch();
-        batch.AddOrdered("test", send);
+        batch.AddPrepared(send);
         return new SealedWorldFanoutBatch(batch, new WorldEventSequence(42, 3, sequence), 0);
     }
 }

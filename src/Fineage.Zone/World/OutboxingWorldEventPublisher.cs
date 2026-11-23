@@ -4,34 +4,37 @@ using Fineage.Protocol;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// <see cref="ZoneWorld.NetBridge"/> as seen by the simulation: inside a recorded step every call becomes an entry of
-/// the step's <see cref="WorldFanoutBatch"/>; outside one it is sent at once through the
-/// <see cref="WorldFanoutSequencer"/>. Watcher lists are copied when recorded; messages are built per call and are
-/// not mutated after emission. Calls whose encoding reads world state are prepared before they are queued.
+/// <see cref="ZoneWorld.NetBridge"/> as seen by the simulation: inside a recorded step every call becomes a
+/// struct descriptor on the step's <see cref="WorldFanoutBatch"/>; outside one it is submitted at once.
+/// Watcher lists are copied into an audience snapshot unless the caller already holds an id for this knownlist.
+/// Messages are the caller's objects and are not mutated after emission. Calls whose encoding reads world state
+/// are prepared before they are queued.
 /// </summary>
 internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, WorldFanoutSequencer sequencer) : IWorldEventPublisher
 {
-    void Emit(string name, Action send)
+    void Record(FanoutKind kind, int subject, IReadOnlyList<int> watchers, FanoutArgs args, bool replaceable)
     {
-        var batch = sequencer.Recording;
-        if (batch != null)
-            batch.AddOrdered(name, send);
+        var recording = sequencer.Recording;
+        var batch = recording ?? new WorldFanoutBatch();
+        batch.Bind(inner);
+        var audience = AudienceSnapshots.Capture(watchers, sort: replaceable);
+        if (replaceable)
+            batch.AddReplaceable(kind, subject, audience, args);
         else
-            sequencer.SendNow(send);
+            batch.AddOrdered(kind, audience, args);
+        if (recording == null)
+            sequencer.Submit(batch);
     }
 
-    void EmitReplaceable<T>(
-        PresenceCoalesceKind kind, int subjectId, int[] audience, T payload, Func<T, T, T> merge, Func<T, Action> bind)
-        where T : class
+    void RecordPrepared(Action send)
     {
-        var batch = sequencer.Recording;
-        if (batch != null)
-            batch.AddReplaceable(kind, subjectId, audience, payload, merge, bind);
-        else
-            sequencer.SendNow(bind(payload));
+        var recording = sequencer.Recording;
+        var batch = recording ?? new WorldFanoutBatch();
+        batch.Bind(inner);
+        batch.AddPrepared(send);
+        if (recording == null)
+            sequencer.Submit(batch);
     }
-
-    static T Latest<T>(T superseded, T latest) => latest;
 
     /// <summary>StatusUpdate carries a subset of attributes: the merged frame keeps earlier attributes the new one omits.</summary>
     internal static StatusUpdateMsg MergeStatus(StatusUpdateMsg superseded, StatusUpdateMsg latest)
@@ -51,48 +54,14 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         return new StatusUpdateMsg { ObjectId = latest.ObjectId, AttributeIds = [.. ids], Values = [.. values] };
     }
 
-    sealed record MoveStateArgs(int OriginX, int OriginY, int OriginZ, int DestX, int DestY, int DestZ, bool Running);
-
-    sealed record MoveTypeArgs(bool Running, float RunSpeed, float WalkSpeed, bool InWater);
-
-    void IWorldEventPublisher.FanoutMoveState(IReadOnlyList<int> watcherObjectIds, int moverObjectId, int originX, int originY, int originZ, int destX, int destY, int destZ, bool running)
-    {
-        int[] watchers = [.. watcherObjectIds];
-        EmitReplaceable(PresenceCoalesceKind.MoveState, moverObjectId, watchers,
-            new MoveStateArgs(originX, originY, originZ, destX, destY, destZ, running), Latest,
-            m => () => inner.FanoutMoveState(watchers, moverObjectId, m.OriginX, m.OriginY, m.OriginZ, m.DestX, m.DestY, m.DestZ, m.Running));
-    }
-
-    void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater)
-    {
-        int[] watchers = [.. watcherObjectIds];
-        EmitReplaceable(PresenceCoalesceKind.ChangeMoveType, moverObjectId, watchers,
-            new MoveTypeArgs(running, runSpeed, walkSpeed, inWater), Latest,
-            m => () => inner.FanoutChangeMoveType(watchers, moverObjectId, m.Running, m.RunSpeed, m.WalkSpeed, m.InWater));
-    }
-
-    void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, StatusUpdateMsg status)
-    {
-        int[] watchers = [.. watcherObjectIds];
-        EmitReplaceable(PresenceCoalesceKind.StatusUpdate, status.ObjectId, watchers, status, MergeStatus,
-            s => () => inner.FanoutStatusUpdate(watchers, s));
-    }
-
-    void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, AbnormalStatusUpdateMsg update)
-    {
-        int[] watchers = [.. watcherObjectIds];
-        EmitReplaceable(PresenceCoalesceKind.AbnormalStatusUpdate, update.ObjectId, watchers, update, Latest,
-            u => () => inner.FanoutAbnormalStatusUpdate(watchers, u));
-    }
+    void IWorldEventPublisher.FanoutMoveState(IReadOnlyList<int> watcherObjectIds, int moverObjectId, int originX, int originY, int originZ, int destX, int destY, int destZ, bool running) =>
+        Record(FanoutKind.MoveState, moverObjectId, watcherObjectIds, new FanoutArgs(A: moverObjectId, B: originX, C: originY, D: originZ, E: destX, F: destY, G: destZ, Flag: running), replaceable: true);
 
     void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed)
     {
-        // Knownlist drain reads live world to encode spawns; must not run on the fan-out worker (PR1 single queue).
-        inner.PrepareKnownlistDiff(selfObjectId, [.. added], [.. removed])();
+        // Knownlist drain reads live world to encode spawns; it runs on the simulation thread, not the fan-out worker.
+        inner.PrepareKnownlistDiff(selfObjectId, added, removed)();
     }
-
-    void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
-        Emit(nameof(IWorldEventPublisher.FanoutCharInfo), inner.PrepareCharInfo([.. watcherObjectIds], objectId));
 
     Action IWorldEventPublisher.PrepareKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed) =>
         inner.PrepareKnownlistDiff(selfObjectId, added, removed);
@@ -100,688 +69,372 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     Action IWorldEventPublisher.PrepareCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
         inner.PrepareCharInfo(watcherObjectIds, objectId);
 
-    void IWorldEventPublisher.FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPositionCorrection), () => inner.FanoutPositionCorrection(watcherObjectIdsCopy, objectId, x, y, z, heading));
-    }
+    void IWorldEventPublisher.FanoutChangeMoveType(IReadOnlyList<int> watcherObjectIds, int moverObjectId, bool running, float runSpeed, float walkSpeed, bool inWater) =>
+        Record(FanoutKind.ChangeMoveType, moverObjectId, watcherObjectIds, new FanoutArgs(A: moverObjectId, Flag: running, Fa: runSpeed, Fb: walkSpeed, Flag2: inWater), replaceable: true);
 
-    void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate), () => inner.FanoutEtcStatusUpdate(watcherObjectIdsCopy, status));
-    }
+    void IWorldEventPublisher.FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading) =>
+        Record(FanoutKind.PositionCorrection, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: x, C: y, D: z, E: heading), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAttackStance), () => inner.FanoutAttackStance(watcherObjectIdsCopy, objectId, inStance));
-    }
+    void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status) =>
+        Record(FanoutKind.EtcStatusUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAutoSoulShot), () => inner.FanoutAutoSoulShot(watcherObjectIdsCopy, itemId, enabled));
-    }
+    void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance) =>
+        Record(FanoutKind.AttackStance, 0, watcherObjectIds, new FanoutArgs(A: objectId, Flag: inStance), replaceable: false);
 
-    void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutUserInfo), () => inner.FanoutUserInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled) =>
+        Record(FanoutKind.AutoSoulShot, 0, watcherObjectIds, new FanoutArgs(A: itemId, Flag: enabled), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAttackState), () => inner.FanoutAttackState(watcherObjectIdsCopy, attack));
-    }
+    void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info) =>
+        Record(FanoutKind.UserInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDie), () => inner.FanoutDie(watcherObjectIdsCopy, objectId, killerObjectId, restartFlags));
-    }
+    void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
+        RecordPrepared(inner.PrepareCharInfo(watcherObjectIds, objectId));
 
-    void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDropItem), () => inner.FanoutDropItem(watcherObjectIdsCopy, drop));
-    }
+    void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack) =>
+        Record(FanoutKind.AttackState, 0, watcherObjectIds, new FanoutArgs(Payload: attack), replaceable: false);
 
-    void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutEntityDespawn), () => inner.FanoutEntityDespawn(watcherObjectIdsCopy, objectId));
-    }
+    void IWorldEventPublisher.FanoutStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.StatusUpdateMsg status) =>
+        Record(FanoutKind.StatusUpdate, status.ObjectId, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: true);
 
-    void IWorldEventPublisher.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutInventoryUpdate), () => inner.FanoutInventoryUpdate(watcherObjectIdsCopy, update));
-    }
+    void IWorldEventPublisher.FanoutDie(IReadOnlyList<int> watcherObjectIds, int objectId, int killerObjectId, int restartFlags) =>
+        Record(FanoutKind.Die, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: killerObjectId, C: restartFlags), replaceable: false);
 
-    void IWorldEventPublisher.FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutItemList), () => inner.FanoutItemList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutDropItem(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DropItemMsg drop) =>
+        Record(FanoutKind.DropItem, 0, watcherObjectIds, new FanoutArgs(Payload: drop), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCreatureSay), () => inner.FanoutCreatureSay(watcherObjectIdsCopy, say));
-    }
+    void IWorldEventPublisher.FanoutEntityDespawn(IReadOnlyList<int> watcherObjectIds, int objectId) =>
+        Record(FanoutKind.EntityDespawn, 0, watcherObjectIds, new FanoutArgs(A: objectId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSystemMessage), () => inner.FanoutSystemMessage(watcherObjectIdsCopy, message));
-    }
+    void IWorldEventPublisher.FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update) =>
+        Record(FanoutKind.InventoryUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
 
-    void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutMagicSkillUse), () => inner.FanoutMagicSkillUse(watcherObjectIdsCopy, cast));
-    }
+    void IWorldEventPublisher.FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list) =>
+        Record(FanoutKind.ItemList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRevive), () => inner.FanoutRevive(watcherObjectIdsCopy, objectId));
-    }
+    void IWorldEventPublisher.FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say) =>
+        Record(FanoutKind.CreatureSay, 0, watcherObjectIds, new FanoutArgs(Payload: say), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTeleportToLocation), () => inner.FanoutTeleportToLocation(watcherObjectIdsCopy, objectId, x, y, z, heading));
-    }
+    void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message) =>
+        Record(FanoutKind.SystemMessage, 0, watcherObjectIds, new FanoutArgs(Payload: message), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPlayerStats), () => inner.FanoutPlayerStats(watcherObjectIdsCopy, stats));
-    }
+    void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast) =>
+        Record(FanoutKind.MagicSkillUse, 0, watcherObjectIds, new FanoutArgs(Payload: cast), replaceable: false);
 
-    void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutNpcHtml), () => inner.FanoutNpcHtml(watcherObjectIdsCopy, html));
-    }
+    void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId) =>
+        Record(FanoutKind.Revive, 0, watcherObjectIds, new FanoutArgs(A: objectId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutBuyList), () => inner.FanoutBuyList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading) =>
+        Record(FanoutKind.TeleportToLocation, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: x, C: y, D: z, E: heading), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SellListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSellList), () => inner.FanoutSellList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats) =>
+        Record(FanoutKind.PlayerStats, 0, watcherObjectIds, new FanoutArgs(Payload: stats), replaceable: false);
 
-    void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutMultiSellList), () => inner.FanoutMultiSellList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update) =>
+        Record(FanoutKind.AbnormalStatusUpdate, update.ObjectId, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: true);
 
-    void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutShopBalance), () => inner.FanoutShopBalance(watcherObjectIdsCopy, balance));
-    }
+    void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html) =>
+        Record(FanoutKind.NpcHtml, 0, watcherObjectIds, new FanoutArgs(Payload: html), replaceable: false);
 
-    void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutWarehouseDepositList), () => inner.FanoutWarehouseDepositList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutBuyList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BuyListMsg list) =>
+        Record(FanoutKind.BuyList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutWarehouseWithdrawList), () => inner.FanoutWarehouseWithdrawList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SellListMsg list) =>
+        Record(FanoutKind.SellList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPackageToList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageToListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPackageToList), () => inner.FanoutPackageToList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list) =>
+        Record(FanoutKind.MultiSellList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageSendableListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPackageSendableList), () => inner.FanoutPackageSendableList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance) =>
+        Record(FanoutKind.ShopBalance, 0, watcherObjectIds, new FanoutArgs(Payload: balance), replaceable: false);
 
-    void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutQuestList), () => inner.FanoutQuestList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutWarehouseDepositList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseDepositListMsg list) =>
+        Record(FanoutKind.WarehouseDepositList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestDirectionNetMsg msg)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutQuestDirection), () => inner.FanoutQuestDirection(watcherObjectIdsCopy, msg));
-    }
+    void IWorldEventPublisher.FanoutWarehouseWithdrawList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WarehouseWithdrawListMsg list) =>
+        Record(FanoutKind.WarehouseWithdrawList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestNpcMarksNetMsg msg)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutQuestNpcMarks), () => inner.FanoutQuestNpcMarks(watcherObjectIdsCopy, msg));
-    }
+    void IWorldEventPublisher.FanoutPackageToList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageToListMsg list) =>
+        Record(FanoutKind.PackageToList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.TutorialUiNetMsg msg)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTutorialUi), () => inner.FanoutTutorialUi(watcherObjectIdsCopy, msg));
-    }
+    void IWorldEventPublisher.FanoutPackageSendableList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PackageSendableListMsg list) =>
+        Record(FanoutKind.PackageSendableList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSkillList), () => inner.FanoutSkillList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list) =>
+        Record(FanoutKind.QuestList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutShortcutInit), () => inner.FanoutShortcutInit(watcherObjectIdsCopy, init));
-    }
+    void IWorldEventPublisher.FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestDirectionNetMsg msg) =>
+        Record(FanoutKind.QuestDirection, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
-    void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutChangeWaitType), () => inner.FanoutChangeWaitType(watcherObjectIdsCopy, objectId, waitType, x, y, z));
-    }
+    void IWorldEventPublisher.FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.QuestNpcMarksNetMsg msg) =>
+        Record(FanoutKind.QuestNpcMarks, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSocialAction), () => inner.FanoutSocialAction(watcherObjectIdsCopy, objectId, actionId));
-    }
+    void IWorldEventPublisher.FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.TutorialUiNetMsg msg) =>
+        Record(FanoutKind.TutorialUi, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTargetSelected), () => inner.FanoutTargetSelected(watcherObjectIdsCopy, targetObjectId, colorHint));
-    }
+    void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list) =>
+        Record(FanoutKind.SkillList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTargetUnselected), () => inner.FanoutTargetUnselected(watcherObjectIdsCopy, targetObjectId));
-    }
+    void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init) =>
+        Record(FanoutKind.ShortcutInit, 0, watcherObjectIds, new FanoutArgs(Payload: init), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAcquireSkillList), () => inner.FanoutAcquireSkillList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z) =>
+        Record(FanoutKind.ChangeWaitType, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: waitType, C: x, D: y, E: z), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAcquireSkillInfo), () => inner.FanoutAcquireSkillInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId) =>
+        Record(FanoutKind.SocialAction, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: actionId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutEnchantSkillList), () => inner.FanoutEnchantSkillList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint) =>
+        Record(FanoutKind.TargetSelected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId, B: colorHint), replaceable: false);
 
-    void IWorldEventPublisher.FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutEnchantSkillInfo), () => inner.FanoutEnchantSkillInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId) =>
+        Record(FanoutKind.TargetUnselected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutEnchantResult), () => inner.FanoutEnchantResult(watcherObjectIdsCopy, result));
-    }
+    void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list) =>
+        Record(FanoutKind.AcquireSkillList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info) =>
+        Record(FanoutKind.AcquireSkillInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
+    void IWorldEventPublisher.FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list) =>
+        Record(FanoutKind.EnchantSkillList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info) =>
+        Record(FanoutKind.EnchantSkillInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
+    void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result) =>
+        Record(FanoutKind.EnchantResult, 0, watcherObjectIds, new FanoutArgs(Payload: result), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentShowMakeWindow(IReadOnlyList<int> watcherObjectIds) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowMakeWindow), () => inner.FanoutAugmentShowMakeWindow([.. watcherObjectIds]));
+        Record(FanoutKind.AugmentShowMakeWindow, 0, watcherObjectIds, default, replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentShowCancelWindow(IReadOnlyList<int> watcherObjectIds) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentShowCancelWindow), () => inner.FanoutAugmentShowCancelWindow([.. watcherObjectIds]));
+        Record(FanoutKind.AugmentShowCancelWindow, 0, watcherObjectIds, default, replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentPutItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutItemMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutItemResult), () => inner.FanoutAugmentPutItemResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentPutItemResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentPutRefinerResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutRefinerMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutRefinerResult), () => inner.FanoutAugmentPutRefinerResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentPutRefinerResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentPutGemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationPutGemMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutGemResult), () => inner.FanoutAugmentPutGemResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentPutGemResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentVariationResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationResultMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentVariationResult), () => inner.FanoutAugmentVariationResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentVariationResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentPutCancelItemResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelItemMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentPutCancelItemResult), () => inner.FanoutAugmentPutCancelItemResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentPutCancelItemResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
     void IWorldEventPublisher.FanoutAugmentCancelResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.VariationCancelResultMsg msg) =>
-        Emit(nameof(IWorldEventPublisher.FanoutAugmentCancelResult), () => inner.FanoutAugmentCancelResult([.. watcherObjectIds], msg));
+        Record(FanoutKind.AugmentCancelResult, 0, watcherObjectIds, new FanoutArgs(Payload: msg), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPledgeStatus), () => inner.FanoutPledgeStatus(watcherObjectIdsCopy, status));
-    }
+    void IWorldEventPublisher.FanoutPledgeStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeStatusChangedMsg status) =>
+        Record(FanoutKind.PledgeStatus, 0, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPledgeMemberList), () => inner.FanoutPledgeMemberList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutPledgeMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PledgeMemberListMsg list) =>
+        Record(FanoutKind.PledgeMemberList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCrestData(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CrestDataNetMsg crest)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCrestData), () => inner.FanoutCrestData(watcherObjectIdsCopy, crest));
-    }
+    void IWorldEventPublisher.FanoutCrestData(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CrestDataNetMsg crest) =>
+        Record(FanoutKind.CrestData, 0, watcherObjectIds, new FanoutArgs(Payload: crest), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPledgeWarList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeWarListNetMsg wars)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPledgeWarList), () => inner.FanoutPledgeWarList(watcherObjectIdsCopy, wars));
-    }
+    void IWorldEventPublisher.FanoutPledgeWarList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeWarListNetMsg wars) =>
+        Record(FanoutKind.PledgeWarList, 0, watcherObjectIds, new FanoutArgs(Payload: wars), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRelationChanged(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RelationChangedNetMsg relation)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRelationChanged), () => inner.FanoutRelationChanged(watcherObjectIdsCopy, relation));
-    }
+    void IWorldEventPublisher.FanoutRelationChanged(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RelationChangedNetMsg relation) =>
+        Record(FanoutKind.RelationChanged, 0, watcherObjectIds, new FanoutArgs(Payload: relation), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPledgeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeInfoNetMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPledgeInfo), () => inner.FanoutPledgeInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutPledgeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PledgeInfoNetMsg info) =>
+        Record(FanoutKind.PledgeInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAllyInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyInfoNetMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAllyInfo), () => inner.FanoutAllyInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutAllyInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyInfoNetMsg info) =>
+        Record(FanoutKind.AllyInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAllyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyAskJoinNetMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAllyAskJoin), () => inner.FanoutAllyAskJoin(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutAllyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AllyAskJoinNetMsg ask) =>
+        Record(FanoutKind.AllyAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutClanHallList), () => inner.FanoutClanHallList(watcherObjectIdsCopy, halls));
-    }
+    void IWorldEventPublisher.FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls) =>
+        Record(FanoutKind.ClanHallList, 0, watcherObjectIds, new FanoutArgs(Payload: halls), replaceable: false);
 
-    void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutAgitDecoInfo), () => inner.FanoutAgitDecoInfo(watcherObjectIdsCopy, deco));
-    }
+    void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco) =>
+        Record(FanoutKind.AgitDecoInfo, 0, watcherObjectIds, new FanoutArgs(Payload: deco), replaceable: false);
 
-    void IWorldEventPublisher.FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClientSetTimeNetMsg time)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutClientSetTime), () => inner.FanoutClientSetTime(watcherObjectIdsCopy, time));
-    }
+    void IWorldEventPublisher.FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClientSetTimeNetMsg time) =>
+        Record(FanoutKind.ClientSetTime, 0, watcherObjectIds, new FanoutArgs(Payload: time), replaceable: false);
 
-    void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDoorStatus), () => inner.FanoutDoorStatus(watcherObjectIdsCopy, door));
-    }
+    void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door) =>
+        Record(FanoutKind.DoorStatus, 0, watcherObjectIds, new FanoutArgs(Payload: door), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CastleInfoNetMsg castle)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCastleInfo), () => inner.FanoutCastleInfo(watcherObjectIdsCopy, castle));
-    }
+    void IWorldEventPublisher.FanoutCastleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.CastleInfoNetMsg castle) =>
+        Record(FanoutKind.CastleInfo, 0, watcherObjectIds, new FanoutArgs(Payload: castle), replaceable: false);
 
-    void IWorldEventPublisher.FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutManorInfo), () => inner.FanoutManorInfo(watcherObjectIdsCopy, manor));
-    }
+    void IWorldEventPublisher.FanoutManorInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ManorInfoNetMsg manor) =>
+        Record(FanoutKind.ManorInfo, 0, watcherObjectIds, new FanoutArgs(Payload: manor), replaceable: false);
 
-    void IWorldEventPublisher.FanoutFishing(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.FishingEventNetMsg fishing)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutFishing), () => inner.FanoutFishing(watcherObjectIdsCopy, fishing));
-    }
+    void IWorldEventPublisher.FanoutFishing(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.FishingEventNetMsg fishing) =>
+        Record(FanoutKind.Fishing, 0, watcherObjectIds, new FanoutArgs(Payload: fishing), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonInfoNetMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSummonInfo), () => inner.FanoutSummonInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutSummonInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonInfoNetMsg info) =>
+        Record(FanoutKind.SummonInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonGoneNetMsg gone)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSummonGone), () => inner.FanoutSummonGone(watcherObjectIdsCopy, gone));
-    }
+    void IWorldEventPublisher.FanoutSummonGone(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.SummonGoneNetMsg gone) =>
+        Record(FanoutKind.SummonGone, 0, watcherObjectIds, new FanoutArgs(Payload: gone), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRide(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RideNetMsg ride)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRide), () => inner.FanoutRide(watcherObjectIdsCopy, ride));
-    }
+    void IWorldEventPublisher.FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory) =>
+        Record(FanoutKind.PetInventory, 0, watcherObjectIds, new FanoutArgs(Payload: inventory), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPlayerActionState(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PlayerActionStateNetMsg state)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPlayerActionState), () => inner.FanoutPlayerActionState(watcherObjectIdsCopy, state));
-    }
+    void IWorldEventPublisher.FanoutRide(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.RideNetMsg ride) =>
+        Record(FanoutKind.Ride, 0, watcherObjectIds, new FanoutArgs(Payload: ride), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPetInventory(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PetInventoryNetMsg inventory)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPetInventory), () => inner.FanoutPetInventory(watcherObjectIdsCopy, inventory));
-    }
+    void IWorldEventPublisher.FanoutPlayerActionState(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.PlayerActionStateNetMsg state) =>
+        Record(FanoutKind.PlayerActionState, 0, watcherObjectIds, new FanoutArgs(Payload: state), replaceable: false);
 
-    void IWorldEventPublisher.FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDuelEvent), () => inner.FanoutDuelEvent(watcherObjectIdsCopy, duel));
-    }
+    void IWorldEventPublisher.FanoutDuelEvent(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelEventNetMsg duel) =>
+        Record(FanoutKind.DuelEvent, 0, watcherObjectIds, new FanoutArgs(Payload: duel), replaceable: false);
 
-    void IWorldEventPublisher.FanoutDuelUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelUserInfoNetMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDuelUserInfo), () => inner.FanoutDuelUserInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutDuelUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DuelUserInfoNetMsg info) =>
+        Record(FanoutKind.DuelUserInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutClanAskJoin), () => inner.FanoutClanAskJoin(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutClanAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanAskJoinMsg ask) =>
+        Record(FanoutKind.ClanAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanJoinResultMsg result)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutClanJoinResult), () => inner.FanoutClanJoinResult(watcherObjectIdsCopy, result));
-    }
+    void IWorldEventPublisher.FanoutClanJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ClanJoinResultMsg result) =>
+        Record(FanoutKind.ClanJoinResult, 0, watcherObjectIds, new FanoutArgs(Payload: result), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyAskJoinMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartyAskJoin), () => inner.FanoutPartyAskJoin(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutPartyAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyAskJoinMsg ask) =>
+        Record(FanoutKind.PartyAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyJoinResultMsg result)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartyJoinResult), () => inner.FanoutPartyJoinResult(watcherObjectIdsCopy, result));
-    }
+    void IWorldEventPublisher.FanoutPartyJoinResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyJoinResultMsg result) =>
+        Record(FanoutKind.PartyJoinResult, 0, watcherObjectIds, new FanoutArgs(Payload: result), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartyMemberList), () => inner.FanoutPartyMemberList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutPartyMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberListMsg list) =>
+        Record(FanoutKind.PartyMemberList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartyMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberUpdateMsg update)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartyMemberUpdate), () => inner.FanoutPartyMemberUpdate(watcherObjectIdsCopy, update));
-    }
+    void IWorldEventPublisher.FanoutPartyMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberUpdateMsg update) =>
+        Record(FanoutKind.PartyMemberUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartySpelled(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg effects)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartySpelled), () => inner.FanoutPartySpelled(watcherObjectIdsCopy, effects));
-    }
+    void IWorldEventPublisher.FanoutPartySpelled(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg effects) =>
+        Record(FanoutKind.PartySpelled, 0, watcherObjectIds, new FanoutArgs(Payload: effects), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPartyMemberPosition), () => inner.FanoutPartyMemberPosition(watcherObjectIdsCopy, positions));
-    }
+    void IWorldEventPublisher.FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions) =>
+        Record(FanoutKind.PartyMemberPosition, 0, watcherObjectIds, new FanoutArgs(Payload: positions), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCommandChannelAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelAskJoinMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelAskJoin), () => inner.FanoutCommandChannelAskJoin(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutCommandChannelAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelAskJoinMsg ask) =>
+        Record(FanoutKind.CommandChannelAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelOpen), () => inner.FanoutCommandChannelOpen(watcherObjectIdsCopy));
-    }
+    void IWorldEventPublisher.FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds) =>
+        Record(FanoutKind.CommandChannelOpen, 0, watcherObjectIds, default, replaceable: false);
 
-    void IWorldEventPublisher.FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelClose), () => inner.FanoutCommandChannelClose(watcherObjectIdsCopy));
-    }
+    void IWorldEventPublisher.FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds) =>
+        Record(FanoutKind.CommandChannelClose, 0, watcherObjectIds, default, replaceable: false);
 
-    void IWorldEventPublisher.FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCommandChannelInfo), () => inner.FanoutCommandChannelInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info) =>
+        Record(FanoutKind.CommandChannelInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
     {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
         int[] targetObjectIdsCopy = [.. targetObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutMagicSkillLaunched), () => inner.FanoutMagicSkillLaunched(watcherObjectIdsCopy, casterObjectId, skillId, skillLevel, targetObjectIdsCopy));
+        Record(FanoutKind.MagicSkillLaunched, 0, watcherObjectIds, new FanoutArgs(A: casterObjectId, B: skillId, C: skillLevel, Payload: targetObjectIdsCopy), replaceable: false);
     }
 
-    void IWorldEventPublisher.FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutMagicSkillCanceled), () => inner.FanoutMagicSkillCanceled(watcherObjectIdsCopy, objectId));
-    }
+    void IWorldEventPublisher.FanoutMagicSkillCanceled(IReadOnlyList<int> watcherObjectIds, int objectId) =>
+        Record(FanoutKind.MagicSkillCanceled, 0, watcherObjectIds, new FanoutArgs(A: objectId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPlaySound), () => inner.FanoutPlaySound(watcherObjectIdsCopy, type, file, objectId, x, y, z, delayMs));
-    }
+    void IWorldEventPublisher.FanoutPlaySound(IReadOnlyList<int> watcherObjectIds, int type, string file, int objectId, int x, int y, int z, int delayMs) =>
+        Record(FanoutKind.PlaySound, 0, watcherObjectIds, new FanoutArgs(A: type, Payload: file, B: objectId, C: x, D: y, E: z, F: delayMs), replaceable: false);
 
-    void IWorldEventPublisher.FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutMonRaceInfo), () => inner.FanoutMonRaceInfo(watcherObjectIdsCopy, packet));
-    }
+    void IWorldEventPublisher.FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet) =>
+        Record(FanoutKind.MonRaceInfo, 0, watcherObjectIds, new FanoutArgs(Payload: packet), replaceable: false);
 
-    void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutVehicleInfo), () => inner.FanoutVehicleInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info) =>
+        Record(FanoutKind.VehicleInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutVehicleDeparture), () => inner.FanoutVehicleDeparture(watcherObjectIdsCopy, departure));
-    }
+    void IWorldEventPublisher.FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure) =>
+        Record(FanoutKind.VehicleDeparture, 0, watcherObjectIds, new FanoutArgs(Payload: departure), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeAsk), () => inner.FanoutTradeAsk(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask) =>
+        Record(FanoutKind.TradeAsk, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeRequestResult), () => inner.FanoutTradeRequestResult(watcherObjectIdsCopy, result));
-    }
+    void IWorldEventPublisher.FanoutTradeRequestResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeRequestResultMsg result) =>
+        Record(FanoutKind.TradeRequestResult, 0, watcherObjectIds, new FanoutArgs(Payload: result), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeStartMsg start)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeStart), () => inner.FanoutTradeStart(watcherObjectIdsCopy, start));
-    }
+    void IWorldEventPublisher.FanoutTradeStart(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeStartMsg start) =>
+        Record(FanoutKind.TradeStart, 0, watcherObjectIds, new FanoutArgs(Payload: start), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeOfferUpdateMsg update)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeOfferUpdate), () => inner.FanoutTradeOfferUpdate(watcherObjectIdsCopy, update));
-    }
+    void IWorldEventPublisher.FanoutTradeOfferUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeOfferUpdateMsg update) =>
+        Record(FanoutKind.TradeOfferUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeConfirmStateMsg state)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeConfirmState), () => inner.FanoutTradeConfirmState(watcherObjectIdsCopy, state));
-    }
+    void IWorldEventPublisher.FanoutTradeConfirmState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeConfirmStateMsg state) =>
+        Record(FanoutKind.TradeConfirmState, 0, watcherObjectIds, new FanoutArgs(Payload: state), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeFinishedMsg finished)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutTradeFinished), () => inner.FanoutTradeFinished(watcherObjectIdsCopy, finished));
-    }
+    void IWorldEventPublisher.FanoutTradeFinished(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeFinishedMsg finished) =>
+        Record(FanoutKind.TradeFinished, 0, watcherObjectIds, new FanoutArgs(Payload: finished), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPrivateStoreInfo), () => inner.FanoutPrivateStoreInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutPrivateStoreInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreInfoMsg info) =>
+        Record(FanoutKind.PrivateStoreInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListSellMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPrivateStoreListSell), () => inner.FanoutPrivateStoreListSell(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListSellMsg list) =>
+        Record(FanoutKind.PrivateStoreListSell, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListBuyMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutPrivateStoreListBuy), () => inner.FanoutPrivateStoreListBuy(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListBuyMsg list) =>
+        Record(FanoutKind.PrivateStoreListBuy, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeBookListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRecipeBookList), () => inner.FanoutRecipeBookList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutRecipeBookList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeBookListMsg list) =>
+        Record(FanoutKind.RecipeBookList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeItemMakeInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRecipeItemMakeInfo), () => inner.FanoutRecipeItemMakeInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutRecipeItemMakeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeItemMakeInfoMsg info) =>
+        Record(FanoutKind.RecipeItemMakeInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopSellListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRecipeShopSellList), () => inner.FanoutRecipeShopSellList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutRecipeShopSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopSellListMsg list) =>
+        Record(FanoutKind.RecipeShopSellList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopItemInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutRecipeShopItemInfo), () => inner.FanoutRecipeShopItemInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutRecipeShopItemInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.RecipeShopItemInfoMsg info) =>
+        Record(FanoutKind.RecipeShopItemInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendInviteAskMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutFriendInviteAsk), () => inner.FanoutFriendInviteAsk(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutFriendInviteAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendInviteAskMsg ask) =>
+        Record(FanoutKind.FriendInviteAsk, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutWeddingEngageAsk), () => inner.FanoutWeddingEngageAsk(watcherObjectIdsCopy, ask));
-    }
+    void IWorldEventPublisher.FanoutWeddingEngageAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.WeddingEngageAskMsg ask) =>
+        Record(FanoutKind.WeddingEngageAsk, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
 
-    void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutFriendList), () => inner.FanoutFriendList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutFriendList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendListMsg list) =>
+        Record(FanoutKind.FriendList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendUpdateMsg update)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutFriendUpdate), () => inner.FanoutFriendUpdate(watcherObjectIdsCopy, update));
-    }
+    void IWorldEventPublisher.FanoutFriendUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.FriendUpdateMsg update) =>
+        Record(FanoutKind.FriendUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
 
-    void IWorldEventPublisher.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BlockListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutBlockList), () => inner.FanoutBlockList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutBlockList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BlockListMsg list) =>
+        Record(FanoutKind.BlockList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BossStatusMsg status)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutBossStatus), () => inner.FanoutBossStatus(watcherObjectIdsCopy, status));
-    }
+    void IWorldEventPublisher.FanoutBossStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.BossStatusMsg status) =>
+        Record(FanoutKind.BossStatus, 0, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSiegeInfo), () => inner.FanoutSiegeInfo(watcherObjectIdsCopy, info));
-    }
+    void IWorldEventPublisher.FanoutSiegeInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SiegeInfoMsg info) =>
+        Record(FanoutKind.SiegeInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
-    void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutOlympiadStatus), () => inner.FanoutOlympiadStatus(watcherObjectIdsCopy, status));
-    }
+    void IWorldEventPublisher.FanoutOlympiadStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadStatusMsg status) =>
+        Record(FanoutKind.OlympiadStatus, 0, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: false);
 
-    void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadMatchMsg match)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutOlympiadMatch), () => inner.FanoutOlympiadMatch(watcherObjectIdsCopy, match));
-    }
+    void IWorldEventPublisher.FanoutOlympiadMatch(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadMatchMsg match) =>
+        Record(FanoutKind.OlympiadMatch, 0, watcherObjectIds, new FanoutArgs(Payload: match), replaceable: false);
 
-    void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadCountdownMsg countdown)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutOlympiadCountdown), () => inner.FanoutOlympiadCountdown(watcherObjectIdsCopy, countdown));
-    }
+    void IWorldEventPublisher.FanoutOlympiadCountdown(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadCountdownMsg countdown) =>
+        Record(FanoutKind.OlympiadCountdown, 0, watcherObjectIds, new FanoutArgs(Payload: countdown), replaceable: false);
 
-    void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutOlympiadResult), () => inner.FanoutOlympiadResult(watcherObjectIdsCopy, result));
-    }
+    void IWorldEventPublisher.FanoutOlympiadResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.OlympiadResultMsg result) =>
+        Record(FanoutKind.OlympiadResult, 0, watcherObjectIds, new FanoutArgs(Payload: result), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSevenSignsStatus), () => inner.FanoutSevenSignsStatus(watcherObjectIdsCopy, status));
-    }
+    void IWorldEventPublisher.FanoutSevenSignsStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsStatusMsg status) =>
+        Record(FanoutKind.SevenSignsStatus, 0, watcherObjectIds, new FanoutArgs(Payload: status), replaceable: false);
 
-    void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsSkyMsg sky)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutSevenSignsSky), () => inner.FanoutSevenSignsSky(watcherObjectIdsCopy, sky));
-    }
+    void IWorldEventPublisher.FanoutSevenSignsSky(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SevenSignsSkyMsg sky) =>
+        Record(FanoutKind.SevenSignsSky, 0, watcherObjectIds, new FanoutArgs(Payload: sky), replaceable: false);
 
-    void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutDungeonEntered), () => inner.FanoutDungeonEntered(watcherObjectIdsCopy, entered));
-    }
+    void IWorldEventPublisher.FanoutDungeonEntered(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DungeonEnteredMsg entered) =>
+        Record(FanoutKind.DungeonEntered, 0, watcherObjectIds, new FanoutArgs(Payload: entered), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponList), () => inner.FanoutCursedWeaponList(watcherObjectIdsCopy, list));
-    }
+    void IWorldEventPublisher.FanoutCursedWeaponList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponListMsg list) =>
+        Record(FanoutKind.CursedWeaponList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
-    void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location)
-    {
-        int[] watcherObjectIdsCopy = [.. watcherObjectIds];
-        Emit(nameof(IWorldEventPublisher.FanoutCursedWeaponLocation), () => inner.FanoutCursedWeaponLocation(watcherObjectIdsCopy, location));
-    }
+    void IWorldEventPublisher.FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location) =>
+        Record(FanoutKind.CursedWeaponLocation, 0, watcherObjectIds, new FanoutArgs(Payload: location), replaceable: false);
 }

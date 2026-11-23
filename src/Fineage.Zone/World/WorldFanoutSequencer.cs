@@ -82,11 +82,9 @@ internal sealed class WorldFanoutSequencer(FanoutDispatcher dispatcher)
     /// <summary>Test hook: wait until the dispatcher worker finishes pending batches.</summary>
     public void Drain() => _dispatcher.WaitUntilIdle();
 
-    /// <summary>Enqueues a single immediate send without draining the queue on the simulation thread.</summary>
-    public void SendNow(Action send)
+    /// <summary>Enqueues one already-built batch without draining the queue on the simulation thread.</summary>
+    public void Submit(WorldFanoutBatch batch)
     {
-        var batch = new WorldFanoutBatch();
-        batch.AddOrdered("immediate", send);
         var seq = new WorldEventSequence(_tick, _phase, _sequence++);
         _dispatcher.Enqueue(new SealedWorldFanoutBatch(batch, seq, 0));
     }

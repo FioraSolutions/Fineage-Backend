@@ -190,11 +190,12 @@ internal sealed class FanoutDispatcher : IDisposable
             // One stripe enqueue per connection for the whole sealed batch, instead of one channel item per frame.
             using (FanoutDeliveryScope scope = FanoutDeliveryScope.Begin())
             {
-                foreach (var (name, send) in batch.Sends())
+                var cursor = batch.OpenCursor();
+                while (cursor.MoveNext())
                 {
                     try
                     {
-                        send();
+                        cursor.Send();
                         events++;
                         FineageTelemetry.FanoutRecipientsPerEvent.Record(CommandFanoutTimingContext.TakeRecipients());
                     }
@@ -202,7 +203,7 @@ internal sealed class FanoutDispatcher : IDisposable
                     {
                         CommandFanoutTimingContext.TakeRecipients();
                         FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "fanout"));
-                        ZoneLog.Warn($"world fan-out {name} failed: {ex}");
+                        ZoneLog.Warn($"world fan-out {cursor.Kind} failed: {ex}");
                         if (FailFast)
                             _propagated ??= ex;
                     }

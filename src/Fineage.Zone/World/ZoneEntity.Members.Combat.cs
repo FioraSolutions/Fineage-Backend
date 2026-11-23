@@ -37,7 +37,6 @@ sealed partial class ZoneEntity
     public Dictionary<int, long> ItemReuseUntilMs => EnsureSkills().ItemReuseUntilMs;
 
     ZonePlayerSkillsPayload EnsureSkills() => Skills ??= new ZonePlayerSkillsPayload();
-    public HashSet<int> Knownlist { get; } = [];
     public int ClanId
     {
         get => Identity?.ClanId ?? 0;
