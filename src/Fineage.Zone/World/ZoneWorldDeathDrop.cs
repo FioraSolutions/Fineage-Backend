@@ -132,7 +132,7 @@ public sealed partial class ZoneWorld
             player.SpiritshotCharge = 0;
         }
 
-        if (invChanges.Count > 0)
+        if (spawned.Count > 0)
             SaveInventory(player.Session, player.Inventory);
 
         if (gearChanged)
