@@ -403,6 +403,10 @@ namespace Fineage.Net.Contract
         /// <c>ClientSetTime.java</c> — <c>writeD(gameMinutes)</c>, <c>writeD(6)</c>.
         /// </summary>
         public const ushort ClientSetTime = 0x03E1;
+        /// <summary>Client → zone: retail <c>RequestRestart</c> (wire 0x46). Empty body. Returns to the character lobby.</summary>
+        public const ushort RequestRestart = 0x03E2;
+        /// <summary>Zone → client: retail <c>RestartResponse</c> (wire 0x5f). Followed by <see cref="CharacterRoster"/> when ok.</summary>
+        public const ushort RestartResponse = 0x03E3;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

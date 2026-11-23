@@ -15,8 +15,8 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 87 |
-| 🟡 partial | 7 |
+| ✅ done | 88 |
+| 🟡 partial | 6 |
 | ❌ missing | 11 |
 | n/a | 3 |
 | **total** | **108** |
@@ -31,7 +31,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 1 | Login, roster, Net auth | ✅ | — | `network/clientpackets/AuthLogin.java` → `Fineage.Login` `Auth` / `ZoneAuth` |
 | 2 | Character create (5 races, templates) | ✅ | — | `CharacterCreate.java` → `CreateCharacter` + class templates |
 | 3 | Enter world / persist / inventory | ✅ | — | `EnterWorld.java` → `ZoneWorld` enter + `CharacterPersistWorker` |
-| 4 | Logout and return to lobby | 🟡 | S | `Logout.java`, `RequestRestart.java` → disconnect persists in `ZoneWorld.Members.Leave`; no lobby-restart opcode (`RESTART_RESPONSE` absent) — #923 |
+| 4 | Logout and return to lobby | ✅ | — | `RequestRestart.java` → `ZoneWorldRestart`: persist, keep the account, `RestartResponse` then `CharacterRoster`. TCP close still persists via `Leave` |
 | **World and geo** |
 | 5 | Movement, sit/stand, run/walk, validate | ✅ | — | `MoveToLocation.java`, `RequestActionUse.java` → `ZoneWorldMovement`, `RequestActionUse` |
 | 6 | Geodata LOS / MoveCheck / path | 🟡 | M | `geoengine/GeoEngine.java` → `Geo/GeoEngine.cs`. Engine is ported; the repo has no `*.l2j` regions. A missing directory is logged and geo is disabled unless `FINEAGE_GEODATA_REQUIRED=1` — #918 |
@@ -174,15 +174,14 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 2. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
 3. User commands, especially Unstuck (row 68) — #920.
 4. Inventory crystallize (row 51) — #921.
-5. Logout back to the character lobby (row 4) — #923.
-6. Shop wear preview (row 48) — #924.
-7. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-8. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-9. Macros (row 69) — #927.
-10. Party matching rooms (row 67) — #928.
-11. Community board (row 70) — #929.
-12. Petitions (row 63) — #930.
-13. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+5. Shop wear preview (row 48) — #924.
+6. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+7. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+8. Macros (row 69) — #927.
+9. Party matching rooms (row 67) — #928.
+10. Community board (row 70) — #929.
+11. Petitions (row 63) — #930.
+12. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

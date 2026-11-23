@@ -84,6 +84,17 @@ sealed partial class SessionLifecyclePacketHandler
             return default;
         }
 
+        // A restart keeps the account on this connection. A ticket for a different account is not a new login.
+        if (!string.IsNullOrEmpty(zoneSession.Account)
+            && !string.Equals(zoneSession.Account, auth.Account, StringComparison.OrdinalIgnoreCase))
+        {
+            ZoneLog.Error(
+                $"[zone] auth refused: connection holds account {zoneSession.Account}, ticket is {auth.Account}");
+            await _reject(conn, "account_held", "This connection is still signed in to another account.", ct)
+                .ConfigureAwait(false);
+            return default;
+        }
+
         var status = _handoff.TryConsume(auth.Token, _clock(), out var parsed);
         if (status == HandoffTokens.ValidateStatus.Expired)
         {
@@ -135,5 +146,80 @@ sealed partial class SessionLifecyclePacketHandler
 
         Console.WriteLine($"[ZONE] auth ok account={parsed.Account} char={parsed.CharacterId} name={parsed.CharacterName} entity={entityId.Value}");
         return entityId;
+    }
+
+    /// <summary>
+    /// Persist the character, drop the character binding, keep the account, then send the lobby roster.
+    /// The roster is built only after <see cref="LeaveAsync"/> returns, so the saved row is what the lobby shows.
+    /// </summary>
+    public async Task OnRestartAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        EntityId self,
+        int registeredObjectId,
+        CancellationToken ct)
+    {
+        string? refusal = await _world.RestartRefusalAsync(zoneSession, ct).ConfigureAwait(false);
+        if (refusal != null)
+        {
+            await conn.SendAsync(
+                NetOpcode.RestartResponse,
+                NetCodec.EncodeRestartResponse(new RestartResponseMsg { Ok = false, Code = refusal }),
+                ct: ct).ConfigureAwait(false);
+            return;
+        }
+
+        await LeaveAsync(zoneSession, self, registeredObjectId, conn).ConfigureAwait(false);
+        zoneSession.ReturnToLobby();
+
+        LobbyCharacterRow[] rows = _world.RosterAfterRestart(zoneSession);
+        await conn.SendAsync(
+            NetOpcode.RestartResponse,
+            NetCodec.EncodeRestartResponse(new RestartResponseMsg { Ok = true }),
+            ct: ct).ConfigureAwait(false);
+        await conn.SendAsync(
+            NetOpcode.CharacterRoster,
+            NetCodec.EncodeCharacterRoster(new CharacterRosterMsg { Characters = ToNet(rows) }),
+            ct: ct).ConfigureAwait(false);
+    }
+
+    static CharacterSummaryNet[] ToNet(LobbyCharacterRow[] rows)
+    {
+        var net = new CharacterSummaryNet[rows.Length];
+        for (int i = 0; i < rows.Length; i++)
+        {
+            var row = rows[i];
+            net[i] = new CharacterSummaryNet
+            {
+                CharacterId = row.CharacterId,
+                Slot = row.Slot,
+                Name = row.Name,
+                ClassId = row.ClassId,
+                Race = row.Race,
+                Sex = row.Sex,
+                Level = row.Level,
+                Hp = row.Hp,
+                MaxHp = row.MaxHp,
+                Mp = row.Mp,
+                MaxMp = row.MaxMp,
+                HairStyle = row.HairStyle,
+                HairColor = row.HairColor,
+                Face = row.Face,
+                PendingDelete = row.PendingDelete,
+                X = row.X,
+                Y = row.Y,
+                Z = row.Z,
+                DeleteSecondsLeft = row.DeleteSecondsLeft,
+                IsLastPlayed = row.IsLastPlayed,
+                CurCp = row.CurCp,
+                MaxCp = row.MaxCp,
+                Exp = row.Exp,
+                Sp = row.Sp,
+                Karma = row.Karma,
+                WeaponItemId = row.WeaponItemId,
+                Paperdoll = row.Paperdoll
+            };
+        }
+        return net;
     }
 }
