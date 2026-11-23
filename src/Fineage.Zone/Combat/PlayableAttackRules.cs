@@ -9,6 +9,13 @@ public static class PlayableAttackRules
     /// <summary>Skill 5182 Blessing of Protection (<c>EffectFlag.PROTECTION_BLESSING</c>).</summary>
     public const int BlessingSkillId = 5182;
 
+    /// <summary>Effect names from the skill-effect catalog. The live abnormal is what carries the rule, not the skill id.</summary>
+    public const string BlockBuffSlotEffect = "BlockBuffSlot";
+
+    public const string NoblesseBlessEffect = "NoblesseBless";
+
+    public const string ProtectionBlessingEffect = "ProtectionBlessing";
+
     public const int BlessingLevelGap = 10;
     public const int CursedWeaponLevel = 20;
 

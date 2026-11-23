@@ -8,8 +8,8 @@
 
 | Status | Effect types | Meaning |
 |--------|-------------:|---------|
-| full | 108 | Routed through shared combat / buff / toggle / utility pipelines |
-| partial | 3 | `BlockBuffSlot` family — abnormal lands; slot mutex not enforced |
+| full | 111 | Routed through shared combat / buff / toggle / utility pipelines |
+| partial | 0 | — |
 | unsupported | 1 | `#effectname1` corrupt datapack placeholder |
 | missing | 0 | — |
 
@@ -26,13 +26,11 @@ Cast conditions: see [`skill-cast-condition-audit.md`](skill-cast-condition-audi
 | Olympiad enter | `clearCharges` in arena prep | `ClearForceCharges` in `EnterOlympiadArena` |
 | Client display | `EtcStatusUpdate.charges` | `FanoutEtcStatusUpdate` |
 
-## Partial effect families (client / follow-up)
+## Handlers with no Interlude datapack row
 
 | Effect | Gap |
 |--------|-----|
-| `BlockBuffSlot` / `BlockAbnormalSlot` | Re-buffing blocked slots should refuse or replace per Mobius `BlockBuffSlot.java` |
-| `NoblesseBless` / `ProtectionBlessing` | Noblesse death penalty / blessing consume messaging |
-| `ServitorShare` / `ApplySkillEffects` | Pet share + nested apply handlers |
+| `ServitorShare` / `ApplySkillEffects` | Mobius handlers with no CT_0 skill row. Not a datapack status. |
 
 ## CI gate
 

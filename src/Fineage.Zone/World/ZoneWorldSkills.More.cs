@@ -138,6 +138,25 @@ public sealed partial class ZoneWorld
         return SkillMessages.List(rows, entity.SkillReuseUntilMs, now);
     }
 
+    /// <summary>
+    /// A datapack effect name that the coverage catalog marks missing or uncataloged never runs.
+    /// Documented unsupported rows stay allowed. A skill with no effect rows is unchanged.
+    /// </summary>
+    string? RefuseUncatalogedEffect(int skillId)
+    {
+        if (!_skillEffects.TryGet(skillId, out var rows))
+            return null;
+        foreach (var row in rows)
+        {
+            if (SkillEffectCoverageCatalog.AllowsDatapackUse(row.Name))
+                continue;
+            ZoneLog.Error(
+                $"[skill] skill {skillId} effect '{row.Name}' is {SkillEffectCoverageCatalog.StatusOf(row.Name)} — refused");
+            return SkillProtocol.EffectMissing;
+        }
+        return null;
+    }
+
     string? TrySkillUse(ZoneSession session, SkillUseIntent request)
     {
         if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Session == null)
@@ -190,6 +209,9 @@ public sealed partial class ZoneWorld
                 curMp: player.CurMp,
                 mpConsume: SkillMpCost(player, template, levelData?.MpConsume ?? 0)) is { } precheckError)
             return precheckError;
+
+        if (RefuseUncatalogedEffect(request.SkillId) is { } effectError)
+            return effectError;
 
         var liveTemplate = template!;
         var liveLevelData = levelData!;

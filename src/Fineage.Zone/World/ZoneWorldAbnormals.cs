@@ -36,6 +36,10 @@ public sealed partial class ZoneWorld
         }
         // The land roll already passed; a lower-level same-slot occupant is rejected silently
         // (Mobius EffectList.add returns without initializeEffects) and is not a resist.
+        // A live BlockBuffSlot lists abnormal types that must not land. The set is the live
+        // abnormals, so the block ends when that abnormal expires.
+        if (IncomingSlotBlocked(target, template.AbnormalType))
+            return true;
         if (!ZoneAbnormals.Apply(
             target.Abnormals,
             template.SkillId,
@@ -48,9 +52,71 @@ public sealed partial class ZoneWorld
         if (target.Abnormals.Count > 0)
             _byId.Join(target, ActiveSets.WithAbnormals);
         FanoutAbnormal(target);
+        NoteEmptyBlockSlot(template.SkillId);
         ApplyControlFromSlot(target, template.AbnormalType, attacker);
         ApplyElementSeedsFromSkill(template, target, nowUnixMs);
         return true;
+    }
+
+    static readonly System.Collections.Concurrent.ConcurrentDictionary<int, byte> MissingBlockSlots = new();
+
+    /// <summary>
+    /// A live abnormal whose skill carries <c>BlockBuffSlot</c> names the abnormal types that cannot land.
+    /// An empty slot list is missing data: it blocks nothing and is logged once per skill id.
+    /// </summary>
+    bool IncomingSlotBlocked(ZoneEntity target, string incomingSlot)
+    {
+        if (string.IsNullOrWhiteSpace(incomingSlot))
+            return false;
+        foreach (var ab in target.Abnormals)
+        {
+            if (!_skillEffects.TryGet(ab.Id, out var rows))
+                continue;
+            foreach (var row in rows)
+            {
+                if (!row.Name.Equals(PlayableAttackRules.BlockBuffSlotEffect, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                if (string.IsNullOrWhiteSpace(row.Slot))
+                {
+                    NoteMissingBlockSlot(ab.Id);
+                    continue;
+                }
+                foreach (var part in row.Slot.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    if (part.Equals(incomingSlot, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void NoteEmptyBlockSlot(int skillId)
+    {
+        if (!_skillEffects.TryGet(skillId, out var rows))
+            return;
+        foreach (var row in rows)
+        {
+            if (row.Name.Equals(PlayableAttackRules.BlockBuffSlotEffect, StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrWhiteSpace(row.Slot))
+                NoteMissingBlockSlot(skillId);
+        }
+    }
+
+    static void NoteMissingBlockSlot(int skillId)
+    {
+        if (MissingBlockSlots.TryAdd(skillId, 0))
+            ZoneLog.Error($"[abnormal] skill {skillId} BlockBuffSlot is missing its slot list");
+    }
+
+    bool HasEffectAbnormal(ZoneEntity entity, string effectName)
+    {
+        foreach (var ab in entity.Abnormals)
+        {
+            if (_skillEffects.TryGet(ab.Id, out var rows) && RowsHave(rows, effectName))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>Mobius calcEffectSuccess for debuffs; jewelry DefenceTrait lands in <paramref name="traitMod"/>.</summary>

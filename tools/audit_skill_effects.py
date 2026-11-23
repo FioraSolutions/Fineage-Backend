@@ -178,13 +178,12 @@ FULL_ROUTES = {
     "TriggerSkillBySkill",
     "TriggerSkillByAvoid",
     "TriggerSkillByAttack",
+    "BlockBuffSlot",
+    "NoblesseBless",
+    "ProtectionBlessing",
 }
 
 PARTIAL = {
-    "NoblesseBless": "abnormal only; noble blessing consume / death passthrough not wired",
-    "ProtectionBlessing": "abnormal only; retail protection rules partial",
-    "BlockBuffSlot": "slot block not enforced on re-buff",
-    "BlockAbnormalSlot": "slot block not enforced on re-buff",
     "ServitorShare": "pet stat share not implemented",
     "ApplySkillEffects": "nested skill apply not implemented",
 }
