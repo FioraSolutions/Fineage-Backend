@@ -44,8 +44,11 @@ public sealed class BotObservationLog
             _tracker.NoteLocalCommand(opcode, at, targetObjectId, skillId);
     }
 
-    public void SetSelfEntity(ulong entityValue) =>
-        _tracker.SetSelfEntity(entityValue);
+    public void SetSelfEntity(ulong entityValue)
+    {
+        lock (_stateGate)
+            _tracker.SetSelfEntity(entityValue);
+    }
 
     public int VisibleNpcObjectId() => TryPickAttackTarget(out int target) ? target : 0;
 
@@ -56,16 +59,17 @@ public sealed class BotObservationLog
     {
         lock (_stateGate)
         {
-            targetObjectId = _tracker.PickAttackableNpc(_rngSeed, MaxAttackRange, out int dist);
+            targetObjectId = _tracker.PickAttackableNpc(MaxAttackRange, out int dist);
             _lastPickedTarget = targetObjectId;
             LastPickedTargetDistance = dist;
             return targetObjectId > 0;
         }
     }
 
-    readonly int _rngSeed;
+    public BotObservationLog(int botId) => BotId = botId;
 
-    public BotObservationLog(int botId) => _rngSeed = botId * 31 + 7;
+    /// <summary>Fleet index. Wire identity is the <c>IsSelf</c> spawn, not this id.</summary>
+    public int BotId { get; }
 
     public sealed class EntityTracker
     {
@@ -131,6 +135,13 @@ public sealed class BotObservationLog
                     {
                         var s = NetCodec.DecodeEntitySpawn(payload);
                         int oid = (int)s.EntityValue;
+                        var previous = _byValue.GetValueOrDefault(s.EntityValue);
+                        // A despawn closes the life. The next spawn starts a new open run.
+                        // SpawnCount stays lifetime-cumulative; the oracle reads the open run,
+                        // otherwise a respawn (gremlin decay + 15s) looks like a spawn with no despawn.
+                        int openRun = previous == null || previous.Despawned
+                            ? 1
+                            : previous.SpawnsWithoutDespawn + 1;
                         _byValue[s.EntityValue] = new TrackedEntity
                         {
                             ObjectId = oid,
@@ -145,10 +156,15 @@ public sealed class BotObservationLog
                             MaxHp = s.MaxHp,
                             CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
                             LastSpawnOrdinal = ++_spawnOrdinal,
-                            LastDespawnOrdinal = 0,
-                            SpawnCount = (_byValue.GetValueOrDefault(s.EntityValue)?.SpawnCount ?? 0) + 1,
+                            LastDespawnOrdinal = previous?.LastDespawnOrdinal ?? 0,
+                            SpawnCount = (previous?.SpawnCount ?? 0) + 1,
+                            SpawnsWithoutDespawn = openRun,
                             Despawned = false
                         };
+                        // The entering client's own pawn is the only spawn marked IsSelf.
+                        // Target range and AttackState/MagicSkillUse pairing both key off this id.
+                        if (s.IsSelf)
+                            _selfEntityValue = s.EntityValue;
                         break;
                     }
                 case NetOpcode.EntityDespawn:
@@ -330,26 +346,37 @@ public sealed class BotObservationLog
             }
         }
 
-        public int PickAttackableNpc(int seed, int maxRange, out int distance)
+        /// <summary>
+        /// Nearest living attackable NPC within <paramref name="maxRange"/> of the observer.
+        /// The observer is the entity whose spawn was marked <c>IsSelf</c>.
+        /// </summary>
+        public int PickAttackableNpc(int maxRange, out int distance)
         {
             distance = -1;
-            if (!_byValue.TryGetValue(_selfEntityValue, out var self))
+            if (_selfEntityValue == 0 || !_byValue.TryGetValue(_selfEntityValue, out var self))
                 return 0;
 
-            var candidates = _byValue.Values
-                .Where(e => !e.Despawned && e.Attackable && e.Kind == EntityKindNet.Npc && e.Alive)
-                .Select(e => (e.ObjectId, Dist: Distance(self.X, self.Y, e.X, e.Y)))
-                .Where(t => t.Dist <= maxRange)
-                .OrderBy(t => t.Dist)
-                .ThenBy(t => t.ObjectId)
-                .ToList();
+            int bestId = 0;
+            int bestDist = int.MaxValue;
+            foreach (var ent in _byValue.Values)
+            {
+                if (ent.Despawned || !ent.Attackable || ent.Kind != EntityKindNet.Npc || !ent.Alive)
+                    continue;
+                int dist = Distance(self.X, self.Y, ent.X, ent.Y);
+                if (dist > maxRange)
+                    continue;
+                if (dist < bestDist || (dist == bestDist && (bestId == 0 || ent.ObjectId < bestId)))
+                {
+                    bestDist = dist;
+                    bestId = ent.ObjectId;
+                }
+            }
 
-            if (candidates.Count == 0)
+            if (bestId == 0)
                 return 0;
 
-            int idx = Math.Abs(seed) % candidates.Count;
-            distance = candidates[idx].Dist;
-            return candidates[idx].ObjectId;
+            distance = bestDist;
+            return bestId;
         }
 
         static int Distance(int x1, int y1, int x2, int y2)
@@ -386,7 +413,10 @@ public sealed class BotObservationLog
         public bool Despawned { get; set; }
         public long LastSpawnOrdinal { get; set; }
         public long LastDespawnOrdinal { get; set; }
+        /// <summary>Lifetime EntitySpawn count, including lives closed by EntityDespawn.</summary>
         public int SpawnCount { get; set; }
+        /// <summary>EntitySpawns since the last EntityDespawn. 1 on the first spawn of a life.</summary>
+        public int SpawnsWithoutDespawn { get; set; }
         public int LastSocialAction { get; set; }
     }
 }

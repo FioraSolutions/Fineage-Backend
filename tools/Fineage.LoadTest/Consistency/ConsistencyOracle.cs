@@ -33,19 +33,14 @@ public static class ConsistencyOracle
             var tracker = bot.ObservationLog.Tracker;
             foreach (var (key, ent) in tracker.Entities)
             {
-                if (ent.SpawnCount > 1 && ent.LastDespawnOrdinal > 0 && ent.LastSpawnOrdinal > ent.LastDespawnOrdinal)
-                {
-                    // duplicate spawn without clearing despawn state first — only flag if counts exceed one live cycle
-                }
-
-                if (ent.SpawnCount > 3 && ent.LastDespawnOrdinal == 0)
+                if (ent.SpawnsWithoutDespawn > 3)
                 {
                     issues.Add(new ConsistencyIssue
                     {
                         Kind = ConsistencyKind.DuplicateSpawn,
                         ObserverBotId = bot.BotId,
                         SubjectObjectId = ent.ObjectId,
-                        Detail = $"entity {key} spawned {ent.SpawnCount} times without an intervening despawn"
+                        Detail = $"entity {key} spawned {ent.SpawnsWithoutDespawn} times without an intervening despawn"
                     });
                 }
 
