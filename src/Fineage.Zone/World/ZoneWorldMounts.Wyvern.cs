@@ -57,11 +57,11 @@ public sealed partial class ZoneWorld
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var move = BeginLedgerMove(kind, player.ObjectId, referenceNpcId);
         ObserveLedger(move, bag);
-        if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
-            return false;
         move.Post(bag, itemId, -count, PiecesOf([item]));
         move.Post(LedgerAccount.Of(SystemAccount.Destroyed), itemId, count);
         if (move.CheckCommit() != LedgerRejection.None)
+            return false;
+        if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return false;
         move.Commit(LedgerHoldingsOf);
         var invUpdate = removedEntirely
