@@ -20,6 +20,17 @@ public sealed class LoadTestRunner
         if (target == "mobius")
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
 
+        var callerCt = ct;
+        using var runCts = CancellationTokenSource.CreateLinkedTokenSource(callerCt);
+        using var watchStop = new CancellationTokenSource();
+        var observedFrom = DateTimeOffset.UtcNow;
+        var hungSignal = new TaskCompletionSource<SimulationHangVerdict>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var hangTask = SimulationHangGate.WatchTicksAsync(runCts, observedFrom, watchStop.Token, hungSignal);
+        // Stall cancel is not a caller cancel. Connect and behavior use this token so a stuck tick still returns a report.
+        ct = runCts.Token;
+        SimulationHangVerdict hang = SimulationHangVerdict.Clear;
+        Exception? runFault = null;
+
         var started = DateTimeOffset.UtcNow;
         var peers = new BotPeerDirectory();
         var bots = new List<FineageBotClient>();
@@ -40,7 +51,16 @@ public sealed class LoadTestRunner
                 ? 0
                 : (int)(scenario.RampUpSeconds * 1000.0 / scenario.BotCount);
             if (delayMs > 0)
-                await Task.Delay(delayMs, ct);
+            {
+                try
+                {
+                    await Task.Delay(delayMs, ct);
+                }
+                catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
 
             try
             {
@@ -73,10 +93,64 @@ public sealed class LoadTestRunner
             .Where(b => !b.Stats.Disconnected)
             .Select(b => b.RunBehaviorLoopAsync(bots, behaviorEnd, TimeSpan.FromMilliseconds(250), ct))
             .ToArray();
-        await Task.WhenAll(behaviorLoops);
+        var behaviorTask = Task.WhenAll(behaviorLoops);
+        await Task.WhenAny(behaviorTask, hungSignal.Task);
+        if (!behaviorTask.IsCompleted)
+            await Task.WhenAny(behaviorTask, Task.Delay(TimeSpan.FromSeconds(5)));
+        if (behaviorTask.IsCompleted)
+        {
+            try
+            {
+                await behaviorTask;
+            }
+            catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+            {
+            }
+            catch (Exception ex)
+            {
+                runFault = ex;
+            }
+        }
+        else
+        {
+            runFault = new TimeoutException(
+                "behavior loops stayed blocked for 5s after a simulation stall; the run stopped so a report could be written");
+        }
 
+        watchStop.Cancel();
         metricsCts.Cancel();
-        (List<PrometheusSample> promSamples, List<string> rawScrapes) = await metricsTask;
+        List<PrometheusSample> promSamples;
+        List<string> rawScrapes;
+        try
+        {
+            (promSamples, rawScrapes) = await metricsTask;
+        }
+        catch (Exception ex)
+        {
+            promSamples = [];
+            rawScrapes = [];
+            runFault ??= ex;
+        }
+
+        SimulationHangVerdict tickHang;
+        try
+        {
+            tickHang = await hangTask;
+        }
+        catch (Exception ex)
+        {
+            tickHang = SimulationHangVerdict.Clear;
+            runFault ??= ex;
+        }
+
+        hang = SimulationHangGate.Combine(
+            SimulationHangGate.Combine(
+                tickHang,
+                SimulationHangGate.Evaluate(
+                    SimulationHangGate.FromScrapes(promSamples, rawScrapes),
+                    observedFrom,
+                    DateTimeOffset.UtcNow)),
+            SimulationHangGate.FromLogFile(zoneLog));
 
         string? peakMetrics = null;
         if (promSamples.Count > 0 && rawScrapes.Count == promSamples.Count)
@@ -142,6 +216,10 @@ public sealed class LoadTestRunner
 
         if (scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
             failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
+        if (hang.Hung && hang.Reason != null)
+            failReasons.Add(hang.Reason);
+        if (runFault != null)
+            failReasons.Add($"Load test runner failed before finishing: {runFault.GetType().Name}: {runFault.Message}");
 
         RuntimeCounterStats? runtimeStats = null;
         if (runtimeSampler != null)
@@ -188,6 +266,8 @@ public sealed class LoadTestRunner
         var legacySamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
         ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples, zoneLog, logPaths, runtimeStats);
 
+        report.SimulationStallSeconds = hang.StallSeconds;
+        report.SimulationStallCount = hang.StallCount;
         report.FailReasons = failReasons;
         report.Passed = failReasons.Count == 0;
 
