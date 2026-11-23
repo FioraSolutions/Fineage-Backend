@@ -166,3 +166,9 @@ public sealed record WeddingEngageAnswerCommand(int Response) : ZoneCommand
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         Completed(world.TryWeddingEngageAnswerAsync(session, Response, CancellationToken.None));
 }
+
+public sealed record UserCommandCommand(int CommandId) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        world.ApplyUserCommand(session, CommandId);
+}

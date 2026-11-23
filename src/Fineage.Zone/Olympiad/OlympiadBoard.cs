@@ -81,6 +81,22 @@ public sealed partial class OlympiadBoard
             return _nobles.TryGetValue(characterId, out var noble) ? noble.Points : 0;
     }
 
+    /// <summary>Olympiad record stored for this character. False when the noble row is absent.</summary>
+    public bool TryRecord(int characterId, out OlympiadRules.Score score)
+    {
+        lock (_gate)
+        {
+            if (!_nobles.TryGetValue(characterId, out var noble))
+            {
+                score = default;
+                return false;
+            }
+
+            score = new OlympiadRules.Score(noble.Points, noble.Done, noble.Won, noble.Lost, noble.Drawn);
+            return true;
+        }
+    }
+
     public int ClassedWaiting(int classId)
     {
         lock (_gate)

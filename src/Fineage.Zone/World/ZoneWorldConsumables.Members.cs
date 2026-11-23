@@ -9,6 +9,7 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
+    static readonly System.Collections.Concurrent.ConcurrentDictionary<int, byte> MissingTownSkills = new();
     /// <summary>Mobius <c>teleToLocation(CLANHALL)</c> for the clan's owned hideout.</summary>
     (int X, int Y, int Z)? ClanHallDestination(ZoneEntity player)
     {
@@ -45,37 +46,8 @@ public sealed partial class ZoneWorld
         int hitTimeMs = ConsumableRules.EscapeHitTimeMs(skillId);
         var (x, y, z) = TownDestination(player);
 
-        // Fan the cast gesture first so the client starts long-cast / short-cast before the teleport lands.
-        var cast = new MagicSkillUseMsg
-        {
-            CasterObjectId = player.ObjectId,
-            TargetObjectId = player.ObjectId,
-            SkillId = skillId,
-            SkillLevel = level,
-            HitTimeMs = hitTimeMs,
-            ReuseDelayMs = Math.Max(0, reuseDelayMs)
-        };
-        FanoutSkill(player, player, cast, targetStatus: null, CasterMpStatus(player));
-        player.CastingUntilMs = now + hitTimeMs;
-
-        var template = new SkillDefinition(
-            skillId,
-            effect.Name ?? "Scroll of Escape",
-            passive: false,
-            operateType: "A1",
-            targetType: "SELF",
-            castRange: 0,
-            hitTimeMs: hitTimeMs,
-            reuseDelayMs: Math.Max(0, reuseDelayMs),
-            abnormalTimeSeconds: 0,
-            isDebuff: false,
-            levels: [new SkillLevelData(level, mpConsume: 0, power: 0)])
-        {
-            MagicType = 1
-        };
-
         // Consume + teleport land together (Mobius destroys the scroll when the cast succeeds).
-        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) =>
+        BeginTownTeleport(player, skillId, effect.Name ?? "Scroll of Escape", level, hitTimeMs, reuseDelayMs, now, () =>
         {
             if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
                 return;
@@ -89,6 +61,52 @@ public sealed partial class ZoneWorld
         });
 
         return null;
+    }
+
+    /// <summary>
+    /// Shared town teleport: <c>MagicSkillUse</c> now, <paramref name="onLand"/> at hit time.
+    /// Scroll of Escape and the unstuck user command both land through this path.
+    /// </summary>
+    void BeginTownTeleport(
+        ZoneEntity player,
+        int skillId,
+        string skillName,
+        int level,
+        int hitTimeMs,
+        int reuseDelayMs,
+        long now,
+        Action onLand)
+    {
+        var cast = new MagicSkillUseMsg
+        {
+            CasterObjectId = player.ObjectId,
+            TargetObjectId = player.ObjectId,
+            SkillId = skillId,
+            SkillLevel = level,
+            HitTimeMs = hitTimeMs,
+            ReuseDelayMs = Math.Max(0, reuseDelayMs)
+        };
+        if (_game.Skills.Find(skillId) == null && MissingTownSkills.TryAdd(skillId, 0))
+            ZoneLog.Error($"[town-teleport] skill {skillId} is missing from skills.json; using the shared town teleport cast");
+        FanoutSkill(player, player, cast, targetStatus: null, CasterMpStatus(player));
+        player.CastingUntilMs = now + hitTimeMs;
+
+        var template = new SkillDefinition(
+            skillId,
+            skillName,
+            passive: false,
+            operateType: "A1",
+            targetType: "SELF",
+            castRange: 0,
+            hitTimeMs: hitTimeMs,
+            reuseDelayMs: Math.Max(0, reuseDelayMs),
+            abnormalTimeSeconds: 0,
+            isDebuff: false,
+            levels: [new SkillLevelData(level, mpConsume: 0, power: 0)])
+        {
+            MagicType = 1
+        };
+        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) => onLand());
     }
 
     /// <summary>Mobius clan-hall Scroll of Escape (skills 2040 / 2177): cast + <c>teleToLocation(CLANHALL)</c> at hitTime.</summary>
