@@ -23,6 +23,7 @@ public static class BotEconomyFlows
         var t = timeout.Token;
         var flowStats = bot.Stats;
         Interlocked.Increment(ref flowStats.EconomyFlowsAttempted);
+        flowStats.BeginEconomyFlow();
         try
         {
             switch (action)
@@ -93,6 +94,10 @@ public static class BotEconomyFlows
         catch (Exception ex)
         {
             flowStats.EconomyFlowFailures.Add($"{action}: {ex.Message}");
+        }
+        finally
+        {
+            flowStats.EndEconomyFlow();
         }
     }
 }

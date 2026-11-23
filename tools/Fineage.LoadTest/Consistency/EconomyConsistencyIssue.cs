@@ -23,6 +23,7 @@ public sealed class EconomyConsistencyReport
     public long LedgerInvariantViolations { get; init; }
     public long LedgerFlushFailures { get; init; }
     public long ExplainedEconomyRejects { get; set; }
+    public long UnexplainedEconomyRejects { get; set; }
     public long EconomyFlowsAttempted { get; set; }
     public long EconomyFlowsSucceeded { get; set; }
 }

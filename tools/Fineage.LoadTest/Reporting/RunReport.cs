@@ -321,7 +321,7 @@ public static class ReportWriter
             sb.AppendLine("## Economy oracle (auditable ledger)");
             sb.AppendLine($"- Flows attempted / succeeded: **{r.Economy.EconomyFlowsAttempted}** / **{r.Economy.EconomyFlowsSucceeded}**");
             sb.AppendLine($"- Ledger invariant violations (metric peak): **{r.Economy.LedgerInvariantViolations}**");
-            sb.AppendLine($"- Explained economy rejects: **{r.Economy.ExplainedEconomyRejects}**");
+            sb.AppendLine($"- Explained / unexplained economy rejects: **{r.Economy.ExplainedEconomyRejects}** / **{r.Economy.UnexplainedEconomyRejects}**");
             sb.AppendLine($"- Issues: **{r.Economy.Issues.Count}**");
             if (r.Economy.Issues.Count > 0)
             {

@@ -14,7 +14,8 @@ public static class EconomyConsistencyOracle
         "world", "range", "bad_request", "closed", "adena", "weight", "slots", "ledger",
         "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance",
         "manor_manager", "manor_period", "store_combat", "store_item", "recipe", "craft",
-        "sit", "mp", "skill", "target"
+        "sit", "mp", "skill", "target",
+        "persist_busy", "persist_queue_full", "economy_commit_failed"
     };
 
     static readonly Regex LedgerRejectRx = new(
@@ -39,9 +40,12 @@ public static class EconomyConsistencyOracle
             report.EconomyFlowsSucceeded += bot.Stats.EconomyFlowsSucceeded;
             foreach (var (code, count) in bot.Stats.EconomyRejectCounts)
             {
-                report.ExplainedEconomyRejects += count;
-                if (!ExplainedRejectCodes.Contains(code))
+                string normalized = NormalizeRejectCode(code);
+                if (ExplainedRejectCodes.Contains(normalized))
+                    report.ExplainedEconomyRejects += count;
+                else
                 {
+                    report.UnexplainedEconomyRejects += count;
                     report.Issues.Add(new EconomyConsistencyIssue
                     {
                         Kind = EconomyConsistencyKind.UnexpectedReject,
@@ -107,6 +111,14 @@ public static class EconomyConsistencyOracle
         }
 
         return report;
+    }
+
+    static string NormalizeRejectCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return "unknown";
+        int colon = code.IndexOf(':');
+        return colon > 0 ? code[..colon] : code;
     }
 
     public static bool IsHardFailure(EconomyConsistencyKind kind) => kind is
