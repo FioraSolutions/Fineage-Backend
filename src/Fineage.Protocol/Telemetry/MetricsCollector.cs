@@ -48,6 +48,14 @@ public sealed class MetricsCollector : IDisposable
     double _persistOldestAgeMs;
     int _online;
     int _commandIngressQueued;
+    readonly BoundedCountHistogram _commandPlayerQueueDepth = new(MetricsText.CountBounds);
+    readonly DurationHistogram _commandQueueAge = new();
+    long _commandCoalesced;
+    readonly Dictionary<string, long> _commandRejected = new(StringComparer.Ordinal);
+    double _tickMaxMs;
+    double _commandQueueAgeMaxMs;
+    double _watchdogStallMaxMs;
+    long _watchdogStalls;
 
     public MetricsCollector()
     {
@@ -127,6 +135,16 @@ public sealed class MetricsCollector : IDisposable
                 CommandTimelinePhases = FreezeLabeled(_commandTimelinePhases),
                 CommandApplyByName = FreezeLabeled(_commandApplyByName),
                 CommandQueueWaitByClass = FreezeLabeled(_commandQueueWaitByClass),
+                CommandPlayerQueueDepth = _commandPlayerQueueDepth.Freeze(),
+                CommandQueueAge = _commandQueueAge.Freeze(),
+                CommandCoalesced = _commandCoalesced,
+                CommandRejected = _commandRejected
+                    .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
+                TickMaxMs = _tickMaxMs,
+                CommandQueueAgeMaxMs = _commandQueueAgeMaxMs,
+                WatchdogStallMaxMs = _watchdogStallMaxMs,
+                WatchdogStalls = _watchdogStalls,
                 Endpoints = endpoints
             };
         }
@@ -207,6 +225,18 @@ public sealed class MetricsCollector : IDisposable
                 case "fineage.outbound.reliable_overflow":
                     _reliableOverflow += value;
                     break;
+                case "fineage.command.coalesced":
+                    _commandCoalesced += value;
+                    break;
+                case "fineage.command.rejected":
+                    string reason = Tag(tags, "reason");
+                    if (reason.Length == 0)
+                        reason = "unspecified";
+                    _commandRejected[reason] = _commandRejected.GetValueOrDefault(reason) + value;
+                    break;
+                case "fineage.step.watchdog.stalls":
+                    _watchdogStalls = value;
+                    break;
             }
         }
     }
@@ -224,6 +254,9 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.command.ingress.queued":
                     _commandIngressQueued = value;
+                    break;
+                case "fineage.command.queue.depth":
+                    _commandPlayerQueueDepth.Record(value);
                     break;
                 case "fineage.persist.pending":
                     _persistPending = value;
@@ -293,6 +326,18 @@ public sealed class MetricsCollector : IDisposable
                     break;
                 case "fineage.command.queue.wait.ms":
                     CommandQueueWait(IngressClassOf(tags)).Duration.Record(value);
+                    break;
+                case "fineage.command.queue.age.ms":
+                    _commandQueueAge.Record(value);
+                    break;
+                case "fineage.tick.max_ms":
+                    _tickMaxMs = value;
+                    break;
+                case "fineage.command.queue.age_max_ms":
+                    _commandQueueAgeMaxMs = value;
+                    break;
+                case "fineage.step.watchdog.stall_max_ms":
+                    _watchdogStallMaxMs = value;
                     break;
                 case "fineage.enter.self_projection_ms":
                     _enterSelf.Record(value);

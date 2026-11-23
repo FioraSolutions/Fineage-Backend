@@ -67,8 +67,17 @@ public sealed partial class ZoneWorld
                 }
                 if (report != last)
                 {
+                    bool newStall = last == null;
                     last = report;
-                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
+                    if (newStall)
+                    {
+                        FineageTelemetry.NoteWatchdogEpisode();
+                        FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "step-watchdog"));
+                    }
+
+                    long started = Volatile.Read(ref _stepStartedTimestamp);
+                    if (started != 0)
+                        FineageTelemetry.NoteWatchdogStall(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
                     ZoneHotPathLogs.SimulationWatchdog(report);
                 }
             }
@@ -109,7 +118,7 @@ public sealed partial class ZoneWorld
                 {
                     Volatile.Write(ref _stepStartedTimestamp, 0L);
                 }
-                FineageTelemetry.TickMilliseconds.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+                FineageTelemetry.NoteTickDuration(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
         }
         catch (OperationCanceledException)

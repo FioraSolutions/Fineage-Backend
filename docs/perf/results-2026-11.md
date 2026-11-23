@@ -199,6 +199,32 @@ Later iteration (`bots-50-town-diag-v4`): item-list prebuild off-thread; worst e
 
 Source artifacts: `local-logs/bots-50-town-diag-v3/` … `diag-v6/`; helper: `scripts/print-enter-phase-stats.py <report.json>`.
 
+## Command ingress scheduler (Nov 23, Debug)
+
+Before numbers are the post-audit Debug run (PR #913): one global 48-cost apply budget (~240 cost/s) against ~800 commands/s at 200 bots. After numbers are this branch, still Debug, 4 cores, sequential regions, `aoi=grid:3000`, `outboundQ=512`, zone GC **Server** (from `Fineage.Zone.runtimeconfig.json`). Histogram p99 is the cumulative scrape. `submit→mailbox` is end-to-end; `fanout_enqueue→mailbox` is the series the old report called cmd→mailboxes.
+
+| | bots-50-town before | bots-50-town after | bots-200-town before | bots-200-town after |
+| --- | ---: | ---: | ---: | ---: |
+| tick p50 / p99 | 15.7 / 65.4 | 16.7 / 58.6 | 16.1 / 49.2 | 40 / 80 (bucket) |
+| tick histogram max / true max | 1500 / (not recorded) | 1500 / **1131** | 1500 / (not recorded) | 10000 bucket / **1884** |
+| submit→dequeue p99 (mean, n) | 624 (363, 700) | **218** (p50 189, 19352) | 2193 (1615, 13312) | **220** (175, 81658) |
+| dequeue→apply p99 | 38.7 | **1.9** | 28.7 | **2.0** |
+| fanout_enqueue→mailbox p99 | 3.9 | 4.6 | 14.8 | 20 (n=644) |
+| submit→mailbox p99 / p99.9 | (not recorded) | **220 / 243** | (not recorded) | **220 / 250** |
+| commands stage p99 | 40.2 | 39.4 | 38.3 | 60 (bucket) |
+| queue depth p99 / age p99 | (not recorded) | 1 / 205 | (not recorded) | 1 / 200 |
+| coalesced / rejected | (not recorded) | 0 / 0 | (not recorded) | 0 / 0 |
+| outbound drops / fanout drops | 0 / 0 | 0 / 0 | 7 / 0 | 0 / 0 |
+| watchdog stalls | (not recorded) | 0 | (not recorded) | **1** (step never returned) |
+| client oracle p50 / p99 | 600.5 / 2608.5 | 406 / 2457 | 705 / 2870 | (runner killed while wedged) |
+| real CPU % avg / max | <10% of 4 cores | **4.8 / 39.8** | <10% of 4 cores | **4.6 / 46.5** |
+| zone RSS | 601 MiB | 570 MiB | (wedged) | 470 MiB (HWM 651) |
+| result | PASS | runner PASS; fanout-enqueue gate PASS (4.6 ≤ 150); submit→mailbox 220 ≤ 1000 | wedged | **wedged** after ~90s of behavior |
+
+50 bots: ramp 20s + 90s, enter concurrency 16, all 50 in world, 0 disconnects. The 1131 ms true max is one `request:enter` (910 ms) inside the apply slice; the timebox does not preempt a command already running.
+
+200 bots: ramp 60s + 90s, all 200 entered (`Bot0199` at ~65s). Histogram figures in that column are the bucket upper bound that contains the quantile; the runner was killed while the step was wedged, so it did not write `load-test-report.md`. Behavior ran until tick `8977109007` stuck with **no region bodies in flight** (world stage / collect / barrier). Watchdog reported the stall from 30s and it was still growing past 4 minutes when the runner was stopped. That hang is the outbound/world-stage deadlock owned by the other change; this branch does not touch `NetFanoutStripes`, `OutboundMailbox`, or the outbound pump. Ingress during the healthy window no longer queues for seconds: submit→dequeue p99 is one tick (220 ms) instead of 2193 ms, queue depth p99 stays 1, and nothing was coalesced or rejected because the queues were drained.
+
 ## Reproduce smoke
 
 ```bash

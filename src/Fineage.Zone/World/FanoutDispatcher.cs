@@ -215,6 +215,7 @@ internal sealed class FanoutDispatcher : IDisposable
                     FineageTelemetry.CommandToMailboxesMilliseconds.Record(commitToMailboxMs);
                     FineageTelemetry.CommandTimelineMilliseconds.Record(commitToMailboxMs,
                         new KeyValuePair<string, object?>("phase", "fanout_enqueue_to_mailbox"));
+                    RecordSubmitToMailbox(batch.CommandSubmits);
                 }
             }
 
@@ -234,6 +235,24 @@ internal sealed class FanoutDispatcher : IDisposable
         FineageTelemetry.FanoutBatchProcessMilliseconds.Record(processMs);
         FineageTelemetry.TickStepFanoutDrainMilliseconds.Record(processMs);
         batch.ReleaseScratchResources();
+    }
+
+    static void RecordSubmitToMailbox(CommandSubmitMark[]? submits)
+    {
+        if (submits == null || submits.Length == 0)
+            return;
+        long now = Stopwatch.GetTimestamp();
+        bool trace = FineageTelemetry.Activity.HasListeners();
+        foreach (var mark in submits)
+        {
+            double ms = Math.Max(0, (now - mark.SubmittedAtTicks) * 1000.0 / Stopwatch.Frequency);
+            FineageTelemetry.CommandTimelineMilliseconds.Record(ms,
+                new KeyValuePair<string, object?>("phase", "submit_to_mailbox"));
+            if (!trace)
+                continue;
+            using var span = FineageTelemetry.Activity.StartActivity("zone.command.submit_to_mailbox");
+            span?.SetTag("fineage.correlation_id", mark.CorrelationId);
+        }
     }
 
     static double ElapsedMs(long fromTimestamp, long? toTimestamp = null)

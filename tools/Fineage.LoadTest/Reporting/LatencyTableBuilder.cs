@@ -10,6 +10,7 @@ public sealed class MetricLatencyRow
     public double P50Ms { get; init; }
     public double P95Ms { get; init; }
     public double P99Ms { get; init; }
+    public double P999Ms { get; init; }
     public double MaxMs { get; init; }
     public long Count { get; init; }
 }
@@ -33,7 +34,39 @@ public static class LatencyTableBuilder
         var rows = new List<MetricLatencyRow>();
         if (peakMetrics != null)
         {
-            rows.Add(RowFromHistogram(peakMetrics, "fineage_tick_ms", "tick"));
+            rows.Add(RowFromHistogram(peakMetrics, "fineage_tick_ms", "tick (histogram)"));
+            if (PrometheusParser.Parse(peakMetrics).TickTrueMaxMs > 0)
+            {
+                rows.Add(new MetricLatencyRow
+                {
+                    Name = "tick_true_max",
+                    Source = "gauge fineage_tick_max_ms",
+                    MaxMs = PrometheusParser.Parse(peakMetrics).TickTrueMaxMs
+                });
+            }
+
+            foreach (string label in new[]
+                     {
+                         "submit_to_dequeue",
+                         "dequeue_to_apply",
+                         "apply_to_seal",
+                         "seal_to_fanout_enqueue",
+                         "fanout_enqueue_to_mailbox",
+                         "submit_to_mailbox",
+                         "mailbox_to_socket_write"
+                     })
+            {
+                if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_timeline_ms", "phase", label) is { } tl)
+                    rows.Add(FromStats($"command.timeline/{label}", tl));
+            }
+
+            if (PrometheusParser.ParseSingletonHistogram(peakMetrics, "fineage_command_queue_depth") is { } depth)
+                rows.Add(FromStats("command_queue_depth", depth));
+            if (PrometheusParser.ParseSingletonHistogram(peakMetrics, "fineage_command_queue_age_ms") is { } age)
+                rows.Add(FromStats("command_queue_age", age));
+            if (PrometheusParser.ParseSingletonHistogram(peakMetrics, "fineage_fanout_queue_oldest_age_ms") is { } fanoutAge)
+                rows.Add(FromStats("fanout_queue_oldest_age", fanoutAge));
+
             foreach (string stage in PreferredStageOrder)
             {
                 if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_tick_stage_ms", "stage", stage) is { } hs)
@@ -61,7 +94,6 @@ public static class LatencyTableBuilder
                 "fineage_enter_peer_fanout_ms",
                 "fineage_command_to_mailboxes_ms",
                 "fineage_fanout_batch_process_ms",
-                "fineage_fanout_queue_oldest_age_ms",
                 "fineage_outbound_queue_oldest_age_ms",
                 "fineage_socket_write_ms"
             ];
@@ -69,20 +101,6 @@ public static class LatencyTableBuilder
             {
                 if (PrometheusParser.ParseSingletonHistogram(peakMetrics, metric) is { } hs)
                     rows.Add(FromStats(metric.Replace("fineage_", "", StringComparison.Ordinal), hs));
-            }
-
-            foreach (string label in new[]
-                     {
-                         "submit_to_dequeue",
-                         "dequeue_to_apply",
-                         "apply_to_seal",
-                         "seal_to_fanout_enqueue",
-                         "fanout_enqueue_to_mailbox",
-                         "mailbox_to_socket_write"
-                     })
-            {
-                if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_timeline_ms", "phase", label) is { } tl)
-                    rows.Add(FromStats($"command.timeline/{label}", tl));
             }
 
             if (PrometheusParser.ParseLabeledHistogram(peakMetrics, "fineage_command_apply_ms", "command", "request:enter") is { } enter)
@@ -119,11 +137,10 @@ public static class LatencyTableBuilder
         Name = name,
         Source = "prometheus",
         P50Ms = hs.P50,
+        P95Ms = hs.P95,
         P99Ms = hs.P99,
-        P95Ms = EstimateP95(hs),
-        MaxMs = hs.Count > 0 ? Math.Max(hs.Mean * 4, hs.P99) : 0,
+        P999Ms = hs.P999,
+        MaxMs = hs.Max,
         Count = hs.Count
     };
-
-    static double EstimateP95(HistogramStats hs) => hs.P50 + (hs.P99 - hs.P50) * 0.7;
 }

@@ -88,19 +88,24 @@ public static class CompactMarkdownRenderer
             return;
         }
 
-        sb.AppendLine("| metric | p50 | p95 | p99 | max | count | source |");
-        sb.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | --- |");
+        sb.AppendLine("| metric | p50 | p95 | p99 | p99.9 | max | count | source |");
+        sb.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |");
         foreach (var row in r.LatencyTable.Take(48))
         {
             sb.AppendLine(
-                $"| `{row.Name}` | {row.P50Ms:0.0} | {row.P95Ms:0.0} | {row.P99Ms:0.0} | {row.MaxMs:0.0} | {row.Count} | {row.Source} |");
+                $"| `{row.Name}` | {row.P50Ms:0.0} | {row.P95Ms:0.0} | {row.P99Ms:0.0} | {row.P999Ms:0.0} | {row.MaxMs:0.0} | {row.Count} | {row.Source} |");
         }
 
         if (r.Server != null)
         {
             sb.AppendLine();
             sb.AppendLine(
-                $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** max **{r.Server.TickMaxMs:0.0}**; ingress max **{r.Server.CommandIngressQueuedMax}**; outbound drops **{r.Server.OutboundDropped}**.");
+                $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** histogram max **{r.Server.TickMaxMs:0.0}** true max **{r.TickTrueMaxMs:0.0}**; " +
+                $"watchdog stalls **{r.WatchdogStalls}** max **{r.WatchdogStallMaxMs:0.0}** ms; ingress max **{r.Server.CommandIngressQueuedMax}**.");
+            sb.AppendLine($"- Outbound drops (`fineage_outbound_dropped_total`): **{r.Server.OutboundDropped}**");
+            sb.AppendLine($"- Fanout drops (`fineage_fanout_dropped_total`): **{r.FanoutDropped}**");
+            sb.AppendLine($"- Ingress coalesced (`fineage_command_coalesced_total`): **{r.Server.CommandCoalesced}**");
+            sb.AppendLine($"- Ingress rejected (`fineage_command_rejected_total`): **{r.Server.CommandRejected}**");
         }
 
         sb.AppendLine();
@@ -117,12 +122,12 @@ public static class CompactMarkdownRenderer
             return;
         }
 
-        sb.AppendLine("| start (UTC) | tick p99 | commands p99 | cmd→mailboxes p99 | fanout depth max |");
-        sb.AppendLine("| --- | ---: | ---: | ---: | ---: |");
+        sb.AppendLine("| start (UTC) | tick p99 | commands p99 | submit→mailbox p99 | fanout_enqueue→mailbox p99 | fanout age p99 | fanout depth max |");
+        sb.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (var w in r.TimeSeriesWindows.Take(24))
         {
             sb.AppendLine(
-                $"| {w.WindowStart:HH:mm:ss} | {w.TickP99Ms:0.0} | {w.CommandsStageP99Ms:0.0} | {w.CommandToMailboxesP99Ms:0.0} | {w.FanoutQueueDepthMax:0} |");
+                $"| {w.WindowStart:HH:mm:ss} | {w.TickP99Ms:0.0} | {w.CommandsStageP99Ms:0.0} | {w.SubmitToMailboxP99Ms:0.0} | {w.FanoutEnqueueToMailboxP99Ms:0.0} | {w.FanoutQueueAgeP99Ms:0.0} | {w.FanoutQueueDepthMax:0} |");
         }
 
         sb.AppendLine();
@@ -145,7 +150,7 @@ public static class CompactMarkdownRenderer
             sb.AppendLine($"- Source: **{rt.Source}**");
         sb.AppendLine("| metric | min | avg | max |");
         sb.AppendLine("| --- | ---: | ---: | ---: |");
-        sb.AppendLine($"| CPU % | {rt.CpuPercentMin:0.0} | {rt.CpuPercentAvg:0.0} | {rt.CpuPercentMax:0.0} |");
+        sb.AppendLine($"| real CPU % (runtime counter, not a sample profiler) | {rt.CpuPercentMin:0.0} | {rt.CpuPercentAvg:0.0} | {rt.CpuPercentMax:0.0} |");
         sb.AppendLine($"| alloc rate (MiB/s) | — | {rt.AllocRateMbPerSecAvg:0.1} | — |");
         sb.AppendLine($"| GC heap (MiB) | — | — | {rt.GcHeapMbMax:0.0} |");
         sb.AppendLine($"| time in GC % | — | — | {rt.TimeInGcPercentMax:0.0} |");
@@ -160,6 +165,8 @@ public static class CompactMarkdownRenderer
                 $"Zone RSS **{r.ZoneProcess.RssBytes / (1024 * 1024)}** MiB, VmHWM **{r.ZoneProcess.VmHwmKb / 1024}** MiB (proc snapshot).");
         }
 
+        sb.AppendLine();
+        sb.AppendLine("Sampled stacks from `dotnet-trace` SampleProfiler include threads parked on waits (LowLevelLifoSemaphore, Monitor.Wait). Those percentages are not CPU%. The CPU% row above is the runtime counter.");
         sb.AppendLine();
     }
 
@@ -209,7 +216,7 @@ public static class CompactMarkdownRenderer
     static void AppendBots(StringBuilder sb, RunReport r)
     {
         sb.AppendLine("## Bot side");
-        sb.AppendLine($"| in world | disconnects | stuck | client RTT p50/p99 | oracle cmd→fanout p50/p99 |");
+        sb.AppendLine($"| in world | disconnects | stuck | client RTT p50/p99 | client consistency oracle p50/p99 (not a server gate) |");
         sb.AppendLine($"| ---: | ---: | ---: | --- | --- |");
         double o50 = r.Consistency?.BroadcastLatencyP50Ms ?? 0;
         double o99 = r.Consistency?.BroadcastLatencyP99Ms ?? 0;
@@ -218,7 +225,7 @@ public static class CompactMarkdownRenderer
         if (r.Consistency != null)
         {
             sb.AppendLine(
-                $"- Consistency oracle: **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
+                $"- Client consistency oracle (labeled separately from server histograms): **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
         }
 
         sb.AppendLine();

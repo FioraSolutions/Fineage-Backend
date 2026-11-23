@@ -133,7 +133,7 @@ public sealed partial class ZoneWorld
     /// (flush, fanout seal+drain, reply completion) milliseconds. Must run only inside a <see cref="RunStep"/> body
     /// while a fan-out batch is recording.
     /// </summary>
-    (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies()
+    (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies(List<CommandSubmitMark>? submits = null)
     {
         long flushStart = Stopwatch.GetTimestamp();
         bool committed;
@@ -150,7 +150,7 @@ public sealed partial class ZoneWorld
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
 
         long sealStart = Stopwatch.GetTimestamp();
-        double enqueueMs = _fanout.Seal(sealStart);
+        double enqueueMs = _fanout.Seal(sealStart, submits?.ToArray());
         double sealMs = RecordCommandPhase(PhaseSeal, sealStart);
         double prepMs = Math.Max(0, sealMs - enqueueMs);
         FineageTelemetry.CommandTimelineMilliseconds.Record(flushMs + prepMs,

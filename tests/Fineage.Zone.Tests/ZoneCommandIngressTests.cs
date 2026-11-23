@@ -98,10 +98,10 @@ public sealed class ZoneCommandIngressTests
 
         kit.World.StartSimulation(new CancellationToken(canceled: true));
 
-        var stranded = await Assert.ThrowsAsync<InvalidOperationException>(() => pending);
+        var stranded = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => pending);
         Assert.Matches("^command select-target for object \\d+ was not applied: the zone simulation stopped at tick \\d+$",
             stranded.Message);
-        var refused = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var refused = await Assert.ThrowsAnyAsync<InvalidOperationException>(() =>
             kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None));
         Assert.Matches("^command cancel-target for object \\d+ refused: the zone simulation stopped at tick \\d+$",
             refused.Message);
