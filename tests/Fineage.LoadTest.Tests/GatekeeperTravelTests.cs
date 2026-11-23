@@ -149,7 +149,12 @@ public class GatekeeperTravelTests
         t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(x + 50, y + 50, z));
         t.OnFrame(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(new EntitySpawnMsg
         {
-            EntityValue = ClarissaObject, Kind = EntityKindNet.Npc, TemplateId = npcId, X = x, Y = y, Z = z
+            EntityValue = ClarissaObject,
+            Kind = EntityKindNet.Npc,
+            TemplateId = npcId,
+            X = x,
+            Y = y,
+            Z = z
         }));
         var now = DateTimeOffset.UnixEpoch;
         Assert.Equal(NetOpcode.NpcTalk, t.Step(now)!.Value.Opcode);
