@@ -58,6 +58,12 @@ public sealed class ZoneSession
     /// <summary>Off-thread item list for the in-flight enter burst; cleared after CommitEnter.</summary>
     internal EnterSelfPrepare? PendingEnterSelfPrepare { get; set; }
 
+    /// <summary>Self enter frames built off the simulation thread. Cleared after CommitEnter.</summary>
+    internal EnterProjection? PendingEnterProjection { get; set; }
+
+    /// <summary>Named reason the last enter was refused. Empty after a successful insert.</summary>
+    internal string? EnterRefusal { get; set; }
+
     public bool Bound => ObjectId != 0;
 
     public void SetLanguage(string? language) =>

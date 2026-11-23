@@ -174,7 +174,11 @@ public sealed partial class ZoneWorld
     {
         if (!TryPlayer(session, out var player))
             return new QuestListMsg();
+        return NetQuestList(player);
+    }
 
+    internal QuestListMsg NetQuestList(ZoneEntity player)
+    {
         var list = _quests.List(player.Quests);
         return new QuestListMsg
         {
