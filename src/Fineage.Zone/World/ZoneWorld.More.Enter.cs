@@ -239,6 +239,8 @@ public sealed partial class ZoneWorld
         LoadLearnedSkills(entity, stored);
         LoadKnownRecipes(entity, stored);
         RefreshKnownSkills(entity);
+        if (NeedsStarterInventory(stored))
+            GrantStarterKitBody(entity);
         RefreshGearSkills(entity);
         RefreshPlayerMaxima(entity, fanout: false);
         RestoreStoredEffects(entity, stored);
