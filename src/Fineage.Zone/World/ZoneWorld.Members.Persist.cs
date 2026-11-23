@@ -164,7 +164,7 @@ public sealed partial class ZoneWorld
     /// </summary>
     bool TryCommitDirtyEconomy(int? discardWithoutPublish)
     {
-        StolenEconomy stolen;
+        EconomyPersistBatch stolen;
         using (_economyLock.Enter())
         {
             if (!HasDirtyEconomy())
@@ -185,8 +185,18 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    bool WriteStolenEconomy(StolenEconomy stolen)
+    bool WriteStolenEconomy(EconomyPersistBatch stolen)
     {
+        if (_economyPersist != null && EconomyPersistWorker.AsyncEnabled)
+        {
+            bool ok = _economyPersist.CommitAndWait(
+                stolen,
+                TimeSpan.FromMilliseconds(EconomyPersistWorker.DefaultWaitMs));
+            if (!ok)
+                LogEconomyCommitFailure(stolen);
+            return ok;
+        }
+
         long started = System.Diagnostics.Stopwatch.GetTimestamp();
         try
         {
@@ -200,16 +210,7 @@ public sealed partial class ZoneWorld
         }
         catch (Exception ex)
         {
-            int pending = _ledger.PendingFlushCount;
-            ZoneLog.Warn($"auditable economy commit failed pending={pending}: {ex.GetType().Name}: {ex.Message}");
-            FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
-            foreach (var bag in stolen.Bags)
-            {
-                int items = bag.Inventory?.Count ?? bag.Warehouse?.Count ?? bag.Freight?.Count ?? 0;
-                ZoneLog.Warn(
-                    $"inventory persist failed char={bag.CharacterId} account={bag.Account} items={items}: {ex.GetType().Name}: {ex.Message}");
-            }
-
+            LogEconomyCommitFailure(stolen, ex);
             return false;
         }
         finally
@@ -220,7 +221,25 @@ public sealed partial class ZoneWorld
         }
     }
 
-    void PublishStolenEconomy(StolenEconomy stolen, int? discardWithoutPublish)
+    void LogEconomyCommitFailure(EconomyPersistBatch stolen, Exception? ex = null)
+    {
+        int pending = _ledger.PendingFlushCount;
+        if (ex != null)
+        {
+            ZoneLog.Warn($"auditable economy commit failed pending={pending}: {ex.GetType().Name}: {ex.Message}");
+            FineageTelemetry.LedgerFlushFailures.Add(1, new KeyValuePair<string, object?>("pending", pending));
+        }
+
+        foreach (var bag in stolen.Bags)
+        {
+            int items = bag.Inventory?.Count ?? bag.Warehouse?.Count ?? bag.Freight?.Count ?? 0;
+            ZoneLog.Warn(
+                $"inventory persist failed char={bag.CharacterId} account={bag.Account} items={items}" +
+                (ex != null ? $": {ex.GetType().Name}: {ex.Message}" : ": worker returned false"));
+        }
+    }
+
+    void PublishStolenEconomy(EconomyPersistBatch stolen, int? discardWithoutPublish)
     {
         foreach (var (objectId, session, inventory) in stolen.Inventories)
         {
@@ -239,9 +258,9 @@ public sealed partial class ZoneWorld
         }
     }
 
-    StolenEconomy StealDirtyEconomy()
+    EconomyPersistBatch StealDirtyEconomy()
     {
-        var stolen = new StolenEconomy();
+        var stolen = new EconomyPersistBatch();
         foreach (var (objectId, pair) in _dirtyInventories)
             stolen.Inventories.Add((objectId, pair.Session, pair.Inventory));
         foreach (var (objectId, player) in _dirtyWarehouses)
@@ -257,7 +276,7 @@ public sealed partial class ZoneWorld
         return stolen;
     }
 
-    void RestoreDirtyEconomy(StolenEconomy stolen)
+    void RestoreDirtyEconomy(EconomyPersistBatch stolen)
     {
         using (_economyLock.Enter())
         {
@@ -272,7 +291,7 @@ public sealed partial class ZoneWorld
         }
     }
 
-    static List<EconomyBagWrite> BagsOf(StolenEconomy stolen)
+    static List<EconomyBagWrite> BagsOf(EconomyPersistBatch stolen)
     {
         var byId = new Dictionary<int, EconomyBagWrite>();
         foreach (var (objectId, session, inventory) in stolen.Inventories)
@@ -305,15 +324,6 @@ public sealed partial class ZoneWorld
         }
 
         return byId.Values.ToList();
-    }
-
-    sealed class StolenEconomy
-    {
-        public List<(int ObjectId, ZoneSession Session, PlayerInventory Inventory)> Inventories { get; } = [];
-        public List<(int ObjectId, ZoneEntity Player)> Warehouses { get; } = [];
-        public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
-        public List<EconomyBagWrite> OfflineFreight { get; } = [];
-        public List<EconomyBagWrite> Bags { get; set; } = [];
     }
 
     static EconomyBagWrite BagFor(Dictionary<int, EconomyBagWrite> byId, string account, int objectId)

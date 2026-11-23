@@ -140,6 +140,12 @@ public sealed partial class ZoneWorld
 
     internal int CharacterSnapshotWriterThreadForTests => _snapshots.LastWriterThreadId;
 
+    internal void StartEconomyPersistForTests() => _economyPersist?.Start();
+
+    internal void StopEconomyPersistForTests() => _economyPersist?.Stop();
+
+    internal int EconomyPersistWriterThreadForTests => _economyPersist?.LastWriterThreadId ?? 0;
+
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
         using (_economyLock.Enter())
