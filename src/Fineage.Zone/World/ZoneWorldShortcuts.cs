@@ -84,11 +84,13 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(session.ObjectId, out var e) || e.Kind != ZoneEntityKind.Player)
             return new ShortCutInitMsg();
-        return new ShortCutInitMsg
-        {
-            Shortcuts = e.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToProtocol).ToArray()
-        };
+        return BuildShortcutInit(e);
     }
+
+    internal ShortCutInitMsg BuildShortcutInit(ZoneEntity entity) => new()
+    {
+        Shortcuts = entity.Shortcuts.Values.OrderBy(s => s.WorldSlot).Select(ToProtocol).ToArray()
+    };
 
     /// <summary>Legacy name used by enter / tests; same as <see cref="BuildShortcutInit"/>.</summary>
     internal ShortCutInitMsg NetShortcutInit(ZoneSession session) => BuildShortcutInit(session);
