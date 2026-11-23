@@ -169,6 +169,55 @@ public sealed class WorldFanoutOutboxTests
         Assert.Equal(Enumerable.Range(1, next).Select(n => $"stance {n}"), rec.Sent);
     }
 
+    [Fact]
+    public void Permuted_audiences_of_a_replaceable_write_coalesce()
+    {
+        var (bridge, rec, fanout) = Outbox();
+
+        fanout.Begin();
+        bridge.FanoutMoveState([2, 1], 7, 0, 0, 0, 4, 0, 0, true);
+        bridge.FanoutMoveState([1, 2], 7, 0, 0, 0, 9, 0, 0, true);
+        fanout.Seal();
+        fanout.Drain();
+
+        Assert.Equal(["move 7 to 9"], rec.Sent);
+    }
+
+    [Fact]
+    public void Repeated_sends_to_one_audience_allocate_under_half_the_closure_shape()
+    {
+        const int n = 200;
+        var (bridge, _, fanout) = Outbox();
+        int[] watchers = [1];
+        fanout.Begin();
+        for (int i = 0; i < 300; i++)
+            bridge.FanoutAttackStance(watchers, i, true);
+
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < n; i++)
+            bridge.FanoutAttackStance(watchers, i, true);
+        long recorded = GC.GetAllocatedBytesForCurrentThread() - before;
+        fanout.Seal();
+        fanout.Drain();
+
+        long baseline = ClosureShapedAllocations(n);
+        Assert.True(recorded * 2 < baseline, $"fan-out recorded {recorded} bytes, closure shape {baseline}");
+    }
+
+    static long ClosureShapedAllocations(int n)
+    {
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        var entries = new List<Action>(n);
+        for (int i = 0; i < n; i++)
+        {
+            int[] copied = [1];
+            int id = i;
+            entries.Add(() => _ = copied[0] + id);
+        }
+
+        return GC.GetAllocatedBytesForCurrentThread() - before;
+    }
+
     const int Hp = 9;
     const int Mp = 10;
     const int Exp = 11;

@@ -212,6 +212,7 @@ public sealed partial class ZoneWorld
         foreach (int id in entity.Knownlist)
             UntrackWatcher(session.ObjectId, id);
         entity.Knownlist.Clear();
+        entity.DropNetWatcherAudience();
         DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);

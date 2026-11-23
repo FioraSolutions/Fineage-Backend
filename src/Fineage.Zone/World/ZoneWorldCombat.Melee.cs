@@ -227,6 +227,7 @@ public sealed partial class ZoneWorld
 
         _aoi.Leave(objectId);
         NoteNpcDespawned();
+        npc.DropNetWatcherAudience();
         _byId.Remove(objectId);
         npc.SpoilerObjectId = 0;
         npc.ClearSeed();

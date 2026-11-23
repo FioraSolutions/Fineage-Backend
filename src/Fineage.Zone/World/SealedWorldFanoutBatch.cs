@@ -8,7 +8,7 @@ internal sealed class SealedWorldFanoutBatch(WorldFanoutBatch source, WorldEvent
     public int Coalesced => source.Coalesced;
     public int Count => source.Count;
 
-    public IEnumerable<(string Name, Action Send)> Sends() => source.Sends();
+    public WorldFanoutBatch.FanoutSendCursor OpenCursor() => source.OpenCursor();
 
-    internal void ReleaseScratchResources() => source.ReleaseAudienceScratch();
+    internal void ReleaseScratchResources() => source.ReleaseAudiences();
 }

@@ -402,6 +402,7 @@ public sealed partial class ZoneWorld
         int objectId = ground.ObjectId;
         _expiringGround.Remove(objectId);
         _aoi.Leave(objectId);
+        ground.DropNetWatcherAudience();
         _byId.Remove(objectId);
 
         List<int>? netWatchers = null;

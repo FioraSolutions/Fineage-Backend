@@ -265,6 +265,7 @@ public sealed partial class ZoneWorld
         summon.MovePath.Clear();
         SetPendingHit(summon, null);
         _aoi.Leave(id);
+        summon.DropNetWatcherAudience();
         _byId.Remove(id);
 
         // Every player, not only watchers: a target or auto-attack set before the summon left view must be cleared.
