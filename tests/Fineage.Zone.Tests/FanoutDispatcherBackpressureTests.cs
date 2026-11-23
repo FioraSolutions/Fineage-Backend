@@ -9,33 +9,74 @@ namespace Fineage.Zone.Tests;
 public sealed class FanoutDispatcherBackpressureTests
 {
     [Fact]
-    public void Enqueue_does_not_block_when_the_queue_is_full_spills_inline_instead()
+    public void Enqueue_never_blocks_or_delivers_inline_past_the_hard_backlog_and_keeps_order()
     {
+        long emergency = 0;
+        long soft = 0;
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == FineageTelemetry.MeterName &&
+                instrument.Name is "fineage.fanout.backlog.emergency" or "fineage.fanout.backlog.soft_exceeded")
+                meterListener.EnableMeasurementEvents(instrument);
+        };
+        listener.SetMeasurementEventCallback<long>((instrument, value, _, _) =>
+        {
+            if (instrument.Name == "fineage.fanout.backlog.emergency")
+                Interlocked.Add(ref emergency, value);
+            else
+                Interlocked.Add(ref soft, value);
+        });
+        listener.Start();
+
         var holdWorker = new ManualResetEventSlim(false);
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 1)
+        using var dispatcher = new FanoutDispatcher(softBacklogBatches: 2, hardBacklogBatches: 4)
         {
             HoldWorkerBeforeReadForTest = holdWorker,
         };
         var delivered = new ConcurrentQueue<ulong>();
+        int callerThread = Environment.CurrentManagedThreadId;
+        int inlineDeliveries = 0;
 
-        var first = Batch(1, () => delivered.Enqueue(1));
-        var second = Batch(2, () => delivered.Enqueue(2));
-
-        dispatcher.Enqueue(first);
-        var spill = Task.Run(() => dispatcher.Enqueue(second));
-        Assert.True(spill.Wait(TimeSpan.FromSeconds(2)), "spill enqueue must return without waiting on a full channel");
+        var enqueue = Task.Run(() =>
+        {
+            int producer = Environment.CurrentManagedThreadId;
+            for (ulong n = 1; n <= 10; n++)
+            {
+                ulong id = n;
+                dispatcher.Enqueue(Batch(id, () =>
+                {
+                    if (Environment.CurrentManagedThreadId == producer)
+                        Interlocked.Increment(ref inlineDeliveries);
+                    delivered.Enqueue(id);
+                }));
+            }
+        });
+        Assert.True(enqueue.Wait(TimeSpan.FromSeconds(2)), "enqueue must return while the worker is held");
+        Assert.Empty(delivered);
+        Assert.Equal(10, dispatcher.Backlog);
 
         holdWorker.Set();
-        spill.GetAwaiter().GetResult();
         dispatcher.WaitUntilIdle();
 
-        Assert.Equal(new ulong[] { 1, 2 }, delivered.OrderBy(n => n).ToArray());
+        Assert.Equal(0, inlineDeliveries);
+        Assert.Equal(Enumerable.Range(1, 10).Select(n => (ulong)n).ToArray(), delivered.ToArray());
+        Assert.Equal(6, Interlocked.Read(ref emergency));
+        Assert.Equal(2, Interlocked.Read(ref soft));
+        Assert.NotEqual(0, callerThread);
+    }
+
+    [Fact]
+    public void Invalid_backlog_limits_throw()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new FanoutDispatcher(softBacklogBatches: 0, hardBacklogBatches: 4));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new FanoutDispatcher(softBacklogBatches: 8, hardBacklogBatches: 4));
     }
 
     [Fact]
     public void Enqueue_after_close_logs_sequence_and_throws_without_delivering_the_batch()
     {
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 4);
+        using var dispatcher = new FanoutDispatcher();
         var delivered = new ConcurrentQueue<ulong>();
 
         dispatcher.Enqueue(Batch(1, () => delivered.Enqueue(1)));
@@ -67,7 +108,7 @@ public sealed class FanoutDispatcherBackpressureTests
         });
         listener.Start();
 
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 4);
+        using var dispatcher = new FanoutDispatcher();
         dispatcher.Enqueue(Batch(1, () => { }));
         dispatcher.WaitUntilIdle();
         Thread.Sleep(300);

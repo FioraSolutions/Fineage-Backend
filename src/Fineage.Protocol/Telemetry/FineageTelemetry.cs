@@ -128,7 +128,7 @@ public static class FineageTelemetry
 
     public static readonly Histogram<double> FanoutDispatcherEnqueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatcher.enqueue_wait.ms", unit: "ms",
-            description: "Time the simulation thread blocked enqueueing a sealed fan-out batch");
+            description: "Time the simulation thread spent handing a sealed fan-out batch to the dispatcher (non-blocking; lock + TryWrite)");
 
     public static readonly Histogram<double> FanoutStripeEnqueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.stripe.enqueue_wait.ms", unit: "ms",
@@ -165,6 +165,22 @@ public static class FineageTelemetry
     public static readonly Counter<long> FanoutCoalesced =
         Meter.CreateCounter<long>("fineage.fanout.coalesced",
             description: "Replaceable fan-out writes superseded before send");
+
+    public static readonly Counter<long> FanoutBacklogSoftExceeded =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.soft_exceeded",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit (worker falling behind)");
+
+    public static readonly Counter<long> FanoutBacklogEmergency =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.emergency",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its hard limit. Must stay 0 in normal runs");
+
+    public static readonly Counter<long> OutboundSlowClientDisconnect =
+        Meter.CreateCounter<long>("fineage.outbound.slow_client_disconnect",
+            description: "Connections closed because their outbound mailbox stayed above the hard byte limit after low-priority frames were shed (tag endpoint)");
+
+    public static readonly Counter<long> OutboundShedBytes =
+        Meter.CreateCounter<long>("fineage.outbound.shed_bytes",
+            description: "Low-priority outbound bytes dropped or coalesced away to keep a mailbox inside its byte budget (tag lane)");
 
     public static readonly Counter<long> FanoutQueueOverflow =
         Meter.CreateCounter<long>("fineage.fanout.queue.overflow",

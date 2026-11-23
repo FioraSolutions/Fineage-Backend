@@ -15,61 +15,124 @@ enum MailboxAdmit
 readonly record struct MailboxTaken(int Frames, int Bytes);
 
 /// <summary>
-/// One ordered mailbox per connection. Producers never wait: movement coalesces, a knownlist snapshot
-/// replaces the pending one when the budget cannot hold both, visuals drop when stale, and a reliable
-/// frame that does not fit rejects so the connection can resync. The pump is the only reader.
-/// The budget is bytes and frames together. The frame cap is at least enough minimum-sized frames to
-/// fill the byte budget, so a burst of small frames cannot report "full" while the byte budget is idle.
+/// One ordered mailbox per connection, bounded in bytes. Producers never wait. The pump is the only reader.
+/// <para>
+/// Two byte limits. Above the <b>soft</b> limit low-priority frames give way: movement / status frames are
+/// coalesced to the newest one per (opcode, entity) (a <c>StatusUpdate</c> merges its attributes into the pending
+/// one, so no attribute is lost), and visual frames (attack / cast animations, social actions, target markers)
+/// are shed oldest first, or the new visual is dropped. Reliable frames (inventory, item drop / pickup, death,
+/// chat, system messages, knownlist spawn / despawn, teleports) are never dropped or replaced. When a reliable
+/// or newest-per-entity frame would push the mailbox above the <b>hard</b> limit after visuals were shed, the
+/// admission is <see cref="MailboxAdmit.Rejected"/> and the connection closes that slow client.
+/// </para>
+/// <para>
+/// Bytes already handed to the pump but not yet written still count, so a blocked socket write does not make
+/// the mailbox look empty. One caller batch may exceed both limits when the connection holds nothing at all
+/// (an enter-world burst); the pump splits the socket writes.
+/// </para>
 /// </summary>
 sealed class OutboundMailbox
 {
+    /// <summary>Default hard byte limit per connection (<c>FINEAGE_NET_OUTBOUND_HARD_BYTES</c>).</summary>
+    public const int DefaultHardBytes = 1024 * 1024;
+
     readonly object _gate = new();
-    readonly List<Segment> _ordered = new();
-    readonly List<CoalesceKey> _openOrder = new();
-    readonly Dictionary<CoalesceKey, PacketEnvelope> _open = new();
-    readonly int _maxFrames;
-    readonly int _maxBytes;
+    readonly List<Queued> _ordered = new();
+    readonly LinkedList<OpenEntry> _openOrder = new();
+    readonly Dictionary<CoalesceKey, LinkedListNode<OpenEntry>> _open = new();
+    readonly int _softFrames;
+    readonly int _softBytes;
+    readonly int _hardFrames;
+    readonly int _hardBytes;
     readonly string _endpoint;
     readonly ulong _connectionId;
-    Segment? _snapshot;
     int _orderedBytes;
-    int _orderedFrames;
     int _openBytes;
+    int _visualFrames;
     // Frames Take already handed to the pump but the socket write has not finished.
-    // They still occupy the budget: the mailbox looks empty while a slow write is in progress,
-    // and the next reliable batch must not be treated as the one empty-queue burst.
     int _inflightFrames;
     int _inflightBytes;
     bool _closed;
     bool _loggedClosed;
 
-    const int MaxOpenEntries = 256;
-
     readonly record struct CoalesceKey(ushort Opcode, ulong EntityValue, uint EntityGeneration);
 
-    sealed class Segment
+    readonly record struct Queued(PacketEnvelope Envelope, int Bytes, bool Visual);
+
+    sealed class OpenEntry(CoalesceKey key, PacketEnvelope envelope)
     {
-        public bool Snapshot { get; init; }
-        public List<PacketEnvelope> Frames { get; } = new();
-        public int Bytes { get; set; }
+        public CoalesceKey Key { get; } = key;
+        public PacketEnvelope Envelope { get; set; } = envelope;
     }
 
-    public OutboundMailbox(int maxFrames, int maxBytes, ulong connectionId, string endpoint)
+    public OutboundMailbox(int maxFrames, int maxBytes, ulong connectionId, string endpoint, int? hardBytes = null)
     {
-        _maxFrames = maxFrames;
-        _maxBytes = maxBytes;
+        if (maxFrames < 1)
+            throw new ArgumentOutOfRangeException(nameof(maxFrames), maxFrames, "outbound soft frame limit must be positive");
+        if (maxBytes < 1)
+            throw new ArgumentOutOfRangeException(nameof(maxBytes), maxBytes, "outbound soft byte limit must be positive");
+        int hard = hardBytes ?? HardBytesSetting;
+        if (hard < maxBytes)
+            throw new ArgumentOutOfRangeException(nameof(hardBytes), hard,
+                $"outbound hard byte limit ({hard}) must be at least the soft limit ({maxBytes})");
+
+        _softFrames = maxFrames;
+        _softBytes = maxBytes;
+        _hardBytes = hard;
+        // Minimum-sized frames must fill the byte limit before the frame count reports full.
+        _hardFrames = Math.Max(maxFrames, hard / PacketEnvelope.HeaderSize);
         _connectionId = connectionId;
         _endpoint = endpoint;
     }
+
+    /// <summary><c>FINEAGE_NET_OUTBOUND_HARD_BYTES</c>, or <see cref="DefaultHardBytes"/>. Invalid text throws.</summary>
+    public static int HardBytesSetting
+    {
+        get
+        {
+            string? text = Environment.GetEnvironmentVariable("FINEAGE_NET_OUTBOUND_HARD_BYTES");
+            if (string.IsNullOrWhiteSpace(text))
+                return DefaultHardBytes;
+            if (!int.TryParse(text, out int value) || value < 1)
+                throw new InvalidOperationException($"FINEAGE_NET_OUTBOUND_HARD_BYTES='{text}' is not a positive byte count");
+            return value;
+        }
+    }
+
+    public int SoftBytes => _softBytes;
+    public int HardBytes => _hardBytes;
 
     public int QueuedFrames
     {
         get
         {
             lock (_gate)
-                return _orderedFrames + _open.Count;
+                return _ordered.Count + _open.Count;
         }
     }
+
+    public int QueuedBytes
+    {
+        get
+        {
+            lock (_gate)
+                return _orderedBytes + _openBytes;
+        }
+    }
+
+    /// <summary>Bytes queued plus bytes the pump has taken but not finished writing.</summary>
+    public int HeldBytes
+    {
+        get
+        {
+            lock (_gate)
+                return UsedBytes;
+        }
+    }
+
+    int UsedBytes => _orderedBytes + _openBytes + _inflightBytes;
+
+    int UsedFrames => _ordered.Count + _open.Count + _inflightFrames;
 
     public void Close()
     {
@@ -84,115 +147,52 @@ sealed class OutboundMailbox
     public MailboxAdmit TryAppend(PacketEnvelope envelope) => TryAdmitBatch([envelope], forceWholeBatch: false);
 
     /// <summary>
-    /// Admits <paramref name="envelopes"/> without waiting. One burst may exceed the budget when this
-    /// connection is holding nothing (the pump splits the socket write), or when
-    /// <paramref name="forceWholeBatch"/> is set. Bytes already handed to the pump still count, so a
-    /// slow socket write does not make the mailbox look empty. A later batch that does not fit rejects
-    /// on a reliable frame.
+    /// Admits <paramref name="envelopes"/> in order without waiting. A dropped visual does not fail the batch.
+    /// Returns <see cref="MailboxAdmit.Rejected"/> as soon as a frame that must not be lost does not fit under the
+    /// hard limit; the caller closes the connection. Frames admitted before the rejection stay queued, which is
+    /// harmless because the connection is closing.
     /// </summary>
-    public MailboxAdmit TryAdmitBatch(IReadOnlyList<PacketEnvelope> envelopes, bool forceWholeBatch)
+    public MailboxAdmit TryAdmitBatch(IReadOnlyList<PacketEnvelope> envelopes, bool forceWholeBatch) =>
+        Admit(envelopes, forceWholeBatch, asSnapshot: false);
+
+    /// <summary>
+    /// Knownlist / appearance burst. Every frame is kept verbatim and in order, ahead of later movement: a spawn
+    /// burst is never replaced or dropped (that would leave the client without those entities). Over the hard
+    /// limit it is <see cref="MailboxAdmit.Rejected"/> and the client is disconnected to resync on re-enter.
+    /// </summary>
+    public MailboxAdmit TryMergeSnapshot(IReadOnlyList<PacketEnvelope> frames) =>
+        Admit(frames, forceWholeBatch: false, asSnapshot: true);
+
+    MailboxAdmit Admit(IReadOnlyList<PacketEnvelope> envelopes, bool forceWholeBatch, bool asSnapshot)
     {
         lock (_gate)
         {
             if (_closed)
                 return ClosedOnce();
+            if (envelopes.Count == 0)
+                return MailboxAdmit.Accepted;
 
-            bool force = forceWholeBatch || (_orderedFrames == 0 && _inflightFrames == 0);
-            foreach (PacketEnvelope envelope in envelopes)
+            // Nothing queued and nothing in a socket write: this one burst may exceed the limits.
+            bool burst = forceWholeBatch || (UsedFrames == 0);
+            MailboxAdmit result = MailboxAdmit.Accepted;
+            if (asSnapshot)
+                SealOpen();
+            for (int i = 0; i < envelopes.Count; i++)
             {
-                MailboxAdmit admit = AdmitOne(envelope, force);
+                PacketEnvelope envelope = envelopes[i];
+                MailboxAdmit admit = asSnapshot ? AdmitReliable(envelope, burst, barrier: false) : AdmitOne(envelope, burst);
                 if (admit == MailboxAdmit.Rejected)
                 {
                     RecordDepth();
                     return MailboxAdmit.Rejected;
                 }
+
+                if (admit == MailboxAdmit.Dropped && envelopes.Count == 1)
+                    result = MailboxAdmit.Dropped;
             }
 
             RecordDepth();
-            return MailboxAdmit.Accepted;
-        }
-    }
-
-    /// <summary>
-    /// Knownlist / appearance burst. Appends to the pending snapshot while the budget allows.
-    /// When it does not, the pending snapshot is replaced if the new burst fits without it.
-    /// </summary>
-    public MailboxAdmit TryMergeSnapshot(IReadOnlyList<PacketEnvelope> frames)
-    {
-        lock (_gate)
-        {
-            if (_closed)
-                return ClosedOnce();
-            if (frames.Count == 0)
-                return MailboxAdmit.Accepted;
-
-            if (_snapshot != null)
-                FoldOpenIntoSnapshot();
-            else if (!SealOpen())
-            {
-                OutboundLaneMetrics.Full(OutboundLane.Snapshot);
-                NetHostLog.Error(
-                    $"connectionId={_connectionId} endpoint={_endpoint} dropped knownlist snapshot of {frames.Count} frames: coalesced movement could not be sealed ahead of it (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                RecordDepth();
-                return MailboxAdmit.Dropped;
-            }
-
-            int addBytes = 0;
-            for (int i = 0; i < frames.Count; i++)
-                addBytes += FrameBytes(frames[i]);
-            int addFrames = frames.Count;
-
-            if (_snapshot != null)
-            {
-                if (RoomFor(addFrames, addBytes))
-                {
-                    AppendSnapshot(_snapshot, frames, addBytes);
-                    RecordDepth();
-                    return MailboxAdmit.Accepted;
-                }
-
-                int otherFrames = _orderedFrames - _snapshot.Frames.Count;
-                int otherBytes = _orderedBytes - _snapshot.Bytes;
-                bool fitsWithoutPending = otherFrames == 0
-                    || (otherFrames + addFrames <= _maxFrames && otherBytes + addBytes <= _maxBytes);
-                if (!fitsWithoutPending)
-                {
-                    OutboundLaneMetrics.Full(OutboundLane.Snapshot, addFrames);
-                    NetHostLog.Error(
-                        $"connectionId={_connectionId} endpoint={_endpoint} dropped knownlist snapshot of {addFrames} frames / {addBytes} bytes: pending snapshot is {_snapshot.Frames.Count} frames / {_snapshot.Bytes} bytes and the new burst does not fit beside other queued data (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                    RecordDepth();
-                    return MailboxAdmit.Dropped;
-                }
-
-                int oldFrames = _snapshot.Frames.Count;
-                int oldBytes = _snapshot.Bytes;
-                _orderedFrames -= oldFrames;
-                _orderedBytes -= oldBytes;
-                _snapshot.Frames.Clear();
-                _snapshot.Bytes = 0;
-                AppendSnapshot(_snapshot, frames, addBytes);
-                OutboundLaneMetrics.Evicted(OutboundLane.Snapshot, oldFrames);
-                NetHostLog.Error(
-                    $"connectionId={_connectionId} endpoint={_endpoint} replaced pending knownlist snapshot ({oldFrames} frames / {oldBytes} bytes) with {addFrames} frames / {addBytes} bytes: outbound budget is {_maxFrames} frames / {_maxBytes} bytes");
-                RecordDepth();
-                return MailboxAdmit.Accepted;
-            }
-
-            if (!RoomFor(addFrames, addBytes))
-            {
-                OutboundLaneMetrics.Full(OutboundLane.Snapshot, addFrames);
-                NetHostLog.Error(
-                    $"connectionId={_connectionId} endpoint={_endpoint} dropped knownlist snapshot of {addFrames} frames / {addBytes} bytes: outbound mailbox is full (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                RecordDepth();
-                return MailboxAdmit.Dropped;
-            }
-
-            var created = new Segment { Snapshot = true };
-            AppendSnapshot(created, frames, addBytes);
-            _ordered.Add(created);
-            _snapshot = created;
-            RecordDepth();
-            return MailboxAdmit.Accepted;
+            return result;
         }
     }
 
@@ -204,27 +204,16 @@ sealed class OutboundMailbox
     {
         lock (_gate)
         {
-            int count = 0;
+            int count = _ordered.Count + _open.Count;
             int bytes = _orderedBytes + _openBytes;
-            for (int s = 0; s < _ordered.Count; s++)
-            {
-                List<PacketEnvelope> frames = _ordered[s].Frames;
-                for (int i = 0; i < frames.Count; i++)
-                {
-                    destination.Add(frames[i]);
-                    count++;
-                }
-            }
+            for (int i = 0; i < _ordered.Count; i++)
+                destination.Add(_ordered[i].Envelope);
+            for (var node = _openOrder.First; node != null; node = node.Next)
+                destination.Add(node.Value.Envelope);
 
             _ordered.Clear();
             _orderedBytes = 0;
-            _orderedFrames = 0;
-            _snapshot = null;
-
-            for (int i = 0; i < _openOrder.Count; i++)
-                destination.Add(_open[_openOrder[i]]);
-            count += _open.Count;
-
+            _visualFrames = 0;
             _open.Clear();
             _openOrder.Clear();
             _openBytes = 0;
@@ -245,283 +234,226 @@ sealed class OutboundMailbox
         }
     }
 
-    MailboxAdmit AdmitOne(PacketEnvelope envelope, bool force)
+    MailboxAdmit AdmitOne(PacketEnvelope envelope, bool burst)
     {
         switch (OutboundLanePolicy.Classify(envelope.Opcode))
         {
             case OutboundLane.Movement:
-                Coalesce(envelope);
-                return MailboxAdmit.Accepted;
+                return Coalesce(envelope, burst);
             case OutboundLane.Visual:
-                return AppendVisual(envelope, force);
+                return AppendVisual(envelope, burst);
             case OutboundLane.Snapshot:
-                return MergeOne(envelope);
+                return AdmitReliable(envelope, burst, barrier: true);
             default:
-                if (OutboundOrdering.IsBarrier(envelope.Opcode) && !SealOpen())
-                {
-                    OutboundLaneMetrics.Full(OutboundLane.Reliable);
-                    NetHostLog.Error(
-                        $"connectionId={_connectionId} endpoint={_endpoint} rejected reliable opcode={envelope.Opcode}: coalesced movement could not be sealed ahead of it (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                    return MailboxAdmit.Rejected;
-                }
-
-                if (!force && !RoomFor(1, FrameBytes(envelope)))
-                {
-                    OutboundLaneMetrics.Full(OutboundLane.Reliable);
-                    NetHostLog.Error(
-                        $"connectionId={_connectionId} endpoint={_endpoint} rejected reliable opcode={envelope.Opcode}: outbound mailbox is full (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                    return MailboxAdmit.Rejected;
-                }
-
-                AppendOrdered(envelope);
-                return MailboxAdmit.Accepted;
+                return AdmitReliable(envelope, burst, barrier: OutboundOrdering.IsBarrier(envelope.Opcode));
         }
     }
 
-    MailboxAdmit MergeOne(PacketEnvelope envelope)
+    MailboxAdmit AdmitReliable(PacketEnvelope envelope, bool burst, bool barrier)
     {
-        // Called with the gate held. Re-enter the snapshot rules for a single appearance frame.
-        if (_snapshot != null)
-            FoldOpenIntoSnapshot();
-        else if (!SealOpen())
-        {
-            OutboundLaneMetrics.Full(OutboundLane.Snapshot);
-            NetHostLog.Error(
-                $"connectionId={_connectionId} endpoint={_endpoint} dropped snapshot opcode={envelope.Opcode}: coalesced movement could not be sealed ahead of it (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-            return MailboxAdmit.Dropped;
-        }
+        if (barrier)
+            SealOpen();
 
         int size = FrameBytes(envelope);
-        if (_snapshot != null)
+        if (!FitsSoft(size))
+            ShedVisuals(size, toHard: false);
+        if (!burst && !FitsHard(size))
         {
-            if (RoomFor(1, size))
+            ShedVisuals(size, toHard: true);
+            if (!FitsHard(size))
             {
-                _snapshot.Frames.Add(envelope);
-                _snapshot.Bytes += size;
-                _orderedFrames++;
-                _orderedBytes += size;
-                return MailboxAdmit.Accepted;
-            }
-
-            int otherFrames = _orderedFrames - _snapshot.Frames.Count;
-            int otherBytes = _orderedBytes - _snapshot.Bytes;
-            bool fitsWithoutPending = otherFrames == 0
-                || (otherFrames + 1 <= _maxFrames && otherBytes + size <= _maxBytes);
-            if (!fitsWithoutPending)
-            {
-                OutboundLaneMetrics.Full(OutboundLane.Snapshot);
+                OutboundLaneMetrics.Full(OutboundLaneOf(envelope.Opcode));
                 NetHostLog.Error(
-                    $"connectionId={_connectionId} endpoint={_endpoint} dropped snapshot opcode={envelope.Opcode} ({size} bytes): pending snapshot is {_snapshot.Frames.Count} frames / {_snapshot.Bytes} bytes (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                return MailboxAdmit.Dropped;
+                    $"connectionId={_connectionId} endpoint={_endpoint} rejected reliable opcode={envelope.Opcode} ({size} bytes): " +
+                    $"outbound mailbox is above its hard limit after shedding visuals ({Describe()})");
+                return MailboxAdmit.Rejected;
             }
+        }
 
-            int oldFrames = _snapshot.Frames.Count;
-            int oldBytes = _snapshot.Bytes;
-            _orderedFrames -= oldFrames;
-            _orderedBytes -= oldBytes;
-            _snapshot.Frames.Clear();
-            _snapshot.Bytes = 0;
-            _snapshot.Frames.Add(envelope);
-            _snapshot.Bytes = size;
-            _orderedFrames++;
-            _orderedBytes += size;
-            OutboundLaneMetrics.Evicted(OutboundLane.Snapshot, oldFrames);
-            NetHostLog.Error(
-                $"connectionId={_connectionId} endpoint={_endpoint} replaced pending knownlist snapshot ({oldFrames} frames / {oldBytes} bytes) with opcode={envelope.Opcode} ({size} bytes): outbound budget is {_maxFrames} frames / {_maxBytes} bytes");
+        AppendOrdered(envelope, size, visual: false);
+        return MailboxAdmit.Accepted;
+    }
+
+    MailboxAdmit Coalesce(PacketEnvelope envelope, bool burst)
+    {
+        if (!TryEntityKey(envelope.Opcode, envelope.Payload, out CoalesceKey key))
+            throw new InvalidOperationException(
+                $"connectionId={_connectionId} endpoint={_endpoint} movement opcode={envelope.Opcode} payload is {envelope.Payload.Length} bytes; " +
+                "a coalesced frame must start with its 12-byte entity key");
+
+        int size;
+        if (_open.TryGetValue(key, out LinkedListNode<OpenEntry>? node))
+        {
+            PacketEnvelope previous = node.Value.Envelope;
+            PacketEnvelope latest = envelope.Opcode == NetOpcode.StatusUpdate ? MergeStatus(previous, envelope) : envelope;
+            int oldSize = FrameBytes(previous);
+            size = FrameBytes(latest);
+            _openBytes += size - oldSize;
+            node.Value.Envelope = latest;
+            // Newest pose goes to the end so it stays after anything coalesced since the superseded one.
+            _openOrder.Remove(node);
+            _openOrder.AddLast(node);
+            OutboundLaneMetrics.Coalesced(OutboundLane.Movement);
+            OutboundLaneMetrics.Shed(OutboundLane.Movement, oldSize);
             return MailboxAdmit.Accepted;
         }
 
-        if (!RoomFor(1, size))
+        size = FrameBytes(envelope);
+        if (!FitsSoft(size))
+            ShedVisuals(size, toHard: false);
+        if (!burst && !FitsHard(size))
         {
-            OutboundLaneMetrics.Full(OutboundLane.Snapshot);
-            NetHostLog.Error(
-                $"connectionId={_connectionId} endpoint={_endpoint} dropped snapshot opcode={envelope.Opcode}: outbound mailbox is full (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-            return MailboxAdmit.Dropped;
-        }
-
-        var created = new Segment { Snapshot = true };
-        created.Frames.Add(envelope);
-        created.Bytes = size;
-        _ordered.Add(created);
-        _snapshot = created;
-        _orderedFrames++;
-        _orderedBytes += size;
-        return MailboxAdmit.Accepted;
-    }
-
-    void Coalesce(PacketEnvelope envelope)
-    {
-        if (!TryEntityKey(envelope.Opcode, envelope.Payload, out CoalesceKey key))
-        {
-            if (!RoomFor(1, FrameBytes(envelope)))
+            ShedVisuals(size, toHard: true);
+            if (!FitsHard(size))
             {
                 OutboundLaneMetrics.Full(OutboundLane.Movement);
                 NetHostLog.Error(
-                    $"connectionId={_connectionId} endpoint={_endpoint} dropped movement opcode={envelope.Opcode}: payload has no entity key and the mailbox is full (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
-                return;
+                    $"connectionId={_connectionId} endpoint={_endpoint} rejected movement opcode={envelope.Opcode} entity={key.EntityValue}: " +
+                    $"newest state for a new entity does not fit under the hard limit ({Describe()})");
+                return MailboxAdmit.Rejected;
             }
-
-            AppendOrdered(envelope);
-            return;
         }
 
-        int size = FrameBytes(envelope);
-        if (_open.TryGetValue(key, out PacketEnvelope? previous))
-        {
-            _openBytes -= FrameBytes(previous);
-            _open[key] = envelope;
-            _openBytes += size;
-            OutboundLaneMetrics.Coalesced(OutboundLane.Movement);
-            return;
-        }
-
-        while (_open.Count > 0 && !OpenHasRoom(size))
-        {
-            CoalesceKey oldest = _openOrder[0];
-            PacketEnvelope evicted = _open[oldest];
-            _openBytes -= FrameBytes(evicted);
-            _open.Remove(oldest);
-            _openOrder.RemoveAt(0);
-            OutboundLaneMetrics.Evicted(OutboundLane.Movement);
-            OutboundLaneMetrics.LogLimited(
-                $"connectionId={_connectionId} endpoint={_endpoint} evicted replaceable opcode={oldest.Opcode} entity={oldest.EntityValue}: movement lane is {MaxOpenEntries} entries / {_maxBytes} bytes");
-        }
-
-        _open[key] = envelope;
-        _openOrder.Add(key);
+        var created = _openOrder.AddLast(new OpenEntry(key, envelope));
+        _open[key] = created;
         _openBytes += size;
+        return MailboxAdmit.Accepted;
     }
 
-    MailboxAdmit AppendVisual(PacketEnvelope envelope, bool force)
+    MailboxAdmit AppendVisual(PacketEnvelope envelope, bool burst)
     {
         int size = FrameBytes(envelope);
-        if (!force && !RoomFor(1, size))
+        if (!burst && !FitsSoft(size))
         {
-            if (DropOldestVisual() && RoomFor(1, size))
-            {
-                OutboundLaneMetrics.Evicted(OutboundLane.Visual);
-            }
-            else
+            ShedVisuals(size, toHard: false);
+            if (!FitsSoft(size))
             {
                 OutboundLaneMetrics.Full(OutboundLane.Visual);
-                OutboundLaneMetrics.Evicted(OutboundLane.Visual);
+                OutboundLaneMetrics.Shed(OutboundLane.Visual, size);
                 OutboundLaneMetrics.LogLimited(
-                    $"connectionId={_connectionId} endpoint={_endpoint} dropped stale visual opcode={envelope.Opcode}: outbound mailbox is full (frames={_orderedFrames}/{_maxFrames} bytes={_orderedBytes}/{_maxBytes})");
+                    $"connectionId={_connectionId} endpoint={_endpoint} dropped visual opcode={envelope.Opcode}: mailbox is above its soft limit and holds no older visual to shed ({Describe()})");
                 return MailboxAdmit.Dropped;
             }
         }
 
-        AppendOrdered(envelope);
+        AppendOrdered(envelope, size, visual: true);
         return MailboxAdmit.Accepted;
     }
 
-    bool DropOldestVisual()
+    /// <summary>Drops queued visual frames, oldest first, until <paramref name="size"/> more bytes fit the limit.</summary>
+    void ShedVisuals(int size, bool toHard)
     {
-        for (int s = 0; s < _ordered.Count; s++)
-        {
-            Segment segment = _ordered[s];
-            if (segment.Snapshot || segment.Frames.Count != 1)
-                continue;
-            if (OutboundLanePolicy.Classify(segment.Frames[0].Opcode) != OutboundLane.Visual)
-                continue;
-            _orderedFrames -= segment.Frames.Count;
-            _orderedBytes -= segment.Bytes;
-            _ordered.RemoveAt(s);
-            return true;
-        }
-
-        return false;
-    }
-
-    void FoldOpenIntoSnapshot()
-    {
-        if (_snapshot == null || _openOrder.Count == 0)
+        if (_visualFrames == 0)
             return;
 
-        for (int i = 0; i < _openOrder.Count; i++)
+        int limitBytes = toHard ? _hardBytes : _softBytes;
+        int limitFrames = toHard ? _hardFrames : _softFrames;
+        int excessBytes = UsedBytes + size - limitBytes;
+        int excessFrames = UsedFrames + 1 - limitFrames;
+        if (excessBytes <= 0 && excessFrames <= 0)
+            return;
+
+        int shedFrames = 0;
+        int shedBytes = 0;
+        int write = 0;
+        for (int read = 0; read < _ordered.Count; read++)
         {
-            PacketEnvelope envelope = _open[_openOrder[i]];
-            int size = FrameBytes(envelope);
-            _snapshot.Frames.Add(envelope);
-            _snapshot.Bytes += size;
-            _orderedFrames++;
-            _orderedBytes += size;
+            Queued item = _ordered[read];
+            if (item.Visual && (shedBytes < excessBytes || shedFrames < excessFrames))
+            {
+                shedFrames++;
+                shedBytes += item.Bytes;
+                continue;
+            }
+
+            _ordered[write++] = item;
         }
 
-        _open.Clear();
-        _openOrder.Clear();
-        _openBytes = 0;
+        if (shedFrames == 0)
+            return;
+        _ordered.RemoveRange(write, _ordered.Count - write);
+        _orderedBytes -= shedBytes;
+        _visualFrames -= shedFrames;
+        OutboundLaneMetrics.Evicted(OutboundLane.Visual, shedFrames);
+        OutboundLaneMetrics.Shed(OutboundLane.Visual, shedBytes);
+        OutboundLaneMetrics.LogLimited(
+            $"connectionId={_connectionId} endpoint={_endpoint} shed {shedFrames} visual frames / {shedBytes} bytes to stay under the {(toHard ? "hard" : "soft")} limit ({Describe()})");
     }
 
-    bool SealOpen()
+    /// <summary>
+    /// A barrier must be observed after the newest coalesced state queued before it. Moves the open movement
+    /// frames into the ordered stream; their bytes are already counted, so this never fails.
+    /// </summary>
+    void SealOpen()
     {
         if (_openOrder.Count == 0)
-            return true;
+            return;
 
-        int bytes = 0;
-        var frames = new List<PacketEnvelope>(_openOrder.Count);
-        for (int i = 0; i < _openOrder.Count; i++)
+        for (var node = _openOrder.First; node != null; node = node.Next)
         {
-            PacketEnvelope envelope = _open[_openOrder[i]];
-            frames.Add(envelope);
-            bytes += FrameBytes(envelope);
+            PacketEnvelope envelope = node.Value.Envelope;
+            _ordered.Add(new Queued(envelope, FrameBytes(envelope), Visual: false));
         }
 
-        if (!RoomFor(frames.Count, bytes))
-            return false;
-
-        var segment = new Segment();
-        segment.Frames.AddRange(frames);
-        segment.Bytes = bytes;
-        _ordered.Add(segment);
-        _orderedFrames += frames.Count;
-        _orderedBytes += bytes;
+        _orderedBytes += _openBytes;
         _open.Clear();
         _openOrder.Clear();
         _openBytes = 0;
-        return true;
     }
 
-    void AppendOrdered(PacketEnvelope envelope)
+    void AppendOrdered(PacketEnvelope envelope, int size, bool visual)
     {
-        int size = FrameBytes(envelope);
-        var segment = new Segment();
-        segment.Frames.Add(envelope);
-        segment.Bytes = size;
-        _ordered.Add(segment);
-        _orderedFrames++;
+        _ordered.Add(new Queued(envelope, size, visual));
         _orderedBytes += size;
+        if (visual)
+            _visualFrames++;
     }
 
-    void AppendSnapshot(Segment snapshot, IReadOnlyList<PacketEnvelope> frames, int addBytes)
-    {
-        for (int i = 0; i < frames.Count; i++)
-            snapshot.Frames.Add(frames[i]);
-        snapshot.Bytes += addBytes;
-        _orderedFrames += frames.Count;
-        _orderedBytes += addBytes;
-    }
+    bool FitsSoft(int size) => UsedBytes + size <= _softBytes && UsedFrames + 1 <= _softFrames;
 
-    bool RoomFor(int frames, int bytes)
-    {
-        if (frames <= 0)
-            return true;
-        // Nothing queued and nothing already in a socket write: one burst may exceed the cap.
-        // The pump splits it. In-flight bytes still count, or a blocked write looks like an empty mailbox
-        // and every later batch is admitted as that one burst.
-        if (_orderedFrames == 0 && _inflightFrames == 0)
-            return true;
-        return _orderedFrames + _inflightFrames + frames <= _maxFrames
-            && _orderedBytes + _inflightBytes + bytes <= _maxBytes;
-    }
+    bool FitsHard(int size) => UsedBytes + size <= _hardBytes && UsedFrames + 1 <= _hardFrames;
 
-    bool OpenHasRoom(int size)
+    string Describe() =>
+        $"held={UsedBytes} bytes / {UsedFrames} frames (in flight {_inflightBytes} bytes), soft={_softBytes} bytes, hard={_hardBytes} bytes";
+
+    static OutboundLane OutboundLaneOf(ushort opcode) => OutboundLanePolicy.Classify(opcode);
+
+    static PacketEnvelope MergeStatus(PacketEnvelope previous, PacketEnvelope latest)
     {
-        if (_open.Count == 0)
-            return true;
-        if (_open.Count >= MaxOpenEntries)
-            return false;
-        return _openBytes + size <= _maxBytes;
+        StatusUpdateNetMsg older = NetCodec.DecodeStatusUpdate(previous.Payload);
+        StatusUpdateNetMsg newer = NetCodec.DecodeStatusUpdate(latest.Payload);
+        var ids = new List<int>(older.AttributeIds.Length + newer.AttributeIds.Length);
+        var values = new List<int>(ids.Capacity);
+        for (int i = 0; i < older.AttributeIds.Length; i++)
+        {
+            if (Array.IndexOf(newer.AttributeIds, older.AttributeIds[i]) >= 0)
+                continue;
+            ids.Add(older.AttributeIds[i]);
+            values.Add(older.Values[i]);
+        }
+
+        ids.AddRange(newer.AttributeIds);
+        values.AddRange(newer.Values);
+        byte[] payload = NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = newer.EntityValue,
+            EntityGeneration = newer.EntityGeneration,
+            AttributeIds = [.. ids],
+            Values = [.. values]
+        });
+        return new PacketEnvelope
+        {
+            Major = latest.Major,
+            Minor = latest.Minor,
+            Opcode = latest.Opcode,
+            Flags = latest.Flags,
+            RequestSequence = latest.RequestSequence,
+            Payload = payload,
+            // Queue age is measured from the oldest state this frame carries.
+            MailboxQueuedAtTimestamp = previous.MailboxQueuedAtTimestamp > 0 && latest.MailboxQueuedAtTimestamp > 0
+                ? Math.Min(previous.MailboxQueuedAtTimestamp, latest.MailboxQueuedAtTimestamp)
+                : Math.Max(previous.MailboxQueuedAtTimestamp, latest.MailboxQueuedAtTimestamp)
+        };
     }
 
     MailboxAdmit ClosedOnce()
@@ -539,19 +471,31 @@ sealed class OutboundMailbox
     void RecordDepth()
     {
         var endpoint = new KeyValuePair<string, object?>("endpoint", _endpoint);
-        FineageTelemetry.OutboundQueueFrames.Record(_orderedFrames + _open.Count, endpoint);
+        FineageTelemetry.OutboundQueueFrames.Record(_ordered.Count + _open.Count, endpoint);
         FineageTelemetry.OutboundQueueBytes.Record(_orderedBytes + _openBytes, endpoint);
     }
 
     static int FrameBytes(PacketEnvelope envelope) => PacketEnvelope.HeaderSize + envelope.Payload.Length;
 
+    /// <summary>
+    /// Entity a coalesced frame describes. Codec frames start with the 12-byte entity key (u64 value, u32
+    /// generation); <c>AbnormalStatusUpdate</c> starts with an i32 object id and carries the full effect list,
+    /// so its newest frame replaces the pending one.
+    /// </summary>
     static bool TryEntityKey(ushort opcode, byte[] payload, out CoalesceKey key)
     {
         key = default;
+        ReadOnlySpan<byte> span = payload;
+        if (opcode == NetOpcode.AbnormalStatusUpdate)
+        {
+            if (payload.Length < 4)
+                return false;
+            key = new CoalesceKey(opcode, BinaryPrimitives.ReadUInt32LittleEndian(span), 0);
+            return true;
+        }
+
         if (payload.Length < 12)
             return false;
-
-        ReadOnlySpan<byte> span = payload;
         ulong entity = BinaryPrimitives.ReadUInt64LittleEndian(span);
         uint generation = BinaryPrimitives.ReadUInt32LittleEndian(span[8..]);
         key = new CoalesceKey(opcode, entity, generation);

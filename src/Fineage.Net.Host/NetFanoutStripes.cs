@@ -67,7 +67,7 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             OutboundLaneMetrics.Blocked(lane, item.Frames.Length);
             NetHostLog.Error(
                 $"fan-out stripe {stripe} queue is full; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
-            if (ContainsReliable(item.Frames))
+            if (ContainsMustDeliver(item.Frames))
                 handle.Connection.FailOutbound($"fan-out stripe {stripe} queue is full ({item.Frames.Length} frames)");
             else
                 OutboundLaneMetrics.Full(lane, item.Frames.Length);
@@ -80,11 +80,11 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             new KeyValuePair<string, object?>("stripe", stripe));
     }
 
-    static bool ContainsReliable(OutboundFrame[] frames)
+    static bool ContainsMustDeliver(OutboundFrame[] frames)
     {
         for (int i = 0; i < frames.Length; i++)
         {
-            if (OutboundLanePolicy.IsReliable(frames[i].Opcode))
+            if (OutboundLanePolicy.MustDeliver(frames[i].Opcode))
                 return true;
         }
 
@@ -141,10 +141,20 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             for (int i = 0; i < batch.Length; i++)
                 frames.Add(batch[i]);
 
-            if (item.Snapshot)
-                connection.SubmitSnapshot(frames);
-            else
-                connection.SubmitOrderedBatch(frames);
+            try
+            {
+                if (item.Snapshot)
+                    connection.SubmitSnapshot(frames);
+                else
+                    connection.SubmitOrderedBatch(frames);
+            }
+            catch (Exception ex)
+            {
+                // One connection's malformed batch must not kill the stripe worker for every other connection.
+                NetHostLog.Error(
+                    $"fan-out stripe failed to admit {frames.Count} frames for {connection.Describe()}: {ex}");
+                connection.FailOutbound($"outbound admission threw {ex.GetType().Name}: {ex.Message}");
+            }
         }
     }
 

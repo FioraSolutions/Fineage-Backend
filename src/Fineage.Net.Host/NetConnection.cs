@@ -9,8 +9,9 @@ namespace Fineage.Net.Host;
 /// <summary>
 /// One accepted Net socket.
 /// Inbound envelopes land in a bounded <see cref="Inbox"/>. Outbound envelopes share one mailbox.
-/// Producers never block on it: movement coalesces, knownlist snapshots replace a pending burst,
-/// visuals drop when stale, and a reliable frame that does not fit closes this connection.
+/// Producers never block on it: it is bounded in bytes (soft and hard limit, see <see cref="OutboundMailbox"/>).
+/// Movement and status coalesce to the newest per entity, visuals are shed above the soft limit, and a frame that
+/// must not be lost and does not fit under the hard limit closes this (slow) connection.
 /// The pump writes whenever the mailbox is non-empty and only then waits for a wake, so a missed
 /// edge cannot leave queued bytes sitting while the socket is idle.
 /// </summary>
@@ -36,6 +37,7 @@ public sealed class NetConnection : IAsyncDisposable
     int _failed;
     int _boundObjectId;
     uint _boundGeneration;
+    string? _peerLabel;
 
     public ulong ConnectionId { get; } = (ulong)Interlocked.Increment(ref _nextConnectionId);
 
@@ -82,6 +84,16 @@ public sealed class NetConnection : IAsyncDisposable
     {
         Volatile.Write(ref _boundObjectId, objectId);
         Volatile.Write(ref _boundGeneration, generation);
+    }
+
+    /// <summary>Who is on this socket (account / character), for disconnect and overflow logs.</summary>
+    public void SetPeerLabel(string label) => Volatile.Write(ref _peerLabel, label);
+
+    /// <summary>connectionId, endpoint, bound object and the peer label, for logs.</summary>
+    public string Describe()
+    {
+        string label = Volatile.Read(ref _peerLabel) ?? "unauthenticated";
+        return $"connectionId={ConnectionId} endpoint={_endpoint} objectId={Volatile.Read(ref _boundObjectId)} {label}";
     }
 
     /// <summary>Clears the binding when it still names <paramref name="objectId"/> at <paramref name="generation"/>.</summary>
@@ -198,8 +210,11 @@ public sealed class NetConnection : IAsyncDisposable
         if (admit == MailboxAdmit.Accepted)
             WakePump();
         else if (admit == MailboxAdmit.Rejected)
+        {
+            NetTelemetry.ReliableOverflow(_endpoint);
             FailOutbound(
-                $"reliable batch of {envelopes.Count} frames does not fit the outbound budget ({MaxBytesPerBatch} bytes)");
+                $"batch of {envelopes.Count} frames does not fit under the outbound hard limit ({_mailbox.HardBytes} bytes)");
+        }
     }
 
     /// <summary>Knownlist / appearance burst. Merges into the pending snapshot and returns. Never waits.</summary>
@@ -220,8 +235,15 @@ public sealed class NetConnection : IAsyncDisposable
         if (envelopes.Count == 0)
             return;
 
-        if (_mailbox.TryMergeSnapshot(envelopes) == MailboxAdmit.Accepted)
+        MailboxAdmit admit = _mailbox.TryMergeSnapshot(envelopes);
+        if (admit == MailboxAdmit.Accepted)
             WakePump();
+        else if (admit == MailboxAdmit.Rejected)
+        {
+            NetTelemetry.ReliableOverflow(_endpoint);
+            FailOutbound(
+                $"knownlist snapshot of {envelopes.Count} frames does not fit under the outbound hard limit ({_mailbox.HardBytes} bytes)");
+        }
     }
 
     /// <summary>
@@ -234,8 +256,10 @@ public sealed class NetConnection : IAsyncDisposable
             return;
 
         int queued = _mailbox.QueuedFrames;
+        int held = _mailbox.HeldBytes;
+        FineageTelemetry.OutboundSlowClientDisconnect.Add(1, new KeyValuePair<string, object?>("endpoint", _endpoint));
         NetHostLog.Error(
-            $"connectionId={ConnectionId} endpoint={_endpoint} outbound overflow: {reason} (queuedFrames={queued}). Closing the connection so a slow client cannot stall the world.");
+            $"slow_client_disconnect {Describe()}: {reason} (queuedFrames={queued} heldBytes={held} soft={_mailbox.SoftBytes} hard={_mailbox.HardBytes}). Closing the connection so a slow client cannot stall the world.");
         Volatile.Write(ref _closed, 1);
         _mailbox.Close();
         WakePump();
@@ -259,7 +283,7 @@ public sealed class NetConnection : IAsyncDisposable
         {
             NetTelemetry.ReliableOverflow(_endpoint);
             if (reliableOverflowCloses)
-                FailOutbound($"reliable opcode={envelope.Opcode} does not fit the outbound budget ({MaxBytesPerBatch} bytes)");
+                FailOutbound($"opcode={envelope.Opcode} does not fit under the outbound hard limit ({_mailbox.HardBytes} bytes)");
         }
 
         return admit;

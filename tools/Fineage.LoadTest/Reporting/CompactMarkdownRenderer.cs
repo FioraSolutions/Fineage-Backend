@@ -132,6 +132,21 @@ public static class CompactMarkdownRenderer
                 : string.Join(", ", lanes.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
             sb.AppendLine($"- Outbound lane {kind} (`{metric}`): {body}");
         }
+
+        if (string.IsNullOrEmpty(peak))
+            return;
+
+        var shed = PrometheusParser.LabeledCounter(peak, "fineage_outbound_shed_bytes_total");
+        string shedBody = shed.Count == 0
+            ? "0"
+            : string.Join(", ", shed.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
+        sb.AppendLine($"- Outbound shed bytes (`fineage_outbound_shed_bytes_total`): {shedBody}");
+        sb.AppendLine(
+            $"- Slow-client disconnects (`fineage_outbound_slow_client_disconnect_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_outbound_slow_client_disconnect_total")}**");
+        sb.AppendLine(
+            $"- Fan-out backlog above soft limit (`fineage_fanout_backlog_soft_exceeded_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_fanout_backlog_soft_exceeded_total")}**");
+        sb.AppendLine(
+            $"- Fan-out backlog emergency, must be 0 (`fineage_fanout_backlog_emergency_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_fanout_backlog_emergency_total")}**");
     }
 
     static void AppendTimeSeries(StringBuilder sb, RunReport r)
