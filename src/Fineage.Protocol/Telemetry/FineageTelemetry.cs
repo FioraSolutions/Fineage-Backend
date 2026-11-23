@@ -203,6 +203,7 @@ public static class FineageTelemetry
             description: "Time a command waited in ingress before apply (tag class)");
 
     static long _tickMaxBits;
+    static long _tickRunningBits;
     static long _queueAgeMaxBits;
     static long _watchdogStallMaxBits;
     static long _watchdogStallCount;
@@ -214,6 +215,19 @@ public static class FineageTelemetry
         TickMilliseconds.Record(milliseconds);
         NoteMax(ref _tickMaxBits, milliseconds);
     }
+
+    /// <summary>
+    /// Elapsed time of the step that is running now. The tick histogram does not move until the step
+    /// returns, so a stall longer than the last finished tick is visible only here.
+    /// </summary>
+    public static void NoteTickRunning(double elapsedMilliseconds)
+    {
+        if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
+            return;
+        Interlocked.Exchange(ref _tickRunningBits, BitConverter.DoubleToInt64Bits(elapsedMilliseconds));
+    }
+
+    public static void ClearTickRunning() => Interlocked.Exchange(ref _tickRunningBits, 0L);
 
     public static void NoteCommandQueueAge(double milliseconds)
     {
@@ -233,9 +247,9 @@ public static class FineageTelemetry
 
     public static readonly ObservableGauge<double> TickMaxMilliseconds = Meter.CreateObservableGauge(
         "fineage.tick.max_ms",
-        () => ObserveBits(_tickMaxBits),
+        ObserveTickMax,
         unit: "ms",
-        description: "Longest simulation step duration observed, not clipped to a histogram bucket");
+        description: "Longest simulation step, including one still running. Not a histogram bucket edge.");
 
     public static readonly ObservableGauge<double> CommandQueueAgeMaxMilliseconds = Meter.CreateObservableGauge(
         "fineage.command.queue.age_max_ms",
@@ -266,6 +280,13 @@ public static class FineageTelemetry
             if (Interlocked.CompareExchange(ref bits, next, current) == current)
                 return;
         }
+    }
+
+    static IEnumerable<Measurement<double>> ObserveTickMax()
+    {
+        double completed = BitConverter.Int64BitsToDouble(Interlocked.Read(ref _tickMaxBits));
+        double running = BitConverter.Int64BitsToDouble(Interlocked.Read(ref _tickRunningBits));
+        yield return new Measurement<double>(running > completed ? running : completed);
     }
 
     static IEnumerable<Measurement<double>> ObserveBits(long bits)

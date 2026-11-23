@@ -34,7 +34,7 @@ public static class LatencyTableBuilder
         var rows = new List<MetricLatencyRow>();
         if (peakMetrics != null)
         {
-            rows.Add(RowFromHistogram(peakMetrics, "fineage_tick_ms", "tick (histogram)"));
+            rows.Add(RowFromHistogram(peakMetrics, "fineage_tick_ms", "tick (histogram bucket ceiling)"));
             if (PrometheusParser.Parse(peakMetrics).TickTrueMaxMs > 0)
             {
                 rows.Add(new MetricLatencyRow

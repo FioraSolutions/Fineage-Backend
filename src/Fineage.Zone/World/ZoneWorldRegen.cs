@@ -59,6 +59,9 @@ public sealed partial class ZoneWorld
             while (true)
             {
                 await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
+                long startedNow = Volatile.Read(ref _stepStartedTimestamp);
+                if (startedNow != 0)
+                    FineageTelemetry.NoteTickRunning(Stopwatch.GetElapsedTime(startedNow).TotalMilliseconds);
                 string? report = StepWatchdogReport();
                 if (report == null)
                 {
@@ -117,6 +120,7 @@ public sealed partial class ZoneWorld
                 finally
                 {
                     Volatile.Write(ref _stepStartedTimestamp, 0L);
+                    FineageTelemetry.ClearTickRunning();
                 }
                 FineageTelemetry.NoteTickDuration(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }

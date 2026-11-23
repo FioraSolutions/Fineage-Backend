@@ -359,7 +359,7 @@ public static class MetricsText
             }
         }
 
-        AppendHelp(sb, "fineage_tick_max_ms", "Longest simulation step duration observed, not clipped to a histogram bucket");
+        AppendHelp(sb, "fineage_tick_max_ms", "Longest simulation step, including one still running. Not a histogram bucket edge.");
         sb.Append("# TYPE fineage_tick_max_ms gauge\n");
         sb.Append("fineage_tick_max_ms ").Append(Num(snapshot.TickMaxMs)).Append('\n');
         AppendHelp(sb, "fineage_command_queue_age_max_ms", "Longest per-player ingress queue age observed");
