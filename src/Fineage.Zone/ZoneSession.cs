@@ -83,6 +83,21 @@ public sealed class ZoneSession
             Account = account;
     }
 
+    /// <summary>
+    /// Back to the character lobby. The account stays on this connection; the character binding does not.
+    /// </summary>
+    public void ReturnToLobby()
+    {
+        ObjectId = 0;
+        Name = "";
+        ClassId = 0;
+        Race = 0;
+        Sex = 0;
+        InWorld = false;
+        SelectedTargetId = 0;
+        TrainerNpcId = 0;
+    }
+
     public void Clear()
     {
         ObjectId = 0;

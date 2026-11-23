@@ -38,6 +38,8 @@ public static class PrivateStoreProtocol
     public const string Weight = "store_weight";
     public const string Slots = "store_slots";
     public const string Package = "store_package";
+    /// <summary>Mobius private store refused inside a no-store zone.</summary>
+    public const string NoStore = "store_zone";
 
     public static bool IsSellStore(byte type) =>
         type is TypeSell or TypePackageSell;

@@ -54,7 +54,8 @@ public sealed partial class ZoneWorld
             .ToArray();
 
     bool InDerbyBroadcast(int x, int y, int z) =>
-        _monsterRaceBroadcast.Length > 0 && PeaceZones.Hit(_monsterRaceBroadcast, x, y, z);
+        ZoneRules.Query(x, y, z, race: 0).InDerby
+        || (_monsterRaceBroadcast.Length > 0 && PeaceZones.Hit(_monsterRaceBroadcast, x, y, z));
 
     MonRaceInfoNetMsg BuildMonRacePacket(MonsterRacePacketOrder order)
     {

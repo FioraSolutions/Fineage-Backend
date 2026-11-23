@@ -157,13 +157,12 @@ public sealed class LoadTestRunner
             runFault ??= ex;
         }
 
+        var tickSeries = SimulationHangGate.FromScrapes(promSamples, rawScrapes);
         hang = SimulationHangGate.Combine(
             SimulationHangGate.Combine(
                 tickHang,
-                SimulationHangGate.Evaluate(
-                    SimulationHangGate.FromScrapes(promSamples, rawScrapes),
-                    observedFrom,
-                    DateTimeOffset.UtcNow)),
+                SimulationHangGate.Evaluate(tickSeries, observedFrom, DateTimeOffset.UtcNow),
+                SimulationHangGate.FromTickMax(tickSeries)),
             SimulationHangGate.FromLogFile(zoneLog));
 
         // Histograms are cumulative for the process, so the last scrape is the run aggregate.
@@ -238,7 +237,8 @@ public sealed class LoadTestRunner
 
         if (oracleRan && scenario.RequireSkillLatencySamples && consistency.SkillSampleCount == 0)
             failReasons.Add("skillSampleCount=0: no UseSkill→MagicSkillUse latency samples in steady window.");
-        // Teardown can cross the watchdog limit after the first read. Read the zone log again so that stall fails the run.
+        // Teardown, or an oracle that outlasts the watchdog, can cross the limit after the first read.
+        // Read the zone log again so that stall fails the run.
         hang = SimulationHangGate.Combine(hang, SimulationHangGate.FromLogFile(zoneLog));
         if (hang.Hung && hang.Reason != null)
             failReasons.Add(hang.Reason);

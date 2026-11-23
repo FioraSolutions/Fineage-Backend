@@ -309,6 +309,7 @@ public sealed partial class ZoneWorld
                 Forget(player, id);
             foreach (var other in OrderedVisible(player.ObjectId))
                 LinkSeen(player, other.ObjectId);
+            UpdateRuleZoneState(player);
         }
     }
 

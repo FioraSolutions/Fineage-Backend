@@ -323,6 +323,25 @@ Before numbers are the post-audit Debug run (PR #913): one global 48-cost apply 
 
 200 bots: ramp 60s + 90s, all 200 entered. Behavior then stuck with no region bodies in flight. That hang is the mailbox wait #914 removed. Ingress during the healthy window no longer queued for seconds: submit→dequeue p99 is one tick (220 ms) instead of 2193 ms.
 
+## Intra-tick command admission (Nov 23, Debug)
+
+Commands were applied only in phase 0 of the next 200 ms step, so submit→mailbox p99 sat at one tick (220 ms on the merged scheduler head) even though commit→mailbox was already 15.5 ms. The live loop now runs the same `commands` stage as soon as a command is queued, pinned to the upcoming tick and stopped at that boundary.
+
+Both columns are Debug bots-200-town, 4 cores, sequential regions. Before is the merged scheduler head `5fab546c` (the run that wedged; histograms are the frozen scrape). After is this branch, from `load-test-report.md` (runner PASS, #867 gates PASS).
+
+| | before (`5fab546c`) | after (intra-tick admission) |
+| --- | ---: | ---: |
+| tick p50 / p99 / true max | 29.0 / 81.2 / **1420.8** | 16.0 / 42.9 / **378.5** |
+| submit→dequeue p99 | 210.8 | **19.3** |
+| command→mailboxes p99 (180 ms gate) | 15.5 | **24.2** |
+| submit→mailbox p99 | 219.9 | **36.4** |
+| dequeue→apply p99 | 1.3 | **1.4** |
+| outbound lanes blocked / full / coalesced / evicted | 0 / 0 / movement 1197 / 0 | 0 / 0 / movement 2135 / 0 |
+| real CPU % avg / max | 10.6 / 38.0 before the stall | 6.4 / 34.4 (13.2 / 34.4 before the stall) |
+| zone RSS (HWM) | 505 MiB (576) | 504 MiB (619) |
+
+The zone step still stuck once, after the behavior window, with no region bodies in flight (watchdog 180.9 s in the zone log). The runner sampled that log before the watchdog crossed 30 s and printed stall 4.8 s, count 0.
+
 ## Reproduce smoke
 
 ```bash

@@ -11,7 +11,7 @@ namespace Fineage.LoadTest.Reporting;
 /// One observation of <c>fineage_tick_ms_count</c>. The load gate parses this from raw scrapes
 /// so it does not depend on <c>PrometheusSample</c>.
 /// </summary>
-public readonly record struct TickObservation(DateTimeOffset At, long TickCount);
+public readonly record struct TickObservation(DateTimeOffset At, long TickCount, double TickMaxMs = 0);
 
 /// <summary>
 /// Whether the zone simulation stalled, and for how long. <see cref="StallSeconds"/> is the
@@ -38,6 +38,10 @@ public static class SimulationHangGate
         @"^fineage_tick_ms_count(?:\{[^}]*\})?\s+(\d+)\s*$",
         RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
+    static readonly Regex TickMaxPattern = new(
+        @"^fineage_tick_max_ms(?:\{[^}]*\})?\s+([0-9]+(?:\.[0-9]+)?)\s*$",
+        RegexOptions.Multiline | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
     static readonly Regex WatchdogPattern = new(
         @"simulation step tick=\d+ has run (?<seconds>[0-9]+(?:\.[0-9]+)?)s without finishing",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
@@ -54,7 +58,7 @@ public static class SimulationHangGate
         for (int i = 0; i < n; i++)
         {
             if (ParseTickCount(rawScrapes[i]) is long count)
-                series.Add(new TickObservation(samples[i].ScrapedAt, count));
+                series.Add(new TickObservation(samples[i].ScrapedAt, count, ParseTickMaxMs(rawScrapes[i]) ?? 0));
         }
 
         return series;
@@ -68,6 +72,46 @@ public static class SimulationHangGate
         if (!match.Success)
             return null;
         return long.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary><c>fineage_tick_max_ms</c>: the longest step, including one still running. Not a histogram bucket edge.</summary>
+    public static double? ParseTickMaxMs(string? metricsText)
+    {
+        if (string.IsNullOrEmpty(metricsText))
+            return null;
+        Match match = TickMaxPattern.Match(metricsText);
+        if (!match.Success)
+            return null;
+        return double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// A finished or still-running step whose true duration exceeds the stall limit. The histogram
+    /// reports the bucket edge (1500, 2000, …), so the hang gate reads the gauge instead.
+    /// </summary>
+    public static SimulationHangVerdict FromTickMax(IReadOnlyList<TickObservation> samples, TimeSpan? stallLimit = null)
+    {
+        double maxMs = 0;
+        foreach (TickObservation sample in samples)
+        {
+            if (sample.TickMaxMs > maxMs)
+                maxMs = sample.TickMaxMs;
+        }
+
+        if (maxMs <= 0)
+            return SimulationHangVerdict.Clear;
+
+        TimeSpan limit = stallLimit ?? StallLimit;
+        double seconds = maxMs / 1000d;
+        bool hung = seconds > limit.TotalSeconds;
+        string? reason = hung
+            ? "Simulation hang: fineage_tick_max_ms "
+              + maxMs.ToString("0.0", CultureInfo.InvariantCulture)
+              + "ms exceeds "
+              + limit.TotalSeconds.ToString("0", CultureInfo.InvariantCulture)
+              + "s. The histogram bucket ceiling is not this duration."
+            : null;
+        return new SimulationHangVerdict(hung, seconds, hung ? 1 : 0, reason);
     }
 
     /// <summary>
@@ -182,12 +226,16 @@ public static class SimulationHangGate
     /// even when the tick series did not cross the limit. Stall count is the number of tick-freeze
     /// episodes over the limit, or one when only the watchdog fired.
     /// </summary>
-    public static SimulationHangVerdict Combine(SimulationHangVerdict ticks, SimulationHangVerdict watchdog)
+    public static SimulationHangVerdict Combine(
+        SimulationHangVerdict ticks,
+        SimulationHangVerdict watchdog,
+        SimulationHangVerdict? tickMax = null)
     {
-        double seconds = Math.Max(ticks.StallSeconds, watchdog.StallSeconds);
-        bool hung = ticks.Hung || watchdog.Hung;
+        tickMax ??= SimulationHangVerdict.Clear;
+        double seconds = Math.Max(ticks.StallSeconds, Math.Max(watchdog.StallSeconds, tickMax.StallSeconds));
+        bool hung = ticks.Hung || watchdog.Hung || tickMax.Hung;
         int count = ticks.StallCount;
-        if (watchdog.Hung && count == 0)
+        if ((watchdog.Hung || tickMax.Hung) && count == 0)
             count = 1;
         if (!hung)
             return new SimulationHangVerdict(false, seconds, 0, null);
@@ -203,6 +251,12 @@ public static class SimulationHangGate
             sb.Append(" Tick counter stopped advancing for ");
             sb.Append(ticks.StallSeconds.ToString("0.0", CultureInfo.InvariantCulture));
             sb.Append("s.");
+        }
+
+        if (tickMax.Hung && tickMax.Reason != null)
+        {
+            sb.Append(' ');
+            sb.Append(tickMax.Reason);
         }
 
         if (watchdog.Hung && watchdog.Reason != null)
@@ -271,12 +325,17 @@ public static class SimulationHangGate
         while (!stop.IsCancellationRequested)
         {
             long? count = null;
+            double tickMaxMs = 0;
             try
             {
                 if (readTickCount != null)
                     count = await readTickCount(stop).ConfigureAwait(false);
                 else if (http != null)
-                    count = ParseTickCount(await http.GetStringAsync($"http://127.0.0.1:{port}/metrics", stop).ConfigureAwait(false));
+                {
+                    string body = await http.GetStringAsync($"http://127.0.0.1:{port}/metrics", stop).ConfigureAwait(false);
+                    count = ParseTickCount(body);
+                    tickMaxMs = ParseTickMaxMs(body) ?? 0;
+                }
             }
             catch (OperationCanceledException) when (stop.IsCancellationRequested)
             {
@@ -288,9 +347,9 @@ public static class SimulationHangGate
             }
 
             if (count is long n)
-                samples.Add(new TickObservation(DateTimeOffset.UtcNow, n));
+                samples.Add(new TickObservation(DateTimeOffset.UtcNow, n, tickMaxMs));
 
-            SimulationHangVerdict verdict = Evaluate(samples, observedFrom, DateTimeOffset.UtcNow, limit);
+            SimulationHangVerdict verdict = Current(samples, observedFrom, DateTimeOffset.UtcNow, limit);
             if (verdict.Hung && !signaled)
             {
                 signaled = true;
@@ -315,6 +374,16 @@ public static class SimulationHangGate
             }
         }
 
-        return Evaluate(samples, observedFrom, DateTimeOffset.UtcNow, limit);
+        return Current(samples, observedFrom, DateTimeOffset.UtcNow, limit);
     }
+
+    static SimulationHangVerdict Current(
+        IReadOnlyList<TickObservation> samples,
+        DateTimeOffset observedFrom,
+        DateTimeOffset observedUntil,
+        TimeSpan limit) =>
+        Combine(
+            Evaluate(samples, observedFrom, observedUntil, limit),
+            SimulationHangVerdict.Clear,
+            FromTickMax(samples, limit));
 }

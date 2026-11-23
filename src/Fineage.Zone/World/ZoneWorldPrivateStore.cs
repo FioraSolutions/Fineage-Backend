@@ -107,6 +107,8 @@ public sealed partial class ZoneWorld
             return PrivateStoreProtocol.Busy;
         if (player.MoveActive)
             return PrivateStoreProtocol.Busy;
+        if (ZoneRules.Query(player.X, player.Y, player.Z, player.Race).BlocksStore)
+            return PrivateStoreProtocol.NoStore;
         return null;
     }
 

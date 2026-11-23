@@ -10,11 +10,11 @@ The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scrip
 
 | Direction | Packets | Server yes | partial | no | n/a | Client yes | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| C2S | 158 | 101 | 35 | 19 | 3 | 91 | 28 | 36 | 3 |
+| C2S | 158 | 102 | 34 | 19 | 3 | 91 | 28 | 36 | 3 |
 | C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
-| S2C | 270 | 177 | 54 | 32 | 7 | 210 | 6 | 47 | 7 |
+| S2C | 270 | 178 | 54 | 31 | 7 | 210 | 6 | 47 | 7 |
 
-**In-scope gaps:** server not fully implemented (partial+no) **154**, of which server absent (**no**) **60**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
+**In-scope gaps:** server not fully implemented (partial+no) **152**, of which server absent (**no**) **59**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
 
 Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `ServerPackets`.
 
@@ -74,7 +74,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x43 | RequestGetOffVehicle | yes | contract | RequestGetOffVehicle |  |
 | 0x44 | AnswerTradeRequest | yes | yes | TradeAnswerRequest |  |
 | 0x45 | RequestActionUse | yes | yes | RequestActionUse | sit, walk/run, social ids |
-| 0x46 | RequestRestart | partial | no |  | no return-to-lobby opcode; disconnect persists |
+| 0x46 | RequestRestart | yes | no | RequestRestart | persist, keep account, then CharacterRoster |
 | 0x47 | RequestSiegeInfo | yes | contract | SiegeListRequest |  |
 | 0x48 | ValidatePosition | yes | yes | ValidatePosition |  |
 | 0x4a | StartRotating | no | no |  |  |
@@ -311,7 +311,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x5c | GET_ON_VEHICLE | GetOnVehicle | partial | yes | GetOnVehicle |  |
 | 0x5d | GET_OFF_VEHICLE | GetOffVehicle | partial | yes | GetOffVehicle |  |
 | 0x5e | SEND_TRADE_REQUEST | SendTradeRequest | yes | yes | TradeAsk |  |
-| 0x5f | RESTART_RESPONSE | RestartResponse | no | no |  | no lobby restart |
+| 0x5f | RESTART_RESPONSE | RestartResponse | yes | no | RestartResponse | ok flag, then CharacterRoster |
 | 0x60 | MOVE_TO_PAWN | MoveToPawn | partial | yes | MoveState | interact approach is movement, not MoveToPawn |
 | 0x61 | VALIDATE_LOCATION | ValidateLocation | yes | yes | PositionCorrection |  |
 | 0x62 | BEGIN_ROTATION | StartRotation | no | no |  |  |
@@ -424,7 +424,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | no | no |  |  |
 | 0xf1 | CAMERA_MODE | CameraMode | no | no |  |  |
 | 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | no | no |  | SpecialXMas item |
-| 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate |  |
+| 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate | danger area follows an enabled EffectZone (`showDangerIcon`) |
 | 0xf4 | SHORT_BUFF_STATUS_UPDATE | ShortBuffStatusUpdate | partial | yes | AbnormalStatusUpdate |  |
 | 0xf5 | SSQ_STATUS | SSQStatus | yes | yes | SevenSignsStatus |  |
 | 0xf7 | AGIT_DECO_INFO | AgitDecoInfo | yes | yes | AgitDecoInfo |  |
@@ -470,7 +470,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xfe/0x2e | EX_STORAGE_MAX_COUNT | ExStorageMaxCount | partial | yes | InventoryUpdate | slot caps are server-side |
 | 0xfe/0x30 | EX_MULTI_PARTY_COMMAND_CHANNEL_INFO | ExMultiPartyCommandChannelInfo | yes | contract | CommandChannelInfo |  |
 | 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | no | no |  |  |
-| 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | no zone-compass packet |
+| 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | zone rules are server-side (`ZoneTypeRegistry`); compass byte is still not sent |
 | 0xfe/0x33 | EX_GET_BOSS_RECORD | ExGetBossRecord | yes | yes | BossStatus |  |
 | 0xfe/0x34 | EX_ASK_JOIN_PARTY_ROOM | ExAskJoinPartyRoom | no | no |  |  |
 | 0xfe/0x35 | EX_LIST_PARTY_MATCHING_WAITING_ROOM | ExListPartyMatchingWaitingRoom | no | no |  |  |
