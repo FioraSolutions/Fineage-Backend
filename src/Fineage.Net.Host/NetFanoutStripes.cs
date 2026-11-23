@@ -6,7 +6,8 @@ namespace Fineage.Net.Host;
 
 /// <summary>
 /// Issue #867 PR2: one bounded queue and consumer per connection stripe (ConnectionId % N). Each stripe owns delivery
-/// order for its connections. PR3: a drained burst is one ordered batch per connection, not one channel item per frame.
+/// order for its connections. Producers use <see cref="TryWrite"/> only: the simulation thread and the fan-out
+/// dispatcher never block on a full stripe or a full mailbox.
 /// </summary>
 public sealed class NetFanoutStripes : IAsyncDisposable
 {
@@ -26,17 +27,25 @@ public sealed class NetFanoutStripes : IAsyncDisposable
     public int StripeCount => _stripes.Length;
 
     public void EnqueueTrySend(ConnectionHandle handle, ushort opcode, byte[] payload, long mailboxAtTimestamp = 0) =>
-        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)]));
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)], Snapshot: false));
 
     public void EnqueueCritical(ConnectionHandle handle, ushort opcode, byte[] payload, long mailboxAtTimestamp = 0) =>
-        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)]));
+        Enqueue(handle, new WorkItem(handle, [new OutboundFrame(opcode, payload, mailboxAtTimestamp)], Snapshot: false));
 
     /// <summary>One ordered batch for <paramref name="handle"/>, already grouped by the delivery scope or a stripe drain.</summary>
     internal void EnqueueBatch(ConnectionHandle handle, List<OutboundFrame> frames)
     {
         if (frames.Count == 0)
             return;
-        Enqueue(handle, new WorkItem(handle, frames.ToArray()));
+        Enqueue(handle, new WorkItem(handle, frames.ToArray(), Snapshot: false));
+    }
+
+    /// <summary>One knownlist / appearance snapshot. A newer pending snapshot replaces the previous one.</summary>
+    internal void EnqueueSnapshot(ConnectionHandle handle, List<OutboundFrame> frames)
+    {
+        if (frames.Count == 0)
+            return;
+        Enqueue(handle, new WorkItem(handle, frames.ToArray(), Snapshot: true));
     }
 
     void Enqueue(ConnectionHandle handle, WorkItem item)
@@ -50,20 +59,18 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
         int stripe = StripeIndex(handle.Connection.ConnectionId);
         long waitStarted = Stopwatch.GetTimestamp();
-        try
+        if (!_stripes[stripe].Writer.TryWrite(item))
         {
-            _stripes[stripe].Writer.WriteAsync(item, _cts.Token).AsTask().GetAwaiter().GetResult();
-        }
-        catch (ChannelClosedException)
-        {
+            OutboundLane lane = item.Frames.Length == 0
+                ? OutboundLane.Reliable
+                : OutboundLanePolicy.Classify(item.Frames[0].Opcode);
+            OutboundLaneMetrics.Blocked(lane, item.Frames.Length);
             NetHostLog.Error(
-                $"fan-out stripe {stripe} is closed; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
-            return;
-        }
-        catch (OperationCanceledException) when (_cts.IsCancellationRequested)
-        {
-            NetHostLog.Error(
-                $"fan-out stripe {stripe} shut down; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
+                $"fan-out stripe {stripe} queue is full; rejected {item.Frames.Length} frames for objectId={handle.ObjectId} connectionId={handle.Connection.ConnectionId}");
+            if (ContainsReliable(item.Frames))
+                handle.Connection.FailOutbound($"fan-out stripe {stripe} queue is full ({item.Frames.Length} frames)");
+            else
+                OutboundLaneMetrics.Full(lane, item.Frames.Length);
             return;
         }
 
@@ -71,6 +78,17 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         FineageTelemetry.FanoutStripeEnqueueWaitMilliseconds.Record(
             waitMs,
             new KeyValuePair<string, object?>("stripe", stripe));
+    }
+
+    static bool ContainsReliable(OutboundFrame[] frames)
+    {
+        for (int i = 0; i < frames.Length; i++)
+        {
+            if (OutboundLanePolicy.IsReliable(frames[i].Opcode))
+                return true;
+        }
+
+        return false;
     }
 
     int StripeIndex(ulong connectionId) => (int)(connectionId % (ulong)_stripes.Length);
@@ -102,11 +120,12 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         if (pending.Count == 0)
             return;
 
-        // One submission per connection, frames in the order the stripe observed them.
+        // Each work item is one caller batch, in the order the stripe observed it.
+        // Gluing every item for a connection into one list made an empty mailbox treat the whole
+        // drain as the single over-budget burst: a slow client was closed only when this channel
+        // happened to be full, which depends on the worker keeping up with the producer.
         // The generation check is per item: a stale handle drained in the same cycle as the
         // rebound connection must not discard the live frames.
-        var groups = new Dictionary<ulong, List<OutboundFrame>>(pending.Count);
-        var order = new List<NetConnection>(pending.Count);
         foreach (WorkItem item in pending)
         {
             NetConnection connection = item.Handle.Connection;
@@ -117,20 +136,16 @@ public sealed class NetFanoutStripes : IAsyncDisposable
                 continue;
             }
 
-            if (!groups.TryGetValue(connection.ConnectionId, out List<OutboundFrame>? frames))
-            {
-                frames = new List<OutboundFrame>(item.Frames.Length);
-                groups.Add(connection.ConnectionId, frames);
-                order.Add(connection);
-            }
-
+            var frames = new List<OutboundFrame>(item.Frames.Length);
             OutboundFrame[] batch = item.Frames;
             for (int i = 0; i < batch.Length; i++)
                 frames.Add(batch[i]);
-        }
 
-        foreach (NetConnection connection in order)
-            connection.SubmitOrderedBatch(groups[connection.ConnectionId]);
+            if (item.Snapshot)
+                connection.SubmitSnapshot(frames);
+            else
+                connection.SubmitOrderedBatch(frames);
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -144,7 +159,7 @@ public sealed class NetFanoutStripes : IAsyncDisposable
         _cts.Dispose();
     }
 
-    readonly record struct WorkItem(ConnectionHandle Handle, OutboundFrame[] Frames);
+    readonly record struct WorkItem(ConnectionHandle Handle, OutboundFrame[] Frames, bool Snapshot);
 
     sealed class Stripe
     {
@@ -158,6 +173,8 @@ public sealed class NetFanoutStripes : IAsyncDisposable
             Channel = System.Threading.Channels.Channel.CreateBounded<WorkItem>(
                 new BoundedChannelOptions(capacity)
                 {
+                    // Producers TryWrite and apply the slow-client policy. Wait mode stays so a mistaken
+                    // WriteAsync cannot drop frames silently; nothing on the tick calls it.
                     FullMode = BoundedChannelFullMode.Wait,
                     SingleReader = true,
                     SingleWriter = false,
