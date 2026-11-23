@@ -44,6 +44,8 @@ One script starts Postgres (docker), builds, and runs Login+Zone:
 ./scripts/run-local-net.sh stop     # also bootouts leftover local.fineage.* LaunchAgents
 ```
 
+`start` runs `scripts/fetch-geodata.sh` and sets `FINEAGE_GEODATA_REQUIRED=1`, so the zone loads the regions in `data/geodata-regions.json` and LOS / pathfinding use those files. A region the mirror does not have is logged by name (`missing region file 16_24.l2j`) and the script exits. `FINEAGE_GEODATA_REQUIRED=0 ./scripts/run-local-net.sh start` keeps the stub height clamp; the load-test scripts use that. Live `deploy/run-zone.sh` does the same fetch before the process starts.
+
 Shared `FINEAGE_HANDOFF_SECRET` defaults to `FineageLoginHandoffV1` for this local path. Do not use ad-hoc `dotnet run` for day-to-day play — that fights the script and any old LaunchAgents.
 
 **GM commands:** the script sets `FINEAGE_ZONE_ADMIN=1` by default. Character name must be in [`data/admin-characters.json`](data/admin-characters.json) (`*` = any name for local/dev; use explicit names on shared hosts). In chat: `//gmshop`, `//setlevel 80`, `//setclass <id>`, `//give <itemId> [count]`, `//buff` / `//mbuff` / `//fbuff` / `//buff_clear`. **Teleport (chat, no client patch):** `//teleport x y z` (alias `//tele`), `//goto <charName>`, `//recall <charName>`, `//loc`, `//town <name>`, `//towns` — towns listed in [`data/gm-teleports.json`](data/gm-teleports.json). `//` lines are never broadcast; non-admins get a system refusal. Override with `FINEAGE_ZONE_ADMIN=0 ./scripts/run-local-net.sh start` to disable.

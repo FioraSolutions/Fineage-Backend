@@ -24,7 +24,7 @@ run_one() {
   mkdir -p "$out"
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
   export FINEAGE_ZONE_REGION_WORKERS="$workers"
-  ./scripts/run-local-net.sh start
+  FINEAGE_GEODATA_REQUIRED=0 ./scripts/run-local-net.sh start
   local zone_pid
   zone_pid="$(cat local-logs/zone-net.pid 2>/dev/null || echo 0)"
   dotnet "$LOADTEST_DLL" run \

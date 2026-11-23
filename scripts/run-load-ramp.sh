@@ -25,7 +25,7 @@ run_scenario() {
   local out="$REPORT_ROOT/$tag"
   mkdir -p "$out"
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
-  ./scripts/run-local-net.sh start
+  FINEAGE_GEODATA_REQUIRED=0 ./scripts/run-local-net.sh start
   ZONE_PID="$(cat local-logs/zone-net.pid 2>/dev/null || echo 0)"
   set +e
   dotnet "$ROOT/tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll" \

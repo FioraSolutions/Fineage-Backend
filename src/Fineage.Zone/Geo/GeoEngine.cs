@@ -33,16 +33,19 @@ public sealed partial class GeoEngine
     static GeoEngine LoadDefaultUncached()
     {
         bool required = GeoSettings.Required;
+        var requiredRegions = GeoSettings.RequiredRegionNames(required);
         string? dir = Environment.GetEnvironmentVariable(GeoSettings.DirVariable);
         if (string.IsNullOrWhiteSpace(dir))
             dir = FindDefaultDir();
 
         if (dir == null || !System.IO.Directory.Exists(dir))
         {
+            if (requiredRegions.Count > 0)
+                LogMissingRequiredRegionFiles(requiredRegions, fatal: required);
             if (required)
             {
                 throw new InvalidOperationException(
-                    $"[geo] FINEAGE_GEODATA_REQUIRED=1 but no geodata directory exists " +
+                    $"[geo] {GeoSettings.RequiredVariable}=1 but no geodata directory exists " +
                     $"(set {GeoSettings.DirVariable} or create data/geodata). Straight-line geo fallback is disabled in production mode.");
             }
 
@@ -50,9 +53,8 @@ public sealed partial class GeoEngine
             return new GeoEngine();
         }
 
-        var requiredRegions = GeoSettings.RequiredRegionNames(required);
         if (required && requiredRegions.Count > 0)
-            LogMissingRequiredRegionFiles(dir, requiredRegions, fatal: true);
+            LogMissingRequiredRegionFiles(requiredRegions, fatal: true);
 
         var (geo, loadedNames, loadErrors) = LoadDirectory(dir, strict: required);
         if (required)
@@ -72,7 +74,7 @@ public sealed partial class GeoEngine
         }
         else if (requiredRegions.Count > 0)
         {
-            LogMissingRequiredRegionFiles(dir, requiredRegions, fatal: false);
+            LogMissingRequiredRegionFiles(requiredRegions, fatal: false);
         }
 
         if (geo.RegionCount == 0)
@@ -86,13 +88,19 @@ public sealed partial class GeoEngine
         return geo;
     }
 
-    static void LogMissingRequiredRegionFiles(string dir, IReadOnlyList<string> requiredRegions, bool fatal)
+    static void LogMissingRequiredRegionFiles(IReadOnlyList<string> requiredRegions, bool fatal)
     {
+        string? dir = Environment.GetEnvironmentVariable(GeoSettings.DirVariable);
+        if (string.IsNullOrWhiteSpace(dir))
+            dir = FindDefaultDir();
+
         var missing = new List<string>();
         foreach (string region in requiredRegions)
         {
-            if (!RegionFileExists(dir, region))
-                missing.Add(region + ".l2j");
+            if (dir == null || !RegionFileExists(dir, region))
+                missing.Add(region.EndsWith(".l2j", StringComparison.OrdinalIgnoreCase) || region.EndsWith(".l2d", StringComparison.OrdinalIgnoreCase)
+                    ? region
+                    : region + ".l2j");
         }
 
         if (missing.Count == 0)
@@ -100,12 +108,19 @@ public sealed partial class GeoEngine
 
         string line = "[geo] missing required region file(s): " + string.Join(", ", missing);
         if (fatal)
-            throw new InvalidOperationException(line + " (set FINEAGE_GEODATA_REQUIRED=0 for stub geo, or run scripts/fetch-geodata.sh).");
-        ZoneLog.Warn(line);
+        {
+            throw new InvalidOperationException(
+                line + $" ({GeoSettings.RequiredVariable}=1 refuses to boot; run scripts/fetch-geodata.sh).");
+        }
+
+        ZoneLog.Error(line);
     }
 
-    static bool RegionFileExists(string dir, string region) =>
-        File.Exists(Path.Combine(dir, region + ".l2j")) || File.Exists(Path.Combine(dir, region + ".l2d"));
+    static bool RegionFileExists(string dir, string region)
+    {
+        string stem = Path.GetFileNameWithoutExtension(region);
+        return File.Exists(Path.Combine(dir, stem + ".l2j")) || File.Exists(Path.Combine(dir, stem + ".l2d"));
+    }
 
     static string? FindDefaultDir()
     {

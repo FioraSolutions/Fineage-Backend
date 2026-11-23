@@ -40,7 +40,7 @@ echo "Deploying to ${REMOTE}:${APP_ROOT} (login/ and zone/ binaries only)…"
 
 "${RSYNC[@]}" "${LOGIN_SRC}/" "${REMOTE}:${STAGING}/login/"
 "${RSYNC[@]}" "${ZONE_SRC}/" "${REMOTE}:${STAGING}/zone/"
-"${RSYNC[@]}" "${SCRIPT_DIR}/run-login.sh" "${SCRIPT_DIR}/run-zone.sh" "${REMOTE}:${APP_ROOT}/"
+"${RSYNC[@]}" "${SCRIPT_DIR}/run-login.sh" "${SCRIPT_DIR}/run-zone.sh" "${SCRIPT_DIR}/../scripts/fetch-geodata.sh" "${REMOTE}:${APP_ROOT}/"
 
 "${SSH[@]}" "$REMOTE" bash -s -- "$STAGING" "$APP_ROOT" "$RESTART" "$LOGIN_UNIT" "$ZONE_UNIT" <<'REMOTE'
 set -euo pipefail
@@ -54,7 +54,7 @@ ZONE_UNIT="$5"
 rsync -a --delete "${STAGING}/login/" "${APP_ROOT}/login/"
 rsync -a --delete "${STAGING}/zone/" "${APP_ROOT}/zone/"
 chmod +x "${APP_ROOT}/login/Fineage.Login" "${APP_ROOT}/zone/Fineage.Zone" \
-  "${APP_ROOT}/run-login.sh" "${APP_ROOT}/run-zone.sh"
+  "${APP_ROOT}/run-login.sh" "${APP_ROOT}/run-zone.sh" "${APP_ROOT}/fetch-geodata.sh"
 rm -rf "${STAGING}"
 
 if [[ "$RESTART" == "systemd" ]]; then
