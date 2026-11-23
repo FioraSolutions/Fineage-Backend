@@ -10,6 +10,7 @@ public static class PerformanceGates
         ["bots-50-town"] = 150,
         ["bots-100-spread"] = 150,
         ["bots-200-spread"] = 180,
+        ["bots-200-town"] = 180,
         ["bots-500-siege"] = 200,
         ["bots-1000-town"] = 200
     };
@@ -32,17 +33,22 @@ public static class PerformanceGates
             Note = tickP99 <= 0 ? "no scrape data" : null
         });
 
-        double cmdMailboxes = report.CommandToMailboxesP99Ms ?? report.Consistency?.BroadcastLatencyP99Ms ?? 0;
+        // #867 command→mailboxes is fineage_command_to_mailboxes_ms (commit to first mailbox enqueue).
+        // It is not the client consistency oracle and not submit_to_mailbox, which includes the tick wait.
+        double cmdMailboxes = report.CommandToMailboxesP99Ms ?? 0;
         if (CommandToMailboxesP99ByScenario.TryGetValue(scenario, out double cmdLimit))
         {
+            bool missingCmd = cmdMailboxes <= 0;
             verdicts.Add(new GateVerdict
             {
                 Gate = $"command→mailboxes p99 <= {cmdLimit:0} ms ({scenario})",
                 Limit = cmdLimit,
                 Observed = cmdMailboxes,
                 Unit = "ms",
-                Passed = cmdMailboxes <= cmdLimit || cmdMailboxes <= 0,
-                Note = cmdMailboxes <= 0 ? "metric missing or no bot oracle samples" : null
+                Passed = !missingCmd && cmdMailboxes <= cmdLimit,
+                Note = missingCmd
+                    ? "MISSING: fineage_command_to_mailboxes_ms (server histogram; the client consistency oracle is not this gate)"
+                    : "server fineage_command_to_mailboxes_ms, not the client consistency oracle"
             });
         }
         else
@@ -54,9 +60,24 @@ public static class PerformanceGates
                 Observed = cmdMailboxes,
                 Unit = "ms",
                 Passed = true,
-                Note = $"scenario `{scenario}` has no mapped gate; see #867 for bots-50-town … bots-1000-town"
+                Note = $"scenario `{scenario}` has no mapped #867 gate; see bots-50-town … bots-1000-town"
             });
         }
+
+        double submitToMailbox = report.SubmitToMailboxP99Ms ?? 0;
+        const double submitLimitMs = 1000;
+        bool missingSubmit = submitToMailbox <= 0;
+        verdicts.Add(new GateVerdict
+        {
+            Gate = "submit→mailbox p99 <= 1000 ms",
+            Limit = submitLimitMs,
+            Observed = submitToMailbox,
+            Unit = "ms",
+            Passed = !missingSubmit && submitToMailbox <= submitLimitMs,
+            Note = missingSubmit
+                ? "MISSING: fineage_command_timeline_ms phase=submit_to_mailbox (server histogram; the client consistency oracle is not this gate)"
+                : "end-to-end submit_to_mailbox, including the wait for the next tick; not the #867 fanout-enqueue limit and not the client consistency oracle"
+        });
 
         double fanoutAge = report.FanoutQueueOldestAgeP99Ms ?? 0;
         verdicts.Add(new GateVerdict

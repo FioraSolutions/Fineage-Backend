@@ -44,7 +44,15 @@ public sealed class RunReport
     public StructuredLogSummary? StructuredLogs { get; set; }
     public List<GateVerdict> GateVerdicts { get; set; } = [];
     public double? CommandToMailboxesP99Ms { get; set; }
+    /// <summary>Server histogram <c>fineage_command_timeline_ms{phase=submit_to_mailbox}</c>.</summary>
+    public double? SubmitToMailboxP99Ms { get; set; }
+    /// <summary>Server histogram <c>fanout_enqueue_to_mailbox</c> (formerly mislabeled command→mailboxes).</summary>
+    public double? FanoutEnqueueToMailboxP99Ms { get; set; }
     public double? FanoutQueueOldestAgeP99Ms { get; set; }
+    public double? TickTrueMaxMs { get; set; }
+    public double? WatchdogStallMaxMs { get; set; }
+    public long WatchdogStalls { get; set; }
+    public long FanoutDropped { get; set; }
     public long? ReliableOverflowTotal { get; set; }
     public HonestLoadSummary? Honest { get; set; }
 
@@ -70,6 +78,8 @@ public sealed class PrometheusAggregate
     public long PacketsErrored { get; init; }
     public int ZoneOnlineMax { get; init; }
     public long OutboundDropped { get; init; }
+    public long CommandCoalesced { get; init; }
+    public long CommandRejected { get; init; }
     public Dictionary<string, double> TickStageP99Ms { get; init; } = new(StringComparer.Ordinal);
     public double BytesOutPerOnlinePlayer { get; init; }
     public long LedgerAdjustments { get; init; }
@@ -123,6 +133,8 @@ public sealed class PrometheusAggregate
             PacketsErrored = samples.Max(s => s.PacketsErrored),
             ZoneOnlineMax = samples.Max(s => s.ZoneOnline),
             OutboundDropped = samples.Max(s => s.OutboundDropped),
+            CommandCoalesced = samples.Max(s => s.CommandCoalesced),
+            CommandRejected = samples.Max(s => s.CommandRejected),
             TickStageP99Ms = MergeStageP99(samples),
             LedgerAdjustments = samples.Max(s => s.LedgerAdjustments),
             BytesOutPerOnlinePlayer = PerPlayerBytes(samples),

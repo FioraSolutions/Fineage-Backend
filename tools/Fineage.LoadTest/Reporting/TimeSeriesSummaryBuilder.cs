@@ -9,6 +9,9 @@ public sealed class TimeSeriesWindow
     public double TickP99Ms { get; init; }
     public double CommandsStageP99Ms { get; init; }
     public double CommandToMailboxesP99Ms { get; init; }
+    public double SubmitToMailboxP99Ms { get; init; }
+    public double FanoutEnqueueToMailboxP99Ms { get; init; }
+    public double FanoutQueueAgeP99Ms { get; init; }
     public double FanoutQueueDepthMax { get; init; }
 }
 
@@ -40,6 +43,9 @@ public static class TimeSeriesSummaryBuilder
                 TickP99Ms = inWindow.Max(s => s.TickP99),
                 CommandsStageP99Ms = inWindow.Max(s => s.TickStageP99Ms.GetValueOrDefault("commands")),
                 CommandToMailboxesP99Ms = inWindow.Max(s => s.CommandToMailboxesP99Ms),
+                SubmitToMailboxP99Ms = inWindow.Max(s => s.SubmitToMailboxP99Ms),
+                FanoutEnqueueToMailboxP99Ms = inWindow.Max(s => s.FanoutEnqueueToMailboxP99Ms),
+                FanoutQueueAgeP99Ms = inWindow.Max(s => s.FanoutQueueOldestAgeMs),
                 FanoutQueueDepthMax = inWindow.Max(s => s.FanoutQueueDepth)
             });
         }

@@ -44,13 +44,18 @@ public sealed class LoadTestRunner
         {
             var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
             stats.Add(botStats);
-            var bot = new FineageBotClient(scenario, i, botStats, peers);
-            bots.Add(bot);
+            bots.Add(new FineageBotClient(scenario, i, botStats, peers));
+        }
 
-            int delayMs = scenario.RampUpSeconds <= 0
-                ? 0
-                : (int)(scenario.RampUpSeconds * 1000.0 / scenario.BotCount);
-            if (delayMs > 0)
+        int concurrency = ResolveEnterConcurrency(scenario);
+        int delayMs = scenario.RampUpSeconds <= 0 || scenario.BotCount <= 1
+            ? 0
+            : (int)(scenario.RampUpSeconds * 1000.0 / scenario.BotCount);
+        using var slots = new SemaphoreSlim(concurrency);
+        var enters = new List<Task>();
+        for (int i = 0; i < scenario.BotCount; i++)
+        {
+            if (i > 0 && delayMs > 0)
             {
                 try
                 {
@@ -64,13 +69,22 @@ public sealed class LoadTestRunner
 
             try
             {
-                await bot.ConnectAndEnterAsync(ct);
+                await slots.WaitAsync(ct);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
             {
-                botStats.LastError = ex.Message;
-                botStats.Disconnected = true;
+                break;
             }
+
+            enters.Add(EnterOneAsync(bots[i], slots, ct));
+        }
+
+        try
+        {
+            await Task.WhenAll(enters);
+        }
+        catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+        {
         }
 
         DateTimeOffset behaviorStart = DateTimeOffset.UtcNow;
@@ -152,22 +166,9 @@ public sealed class LoadTestRunner
                     DateTimeOffset.UtcNow)),
             SimulationHangGate.FromLogFile(zoneLog));
 
-        string? peakMetrics = null;
-        if (promSamples.Count > 0 && rawScrapes.Count == promSamples.Count)
-        {
-            int peakIdx = 0;
-            long peakQ = 0;
-            for (int i = 0; i < promSamples.Count; i++)
-            {
-                if (promSamples[i].CommandIngressQueued > peakQ)
-                {
-                    peakQ = promSamples[i].CommandIngressQueued;
-                    peakIdx = i;
-                }
-            }
-
-            peakMetrics = rawScrapes[peakIdx];
-        }
+        // Histograms are cumulative for the process, so the last scrape is the run aggregate.
+        // A scrape chosen for a high queue gauge can predate those histograms and report them missing.
+        string? peakMetrics = rawScrapes.Count > 0 ? rawScrapes[^1] : null;
 
         foreach (var bot in bots)
             await bot.DisposeAsync();
@@ -264,7 +265,7 @@ public sealed class LoadTestRunner
         var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples);
         var skillSamples = bots.SelectMany(b => b.ObservationLog.Tracker.SkillFanoutSamples);
         var legacySamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
-        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples, zoneLog, logPaths, runtimeStats);
+        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples, zoneLog, logPaths, runtimeStats, zonePid);
 
         report.SimulationStallSeconds = hang.StallSeconds;
         report.SimulationStallCount = hang.StallCount;
@@ -272,5 +273,39 @@ public sealed class LoadTestRunner
         report.Passed = failReasons.Count == 0;
 
         return report;
+    }
+
+    static int ResolveEnterConcurrency(LoadScenario scenario)
+    {
+        string? text = Environment.GetEnvironmentVariable("FINEAGE_LOADTEST_ENTER_CONCURRENCY");
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            if (!int.TryParse(text, out int fromEnv) || fromEnv < 1)
+                throw new InvalidOperationException(
+                    $"FINEAGE_LOADTEST_ENTER_CONCURRENCY='{text}' must be an integer >= 1.");
+            return fromEnv;
+        }
+
+        if (scenario.EnterConcurrency < 1)
+            throw new InvalidOperationException(
+                $"scenario enterConcurrency={scenario.EnterConcurrency} must be an integer >= 1.");
+        return scenario.EnterConcurrency;
+    }
+
+    static async Task EnterOneAsync(FineageBotClient bot, SemaphoreSlim slots, CancellationToken ct)
+    {
+        try
+        {
+            await bot.ConnectAndEnterAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            bot.Stats.LastError = ex.Message;
+            bot.Stats.Disconnected = true;
+        }
+        finally
+        {
+            slots.Release();
+        }
     }
 }

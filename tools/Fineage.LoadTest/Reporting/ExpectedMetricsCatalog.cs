@@ -15,7 +15,13 @@ public static class ExpectedMetricsCatalog
     [
         "fineage_command_apply_ms",
         "fineage_command_timeline_ms",
-        "fineage_command_to_mailboxes_ms"
+        "fineage_command_to_mailboxes_ms",
+        "fineage_command_queue_depth",
+        "fineage_command_queue_age_ms",
+        "fineage_command_coalesced_total",
+        "fineage_command_rejected_total",
+        "fineage_tick_max_ms",
+        "fineage_step_watchdog_stalls"
     ];
 
     public static readonly string[] FanoutAndOutbound =

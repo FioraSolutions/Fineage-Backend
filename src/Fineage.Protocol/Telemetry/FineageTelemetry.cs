@@ -184,11 +184,94 @@ public static class FineageTelemetry
 
     public static readonly Histogram<int> CommandQueueDepth =
         Meter.CreateHistogram<int>("fineage.command.queue.depth", unit: "{command}",
-            description: "Queued commands per ingress class (tag class)");
+            description: "Per-player ingress queue depth (one sample per player per observation)");
+
+    public static readonly Histogram<double> CommandQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.queue.age.ms", unit: "ms",
+            description: "Age of the oldest command in a player's ingress queue");
+
+    public static readonly Counter<long> CommandCoalesced =
+        Meter.CreateCounter<long>("fineage.command.coalesced",
+            description: "Pending movement commands collapsed into a later movement command from the same player");
+
+    public static readonly Counter<long> CommandRejected =
+        Meter.CreateCounter<long>("fineage.command.rejected",
+            description: "Commands refused by ingress admission (tag reason: queue_depth, queue_age, closed)");
 
     public static readonly Histogram<double> CommandQueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
             description: "Time a command waited in ingress before apply (tag class)");
+
+    static long _tickMaxBits;
+    static long _queueAgeMaxBits;
+    static long _watchdogStallMaxBits;
+    static long _watchdogStallCount;
+
+    public static void NoteTickDuration(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            return;
+        TickMilliseconds.Record(milliseconds);
+        NoteMax(ref _tickMaxBits, milliseconds);
+    }
+
+    public static void NoteCommandQueueAge(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            return;
+        NoteMax(ref _queueAgeMaxBits, milliseconds);
+    }
+
+    public static void NoteWatchdogStall(double elapsedMilliseconds)
+    {
+        if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
+            return;
+        NoteMax(ref _watchdogStallMaxBits, elapsedMilliseconds);
+    }
+
+    public static void NoteWatchdogEpisode() => Interlocked.Increment(ref _watchdogStallCount);
+
+    public static readonly ObservableGauge<double> TickMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.tick.max_ms",
+        () => ObserveBits(_tickMaxBits),
+        unit: "ms",
+        description: "Longest simulation step duration observed, not clipped to a histogram bucket");
+
+    public static readonly ObservableGauge<double> CommandQueueAgeMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.command.queue.age_max_ms",
+        () => ObserveBits(_queueAgeMaxBits),
+        unit: "ms",
+        description: "Longest per-player ingress queue age observed");
+
+    public static readonly ObservableGauge<double> WatchdogStallMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.step.watchdog.stall_max_ms",
+        () => ObserveBits(_watchdogStallMaxBits),
+        unit: "ms",
+        description: "Longest watchdog-detected simulation stall");
+
+    public static readonly ObservableGauge<long> WatchdogStallCount = Meter.CreateObservableGauge(
+        "fineage.step.watchdog.stalls",
+        () => Interlocked.Read(ref _watchdogStallCount),
+        description: "Watchdog reports of a simulation step that had not returned");
+
+    static void NoteMax(ref long bits, double milliseconds)
+    {
+        long next = BitConverter.DoubleToInt64Bits(milliseconds);
+        while (true)
+        {
+            long current = Interlocked.Read(ref bits);
+            double have = BitConverter.Int64BitsToDouble(current);
+            if (milliseconds <= have)
+                return;
+            if (Interlocked.CompareExchange(ref bits, next, current) == current)
+                return;
+        }
+    }
+
+    static IEnumerable<Measurement<double>> ObserveBits(long bits)
+    {
+        yield return new Measurement<double>(BitConverter.Int64BitsToDouble(Interlocked.Read(ref bits)));
+    }
 
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
