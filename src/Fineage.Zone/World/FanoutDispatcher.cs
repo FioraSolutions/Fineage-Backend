@@ -50,8 +50,9 @@ internal sealed class FanoutDispatcher : IDisposable
     }
 
     /// <summary>
-    /// Enqueues a sealed batch. Blocks the caller when the queue is full (backpressure). Throws when the
-    /// dispatcher is closed so the batch is never silently dropped.
+    /// Enqueues a sealed batch. Never blocks: <see cref="ChannelWriter.TryWrite"/> first; when the queue is full the
+    /// batch is delivered inline on the caller so the simulation thread cannot wait on fan-out workers or mailboxes.
+    /// Throws only when the dispatcher is closed.
     /// </summary>
     public void Enqueue(SealedWorldFanoutBatch batch)
     {
@@ -68,35 +69,28 @@ internal sealed class FanoutDispatcher : IDisposable
         }
 
         long waitStarted = Stopwatch.GetTimestamp();
-        // Push the enqueue timestamp before the channel write, under one lock, so the side queue
-        // stays in the same order as the channel when several threads seal batches.
+        bool spilled = false;
         lock (_enqueueOrder)
         {
-            NoteEnqueued();
-            try
+            if (_queue.Writer.TryWrite(batch))
             {
-                StepWaitRegistry.Push("fanout-dispatcher channel");
-                try
-                {
-                    _queue.Writer.WriteAsync(batch, _cts.Token).AsTask().GetAwaiter().GetResult();
-                }
-                finally
-                {
-                    StepWaitRegistry.Pop("fanout-dispatcher channel");
-                }
+                NoteEnqueued();
             }
-            catch (ChannelClosedException ex)
+            else
             {
-                NoteDequeued();
-                RejectUnrecoverable(batch, "channel closed");
-                throw RejectException(batch, "channel closed", ex);
+                spilled = true;
             }
-            catch (OperationCanceledException ex) when (_cts.IsCancellationRequested)
-            {
-                NoteDequeued();
-                RejectUnrecoverable(batch, "dispatcher shut down");
-                throw RejectException(batch, "dispatcher shut down", ex);
-            }
+        }
+
+        if (spilled)
+        {
+            FineageTelemetry.FanoutQueueOverflow.Add(1);
+            ZoneLog.Warn(
+                $"fan-out dispatcher queue full; delivering batch tick={batch.Sequence.Tick} phase={batch.Sequence.Phase} seq={batch.Sequence.Sequence} inline so the simulation thread does not block");
+            ExecuteBatch(batch);
+            double spillMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;
+            FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(spillMs);
+            return;
         }
 
         double enqueueWaitMs = (Stopwatch.GetTimestamp() - waitStarted) * 1000.0 / Stopwatch.Frequency;

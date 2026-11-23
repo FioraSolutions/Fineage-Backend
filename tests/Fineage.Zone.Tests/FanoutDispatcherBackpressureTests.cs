@@ -9,7 +9,7 @@ namespace Fineage.Zone.Tests;
 public sealed class FanoutDispatcherBackpressureTests
 {
     [Fact]
-    public void Enqueue_blocks_when_the_queue_is_full_instead_of_dropping_batches()
+    public void Enqueue_does_not_block_when_the_queue_is_full_spills_inline_instead()
     {
         var holdWorker = new ManualResetEventSlim(false);
         using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 1)
@@ -22,14 +22,14 @@ public sealed class FanoutDispatcherBackpressureTests
         var second = Batch(2, () => delivered.Enqueue(2));
 
         dispatcher.Enqueue(first);
-        var blocked = Task.Run(() => dispatcher.Enqueue(second));
-        Assert.False(blocked.Wait(TimeSpan.FromMilliseconds(300)));
+        var spill = Task.Run(() => dispatcher.Enqueue(second));
+        Assert.True(spill.Wait(TimeSpan.FromSeconds(2)), "spill enqueue must return without waiting on a full channel");
 
         holdWorker.Set();
-        blocked.GetAwaiter().GetResult();
+        spill.GetAwaiter().GetResult();
         dispatcher.WaitUntilIdle();
 
-        Assert.Equal(new ulong[] { 1, 2 }, delivered.ToArray());
+        Assert.Equal(new ulong[] { 1, 2 }, delivered.OrderBy(n => n).ToArray());
     }
 
     [Fact]

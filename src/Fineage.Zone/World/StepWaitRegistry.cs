@@ -10,8 +10,21 @@ internal static class StepWaitRegistry
 {
     static readonly ConcurrentDictionary<int, string> Waiting = new();
 
-    public static void Push(string name) =>
+    public static void Push(string name)
+    {
+        if (SimulationThreadMarker.Active && IsForbiddenOnSimulationThread(name))
+        {
+            throw new InvalidOperationException(
+                $"simulation thread must not block on '{name}'; use non-blocking enqueue, bounded queues, or offload I/O to workers");
+        }
+
         Waiting[Environment.CurrentManagedThreadId] = name;
+    }
+
+    static bool IsForbiddenOnSimulationThread(string name) =>
+        name.Contains("channel", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("WriteAsync", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("fanout-dispatcher", StringComparison.OrdinalIgnoreCase);
 
     public static void Pop(string name)
     {
