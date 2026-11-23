@@ -403,6 +403,11 @@ namespace Fineage.Net.Contract
         /// <c>ClientSetTime.java</c> — <c>writeD(gameMinutes)</c>, <c>writeD(6)</c>.
         /// </summary>
         public const ushort ClientSetTime = 0x03E1;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestBypassUserCmd</c> (retail wire <c>0xaa</c>).
+        /// Body is one int, the Interlude user-command id.
+        /// </summary>
+        public const ushort BypassUserCmd = 0x03E2;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

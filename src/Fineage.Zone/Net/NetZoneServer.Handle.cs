@@ -314,6 +314,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RecipeBookOpen:
                             await _recipes.OnBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.BypassUserCmd:
+                            await _userCommands.OnBypassAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.RecipeMakeSelf:
                             await _recipes.OnMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
