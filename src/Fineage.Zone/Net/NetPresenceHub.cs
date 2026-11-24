@@ -169,8 +169,8 @@ public sealed class NetPresenceHub : IAsyncDisposable
     }
 
     /// <summary>
-    /// Appearance burst (knownlist, char info). One stripe enqueue per connection. A pending snapshot is
-    /// replaced when the mailbox budget cannot hold both. The caller does not wait.
+    /// Appearance burst (knownlist, char info). One stripe enqueue per connection. Snapshots are never replaced
+    /// or dropped: past the mailbox hard byte limit the connection is closed as a slow client. The caller does not wait.
     /// </summary>
     internal void SubmitSnapshot(int objectId, List<OutboundFrame> frames)
     {

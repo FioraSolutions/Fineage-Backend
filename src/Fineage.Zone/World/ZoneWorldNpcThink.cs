@@ -23,7 +23,15 @@ public sealed partial class ZoneWorld
     }
     readonly List<int> _thinkUrgent = [];
     readonly List<int> _thinkReschedule = [];
+    [ThreadStatic] static List<int>? t_thinkReschedule;
     readonly object _thinkRescheduleLock = new();
+    readonly HashSet<int> _privatesPending = [];
+    readonly Queue<int> _privatesPendingOrder = [];
+    int _privatesBacklog;
+    int _privatesBacklogMax;
+    int _regionWakeBacklog;
+    int _regionWakeBacklogMax;
+    readonly object _privatesPendingLock = new();
     long _thinkDrainedThroughMs = long.MinValue;
 
     /// <summary>Combat-tick test hook: the same prep + think the region stage runs in production.</summary>
@@ -40,6 +48,7 @@ public sealed partial class ZoneWorld
         ReapThinkReschedule();
         RefreshPlayerActiveRegions();
         DrainRegionWakeBudget();
+        SpawnPendingPrivates();
         TickWalkingRoutes(tick.NowUnixMs);
         TickBoats(tick.NowUnixMs);
         CollectDueThinks(tick.NowUnixMs, work);
@@ -47,13 +56,16 @@ public sealed partial class ZoneWorld
 
     void ThinkActiveInRegion(RegionId region, IReadOnlyList<int> npcIds, long now)
     {
-        int drift = ZoneNpcSettings.MaxDriftRange;
+        int drift = _maxDriftRange;
         long driftSq = (long)drift * drift;
+        // One lock per region body instead of one per NPC.
+        var reschedule = t_thinkReschedule ??= [];
+        reschedule.Clear();
         foreach (int id in npcIds)
         {
             if (!_byId.TryGetValue(id, out var npc))
                 continue;
-            bool reschedule = (npc.ActiveSets & ActiveSets.Thinking) != 0;
+            bool thinking = (npc.ActiveSets & ActiveSets.Thinking) != 0;
             if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
             {
                 DequeueThink(npc);
@@ -62,14 +74,14 @@ public sealed partial class ZoneWorld
             }
             if (npc.WalkingRouteName != null || npc.IsBoat)
             {
-                if (reschedule)
-                    QueueThinkReschedule(id);
+                if (thinking)
+                    reschedule.Add(id);
                 continue;
             }
             if (!ZoneCombat.IsCombatNpcType(npc.NpcType) || IsTreasureBox(npc.NpcId))
             {
-                if (reschedule)
-                    QueueThinkReschedule(id);
+                if (thinking)
+                    reschedule.Add(id);
                 continue;
             }
 
@@ -78,7 +90,7 @@ public sealed partial class ZoneWorld
             bool idle = !IsThinkJob(npc);
             if (idle && now < npc.NextThinkMs)
             {
-                QueueThinkReschedule(id);
+                reschedule.Add(id);
                 continue;
             }
             if (idle)
@@ -86,12 +98,35 @@ public sealed partial class ZoneWorld
 
             ThinkActiveNpc(npc, now, drift, driftSq);
             if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
-                QueueThinkReschedule(id);
+                reschedule.Add(id);
+        }
+
+        if (reschedule.Count > 0)
+        {
+            lock (_thinkRescheduleLock)
+                _thinkReschedule.AddRange(reschedule);
+            reschedule.Clear();
         }
     }
 
-    static bool IsThinkJob(ZoneEntity npc) =>
-        npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome || npc.LeaderObjectId != 0;
+    bool IsThinkJob(ZoneEntity npc) =>
+        npc.AggroTargetId > 0 || npc.Chasing || npc.ReturningHome || (npc.LeaderObjectId != 0 && MinionOutOfReach(npc));
+
+    /// <summary>
+    /// A minion is a think job only while it is outside its follow offset of a live leader
+    /// (<see cref="TryFollowLeader"/>). Within reach it thinks on the idle cadence like Mobius' 1 s AI task;
+    /// treating every minion as a job made each one think every 200 ms tick.
+    /// </summary>
+    bool MinionOutOfReach(ZoneEntity npc)
+    {
+        if (!_byId.TryGetValue(npc.LeaderObjectId, out var leader) || leader.CurHp <= 0)
+            return false;
+        int offset = npc.RaidMinion ? 500 : 200;
+        long dx = npc.X - (long)leader.X;
+        long dy = npc.Y - (long)leader.Y;
+        // A walking leader drags its minions every tick; a resting one leaves them on the idle cadence.
+        return leader.MoveActive || dx * dx + dy * dy > (long)offset * offset || npc.Running != leader.Running;
+    }
 
     /// <summary>
     /// A chase, a walk home, or a minion follow is due on the next think, not when its idle bucket comes around.
@@ -118,10 +153,71 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        // A noted job is due now, even when IsThinkJob does not hold yet (a minion whose leader is about to move).
+        npc.NextThinkMs = 0;
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             TrackThink(npc);
         else
             EnqueueThink(npc);
+    }
+
+    /// <summary>Scheduler thread: spawns the privates of masters whose think ran inside a region body.</summary>
+    /// <summary>
+    /// Spawns privates for at most <see cref="ZoneSimulationSettings.PrivatesSpawnBudgetPerTick"/> masters, oldest first,
+    /// so a ramp that wakes thousands of masters spreads the entity inserts over many steps instead of one.
+    /// </summary>
+    void SpawnPendingPrivates()
+    {
+        var batch = t_privatesBatch ??= [];
+        batch.Clear();
+        lock (_privatesPendingLock)
+        {
+            while (batch.Count < _privatesSpawnBudget && _privatesPendingOrder.Count > 0)
+            {
+                int id = _privatesPendingOrder.Dequeue();
+                _privatesPending.Remove(id);
+                batch.Add(id);
+            }
+
+            Volatile.Write(ref _privatesBacklog, _privatesPendingOrder.Count);
+        }
+
+        foreach (int id in batch)
+        {
+            if (_byId.TryGetValue(id, out var master) && master.CurHp > 0)
+                SpawnPrivatesNow(master);
+        }
+    }
+
+    [ThreadStatic] static List<int>? t_privatesBatch;
+
+    /// <summary>Publishes the budget backlogs for <c>fineage.npc.activation.backlog</c>; sim thread only.</summary>
+    void NoteActivationBacklog()
+    {
+        int privates = Volatile.Read(ref _privatesBacklog);
+        int wake = _regionWakeQueue.Count;
+        Volatile.Write(ref _regionWakeBacklog, wake);
+        if (privates > _privatesBacklogMax)
+            Volatile.Write(ref _privatesBacklogMax, privates);
+        if (wake > _regionWakeBacklogMax)
+            Volatile.Write(ref _regionWakeBacklogMax, wake);
+    }
+
+    /// <summary>Budget backlogs for telemetry; safe from any thread.</summary>
+    public Fineage.Protocol.Telemetry.NpcActivationBacklogReading ActivationBacklog => new(
+        Volatile.Read(ref _privatesBacklog),
+        Volatile.Read(ref _regionWakeBacklog),
+        Volatile.Read(ref _privatesBacklogMax),
+        Volatile.Read(ref _regionWakeBacklogMax));
+
+    /// <summary>Masters waiting for the privates budget (tests/diagnostics).</summary>
+    internal int PendingPrivatesCount
+    {
+        get
+        {
+            lock (_privatesPendingLock)
+                return _privatesPendingOrder.Count;
+        }
     }
 
     void QueueThinkReschedule(int objectId)

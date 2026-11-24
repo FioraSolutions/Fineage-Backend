@@ -1,0 +1,19 @@
+# Perf #951 — 4×9 parties in one AOI cell, each party killing a ~50-mob cluster (worst-case fan-out).
+name: perf-aoe-multiparty
+botCount: 36
+rampUpSeconds: 25
+durationSeconds: 150
+spawnLayout: aoe-multiparty
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+aoiCellSize: 3000
+requireSkillLatencySamples: true
+heavyPlay:
+  mode: aoe-multiparty
+  partySize: 9
+  partyCount: 4
+  skillRotation: [36, 48]
+actionWeights:
+  sit: 0.92
+  social: 0.08

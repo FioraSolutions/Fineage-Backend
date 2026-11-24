@@ -45,6 +45,7 @@ public sealed partial class NetZoneServer
                             {
                                 if (registeredObjectId != 0 && registeredObjectId != zoneSession.ObjectId)
                                     _presence.Unregister(registeredObjectId, conn);
+                                conn.SetPeerLabel($"account={zoneSession.Account} char={zoneSession.Name}");
                                 _presence.Register(zoneSession.ObjectId, conn, self);
                                 registeredObjectId = zoneSession.ObjectId;
                             }
@@ -62,6 +63,9 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.SelectTarget:
                             await _combat.OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.TeleportToLocation:
+                            await _combat.OnLoadTestTeleportAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TargetCancelRequest:
                             await _combat.OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);

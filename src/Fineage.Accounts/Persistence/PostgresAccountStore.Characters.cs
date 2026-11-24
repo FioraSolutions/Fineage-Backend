@@ -15,6 +15,28 @@ public sealed partial class PostgresAccountStore
 {
     public int NextItemObjectId => _inner.NextItemObjectId;
 
+    /// <summary>
+    /// Atomic block reservation on the shared <c>store_meta.next_item_object_id</c> row (row lock serialises login and
+    /// every zone). The local memory counter is raised past the block so snapshot counters never rewind it.
+    /// </summary>
+    public int ReserveItemObjectIds(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        long first;
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            first = NormalizedStoreMeta.ReserveItemObjectIds(conn, tx, _inner.NextItemObjectId, count);
+            tx.Commit();
+        }
+
+        if (first + count > int.MaxValue)
+            throw new InvalidOperationException($"item object id space exhausted (reserved {first}+{count}).");
+        _inner.SyncAllocationCounters(0, 0, first + count);
+        return (int)first;
+    }
+
     public bool AccountExists(string account) => _inner.AccountExists(account);
 
     public AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email)
