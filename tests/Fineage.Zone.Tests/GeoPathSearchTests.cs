@@ -86,22 +86,48 @@ public sealed class GeoPathSearchTests
         var search = geo.BeginPath(8, 40, 96, 400, 40, 96);
         Assert.Equal(GeoPathSearch.Status.Found, search.Step(int.MaxValue));
 
-        // A zero probe budget pays for no raycast at all, so each call may only accept the adjacent A* cell. That must
-        // still advance the route one cell per call (never spin) and end exactly on the target.
+        // A slice smaller than one straight leg still pays one probe per call instead of degrading to A* cells, so the
+        // route advances every call and finishes on the exact target.
         var capped = new List<(int X, int Y, int Z)>();
         int calls = 0;
-        while (!search.TrySmooth(0, capped))
+        while (!search.TrySmooth(60, capped))
         {
             calls++;
-            Assert.True(calls < 10_000, "a zero probe budget must still advance the route every call");
+            Assert.True(calls < 10_000, "a small probe slice must still advance the route every call");
         }
 
         Assert.True(calls > 0, "the route must actually be spread over several calls");
-        Assert.True(search.SmoothingCellsWalked == 0, "a zero probe budget must pay for no probe cells");
+        Assert.True(search.SmoothingCellsWalked > 0, "each call pays for the legs it collapses");
         Assert.Equal((400, 40, 96), capped[^1]);
+        AssertWalkable(geo, capped, startX: 8, startY: 40, startZ: 96);
+    }
 
-        int ax = 8, ay = 40, az = 96;
-        foreach (var (x, y, z) in capped)
+    [Fact]
+    public void Zero_probe_slice_still_advances_and_ends_on_the_target()
+    {
+        var geo = FlatWithWall();
+        var search = geo.BeginPath(8, 40, 96, 400, 40, 96);
+        Assert.Equal(GeoPathSearch.Status.Found, search.Step(int.MaxValue));
+
+        // The first probe of a call is always paid: one raycast is a whole leg, and refusing it would turn a village
+        // crossing into "no progress". After that the slice falls back to the adjacent A* cell, so the route still
+        // finishes and never spins.
+        var path = new List<(int X, int Y, int Z)>();
+        int calls = 0;
+        while (!search.TrySmooth(0, path))
+        {
+            calls++;
+            Assert.True(calls < 10_000, "a zero probe slice must still advance the route every call");
+        }
+
+        Assert.Equal((400, 40, 96), path[^1]);
+        AssertWalkable(geo, path, startX: 8, startY: 40, startZ: 96);
+    }
+
+    static void AssertWalkable(GeoEngine geo, List<(int X, int Y, int Z)> path, int startX, int startY, int startZ)
+    {
+        int ax = startX, ay = startY, az = startZ;
+        foreach (var (x, y, z) in path)
         {
             geo.MoveCheck(ax, ay, az, x, y, z, out bool blocked);
             Assert.False(blocked);

@@ -26,8 +26,14 @@ public sealed partial class ZoneWorld
     /// <summary>Expanded geo cells the <c>npc.paths</c> stage may spend per step.</summary>
     internal const int PathfindNodeBudgetPerStep = 2400;
 
-    /// <summary>Line-of-sight smoothing probes the stage may spend per step; each probe walks a whole straight leg.</summary>
-    internal const int PathfindProbeBudgetPerStep = 24;
+    /// <summary>
+    /// Line-of-sight smoothing probes the stage may spend per step, in geo cells walked. A probe walks a whole straight
+    /// leg, so this has to be measured like a route, not like a single node: one leg across a village is already ~25
+    /// cells, and a budget below that would starve every probe and degrade the route to per-cell legs. Shared with the
+    /// node budget in the same "geo cell work" unit: 2400 expansions (up to 8 <c>CanStep</c> probes each) against 512
+    /// cells of raycast.
+    /// </summary>
+    internal const int PathfindProbeBudgetPerStep = 512;
 
     const int NpcPathCacheCapacity = 4096;
     static readonly int GeoPathQuantize = Math.Max(128, GridRegionPartition.MapTileSize / 4);

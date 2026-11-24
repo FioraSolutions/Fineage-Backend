@@ -133,9 +133,12 @@ public sealed class GeoPathSearch
     /// <summary>
     /// Appends the found route's straight walkable legs to <paramref name="appendTo"/>, staying inside
     /// <paramref name="maxCellsWalked"/> probe cells for this call. Returns true when the route is complete, false when the
-    /// caller must resume. The first probe aims at the farthest cell the slice can pay for, so a tight budget still
-    /// collapses a real leg instead of degrading to raw A* cells. A call that cannot pay for any probe accepts the
-    /// adjacent A* cell (walkable by construction) and returns, so every resuming call strictly advances the anchor.
+    /// caller must resume.
+    ///
+    /// The farthest cell the slice can afford is picked once per call (arithmetic only, no raycast), so the raycasts land
+    /// where they collapse the most route and the call never overruns its slice. A leg that cannot afford any probe falls
+    /// back to the adjacent A* cell (walkable by construction) and ends the call: the anchor strictly advances, so a
+    /// resuming caller — the <c>npc.paths</c> stage or <see cref="BuildPath"/> — never spins.
     /// </summary>
     public bool TrySmooth(int maxCellsWalked, List<(int X, int Y, int Z)> appendTo)
     {
@@ -152,18 +155,19 @@ public sealed class GeoPathSearch
         }
 
         int budget = Math.Max(0, maxCellsWalked);
-        while (_smoothIndex < _cells.Count - 1)
+        int last = _cells.Count - 1;
+
+        // Farthest cell this slice can reach from the call's anchor. Scanning down is arithmetic only, so it costs
+        // nothing from the probe budget.
+        int cap = last;
+        while (cap > _smoothIndex + 1 && ProbeCost(_anchorX, _anchorY, cap) > budget)
+            cap--;
+
+        while (_smoothIndex < last)
         {
             int best = _smoothIndex + 1;
             int probed = 0;
-
-            // Farthest cell this slice can afford. Scanning inward is arithmetic only, so it costs nothing from the
-            // probe budget and keeps the raycasts aimed where they still collapse the most route.
-            int from = _cells.Count - 1;
-            while (from > _smoothIndex + 1 && ProbeCost(_anchorX, _anchorY, from) > budget)
-                from--;
-
-            for (int j = from; j > _smoothIndex + 1; j--)
+            for (int j = cap; j > _smoothIndex + 1; j--)
             {
                 int cost = ProbeCost(_anchorX, _anchorY, j);
                 if (cost > budget)
@@ -172,7 +176,7 @@ public sealed class GeoPathSearch
                 budget -= cost;
                 probed++;
                 SmoothingCellsWalked += cost;
-                var (jx, jy) = Pt(_cells[j], j == _cells.Count - 1);
+                var (jx, jy) = Pt(_cells[j], j == last);
                 _geo.MoveCheck(_anchorX, _anchorY, _anchorZ, jx, jy, _zAt[_cells[j]], out bool blocked);
                 if (!blocked)
                 {
@@ -181,7 +185,7 @@ public sealed class GeoPathSearch
                 }
             }
 
-            var (wx, wy) = Pt(_cells[best], best == _cells.Count - 1);
+            var (wx, wy) = Pt(_cells[best], best == last);
             int wz = _zAt[_cells[best]];
             appendTo.Add((wx, wy, wz));
             _anchorX = wx;
@@ -189,10 +193,9 @@ public sealed class GeoPathSearch
             _anchorZ = wz;
             _smoothIndex = best;
 
-            if (probed == 0 && _smoothIndex < _cells.Count - 1)
+            if (probed == 0 && _smoothIndex < last)
             {
-                // No probe fit in the remaining slice. The adjacent A* cell was accepted, so resume from there rather
-                // than spinning on the same slice with no progress.
+                // No probe fit in the slice: the adjacent A* cell carried the leg. Resume from there, never spin.
                 return false;
             }
         }
