@@ -222,20 +222,12 @@ internal sealed class EconomyPersistService
         else
         {
             world.RestoreDirtyEconomyInternal(pending.Batch);
+            // Only the characters whose economy write was in this batch hear the failure; a command from anyone else
+            // that merely shared the step still answers with its own result.
             if (pending.HeldReplies is { Count: > 0 })
-            {
-                var uncommitted = UncommittedOf(pending.HeldReplies);
-                world.CommandIngress.FailUncommitted(uncommitted, EconomyCommitFailed);
-            }
+                ZoneCommandIngress.AnswerAfterFlush(
+                    pending.HeldReplies, committed: false, pending.CharacterIds.ToHashSet(), EconomyCommitFailed);
         }
-    }
-
-    static HashSet<int> UncommittedOf(List<ZoneCommandIngress.Applied> held)
-    {
-        var ids = new HashSet<int>();
-        foreach (var applied in held)
-            ids.Add(applied.Submission.Session.ObjectId);
-        return ids;
     }
 
     static List<int> CharacterIdsOf(EconomyPersistBatch batch)

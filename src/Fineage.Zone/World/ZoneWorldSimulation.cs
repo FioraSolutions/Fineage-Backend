@@ -201,8 +201,6 @@ public sealed partial class ZoneWorld
         bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied);
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
-        if (uncommitted != null)
-            _ingress.FailUncommitted(uncommitted, EconomyCommitFailed);
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
 
         long sealStart = Stopwatch.GetTimestamp();
@@ -217,8 +215,10 @@ public sealed partial class ZoneWorld
         AwaitTestFanoutDelivery();
 
         long replyStart = Stopwatch.GetTimestamp();
-        if (committed && applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
-            ZoneCommandIngress.Complete(applied);
+        // A batch still on the worker queue answers through its own completion, so this step leaves those replies
+        // alone; everything else answers here, including a commit that failed.
+        if (applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
+            ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);
         return (flushMs, sealMs, replyMs);
