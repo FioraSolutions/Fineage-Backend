@@ -88,7 +88,7 @@ public sealed partial class ZoneWorld
     /// <summary>Drains the wake queue once per combat tick before random-walk collect.</summary>
     void DrainRegionWakeBudget()
     {
-        int budget = ZoneSimulationSettings.RegionWakeBudgetPerTick;
+        int budget = _regionWakeBudget;
         while (budget > 0 && _regionWakeQueue.Count > 0)
         {
             int id = _regionWakeQueue.Dequeue();
@@ -102,6 +102,8 @@ public sealed partial class ZoneWorld
             TrackThink(npc);
             budget--;
         }
+
+        NoteActivationBacklog();
     }
 
     void OnRegionDeactivated(RegionId region) => SuspendNpcRegion(region);

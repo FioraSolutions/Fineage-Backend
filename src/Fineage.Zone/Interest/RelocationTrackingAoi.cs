@@ -22,5 +22,7 @@ sealed class RelocationTrackingAoi(IAoi inner, Action<int> relocated) : IAoi
 
     public IReadOnlyCollection<int> GetVisible(int objectId) => inner.GetVisible(objectId);
 
+    public void CollectVisible(int objectId, List<int> into) => inner.CollectVisible(objectId, into);
+
     public bool StillKnown(int objectId, int otherId) => inner.StillKnown(objectId, otherId);
 }

@@ -10,18 +10,22 @@ public sealed class FanoutDeliveryScope : IDisposable
     static readonly AsyncLocal<FanoutDeliveryScope?> Current = new();
 
     readonly List<Op> _ops = [];
+    readonly long _batchEnqueuedAt;
     int _flushed;
 
-    FanoutDeliveryScope()
+    FanoutDeliveryScope(long batchEnqueuedAt)
     {
+        _batchEnqueuedAt = batchEnqueuedAt;
     }
 
-    public static FanoutDeliveryScope Begin()
+    /// <param name="batchEnqueuedAt">Stopwatch timestamp the batch was handed to the dispatcher; stamped on every frame
+    /// so the socket pump can record fan-out enqueue → socket write.</param>
+    public static FanoutDeliveryScope Begin(long batchEnqueuedAt = 0)
     {
         if (Current.Value != null)
             throw new InvalidOperationException("fan-out delivery scope is already active on this thread");
 
-        var scope = new FanoutDeliveryScope();
+        var scope = new FanoutDeliveryScope(batchEnqueuedAt);
         Current.Value = scope;
         return scope;
     }
@@ -47,6 +51,12 @@ public sealed class FanoutDeliveryScope : IDisposable
         var scope = Current.Value;
         if (scope == null || Volatile.Read(ref scope._flushed) != 0 || frames.Count == 0)
             return false;
+
+        if (scope._batchEnqueuedAt > 0)
+        {
+            for (int i = 0; i < frames.Count; i++)
+                frames[i] = frames[i] with { FanoutEnqueuedAtTimestamp = scope._batchEnqueuedAt };
+        }
 
         scope._ops.Add(new SnapshotOp(stripes, handle, frames));
         return true;
@@ -79,7 +89,7 @@ public sealed class FanoutDeliveryScope : IDisposable
                     pendingOrder.Add(id);
                 }
 
-                group.Frames.Add(new OutboundFrame(frame.Opcode, frame.Payload, frame.MailboxAtTimestamp));
+                group.Frames.Add(new OutboundFrame(frame.Opcode, frame.Payload, frame.MailboxAtTimestamp, _batchEnqueuedAt));
                 continue;
             }
 

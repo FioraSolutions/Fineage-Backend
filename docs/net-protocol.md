@@ -275,6 +275,7 @@ How much of the datapack is spawned:
 | *(default)* | every `enabled` map under `data/spawns/` — the whole Interlude world (~34k NPCs) |
 | `FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0` | single active map only (`ti_cedric` unless overridden) — tests / emergency |
 | `FINEAGE_ZONE_MAPS=a,b` | whitelist: only those spawn maps |
+| `FINEAGE_ZONE_EXTRA_MAPS=a,b` | add those maps (disabled ones too, e.g. `loadtest_aoe_arena`) on top of the base set — load tests |
 | `FINEAGE_ZONE_BOUNDS=x1,y1,x2,y2[;...]` | keep only rows inside those XY boxes |
 
 Hosted Zone defaults to the full enabled datapack with `GridAoi(3000)`, so a player only receives

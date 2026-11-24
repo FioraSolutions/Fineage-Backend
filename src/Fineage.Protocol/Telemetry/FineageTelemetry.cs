@@ -126,9 +126,17 @@ public static class FineageTelemetry
         Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
             description: "Age of the oldest batch still waiting on the fan-out dispatcher");
 
+    public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
+            description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");
+
+    public static readonly Histogram<double> FanoutEnqueueToSocketWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.enqueue_to_socket_write.ms", unit: "ms",
+            description: "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts");
+
     public static readonly Histogram<double> FanoutDispatcherEnqueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatcher.enqueue_wait.ms", unit: "ms",
-            description: "Time the simulation thread blocked enqueueing a sealed fan-out batch");
+            description: "Time the simulation thread spent handing a sealed fan-out batch to the dispatcher (non-blocking; lock + TryWrite)");
 
     public static readonly Histogram<double> FanoutStripeEnqueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.stripe.enqueue_wait.ms", unit: "ms",
@@ -165,6 +173,22 @@ public static class FineageTelemetry
     public static readonly Counter<long> FanoutCoalesced =
         Meter.CreateCounter<long>("fineage.fanout.coalesced",
             description: "Replaceable fan-out writes superseded before send");
+
+    public static readonly Counter<long> FanoutBacklogSoftExceeded =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.soft_exceeded",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit (worker falling behind)");
+
+    public static readonly Counter<long> FanoutBacklogEmergency =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.emergency",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its hard limit. Must stay 0 in normal runs");
+
+    public static readonly Counter<long> OutboundSlowClientDisconnect =
+        Meter.CreateCounter<long>("fineage.outbound.slow_client_disconnect",
+            description: "Connections closed because their outbound mailbox stayed above the hard byte limit after low-priority frames were shed (tag endpoint)");
+
+    public static readonly Counter<long> OutboundShedBytes =
+        Meter.CreateCounter<long>("fineage.outbound.shed_bytes",
+            description: "Low-priority outbound bytes dropped or coalesced away to keep a mailbox inside its byte budget (tag lane)");
 
     public static readonly Counter<long> FanoutQueueOverflow =
         Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
@@ -315,6 +339,15 @@ public static class FineageTelemetry
     public static readonly Counter<long> LedgerFlushFailures =
         Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
 
+    /// <summary>Auditable economy ledger invariant violations (tag code).</summary>
+    public static readonly Counter<long> LedgerInvariantViolations =
+        Meter.CreateCounter<long>("fineage.ledger.invariant_violations", description: "EconomyInvariantChecker violations (tag code)");
+
+    /// <summary>Optional hook before each Prometheus scrape (wall unix ms).</summary>
+    public static Action<long>? BeforeMetricsScrape;
+
+    public static void NotifyMetricsScrape(long wallUnixMs) => BeforeMetricsScrape?.Invoke(wallUnixMs);
+
     /// <summary>Non-economic character snapshots. Tag <c>result</c> is written or coalesced.</summary>
     public static readonly Counter<long> PersistSnapshots =
         Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");
@@ -330,6 +363,31 @@ public static class FineageTelemetry
         ObservePersistOldestAge,
         unit: "ms",
         description: "Age of the oldest character or pet snapshot that has not been written");
+
+    /// <summary>Ramp-time NPC work deferred by the per-tick budgets (tag <c>kind</c>: privates, region_wake).</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklog = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog",
+        () => ObserveActivationBacklog(max: false),
+        unit: "{item}",
+        description: "NPC work waiting for its per-tick budget (tag kind: privates = minion masters, region_wake = NPCs)");
+
+    /// <summary>Largest backlog seen since start, sampled by the simulation every tick.</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklogMax = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog_max",
+        () => ObserveActivationBacklog(max: true),
+        unit: "{item}",
+        description: "Largest per-tick-budget NPC backlog since start (tag kind)");
+
+    public static Func<NpcActivationBacklogReading>? ActivationBacklog { get; set; }
+
+    static IEnumerable<Measurement<int>> ObserveActivationBacklog(bool max)
+    {
+        var reading = ActivationBacklog?.Invoke() ?? default;
+        yield return new Measurement<int>(
+            max ? reading.PrivatesMax : reading.Privates, new KeyValuePair<string, object?>("kind", "privates"));
+        yield return new Measurement<int>(
+            max ? reading.RegionWakeMax : reading.RegionWake, new KeyValuePair<string, object?>("kind", "region_wake"));
+    }
 
     public static Func<int>? PersistPendingCount { get; set; }
     public static Func<double>? PersistOldestAgeMs { get; set; }
@@ -435,3 +493,6 @@ public static class FineageTelemetry
         yield return new Measurement<int>(CommandIngressDepth?.Invoke() ?? 0);
     }
 }
+
+/// <summary>Current and peak NPC activation backlog behind the per-tick budgets.</summary>
+public readonly record struct NpcActivationBacklogReading(int Privates, int RegionWake, int PrivatesMax, int RegionWakeMax);

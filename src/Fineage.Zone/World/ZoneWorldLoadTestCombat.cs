@@ -1,0 +1,93 @@
+using Fineage.Game;
+using Fineage.Accounts;
+using Fineage.Protocol;
+
+namespace Fineage.Zone.World;
+
+/// <summary>Warlord pole + AoE skills for perf load bots (real combat pipeline, no broadcast shortcuts).</summary>
+public sealed partial class ZoneWorld
+{
+    internal void TryApplyLoadTestCombatProfile(ZoneEntity player)
+    {
+        if (player.Kind != ZoneEntityKind.Player || player.Session == null)
+            return;
+        if (!LoadTestCombatSettings.AppliesToAccount(player.Session.Account))
+            return;
+        ApplyLoadTestCombatProfile(player);
+    }
+
+    /// <summary>Ungated body of <see cref="TryApplyLoadTestCombatProfile"/>; throws when the datapack cannot build the profile.</summary>
+    internal void ApplyLoadTestCombatProfile(ZoneEntity player)
+    {
+        if (player.Kind != ZoneEntityKind.Player || player.Session == null)
+            throw new InvalidOperationException($"loadtest combat profile: object {player.ObjectId} is not a live player.");
+
+        if (!PlayerClasses.TryGet(LoadTestCombatSettings.WarlordClassId, out var template) || template == null)
+            throw new InvalidOperationException(
+                $"loadtest combat profile: class template {LoadTestCombatSettings.WarlordClassId} (Warlord) is missing from the datapack.");
+        if (!_game.Items.TryGet(LoadTestCombatSettings.PolearmItemId, out _))
+            throw new InvalidOperationException(
+                $"loadtest combat profile: polearm item {LoadTestCombatSettings.PolearmItemId} is missing from the datapack.");
+        if (player.Inventory == null)
+            throw new InvalidOperationException($"loadtest combat profile: player {player.ObjectId} has no inventory.");
+
+        player.Level = LoadTestCombatSettings.CombatLevel;
+        // Level and Exp must agree, or the next Exp change (kill, death penalty) recomputes a different level.
+        player.Exp = Math.Max(player.Exp, PlayerClasses.Experience.ExpToBeLevel(LoadTestCombatSettings.CombatLevel));
+        player.Sp = Math.Max(player.Sp, 10_000_000);
+        player.ClassId = LoadTestCombatSettings.WarlordClassId;
+        player.Session.ChangeClass(LoadTestCombatSettings.WarlordClassId);
+        player.BaseRunSpeed = template.RunSpeed;
+        player.BaseWalkSpeed = template.WalkSpeed;
+        player.Dex = template.Dex;
+        player.MaxHp = template.ModifiedHp(player.Level);
+        player.MaxMp = template.ModifiedMp(player.Level);
+        player.CurHp = player.MaxHp;
+        player.CurMp = player.MaxMp;
+        RefreshKnownSkills(player);
+        foreach (int skillId in LoadTestCombatSettings.RequiredSkillIds)
+        {
+            if (!player.KnownSkills.ContainsKey(skillId))
+                throw new InvalidOperationException(
+                    $"loadtest combat profile: class {player.ClassId} level {player.Level} does not learn skill {skillId}; " +
+                    "the perf scenario skillRotation would be rejected as skill_unknown.");
+        }
+
+        // Relogs keep the pole from the previous enter: add one only when the bag has none.
+        var weapon = player.Inventory.FindByItemId(LoadTestCombatSettings.PolearmItemId);
+        if (weapon == null)
+        {
+            player.Inventory.Add(LoadTestCombatSettings.PolearmItemId, 1);
+            weapon = player.Inventory.FindByItemId(LoadTestCombatSettings.PolearmItemId)
+                ?? throw new InvalidOperationException(
+                    $"loadtest combat profile: polearm {LoadTestCombatSettings.PolearmItemId} not in bag after add.");
+        }
+
+        if (!weapon.IsEquipped)
+            player.Inventory.Equip(weapon);
+        SaveInventory(player.Session, player.Inventory);
+
+        ZoneLog.Info($"loadtest combat profile object={player.ObjectId} class={player.ClassId} level={player.Level}");
+    }
+
+    /// <summary>
+    /// Sim-thread relocation for load-test accounts only. Same path as a gatekeeper or admin move
+    /// (<see cref="Relocate"/>: knownlist rebuild, TeleportToLocation fan-out, persisted position).
+    /// </summary>
+    internal string? TryLoadTestTeleport(ZoneSession session, int x, int y, int z)
+    {
+        if (!LoadTestCombatSettings.AllowsTeleport(session.Account))
+            return "unknown_opcode";
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
+            return "world";
+        if (player.CurHp <= 0)
+            return "dead";
+        if (!Loaded(x, y))
+            return NpcServiceProtocol.TeleportRefusalCode(NpcServiceProtocol.DestinationUnloaded);
+        Relocate(player, x, y, z);
+        return null;
+    }
+
+    internal bool LoadTestCombatProfileNeeded(ZoneEntity player) =>
+        LoadTestCombatSettings.AppliesToAccount(player.Session?.Account);
+}

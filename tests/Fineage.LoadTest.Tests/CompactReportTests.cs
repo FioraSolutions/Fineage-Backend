@@ -25,7 +25,7 @@ public class CompactReportTests
     {
         string peak = File.ReadAllText(FixturePath);
         var rows = LatencyTableBuilder.FromPeakMetrics(peak, zoneLogPath: null);
-        Assert.Contains(rows, r => r.Name == "tick (histogram)");
+        Assert.Contains(rows, r => r.Name.StartsWith("tick (histogram", StringComparison.Ordinal));
         Assert.Contains(rows, r => r.Name == "tick_stage/commands");
     }
 

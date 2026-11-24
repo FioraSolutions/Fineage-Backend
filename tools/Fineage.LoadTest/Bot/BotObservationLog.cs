@@ -17,9 +17,80 @@ public sealed class BotObservationLog
 
     readonly ConcurrentQueue<ObservedFrame> _frames = new();
     readonly object _stateGate = new();
+    readonly BotBagTracker? _bag;
     EntityTracker _tracker = new();
+    TradeAskNetMsg? _lastTradeAsk;
+    PrivateStoreListSellNetMsg? _lastPrivateStoreListSell;
+    int _frameCount;
 
     public IReadOnlyList<ObservedFrame> Snapshot() => _frames.ToArray();
+    public int FrameCount => Volatile.Read(ref _frameCount);
+    public TradeAskNetMsg? LastTradeAsk => _lastTradeAsk;
+    public PrivateStoreListSellNetMsg? LastPrivateStoreListSell => _lastPrivateStoreListSell;
+
+    public bool ContainsOpcodeAfter(int afterFrame, params ushort[] opcodes)
+    {
+        int i = 0;
+        foreach (var frame in _frames)
+        {
+            if (++i <= afterFrame)
+                continue;
+            foreach (ushort opcode in opcodes)
+            {
+                if (frame.Opcode == opcode)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool ContainsRejectAfter(int afterFrame, out string? code)
+    {
+        code = null;
+        int i = 0;
+        foreach (var frame in _frames)
+        {
+            if (++i <= afterFrame)
+                continue;
+            if (frame.Opcode != NetOpcode.Reject)
+                continue;
+            code = NetCodec.DecodeReject(frame.Payload).Code;
+            return true;
+        }
+
+        return false;
+    }
+
+    public int? TryPickNearestGroundItem(int selfObjectId, int maxRange)
+    {
+        lock (_stateGate)
+        {
+            if (!_tracker.Entities.TryGetValue(_tracker.SelfEntityValue, out var self))
+                return null;
+            int best = 0;
+            int bestDist = int.MaxValue;
+            foreach (var ent in _tracker.Entities.Values)
+            {
+                if (ent.Despawned || ent.Kind != EntityKindNet.Item)
+                    continue;
+                int dist = Distance(self.X, self.Y, ent.X, ent.Y);
+                if (dist > maxRange || dist >= bestDist)
+                    continue;
+                bestDist = dist;
+                best = ent.ObjectId;
+            }
+
+            return best > 0 ? best : null;
+        }
+    }
+
+    static int Distance(int x1, int y1, int x2, int y2)
+    {
+        long dx = x1 - x2;
+        long dy = y1 - y2;
+        return (int)Math.Sqrt(dx * dx + dy * dy);
+    }
 
     public EntityTracker Tracker
     {
@@ -34,8 +105,26 @@ public sealed class BotObservationLog
     {
         var copy = payload.ToArray();
         _frames.Enqueue(new ObservedFrame(at, opcode, copy));
+        Interlocked.Increment(ref _frameCount);
         lock (_stateGate)
+        {
             _tracker.Apply(opcode, copy, at);
+            switch (opcode)
+            {
+                case NetOpcode.ItemList:
+                    _bag?.ApplyItemList(NetCodec.DecodeItemList(copy));
+                    break;
+                case NetOpcode.InventoryUpdate:
+                    _bag?.ApplyInventoryUpdate(NetCodec.DecodeInventoryUpdate(copy));
+                    break;
+                case NetOpcode.TradeAsk:
+                    _lastTradeAsk = NetCodec.DecodeTradeAsk(copy);
+                    break;
+                case NetOpcode.PrivateStoreListSell:
+                    _lastPrivateStoreListSell = NetCodec.DecodePrivateStoreListSell(copy);
+                    break;
+            }
+        }
     }
 
     public void RecordCommandSent(ushort opcode, DateTimeOffset at, int targetObjectId = 0, int skillId = 0)
@@ -55,6 +144,38 @@ public sealed class BotObservationLog
     int _lastPickedTarget;
     public int LastPickedTargetDistance { get; private set; }
 
+    /// <summary>True while a sent <paramref name="commandOpcode"/> still waits for its server response (TTL 3 s).</summary>
+    public bool HasPendingCommand(ushort commandOpcode, DateTimeOffset now)
+    {
+        lock (_stateGate)
+            return _tracker.HasPending(commandOpcode, now);
+    }
+
+    public bool IsSkillReady(int skillId, DateTimeOffset now)
+    {
+        lock (_stateGate)
+            return _tracker.IsSkillReady(skillId, now);
+    }
+
+    /// <summary>True while <paramref name="objectId"/> is a visible, attackable NPC that has not been seen at 0 HP.</summary>
+    public bool IsLiveAttackTarget(int objectId)
+    {
+        if (objectId <= 0)
+            return false;
+        lock (_stateGate)
+        {
+            foreach (var ent in _tracker.Entities.Values)
+            {
+                if (ent.ObjectId != objectId)
+                    continue;
+                return !ent.Despawned && ent.Attackable && ent.Kind == EntityKindNet.Npc && ent.Alive &&
+                       (ent.MaxHp <= 0 || ent.CurHp > 0);
+            }
+
+            return false;
+        }
+    }
+
     public bool TryPickAttackTarget(out int targetObjectId)
     {
         lock (_stateGate)
@@ -66,7 +187,11 @@ public sealed class BotObservationLog
         }
     }
 
-    public BotObservationLog(int botId) => BotId = botId;
+    public BotObservationLog(int botId, BotBagTracker? bag = null)
+    {
+        BotId = botId;
+        _bag = bag;
+    }
 
     /// <summary>Fleet index. Wire identity is the <c>IsSelf</c> spawn, not this id.</summary>
     public int BotId { get; }
@@ -84,6 +209,7 @@ public sealed class BotObservationLog
         readonly List<LatencySample> _skillSamples = [];
         readonly List<LatencySample> _legacyCommandToFanoutSamples = [];
         ulong _selfEntityValue;
+        public ulong SelfEntityValue => _selfEntityValue;
         int _attackSampleCount;
         int _skillSampleCount;
         int _attackTimeoutCount;
@@ -92,6 +218,30 @@ public sealed class BotObservationLog
 
         public int LastCommandTargetDistance => _lastCommandTargetDistance;
         public int AttackSampleCount => _attackSampleCount;
+        readonly Dictionary<int, DateTimeOffset> _skillReadyAt = new();
+
+        public bool HasPending(ushort commandOpcode, DateTimeOffset now)
+        {
+            ExpirePending(now);
+            foreach (var p in _pendingCombat)
+            {
+                if (p.CommandOpcode == commandOpcode)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>False until the reuse announced by this bot's last MagicSkillUse for <paramref name="skillId"/> has passed.</summary>
+        public bool IsSkillReady(int skillId, DateTimeOffset now) =>
+            !_skillReadyAt.TryGetValue(skillId, out var ready) || now >= ready;
+
+        int _killsBySelf;
+        int _deathsSeen;
+        /// <summary>EntityDie frames naming this bot as the killer (real kills, not inferred from HP).</summary>
+        public int KillsBySelf => _killsBySelf;
+        /// <summary>EntityDie frames for any watched entity.</summary>
+        public int DeathsSeen => _deathsSeen;
         public int SkillSampleCount => _skillSampleCount;
         public int AttackTimeoutCount => _attackTimeoutCount;
         public int SkillTimeoutCount => _skillTimeoutCount;
@@ -123,6 +273,10 @@ public sealed class BotObservationLog
             t._attackTimeoutCount = _attackTimeoutCount;
             t._skillTimeoutCount = _skillTimeoutCount;
             t._lastCommandTargetDistance = _lastCommandTargetDistance;
+            t._killsBySelf = _killsBySelf;
+            t._deathsSeen = _deathsSeen;
+            foreach (var (skill, ready) in _skillReadyAt)
+                t._skillReadyAt[skill] = ready;
             return t;
         }
 
@@ -167,6 +321,16 @@ public sealed class BotObservationLog
                             _selfEntityValue = s.EntityValue;
                         break;
                     }
+                case NetOpcode.EntityDie:
+                    {
+                        var die = NetCodec.DecodeEntityDie(payload);
+                        _deathsSeen++;
+                        if (_selfEntityValue != 0 && (ulong)(uint)die.KillerObjectId == _selfEntityValue)
+                            _killsBySelf++;
+                        if (_byValue.TryGetValue(die.EntityValue, out var dead))
+                            _byValue[die.EntityValue] = dead with { Alive = false, CurHp = 0 };
+                        break;
+                    }
                 case NetOpcode.EntityDespawn:
                     {
                         var d = NetCodec.DecodeEntityDespawn(payload);
@@ -205,6 +369,21 @@ public sealed class BotObservationLog
 
                         break;
                     }
+                case NetOpcode.TeleportToLocation:
+                    {
+                        // Gatekeeper/admin/scroll teleports snap the pawn; watchers and the owner both get this.
+                        var t = NetCodec.DecodeTeleportToLocation(payload);
+                        ulong key = (ulong)(uint)t.ObjectId;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = t.X;
+                            e.Y = t.Y;
+                            e.Z = t.Z;
+                            _byValue[key] = e;
+                        }
+
+                        break;
+                    }
                 case NetOpcode.StatusUpdate:
                     {
                         var st = NetCodec.DecodeStatusUpdate(payload);
@@ -239,6 +418,8 @@ public sealed class BotObservationLog
                         var c = NetCodec.DecodeMagicSkillUse(payload);
                         if (_selfEntityValue != 0 && (ulong)(uint)c.CasterObjectId == (ulong)(uint)_selfEntityValue)
                         {
+                            // The server's own reuse for this cast: the fighter waits it out instead of drawing skill_reuse.
+                            _skillReadyAt[c.SkillId] = at.AddMilliseconds(Math.Max(c.ReuseDelayMs, c.HitTimeMs));
                             TryClosePending(NetOpcode.MagicSkillUse, at,
                                 p => p.CommandOpcode == NetOpcode.UseSkill && (p.SkillId == 0 || p.SkillId == c.SkillId));
                         }

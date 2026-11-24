@@ -8,6 +8,9 @@ public sealed partial class ZoneWorld
 {
     internal int NextItemObjectIdForTests => _itemIds.PeekNext();
 
+    /// <summary>Item ids reserved per store round-trip; the next block is prefetched at half use.</summary>
+    internal const int ItemIdBlockSize = 4096;
+
     static ItemObjectIdAllocator SeedItemObjectIds(IAccountStore? accounts, ItemObjectIdAllocator? injected, EconomyLedger ledger)
     {
         if (injected != null)
@@ -21,10 +24,7 @@ public sealed partial class ZoneWorld
             return new ItemObjectIdAllocator();
         }
 
-        int storeNext = accounts.NextItemObjectId;
-        int first = Math.Max(storeNext, ledgerFloor);
-        if (first < PlayerInventory.FirstObjectId)
-            first = PlayerInventory.FirstObjectId;
-        return new ItemObjectIdAllocator(first);
+        // Shared-store blocks: login and other zones allocate from the same durable counter (no cross-process collisions).
+        return new ItemObjectIdAllocator(accounts.ReserveItemObjectIds, ItemIdBlockSize, ledgerFloor);
     }
 }
