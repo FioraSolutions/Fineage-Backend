@@ -271,6 +271,16 @@ public readonly record struct QuestActor(int Race, int Level, int ClassId = -1, 
     public Func<double>? Roll { get; init; }
 }
 
+/// <summary>
+/// What a step is looked up by: hook, npc, and the event name (only an <see cref="QuestHook.Event"/> step has one;
+/// every other hook matches the empty name, exactly like <c>QuestMachine.Find</c> ignores the name for them).
+/// </summary>
+public readonly record struct QuestDialogKey(QuestHook Hook, int NpcId, string Event)
+{
+    public static QuestDialogKey Of(QuestHook hook, int npcId, string? eventName) =>
+        new(hook, npcId, hook == QuestHook.Event ? eventName ?? "" : "");
+}
+
 public sealed record QuestDefinition(
     int Id,
     string Name,
@@ -286,4 +296,28 @@ public sealed record QuestDefinition(
 
     public IReadOnlyList<QuestJournalReward> JournalRewards { get; init; } =
         JournalRewards ?? Array.Empty<QuestJournalReward>();
+
+    /// <summary>
+    /// This quest's steps grouped by <see cref="QuestDialogKey"/>, each group in the datapack's own order.
+    /// A lookup for a key only ever has to walk that key's group: <see cref="Dialogs"/> is scanned once, when the
+    /// catalog is built, instead of once per lookup.
+    /// </summary>
+    public IReadOnlyDictionary<QuestDialogKey, IReadOnlyList<QuestDialog>> DialogsByKey { get; } = GroupDialogs(Dialogs);
+
+    static IReadOnlyDictionary<QuestDialogKey, IReadOnlyList<QuestDialog>> GroupDialogs(IReadOnlyList<QuestDialog>? dialogs)
+    {
+        var groups = new Dictionary<QuestDialogKey, List<QuestDialog>>();
+        foreach (var dialog in dialogs ?? [])
+        {
+            var key = QuestDialogKey.Of(dialog.Hook, dialog.NpcId, dialog.Event);
+            if (!groups.TryGetValue(key, out var group))
+                groups[key] = group = [];
+            group.Add(dialog);
+        }
+
+        var byKey = new Dictionary<QuestDialogKey, IReadOnlyList<QuestDialog>>(groups.Count);
+        foreach (var (key, group) in groups)
+            byKey[key] = group;
+        return byKey;
+    }
 }
