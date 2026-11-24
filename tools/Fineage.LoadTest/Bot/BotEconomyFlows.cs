@@ -24,6 +24,7 @@ public static class BotEconomyFlows
         var t = timeout.Token;
         var flowStats = bot.Stats;
         Interlocked.Increment(ref flowStats.EconomyFlowsAttempted);
+        flowStats.BeginEconomyFlow();
         try
         {
             switch (action)
@@ -33,6 +34,7 @@ public static class BotEconomyFlows
                     break;
                 case "economy_shop_buy":
                     await bot.TeleportToAsync(economy.HubX, economy.HubY, economy.HubZ, t);
+                    await bot.BypassAsync(economy.MerchantObjectId, "Buy 1", t);
                     await bot.BypassAsync(economy.MerchantObjectId, $"Buy {economy.ShopBuyListId}", t);
                     await bot.BuyItemAsync(economy.MerchantObjectId, economy.ShopBuyListId,
                         economy.ShopBuyItemId, economy.ShopBuyCount, t);
@@ -64,6 +66,18 @@ public static class BotEconomyFlows
                 case "economy_store":
                     await EconomyFleetCoordinator.TryPrivateStoreAsync(bot, fleet, t);
                     break;
+                case "economy_manufacture_maker":
+                    if (Math.Abs(bot.BotId) % economy.ManufacturerModulo != economy.ManufacturerRemainder)
+                        throw new InvalidOperationException(
+                            $"economy_manufacture_maker picked for bot {bot.BotId} without manufacturer role");
+                    await EconomyFleetCoordinator.TryManufactureMakerAsync(bot, t);
+                    break;
+                case "economy_manufacture_customer":
+                    if (Math.Abs(bot.BotId) % economy.ManufacturerModulo != 1)
+                        throw new InvalidOperationException(
+                            $"economy_manufacture_customer picked for bot {bot.BotId} without customer role");
+                    await EconomyFleetCoordinator.TryManufactureCustomerAsync(bot, fleet, t);
+                    break;
                 case "economy_manufacture":
                     await EconomyFleetCoordinator.TryManufactureAsync(bot, fleet, t);
                     break;
@@ -87,6 +101,10 @@ public static class BotEconomyFlows
         catch (Exception ex)
         {
             flowStats.EconomyFlowFailures.Add($"{action}: {ex.Message}");
+        }
+        finally
+        {
+            flowStats.EndEconomyFlow();
         }
     }
 }
