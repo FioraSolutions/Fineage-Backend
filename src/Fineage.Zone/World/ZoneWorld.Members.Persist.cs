@@ -129,7 +129,10 @@ public sealed partial class ZoneWorld
         if (commitNow)
         {
             TryCommitDirtyEconomy(discardWithoutPublish: null);
-            AwaitEconomyPersistOffStep();
+            // Inside a step the batch stays on the worker queue: RunStep drains it at its boundaries and the step
+            // must never wait on Postgres. Off the step the caller has to return with its write durable.
+            if (!InSimulationStep)
+                AwaitEconomyPersistOffStep();
         }
     }
 
