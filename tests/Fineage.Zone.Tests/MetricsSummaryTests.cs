@@ -240,7 +240,10 @@ public sealed class MetricsCollectorTests
             new KeyValuePair<string, object?>("class", "player"));
 
         MetricsSnapshot snapshot = collector.Snapshot();
-        Assert.Equal(2, snapshot.CommandTimelinePhases.Count);
+        // The meter is process-wide and test classes run in parallel, so other suites may have recorded their own
+        // phases into the same collector. What this test owns is that its two phases arrive with their counts.
+        Assert.Single(snapshot.CommandTimelinePhases, r => r.Stage == "submit_to_dequeue");
+        Assert.Single(snapshot.CommandTimelinePhases, r => r.Stage == "dequeue_to_apply");
         Assert.Single(snapshot.CommandApplyByName, r => r.Stage == "MoveInput");
         Assert.Single(snapshot.CommandQueueWaitByClass, r => r.Stage == "player");
 
