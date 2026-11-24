@@ -78,6 +78,8 @@ public sealed class MetricsSnapshot
     public HistogramMetrics OutboundQueueFrames { get; init; } = new();
     public HistogramMetrics OutboundQueueBytes { get; init; } = new();
     public HistogramMetrics OutboundQueueOldestAge { get; init; } = new();
+    public HistogramMetrics PathfindNodes { get; init; } = new();
+    public HistogramMetrics PathfindQueued { get; init; } = new();
     public long FanoutOverflow { get; init; }
     public long FanoutCoalesced { get; init; }
     public long ReliableOverflow { get; init; }
@@ -86,6 +88,7 @@ public sealed class MetricsSnapshot
     public long FanoutBacklogEmergency { get; init; }
     public long OutboundSlowClientDisconnect { get; init; }
     public long OutboundShedBytes { get; init; }
+    public long PathfindBudgetExhausted { get; init; }
     public long TicksSkipped { get; init; }
     public long RegionHandoffs { get; init; }
     public IReadOnlyDictionary<string, long> LedgerAdjustments { get; init; } =
@@ -284,6 +287,12 @@ public static class MetricsText
             "Bytes waiting on a connection when another frame is queued", snapshot.OutboundQueueBytes, SocketWriteByteBounds);
         AppendSingletonHistogram(sb, "fineage_outbound_queue_oldest_age_ms",
             "Age of the oldest frame included in one socket write", snapshot.OutboundQueueOldestAge);
+        AppendSingletonHistogram(sb, "fineage_npc_pathfind_nodes",
+            "Geo nodes the npc.paths stage expanded in one step", snapshot.PathfindNodes, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_npc_pathfind_queued",
+            "Route requests still queued or running at the end of a step", snapshot.PathfindQueued, CountBounds);
+        AppendCounterLine(sb, "fineage_npc_pathfind_budget_exhausted_total",
+            "Steps where the npc.paths node budget ran out with routes still pending", snapshot.PathfindBudgetExhausted);
         AppendCounterLine(sb, "fineage_fanout_overflow_total",
             "Sealed fan-out batches rejected because the dispatcher is closed", snapshot.FanoutOverflow);
         AppendCounterLine(sb, "fineage_coalesced_total",

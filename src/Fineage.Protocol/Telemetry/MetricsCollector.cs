@@ -58,6 +58,9 @@ public sealed class MetricsCollector : IDisposable
     readonly BoundedCountHistogram _outboundQueueFrames = new(MetricsText.SocketWriteFrameBounds);
     readonly BoundedCountHistogram _outboundQueueBytes = new(MetricsText.SocketWriteByteBounds);
     readonly DurationHistogram _outboundQueueAge = new();
+    readonly BoundedCountHistogram _pathfindNodes = new(MetricsText.CountBounds);
+    readonly BoundedCountHistogram _pathfindQueued = new(MetricsText.CountBounds);
+    long _pathfindBudgetExhausted;
     long _fanoutOverflow;
     long _fanoutCoalesced;
     long _reliableOverflow;
@@ -154,6 +157,8 @@ public sealed class MetricsCollector : IDisposable
                 OutboundQueueFrames = _outboundQueueFrames.Freeze(),
                 OutboundQueueBytes = _outboundQueueBytes.Freeze(),
                 OutboundQueueOldestAge = _outboundQueueAge.Freeze(),
+                PathfindNodes = _pathfindNodes.Freeze(),
+                PathfindQueued = _pathfindQueued.Freeze(),
                 FanoutOverflow = _fanoutOverflow,
                 FanoutCoalesced = _fanoutCoalesced,
                 ReliableOverflow = _reliableOverflow,
@@ -162,6 +167,7 @@ public sealed class MetricsCollector : IDisposable
                 FanoutBacklogEmergency = _fanoutBacklogEmergency,
                 OutboundSlowClientDisconnect = _outboundSlowClientDisconnect,
                 OutboundShedBytes = _outboundShedBytes,
+                PathfindBudgetExhausted = _pathfindBudgetExhausted,
                 TicksSkipped = _ticksSkipped,
                 RegionHandoffs = _regionHandoffs,
                 LedgerAdjustments = _ledgerAdjustments
@@ -552,6 +558,9 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.fanout.queue.overflow":
                 _fanoutOverflow += value;
                 break;
+            case "fineage.npc.pathfind.budget_exhausted":
+                _pathfindBudgetExhausted += value;
+                break;
             case "fineage.fanout.coalesced":
                 _fanoutCoalesced += value;
                 break;
@@ -615,6 +624,12 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.fanout.queue.depth":
                 _fanoutQueueDepth.Record(value);
+                break;
+            case "fineage.npc.pathfind.nodes":
+                _pathfindNodes.Record(value);
+                break;
+            case "fineage.npc.pathfind.queued":
+                _pathfindQueued.Record(value);
                 break;
             case "fineage.fanout.events_per_batch":
                 _fanoutEventsPerBatch.Record(value);
