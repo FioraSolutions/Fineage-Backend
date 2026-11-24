@@ -126,6 +126,18 @@ public static class FineageTelemetry
         Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
             description: "Age of the oldest batch still waiting on the fan-out dispatcher");
 
+    public static readonly Histogram<int> PathfindNodes =
+        Meter.CreateHistogram<int>("fineage.npc.pathfind.nodes", unit: "{node}",
+            description: "Geo nodes the npc.paths stage expanded in one step");
+
+    public static readonly Histogram<int> PathfindQueued =
+        Meter.CreateHistogram<int>("fineage.npc.pathfind.queued", unit: "{request}",
+            description: "Route requests still queued or running at the end of a step");
+
+    public static readonly Counter<long> PathfindBudgetExhausted =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.budget_exhausted",
+            description: "Steps where the npc.paths node budget ran out with requests still pending");
+
     public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
             description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");
