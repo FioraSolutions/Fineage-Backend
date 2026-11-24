@@ -140,6 +140,15 @@ public sealed partial class ZoneWorld
     /// </summary>
     int _deferInventoryPersistDepth;
 
+    /// <summary>
+    /// True while <see cref="ZoneWorldSimulation.RunStep"/> runs: the one place that must not wait on a durable
+    /// economy commit. Off-step callers also hold the world turn, so the turn alone says nothing about a step.
+    /// </summary>
+    bool _stepping;
+
+    /// <summary>True only inside a real simulation step body, off-step callers included in "not a step".</summary>
+    internal bool InSimulationStep => _stepping;
+
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
     readonly TrackedLock _economyLock = new("economy");
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];

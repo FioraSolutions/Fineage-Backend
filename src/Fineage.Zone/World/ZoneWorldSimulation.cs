@@ -77,18 +77,43 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
+    /// <summary>
+    /// Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler. It is a step
+    /// body, so it never waits on a durable economy commit; it drains completions when it returns.
+    /// </summary>
     internal void RunStepForTest(Action body)
     {
         using (_affinity.Step())
-            body();
+        {
+            _stepping = true;
+            try
+            {
+                body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+
+            _economyPersist?.DrainCompletions(this);
+        }
     }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
     internal T RunStepForTest<T>(Func<T> body)
     {
         using (_affinity.Step())
-            return body();
+        {
+            _stepping = true;
+            try
+            {
+                return body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+        }
     }
 
     /// <summary>
@@ -104,6 +129,7 @@ public sealed partial class ZoneWorld
         SimulationThreadMarker.Enter();
         NotePhase("step-body");
         bool outermost = _fanout.Recording == null;
+        _stepping = true;
         try
         {
             WithDeferredInventoryPersist(() =>
@@ -136,6 +162,8 @@ public sealed partial class ZoneWorld
                 if (stranded.Count > 0)
                     ZoneCommandIngress.Complete(stranded);
             }
+
+            _stepping = false;
         }
     }
 

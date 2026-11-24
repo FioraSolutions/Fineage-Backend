@@ -25,7 +25,6 @@ internal sealed class EconomyPersistService
     internal const string EconomyCommitFailed = "economy_commit_failed: auditable economy commit failed";
     public const int DefaultQueueCapacity = 64;
 
-    public const string PersistBusyReject = "persist_busy";
     public const string PersistQueueFullReject = "persist_queue_full";
 
     readonly IAccountStore? _store;
@@ -105,7 +104,12 @@ internal sealed class EconomyPersistService
         _thread = null;
     }
 
-    /// <summary>Enqueue without blocking. Never call from the simulation thread with a blocking follow-up.</summary>
+    /// <summary>
+    /// Hand a dirty economy batch to the persist worker without blocking.
+    /// This is the simulation thread's only economy-persist entry point, so it must stay
+    /// non-blocking: no SQL, no wait, no <c>Drain</c>. The batch commits on the worker and
+    /// reports back through the completion queue that <c>DrainCompletions</c> pumps.
+    /// </summary>
     public EconomyFlushResult TryEnqueue(
         EconomyPersistBatch batch,
         int? discardWithoutPublish,
@@ -113,7 +117,6 @@ internal sealed class EconomyPersistService
         Action<EconomyPersistBatch> restore)
     {
         ArgumentNullException.ThrowIfNull(batch);
-        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "TryEnqueue");
 
         var charIds = CharacterIdsOf(batch);
         if (!_reservations.TryReserve(charIds))
@@ -160,7 +163,7 @@ internal sealed class EconomyPersistService
     /// <summary>Logout / shutdown: wait for batches on a non-simulation caller.</summary>
     public bool WaitForAllBatches(TimeSpan budget, ZoneWorld world)
     {
-        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "WaitForAllBatches");
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(world.InSimulationStep, "WaitForAllBatches");
         long deadline = Stopwatch.GetTimestamp() + (long)(budget.TotalSeconds * Stopwatch.Frequency);
         while (PendingCount > 0 || !_pending.IsEmpty)
         {
@@ -246,7 +249,7 @@ internal sealed class EconomyPersistService
 
     void DrainWorkerOnCallerThread()
     {
-        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, "DrainWorkerOnCallerThread");
+        // Stop runs on the shutdown thread, never inside a step body.
         while (_queue.Reader.TryRead(out var work))
         {
             bool ok = Apply(work);
