@@ -339,6 +339,15 @@ public static class FineageTelemetry
     public static readonly Counter<long> LedgerFlushFailures =
         Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
 
+    /// <summary>Auditable economy ledger invariant violations (tag code).</summary>
+    public static readonly Counter<long> LedgerInvariantViolations =
+        Meter.CreateCounter<long>("fineage.ledger.invariant_violations", description: "EconomyInvariantChecker violations (tag code)");
+
+    /// <summary>Optional hook before each Prometheus scrape (wall unix ms).</summary>
+    public static Action<long>? BeforeMetricsScrape;
+
+    public static void NotifyMetricsScrape(long wallUnixMs) => BeforeMetricsScrape?.Invoke(wallUnixMs);
+
     /// <summary>Non-economic character snapshots. Tag <c>result</c> is written or coalesced.</summary>
     public static readonly Counter<long> PersistSnapshots =
         Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");

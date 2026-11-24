@@ -68,10 +68,23 @@ public sealed class LoadScenario
     /// Bot <paramref name="botId"/> travels when the running share count steps up at its index, so
     /// exactly round(share × botCount) bots travel, spread evenly over the fleet and the ramp.
     /// </summary>
+    /// <remarks>
+    /// Heavy-play combat bots (party or train slots) never travel; in <c>aoe-combined</c> the share applies to
+    /// the economy background bots only, counted from the first of them.
+    /// </remarks>
     public bool IsGatekeeperTraveler(int botId)
     {
         double share = ResolvedGatekeeperTravelShare;
-        return Math.Floor((botId + 1) * share + 1e-9) > Math.Floor(botId * share + 1e-9);
+        int index = botId;
+        if (HeavyPlay is { IsHeavyPlay: true } hp)
+        {
+            int combat = hp.CombatBotCount;
+            if (botId < combat)
+                return false;
+            index = botId - combat;
+        }
+
+        return Math.Floor((index + 1) * share + 1e-9) > Math.Floor(index * share + 1e-9);
     }
 
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
@@ -83,19 +96,27 @@ public sealed class LoadScenario
     /// </summary>
     public int EnterConcurrency { get; set; } = 16;
 
-    /// <summary>Instant offensive skill known at level 1 for the scenario class (Mobius autoGet).</summary>
+    /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
+    public string? Extends { get; set; }
+
+    /// <summary>Full-economy hammer (#955): P2P trade, shops, stores, manufacture, manor, warehouse.</summary>
+    public EconomyHammerConfig? Economy { get; set; }
+
+    /// <summary>Structured AoE / party fan-out scenarios (#951).</summary>
+    public HeavyPlayConfig? HeavyPlay { get; set; }
+
     public int ResolveCombatSkillId()
     {
         if (CombatSkillId > 0)
             return CombatSkillId;
+        if (HeavyPlay?.SkillRotation is { Length: > 0 })
+            return HeavyPlay.SkillRotation[0];
         return ClassId switch
         {
-            HumanClasses.Mystic or 25 or 38 => 1177, // Wind Strike
-            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3, // Power Strike (level ≥ 5)
+            HumanClasses.Mystic or 25 or 38 => 1177,
+            48 => 36,
+            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3,
             _ => 1177
         };
     }
-
-    /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
-    public string? Extends { get; set; }
 }

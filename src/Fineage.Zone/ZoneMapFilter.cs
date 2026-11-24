@@ -29,6 +29,22 @@ public static class ZoneMapFilter
         }
     }
 
+    /// <summary>
+    /// <c>FINEAGE_ZONE_EXTRA_MAPS</c>: maps loaded on top of the base set (the whitelist or every enabled map),
+    /// including maps that are disabled in the datapack, such as the perf arena <c>loadtest_aoe_arena</c>.
+    /// </summary>
+    public static IReadOnlyList<string> ExtraMaps
+    {
+        get
+        {
+            string? text = Environment.GetEnvironmentVariable("FINEAGE_ZONE_EXTRA_MAPS");
+            if (string.IsNullOrWhiteSpace(text))
+                return [];
+            return text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.Ordinal).ToArray();
+        }
+    }
+
     /// <summary>First box only (legacy). Prefer <see cref="BoundsList"/>.</summary>
     public static Box? Bounds => BoundsList.Count > 0 ? BoundsList[0] : null;
 

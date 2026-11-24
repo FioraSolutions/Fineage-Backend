@@ -60,6 +60,32 @@ public sealed class CombatPacketHandler
             await _reject(conn, error, "UseSkill failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary>Client <c>TeleportToLocation</c>: load-test accounts only, otherwise the same reject as any unknown opcode.</summary>
+    public async Task OnLoadTestTeleportAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!LoadTestCombatSettings.AllowsTeleport(zoneSession.Account))
+        {
+            await _reject(conn, "unknown_opcode", NetOpcodeTable.DescribeUnknown(envelope.Opcode), ct).ConfigureAwait(false);
+            return;
+        }
+
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var tp = NetCodec.DecodeTeleportToLocation(envelope.Payload);
+        string? error = await _world.ExecuteAsync(zoneSession, new LoadTestTeleportCommand(tp.X, tp.Y, tp.Z), ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Teleport failed.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnSelectTargetAsync(
         NetConnection conn,
         ZoneSession zoneSession,

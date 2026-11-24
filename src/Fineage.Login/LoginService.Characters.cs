@@ -8,6 +8,9 @@ namespace Fineage.Login;
 
 public sealed partial class LoginService
 {
+    /// <summary>Item ids reserved per created character; the largest Interlude starter kit is far below this.</summary>
+    internal const int StarterKitIdBlock = 64;
+
     public LoginResult<CharacterRecord> CreateHuman(
         string account,
         string name,
@@ -44,13 +47,19 @@ public sealed partial class LoginService
         if (!_allowedRaces.Contains(template.Race))
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
 
-        var inventory = _game.CreateStarterInventory(classId, _store.NextItemObjectId);
+        // Ids come from a block reserved on the shared store: the zone allocates item ids concurrently, so a
+        // login-local "next id" collides with zone-created items (character_items_pkey violation).
+        int firstItemId = _store.ReserveItemObjectIds(StarterKitIdBlock);
+        var inventory = _game.CreateStarterInventory(classId, firstItemId);
         long adena = Math.Max(0, _create.StartingAdena ?? _game.StarterKits.MobiusStartingAdena);
         if (adena > 0)
             inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);
         if (inventory.Items.Count == 0)
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, $"Starter kit for class {classId} is empty.");
         var kit = CharacterInventory.Rows(inventory);
+        if (kit.Any(i => i.ObjectId < firstItemId || i.ObjectId >= firstItemId + StarterKitIdBlock))
+            throw new InvalidOperationException(
+                $"Starter kit for class {classId} needs more than {StarterKitIdBlock} item ids; raise StarterKitIdBlock.");
         var now = _clock();
         int level = Math.Max(1, _create.StartingLevel);
         int sp = Math.Max(0, _create.StartingSp);

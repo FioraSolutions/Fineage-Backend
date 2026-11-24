@@ -39,6 +39,7 @@ public sealed class PrometheusSample
     public long BytesIn { get; init; }
     public long LedgerAdjustments { get; init; }
     public long LedgerFlushFailures { get; init; }
+    public long LedgerInvariantViolations { get; init; }
     public double FanoutQueueDepth { get; init; }
     public double FanoutQueueOldestAgeMs { get; init; }
     public double FanoutQueueOldestAgeP999Ms { get; init; }
@@ -108,6 +109,7 @@ public static class PrometheusParser
             BytesIn = ParseCounterSum(text, "fineage_bytes_in_total"),
             LedgerAdjustments = ParseCounterSum(text, "fineage_ledger_adjustments_total"),
             LedgerFlushFailures = ParseLong(text, "fineage_ledger_flush_failures_total"),
+            LedgerInvariantViolations = ParseLong(text, "fineage_ledger_invariant_violations_total"),
             FanoutQueueDepth = ParseSingletonHistogram(text, "fineage_fanout_queue_depth")?.Max ?? 0,
             FanoutQueueOldestAgeMs = ParseSingletonHistogram(text, "fineage_fanout_queue_oldest_age_ms")?.P99 ?? 0,
             FanoutQueueOldestAgeP999Ms = ParseSingletonHistogram(text, "fineage_fanout_queue_oldest_age_ms")?.P999 ?? 0,

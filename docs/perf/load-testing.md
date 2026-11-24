@@ -58,6 +58,10 @@ Login honours `Auth.RegisterIfMissing` only when **both** are set:
 
 Unset either variable and auto-registration is denied. Bots default to `loadbot#####` / `loadtest-pass-v1` in scenario YAML.
 
+## Heavy-play scenarios (#951)
+
+Warlord pole + AoE trains, multi-party fan-out, and economy-combined loads are documented in [heavy-play-scenarios.md](heavy-play-scenarios.md). Use `FINEAGE_ZONE_LOADTEST_COMBAT=1` and `FINEAGE_ZONE_MAPS=loadtest_aoe_arena` with the `perf-aoe-*.yaml` files.
+
 ## Scenarios
 
 YAML files under `tools/Fineage.LoadTest/scenarios/` control:

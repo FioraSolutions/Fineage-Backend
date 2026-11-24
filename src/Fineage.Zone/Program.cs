@@ -110,6 +110,7 @@ world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenI
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;
+FineageTelemetry.BeforeMetricsScrape = world.PublishLedgerInvariantsForMetrics;
 FineageTelemetry.ActivationBacklog = () => world.ActivationBacklog;
 string host = bindAddress.Equals(IPAddress.Any) ? "0.0.0.0" : bindDisplay;
 int maxConnections = ZoneNetSettings.MaxConnections;

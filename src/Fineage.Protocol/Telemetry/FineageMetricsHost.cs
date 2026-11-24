@@ -112,6 +112,7 @@ public sealed class FineageMetricsHost : IAsyncDisposable
     {
         lock (_scrapeGate)
         {
+            FineageTelemetry.NotifyMetricsScrape(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             MetricsSnapshot snapshot = _collector.Snapshot();
             TrafficTotals current = MetricsText.Totals(snapshot);
             double elapsed = _scrapeClock.Elapsed.TotalSeconds;

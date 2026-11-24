@@ -62,6 +62,19 @@ public sealed partial class MemoryAccountStore : IAccountStore
         }
     }
 
+    public int ReserveItemObjectIds(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        lock (_gate)
+        {
+            if (_data.NextItemObjectId < PlayerInventory.FirstObjectId)
+                _data.NextItemObjectId = PlayerInventory.FirstObjectId;
+            int first = _data.NextItemObjectId;
+            _data.NextItemObjectId = checked(first + count);
+            return first;
+        }
+    }
+
     /// <summary>In-memory store seeded from a versioned snapshot JSON (the <c>store_snapshot</c> payload).</summary>
     public static MemoryAccountStore FromSnapshot(string json)
     {

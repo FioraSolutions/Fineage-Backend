@@ -24,9 +24,12 @@ public sealed class SpawnMapEnablementTests
     public void Datapack_enables_all_spawn_json_maps()
     {
         var catalog = SpawnCatalog.LoadDefault();
-        int enabled = catalog.Maps.Values.Count(m => m.Enabled);
+        // Load-test maps (loadtest_*) ship disabled and are opted in via FINEAGE_ZONE_EXTRA_MAPS; every world map is on.
+        var world = catalog.Maps.Where(kv => !kv.Key.StartsWith("loadtest_", StringComparison.Ordinal)).ToList();
+        int enabled = world.Count(kv => kv.Value.Enabled);
         Assert.InRange(enabled, 180, 200);
-        Assert.Equal(catalog.Maps.Count, enabled);
+        Assert.Equal(world.Count, enabled);
+        Assert.All(catalog.Maps.Where(kv => kv.Key.StartsWith("loadtest_", StringComparison.Ordinal)), kv => Assert.False(kv.Value.Enabled));
     }
 
     [Fact]
