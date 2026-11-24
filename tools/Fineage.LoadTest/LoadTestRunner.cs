@@ -18,6 +18,23 @@ public sealed class LoadTestRunner
         int? zonePid,
         CancellationToken ct)
     {
+        if (scenario.Economy is { Enabled: true })
+        {
+            if (!string.Equals(Environment.GetEnvironmentVariable("FINEAGE_LOADTEST_ECONOMY_HAMMER"), "1",
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "economy hammer scenarios require FINEAGE_LOADTEST_ECONOMY_HAMMER=1 on the Zone process " +
+                    "(dwarf manufacturers + customer materials provisioning).");
+            }
+
+            if (scenario.BotCount < scenario.Economy.ManufacturerModulo)
+            {
+                throw new InvalidOperationException(
+                    $"economy hammer needs at least {scenario.Economy.ManufacturerModulo} bots for manufacture roles; got {scenario.BotCount}.");
+            }
+        }
+
         if (target == "mobius")
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
 

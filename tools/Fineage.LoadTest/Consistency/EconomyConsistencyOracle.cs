@@ -41,7 +41,6 @@ public static class EconomyConsistencyOracle
         ExplainedRejectCodes.Contains(code) ? RejectClass.Explained
         : ExpectedDomainRejectCodes.Contains(code) ? RejectClass.ExpectedDomain
         : RejectClass.Unexpected;
-
     static readonly Regex LedgerRejectRx = new(
         @"ledger rejected|economy_commit_failed|auditable economy ledger invariant",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -142,6 +141,35 @@ public static class EconomyConsistencyOracle
         return report;
     }
 
+    /// <summary>Strips the <c>code: detail</c> suffix the zone appends to a reject reason.</summary>
+    public static string NormalizeRejectCode(string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+            return "unknown";
+        int colon = code.IndexOf(':');
+        return colon > 0 ? code[..colon].Trim() : code;
+    }
+
+    /// <summary>True when a reject during an economy flow is attributable to economy/shop/trade/warehouse paths.</summary>
+    public static bool IsEconomyFlowReject(string code)
+    {
+        string normalized = NormalizeRejectCode(code);
+        if (ExplainedRejectCodes.Contains(normalized) || ExpectedDomainRejectCodes.Contains(normalized))
+            return true;
+        return normalized.StartsWith("trade_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("store_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("warehouse", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("manor_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("economy_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("persist_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("recipe", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("craft", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsExplainedEconomyReject(string code) =>
+        Classify(NormalizeRejectCode(code)) == RejectClass.Explained;
+
+    public static bool ExplainedEconomyReject(string code) => IsExplainedEconomyReject(code);
     public static bool IsHardFailure(EconomyConsistencyKind kind) => kind is
         EconomyConsistencyKind.LedgerInvariantViolation or
         EconomyConsistencyKind.EconomyCommitFailed or

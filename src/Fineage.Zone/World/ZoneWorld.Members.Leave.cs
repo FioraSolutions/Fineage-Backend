@@ -159,6 +159,7 @@ public sealed partial class ZoneWorld
         if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(10), this))
             return false;
         DriveForTest();
+        // A test hook runs off-step and DriveForTest leaves the world driven, so this one takes the turn itself.
         using (_affinity.Step())
             _economyPersist.DrainCompletions(this);
         return true;
@@ -166,6 +167,9 @@ public sealed partial class ZoneWorld
 
     internal void EconomyPersistBlockingWaitForTests() =>
         _economyPersist?.WaitForAllBatches(TimeSpan.FromSeconds(1), this);
+
+    internal IEnumerable<ZoneEntity> PlayersForTests() =>
+        _byId.Values.Where(e => e.Kind == ZoneEntityKind.Player);
 
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
