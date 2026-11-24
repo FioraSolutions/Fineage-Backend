@@ -54,8 +54,27 @@ public sealed partial class ZoneWorld
     /// <summary>The wall sample of the current step for calendar rules; outside a step the wall clock.</summary>
     DateTimeOffset WallNow() => DateTimeOffset.FromUnixTimeMilliseconds(_simulationClock.WallUnixMs());
 
-    /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
-    internal void StepSimulation() => RunStep(wall =>
+    /// <summary>
+    /// One fixed step on demand for a host that drives the world itself (tests and admin diagnostics): the loop
+    /// step, then the durable economy commit of what it dirtied. Commands answer after that commit, so a host that
+    /// steps by hand has to finish the commit before it awaits a reply; only the live loop leaves the batch on the
+    /// worker queue and drains it at the next step boundary.
+    /// </summary>
+    internal void StepSimulation()
+    {
+        StepSimulationRaw();
+
+        // A hand-stepped host has to see its economy commit before it awaits a command reply. The live loop keeps the
+        // batch on the worker queue and drains it at the next step boundary instead (see SimulationLoopAsync).
+        if (_economyPersist != null)
+        {
+            using (_affinity.Step())
+                _economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this);
+        }
+    }
+
+    /// <summary>The step alone: what the live loop runs, leaving the durable economy on the worker queue.</summary>
+    void StepSimulationRaw() => RunStep(wall =>
     {
         _simulationTicks.Step(wall);
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
@@ -77,18 +96,43 @@ public sealed partial class ZoneWorld
         }
     }
 
-    /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
+    /// <summary>
+    /// Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler. It is a step
+    /// body, so it never waits on a durable economy commit; it drains completions when it returns.
+    /// </summary>
     internal void RunStepForTest(Action body)
     {
         using (_affinity.Step())
-            body();
+        {
+            _stepping = true;
+            try
+            {
+                body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+
+            _economyPersist?.DrainCompletions(this);
+        }
     }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
     internal T RunStepForTest<T>(Func<T> body)
     {
         using (_affinity.Step())
-            return body();
+        {
+            _stepping = true;
+            try
+            {
+                return body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+        }
     }
 
     /// <summary>
@@ -104,6 +148,7 @@ public sealed partial class ZoneWorld
         SimulationThreadMarker.Enter();
         NotePhase("step-body");
         bool outermost = _fanout.Recording == null;
+        _stepping = true;
         try
         {
             WithDeferredInventoryPersist(() =>
@@ -136,6 +181,8 @@ public sealed partial class ZoneWorld
                 if (stranded.Count > 0)
                     ZoneCommandIngress.Complete(stranded);
             }
+
+            _stepping = false;
         }
     }
 

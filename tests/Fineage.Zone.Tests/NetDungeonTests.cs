@@ -204,6 +204,15 @@ public sealed class NetDungeonTests
         Assert.Equal(20, member.Session.Y);
 
         // The fee leaves the bag, so the client must see the row it lost. A fully spent stack reports 0 left.
+        // The bag write commits on the persist worker, so the row is published when that batch drains.
+        Console.WriteLine("[diag] about to drain");
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        Console.WriteLine("[diag] updates=" + bench.Rec.Of("FanoutInventoryUpdate").Count
+            + " allCalls=" + string.Join(",", bench.Rec.Calls.Select(c => c.Method).Distinct())
+            + " pending=" + bench.World.LedgerForTests.PendingFlushCount
+            + " adena=" + member.Inventory?.CountOf(DungeonProtocol.AdenaItemId)
+            + " storeAdena=" + member.Store.FindById(member.Session.Account, member.Session.ObjectId)?.Items?
+                .Where(i => i.ItemId == DungeonProtocol.AdenaItemId).Sum(i => i.Count));
         var paid = Assert.IsType<InventoryUpdateMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
         var row = Assert.Single(paid.Changes);
         Assert.Equal(DungeonProtocol.AdenaItemId, row.ItemId);

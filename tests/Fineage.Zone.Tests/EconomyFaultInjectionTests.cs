@@ -31,7 +31,8 @@ public sealed class EconomyFaultInjectionTests
             [new LedgerPosting(shop, Adena, -1), new LedgerPosting(bag, Adena, 1)])).Ok);
         bench.World.StageDeferredInventoryForTest(player.Session, player.Inventory!);
         using var metrics = new MetricsCollector();
-        Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        // Off the step the flush reports its own commit: a failed ledger flush is a failed flush, not a queued one.
+        Assert.False(bench.World.FlushDirtyInventoriesForTests());
         Assert.True(bench.World.DrainEconomyPersistForTests());
         Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
         Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));
@@ -79,7 +80,7 @@ public sealed class EconomyFaultInjectionTests
         Assert.Null(await bench.World.TryGiveItemAsync(player.Session, Adena, 3, CancellationToken.None));
         Assert.True(bench.World.HasDeferredInventoryForTests(player.ObjectId));
         using var metrics = new MetricsCollector();
-        Assert.True(bench.World.FlushDirtyInventoriesForTests());
+        Assert.False(bench.World.FlushDirtyInventoriesForTests());
         Assert.True(bench.World.DrainEconomyPersistForTests());
         Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
         Assert.Equal(7, player.Saved().Sum(row => row.ItemId == Adena ? row.Count : 0));

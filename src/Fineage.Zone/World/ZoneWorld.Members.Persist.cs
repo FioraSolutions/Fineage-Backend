@@ -180,7 +180,7 @@ public sealed partial class ZoneWorld
             stolen = StealDirtyEconomy();
         }
 
-        if (_affinity.OnStep)
+        if (_stepping)
             NotePhase("economy-commit");
 
         if (_economyPersist == null)
@@ -192,10 +192,45 @@ public sealed partial class ZoneWorld
             heldReplies,
             RestoreDirtyEconomy);
 
+        // A character with a durable commit still in flight cannot start another. Off the step the caller has to
+        // see its own write land, so it waits for that batch and retries instead of reporting a lost commit;
+        // that batch published the earlier state, and the retry carries the newer one.
+        if (result is EconomyFlushResult.ReservationConflict && !_stepping)
+        {
+            if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(10), this))
+                LogEconomyCommitFailure(stolen);
+            else
+            {
+                result = _economyPersist.TryEnqueue(
+                    stolen,
+                    discardWithoutPublish,
+                    heldReplies,
+                    RestoreDirtyEconomy);
+            }
+        }
+
         if (result is EconomyFlushResult.QueueFull or EconomyFlushResult.ReservationConflict)
         {
             LogEconomyCommitFailure(stolen);
             return false;
+        }
+
+        // Off the step the caller must return with its write durable (shutdown drain, TryFlushLedger, a request path).
+        // Inside a step the batch stays on the worker queue: RunStep drains the completion at its boundaries and the
+        // step never waits on Postgres.
+        if (!_stepping && result is EconomyFlushResult.Queued)
+        {
+            // The drain publishes the committed bags, which is world state, so it runs with the turn. Taking the turn
+            // here is safe on a caller that already holds it (a monitor is reentrant for its owner) and on a bare
+            // shutdown/test thread that does not.
+            bool durable;
+            using (_affinity.Step())
+                durable = AwaitEconomyPersistOffStepBlocking();
+            if (!durable)
+            {
+                LogEconomyCommitFailure(stolen);
+                return false;
+            }
         }
 
         return true;
@@ -333,9 +368,19 @@ public sealed partial class ZoneWorld
 
     /// <summary>
     /// Runs <paramref name="change"/> with inventory/warehouse Postgres deferred until it returns. Calls nest (a command
-    /// wrapping a world method that defers too): only the outermost one flushes.
+    /// wrapping a world method that defers too): only the outermost one flushes. It also owns the world turn for the
+    /// whole call: the flush waits for the durable commit, which releases the turn, and the body reads world state.
     /// </summary>
     T WithDeferredInventoryPersist<T>(Func<T> change)
+    {
+        if (!InSimulationStep && _affinity.MayTouch)
+            return WithDeferredInventoryPersistUnderTurn(change);
+
+        using (_affinity.Step())
+            return WithDeferredInventoryPersistUnderTurn(change);
+    }
+
+    T WithDeferredInventoryPersistUnderTurn<T>(Func<T> change)
     {
         T result;
         bool outermost = _deferInventoryPersistDepth == 0;
@@ -352,7 +397,10 @@ public sealed partial class ZoneWorld
         if (outermost)
         {
             FlushDirtyInventories();
-            AwaitEconomyPersistOffStep();
+            // Inside a simulation step the batch stays queued: the step drains completions at its boundaries and
+            // must never wait for the durable commit. Off-tick callers wait so their change is durable on return.
+            if (!InSimulationStep)
+                AwaitEconomyPersistOffStep();
             AwaitTestFanoutDelivery();
         }
 
@@ -365,15 +413,20 @@ public sealed partial class ZoneWorld
     /// </summary>
     void AwaitEconomyPersistOffStep() => _ = AwaitEconomyPersistOffStepBlocking();
 
+    /// <summary>
+    /// Waits on any caller. <see cref="ZoneWorldSimulation.RunStep"/> never calls this — it drains completions at
+    /// step boundaries instead — and the assert names that caller if a future step path does.
+    /// </summary>
     bool AwaitEconomyPersistOffStepBlocking()
     {
-        if (_economyPersist == null || _affinity.OnStep)
+        if (_economyPersist == null)
             return true;
-        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(_affinity, nameof(AwaitEconomyPersistOffStepBlocking));
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(InSimulationStep, nameof(AwaitEconomyPersistOffStepBlocking));
         if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this))
             return false;
-        using (_affinity.Step())
-            _economyPersist.DrainCompletions(this);
+        // The caller already holds the turn (it touched the world before it waited); stepping again here would
+        // leave the turn unbalanced because WorldAffinity allows one depth for a whole step body.
+        _economyPersist.DrainCompletions(this);
         return true;
     }
 }

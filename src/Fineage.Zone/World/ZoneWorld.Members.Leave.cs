@@ -159,7 +159,7 @@ public sealed partial class ZoneWorld
         if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(10), this))
             return false;
         DriveForTest();
-        // A test hook runs off-step and DriveForTest leaves the world driven, so this one takes the turn itself.
+        // A test hook runs off-step and DriveForTest leaves the world "driven", so this one needs the turn itself.
         using (_affinity.Step())
             _economyPersist.DrainCompletions(this);
         return true;
