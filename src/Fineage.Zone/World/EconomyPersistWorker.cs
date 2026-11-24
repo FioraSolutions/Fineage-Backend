@@ -154,18 +154,24 @@ internal sealed class EconomyPersistService
             EnqueuedAt = Stopwatch.GetTimestamp(),
         };
 
+        // The pending entry and the queued count are published before the work is visible to the worker. The worker
+        // commits the batch and enqueues its completion as soon as it reads it; a completion that arrives before its
+        // entry exists is dropped by Finish, which strands the held command replies forever (the caller waits on a
+        // reply no one will complete).
+        _pending[batchId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), charIds);
+        Interlocked.Increment(ref _queued);
+        if (_oldestEnqueueTimestamp == 0)
+            Volatile.Write(ref _oldestEnqueueTimestamp, work.EnqueuedAt);
+
         if (!_queue.Writer.TryWrite(work))
         {
+            _pending.TryRemove(batchId, out _);
+            Interlocked.Decrement(ref _queued);
             _reservations.Release(charIds);
             restore(batch);
             return EconomyFlushResult.QueueFull;
         }
 
-        Interlocked.Increment(ref _queued);
-        if (_oldestEnqueueTimestamp == 0)
-            Volatile.Write(ref _oldestEnqueueTimestamp, work.EnqueuedAt);
-
-        _pending[batchId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), charIds);
         return EconomyFlushResult.Queued;
     }
 
