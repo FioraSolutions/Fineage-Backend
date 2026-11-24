@@ -168,6 +168,9 @@ public sealed partial class ZoneWorld
     internal void EconomyPersistBlockingWaitForTests() =>
         _economyPersist?.WaitForAllBatches(TimeSpan.FromSeconds(1), this);
 
+    internal IEnumerable<ZoneEntity> PlayersForTests() =>
+        _byId.Values.Where(e => e.Kind == ZoneEntityKind.Player);
+
     internal void StageDeferredInventoryForTest(ZoneSession session, PlayerInventory inventory)
     {
         using (_economyLock.Enter())

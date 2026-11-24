@@ -119,4 +119,16 @@ public sealed class LoadScenario
             _ => 1177
         };
     }
+
+    public (int classId, int race) ResolveClassAndRace(int botId)
+    {
+        if (Economy is { Enabled: true } eco)
+        {
+            int mod = Math.Abs(botId) % eco.ManufacturerModulo;
+            if (mod == eco.ManufacturerRemainder)
+                return (eco.ManufacturerClassId, eco.ManufacturerRace);
+        }
+
+        return (ClassId, Race);
+    }
 }

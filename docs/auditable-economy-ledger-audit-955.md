@@ -53,9 +53,9 @@ Fineage routes most adena/item movement through `EconomyLedger` + `LedgerMove` (
 | **E2** | `ZoneWorldWedding.cs:200-206` | Divorce adena transfer mutated both bags before `CheckCommit` | Postings first, `CheckCommit`, then `Take`/`Add`, then `Commit` |
 | **E3** | `ZoneWorldMounts.Wyvern.cs:60-66` | Wyvern fee `TryReduce` before `CheckCommit`; rejection left stack depleted | Postings + `CheckCommit` before `TryReduce` |
 | **E4** | `ZoneWorldPrivateStore.Members.cs:74-87` | Buy-list purchase applied adena/items before ledger validation (sell path in `.More.cs` already checked) | Mirror buyer path: `CheckCommit` before transfers |
-| **E5** | `ZoneWorldFestival.Drops.cs:17` | Festival blood offering `Inventory.Add` with **no** ledger posting | **Open** — document; needs `LedgerTxKind` + Mobius parity pass |
-| **E6** | `ZoneWorldConsumables.cs:158-161` | Potion `restorationRandom` grants items after consume without extra ledger rows | **Open** — likely bundled in consume transaction; verify |
-| **E7** | Cross-cutting | `RecordPlayerBagChange` mutates before commit | **Open** — migrate hot paths to check-before-mutate |
+| **E5** | `ZoneWorldFestival.Drops.cs` | Festival blood offering without ledger posting | **Closed** — `LedgerTxKind.FestivalBloodOffering` via `RecordBagChange` |
+| **E6** | `ZoneWorldConsumables.cs` | `restorationRandom` / `restoration` grants after consume | **Closed** — second `RecordBagChange` on same `Consume` move |
+| **E7** | Cross-cutting | `RecordPlayerBagChange` mutates before commit | **Open** — enchant/augment/crystallize; use explicit `CheckCommit` migration |
 
 Cross-player / AOI issues from the 2026-11-22 review (`docs/zone-consistency-review-2026-11-22.md`) remain tracked there; they are visibility/presence, not ledger conservation.
 
@@ -69,7 +69,7 @@ Cross-player / AOI issues from the 2026-11-22 review (`docs/zone-consistency-rev
 - Every piece in holdings has `OwnerOf(instance)` pointing at that account.
 - Every `OwnerOf` entry has a matching instance in holdings.
 
-World-level checks (every ground account has live `GroundItem`, every NPC maps to spawn data, movement authority) — **PR 3** with load-test oracle extension.
+World-level checks: `EconomyWorldReconciler` (ground accounts vs live stacks, online bag vs ledger). Load-test oracle extension — follow-up.
 
 ---
 

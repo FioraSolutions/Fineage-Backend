@@ -183,12 +183,13 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
         if (roster.Characters.Length == 0)
         {
+            var (classId, race) = Scenario.ResolveClassAndRace(BotId);
             await LoginExchangeAsync(NetOpcode.CreateCharacter,
                 NetCodec.EncodeCreateCharacter(new CreateCharacterMsg
                 {
                     Name = CharacterName,
-                    ClassId = Scenario.ClassId,
-                    Race = Scenario.Race,
+                    ClassId = classId,
+                    Race = race,
                     Sex = HumanClasses.SexMale
                 }),
                 NetOpcode.CreateResult, ct);
@@ -512,15 +513,22 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     /// <summary>Weighted pick over the whole mix: weights are relative, so a mix that sums past 1 cannot shadow its tail.</summary>
     internal string PickAction()
     {
-        double total = 0;
-        foreach (var weight in Scenario.ActionWeights.Values)
-            total += weight;
-        if (total <= 0)
-            throw new InvalidOperationException($"scenario {Scenario.Name}: actionWeights sum to 0.");
-        double roll = _rng.NextDouble() * total;
+        IEnumerable<KeyValuePair<string, double>> weights = Scenario.ActionWeights;
+        if (Scenario.Economy is { Enabled: true } eco)
+        {
+            int mod = Math.Abs(BotId) % eco.ManufacturerModulo;
+            weights = weights.Where(pair => pair.Key switch
+            {
+                "economy_manufacture_maker" => mod == eco.ManufacturerRemainder,
+                "economy_manufacture_customer" => mod == 1,
+                _ => true
+            });
+        }
+
+        double roll = _rng.NextDouble();
         double acc = 0;
         string last = "";
-        foreach (var (name, weight) in Scenario.ActionWeights)
+        foreach (var (name, weight) in weights)
         {
             if (weight <= 0)
                 continue;

@@ -26,6 +26,12 @@ int? zonePid = int.TryParse(Arg(args, "--zone-pid"), out int pid) ? pid : null;
 var scenario = ScenarioLoader.Load(scenarioPath);
 if (string.IsNullOrWhiteSpace(scenario.Name))
     scenario.Name = Path.GetFileNameWithoutExtension(scenarioPath);
+string? prefixOverride = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX");
+if (!string.IsNullOrWhiteSpace(prefixOverride))
+    scenario.AccountPrefix = prefixOverride.Trim();
+string? passwordOverride = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_LOADTEST_PASSWORD");
+if (!string.IsNullOrWhiteSpace(passwordOverride))
+    scenario.Password = passwordOverride;
 string? layoutOverride = Arg(args, "--spawn-layout");
 if (!string.IsNullOrWhiteSpace(layoutOverride))
     scenario.SpawnLayout = layoutOverride;

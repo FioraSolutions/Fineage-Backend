@@ -72,7 +72,8 @@ public static class ScenarioLoader
     public static readonly IReadOnlySet<string> BotEconomyActions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "economy_hub", "economy_shop_buy", "economy_shop_sell", "economy_warehouse", "economy_trade",
-        "economy_store", "economy_manufacture", "economy_manor", "economy_pickup_drop"
+        "economy_store", "economy_manufacture", "economy_manufacture_maker", "economy_manufacture_customer",
+        "economy_manor", "economy_pickup_drop"
     };
 
     /// <summary>True when the scenario file itself sets top-level <paramref name="key"/> (not a class default).</summary>
@@ -118,6 +119,12 @@ public static class ScenarioLoader
             child.Economy = parent.Economy;
         if (child.HeavyPlay == null && parent.HeavyPlay != null)
             child.HeavyPlay = parent.HeavyPlay;
+
+        if (child.Economy == null && parent.Economy != null)
+            child.Economy = parent.Economy;
+
+        if (parent.Economy is { Enabled: true } && child.SpawnLayout is "town" or "")
+            child.SpawnLayout = parent.SpawnLayout;
 
         return child;
     }

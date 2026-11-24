@@ -43,6 +43,12 @@ public sealed class EconomyHammerConfig
     public int RecipeListId { get; set; } = 1;
     public long ManufactureFee { get; set; } = 50;
 
+    /// <summary>Every Nth bot is created as the dwarf crafter the manufacture flow needs.</summary>
+    public int ManufacturerRace { get; set; } = 4;
+    public int ManufacturerClassId { get; set; } = 53;
+    public int ManufacturerModulo { get; set; } = 6;
+    public int ManufacturerRemainder { get; set; } = 0;
+
     public int TradeAdenaAmount { get; set; } = 100;
     public int WarehouseDepositAdena { get; set; } = 50;
 

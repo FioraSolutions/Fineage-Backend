@@ -29,8 +29,22 @@ public sealed class BotStats
 
     public double RttAvgMs => RttSamples == 0 ? 0 : RttSumMs / RttSamples;
 
+    int _economyFlowDepth;
+
+    public bool InEconomyFlow => Volatile.Read(ref _economyFlowDepth) > 0;
+
+    public void BeginEconomyFlow() => Interlocked.Increment(ref _economyFlowDepth);
+
+    public void EndEconomyFlow()
+    {
+        if (Interlocked.Decrement(ref _economyFlowDepth) < 0)
+            Interlocked.Exchange(ref _economyFlowDepth, 0);
+    }
+
     public void RecordEconomyReject(string code)
     {
+        if (!InEconomyFlow || !Consistency.EconomyConsistencyOracle.IsEconomyFlowReject(code))
+            return;
         if (string.IsNullOrWhiteSpace(code))
             code = "unknown";
         EconomyRejectCounts.AddOrUpdate(code, 1, static (_, n) => n + 1);
