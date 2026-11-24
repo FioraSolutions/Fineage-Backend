@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 
 namespace Fineage.Protocol.Telemetry;
@@ -5,12 +6,12 @@ namespace Fineage.Protocol.Telemetry;
 /// <summary>
 /// Aggregates the Fineage meter for Prometheus scrapes.
 /// <para>
-/// Recording never takes a lock: each recording thread appends to its own single-producer ring
+/// Recording never takes a lock: each recording thread appends to its own single-producer log
 /// (<see cref="ThreadBuffer"/>), and the aggregation below runs only on the drain thread or inside
 /// <see cref="Snapshot"/>, both under <c>_gate</c>. Before this, every counter add and histogram record took one
 /// process-wide lock, so the fan-out worker, the stripe workers and the socket pumps serialized on telemetry.
-/// A ring that fills before the drain thread empties it is drained by its own producer under <c>_gate</c>
-/// (counted in <see cref="BufferFullDrains"/>); values are never dropped.
+/// A recording thread that outruns the drain thread seals its full block onto a lock-free queue and starts a new
+/// one, so the recording path never waits on <c>_gate</c> and no measurement is dropped.
 /// </para>
 /// </summary>
 public sealed class MetricsCollector : IDisposable
@@ -31,7 +32,6 @@ public sealed class MetricsCollector : IDisposable
     readonly KeyValuePair<string, object?>[] _tagScratch = new KeyValuePair<string, object?>[ThreadBuffer.InlineTags];
     readonly ManualResetEventSlim _stop = new(false);
     readonly Thread _drainer;
-    long _bufferFullDrains;
     readonly Dictionary<string, MutableEndpoint> _rows = new(StringComparer.Ordinal);
     readonly DurationHistogram _tick = new();
     readonly DurationHistogram _enterTry = new();
@@ -206,8 +206,6 @@ public sealed class MetricsCollector : IDisposable
     }
 
 
-    public long BufferFullDrains => Interlocked.Read(ref _bufferFullDrains);
-
     public void Dispose()
     {
         _stop.Set();
@@ -260,7 +258,7 @@ public sealed class MetricsCollector : IDisposable
             DrainAllLocked();
     }
 
-    /// <summary>Applies every published measurement; drops rings whose thread has exited once they are empty.</summary>
+    /// <summary>Applies every published measurement; drops buffers whose thread has exited once they are empty.</summary>
     void DrainAllLocked()
     {
         for (int i = _buffers.Count - 1; i >= 0; i--)
@@ -274,11 +272,8 @@ public sealed class MetricsCollector : IDisposable
 
     void DrainLocked(ThreadBuffer buffer)
     {
-        long head = buffer.Head;
-        long tail = buffer.PublishedTail;
-        for (long at = head; at < tail; at++)
+        while (buffer.TryTake(out ThreadBuffer.Slot slot))
         {
-            ref ThreadBuffer.Slot slot = ref buffer.SlotAt(at);
             ReadOnlySpan<KeyValuePair<string, object?>> tags = slot.Extra ?? TagsOf(ref slot);
             switch (slot.Kind)
             {
@@ -292,13 +287,9 @@ public sealed class MetricsCollector : IDisposable
                     ApplyDouble(slot.Instrument!, slot.Double, tags);
                     break;
                 default:
-                    throw new InvalidOperationException($"metrics ring slot has unknown kind {slot.Kind}");
+                    throw new InvalidOperationException($"metrics buffer slot has unknown kind {slot.Kind}");
             }
-
-            slot = default;
         }
-
-        buffer.Release(tail);
     }
 
     ReadOnlySpan<KeyValuePair<string, object?>> TagsOf(ref ThreadBuffer.Slot slot)
@@ -316,11 +307,27 @@ public sealed class MetricsCollector : IDisposable
     }
 
     /// <summary>
-    /// Single-producer ring owned by one recording thread. The producer writes a slot and then publishes the tail;
-    /// the consumer (always under the collector gate) reads up to the published tail and then releases the head.
+    /// Single-producer log owned by one recording thread. The producer appends to the block it is filling and
+    /// publishes that block's count; the consumer (always under the collector gate) reads the published slots.
+    /// <para>
+    /// The log is a chain of fixed blocks instead of one wrapping array, so <see cref="Append"/> never takes a lock
+    /// and never loses a measurement. The old flat ring had to wrap, and wrapping meant overwriting slots the drain
+    /// thread had not read yet, so a producer that caught up with the consumer drained its own ring under
+    /// <c>_gate</c> — the same lock the drain thread and every snapshot hold. That is the coupling that put the
+    /// fan-out worker and the socket pumps behind telemetry. A full block is now sealed onto a lock-free queue and
+    /// a fresh one started, so the producer always has room.
+    /// </para>
     /// </summary>
-    sealed class ThreadBuffer(MetricsCollector owner, Thread thread)
+    sealed class ThreadBuffer
     {
+        readonly MetricsCollector owner;
+
+        public ThreadBuffer(MetricsCollector owner, Thread thread)
+        {
+            this.owner = owner;
+            Owner = thread;
+            _current = _first;
+        }
         public const byte KindLong = 1;
         public const byte KindInt = 2;
         public const byte KindDouble = 3;
@@ -340,36 +347,105 @@ public sealed class MetricsCollector : IDisposable
             public KeyValuePair<string, object?>[]? Extra;
         }
 
-        readonly Slot[] _slots = new Slot[BufferCapacity];
-        long _head;
-        long _tail;
+        /// <summary>One fixed block. The producer seals it onto the queue once it is full.</summary>
+        sealed class Block(long id)
+        {
+            public readonly Slot[] Slots = new Slot[BufferCapacity];
+            long _count;
 
-        public Thread Owner { get; } = thread;
+            public long Id { get; } = id;
 
-        public long Head => Volatile.Read(ref _head);
+            public long Count => Volatile.Read(ref _count);
 
-        public long PublishedTail => Volatile.Read(ref _tail);
+            public void Publish(long count) => Volatile.Write(ref _count, count);
+        }
 
-        public bool IsEmpty => Volatile.Read(ref _head) == Volatile.Read(ref _tail);
+        readonly ConcurrentQueue<Block> _sealed = new();
+        readonly Block _first = new(0);
+        Block _current;
+        int _currentCount;
+        long _nextId = 1;
+        // Consumer side: the block it is reading, how far, and the highest block it fully consumed. The drain
+        // thread and Snapshot are the only readers, both under the collector gate.
+        Block? _readBlock;
+        int _readAt;
+        long _consumedThroughId = -1;
 
-        public ref Slot SlotAt(long at) => ref _slots[at % BufferCapacity];
+        public Thread Owner { get; }
 
-        public void Release(long head) => Volatile.Write(ref _head, head);
+        public bool IsEmpty
+        {
+            get
+            {
+                if (_readBlock != null && _readAt < _readBlock.Count)
+                    return false;
+                Block current = Volatile.Read(ref _current);
+                return _sealed.IsEmpty && current.Count == (ReferenceEquals(_readBlock, current) ? _readAt : 0);
+            }
+        }
+
+        /// <summary>Consumer side, under the collector gate: the next published slot, or false when caught up.</summary>
+        public bool TryTake(out Slot slot)
+        {
+            while (true)
+            {
+                if (_readBlock != null)
+                {
+                    if (_readAt < _readBlock.Count)
+                    {
+                        slot = _readBlock.Slots[_readAt++];
+                        return true;
+                    }
+
+                    if (!ReferenceEquals(_readBlock, Volatile.Read(ref _current)))
+                    {
+                        // Fully read and the producer already moved on; it sealed this block onto the queue.
+                        _consumedThroughId = _readBlock.Id;
+                        _readBlock = null;
+                        continue;
+                    }
+
+                    // The block being filled has nothing new yet.
+                    slot = default;
+                    return false;
+                }
+
+                Block? next = null;
+                while (_sealed.TryDequeue(out Block? candidate))
+                {
+                    if (candidate.Id > _consumedThroughId)
+                    {
+                        next = candidate;
+                        break;
+                    }
+                }
+
+                next ??= Volatile.Read(ref _current);
+                if (next.Id <= _consumedThroughId)
+                {
+                    slot = default;
+                    return false;
+                }
+
+                _readBlock = next;
+                _readAt = 0;
+            }
+        }
 
         public void Append(Instrument instrument, byte kind, long longValue, double doubleValue,
             ReadOnlySpan<KeyValuePair<string, object?>> tags)
         {
-            long tail = _tail;
-            if (tail - Volatile.Read(ref _head) >= BufferCapacity)
+            if (_currentCount >= BufferCapacity)
             {
-                // The drain thread fell behind: this producer empties its own ring under the gate. Rare by design;
-                // a dropped measurement would make the counters lie.
-                Interlocked.Increment(ref owner._bufferFullDrains);
-                lock (owner._gate)
-                    owner.DrainLocked(this);
+                // Seal the full block and start a new one. The producer never writes a sealed block again, so the
+                // consumer can read it at its own pace and this path stays lock-free.
+                _current.Publish(BufferCapacity);
+                _sealed.Enqueue(_current);
+                _current = new Block(_nextId++);
+                _currentCount = 0;
             }
 
-            ref Slot slot = ref _slots[tail % BufferCapacity];
+            ref Slot slot = ref _current.Slots[_currentCount];
             slot.Instrument = instrument;
             slot.Kind = kind;
             slot.Long = longValue;
@@ -393,7 +469,8 @@ public sealed class MetricsCollector : IDisposable
                 slot.Extra = tags.ToArray();
             }
 
-            Volatile.Write(ref _tail, tail + 1);
+            _currentCount++;
+            _current.Publish(_currentCount);
         }
     }
 
