@@ -411,32 +411,44 @@ internal sealed class ZoneCommandIngress
         }
     }
 
-    public void FailUncommitted(IReadOnlySet<int> characterIds, string error)
+    public static void Complete(IReadOnlyList<Applied> applied) =>
+        Answer(applied, committed: true, uncommitted: null, error: null);
+
+    public static void Complete(IReadOnlyList<Applied> applied, string uncommittedError) =>
+        Answer(applied, committed: true, uncommitted: null, uncommittedError);
+
+    /// <summary>
+    /// Answers the commands of one step after its economy flush. The list is the one taken from
+    /// <see cref="TakeApplied"/>, so it is the only owner of those replies: when the batch never reached a durable
+    /// commit, every character whose write failed hears <paramref name="error"/> instead of success. A row that
+    /// already carries its own error or failure keeps it.
+    /// </summary>
+    public static void AnswerAfterFlush(
+        IReadOnlyList<Applied> applied,
+        bool committed,
+        IReadOnlySet<int>? uncommitted,
+        string error)
     {
-        ArgumentNullException.ThrowIfNull(characterIds);
+        ArgumentNullException.ThrowIfNull(applied);
         ArgumentException.ThrowIfNullOrEmpty(error);
-        lock (_lock)
-        {
-            for (int i = 0; i < _applied.Count; i++)
-            {
-                var row = _applied[i];
-                if (row.Error != null || row.Failure != null)
-                    continue;
-                if (!characterIds.Contains(row.Submission.Session.ObjectId))
-                    continue;
-                _applied[i] = row with { Error = error };
-            }
-        }
+        Answer(applied, committed, uncommitted, error);
     }
 
-    public static void Complete(IReadOnlyList<Applied> applied)
+    static void Answer(IReadOnlyList<Applied> applied, bool committed, IReadOnlySet<int>? uncommitted, string? error)
     {
-        foreach (var (submission, error, failure) in applied)
+        foreach (var (submission, rowError, failure) in applied)
         {
+            if (!committed && failure == null && rowError == null && uncommitted != null && error != null
+                && uncommitted.Contains(submission.Session.ObjectId))
+            {
+                submission.Reply.TrySetResult(error);
+                continue;
+            }
+
             if (failure != null)
                 submission.Reply.TrySetException(failure);
             else
-                submission.Reply.TrySetResult(error);
+                submission.Reply.TrySetResult(rowError);
         }
     }
 

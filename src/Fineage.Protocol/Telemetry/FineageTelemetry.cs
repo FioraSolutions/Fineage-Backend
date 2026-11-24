@@ -392,6 +392,37 @@ public static class FineageTelemetry
     public static Func<int>? PersistPendingCount { get; set; }
     public static Func<double>? PersistOldestAgeMs { get; set; }
 
+    public static readonly Counter<long> EconomyPersistBatches =
+        Meter.CreateCounter<long>("fineage.economy.persist.batches", description: "Economy durable commits (tag result)");
+
+    public static readonly Counter<long> EconomyPersistFailures =
+        Meter.CreateCounter<long>("fineage.economy.persist.failures", description: "Economy durable commits that failed (tag reason)");
+
+    public static readonly ObservableGauge<int> EconomyPersistPending = Meter.CreateObservableGauge(
+        "fineage.economy.persist.pending",
+        ObserveEconomyPersistPending,
+        unit: "{batch}",
+        description: "Economy commit batches waiting on the persist worker");
+
+    public static readonly ObservableGauge<double> EconomyPersistOldestAge = Meter.CreateObservableGauge(
+        "fineage.economy.persist.oldest_age_ms",
+        ObserveEconomyPersistOldestAge,
+        unit: "ms",
+        description: "Age of the oldest economy commit batch not yet durable");
+
+    public static Func<int>? EconomyPersistPendingCount { get; set; }
+    public static Func<double>? EconomyPersistOldestAgeMs { get; set; }
+
+    static IEnumerable<Measurement<int>> ObserveEconomyPersistPending()
+    {
+        yield return new Measurement<int>(EconomyPersistPendingCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<double>> ObserveEconomyPersistOldestAge()
+    {
+        yield return new Measurement<double>(EconomyPersistOldestAgeMs?.Invoke() ?? 0);
+    }
+
     static IEnumerable<Measurement<int>> ObservePersistPending()
     {
         yield return new Measurement<int>(PersistPendingCount?.Invoke() ?? 0);

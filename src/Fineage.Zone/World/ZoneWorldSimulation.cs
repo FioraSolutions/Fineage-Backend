@@ -54,8 +54,27 @@ public sealed partial class ZoneWorld
     /// <summary>The wall sample of the current step for calendar rules; outside a step the wall clock.</summary>
     DateTimeOffset WallNow() => DateTimeOffset.FromUnixTimeMilliseconds(_simulationClock.WallUnixMs());
 
-    /// <summary>One full fixed step on demand (tests and admin diagnostics), same body the loop runs.</summary>
-    internal void StepSimulation() => RunStep(wall =>
+    /// <summary>
+    /// One fixed step on demand for a host that drives the world itself (tests and admin diagnostics): the loop
+    /// step, then the durable economy commit of what it dirtied. Commands answer after that commit, so a host that
+    /// steps by hand has to finish the commit before it awaits a reply; only the live loop leaves the batch on the
+    /// worker queue and drains it at the next step boundary.
+    /// </summary>
+    internal void StepSimulation()
+    {
+        StepSimulationRaw();
+
+        // A hand-stepped host has to see its economy commit before it awaits a command reply. The live loop keeps the
+        // batch on the worker queue and drains it at the next step boundary instead (see SimulationLoopAsync).
+        if (_economyPersist != null)
+        {
+            using (_affinity.Step())
+                _economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this);
+        }
+    }
+
+    /// <summary>The step alone: what the live loop runs, leaving the durable economy on the worker queue.</summary>
+    void StepSimulationRaw() => RunStep(wall =>
     {
         _simulationTicks.Step(wall);
         _commandLog?.AppendStep(_simulationTicks.Tick, wall);
@@ -69,20 +88,51 @@ public sealed partial class ZoneWorld
     {
         StepSimulation();
         _fanoutDispatcher.WaitUntilIdle();
+        if (_economyPersist != null && !_affinity.OnStep)
+        {
+            _economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(30), this);
+            using (_affinity.Step())
+                _economyPersist.DrainCompletions(this);
+        }
     }
 
-    /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
+    /// <summary>
+    /// Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler. It is a step
+    /// body, so it never waits on a durable economy commit; it drains completions when it returns.
+    /// </summary>
     internal void RunStepForTest(Action body)
     {
         using (_affinity.Step())
-            body();
+        {
+            _stepping = true;
+            try
+            {
+                body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+
+            _economyPersist?.DrainCompletions(this);
+        }
     }
 
     /// <summary>Test hook: runs <paramref name="body"/> with world ownership, without advancing the scheduler.</summary>
     internal T RunStepForTest<T>(Func<T> body)
     {
         using (_affinity.Step())
-            return body();
+        {
+            _stepping = true;
+            try
+            {
+                return body();
+            }
+            finally
+            {
+                _stepping = false;
+            }
+        }
     }
 
     /// <summary>
@@ -98,10 +148,12 @@ public sealed partial class ZoneWorld
         SimulationThreadMarker.Enter();
         NotePhase("step-body");
         bool outermost = _fanout.Recording == null;
+        _stepping = true;
         try
         {
             WithDeferredInventoryPersist(() =>
             {
+                _economyPersist?.DrainCompletions(this);
                 _fanout.ConfigureSequence(_simulationTicks.Tick, 0);
                 _fanout.Begin();
                 try
@@ -129,6 +181,8 @@ public sealed partial class ZoneWorld
                 if (stranded.Count > 0)
                     ZoneCommandIngress.Complete(stranded);
             }
+
+            _stepping = false;
         }
     }
 
@@ -140,12 +194,13 @@ public sealed partial class ZoneWorld
     /// </summary>
     (double FlushMs, double SealMs, double ReplyMs) ReleaseAppliedCommandReplies(List<CommandSubmitMark>? submits = null)
     {
+        _economyPersist?.DrainCompletions(this);
+
         long flushStart = Stopwatch.GetTimestamp();
-        bool committed = FlushDirtyInventories();
+        var applied = _ingress.TakeApplied();
+        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied);
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
-        if (uncommitted != null)
-            _ingress.FailUncommitted(uncommitted, EconomyCommitFailed);
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
 
         long sealStart = Stopwatch.GetTimestamp();
@@ -160,9 +215,10 @@ public sealed partial class ZoneWorld
         AwaitTestFanoutDelivery();
 
         long replyStart = Stopwatch.GetTimestamp();
-        var applied = _ingress.TakeApplied();
-        if (applied.Count > 0)
-            ZoneCommandIngress.Complete(applied);
+        // A batch still on the worker queue answers through its own completion, so this step leaves those replies
+        // alone; everything else answers here, including a commit that failed.
+        if (applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
+            ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);
         return (flushMs, sealMs, replyMs);

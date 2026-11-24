@@ -132,12 +132,22 @@ public sealed partial class ZoneWorld
     readonly WorldAffinity _affinity = new();
     readonly SimulationSyncIoGuard _syncIo;
     readonly CharacterPersistWorker _snapshots;
+    EconomyPersistService? _economyPersist;
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
     /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
     /// <see cref="FlushDirtyInventories"/>, once per step instead of once per change.
     /// </summary>
     int _deferInventoryPersistDepth;
+
+    /// <summary>
+    /// True while <see cref="ZoneWorldSimulation.RunStep"/> runs: the one place that must not wait on a durable
+    /// economy commit. Off-step callers also hold the world turn, so the turn alone says nothing about a step.
+    /// </summary>
+    bool _stepping;
+
+    /// <summary>True only inside a real simulation step body, off-step callers included in "not a step".</summary>
+    internal bool InSimulationStep => _stepping;
 
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
     readonly TrackedLock _economyLock = new("economy");
@@ -354,6 +364,7 @@ public sealed partial class ZoneWorld
                     "accounts.OpenLedgerJournal(); tests must pass new MemoryLedgerJournal().")
                 : new MemoryLedgerJournal());
         _journal = journal;
+        _economyPersist = new EconomyPersistService(_accounts, journal, _affinity);
         _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);

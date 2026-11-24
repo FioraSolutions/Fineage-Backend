@@ -29,7 +29,13 @@ public sealed partial class ZoneWorld
             return LedgerHoldingsOf(account);
     }
 
-    /// <summary>A move at the step's tick, numbered after the tick's earlier moves.</summary>
+    /// <summary>
+    /// A move at the step's tick, numbered after the tick's earlier moves. A character with a durable
+    /// economy commit in flight is not blocked here: the step keeps one scenario going across several
+    /// moves (unlock, then the chest's own drop), and the in-flight batch is a snapshot the completion
+    /// drain applies in order. Guarding moves on the reservation froze the second move of every such
+    /// scenario and broke #948's allow-writes-during-commit contract.
+    /// </summary>
     LedgerMove BeginLedgerMove(LedgerTxKind kind, int causedBy, int reference)
     {
         if (RegionBodyScope.Of(this) != null)

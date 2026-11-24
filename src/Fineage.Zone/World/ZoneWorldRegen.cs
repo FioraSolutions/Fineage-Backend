@@ -28,6 +28,7 @@ public sealed partial class ZoneWorld
             return;
         _affinity.Drive();
         _snapshots.Start();
+        _economyPersist?.Start();
         _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
         _ = Task.Run(() => StepWatchdogAsync(shutdown));
     }
@@ -138,7 +139,9 @@ public sealed partial class ZoneWorld
                 Volatile.Write(ref _stepStartedTimestamp, started);
                 try
                 {
-                    StepSimulation();
+                    // The step only: its economy batch stays on the worker queue and the next step's boundary drains it,
+                    // so the loop never waits on Postgres.
+                    StepSimulationRaw();
                 }
                 catch (Exception ex)
                 {
@@ -162,6 +165,7 @@ public sealed partial class ZoneWorld
         {
             ShutdownSaveOnlinePlayers();
             _snapshots.Stop();
+            _economyPersist?.Stop();
             FlushLedgerOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }

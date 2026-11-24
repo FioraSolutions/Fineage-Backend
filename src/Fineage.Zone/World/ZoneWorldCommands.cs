@@ -22,6 +22,8 @@ public sealed partial class ZoneWorld
     internal const string EconomyCommitFailed = "economy_commit_failed: auditable economy commit failed";
 
     readonly ZoneCommandIngress _ingress = new();
+
+    internal ZoneCommandIngress CommandIngress => _ingress;
     SimulationLog? _commandLog;
 
     internal int SubmissionWakeCountForTest => _ingress.WakeSignalCountForTest;
