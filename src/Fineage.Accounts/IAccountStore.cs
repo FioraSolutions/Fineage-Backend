@@ -8,6 +8,14 @@ public interface IAccountStore
     /// <summary>Next item instance id this store will assign (Mobius character_items sequence).</summary>
     int NextItemObjectId { get; }
 
+    /// <summary>
+    /// Reserves <paramref name="count"/> contiguous item instance ids and returns the first. Every process that
+    /// shares this store (login creating starter kits, each zone allocating loot/shop items) draws from the same
+    /// durable counter, so ids never collide across processes. A per-process copy of <see cref="NextItemObjectId"/>
+    /// is not a valid allocator once a second process writes items.
+    /// </summary>
+    int ReserveItemObjectIds(int count);
+
     bool AccountExists(string account);
 
     AddAccountStatus TryAddAccount(string name, string passwordHash, string passwordSalt, int iterations, string? email);

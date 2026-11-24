@@ -101,6 +101,7 @@ public sealed partial class ZoneWorld
     {
         NotePhase("acquiring-turn");
         using var turn = _affinity.Step();
+        SimulationThreadMarker.Enter();
         NotePhase("step-body");
         bool outermost = _fanout.Recording == null;
         try
@@ -127,6 +128,7 @@ public sealed partial class ZoneWorld
         }
         finally
         {
+            SimulationThreadMarker.Exit();
             if (outermost)
             {
                 AwaitTestFanoutDelivery();

@@ -9,33 +9,57 @@ namespace Fineage.Zone.Tests;
 public sealed class FanoutDispatcherBackpressureTests
 {
     [Fact]
-    public void Enqueue_blocks_when_the_queue_is_full_instead_of_dropping_batches()
+    public void Enqueue_never_blocks_or_delivers_inline_past_the_hard_backlog_and_keeps_order()
     {
         var holdWorker = new ManualResetEventSlim(false);
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 1)
+        using var dispatcher = new FanoutDispatcher(softBacklogBatches: 2, hardBacklogBatches: 4)
         {
             HoldWorkerBeforeReadForTest = holdWorker,
         };
         var delivered = new ConcurrentQueue<ulong>();
+        int callerThread = Environment.CurrentManagedThreadId;
+        int inlineDeliveries = 0;
 
-        var first = Batch(1, () => delivered.Enqueue(1));
-        var second = Batch(2, () => delivered.Enqueue(2));
-
-        dispatcher.Enqueue(first);
-        var blocked = Task.Run(() => dispatcher.Enqueue(second));
-        Assert.False(blocked.Wait(TimeSpan.FromMilliseconds(300)));
+        var enqueue = Task.Run(() =>
+        {
+            int producer = Environment.CurrentManagedThreadId;
+            for (ulong n = 1; n <= 10; n++)
+            {
+                ulong id = n;
+                dispatcher.Enqueue(Batch(id, () =>
+                {
+                    if (Environment.CurrentManagedThreadId == producer)
+                        Interlocked.Increment(ref inlineDeliveries);
+                    delivered.Enqueue(id);
+                }));
+            }
+        });
+        Assert.True(enqueue.Wait(TimeSpan.FromSeconds(2)), "enqueue must return while the worker is held");
+        Assert.Empty(delivered);
+        Assert.Equal(10, dispatcher.Backlog);
 
         holdWorker.Set();
-        blocked.GetAwaiter().GetResult();
         dispatcher.WaitUntilIdle();
 
-        Assert.Equal(new ulong[] { 1, 2 }, delivered.ToArray());
+        Assert.Equal(0, inlineDeliveries);
+        Assert.Equal(Enumerable.Range(1, 10).Select(n => (ulong)n).ToArray(), delivered.ToArray());
+        // Instance counters, not the process-wide meter: other tests publish to the same instruments in parallel.
+        Assert.Equal(6, dispatcher.EmergencyEnqueues);
+        Assert.Equal(2, dispatcher.SoftExceededEnqueues);
+        Assert.NotEqual(0, callerThread);
+    }
+
+    [Fact]
+    public void Invalid_backlog_limits_throw()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new FanoutDispatcher(softBacklogBatches: 0, hardBacklogBatches: 4));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new FanoutDispatcher(softBacklogBatches: 8, hardBacklogBatches: 4));
     }
 
     [Fact]
     public void Enqueue_after_close_logs_sequence_and_throws_without_delivering_the_batch()
     {
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 4);
+        using var dispatcher = new FanoutDispatcher();
         var delivered = new ConcurrentQueue<ulong>();
 
         dispatcher.Enqueue(Batch(1, () => delivered.Enqueue(1)));
@@ -67,7 +91,7 @@ public sealed class FanoutDispatcherBackpressureTests
         });
         listener.Start();
 
-        using var dispatcher = new FanoutDispatcher(batchQueueCapacity: 4);
+        using var dispatcher = new FanoutDispatcher();
         dispatcher.Enqueue(Batch(1, () => { }));
         dispatcher.WaitUntilIdle();
         Thread.Sleep(300);

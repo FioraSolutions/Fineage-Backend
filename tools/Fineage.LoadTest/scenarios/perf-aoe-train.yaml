@@ -1,0 +1,19 @@
+# Perf #951 — one Warlord pulls/kills ~50 mobs; party of 9 watches (full fan-out).
+name: perf-aoe-train
+botCount: 9
+rampUpSeconds: 15
+durationSeconds: 120
+spawnLayout: aoe-train
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+aoiCellSize: 3000
+requireSkillLatencySamples: true
+classId: 0  # Human Fighter; FINEAGE_ZONE_LOADTEST_COMBAT=1 makes each load-test account a level 77 Warlord (class 3)
+heavyPlay:
+  mode: aoe-train
+  partySize: 9
+  skillRotation: [36, 48]
+actionWeights:
+  sit: 0.9
+  social: 0.1

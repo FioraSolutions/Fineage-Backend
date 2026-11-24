@@ -121,6 +121,13 @@ public sealed record SelectTargetCommand(int TargetObjectId) : ZoneCommand
         Completed(world.TrySelectTargetAsync(session, TargetObjectId, CancellationToken.None));
 }
 
+/// <summary>Load-test relocation (<see cref="LoadTestCombatSettings.AllowsTeleport"/>); see <see cref="ZoneWorld.TryLoadTestTeleport"/>.</summary>
+public sealed record LoadTestTeleportCommand(int X, int Y, int Z) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        world.TryLoadTestTeleport(session, X, Y, Z);
+}
+
 public sealed record CancelTargetCommand : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

@@ -1,4 +1,6 @@
 # Mixed behavior profile: combat, PvP, social, economy hooks, relog churn.
+# gatekeeperTravelShare: that share of the fleet walks to the village gatekeeper and teleports town to town.
+gatekeeperTravelShare: 0.2
 actionWeights:
   move: 0.22
   attack: 0.14
@@ -10,7 +12,6 @@ actionWeights:
   pickup: 0.06
   trade: 0.05
   party: 0.05
-  teleport: 0.04
   relog: 0.03
 spawnLayout: spread
 aoiCellSize: 3000

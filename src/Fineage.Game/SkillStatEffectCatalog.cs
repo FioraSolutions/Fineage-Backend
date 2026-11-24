@@ -90,6 +90,15 @@ public sealed class SkillStatEffectCatalog
     readonly Dictionary<int, SkillStatEffect> _byId;
     static readonly ConcurrentDictionary<int, byte> MissingStatWarned = new();
 
+    /// <summary>
+    /// True once per skill id. The lock-free <see cref="ConcurrentDictionary{TKey,TValue}.ContainsKey"/> check comes
+    /// first because <c>TryAdd</c> takes a bucket lock even when the key is already there: every stat rebuild of a
+    /// player with a passive that has no stat row took that lock on the simulation thread, and the load-test profile
+    /// showed attack and auto-attack ticks stalled 200-260 ms in <c>Monitor.Enter</c> under it.
+    /// </summary>
+    static bool FirstMissing(int skillId) =>
+        !MissingStatWarned.ContainsKey(skillId) && MissingStatWarned.TryAdd(skillId, 0);
+
     SkillStatEffectCatalog(Dictionary<int, SkillStatEffect> byId) => _byId = byId;
 
     public static readonly SkillStatEffectCatalog Empty = new([]);
@@ -117,7 +126,7 @@ public sealed class SkillStatEffectCatalog
         {
             if (!_byId.TryGetValue(a.SkillId, out var effect))
             {
-                if (onMissing != null && MissingStatWarned.TryAdd(a.SkillId, 0))
+                if (onMissing != null && FirstMissing(a.SkillId))
                     onMissing(a.SkillId);
                 continue;
             }
@@ -177,7 +186,7 @@ public sealed class SkillStatEffectCatalog
         {
             if (!_byId.TryGetValue(skillId, out var effect))
             {
-                if (onMissing != null && MissingStatWarned.TryAdd(skillId, 0))
+                if (onMissing != null && FirstMissing(skillId))
                     onMissing(skillId);
                 continue;
             }

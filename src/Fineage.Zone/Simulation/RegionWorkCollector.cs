@@ -7,12 +7,16 @@ public sealed record RegionWork(RegionId Region, IReadOnlyList<int> ObjectIds);
 public sealed class RegionWorkCollector
 {
     readonly Dictionary<RegionId, List<int>> _byRegion = [];
+    // Lists handed out by the previous Drain. A stage finishes its region bodies before the next stage collects,
+    // so they are free again on the next Drain; reusing them keeps their capacity instead of regrowing every tick.
+    readonly List<List<int>> _lent = [];
+    readonly Stack<List<int>> _free = new();
 
     public void Add(RegionId region, int objectId)
     {
         if (!_byRegion.TryGetValue(region, out var ids))
         {
-            ids = [];
+            ids = _free.Count > 0 ? _free.Pop() : [];
             _byRegion[region] = ids;
         }
 
@@ -22,11 +26,19 @@ public sealed class RegionWorkCollector
     /// <summary>Collected work in ascending region order, each region's ids ascending; the collector is empty after.</summary>
     internal List<RegionWork> Drain()
     {
+        foreach (List<int> lent in _lent)
+        {
+            lent.Clear();
+            _free.Push(lent);
+        }
+
+        _lent.Clear();
         var work = new List<RegionWork>(_byRegion.Count);
         foreach (var (region, ids) in _byRegion)
         {
             ids.Sort();
             work.Add(new RegionWork(region, ids));
+            _lent.Add(ids);
         }
 
         _byRegion.Clear();

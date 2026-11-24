@@ -22,14 +22,32 @@ public sealed class RunEnvironmentInfo
 
 public static class RunEnvironmentCollector
 {
+    /// <summary><c>Debug</c> / <c>Release</c> from <c>/proc/&lt;pid&gt;/cmdline</c> (<c>…/bin/Debug/…</c>), or null.</summary>
+    internal static string? ZoneBuildFromProcess(int? zonePid)
+    {
+        if (zonePid is not > 0)
+            return null;
+        string path = $"/proc/{zonePid}/cmdline";
+        if (!File.Exists(path))
+            return null;
+        string cmd = File.ReadAllText(path).Replace('\0', ' ');
+        if (cmd.Contains("/bin/Debug/", StringComparison.Ordinal))
+            return "Debug";
+        if (cmd.Contains("/bin/Release/", StringComparison.Ordinal))
+            return "Release";
+        return null;
+    }
+
     public static RunEnvironmentInfo Collect(int? zonePid = null)
     {
         string? commit = TryGit("rev-parse", "HEAD");
         string? branch = TryGit("branch", "--show-current");
         bool dirty = TryGit("status", "--porcelain") is { Length: > 0 };
-        string build = Environment.GetEnvironmentVariable("FINEAGE_BUILD_CONFIGURATION")
-                         ?? Environment.GetEnvironmentVariable("DOTNET_BUILD_CONFIGURATION")
-                         ?? "Release";
+        // The zone binary path is the truth (run-local-net.sh defaults to Debug); the env is only a fallback.
+        string build = ZoneBuildFromProcess(zonePid)
+                       ?? Environment.GetEnvironmentVariable("FINEAGE_BUILD_CONFIGURATION")
+                       ?? Environment.GetEnvironmentVariable("DOTNET_BUILD_CONFIGURATION")
+                       ?? "unknown";
 
         long ramMb = 0;
         if (File.Exists("/proc/meminfo"))
