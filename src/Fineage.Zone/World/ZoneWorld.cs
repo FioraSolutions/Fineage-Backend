@@ -146,6 +146,10 @@ public sealed partial class ZoneWorld
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
     readonly List<EconomyBagWrite> _dirtyOfflineFreight = [];
     readonly bool _npcRegen;
+    /// <summary><see cref="ZoneNpcSettings.MaxDriftRange"/> read once: it was an environment lookup per NPC per think.</summary>
+    readonly int _maxDriftRange;
+    readonly int _regionWakeBudget;
+    readonly int _privatesSpawnBudget;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
     static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
@@ -246,6 +250,9 @@ public sealed partial class ZoneWorld
         InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
             regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
+        _maxDriftRange = ZoneNpcSettings.MaxDriftRange;
+        _regionWakeBudget = ZoneSimulationSettings.RegionWakeBudgetPerTick;
+        _privatesSpawnBudget = ZoneSimulationSettings.PrivatesSpawnBudgetPerTick;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
         _minions = Fineage.Zone.Npcs.NpcMinionCatalog.LoadDefault();

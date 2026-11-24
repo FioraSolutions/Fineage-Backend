@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Fineage.LoadTest.Travel;
 
 namespace Fineage.LoadTest.Bot;
 
@@ -18,6 +19,8 @@ public sealed class BotStats
     public double RttMaxMs;
     public long MissedBehaviorSlots;
     public DateTimeOffset? LastActionAt;
+    /// <summary>Set for gatekeeper travellers only.</summary>
+    public TravelStats? Travel;
 
     public long EconomyFlowsAttempted;
     public long EconomyFlowsSucceeded;

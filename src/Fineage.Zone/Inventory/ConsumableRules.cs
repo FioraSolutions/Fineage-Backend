@@ -26,9 +26,6 @@ public static class ConsumableRules
     public static string? EscapeClanHallError(bool dead, bool casting, bool hasHall) =>
         dead ? InventoryProtocol.Dead : casting ? "busy" : !hasHall ? EscapeNoClanHall : null;
 
-    /// <summary>Mobius SOE hit times: blessed (2036 / 2177) is near-instant; normal SOE is 20s.</summary>
-    public static int EscapeHitTimeMs(int skillId) => skillId is 2036 or 2177 ? 200 : 20_000;
-
     public static int PercentHeal(int current, int max, int percent)
     {
         if (max <= 0 || percent <= 0)

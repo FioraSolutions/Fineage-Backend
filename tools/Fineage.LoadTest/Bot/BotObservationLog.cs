@@ -144,6 +144,38 @@ public sealed class BotObservationLog
     int _lastPickedTarget;
     public int LastPickedTargetDistance { get; private set; }
 
+    /// <summary>True while a sent <paramref name="commandOpcode"/> still waits for its server response (TTL 3 s).</summary>
+    public bool HasPendingCommand(ushort commandOpcode, DateTimeOffset now)
+    {
+        lock (_stateGate)
+            return _tracker.HasPending(commandOpcode, now);
+    }
+
+    public bool IsSkillReady(int skillId, DateTimeOffset now)
+    {
+        lock (_stateGate)
+            return _tracker.IsSkillReady(skillId, now);
+    }
+
+    /// <summary>True while <paramref name="objectId"/> is a visible, attackable NPC that has not been seen at 0 HP.</summary>
+    public bool IsLiveAttackTarget(int objectId)
+    {
+        if (objectId <= 0)
+            return false;
+        lock (_stateGate)
+        {
+            foreach (var ent in _tracker.Entities.Values)
+            {
+                if (ent.ObjectId != objectId)
+                    continue;
+                return !ent.Despawned && ent.Attackable && ent.Kind == EntityKindNet.Npc && ent.Alive &&
+                       (ent.MaxHp <= 0 || ent.CurHp > 0);
+            }
+
+            return false;
+        }
+    }
+
     public bool TryPickAttackTarget(out int targetObjectId)
     {
         lock (_stateGate)
@@ -186,6 +218,30 @@ public sealed class BotObservationLog
 
         public int LastCommandTargetDistance => _lastCommandTargetDistance;
         public int AttackSampleCount => _attackSampleCount;
+        readonly Dictionary<int, DateTimeOffset> _skillReadyAt = new();
+
+        public bool HasPending(ushort commandOpcode, DateTimeOffset now)
+        {
+            ExpirePending(now);
+            foreach (var p in _pendingCombat)
+            {
+                if (p.CommandOpcode == commandOpcode)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>False until the reuse announced by this bot's last MagicSkillUse for <paramref name="skillId"/> has passed.</summary>
+        public bool IsSkillReady(int skillId, DateTimeOffset now) =>
+            !_skillReadyAt.TryGetValue(skillId, out var ready) || now >= ready;
+
+        int _killsBySelf;
+        int _deathsSeen;
+        /// <summary>EntityDie frames naming this bot as the killer (real kills, not inferred from HP).</summary>
+        public int KillsBySelf => _killsBySelf;
+        /// <summary>EntityDie frames for any watched entity.</summary>
+        public int DeathsSeen => _deathsSeen;
         public int SkillSampleCount => _skillSampleCount;
         public int AttackTimeoutCount => _attackTimeoutCount;
         public int SkillTimeoutCount => _skillTimeoutCount;
@@ -217,6 +273,10 @@ public sealed class BotObservationLog
             t._attackTimeoutCount = _attackTimeoutCount;
             t._skillTimeoutCount = _skillTimeoutCount;
             t._lastCommandTargetDistance = _lastCommandTargetDistance;
+            t._killsBySelf = _killsBySelf;
+            t._deathsSeen = _deathsSeen;
+            foreach (var (skill, ready) in _skillReadyAt)
+                t._skillReadyAt[skill] = ready;
             return t;
         }
 
@@ -261,6 +321,16 @@ public sealed class BotObservationLog
                             _selfEntityValue = s.EntityValue;
                         break;
                     }
+                case NetOpcode.EntityDie:
+                    {
+                        var die = NetCodec.DecodeEntityDie(payload);
+                        _deathsSeen++;
+                        if (_selfEntityValue != 0 && (ulong)(uint)die.KillerObjectId == _selfEntityValue)
+                            _killsBySelf++;
+                        if (_byValue.TryGetValue(die.EntityValue, out var dead))
+                            _byValue[die.EntityValue] = dead with { Alive = false, CurHp = 0 };
+                        break;
+                    }
                 case NetOpcode.EntityDespawn:
                     {
                         var d = NetCodec.DecodeEntityDespawn(payload);
@@ -299,6 +369,21 @@ public sealed class BotObservationLog
 
                         break;
                     }
+                case NetOpcode.TeleportToLocation:
+                    {
+                        // Gatekeeper/admin/scroll teleports snap the pawn; watchers and the owner both get this.
+                        var t = NetCodec.DecodeTeleportToLocation(payload);
+                        ulong key = (ulong)(uint)t.ObjectId;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = t.X;
+                            e.Y = t.Y;
+                            e.Z = t.Z;
+                            _byValue[key] = e;
+                        }
+
+                        break;
+                    }
                 case NetOpcode.StatusUpdate:
                     {
                         var st = NetCodec.DecodeStatusUpdate(payload);
@@ -333,6 +418,8 @@ public sealed class BotObservationLog
                         var c = NetCodec.DecodeMagicSkillUse(payload);
                         if (_selfEntityValue != 0 && (ulong)(uint)c.CasterObjectId == (ulong)(uint)_selfEntityValue)
                         {
+                            // The server's own reuse for this cast: the fighter waits it out instead of drawing skill_reuse.
+                            _skillReadyAt[c.SkillId] = at.AddMilliseconds(Math.Max(c.ReuseDelayMs, c.HitTimeMs));
                             TryClosePending(NetOpcode.MagicSkillUse, at,
                                 p => p.CommandOpcode == NetOpcode.UseSkill && (p.SkillId == 0 || p.SkillId == c.SkillId));
                         }

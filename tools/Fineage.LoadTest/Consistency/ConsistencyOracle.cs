@@ -162,10 +162,13 @@ public static class ConsistencyOracle
         // (a full ToArray) from inside the per-watcher scan, which allocated until the
         // report never got written after a 200-bot run.
         var combat = IndexCombat(bots);
+        // Positions at the time of each event: economy bots teleport hub/warehouse/manor/arena, so the end-of-run
+        // position says nothing about whether a watcher was in range when an early attack happened.
+        var timelines = bots.ToDictionary(b => b.BotId, b => PositionTimeline.From(b.ObservationLog.Snapshot()));
 
         foreach (var bot in bots)
-            CheckCombatFanout(bot, roster, watch, issues, combat);
-        CheckVisibilityLeaks(bots, roster, watch, issues, combat);
+            CheckCombatFanout(bot, roster, watch, issues, combat, timelines);
+        CheckVisibilityLeaks(bots, roster, watch, issues, combat, timelines);
 
         var samples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples).ToList();
         var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples).ToList();
@@ -189,7 +192,8 @@ public static class ConsistencyOracle
             AttackSampleCount = bots.Sum(b => b.ObservationLog.Tracker.AttackSampleCount),
             SkillSampleCount = bots.Sum(b => b.ObservationLog.Tracker.SkillSampleCount),
             AttackTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.AttackTimeoutCount),
-            SkillTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.SkillTimeoutCount)
+            SkillTimeoutCount = bots.Sum(b => b.ObservationLog.Tracker.SkillTimeoutCount),
+            BotKillCount = bots.Sum(b => b.ObservationLog.Tracker.KillsBySelf)
         };
     }
 
@@ -265,8 +269,10 @@ public static class ConsistencyOracle
         List<BotRosterEntry> roster,
         int watch,
         List<ConsistencyIssue> issues,
-        Dictionary<int, CombatIndex> combat)
+        Dictionary<int, CombatIndex> combat,
+        Dictionary<int, PositionTimeline> timelines)
     {
+        var window = TimeSpan.FromMilliseconds(2500);
         int combatIssues = issues.Count(i => i.Kind == ConsistencyKind.MissingCombatFanout);
         if (combatIssues >= 25)
             return;
@@ -285,7 +291,11 @@ public static class ConsistencyOracle
             {
                 if (w.BotId == observer.BotId)
                     continue;
-                if (Distance(w.X, w.Y, attackerEntry.X, attackerEntry.Y) > watch)
+                // In range at the attack and still in range when the window closes (no teleport out meanwhile).
+                var (ax, ay) = PositionAt(timelines[attackerEntry.BotId], at, attackerEntry);
+                var (wx, wy) = PositionAt(timelines[w.BotId], at, w);
+                var (wx2, wy2) = PositionAt(timelines[w.BotId], at + window, w);
+                if (Distance(wx, wy, ax, ay) > watch || Distance(wx2, wy2, ax, ay) > watch)
                     continue;
                 bool saw = combat[w.BotId].AttacksByAttacker.TryGetValue(attackerVal, out var times)
                     && SawAttackNear(times, at);
@@ -311,19 +321,24 @@ public static class ConsistencyOracle
         List<BotRosterEntry> roster,
         int watch,
         List<ConsistencyIssue> issues,
-        Dictionary<int, CombatIndex> combat)
+        Dictionary<int, CombatIndex> combat,
+        Dictionary<int, PositionTimeline> timelines)
     {
+        // Positions at the time of each sighting: a bot that teleported town to town saw combat
+        // in the town it was in then, not where it ended the run.
         foreach (var bot in bots)
         {
             var entry = roster.FirstOrDefault(r => r.BotId == bot.BotId);
             if (entry == null)
                 continue;
-            foreach (var (_, actorOid, opcode) in combat[bot.BotId].Sightings)
+            foreach (var (at, actorOid, opcode) in combat[bot.BotId].Sightings)
             {
                 var actor = roster.FirstOrDefault(r => r.ObjectId == actorOid);
                 if (actor == null)
                     continue;
-                int dist = Distance(entry.X, entry.Y, actor.X, actor.Y);
+                var (ox, oy) = PositionAt(timelines[bot.BotId], at, entry);
+                var (ax, ay) = PositionAt(timelines[actor.BotId], at, actor);
+                int dist = Distance(ox, oy, ax, ay);
                 if (dist > watch * 2)
                 {
                     issues.Add(new ConsistencyIssue
@@ -338,6 +353,9 @@ public static class ConsistencyOracle
         }
     }
 
+    static (int X, int Y) PositionAt(PositionTimeline timeline, DateTimeOffset at, BotRosterEntry fallback) =>
+        timeline.TryAt(at, out int x, out int y) ? (x, y) : (fallback.X, fallback.Y);
+
     static List<BotRosterEntry> BuildRoster(IReadOnlyList<FineageBotClient> bots, LoadScenario scenario)
     {
         var list = new List<BotRosterEntry>();
@@ -349,10 +367,12 @@ public static class ConsistencyOracle
                 continue;
             var (x, y, z) = BotSpawn.Position(scenario, bot.BotId);
             var tracker = bot.ObservationLog.Tracker;
+            // The self pawn the server last placed (spawn, move, teleport) is the truth; the layout
+            // slot is only for a bot that never saw itself. West of x=0 (Talking Island, Gludin) is a real position.
             if (tracker.Entities.TryGetValue((ulong)bot.SelfObjectId, out var self))
             {
-                x = self.X > 0 ? self.X : x;
-                y = self.Y > 0 ? self.Y : y;
+                x = self.X;
+                y = self.Y;
             }
 
             list.Add(new BotRosterEntry(bot.BotId, bot.SelfObjectId, x, y, z, bot, tracker));

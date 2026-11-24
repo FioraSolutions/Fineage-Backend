@@ -8,16 +8,16 @@ namespace Fineage.Net.Host;
 /// </summary>
 enum OutboundLane
 {
-    /// <summary>Latest pose per entity. A newer frame replaces the pending one.</summary>
+    /// <summary>Newest state per (opcode, entity): pose, move type, position correction, status (attributes merged), abnormals. Never dropped.</summary>
     Movement,
 
-    /// <summary>Knownlist / appearance. One pending snapshot per connection; a newer burst replaces it when the budget cannot hold both.</summary>
+    /// <summary>Knownlist / appearance (spawn, despawn, relation, wait type). Reliable and an ordering barrier: never replaced or dropped.</summary>
     Snapshot,
 
-    /// <summary>Combat and other visuals. A full lane drops the stale frame.</summary>
+    /// <summary>Animations and markers (attack / cast visuals, social actions, target select). Above the soft limit the oldest is shed.</summary>
     Visual,
 
-    /// <summary>Order-preserving gameplay. A full mailbox closes the connection so the client resyncs.</summary>
+    /// <summary>Order-preserving gameplay (inventory, drops, death, chat, system messages). Above the hard limit the connection closes so the client resyncs.</summary>
     Reliable
 }
 
@@ -31,8 +31,7 @@ static class OutboundLanePolicy
             or NetOpcode.ChangeWaitType => OutboundLane.Snapshot,
         NetOpcode.AttackState or NetOpcode.MagicSkillUse or NetOpcode.MagicSkillLaunched
             or NetOpcode.MagicSkillCanceled or NetOpcode.AutoAttackStart or NetOpcode.AutoAttackStop
-            or NetOpcode.SocialAction or NetOpcode.TargetSelected or NetOpcode.TargetUnselected
-            or NetOpcode.CreatureSay => OutboundLane.Visual,
+            or NetOpcode.SocialAction or NetOpcode.TargetSelected or NetOpcode.TargetUnselected => OutboundLane.Visual,
         _ => OutboundLane.Reliable
     };
 
@@ -45,4 +44,7 @@ static class OutboundLanePolicy
     };
 
     public static bool IsReliable(ushort opcode) => Classify(opcode) == OutboundLane.Reliable;
+
+    /// <summary>True when losing this frame would desync the client: everything except visuals.</summary>
+    public static bool MustDeliver(ushort opcode) => Classify(opcode) != OutboundLane.Visual;
 }

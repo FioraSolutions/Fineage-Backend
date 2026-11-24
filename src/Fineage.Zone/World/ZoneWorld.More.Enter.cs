@@ -143,7 +143,13 @@ public sealed partial class ZoneWorld
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            // The first frame is often inside the BCL (Dictionary.TryInsert); name the first Fineage frame too and
+            // keep the whole trace in the log so a load-path race can be found from one run.
             string frame = ex.StackTrace?.Split('\n', 2)[0].Trim() ?? "";
+            string? ours = ex.StackTrace?.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Contains(" Fineage.", StringComparison.Ordinal));
+            if (ours != null && ours != frame)
+                frame = $"{frame} <- {ours}";
+            ZoneLog.Error($"enter load failed character={session.ObjectId}: {ex}");
             return new EnteringPlayer
             {
                 Failure = $"enter refused: character {session.ObjectId} load failed: {ex.GetType().Name}: {ex.Message}"
@@ -347,10 +353,13 @@ public sealed partial class ZoneWorld
         UpdateRuleZoneState(entity);
         if (loaded.ApplyStarterKit)
             ApplyStarterKitLedger(entity);
+        if (LoadTestCombatProfileNeeded(entity))
+            TryApplyLoadTestCombatProfile(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.
         entity.Inventory?.EstablishCursor();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         session.InWorld = true;
+        NoteInWorldPlayer(entity);
         _chat.Entered(entity.ObjectId, entity.Name);
         session.X = entity.X;
         session.Y = entity.Y;

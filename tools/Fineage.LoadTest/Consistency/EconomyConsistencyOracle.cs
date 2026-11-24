@@ -12,12 +12,35 @@ public static class EconomyConsistencyOracle
     static readonly HashSet<string> ExplainedRejectCodes = new(StringComparer.OrdinalIgnoreCase)
     {
         "world", "range", "bad_request", "closed", "adena", "weight", "slots", "ledger",
-        "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance",
-        "manor_manager", "manor_period", "store_combat", "store_item", "recipe", "craft",
-        "sit", "mp", "skill", "target",
-        "persist_busy", "persist_queue_full", "economy_commit_failed"
+        "not_owned", "dead", "busy", "period", "rights", "maintenance", "distance"
     };
 
+    /// <summary>
+    /// Normal refusals when many players contend for the same people and items: the target is already in a
+    /// party or a trade, is out of trade range, the drop was picked up first, sit/social while fighting, the
+    /// target died between pick and hit, a private store closed, sold out, moved away or is busy with another buyer,
+    /// a cast raced its own reuse or a target that just died, the castle manor offers no seed this period, the partner closed the trade window (moved, teleported or
+    /// cancelled) before this side's add/confirm arrived (<c>trade</c> = no open trade session). Counted per code, never a failure. A code outside both sets
+    /// (for example <c>skill_unknown</c> or <c>unknown_opcode</c>) is a harness or server bug and fails the run.
+    /// </summary>
+    public static readonly IReadOnlySet<string> ExpectedDomainRejectCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "party_busy", "party_leader", "trade_busy", "trade_range", "pickup", "action_blocked", "target", "attack",
+        "store_busy", "store_range", "store_closed", "store_item", "store_adena", "store_combat",
+        "skill_reuse", "skill_target", "manor_product", "trade"
+    };
+
+    public enum RejectClass
+    {
+        Explained,
+        ExpectedDomain,
+        Unexpected
+    }
+
+    public static RejectClass Classify(string code) =>
+        ExplainedRejectCodes.Contains(code) ? RejectClass.Explained
+        : ExpectedDomainRejectCodes.Contains(code) ? RejectClass.ExpectedDomain
+        : RejectClass.Unexpected;
     static readonly Regex LedgerRejectRx = new(
         @"ledger rejected|economy_commit_failed|auditable economy ledger invariant",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -40,11 +63,17 @@ public static class EconomyConsistencyOracle
             report.EconomyFlowsSucceeded += bot.Stats.EconomyFlowsSucceeded;
             foreach (var (code, count) in bot.Stats.EconomyRejectCounts)
             {
-                if (ExplainedEconomyReject(code))
+                var kind = Classify(code);
+                if (kind == RejectClass.Explained)
                     report.ExplainedEconomyRejects += count;
+                else if (kind == RejectClass.ExpectedDomain)
+                {
+                    report.ExpectedDomainRejects += count;
+                    report.ExpectedDomainRejectsByCode[code] =
+                        report.ExpectedDomainRejectsByCode.GetValueOrDefault(code) + count;
+                }
                 else
                 {
-                    report.UnexplainedEconomyRejects += count;
                     report.Issues.Add(new EconomyConsistencyIssue
                     {
                         Kind = EconomyConsistencyKind.UnexpectedReject,
@@ -112,41 +141,35 @@ public static class EconomyConsistencyOracle
         return report;
     }
 
+    /// <summary>Strips the <c>code: detail</c> suffix the zone appends to a reject reason.</summary>
     public static string NormalizeRejectCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
             return "unknown";
         int colon = code.IndexOf(':');
-        return colon > 0 ? code[..colon] : code;
+        return colon > 0 ? code[..colon].Trim() : code;
     }
 
     /// <summary>True when a reject during an economy flow is attributable to economy/shop/trade/warehouse paths.</summary>
     public static bool IsEconomyFlowReject(string code)
     {
         string normalized = NormalizeRejectCode(code);
-        if (ExplainedRejectCodes.Contains(normalized))
+        if (ExplainedRejectCodes.Contains(normalized) || ExpectedDomainRejectCodes.Contains(normalized))
             return true;
         return normalized.StartsWith("trade_", StringComparison.OrdinalIgnoreCase)
             || normalized.StartsWith("store_", StringComparison.OrdinalIgnoreCase)
             || normalized.StartsWith("warehouse", StringComparison.OrdinalIgnoreCase)
             || normalized.StartsWith("manor_", StringComparison.OrdinalIgnoreCase)
             || normalized.StartsWith("economy_", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("persist_", StringComparison.OrdinalIgnoreCase);
+            || normalized.StartsWith("persist_", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("recipe", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("craft", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static bool IsExplainedEconomyReject(string code)
-    {
-        string normalized = NormalizeRejectCode(code);
-        if (ExplainedRejectCodes.Contains(normalized))
-            return true;
-        return normalized.StartsWith("trade_", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("store_", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("warehouse", StringComparison.OrdinalIgnoreCase)
-            || normalized.StartsWith("manor_", StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool IsExplainedEconomyReject(string code) =>
+        Classify(NormalizeRejectCode(code)) == RejectClass.Explained;
 
     public static bool ExplainedEconomyReject(string code) => IsExplainedEconomyReject(code);
-
     public static bool IsHardFailure(EconomyConsistencyKind kind) => kind is
         EconomyConsistencyKind.LedgerInvariantViolation or
         EconomyConsistencyKind.EconomyCommitFailed or

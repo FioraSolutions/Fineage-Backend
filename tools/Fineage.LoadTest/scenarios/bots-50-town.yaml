@@ -17,6 +17,5 @@ actionWeights:
   pickup: 0.06
   trade: 0.03
   party: 0.03
-  teleport: 0.03
   pvp: 0.04
   relog: 0

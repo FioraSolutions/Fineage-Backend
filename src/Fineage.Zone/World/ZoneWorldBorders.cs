@@ -42,10 +42,67 @@ public sealed partial class ZoneWorld
         entity.Karma,
         QuestMachine.AllianceOf(entity.Inventory));
 
+    /// <summary>Set once the first publish has copied every region's border. Later ticks skip the copy while nothing moved.</summary>
+    bool _bordersPublished;
+
     /// <summary>At the end-of-tick barrier, after the handoff: what each region shows its neighbours next step.</summary>
-    void PublishBorders(TickContext tick) =>
+    void PublishBorders(TickContext tick)
+    {
+        // Boot marks every region dirty (each spawn is an add). After that an idle world has nothing to republish:
+        // rebuilding the snapshot walked every region and allocated a presence list per border every 200 ms.
+        if (_bordersPublished && !_byId.BordersPending)
+            return;
+        _borderSeen.Clear();
         _borders.Publish(tick.Tick, _byId.BorderMembers(BorderReach)
-            .Select(r => (r.Region, (IReadOnlyList<ZonePresence>)r.Members.ConvertAll(PresenceOf))));
+            .Select(r => (r.Region, BorderPresence(r.Region, r.Members))));
+        _bordersPublished = true;
+        PruneBorderPresence();
+    }
+
+    readonly HashSet<RegionId> _borderSeen = [];
+    readonly List<RegionId> _borderGone = [];
+
+    /// <summary>
+    /// Drops cached conversions for regions the publish no longer yielded (the container emptied and was dropped,
+    /// or the region has no border members any more). Without this every region that ever held a border entity
+    /// kept its member and presence lists alive for the life of the process.
+    /// </summary>
+    void PruneBorderPresence()
+    {
+        if (_borderPresence.Count == _borderSeen.Count)
+            return;
+        _borderGone.Clear();
+        foreach (var region in _borderPresence.Keys)
+        {
+            if (!_borderSeen.Contains(region))
+                _borderGone.Add(region);
+        }
+
+        foreach (var region in _borderGone)
+            _borderPresence.Remove(region);
+    }
+
+    /// <summary>Cached border conversions (tests/diagnostics).</summary>
+    internal int BorderPresenceCacheCount => _borderPresence.Count;
+
+    readonly Dictionary<RegionId, (List<ZoneEntity> Members, IReadOnlyList<ZonePresence> Presence)> _borderPresence = [];
+
+    /// <summary>
+    /// A clean region hands back the same member list; when it holds no player its presences cannot have changed
+    /// (no member relocated, and <see cref="ZonePresence.AggroTarget"/> is false for every non-player), so the
+    /// previous conversion is reused. Any republish used to re-convert every border entity of every region.
+    /// </summary>
+    IReadOnlyList<ZonePresence> BorderPresence(RegionId region, List<ZoneEntity> members)
+    {
+        _borderSeen.Add(region);
+        if (_borderPresence.TryGetValue(region, out var cached) && ReferenceEquals(cached.Members, members)
+            && !members.Exists(static m => m.Kind == ZoneEntityKind.Player))
+            return cached.Presence;
+
+        IReadOnlyList<ZonePresence> presence = members.ConvertAll(PresenceOf);
+        _borderPresence[region] = (members, presence);
+        return presence;
+    }
 
     void CollectAggression(RegionWorkCollector work)
     {

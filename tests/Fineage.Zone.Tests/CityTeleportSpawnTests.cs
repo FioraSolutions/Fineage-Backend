@@ -71,16 +71,29 @@ public sealed class CityTeleportSpawnTests
         Assert.True(catalog.GetMap("ti_village_road").Enabled);
     }
 
-    [Fact]
-    public void Enabled_world_stands_gatekeepers_and_loads_town_squares()
+    /// <summary>
+    /// The world and the expectation share one injected clock and game-time anchor. The test used to rebuild the
+    /// game time from the process time zone while the world anchors on its own wall clock, so on a non-UTC host
+    /// the two disagreed about day and night and the test failed for hours of every real day.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Enabled_world_stands_gatekeepers_and_loads_town_squares(bool night)
     {
         var templates = NpcCatalog.LoadDefault();
         var catalog = SpawnCatalog.LoadDefault();
         var teleports = TeleportCatalog.LoadDefault();
-        var world = new ZoneWorld(includeEnabledMaps: true);
+        var now = new DateTimeOffset(2026, 3, 1, 12, 0, 0, TimeSpan.Zero);
+        // IG hour 1 (night) is 10 real minutes past the anchor; IG hour 12 (day) is two real hours past it.
+        var anchor = now - (night ? TimeSpan.FromMinutes(10) : TimeSpan.FromHours(2));
+        var world = new ZoneWorld(
+            includeEnabledMaps: true,
+            clock: () => now,
+            gameTime: new ZoneGameTime(anchor.ToUnixTimeMilliseconds()));
+        Assert.Equal(night, world.IsNight);
         var spawned = world.NpcObjectIds.ToHashSet();
         var anchors = new List<(int X, int Y)>();
-        bool night = ZoneGameTime.FromLocalMidnight().IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
         foreach (var map in catalog.Maps.Values)
         {

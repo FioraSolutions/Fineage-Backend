@@ -4,9 +4,9 @@ botCount: 24
 rampUpSeconds: 20
 durationSeconds: 90
 spawnLayout: economy
-spawnX: -86300
-spawnY: 243250
-spawnZ: -3717
+spawnX: -84160
+spawnY: 240403
+spawnZ: -3720
 economy:
   enabled: true
   requireLedgerInvariant: true

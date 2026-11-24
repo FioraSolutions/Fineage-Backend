@@ -3,6 +3,7 @@ using Fineage.LoadTest.Consistency;
 using Fineage.LoadTest.Metrics;
 using Fineage.LoadTest.Models;
 using Fineage.LoadTest.Reporting;
+using Fineage.LoadTest.Travel;
 
 namespace Fineage.LoadTest;
 
@@ -57,11 +58,14 @@ public sealed class LoadTestRunner
         if (runtimeSampler != null)
             await runtimeSampler.StartAsync(ct);
 
+        var gatekeepers = scenario.ResolvedGatekeeperTravelShare > 0
+            ? GatekeeperDirectory.Load(GatekeeperDirectory.ResolveDataDir(scenario.DataDir))
+            : null;
         for (int i = 0; i < scenario.BotCount; i++)
         {
             var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
             stats.Add(botStats);
-            bots.Add(new FineageBotClient(scenario, i, botStats, peers));
+            bots.Add(new FineageBotClient(scenario, i, botStats, peers, gatekeepers));
         }
 
         int concurrency = ResolveEnterConcurrency(scenario);
@@ -103,6 +107,9 @@ public sealed class LoadTestRunner
         catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
         {
         }
+
+        if (scenario.HeavyPlay is { IsHeavyPlay: true })
+            await HeavyPlayBehavior.FormPartiesAsync(bots, scenario, ct);
 
         DateTimeOffset behaviorStart = DateTimeOffset.UtcNow;
         DateTimeOffset steadyStateStarted = behaviorStart.AddSeconds(scenario.RampUpSeconds);
@@ -213,7 +220,17 @@ public sealed class LoadTestRunner
             failReasons.Add($"Many bots stuck: {stuck}/{scenario.BotCount}");
 
         if (disconnected > 0)
+        {
             bugs.Add($"P2: {disconnected} bots disconnected during {scenario.Name} — check rate limits and handoff TTL.");
+            foreach (var group in bots.Where(b => b.Stats.Disconnected)
+                         .GroupBy(b => b.Stats.LastError ?? "(no error recorded)")
+                         .OrderByDescending(g => g.Count())
+                         .Take(5))
+            {
+                string error = group.Key.Length > 200 ? group.Key[..200] : group.Key;
+                bugs.Add($"P2:   {group.Count()} disconnected bot(s) last error: {error} (bots {string.Join(",", group.Select(b => b.BotId).Take(8))})");
+            }
+        }
         if (promSamples.Count > 0 && promSamples.Max(s => s.TickP99) > 500)
             bugs.Add($"P1: tick p99 exceeded 500ms (max {promSamples.Max(s => s.TickP99):0}ms) under {scenario.BotCount} bots.");
 
@@ -251,6 +268,10 @@ public sealed class LoadTestRunner
 
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
+
+        var travel = TravelSummary.From(stats.Where(s => s.Travel != null).Select(s => s.Travel!));
+        if (travel.FailReason() is { } travelFail)
+            failReasons.Add(travelFail);
 
         EconomyConsistencyReport? economyReport = null;
         if (scenario.Economy is { Enabled: true })
@@ -300,6 +321,7 @@ public sealed class LoadTestRunner
             BotsStuck = stuck,
             RelogsAttempted = stats.Sum(s => s.RelogsAttempted),
             RelogsSucceeded = stats.Sum(s => s.RelogsSucceeded),
+            GatekeeperTravel = travel,
             ClientRttP50Ms = p50,
             ClientRttP95Ms = p95,
             ClientRttP99Ms = p99,

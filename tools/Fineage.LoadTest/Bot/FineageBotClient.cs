@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using Fineage.Accounts;
 using Fineage.LoadTest.Models;
+using Fineage.LoadTest.Travel;
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 
@@ -29,7 +30,14 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     int _spawnY;
     int _spawnZ;
 
-    public FineageBotClient(LoadScenario scenario, int botId, BotStats stats, BotPeerDirectory peers)
+    readonly GatekeeperTraveler? _traveler;
+
+    public FineageBotClient(
+        LoadScenario scenario,
+        int botId,
+        BotStats stats,
+        BotPeerDirectory peers,
+        GatekeeperDirectory? gatekeepers = null)
     {
         _peers = peers;
         _rng = new Random(botId * 7919 + 17);
@@ -40,7 +48,20 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         CharacterName = $"Bot{botId:D4}";
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
         _observation = new BotObservationLog(botId, _bag);
+        if (scenario.IsGatekeeperTraveler(botId))
+        {
+            if (gatekeepers == null)
+                throw new InvalidOperationException($"bot {botId} is a gatekeeper traveller but no GatekeeperDirectory was loaded");
+            stats.Travel = new TravelStats();
+            _traveler = new GatekeeperTraveler(
+                gatekeepers,
+                botId * 7919 + 31,
+                TimeSpan.FromMilliseconds(scenario.GatekeeperTripCooldownMs),
+                stats.Travel);
+        }
     }
+
+    public bool IsTraveler => _traveler != null;
 
     public int BotId { get; }
     public LoadScenario Scenario { get; }
@@ -89,6 +110,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                 var (opcode, payload) = await ZoneReadFrameAsync(ct);
                 _lastRecvOpcode = opcode;
                 _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
+                _traveler?.OnFrame(opcode, payload);
+                await MaybeAcceptPartyInviteAsync(opcode, payload);
                 if (opcode == NetOpcode.Reject)
                 {
                     string code = NetCodec.DecodeReject(payload).Code;
@@ -184,31 +207,47 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _handoff = NetCodec.DecodeHandoff(handoffPayload);
     }
 
+    static readonly TimeSpan EnterSettleCap = TimeSpan.FromSeconds(3);
+    static readonly TimeSpan EnterWelcomeTimeout = TimeSpan.FromSeconds(30);
+
     async Task EnterWorldAsync(CancellationToken ct)
     {
         await ZoneWriteAsync(NetOpcode.EnterWorld, NetCodec.EncodeEnterWorld(new EnterWorldMsg()), ct);
         bool sawWelcome = false;
+        var enterStarted = Stopwatch.StartNew();
+        TimeSpan welcomeAt = TimeSpan.Zero;
         while (true)
         {
+            // Enter ends at the first 400 ms quiet after the welcome, or EnterSettleCap after it: next to a fighting
+            // pack the stream never goes quiet, and the bot must start playing rather than wait for silence.
+            if (sawWelcome && enterStarted.Elapsed - welcomeAt >= EnterSettleCap)
+                return;
+            if (!sawWelcome && enterStarted.Elapsed >= EnterWelcomeTimeout)
+                throw new TimeoutException($"bot {BotId}: no welcome SystemMessage within {EnterWelcomeTimeout.TotalSeconds:0}s of EnterWorld");
             using var quiet = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            if (sawWelcome)
-                quiet.CancelAfter(TimeSpan.FromMilliseconds(400));
+            quiet.CancelAfter(sawWelcome ? TimeSpan.FromMilliseconds(400) : EnterWelcomeTimeout - enterStarted.Elapsed);
             byte[] payload;
             ushort opcode;
             try
             {
                 (opcode, payload) = await ZoneReadFrameAsync(quiet.Token);
             }
-            catch (OperationCanceledException) when (sawWelcome && !ct.IsCancellationRequested)
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
-                return;
+                if (sawWelcome)
+                    return;
+                continue; // the welcome timeout check above throws
             }
 
             _observation.Record(opcode, payload, DateTimeOffset.UtcNow);
+            _traveler?.OnFrame(opcode, payload);
             if (opcode == NetOpcode.Reject)
                 throw new InvalidOperationException(NetCodec.DecodeReject(payload).Code);
-            if (opcode == NetOpcode.SystemMessage)
+            if (opcode == NetOpcode.SystemMessage && !sawWelcome)
+            {
                 sawWelcome = true;
+                welcomeAt = enterStarted.Elapsed;
+            }
             if (opcode == NetOpcode.EntitySpawn)
             {
                 var spawn = NetCodec.DecodeEntitySpawn(payload);
@@ -218,10 +257,16 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         }
     }
 
-    public async Task RunBehaviorTickAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
+    async Task RunLegacyMixedBehaviorTickAsync(IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
     {
         if (_zoneStream == null || _stats.Disconnected)
             return;
+
+        if (_traveler != null)
+        {
+            await RunTravelTickAsync(ct);
+            return;
+        }
 
         string action = PickAction();
         var sw = Stopwatch.StartNew();
@@ -237,106 +282,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                 return;
             }
 
-            switch (action)
-            {
-                case "move":
-                    int dx = _rng.Next(-400, 400);
-                    int dy = _rng.Next(-400, 400);
-                    await SendTrackedAsync(NetOpcode.MoveInput,
-                        NetCodec.EncodeMoveInput(new MoveInputMsg
-                        {
-                            DestX = _spawnX + dx,
-                            DestY = _spawnY + dy,
-                            DestZ = _spawnZ
-                        }), ct);
-                    break;
-                case "attack":
-                    {
-                        if (_observation.TryPickAttackTarget(out int target))
-                        {
-                            await ZoneWriteAsync(NetOpcode.SelectTarget,
-                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-                            await SendTrackedAsync(
-                                NetOpcode.AttackRequest,
-                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
-                                ct,
-                                targetObjectId: target);
-                        }
-
-                        break;
-                    }
-                case "skill":
-                    {
-                        if (_observation.TryPickAttackTarget(out int target))
-                        {
-                            int skillId = Scenario.ResolveCombatSkillId();
-                            await ZoneWriteAsync(NetOpcode.SelectTarget,
-                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
-                            await SendTrackedAsync(
-                                NetOpcode.UseSkill,
-                                NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),
-                                ct,
-                                targetObjectId: target,
-                                skillId: skillId);
-                        }
-
-                        break;
-                    }
-                case "say":
-                    await ZoneWriteAsync(NetOpcode.Say,
-                        NetCodec.EncodeSay(new SayNetMsg { Text = $"load {BotId}", ChatType = 0 }), ct);
-                    break;
-                case "sit":
-                    await ZoneWriteAsync(NetOpcode.RequestActionUse,
-                        NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 0 }), ct);
-                    break;
-                case "social":
-                    await ZoneWriteAsync(NetOpcode.RequestActionUse,
-                        NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 12 + _rng.Next(0, 3) }), ct);
-                    break;
-                case "pickup":
-                    await ZoneWriteAsync(NetOpcode.PickupRequest,
-                        NetCodec.EncodePickupRequest(new PickupRequestNetMsg { GroundObjectId = 1 }), ct);
-                    break;
-                case "trade":
-                    await ZoneWriteAsync(NetOpcode.TradeRequest,
-                        NetCodec.EncodeTradeRequest(new TradeRequestNetMsg { TargetObjectId = SelfObjectId + 2 }), ct);
-                    break;
-                case "pvp":
-                    {
-                        int? peer = VisiblePlayerObjectId() ?? _peers.PickPeerObjectId(BotId, _rng);
-                        if (peer is > 0)
-                        {
-                            await ZoneWriteAsync(NetOpcode.SelectTarget,
-                                NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = peer.Value }), ct);
-                            await SendTrackedAsync(NetOpcode.AttackRequest,
-                                NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = peer.Value, Forced = true }), ct);
-                        }
-
-                        break;
-                    }
-                case "party":
-                    {
-                        int? peer = _peers.PickPeerObjectId(BotId, _rng);
-                        if (peer is > 0)
-                            await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
-                                NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = peer.Value }), ct);
-                        break;
-                    }
-                case "relog":
-                    await RelogAsync(fleet, ct);
-                    break;
-                case "teleport":
-                    await ZoneWriteAsync(NetOpcode.TeleportToLocation,
-                        NetCodec.EncodeTeleportToLocation(new TeleportToLocationNetMsg
-                        {
-                            X = _spawnX,
-                            Y = _spawnY,
-                            Z = _spawnZ
-                        }), ct);
-                    break;
-            }
-
+            await RunLegacyActionAsync(action, fleet, ct);
             Interlocked.Increment(ref _stats.ActionsAttempted);
             _stats.LastActionAt = DateTimeOffset.UtcNow;
             sw.Stop();
@@ -350,7 +296,125 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         }
     }
 
-    async Task SendTrackedAsync(
+    async Task RunLegacyActionAsync(string action, IReadOnlyList<FineageBotClient> fleet, CancellationToken ct)
+    {
+        switch (action)
+        {
+            case "move":
+                int dx = _rng.Next(-400, 400);
+                int dy = _rng.Next(-400, 400);
+                await SendTrackedAsync(NetOpcode.MoveInput,
+                    NetCodec.EncodeMoveInput(new MoveInputMsg
+                    {
+                        DestX = _spawnX + dx,
+                        DestY = _spawnY + dy,
+                        DestZ = _spawnZ
+                    }), ct);
+                break;
+            case "attack":
+                {
+                    if (_observation.TryPickAttackTarget(out int target))
+                    {
+                        await ZoneWriteAsync(NetOpcode.SelectTarget,
+                            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
+                        await SendTrackedAsync(
+                            NetOpcode.AttackRequest,
+                            NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = target }),
+                            ct,
+                            targetObjectId: target);
+                    }
+
+                    break;
+                }
+            case "skill":
+                {
+                    if (_observation.TryPickAttackTarget(out int target))
+                    {
+                        int skillId = Scenario.ResolveCombatSkillId();
+                        await ZoneWriteAsync(NetOpcode.SelectTarget,
+                            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = target }), ct);
+                        await SendTrackedAsync(
+                            NetOpcode.UseSkill,
+                            NetCodec.EncodeUseSkill(new UseSkillNetMsg { SkillId = skillId, TargetObjectId = target, CtrlPressed = false }),
+                            ct,
+                            targetObjectId: target,
+                            skillId: skillId);
+                    }
+
+                    break;
+                }
+            case "say":
+                await ZoneWriteAsync(NetOpcode.Say,
+                    NetCodec.EncodeSay(new SayNetMsg { Text = $"load {BotId}", ChatType = 0 }), ct);
+                break;
+            case "sit":
+                await ZoneWriteAsync(NetOpcode.RequestActionUse,
+                    NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 0 }), ct);
+                break;
+            case "social":
+                await ZoneWriteAsync(NetOpcode.RequestActionUse,
+                    NetCodec.EncodeActionUse(new ActionUseNetMsg { ActionId = 12 + _rng.Next(0, 3) }), ct);
+                break;
+            case "pickup":
+                await ZoneWriteAsync(NetOpcode.PickupRequest,
+                    NetCodec.EncodePickupRequest(new PickupRequestNetMsg { GroundObjectId = 1 }), ct);
+                break;
+            case "trade":
+                await ZoneWriteAsync(NetOpcode.TradeRequest,
+                    NetCodec.EncodeTradeRequest(new TradeRequestNetMsg { TargetObjectId = SelfObjectId + 2 }), ct);
+                break;
+            case "pvp":
+                {
+                    int? peer = VisiblePlayerObjectId() ?? _peers.PickPeerObjectId(BotId, _rng);
+                    if (peer is > 0)
+                    {
+                        await ZoneWriteAsync(NetOpcode.SelectTarget,
+                            NetCodec.EncodeSelectTarget(new SelectTargetNetMsg { TargetObjectId = peer.Value }), ct);
+                        await SendTrackedAsync(NetOpcode.AttackRequest,
+                            NetCodec.EncodeAttackRequest(new AttackRequestNetMsg { TargetObjectId = peer.Value, Forced = true }), ct);
+                    }
+
+                    break;
+                }
+            case "party":
+                {
+                    int? peer = _peers.PickPeerObjectId(BotId, _rng);
+                    if (peer is > 0)
+                        await ZoneWriteAsync(NetOpcode.PartyInviteRequest,
+                            NetCodec.EncodePartyInviteRequest(new PartyInviteRequestNetMsg { TargetObjectId = peer.Value }), ct);
+                    break;
+                }
+            case "relog":
+                await RelogAsync(fleet, ct);
+                break;
+            default:
+                throw new InvalidOperationException($"bot {BotId}: action '{action}' has no implementation.");
+        }
+    }
+
+    /// <summary>Gatekeeper travellers run only the travel loop; see <see cref="GatekeeperTraveler"/>.</summary>
+    async Task RunTravelTickAsync(CancellationToken ct)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            var next = _traveler!.Step(DateTimeOffset.UtcNow);
+            if (next is { } command)
+                await SendTrackedAsync(command.Opcode, command.Payload, ct);
+            Interlocked.Increment(ref _stats.ActionsAttempted);
+            _stats.LastActionAt = DateTimeOffset.UtcNow;
+            sw.Stop();
+            _stats.RecordRtt(sw.Elapsed.TotalMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            Interlocked.Increment(ref _stats.ActionsFailed);
+            _stats.LastError = ex.Message;
+            _stats.Disconnected = true;
+        }
+    }
+
+    internal async Task SendTrackedAsync(
         ushort opcode,
         byte[] payload,
         CancellationToken ct,
@@ -446,7 +510,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _loginStream = null;
     }
 
-    string PickAction()
+    /// <summary>Weighted pick over the whole mix: weights are relative, so a mix that sums past 1 cannot shadow its tail.</summary>
+    internal string PickAction()
     {
         IEnumerable<KeyValuePair<string, double>> weights = Scenario.ActionWeights;
         if (Scenario.Economy is { Enabled: true } eco)
@@ -462,14 +527,18 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
         double roll = _rng.NextDouble();
         double acc = 0;
+        string last = "";
         foreach (var (name, weight) in weights)
         {
+            if (weight <= 0)
+                continue;
             acc += weight;
-            if (roll <= acc)
+            last = name;
+            if (roll < acc)
                 return name;
         }
 
-        return "move";
+        return last;
     }
 
     async Task LoginExchangeAsync(ushort send, byte[] payload, ushort expect, CancellationToken ct)

@@ -34,10 +34,58 @@ public sealed class LoadScenario
         ["pickup"] = 0.08,
         ["trade"] = 0.04,
         ["party"] = 0.04,
-        ["teleport"] = 0.03,
         ["pvp"] = 0.05,
         ["relog"] = 0.02
     };
+
+    /// <summary>Default share of the fleet that travels town to town through gatekeepers.</summary>
+    public const double DefaultGatekeeperTravelShare = 0.2;
+
+    /// <summary>
+    /// Share of bots (0..1) that only travel between towns via gatekeeper teleports instead of
+    /// running <see cref="ActionWeights"/>. Null uses <see cref="DefaultGatekeeperTravelShare"/>; 0 turns travel off.
+    /// </summary>
+    public double? GatekeeperTravelShare { get; set; }
+
+    /// <summary>Pause after a landed teleport before the bot talks to the next gatekeeper.</summary>
+    public int GatekeeperTripCooldownMs { get; set; } = 3000;
+
+    /// <summary>Datapack directory with teleports.json and spawns/ (see <c>GatekeeperDirectory.ResolveDataDir</c>).</summary>
+    public string? DataDir { get; set; }
+
+    public double ResolvedGatekeeperTravelShare
+    {
+        get
+        {
+            double share = GatekeeperTravelShare ?? DefaultGatekeeperTravelShare;
+            if (share is < 0 or > 1 || double.IsNaN(share))
+                throw new InvalidOperationException($"gatekeeperTravelShare must be within 0..1, got {share}");
+            return share;
+        }
+    }
+
+    /// <summary>
+    /// Bot <paramref name="botId"/> travels when the running share count steps up at its index, so
+    /// exactly round(share × botCount) bots travel, spread evenly over the fleet and the ramp.
+    /// </summary>
+    /// <remarks>
+    /// Heavy-play combat bots (party or train slots) never travel; in <c>aoe-combined</c> the share applies to
+    /// the economy background bots only, counted from the first of them.
+    /// </remarks>
+    public bool IsGatekeeperTraveler(int botId)
+    {
+        double share = ResolvedGatekeeperTravelShare;
+        int index = botId;
+        if (HeavyPlay is { IsHeavyPlay: true } hp)
+        {
+            int combat = hp.CombatBotCount;
+            if (botId < combat)
+                return false;
+            index = botId - combat;
+        }
+
+        return Math.Floor((index + 1) * share + 1e-9) > Math.Floor(index * share + 1e-9);
+    }
 
     /// <summary>AOI cell size used by the consistency oracle (match FINEAGE_ZONE_AOI_CELL).</summary>
     public int AoiCellSize { get; set; } = 3000;
@@ -48,24 +96,29 @@ public sealed class LoadScenario
     /// </summary>
     public int EnterConcurrency { get; set; } = 16;
 
-    /// <summary>Instant offensive skill known at level 1 for the scenario class (Mobius autoGet).</summary>
-    public int ResolveCombatSkillId()
-    {
-        if (CombatSkillId > 0)
-            return CombatSkillId;
-        return ClassId switch
-        {
-            HumanClasses.Mystic or 25 or 38 => 1177, // Wind Strike
-            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3, // Power Strike (level ≥ 5)
-            _ => 1177
-        };
-    }
-
     /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
     public string? Extends { get; set; }
 
     /// <summary>Full-economy hammer (#955): P2P trade, shops, stores, manufacture, manor, warehouse.</summary>
     public EconomyHammerConfig? Economy { get; set; }
+
+    /// <summary>Structured AoE / party fan-out scenarios (#951).</summary>
+    public HeavyPlayConfig? HeavyPlay { get; set; }
+
+    public int ResolveCombatSkillId()
+    {
+        if (CombatSkillId > 0)
+            return CombatSkillId;
+        if (HeavyPlay?.SkillRotation is { Length: > 0 })
+            return HeavyPlay.SkillRotation[0];
+        return ClassId switch
+        {
+            HumanClasses.Mystic or 25 or 38 => 1177,
+            48 => 36,
+            HumanClasses.Fighter or 18 or 31 or 44 or 49 or 53 => 3,
+            _ => 1177
+        };
+    }
 
     public (int classId, int race) ResolveClassAndRace(int botId)
     {

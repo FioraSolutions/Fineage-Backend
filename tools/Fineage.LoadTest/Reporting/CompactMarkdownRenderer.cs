@@ -24,6 +24,7 @@ public static class CompactMarkdownRenderer
         AppendRuntime(sb, r);
         AppendLogs(sb, r);
         AppendBots(sb, r);
+        AppendTravel(sb, r);
         AppendGates(sb, r);
         AppendMissingMetrics(sb, r);
 
@@ -104,6 +105,7 @@ public static class CompactMarkdownRenderer
             sb.AppendLine(
                 $"Aggregate tick (scrapes): p50 **{r.Server.TickP50Ms:0.0}** p95 **{r.Server.TickP95Ms:0.0}** p99 **{r.Server.TickP99Ms:0.0}** max **{r.Server.TickMaxMs:0.0}** (`fineage_tick_max_ms`); histogram bucket ceiling **{r.Server.TickHistogramCeilingMs:0.0}** is not the duration; " +
                 $"watchdog stalls **{r.WatchdogStalls}** max **{r.WatchdogStallMaxMs:0.0}** ms; ingress max **{r.Server.CommandIngressQueuedMax}**.");
+            AppendTickWindows(sb, r.Honest);
             sb.AppendLine($"- Outbound drops (`fineage_outbound_dropped_total`): **{r.Server.OutboundDropped}**");
             sb.AppendLine($"- Fanout drops (`fineage_fanout_dropped_total`): **{r.FanoutDropped}**");
             AppendOutboundLanes(sb, r.PeakMetricsText);
@@ -112,6 +114,29 @@ public static class CompactMarkdownRenderer
         }
 
         sb.AppendLine();
+    }
+
+    static void AppendTickWindows(StringBuilder sb, HonestLoadSummary? honest)
+    {
+        sb.AppendLine();
+        sb.AppendLine("| tick window | rule | ticks | mean | p50 | p99 | p99.9 | max |");
+        sb.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        AppendTickWindow(sb, "overall", honest?.TickOverall);
+        AppendTickWindow(sb, "steady-state", honest?.TickSteady);
+        sb.AppendLine();
+    }
+
+    static void AppendTickWindow(StringBuilder sb, string name, TickWindowStats? w)
+    {
+        if (w == null)
+        {
+            sb.AppendLine($"| {name} | MISSING (see data errors) | | | | | | |");
+            return;
+        }
+
+        string max = w.MaxExact ? $"{w.MaxMs:0.0}" : $"<= {w.MaxMs:0.0} (bucket ceiling)";
+        sb.AppendLine(
+            $"| {name} | {w.Rule} | {w.Ticks} | {w.MeanMs:0.0} | {w.P50Ms:0.0} | **{w.P99Ms:0.0}** | {w.P999Ms:0.0} | {max} |");
     }
 
     static void AppendOutboundLanes(StringBuilder sb, string? peak)
@@ -131,6 +156,21 @@ public static class CompactMarkdownRenderer
                 : string.Join(", ", lanes.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
             sb.AppendLine($"- Outbound lane {kind} (`{metric}`): {body}");
         }
+
+        if (string.IsNullOrEmpty(peak))
+            return;
+
+        var shed = PrometheusParser.LabeledCounter(peak, "fineage_outbound_shed_bytes_total");
+        string shedBody = shed.Count == 0
+            ? "0"
+            : string.Join(", ", shed.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => $"{pair.Key}={pair.Value}"));
+        sb.AppendLine($"- Outbound shed bytes (`fineage_outbound_shed_bytes_total`): {shedBody}");
+        sb.AppendLine(
+            $"- Slow-client disconnects (`fineage_outbound_slow_client_disconnect_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_outbound_slow_client_disconnect_total")}**");
+        sb.AppendLine(
+            $"- Fan-out backlog above soft limit (`fineage_fanout_backlog_soft_exceeded_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_fanout_backlog_soft_exceeded_total")}**");
+        sb.AppendLine(
+            $"- Fan-out backlog emergency, must be 0 (`fineage_fanout_backlog_emergency_total`): **{PrometheusParser.ParseCounterSumStatic(peak, "fineage_fanout_backlog_emergency_total")}**");
     }
 
     static void AppendTimeSeries(StringBuilder sb, RunReport r)
@@ -250,6 +290,49 @@ public static class CompactMarkdownRenderer
                 $"- Client consistency oracle (labeled separately from server histograms): **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
         }
 
+        if (r.Consistency != null && (r.Consistency.AttackSampleCount + r.Consistency.AttackTimeoutCount +
+                                      r.Consistency.SkillSampleCount + r.Consistency.SkillTimeoutCount) > 0)
+        {
+            sb.AppendLine(
+                $"- Combat: attack→AttackState samples **{r.Consistency.AttackSampleCount}** (timeouts {r.Consistency.AttackTimeoutCount}), " +
+                $"skill→MagicSkillUse samples **{r.Consistency.SkillSampleCount}** (timeouts {r.Consistency.SkillTimeoutCount}), " +
+                $"NPC kills by bots **{r.Consistency.BotKillCount}**.");
+        }
+
+        if (r.Economy != null)
+        {
+            sb.AppendLine(
+                $"- Economy: flows **{r.Economy.EconomyFlowsSucceeded}** / {r.Economy.EconomyFlowsAttempted} succeeded; " +
+                $"explained rejects {r.Economy.ExplainedEconomyRejects}; expected domain rejects {r.Economy.ExpectedDomainRejects}" +
+                (r.Economy.ExpectedDomainRejectsByCode.Count > 0
+                    ? " (" + string.Join(", ", r.Economy.ExpectedDomainRejectsByCode.Select(p => $"{p.Key} {p.Value}")) + ")"
+                    : "") +
+                $"; hard issues **{r.Economy.Issues.Count(i => Consistency.EconomyConsistencyOracle.IsHardFailure(i.Kind))}**.");
+        }
+
+        sb.AppendLine();
+    }
+
+    static void AppendTravel(StringBuilder sb, RunReport r)
+    {
+        var t = r.GatekeeperTravel;
+        sb.AppendLine("## Gatekeeper travel");
+        if (t.Travellers == 0)
+        {
+            sb.AppendLine("- No travelling bots (gatekeeperTravelShare = 0).");
+            sb.AppendLine();
+            return;
+        }
+
+        sb.AppendLine("| travellers | talks | walk hops | teleports attempted | succeeded | rejected (reason) | unexplained |");
+        sb.AppendLine("| ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
+        sb.AppendLine($"| {t.Travellers} | {t.Talks} | {t.WalkHops} | {t.Attempted} | {t.Succeeded} | {t.Rejected} | {t.Unexplained} |");
+        foreach (var (reason, count) in t.RejectedByReason.OrderByDescending(kv => kv.Value))
+            sb.AppendLine($"- rejected `{reason}`: {count}");
+        if (t.TalkRangeRetries > 0)
+            sb.AppendLine($"- talk retried after `range` (walked closer): {t.TalkRangeRetries}");
+        foreach (string sample in t.UnexplainedSamples)
+            sb.AppendLine($"- UNEXPLAINED: {sample}");
         sb.AppendLine();
     }
 

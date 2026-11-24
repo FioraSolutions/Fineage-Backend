@@ -18,6 +18,8 @@ public sealed class LocalizedHtml
         _english = english ?? throw new ArgumentNullException(nameof(english));
     }
 
+    readonly System.Collections.Concurrent.ConcurrentDictionary<(int NpcId, int Page), byte> _defaultPageServed = new();
+
     public string ReadNpc(string? locale, string? npcType, int npcId, int page)
     {
         var candidates = NpcHtmlPaths.Candidates(npcType, npcId, page);
@@ -25,7 +27,11 @@ public sealed class LocalizedHtml
         foreach (string relative in candidates)
         {
             if (TryExact(tag, relative, out string hit))
+            {
+                if (relative == NpcHtmlPaths.DefaultPage)
+                    ReportDefaultPage(npcType, npcId, page, candidates);
                 return hit;
+            }
         }
 
         string primary = "html/" + candidates[0];
@@ -43,6 +49,21 @@ public sealed class LocalizedHtml
 
         _l10n.Get(primary, tag);
         return NpcHtmlText.NothingToSay;
+    }
+
+    /// <summary>
+    /// Mobius <c>Npc.getHtmlPath</c> serves <c>npcdefault.htm</c> when the NPC has no page of its own. That is the
+    /// datapack's rule, but it also hides an NPC whose pages were never imported (the Giran gatekeeper showed
+    /// "nothing to say" this way), so each such NPC page is logged once with the files that were searched.
+    /// </summary>
+    void ReportDefaultPage(string? npcType, int npcId, int page, IReadOnlyList<string> candidates)
+    {
+        if (!_defaultPageServed.TryAdd((npcId, page), 0))
+            return;
+        Fineage.Zone.ZoneLog.Error(
+            $"[npc-html] npc {npcId} ({npcType}) page {page} has no dialog: searched " +
+            string.Join(", ", candidates.Take(candidates.Count - 1)) +
+            $"; serving {NpcHtmlPaths.DefaultPage}. Import its Mobius pages with tools/import_npc_html.py.");
     }
 
     public NpcHtmlPaths.LinkPage ReadLink(string? locale, string? npcType, string command)

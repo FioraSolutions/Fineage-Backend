@@ -25,11 +25,17 @@ public sealed partial class MemoryAccountStore
         _data = data;
     }
 
+    /// <summary>
+    /// Serializes the whole store only when someone will receive the snapshot. It used to serialize first and then
+    /// drop the JSON on silent paths: every Postgres hot-path write (presence, vitals, progress, quests) built a
+    /// multi-megabyte string of all accounts under <c>_gate</c>, which held the lock the simulation's store reads
+    /// wait on and churned ~100 MB/s of large-object strings at 200 players.
+    /// </summary>
     void Save()
     {
-        string snapshot = JsonSerializer.Serialize(_data, JsonOptions);
-        if (EmitSnapshots)
-            _afterSaveSnapshot?.Invoke(snapshot);
+        if (!EmitSnapshots || _afterSaveSnapshot is not { } handler)
+            return;
+        handler(JsonSerializer.Serialize(_data, JsonOptions));
     }
 
     List<StoredItemDto>? CopyItemsAssigningIds(IReadOnlyList<StoredItem>? items, HashSet<int>? releaseObjectIds)

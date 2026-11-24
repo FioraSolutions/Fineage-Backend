@@ -112,7 +112,7 @@ public sealed class SpawnCatalog
                     throw new InvalidDataException($"{map.Path} object {objectId} has negative respawnRandomSeconds.");
 
                 var period = SpawnPeriodOfDayParse.Parse(row.PeriodOfDay);
-                npcs.Add(FromTemplate(
+                var def = FromTemplate(
                     objectId,
                     template,
                     row.X,
@@ -126,7 +126,12 @@ public sealed class SpawnCatalog
                     Speed(row.WalkSpeed, template.WalkSpeed, 40f),
                     Math.Max(0, row.RespawnDelaySeconds),
                     Math.Max(0, row.RespawnRandomSeconds),
-                    periodOfDay: period));
+                    periodOfDay: period);
+                if (row.Aggressive is bool aggressive)
+                    def = def with { Aggressive = aggressive };
+                if (row.AggroRange is int aggroRange && aggroRange > 0)
+                    def = def with { AggroRange = aggroRange };
+                npcs.Add(def);
             }
 
             maps.Add(map.MapId, new SpawnMapDefinition(map.MapId, map.Enabled, npcs));
@@ -277,7 +282,9 @@ public sealed class SpawnCatalog
                 row.WalkSpeed,
                 row.RespawnDelaySeconds,
                 row.RespawnRandomSeconds,
-                row.PeriodOfDay));
+                row.PeriodOfDay,
+                row.Aggressive,
+                row.AggroRange));
         }
 
         return new PendingMap(path, file.MapId.Trim(), file.Enabled, npcs);
@@ -299,7 +306,9 @@ public sealed class SpawnCatalog
         float? WalkSpeed,
         int RespawnDelaySeconds,
         int RespawnRandomSeconds,
-        string? PeriodOfDay);
+        string? PeriodOfDay,
+        bool? Aggressive,
+        int? AggroRange);
 
     sealed class MapFileDto
     {
@@ -324,6 +333,8 @@ public sealed class SpawnCatalog
         public int RespawnDelaySeconds { get; set; } = 60;
         public int RespawnRandomSeconds { get; set; }
         public string? PeriodOfDay { get; set; }
+        public bool? Aggressive { get; set; }
+        public int? AggroRange { get; set; }
     }
 }
 

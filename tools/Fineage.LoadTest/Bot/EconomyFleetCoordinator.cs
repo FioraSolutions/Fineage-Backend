@@ -103,4 +103,21 @@ public static class EconomyFleetCoordinator
         await bot.RecipeShopMakeItemAsync(maker.Value, economy.RecipeListId, ct);
         await bot.WaitForOpcodeAsync(NetOpcode.RecipeItemMakeInfo, ct);
     }
+
+    /// <summary>
+    /// Legacy single-action entry (<c>economy_manufacture</c>): dispatches on the bot's role instead of failing a
+    /// bot that is neither the crafter nor a customer.
+    /// </summary>
+    public static async Task TryManufactureAsync(
+        FineageBotClient bot,
+        IReadOnlyList<FineageBotClient> fleet,
+        CancellationToken ct)
+    {
+        var economy = bot.Scenario.Economy!;
+        int mod = Math.Abs(bot.BotId) % economy.ManufacturerModulo;
+        if (mod == economy.ManufacturerRemainder)
+            await TryManufactureMakerAsync(bot, ct);
+        else if (mod == 1)
+            await TryManufactureCustomerAsync(bot, fleet, ct);
+    }
 }

@@ -107,14 +107,14 @@ public sealed partial class ZoneWorld
             return RefuseUnstuck(player, "sitting");
 
         bool gm = ZoneAdmin.IsAdminCharacter(player.Name);
-        int hitTimeMs = gm ? UserCommandProtocol.GmUnstuckMs : UserCommandProtocol.PlayerUnstuckMs;
-        int skillId = gm ? 2100 : 2099;
+        // Mobius Unstuck casts 2100 (1 s) for a GM and 2099 (5 min) otherwise; the hit time is the skill's.
+        var skill = CatalogCastSkill(gm ? UserCommandProtocol.GmUnstuckSkillId : UserCommandProtocol.PlayerUnstuckSkillId, "/unstuck");
         if (!gm)
             SelfLine(session, UserCommandProtocol.UnstuckFiveMinutes,
                 "You are stuck. You will be transported to the nearest village in five minutes.");
 
         var (x, y, z) = TownDestination(player);
-        BeginTownTeleport(player, skillId, gm ? "Escape" : "Escape", 1, hitTimeMs, 0, now, () =>
+        BeginTownTeleport(player, skill, 1, 0, now, () =>
         {
             if (player.Dead)
                 return;

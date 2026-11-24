@@ -38,5 +38,7 @@ public sealed class ConsistencyReport
     public int SkillSampleCount { get; init; }
     public int AttackTimeoutCount { get; init; }
     public int SkillTimeoutCount { get; init; }
+    /// <summary>Sum of EntityDie frames that named a bot as the killer.</summary>
+    public int BotKillCount { get; init; }
     public bool Passed => Issues.Count == 0;
 }

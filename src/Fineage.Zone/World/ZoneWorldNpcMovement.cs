@@ -170,8 +170,21 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius <c>Spawn</c> spawns <c>Privates</c> with the master. They are created when the master
     /// enters the think set (the region just became active), not for every master on an empty world.
+    /// This only queues the master: <see cref="SpawnPendingPrivates"/> places the minions on the scheduler
+    /// thread under a per-step budget, so neither a region body nor a ramp burst places entities inline.
     /// </summary>
     void SpawnPrivates(ZoneEntity master)
+    {
+        if (master.PrivatesSpawned || !_minions.TryGet(master.NpcId, out _))
+            return;
+        lock (_privatesPendingLock)
+        {
+            if (_privatesPending.Add(master.ObjectId))
+                _privatesPendingOrder.Enqueue(master.ObjectId);
+        }
+    }
+
+    void SpawnPrivatesNow(ZoneEntity master)
     {
         if (master.PrivatesSpawned)
             return;
@@ -232,6 +245,7 @@ public sealed partial class ZoneWorld
                 _aoi.Enter(objectId, x, y);
                 master.MinionIds.Add(objectId);
                 _byId.Join(entity, ActiveSets.Thinking);
+                QueueThinkReschedule(objectId);
                 FanoutNewNpc(entity);
                 SpawnPrivates(entity);
             }
@@ -286,7 +300,7 @@ public sealed partial class ZoneWorld
             return false;
 
         long dx = npc.X - (long)npc.HomeX, dy = npc.Y - (long)npc.HomeY;
-        int leash = Math.Max(ZoneNpcSettings.MaxDriftRange, raid ? raidRange : range);
+        int leash = Math.Max(_maxDriftRange, raid ? raidRange : range);
         if (dx * dx + dy * dy <= (long)leash * leash)
             return false;
 
@@ -351,6 +365,8 @@ public sealed partial class ZoneWorld
         }
     }
 
+    [ThreadStatic] static List<int>? t_visibleScratch;
+
     /// <summary>
     /// Moving NPC knownlist revalidate (Mobius knownlist update while the creature walks/chases): players whose view now
     /// covers the NPC get NpcInfo / Net EntitySpawn (+ MoveState), players it left get DeleteObject / EntityDespawn.
@@ -373,7 +389,10 @@ public sealed partial class ZoneWorld
             }
         }
 
-        foreach (int id in _aoi.GetVisible(npc.ObjectId))
+        var visible = t_visibleScratch ??= [];
+        visible.Clear();
+        _aoi.CollectVisible(npc.ObjectId, visible);
+        foreach (int id in visible)
         {
             if (id == npc.ObjectId)
                 continue;

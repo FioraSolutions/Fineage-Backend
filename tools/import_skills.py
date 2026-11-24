@@ -9,7 +9,10 @@ Mobius references (L2J_Mobius_CT_0_Interlude):
   dist/game/data/stats/players/skillTrees/**/*.xml
 
 Usage:
-  python3 tools/import_skills.py /path/to/L2J_Mobius_CT_0_Interlude
+  python3 tools/import_skills.py /path/to/L2J_Mobius_CT_0_Interlude [--add-missing]
+
+--add-missing keeps every row already in data/skills.json (other tools enrich those rows) and appends the
+templates of referenced skills that are not there yet; data/skill-trees.json is left alone.
 """
 
 from __future__ import annotations
@@ -19,6 +22,9 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+# Skills the server casts on its own (not learned, not item skills): Mobius usercommandhandlers/Unstuck.
+ZONE_CAST_SKILLS = {2099, 2100}
 
 SKILL_DIR = Path("dist/game/data/stats/skills")
 TREE_DIR = Path("dist/game/data/stats/players/skillTrees")
@@ -193,9 +199,12 @@ def load_skill_trees(trees_root: Path) -> list[dict]:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: import_skills.py <L2J_Mobius_CT_0_Interlude>")
-    root = Path(sys.argv[1]).resolve()
+    args = sys.argv[1:]
+    add_missing = "--add-missing" in args
+    args = [a for a in args if a != "--add-missing"]
+    if len(args) != 1:
+        raise SystemExit("usage: import_skills.py <L2J_Mobius_CT_0_Interlude> [--add-missing]")
+    root = Path(args[0]).resolve()
     skills_root = root / SKILL_DIR
     trees_root = root / TREE_DIR
     if not skills_root.is_dir() or not trees_root.is_dir():
@@ -222,6 +231,19 @@ def main() -> None:
                     elif isinstance(sid, str) and sid.isdigit():
                         referenced.add(int(sid))
 
+    # Item skills (Scroll of Escape 2013 / Blessed SoE 2036, potions, ...): the zone casts the item's skill on use
+    # (Mobius ItemSkills), so its template has to be in skills.json like any learnable skill.
+    item_skills = repo / "data" / "item-skills.json"
+    if item_skills.is_file():
+        for item in json.loads(item_skills.read_text()).get("items") or []:
+            for effect in item.get("effects") or []:
+                sid = effect.get("skillId")
+                if isinstance(sid, int) and 0 < sid < 10000:
+                    referenced.add(sid)
+
+    # Skills the zone casts itself: Mobius Unstuck (/unstuck) casts 2099, and 2100 for a GM.
+    referenced.update(ZONE_CAST_SKILLS)
+
     # Noble and hero trees have no classId (Mobius nobleSkillTree.xml / heroSkillTree.xml); their templates are still
     # needed because the zone grants them on noblesse (Block G1) and hero status (Block G2).
     for special in ("nobleSkillTree.xml", "heroSkillTree.xml"):
@@ -238,6 +260,16 @@ def main() -> None:
     selected = [templates[sid] for sid in sorted(referenced)]
 
     data = repo / "data"
+    if add_missing:
+        skills_path = data / "skills.json"
+        existing = json.loads(skills_path.read_text(encoding="utf-8"))
+        have = {row["skillId"] for row in existing["skills"]}
+        added = [row for row in selected if row["skillId"] not in have]
+        existing["skills"] = sorted(existing["skills"] + added, key=lambda row: row["skillId"])
+        skills_path.write_text(json.dumps(existing, indent=2) + "\n", encoding="utf-8")
+        print(f"added {len(added)} skill templates to {skills_path}: {[row['skillId'] for row in added]}")
+        return
+
     data.mkdir(exist_ok=True)
 
     skills_path = data / "skills.json"

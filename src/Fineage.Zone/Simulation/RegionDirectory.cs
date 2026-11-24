@@ -182,6 +182,9 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     readonly SortedDictionary<RegionId, RegionContainer> _regions = [];
     readonly HashSet<int> _relocated = [];
     readonly HashSet<RegionId> _borderDirty = [];
+
+    /// <summary>True when a region's border list must be rebuilt before the next publish.</summary>
+    public bool BordersPending => _borderDirty.Count > 0;
     readonly Dictionary<RegionId, List<T>> _borderCache = [];
     readonly Action<string>? _requireOwner;
 
@@ -529,11 +532,14 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
     /// Entities <paramref name="region"/> owns within <paramref name="radius"/> (2D) of the point, ascending ids: the
     /// live half of a region body's spatial query (the other half reads the neighbours' border snapshots).
     /// </summary>
+    [ThreadStatic] static List<int>? t_ownedNearScratch;
+
     public void OwnedNear(RegionId region, int x, int y, int radius, List<T> into)
     {
         if (!_regions.TryGetValue(region, out var container))
             return;
-        var ids = new List<int>();
+        var ids = t_ownedNearScratch ??= [];
+        ids.Clear();
         container.CollectCells(SpatialCells.Of(x - radius, CellSize), SpatialCells.Of(y - radius, CellSize),
             SpatialCells.Of(x + radius, CellSize), SpatialCells.Of(y + radius, CellSize), ids);
         ids.Sort();
@@ -665,7 +671,15 @@ public sealed class RegionDirectory<T> where T : class, IRegionMember
 
     void DropIfEmpty(RegionContainer region)
     {
-        if (region.EntityCount == 0)
-            _regions.Remove(region.Id);
+        if (region.EntityCount != 0)
+            return;
+        _regions.Remove(region.Id);
+        // A dropped region's cached border list must go with it: it leaked, and a region re-created later
+        // with a clean dirty bit would have published the stale members.
+        _borderCache.Remove(region.Id);
+        _borderDirty.Remove(region.Id);
     }
+
+    /// <summary>Cached border member lists (tests/diagnostics).</summary>
+    internal int BorderCacheCount => _borderCache.Count;
 }
