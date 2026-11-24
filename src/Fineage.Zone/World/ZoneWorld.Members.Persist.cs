@@ -215,6 +215,24 @@ public sealed partial class ZoneWorld
             return false;
         }
 
+        // Off the step the caller must return with its write durable (shutdown drain, TryFlushLedger, a request path).
+        // Inside a step the batch stays on the worker queue: RunStep drains the completion at its boundaries and the
+        // step never waits on Postgres.
+        if (!_stepping && result is EconomyFlushResult.Queued)
+        {
+            // The drain publishes the committed bags, which is world state, so it runs with the turn. Taking the turn
+            // here is safe on a caller that already holds it (a monitor is reentrant for its owner) and on a bare
+            // shutdown/test thread that does not.
+            bool durable;
+            using (_affinity.Step())
+                durable = AwaitEconomyPersistOffStepBlocking();
+            if (!durable)
+            {
+                LogEconomyCommitFailure(stolen);
+                return false;
+            }
+        }
+
         return true;
     }
 

@@ -39,6 +39,7 @@ internal sealed class EconomyPersistService
     int _running;
     int _inFlight;
     int _queued;
+    long _commitFailures;
     long _oldestEnqueueTimestamp;
     long _nextBatchId;
 
@@ -118,6 +119,26 @@ internal sealed class EconomyPersistService
     {
         ArgumentNullException.ThrowIfNull(batch);
 
+        // A world with no hosted simulation (tests, admin hooks, tools) has no worker thread. Enqueueing there would
+        // leave the batch in the queue until some later drain the caller does not run, so the write is committed on
+        // the caller instead — the same rule ZoneCharacterPersist uses for a world without its worker.
+        if (!IsRunning)
+        {
+            ulong inlineId = (ulong)Interlocked.Increment(ref _nextBatchId);
+            var inline = new EconomyPersistWork
+            {
+                BatchId = inlineId,
+                Batch = batch,
+                EnqueuedAt = Stopwatch.GetTimestamp(),
+            };
+            bool committed = Apply(inline);
+            if (!committed)
+                Interlocked.Increment(ref _commitFailures);
+            _pending[inlineId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), []);
+            _completions.Enqueue(new EconomyPersistCompletion(inlineId, committed));
+            return EconomyFlushResult.Queued;
+        }
+
         var charIds = CharacterIdsOf(batch);
         if (!_reservations.TryReserve(charIds))
         {
@@ -160,10 +181,14 @@ internal sealed class EconomyPersistService
         return drained;
     }
 
-    /// <summary>Logout / shutdown: wait for batches on a non-simulation caller.</summary>
+    /// <summary>
+    /// Logout / shutdown / off-step callers: wait for every queued batch and report whether all of them committed.
+    /// The completions it pumps are world state, so the caller must already hold the world turn.
+    /// </summary>
     public bool WaitForAllBatches(TimeSpan budget, ZoneWorld world)
     {
         EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(world.InSimulationStep, "WaitForAllBatches");
+        long failuresBefore = Volatile.Read(ref _commitFailures);
         long deadline = Stopwatch.GetTimestamp() + (long)(budget.TotalSeconds * Stopwatch.Frequency);
         while (PendingCount > 0 || !_pending.IsEmpty)
         {
@@ -173,7 +198,7 @@ internal sealed class EconomyPersistService
             Thread.Sleep(5);
         }
 
-        return true;
+        return Volatile.Read(ref _commitFailures) == failuresBefore;
     }
 
     void Finish(ZoneWorld world, EconomyPersistCompletion completion)
@@ -237,6 +262,8 @@ internal sealed class EconomyPersistService
                         Volatile.Write(ref _oldestEnqueueTimestamp, 0);
 
                     bool ok = Apply(work);
+                    if (!ok)
+                        Interlocked.Increment(ref _commitFailures);
                     _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
                     Interlocked.Decrement(ref _inFlight);
                 }
@@ -253,6 +280,8 @@ internal sealed class EconomyPersistService
         while (_queue.Reader.TryRead(out var work))
         {
             bool ok = Apply(work);
+            if (!ok)
+                Interlocked.Increment(ref _commitFailures);
             _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
         }
     }
