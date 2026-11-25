@@ -50,7 +50,7 @@ public sealed partial class NetLoginServer
                         await OnRestoreAsync(conn, account, envelope, ct).ConfigureAwait(false);
                         break;
                     default:
-                        await RejectAsync(conn, "unknown_opcode", $"opcode 0x{envelope.Opcode:X4}", ct)
+                        await RejectAsync(conn, "unknown_opcode", NetOpcodeTable.DescribeUnknown(envelope.Opcode), ct)
                             .ConfigureAwait(false);
                         break;
                 }
@@ -61,7 +61,7 @@ public sealed partial class NetLoginServer
                     "Fineage.Login",
                     "Information",
                     "log",
-                    ("message", $"handler_error opcode=0x{envelope.Opcode:X4}: {ex}"));
+                    ("message", $"handler_error opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex}"));
                 await RejectAsync(conn, "handler_error", "An internal error occurred.", ct).ConfigureAwait(false);
             }
         }

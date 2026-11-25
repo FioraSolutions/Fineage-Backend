@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// the +6 armor / +7 / +15 weapon broadcast with the Firework cast, the weapon glow in CharInfo, one scroll at a
 /// time, no enchanting from a private store, and the "Inappropriate enchant conditions" refusal.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEnchantAuditTests
 {
     const int Saber = 123;        // D one-hand sword

@@ -17,16 +17,20 @@ public sealed partial class ZoneWorld
             _byId.CountOf(ActiveSets.WithAbnormals));
 
     /// <summary>Counts included in simulation overrun warnings.</summary>
+    int _spawnedNpcCount;
+
+    internal void NoteNpcSpawned() => _spawnedNpcCount++;
+
+    internal void NoteNpcDespawned()
+    {
+        if (_spawnedNpcCount > 0)
+            _spawnedNpcCount--;
+    }
+
     internal (int TotalNpcs, int ThinkingNpcs, int PlayerRegions) TickNpcDiagnostics()
     {
-        int npcs = 0;
-        foreach (var entity in _byId.Values)
-        {
-            if (entity.Kind == ZoneEntityKind.Npc)
-                npcs++;
-        }
-
-        return (npcs, _byId.CountOf(ActiveSets.Thinking), _playerActiveRegions.Count);
+        RefreshPlayerActiveRegions();
+        return (_spawnedNpcCount, _byId.CountOf(ActiveSets.Thinking), _playerActiveRegions.Count);
     }
 
     /// <summary>Members of <paramref name="set"/> by owning region, then object id; safe to mutate the set while iterating.</summary>
@@ -50,12 +54,16 @@ public sealed partial class ZoneWorld
     {
         npc.ReturningHome = returning;
         SyncAiBusy(npc);
+        if (returning)
+            NoteNpcThinkJob(npc);
     }
 
     internal void SetAggroTarget(ZoneEntity npc, int targetId)
     {
         npc.AggroTargetId = targetId;
         SyncAiBusy(npc);
+        if (targetId > 0)
+            NoteNpcThinkJob(npc);
         // Mobius setIntention(ATTACK) → setRunning() / ChangeMoveType. Every path that
         // enters combat (damage hate, AddHate payloads, aggro-range scan, clan help)
         // comes through here — not only a melee hit.
@@ -94,8 +102,25 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius <c>AttackableThinkTaskManager.add</c>: only attackables in an active region
-    /// (a player can see them) or stuck beyond two drift radii.
+    /// Mobius awake predicate: player-active tile (or neighbor), a live watcher, combat/return home,
+    /// or drifted far enough that AI must return.
+    /// </summary>
+    bool NpcRegionAwake(ZoneEntity npc)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc)
+            return true;
+        if (AnyLivePlayerWatching(npc.ObjectId))
+            return true;
+        if (npc.AggroTargetId > 0 || npc.ReturningHome)
+            return true;
+        // Same threshold as AttackableAI thinkActive returnHome (MaxDriftRange), not 2×.
+        if (DriftedBeyondMaxRange(npc))
+            return true;
+        return IsPlayerRegionActive(_byId.OwnerOf(npc).Region);
+    }
+
+    /// <summary>
+    /// Mobius <c>AttackableThinkTaskManager.add</c>: only attackables in an awake region or otherwise needing AI.
     /// </summary>
     void TrackThink(ZoneEntity npc)
     {
@@ -105,35 +130,38 @@ public sealed partial class ZoneWorld
             return;
         if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
             return;
-        var region = _byId.OwnerOf(npc).Region;
-        if (!IsPlayerRegionActive(region) && !AnyLivePlayerWatching(npc.ObjectId) && !DriftedBeyondDouble(npc))
+        if (!NpcRegionAwake(npc))
             return;
+        // A player entering view used to mark every watched NPC due on this tick. That is the
+        // activation spike (thousands of thinks, and with geodata a MoveCheck each, on one step).
+        // Idle think keeps a phase inside the interval. A mob that already has a job is due now.
         long now = NowUnixMs();
-        if (AnyLivePlayerWatching(npc.ObjectId))
+        if (npc.AggroTargetId > 0 || npc.ReturningHome || npc.LeaderObjectId != 0)
             npc.NextThinkMs = now;
         else if (npc.NextThinkMs <= now)
             ScheduleNextThink(npc, now);
         _byId.Join(npc, ActiveSets.Thinking);
-        SpawnPrivates(npc);
+        EnqueueThink(npc);
     }
 
     void ReleaseThink(ZoneEntity npc)
     {
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             return;
-        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondDouble(npc))
+        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondMaxRange(npc))
             return;
         if (AnyLivePlayerWatching(npc.ObjectId))
             return;
 
+        DequeueThink(npc);
         _byId.Leave(npc, ActiveSets.Thinking);
     }
 
-    bool DriftedBeyondDouble(ZoneEntity npc)
+    bool DriftedBeyondMaxRange(ZoneEntity npc)
     {
         if (!npc.HomeSet)
             return false;
-        int limit = ZoneNpcSettings.MaxDriftRange * 2;
+        int limit = _maxDriftRange;
         long dx = npc.X - (long)npc.HomeX;
         long dy = npc.Y - (long)npc.HomeY;
         return dx * dx + dy * dy > (long)limit * limit;

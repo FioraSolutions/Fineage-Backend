@@ -291,6 +291,23 @@ public sealed partial class ZoneWorld
         return netWatchers ?? [];
     }
 
+    /// <summary>Moves a live player without rebuilding knownlist (region-activation tests only).</summary>
+    internal void MovePlayerCoordsForTests(ZoneSession session, int x, int y, int z)
+    {
+        using (_affinity.Step())
+        {
+            if (!TryGetLivePlayer(session, out var player))
+                return;
+            player.X = x;
+            player.Y = y;
+            player.Z = z;
+            session.X = x;
+            session.Y = y;
+            session.Z = z;
+            _aoi.Move(player.ObjectId, x, y);
+        }
+    }
+
     /// <summary>Re-anchor a live player and rebuild knownlist + watcher index (tests).</summary>
     internal void TeleportPlayerForTests(ZoneSession session, int x, int y, int z)
     {
@@ -309,6 +326,7 @@ public sealed partial class ZoneWorld
                 Forget(player, id);
             foreach (var other in OrderedVisible(player.ObjectId))
                 LinkSeen(player, other.ObjectId);
+            UpdateRuleZoneState(player);
         }
     }
 

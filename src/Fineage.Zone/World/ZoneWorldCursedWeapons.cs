@@ -328,9 +328,6 @@ public sealed partial class ZoneWorld
             return;
         player.Inventory.Remove(item);
         SaveInventory(player.Session, player.Inventory);
-        NetBridge?.FanoutInventoryUpdate(
-            [player.ObjectId],
-            InventoryMessages.Update(InventoryChange.Remove, item));
     }
 
     void CheckCursedWeaponOnEnter(ZoneEntity player)
@@ -470,9 +467,9 @@ public sealed partial class ZoneWorld
     List<int> OnlinePlayerObjectIds()
     {
         var list = new List<int>();
-        foreach (var entity in _byId.Values)
+        foreach (var entity in Players())
         {
-            if (entity.Kind == ZoneEntityKind.Player && entity.Session != null)
+            if (entity.Session != null)
                 list.Add(entity.ObjectId);
         }
 

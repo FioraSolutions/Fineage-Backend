@@ -16,6 +16,7 @@ namespace Fineage.Zone.Tests;
 /// Net teleport feedback: a revive or gatekeeper relocation has to reach the moving client and
 /// every peer that had it in view, or the client keeps rendering the old spot.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetTeleportFanoutTests
 {
     [Fact]
@@ -26,7 +27,7 @@ public sealed class NetTeleportFanoutTests
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
 
-        int deathX = player.X, deathY = player.Y;
+        int deathX = player.X, deathY = player.Y, deathZ = player.Z;
         Assert.Null(await kit.World.TryAdminKillPlayerAsync(session, CancellationToken.None));
         Assert.Null(await kit.World.TryReviveAsync(session, DeathProtocol.ReviveToVillage, CancellationToken.None));
 
@@ -37,11 +38,14 @@ public sealed class NetTeleportFanoutTests
         Assert.Equal(0, (int)only[5]!);
         Assert.Contains(player.ObjectId, Assert.IsAssignableFrom<IReadOnlyList<int>>(only[0]));
 
-        // Mobius teleToLocation(TOWN): map-region of the death cell (elf_town for NetTestKit spawn), not TI hardcode.
+        // Mobius teleToLocation(TOWN): a RespawnZone race point wins over the death cell's map region.
         var regions = MapRegionCatalog.LoadDefault();
-        var region = regions.At(deathX, deathY);
+        var rules = kit.World.ZoneRules.Query(deathX, deathY, deathZ, player.Race);
+        var region = !string.IsNullOrEmpty(rules.RespawnPoint)
+            ? regions.ByName(rules.RespawnPoint)
+            : regions.At(deathX, deathY);
         Assert.NotNull(region);
-        Assert.Equal("elf_town", region!.Name);
+        Assert.Equal("Mothertree_Glade", region!.Name);
         Assert.Contains(region.RespawnPoints, pt =>
             !pt.IsChaotic && pt.Kind == "normal" && pt.X == x && pt.Y == y && pt.Z == z);
         Assert.NotEqual(TalkingIslandRestart.X, x);

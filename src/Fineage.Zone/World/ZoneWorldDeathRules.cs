@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 
 namespace Fineage.Zone.World;
 
@@ -20,7 +21,7 @@ public sealed partial class ZoneWorld
     /// current level's bar, then rolls the Death Penalty buff. Both are skipped when nothing killed the character
     /// (admin kill, scripted death), exactly like Mobius, which warns and returns on a null killer.
     /// </summary>
-    void ApplyDeathConsequences(ZoneEntity player, int killerObjectId)
+    void ApplyDeathConsequences(ZoneEntity player, int killerObjectId, bool noblesseBlessing = false)
     {
         if (player.Session == null || killerObjectId <= 0)
             return;
@@ -30,9 +31,16 @@ public sealed partial class ZoneWorld
         // Mobius CT_0 Player.doDie: exp is lost on any death (PvE, PvP and PK) unless the victim stands in a
         // non-siege PVP zone (arena). calculateDeathPenaltyBuffLevel skips PVP / siege zones and, for a playable
         // killer, only rolls when the victim carries karma.
+        // NoblesseBless zeroes the exp loss and the Death Penalty roll. ApplyPlayerDeath already stopped the
+        // abnormal with the rest of the effect list and passed that fact in.
+        if (noblesseBlessing)
+            ZoneLog.Info($"[death] noblesse blessing consumed object={player.ObjectId}");
+
         if (killer.Kind == ZoneEntityKind.Player)
         {
             if (InArenaOnly(player))
+                return;
+            if (noblesseBlessing)
                 return;
             ApplyDeathExpLoss(player, killer);
             if (player.Karma > 0 && !InPvpArea(player))
@@ -40,6 +48,8 @@ public sealed partial class ZoneWorld
             return;
         }
 
+        if (noblesseBlessing)
+            return;
         ApplyDeathExpLoss(player, killer);
         RollDeathPenalty(player, killer);
     }

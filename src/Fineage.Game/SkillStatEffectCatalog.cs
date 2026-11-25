@@ -90,6 +90,15 @@ public sealed class SkillStatEffectCatalog
     readonly Dictionary<int, SkillStatEffect> _byId;
     static readonly ConcurrentDictionary<int, byte> MissingStatWarned = new();
 
+    /// <summary>
+    /// True once per skill id. The lock-free <see cref="ConcurrentDictionary{TKey,TValue}.ContainsKey"/> check comes
+    /// first because <c>TryAdd</c> takes a bucket lock even when the key is already there: every stat rebuild of a
+    /// player with a passive that has no stat row took that lock on the simulation thread, and the load-test profile
+    /// showed attack and auto-attack ticks stalled 200-260 ms in <c>Monitor.Enter</c> under it.
+    /// </summary>
+    static bool FirstMissing(int skillId) =>
+        !MissingStatWarned.ContainsKey(skillId) && MissingStatWarned.TryAdd(skillId, 0);
+
     SkillStatEffectCatalog(Dictionary<int, SkillStatEffect> byId) => _byId = byId;
 
     public static readonly SkillStatEffectCatalog Empty = new([]);
@@ -117,7 +126,7 @@ public sealed class SkillStatEffectCatalog
         {
             if (!_byId.TryGetValue(a.SkillId, out var effect))
             {
-                if (onMissing != null && MissingStatWarned.TryAdd(a.SkillId, 0))
+                if (onMissing != null && FirstMissing(a.SkillId))
                     onMissing(a.SkillId);
                 continue;
             }
@@ -170,12 +179,17 @@ public sealed class SkillStatEffectCatalog
         bool resting = false,
         double hpPercent = 100d,
         bool moving = false,
-        Func<string[], bool>? wearingSlot = null)
+        Func<string[], bool>? wearingSlot = null,
+        Action<int>? onMissing = null)
     {
         foreach (var (skillId, level) in known.OrderBy(static p => p.Key))
         {
             if (!_byId.TryGetValue(skillId, out var effect))
+            {
+                if (onMissing != null && FirstMissing(skillId))
+                    onMissing(skillId);
                 continue;
+            }
             foreach (var f in effect.Funcs)
             {
                 if (UsingGateFails(f, wearing, wearingSlot))
@@ -285,14 +299,13 @@ public sealed class SkillStatEffectCatalog
                     : null;
                 funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing, notUsing, usingSlot));
             }
-            if (funcs.Count > 0)
-            {
-                // Skill-level <cond><using kind> applies to the skill itself (cast refusal), not only to its funcs.
-                string[]? skillUsing = row.TryGetProperty("using", out var su)
-                    ? su.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
-                    : null;
-                byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs) { Using = skillUsing };
-            }
+            // A passive row with no effects is a real passive that grants no combat stat mod (Lucky 194,
+            // Expertise D 239, Create Item 172, Divine Inspiration 1405, Equip Set Items 3006). Keep it in the
+            // catalog so a learned passive always resolves; an empty func list means "adds nothing".
+            string[]? skillUsing = row.TryGetProperty("using", out var su)
+                ? su.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
+                : null;
+            byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs) { Using = skillUsing };
         }
         return new SkillStatEffectCatalog(byId);
     }

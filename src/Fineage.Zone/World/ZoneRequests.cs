@@ -7,17 +7,27 @@ namespace Fineage.Zone.World;
 /// read-only projections handlers send. It goes through the command ingress, so it is applied in the commands stage
 /// in submission order with the commands around it, but it is neither logged nor replayed.
 /// </summary>
-internal sealed record ZoneRequest<T>(string What, Func<TickContext, T> Run) : ZoneCommand
+internal sealed record ZoneRequest<T>(string What, Func<TickContext, T> Run, ZoneCommand? Wrapped = null) : ZoneCommand
 {
     public override string Name => $"request:{What}";
 
     internal override bool Logged => false;
+
+    internal override ZoneCommandClass IngressClass => Wrapped?.IngressClass ?? base.IngressClass;
+
+    internal override int ApplyCost => Wrapped?.ApplyCost ?? base.ApplyCost;
+
+    internal override bool IsCoalesceableMovement => Wrapped?.IsCoalesceableMovement == true;
+
+    /// <summary>Set when <see cref="Apply"/> ran. An ingress refusal leaves it false so the caller can tell coalesce from a result.</summary>
+    internal bool WasApplied { get; private set; }
 
     /// <summary>What <see cref="Run"/> returned; read it once the reply completed.</summary>
     public T Result { get; private set; } = default!;
 
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick)
     {
+        WasApplied = true;
         Result = Run(tick);
         return null;
     }
@@ -57,12 +67,16 @@ public sealed partial class ZoneWorld
         ZoneSession session, ZoneCommand command, Func<Func<string?>, T> around, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
-        return RequestAsync(session, new ZoneRequest<T>(command.Name, tick => around(() => ApplyLogged(session, command, tick))), ct);
+        return RequestAsync(session, new ZoneRequest<T>(command.Name, tick => around(() => ApplyLogged(session, command, tick)), command), ct);
     }
 
     async Task<T> RequestAsync<T>(ZoneSession session, ZoneRequest<T> request, CancellationToken ct)
     {
-        await _ingress.Submit(session, request, ct).ConfigureAwait(false);
+        string? error = await _ingress.Submit(session, request, ct).ConfigureAwait(false);
+        // Applied requests carry rule failures inside Result. An error with WasApplied still false is ingress
+        // admission or movement coalescing, and the result was never produced.
+        if (error != null && !request.WasApplied)
+            throw new ZoneIngressRefusal(error);
         return request.Result;
     }
 

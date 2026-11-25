@@ -80,7 +80,7 @@
       "htmlFile": "31540-event-31540-05-007.htm"
     },
     {
-      "npcId": 31540,
+      "npcId": 31271,
       "hook": "event",
       "when": "absent",
       "event": "31271-02",
@@ -93,7 +93,7 @@
       "htmlFile": "31540-event-31271-02-008.htm"
     },
     {
-      "npcId": 31540,
+      "npcId": 31271,
       "hook": "event",
       "when": "absent",
       "event": "31271-05",
@@ -114,6 +114,210 @@
         }
       ],
       "htmlFile": "31540-event-31271-05-009.htm"
+    },
+    {
+      "npcId": 21274,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21275,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21276,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21277,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21282,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21283,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21284,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21285,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21290,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21291,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21292,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21293,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7265,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

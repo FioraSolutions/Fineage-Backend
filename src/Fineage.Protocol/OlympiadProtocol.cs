@@ -135,4 +135,7 @@ public static class OlympiadProtocol
     public const int CountdownLine = 177;
     public const int PointsChanged = 178;
     public const int MatchDecided = 179;
+    /// <summary>Monument bypass when the hero already holds an Infinity weapon (Mobius <c>already_have_weapon.htm</c>).</summary>
+    public const int HeroWeaponAlready = 180;
+    public const string HeroWeaponAlreadyText = "You've already received a weapon and cannot have another one.";
 }

@@ -1,0 +1,105 @@
+name: load-test-smoke
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skipped:
+    if: >-
+      ${{ !(
+          github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf'))
+        ) }}
+    name: load-test-smoke-skipped
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Load-test smoke skipped (dev PR fast gate)."
+
+  load-test-smoke:
+    name: load-test-smoke
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+          (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
+            contains(github.event.pull_request.labels.*.name, 'perf')) }}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      FINEAGE_DATABASE_URL: Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+      FINEAGE_HANDOFF_SECRET: FineageLoginHandoffV1
+      FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX: loadbot
+      FINEAGE_LOGIN_LOADTEST_PASSWORD: loadtest-pass-v1
+      FINEAGE_LOGIN_METRICS_PORT: 9464
+      FINEAGE_ZONE_METRICS_PORT: 9465
+      FINEAGE_ZONE_REGION_WORKERS: '0'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Build stack
+        run: |
+          dotnet build src/Fineage.Login -c Release -v q
+          dotnet build src/Fineage.Zone -c Release -v q
+          dotnet build tools/Fineage.LoadTest -c Release -v q
+
+      - name: Start Login+Zone
+        run: |
+          ./scripts/run-local-net.sh start
+          ./scripts/run-local-net.sh status
+
+      - name: Load test (short)
+        run: |
+          mkdir -p local-logs/loadtest-ci
+          dotnet tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll \
+            --scenario tools/Fineage.LoadTest/scenarios/bots-20-smoke.yaml \
+            --target fineage \
+            --report-dir local-logs/loadtest-ci \
+            --login-log local-logs/login-net.log \
+            --zone-log local-logs/zone-net.log \
+            --zone-pid "$(cat local-logs/zone-net.pid)" \
+            --region-workers 0
+
+      - name: Stop stack
+        if: always()
+        run: ./scripts/run-local-net.sh stop || true

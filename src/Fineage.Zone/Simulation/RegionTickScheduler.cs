@@ -1,6 +1,16 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Fineage.Zone.Simulation;
+
+/// <summary>A region body running right now: what a step watchdog names when a step does not finish.</summary>
+public sealed record RegionBodyTrace(string Stage, RegionId Region, int ManagedThreadId, long StartedTimestamp)
+{
+    public TimeSpan Elapsed => Stopwatch.GetElapsedTime(StartedTimestamp);
+
+    public override string ToString() =>
+        $"{Stage}@{Region} on thread {ManagedThreadId} for {Elapsed.TotalMilliseconds:F0} ms";
+}
 
 /// <summary>
 /// Fixed-step simulation clock. Each <see cref="Step"/> moves <see cref="Tick"/> to the next tick (or, when the caller
@@ -20,11 +30,29 @@ public sealed class RegionTickScheduler
     readonly IRegionExecutor _executor;
     readonly ISimulationObserver _observer;
     readonly IRegionScopes _scopes;
+    readonly ConcurrentDictionary<long, RegionBodyTrace> _inFlight = new();
+    long _inFlightSeq;
+    string? _currentWork;
 
     [ThreadStatic] static RegionId? t_body;
 
     /// <summary>The region whose body runs on this thread, or null outside region bodies.</summary>
     public static RegionId? CurrentBody => t_body;
+
+    /// <summary>
+    /// The region bodies running right now, in (stage, region) order. Empty between region stages and while world
+    /// stages run, so a stuck step with an empty list points at a world stage, the collect step or the barrier.
+    /// </summary>
+    public IReadOnlyList<RegionBodyTrace> InFlightRegionBodies =>
+        _inFlight.Values.OrderBy(t => t.Stage, StringComparer.Ordinal).ThenBy(t => t.Region).ToList();
+
+    /// <summary>
+    /// The stage slice the scheduler thread is in: the stage name, then <c>collect</c>, <c>scopes</c>,
+    /// <c>barrier</c>, or <c>commit</c> for a region stage. Null between stages. The step watchdog reads it.
+    /// </summary>
+    public string? CurrentWork => Volatile.Read(ref _currentWork);
+
+    internal void NoteWork(string? work) => Volatile.Write(ref _currentWork, work);
 
     /// <summary>Starts at the tick the clock's wall time is in; the first <see cref="Step"/> runs the tick after it.</summary>
     /// <param name="executor">Runs the regions of stages that allow it (<see cref="IRegionStage.Parallel"/>).</param>
@@ -128,6 +156,28 @@ public sealed class RegionTickScheduler
     }
 
     /// <summary>
+    /// Runs the registered stage named <paramref name="name"/> as tick <see cref="Tick"/> + 1 without advancing
+    /// <see cref="Tick"/>. The live loop admits queued commands during the wait for the next step at the same tick
+    /// time phase 0 of that step uses, so a command does not sit until the tick boundary. The stage logs the
+    /// upcoming tick; replay still applies the command on the step that follows it.
+    /// </summary>
+    public void RunAhead(string name, long wallUnixMs)
+    {
+        var entry = _stages.FirstOrDefault(s => s.Name == name)
+            ?? throw new InvalidOperationException($"Simulation stage '{name}' is not registered on this scheduler.");
+        long ahead = Tick + 1;
+        var tick = new TickContext(ahead, Clock.TimeOf(ahead), wallUnixMs);
+        List<StageFailure> failures = [];
+        using (Clock.Pin(tick))
+            failures.AddRange(entry.Run(this, tick));
+        Report(failures);
+        if (failures.Count > 0)
+            throw new AggregateException(
+                $"Stage '{name}' failed ahead of tick {ahead} in {failures.Count} scope(s): {string.Join("; ", failures)}",
+                failures.Select(f => f.Error));
+    }
+
+    /// <summary>
     /// Runs every stage registered with <paramref name="periodTicks"/>, in registration order, after
     /// <see cref="Resume"/>, at the resulting tick (test and admin hooks for one cadence). Failures are reported and
     /// rethrown.
@@ -190,6 +240,7 @@ public sealed class RegionTickScheduler
         {
             long started = Stopwatch.GetTimestamp();
             StageFailure[] failures = [];
+            owner.NoteWork(Name);
             try
             {
                 run(tick);
@@ -199,6 +250,7 @@ public sealed class RegionTickScheduler
                 failures = [new StageFailure(Name, tick.Tick, "world", ex)];
             }
 
+            owner.NoteWork(null);
             owner._observer.StageCompleted(Name, tick, 1, 0, Stopwatch.GetElapsedTime(started));
             return failures;
         }
@@ -211,6 +263,7 @@ public sealed class RegionTickScheduler
         public override IReadOnlyList<StageFailure> Run(RegionTickScheduler owner, TickContext tick)
         {
             long started = Stopwatch.GetTimestamp();
+            owner.NoteWork(Name + " collect");
             try
             {
                 Stage.Collect(tick, owner._collector);
@@ -218,12 +271,14 @@ public sealed class RegionTickScheduler
             catch (Exception ex)
             {
                 owner._collector.Drain();
+                owner.NoteWork(null);
                 owner._observer.StageCompleted(Name, tick, 0, 0, Stopwatch.GetElapsedTime(started));
                 return [new StageFailure(Name, tick.Tick, "collect", ex)];
             }
 
             var work = owner._collector.Drain();
             var scopes = new IRegionScope[work.Count];
+            owner.NoteWork(Name + " scopes");
             try
             {
                 for (int i = 0; i < work.Count; i++)
@@ -231,6 +286,7 @@ public sealed class RegionTickScheduler
             }
             catch (Exception ex)
             {
+                owner.NoteWork(null);
                 owner._observer.StageCompleted(Name, tick, 0, 0, Stopwatch.GetElapsedTime(started));
                 return [new StageFailure(Name, tick.Tick, "scopes", ex)];
             }
@@ -238,10 +294,14 @@ public sealed class RegionTickScheduler
             // One slot per region keeps the failure order deterministic under the parallel executor.
             var errors = new Exception?[work.Count];
             var executor = Stage.Parallel ? owner._executor : SequentialRegionExecutor.Instance;
+            owner.NoteWork(Name + " barrier");
             executor.Run(work.Count, i =>
             {
                 var outer = t_body;
                 t_body = work[i].Region;
+                long traceId = Interlocked.Increment(ref owner._inFlightSeq);
+                owner._inFlight[traceId] = new RegionBodyTrace(Name, work[i].Region,
+                    Environment.CurrentManagedThreadId, Stopwatch.GetTimestamp());
                 try
                 {
                     // The pin is per thread: a worker reads the step's time like the scheduler thread does.
@@ -255,12 +315,14 @@ public sealed class RegionTickScheduler
                 }
                 finally
                 {
+                    owner._inFlight.TryRemove(traceId, out _);
                     t_body = outer;
                 }
             });
 
             var failures = new List<StageFailure>();
             int entities = 0;
+            owner.NoteWork(Name + " commit");
             for (int i = 0; i < work.Count; i++)
             {
                 entities += work[i].ObjectIds.Count;
@@ -276,6 +338,7 @@ public sealed class RegionTickScheduler
                 }
             }
 
+            owner.NoteWork(null);
             owner._observer.StageCompleted(Name, tick, work.Count, entities, Stopwatch.GetElapsedTime(started));
             return failures;
         }

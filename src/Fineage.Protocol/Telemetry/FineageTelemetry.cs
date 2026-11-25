@@ -37,6 +37,24 @@ public static class FineageTelemetry
     public static readonly Counter<long> OutboundDropped =
         Meter.CreateCounter<long>("fineage.outbound.dropped", description: "Frames dropped because a session outbound queue was full");
 
+    public static readonly Counter<long> FanoutDropped =
+        Meter.CreateCounter<long>("fineage.fanout.dropped", description: "Fanout frames dropped under stripe/outbound backpressure (tag opcode_group)");
+
+    public static readonly Counter<long> OutboundReliableOverflow =
+        Meter.CreateCounter<long>("fineage.outbound.reliable_overflow", description: "Reliable frames refused because a session outbound queue was full");
+
+    public static readonly Counter<long> OutboundLaneBlocked =
+        Meter.CreateCounter<long>("fineage.outbound.lane.blocked", description: "Producer found a full fan-out stripe and did not wait (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneFull =
+        Meter.CreateCounter<long>("fineage.outbound.lane.full", description: "Mailbox budget refused a frame or snapshot (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneCoalesced =
+        Meter.CreateCounter<long>("fineage.outbound.lane.coalesced", description: "Movement frame replaced a pending one for the same entity (tag lane)");
+
+    public static readonly Counter<long> OutboundLaneEvicted =
+        Meter.CreateCounter<long>("fineage.outbound.lane.evicted", description: "Stale mailbox frame discarded (snapshot replace, visual drop, movement eviction) (tag lane)");
+
     public static readonly Counter<long> PacketsRejected =
         Meter.CreateCounter<long>("fineage.packets.rejected", description: "Packets refused before normal handling (rate limit, unknown opcode, wrong port)");
 
@@ -49,8 +67,353 @@ public static class FineageTelemetry
     public static readonly Histogram<double> TickMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.ms", unit: "ms", description: "Zone simulation tick duration");
 
+    public static readonly Histogram<double> EnterTryMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.try_ms", unit: "ms", description: "TryEnter world join on the simulation thread");
+
+    public static readonly Histogram<double> EnterTryAoiBindMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.try_aoi_bind_ms", unit: "ms", description: "TryEnter knownlist/AOI bind on the simulation thread");
+
+    public static readonly Histogram<double> CommandApplyMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.apply_ms", unit: "ms", description: "Single command apply duration (tag command)");
+
+    public static readonly Histogram<double> EnterPlanMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.plan_ms", unit: "ms", description: "Enter commit planning on the simulation thread");
+
+    public static readonly Histogram<double> EnterSelfProjectionMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.self_projection_ms", unit: "ms", description: "Enter self packet projection on the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownSnapshotMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.known_snapshot_ms", unit: "ms", description: "Enter knownlist snapshot on the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownEncodeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.known_encode_ms", unit: "ms", description: "Enter knownlist NetCodec work off the simulation thread");
+
+    public static readonly Histogram<double> EnterPeerFanoutMilliseconds =
+        Meter.CreateHistogram<double>("fineage.enter.peer_fanout_ms", unit: "ms", description: "Enter peer fan-out encoding off the simulation thread");
+
+    public static readonly Histogram<double> EnterKnownEntities =
+        Meter.CreateHistogram<double>("fineage.enter.known_entities", unit: "{entity}", description: "Known entities per enter");
+
+    public static readonly Histogram<double> EnterKnownPlayers =
+        Meter.CreateHistogram<double>("fineage.enter.known_players", unit: "{player}", description: "Known players per enter");
+
+    public static readonly Histogram<double> EnterFrames =
+        Meter.CreateHistogram<double>("fineage.enter.frames", unit: "{frame}", description: "Outbound frames per enter burst");
+
+    public static readonly Histogram<double> EnterBytes =
+        Meter.CreateHistogram<double>("fineage.enter.bytes", unit: "By", description: "Outbound bytes per enter burst");
+
     public static readonly Histogram<double> StageMilliseconds =
         Meter.CreateHistogram<double>("fineage.tick.stage.ms", unit: "ms", description: "Zone simulation stage duration (tag stage)");
+
+    public static readonly Histogram<double> TickStepFanoutDrainMilliseconds =
+        Meter.CreateHistogram<double>("fineage.tick.step.fanout_drain.ms", unit: "ms",
+            description: "Wall time to deliver one sealed world fan-out batch");
+
+    public static readonly Histogram<double> CommandToMailboxesMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command_to_mailboxes.ms", unit: "ms",
+            description: "Command apply commit to first outbound mailbox enqueue for that batch");
+
+    public static readonly Histogram<double> CommandTimelineMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.timeline.ms", unit: "ms",
+            description: "Command lifecycle segment duration (tag phase)");
+
+    public static readonly Histogram<int> FanoutQueueDepth =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.depth", unit: "{batch}",
+            description: "Sealed fan-out batches waiting on the dispatcher worker");
+
+    public static readonly Histogram<int> FanoutQueueWork =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.work", unit: "{recipient}",
+            description: "Recipient send work waiting on the dispatcher worker (queued batches, in flight excluded)");
+
+    public static readonly Histogram<double> FanoutQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest batch still waiting on the fan-out dispatcher");
+
+    public static readonly Histogram<int> PathfindNodes =
+        Meter.CreateHistogram<int>("fineage.npc.pathfind.nodes", unit: "{node}",
+            description: "Geo nodes the npc.paths stage expanded in one step");
+
+    public static readonly Histogram<int> PathfindQueued =
+        Meter.CreateHistogram<int>("fineage.npc.pathfind.queued", unit: "{request}",
+            description: "Route requests still queued or running at the end of a step");
+
+    public static readonly Counter<long> PathfindBudgetExhausted =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.budget_exhausted",
+            description: "Steps where the npc.paths node budget ran out with requests still pending");
+
+    /// <summary>
+    /// How long a route request waited before the stage took it, tagged by priority. This is the number that answers
+    /// whether a flood of P1 work starves P2/P3: queue depth alone cannot, because a starved request is already queued.
+    /// </summary>
+    public static readonly Histogram<double> PathfindWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.wait.ms", unit: "ms",
+            description: "Route request wait before the npc.paths stage took it, by priority");
+
+    /// <summary>
+    /// Age of the oldest request still queued at the end of a step, tagged by priority, measured for every priority that
+    /// still has work. A P1 flood shows up here as a P2/P3 age that keeps climbing while P1 stays low.
+    /// </summary>
+    public static readonly Histogram<double> PathfindOldestAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest route request still queued at the end of a step, by priority");
+
+    /// <summary>Steps where the node budget ran out while requests were still waiting for nodes.</summary>
+    public static readonly Counter<long> PathfindStarvedSteps =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.starved_steps",
+            description: "Steps where a route request was left waiting by the node budget, by priority");
+
+    /// <summary>
+    /// Searches that ran to completion and concluded that no route exists. Distinct from
+    /// <see cref="PathfindBudgetExhausted"/>: this is a definitive answer, and it is the one that may be cached.
+    /// </summary>
+    public static readonly Counter<long> PathfindNoRoute =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.no_route",
+            description: "Completed route searches that found no path from origin to destination");
+
+    /// <summary>
+    /// Route requests answered from the negative cache instead of running a search. A high rate is the signal that an
+    /// unreachable target is still being asked about, so the approach backoff is not holding it back.
+    /// </summary>
+    public static readonly Counter<long> PathfindNoRouteCached =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.no_route_cached",
+            description: "Route requests served from the cached \"no route\" answer without a search");
+
+    /// <summary>
+    /// Wait of a request that was dropped from the queue without the stage ever serving it. Kept apart from
+    /// <see cref="PathfindWaitMilliseconds"/> so the served-latency histogram is not polluted by work that never ran,
+    /// and a single request is never counted in both.
+    /// </summary>
+    public static readonly Histogram<double> PathfindUnservedWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.unserved_wait.ms", unit: "ms",
+            description: "Wait of a route request dropped before the npc.paths stage ever served it, by priority");
+
+    /// <summary>Route searches the npc.paths stage actually started (a fresh <c>BeginPath</c>), by priority.</summary>
+    public static readonly Counter<long> PathfindSearches =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.searches",
+            description: "Route searches started by the npc.paths stage, by priority");
+
+    /// <summary>
+    /// Finished searches whose smoothed route was empty. Kept apart from <see cref="PathfindNoRoute"/>: the search found
+    /// the destination but the pose check rejected every leg, which is a different failure from an unreachable target.
+    /// </summary>
+    public static readonly Counter<long> PathfindEmptyPath =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.empty_path",
+            description: "Completed route searches whose smoothed path had no leg");
+
+    /// <summary>
+    /// Server-driven approaches asked for, by outcome: served (the pawn started moving), pending (a search is queued),
+    /// or refused (backoff or no route). This is the counter that shows whether an unreachable target is still being
+    /// re-approached every tick.
+    /// </summary>
+    public static readonly Counter<long> ApproachAttempts =
+        Meter.CreateCounter<long>("fineage.approach.attempts",
+            description: "ApproachTarget calls by outcome and priority");
+
+    /// <summary>Approaches whose straight-line destination clipped back onto the origin (from == to).</summary>
+    public static readonly Counter<long> ApproachClippedToOrigin =
+        Meter.CreateCounter<long>("fineage.approach.clipped_to_origin",
+            description: "Approach attempts whose MoveCheck left the pawn at its origin");
+
+    public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
+            description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");
+
+    public static readonly Histogram<double> FanoutEnqueueToSocketWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.enqueue_to_socket_write.ms", unit: "ms",
+            description: "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts");
+
+    public static readonly Histogram<double> FanoutDispatcherEnqueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.dispatcher.enqueue_wait.ms", unit: "ms",
+            description: "Time the simulation thread spent handing a sealed fan-out batch to the dispatcher (non-blocking; lock + TryWrite)");
+
+    public static readonly Histogram<double> FanoutStripeEnqueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.stripe.enqueue_wait.ms", unit: "ms",
+            description: "Time a stripe worker blocked enqueueing one connection fan-out frame (tag stripe)");
+
+    public static readonly Histogram<double> FanoutBatchProcessMilliseconds =
+        Meter.CreateHistogram<double>("fineage.fanout.batch_process.ms", unit: "ms",
+            description: "Dispatcher worker time to execute one sealed batch");
+
+    public static readonly Histogram<int> FanoutEventsPerBatch =
+        Meter.CreateHistogram<int>("fineage.fanout.events_per_batch", unit: "{event}",
+            description: "Send actions executed per sealed batch");
+
+    public static readonly Histogram<int> FanoutQueueBytes =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.bytes", unit: "By",
+            description: "Encoded payload bytes in a sealed batch when it leaves the dispatcher queue");
+
+    public static readonly Histogram<int> FanoutRecipientsPerEvent =
+        Meter.CreateHistogram<int>("fineage.fanout.recipients_per_event", unit: "{recipient}",
+            description: "Mailbox enqueues performed by one fan-out send");
+
+    public static readonly Histogram<int> OutboundQueueFrames =
+        Meter.CreateHistogram<int>("fineage.outbound.queue.frames", unit: "{frame}",
+            description: "Frames waiting on a connection when another frame is queued (tag endpoint)");
+
+    public static readonly Histogram<int> OutboundQueueBytes =
+        Meter.CreateHistogram<int>("fineage.outbound.queue.bytes", unit: "By",
+            description: "Bytes waiting on a connection when another frame is queued (tag endpoint)");
+
+    public static readonly Histogram<double> OutboundQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.outbound.queue.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest frame included in one socket write (tag endpoint)");
+
+    public static readonly Counter<long> FanoutCoalesced =
+        Meter.CreateCounter<long>("fineage.fanout.coalesced",
+            description: "Replaceable fan-out writes superseded before send");
+
+    public static readonly Counter<long> FanoutShedVisual =
+        Meter.CreateCounter<long>("fineage.fanout.shed_visual",
+            description: "Visual fan-out writes shed at seal time to keep a sealed batch inside its send-work budget");
+
+    public static readonly Counter<long> FanoutBacklogSoftExceeded =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.soft_exceeded",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit (worker falling behind)");
+
+    public static readonly Counter<long> FanoutBacklogEmergency =
+        Meter.CreateCounter<long>("fineage.fanout.backlog.emergency",
+            description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its hard limit. Must stay 0 in normal runs");
+
+    public static readonly Counter<long> OutboundSlowClientDisconnect =
+        Meter.CreateCounter<long>("fineage.outbound.slow_client_disconnect",
+            description: "Connections closed because their outbound mailbox stayed above the hard byte limit after low-priority frames were shed (tag endpoint)");
+
+    public static readonly Counter<long> OutboundShedBytes =
+        Meter.CreateCounter<long>("fineage.outbound.shed_bytes",
+            description: "Low-priority outbound bytes dropped or coalesced away to keep a mailbox inside its byte budget (tag lane)");
+
+    public static readonly Counter<long> FanoutQueueOverflow =
+        Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
+            description: "Sealed fan-out batches rejected because the dispatcher is closed or shutting down");
+
+    public static readonly Counter<long> FanoutOverflowShed =
+        Meter.CreateCounter<long>("fineage.fanout.overflow.shed",
+            description: "Hand-offs that crossed the hard fan-out backlog and shed their visual writes instead of growing the backlog");
+
+    public static readonly Histogram<double> SocketWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",
+            description: "TCP socket write duration for one outbound frame batch (tag endpoint)");
+
+    public static readonly Histogram<int> SocketWriteBytes =
+        Meter.CreateHistogram<int>("fineage.socket_write.bytes", unit: "By",
+            description: "Bytes written in one socket write (tag endpoint)");
+
+    public static readonly Histogram<int> SocketWriteFrames =
+        Meter.CreateHistogram<int>("fineage.socket_write.frames", unit: "{frame}",
+            description: "Frames combined in one socket write (tag endpoint)");
+
+    public static readonly Histogram<int> CommandQueueDepth =
+        Meter.CreateHistogram<int>("fineage.command.queue.depth", unit: "{command}",
+            description: "Per-player ingress queue depth (one sample per player per observation)");
+
+    public static readonly Histogram<double> CommandQueueAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.queue.age.ms", unit: "ms",
+            description: "Age of the oldest command in a player's ingress queue");
+
+    public static readonly Counter<long> CommandCoalesced =
+        Meter.CreateCounter<long>("fineage.command.coalesced",
+            description: "Pending movement commands collapsed into a later movement command from the same player");
+
+    public static readonly Counter<long> CommandRejected =
+        Meter.CreateCounter<long>("fineage.command.rejected",
+            description: "Commands refused by ingress admission (tag reason: queue_depth, queue_age, closed)");
+
+    public static readonly Histogram<double> CommandQueueWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
+            description: "Time a command waited in ingress before apply (tag class)");
+
+    static long _tickMaxBits;
+    static long _tickRunningBits;
+    static long _queueAgeMaxBits;
+    static long _watchdogStallMaxBits;
+    static long _watchdogStallCount;
+
+    public static void NoteTickDuration(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            return;
+        TickMilliseconds.Record(milliseconds);
+        NoteMax(ref _tickMaxBits, milliseconds);
+    }
+
+    /// <summary>
+    /// Elapsed time of the step that is running now. The tick histogram does not move until the step
+    /// returns, so a stall longer than the last finished tick is visible only here.
+    /// </summary>
+    public static void NoteTickRunning(double elapsedMilliseconds)
+    {
+        if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
+            return;
+        Interlocked.Exchange(ref _tickRunningBits, BitConverter.DoubleToInt64Bits(elapsedMilliseconds));
+    }
+
+    public static void ClearTickRunning() => Interlocked.Exchange(ref _tickRunningBits, 0L);
+
+    public static void NoteCommandQueueAge(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            return;
+        NoteMax(ref _queueAgeMaxBits, milliseconds);
+    }
+
+    public static void NoteWatchdogStall(double elapsedMilliseconds)
+    {
+        if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
+            return;
+        NoteMax(ref _watchdogStallMaxBits, elapsedMilliseconds);
+    }
+
+    public static void NoteWatchdogEpisode() => Interlocked.Increment(ref _watchdogStallCount);
+
+    public static readonly ObservableGauge<double> TickMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.tick.max_ms",
+        ObserveTickMax,
+        unit: "ms",
+        description: "Longest simulation step, including one still running. Not a histogram bucket edge.");
+
+    public static readonly ObservableGauge<double> CommandQueueAgeMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.command.queue.age_max_ms",
+        () => ObserveBits(_queueAgeMaxBits),
+        unit: "ms",
+        description: "Longest per-player ingress queue age observed");
+
+    public static readonly ObservableGauge<double> WatchdogStallMaxMilliseconds = Meter.CreateObservableGauge(
+        "fineage.step.watchdog.stall_max_ms",
+        () => ObserveBits(_watchdogStallMaxBits),
+        unit: "ms",
+        description: "Longest watchdog-detected simulation stall");
+
+    public static readonly ObservableGauge<long> WatchdogStallCount = Meter.CreateObservableGauge(
+        "fineage.step.watchdog.stalls",
+        () => Interlocked.Read(ref _watchdogStallCount),
+        description: "Watchdog reports of a simulation step that had not returned");
+
+    static void NoteMax(ref long bits, double milliseconds)
+    {
+        long next = BitConverter.DoubleToInt64Bits(milliseconds);
+        while (true)
+        {
+            long current = Interlocked.Read(ref bits);
+            double have = BitConverter.Int64BitsToDouble(current);
+            if (milliseconds <= have)
+                return;
+            if (Interlocked.CompareExchange(ref bits, next, current) == current)
+                return;
+        }
+    }
+
+    static IEnumerable<Measurement<double>> ObserveTickMax()
+    {
+        double completed = BitConverter.Int64BitsToDouble(Interlocked.Read(ref _tickMaxBits));
+        double running = BitConverter.Int64BitsToDouble(Interlocked.Read(ref _tickRunningBits));
+        yield return new Measurement<double>(running > completed ? running : completed);
+    }
+
+    static IEnumerable<Measurement<double>> ObserveBits(long bits)
+    {
+        yield return new Measurement<double>(BitConverter.Int64BitsToDouble(Interlocked.Read(ref bits)));
+    }
 
     public static readonly Histogram<int> StageRegions =
         Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
@@ -72,6 +435,109 @@ public static class FineageTelemetry
 
     public static readonly Counter<long> LedgerFlushFailures =
         Meter.CreateCounter<long>("fineage.ledger.flush_failures", description: "Durable journal flushes that threw (tag pending)");
+
+    /// <summary>Auditable economy ledger invariant violations (tag code).</summary>
+    public static readonly Counter<long> LedgerInvariantViolations =
+        Meter.CreateCounter<long>("fineage.ledger.invariant_violations", description: "EconomyInvariantChecker violations (tag code)");
+
+    /// <summary>Optional hook before each Prometheus scrape (wall unix ms).</summary>
+    public static Action<long>? BeforeMetricsScrape;
+
+    public static void NotifyMetricsScrape(long wallUnixMs) => BeforeMetricsScrape?.Invoke(wallUnixMs);
+
+    /// <summary>Non-economic character snapshots. Tag <c>result</c> is written or coalesced.</summary>
+    public static readonly Counter<long> PersistSnapshots =
+        Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");
+
+    /// <summary>
+    /// Write duration of one durable persist call on its worker thread (tag <c>kind</c>: snapshot, economy). These run off
+    /// the simulation thread, so they must not land in <c>fineage.tick.stage.ms</c>: a slow Postgres write there would
+    /// read as a slow tick and hide the step's own cost.
+    /// </summary>
+    public static readonly Histogram<double> PersistWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.persist.write.ms", unit: "ms",
+            description: "Durable write duration on a persist worker (tag kind: snapshot, economy)");
+
+    public static readonly ObservableGauge<int> PersistPending = Meter.CreateObservableGauge(
+        "fineage.persist.pending",
+        ObservePersistPending,
+        unit: "{snapshot}",
+        description: "Character and pet snapshots waiting to be written, including the one in flight");
+
+    public static readonly ObservableGauge<double> PersistOldestAge = Meter.CreateObservableGauge(
+        "fineage.persist.oldest_age_ms",
+        ObservePersistOldestAge,
+        unit: "ms",
+        description: "Age of the oldest character or pet snapshot that has not been written");
+
+    /// <summary>Ramp-time NPC work deferred by the per-tick budgets (tag <c>kind</c>: privates, region_wake).</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklog = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog",
+        () => ObserveActivationBacklog(max: false),
+        unit: "{item}",
+        description: "NPC work waiting for its per-tick budget (tag kind: privates = minion masters, region_wake = NPCs)");
+
+    /// <summary>Largest backlog seen since start, sampled by the simulation every tick.</summary>
+    public static readonly ObservableGauge<int> NpcActivationBacklogMax = Meter.CreateObservableGauge(
+        "fineage.npc.activation.backlog_max",
+        () => ObserveActivationBacklog(max: true),
+        unit: "{item}",
+        description: "Largest per-tick-budget NPC backlog since start (tag kind)");
+
+    public static Func<NpcActivationBacklogReading>? ActivationBacklog { get; set; }
+
+    static IEnumerable<Measurement<int>> ObserveActivationBacklog(bool max)
+    {
+        var reading = ActivationBacklog?.Invoke() ?? default;
+        yield return new Measurement<int>(
+            max ? reading.PrivatesMax : reading.Privates, new KeyValuePair<string, object?>("kind", "privates"));
+        yield return new Measurement<int>(
+            max ? reading.RegionWakeMax : reading.RegionWake, new KeyValuePair<string, object?>("kind", "region_wake"));
+    }
+
+    public static Func<int>? PersistPendingCount { get; set; }
+    public static Func<double>? PersistOldestAgeMs { get; set; }
+
+    public static readonly Counter<long> EconomyPersistBatches =
+        Meter.CreateCounter<long>("fineage.economy.persist.batches", description: "Economy durable commits (tag result)");
+
+    public static readonly Counter<long> EconomyPersistFailures =
+        Meter.CreateCounter<long>("fineage.economy.persist.failures", description: "Economy durable commits that failed (tag reason)");
+
+    public static readonly ObservableGauge<int> EconomyPersistPending = Meter.CreateObservableGauge(
+        "fineage.economy.persist.pending",
+        ObserveEconomyPersistPending,
+        unit: "{batch}",
+        description: "Economy commit batches waiting on the persist worker");
+
+    public static readonly ObservableGauge<double> EconomyPersistOldestAge = Meter.CreateObservableGauge(
+        "fineage.economy.persist.oldest_age_ms",
+        ObserveEconomyPersistOldestAge,
+        unit: "ms",
+        description: "Age of the oldest economy commit batch not yet durable");
+
+    public static Func<int>? EconomyPersistPendingCount { get; set; }
+    public static Func<double>? EconomyPersistOldestAgeMs { get; set; }
+
+    static IEnumerable<Measurement<int>> ObserveEconomyPersistPending()
+    {
+        yield return new Measurement<int>(EconomyPersistPendingCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<double>> ObserveEconomyPersistOldestAge()
+    {
+        yield return new Measurement<double>(EconomyPersistOldestAgeMs?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<int>> ObservePersistPending()
+    {
+        yield return new Measurement<int>(PersistPendingCount?.Invoke() ?? 0);
+    }
+
+    static IEnumerable<Measurement<double>> ObservePersistOldestAge()
+    {
+        yield return new Measurement<double>(PersistOldestAgeMs?.Invoke() ?? 0);
+    }
 
     public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
         "fineage.packets.per_second",
@@ -133,3 +599,6 @@ public static class FineageTelemetry
         yield return new Measurement<int>(CommandIngressDepth?.Invoke() ?? 0);
     }
 }
+
+/// <summary>Current and peak NPC activation backlog behind the per-tick budgets.</summary>
+public readonly record struct NpcActivationBacklogReading(int Privates, int RegionWake, int PrivatesMax, int RegionWakeMax);

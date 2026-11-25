@@ -82,7 +82,7 @@
       "htmlFile": "31555-event-31555-02-008.htm"
     },
     {
-      "npcId": 31555,
+      "npcId": 31665,
       "hook": "event",
       "when": "absent",
       "event": "31665-02",
@@ -119,28 +119,28 @@
       "htmlFile": "31555-event-31555-05-010.htm"
     },
     {
-      "npcId": 31555,
+      "npcId": 31661,
       "hook": "event",
       "when": "absent",
       "event": "31661-02",
       "htmlFile": "31555-event-31661-02-011.htm"
     },
     {
-      "npcId": 31555,
+      "npcId": 31662,
       "hook": "event",
       "when": "absent",
       "event": "31662-02",
       "htmlFile": "31555-event-31662-02-012.htm"
     },
     {
-      "npcId": 31555,
+      "npcId": 31663,
       "hook": "event",
       "when": "absent",
       "event": "31663-02",
       "htmlFile": "31555-event-31663-02-013.htm"
     },
     {
-      "npcId": 31555,
+      "npcId": 31664,
       "hook": "event",
       "when": "absent",
       "event": "31664-02",
@@ -166,6 +166,30 @@
         }
       ],
       "htmlFile": "31555-event-31555-08-015.htm"
+    },
+    {
+      "npcId": 31661,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31661-talk-016.htm"
+    },
+    {
+      "npcId": 31662,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31662-talk-017.htm"
+    },
+    {
+      "npcId": 31663,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31663-talk-018.htm"
+    },
+    {
+      "npcId": 31664,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31664-talk-019.htm"
     }
   ]
 }

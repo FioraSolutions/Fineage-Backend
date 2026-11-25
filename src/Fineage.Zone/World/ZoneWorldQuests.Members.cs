@@ -174,7 +174,11 @@ public sealed partial class ZoneWorld
     {
         if (!TryPlayer(session, out var player))
             return new QuestListMsg();
+        return NetQuestList(player);
+    }
 
+    internal QuestListMsg NetQuestList(ZoneEntity player)
+    {
         var list = _quests.List(player.Quests);
         return new QuestListMsg
         {
@@ -263,7 +267,6 @@ public sealed partial class ZoneWorld
         player.Quests.Add(NewbieHelperGift.QuestId, QuestPhase.Completed);
         var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
         // Net clients only learn about the kit from the bridge; without this they get the page but never the items.
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
         SaveInventory(session, player.Inventory);
         SaveQuestProgress(session, player);
         QueueList(session);

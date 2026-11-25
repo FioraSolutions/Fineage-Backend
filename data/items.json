@@ -46765,6 +46765,15 @@
       "weight": 30
     },
     {
+      "id": 5232,
+      "name": "White Fabric",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_piece_of_cloth_white_i00",
+      "price": 0,
+      "weight": 0
+    },
+    {
       "id": 5233,
       "name": "Keshanberk*Keshanberk",
       "kind": "weapon",
@@ -71026,6 +71035,150 @@
       "spiritshots": 1
     },
     {
+      "id": 8158,
+      "name": "Skull of the Dead: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8159,
+      "name": "Skull of the Dead: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8160,
+      "name": "Skull of the Dead: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_a_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8161,
+      "name": "Dragon's Heart: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8162,
+      "name": "Dragon's Heart: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8163,
+      "name": "Dragon's Heart: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_b_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8164,
+      "name": "Egg of Earth: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8165,
+      "name": "Egg of Earth: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8166,
+      "name": "Egg of Earth: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_c_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8167,
+      "name": "False Nucleus of Life: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8168,
+      "name": "False Nucleus of Life: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8169,
+      "name": "False Nucleus of Life: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_d_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8170,
+      "name": "Angel's Soul: C-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i02",
+      "price": 10000,
+      "weight": 0
+    },
+    {
+      "id": 8171,
+      "name": "Angel's Soul: B-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i01",
+      "price": 20000,
+      "weight": 0
+    },
+    {
+      "id": 8172,
+      "name": "Angel's Soul: A-Grade",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_e_i00",
+      "price": 50000,
+      "weight": 0
+    },
+    {
+      "id": 8176,
+      "name": "Destruction Tombstone",
+      "kind": "etc",
+      "stackable": true,
+      "icon": "icon.etc_raid_f_i00",
+      "price": 10000,
+      "weight": 0
+    },
+    {
       "id": 8177,
       "name": "Raid Challenger's Circlet",
       "kind": "armor",
@@ -71141,6 +71294,29 @@
       "price": 500000,
       "weight": 10,
       "bodySlot": "hair2"
+    },
+    {
+      "id": 8190,
+      "name": "Demonic Sword Zariche",
+      "kind": "weapon",
+      "icon": "icon.weapon_unique_zariche_i00",
+      "bodySlot": "lrhand",
+      "weaponType": "sword",
+      "price": 0,
+      "weight": 1840,
+      "pAtk": 361,
+      "mAtk": 137,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 1,
+      "spiritshots": 1,
+      "enchantable": false,
+      "sellable": false,
+      "dropable": true,
+      "destroyable": true,
+      "tradeable": false
     },
     {
       "id": 8191,
@@ -75077,6 +75253,29 @@
       "spiritshots": 1
     },
     {
+      "id": 8689,
+      "name": "Blood Sword Akamanah",
+      "kind": "weapon",
+      "icon": "icon.weapon_unique_akamanah_i00",
+      "bodySlot": "lrhand",
+      "weaponType": "sword",
+      "price": 0,
+      "weight": 1840,
+      "pAtk": 361,
+      "mAtk": 137,
+      "pAtkSpd": 379,
+      "critRate": 8,
+      "attackRange": 40,
+      "randomDamage": 10,
+      "soulshots": 1,
+      "spiritshots": 1,
+      "enchantable": false,
+      "sellable": false,
+      "dropable": true,
+      "destroyable": true,
+      "tradeable": false
+    },
+    {
       "id": 8690,
       "name": "Recipe: Sirra's Blade (60%)",
       "kind": "etc",
@@ -77472,58 +77671,36 @@
       "weight": 0
     },
     {
+      "id": 15307,
+      "name": "Holy Pomander - Cardinal",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_bishop_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
+      "id": 15308,
+      "name": "Holy Pomander - Eva's Saint",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_elder_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
+      "id": 15309,
+      "name": "Holy Pomander - Shillien Saint",
+      "kind": "etc",
+      "icon": "icon.etc_saint_pomander_silienelder_i00",
+      "weight": 10,
+      "stackable": true
+    },
+    {
       "id": 15533,
       "name": "Quest Item 15533",
       "kind": "etc",
       "icon": "icon.etc_question_mark_i00",
       "price": 0,
       "weight": 0
-    },
-    {
-      "id": 8190,
-      "name": "Demonic Sword Zariche",
-      "kind": "weapon",
-      "icon": "icon.weapon_unique_zariche_i00",
-      "bodySlot": "lrhand",
-      "weaponType": "sword",
-      "price": 0,
-      "weight": 1840,
-      "pAtk": 361,
-      "mAtk": 137,
-      "pAtkSpd": 379,
-      "critRate": 8,
-      "attackRange": 40,
-      "randomDamage": 10,
-      "soulshots": 1,
-      "spiritshots": 1,
-      "enchantable": false,
-      "sellable": false,
-      "dropable": true,
-      "destroyable": true,
-      "tradeable": false
-    },
-    {
-      "id": 8689,
-      "name": "Blood Sword Akamanah",
-      "kind": "weapon",
-      "icon": "icon.weapon_unique_akamanah_i00",
-      "bodySlot": "lrhand",
-      "weaponType": "sword",
-      "price": 0,
-      "weight": 1840,
-      "pAtk": 361,
-      "mAtk": 137,
-      "pAtkSpd": 379,
-      "critRate": 8,
-      "attackRange": 40,
-      "randomDamage": 10,
-      "soulshots": 1,
-      "spiritshots": 1,
-      "enchantable": false,
-      "sellable": false,
-      "dropable": true,
-      "destroyable": true,
-      "tradeable": false
     }
   ]
 }

@@ -354,6 +354,24 @@
         {
           "op": "set_cond",
           "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 32019,
+          "x": 104562,
+          "y": -107598,
+          "z": -3688,
+          "despawnSec": 300,
+          "owned": true
+        },
+        {
+          "op": "summon",
+          "npcId": 32019,
+          "x": 117890,
+          "y": -126478,
+          "z": -2584,
+          "despawnSec": 300,
+          "owned": true
         }
       ],
       "htmlFile": "32020-event-32020-02-037.htm"
@@ -530,7 +548,7 @@
       "htmlFile": "32020-event-finish2-050.htm"
     },
     {
-      "npcId": 32020,
+      "npcId": 32018,
       "hook": "event",
       "when": "absent",
       "event": "32018-05",
@@ -549,7 +567,7 @@
       "htmlFile": "32020-event-32018-05-051.htm"
     },
     {
-      "npcId": 32020,
+      "npcId": 32022,
       "hook": "event",
       "when": "absent",
       "event": "32022-02",
@@ -581,7 +599,7 @@
       "htmlFile": "32021-event-32021-02-053.htm"
     },
     {
-      "npcId": 32077,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
@@ -595,7 +613,7 @@
       "htmlFile": "32077-event-32021-02-054.htm"
     },
     {
-      "npcId": 32078,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
@@ -609,7 +627,7 @@
       "htmlFile": "32078-event-32021-02-055.htm"
     },
     {
-      "npcId": 32079,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-02",
@@ -630,21 +648,21 @@
       "htmlFile": "32021-event-32021-03-057.htm"
     },
     {
-      "npcId": 32077,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-03",
       "htmlFile": "32077-event-32021-03-058.htm"
     },
     {
-      "npcId": 32078,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-03",
       "htmlFile": "32078-event-32021-03-059.htm"
     },
     {
-      "npcId": 32079,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-03",
@@ -664,7 +682,7 @@
       "htmlFile": "32021-event-32021-06-061.htm"
     },
     {
-      "npcId": 32077,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-06",
@@ -677,7 +695,7 @@
       "htmlFile": "32077-event-32021-06-062.htm"
     },
     {
-      "npcId": 32078,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-06",
@@ -690,7 +708,7 @@
       "htmlFile": "32078-event-32021-06-063.htm"
     },
     {
-      "npcId": 32079,
+      "npcId": 32021,
       "hook": "event",
       "when": "absent",
       "event": "32021-06",

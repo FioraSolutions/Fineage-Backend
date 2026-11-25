@@ -49,6 +49,15 @@
           "op": "take_item",
           "itemId": 736,
           "count": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 32013,
+          "x": 66578,
+          "y": 72351,
+          "z": -3731,
+          "despawnSec": 300,
+          "owned": true
         }
       ],
       "htmlFile": "32013-event-32013-04-003.htm"

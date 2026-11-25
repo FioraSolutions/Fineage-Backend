@@ -47,24 +47,56 @@ public sealed partial class ZoneWorld
         return visible;
     }
 
-    List<ZoneEntity> Players()
+    /// <summary>Players admitted by enter and dropped by leave. Stages read this instead of scanning every NPC.</summary>
+    readonly List<ZoneEntity> _inWorldPlayers = [];
+
+    void NoteInWorldPlayer(ZoneEntity entity)
     {
-        var players = new List<ZoneEntity>();
-        foreach (var entity in _byId.Values)
+        if (entity.Kind != ZoneEntityKind.Player || entity.Session is not { InWorld: true })
+            return;
+        for (int i = 0; i < _inWorldPlayers.Count; i++)
         {
-            if (entity.Kind == ZoneEntityKind.Player && entity.Session is { InWorld: true })
-                players.Add(entity);
+            if (_inWorldPlayers[i].ObjectId == entity.ObjectId)
+            {
+                _inWorldPlayers[i] = entity;
+                return;
+            }
         }
 
-        return players;
+        _inWorldPlayers.Add(entity);
     }
 
-    static List<int> SortedExcept(HashSet<int> source, HashSet<int> other)
+    void ForgetInWorldPlayer(int objectId)
     {
-        var ids = new List<int>();
+        for (int i = _inWorldPlayers.Count - 1; i >= 0; i--)
+        {
+            if (_inWorldPlayers[i].ObjectId == objectId)
+                _inWorldPlayers.RemoveAt(i);
+        }
+    }
+
+    List<ZoneEntity> Players() => new(_inWorldPlayers);
+
+    List<int> SortedExcept(HashSet<int> source, HashSet<int> other) => SortedDiff(source, other, shared: false);
+
+    List<int> SortedShared(HashSet<int> source, HashSet<int> other) => SortedDiff(source, other, shared: true);
+
+    /// <summary>
+    /// Set difference or intersection in ascending order. The knownlist reconcile calls this three times per moving
+    /// entity per movement stage, so it reuses one thread-static bucket instead of renting a list each time.
+    /// <para>
+    /// Each caller consumes the result before it asks for the next one (the loops it feeds never re-enter), which is
+    /// why a single bucket is enough; the result must not be stored past that loop.
+    /// </para>
+    /// </summary>
+    static List<int> SortedDiff(HashSet<int> source, HashSet<int> other, bool shared)
+    {
+        var ids = t_sortedDiffScratch ??= [];
+        ids.Clear();
         foreach (int id in source)
         {
-            if (!other.Contains(id))
+            // HashSet enumeration is not sorted, and callers rely on ascending ids for a stable fan-out order.
+            if (other.Contains(id) == shared)
                 ids.Add(id);
         }
 
@@ -72,18 +104,7 @@ public sealed partial class ZoneWorld
         return ids;
     }
 
-    static List<int> SortedShared(HashSet<int> source, HashSet<int> other)
-    {
-        var ids = new List<int>();
-        foreach (int id in source)
-        {
-            if (other.Contains(id))
-                ids.Add(id);
-        }
-
-        ids.Sort();
-        return ids;
-    }
+    [ThreadStatic] static List<int>? t_sortedDiffScratch;
 
     InventoryMessages.UserInfoVitals BuildUserInfoVitals(ZoneEntity entity)
     {

@@ -131,6 +131,24 @@
         {
           "op": "set_cond",
           "cond": 2
+        },
+        {
+          "op": "summon",
+          "npcId": 31747,
+          "x": 85884,
+          "y": -76588,
+          "z": -3470,
+          "despawnSec": 300,
+          "owned": true
+        },
+        {
+          "op": "summon",
+          "npcId": 31746,
+          "x": 85884,
+          "y": -76588,
+          "z": -3470,
+          "despawnSec": 300,
+          "owned": true
         }
       ],
       "htmlFile": "31743-05.htm"

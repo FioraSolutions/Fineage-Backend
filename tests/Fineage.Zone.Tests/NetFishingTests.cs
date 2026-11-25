@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// Fishing after Mobius CT_0: learn the guild skills, cast a lure onto fishing water, wait for the bite, pump and reel
 /// the fish's HP to zero for the fish item (or a fishing monster), with watchers seeing the line, the fight and the end.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetFishingTests
 {
     const int Rod = 6529;           // Baby Duck Rod: no grade, level 20, damage 20
@@ -366,8 +367,8 @@ public sealed class NetFishingTests
         Assert.NotNull(registry.Find("FishingChampionship"));
         var reply = registry.Find("FishSkillList")!.Handle(Call("FishSkillList"));
         Assert.Equal(NpcServiceIntent.FishSkillList, reply.Service);
-        var page = registry.Find("FishingChampionship")!.Handle(Call("FishingChampionship"));
-        Assert.Contains("Championship", page.Html);
+        var champ = registry.Find("FishingChampionship")!.Handle(Call("FishingChampionship"));
+        Assert.Equal(NpcServiceIntent.FishingChampionship, champ.Service);
         await Task.CompletedTask;
     }
 

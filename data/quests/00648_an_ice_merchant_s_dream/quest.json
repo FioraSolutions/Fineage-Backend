@@ -632,6 +632,12 @@
           "limit": 0
         }
       ]
+    },
+    {
+      "npcId": 32023,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32023-talk-041.htm"
     }
   ]
 }

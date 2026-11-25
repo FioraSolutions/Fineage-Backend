@@ -50,6 +50,16 @@ static partial class NormalizedStoreWriter
         IReadOnlyList<StoredItem> inventory)
     {
         using var tx = conn.BeginTransaction();
+        ReplaceInventory(conn, tx, characterId, inventory);
+        tx.Commit();
+    }
+
+    public static void ReplaceInventory(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        int characterId,
+        IReadOnlyList<StoredItem> inventory)
+    {
         DeleteItemsByObjectIds(conn, tx, inventory);
         using (var del = conn.CreateCommand())
         {
@@ -63,7 +73,6 @@ static partial class NormalizedStoreWriter
 
         foreach (var item in inventory)
             InsertItem(conn, tx, characterId, item, bagLoc: LocInventory);
-        tx.Commit();
     }
 
     public static void ReplaceWarehouseOnly(
@@ -72,6 +81,16 @@ static partial class NormalizedStoreWriter
         IReadOnlyList<StoredItem> warehouse)
     {
         using var tx = conn.BeginTransaction();
+        ReplaceWarehouse(conn, tx, characterId, warehouse);
+        tx.Commit();
+    }
+
+    public static void ReplaceWarehouse(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        int characterId,
+        IReadOnlyList<StoredItem> warehouse)
+    {
         DeleteItemsByObjectIds(conn, tx, warehouse);
         using (var del = conn.CreateCommand())
         {
@@ -84,7 +103,6 @@ static partial class NormalizedStoreWriter
 
         foreach (var item in warehouse)
             InsertItem(conn, tx, characterId, item, bagLoc: LocWarehouse);
-        tx.Commit();
     }
 
     public static void ReplaceFreightOnly(
@@ -93,6 +111,16 @@ static partial class NormalizedStoreWriter
         IReadOnlyList<StoredItem> freight)
     {
         using var tx = conn.BeginTransaction();
+        ReplaceFreight(conn, tx, characterId, freight);
+        tx.Commit();
+    }
+
+    public static void ReplaceFreight(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        int characterId,
+        IReadOnlyList<StoredItem> freight)
+    {
         DeleteItemsByObjectIds(conn, tx, freight);
         using (var del = conn.CreateCommand())
         {
@@ -105,7 +133,6 @@ static partial class NormalizedStoreWriter
 
         foreach (var item in freight)
             InsertItem(conn, tx, characterId, item, bagLoc: LocFreight);
-        tx.Commit();
     }
 
     static void DeleteItemsByObjectIds(

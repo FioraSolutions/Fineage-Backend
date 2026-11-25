@@ -1,141 +1,195 @@
 # Mobius CT_0 Interlude ↔ Fineage — parity matrix
 
-> **2026-11-21** — audited against Fineage `dev` @ `0efaa43` and  
-> `.cache/l2j-mobius/L2J_Mobius_CT_0_Interlude` (MobiusDevelopment GitLab, `master`).  
-> Method: source/data diff, not issue trackers. Detail: [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md).  
-> Combat slice checklist: [`combat-parity.md`](combat-parity.md). Quest counts: [`QUEST_STATUS.md`](QUEST_STATUS.md).
+> **2026-11-23** — re-verified against Fineage `dev` @ `8daf4209` and  
+> Mobius `L2J_Mobius_CT_0_Interlude` @ `5c019037` (gitlab.com/MobiusDevelopment/L2J_Mobius, `master`).  
+> Unity client `FioraSolutions/Fineage` `dev` @ `c1e79fe`.  
+> Method: source and data diff, not issue trackers. Wire: [`wire-coverage.md`](wire-coverage.md).  
+> Quests: [`QUEST_STATUS.md`](QUEST_STATUS.md) (344 / 0 / 0 / 0).  
+> Prior snapshots: [`mobius-gap-audit-2026-11-22.md`](mobius-gap-audit-2026-11-22.md), [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md).
 
-**Legend:** ✅ done · 🟡 partial · ❌ missing · n/a (not in Interlude target or explicitly deferred)
+**Legend:** ✅ done · 🟡 partial · ❌ missing · n/a (not an Interlude Net target, or a Mobius-only extra)
 
-**Size:** S = days-scale slice · M = multi-week subsystem · L = large program
+**Size:** S = one mechanism · M = a subsystem · L = a long tail of content
 
-| # | System | Status | Size | Notes (gap headline) |
-|---|--------|--------|------|----------------------|
-| **Auth & character** |
-| 1 | Login, roster, Net auth | ✅ | — | `Fineage.Login` |
-| 2 | Character create (5 races, templates) | ✅ | — | `LoginAcceptance` + Mobius class templates import |
-| 3 | Enter world / persist / inventory | ✅ | — | Accounts + `ZoneWorld.Members.Persist` |
-| **World & geo** |
-| 4 | Movement, sit/stand, run/walk, validate | ✅ | — | `ZoneWorldMovement` |
-| 5 | Geodata LOS / MoveCheck / FindPath | 🟡 | M | `GeoEngine` port; no-geo fallback; fence rules skipped (`combat-parity` §12) |
-| 6 | Doors (collision) | 🟡 | S | `DoorTable`; no doorman/siege door timers |
-| 7 | Zones: peace / PvP arena / water | 🟡 | M | `PeaceZones`, `PvpZones`, `WaterZones` — no swamp, damage, no-landing, mother tree (`zones/*.xml`) |
-| 8 | NPC spawns + respawn | 🟡 | L | 189 spawn files; TI-focused; 223/223 RB rows `enabled: false` in `raidbosses.json` |
-| 9 | Day/night spawn swap | ❌ | M | Mobius `DayNightSpawnManager.java` + spawn `night` flags |
-| 10 | Walking NPC routes | ❌ | S | Mobius `WalkingManager.java` |
-| 11 | Boats | ❌ | M | Mobius `BoatManager.java` |
-| **Combat core** |
-| 12 | Melee hit/miss/crit/shield/ss/position/night | ✅ | — | `ZoneCombat`, `combat-parity` slices 5–16 |
-| 13 | Bow + arrows | 🟡 | S | Consumption/reuse timing open (`combat-parity` §3) |
-| 14 | Physical/magic skill damage catalog | ✅ | — | 387 rows `skill-combat.json`; missing row → refuse cast (no `power+10`) |
-| 15 | Blow / lethal | ✅ | — | `ZoneWorldSkills` + gen scripts |
-| 16 | Magic crit / fail / mcrit stats | ✅ | — | Slice 10 |
-| 17 | Buffs/debuffs / abnormals / stat funcs | 🟡 | M | 372 stat-effect skills; passive HP/zone conditions skipped; buffs apply at cast-start not hitTime |
-| 18 | Skill conditions (`using` kinds) | 🟡 | S | 41 skills; compound XML conditions skipped (`gen_skill_conditions.py`) |
-| 19 | Signets (454–460) | 🟡 | S | `ZoneWorldSignets`; EffectPoint TODO |
-| 20 | Cast ↔ movement / queue | 🟡 | M | No damage/stun interrupt; no `MagicSkillCanceled` on target death |
-| 21 | Spoil / sweep single-target | ✅ | — | `ZoneWorldSpoil` |
-| 22 | Spoil/Sweeper Festival (302/444) | ❌ | S | Mobius AoE spoil handlers |
-| 23 | Death exp/SP/karma/DP/town respawn | ✅ | — | `ZoneWorldDeath*` |
-| 24 | PK item drop | ✅ | — | `ZoneWorldDeathDrop` |
-| 25 | PvP flag / karma persist | ✅ | — | `ZoneWorldPvp` |
-| 26 | Weight penalty 4270 / grade 4267 | ✅ | — | `ZoneWorldWeight` |
-| **AI & NPC combat** |
-| 27 | Mob AI aggro/hate/clan/LOS | ✅ | — | `ZoneWorldMobAi`, `ZoneWorldAggro` |
-| 28 | Minion follow + raid minion | ✅ | — | `ZoneWorldNpcMovement` |
-| 29 | NPC soul/spirit shots | 🟡 | S | Stock+chance; SS glow 2154 / boss stock copy open |
-| 30 | NPC cast heal/buff/debuff/AI skills | ✅ | — | `ZoneWorldNpcSkills` |
-| 31 | Guard / village master AI scripts | 🟡 | M | Generic AI only; Mobius `ai/others/*Guard*` scripts not ported |
-| **Drops & economy** |
-| 32 | Droplists (1295 NPC JSON) | 🟡 | M | `DropCatalog`; not every Mobius NPC has a row |
-| 33 | Herbs on ground | ✅ | — | `ZoneWorldHerbs` |
-| 34 | Ground loot + drop protection | ✅ | — | `ZoneWorldGround`, `GroundRules` |
-| 35 | Auto-loot (config + herbs/raid flags) | ❌ | M | Mobius `Attackable.doDie` + `PlayerConfig.AUTO_LOOT*` |
-| 36 | Party loot modes + adena share | ✅ | — | `PartyLootRules`, spoil/ground |
-| 37 | Raid loot owner + curse | ✅ | — | `ZoneWorldRaidLoot`, `ZoneWorldRaidCurse` |
-| 38 | Inventory / equip / private WH | ✅ | — | `ZoneWorldInventory`, `ZoneWorldGear` |
-| 39 | Clan WH / crest / skills / academy | ✅ | — | `ZoneWorldPledge.*` |
-| 40 | Freight warehouse | ❌ | S | Mobius freight; bypass stub `NpcServiceBypass.cs` |
-| 41 | Shops / multisell / buylists | ✅ | — | `ZoneWorldShops` |
-| 42 | Trade / private store / manufacture | ✅ | — | `ZoneWorldTrade`, `ZoneWorldPrivateStore`, `ZoneWorldManufacture` |
-| 43 | Item enchant scrolls | ✅ | — | `ZoneWorldEnchant` |
-| 44 | Item augmentation (life stones) | ❌ | L | Mobius `AugmentationData.java`, `RequestRefine*.java` |
-| 45 | Skill enchant (+) | ❌ | M | Mobius `RequestExEnchantSkill.java` — persistence note only in `AccountModels` |
-| 46 | Craft / recipes / dwarven manufacture | 🟡 | M | `ZoneWorldCraft`; recipe coverage vs Mobius `RecipeController` not 1:1 |
-| 47 | Manor (sow/harvest/tax) | ✅ | — | `ZoneWorldManor*`, `Manor/*` |
-| 48 | Economy ledgers (consume/grant/fee/…) | ✅ | — | `*Ledger.cs` |
+## Counts
+
+| Status | Rows |
+|--------|-----:|
+| ✅ done | 91 |
+| 🟡 partial | 5 |
+| ❌ missing | 9 |
+| n/a | 3 |
+| **total** | **108** |
+
+Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for auto-loot, festival, freight, clan-hall siege, mercenary tickets, siege golem, day/night spawns, boats, walking routes, mother tree, command channel, augmentation, skill enchant, cursed weapons, raid points, fishing championship scoring, event-drop windows, and the quest packs landed in `dev`. The rows below are what the code does now.
+
+## Matrix
+
+| # | System | Status | Size | Gap (Mobius file → Fineage file) |
+|---|--------|--------|------|----------------------------------|
+| **Auth and character** |
+| 1 | Login, roster, Net auth | ✅ | — | `network/clientpackets/AuthLogin.java` → `Fineage.Login` `Auth` / `ZoneAuth` |
+| 2 | Character create (5 races, templates) | ✅ | — | `CharacterCreate.java` → `CreateCharacter` + class templates |
+| 3 | Enter world / persist / inventory | ✅ | — | `EnterWorld.java` → `ZoneWorld` enter + `CharacterPersistWorker` |
+| 4 | Logout and return to lobby | ✅ | — | `RequestRestart.java` → `ZoneWorldRestart`: persist, keep the account, `RestartResponse` then `CharacterRoster`. TCP close still persists via `Leave` |
+| **World and geo** |
+| 5 | Movement, sit/stand, run/walk, validate | ✅ | — | `MoveToLocation.java`, `RequestActionUse.java` → `ZoneWorldMovement`, `RequestActionUse` |
+| 6 | Geodata LOS / MoveCheck / path | ✅ | — | `geoengine/GeoEngine.java` → `Geo/GeoEngine.cs`. `scripts/fetch-geodata.sh` loads `data/geodata-regions.json` before the documented boot. A missing region file is logged by name. `FINEAGE_GEODATA_REQUIRED=1` refuses to boot — #918 |
+| 7 | Doors | ✅ | — | `entity/actor/instance/Door.java` → `ZoneWorldDoors` |
+| 8 | Peace, arena, water, swamp, damage, no-landing, mother tree, jail, siege, fishing, olympiad, HQ | ✅ | — | matching `entity/zone/type/*Zone.java` → `Geo/MoveZones.cs`, `JailZoneCatalog`, `FishingTable`, `OlympiadStadiums`, `ZoneWorldSiege.Structures` |
+| 9 | Remaining zone types | ✅ | — | `entity/zone/type/*Zone.java` + `zones/*.xml` → `ZoneTypeRegistry` (`data/zone-types.json`). One profile class per type. Unknown type is logged and skipped. Wedding summon reads the no-summon flag. #917 |
+| 10 | NPC spawns | ✅ | — | `data/spawns` (186 xml) → 189 spawn JSON files, none left `enabled: false` |
+| 11 | Raid / grand boss schedule | 🟡 | S | `RaidBossSpawnManager.java` → `data/raidbosses.json` 216/223 enabled. Anakazel 25333–25338 stay off (script minions). **25512 Gigantic Chaos Golem** is `enabled: false` at 0,0,0 — the import has no coordinates — #926 |
+| 12 | Day/night spawn swap | ✅ | — | `DayNightSpawnManager.java` → `ZoneWorldSpawns.DayNight` |
+| 13 | Walking routes | ✅ | — | `WalkingManager.java` → `ZoneWorldWalking` |
+| 14 | Boats | ✅ | — | `BoatManager.java` → `ZoneWorldBoats` + vehicle opcodes in `NetOpcode` |
+| 15 | Monster race (derby) | ✅ | — | `games/MonsterRaceManager.java` → `ZoneWorldMonsterRace` |
+| **Combat** |
+| 16 | Melee hit/miss/crit/shield/shots/position | ✅ | — | `model/stats/Formulas.java` → `ZoneCombat` |
+| 17 | Bow and arrows | ✅ | — | `Creature` bow branch → `ZoneWorldArrows` |
+| 18 | Physical/magic skill catalog | ✅ | — | skill XML → `data/skill-combat.json`; a missing row refuses the cast |
+| 19 | Blow / lethal | ✅ | — | blow handlers → `ZoneWorldSkills` |
+| 20 | Magic crit / fail | ✅ | — | `Formulas` magic crit → `ZoneWorldSkillDamage` |
+| 21 | Buffs, debuffs, stat funcs, hit-time apply | ✅ | — | `handlers/skill/effects` → `ZoneWorldSkills` `ScheduleEffect`; 111/112 effect names full in `skill-effect-coverage.json` |
+| 22 | BlockBuffSlot family | ✅ | — | `BlockBuffSlot` / `NoblesseBless` / `ProtectionBlessing` → `ZoneWorldAbnormals` slot block, death consume, `PlayableAttackRules` via the effect name |
+| 23 | Cast conditions | ✅ | — | skill XML `<conditions>` → `SkillCastConditionEvaluator` (37/37 kinds, 189 imported trees) |
+| 24 | Signets 454–460 | ✅ | — | `EffectPoint.java` (Mobius still TODO on the signet case) → `ZoneWorldSignets` pulses from the skill template |
+| 25 | Cast vs movement, damage/stun break | ✅ | — | `Formulas.calcAtkBreak` → `ZoneWorldCastInterrupt`, `MagicSkillCanceled` |
+| 26 | Spoil / sweep | ✅ | — | spoil handlers → `ZoneWorldSpoil` |
+| 27 | Spoil Festival 302 / Sweeper | ✅ | — | skill 302 `targetType: AREA` → `ZoneWorldSpoil.Members.TrySkillUseSpoilOrSweep` |
+| 28 | Death exp/SP/karma/restart | ✅ | — | `Player` death → `ZoneWorldDeath` including castle and siege HQ restart |
+| 29 | PK item drop | ✅ | — | PK drop → `ZoneWorldDeathDrop` |
+| 30 | PvP flag / karma | ✅ | — | `Player.updatePvPStatus` → `ZoneWorldPvp` |
+| 31 | Weight and grade penalty | ✅ | — | weight penalty → `ZoneWorldWeight` |
+| **AI and NPC combat** |
+| 32 | Mob aggro / hate / clan / LOS | ✅ | — | `ai/AttackableAI.java` → `ZoneWorldMobAi`, `ZoneWorldAggro` |
+| 33 | Minion follow and raid minion buff | ✅ | — | `AttackableAI` follow → `ZoneWorldNpcMovement` |
+| 34 | NPC shots | ✅ | — | `Npc` recharge shots → `ZoneWorldNpcSkills` |
+| 35 | NPC heal / buff / debuff | ✅ | — | `NpcAI` → `ZoneWorldNpcSkills` |
+| 36 | Guards | ✅ | — | `ai/others` guards → `ScanAggression` |
+| 37 | Scripted NPC / boss / area AI | 🟡 | L | `dist/game/data/scripts/ai` (90 java) → `data/npc-scripts.json` (32 rows) and `ZoneWorldNpcScripts`. An unknown script id logs `[npc-script] unhandled script id`. `RaidbossInfo` on 31775/31776 still calls `SendScriptUnavailable`; ranking HTML is only for npc 31603 — #919 |
+| **Drops and economy** |
+| 38 | Droplists | ✅ | — | per-NPC drop XML → 1518 `data/drops` JSON files via `DropCatalog`. A kill with no file logs `drop miss npc={id} (no droplist)`. #803 closed the spawn-set holes |
+| 39 | Herbs | ✅ | — | herb items → `ZoneWorldHerbs` |
+| 40 | Ground loot and protection | ✅ | — | `ItemsOnGroundManager.java` → `ZoneWorldGround` |
+| 41 | Auto-loot | ✅ | — | `Attackable` drop + `AUTO_LOOT*` → `ZoneRates` / `ZoneWorldGround` |
+| 42 | Party loot and adena share | ✅ | — | `Party.distributeItem` → `PartyLootRules` |
+| 43 | Raid loot owner and curse | ✅ | — | raid drop owner → `ZoneWorldRaidLoot` |
+| 44 | Inventory / equip / private warehouse | ✅ | — | `ItemContainer` → `ZoneWorldInventory`, `ZoneWorldGear` |
+| 45 | Clan warehouse, crest, skills, academy | ✅ | — | `Clan.java` → `ZoneWorldPledge` |
+| 46 | Freight warehouse | ✅ | — | freight warehouse → `FreightBypassHandler` |
+| 47 | Shops, multisell, buylists | ✅ | — | `Buy.java` / `Multisell` → `ZoneWorldShops` |
+| 48 | Shop wear / try-on | 🟡 | S | `handlers/bypass/npc/Wear.java` → `StubBypassHandler("Wear")` in `BypassRegistry.cs`. `SHOP_PREVIEW_LIST` is not sent — #924 |
+| 49 | Trade, private store, manufacture | ✅ | — | trade and private-store packets → `ZoneWorldTrade`, `ZoneWorldPrivateStore`, `ZoneWorldManufacture` |
+| 50 | Item enchant | ✅ | — | `RequestEnchantItem.java` → `ZoneWorldEnchant` |
+| 51 | Crystallize from inventory | ✅ | — | `RequestCrystallizeItem.java` → `CrystallizeRules` + `LedgerTxKind.Crystallize`. Enchant-fail crystals stay on `ZoneWorldEnchant` — #921 |
+| 52 | Augmentation (life stones) | ✅ | — | `RequestRefine.java` → `AugmentPacketHandler`, `AugmentationCatalog` |
+| 53 | Skill enchant | ✅ | — | `RequestExEnchantSkill.java` → `SkillEnchantService` |
+| 54 | Craft and recipes | 🟡 | S | `RecipeManager.java` → `ZoneWorldCraft`. Forget-recipe (`RequestRecipeBookDestroy`) has no opcode — #935 |
+| 55 | Manor | ✅ | — | `CastleManorManager.java` → `Manor/*`, `ZoneWorldManor` |
+| 56 | Auditable economy ledgers | ✅ | — | Fineage `*Ledger.cs` on consume, grant, fee, and trade. Not a Mobius type |
 | **Social** |
-| 49 | Party invite/leave/CC | ✅ | — | `ZoneWorldParty` |
-| 50 | Friends / block | ✅ | — | `ZoneWorldFriends` |
-| 50a | Wedding (engage, ceremony, divorce, teleport) | 🟡 | S | `ZoneWorldWedding`, NPC 50007; V2 engage ask/answer packets; some `gotolove` zone gates stubbed |
-| 51 | Chat say/shout/trade/party/clan/hero | 🟡 | S | `ZoneWorldChat`; GM/alliance broadcast polish |
-| 52 | Chat ban (punishment) | 🟡 | S | `ChatBannedUntilUnixMs`; no jail/ban login |
-| 53 | Duels 1v1 / party | ✅ | — | `ZoneWorldDuels` |
-| 54 | Clan wars | ✅ | — | `ZoneWorldPledge.Wars` |
-| 55 | Alliance | ✅ | — | `ZoneWorldAlly` |
+| 57 | Party | ✅ | — | `RequestJoinParty.java` → `ZoneWorldParty` |
+| 58 | Command channel | ✅ | — | `RequestExAskJoinMPCC.java` → `CommandChannelActor` |
+| 59 | Friends and block | ✅ | — | friend packets → `ZoneWorldFriends` |
+| 60 | Wedding | ✅ | — | `CoupleManager` / voiced Wedding → `ZoneWorldWedding` |
+| 61 | Chat channels including hero | ✅ | — | `Say2.java`, `ChatHeroVoice.java` → `ZoneWorldChat` |
+| 62 | Chat ban, jail, character and account ban | ✅ | — | `PunishmentManager.java` → `ZoneWorldPunishment` |
+| 63 | Petitions | ❌ | S | `RequestPetition.java` → `Say` petition types return `NotInPetitionChat` (`ZoneWorldChat`) — #930 |
+| 64 | Duels | ✅ | — | `DuelManager.java` → `ZoneWorldDuels` |
+| 65 | Clan wars | ✅ | — | `ClanWar` → `ZoneWorldPledge.Wars` |
+| 66 | Alliance | ✅ | — | `Alliance` → `ZoneWorldAlly` |
+| 67 | Party matching rooms | ❌ | M | `RequestAskJoinPartyRoom.java` and `EX_PARTY_ROOM_MEMBER` → no room manager. Chat types exist and then have nowhere to go — #928 |
+| 68 | User commands | ✅ | — | `handlers/chat/commands/user/*.java` → `UserCommandRegistry` dispatches ids onto teleport, mount, party, clan, channel, olympiad, and siege. Unstuck shares `BeginTownTeleport`. Unknown id is logged — #920 |
+| 69 | Macros | ❌ | S | `RequestMakeMacro.java`, `SendMacroList.java` → no macro store — #927 |
+| 70 | Community board | ❌ | L | `communitybbs/` and `RequestShowBoard.java` → no board — #929 |
+| 71 | PC cafe points and coupons | ❌ | S | `PcCafePointsManager.java`, `RequestPCCafeCouponUse.java` → no points — #933 |
 | **Companions** |
-| 56 | Servitors | ✅ | — | `ZoneWorldSummons` |
-| 57 | Cubics | 🟡 | S | `ZoneWorldCubics`; M.Atk/M.Def on success TODO |
-| 58 | Pets (hunger, exp, resurrect) | 🟡 | M | `ZoneWorldPets`; baby buffs / evolution missing |
-| 59 | Mounts / wyvern | ✅ | — | `ZoneWorldMounts*` |
-| **Progression & services** |
-| 60 | 1st/2nd class (village masters) | 🟡 | M | `ZoneWorldVillageMasters`; Ketra/Varka NPC gaps on quests |
-| 61 | 3rd class sagas (70–100) | 🟡 | M | Saga engine; no helper skill casts / timers |
-| 62 | Subclass | ✅ | — | `ZoneWorldSubclass` |
-| 63 | Noblesse | 🟡 | S | `ZoneWorldNoblesse`; NPC selection bypass stub |
-| 64 | Henna / symbol maker | ✅ | — | `ZoneWorldHenna`, `ZoneWorldSymbolMaker` |
-| 65 | Skill learn / SP | 🟡 | M | Trainer HTML; not every Mobius skill tree edge |
-| 66 | NPC teleports / HTML / bypass | ✅ | — | `ZoneWorldNpcHtml`, `BypassHandlers` |
-| 67 | Warehouse / package / clan WH | 🟡 | S | Clan done; freight missing |
-| **Quests & content** |
-| 68 | Quest engine + packs | 🟡 | L | 213 impl / 93 partial / 31 stub / 7 missing / 344 Mobius (`QUEST_STATUS`) |
-| 69 | NPC quests (non-pack) village master scripts | 🟡 | M | Alliance/clan masters wired; many `ai/others` absent |
+| 72 | Servitors | ✅ | — | `Servitor.java` → `ZoneWorldSummons` |
+| 73 | Cubics | ✅ | — | `Cubic.java` → `ZoneWorldCubics` (owner M.Atk is in the success roll) |
+| 74 | Pets (hunger, exp, evolve, feed) | ✅ | — | `Pet.java` → `ZoneWorldPets`, `ZoneWorldPets.Evolve` |
+| 75 | Pet rename | ❌ | S | `RequestChangePetName.java` → `ZoneEntity.Summon` has a name field and no rename request — #936 |
+| 76 | Mounts and wyvern | ✅ | — | `Ride` → `ZoneWorldMounts` |
+| **Progression and services** |
+| 77 | 1st and 2nd class village masters | ✅ | — | `village_master/*` → `ZoneWorldVillageMasters`, quests 211–233 and 401–418 |
+| 78 | 3rd class sagas | ✅ | — | `Q0070`–`Q0100` → `QuestCatalog.Sagas`. Helper `cast()` is visual `MagicSkillUse`, matching Mobius |
+| 79 | Subclass | ✅ | — | `SubClass` → `ZoneWorldSubclass` |
+| 80 | Noblesse | ✅ | — | village-master noblesse → `ZoneWorldNoblesse` |
+| 81 | Henna / symbol maker | ✅ | — | `Henna.java` → `ZoneWorldHenna` / `ZoneWorldSymbolMaker` (lists are HTML, not `HennaEquipList`) |
+| 82 | Skill learn trees and transfer skills | ✅ | — | `SkillTreeData` → `ZoneWorld` skill learn + `ZoneWorldTransferSkills` |
+| 83 | NPC HTML, teleport, warehouse, buff, territory status | ✅ | — | `handlers/bypass/npc/{Buy,Sell,Link,Teleport,SupportMagic,TerritoryStatus}.java` → `BypassRegistry`, `ZoneWorldNpcServices` |
+| **Quests** |
+| 84 | Quest packs | ✅ | — | 344 Mobius quest scripts → 344 implemented, 0 partial, 0 stub, 0 missing (`tools/quest_status.py`). The heuristic checks talk NPCs, kill targets, and engine calls, not drop rates |
 | **PvE endgame** |
-| 70 | Raid/grand boss schedule | 🟡 | L | `ZoneWorldBosses`; world gating disables most spawns |
-| 71 | Seven Signs (engine, stones, catacombs gate) | 🟡 | M | `SevenSigns/*`; **Festival of Darkness** instance ❌ |
-| 72 | Mammon merchants | ✅ | — | `ZoneWorldMammon` |
-| 73 | Dimensional rift | ✅ | L | `DimensionalRiftCatalog` + `ZoneWorldDimensionalRift` |
-| 74 | Cursed weapons (Zariche/Akamanah) | ❌ | L | Rules only (`PlayableAttackRules`); Mobius `CursedWeaponsManager.java` |
-| 75 | Lottery (Loto) | ✅ | — | `ZoneWorldLottery` |
-| **Castle & siege** |
-| 76 | Castle siege (towers, guards, HQ flag) | 🟡 | M | `ZoneWorldSiege.*`; flame/control towers present |
-| 77 | Siege mercenary tickets | ❌ | M | Mobius `MercTicketManager.java`, `handlers/items/MercTicket.java` |
-| 78 | Noble siege skills / siege golem summon | ❌ | M | Mobius `ConditionPlayerCanSummonSiegeGolem.java` |
-| 79 | Clan hall **auction** | ✅ | — | `ZoneWorldPledge.Halls`, `ClanHallAuctionActor` |
-| 80 | Clan hall **siege** | ❌ | M | Mobius `CHSiegeManager.java` |
-| 81 | Fortress siege | n/a | — | Interlude Fineage scope: castles only |
-| **Olympiad & hero** |
-| 82 | Olympiad matchmaking / stadium / hero | ✅ | — | `Olympiad/*`, `ZoneWorldOlympiad*` |
-| 83 | Raid boss points (ranking) | ❌ | S | Mobius `RaidBossPointsManager.java` |
-| **Activities** |
-| 84 | Fishing | ✅ | — | `ZoneWorldFishing`, `Fishing/*` |
-| 85 | Fishing championship / quests 27–30 | 🟡 | M | Engine ✅; quest packs stub/partial |
-| 86 | Soul crystals / symbol maker raids | 🟡 | S | `ZoneWorldSoulCrystals` — coverage incomplete |
-| **Items & shots** |
-| 87 | Soul/spirit shots (player + auto) | ✅ | — | `ZoneWorldShots`, slice 9 |
-| 88 | Arrows | 🟡 | S | Partial bow loop |
-| 89 | Consumables (potions, scrolls) | ✅ | — | `ZoneWorldConsumables` |
+| 85 | Seven Signs periods, stones, catacombs | ✅ | — | `SevenSigns.java` → `SevenSignsEngine`, `ZoneWorldDungeons` |
+| 86 | Festival of Darkness | ✅ | — | `SevenSignsFestival` → `ZoneWorldFestival` |
+| 87 | Dimensional rift | ✅ | — | `DimensionalRiftManager.java` → `ZoneWorldDimensionalRift`. The earthquake warning is scheduled; the `Earthquake` packet is not sent |
+| 88 | Mammon | ✅ | — | `SignsPriest` / Mammon → `ZoneWorldMammon` |
+| 89 | Cursed weapons | ✅ | — | `CursedWeaponsManager.java` → `CursedWeapons/CursedWeaponsManager.cs` plus `CursedWeaponList` / `CursedWeaponLocation` |
+| 90 | Lottery | ✅ | — | `LotteryManager.java` → `ZoneWorldLottery` |
+| 91 | Raid boss points | ✅ | — | `RaidBossPointsManager.java` → `RaidBossPointsManager` and ranking HTML for npc 31603 |
+| **Castle and siege** |
+| 92 | Castle siege, towers, hired guards, HQ | ✅ | — | `Siege.java`, `SiegeGuardManager.java` → `ZoneWorldSiege.Battle` `SpawnHiredSiegeGuards` |
+| 93 | Mercenary tickets and siege golem | ✅ | — | `MercTicketManager.java`, siege-golem condition → `ZoneWorldMercTickets`, `ZoneWorldSummons` |
+| 94 | Clan hall auction and functions | ✅ | — | `ClanHallAuctionManager.java` → `ClanHallAuctionActor`, `ZoneWorldPledge.HallFunctions`, `AgitDecoInfo` |
+| 95 | Clan hall siege | ✅ | — | `CHSiegeManager.java` → `ChSiegeActor` |
+| 96 | Fortress siege | n/a | — | not an Interlude castle-scope target |
+| **Olympiad and hero** |
+| 97 | Olympiad, stadium, hero weapons | ✅ | — | `OlympiadGameManager` → `Olympiad/*`, `ZoneWorldOlympiad.Npc` hero weapon grant |
+| 98 | Hero inscription | ❌ | S | `RequestWriteHeroWords.java` → no hero-words store. `EX_HERO_LIST` is only the olympiad status sheet — #932 |
+| **Activities and items** |
+| 99 | Fishing | ✅ | — | fishing packets → `ZoneWorldFishing` |
+| 100 | Fishing championship | ✅ | — | `FishingChampionshipManager.java` → `ZoneWorldFishingChampionship.cs`. NPC HTML board, weekly reset, prize via `LedgerTxKind.FishingChampionshipPrize`. The ranking is the NPC page, not `RequestExFishRanking` |
+| 101 | Soul crystals (Q350) | ✅ | — | `Q00350` → `ZoneWorldSoulCrystals` |
+| 102 | Shots, arrows, consumables, seeds, merc tickets | ✅ | — | `handlers/items/{SoulShots,SpiritShot,EnchantScrolls,Seed,MercTicket,SummonItems}.java` → `ZoneWorldShots`, `ZoneWorldConsumables`, `ZoneWorldPets` |
+| 103 | Item-handler tail | ❌ | S | `Book.java`, `Calculator.java`, `Maps.java`, `RollingDice.java`, `SpecialXMas.java` → no handlers (`DICE`, `SHOW_CALCULATOR`, `SHOW_XMAS_SEAL` absent) — #925 |
 | **Meta** |
-| 90 | GM commands / admin panel | 🟡 | L | `ZoneWorldAdmin` (~500 LOC) vs 80+ Mobius `handlers/admin/*` |
-| 91 | Scripted events (drops, TvT, …) | ❌ | M | Mobius `EventDropManager`, `dist/.../events` |
-| 92 | Mail system | n/a | — | Not targeted on Fineage Net |
-| 93 | Community board | ❌ | L | Mobius `communitybbs/*` |
-| 94 | Autoplay voiced command | n/a | — | Mobius optional; client-side on retail |
+| 104 | GM admin commands | 🟡 | L | `handlers/chat/commands/admin` (77 handlers) → 34 `admin_*` verbs in `ZoneWorldAdmin`. Missing verbs are not dispatched — #931 |
+| 105 | Seasonal events | ❌ | S | `scripts/events/{Christmas,L2Day,HeavyMedal}.java` → not present. Time-boxed `EventDropCatalog` is separate and done — #934 |
+| 106 | Event drop windows | ✅ | — | `EventDropManager.java` → `Drops/EventDropCatalog.cs` |
+| 107 | Player mail | n/a | — | `EX_MAIL_ARRIVED` / `CustomMailManager` are not a Fineage Net target |
+| 108 | Mobius-only extras | n/a | — | captcha, rebirth, premium, sell-buffs, fake players, offline play, banking voiced, GameGuard, HackShield, GM snoop, Kamael slideshow. Not retail Interlude gameplay |
 
-## Landed since 2026-11-06 matrix (PRs ~#587–#697)
+## Walked and folded into the rows above
 
-Core combat/PvE (earlier #256–#287) plus: full pledge/siege/manor/olympiad stacks, pets/summons/mounts, fishing/lottery/Mammon, Seven Signs periods, raid curse/loot, clan wars, Ketra/Varka and profession quest waves, economy ledgers, expanded `skill-combat` / drops / NPC AI skills.
+These Mobius trees were walked. They do not get their own row when the mechanism already has one.
 
-## Prioritized next slices (player impact)
+| Mobius tree | Where it landed |
+|-------------|-----------------|
+| `gameserver/ai` (14 engine types) | rows 32–36 |
+| `scripts/handlers/skill/effects` (146) and `skill/targets` (34) | rows 21–23. Interlude skills in `skills.json` use 22 target types; the extra target classes are not referenced by those skills |
+| `scripts/handlers/bypass/npc` (28) | row 83, except Wear (48) and Mobius-only Rebirth / NpcViewMod / VoiceCommand (108) |
+| `scripts/handlers/actions` click and shift-click | row 5 (target and social) |
+| `entity/actor/instance` (59) | merchant, trainer, warehouse, doorman, raid, guard, boat, pet, cubic, festival, rift — rows 8, 14, 47, 72–74, 85–88 |
+| `managers/*` | each manager is named on its row. AntiFeed, DailyReset, Id, PrecautionaryRestart, ServerRestart, ZoneBuild are process concerns, not gameplay gaps |
+| `data/stats`, `buylists`, `multisell`, `teleporters`, `html`, `mapregion` | catalogs behind rows 18, 47, 55, 83 |
+| `data/instances` (`Coliseum.xml` only) | no extra instance system beyond olympiad and the rift |
+| `network/clientpackets` (158 + 46 extended) and `serverpackets` (270) | [`wire-coverage.md`](wire-coverage.md) |
 
-See **Top 20** in [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md). PvE-first ordering: world spawns → quest partials → augmentation → cursed weapons → auto-loot → siege mercs/golem → festival/rift → skill enchant.
+## Ordered next work
+
+PvE and character leveling first. Siege, olympiad, and clan are last because those stacks are already on `dev`.
+
+1. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
+2. Shop wear preview (row 48) — #924.
+3. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+4. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
+5. Macros (row 69) — #927.
+6. Party matching rooms (row 67) — #928.
+7. Community board (row 70) — #929.
+8. Petitions (row 63) — #930.
+9. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+
+Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 
 ## Related docs
 
 | Doc | Role |
 |-----|------|
 | This file | Living feature matrix |
-| `mobius-gap-audit-2026-11-21.md` | 2026-11-21 full audit + Mobius paths |
-| `mobius-parity-audit.md` | **SNAPSHOT 2026-11-03** — historical only |
+| `wire-coverage.md` | Every Interlude client and server packet |
+| `QUEST_STATUS.md` | Per-quest heuristic |
+| `mobius-gap-audit-2026-11-22.md` | Previous audit snapshot — do not edit |
 | `combat-parity.md` | Combat slice checklist |
-| `QUEST_STATUS.md` | Per-quest Mobius diff |
+| `skill-effect-coverage-audit.md` | Effect-name catalog |
+| `skill-cast-condition-audit.md` | Cast-condition kinds |

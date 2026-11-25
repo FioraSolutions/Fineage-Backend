@@ -18,6 +18,7 @@ public sealed partial class ZoneWorld
     const long LedgerIdempotencyMilliseconds = 60 * 60 * 1000;
 
     readonly EconomyLedger _ledger;
+    readonly ILedgerJournal _journal;
     readonly LedgerTxSequence _ledgerIds = new();
 
     internal EconomyLedger LedgerForTests => _ledger;
@@ -28,7 +29,13 @@ public sealed partial class ZoneWorld
             return LedgerHoldingsOf(account);
     }
 
-    /// <summary>A move at the step's tick, numbered after the tick's earlier moves.</summary>
+    /// <summary>
+    /// A move at the step's tick, numbered after the tick's earlier moves. A character with a durable
+    /// economy commit in flight is not blocked here: the step keeps one scenario going across several
+    /// moves (unlock, then the chest's own drop), and the in-flight batch is a snapshot the completion
+    /// drain applies in order. Guarding moves on the reservation froze the second move of every such
+    /// scenario and broke #948's allow-writes-during-commit contract.
+    /// </summary>
     LedgerMove BeginLedgerMove(LedgerTxKind kind, int causedBy, int reference)
     {
         if (RegionBodyScope.Of(this) != null)
@@ -42,7 +49,7 @@ public sealed partial class ZoneWorld
     {
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Inventory } =>
             _byId.TryGetValue(account.OwnerId, out var player) && player.Inventory != null
-                ? HoldingsOf(player.Inventory)
+                ? LedgerInventoryChange.HoldingsFrom(player.Inventory)
                 : _accounts?.FindByCharacterId(account.OwnerId) is { Items: { } stored }
                     ? HoldingsFromStored(stored)
                     : throw new InvalidOperationException($"{account} has no inventory in the world or store"),
@@ -58,7 +65,9 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Freight } freightAccount =>
             _byId.TryGetValue(freightAccount.OwnerId, out var freightOwner) && freightOwner.Freight != null
                 ? HoldingsOf(freightOwner.Freight)
-                : HoldingsFromStored(_accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight ?? []),
+                : HoldingsFromStored(QueuedFreight(freightAccount.OwnerId)
+                    ?? _accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight
+                    ?? []),
         { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
             HoldingsOf(_clan.TryGet(account.OwnerId, out var clan)
                 ? ClanWarehouseOf(clan)!
@@ -66,8 +75,15 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Pet, Container: LedgerContainer.Inventory } =>
             HoldingsOf(SummonedPet(account.OwnerId)?.Inventory
                 ?? throw new InvalidOperationException($"{account} is not a summoned pet")),
+        { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Progress } progress =>
+            _byId.TryGetValue(progress.OwnerId, out var progressPlayer)
+                ? ProgressHoldingsOf(progressPlayer)
+                : throw new InvalidOperationException($"{account} has no character in the world"),
         _ => throw new InvalidOperationException($"{account} has no state in the zone")
     };
+
+    static LedgerHoldings ProgressHoldingsOf(ZoneEntity player) =>
+        new LedgerHoldings().Add(LedgerResourceIds.Sp, player.Sp).Add(LedgerResourceIds.Exp, player.Exp);
 
     static LedgerHoldings HoldingsFromStored(IReadOnlyList<StoredItem> items)
     {
@@ -81,24 +97,34 @@ public sealed partial class ZoneWorld
             else
                 holdings.Add(row.ItemId, row.Count);
         }
+
         return holdings;
     }
 
-    static LedgerHoldings HoldingsOf(PlayerInventory inventory)
+    /// <summary>
+    /// Freight for a character who is not in the world is queued until the economy commit. Reconciliation has to
+    /// see that queue: the store row is written in the same transaction as the ledger insert, which is after this.
+    /// </summary>
+    IReadOnlyList<StoredItem>? QueuedFreight(int characterId)
     {
-        var holdings = new LedgerHoldings();
-        foreach (var item in inventory.Items)
+        using (_economyLock.Enter())
         {
-            if (item.Template.Stackable)
-                holdings.Add(item.ItemId, item.Count);
-            else if (item.Count == 1)
-                holdings.AddPiece(item.ItemId, item.ObjectId);
-            else
-                throw new InvalidOperationException($"non-stackable item {item.ObjectId} has count {item.Count}");
+            for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
+            {
+                if (_dirtyOfflineFreight[i].CharacterId == characterId)
+                    return _dirtyOfflineFreight[i].Freight;
+            }
         }
 
-        return holdings;
+        return null;
     }
+
+    static LedgerHoldings HoldingsOf(PlayerInventory inventory) => LedgerInventoryChange.HoldingsFrom(inventory);
+
+    /// <summary>Delegates to <see cref="LedgerInventoryChange.PostChange"/> for partial-class ledger sites and tests.</summary>
+    internal static void PostChange(
+        LedgerMove move, LedgerAccount account, LedgerHoldings before, LedgerHoldings after, LedgerAccount counterpart) =>
+        LedgerInventoryChange.PostChange(move, account, before, after, counterpart);
 
     static LedgerHoldings HoldingsOf(PrivateWarehouse warehouse)
     {
@@ -106,39 +132,6 @@ public sealed partial class ZoneWorld
         foreach (var stack in warehouse.Items)
             holdings.Add(stack.ItemId, stack.Count);
         return holdings;
-    }
-
-    /// <summary>
-    /// Posts everything <paramref name="account"/> gained and lost between two observations, with the system account
-    /// <paramref name="counterpart"/> on the other side of every change: pieces by instance id, the rest by count.
-    /// </summary>
-    internal static void PostChange(
-        LedgerMove move, LedgerAccount account, LedgerHoldings before, LedgerHoldings after, LedgerAccount counterpart)
-    {
-        if (!counterpart.IsSystem)
-            throw new ArgumentException("the counterpart of a change takes no pieces, so it must be a system account", nameof(counterpart));
-        var pieces = new Dictionary<int, long>();
-        void Pieces(LedgerHoldings from, LedgerHoldings without, int sign)
-        {
-            foreach (var group in from.Instances
-                         .Where(piece => !without.Instances.TryGetValue(piece.Key, out int item) || item != piece.Value)
-                         .GroupBy(piece => piece.Value, piece => piece.Key))
-            {
-                var ids = group.Order().ToList();
-                move.Post(account, group.Key, sign * ids.Count, ids);
-                move.Post(counterpart, group.Key, -sign * ids.Count);
-                pieces[group.Key] = pieces.GetValueOrDefault(group.Key) + sign * ids.Count;
-            }
-        }
-
-        Pieces(before, after, -1);
-        Pieces(after, before, 1);
-        foreach (int item in before.Counts.Keys.Union(after.Counts.Keys).Order())
-        {
-            long rest = after.CountOf(item) - before.CountOf(item) - pieces.GetValueOrDefault(item);
-            move.Post(account, item, rest);
-            move.Post(counterpart, item, -rest);
-        }
     }
 
     /// <summary>
@@ -151,14 +144,14 @@ public sealed partial class ZoneWorld
         if (player.Inventory == null)
             return change();
         var bag = LedgerAccount.Inventory(player.ObjectId);
-        var before = HoldingsOf(player.Inventory);
+        var before = LedgerInventoryChange.HoldingsFrom(player.Inventory);
         var result = change();
-        var after = HoldingsOf(player.Inventory);
+        var after = LedgerInventoryChange.HoldingsFrom(player.Inventory);
         if (after.SameAs(before))
             return result;
         var move = BeginLedgerMove(kind, player.ObjectId, reference(result));
         move.Observe(bag, before);
-        PostChange(move, bag, before, after, counterpart);
+        LedgerInventoryChange.PostChange(move, bag, before, after, counterpart);
         move.Commit(LedgerHoldingsOf);
         return result;
     }

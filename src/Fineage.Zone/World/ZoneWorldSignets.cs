@@ -1,6 +1,8 @@
+using Fineage.Game.Skills;
 using Fineage.Protocol;
 using Fineage.Zone.Combat;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
 
@@ -42,10 +44,38 @@ public sealed partial class ZoneWorld
             if (signet.LastAiTickMs > 0 && now < signet.LastAiTickMs + delay * 1000L)
                 continue;
             signet.LastAiTickMs = now;
-            if (_npcAiSupport.Get(signet.NpcId)?.Buff is not { Count: > 0 } buffs)
+            var support = _npcAiSupport.Get(signet.NpcId);
+            if (support == null)
+            {
+                ZoneHotPathLogs.SignetMissingAiSupport(signet.NpcId);
                 continue;
-            foreach (var skill in buffs)
-                PulseSignetAura(signet, skill, now);
+            }
+            if (support.Value.Buff is { Count: > 0 } buffs)
+            {
+                foreach (var skill in buffs)
+                    PulseSignetAura(signet, skill, now);
+            }
+            foreach (var skill in EnumerateSignetHostileSkills(support.Value))
+                PulseSignetHostile(signet, skill, now);
+        }
+    }
+
+    static IEnumerable<NpcAiSupportSkill> EnumerateSignetHostileSkills(NpcAiSupportCatalog.NpcAiSupportRow row)
+    {
+        if (row.Debuff is { Count: > 0 } debuffs)
+        {
+            foreach (var skill in debuffs)
+                yield return skill;
+        }
+        if (row.Immobilize is { Count: > 0 } immobilize)
+        {
+            foreach (var skill in immobilize)
+                yield return skill;
+        }
+        if (row.Silence is { Count: > 0 } silence)
+        {
+            foreach (var skill in silence)
+                yield return skill;
         }
     }
 
@@ -79,8 +109,85 @@ public sealed partial class ZoneWorld
                 skill.Level, slot);
             FanoutAbnormal(target);
         }
-        ZoneLog.Info($"[signet] pulse {skill.SkillId} lv{skill.Level} npc={signet.NpcId} range={range} " +
-                     $"hit={targets.Count}");
+        ZoneHotPathLogs.SignetPulse(skill.SkillId, skill.Level, signet.NpcId, range, targets.Count);
+    }
+
+    /// <summary>Mobius EffectPoint debuff scopes: pulse debuffs / damage on attackable NPCs inside <c>affectRange</c>.</summary>
+    void PulseSignetHostile(ZoneEntity signet, NpcAiSupportSkill skill, long now)
+    {
+        var owner = QuestSpawnOwner(signet);
+        if (owner == null)
+            return;
+        var template = _game.Skills.Find(skill.SkillId);
+        SkillLevelData? levelData = null;
+        if (template != null)
+        {
+            if (!template.TryLevelData(skill.Level, out var found))
+            {
+                ZoneHotPathLogs.SignetMissingSkillLevel(skill.SkillId, skill.Level, signet.NpcId);
+                return;
+            }
+            levelData = found;
+        }
+
+        bool catalogAbnormal = template is { AppliesAbnormal: true } && levelData != null;
+        bool supportAbnormal = skill.AbnormalTimeSeconds > 0;
+        if (!catalogAbnormal && !supportAbnormal)
+        {
+            if (template == null)
+                ZoneHotPathLogs.SignetMissingSkillCatalog(skill.SkillId, signet.NpcId);
+            return;
+        }
+
+        int range = skill.AffectRange > 0 ? skill.AffectRange : 200;
+        FanoutNpcMagicSkillUse(signet, signet, skill.SkillId, skill.Level, 0, 0);
+        int hits = 0;
+        foreach (var entity in _byId.Values.ToList())
+        {
+            if (entity.Dead || entity.CurHp <= 0)
+                continue;
+            if (entity.ObjectId == signet.ObjectId || entity.ObjectId == owner.ObjectId)
+                continue;
+            if (!SameInstance(signet.ObjectId, entity.ObjectId))
+                continue;
+            if (!ZoneCombat.InCastRange(signet.X, signet.Y, entity.X, entity.Y, range))
+                continue;
+            if (entity.Kind == ZoneEntityKind.Npc && !entity.Attackable)
+                continue;
+
+            if (skill.Power > 0 && entity.Kind == ZoneEntityKind.Npc && levelData != null)
+            {
+                double mAtk = Math.Max(1d, owner.Kind == ZoneEntityKind.Player ? PlayerStats(owner).MAtk : owner.MAtk);
+                double mDef = entity.MDef > 0 ? entity.MDef : entity.Level * 30d;
+                var (damage, _) = ZoneCombat.RollMagicDamage(
+                    Rng(_combatRandom, entity), mAtk, Math.Max(1d, mDef), skill.Power,
+                    owner.Level, magicLevel: levelData.MagicLevel > 0 ? levelData.MagicLevel : owner.Level,
+                    entity.Level, mCritRate: 5);
+                if (damage > 0)
+                    DamageNpcBy(owner, entity, damage, now);
+            }
+
+            if (catalogAbnormal && template != null && levelData != null &&
+                ApplyAbnormalFromSkill(template, levelData, entity, now, attacker: owner))
+                hits++;
+            else if (supportAbnormal && ApplySignetSupportAbnormal(skill, entity, now, template?.AbnormalType))
+                hits++;
+        }
+        ZoneHotPathLogs.SignetHostilePulse(skill.SkillId, skill.Level, signet.NpcId, range, hits);
+    }
+
+    /// <summary>npc-ai-support debuff pulses when the skill id is not in <c>skills.json</c> yet.</summary>
+    bool ApplySignetSupportAbnormal(NpcAiSupportSkill skill, ZoneEntity target, long now, string? abnormalType)
+    {
+        int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
+        string slot = skill.Slot.Length > 0 ? skill.Slot : abnormalType ?? "";
+        if (!ZoneAbnormals.Apply(
+                target.Abnormals, skill.SkillId, abnormal, skill.AbnormalTimeSeconds, now, skill.Level, slot))
+            return false;
+        if (target.Abnormals.Count > 0)
+            _byId.Join(target, ActiveSets.WithAbnormals);
+        FanoutAbnormal(target);
+        return true;
     }
 
     /// <summary>Test hook: run the signet aura timers now.</summary>

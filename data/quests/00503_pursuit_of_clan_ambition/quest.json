@@ -1,0 +1,318 @@
+{
+  "id": 503,
+  "name": "Pursuit of Clan Ambition!",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    3865,
+    3866,
+    3867,
+    3868,
+    3869
+  ],
+  "dialogs": [
+    {
+      "npcId": 30760,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30760-talk-000.htm"
+    },
+    {
+      "npcId": 30760,
+      "hook": "event",
+      "when": "absent",
+      "event": "30760-08",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 30759,
+          "x": 160665,
+          "y": 21209,
+          "z": -3710,
+          "despawnSec": 300,
+          "owned": true
+        },
+        {
+          "op": "summon",
+          "npcId": 30758,
+          "x": 160665,
+          "y": 21291,
+          "z": -3710,
+          "despawnSec": 300,
+          "owned": true
+        }
+      ],
+      "htmlFile": "30760-event-30760-08-001.htm"
+    },
+    {
+      "npcId": 30760,
+      "hook": "event",
+      "when": "started",
+      "event": "30760-20",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30760-event-30760-20-002.htm"
+    },
+    {
+      "npcId": 30760,
+      "hook": "event",
+      "when": "started",
+      "event": "30760-23",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30760-event-30760-23-003.htm"
+    },
+    {
+      "npcId": 30512,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30512-talk-004.htm"
+    },
+    {
+      "npcId": 30645,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30645-talk-005.htm"
+    },
+    {
+      "npcId": 30758,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30758-talk-006.htm"
+    },
+    {
+      "npcId": 30759,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30759-talk-007.htm"
+    },
+    {
+      "npcId": 30761,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30761-talk-008.htm"
+    },
+    {
+      "npcId": 30762,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30762-talk-009.htm"
+    },
+    {
+      "npcId": 30763,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30763-talk-010.htm"
+    },
+    {
+      "npcId": 30764,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30764-talk-011.htm"
+    },
+    {
+      "npcId": 30765,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30765-talk-012.htm"
+    },
+    {
+      "npcId": 30766,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30766-talk-013.htm"
+    },
+    {
+      "npcId": 30868,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30868-talk-014.htm"
+    },
+    {
+      "npcId": 20137,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20243,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20282,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20285,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20654,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20656,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20668,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27178,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27179,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27181,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3865,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -63,11 +63,19 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
     {
     }
 
+    /// <summary>
+    /// The roster only changes on the scheduler thread and at the stage barrier, neither of which runs while a region
+    /// body is in flight, so a body reads a stable snapshot of it. A combat body deciding whether two players are at
+    /// mutual war (<c>auto-attacks</c> → <c>PlayerAutoAttackable</c> → <c>AtMutualWar</c>) therefore reads the roster
+    /// without deferring the whole hit. Writes still require the actor thread.
+    /// </summary>
+    void RequireClanRead() => RequireActorThread(readOnly: true);
+
     public int Count
     {
         get
         {
-            RequireActorThread();
+            RequireClanRead();
             return _clans.Count;
         }
     }
@@ -76,26 +84,26 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
     {
         get
         {
-            RequireActorThread();
+            RequireClanRead();
             return _clans.Values;
         }
     }
 
     public bool Contains(int clanId)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _clans.ContainsKey(clanId);
     }
 
     public bool TryGet(int clanId, [NotNullWhen(true)] out ZoneClan? clan)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _clans.TryGetValue(clanId, out clan);
     }
 
     public ZoneClan Get(int clanId)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _clans.TryGetValue(clanId, out var clan) ? clan : throw new KeyNotFoundException($"clan {clanId} is not on the roster");
     }
 
@@ -129,7 +137,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
     /// <summary>The clan of the character, or 0 when it has none or that clan is gone.</summary>
     public int ClanIdOf(int characterId)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _byCharacter.TryGetValue(characterId, out int id) && _clans.ContainsKey(id) ? id : 0;
     }
 
@@ -147,7 +155,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
 
     public bool TryGetJoinExpiry(int characterId, out long unixMs)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _joinExpiry.TryGetValue(characterId, out unixMs);
     }
 
@@ -159,7 +167,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
 
     public bool TryGetCreateExpiry(int characterId, out long unixMs)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _createExpiry.TryGetValue(characterId, out unixMs);
     }
 
@@ -174,7 +182,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
     {
         get
         {
-            RequireActorThread();
+            RequireClanRead();
             return [.. _invites];
         }
     }
@@ -187,7 +195,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
 
     public bool TryGetInvite(int inviteeObjectId, out PendingClanInvite invite)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _invites.TryGetValue(inviteeObjectId, out invite);
     }
 
@@ -206,7 +214,7 @@ internal sealed class ClanActor : GlobalActor<ClanDissolutionDue>
     /// <summary>The player has a clan invite pending, received or sent.</summary>
     public bool InInvite(int objectId)
     {
-        RequireActorThread();
+        RequireClanRead();
         return _invites.ContainsKey(objectId) || _invites.Values.Any(i => i.InviterObjectId == objectId);
     }
 

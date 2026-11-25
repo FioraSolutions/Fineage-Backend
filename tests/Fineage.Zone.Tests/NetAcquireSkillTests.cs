@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <c>RequestAcquireSkillInfo</c> with <c>AcquireSkillInfo</c>, and <c>RequestAcquireSkill</c> buys the row
 /// (SP taken, skill learned, refreshed SkillList + a new AcquireSkillList without the bought row).
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetAcquireSkillTests
 {
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Elf, NetBridgeRecorder Rec)> SetupAsync()
@@ -190,6 +191,7 @@ public sealed class NetAcquireSkillTests
 
         // With the book the skill is learned and the book leaves the bag.
         elf.Inventory!.Add(8618, 1);
+        elf.Inventory.DiscardChanges();
         var spBefore = elf.Sp;
         Assert.Null(await kit.World.TryAcquireSkillAsync(
             session, 1405, 1, ZoneWorld.AcquireSkillTypeUsual, informing: false, default));

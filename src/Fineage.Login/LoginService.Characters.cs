@@ -1,12 +1,16 @@
 using System.Text.RegularExpressions;
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 
 namespace Fineage.Login;
 
 public sealed partial class LoginService
 {
+    /// <summary>Item ids reserved per created character; the largest Interlude starter kit is far below this.</summary>
+    internal const int StarterKitIdBlock = 64;
+
     public LoginResult<CharacterRecord> CreateHuman(
         string account,
         string name,
@@ -43,11 +47,19 @@ public sealed partial class LoginService
         if (!_allowedRaces.Contains(template.Race))
             return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, "That race cannot be created.");
 
-        var inventory = _game.CreateStarterInventory(classId, _store.NextItemObjectId);
-        long adena = Math.Max(0, _create.StartingAdena);
+        // Ids come from a block reserved on the shared store: the zone allocates item ids concurrently, so a
+        // login-local "next id" collides with zone-created items (character_items_pkey violation).
+        int firstItemId = _store.ReserveItemObjectIds(StarterKitIdBlock);
+        var inventory = _game.CreateStarterInventory(classId, firstItemId);
+        long adena = Math.Max(0, _create.StartingAdena ?? _game.StarterKits.MobiusStartingAdena);
         if (adena > 0)
             inventory.Add(57, adena > int.MaxValue ? int.MaxValue : (int)adena);
+        if (inventory.Items.Count == 0)
+            return LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, $"Starter kit for class {classId} is empty.");
         var kit = CharacterInventory.Rows(inventory);
+        if (kit.Any(i => i.ObjectId < firstItemId || i.ObjectId >= firstItemId + StarterKitIdBlock))
+            throw new InvalidOperationException(
+                $"Starter kit for class {classId} needs more than {StarterKitIdBlock} item ids; raise StarterKitIdBlock.");
         var now = _clock();
         int level = Math.Max(1, _create.StartingLevel);
         int sp = Math.Max(0, _create.StartingSp);
@@ -79,7 +91,10 @@ public sealed partial class LoginService
             maxCharacters: _create.CharMaxNumber);
         return status switch
         {
-            CreateCharacterStatus.Ok when created != null => LoginResult<CharacterRecord>.Success(created),
+            CreateCharacterStatus.Ok when created != null =>
+                RecordStarterKitLedger(created.Id, classId, inventory) is { } ledgerError
+                    ? LoginResult<CharacterRecord>.Fail(LobbyProtocol.CreationFailed, ledgerError)
+                    : LoginResult<CharacterRecord>.Success(created),
             CreateCharacterStatus.NameTaken => LoginResult<CharacterRecord>.Fail(LobbyProtocol.NameTaken, "That character name is already used."),
             CreateCharacterStatus.TooMany => LoginResult<CharacterRecord>.Fail(
                 LobbyProtocol.CharacterLimit,
@@ -89,6 +104,25 @@ public sealed partial class LoginService
             CreateCharacterStatus.AccountMissing => LoginResult<CharacterRecord>.Fail("auth_required", "Login required."),
             _ => LoginResult<CharacterRecord>.Fail(LobbyProtocol.InvalidName, "Character name must be letters or digits.")
         };
+    }
+
+    /// <summary>Null on success; otherwise a create failure message (ledger reconciliation is not a silent fallback).</summary>
+    string? RecordStarterKitLedger(int characterId, int classId, PlayerInventory inventory)
+    {
+        if (_ledger == null || _ledgerIds == null)
+            return null;
+        try
+        {
+            var result = StarterKitLedger.RecordCreateGrant(_ledger, _ledgerIds, characterId, classId, inventory, _clock().ToUnixTimeMilliseconds());
+            if (!result.Ok)
+                return $"Starter kit ledger grant rejected: {result.Rejection}.";
+        }
+        catch (LedgerReconciliationException ex)
+        {
+            return ex.Message;
+        }
+
+        return null;
     }
 
     string? ClassifyName(string? name)
@@ -218,20 +252,8 @@ public sealed partial class LoginService
     }
 
     /// <summary>Character id with the greatest <see cref="CharacterRecord.LastAccess"/>, or 0 when nobody has played.</summary>
-    public static int LastPlayedId(IReadOnlyList<CharacterRecord> characters)
-    {
-        ArgumentNullException.ThrowIfNull(characters);
-        CharacterRecord? best = null;
-        foreach (var character in characters)
-        {
-            if (character.LastAccess == default)
-                continue;
-            if (best == null || character.LastAccess >= best.LastAccess)
-                best = character;
-        }
-
-        return best?.Id ?? 0;
-    }
+    public static int LastPlayedId(IReadOnlyList<CharacterRecord> characters) =>
+        LobbyRoster.LastPlayedId(characters);
 
     CharacterRecord? Resolve(string account, int characterId, string? name, int slot, DateTimeOffset now)
     {

@@ -133,6 +133,9 @@ public sealed class ZoneProactiveAggroTests
 
     static async Task<(ZoneWorld World, ZoneEntity Player)> EnterWithMobAsync(int offsetX, GeoEngine? geo = null)
     {
+        // No geo means "see-through" (GeoEngine.Empty), not "whatever data/geodata this machine has": with the retail
+        // geodata present the elf spawn sits behind a hill, the LOS check rejects the target and the test flips.
+        geo ??= GeoEngine.Empty;
         var store = MemoryAccountStore.InMemory();
         var login = new LoginService(store, new HandoffTokens(HandoffTokens.DefaultSecret));
         Assert.True(login.Register("kaboo", "pass1234").Ok);

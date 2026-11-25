@@ -10,7 +10,9 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    bool TryServicePair(ZoneSession session, int npcObjectId, out ZoneEntity player, out ZoneEntity npc, out string? error)
+    bool TryServicePair(
+        ZoneSession session, int npcObjectId, out ZoneEntity player, out ZoneEntity npc, out string? error,
+        InteractGate gate = InteractGate.Sphere3D)
     {
         player = null!;
         npc = null!;
@@ -39,7 +41,7 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        if (!InTalkRange(player, npc))
+        if (!InInteractGate(player, npc, gate))
         {
             error = "range";
             return false;
@@ -117,28 +119,15 @@ public sealed partial class ZoneWorld
     {
         if (player.Warehouse == null)
             return;
-        if (InventoryPersistDeferred)
+        bool commitNow;
+        using (_economyLock.Enter())
         {
             _dirtyWarehouses[session.ObjectId] = player;
-            return;
+            commitNow = !InventoryPersistDeferred;
         }
 
-        ReplaceWarehouseNow(session, player);
-    }
-
-    void ReplaceWarehouseNow(ZoneSession session, ZoneEntity player)
-    {
-        if (player.Warehouse == null)
-            return;
-        var stacks = player.Warehouse.Items;
-        var stored = new StoredItem[stacks.Count];
-        for (int i = 0; i < stacks.Count; i++)
-        {
-            var stack = stacks[i];
-            stored[i] = new StoredItem(stack.ItemId, stack.Count, -1, stack.EnchantLevel, stack.ObjectId);
-        }
-
-        _persist.ReplaceWarehouse(session.Account, session.ObjectId, stored);
+        if (commitNow)
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
     }
 
     static int ReadTeleportOffset()
@@ -173,9 +162,21 @@ public sealed partial class ZoneWorld
 
     void FanInventory(ZoneSession session, InventoryUpdateEntryMsg[] changes)
     {
-        var invUpdate = new InventoryUpdateMsg { Changes = changes };
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+        // Callers still pass the rows they used to encode. The journal is the packet; this persists and publishes it.
+        _ = changes;
+        if (!_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
+        {
+            ZoneLog.Warn($"inventory publish skipped char={session.ObjectId}: no live bag");
+            return;
+        }
+
+        SaveInventory(session, player.Inventory);
+    }
+
+    void LogWarehouseLoad(string container, int ownerId, PrivateWarehouse warehouse)
+    {
+        foreach (string warning in warehouse.LoadWarnings)
+            ZoneLog.Warn($"inventory load {container} owner={ownerId}: {warning}");
     }
 
     static (int Id, string Text, string Code) Refusal(NewbieBuffRefusal refusal) => refusal switch

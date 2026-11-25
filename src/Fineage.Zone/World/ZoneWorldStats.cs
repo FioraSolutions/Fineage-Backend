@@ -156,7 +156,7 @@ public sealed partial class ZoneWorld
 
     CombatStatMods? FoldLearnedClanAndGearPassives(ZoneEntity player, CombatStatMods? mods)
     {
-        var passiveLevels = PassiveSkillLevels(player);
+        var passiveLevels = ActivePassiveLevels(player);
         return passiveLevels.Count == 0
             ? mods
             : _passives.CollectPassives(
@@ -166,7 +166,8 @@ public sealed partial class ZoneWorld
                 resting: player.Sitting,
                 hpPercent: player.MaxHp <= 0 ? 100d : 100d * player.CurHp / player.MaxHp,
                 moving: player.MoveActive,
-                wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots));
+                wearingSlot: slots => ConditionUsingItemType.MatchesSlot(player.Inventory, slots),
+                onMissing: id => ZoneLog.Warn($"skill-passives missing skillId={id} — passive has no combat mods"));
     }
 
     /// <summary>
@@ -176,10 +177,38 @@ public sealed partial class ZoneWorld
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
         PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills, player.CursedSkills);
 
+    /// <summary>
+    /// The passive subset of <see cref="PassiveSkillLevels"/>: ids the skill book marks <c>passive</c>.
+    /// <para>
+    /// Mobius folds only <c>operateType P</c> funcs into the player's stat line; actives apply their funcs
+    /// through an abnormal while the buff is on. Feeding the whole skill book here matched the actives'
+    /// buff funcs against <c>skill-passives.json</c> (which carries passives only), so every learned Heal,
+    /// Might, Shield or Wind Strike was reported as <c>skill-passives missing skillId=N</c> and — worse —
+    /// an id that happens to exist in both tables would have been applied twice: once as a known skill and
+    /// again as an abnormal.
+    /// </para>
+    /// <para>
+    /// A gear/set/clan id the skill book does not know is kept: those come from Mobius Inventory/Clan skill
+    /// additions that are not in <c>skills.json</c>, and their passives must still fold.
+    /// </para>
+    /// </summary>
+    internal Dictionary<int, int> ActivePassiveLevels(ZoneEntity player)
+    {
+        var all = PassiveSkillLevels(player);
+        var passives = new Dictionary<int, int>(all.Count);
+        foreach (var (skillId, level) in all)
+        {
+            var template = _game.Skills.Find(skillId);
+            if (template == null || template.Passive)
+                passives[skillId] = level;
+        }
+        return passives;
+    }
+
     /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
     internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)
     {
-        return _defenceTraits.Collect(PassiveSkillLevels(player));
+        return _defenceTraits.Collect(ActivePassiveLevels(player));
     }
 
     /// <summary>
@@ -192,8 +221,39 @@ public sealed partial class ZoneWorld
         var gear = player.GearSkills;
         gear.Clear();
         _equipSkills.CollectEquipped(player.Inventory, gear);
+        WarnMissingEquipSkillStats(player);
         CollectArmorSetSkills(player, gear);
         Augmentation.AugmentationStatMods.CollectGearSkills(player.Inventory, _augmentation, gear);
+    }
+
+    /// <summary>
+    /// Mobius <c>item_skill</c> rows must resolve to <c>skill-passives.json</c> funcs (or
+    /// <c>skill-stat-effects.json</c> for active buffs). Log once per equipped item/skill with no data.
+    /// </summary>
+    void WarnMissingEquipSkillStats(ZoneEntity player)
+    {
+        if (player.Inventory == null)
+            return;
+        foreach (PaperdollSlot slot in Enum.GetValues<PaperdollSlot>())
+        {
+            var item = player.Inventory.GetEquipped(slot);
+            if (item == null || !_equipSkills.TryGet(item.ItemId, out var skills))
+                continue;
+            foreach (var skill in skills)
+            {
+                if (skill.Id <= 0)
+                    continue;
+                if (_passives.TryGet(skill.Id, out var passive) && passive.Funcs.Count > 0)
+                    continue;
+                if (_statEffects.TryGet(skill.Id, out var active) && active.Funcs.Count > 0)
+                    continue;
+                var key = (item.ItemId, skill.Id);
+                if (!player.ReportedMissingEquipSkills.Add(key))
+                    continue;
+                ZoneLog.Warn(
+                    $"item-equip-skill missing stat funcs itemId={item.ItemId} skillId={skill.Id} level={skill.Level}");
+            }
+        }
     }
 
     void CollectArmorSetSkills(ZoneEntity player, Dictionary<int, int> target)

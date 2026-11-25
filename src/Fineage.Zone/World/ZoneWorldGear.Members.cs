@@ -21,11 +21,10 @@ public sealed partial class ZoneWorld
         RefreshGearSkills(player);
         RefreshPlayerMaxima(player, fanout: true);
         RefreshRunSpeedAndFanout(player);
-        var invUpdate = InventoryMessages.Modify(changed);
-        // UserInfo (paperdoll + CurrWeight/MaxWeight) is sent from SaveInventory →
-        // RefreshWeightPenaltyAfterInventoryChange, which every equip/unequip path calls next.
+        // Mobius broadcastUserInfo(self): paperdoll + live P.Atk/M.Atk/speeds, not only vitals.
         if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
+            SelfUserInfo(player);
+        // InventoryUpdate is published by SaveInventory / FlushDirtyInventories after the bag write commits.
         if (NetBridge != null && !SkillMapsEqual(gearBefore, player.GearSkills))
         {
             NetBridge.FanoutSkillList(

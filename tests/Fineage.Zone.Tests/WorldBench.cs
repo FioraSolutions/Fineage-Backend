@@ -48,28 +48,34 @@ internal sealed class WorldBench
         Fineage.Zone.DimensionalRift.DimensionalRiftCatalog? dimensionalRift = null,
         Fineage.Zone.DimensionalRift.DimensionalRiftSettings? dimensionalRiftSettings = null,
         Random? combatRandom = null,
+        Random? dropRandom = null,
         Fineage.Zone.Manor.ManorSettings? manor = null,
         Random? manorRandom = null,
         Random? fishingRandom = null,
         Fineage.Zone.Olympiad.OlympiadBoard? olympiad = null,
         bool includeEnabledMaps = false,
+        bool allowAmbientBoats = true,
         Fineage.Game.Services.GmTeleportCatalog? gmTeleports = null,
         ulong? simulationSeed = null,
         Fineage.Zone.Simulation.IRegionExecutor? regionExecutor = null,
         Fineage.Zone.Simulation.ISimulationObserver? simulationObserver = null,
         Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
-        PunishmentManager? punishments = null)
+        PunishmentManager? punishments = null,
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
+        IAccountStore? accounts = null)
     {
         Game = game ?? TestCatalogs.Game;
         Store = MemoryAccountStore.InMemory();
         Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
-        IRegionExecutor resolvedExecutor =
-            regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers);
+        IRegionExecutor resolvedExecutor = regionExecutor ??
+            (combatRandom != null || dropRandom != null
+                ? SequentialRegionExecutor.Instance
+                : ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         World = new ZoneWorld(
             aoi ?? new RangeAoi(1_000),
             Game,
-            accounts: Store,
+            accounts: accounts ?? Store,
             clock: Now,
             geo: geo,
             deathRules: deathRules,
@@ -97,18 +103,22 @@ internal sealed class WorldBench
             dimensionalRift: dimensionalRift,
             dimensionalRiftSettings: dimensionalRiftSettings,
             combatRandom: combatRandom,
+            dropRandom: dropRandom,
             manor: manor,
             manorRandom: manorRandom,
             fishingRandom: fishingRandom,
             includeEnabledMaps: includeEnabledMaps,
+            allowAmbientBoats: allowAmbientBoats,
             gmTeleports: gmTeleports,
             simulationSeed: simulationSeed,
             regionExecutor: resolvedExecutor,
             simulationObserver: simulationObserver,
             ledgerJournal: Ledger,
-            punishments: punishments);
+            punishments: punishments,
+            raidBossPoints: raidBossPoints);
         (Bridge, Rec) = NetBridgeRecorder.Create();
         World.NetBridge = Bridge;
+        World.StartEconomyPersistForTests();
     }
 
     public GameData Game { get; }

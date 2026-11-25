@@ -1,6 +1,7 @@
 using Fineage.Zone.Combat;
 using Fineage.Protocol;
 using Fineage.Zone.Geo;
+using Fineage.Zone.Interest;
 using Fineage.Zone.Movement;
 using Fineage.Zone.Simulation;
 
@@ -37,16 +38,23 @@ public sealed partial class ZoneWorld
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
             (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
-            if (blocked && _geo.FindPath(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ) is { Count: > 0 } path)
+            if (blocked && TryNpcPathCacheOnly(entity.X, entity.Y, move.DestX, move.DestY, out var path) && path.Count > 0)
             {
-                // Mobius moveToLocation + geoPath: walk the first waypoint, queue the rest (moveToNextRoutePoint).
-                ZoneLog.Info($"[geo] path obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY} nodes={path.Count} {string.Join(' ', path.Select(p => $"{p.X},{p.Y},{p.Z}"))}");
+                // A path computed for this cell pair already. Walk it now; a miss waits for the
+                // shared per-tick A* budget instead of searching inside this step.
+                ZoneHotPathLogs.GeoPath(
+                    entity.ObjectId, entity.X, entity.Y, entity.Z, move.DestX, move.DestY, path.Count);
                 (destX, destY, destZ) = path[0];
                 for (int i = 1; i < path.Count; i++)
                     entity.MovePath.Enqueue(path[i]);
             }
             else if (blocked)
-                ZoneLog.Info($"[geo] move blocked obj={entity.ObjectId} from={entity.X},{entity.Y},{entity.Z} want={move.DestX},{move.DestY},{move.DestZ} stop={destX},{destY},{destZ}");
+            {
+                RequestNpcGeoPath(entity, move.DestX, move.DestY, move.DestZ);
+                ZoneHotPathLogs.GeoMoveBlocked(
+                    entity.ObjectId, entity.X, entity.Y, entity.Z,
+                    move.DestX, move.DestY, move.DestZ, destX, destY, destZ);
+            }
         }
         else
         {
@@ -71,7 +79,24 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
-        ReconcileKnownlist(entity, ack);
+        if (NetBridge is { } bridge && ack != null && _aoi is GridAoi grid &&
+            grid.AtCell(entity.ObjectId, destX, destY))
+        {
+            if (_knownlistDiffActive)
+            {
+                _knownlistDiffAfter.Clear();
+                _knownlistDiffAfter.UnionWith(entity.Knownlist);
+            }
+
+            bridge.FanoutMoveState(
+                [entity.ObjectId],
+                entity.ObjectId,
+                ack.OriginX, ack.OriginY, ack.OriginZ,
+                ack.DestX, ack.DestY, ack.DestZ,
+                entity.Running);
+        }
+        else
+            ReconcileKnownlist(entity, ack, _knownlistDiffActive ? _knownlistDiffAfter : null);
         entity.AoiRefreshX = curX;
         entity.AoiRefreshY = curY;
 
@@ -156,6 +181,29 @@ public sealed partial class ZoneWorld
     /// </summary>
     internal const int AoiRefreshDistance = 250;
 
+    long AoiCellKeyAt(int x, int y) => _aoi is Interest.GridAoi grid ? grid.CellKeyAt(x, y) : 0;
+
+    /// <summary>
+    /// Grid AOI: refresh knownlist when the mover crosses a cell (Mobius region revalidate). Range AOI (tests): distance gate.
+    /// </summary>
+    bool ShouldRefreshKnownlistAfterMove(ZoneEntity e)
+    {
+        if (!e.MoveActive)
+            return true;
+        if (_aoi is Interest.GridAoi)
+            return AoiCellKeyAt(e.X, e.Y) != e.AoiRefreshCell;
+        long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
+        return dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance;
+    }
+
+    void StampKnownlistRefreshAnchor(ZoneEntity e)
+    {
+        e.AoiRefreshX = e.X;
+        e.AoiRefreshY = e.Y;
+        if (_aoi is Interest.GridAoi)
+            e.AoiRefreshCell = AoiCellKeyAt(e.X, e.Y);
+    }
+
     void TickPlayerMovement(long now)
     {
         if (_byId.CountOf(ActiveSets.Moving) == 0)
@@ -197,9 +245,7 @@ public sealed partial class ZoneWorld
             }
             if (!wasMoving)
                 continue;
-            long dx = e.X - e.AoiRefreshX, dy = e.Y - e.AoiRefreshY;
-            // Refresh on distance travelled, and once on arrival so the final position is exact.
-            if (!e.MoveActive || dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance)
+            if (ShouldRefreshKnownlistAfterMove(e))
                 RefreshMovingKnownlist(e, null);
         }
     }

@@ -18,11 +18,11 @@ public sealed partial class ZoneWorld
             TickPlayerMovement(now);
             TickNpcMovement(now);
             RunNpcThinkTick(now);
-            TickPendingHits(now);
+            _simulationTicks.RunNow(_pendingHitStage, now);
             TickMeleeHits(now);
             _simulationTicks.RunNow(_aggressionStage, now);
             TickLeash(now);
-            TickMobAttacks(now);
+            _simulationTicks.RunNow(_mobAttackStage, now);
             TickSummons(now);
             TickCubics(now);
             TickDuels(now);
@@ -36,26 +36,23 @@ public sealed partial class ZoneWorld
         return Task.CompletedTask;
     }
 
-    void TickPendingHits(long now)
+    void CollectPendingHits(TickContext tick, RegionWorkCollector work) => _byId.Collect(ActiveSets.PendingHit, work);
+
+    void PendingHitEntity(int id, long now)
     {
-        if (_byId.CountOf(ActiveSets.PendingHit) == 0)
+        if (!_byId.TryGetValue(id, out var entity))
             return;
-        foreach (int id in Active(ActiveSets.PendingHit))
+        if (entity.PendingHit == null)
         {
-            if (!_byId.TryGetValue(id, out var entity))
-                continue;
-            if (entity.PendingHit == null)
-            {
-                _byId.Leave(entity, ActiveSets.PendingHit);
-                continue;
-            }
-            if (entity.PendingHit.DueUnixMs > now)
-                continue;
-            if (entity.Kind == ZoneEntityKind.Player)
-                ResolvePendingHit(entity, now);
-            else if (entity.Kind == ZoneEntityKind.Npc)
-                ResolveNpcPendingHit(entity, now);
+            _byId.Leave(entity, ActiveSets.PendingHit);
+            return;
         }
+        if (entity.PendingHit.DueUnixMs > now)
+            return;
+        if (entity.Kind == ZoneEntityKind.Player)
+            ResolvePendingHit(entity, now);
+        else if (entity.Kind == ZoneEntityKind.Npc)
+            ResolveNpcPendingHit(entity, now);
     }
 
     void ResolvePendingHit(ZoneEntity player, long now)
@@ -64,9 +61,9 @@ public sealed partial class ZoneWorld
         SetPendingHit(player, null);
         if (hit == null || player.Dead)
             return;
-        if (hit.Apply is DeferredEffect deferred)
+        if (hit.Apply is DeferredEffect)
         {
-            ResolveDeferredEffect(player, hit, deferred, now);
+            ResolveDeferredEffect(player, hit, now);
             return;
         }
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 ||
@@ -100,32 +97,52 @@ public sealed partial class ZoneWorld
 
             // Mobius onMagicLaunchedTimer → broadcastPacket(MagicSkillLaunched) to the caster's knownlist.
             FanoutSkillLaunched(player, hit.Combat.SkillId, hit.Level, target);
+            ApplyFocusEnergyAfterCombatHit(player, hit.Combat.SkillId, hit.Level);
         }
 
         int damage = hit.Combat != null ? RollSkillDamage(player, target, hit.Combat, hit.Level) : hit.Damage;
         if (hit.Combat != null)
         {
-            ZoneLog.Info($"[skill] hit {hit.Combat.SkillId} lv{hit.Level} target={target.ObjectId} damage={damage}");
+            ZoneHotPathLogs.MobSkillHit(hit.Combat.SkillId, hit.Level, target.ObjectId, damage);
             // Mobius Player.sendDamageMessage after a damage skill: the caster sees its own number.
             if (damage > 0)
                 QueueAttackerDamageLine(player, target, damage);
         }
+
+        // The target may be owned by another region: HP, hate, death and rewards travel as region messages and land
+        // at the stage barrier (outside a body, Post applies them at once).
+        Post(new SkillDamageMessage(player.ObjectId, target.ObjectId, damage, hit.Combat?.SkillId ?? 0, hit.Level, now));
+
+        // Debuff-nukes (Aura Flare, Fire Vortex, …): the abnormal lands with the damage at hitTime. Mobius applies
+        // it to a playable only when the hit dealt damage; a monster takes it either way.
+        if (hit.Combat != null && target.Summon == null && (damage > 0 || target.Kind == ZoneEntityKind.Npc) &&
+            _game.Skills.Find(hit.Combat.SkillId) is { AppliesAbnormal: true } nuke &&
+            nuke.TryLevelData(hit.Level, out _))
+        {
+            Post(new AbnormalApplyMessage(player.ObjectId, target.ObjectId, hit.Combat.SkillId, hit.Level, now));
+        }
+    }
+
+    /// <summary>
+    /// The target side of a player's skill hit (Mobius <c>onMagicHitTimer</c>): HP, hate, drain, death and rewards.
+    /// Runs where the target may be written: at the stage barrier (<see cref="SkillDamageMessage"/>) or anywhere a
+    /// region body is not running.
+    /// </summary>
+    void ApplyPlayerSkillDamage(ZoneEntity player, ZoneEntity target, int damage, int skillId, int level, long now)
+    {
         if (target.Summon != null)
         {
             UpdatePvPStatus(player, CreditOf(target), now);
             DamageSummon(player, target, damage, now);
-            if (hit.Combat != null && damage > 0)
-                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
+            if (skillId > 0 && damage > 0)
+                ApplyHpDrainAfterDamage(player, target, damage, skillId);
             return;
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
             ApplySkillDamageToPlayer(player, target, damage, now);
-            if (hit.Combat != null && damage > 0)
-            {
-                ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
-                ApplySkillAbnormal(player, target, hit, now);
-            }
+            if (skillId > 0 && damage > 0)
+                ApplyHpDrainAfterDamage(player, target, damage, skillId);
             return;
         }
         if (SiegeNpcHit(player, target, damage, now))
@@ -139,31 +156,19 @@ public sealed partial class ZoneWorld
         if (TryExplodeTreasureBox(player, target, now))
             return;
         DuelNoteOutsideHit(player, target);
-        bool magicSkill = hit.Combat is { Kind: SkillDamageKind.Magical }
-                          || (hit.Combat != null && _game.Skills.Find(hit.Combat.SkillId) is { MagicType: 1 });
+        bool magicSkill = (skillId > 0 && _skillCombat.TryGet(skillId, out var combatData) && combatData is { Kind: SkillDamageKind.Magical })
+                          || (skillId > 0 && _game.Skills.Find(skillId) is { MagicType: 1 });
         if (TryApplyRaidCurse(target, player, magicSkill, now))
             return;
 
         target.CurHp = Math.Max(0, target.CurHp - damage);
         FanoutVitals(target, StatusFor(target));
-        if (hit.Combat != null && damage > 0)
-            ApplyHpDrainAfterDamage(player, target, damage, hit.Combat.SkillId);
+        if (skillId > 0 && damage > 0)
+            ApplyHpDrainAfterDamage(player, target, damage, skillId);
         RecordDamage(target, player, damage);
         ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-
-        // Debuff-nukes (Aura Flare, Fire Vortex, …): abnormal lands with the damage at hitTime.
-        if (hit.Combat != null)
-        {
-            var template = _game.Skills.Find(hit.Combat.SkillId);
-            if (template != null &&
-                template.AppliesAbnormal &&
-                template.TryLevelData(hit.Level, out var levelData))
-            {
-                ApplyAbnormalFromSkill(template, levelData, target, now, attacker: player);
-            }
-        }
 
         if (target.CurHp <= 0)
         {
@@ -209,158 +214,148 @@ public sealed partial class ZoneWorld
         ApplyPlayerDeath(target, attacker.ObjectId);
     }
 
-    void ApplySkillAbnormal(ZoneEntity attacker, ZoneEntity target, PendingSkillHit hit, long now)
-    {
-        var template = _game.Skills.Find(hit.Combat!.SkillId);
-        if (template == null || !template.AppliesAbnormal || !template.TryLevelData(hit.Level, out var levelData))
-            return;
-        ApplyAbnormalFromSkill(template, levelData, target, now, attacker: attacker);
-    }
+    void CollectAiBusy(TickContext tick, RegionWorkCollector work) => _byId.Collect(ActiveSets.AiBusy, work);
 
-    void TickMobAttacks(long now)
+    void MobAttackEntity(int id, long now)
     {
-        if (_byId.CountOf(ActiveSets.AiBusy) == 0)
+        if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null ||
+            IsTreasureBox(npc.NpcId))
             return;
-        foreach (int id in Active(ActiveSets.AiBusy))
+        if (npc.CurHp <= 0)
         {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || npc.AggroTargetId <= 0 || npc.Summon != null ||
-                IsTreasureBox(npc.NpcId))
-                continue;
-            if (npc.CurHp <= 0)
+            SetAggroTarget(npc, 0);
+            npc.HateList.Clear();
+            StopTimedMove(npc);
+            return;
+        }
+        // Mobius thinkAttack: attack timeout (2 min without a fresh onEvtAttacked) drops the fight
+        // and teleports a monster back to its spawn. The teleport relocates: it runs at the stage barrier.
+        if (npc.AttackTimeoutAtMs > 0 && now >= npc.AttackTimeoutAtMs)
+        {
+            AtBarrier(() => TeleportHome(npc));
+            return;
+        }
+        if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
+            !IsValidMobAttackTarget(npc, player) ||
+            !SameInstance(npc.ObjectId, player.ObjectId) ||
+            !ZoneCombat.WithinAggroForgetRange(npc.X, npc.Y, player.X, player.Y))
+        {
+            // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
+            npc.HateList.Remove(npc.AggroTargetId);
+            int next = MostHated(npc);
+            if (next > 0)
             {
-                SetAggroTarget(npc, 0);
-                npc.HateList.Clear();
-                StopTimedMove(npc);
-                continue;
+                SetAggroTarget(npc, next);
+                npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
+                return;
             }
-            // Mobius thinkAttack: attack timeout (2 min without a fresh onEvtAttacked) drops the fight
-            // and teleports a monster back to its spawn.
-            if (npc.AttackTimeoutAtMs > 0 && now >= npc.AttackTimeoutAtMs)
-            {
-                TeleportHome(npc);
-                continue;
-            }
-            if (!_byId.TryGetValue(npc.AggroTargetId, out var player) ||
-                !IsValidMobAttackTarget(npc, player) ||
-                !SameInstance(npc.ObjectId, player.ObjectId) ||
-                !ZoneCombat.WithinAggroForgetRange(npc.X, npc.Y, player.X, player.Y))
-            {
-                // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
-                npc.HateList.Remove(npc.AggroTargetId);
-                int next = MostHated(npc);
-                if (next > 0)
-                {
-                    SetAggroTarget(npc, next);
-                    npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
-                    continue;
-                }
-                ReturnHome(npc, now);
-                continue;
-            }
-            int topHate = MostHated(npc);
-            if (topHate > 0)
-                SetAggroTarget(npc, topHate);
-            bool summonTarget = player.Summon != null;
-            if (!summonTarget)
-                CallClanHelp(npc, player, now);
-            npc.LastAiTickMs = now;
-            // Mobius onEvtAfraid: the first step is away from the caster; later steps follow heading.
-            if (IsFeared(npc))
-            {
-                if (now >= npc.FearFleeAtUnixMs)
-                    StartFearFlee(npc, from: null, alongHeading: true);
-                continue;
-            }
-            // Sleep / stun / root / hold / paralyze: stop chase and do not swing (Mobius EffectFlag).
-            if (IsImmobilized(npc))
-            {
-                if (npc.Chasing || npc.MoveActive)
-                {
-                    npc.Chasing = false;
-                    StopTimedMove(npc);
-                    BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
-                }
-                continue;
-            }
-            // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
-            if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, AttackReachAgainst(npc, player)) ||
-                !CanSeeTarget(npc, player))
-            {
-                // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
-                ChaseStep(npc, player, now);
-                continue;
-            }
-            if (npc.Chasing)
+            ReturnHome(npc, now);
+            return;
+        }
+        int topHate = MostHated(npc);
+        if (topHate > 0)
+            SetAggroTarget(npc, topHate);
+        bool summonTarget = player.Summon != null;
+        if (!summonTarget)
+            CallClanHelp(npc, player, now);
+        npc.LastAiTickMs = now;
+        // Mobius onEvtAfraid: the first step is away from the caster; later steps follow heading.
+        if (IsFeared(npc))
+        {
+            if (now >= npc.FearFleeAtUnixMs)
+                StartFearFlee(npc, from: null, alongHeading: true);
+            return;
+        }
+        // Sleep / stun / root / hold / paralyze: stop chase and do not swing (Mobius EffectFlag).
+        if (IsImmobilized(npc))
+        {
+            if (npc.Chasing || npc.MoveActive)
             {
                 npc.Chasing = false;
-                // Arrived: halt at the server position; Mobius sends a final MoveToLocation/StopMove at the reached spot.
                 StopTimedMove(npc);
                 BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
             }
-            if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
-                continue;
-            // Mobius thinkAttack: SUICIDE (HP&lt;30%), then HEAL/BUFF/control/debuff, then ATTACK skill chance.
-            // Against a summon only the melee swing is used here (NPC skill paths roll against a player).
-            if (summonTarget)
-            {
-                int swingMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
-                npc.NextMobAttackMs = now + swingMs;
-                var (sDamage, sFlags) = NpcMeleeRoll(npc, player);
-                player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-                FanoutAttack(npc, player, new AttackMsg
-                {
-                    AttackerObjectId = npc.ObjectId,
-                    TargetObjectId = player.ObjectId,
-                    Damage = sDamage,
-                    Flags = sFlags,
-                    AttackerX = npc.X,
-                    AttackerY = npc.Y,
-                    AttackerZ = npc.Z,
-                    TargetX = player.X,
-                    TargetY = player.Y,
-                    TargetZ = player.Z
-                });
-                _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
-                continue;
-            }
-            if (TryNpcSuicideSkill(npc, player, now))
-                continue;
-            if (TryNpcHealSkill(npc, now))
-                continue;
-            if (TryNpcSelfBuffSkill(npc, now))
-                continue;
-            if (TryNpcImmobilizeSkill(npc, player, now))
-                continue;
-            if (TryNpcSilenceSkill(npc, player, now))
-                continue;
-            if (TryNpcDebuffSkill(npc, player, now))
-                continue;
-            // Mobius AttackableAI: skill chance before the melee swing.
-            if (TryNpcSkillInsteadOfMelee(npc, player, now))
-                continue;
-            int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
-            npc.NextMobAttackMs = now + npcAtkMs;
-
-            var (damage, flags) = NpcMeleeRoll(npc, player);
-            player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-
-            var attack = new AttackMsg
+            return;
+        }
+        // Mobius thinkAttack: no LOS to the most hated → moveTo(target) instead of swinging.
+        if (!ZoneCombat.Within(npc.X, npc.Y, player.X, player.Y, AttackReachAgainst(npc, player)) ||
+            !CanSeeTarget(npc, player))
+        {
+            // Mobius AttackableAI.thinkAttack -> moveToPawn(target, range): mob runs to the attacker.
+            ChaseStep(npc, player, now);
+            return;
+        }
+        if (npc.Chasing)
+        {
+            npc.Chasing = false;
+            // Arrived: halt at the server position; Mobius sends a final MoveToLocation/StopMove at the reached spot.
+            StopTimedMove(npc);
+            BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
+        }
+        if (now < npc.NextMobAttackMs || npc.CastingUntilMs > now)
+            return;
+        // Mobius thinkAttack: SUICIDE (HP&lt;30%), then HEAL/BUFF/control/debuff, then ATTACK skill chance.
+        // Against a summon only the melee swing is used here (NPC skill paths roll against a player).
+        if (summonTarget)
+        {
+            int swingMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
+            npc.NextMobAttackMs = now + swingMs;
+            var (sDamage, sFlags) = NpcMeleeRoll(npc, player);
+            // The victim may be owned by another region: the combat-stance write lands at the stage barrier.
+            AtBarrier(() => player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis);
+            FanoutAttack(npc, player, new AttackMsg
             {
                 AttackerObjectId = npc.ObjectId,
                 TargetObjectId = player.ObjectId,
-                Damage = damage,
-                Flags = flags,
+                Damage = sDamage,
+                Flags = sFlags,
                 AttackerX = npc.X,
                 AttackerY = npc.Y,
                 AttackerZ = npc.Z,
                 TargetX = player.X,
                 TargetY = player.Y,
                 TargetZ = player.Z
-            };
-            // Swing now; player HP drops at hitTime (Mobius onHitTimer).
-            FanoutAttack(npc, player, attack);
-            _meleeHits.Add(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags));
+            });
+            QueueMeleeHit(new PendingMeleeHit(npc.ObjectId, player.ObjectId, sDamage, now + swingMs / 2, sFlags));
+            return;
         }
+        if (TryNpcSuicideSkill(npc, player, now))
+            return;
+        if (TryNpcHealSkill(npc, now))
+            return;
+        if (TryNpcSelfBuffSkill(npc, now))
+            return;
+        if (TryNpcImmobilizeSkill(npc, player, now))
+            return;
+        if (TryNpcSilenceSkill(npc, player, now))
+            return;
+        if (TryNpcDebuffSkill(npc, player, now))
+            return;
+        // Mobius AttackableAI: skill chance before the melee swing.
+        if (TryNpcSkillInsteadOfMelee(npc, player, now))
+            return;
+        int npcAtkMs = ZoneCombat.AttackTimeMs(NpcPAtkSpd(npc));
+        npc.NextMobAttackMs = now + npcAtkMs;
+
+        var (damage, flags) = NpcMeleeRoll(npc, player);
+        AtBarrier(() => player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis);
+
+        var attack = new AttackMsg
+        {
+            AttackerObjectId = npc.ObjectId,
+            TargetObjectId = player.ObjectId,
+            Damage = damage,
+            Flags = flags,
+            AttackerX = npc.X,
+            AttackerY = npc.Y,
+            AttackerZ = npc.Z,
+            TargetX = player.X,
+            TargetY = player.Y,
+            TargetZ = player.Z
+        };
+        // Swing now; player HP drops at hitTime (Mobius onHitTimer).
+        FanoutAttack(npc, player, attack);
+        QueueMeleeHit(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags));
     }
 
 }

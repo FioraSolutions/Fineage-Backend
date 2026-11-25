@@ -57,7 +57,8 @@ public sealed partial class ZoneWorld
 
     string? DepositPrivate(ZoneSession session, int npcObjectId, WarehouseLine[]? lines, bool html)
     {
-        if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error))
+        // Mobius SendWareHouseDepositList: isInsideRadius2D(manager, INTERACTION_DISTANCE).
+        if (!TryServicePair(session, npcObjectId, out var player, out var npc, out var error, InteractGate.Circle2D))
             return error;
         var wh = ActiveWarehouse(player);
         if (player.Inventory == null || wh == null)

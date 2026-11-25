@@ -36,6 +36,9 @@ public static class NetTelemetry
     public static void OutboundDropped(string endpoint) =>
         FineageTelemetry.OutboundDropped.Add(1, Tag(endpoint));
 
+    public static void ReliableOverflow(string endpoint) =>
+        FineageTelemetry.OutboundReliableOverflow.Add(1, Tag(endpoint));
+
     public static void PacketRejected(string endpoint) =>
         FineageTelemetry.PacketsRejected.Add(1, Tag(endpoint));
 

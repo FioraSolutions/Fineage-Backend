@@ -15,12 +15,16 @@ public sealed class ServerMetricsSampler
     public async Task<List<PrometheusSample>> SampleZoneDuringAsync(TimeSpan interval, TimeSpan duration, CancellationToken ct)
     {
         var samples = new List<PrometheusSample>();
+        RawScrapes.Clear();
         var end = DateTimeOffset.UtcNow + duration;
         while (DateTimeOffset.UtcNow < end && !ct.IsCancellationRequested)
         {
             string? text = await FetchAsync($"http://127.0.0.1:{_zoneMetricsPort}/metrics", ct);
             if (text != null)
+            {
+                RawScrapes.Add(text);
                 samples.Add(PrometheusParser.Parse(text));
+            }
             try
             {
                 await Task.Delay(interval, ct);
@@ -33,6 +37,8 @@ public sealed class ServerMetricsSampler
 
         return samples;
     }
+
+    public List<string> RawScrapes { get; } = [];
 
     public async Task<PrometheusSample?> SampleZoneOnceAsync(CancellationToken ct) =>
         await FetchAsync($"http://127.0.0.1:{_zoneMetricsPort}/metrics", ct) is { } t ? PrometheusParser.Parse(t) : null;

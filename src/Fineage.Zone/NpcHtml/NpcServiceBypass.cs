@@ -120,19 +120,22 @@ public sealed class TrainerBypassHandler : IBypassHandler
 /// </summary>
 public sealed class FishermanBypassHandler : IBypassHandler
 {
-    readonly LocalizedHtml _pages;
-
-    public FishermanBypassHandler(LocalizedHtml pages) => _pages = pages ?? throw new ArgumentNullException(nameof(pages));
-
     public IReadOnlyList<string> Commands { get; } = ["FishSkillList", "FishingChampionship"];
 
-    public BypassReply Handle(BypassCall call)
-    {
-        if (BypassCommands.Token(call.Command).Equals("FishSkillList", StringComparison.OrdinalIgnoreCase))
-            return BypassReply.ServiceCall(NpcServiceIntent.FishSkillList);
-        var page = _pages.ReadLink(call.Language, call.NpcType, "Link fisherman/fishing_championship.htm");
-        return page.RejectedPath ? BypassReply.Fail("bad_request") : BypassReply.Page(page.Html);
-    }
+    public BypassReply Handle(BypassCall call) =>
+        BypassCommands.Token(call.Command).Equals("FishSkillList", StringComparison.OrdinalIgnoreCase)
+            ? BypassReply.ServiceCall(NpcServiceIntent.FishSkillList)
+            : BypassReply.ServiceCall(NpcServiceIntent.FishingChampionship);
+}
+
+public sealed class RaidBossRankingBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["RaidRanking"];
+
+    public BypassReply Handle(BypassCall call) =>
+        BypassCommands.Token(call.Command).Equals("RaidRanking", StringComparison.OrdinalIgnoreCase)
+            ? BypassReply.ServiceCall(NpcServiceIntent.RaidBossRanking)
+            : BypassReply.Fail("bad_request");
 }
 
 /// <summary>Race Manager <c>BuyTicket</c> / <c>ShowOdds</c> / … (Mobius <c>RaceManager</c>).</summary>
@@ -208,6 +211,14 @@ public sealed class NoblesSelectBypassHandler : IBypassHandler
     public IReadOnlyList<string> Commands { get; } = ["showNoblesSelect"];
 
     public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.NoblesSelect);
+}
+
+/// <summary>Interlude village master <c>RequestNobless</c> (Q247 gate ready → pay SP/adena, <c>setNoble</c>).</summary>
+public sealed class RequestNoblessBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["RequestNobless"];
+
+    public BypassReply Handle(BypassCall call) => BypassReply.ServiceCall(NpcServiceIntent.RequestNobless);
 }
 
 /// <summary>Grand Olympiad Manager / Monument of Heroes pages (Block G2): the whole command rides in the service arg.</summary>

@@ -48,7 +48,12 @@ public sealed class MetricsSummaryTests
         var snapshot = new MetricsSnapshot
         {
             PlayersOnline = 2,
-            Tick = new HistogramMetrics { Sum = 4.5, Count = 2, CumulativeBuckets = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2] },
+            Tick = new HistogramMetrics
+            {
+                Sum = 4.5,
+                Count = 2,
+                CumulativeBuckets = MetricsText.DurationBoundsMs.Select((_, i) => (long)(i >= 4 ? 2 : i >= 3 ? 1 : 0)).Concat([2L]).ToArray()
+            },
             Endpoints =
             [
                 new EndpointMetrics
@@ -67,7 +72,7 @@ public sealed class MetricsSummaryTests
                     {
                         Sum = 13.5,
                         Count = 2,
-                        CumulativeBuckets = [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2]
+                        CumulativeBuckets = MetricsText.DurationBoundsMs.Select((_, i) => (long)(i >= 9 ? 2 : i >= 8 ? 1 : 0)).Concat([2L]).ToArray()
                     }
                 }
             ]
@@ -85,8 +90,10 @@ public sealed class MetricsSummaryTests
         Assert.Contains("fineage_outbound_dropped_total{endpoint=\"zone\"} 1\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"in\"} 1.5\n", text);
         Assert.Contains("fineage_packets_per_second{direction=\"out\"} 2.5\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"1\"} 0\n", text);
-        Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"2\"} 1\n", text);
+        string leBeforeTwo = MetricsText.DurationBoundsMs[8].ToString("0.###", CultureInfo.InvariantCulture);
+        string leTwo = MetricsText.DurationBoundsMs[9].ToString("0.###", CultureInfo.InvariantCulture);
+        Assert.Contains($"fineage_handler_ms_bucket{{endpoint=\"zone\",le=\"{leBeforeTwo}\"}} 1\n", text);
+        Assert.Contains($"fineage_handler_ms_bucket{{endpoint=\"zone\",le=\"{leTwo}\"}} 2\n", text);
         Assert.Contains("fineage_handler_ms_bucket{endpoint=\"zone\",le=\"+Inf\"} 2\n", text);
         Assert.Contains("fineage_handler_ms_sum{endpoint=\"zone\"} 13.5\n", text);
         Assert.Contains("fineage_handler_ms_count{endpoint=\"zone\"} 2\n", text);
@@ -208,11 +215,61 @@ public sealed class MetricsCollectorTests
         Assert.True(snapshot.RegionHandoffs >= handoffsBefore + 3);
 
         string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains("fineage_fanout_overflow_total 0\n", text);
+        Assert.Contains("fineage_coalesced_total 0\n", text);
+        Assert.Contains("fineage_reliable_overflow_total 0\n", text);
+        Assert.Contains("fineage_fanout_dropped_total 0\n", text);
         Assert.Contains($"fineage_tick_stage_ms_count{{stage=\"{stage}\"}} 1\n", text);
         Assert.Contains($"fineage_tick_stage_failures_total{{stage=\"{stage}\"}} 2\n", text);
         Assert.Contains("# TYPE fineage_tick_overruns_total counter\n", text);
         Assert.Contains("# TYPE fineage_tick_skipped_total counter\n", text);
         Assert.Contains("# TYPE fineage_region_handoffs_total counter\n", text);
+    }
+
+    [Fact]
+    public void Persist_worker_writes_are_exported_apart_from_the_tick_stage()
+    {
+        string kind = "kind" + Guid.NewGuid().ToString("N");
+        using var collector = new MetricsCollector();
+        FineageTelemetry.PersistWriteMilliseconds.Record(42.0,
+            new KeyValuePair<string, object?>("kind", kind));
+
+        MetricsSnapshot snapshot = collector.Snapshot();
+        StageMetrics row = Assert.Single(snapshot.PersistWriteByKind, r => r.Stage == kind);
+        Assert.Equal(1, row.Duration.Count);
+        Assert.Equal(42.0, row.Duration.Sum, 3);
+
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains($"fineage_persist_write_ms_count{{kind=\"{kind}\"}} 1\n", text);
+        // A durable write on a worker thread is not a step: it must not land in the tick stage histogram.
+        Assert.DoesNotContain(snapshot.Stages, s => s.Stage == "persist.snapshot" && s.Duration.Count == 1 && s.Duration.Sum == 42.0);
+    }
+
+    [Fact]
+    public void Collector_exports_command_timeline_apply_and_queue_wait_histograms()
+    {
+        using var collector = new MetricsCollector();
+        FineageTelemetry.CommandTimelineMilliseconds.Record(12,
+            new KeyValuePair<string, object?>("phase", "submit_to_dequeue"));
+        FineageTelemetry.CommandTimelineMilliseconds.Record(4.5,
+            new KeyValuePair<string, object?>("phase", "dequeue_to_apply"));
+        FineageTelemetry.CommandApplyMilliseconds.Record(4.5,
+            new KeyValuePair<string, object?>("command", "MoveInput"));
+        FineageTelemetry.CommandQueueWaitMilliseconds.Record(8,
+            new KeyValuePair<string, object?>("class", "player"));
+
+        MetricsSnapshot snapshot = collector.Snapshot();
+        // The meter is process-wide and test classes run in parallel, so other suites may have recorded their own
+        // phases into the same collector. What this test owns is that its two phases arrive with their counts.
+        Assert.Single(snapshot.CommandTimelinePhases, r => r.Stage == "submit_to_dequeue");
+        Assert.Single(snapshot.CommandTimelinePhases, r => r.Stage == "dequeue_to_apply");
+        Assert.Single(snapshot.CommandApplyByName, r => r.Stage == "MoveInput");
+        Assert.Single(snapshot.CommandQueueWaitByClass, r => r.Stage == "player");
+
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains("fineage_command_timeline_ms_count{phase=\"submit_to_dequeue\"} 1\n", text);
+        Assert.Contains("fineage_command_apply_ms_count{command=\"MoveInput\"} 1\n", text);
+        Assert.Contains("fineage_command_queue_wait_ms_count{class=\"player\"} 1\n", text);
     }
 }
 

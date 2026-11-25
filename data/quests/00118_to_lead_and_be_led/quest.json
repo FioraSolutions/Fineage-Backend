@@ -330,6 +330,28 @@
         }
       ],
       "html": ""
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30298-talk-030.htm"
+    },
+    {
+      "npcId": 30298,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30298-talk-031.htm"
     }
   ]
 }

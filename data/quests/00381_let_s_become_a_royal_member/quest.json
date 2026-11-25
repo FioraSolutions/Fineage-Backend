@@ -108,7 +108,7 @@
       "htmlFile": "30232-event-30232-03-006.htm"
     },
     {
-      "npcId": 30232,
+      "npcId": 30090,
       "hook": "event",
       "when": "absent",
       "event": "30090-02",
@@ -123,6 +123,38 @@
         }
       ],
       "htmlFile": "30232-event-30090-02-007.htm"
+    },
+    {
+      "npcId": 21018,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5899,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27316,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5899,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

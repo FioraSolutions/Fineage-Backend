@@ -1,6 +1,7 @@
 using Fineage.Game;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Geo;
 using Fineage.Zone.Net;
 using System.Linq;
@@ -11,6 +12,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Sonic Focus charges and Sonic Blaster <c>player charges="2"</c> gate.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetForceChargeTests
 {
     const int MobId = 9_300_080;
@@ -99,5 +101,49 @@ public sealed class NetForceChargeTests
         ResolveCast(kit, player);
         Assert.False(Unsuitable(rec));
         Assert.Equal(0, player.ForceCharges);
+    }
+
+    [Fact]
+    public async Task Sonic_focus_at_seven_charges_refuses_with_max_capacity_message()
+    {
+        var (kit, session, player, rec) = await GladiatorSetupAsync();
+        player.ForceCharges = 7;
+        int mp = player.CurMp;
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)).Clear();
+
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicFocus, player.ObjectId, CancellationToken.None));
+        Assert.Equal(7, player.ForceCharges);
+        Assert.Equal(mp, player.CurMp);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage)),
+            m => ((SystemMessageMsg)m[1]!).Id == ForceChargeRules.SysMsgForceMaxCapacity);
+    }
+
+    [Fact]
+    public async Task Sonic_focus_sends_etc_status_when_charges_change()
+    {
+        var (kit, session, player, rec) = await GladiatorSetupAsync();
+        rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate)).Clear();
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicFocus, player.ObjectId, CancellationToken.None));
+        ResolveCast(kit, player);
+        Assert.Equal(1, player.ForceCharges);
+        var status = rec.Of(nameof(IWorldEventPublisher.FanoutEtcStatusUpdate))
+            .Select(m => (EtcStatusUpdateMsg)m[1]!)
+            .Last();
+        Assert.Equal(1, status.Charges);
+    }
+
+    [Fact]
+    public async Task Force_charges_decay_after_ten_minutes_idle()
+    {
+        var (kit, session, player, _) = await GladiatorSetupAsync();
+        Assert.Null(await kit.World.TrySkillUseAsync(session, SonicFocus, player.ObjectId, CancellationToken.None));
+        ResolveCast(kit, player);
+        Assert.Equal(1, player.ForceCharges);
+        Assert.True(player.ForceChargeResetAtUnixMs > 0);
+
+        kit.AdvanceToTickCovering(player.ForceChargeResetAtUnixMs + 1);
+        kit.World.StepSimulation();
+        Assert.Equal(0, player.ForceCharges);
+        Assert.Equal(0, player.ForceChargeResetAtUnixMs);
     }
 }

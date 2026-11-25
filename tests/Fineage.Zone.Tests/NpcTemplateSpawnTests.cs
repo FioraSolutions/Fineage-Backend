@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class NpcTemplateSpawnTests
 {
     const int MobiusTemplateCount = 6520;
@@ -174,7 +175,8 @@ public sealed class NpcTemplateSpawnTests
     {
         var baseline = new ZoneWorld().NpcObjectIds;
         var enabled = new ZoneWorld(includeEnabledMaps: true);
-        bool night = ZoneGameTime.FromLocalMidnight().IsNight(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        // The world's own day/night, not one rebuilt from the process time zone (they differ on a non-UTC host).
+        bool night = enabled.IsNight;
         int extra = TestCatalogs.Spawns.Maps.Values
             .Where(map => map.Enabled && map.MapId != SpawnCatalog.SmokeMapId)
             .Sum(map => map.Npcs.Count(n => SpawnPeriodOfDayParse.IsActive(n.PeriodOfDay, night)));

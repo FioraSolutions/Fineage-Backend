@@ -158,6 +158,13 @@
         {
           "op": "set_cond",
           "cond": 1
+        },
+        {
+          "op": "summon",
+          "npcId": 30989,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30385-event-30385-03-013.htm"
@@ -246,7 +253,7 @@
       "htmlFile": "30385-event-30385-10-018.htm"
     },
     {
-      "npcId": 30385,
+      "npcId": 30037,
       "hook": "event",
       "when": "absent",
       "event": "30037-02",
@@ -264,7 +271,7 @@
       "htmlFile": "30385-event-30037-02-019.htm"
     },
     {
-      "npcId": 30385,
+      "npcId": 30375,
       "hook": "event",
       "when": "absent",
       "event": "30375-02",
@@ -282,7 +289,7 @@
       "htmlFile": "30385-event-30375-02-020.htm"
     },
     {
-      "npcId": 30385,
+      "npcId": 30989,
       "hook": "event",
       "when": "absent",
       "event": "30989-02",
@@ -305,115 +312,116 @@
       "htmlFile": "30385-event-30989-02-021.htm"
     },
     {
-      "npcId": 20024,
+      "npcId": 20008,
       "hook": "kill",
       "when": "started",
-      "lacksItems": [
-        4256
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 4256,
+          "itemId": 4255,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
+    },
+    {
+      "npcId": 20010,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4255,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20014,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4255,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     },
     {
       "npcId": 20024,
       "hook": "kill",
       "when": "started",
-      "hasItem": 4256,
-      "lacksItems": [
-        4257
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 4257,
+          "itemId": 4255,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 20027,
       "hook": "kill",
       "when": "started",
-      "lacksItems": [
-        4256
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 4256,
+          "itemId": 4255,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 0
         }
-      ],
-      "html": ""
-    },
-    {
-      "npcId": 20027,
-      "hook": "kill",
-      "when": "started",
-      "hasItem": 4256,
-      "lacksItems": [
-        4257
-      ],
-      "ops": [
-        {
-          "op": "drop_item",
-          "itemId": 4257,
-          "count": 1,
-          "chance": 1.0,
-          "limit": 1
-        }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 20030,
       "hook": "kill",
       "when": "started",
-      "lacksItems": [
-        4256
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 4256,
+          "itemId": 4255,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     },
     {
-      "npcId": 20030,
+      "npcId": 25146,
       "hook": "kill",
       "when": "started",
-      "hasItem": 4256,
-      "lacksItems": [
-        4257
-      ],
+      "cond": 1,
+      "html": "",
       "ops": [
         {
           "op": "drop_item",
-          "itemId": 4257,
+          "itemId": 4255,
           "count": 1,
           "chance": 1.0,
-          "limit": 1
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     }
   ]
 }

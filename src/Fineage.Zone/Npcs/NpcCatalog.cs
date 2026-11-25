@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Text.Json;
 
 namespace Fineage.Zone.Npcs;
@@ -233,7 +234,7 @@ public sealed class NpcCatalog
             return list.Count > 0 ? list : null;
         }
 
-        return new NpcCatalog(byId);
+        return new NpcCatalog(byId.ToFrozenDictionary());
     }
 
     sealed class FileDto

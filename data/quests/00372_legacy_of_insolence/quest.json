@@ -624,6 +624,78 @@
       "when": "absent",
       "event": "30844-11",
       "htmlFile": "30844-event-30844-11-041.htm"
+    },
+    {
+      "npcId": 30839,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30839-talk-042.htm"
+    },
+    {
+      "npcId": 30855,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30855-talk-043.htm"
+    },
+    {
+      "npcId": 30929,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30929-talk-044.htm"
+    },
+    {
+      "npcId": 31001,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "31001-talk-045.htm"
+    },
+    {
+      "npcId": 20817,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20821,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20825,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 20829,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 21063,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
+    },
+    {
+      "npcId": 21069,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": []
     }
   ]
 }

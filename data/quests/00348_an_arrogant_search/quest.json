@@ -15,7 +15,8 @@
     4397,
     4398,
     4399,
-    4400
+    4400,
+    5232
   ],
   "dialogs": [
     {
@@ -634,21 +635,21 @@
       "htmlFile": "30864-event-30864-25-052.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 31001,
       "hook": "event",
       "when": "absent",
       "event": "31001-02",
       "htmlFile": "30864-event-31001-02-053.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 30144,
       "hook": "event",
       "when": "absent",
       "event": "30144-02",
       "htmlFile": "30864-event-30144-02-054.htm"
     },
     {
-      "npcId": 30864,
+      "npcId": 30645,
       "hook": "event",
       "when": "absent",
       "event": "30645-02",
@@ -674,6 +675,27 @@
         {
           "op": "set_cond",
           "cond": 2
+        },
+        {
+          "op": "summon",
+          "npcId": 27184,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27182,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
+        },
+        {
+          "op": "summon",
+          "npcId": 27183,
+          "despawnSec": 300,
+          "owned": true,
+          "atPlayer": true
         }
       ],
       "htmlFile": "30864-event-30864-04-056.htm"
@@ -914,50 +936,148 @@
       "htmlFile": "30864-event-30864-51-069.htm"
     },
     {
-      "npcId": 27182,
+      "npcId": 20657,
       "hook": "kill",
       "when": "started",
+      "cond": 1,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 11
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     },
     {
-      "npcId": 27183,
+      "npcId": 20658,
       "hook": "kill",
       "when": "started",
+      "cond": 1,
+      "html": "",
       "ops": [
         {
-          "op": "set_cond",
-          "cond": 15
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 20828,
       "hook": "kill",
       "when": "started",
+      "cond": 1,
+      "html": "",
       "ops": [
         {
-          "op": "complete"
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
     },
     {
       "npcId": 20829,
       "hook": "kill",
       "when": "started",
+      "cond": 1,
+      "html": "",
       "ops": [
         {
-          "op": "complete"
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
         }
-      ],
-      "html": ""
+      ]
+    },
+    {
+      "npcId": 20859,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20860,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27182,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27183,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27184,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4287,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

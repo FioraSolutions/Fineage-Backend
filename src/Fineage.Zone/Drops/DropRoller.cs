@@ -32,6 +32,22 @@ public static class DropRoller
             victimLevel, killerLevel, raid);
     }
 
+    /// <summary>Mobius <c>doEventDrop</c>: each configured group may add one extra stack (no level-gap reuse on raid).</summary>
+    public static IReadOnlyList<DropStack> RollEventDeath(
+        IReadOnlyList<DropGroupDefinition> groups,
+        Random random,
+        DropRates? rates = null,
+        int victimLevel = 0,
+        int killerLevel = 0,
+        bool raid = false)
+    {
+        if (groups.Count == 0)
+            return [];
+        rates ??= DropRates.Retail;
+        return RollGroups(groups, random, rates, rates.DeathDropChanceMultiplier, rates.DeathDropAmountMultiplier,
+            victimLevel, killerLevel, raid, skipLevelGap: true);
+    }
+
     public static IReadOnlyList<DropStack> RollCorpse(
         DropNpcDefinition definition,
         Random random,
@@ -60,7 +76,7 @@ public static class DropRoller
             });
         }
         return RollGroups(groups, random, rates, rates.CorpseDropChanceMultiplier, rates.CorpseDropAmountMultiplier,
-            victimLevel, killerLevel, raid);
+            victimLevel, killerLevel, raid, skipLevelGap: false);
     }
 
     /// <summary>
@@ -87,7 +103,8 @@ public static class DropRoller
         double amountMultiplier,
         int victimLevel,
         int killerLevel,
-        bool raid)
+        bool raid,
+        bool skipLevelGap = false)
     {
         var calculated = new List<Rolled>();
         var randomDrops = new List<Rolled>();
@@ -119,8 +136,7 @@ public static class DropRoller
                 }
 
                 bool adena = item.ItemId == AdenaItemId;
-                // Mobius raid/grand bosses: no level-gap penalty on death drops (retail RB tables).
-                double gap = raid ? 100 : LevelGapChance(victimLevel, killerLevel, adena);
+                double gap = skipLevelGap || raid ? 100 : LevelGapChance(victimLevel, killerLevel, adena);
                 if (random.NextDouble() * 100 > gap)
                     continue;
 

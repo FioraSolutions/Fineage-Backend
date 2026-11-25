@@ -54,15 +54,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             DestZ = destZ,
             Running = running
         });
-        foreach (int watcher in watcherObjectIds)
-        {
-            if (!_presence.TryGet(watcher, out _, out _))
-            {
-                ZoneLog.Info($"[move] MoveState watcher={watcher} mover={moverObjectId} NOT REGISTERED in presence hub");
-                continue;
-            }
-            _presence.TrySend(watcher, NetOpcode.MoveState, payload);
-        }
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MoveState, payload);
     }
 
     void IWorldEventPublisher.FanoutKnownlistDiff(int selfObjectId, IReadOnlyList<int> added, IReadOnlyList<int> removed) =>
@@ -174,8 +166,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             WalkSpeed = walkSpeed,
             InWater = inWater
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.ChangeMoveType, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ChangeMoveType, payload);
     }
 
     void IWorldEventPublisher.FanoutPositionCorrection(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
@@ -190,8 +181,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
             Z = z,
             Heading = heading
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PositionCorrection, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PositionCorrection, payload);
     }
 
     void IWorldEventPublisher.FanoutAttackStance(IReadOnlyList<int> watcherObjectIds, int objectId, bool inStance)
@@ -199,21 +189,18 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         var id = _ids.AllocateOrGet(objectId);
         var payload = NetCodec.EncodeAttackStance(new AttackStanceNetMsg { EntityValue = id.Value, EntityGeneration = id.Generation });
         ushort opcode = inStance ? NetOpcode.AutoAttackStart : NetOpcode.AutoAttackStop;
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, opcode, payload);
+        _presence.TryBroadcast(watcherObjectIds, opcode, payload);
     }
 
     void IWorldEventPublisher.FanoutAutoSoulShot(IReadOnlyList<int> watcherObjectIds, int itemId, bool enabled)
     {
         var payload = NetCodec.EncodeAutoSoulShot(new AutoSoulShotNetMsg { ItemId = itemId, Enabled = enabled });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.AutoSoulShot, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AutoSoulShot, payload);
     }
 
     void IWorldEventPublisher.FanoutUserInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.UserInfoMsg info)
     {
         var payload = NetCodec.EncodeUserInfo(ToNetUserInfo(info));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySendCritical(watcher, NetOpcode.UserInfo, payload);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.UserInfo, payload);
     }
 }

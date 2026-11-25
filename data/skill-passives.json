@@ -132,6 +132,12 @@
    ]
   },
   {
+   "skillId": 143,
+   "name": "Cubic Mastery",
+   "levels": 2,
+   "effects": []
+  },
+  {
    "skillId": 144,
    "name": "Dual Weapon Mastery",
    "levels": 37,
@@ -413,6 +419,12 @@
    ]
   },
   {
+   "skillId": 165,
+   "name": "Trade",
+   "levels": 5,
+   "effects": []
+  },
+  {
    "skillId": 168,
    "name": "Boost Attack Speed",
    "levels": 3,
@@ -460,6 +472,12 @@
      -11.0
     ]
    }
+  },
+  {
+   "skillId": 172,
+   "name": "Create Item",
+   "levels": 10,
+   "effects": []
   },
   {
    "skillId": 173,
@@ -513,6 +531,12 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 194,
+   "name": "Lucky",
+   "levels": 1,
+   "effects": []
   },
   {
    "skillId": 195,
@@ -1631,6 +1655,12 @@
    ]
   },
   {
+   "skillId": 239,
+   "name": "Expertise D",
+   "levels": 7,
+   "effects": []
+  },
+  {
    "skillId": 244,
    "name": "Armor Mastery",
    "levels": 3,
@@ -1645,6 +1675,12 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 248,
+   "name": "Crystallize",
+   "levels": 5,
+   "effects": []
   },
   {
    "skillId": 249,
@@ -2366,6 +2402,12 @@
    ]
   },
   {
+   "skillId": 285,
+   "name": "Higher Mana Gain",
+   "levels": 27,
+   "effects": []
+  },
+  {
    "skillId": 290,
    "name": "Final Frenzy",
    "levels": 14,
@@ -2622,6 +2664,66 @@
    ]
   },
   {
+   "skillId": 332,
+   "name": "Extra Inventory",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 333,
+   "name": "Extra Sales Slots",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 370,
+   "name": "Clan Vitality",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.06
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 371,
+   "name": "Clan Spirituality",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.1,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 372,
+   "name": "Clan Essence",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.06,
+      1.1,
+      1.12
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 373,
    "name": "Clan Lifeblood",
    "levels": 3,
@@ -2633,6 +2735,22 @@
       1.03,
       1.05,
       1.06
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 374,
+   "name": "Clan Morale",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.03,
+      1.05,
+      1.07
      ]
     }
    ]
@@ -2750,6 +2868,88 @@
    ]
   },
   {
+   "skillId": 382,
+   "name": "Clan Withstand-Attack",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 383,
+   "name": "Clan Shield Boost",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.2,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 384,
+   "name": "Clan Cyclonic Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      5.0,
+      10.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 385,
+   "name": "Clan Magmatic Resistance",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.9,
+      0.85
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.8,
+      0.7
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 386,
    "name": "Clan Fortitude",
    "levels": 3,
@@ -2803,6 +3003,54 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 390,
+   "name": "Clan Luck",
+   "levels": 3,
+   "effects": []
+  },
+  {
+   "skillId": 391,
+   "name": "Clan Imperium",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 392,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 393,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 394,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 397,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 398,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 399,
+   "name": "",
+   "levels": 1,
+   "effects": []
   },
   {
    "skillId": 418,
@@ -3037,6 +3285,72 @@
    ]
   },
   {
+   "skillId": 1315,
+   "name": "Fishing Expertise",
+   "levels": 27,
+   "effects": []
+  },
+  {
+   "skillId": 1316,
+   "name": "Fishing Expertise -C-Grade",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1317,
+   "name": "Fishing Expertise -B-Grade",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1318,
+   "name": "Fishing Expertise: A-Grade",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1319,
+   "name": "Fishing Expertise: S-Grade",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1320,
+   "name": "Create Common Item",
+   "levels": 9,
+   "effects": []
+  },
+  {
+   "skillId": 1368,
+   "name": "Expand Dwarven Craft",
+   "levels": 8,
+   "effects": []
+  },
+  {
+   "skillId": 1369,
+   "name": "Expand Common Craft",
+   "levels": 8,
+   "effects": []
+  },
+  {
+   "skillId": 1370,
+   "name": "Expand Trade",
+   "levels": 8,
+   "effects": []
+  },
+  {
+   "skillId": 1371,
+   "name": "Expand Storage",
+   "levels": 8,
+   "effects": []
+  },
+  {
+   "skillId": 1372,
+   "name": "Expand Inventory",
+   "levels": 8,
+   "effects": []
+  },
+  {
    "skillId": 1373,
    "name": "Strider Mastery",
    "levels": 1,
@@ -3056,6 +3370,60 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 1377,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1378,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1379,
+   "name": "",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 1405,
+   "name": "Divine Inspiration",
+   "levels": 4,
+   "effects": []
+  },
+  {
+   "skillId": 3001,
+   "name": "int_1",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 3002,
+   "name": "int_2",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 3003,
+   "name": "str_2",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 3004,
+   "name": "maxmp_5",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 3006,
+   "name": "Equip Set Items",
+   "levels": 1,
+   "effects": []
   },
   {
    "skillId": 3007,
@@ -3174,6 +3542,89 @@
    ]
   },
   {
+   "skillId": 3013,
+   "name": "Special Ability: Health",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25,
+      1.25,
+      1.25,
+      1.25,
+      1.25
+     ]
+    },
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      0.0,
+      4.0,
+      0.0,
+      4.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3014,
+   "name": "Special Ability: Mana Up",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3,
+      1.3,
+      1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3018,
+   "name": "Special Ability: Back Blow",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRatePos",
+     "op": "mul",
+     "values": [
+      1.71,
+      1.67,
+      1.63,
+      1.6,
+      1.56,
+      1.53
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3019,
+   "name": "Special Ability: Back Blow",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "mul",
+     "values": [
+      1.5,
+      1.47,
+      1.45,
+      1.42,
+      1.4,
+      1.37
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3023,
    "name": "Special Ability: Critical Damage",
    "levels": 6,
@@ -3208,6 +3659,166 @@
       474.82,
       539.9
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 3027,
+   "name": "Special Ability: Rsk. Focus",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      138.7,
+      130.9,
+      123.1,
+      115.4,
+      107.7,
+      99.9
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3028,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3029,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      4.44,
+      4.24,
+      4.04,
+      3.84,
+      3.63,
+      3.41
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3030,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3031,
+   "name": "Special Ability: Rsk. Evasion",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      7.63,
+      7.29,
+      6.95,
+      6.6,
+      6.24,
+      5.87
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3032,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3033,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3034,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 6,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.13,
+      1.12,
+      1.12,
+      1.11,
+      1.1,
+      1.09
+     ],
+     "hpBelow": 60
     }
    ]
   },
@@ -3453,6 +4064,31 @@
    ]
   },
   {
+   "skillId": 3048,
+   "name": "Special Ability: Conversion",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.6,
+      1.6,
+      1.6
+     ]
+    },
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      0.6,
+      0.6,
+      0.6
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3050,
    "name": "Special Ability: Focus",
    "levels": 2,
@@ -3477,6 +4113,23 @@
      "values": [
       67.3
      ]
+    }
+   ]
+  },
+  {
+   "skillId": 3056,
+   "name": "Special Ability: Rsk. Haste",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "pAtkSpd",
+     "op": "mul",
+     "values": [
+      1.11,
+      1.11,
+      1.11
+     ],
+     "hpBelow": 60
     }
    ]
   },
@@ -3508,6 +4161,21 @@
      "values": [
       38.09,
       39.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3063,
+   "name": "Special Ability: Back Blow",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "critRatePos",
+     "op": "mul",
+     "values": [
+      1.37,
+      1.37
      ]
     }
    ]
@@ -3589,6 +4257,37 @@
    ]
   },
   {
+   "skillId": 3069,
+   "name": "Special Ability: Risky Evasion",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rEvas",
+     "op": "add",
+     "values": [
+      6.8
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
+   "skillId": 3071,
+   "name": "Special Ability: Rsk. Focus",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "critRate",
+     "op": "add",
+     "values": [
+      130.0,
+      130.0
+     ],
+     "hpBelow": 60
+    }
+   ]
+  },
+  {
    "skillId": 3072,
    "name": "Special Ability: Empower",
    "levels": 2,
@@ -3657,6 +4356,221 @@
    ]
   },
   {
+   "skillId": 3207,
+   "name": "Item Skill: Heal",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3208,
+   "name": "Item Skill: Blessed Body",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3209,
+   "name": "Item Skill: Prayer",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3210,
+   "name": "Item Skill: Recharge",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3211,
+   "name": "Item Skill: Blessed Soul",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3212,
+   "name": "Item Skill: Mana Gain",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3213,
+   "name": "Item Skill: Ritual",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3214,
+   "name": "Item Skill: Cheer",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3215,
+   "name": "Item Skill: Might",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3216,
+   "name": "Item Skill: Empower",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3217,
+   "name": "Item Skill: Duel Might",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3218,
+   "name": "Item Skill: Shield",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3219,
+   "name": "Item Skill: Magic Barrier",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3220,
+   "name": "Item Skill: Duel Weakness",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3221,
+   "name": "Item Skill: Agility",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3222,
+   "name": "Item Skill: Guidance",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3223,
+   "name": "Item Skill: Focus",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3224,
+   "name": "Item Skill: Wild Magic",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3225,
+   "name": "Item Skill: Charm",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3226,
+   "name": "Item Skill: Slow",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3227,
+   "name": "Item Skill: Winter",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3228,
+   "name": "Item Skill: Stun",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3229,
+   "name": "Item Skill: Hold",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3230,
+   "name": "Item Skill: Sleep",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3231,
+   "name": "Item Skill: Paralyze",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3232,
+   "name": "Item Skill: Medusa",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3233,
+   "name": "Item Skill: Fear",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3234,
+   "name": "Item Skill: Poison",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3235,
+   "name": "Item Skill: Bleed",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3236,
+   "name": "Item Skill: Silence",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3237,
+   "name": "Item Skill: Doom",
+   "levels": 10,
+   "effects": []
+  },
+  {
+   "skillId": 3238,
+   "name": "Item Skill: Prayer",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      1.1,
+      1.11,
+      1.12,
+      1.13,
+      1.14,
+      1.15,
+      1.16,
+      1.17,
+      1.18,
+      1.19
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3239,
+   "name": "Item Skill: Mana Gain",
+   "levels": 10,
+   "effects": []
+  },
+  {
    "skillId": 3240,
    "name": "Item Skill: Might",
    "levels": 10,
@@ -3703,6 +4617,12 @@
    ]
   },
   {
+   "skillId": 3243,
+   "name": "Item Skill: Duel Might",
+   "levels": 10,
+   "effects": []
+  },
+  {
    "skillId": 3244,
    "name": "Item Skill: Shield",
    "levels": 10,
@@ -3744,6 +4664,29 @@
       1.13,
       1.14,
       1.15
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3246,
+   "name": "Item Skill: Heal Empower",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "add",
+     "values": [
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0,
+      17.0,
+      18.0,
+      19.0
      ]
     }
    ]
@@ -3855,6 +4798,173 @@
    ]
   },
   {
+   "skillId": 3252,
+   "name": "Item Skill: Kiss of Eva",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "breath",
+     "op": "mul",
+     "values": [
+      1.05,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8,
+      2.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3253,
+   "name": "Item Skill: Acrobatics",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "fall",
+     "op": "sub",
+     "values": [
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0,
+      60.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3254,
+   "name": "Item Skill: Iron Body",
+   "levels": 10,
+   "effects": [
+    {
+     "stat": "damageZoneVuln",
+     "op": "mul",
+     "values": [
+      0.95,
+      0.9,
+      0.85,
+      0.8,
+      0.75,
+      0.7,
+      0.65,
+      0.6,
+      0.55,
+      0.5
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3255,
+   "name": "Item Skill: Skill Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3256,
+   "name": "Item Skill: Spell Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3257,
+   "name": "Item Skill: Music Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "danceMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3258,
+   "name": "Item Skill: Clarity",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "magicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    },
+    {
+     "stat": "physicalMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.85,
+      0.8
+     ]
+    },
+    {
+     "stat": "danceMpConsumeRate",
+     "op": "mul",
+     "values": [
+      0.9,
+      0.9,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3259,
+   "name": "Item Skill: Reflect Damage",
+   "levels": 3,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "mul",
+     "values": [
+      0.96,
+      0.93,
+      0.9
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3500,
    "name": "Wooden Set",
    "levels": 1,
@@ -3894,6 +5004,20 @@
    }
   },
   {
+   "skillId": 3503,
+   "name": "Reinforced Leather Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      80.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3504,
    "name": "Knowledge Set",
    "levels": 1,
@@ -3910,6 +5034,20 @@
      "op": "mul",
      "values": [
       0.95
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3505,
+   "name": "Manticore Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "add",
+     "values": [
+      91.81
      ]
     }
    ]
@@ -3992,6 +5130,12 @@
    ]
   },
   {
+   "skillId": 3511,
+   "name": "Plated Leather Set",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 3512,
    "name": "Composite Heavy Armor Set",
    "levels": 1,
@@ -4001,6 +5145,20 @@
      "op": "add",
      "values": [
       5795.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3513,
+   "name": "Demon's Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "sub",
+     "values": [
+      269.65
      ]
     }
    ]
@@ -4034,6 +5192,20 @@
    ]
   },
   {
+   "skillId": 3516,
+   "name": "Full Plate Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      269.65
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3517,
    "name": "Divine Set",
    "levels": 1,
@@ -4057,6 +5229,20 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3519,
+   "name": "Avadon Breastplate Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      294.49
      ]
     }
    ]
@@ -4155,6 +5341,27 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3525,
+   "name": "Doom Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      320.0
+     ]
+    },
+    {
+     "stat": "breath",
+     "op": "add",
+     "values": [
+      200.0
      ]
     }
    ]
@@ -4565,6 +5772,48 @@
    ]
   },
   {
+   "skillId": 3543,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      126.13
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3544,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3545,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "add",
+     "values": [
+      198.21
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3546,
    "name": "Equipped with Shield",
    "levels": 1,
@@ -4574,6 +5823,91 @@
      "op": "mul",
      "values": [
       1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3547,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.0526
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3548,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.24
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3549,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.24
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3550,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.18
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3551,
+   "name": "Equipped with Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      5.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3552,
+   "name": "Special Ability: PvP Damage",
+   "levels": 2,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      0.0,
+      4.0
      ]
     }
    ]
@@ -4968,6 +6302,20 @@
    ]
   },
   {
+   "skillId": 3568,
+   "name": "Special Ability: HP Drain",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      3.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3569,
    "name": "Special Ability: HP Regeneration",
    "levels": 4,
@@ -4980,6 +6328,34 @@
       4.92,
       5.15,
       5.18
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3570,
+   "name": "Special Ability: Robust Health",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.15
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.2
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.3
      ]
     }
    ]
@@ -5047,6 +6423,90 @@
       1.95,
       2.04,
       2.05
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3578,
+   "name": "Special Ability: Infinity Blade",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    },
+    {
+     "stat": "sDef",
+     "op": "mul",
+     "values": [
+      1.33
+     ]
+    },
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      9.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3580,
+   "name": "Special Ability: Infinity Axe",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxHp",
+     "op": "mul",
+     "values": [
+      1.25
+     ]
+    },
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    },
+    {
+     "stat": "rShld",
+     "op": "mul",
+     "values": [
+      1.39
+     ]
+    },
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      9.0
      ]
     }
    ]
@@ -5157,6 +6617,27 @@
    ]
   },
   {
+   "skillId": 3593,
+   "name": "Special Ability: Infinity Bow",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxMp",
+     "op": "mul",
+     "values": [
+      1.3
+     ]
+    },
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.5
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 3595,
    "name": "Special Ability: Infinity Scepter",
    "levels": 1,
@@ -5194,6 +6675,20 @@
      "op": "add",
      "values": [
       0.51
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3599,
+   "name": "Polearm Multi-attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "atkCountMax",
+     "op": "add",
+     "values": [
+      4.0
      ]
     }
    ]
@@ -5549,6 +7044,69 @@
      "op": "mul",
      "values": [
       1.05
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3608,
+   "name": "Apella Heavy Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      232.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3609,
+   "name": "Apella Light Armor Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      195.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 3610,
+   "name": "Apella Robe Set",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "add",
+     "values": [
+      177.0
+     ]
+    },
+    {
+     "stat": "regCp",
+     "op": "mul",
+     "values": [
+      1.4
      ]
     }
    ]
@@ -6130,6 +7688,82 @@
    }
   },
   {
+   "skillId": 4007,
+   "name": "Immortal Life",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4008,
+   "name": "Insect Skin",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "sub",
+     "values": [
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4009,
+   "name": "Resist Fire",
+   "levels": 5,
+   "effects": []
+  },
+  {
+   "skillId": 4010,
+   "name": "Resist Water",
+   "levels": 5,
+   "effects": []
+  },
+  {
+   "skillId": 4011,
+   "name": "Resist Wind",
+   "levels": 5,
+   "effects": []
+  },
+  {
+   "skillId": 4012,
+   "name": "Resist Earth",
+   "levels": 5,
+   "effects": []
+  },
+  {
+   "skillId": 4013,
+   "name": "Resistance to Fire, Vulnerable to Water",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4014,
+   "name": "Resistance to Water, Vulnerable to Fire",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4015,
+   "name": "Resistance to Wind, Vulnerable to Earth",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4016,
+   "name": "Resistance to Earth, Vulnerable to Wind",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4021,
    "name": "Queen Ant",
    "levels": 1,
@@ -6139,6 +7773,18 @@
      80.0
     ]
    }
+  },
+  {
+   "skillId": 4022,
+   "name": "Body of Nurse Ant",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4023,
+   "name": "Body of Royal Guard Ant",
+   "levels": 1,
+   "effects": []
   },
   {
    "skillId": 4045,
@@ -6168,6 +7814,12 @@
      100.0
     ]
    }
+  },
+  {
+   "skillId": 4056,
+   "name": "Immortal Attack",
+   "levels": 1,
+   "effects": []
   },
   {
    "skillId": 4057,
@@ -6317,6 +7969,20 @@
    ]
   },
   {
+   "skillId": 4095,
+   "name": "Damage Shield",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "reflectDam",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4116,
    "name": "Resist M. Atk.",
    "levels": 10,
@@ -6386,6 +8052,34 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4226,
+   "name": "Ban Heal",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "healEffect",
+     "op": "mul",
+     "values": [
+      0.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4233,
+   "name": "Vampiric Attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "absorbDam",
+     "op": "add",
+     "values": [
+      15.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4246,
@@ -6547,6 +8241,18 @@
    ]
   },
   {
+   "skillId": 4268,
+   "name": "Danger Area",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4269,
+   "name": "Block All Chat",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4270,
    "name": "Weight Penalty",
    "levels": 4,
@@ -6582,6 +8288,12 @@
      ]
     }
    ]
+  },
+  {
+   "skillId": 4271,
+   "name": "Increase Force",
+   "levels": 8,
+   "effects": []
   },
   {
    "skillId": 4272,
@@ -6632,6 +8344,35 @@
    }
   },
   {
+   "skillId": 4275,
+   "name": "Sacred Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4276,
    "name": "Bow Weapon Weak Point",
    "levels": 5,
@@ -6660,6 +8401,128 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4278,
+   "name": "Dark Attack",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4279,
+   "name": "Fire Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4280,
+   "name": "Water Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4281,
+   "name": "Wind Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4282,
+   "name": "Earth Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "sub",
+     "values": [
+      6.0,
+      12.0,
+      18.0,
+      24.0,
+      30.0
+     ]
+    },
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      3.0,
+      6.0,
+      9.0,
+      12.0,
+      15.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4283,
@@ -6743,6 +8606,150 @@
    }
   },
   {
+   "skillId": 4290,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4291,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4292,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4293,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4294,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4295,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4296,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4297,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4298,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4299,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4300,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4301,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4302,
+   "name": "Race",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4303,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4304,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4305,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4306,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4307,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4308,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4309,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4310,
+   "name": "Strong Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4311,
+   "name": "Feeble Type",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4312,
+   "name": "Heavy Armor",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4313,
+   "name": "Light Armor",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4332,
    "name": "Mental Aegis",
    "levels": 1,
@@ -6758,6 +8765,74 @@
      100.0
     ]
    }
+  },
+  {
+   "skillId": 4333,
+   "name": "Resist Dark Attack",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4335,
+   "name": "Sacred Attack",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4336,
+   "name": "Dark Attack Weak Point",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "sub",
+     "values": [
+      11.0,
+      25.0,
+      43.0,
+      67.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4337,
+   "name": "Resist Sacred Attack",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4376,
@@ -6789,6 +8864,12 @@
    }
   },
   {
+   "skillId": 4381,
+   "name": "Magic Skill Block",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4388,
    "name": "Resist Paralysis Attacks",
    "levels": 5,
@@ -6817,6 +8898,18 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4390,
+   "name": "NPC Abnormal Immunity",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4407,
+   "name": "Ordinary Monster",
+   "levels": 2,
+   "effects": []
   },
   {
    "skillId": 4408,
@@ -7781,6 +9874,136 @@
    }
   },
   {
+   "skillId": 4418,
+   "name": "Fire Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "firePower",
+     "op": "add",
+     "values": [
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4419,
+   "name": "Water Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4420,
+   "name": "Wind Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4421,
+   "name": "Earth Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4422,
+   "name": "Dark Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4423,
+   "name": "Sacred Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyPower",
+     "op": "add",
+     "values": [
+      10.0,
+      10.0,
+      10.0,
+      10.0,
+      10.0
+     ]
+    },
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 4424,
    "name": "Resist Hand-to-hand Weapons",
    "levels": 5,
@@ -7839,6 +10062,120 @@
      50.0
     ]
    }
+  },
+  {
+   "skillId": 4428,
+   "name": "Resist Two-handed Weapons",
+   "levels": 5,
+   "effects": []
+  },
+  {
+   "skillId": 4429,
+   "name": "Greater Resist Fire Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "fireRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4430,
+   "name": "Greater Resist Water Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "waterRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4431,
+   "name": "Greater Resist Wind Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "windRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4432,
+   "name": "Greater Resist Earth Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "earthRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4433,
+   "name": "Greater Resist Sacred Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "holyRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4434,
+   "name": "Greater Resist Dark Attacks",
+   "levels": 5,
+   "effects": [
+    {
+     "stat": "darkRes",
+     "op": "add",
+     "values": [
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0
+     ]
+    }
+   ]
   },
   {
    "skillId": 4435,
@@ -8058,6 +10395,12 @@
    }
   },
   {
+   "skillId": 4449,
+   "name": "Greater Resist Two-handed Weapons",
+   "levels": 5,
+   "effects": []
+  },
+  {
    "skillId": 4450,
    "name": "Shock Attack Weak Point",
    "levels": 5,
@@ -8267,6 +10610,108 @@
    }
   },
   {
+   "skillId": 4494,
+   "name": "Raid Boss",
+   "levels": 2,
+   "effects": []
+  },
+  {
+   "skillId": 4497,
+   "name": "Treasure Chest - Level 21",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4498,
+   "name": "Treasure Chest - Level 22",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4499,
+   "name": "Treasure Chest - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4500,
+   "name": "Treasure Chest - Level 27",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4501,
+   "name": "Treasure Chest - Level 29",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4502,
+   "name": "Treasure Chest - Level 31",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4503,
+   "name": "Treasure Chest - Level 32",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4504,
+   "name": "Treasure Chest - Level 33",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4505,
+   "name": "Treasure Chest - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4506,
+   "name": "Treasure Chest - Level 39",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4507,
+   "name": "Treasure Chest - Level 42",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4508,
+   "name": "Treasure Chest - Level 43",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4509,
+   "name": "Treasure Chest - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4510,
+   "name": "Treasure Chest - Level 47",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4511,
+   "name": "Treasure Chest - Level 49",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4512,
+   "name": "Treasure Chest - Level 52",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4521,
    "name": "Quest - BOSS Resist non Bow Weapon",
    "levels": 1,
@@ -8377,6 +10822,24 @@
    }
   },
   {
+   "skillId": 4714,
+   "name": "Twilight Dragon",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4715,
+   "name": "Wind Dragon",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4716,
+   "name": "Star Dragon",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 4789,
    "name": "NPC High Level",
    "levels": 10,
@@ -8411,6 +10874,1312 @@
       1.24,
       1.27,
       1.3
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 4790,
+   "name": "Raid Boss - Level 23",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4791,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4792,
+   "name": "Raid Boss - Level 42",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4793,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4794,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4795,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4796,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4797,
+   "name": "Raid Boss - Level 34",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4798,
+   "name": "Raid Boss - Level 34",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4799,
+   "name": "Raid Boss - Level 49",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4800,
+   "name": "Raid Boss - Level 53",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4801,
+   "name": "Raid Boss - Level 58",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4802,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4803,
+   "name": "Raid Boss - Level 28",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4804,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4805,
+   "name": "Raid Boss - Level 47",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4806,
+   "name": "Raid Boss - Level 49",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4807,
+   "name": "Raid Boss - Level 51",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4808,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4809,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4810,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4811,
+   "name": "Raid Boss - Level 24",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4812,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4813,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4814,
+   "name": "Raid Boss - Level 52",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4815,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4816,
+   "name": "Raid Boss - Level 69",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4817,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4818,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4819,
+   "name": "Raid Boss - Level 39",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4820,
+   "name": "Raid Boss - Level 44",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4821,
+   "name": "Raid Boss - Level 43",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4822,
+   "name": "Raid Boss - Level 59",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4823,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4824,
+   "name": "Raid Boss - Level 29",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4825,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4826,
+   "name": "Raid Boss - Level 44",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4827,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4828,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4829,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4830,
+   "name": "Raid Boss - Level 74",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4831,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4832,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4833,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4834,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4835,
+   "name": "Raid Boss - Level 56",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4836,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4837,
+   "name": "Raid Boss - Level 79",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4838,
+   "name": "Raid Boss - Level 24",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4839,
+   "name": "Raid Boss - Level 33",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4840,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4841,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4842,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4843,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4844,
+   "name": "Raid Boss - Level 78",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4845,
+   "name": "Raid Boss - Level 21",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4846,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4847,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4848,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4849,
+   "name": "Raid Boss - Level 48",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4850,
+   "name": "Raid Boss - Level 54",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4851,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4852,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4853,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4854,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4855,
+   "name": "Raid Boss - Level 38",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4856,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4857,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4858,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4859,
+   "name": "Raid Boss - Level 59",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4860,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4861,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4862,
+   "name": "Raid Boss - Level 34",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4863,
+   "name": "Raid Boss - Level 43",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4864,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4865,
+   "name": "Raid Boss - Level 36",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4866,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4867,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4868,
+   "name": "Raid Boss - Level 73",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4869,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4870,
+   "name": "Raid Boss - Level 62",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4871,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4872,
+   "name": "Raid Boss - Level 57",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4873,
+   "name": "Raid Boss - Level 69",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4874,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4875,
+   "name": "Raid Boss - Level 72",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4876,
+   "name": "Raid Boss - Level 59",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4877,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4878,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4879,
+   "name": "Raid Boss - Level 78",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4880,
+   "name": "Raid Boss - Level 72",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4881,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4882,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4883,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4884,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4885,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4886,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4887,
+   "name": "Raid Boss - Level 67",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4888,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4889,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4890,
+   "name": "Raid Boss - Level 28",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4891,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4892,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4893,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4894,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4895,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4896,
+   "name": "Raid Boss - Level 75",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4897,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4898,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4899,
+   "name": "Raid Boss - Level 20",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4900,
+   "name": "Raid Boss - Level 78",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4901,
+   "name": "Raid Boss - Level 78",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4902,
+   "name": "Raid Boss - Level 74",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4903,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4904,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4905,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4906,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4907,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4908,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4909,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4910,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4911,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4912,
+   "name": "Raid Boss - Level 66",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4913,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4914,
+   "name": "Raid Boss - Level 71",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4915,
+   "name": "Raid Boss - Level 28",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4916,
+   "name": "Raid Boss - Level 38",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4917,
+   "name": "Raid Boss - Level 48",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4918,
+   "name": "Raid Boss - Level 58",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4919,
+   "name": "Raid Boss - Level 68",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4920,
+   "name": "Raid Boss - Level 78",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4921,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4922,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4923,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4924,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4925,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4926,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4927,
+   "name": "Raid Boss - Level 21",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4928,
+   "name": "Raid Boss - Level 26",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4929,
+   "name": "Raid Boss - Level 23",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4930,
+   "name": "Raid Boss - Level 26",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4931,
+   "name": "Raid Boss - Level 23",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4932,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4933,
+   "name": "Raid Boss - Level 20",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4934,
+   "name": "Raid Boss - Level 21",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4935,
+   "name": "Raid Boss - Level 20",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4936,
+   "name": "Raid Boss - Level 21",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4937,
+   "name": "Raid Boss - Level 34",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4938,
+   "name": "Raid Boss - Level 36",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4939,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4940,
+   "name": "Raid Boss - Level 33",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4941,
+   "name": "Raid Boss - Level 32",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4942,
+   "name": "Raid Boss - Level 38",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4943,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4944,
+   "name": "Raid Boss - Level 35",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4945,
+   "name": "Raid Boss - Level 32",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4946,
+   "name": "Raid Boss - Level 33",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4947,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4948,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4949,
+   "name": "Raid Boss - Level 47",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4950,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4951,
+   "name": "Raid Boss - Level 44",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4952,
+   "name": "Raid Boss - Level 48",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4953,
+   "name": "Raid Boss - Level 61",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4954,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4955,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4956,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4957,
+   "name": "Raid Boss - Level 44",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4958,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4959,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4960,
+   "name": "Raid Boss - Level 71",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4961,
+   "name": "Raid Boss - Level 79",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4962,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4963,
+   "name": "Raid Boss - Level 49",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4964,
+   "name": "Raid Boss - Level 51",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4965,
+   "name": "Raid Boss - Level 56",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4966,
+   "name": "Raid Boss - Level 64",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4967,
+   "name": "Raid Boss - Level 66",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4968,
+   "name": "Raid Boss - Level 52",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4969,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4970,
+   "name": "Raid Boss - Level 65",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4971,
+   "name": "Raid Boss - Level 53",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4972,
+   "name": "Raid Boss - Level 50",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4973,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4974,
+   "name": "Raid Boss - Level 40",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4975,
+   "name": "Raid Boss - Level 55",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4976,
+   "name": "Raid Boss - Level 52",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4977,
+   "name": "Raid Boss - Level 45",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4978,
+   "name": "Raid Boss - Level 81",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4979,
+   "name": "Raid Boss - Level 82",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4980,
+   "name": "Raid Boss - Level 83",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4981,
+   "name": "Raid Boss - Level 84",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4982,
+   "name": "Raid Boss - Level 85",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4983,
+   "name": "Raid Boss - Level 25",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4984,
+   "name": "Raid Boss - Level 44",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4985,
+   "name": "Raid Boss - Level 70",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4986,
+   "name": "Raid Boss - Level 72",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4987,
+   "name": "Raid Boss - Level 74",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 4988,
+   "name": "Raid Boss - Level 76",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5025,
+   "name": "Raid Boss - Level 30",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5026,
+   "name": "Raid Boss - Level 39",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5027,
+   "name": "Raid Boss - Level 37",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5028,
+   "name": "Raid Boss - Level 53",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5029,
+   "name": "Raid Boss - Level 52",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5030,
+   "name": "Raid Boss - Level 59",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5031,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5032,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5033,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5034,
+   "name": "Raid Boss - Level 73",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5035,
+   "name": "Raid Boss - Level 76",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5036,
+   "name": "Raid Boss - Level 60",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5038,
+   "name": "Summon PVP Penalty",
+   "levels": 16,
+   "effects": []
+  },
+  {
+   "skillId": 5041,
+   "name": "Charm of Courage",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5074,
+   "name": "The Victor of War",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      1.1
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 5075,
+   "name": "The Vanquished of War",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "maxCp",
+     "op": "mul",
+     "values": [
+      0.9
      ]
     }
    ]
@@ -8626,6 +12395,90 @@
    ]
   },
   {
+   "skillId": 5179,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5180,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 5181,
+   "name": "Raid Boss - Level 80",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7008,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7009,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7010,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7011,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7012,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7013,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7023,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7024,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7025,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7026,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7027,
+   "name": "not_used",
+   "levels": 1,
+   "effects": []
+  },
+  {
    "skillId": 7028,
    "name": "For Stationary NPCs",
    "levels": 1,
@@ -8635,6 +12488,54 @@
      100.0
     ]
    }
+  },
+  {
+   "skillId": 7033,
+   "name": "Test Flame Strike",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7034,
+   "name": "Test Aqua Splash",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7035,
+   "name": "Display - Swoop Cannon",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7036,
+   "name": "Display - Valakas",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7037,
+   "name": "Display - Tyrannosaurus Capture",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7038,
+   "name": "Channeling DD Test: Short",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7039,
+   "name": "Channeling DD Test: Middle",
+   "levels": 1,
+   "effects": []
+  },
+  {
+   "skillId": 7040,
+   "name": "Channeling DD Test: Long",
+   "levels": 1,
+   "effects": []
   }
  ]
 }

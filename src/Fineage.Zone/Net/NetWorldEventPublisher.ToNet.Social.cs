@@ -30,9 +30,38 @@ sealed partial class NetWorldEventPublisher
                 Option2 = row.Option2
             };
         }
-        var payload = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySendCritical(watcher, NetOpcode.InventoryUpdate, payload);
+        var encoded = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = rows });
+        var payload = InventoryVersionTail.Append(encoded, update.Version);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.InventoryUpdate, payload);
+    }
+
+    void IWorldEventPublisher.FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list)
+    {
+        var src = list.Items ?? [];
+        var rows = new ItemListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            var row = src[i];
+            rows[i] = new ItemListEntryNet
+            {
+                ObjectId = row.ObjectId,
+                ItemId = row.ItemId,
+                Count = row.Count,
+                EnchantLevel = row.EnchantLevel,
+                EquippedSlot = row.EquippedSlot,
+                BodySlot = row.BodySlot ?? "",
+                Kind = row.Kind ?? "",
+                Icon = row.Icon ?? "",
+                WeaponType = row.WeaponType ?? "",
+                ArmorType = row.ArmorType ?? "",
+                Option1 = row.Option1,
+                Option2 = row.Option2
+            };
+        }
+
+        var encoded = NetCodec.EncodeItemList(new ItemListNetMsg { Items = rows });
+        var payload = InventoryVersionTail.Append(encoded, list.Version);
+        _presence.TryBroadcastCritical(watcherObjectIds, NetOpcode.ItemList, payload);
     }
 
     void IWorldEventPublisher.FanoutEtcStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EtcStatusUpdateMsg status)
@@ -66,8 +95,7 @@ sealed partial class NetWorldEventPublisher
             Text = say.Text ?? "",
             ChatType = say.ChatType
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.CreatureSay, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.CreatureSay, payload);
     }
 
     void IWorldEventPublisher.FanoutSystemMessage(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SystemMessageMsg message)
@@ -78,8 +106,7 @@ sealed partial class NetWorldEventPublisher
             Params = message.Params ?? [],
             Text = message.Text ?? ""
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SystemMessage, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.SystemMessage, payload);
     }
 
     void IWorldEventPublisher.FanoutMagicSkillUse(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MagicSkillUseMsg cast)
@@ -93,15 +120,13 @@ sealed partial class NetWorldEventPublisher
             HitTimeMs = cast.HitTimeMs,
             ReuseDelayMs = cast.ReuseDelayMs
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.MagicSkillUse, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MagicSkillUse, payload);
     }
 
     void IWorldEventPublisher.FanoutRevive(IReadOnlyList<int> watcherObjectIds, int objectId)
     {
         var payload = NetCodec.EncodeRevive(new ReviveNetMsg { ObjectId = objectId });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.Revive, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.Revive, payload);
     }
 
     void IWorldEventPublisher.FanoutTeleportToLocation(IReadOnlyList<int> watcherObjectIds, int objectId, int x, int y, int z, int heading)
@@ -114,8 +139,7 @@ sealed partial class NetWorldEventPublisher
             Z = z,
             Heading = heading
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.TeleportToLocation, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TeleportToLocation, payload);
     }
 
     void IWorldEventPublisher.FanoutPlayerStats(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PlayerStatsMsg stats)
@@ -134,8 +158,7 @@ sealed partial class NetWorldEventPublisher
             Cp = stats.Cp,
             MaxCp = stats.MaxCp
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PlayerStats, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PlayerStats, payload);
     }
 
     void IWorldEventPublisher.FanoutAbnormalStatusUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AbnormalStatusUpdateMsg update)
@@ -159,8 +182,7 @@ sealed partial class NetWorldEventPublisher
             ObjectId = update.ObjectId,
             Effects = netEffects
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.AbnormalStatusUpdate, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AbnormalStatusUpdate, payload);
     }
 
     void IWorldEventPublisher.FanoutNpcHtml(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.NpcHtmlMsg html)
@@ -172,7 +194,6 @@ sealed partial class NetWorldEventPublisher
             Html = html.Html ?? "",
             ItemId = html.ItemId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.NpcHtml, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.NpcHtml, payload);
     }
 }

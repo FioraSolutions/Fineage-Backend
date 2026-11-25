@@ -29,6 +29,8 @@ public sealed partial class GameData
         QuestCatalog quests,
         SkillCatalog skills,
         SkillTreeCatalog skillTrees,
+        TransferSkillTreeCatalog transferSkillTrees,
+        SkillEnchantCatalog skillEnchants,
         RecipeCatalog recipes)
     {
         Items = items;
@@ -37,6 +39,8 @@ public sealed partial class GameData
         Quests = quests;
         Skills = skills;
         SkillTrees = skillTrees;
+        TransferSkillTrees = transferSkillTrees;
+        SkillEnchants = skillEnchants;
         Recipes = recipes;
     }
 
@@ -53,6 +57,10 @@ public sealed partial class GameData
 
     public SkillTreeCatalog SkillTrees { get; }
 
+    public TransferSkillTreeCatalog TransferSkillTrees { get; }
+
+    public SkillEnchantCatalog SkillEnchants { get; }
+
     public RecipeCatalog Recipes { get; }
 
     public static GameData Load(string dataDirectory)
@@ -67,8 +75,33 @@ public sealed partial class GameData
         var quests = QuestCatalog.LoadPack(Path.Combine(dataDirectory, QuestCatalog.DirectoryName), items);
         var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
         var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));
+        var transferPath = Path.Combine(dataDirectory, TransferSkillTreeCatalog.FileName);
+        var transferSkillTrees = File.Exists(transferPath)
+            ? TransferSkillTreeCatalog.Load(transferPath)
+            : TransferSkillTreeCatalog.Empty;
+        var skillEnchants = LoadSkillEnchants(Path.Combine(dataDirectory, SkillEnchantCatalog.FileName));
         var recipes = RecipeCatalog.Load(Path.Combine(dataDirectory, RecipeCatalog.FileName));
-        return new GameData(items, kits, classes, quests, skills, skillTrees, recipes);
+        var whitelistPath = Path.Combine(dataDirectory, InterludeSkillWhitelist.FileName);
+        if (File.Exists(whitelistPath))
+        {
+            var whitelist = InterludeSkillWhitelist.Load(whitelistPath);
+            var violations = InterludeSkillReferenceValidator.ViolationsUnderDataDirectory(dataDirectory, whitelist);
+            if (violations.Count > 0)
+            {
+                throw new InvalidDataException(
+                    "Game data references skills that are not in CT_0 Interlude: "
+                    + string.Join("; ", violations));
+            }
+
+            foreach (var skill in skills.Skills)
+            {
+                if (!whitelist.Contains(skill.SkillId))
+                    throw new InvalidDataException(
+                        $"skills.json skillId={skill.SkillId} ({skill.Name}) is not in {InterludeSkillWhitelist.FileName}.");
+            }
+        }
+
+        return new GameData(items, kits, classes, quests, skills, skillTrees, transferSkillTrees, skillEnchants, recipes);
     }
 
     public static GameData LoadDefault()
@@ -117,6 +150,8 @@ public sealed partial class GameData
             quests ?? QuestCatalog.Empty,
             skills: SkillCatalog.Parse("{\"skills\":[]}", "memory"),
             skillTrees: SkillTreeCatalog.Parse("{\"trees\":[]}", "memory"),
+            transferSkillTrees: TransferSkillTreeCatalog.Empty,
+            skillEnchants: SkillEnchantCatalog.Empty,
             recipes: RecipeCatalog.Empty);
     }
 
@@ -130,4 +165,7 @@ public sealed partial class GameData
         inventory.AddStarterKit(StarterKits.ForClass(classId));
         return inventory;
     }
+
+    static SkillEnchantCatalog LoadSkillEnchants(string path) =>
+        File.Exists(path) ? SkillEnchantCatalog.Load(path) : SkillEnchantCatalog.Empty;
 }

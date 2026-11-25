@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.Economy;
+using Fineage.Game.Punishment;
 using Fineage.Protocol;
 
 namespace Fineage.Login;
@@ -18,6 +20,9 @@ public sealed partial class LoginService
     readonly IReadOnlySet<int> _allowedClasses;
     readonly IReadOnlySet<int> _allowedRaces;
     readonly AuthAttemptLimiter _authAttempts;
+    readonly AccountBanGate _accountBans;
+    readonly EconomyLedger? _ledger;
+    readonly LedgerTxSequence? _ledgerIds;
 
     public LoginService(
         IAccountStore store,
@@ -27,7 +32,10 @@ public sealed partial class LoginService
         int? deleteAfterDays = null,
         CharacterCreateOptions? create = null,
         Action<string>? warn = null,
-        AuthAttemptLimiter? authAttempts = null)
+        AuthAttemptLimiter? authAttempts = null,
+        AccountBanGate? accountBans = null,
+        EconomyLedger? ledger = null,
+        LedgerTxSequence? ledgerIds = null)
     {
         _store = store;
         _tokens = tokens;
@@ -42,6 +50,11 @@ public sealed partial class LoginService
         _allowedClasses = _create.AllowedClasses ?? _classes.BaseClassIdSet;
         _allowedRaces = _create.AllowedRaces ?? _classes.BaseRaceSet;
         _authAttempts = authAttempts ?? new AuthAttemptLimiter(clock: _clock);
+        _accountBans = accountBans ?? AccountBanGate.Disabled;
+        if (ledger != null ^ ledgerIds != null)
+            throw new ArgumentException("Login ledger requires both EconomyLedger and LedgerTxSequence.");
+        _ledger = ledger;
+        _ledgerIds = ledgerIds;
         _classes.EnsureCreatable(_allowedClasses);
         foreach (int race in _allowedRaces)
         {
@@ -142,6 +155,10 @@ public sealed partial class LoginService
         }
 
         _authAttempts.RegisterSuccess(cred.AccountName);
+        long nowUnixMs = _clock().ToUnixTimeMilliseconds();
+        if (_accountBans.IsAccountLoginBanned(cred.AccountName, nowUnixMs, out string banMessage))
+            return LoginResult<string>.Fail("account_banned", banMessage);
+
         return LoginResult<string>.Success(cred.AccountName);
     }
 

@@ -1,0 +1,852 @@
+{
+  "effectTypesInDatapack": 112,
+  "statusSummary": {
+    "full": 111,
+    "partial": 0,
+    "unsupported": 1
+  },
+  "missingOrUncataloged": [],
+  "rows": [
+    {
+      "effect": "Buff",
+      "instances": 794,
+      "skills": 794,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "PhysicalAttack",
+      "instances": 179,
+      "skills": 179,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "MagicalAttack",
+      "instances": 166,
+      "skills": 166,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Debuff",
+      "instances": 157,
+      "skills": 157,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DefenceTrait",
+      "instances": 156,
+      "skills": 156,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Stun",
+      "instances": 72,
+      "skills": 72,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DamOverTime",
+      "instances": 69,
+      "skills": 69,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "RestorationRandom",
+      "instances": 65,
+      "skills": 65,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Heal",
+      "instances": 45,
+      "skills": 45,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "HpDrain",
+      "instances": 40,
+      "skills": 40,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Restoration",
+      "instances": 37,
+      "skills": 37,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TriggerSkillByDamage",
+      "instances": 36,
+      "skills": 36,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DispelBySlot",
+      "instances": 32,
+      "skills": 32,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Root",
+      "instances": 28,
+      "skills": 28,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Summon",
+      "instances": 27,
+      "skills": 27,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "FatalBlow",
+      "instances": 23,
+      "skills": 23,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Mute",
+      "instances": 21,
+      "skills": 21,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Paralyze",
+      "instances": 20,
+      "skills": 20,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "HealPercent",
+      "instances": 19,
+      "skills": 19,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "HealOverTime",
+      "instances": 19,
+      "skills": 19,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DispelBySlotProbability",
+      "instances": 18,
+      "skills": 18,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Fear",
+      "instances": 16,
+      "skills": 16,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "AttackTrait",
+      "instances": 16,
+      "skills": 16,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Sleep",
+      "instances": 16,
+      "skills": 16,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "SummonNpc",
+      "instances": 15,
+      "skills": 15,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Escape",
+      "instances": 15,
+      "skills": 15,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TargetCancel",
+      "instances": 14,
+      "skills": 14,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ManaDamOverTime",
+      "instances": 14,
+      "skills": 14,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ChangeHairStyle",
+      "instances": 14,
+      "skills": 14,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "SummonCubic",
+      "instances": 13,
+      "skills": 13,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DispelByCategory",
+      "instances": 13,
+      "skills": 12,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "PhysicalMute",
+      "instances": 13,
+      "skills": 13,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ConsumeBody",
+      "instances": 12,
+      "skills": 12,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Petrification",
+      "instances": 12,
+      "skills": 12,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ManaHealOverTime",
+      "instances": 11,
+      "skills": 11,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "MagicalAttackMp",
+      "instances": 11,
+      "skills": 11,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "MpConsumePerLevel",
+      "instances": 10,
+      "skills": 10,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "EnergyAttack",
+      "instances": 9,
+      "skills": 9,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Lethal",
+      "instances": 9,
+      "skills": 9,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TargetMeProbability",
+      "instances": 9,
+      "skills": 9,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CpHeal",
+      "instances": 9,
+      "skills": 9,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Resurrection",
+      "instances": 9,
+      "skills": 9,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ChangeHairColor",
+      "instances": 8,
+      "skills": 8,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Grow",
+      "instances": 8,
+      "skills": 8,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "MaxHp",
+      "instances": 7,
+      "skills": 7,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ManaHealByLevel",
+      "instances": 7,
+      "skills": 7,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "FocusEnergy",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "AddHate",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "OpenDoor",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ImmobileBuff",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "BlockBuffSlot",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ChangeFace",
+      "instances": 6,
+      "skills": 6,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "OpenChest",
+      "instances": 5,
+      "skills": 5,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DamOverTimePercent",
+      "instances": 5,
+      "skills": 5,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "SilentMove",
+      "instances": 5,
+      "skills": 5,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "RunAway",
+      "instances": 5,
+      "skills": 5,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Invincible",
+      "instances": 5,
+      "skills": 5,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DeleteHateOfMe",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ManaHeal",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DeleteHate",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DeathLink",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ManaHealPercent",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CallSkill",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "DispelAll",
+      "instances": 4,
+      "skills": 4,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "RandomizeHate",
+      "instances": 3,
+      "skills": 3,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Spoil",
+      "instances": 3,
+      "skills": 3,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Confuse",
+      "instances": 3,
+      "skills": 3,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ElementSeed",
+      "instances": 3,
+      "skills": 3,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TargetMe",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "GetAgro",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Sweeper",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "HpByLevel",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Passive",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "HeadquarterCreate",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CpDamPercent",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Bluff",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ResurrectionSpecial",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Unsummon",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CallPc",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "GiveSp",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Teleport",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "StaticDamage",
+      "instances": 2,
+      "skills": 2,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Backstab",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "FakeDeath",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CubicMastery",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Lucky",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TriggerSkillByAttack",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Relax",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "TakeCastle",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ChameleonRest",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "PhysicalAttackHpLink",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "PolearmSingleTarget",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Distrust",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ImmobilePetBuff",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Fishing",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Pumping",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Reeling",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "OpenDwarfRecipeBook",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "OpenCommonRecipeBook",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "NoblesseBless",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "RebalanceHP",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Betray",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "SkillTurning",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "CallParty",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "SummonPet",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Sow",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Harvesting",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ChangeFishingMastery",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "Recovery",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "ClanGate",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    },
+    {
+      "effect": "#effectname1",
+      "instances": 1,
+      "skills": 1,
+      "status": "unsupported",
+      "note": "corrupt datapack row skill 5404"
+    },
+    {
+      "effect": "ProtectionBlessing",
+      "instances": 1,
+      "skills": 1,
+      "status": "full",
+      "note": ""
+    }
+  ],
+  "mobiusJavaHandlers": 146,
+  "handlersWithoutDatapackRow": [
+    "ApplySkillEffects",
+    "BlockAbnormalSlot",
+    "BlockChat",
+    "BlockParty",
+    "BlockResurrection",
+    "CpHealOverTime",
+    "CpHealPercent",
+    "CrystalGradeModify",
+    "DetectHiddenObjects",
+    "Detection",
+    "Disarm",
+    "EnableCloak",
+    "EnergyDamage",
+    "EnlargeAbnormalSlot",
+    "Flag",
+    "FocusMaxEnergy",
+    "GiveRecommendation",
+    "Hide",
+    "MagicalDamage",
+    "MagicalDamageByAbnormal",
+    "MagicalDamageMp",
+    "MaxCp",
+    "PhysicalDamage",
+    "PhysicalDamageHpLink",
+    "PhysicalDamageMute",
+    "ResistSkill",
+    "Ride",
+    "ServitorShare",
+    "SetSkill",
+    "StealAbnormal",
+    "SummonAgathion",
+    "SummonTrap",
+    "TeleportToTarget",
+    "TransferDamage",
+    "TransferHate",
+    "TrapDetect",
+    "TrapRemove",
+    "TriggerSkillByAvoid",
+    "TriggerSkillByDamageDealt",
+    "TriggerSkillByDamageReceived",
+    "TriggerSkillBySkill",
+    "UnsummonAgathion",
+    "VitalityPointUp"
+  ],
+  "datapackWithoutJavaHandler": [
+    "#effectname1",
+    "BlockBuffSlot",
+    "EnergyAttack",
+    "MagicalAttack",
+    "MagicalAttackMp",
+    "PhysicalAttack",
+    "PhysicalAttackHpLink",
+    "TriggerSkillByAttack",
+    "TriggerSkillByDamage"
+  ]
+}

@@ -31,7 +31,9 @@ Headless bots in `tools/Fineage.LoadTest` speak the **same Net `PacketEnvelope` 
      --region-workers 0
    ```
 
-3. Full matrix helper (local VM only — **never** point at public hosts):
+3. Stress ramp **100 → 1000** mixed bots (`./scripts/run-load-stress.sh`, override `LEVELS="100 300"`). Set `FINEAGE_ZONE_OUTBOUND_QUEUE=512` for soak (default in `run-local-net.sh` for local runs).
+
+4. Full matrix helper (local VM only — **never** point at public hosts):
 
    ```bash
    ./scripts/run-load-test.sh matrix
@@ -39,7 +41,7 @@ Headless bots in `tools/Fineage.LoadTest` speak the **same Net `PacketEnvelope` 
 
    Toggles `FINEAGE_ZONE_REGION_WORKERS` between `0` and `4` per run. Parallel region workers stay **off** in production until soak tests pass; the matrix reports behavior with workers enabled for comparison only.
 
-4. Stop servers:
+5. Stop servers:
 
    ```bash
    ./scripts/run-local-net.sh stop
@@ -56,6 +58,10 @@ Login honours `Auth.RegisterIfMissing` only when **both** are set:
 
 Unset either variable and auto-registration is denied. Bots default to `loadbot#####` / `loadtest-pass-v1` in scenario YAML.
 
+## Heavy-play scenarios (#951)
+
+Warlord pole + AoE trains, multi-party fan-out, and economy-combined loads are documented in [heavy-play-scenarios.md](heavy-play-scenarios.md). Use `FINEAGE_ZONE_LOADTEST_COMBAT=1` and `FINEAGE_ZONE_MAPS=loadtest_aoe_arena` with the `perf-aoe-*.yaml` files.
+
 ## Scenarios
 
 YAML files under `tools/Fineage.LoadTest/scenarios/` control:
@@ -71,7 +77,7 @@ YAML files under `tools/Fineage.LoadTest/scenarios/` control:
 - **Process:** RSS / VmHWM via `/proc` for the zone PID passed to `--zone-pid`.
 - **Logs:** `local-logs/login-net.log`, `local-logs/zone-net.log` scanned for exceptions, stage failures, ledger, desync, deadlock, timeout, `handler_error`.
 
-Each run writes `report.json` and `report.md` under `--report-dir`. The report **fails** when log signals or disconnect/stuck thresholds trip.
+Each run writes **`load-test-report.md`** (LLM-ready, capped at ~30 KiB) and **`load-test-report.json`** under `--report-dir` (aliases: `report.md` / `report.json`). The markdown includes run header (git, build, machine, GC env), peak-scrape latency tables, 10s time-series windows, optional `dotnet-counters` runtime stats, structured Error/Warning counts, bot/oracle stats, **#867 gate verdicts**, and an explicit list of **missing** Prometheus names expected after PR #862. CI (`scripts/ci-load-test-smoke.sh`) prints `load-test-report: …/load-test-report.md` after each run and uploads `local-logs/ci-load-smoke/` as the `load-test-smoke` artifact.
 
 ## L2J Mobius comparison
 

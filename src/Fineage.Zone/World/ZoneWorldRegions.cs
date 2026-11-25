@@ -34,7 +34,10 @@ public sealed partial class ZoneWorld
     internal void PlaceForTests(ZoneEntity entity)
     {
         using (_affinity.Step())
+        {
             _byId.Add(entity.ObjectId, entity);
+            NoteInWorldPlayer(entity);
+        }
     }
 
     /// <summary>Test and diagnostics: throws when an entity has no owner or two, or a region's sets drifted.</summary>

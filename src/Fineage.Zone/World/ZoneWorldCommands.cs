@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Globalization;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Simulation;
 
@@ -10,47 +12,194 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     const string CommandsStage = "commands";
+    const string PhaseDequeue = "commands.ingress_dequeue";
+    const string PhaseApply = "commands.apply";
+    const string PhaseFlush = "commands.flush_dirty_inventory";
+    const string PhaseSeal = "commands.fanout_seal";
+    const string PhaseReply = "commands.reply_completion";
+
+    /// <summary>Client-visible failure when the ledger commit did not land. Success is not reported in that case.</summary>
+    internal const string EconomyCommitFailed = "economy_commit_failed: auditable economy commit failed";
 
     readonly ZoneCommandIngress _ingress = new();
+
+    internal ZoneCommandIngress CommandIngress => _ingress;
     SimulationLog? _commandLog;
 
     internal int SubmissionWakeCountForTest => _ingress.WakeSignalCountForTest;
     internal int CommandIngressQueuedDepth => _ingress.QueuedDepth;
 
     /// <summary>
-    /// Submits <paramref name="command"/> for <paramref name="session"/>. It is applied in phase 0 of the next step at
-    /// the tick time; the task completes with its rejection reason (or null) once that step's fan-out was sent.
+    /// Submits <paramref name="command"/> for <paramref name="session"/>. The live loop applies it through this
+    /// ingress as soon as the thread is between ticks, at the upcoming tick's time; a step's phase 0 applies whatever
+    /// is still queued. The task completes with its rejection reason (or null) once that admission's fan-out was sent.
     /// </summary>
     public Task<string?> ExecuteAsync(ZoneSession session, ZoneCommand command, CancellationToken ct) =>
         _ingress.Submit(session, command, ct);
 
-    /// <summary>Phase 0: every command submitted before the step started, in submission order.</summary>
+    /// <summary>
+    /// One admission slice while the loop is waiting for the next tick. Same ingress, same <c>commands</c> stage,
+    /// pinned to tick <c>Tick + 1</c> so the apply time matches the phase 0 that follows. The slice stops at that
+    /// tick boundary. Fan-out for the slice is sealed on its own phase so it does not reuse the step's sequence.
+    /// </summary>
+    void AdmitQueuedCommands(long untilMs)
+    {
+        long now = Stopwatch.GetTimestamp();
+        long stepTicks = (long)(ZoneSimulationSettings.StepMilliseconds * Stopwatch.Frequency / 1000.0);
+        long untilTicks = (long)(untilMs * Stopwatch.Frequency / 1000.0);
+        long syntheticStart = now - Math.Max(0, stepTicks - untilTicks);
+        long wall = _simulationClock.WallUnixMs();
+        Volatile.Write(ref _stepStartedTimestamp, syntheticStart);
+        try
+        {
+            RunStep(_ =>
+            {
+                _fanout.ConfigureSequence(_simulationTicks.Tick + 1, phase: 1);
+                _simulationTicks.RunAhead(CommandsStage, wall);
+            });
+        }
+        catch (Exception ex)
+        {
+            FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", "command-admission"));
+            ZoneHotPathLogs.SimulationStepFailedOutsideStages(_simulationTicks.Tick, ex);
+        }
+        finally
+        {
+            Volatile.Write(ref _stepStartedTimestamp, 0L);
+        }
+    }
+
+    /// <summary>
+    /// Waits until the next tick or until a command is queued, whichever comes first.
+    /// Returns true when the tick is due. Returns false when a command should be admitted and the loop should
+    /// look again. Cancelling <paramref name="ct"/> throws.
+    /// </summary>
+    async Task<bool> WaitForTickOrCommandAsync(long waitMs, CancellationToken ct)
+    {
+        using var wake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        Task delay = Task.Delay(TimeSpan.FromMilliseconds(waitMs), wake.Token);
+        Task submitted = _ingress.WaitForSubmissionAsync(wake.Token);
+        Task finished = await Task.WhenAny(delay, submitted).ConfigureAwait(false);
+        wake.Cancel();
+        await ObserveWaitAsync(delay).ConfigureAwait(false);
+        await ObserveWaitAsync(submitted).ConfigureAwait(false);
+        ct.ThrowIfCancellationRequested();
+        return finished == delay && delay.IsCompletedSuccessfully;
+    }
+
+    static async Task ObserveWaitAsync(Task wait)
+    {
+        try
+        {
+            await wait.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Phase 0: deficit round-robin over per-player queues, inside the wall-clock apply slice. Ordering is per
+    /// player; players share the slice. A command cancelled before it is dequeued never reaches this loop.
+    /// </summary>
     void ApplyCommands(TickContext tick)
     {
-        foreach (var submission in _ingress.TakeQueued())
+        using var commandScope = _syncIo.CommandScope();
+        bool applied = false;
+        var slice = _ingress.BeginApply(Volatile.Read(ref _stepStartedTimestamp));
+        int costRemaining = slice.CostRemaining;
+        long dequeueTicks = 0;
+        long applyTicks = 0;
+        var applyMsByCommand = new Dictionary<string, double>(StringComparer.Ordinal);
+        var submits = new List<CommandSubmitMark>();
+        try
         {
-            // Cancelled by its connection before this tick: it never happened.
-            if (submission.Reply.Task.IsCompleted)
-                continue;
-
-            string? error = null;
-            Exception? failure = null;
-            try
+            while (true)
             {
-                error = submission.Command.Apply(this, submission.Session, tick);
-            }
-            catch (Exception ex)
-            {
-                failure = ex;
-                FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
-                ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
-            }
+                long dequeueStart = Stopwatch.GetTimestamp();
+                bool took = _ingress.TryTake(slice, ref costRemaining, out var submission);
+                dequeueTicks += Stopwatch.GetTimestamp() - dequeueStart;
+                if (!took)
+                    break;
 
-            if (submission.Command.Logged)
-                _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                    failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
-            _ingress.Record(submission, error, failure);
+                // Cancelled by its connection before this tick: it never happened.
+                if (submission.Reply.Task.IsCompleted)
+                    continue;
+
+                string? error = null;
+                Exception? failure = null;
+                long oneStart = Stopwatch.GetTimestamp();
+                using var commandActivity = FineageTelemetry.Activity.StartActivity("zone.command");
+                commandActivity?.SetTag("command", submission.Command.Name);
+                commandActivity?.SetTag("fineage.correlation_id", submission.CorrelationId);
+                try
+                {
+                    error = submission.Command.Apply(this, submission.Session, tick);
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                    FineageTelemetry.StageFailures.Add(1, new KeyValuePair<string, object?>("stage", CommandsStage));
+                    ZoneLog.Warn($"command {submission.Command} for object {submission.Session.ObjectId} failed at tick {tick.Tick}: {ex}");
+                }
+
+                applyTicks += Stopwatch.GetTimestamp() - oneStart;
+                double oneMs = Stopwatch.GetElapsedTime(oneStart).TotalMilliseconds;
+                string name = submission.Command.Name;
+                applyMsByCommand[name] = applyMsByCommand.GetValueOrDefault(name) + oneMs;
+                FineageTelemetry.CommandApplyMilliseconds.Record(oneMs,
+                    new KeyValuePair<string, object?>("command", name));
+                FineageTelemetry.CommandTimelineMilliseconds.Record(oneMs,
+                    new KeyValuePair<string, object?>("phase", "dequeue_to_apply"));
+
+                if (submission.Command.Logged)
+                    _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
+                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+                _ingress.Record(submission, error, failure);
+                submits.Add(new CommandSubmitMark(submission.CorrelationId, submission.SubmittedAtTicks));
+                applied = true;
+            }
         }
+        finally
+        {
+            _ingress.FinishApply();
+        }
+
+        RecordCommandPhaseTicks(PhaseDequeue, dequeueTicks);
+        double applyMs = RecordCommandPhaseTicks(PhaseApply, applyTicks);
+        double flushMs = 0, sealMs = 0, replyMs = 0;
+        if (applied)
+            (flushMs, sealMs, replyMs) = ReleaseAppliedCommandReplies(submits);
+
+        string? syncIo = _syncIo.ConsumeSummary();
+        if (syncIo != null)
+            ZoneLog.Info($"commands tick={tick.Tick} sync-io on simulation thread: {syncIo}");
+
+        double totalMs = applyMs + flushMs + sealMs + replyMs;
+        if (totalMs >= 100 && (applyMsByCommand.Count > 0 || flushMs + sealMs + replyMs > 0))
+        {
+            string breakdown = string.Join(", ",
+                applyMsByCommand.OrderByDescending(pair => pair.Value).Take(8)
+                    .Select(pair => $"{pair.Key}={pair.Value.ToString("F1", CultureInfo.InvariantCulture)}ms"));
+            ZoneLog.Warn(
+                $"commands stage tick={tick.Tick} total={totalMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"apply={applyMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"flush_dirty_inventory={flushMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"fanout_seal={sealMs.ToString("F1", CultureInfo.InvariantCulture)}ms " +
+                $"reply_completion={replyMs.ToString("F1", CultureInfo.InvariantCulture)}ms: {breakdown}");
+        }
+    }
+
+    static double RecordCommandPhase(string phase, long started) =>
+        RecordCommandPhaseTicks(phase, Stopwatch.GetTimestamp() - started);
+
+    static double RecordCommandPhaseTicks(string phase, long ticks)
+    {
+        double ms = ticks * 1000.0 / Stopwatch.Frequency;
+        if (ms < 0)
+            ms = 0;
+        FineageTelemetry.StageMilliseconds.Record(ms, new KeyValuePair<string, object?>("stage", phase));
+        return ms;
     }
 
     /// <summary>

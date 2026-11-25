@@ -404,133 +404,133 @@
       "htmlFile": "31349-event-31349-09-044.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-08",
       "htmlFile": "31349-event-31522-08-045.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-09",
       "htmlFile": "31349-event-31522-09-046.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-07",
       "htmlFile": "31349-event-31522-07-047.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-11",
       "htmlFile": "31349-event-31522-11-048.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-04",
       "htmlFile": "31349-event-31348-04-049.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-05",
       "htmlFile": "31349-event-31348-05-050.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-06",
       "htmlFile": "31349-event-31348-06-051.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-11",
       "htmlFile": "31349-event-31348-11-052.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-07",
       "htmlFile": "31349-event-31348-07-053.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-12",
       "htmlFile": "31349-event-31348-12-054.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-14",
       "htmlFile": "31349-event-31348-14-055.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-04",
       "htmlFile": "31349-event-31532-04-056.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-05",
       "htmlFile": "31349-event-31532-05-057.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-06",
       "htmlFile": "31349-event-31532-06-058.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-14",
       "htmlFile": "31349-event-31532-14-059.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-15",
       "htmlFile": "31349-event-31532-15-060.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-16",
       "htmlFile": "31349-event-31532-16-061.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-19",
       "htmlFile": "31349-event-31532-19-062.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-20",
@@ -589,7 +589,7 @@
       "htmlFile": "31349-event-31349-10-066.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-04",
@@ -608,7 +608,7 @@
       "htmlFile": "31349-event-31522-04-067.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-10",
@@ -622,7 +622,7 @@
       "htmlFile": "31349-event-31522-10-068.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-13",
@@ -640,7 +640,7 @@
       "htmlFile": "31349-event-31522-13-069.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31522,
       "hook": "event",
       "when": "absent",
       "event": "31522-16",
@@ -672,7 +672,7 @@
       "htmlFile": "31349-event-31522-16-070.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-02",
@@ -691,7 +691,7 @@
       "htmlFile": "31349-event-31348-02-071.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-08",
@@ -714,7 +714,7 @@
       "htmlFile": "31349-event-31348-08-072.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-10",
@@ -734,7 +734,7 @@
       "htmlFile": "31349-event-31348-10-073.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-13",
@@ -748,7 +748,7 @@
       "htmlFile": "31349-event-31348-13-074.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-16",
@@ -766,7 +766,7 @@
       "htmlFile": "31349-event-31348-16-075.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31348,
       "hook": "event",
       "when": "absent",
       "event": "31348-17",
@@ -784,14 +784,14 @@
       "htmlFile": "31349-event-31348-17-076.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-04",
       "htmlFile": "31349-event-31533-04-077.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-05",
@@ -811,7 +811,7 @@
       "htmlFile": "31349-event-31533-05-078.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-05",
@@ -821,7 +821,7 @@
       "htmlFile": "31349-event-31533-05-079.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-05",
@@ -838,14 +838,14 @@
       "htmlFile": "31349-event-31533-05-080.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-05",
       "htmlFile": "31349-event-31533-05-081.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31533,
       "hook": "event",
       "when": "absent",
       "event": "31533-09",
@@ -877,7 +877,7 @@
       "htmlFile": "31349-event-31533-09-082.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-02",
@@ -897,7 +897,7 @@
       "htmlFile": "31349-event-31532-02-083.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-07",
@@ -915,14 +915,14 @@
       "htmlFile": "31349-event-31532-07-084.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-11",
       "htmlFile": "31349-event-31532-11-085.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-17",
@@ -936,7 +936,7 @@
       "htmlFile": "31349-event-31532-17-086.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-21",
@@ -954,7 +954,7 @@
       "htmlFile": "31349-event-31532-21-087.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31532,
       "hook": "event",
       "when": "absent",
       "event": "31532-25",
@@ -986,7 +986,7 @@
       "htmlFile": "31349-event-31532-25-088.htm"
     },
     {
-      "npcId": 31349,
+      "npcId": 31531,
       "hook": "event",
       "when": "absent",
       "event": "31531-02",
@@ -1001,6 +1001,22 @@
         }
       ],
       "htmlFile": "31349-event-31531-02-089.htm"
+    },
+    {
+      "npcId": 27218,
+      "hook": "kill",
+      "when": "started",
+      "cond": 7,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7158,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

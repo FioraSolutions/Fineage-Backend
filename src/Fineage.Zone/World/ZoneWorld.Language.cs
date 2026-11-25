@@ -40,7 +40,7 @@ public sealed partial class ZoneWorld
         ArgumentNullException.ThrowIfNull(message);
         if (string.IsNullOrEmpty(message.Key))
             return message;
-        message.Text = _l10n.Format(message.Key, session.Language, Args(message.Params));
+        message.Text = _l10n.Format(message.Key, session.Language, message.Text, Args(message.Params));
         return message;
     }
 

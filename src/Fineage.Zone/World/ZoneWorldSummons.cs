@@ -265,6 +265,7 @@ public sealed partial class ZoneWorld
         summon.MovePath.Clear();
         SetPendingHit(summon, null);
         _aoi.Leave(id);
+        summon.DropNetWatcherAudience();
         _byId.Remove(id);
 
         // Every player, not only watchers: a target or auto-attack set before the summon left view must be cleared.
@@ -513,7 +514,7 @@ public sealed partial class ZoneWorld
             int reach = AttackReachAgainst(s, target);
             if (!ZoneCombat.Within(s.X, s.Y, target.X, target.Y, reach) || !CanSeeTarget(s, target))
             {
-                SummonApproach(s, target, reach - ZoneCombat.ApproachSlack, now);
+                SummonApproach(s, target, reach, now);
                 return;
             }
             if (s.MoveActive)
@@ -544,11 +545,16 @@ public sealed partial class ZoneWorld
         t.Kind is ZoneEntityKind.Npc or ZoneEntityKind.Player && t.InstanceId == s.InstanceId &&
         ZoneCombat.Within(s.X, s.Y, t.X, t.Y, SummonMaxChase);
 
-    void SummonApproach(ZoneEntity s, ZoneEntity target, int stopAt, long now)
+    /// <summary>
+    /// Walk a summon to <paramref name="reach"/> of its target. The stop folds the target height in
+    /// (<see cref="ApproachStopDistance"/>), the same way the player and mob approaches do, so the follow-up
+    /// <c>Within(…, reach)</c> gate is satisfiable.
+    /// </summary>
+    void SummonApproach(ZoneEntity s, ZoneEntity target, int reach, long now)
     {
         double dx = target.X - s.X, dy = target.Y - s.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
-        stopAt = Math.Max(10, stopAt);
+        double stopAt = ApproachStopDistance(reach, Math.Abs(target.Z - s.Z));
         if (dist <= stopAt)
             return;
         int destX = (int)Math.Round(target.X - dx / dist * stopAt);
@@ -579,7 +585,7 @@ public sealed partial class ZoneWorld
             TargetZ = target.Z
         };
         FanoutAttack(s, target, attack);
-        _meleeHits.Add(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
+        QueueMeleeHit(new PendingMeleeHit(s.ObjectId, target.ObjectId, damage, now + atkMs / 2, flags));
     }
 
     /// <summary>Ordered skill: run into cast range, then cast it like an NPC attack skill (owner gets the credit).</summary>
@@ -608,7 +614,7 @@ public sealed partial class ZoneWorld
             : AttackReachAgainst(s, target);
         if (!ZoneCombat.Within(s.X, s.Y, target.X, target.Y, range) || !CanSeeTarget(s, target))
         {
-            SummonApproach(s, target, Math.Max(10, range - ZoneCombat.ApproachSlack), now);
+            SummonApproach(s, target, range, now);
             return;
         }
         if (s.MoveActive)

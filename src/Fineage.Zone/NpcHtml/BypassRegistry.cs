@@ -72,12 +72,14 @@ public sealed class BypassRegistry
         registry.Register(new TerritoryBypassHandler());
         registry.Register(new TeleportBypassHandler());
         registry.Register(new NoblesSelectBypassHandler());
+        registry.Register(new RequestNoblessBypassHandler());
         registry.Register(new OlympiadBypassHandler());
         registry.Register(new WarehouseBypassHandler());
         registry.Register(new FreightBypassHandler());
         registry.Register(new BuffBypassHandler());
         registry.Register(new TrainerBypassHandler());
-        registry.Register(new FishermanBypassHandler(pages));
+        registry.Register(new FishermanBypassHandler());
+        registry.Register(new RaidBossRankingBypassHandler());
         registry.Register(new LotoBypassHandler());
         registry.Register(new MonsterRaceBypassHandler());
         registry.Register(new SevenSignsBypassHandler());

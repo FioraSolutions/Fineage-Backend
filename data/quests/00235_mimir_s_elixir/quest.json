@@ -225,14 +225,14 @@
       "htmlFile": "30721-event-30721-19-019.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 30718,
       "hook": "event",
       "when": "absent",
       "event": "30718-02",
       "htmlFile": "30721-event-30718-02-020.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 30718,
       "hook": "event",
       "when": "absent",
       "event": "30718-03",
@@ -250,7 +250,7 @@
       "htmlFile": "30721-event-30718-03-021.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 30718,
       "hook": "event",
       "when": "absent",
       "event": "30718-06",
@@ -279,42 +279,42 @@
       "htmlFile": "30721-event-30718-06-022.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-02",
       "htmlFile": "30721-event-31149-02-023.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-05",
       "htmlFile": "30721-event-31149-05-024.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-07",
       "htmlFile": "30721-event-31149-07-025.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-09",
       "htmlFile": "30721-event-31149-09-026.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-10",
       "htmlFile": "30721-event-31149-10-027.htm"
     },
     {
-      "npcId": 30721,
+      "npcId": 31149,
       "hook": "event",
       "when": "absent",
       "event": "31149-11",
@@ -340,6 +340,38 @@
         }
       ],
       "htmlFile": "30721-event-31149-11-028.htm"
+    },
+    {
+      "npcId": 20965,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6322,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21090,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 6322,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

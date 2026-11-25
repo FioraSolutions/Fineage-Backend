@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 
 namespace Fineage.Accounts;
@@ -6,6 +7,14 @@ public interface IAccountStore
 {
     /// <summary>Next item instance id this store will assign (Mobius character_items sequence).</summary>
     int NextItemObjectId { get; }
+
+    /// <summary>
+    /// Reserves <paramref name="count"/> contiguous item instance ids and returns the first. Every process that
+    /// shares this store (login creating starter kits, each zone allocating loot/shop items) draws from the same
+    /// durable counter, so ids never collide across processes. A per-process copy of <see cref="NextItemObjectId"/>
+    /// is not a valid allocator once a second process writes items.
+    /// </summary>
+    int ReserveItemObjectIds(int count);
 
     bool AccountExists(string account);
 
@@ -59,6 +68,13 @@ public interface IAccountStore
 
     /// <summary>Replaces freight packages stored for this character.</summary>
     bool TryReplaceFreight(string account, int characterId, IReadOnlyList<StoredItem> items);
+
+    /// <summary>
+    /// Inserts <paramref name="entries"/> and applies every bag in <paramref name="bags"/> in one transaction.
+    /// A failure leaves the ledger and every bag, warehouse, and freight hold as they were.
+    /// A null list on a bag means that container is not part of this commit. An empty list clears it.
+    /// </summary>
+    void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags);
 
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);

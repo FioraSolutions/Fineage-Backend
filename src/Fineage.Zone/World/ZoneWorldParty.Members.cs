@@ -13,18 +13,25 @@ public sealed partial class ZoneWorld
             return "party";
         }
 
+        bool loneMember = party.MemberIds.Count == 1;
+
         RiftOnPartyLeave(objectId);
         _party.Remove(party, objectId);
         DuelOnPartyRemove(objectId);
 
         if (party.MemberIds.Count == 0)
+        {
+            if (loneMember)
+                CommandChannelOnPartyEmpty(party);
             return null;
+        }
 
         if (party.LeaderObjectId == objectId)
             party.LeaderObjectId = party.MemberIds[0];
 
         if (party.MemberIds.Count == 1)
         {
+            CommandChannelOnPartyShrunkToOne(party);
             int lastId = party.MemberIds[0];
             _party.Remove(party, lastId);
             DuelOnPartyRemove(lastId);

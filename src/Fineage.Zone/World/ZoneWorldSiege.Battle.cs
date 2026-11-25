@@ -535,14 +535,42 @@ public sealed partial class ZoneWorld
                     run.Flags.Remove(info.FlagClanId);
                 break;
             case SiegeNpcRole.Guard:
-                if (run.Guards.Remove(npc.ObjectId, out int tower) && CastleTable.Find(info.CastleId) is { } data)
+                if (run.Guards.Remove(npc.ObjectId, out int tower)
+                    && CastleTable.Find(info.CastleId) is { } data
+                    && _siege.Board.Find(info.CastleId) is { } siegeCastle
+                    && TryGuardPlacementAtDeath(siegeCastle, data, npc, out var row)
+                    && row.RespawnSeconds > 0
+                    && (tower < 0 || run.ControlTowers.ContainsKey(tower)))
                 {
-                    var row = data.Guards.FirstOrDefault(g => g.NpcId == npc.NpcId && g.X == npc.HomeX && g.Y == npc.HomeY);
-                    if (row != null && (tower < 0 || run.ControlTowers.ContainsKey(tower)))
-                        run.GuardRespawns.Add((NowUnixMs() + Math.Max(1, row.RespawnSeconds) * 1000L, row, tower));
+                    run.GuardRespawns.Add((NowUnixMs() + Math.Max(1, row.RespawnSeconds) * 1000L, row, tower));
                 }
                 break;
         }
+    }
+
+    /// <summary>JSON garrison row or a posted mercenary ticket at the guard's home position.</summary>
+    bool TryGuardPlacementAtDeath(CastleSiege castle, CastleDataRow data, ZoneEntity npc, out CastlePlacement placement)
+    {
+        foreach (var row in data.Guards)
+        {
+            if (row.NpcId == npc.NpcId && row.X == npc.HomeX && row.Y == npc.HomeY)
+            {
+                placement = row;
+                return true;
+            }
+        }
+
+        foreach (var post in castle.HiredGuards)
+        {
+            if (post.NpcId != npc.NpcId || post.X != npc.HomeX || post.Y != npc.HomeY || post.Z != npc.HomeZ)
+                continue;
+            int respawn = MercTickets.Find(post.ItemId)?.RespawnSeconds ?? 0;
+            placement = new CastlePlacement(post.NpcId, post.X, post.Y, post.Z, post.Heading, respawn);
+            return true;
+        }
+
+        placement = new CastlePlacement(0, 0, 0, 0);
+        return false;
     }
 
     /// <summary>Test hook: one simulation pass of the siege timers.</summary>

@@ -14,10 +14,7 @@ public sealed partial class ZoneWorld
     {
         if (looter.Inventory == null || looter.Session == null || count <= 0)
             return;
-        bool merged = looter.Inventory.FindByItemId(itemId) != null;
-        var added = looter.Inventory.Add(itemId, count);
-        var invUpdate = InventoryMessages.Update(merged ? InventoryChange.Modify : InventoryChange.Add, added);
-        NetBridge?.FanoutInventoryUpdate([looter.Session.ObjectId], invUpdate);
+        looter.Inventory.Add(itemId, count);
         SaveInventory(looter.Session, looter.Inventory);
         if (notifyObtained)
             NotifyObtained(looter.Session, itemId, count);
@@ -78,6 +75,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
+        if (item.IsAugmented)
+        {
+            ShotNotice(session, SysMsgAugmentedCannotDiscard, "The augmented item cannot be discarded.");
+            return "augmented";
+        }
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items cannot be destroyed either
         if (item.Count < count)
@@ -91,11 +93,6 @@ public sealed partial class ZoneWorld
         move.Post(bag, item.ItemId, -count, PiecesOf([item]));
         move.Post(LedgerAccount.Of(SystemAccount.Destroyed), item.ItemId, count);
         move.Commit(LedgerHoldingsOf);
-
-        var invUpdate = removedEntirely
-            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
-            : InventoryMessages.Update(InventoryChange.Modify, item);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"destroy-bag object={session.ObjectId} item={item.ItemId} x{count} all={removedEntirely}");
         return null;
@@ -119,6 +116,11 @@ public sealed partial class ZoneWorld
         var item = player.Inventory.Find(objectId);
         if (item == null || item.IsEquipped)
             return InventoryProtocol.NotOwned;
+        if (item.IsAugmented)
+        {
+            ShotNotice(session, SysMsgAugmentedCannotDiscard, "The augmented item cannot be discarded.");
+            return "augmented";
+        }
         if (!item.Template.CanDropTradeStore)
             return "bad_request"; // Mobius: quest items are not dropable
         if (item.Count < count)
@@ -134,8 +136,10 @@ public sealed partial class ZoneWorld
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
             // hid the slot on drag puts it back without a relog.
             ShotNotice(session, SysMsgDiscardTooFar, "That is too far from you to discard.");
-            var keep = InventoryMessages.Update(InventoryChange.Modify, item);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], keep);
+            bool pending = player.Inventory.HasPendingChanges;
+            player.Inventory.NoteRefresh(item);
+            if (!pending)
+                PublishCommittedInventory(session, player.Inventory);
             ZoneLog.Info($"drop-bag refused far object={session.ObjectId} item={item.ItemId} player={player.X},{player.Y},{player.Z} at={dropX},{dropY},{dropZ}");
             return "range";
         }
@@ -155,13 +159,6 @@ public sealed partial class ZoneWorld
 
         if (!player.Inventory.TryReduce(item, count, out bool removedEntirely))
             return "bad_request";
-
-        InventoryUpdateMsg invUpdate = removedEntirely
-            ? new InventoryUpdateMsg { Changes = [InventoryMessages.RemoveRow(item, -1)] }
-            : InventoryMessages.Update(InventoryChange.Modify, item);
-
-        if (NetBridge != null)
-            NetBridge.FanoutInventoryUpdate([session.ObjectId], invUpdate);
 
         var watchers = new List<ZoneEntity> { player };
         foreach (var other in Players())
@@ -184,7 +181,17 @@ public sealed partial class ZoneWorld
             piece: item.Template.Stackable ? null : item,
             reserveObjectId: item.Template.Stackable ? groundId : null);
         if (ground == null)
+        {
+            if (removedEntirely)
+                player.Inventory.Reinsert(item, count);
+            else
+                player.Inventory.RestoreCount(item, item.Count + count);
+            player.Inventory.DiscardChanges();
+            ZoneLog.Warn(
+                $"drop aborted: ground spawn failed char={session.ObjectId} item={itemId} objectId={objectId} count={count}");
             return "bad_request";
+        }
+
         move.Commit(LedgerHoldingsOf);
         SaveInventory(session, player.Inventory);
         ZoneLog.Info($"drop-bag object={session.ObjectId} item={itemId} count={count} @ {dropX},{dropY},{dropZ}");
@@ -213,7 +220,10 @@ public sealed partial class ZoneWorld
         int instanceId = killer?.InstanceId ?? (watchers.Count > 0 ? watchers[0].InstanceId : 0);
         var dropRng = _dropRandom.For(_regions.RegionOf(instanceId, x, y));
         int killerLevel = killer?.Level ?? victimLevel;
-        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid);
+        long now = NowUnixMs();
+        var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
+        if (killer != null && !seeded)
+            rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
@@ -226,7 +236,6 @@ public sealed partial class ZoneWorld
             : killer?.Session != null
                 ? killer.ObjectId
                 : 0;
-        long now = NowUnixMs();
         if (rolls.Count == 0)
             return;
 
@@ -393,6 +402,7 @@ public sealed partial class ZoneWorld
         int objectId = ground.ObjectId;
         _expiringGround.Remove(objectId);
         _aoi.Leave(objectId);
+        ground.DropNetWatcherAudience();
         _byId.Remove(objectId);
 
         List<int>? netWatchers = null;

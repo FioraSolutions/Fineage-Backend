@@ -37,7 +37,6 @@ sealed partial class ZoneEntity
     public Dictionary<int, long> ItemReuseUntilMs => EnsureSkills().ItemReuseUntilMs;
 
     ZonePlayerSkillsPayload EnsureSkills() => Skills ??= new ZonePlayerSkillsPayload();
-    public HashSet<int> Knownlist { get; } = [];
     public int ClanId
     {
         get => Identity?.ClanId ?? 0;
@@ -124,6 +123,13 @@ sealed partial class ZoneEntity
     {
         get => Aggro?.NextThinkMs ?? 0;
         set => EnsureAggro().NextThinkMs = value;
+    }
+
+    /// <summary>Which think-timer bucket holds this NPC. −1 when it is not queued.</summary>
+    public int ThinkWheelSlot
+    {
+        get => Aggro?.ThinkWheelSlot ?? -1;
+        set => EnsureAggro().ThinkWheelSlot = value;
     }
 
     internal void SetWanderGeoCache(int fromX, int fromY, int wantX, int wantY, int destX, int destY, int destZ)

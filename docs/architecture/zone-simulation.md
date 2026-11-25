@@ -182,8 +182,18 @@ sequenceDiagram
   owning region. Reads that need world state (enter-world projection) become request messages answered at the next
   tick. Since step 6 every gameplay handler submits a `ZoneCommand` (`World/ZoneCommands*.cs`) through
   `ZoneWorld.ExecuteAsync` into `ZoneCommandIngress`; the `commands` world stage, first at period 1, applies them in
-  submission order (phase 0). The handler awaits the outcome, which completes only after the applying step's
-  persistence flush and fan-out drain, so a reply never overtakes the frames or writes it caused. A submission
+  per-player submission order (phase 0). The live loop also runs that same stage while it is waiting for the next
+  tick, as soon as a command is queued, pinned to the upcoming tick's time and stopped at that tick boundary, and
+  seals the slice's fan-out before the rest of the tick. Phase 0 of the step applies whatever arrived after the last
+  slice. Ready players share each slice through deficit round-robin (quantum in command cost units); deficit carries
+  from one slice into the next, so the admission point stays the one ingress. The wall-clock budget is
+  `FINEAGE_ZONE_COMMAND_APPLY_BUDGET_FRACTION` of the step (default 0.35);
+  unused time is banked and may be borrowed while a backlog remains, and the stage still stops at the tick deadline.
+  `FINEAGE_ZONE_COMMAND_APPLY_BUDGET`, when set, is an extra cost-unit cap (0 or unset = no cost cap). It is not a
+  fixed 48-unit global queue. Consecutive pending movement commands from one player collapse to the latest; a
+  non-movement command is a boundary. The handler awaits the outcome, which completes after the fan-out and inventory flush
+  the command caused (released at the end of the `commands` stage, before later stages run), so a reply never overtakes
+  those frames or writes. A submission
   cancelled before its step is skipped; when the simulation loop stops, pending and later submissions fail with the
   tick it stopped at.
 - **One owner (step 12).** `ZoneWorld._gate` is gone. Once the simulation loop or a command pump drives the world,
@@ -204,7 +214,9 @@ sequenceDiagram
   bookkeeping (`AtBarrier`, the party vitals queue) and collects region messages. Inside a body `RegionDirectory`
   throws on placement, removal, relocation, handoff, world-wide counts and listings, and set changes of entities
   another region owns, so a race becomes a concrete error in both executors. A stage opts into worker threads with
-  `IRegionStage.Parallel`; regen (players, NPCs) and abnormals do. `FINEAGE_ZONE_REGION_WORKERS` picks the executor:
+  `IRegionStage.Parallel`; movement (players, NPCs), random-walk, aggression, regen (players, NPCs), abnormals,
+  pending-hits, auto-attacks and mob-attacks do. Region bodies defer global `GridAoi` updates and knownlist fan-out
+  to scope `Commit` on the scheduler thread. `FINEAGE_ZONE_REGION_WORKERS` picks the executor:
   0 (default) runs regions one after another on the scheduler thread, N spreads opted-in stages over N workers; the
   startup banner prints `regions=sequential|parallel:N`. A parallel executor refuses an injected `Random`
   (`SharedRegionRandom` is one generator for every region). Workers re-pin the step's clock. Bodies must never take a
@@ -275,8 +287,14 @@ reach minus the handoff margin (5 700), which covers the widest aggro range in t
 neighbours' from the snapshot, in ascending id order, and asks for the hate with a `HateMessage`. Region messages
 (`ZoneRegionMessage`) are applied on the scheduler thread when the stage commits, in (source region, sequence) order,
 so a decision lands in the same step as before; a message for an entity that left is logged and dropped. The
-cross-host form delivers them at *t+1*. Damage and abnormal-apply messages come with the stages that send them
-(combat, casts), which are still world stages.
+cross-host form delivers them at *t+1*. The combat stages run as parallel region bodies on the same mechanism:
+`pending-hits`, `auto-attacks` and `mob-attacks` validate, roll and fan out inside the body and send what lands on
+an entity they do not own as a message — skill damage (`SkillDamageMessage`, HP/hate/death/rewards on the target),
+debuff-nuke abnormal applies (`AbnormalApplyMessage`) and non-damage skill effects (`SkillEffectMessage`, carrying
+the in-process effect delegate). A swing a body queues for `melee-hits` and a mob's attack-timeout teleport wait
+for the barrier (`AtBarrier`). A body never advances movement: the movement stages settle every mover earlier in
+the same step, so the combat stages read positions as of this tick (`AdvanceMoveSettled` logs and skips anything
+the movement stages missed).
 
 **Party, clan, chat, friends.** Social actors keyed by party / clan id. Regions push member deltas (vitals,
 position) to them once per tick in a batch; the actors fan out to members through gateway routing, independent of
@@ -317,6 +335,9 @@ actors with their own state and mailbox. They act on the world through messages
   per-tick read-only snapshot.
 - The simulation never awaits a socket. `NetConnection` keeps its bounded outbound queue and drop counters, and
   coalesced MoveState already exists there.
+- **Budgets and overflow policies for every stage** of this chain (simulation → dispatcher → stripes → mailbox →
+  socket), the lock audit of `Step()`, and the metric per stage are in
+  [`docs/perf/nonblocking-simulation.md`](../perf/nonblocking-simulation.md) (issue #986).
 
 ### 3.7 Scale-out seams (defined now, built later)
 
@@ -559,7 +580,8 @@ Each PR keeps the server playable and the test suite green; behaviour changes ar
 | **5 (done)** | Tick-derived simulation time and seeded per-region RNG streams in migrated stages; command log and replay test (B6, B7). | Same distributions, reproducible runs. Stage time is quantised to the 200 ms tick, so a deadline set between ticks is honoured on the next tick (it already was by the live loop). |
 | **6 (done)** | Command ingress: every gameplay handler enqueues a command drained in phase 0 instead of locking (B11); enchant, olympiad and town respawn rolls on seeded streams; the step's wall sample pinned for calendar rules. | Up to one tick of input latency (≤ 200 ms, already the combat cadence). |
 | **7 (done)** | Region containers: entities and active sets move into region objects; `RegionDirectory`; in-process handoff at the end-of-tick barrier. | No change visible to clients. World stages walk active sets region by region (ids ascending) instead of hash order; rolls draw from the owning region's stream, which lags the position by the handoff margin. |
-| **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages, with aggression as a region stage on them; `ParallelRegionExecutor` for regen and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: damage and abnormal-apply messages with the combat stages, parallel movement and AI after a soak, region-local knownlist diffs with movement. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
+| **8 (done)** | Session intent on the player entity; region scopes and directory guards; per-region cell index; border snapshots and region messages; parallel region stages for movement, AI (random-walk, aggression), regen, and abnormals behind `FINEAGE_ZONE_REGION_WORKERS` (default off). Bodies may relocate owned entities and defer global AOI to commit. Sequential-vs-parallel and replay-with-parallel tests gate it. Deferred: region-local knownlist diffs without deferred commit. | No change with the default setting, except that aggression tries candidates in ascending id order and sees a player across a region edge one step late. |
+| **8a (done)** | Damage (`SkillDamageMessage`), abnormal-apply (`AbnormalApplyMessage`) and skill-effect (`SkillEffectMessage`) region messages; `pending-hits`, `auto-attacks` and `mob-attacks` as parallel region stages alongside the movement stages. A mob's attack-timeout teleport and the victim's combat-stance write go to the barrier. | Same outcomes in both executors. Clan help called by two mobs on one idle NPC in the same step now adds both hates (barrier order) instead of only the first; the NPC still picks the most hated. |
 | **9 (done)** | Global actors: olympiad, sieges, seven signs, lottery, boss schedule, manor, mammon, clan halls, on `GlobalActor<TEffect>`. Seven signs and the boss schedule lose their clocks; boss respawn windows roll on the seeded boss stream. | Same schedules. A boss killed in combat now opens its respawn window (before, only the admin action did, so it came back only on restart); the window is measured from the death tick. Siege starts and ends are applied before the battle ticks of the same step. Mammon leaves only when it was placed. |
 | **10 (done)** | Social actors: party, clan, chat, friends, on `GlobalActor`. Entities keep only party and clan ids. | Same frames. Parties, clans and hero/announce audiences go in ascending id order. Party buff icons from region bodies go out at the barrier. Clan chat reaches the clan's online members. Friends now see a leaving player go offline (before, the notice was looked up after the player had left and never sent). Two online players with the same name are refused. |
 | **11a (done)** | Economy ledger: `EconomyLedger`, hash-chained journal (Postgres `economy_ledger`), `LedgerMove` reconciliation; shop buy, sell and multisell, castle tax included. | Same outcomes. Castle tax credits report what each treasury received. A shop move whose postings disagree with the bag fails the command. |

@@ -13,7 +13,6 @@ sealed partial class NetWorldEventPublisher
             RequestorName = ask.RequestorName ?? "",
             RequestorObjectId = ask.RequestorObjectId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.WeddingEngageAsk, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.WeddingEngageAsk, payload);
     }
 }

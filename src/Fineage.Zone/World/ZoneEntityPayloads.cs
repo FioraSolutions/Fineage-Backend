@@ -130,6 +130,7 @@ sealed class ZonePlayerIdentityPayload
     public int PledgeClass { get; set; }
     public int CastleId { get; set; }
     public int HideoutId { get; set; }
+    public int InClanHallZoneId { get; set; }
     public double HallRegenHpMult { get; set; } = 1d;
     public double HallRegenMpMult { get; set; } = 1d;
     public int PledgeType { get; set; }
@@ -235,6 +236,15 @@ sealed class ZoneEntityMovePayload
     public bool MoveSegmentDirty { get; set; }
     public int AoiRefreshX { get; set; }
     public int AoiRefreshY { get; set; }
+    /// <summary>AOI grid cell of the last knownlist refresh (<see cref="Interest.GridAoi.CellKeyAt"/>).</summary>
+    public long AoiRefreshCell { get; set; }
+    /// <summary>Grid cell where <see cref="Geo.GeoEngine.GetHeight"/> was last applied during a move.</summary>
+    public long MoveGeoHeightCell { get; set; }
+    /// <summary>A* path not ready yet; resolved by the <c>npc.paths</c> stage before movement runs.</summary>
+    public bool PathfindPending { get; set; }
+    public int PathWantX { get; set; }
+    public int PathWantY { get; set; }
+    public int PathWantZ { get; set; }
 }
 
 /// <summary>Player skill / abnormal / shortcut fields composed off <see cref="ZoneEntity"/> (#353).</summary>
@@ -258,6 +268,8 @@ sealed class ZonePlayerSkillsPayload
     public Dictionary<int, int> GearSkills { get; } = [];
     /// <summary>Ephemeral Zariche / Akamanah passive while the blade is active (Mobius <c>addSkill(false)</c>).</summary>
     public Dictionary<int, int> CursedSkills { get; } = [];
+    /// <summary>Equipped <c>item_skill</c> rows already warned as missing from stat catalogs (per login).</summary>
+    internal HashSet<(int ItemId, int SkillId)> ReportedMissingEquipSkills { get; } = [];
     public Dictionary<int, long> SkillReuseUntilMs { get; } = [];
     public Dictionary<int, long> ItemReuseUntilMs { get; } = [];
 }
@@ -278,6 +290,8 @@ sealed class ZonePlayerStatusPayload
     public int SpiritshotCharge { get; set; }
     /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
     public int ForceCharges { get; set; }
+    /// <summary>Mobius <c>ResetChargesTask</c>: unix ms when stacks clear after 10 min idle (0 = none scheduled).</summary>
+    public long ForceChargeResetAtUnixMs { get; set; }
     public HashSet<int> AutoShots { get; } = [];
     /// <summary>Mobius henna dye ids in the three tattoo slots (0 = empty).</summary>
     public int HennaDye1 { get; set; }
@@ -347,6 +361,8 @@ sealed class ZoneNpcAggroPayload
     public long LastAiTickMs { get; set; }
     /// <summary>Mobius <c>AttackableThinkTaskManager</c> next <c>thinkActive</c> at this unix ms.</summary>
     public long NextThinkMs { get; set; }
+    /// <summary>Wheel slot this NPC is queued in. −1 none, −2 the every-tick job list.</summary>
+    public int ThinkWheelSlot { get; set; } = -1;
     /// <summary>Last geo <c>getValidLocation</c> for idle wander, keyed to <see cref="WanderGeoFromX"/>/<see cref="WanderGeoFromY"/>.</summary>
     public int WanderGeoFromX { get; set; }
     public int WanderGeoFromY { get; set; }

@@ -92,11 +92,12 @@ public sealed partial class ZoneWorld
             HomeX = def.X,
             HomeY = def.Y,
             HomeZ = def.Z,
-            MerchantCastleId = tax.CastleId,
+            MerchantCastleId = TaxCastleAt(def.X, def.Y, def.Z) is var zoned && zoned > 0 ? zoned : tax.CastleId,
             MerchantTown = MerchantTowns.TownName(mapId),
             MerchantBaseTaxPercent = tax.BaseTaxPercent
         };
         _byId.Add(entity.ObjectId, entity);
+        NoteNpcSpawned();
         _aoi.Enter(entity.ObjectId, entity.X, entity.Y);
         AttachWalkingRoute(entity);
     }

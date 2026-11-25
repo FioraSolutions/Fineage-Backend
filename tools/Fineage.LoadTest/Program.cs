@@ -26,6 +26,12 @@ int? zonePid = int.TryParse(Arg(args, "--zone-pid"), out int pid) ? pid : null;
 var scenario = ScenarioLoader.Load(scenarioPath);
 if (string.IsNullOrWhiteSpace(scenario.Name))
     scenario.Name = Path.GetFileNameWithoutExtension(scenarioPath);
+string? prefixOverride = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX");
+if (!string.IsNullOrWhiteSpace(prefixOverride))
+    scenario.AccountPrefix = prefixOverride.Trim();
+string? passwordOverride = Environment.GetEnvironmentVariable("FINEAGE_LOGIN_LOADTEST_PASSWORD");
+if (!string.IsNullOrWhiteSpace(passwordOverride))
+    scenario.Password = passwordOverride;
 string? layoutOverride = Arg(args, "--spawn-layout");
 if (!string.IsNullOrWhiteSpace(layoutOverride))
     scenario.SpawnLayout = layoutOverride;
@@ -38,10 +44,43 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 var runner = new LoadTestRunner();
-var report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token);
-ReportWriter.Write(report, reportDir);
-Console.WriteLine($"Report: {reportDir} ({(report.Passed ? "PASS" : "FAIL")})");
-Environment.ExitCode = report.Passed ? 0 : 2;
+RunReport report;
+try
+{
+    report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine(ex);
+    report = SimulationHangGate.RunnerFault(
+        scenario, target, regionWorkers, ex, SimulationHangGate.FromLogFile(zoneLog));
+}
+
+string mdPath = Path.Combine(reportDir, "load-test-report.md");
+try
+{
+    ReportWriter.Write(report, reportDir);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"FAIL: load test runner wrote no report ({ex.Message})");
+    Environment.ExitCode = SimulationHangGate.ExitCode(reportWritten: false, passed: false);
+    return;
+}
+
+if (!File.Exists(mdPath))
+{
+    Console.Error.WriteLine("FAIL: load test runner wrote no report");
+    Environment.ExitCode = SimulationHangGate.ExitCode(reportWritten: false, passed: false);
+    return;
+}
+
+Console.WriteLine(
+    $"simulation stall: {report.SimulationStallSeconds:0.0}s count={report.SimulationStallCount} limit={SimulationHangGate.StallLimit.TotalSeconds:0}s");
+if (report.FailReasons.FirstOrDefault(reason => reason.StartsWith("Simulation hang:", StringComparison.Ordinal)) is { } hangReason)
+    Console.WriteLine(hangReason);
+Console.WriteLine($"Report: {mdPath} ({(report.Passed ? "PASS" : "FAIL")})");
+Environment.ExitCode = SimulationHangGate.ExitCode(reportWritten: true, passed: report.Passed);
 
 static string? Arg(string[] args, string name)
 {

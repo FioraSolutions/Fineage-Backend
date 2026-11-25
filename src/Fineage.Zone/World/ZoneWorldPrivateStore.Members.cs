@@ -71,13 +71,21 @@ public sealed partial class ZoneWorld
         var storeChanges = new List<InventoryUpdateEntryMsg>();
         var move = BeginStoreSale(seller, store);
 
+        PostStoreAdena(move, store, seller, payout);
+        foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
+            PostTradeRow(move, seller, store, row);
+        if (move.CheckCommit() != LedgerRejection.None)
+        {
+            ZoneLog.Warn(
+                $"private store buy refused between {store.ObjectId} and {seller.ObjectId}: ledger rejected the postings");
+            return PrivateStoreProtocol.Closed;
+        }
+
         if (!TransferAdena(store.Inventory, seller.Inventory, (int)payout, storeChanges, sellerChanges))
             return PrivateStoreProtocol.Adena;
-        PostStoreAdena(move, store, seller, payout);
 
         foreach (var (listing, row) in transfers.Zip(offerProxy, (t, row) => (t.Listing, row)))
         {
-            PostTradeRow(move, seller, store, row);
             TransferOfferRow(seller.Inventory, store.Inventory, row, sellerChanges, storeChanges);
             listing.Count -= row.Count;
             if (listing.Count <= 0)
@@ -92,12 +100,10 @@ public sealed partial class ZoneWorld
 
         if (sellerChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([seller.ObjectId], new InventoryUpdateMsg { Changes = sellerChanges.ToArray() });
             SelfUserInfo(seller);
         }
         if (storeChanges.Count > 0)
         {
-            NetBridge?.FanoutInventoryUpdate([store.ObjectId], new InventoryUpdateMsg { Changes = storeChanges.ToArray() });
             SelfUserInfo(store);
         }
 

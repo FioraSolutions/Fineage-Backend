@@ -10,10 +10,12 @@ public sealed partial class ZoneWorld
     static readonly Lazy<SwampZones> SharedSwamp = new(SwampZones.LoadDefault);
     static readonly Lazy<DamageZones> SharedDamage = new(DamageZones.LoadDefault);
     static readonly Lazy<NoLandingZones> SharedNoLanding = new(NoLandingZones.LoadDefault);
+    static readonly Lazy<MotherTreeZones> SharedMotherTree = new(MotherTreeZones.LoadDefault);
 
     internal SwampZones Swamp { get; set; } = SwampZones.Empty;
     internal DamageZones Damage { get; set; } = DamageZones.Empty;
     internal NoLandingZones NoLanding { get; set; } = NoLandingZones.Empty;
+    internal MotherTreeZones MotherTree { get; set; } = MotherTreeZones.Empty;
 
     void UpdateMoveEnvironment(ZoneEntity e)
     {
@@ -21,6 +23,7 @@ public sealed partial class ZoneWorld
         UpdateSwampState(e);
         UpdateNoLandingState(e);
         UpdateDamageZoneMembership(e);
+        UpdateRuleZoneState(e);
     }
 
     void UpdateSwampState(ZoneEntity e)
@@ -81,12 +84,13 @@ public sealed partial class ZoneWorld
 
     void TickEnvironmentZones(long nowUnixMs)
     {
+        TickRuleZones(nowUnixMs);
         if (Damage.Count == 0 && NoLanding.Count == 0)
             return;
 
-        foreach (var entity in _byId.Values)
+        foreach (var entity in Players())
         {
-            if (entity.Kind != ZoneEntityKind.Player || entity.Session == null || entity.CurHp <= 0)
+            if (entity.Session == null || entity.CurHp <= 0)
                 continue;
 
             if (entity.NoLandingDismountAtMs > 0 && nowUnixMs >= entity.NoLandingDismountAtMs)

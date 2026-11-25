@@ -219,6 +219,7 @@ public sealed partial class ZoneWorld
 
     void PartyPlayerLeftWorld(int objectId)
     {
+        CommandChannelPlayerLeft(objectId);
         _party.DropInvitesOf(objectId);
         if (!_party.InParty(objectId))
             return;

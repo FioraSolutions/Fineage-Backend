@@ -52,8 +52,7 @@ public sealed partial class ZoneWorld
         npc.NextMobAttackMs = npc.CastingUntilMs;
         int range = skill.AffectRange > 0 ? skill.AffectRange : 150;
         int creditId = hateTarget.ObjectId;
-        ZoneLog.Info(
-            $"[npc-suicide] cast {skill.SkillId} lv{skill.Level} npc={npc.NpcId} power={skill.Power} range={range} hit={hitTime}ms");
+        ZoneHotPathLogs.NpcSuicideCast(skill.SkillId, skill.Level, npc.NpcId, skill.Power, range, hitTime);
 
         // Pending on self so mid-cast hate-target death still detonates (Mobius activateSkill → doDie).
         SetPendingHit(npc, new PendingSkillHit(npc.ObjectId, 0, now + hitTime, null, skill.Level)
@@ -156,6 +155,35 @@ public sealed partial class ZoneWorld
             return CastNpcSupportSkill(npc, other, pick, NpcSupportKind.Heal, now);
         }
         return false;
+    }
+
+    /// <summary>
+    /// Mobius <c>AttackableAI</c> follow path after self-buffs: buff the live leader when it still lacks the effect
+    /// (same skill table as thinkActive minion buff roll).
+    /// </summary>
+    internal bool TryNpcLeaderBuffForTest(ZoneEntity npc, long now) =>
+        RunStepForTest(() => TryNpcLeaderBuffSkill(npc, now));
+
+    bool TryNpcLeaderBuffSkill(ZoneEntity npc, long now)
+    {
+        if (npc.LeaderObjectId <= 0 || npc.AiBuffSkills is not { Count: > 0 } || npc.CastingUntilMs > now || npc.PendingHit != null)
+            return false;
+        if (!_byId.TryGetValue(npc.LeaderObjectId, out var leader) || leader.CurHp <= 0 || leader.Dead)
+            return false;
+        if (!CanSeeTarget(npc, leader))
+            return false;
+
+        var ready = new List<NpcAiSupportSkill>();
+        foreach (var skill in ReadySupportSkills(npc, npc.AiBuffSkills, now))
+        {
+            if (leader.Abnormals.Any(a => a.Id == skill.SkillId))
+                continue;
+            ready.Add(skill);
+        }
+        if (ready.Count == 0)
+            return false;
+        var pick = ready[Rng(_combatRandom, npc).Next(ready.Count)];
+        return CastNpcSupportSkill(npc, leader, pick, NpcSupportKind.Buff, now);
     }
 
     /// <summary>Mobius BUFF scope (self): cast when the NPC is not already affected by that skill id.</summary>
@@ -342,8 +370,7 @@ public sealed partial class ZoneWorld
             TargetIsNpc = target.Kind == ZoneEntityKind.Npc,
             Apply = (Action<ZoneEntity, long>)((t, at) => ApplyNpcSupportEffect(npc, t, skill, kind, at))
         });
-        ZoneLog.Info(
-            $"[npc-support] cast {kind} {skill.SkillId} lv{skill.Level} npc={npc.NpcId} → {target.ObjectId} hit={hitTime}ms");
+        ZoneHotPathLogs.NpcSupportCast(kind.ToString(), skill.SkillId, skill.Level, npc.NpcId, target.ObjectId, hitTime);
         if (hitTime == 0)
             ResolveNpcPendingHit(npc, now);
         return true;

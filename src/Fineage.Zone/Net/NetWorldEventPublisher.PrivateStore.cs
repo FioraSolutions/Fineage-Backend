@@ -14,22 +14,19 @@ sealed partial class NetWorldEventPublisher
             StoreType = info.StoreType,
             Message = info.Message ?? ""
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PrivateStoreInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PrivateStoreInfo, payload);
     }
 
     void IWorldEventPublisher.FanoutPrivateStoreListSell(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListSellMsg list)
     {
         var payload = NetCodec.EncodePrivateStoreListSell(ToNetPrivateStoreListSell(list));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PrivateStoreListSell, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PrivateStoreListSell, payload);
     }
 
     void IWorldEventPublisher.FanoutPrivateStoreListBuy(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PrivateStoreListBuyMsg list)
     {
         var payload = NetCodec.EncodePrivateStoreListBuy(ToNetPrivateStoreListBuy(list));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.PrivateStoreListBuy, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.PrivateStoreListBuy, payload);
     }
 
     static PrivateStoreListSellNetMsg ToNetPrivateStoreListSell(Fineage.Protocol.PrivateStoreListSellMsg list)

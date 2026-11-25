@@ -1,0 +1,346 @@
+{
+  "reference": "Mobius CT_0 Interlude effect handlers vs Fineage zone pipelines",
+  "effects": {
+    "#effectname1": {
+      "status": "unsupported",
+      "note": "corrupt datapack row skill 5404"
+    },
+    "AddHate": {
+      "status": "full"
+    },
+    "AttackTrait": {
+      "status": "full"
+    },
+    "Backstab": {
+      "status": "full"
+    },
+    "Betray": {
+      "status": "full"
+    },
+    "BlockBuffSlot": {
+      "status": "full"
+    },
+    "Bluff": {
+      "status": "full"
+    },
+    "Buff": {
+      "status": "full"
+    },
+    "CallParty": {
+      "status": "full"
+    },
+    "CallPc": {
+      "status": "full"
+    },
+    "CallSkill": {
+      "status": "full"
+    },
+    "ChameleonRest": {
+      "status": "full"
+    },
+    "ChangeFace": {
+      "status": "full"
+    },
+    "ChangeFishingMastery": {
+      "status": "full"
+    },
+    "ChangeHairColor": {
+      "status": "full"
+    },
+    "ChangeHairStyle": {
+      "status": "full"
+    },
+    "ClanGate": {
+      "status": "full"
+    },
+    "Confuse": {
+      "status": "full"
+    },
+    "ConsumeBody": {
+      "status": "full"
+    },
+    "CpDamPercent": {
+      "status": "full"
+    },
+    "CpHeal": {
+      "status": "full"
+    },
+    "CubicMastery": {
+      "status": "full"
+    },
+    "DamOverTime": {
+      "status": "full"
+    },
+    "DamOverTimePercent": {
+      "status": "full"
+    },
+    "DeathLink": {
+      "status": "full"
+    },
+    "Debuff": {
+      "status": "full"
+    },
+    "DefenceTrait": {
+      "status": "full"
+    },
+    "DeleteHate": {
+      "status": "full"
+    },
+    "DeleteHateOfMe": {
+      "status": "full"
+    },
+    "DispelAll": {
+      "status": "full"
+    },
+    "DispelByCategory": {
+      "status": "full"
+    },
+    "DispelBySlot": {
+      "status": "full"
+    },
+    "DispelBySlotProbability": {
+      "status": "full"
+    },
+    "Distrust": {
+      "status": "full"
+    },
+    "ElementSeed": {
+      "status": "full"
+    },
+    "EnergyAttack": {
+      "status": "full"
+    },
+    "Escape": {
+      "status": "full"
+    },
+    "FakeDeath": {
+      "status": "full"
+    },
+    "FatalBlow": {
+      "status": "full"
+    },
+    "Fear": {
+      "status": "full"
+    },
+    "Fishing": {
+      "status": "full"
+    },
+    "FocusEnergy": {
+      "status": "full"
+    },
+    "GetAgro": {
+      "status": "full"
+    },
+    "GiveSp": {
+      "status": "full"
+    },
+    "Grow": {
+      "status": "full"
+    },
+    "Harvesting": {
+      "status": "full"
+    },
+    "HeadquarterCreate": {
+      "status": "full"
+    },
+    "Heal": {
+      "status": "full"
+    },
+    "HealOverTime": {
+      "status": "full"
+    },
+    "HealPercent": {
+      "status": "full"
+    },
+    "HpByLevel": {
+      "status": "full"
+    },
+    "HpDrain": {
+      "status": "full"
+    },
+    "ImmobileBuff": {
+      "status": "full"
+    },
+    "ImmobilePetBuff": {
+      "status": "full"
+    },
+    "Invincible": {
+      "status": "full"
+    },
+    "Lethal": {
+      "status": "full"
+    },
+    "Lucky": {
+      "status": "full"
+    },
+    "MagicalAttack": {
+      "status": "full"
+    },
+    "MagicalAttackMp": {
+      "status": "full"
+    },
+    "ManaDamOverTime": {
+      "status": "full"
+    },
+    "ManaHeal": {
+      "status": "full"
+    },
+    "ManaHealByLevel": {
+      "status": "full"
+    },
+    "ManaHealOverTime": {
+      "status": "full"
+    },
+    "ManaHealPercent": {
+      "status": "full"
+    },
+    "MaxHp": {
+      "status": "full"
+    },
+    "MpConsumePerLevel": {
+      "status": "full"
+    },
+    "Mute": {
+      "status": "full"
+    },
+    "NoblesseBless": {
+      "status": "full"
+    },
+    "OpenChest": {
+      "status": "full"
+    },
+    "OpenCommonRecipeBook": {
+      "status": "full"
+    },
+    "OpenDoor": {
+      "status": "full"
+    },
+    "OpenDwarfRecipeBook": {
+      "status": "full"
+    },
+    "Paralyze": {
+      "status": "full"
+    },
+    "Passive": {
+      "status": "full"
+    },
+    "Petrification": {
+      "status": "full"
+    },
+    "PhysicalAttack": {
+      "status": "full"
+    },
+    "PhysicalAttackHpLink": {
+      "status": "full"
+    },
+    "PhysicalMute": {
+      "status": "full"
+    },
+    "PolearmSingleTarget": {
+      "status": "full"
+    },
+    "ProtectionBlessing": {
+      "status": "full"
+    },
+    "Pumping": {
+      "status": "full"
+    },
+    "RandomizeHate": {
+      "status": "full"
+    },
+    "RebalanceHP": {
+      "status": "full"
+    },
+    "Recovery": {
+      "status": "full"
+    },
+    "Reeling": {
+      "status": "full"
+    },
+    "Relax": {
+      "status": "full"
+    },
+    "Restoration": {
+      "status": "full"
+    },
+    "RestorationRandom": {
+      "status": "full"
+    },
+    "Resurrection": {
+      "status": "full"
+    },
+    "ResurrectionSpecial": {
+      "status": "full"
+    },
+    "Root": {
+      "status": "full"
+    },
+    "RunAway": {
+      "status": "full"
+    },
+    "SilentMove": {
+      "status": "full"
+    },
+    "SkillTurning": {
+      "status": "full"
+    },
+    "Sleep": {
+      "status": "full"
+    },
+    "Sow": {
+      "status": "full"
+    },
+    "Spoil": {
+      "status": "full"
+    },
+    "StaticDamage": {
+      "status": "full"
+    },
+    "Stun": {
+      "status": "full"
+    },
+    "Summon": {
+      "status": "full"
+    },
+    "SummonCubic": {
+      "status": "full"
+    },
+    "SummonNpc": {
+      "status": "full"
+    },
+    "SummonPet": {
+      "status": "full"
+    },
+    "Sweeper": {
+      "status": "full"
+    },
+    "TakeCastle": {
+      "status": "full"
+    },
+    "TargetCancel": {
+      "status": "full"
+    },
+    "TargetMe": {
+      "status": "full"
+    },
+    "TargetMeProbability": {
+      "status": "full"
+    },
+    "Teleport": {
+      "status": "full"
+    },
+    "TriggerSkillByAttack": {
+      "status": "full"
+    },
+    "TriggerSkillByDamage": {
+      "status": "full"
+    },
+    "Unsummon": {
+      "status": "full"
+    }
+  },
+  "documentedUnsupported": [
+    "#effectname1",
+    "FocusMaxEnergy"
+  ]
+}

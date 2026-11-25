@@ -7,6 +7,7 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>Mobius Interlude cast ↔ movement: cast stops the run, moves/skills mid-cast are queued, no sit while casting.</summary>
+[Trait("Category", "Integration")]
 public sealed class NetCastMoveTests
 {
     const int MobId = 9_200_301;

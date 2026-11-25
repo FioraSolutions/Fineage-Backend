@@ -71,7 +71,6 @@ public sealed partial class ZoneWorld
                     if (changes.Count > 0)
                     {
                         var update = new InventoryUpdateMsg { Changes = changes.ToArray() };
-                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
                         SaveInventory(session, player.Inventory);
                     }
                 }

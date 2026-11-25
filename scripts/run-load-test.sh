@@ -32,13 +32,14 @@ run_one() {
 
   export FINEAGE_ZONE_REGION_WORKERS="$workers"
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
-  ./scripts/run-local-net.sh start
+  FINEAGE_GEODATA_REQUIRED=0 ./scripts/run-local-net.sh start
 
   ZONE_PID="$(cat local-logs/zone-net.pid 2>/dev/null || true)"
   export FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX FINEAGE_LOGIN_LOADTEST_PASSWORD
 
   SCENARIO_FILE="$ROOT/tools/Fineage.LoadTest/scenarios/${scenario}.yaml"
 
+  set +e
   dotnet "$ROOT/tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll" run \
     --scenario "$SCENARIO_FILE" \
     --spawn-layout "$layout" \
@@ -47,12 +48,23 @@ run_one() {
     --login-log "$ROOT/local-logs/login-net.log" \
     --zone-log "$ROOT/local-logs/zone-net.log" \
     --zone-pid "${ZONE_PID:-0}" \
-    --region-workers "$workers" \
-    || true
+    --region-workers "$workers"
+  local status=$?
+  set -e
 
   ./scripts/run-local-net.sh stop >/dev/null 2>&1 || true
+  if [[ ! -f "$out/load-test-report.md" ]]; then
+    echo "FAIL: load test runner wrote no report under $out" >&2
+    exit 1
+  fi
+  if [[ "$status" -ne 0 ]]; then
+    echo "FAIL: load test exit $status ($out/load-test-report.md)" >&2
+    exit "$status"
+  fi
   cp -f "$out/report.json" "$REPORT_ROOT/${tag}.json" 2>/dev/null || true
   cp -f "$out/report.md" "$REPORT_ROOT/${tag}.md" 2>/dev/null || true
+  cp -f "$out/load-test-report.md" "$REPORT_ROOT/${tag}-load-test-report.md" 2>/dev/null || true
+  echo "load-test-report: $out/load-test-report.md"
 }
 
 if [[ "$MATRIX" == "smoke" ]]; then

@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Login;
+using Fineage.Zone.Geo;
 using Fineage.Zone.Spawns;
 using Fineage.Game.Economy;
 using Fineage.Zone.World;
@@ -52,16 +53,32 @@ public sealed class ZoneRandomWalkTests
             id, 20001, "Gremlin", probe.X + 8000, probe.Y, probe.Z, 0,
             true, 80, 80f, 40f, 30, 0, NpcType: "Monster", Level: 1, Aggressive: false);
 
-        var (world, _) = await Enter(Map(mob));
+        var clock = new MutableClock { Now = ManualSimulationDriver.FixedStartUtc };
+        var world = new ZoneWorld(accounts: store, spawnCatalog: Map(mob), activeMapId: "walk", combatRandom: new MobiusWalkRoll(),
+            clock: () => clock.Now, ledgerJournal: new MemoryLedgerJournal());
+        var session = new ZoneSession();
+        var ticket = login.Play("walk", "pass1234", created.Value!.Name, HumanClasses.Fighter);
+        session.Bind(ticket.Value!.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
+        Assert.True(await world.TryEnterAsync(session, CancellationToken.None));
         Assert.True(world.TryGetEntityById(id, out var before));
         Assert.False(before.MoveActive);
         int homeX = before.HomeX;
         int homeY = before.HomeY;
 
-        await world.RunCombatTickAsync(CancellationToken.None);
+        var driver = new ManualSimulationDriver(world, clock);
+        driver.Step(1);
+        Assert.True(world.TryGetEntityById(id, out var staggered));
+        Assert.False(staggered.MoveActive);
+        ZoneEntity after = staggered;
+        bool moved = false;
+        for (int i = 0; i < 6 && !moved; i++)
+        {
+            driver.Step(1);
+            Assert.True(world.TryGetEntityById(id, out after));
+            moved = after.MoveActive;
+        }
 
-        Assert.True(world.TryGetEntityById(id, out var after));
-        Assert.True(after.MoveActive);
+        Assert.True(moved);
         Assert.False(after.Running);
         long dx = after.MoveDestX - (long)homeX;
         long dy = after.MoveDestY - (long)homeY;
@@ -91,18 +108,25 @@ public sealed class ZoneRandomWalkTests
         var mob = new SpawnNpcDefinition(
             id, 20001, "Gremlin", player.X + 50_000, player.Y, player.Z, 0,
             true, 80, 80f, 40f, 30, 0, NpcType: "Monster", Level: 1);
+        var clock = new MutableClock { Now = ManualSimulationDriver.FixedStartUtc };
         var world = new ZoneWorld(accounts: store, spawnCatalog: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             ["far"] = new("far", true, [mob])
         }), activeMapId: "far", aoi: new Fineage.Zone.Interest.GridAoi(), combatRandom: new MobiusWalkRoll(),
+        clock: () => clock.Now,
         ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));
 
-        await world.RunCombatTickAsync(CancellationToken.None);
+        Assert.True(world.TryGetEntityById(id, out var before));
+        Assert.False(before.MoveActive);
+        var driver = new ManualSimulationDriver(world, clock);
+        driver.Step(1);
         Assert.True(world.TryGetEntityById(id, out var after));
         Assert.False(after.MoveActive);
+        Assert.Equal(before.X, after.X);
+        Assert.Equal(before.Y, after.Y);
     }
 
     [Fact]
@@ -132,13 +156,15 @@ public sealed class ZoneRandomWalkTests
         {
             ["min"] = new("min", true, [leader, minion])
         }), activeMapId: "min",
-        ledgerJournal: new MemoryLedgerJournal());
+        geo: GeoEngine.Empty, ledgerJournal: new MemoryLedgerJournal());
         var session2 = new ZoneSession();
         session2.Bind(ticket.Value.CharacterId, ticket.Value.Account, ticket.Value.CharacterName, ticket.Value.ClassId);
         Assert.True(await world.TryEnterAsync(session2, CancellationToken.None));
         Assert.True(world.TryGetEntityById(9_200_020, out var lead));
         Assert.True(world.TryGetEntityById(9_200_021, out var pet));
         pet.LeaderObjectId = lead.ObjectId;
+        // The leader was assigned after the idle phase was bucketed. A follow is a job and is due now.
+        world.NoteNpcThinkJob(pet);
         // Inside MaxDriftRange so think does not send the leader home, and far enough that the minion must follow.
         lead.X += 250;
         lead.Running = true;

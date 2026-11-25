@@ -230,16 +230,40 @@ public sealed partial class ZoneWorld
     /// Self (players) + live players in the actor's own knownlist. Equals <see cref="NetWatchersOf"/> for a player
     /// actor (player knownlists are symmetric); an NPC actor keeps no knownlist, so its audience is empty.
     /// </summary>
-    List<int> KnownNetPlayersOf(ZoneEntity actor)
+    SnapshottedWatchers KnownNetPlayersOf(ZoneEntity actor)
     {
-        var list = new List<int>();
-        if (actor.Session != null)
+        bool self = actor.Session != null;
+        var list = new SnapshottedWatchers();
+        if (!actor.NetWatcherAudience.IsEmpty && actor.NetWatcherSelf == self)
+        {
+            list.AddRange(AudienceSnapshots.Watchers(actor.NetWatcherAudience));
+            list.Attach(actor, actor.NetWatcherAudience);
+            return list;
+        }
+
+        if (self)
             list.Add(actor.ObjectId);
         foreach (int id in actor.Knownlist)
         {
+            if (id == actor.ObjectId)
+                continue;
             if (_byId.TryGetValue(id, out var w) && w.Session != null && w.Kind == ZoneEntityKind.Player)
                 list.Add(id);
         }
+
+        if (list.Count == 0)
+        {
+            if (!actor.NetWatcherAudience.IsEmpty || actor.NetWatcherSelf != self)
+                actor.ReplaceNetWatcherAudience(default, self);
+            return list;
+        }
+
+        var owned = new int[list.Count];
+        for (int i = 0; i < owned.Length; i++)
+            owned[i] = list[i];
+        var snapshot = AudienceSnapshots.Adopt(owned);
+        actor.ReplaceNetWatcherAudience(snapshot, self);
+        list.Attach(actor, snapshot);
         return list;
     }
 

@@ -37,6 +37,7 @@ public sealed partial class ZoneWorld
         var masters = VillageMasters;
         if (!masters.Knows(script))
         {
+            LogNpcScriptMiss(script, npc.NpcId, evt, "not listed in village-masters.json");
             SendHtml(session, player, npc, QuestBypassHandler.Unavailable);
             return null;
         }
@@ -47,7 +48,11 @@ public sealed partial class ZoneWorld
             ? masters.Talk(script, npc.NpcId, who)
             : masters.Event(script, npc.NpcId, evt, who, inventory.CountOf);
         if (result == null)
-            return null; // Mobius: script returned no page.
+        {
+            LogNpcScriptMiss(script, npc.NpcId, evt, "village_master script returned no page for this NPC");
+            SendHtml(session, player, npc, QuestBypassHandler.Unavailable);
+            return null;
+        }
 
         if (result.Change is { } change && !ApplyClassChange(session, player, change, result.RewardItemId, result.RewardCount))
             return "bad_request";
@@ -151,7 +156,6 @@ public sealed partial class ZoneWorld
                         {
                             Changes = touches.Select(touch => InventoryMessages.ChangeRow((int)touch.Kind, touch.Item)).ToArray()
                         };
-                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], invUpdate);
                         SaveInventory(session, inventory);
                     }
 
@@ -182,6 +186,13 @@ public sealed partial class ZoneWorld
         Notice(session, ClassTransferMessageId, "Congratulations. You have completed the class transfer.");
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
         SelfUserInfo(player);
+        NetBridge?.FanoutMagicSkillUse(KnownNetPlayersOf(player), new MagicSkillUseMsg
+        {
+            CasterObjectId = player.ObjectId,
+            TargetObjectId = player.ObjectId,
+            SkillId = ClassChangeAnimationSkillId,
+            SkillLevel = 1
+        });
 
         // Mobius broadcastUserInfo: peers see the new class.
         List<int>? netPeers = null;

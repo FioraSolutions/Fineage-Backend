@@ -12,9 +12,11 @@ namespace Fineage.Zone.Tests;
 /// CharInfo, offensive actions only in attack stance on a valid target, max count / use-up, debuff land, Life Cubic
 /// heal, mass summon on the party, lifetime, death and logout.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetCubicTests
 {
     const int StormSkill = 10, LifeSkill = 67, ViperSkill = 278, BindingSkill = 1279, MassStormSkill = 1328, Mastery = 143;
+    const int StormCubicAction = 4049, ViperCubicAction = 4052, BindingCubicAction = 4164;
     const int CrystalD = 1458;
     const int Gremlin = 20001;
     const int X = 46045, Y = 41251, Z = -3440;
@@ -157,6 +159,17 @@ public sealed class NetCubicTests
         Assert.True(viper.Running);
         Assert.Equal(1, viper.Count);
         Assert.Contains(mob.Abnormals, a => a.Id == 4052);
+    }
+
+    [Fact]
+    public void Offensive_cubic_debuffs_include_owner_m_atk_in_land_rolls()
+    {
+        // Action skill ids from data/cubics.json: Binding cubic 6 → 4164, Viper cubic 4 → 4052, Storm cubic 1 → 4049.
+        const int BindingAction = 4164, ViperAction = 4052, StormAction = 4049;
+        var (bench, _) = Open();
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(BindingCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(ViperCubicAction));
+        Assert.True(bench.World.CubicActionUsesMagicAtkForTests(StormCubicAction));
     }
 
     [Fact]

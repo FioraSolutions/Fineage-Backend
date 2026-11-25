@@ -23,6 +23,8 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
 # Local playtest: GM chat (//gmshop, //setlevel, …) for allowlisted chars in data/admin-characters.json (KuK).
 export FINEAGE_ZONE_ADMIN="${FINEAGE_ZONE_ADMIN:-1}"
+export FINEAGE_ZONE_OUTBOUND_QUEUE="${FINEAGE_ZONE_OUTBOUND_QUEUE:-512}"
+# Do not export DOTNET_GCDynamicAdaptationMode=0 here — Zone keeps DATAS unless a perf run measures otherwise (#867).
 
 PORTS=(5080 9106 9777 7780)
 
@@ -199,13 +201,14 @@ esac
 
 stop
 ensure_postgres
-dotnet build src/Fineage.Login -c Debug -v q -nologo >/dev/null
-dotnet build src/Fineage.Zone -c Debug -v q -nologo >/dev/null
+BUILD_CFG="${FINEAGE_BUILD_CONFIGURATION:-Debug}"
+dotnet build src/Fineage.Login -c "$BUILD_CFG" -v q -nologo >/dev/null
+dotnet build src/Fineage.Zone -c "$BUILD_CFG" -v q -nologo >/dev/null
 
-LOGIN_BIN="$ROOT/src/Fineage.Login/bin/Debug/net10.0/Fineage.Login"
-ZONE_BIN="$ROOT/src/Fineage.Zone/bin/Debug/net10.0/Fineage.Zone"
-LOGIN_DLL="$ROOT/src/Fineage.Login/bin/Debug/net10.0/Fineage.Login.dll"
-ZONE_DLL="$ROOT/src/Fineage.Zone/bin/Debug/net10.0/Fineage.Zone.dll"
+LOGIN_BIN="$ROOT/src/Fineage.Login/bin/$BUILD_CFG/net10.0/Fineage.Login"
+ZONE_BIN="$ROOT/src/Fineage.Zone/bin/$BUILD_CFG/net10.0/Fineage.Zone"
+LOGIN_DLL="$ROOT/src/Fineage.Login/bin/$BUILD_CFG/net10.0/Fineage.Login.dll"
+ZONE_DLL="$ROOT/src/Fineage.Zone/bin/$BUILD_CFG/net10.0/Fineage.Zone.dll"
 if [[ -x "$LOGIN_BIN" && -x "$ZONE_BIN" ]]; then
   LOGIN_CMD=("$LOGIN_BIN")
   ZONE_CMD=("$ZONE_BIN")
@@ -219,6 +222,16 @@ fi
 
 export FINEAGE_NET_LOGIN_PORT=9106
 export FINEAGE_NET_ZONE_PORT=9777
+# Documented boot loads the manifest region pack so LOS and pathfinding are on.
+# Load-test scripts set FINEAGE_GEODATA_REQUIRED=0 to keep the stub clamp.
+case "${FINEAGE_GEODATA_REQUIRED:-1}" in
+  0|false|FALSE|no|NO|off|OFF) export FINEAGE_GEODATA_REQUIRED=0 ;;
+  *)
+    export FINEAGE_GEODATA_REQUIRED=1
+    export FINEAGE_GEODATA_DIR="${FINEAGE_GEODATA_DIR:-$ROOT/data/geodata}"
+    "$ROOT/scripts/fetch-geodata.sh"
+    ;;
+esac
 # Loopback /status so Login's /api/status can report the zone as up.
 export FINEAGE_ZONE_STATUS_PORT="${FINEAGE_ZONE_STATUS_PORT:-7780}"
 export FINEAGE_ZONE_HOST=127.0.0.1

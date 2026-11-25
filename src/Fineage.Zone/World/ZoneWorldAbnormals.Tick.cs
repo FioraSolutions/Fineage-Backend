@@ -125,6 +125,7 @@ public sealed partial class ZoneWorld
     internal Task RunAbnormalTickAsync(CancellationToken ct)
     {
         RunStep(now => _simulationTicks.RunNow(_abnormalsStage, now));
+        _fanoutDispatcher.WaitUntilIdle();
         return Task.CompletedTask;
     }
 
@@ -226,7 +227,18 @@ public sealed partial class ZoneWorld
     internal bool TryBuildNetAbnormalStatus(ZoneSession session, out AbnormalStatusUpdateMsg update)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var entity) ||
-            entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
+            entity.Kind != ZoneEntityKind.Player)
+        {
+            update = null!;
+            return false;
+        }
+
+        return TryBuildNetAbnormalStatus(entity, out update);
+    }
+
+    internal bool TryBuildNetAbnormalStatus(ZoneEntity entity, out AbnormalStatusUpdateMsg update)
+    {
+        if (entity.Kind != ZoneEntityKind.Player || entity.Abnormals.Count == 0)
         {
             update = null!;
             return false;

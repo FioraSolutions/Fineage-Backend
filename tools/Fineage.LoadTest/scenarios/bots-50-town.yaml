@@ -3,3 +3,19 @@ botCount: 50
 rampUpSeconds: 20
 durationSeconds: 90
 spawnLayout: town
+classId: 25
+race: 1
+combatSkillId: 1177
+requireSkillLatencySamples: true
+actionWeights:
+  move: 0.22
+  attack: 0.16
+  skill: 0.22
+  say: 0.06
+  sit: 0.06
+  social: 0.05
+  pickup: 0.06
+  trade: 0.03
+  party: 0.03
+  pvp: 0.04
+  relog: 0

@@ -27,6 +27,7 @@ public sealed partial class NetZoneServer
     readonly ClanPacketHandler _clan;
     readonly TradePacketHandler _trade;
     readonly PartyPacketHandler _party;
+    readonly CommandChannelPacketHandler _commandChannel;
     readonly FriendPacketHandler _friends;
     readonly WeddingPacketHandler _wedding;
     readonly ShortcutActionPacketHandler _shortcutActions;
@@ -39,7 +40,9 @@ public sealed partial class NetZoneServer
     readonly CombatPacketHandler _combat;
     readonly InventoryActionPacketHandler _inventoryActions;
     readonly SkillLearnPacketHandler _skillLearn;
+    readonly SkillEnchantPacketHandler _skillEnchant;
     readonly RecipePacketHandler _recipes;
+    readonly UserCommandPacketHandler _userCommands;
     readonly ChatPacketHandler _chat;
     readonly WorldEventPacketHandler _worldEvents;
     readonly MovementPacketHandler _movement;
@@ -72,6 +75,7 @@ public sealed partial class NetZoneServer
         _clan = new ClanPacketHandler(_world, RejectAsync);
         _trade = new TradePacketHandler(_world, RejectAsync);
         _party = new PartyPacketHandler(_world, RejectAsync);
+        _commandChannel = new CommandChannelPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
         _wedding = new WeddingPacketHandler(_world, RejectAsync);
         _shortcutActions = new ShortcutActionPacketHandler(_world, RejectAsync);
@@ -84,7 +88,9 @@ public sealed partial class NetZoneServer
         _combat = new CombatPacketHandler(_world, RejectAsync);
         _inventoryActions = new InventoryActionPacketHandler(_world, RejectAsync);
         _skillLearn = new SkillLearnPacketHandler(_world, RejectAsync);
+        _skillEnchant = new SkillEnchantPacketHandler(_world, RejectAsync);
         _recipes = new RecipePacketHandler(_world, RejectAsync);
+        _userCommands = new UserCommandPacketHandler(_world, RejectAsync);
         _chat = new ChatPacketHandler(_world, RejectAsync);
         _worldEvents = new WorldEventPacketHandler(_world, _adminCommands, RejectAsync);
         _knownlist = new NetKnownlistFanout(_world, _ids, _presence, PlayerSpawnPAtkSpd);

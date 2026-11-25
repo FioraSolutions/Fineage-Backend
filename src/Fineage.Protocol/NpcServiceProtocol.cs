@@ -56,6 +56,28 @@ public static class NpcServiceProtocol
     public const int BuffNone = 208;
     public const int EnchantOpen = 209;
 
+    /// <summary>Stable log/report code for a gatekeeper refusal's system message (load test and zone log share it).</summary>
+    public static string TeleportRefusalCode(int messageId) =>
+        TryTeleportRefusalCode(messageId, out string code)
+            ? code
+            : throw new ArgumentOutOfRangeException(nameof(messageId), messageId, "not a gatekeeper refusal message");
+
+    /// <summary>True when <paramref name="messageId"/> is a gatekeeper refusal; a client classifying replies uses this.</summary>
+    public static bool TryTeleportRefusalCode(int messageId, out string code)
+    {
+        code = messageId switch
+        {
+            NotEnoughAdena => "not_enough_fee",
+            DestinationUnloaded => "destination_unloaded",
+            SiegeBlocked => "siege",
+            UnknownTeleport => "unknown_teleport",
+            NoblesOnly => "nobles_only",
+            KarmaTeleportRefused => "karma",
+            _ => ""
+        };
+        return code.Length > 0;
+    }
+
     public const string NotEnoughAdenaText = "You do not have enough adena.";
     public const string DestinationUnloadedText = "That destination is not on a loaded map.";
     public const string SiegeBlockedText = "You cannot teleport to a village that is in a siege.";
@@ -107,6 +129,8 @@ public static class NpcServiceIntent
     public const string TerritoryStatus = "territory-status";
     /// <summary>Fisherman <c>FishSkillList</c>: the fishing guild skill window.</summary>
     public const string FishSkillList = "fish-skill-list";
+    public const string FishingChampionship = "fishing-championship";
+    public const string FishingChampionshipClaim = "fishing-championship-claim";
     /// <summary>Lottery seller <c>Loto N</c> (service id = N).</summary>
     public const string Loto = "loto";
     /// <summary>Race Manager bypass command (Mobius <c>BuyTicket</c>, <c>ShowOdds</c>, …).</summary>
@@ -120,8 +144,14 @@ public static class NpcServiceIntent
     /// <summary>Mobius <c>Teleporter showNoblesSelect</c>: nobles_select.htm for a noble, not_nobles.htm otherwise.</summary>
     public const string NoblesSelect = "nobles-select";
 
+    /// <summary>Interlude village master <c>RequestNobless</c> (Q247 gate; Mobius CT0 has no Java handler).</summary>
+    public const string RequestNobless = "request-nobless";
+
     /// <summary>Mobius <c>OlympiadManager</c> <c>OlympiadDesc</c> / <c>OlympiadNoble</c> / <c>Olympiad</c> (Block G2).</summary>
     public const string Olympiad = "olympiad";
+
+    /// <summary>Raid boss points ranking page (Mobius <c>RaidBossPointsManager</c> leaderboard HTML).</summary>
+    public const string RaidBossRanking = "raid-boss-ranking";
 
     /// <summary>Mobius <c>WyvernManagerInstance</c> <c>RideWyvern</c>: rent wyvern for castle lord with B crystals.</summary>
     public const string WyvernRide = "wyvern-ride";
@@ -154,4 +184,5 @@ public static class NpcServiceIntent
     public const string HallSupport = "hall-support";
     public const string HallTeleport = "hall-teleport";
     public const string HallDeco = "hall-deco";
+    public const string HallItemCreate = "hall-item-create";
 }

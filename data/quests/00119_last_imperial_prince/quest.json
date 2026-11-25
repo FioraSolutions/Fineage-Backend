@@ -110,7 +110,7 @@
       "htmlFile": "31453-event-31453-11-011.htm"
     },
     {
-      "npcId": 31453,
+      "npcId": 32009,
       "hook": "event",
       "when": "absent",
       "event": "32009-04",
@@ -122,6 +122,12 @@
         }
       ],
       "htmlFile": "31453-event-32009-04-012.htm"
+    },
+    {
+      "npcId": 32009,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "32009-talk-013.htm"
     }
   ]
 }

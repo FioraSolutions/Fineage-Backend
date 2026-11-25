@@ -1,8 +1,10 @@
+using System.Collections.Frozen;
+
 namespace Fineage.Game;
 
 public sealed class ItemCatalog
 {
-    readonly Dictionary<int, ItemTemplate> _byId;
+    readonly FrozenDictionary<int, ItemTemplate> _byId;
 
     public ItemCatalog(IEnumerable<ItemTemplate> templates)
     {
@@ -42,7 +44,7 @@ public sealed class ItemCatalog
             list.Add(template);
         }
 
-        _byId = map;
+        _byId = map.ToFrozenDictionary();
         Templates = list;
     }
 

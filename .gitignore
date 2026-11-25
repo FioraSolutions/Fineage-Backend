@@ -12,6 +12,7 @@ data/*
 !data/manor.json
 !data/wedding.json
 !data/fishing.json
+!data/raid-boss-points.json
 !data/monster-race.json
 !data/recipes.json
 !data/starter-kits.json
@@ -23,13 +24,17 @@ data/*
 !data/mobius-quest-dialogs/
 !data/mobius-quest-dialogs/**
 !data/skills.json
+!data/interlude-skill-ids.tsv
 !data/skill-combat.json
 !data/skill-stat-effects.json
 !data/skill-passives.json
 !data/skill-effects.json
+!data/skill-effect-coverage.json
 !data/skill-persist-flags.json
 !data/skill-dots.json
 !data/skill-trees.json
+!data/skill-enchant-tree.json
+!data/skill-transfer-trees.json
 !data/henna.json
 !data/npcs.json
 !data/dungeons.json
@@ -66,6 +71,8 @@ data/*
 !data/swamp-zones.json
 !data/damage-zones.json
 !data/no-landing-zones.json
+!data/mother-tree-zones.json
+!data/zone-types.json
 !data/admin-characters.json
 # Prefer converters → JSON; do not commit the full Mobius datapack (~1486+ XML files).
 data/mobius-xml/
@@ -93,7 +100,10 @@ publish/
 !data/xp-percent-lost.json
 !data/item-skills.json
 !data/map-regions.json
+!data/geodata-regions.json
 !data/clan-hall-spawns.json
+!data/clan-hall-functions.json
+!data/clan-hall-item-create.json
 !data/death-drop.json
 !data/cursed-weapons.json
 !data/npc-ai-support.json

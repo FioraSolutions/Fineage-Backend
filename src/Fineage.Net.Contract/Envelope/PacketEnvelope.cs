@@ -15,6 +15,12 @@ namespace Fineage.Net.Contract
         public ushort Flags { get; set; }
         public uint RequestSequence { get; set; }
         public byte[] Payload { get; set; } = System.Array.Empty<byte>();
+
+        /// <summary>Stopwatch timestamp when a command-batch frame was handed to this connection. 0 otherwise.</summary>
+        public long MailboxQueuedAtTimestamp { get; set; }
+
+        /// <summary>Stopwatch timestamp when the world fan-out batch carrying this frame was handed to the dispatcher. 0 otherwise.</summary>
+        public long FanoutEnqueuedAtTimestamp { get; set; }
     }
 
     [System.Flags]

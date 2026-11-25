@@ -26,20 +26,49 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
+    public async Task The_live_loop_applies_a_queued_command_before_the_next_tick()
+    {
+        var (kit, session, peer, _) = await SetupAsync();
+        using var cts = new CancellationTokenSource();
+        kit.World.StartSimulation(cts.Token);
+        try
+        {
+            await Task.Delay(30);
+            long tick = kit.World.SimulationTicks.Tick;
+
+            var started = System.Diagnostics.Stopwatch.StartNew();
+            var select = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+            var cancel = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
+            await Task.WhenAny(Task.WhenAll(select, cancel), Task.Delay(TimeSpan.FromMilliseconds(120)));
+
+            Assert.True(select.IsCompletedSuccessfully && cancel.IsCompletedSuccessfully,
+                $"admission waited {started.ElapsedMilliseconds} ms for the next tick");
+            Assert.Null(await select);
+            Assert.Null(await cancel);
+            Assert.Equal(0, session.SelectedTargetId);
+            Assert.Equal(tick, kit.World.SimulationTicks.Tick);
+        }
+        finally
+        {
+            await cts.CancelAsync();
+        }
+    }
+
+    [Fact]
     public async Task Commands_apply_in_submission_order_within_one_step()
     {
         var (kit, session, peer, _) = await SetupAsync();
 
         var select = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
         var cancel = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
         Assert.Null(await select);
         Assert.Null(await cancel);
         Assert.Equal(0, session.SelectedTargetId);
 
         var cancelFirst = kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None);
         var selectLast = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
         await Task.WhenAll(cancelFirst, selectLast);
         Assert.Equal(peer.ObjectId, session.SelectedTargetId);
     }
@@ -53,7 +82,7 @@ public sealed class ZoneCommandIngressTests
 
         var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), cts.Token);
         cts.Cancel();
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => reply);
         Assert.Equal(0, session.SelectedTargetId);
@@ -61,24 +90,33 @@ public sealed class ZoneCommandIngressTests
     }
 
     [Fact]
-    public async Task A_reply_arrives_after_the_fanout_of_the_step_that_applied_it()
+    public async Task A_handler_reply_is_not_blocked_on_stages_after_commands()
+    {
+        var (kit, session, peer, _) = await SetupAsync();
+        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+        Assert.False(reply.IsCompleted);
+        kit.World.RunStepForTest();
+        Assert.True(reply.IsCompleted);
+    }
+
+    [Fact]
+    public async Task A_reply_completes_when_the_command_batch_is_committed_and_fanout_drains_in_step_order()
     {
         var (kit, session, peer, recorder) = await SetupAsync();
-        int before = CallCount(recorder);
+        lock (recorder.Calls)
+            recorder.Calls.Clear();
 
-        int seenByReply = -1;
-        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None)
-            .ContinueWith(t =>
-            {
-                seenByReply = CallCount(recorder);
-                return t.Result;
-            }, TaskScheduler.Default);
-        kit.World.StepSimulation();
-        int afterStep = CallCount(recorder);
-
+        var reply = kit.World.ExecuteAsync(session, new SelectTargetCommand(peer.ObjectId), CancellationToken.None);
+        Assert.False(reply.IsCompleted);
+        kit.World.RunStepForTest();
+        Assert.True(reply.IsCompleted);
         Assert.Null(await reply);
-        Assert.True(afterStep > before, "selecting a target fans out to the player");
-        Assert.Equal(afterStep, seenByReply);
+
+        lock (recorder.Calls)
+        {
+            Assert.Contains(recorder.Calls,
+                c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && Equals(c.Args[1], peer.ObjectId));
+        }
     }
 
     [Fact]
@@ -89,10 +127,10 @@ public sealed class ZoneCommandIngressTests
 
         kit.World.StartSimulation(new CancellationToken(canceled: true));
 
-        var stranded = await Assert.ThrowsAsync<InvalidOperationException>(() => pending);
+        var stranded = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => pending);
         Assert.Matches("^command select-target for object \\d+ was not applied: the zone simulation stopped at tick \\d+$",
             stranded.Message);
-        var refused = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var refused = await Assert.ThrowsAnyAsync<InvalidOperationException>(() =>
             kit.World.ExecuteAsync(session, new CancelTargetCommand(), CancellationToken.None));
         Assert.Matches("^command cancel-target for object \\d+ refused: the zone simulation stopped at tick \\d+$",
             refused.Message);
@@ -109,7 +147,7 @@ public sealed class ZoneCommandIngressTests
         var far = kit.World.ExecuteAsync(session, new ValidatePositionCommand(session.X + 2_000, session.Y, session.Z),
             CancellationToken.None);
         Assert.False(far.IsCompleted);
-        kit.World.StepSimulation();
+        kit.World.RunStepForTest();
 
         Assert.Null(await close);
         Assert.Matches("^position drift dxy=\\d+ dz=\\d+$", await far);
@@ -156,12 +194,6 @@ public sealed class ZoneCommandIngressTests
         }
 
         return levels;
-    }
-
-    static int CallCount(NetBridgeRecorder recorder)
-    {
-        lock (recorder.Calls)
-            return recorder.Calls.Count;
     }
 
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Peer, NetBridgeRecorder Recorder)> SetupAsync()

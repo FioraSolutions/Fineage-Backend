@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Combat;
 
 namespace Fineage.Zone.World;
@@ -21,7 +22,7 @@ public sealed partial class ZoneWorld
     long ApproachTarget(ZoneEntity player, ZoneEntity target, int range)
     {
         if (player.Sitting || player.Dead || IsImmobilized(player))
-            return -1;
+            return ApproachRefused(player, target, "immobile");
         var session = player.Session;
         long now = NowUnixMs();
         // Net: bring the timed-move position up to date before measuring (the pawn may already be running).
@@ -33,20 +34,29 @@ public sealed partial class ZoneWorld
             ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY, ZoneCombat.ApproachRepathDistance))
         {
             if (player.MoveActive || ZoneCombat.Within(player.X, player.Y, target.X, target.Y, range))
-                return Math.Max(1, player.Intent.ApproachArriveUnixMs - now);
+                return ApproachServed(player, target, Math.Max(1, player.Intent.ApproachArriveUnixMs - now), "sticky");
         }
 
         double dx = target.X - player.X;
         double dy = target.Y - player.Y;
         double dist = Math.Sqrt(dx * dx + dy * dy);
         if (dist > ZoneCombat.AggroForgetRange)
-            return -1;
-        double stopAt = Math.Max(10, range - ZoneCombat.ApproachSlack);
+            return ApproachRefused(player, target, "out_of_range");
+        double stopAt = ApproachStopDistance(range, Math.Abs(target.Z - player.Z));
         if (dist <= stopAt)
         {
             player.Intent.ClearApproach();
-            return 0;
+            return ApproachRefused(player, target, "in_range");
         }
+
+        // This is the single entry point for every approach (auto attack, action, skill, pickup, talk), so the backoff
+        // belongs here rather than in one caller: an unreachable target is asked about from several paths, and gating
+        // only the auto-attack tick left the others re-running the search. A target that drifted or a cleared intent
+        // resets the wait, so a reachable target is never held back by a stale failure.
+        if (session != null && player.Intent.ApproachTargetId == target.ObjectId && !ApproachRetryDue(player, target, now))
+            return ApproachRefused(player, target, "backoff", Math.Max(1, player.Intent.ApproachRetryAtUnixMs - now));
+
+        int originX = player.X, originY = player.Y;
 
         int destX = (int)Math.Round(target.X - dx / dist * stopAt);
         int destY = (int)Math.Round(target.Y - dy / dist * stopAt);
@@ -69,7 +79,6 @@ public sealed partial class ZoneWorld
             OriginY = player.Y,
             OriginZ = player.Z
         };
-        int originX = player.X, originY = player.Y;
 
         // Net: Mobius moveToPawn is a real timed run (MovementTaskManager), never a snap. Snapping the server
         // position here made the next ValidatePosition send a PositionCorrection onto the mob = "teleport".
@@ -80,10 +89,33 @@ public sealed partial class ZoneWorld
             $"[combat] approach obj={player.ObjectId} target={target.ObjectId} from={originX},{originY} " +
             $"to={player.MoveDestX},{player.MoveDestY} path={player.MovePath.Count} dist={(int)dist}");
 
+        // A MoveCheck that clipped the whole straight line back onto the origin is the shape of an unreachable target:
+        // the pawn stands still and asks again on the next tick unless the backoff holds it.
+        if (player.MoveDestX == originX && player.MoveDestY == originY)
+            FineageTelemetry.ApproachClippedToOrigin.Add(1);
+
         float speed = MoveSpeedOf(player);
         long ms = RemainingPathTravelMs(player, speed);
+        bool served = false;
         if (session != null)
         {
+            // Whether this attempt actually got the pawn moving. A MoveCheck that clipped the destination back onto the
+            // origin leaves no move and no queued leg. A queued search is deliberately NOT counted as progress: it is a
+            // temporary state, and when it resolves without a route the pawn is still standing exactly where it was —
+            // counting it here reset the attempt counter every tick and the backoff never engaged.
+            bool progressed = player.MoveActive || player.MovePath.Count > 0;
+            served = progressed;
+            if (progressed)
+            {
+                player.Intent.ApproachAttempts = 0;
+                player.Intent.ApproachRetryAtUnixMs = 0;
+            }
+            else
+            {
+                player.Intent.ApproachAttempts++;
+                player.Intent.ApproachRetryAtUnixMs = now + ApproachRetryDelayMs(player.Intent.ApproachAttempts);
+            }
+
             player.Intent.ApproachTargetId = target.ObjectId;
             player.Intent.ApproachArriveUnixMs = now + ms;
             player.Intent.ApproachOriginX = originX;
@@ -94,7 +126,70 @@ public sealed partial class ZoneWorld
             player.Intent.ApproachTargetX = target.X;
             player.Intent.ApproachTargetY = target.Y;
         }
+        return ApproachServed(player, target, ms, served ? "served" : "pending");
+    }
+
+    static long ApproachRefused(ZoneEntity player, ZoneEntity target, string outcome) =>
+        ApproachRefused(player, target, outcome, outcome is "in_range" ? 0 : -1);
+
+    /// <summary>
+    /// Where an approach stops in the XY plane for a reach <paramref name="reach"/> and a target
+    /// <paramref name="zDelta"/> above or below the pawn. Mobius <c>Creature.moveToLocation</c>
+    /// (<c>Creature.java:4346-4368</c>) first folds the height into the offset —
+    /// <c>offset -= |dz|; if (offset &lt; 5) offset = 5;</c> — and then backs one more unit off
+    /// (<c>distance -= offset - 5</c>). So a pawn standing below a ledge keeps walking all the way under the target and
+    /// climbs the ramp, while a level approach keeps the usual <see cref="ZoneCombat.ApproachSlack"/> margin. Taking the
+    /// height out of the *stop distance* is what makes a 3D interaction gate satisfiable; a flat stop under the ledge
+    /// never gets inside the sphere no matter how long the pawn waits.
+    /// </summary>
+    internal static double ApproachStopDistance(int reach, int zDelta)
+    {
+        double offset = Math.Max(5, reach - Math.Abs(zDelta));
+        return Math.Max(10, offset - 5);
+    }
+
+    static long ApproachRefused(ZoneEntity player, ZoneEntity target, string outcome, long result)
+    {
+        FineageTelemetry.ApproachAttempts.Add(1, OutcomeTag(outcome));
+        return result;
+    }
+
+    static long ApproachServed(ZoneEntity player, ZoneEntity target, long ms, string outcome)
+    {
+        FineageTelemetry.ApproachAttempts.Add(1, OutcomeTag(outcome));
         return ms;
+    }
+
+    static KeyValuePair<string, object?> OutcomeTag(string outcome) => new("outcome", outcome);
+
+    /// <summary>
+    /// Wait before retrying a target this pawn has failed to close on <paramref name="attempts"/> times in a row:
+    /// <see cref="ZoneCombat.ApproachRetryMinMs"/> doubled per attempt, capped at
+    /// <see cref="ZoneCombat.ApproachRetryMaxMs"/>. Bounded so the cap costs no allocation or loop over a long failure run.
+    /// </summary>
+    internal static long ApproachRetryDelayMs(int attempts)
+    {
+        if (attempts <= 1)
+            return ZoneCombat.ApproachRetryMinMs;
+        int shift = Math.Min(attempts - 1, 8);
+        long delay = (long)ZoneCombat.ApproachRetryMinMs << shift;
+        return Math.Min(delay, ZoneCombat.ApproachRetryMaxMs);
+    }
+
+    /// <summary>
+    /// Whether a fresh approach attempt for <paramref name="target"/> is allowed now. A retry blocked by the backoff is
+    /// only held while the target stays put: a target that moved, or an attempt still in flight, clears the wait.
+    /// </summary>
+    internal static bool ApproachRetryDue(ZoneEntity player, ZoneEntity target, long now)
+    {
+        var intent = player.Intent;
+        if (intent.ApproachTargetId != target.ObjectId)
+            return true;
+        if (intent.ApproachRetryAtUnixMs <= 0 || now >= intent.ApproachRetryAtUnixMs)
+            return true;
+        // The target drifted: the previous failure says nothing about this new position.
+        return !ZoneCombat.Within(target.X, target.Y, intent.ApproachTargetX, intent.ApproachTargetY,
+            ZoneCombat.ApproachRepathDistance);
     }
 
     /// <summary>Travel time along the active MoveDest + queued geo waypoints at <paramref name="speed"/>.</summary>

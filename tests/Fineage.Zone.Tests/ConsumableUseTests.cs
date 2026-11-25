@@ -33,7 +33,12 @@ public sealed class ConsumableUseTests
     static int Grant(NetTestKit kit, ZoneEntity player, int itemId, int count = 1)
     {
         lock (kit.World)
-            return player.Inventory!.Add(itemId, count).ObjectId;
+        {
+            var item = player.Inventory!.Add(itemId, count);
+            // The fixture add is not an action. Drop it so the use publishes only the consume.
+            player.Inventory.DiscardChanges();
+            return item.ObjectId;
+        }
     }
 
     [Fact]
@@ -103,11 +108,17 @@ public sealed class ConsumableUseTests
 
         await kit.World.CompleteCastForTestAsync(s);
 
-        var town = MapRegionCatalog.LoadDefault().At(beforeX, beforeY)
-                    ?? MapRegionCatalog.LoadDefault().Fallback;
+        var regions = MapRegionCatalog.LoadDefault();
+        var rules = kit.World.ZoneRules.Query(beforeX, beforeY, p.Z, p.Race);
+        var town = !string.IsNullOrEmpty(rules.RespawnPoint)
+            ? regions.ByName(rules.RespawnPoint) ?? regions.At(beforeX, beforeY) ?? regions.Fallback
+            : regions.At(beforeX, beforeY) ?? regions.Fallback;
         Assert.Contains(town.RespawnPoints, pt =>
             !pt.IsChaotic && pt.Kind == "normal" && pt.X == p.X && pt.Y == p.Y && pt.Z == p.Z);
-        Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
+        bool originIsSpawn = town.RespawnPoints.Any(pt =>
+            !pt.IsChaotic && pt.Kind == "normal" && pt.X == beforeX && pt.Y == beforeY);
+        if (!originIsSpawn)
+            Assert.NotEqual((beforeX, beforeY), (p.X, p.Y));
         Assert.Equal(before - 1, p.Inventory!.CountOf(ScrollOfEscape));
         Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutTeleportToLocation)));
         Assert.NotEmpty(rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)));
@@ -126,11 +137,12 @@ public sealed class ConsumableUseTests
 
         Assert.Equal(0, p.Inventory.CountOf(CompressedSoulshots));
         Assert.Equal(shotsBefore + 300, p.Inventory.CountOf(SoulshotNoGrade));
-        // The package's shots merge into the stack the character already carries, so the Add row reports the merged count.
+        // A stack the character already carries is a modify. A new stack is an add. The count is the merged total.
+        int shotChange = shotsBefore > 0 ? InventoryChange.Modify : InventoryChange.Add;
         var added = rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate))
             .Select(call => Assert.IsType<InventoryUpdateMsg>(call[1]))
             .SelectMany(update => update.Changes)
-            .Any(row => row.ItemId == SoulshotNoGrade && row.Change == InventoryChange.Add && row.Count == shotsBefore + 300);
+            .Any(row => row.ItemId == SoulshotNoGrade && row.Change == shotChange && row.Count == shotsBefore + 300);
         Assert.True(added);
     }
 

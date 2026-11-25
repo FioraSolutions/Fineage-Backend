@@ -111,25 +111,44 @@ public sealed partial class ZoneWorld
             return AdminSpawn(session, player, npcId, count);
         }
 
+        if (verb.Equals("admin_kick", StringComparison.OrdinalIgnoreCase))
+            return AdminKick(session, player, args);
+
         if (IsAdminPunishmentVerb(verb))
             return TryAdminPunishment(session, player, verb, args);
 
         if (IsAdminFestivalVerb(verb))
             return TryAdminFestival(session, player, verb, args);
 
-        // Unknown admin_* — show shop hub rather than hard-failing HTML clicks we have not wired yet.
-        ZoneLog.Info($"admin unknown object={player.ObjectId} cmd={command}");
-        return SendAdminHtml(session, player, AdminGmShopPage);
+        if (IsAdminTeleportVerb(verb))
+            return TryAdminTeleport(session, player, verb, args);
+
+        ZoneLog.Warn($"admin unknown cmd={verb} object={player.ObjectId}");
+        FanGmSystem(session, $"Unknown admin command: {verb}" + AdminTeleportHint(verb));
+        return "bad_request";
     }
+
+    /// <summary>Mobius has no <c>admin_teleport</c> / <c>admin_tp</c>; point a GM who types one at the real verbs.</summary>
+    static string AdminTeleportHint(string verb) =>
+        verb.StartsWith("admin_te", StringComparison.OrdinalIgnoreCase) || verb.StartsWith("admin_tp", StringComparison.OrdinalIgnoreCase)
+            ? ". Teleport: admin_move_to <x> <y> <z>, admin_teleportto <name>, admin_recall <name>, admin_show_moves, admin_tele"
+            : "";
 
     string? SendAdminHtml(ZoneSession session, ZoneEntity player, string relativePath)
     {
         if (!TryPage(session.Language, relativePath, out string html) || string.IsNullOrEmpty(html))
         {
-            ZoneLog.Info($"admin html missing path={relativePath}");
+            ZoneLog.Error($"admin html missing path={relativePath}");
+            FanGmSystem(session, $"Admin page {relativePath} is missing from data/html.");
             return "bad_request";
         }
 
+        SendAdminRawHtml(session, player, html);
+        return null;
+    }
+
+    void SendAdminRawHtml(ZoneSession session, ZoneEntity player, string html)
+    {
         string rendered = NpcHtmlText.Apply(
             html,
             new NpcHtmlText.Tokens(0, 0, "GM Shop", player.Name));
@@ -144,8 +163,6 @@ public sealed partial class ZoneWorld
                 ItemId = 0
             });
         }
-
-        return null;
     }
 
     /// <summary>Fulfill an open admin buylist purchase (free rows + paid rows via ShopTrade).</summary>

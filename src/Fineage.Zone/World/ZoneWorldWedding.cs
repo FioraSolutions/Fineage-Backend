@@ -197,13 +197,14 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(LedgerTxKind.WeddingDivorcePenalty, payer.ObjectId, payeeObjectId);
         ObserveLedger(move, LedgerAccount.Inventory(payer.ObjectId));
         ObserveLedger(move, LedgerAccount.Inventory(payeeObjectId));
+        move.Post(LedgerAccount.Inventory(payer.ObjectId), ShopTrade.AdenaItemId, -amount);
+        move.Post(LedgerAccount.Inventory(payeeObjectId), ShopTrade.AdenaItemId, amount);
+        if (move.CheckCommit() != LedgerRejection.None)
+            return;
         int pay = checked((int)amount);
         Take(payer.Inventory, ShopTrade.AdenaItemId, pay, []);
         payee.Inventory.Add(ShopTrade.AdenaItemId, pay);
-        move.Post(LedgerAccount.Inventory(payer.ObjectId), ShopTrade.AdenaItemId, -amount);
-        move.Post(LedgerAccount.Inventory(payeeObjectId), ShopTrade.AdenaItemId, amount);
-        if (move.CheckCommit() == LedgerRejection.None)
-            move.Commit(LedgerHoldingsOf);
+        move.Commit(LedgerHoldingsOf);
     }
 
     string? TryGoToLove(ZoneEntity activeChar)
@@ -221,7 +222,7 @@ public sealed partial class ZoneWorld
                 siege,
                 festival: PlayerZoneChecks.IsInFestivalArena(this, activeChar.ObjectId),
                 dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, activeChar.ObjectId),
-                noSummonZone: false,
+                noSummonZone: ZoneRules.Query(activeChar.X, activeChar.Y, activeChar.Z, activeChar.Race).BlocksSummon,
                 grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, activeChar.ObjectId))
             is { } selfErr)
             return SendWeddingLine(activeChar, selfErr);
@@ -241,7 +242,7 @@ public sealed partial class ZoneWorld
                 siegeInProgress: SiegeBlocksPartnerTeleport(partner),
                 festival: PlayerZoneChecks.IsInFestivalArena(this, partner.ObjectId),
                 dimensionalRift: PlayerZoneChecks.IsInDimensionalRift(this, partner.ObjectId),
-                noSummonZone: false,
+                noSummonZone: ZoneRules.Query(partner.X, partner.Y, partner.Z, partner.Race).BlocksSummon,
                 grandBossZone: PlayerZoneChecks.IsInGrandBossZone(this, partner.ObjectId),
                 offline: false)
             is { } partnerErr)

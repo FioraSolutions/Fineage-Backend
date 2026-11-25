@@ -108,7 +108,24 @@ public static class InventoryMessages
         var rows = new ItemListEntryMsg[inventory.Items.Count];
         for (int i = 0; i < rows.Length; i++)
             rows[i] = Entry(inventory.Items[i]);
-        return new ItemListMsg { Items = rows };
+        return new ItemListMsg { Items = rows, Version = inventory.EstablishCursor() };
+    }
+
+    /// <summary>The journal of one committed mutation, in object-id order.</summary>
+    public static InventoryUpdateMsg FromPending(IReadOnlyList<PlayerInventory.PendingChange> changes, int version)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+        var rows = new InventoryUpdateEntryMsg[changes.Count];
+        for (int i = 0; i < changes.Count; i++)
+        {
+            var change = changes[i];
+            var row = ChangeRow(change.Change, change.Item);
+            row.Count = change.Count;
+            row.EquippedSlot = change.EquippedSlot;
+            rows[i] = row;
+        }
+
+        return new InventoryUpdateMsg { Changes = rows, Version = version };
     }
 
     /// <summary>One add, modify, or remove row.</summary>

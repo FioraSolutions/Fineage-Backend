@@ -10,9 +10,14 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     readonly HashSet<RegionId> _playerActiveRegions = [];
+    readonly Queue<int> _regionWakeQueue = [];
+    readonly HashSet<int> _regionWakeQueued = [];
 
     /// <summary>Regions with at least one player in range of their tile (test/diagnostics).</summary>
     internal IReadOnlyCollection<RegionId> PlayerActiveRegions => _playerActiveRegions;
+
+    /// <summary>NPCs waiting for a budgeted <see cref="TrackThink"/> after their tile woke (tests/diagnostics).</summary>
+    internal int PendingRegionWakeCount => _regionWakeQueue.Count;
 
     /// <summary>How far past a tile edge we still activate neighbours (one map tile).</summary>
     const int RegionActivationPad = GridRegionPartition.MapTileSize;
@@ -63,11 +68,48 @@ public sealed partial class ZoneWorld
         foreach (int id in container.Members.ToArray())
         {
             if (_byId.TryGetValue(id, out var entity))
-                TrackThink(entity);
+                QueueRegionWake(entity);
         }
     }
 
-    void OnRegionDeactivated(RegionId region)
+    void QueueRegionWake(ZoneEntity npc)
+    {
+        if (npc.Kind != ZoneEntityKind.Npc || npc.CurHp <= 0 || !npc.HomeSet)
+            return;
+        if (!ZoneCombat.IsCombatNpcType(npc.NpcType))
+            return;
+        if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
+            return;
+        if (!_regionWakeQueued.Add(npc.ObjectId))
+            return;
+        _regionWakeQueue.Enqueue(npc.ObjectId);
+    }
+
+    /// <summary>Drains the wake queue once per combat tick before random-walk collect.</summary>
+    void DrainRegionWakeBudget()
+    {
+        int budget = _regionWakeBudget;
+        while (budget > 0 && _regionWakeQueue.Count > 0)
+        {
+            int id = _regionWakeQueue.Dequeue();
+            _regionWakeQueued.Remove(id);
+            if (!_byId.TryGetValue(id, out var npc))
+                continue;
+            if ((npc.ActiveSets & ActiveSets.Thinking) != 0)
+                continue;
+            if (!NpcRegionAwake(npc))
+                continue;
+            TrackThink(npc);
+            budget--;
+        }
+
+        NoteActivationBacklog();
+    }
+
+    void OnRegionDeactivated(RegionId region) => SuspendNpcRegion(region);
+
+    /// <summary>Mobius inactive region: pause think + idle movement; combat / watched mobs stay awake.</summary>
+    void SuspendNpcRegion(RegionId region)
     {
         if (!_byId.TryGetContainer(region, out var container))
             return;
@@ -76,13 +118,34 @@ public sealed partial class ZoneWorld
             if (_byId.TryGetValue(id, out var npc) && npc.Kind == ZoneEntityKind.Npc)
                 ReleaseThink(npc);
         }
+
+        foreach (int id in container.Snapshot(ActiveSets.Moving))
+        {
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc)
+                continue;
+            if (NpcRegionAwake(npc))
+                continue;
+            SuspendIdleNpcMove(npc);
+        }
+
+        foreach (int id in container.Members)
+        {
+            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || !npc.PathfindPending)
+                continue;
+            if (NpcRegionAwake(npc))
+                continue;
+            npc.PathfindPending = false;
+            DequeueNpcPathfind(npc.ObjectId);
+        }
     }
 
-    /// <summary>Stagger the first think so active mobs do not pile into one tick.</summary>
+    /// <summary>
+    /// One phase in <c>(now, now + interval]</c>. A uniform draw keeps each mob on the same step slice
+    /// across later intervals instead of piling onto an activation tick.
+    /// </summary>
     void ScheduleNextThink(ZoneEntity npc, long now)
     {
-        int spread = RandomWalkThinkIntervalMs / 2;
-        npc.NextThinkMs = now + spread + RndBound(npc, Math.Max(1, spread));
+        npc.NextThinkMs = now + 1 + RndBound(npc, RandomWalkThinkIntervalMs);
     }
 
     internal const int RandomWalkThinkIntervalMs = 1000;

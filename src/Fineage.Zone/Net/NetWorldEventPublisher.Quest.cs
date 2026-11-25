@@ -9,8 +9,7 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutQuestList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.QuestListMsg list)
     {
         var payload = NetCodec.EncodeQuestList(ToNetQuestList(list));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.QuestList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.QuestList, payload);
     }
 
     internal static QuestListNetMsg ToNetQuestList(Fineage.Protocol.QuestListMsg list)
@@ -57,21 +56,18 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutQuestDirection(IReadOnlyList<int> watcherObjectIds, QuestDirectionNetMsg msg)
     {
         var payload = NetCodec.EncodeQuestDirection(msg);
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.QuestDirection, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.QuestDirection, payload);
     }
 
     void IWorldEventPublisher.FanoutQuestNpcMarks(IReadOnlyList<int> watcherObjectIds, QuestNpcMarksNetMsg msg)
     {
         var payload = NetCodec.EncodeQuestNpcMarks(msg);
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.QuestNpcMarks, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.QuestNpcMarks, payload);
     }
 
     void IWorldEventPublisher.FanoutTutorialUi(IReadOnlyList<int> watcherObjectIds, TutorialUiNetMsg msg)
     {
         var payload = NetCodec.EncodeTutorialUi(msg);
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.TutorialUi, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TutorialUi, payload);
     }
 }

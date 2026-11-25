@@ -28,22 +28,98 @@ public sealed partial class GeoEngine
     public int RegionCount => _regions.Count;
     public string? Directory { get; private set; }
 
-    public static GeoEngine LoadDefault()
+    public static GeoEngine LoadDefault() => LoadDefaultUncached();
+
+    static GeoEngine LoadDefaultUncached()
     {
-        string? dir = Environment.GetEnvironmentVariable("FINEAGE_GEODATA_DIR");
+        bool required = GeoSettings.Required;
+        var requiredRegions = GeoSettings.RequiredRegionNames(required);
+        string? dir = Environment.GetEnvironmentVariable(GeoSettings.DirVariable);
         if (string.IsNullOrWhiteSpace(dir))
             dir = FindDefaultDir();
+
         if (dir == null || !System.IO.Directory.Exists(dir))
         {
+            if (requiredRegions.Count > 0)
+                LogMissingRequiredRegionFiles(requiredRegions, fatal: required);
+            if (required)
+            {
+                throw new InvalidOperationException(
+                    $"[geo] {GeoSettings.RequiredVariable}=1 but no geodata directory exists " +
+                    $"(set {GeoSettings.DirVariable} or create data/geodata). Straight-line geo fallback is disabled in production mode.");
+            }
+
             ZoneLog.Info("[geo] no geodata dir (data/geodata or FINEAGE_GEODATA_DIR) -> geo disabled, Z uses stub sanity clamp");
             return new GeoEngine();
         }
 
-        var geo = LoadDirectory(dir);
-        ZoneLog.Info(geo.RegionCount == 0
-            ? $"[geo] {dir}: no *.l2j/*.l2d region files -> geo disabled, Z uses stub sanity clamp"
-            : $"[geo] loaded {geo.RegionCount} region(s) from {dir}");
+        if (required && requiredRegions.Count > 0)
+            LogMissingRequiredRegionFiles(requiredRegions, fatal: true);
+
+        var (geo, loadedNames, loadErrors) = LoadDirectory(dir, strict: required);
+        if (required)
+        {
+            if (loadErrors.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    "[geo] FINEAGE_GEODATA_REQUIRED=1 but region file(s) failed to load: "
+                    + string.Join(", ", loadErrors));
+            }
+
+            if (geo.RegionCount == 0)
+            {
+                throw new InvalidOperationException(
+                    $"[geo] FINEAGE_GEODATA_REQUIRED=1 but {dir} has no usable *.l2j/*.l2d region files.");
+            }
+        }
+        else if (requiredRegions.Count > 0)
+        {
+            LogMissingRequiredRegionFiles(requiredRegions, fatal: false);
+        }
+
+        if (geo.RegionCount == 0)
+        {
+            ZoneLog.Info($"[geo] {dir}: no *.l2j/*.l2d region files -> geo disabled, Z uses stub sanity clamp");
+            return geo;
+        }
+
+        string listing = loadedNames.Count > 0 ? ": " + string.Join(", ", loadedNames) : "";
+        ZoneLog.Info($"[geo] loaded {geo.RegionCount} region(s) from {dir}{listing}");
         return geo;
+    }
+
+    static void LogMissingRequiredRegionFiles(IReadOnlyList<string> requiredRegions, bool fatal)
+    {
+        string? dir = Environment.GetEnvironmentVariable(GeoSettings.DirVariable);
+        if (string.IsNullOrWhiteSpace(dir))
+            dir = FindDefaultDir();
+
+        var missing = new List<string>();
+        foreach (string region in requiredRegions)
+        {
+            if (dir == null || !RegionFileExists(dir, region))
+                missing.Add(region.EndsWith(".l2j", StringComparison.OrdinalIgnoreCase) || region.EndsWith(".l2d", StringComparison.OrdinalIgnoreCase)
+                    ? region
+                    : region + ".l2j");
+        }
+
+        if (missing.Count == 0)
+            return;
+
+        string line = "[geo] missing required region file(s): " + string.Join(", ", missing);
+        if (fatal)
+        {
+            throw new InvalidOperationException(
+                line + $" ({GeoSettings.RequiredVariable}=1 refuses to boot; run scripts/fetch-geodata.sh).");
+        }
+
+        ZoneLog.Error(line);
+    }
+
+    static bool RegionFileExists(string dir, string region)
+    {
+        string stem = Path.GetFileNameWithoutExtension(region);
+        return File.Exists(Path.Combine(dir, stem + ".l2j")) || File.Exists(Path.Combine(dir, stem + ".l2d"));
     }
 
     static string? FindDefaultDir()
@@ -63,9 +139,13 @@ public sealed partial class GeoEngine
         return null;
     }
 
-    public static GeoEngine LoadDirectory(string dir)
+    public static GeoEngine LoadDirectory(string dir) => LoadDirectory(dir, strict: false).Geo;
+
+    internal static (GeoEngine Geo, List<string> LoadedNames, List<string> LoadErrors) LoadDirectory(string dir, bool strict)
     {
         var geo = new GeoEngine { Directory = dir };
+        var loadedNames = new List<string>();
+        var loadErrors = new List<string>();
         foreach (string file in System.IO.Directory.EnumerateFiles(dir))
         {
             string ext = Path.GetExtension(file).ToLowerInvariant();
@@ -78,18 +158,35 @@ public sealed partial class GeoEngine
             {
                 byte[] bytes = File.ReadAllBytes(file);
                 geo._regions[Key(rx, ry)] = ext == ".l2j" ? Region.ParseL2j(bytes) : Region.ParseL2d(bytes);
+                geo.GeometryVersion++;
+                loadedNames.Add(Path.GetFileName(file));
             }
             catch (Exception ex)
             {
-                ZoneLog.Info($"[geo] failed to load {file}: {ex.Message}");
+                string name = Path.GetFileName(file);
+                loadErrors.Add($"{name} ({ex.Message})");
+                if (!strict)
+                    ZoneLog.Info($"[geo] failed to load {file}: {ex.Message}");
             }
         }
 
-        return geo;
+        loadedNames.Sort(StringComparer.Ordinal);
+        return (geo, loadedNames, loadErrors);
     }
 
+    /// <summary>
+    /// Monotonic counter bumped whenever a region is installed or replaced. Anything that caches a search result
+    /// derived from the geometry must key on this: a route found (or not found) against older bytes is not valid for
+    /// newer ones, and an unreachable target can become reachable after a region swap.
+    /// </summary>
+    public int GeometryVersion { get; private set; }
+
     /// <summary>Test/tool hook: install a region built in memory.</summary>
-    internal void SetRegion(int rx, int ry, Region region) => _regions[Key(rx, ry)] = region;
+    internal void SetRegion(int rx, int ry, Region region)
+    {
+        _regions[Key(rx, ry)] = region;
+        GeometryVersion++;
+    }
 
     static int Key(int rx, int ry) => (rx << 8) | ry;
 

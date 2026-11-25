@@ -5,16 +5,14 @@ using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Game.Economy;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// Real Net sessions on one loopback zone with a hand-driven clock: the world sim is not started, so movement only
-/// advances when a test calls <see cref="AdvanceAsync"/>. No NPCs and no geodata, so every frame on a socket is
-/// about the players the test placed. AOI is a plain <see cref="RangeAoi"/> (<see cref="Range"/> to see,
-/// +<see cref="RangeAoi.ForgetSlack"/> to forget).
+/// Loopback Net sessions with a fixed simulation start and stepped clock for the two TCP smoke tests.
 /// </summary>
 internal sealed class NetMoveVisibilityRig : IAsyncDisposable
 {
@@ -22,46 +20,50 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
     public const int X0 = NetTestKit.ElfX, Y0 = NetTestKit.ElfY, Z0 = NetTestKit.ElfZ;
 
     readonly List<NetZoneSession> _sessions = [];
+    readonly ManualSimulationDriver _driver;
+    readonly MutableClock _clock;
     int _n;
 
-    NetMoveVisibilityRig(MemoryAccountStore store, ZoneWorld world, NetZoneHost host, CancellationToken ct)
+    NetMoveVisibilityRig(MemoryAccountStore store, ZoneWorld world, NetZoneHost host, ManualSimulationDriver driver, MutableClock clock,
+        CancellationToken ct)
     {
         Store = store;
         World = world;
         Host = host;
+        _driver = driver;
+        _clock = clock;
         Ct = ct;
     }
 
-    public long NowMs { get; set; }
     public MemoryAccountStore Store { get; }
     public ZoneWorld World { get; }
     public NetZoneHost Host { get; }
     public CancellationToken Ct { get; }
 
-    public DateTimeOffset Clock() => DateTimeOffset.FromUnixTimeMilliseconds(NowMs);
+    public long NowMs => _clock.Now.ToUnixTimeMilliseconds();
 
-    /// <param name="spawns">Optional NPC catalog (observer-parity tests put mobs next to the players).</param>
-    /// <param name="mapId">Map of <paramref name="spawns"/> to load.</param>
+    public DateTimeOffset Clock() => _clock.Now;
+
     public static async Task<NetMoveVisibilityRig> StartAsync(CancellationToken ct, SpawnCatalog? spawns = null, string? mapId = null)
     {
         var store = MemoryAccountStore.InMemory();
+        var clock = new MutableClock { Now = ManualSimulationDriver.FixedStartUtc };
         NetMoveVisibilityRig? rig = null;
-        DateTimeOffset Clock() => rig?.Clock() ?? DateTimeOffset.UtcNow;
+        DateTimeOffset Clock() => rig?.Clock() ?? ManualSimulationDriver.FixedStartUtc;
         var empty = spawns ?? SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
         {
             [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, true, [])
         });
         var world = new ZoneWorld(new RangeAoi(Range), accounts: store, clock: Clock, spawnCatalog: empty, geo: GeoEngine.Empty,
             activeMapId: mapId ?? SpawnCatalog.DefaultMapId,
-            ledgerJournal: new MemoryLedgerJournal());
+            ledgerJournal: new MemoryLedgerJournal(),
+            allowAmbientBoats: false);
         var host = await NetZoneHost.StartAsync(world, store, clock: Clock);
-        long step = ZoneSimulationSettings.StepMilliseconds;
-        // Stages run at tick time; starting on a tick boundary keeps AdvanceAsync's whole-step totals exact.
-        rig = new NetMoveVisibilityRig(store, world, host, ct) { NowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / step * step };
+        var driver = new ManualSimulationDriver(world, clock);
+        rig = new NetMoveVisibilityRig(store, world, host, driver, clock, ct);
         return rig;
     }
 
-    /// <summary>A fresh Human Fighter entered at <paramref name="x"/>,<paramref name="y"/>; its enter burst is kept on <see cref="NetZoneSession.EnterFrames"/>.</summary>
     public async Task<Player> JoinAsync(int x, int y, int z = Z0)
     {
         int n = ++_n;
@@ -80,12 +82,24 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
         return player;
     }
 
-    /// <summary>Moves the clock in <paramref name="stepMs"/> slices, running one live combat/movement tick per slice.</summary>
+    public void StepTicks(int count) => _driver.Step(count);
+
+    /// <summary>
+    /// Combat-period slices for long-running TCP observer tests (mob/player fights). Move/visibility smokes use
+    /// <see cref="StepTicks"/> for full scheduler steps instead.
+    /// </summary>
     public async Task AdvanceAsync(int totalMs, int stepMs = 100)
     {
+        if (totalMs < 0)
+            throw new ArgumentOutOfRangeException(nameof(totalMs));
+        if (stepMs <= 0)
+            throw new ArgumentOutOfRangeException(nameof(stepMs));
+        long wallUnixMs = _clock.Now.ToUnixTimeMilliseconds();
         for (int done = 0; done < totalMs; done += stepMs)
         {
-            NowMs += Math.Min(stepMs, totalMs - done);
+            int slice = Math.Min(stepMs, totalMs - done);
+            wallUnixMs += slice;
+            _clock.Now = DateTimeOffset.FromUnixTimeMilliseconds(wallUnixMs);
             await World.RunPlayerCombatTickAsync(Ct);
         }
     }
@@ -97,7 +111,6 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
         await Host.DisposeAsync();
     }
 
-    /// <summary>The live entity, read as a step: the command pump owns the world while the test runs.</summary>
     public ZoneEntity EntityOf(int objectId)
     {
         var entity = World.RunStepForTest(() => World.TryGetEntityById(objectId, out var found) ? found : null);
@@ -127,7 +140,6 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
 
         public Task<List<PacketEnvelope>> DrainAsync(int quietMs = 250) => Net.DrainAsync(rig.Ct, quietMs);
 
-        /// <summary>Next <c>MoveState</c> about <paramref name="mover"/>, skipping everything else.</summary>
         public async Task<MoveStateMsg> NextMoveOfAsync(Player mover)
         {
             while (true)
@@ -162,7 +174,6 @@ internal sealed class NetMoveVisibilityRig : IAsyncDisposable
             NetCodec.DecodePositionCorrection((await Net.ExpectAsync(NetOpcode.PositionCorrection, rig.Ct)).Payload);
     }
 
-    /// <summary>The entity a presence frame is about, or null for frames that do not describe one entity.</summary>
     public static ulong? Subject(PacketEnvelope f) => f.Opcode switch
     {
         NetOpcode.MoveState => NetCodec.DecodeMoveState(f.Payload).EntityValue,

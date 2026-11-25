@@ -35,14 +35,14 @@
       "htmlFile": "30181-event-30181-09-003.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-01",
       "htmlFile": "30181-event-30929-01-004.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-02",
@@ -96,7 +96,7 @@
       "htmlFile": "30181-event-30181-10-009.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -111,7 +111,7 @@
       "htmlFile": "30181-event-30929-03-010.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -126,7 +126,7 @@
       "htmlFile": "30181-event-30929-03-011.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -141,7 +141,7 @@
       "htmlFile": "30181-event-30929-03-012.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -156,7 +156,7 @@
       "htmlFile": "30181-event-30929-03-013.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -170,7 +170,7 @@
       "htmlFile": "30181-event-30929-03-014.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -184,7 +184,7 @@
       "htmlFile": "30181-event-30929-03-015.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -198,7 +198,7 @@
       "htmlFile": "30181-event-30929-03-016.htm"
     },
     {
-      "npcId": 30181,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -210,6 +210,70 @@
         }
       ],
       "htmlFile": "30181-event-30929-03-017.htm"
+    },
+    {
+      "npcId": 20767,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4252,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20768,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4252,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20769,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4252,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20770,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4252,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

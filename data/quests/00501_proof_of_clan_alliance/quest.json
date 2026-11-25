@@ -1,0 +1,343 @@
+{
+  "id": 501,
+  "name": "Proof of Clan Alliance",
+  "repeatable": false,
+  "abortable": true,
+  "questItems": [
+    3832,
+    3833,
+    3834,
+    3835,
+    3836,
+    3872,
+    3873,
+    3874,
+    3889
+  ],
+  "dialogs": [
+    {
+      "npcId": 30756,
+      "hook": "talk",
+      "when": "absent",
+      "htmlFile": "30756-talk-000.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "event",
+      "when": "absent",
+      "event": "30756-07",
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "set",
+          "key": "state",
+          "value": "1"
+        }
+      ],
+      "htmlFile": "30756-event-30756-07-001.htm"
+    },
+    {
+      "npcId": 30759,
+      "hook": "event",
+      "when": "started",
+      "event": "30759-03",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        },
+        {
+          "op": "set",
+          "key": "state",
+          "value": "2"
+        }
+      ],
+      "htmlFile": "30759-event-30759-03-c1-002.htm"
+    },
+    {
+      "npcId": 30759,
+      "hook": "event",
+      "when": "started",
+      "event": "30759-07",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 3
+        },
+        {
+          "op": "set",
+          "key": "state",
+          "value": "3"
+        },
+        {
+          "op": "give_item",
+          "itemId": 3872,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30759-event-30759-07-c2-003.htm"
+    },
+    {
+      "npcId": 30757,
+      "hook": "event",
+      "when": "started",
+      "event": "30757-04",
+      "cond": 3,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 4
+        },
+        {
+          "op": "give_item",
+          "itemId": 3837,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30757-event-30757-04-c3-004.htm"
+    },
+    {
+      "npcId": 30758,
+      "hook": "talk",
+      "when": "started",
+      "cond": 4,
+      "htmlFile": "30758-talk-c4-005.htm"
+    },
+    {
+      "npcId": 30758,
+      "hook": "event",
+      "when": "started",
+      "event": "30758-03",
+      "cond": 4,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 5
+        },
+        {
+          "op": "summon",
+          "npcId": 27173,
+          "x": 102273,
+          "y": 103433,
+          "z": -3512,
+          "despawnSec": 600,
+          "owned": false
+        }
+      ],
+      "htmlFile": "30758-event-30758-03-c4-006.htm"
+    },
+    {
+      "npcId": 30759,
+      "hook": "event",
+      "when": "started",
+      "event": "30759-09",
+      "cond": 5,
+      "hasItems": [
+        3832,
+        3833,
+        3834
+      ],
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            3832,
+            3833,
+            3834
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 3835,
+          "count": 1
+        },
+        {
+          "op": "set_cond",
+          "cond": 6
+        },
+        {
+          "op": "set",
+          "key": "state",
+          "value": "6"
+        },
+        {
+          "op": "give_item",
+          "itemId": 3873,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30759-event-30759-09-c5-007.htm"
+    },
+    {
+      "npcId": 30756,
+      "hook": "event",
+      "when": "started",
+      "event": "30756-09",
+      "hasItem": 3873,
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            3873
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 3874,
+          "count": 1
+        },
+        {
+          "op": "give_exp_sp",
+          "exp": 0,
+          "sp": 120000
+        },
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "30756-event-30756-09-008.htm"
+    },
+    {
+      "npcId": 20685,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3833,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20644,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3832,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 20576,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "party": true,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3834,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 1
+        }
+      ]
+    },
+    {
+      "npcId": 27173,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3836,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27174,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3836,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27175,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3836,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27176,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3836,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 27177,
+      "hook": "kill",
+      "when": "started",
+      "cond": 5,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3836,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    }
+  ]
+}

@@ -124,7 +124,7 @@
       "htmlFile": "30829-event-30829-06-010.htm"
     },
     {
-      "npcId": 30829,
+      "npcId": 30097,
       "hook": "event",
       "when": "absent",
       "event": "30097-02",
@@ -158,6 +158,38 @@
         }
       ],
       "htmlFile": "30829-event-30829-09-012.htm"
+    },
+    {
+      "npcId": 20171,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7550,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20197,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7550,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

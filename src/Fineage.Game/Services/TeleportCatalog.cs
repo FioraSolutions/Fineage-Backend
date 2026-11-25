@@ -53,6 +53,13 @@ public sealed class TeleportCatalog
 
     public int GatekeeperCount => _byNpc.Count;
 
+    /// <summary>Every gatekeeper npc id with a list.</summary>
+    public IReadOnlyCollection<int> GatekeeperIds => _byNpc.Keys;
+
+    /// <summary>Every list of <paramref name="npcId"/> (empty when it is no gatekeeper).</summary>
+    public IReadOnlyCollection<TeleportList> ListsOf(int npcId) =>
+        _byNpc.TryGetValue(npcId, out var lists) ? lists.Values : [];
+
     public TeleportList? Find(int npcId, string? listName)
     {
         if (string.IsNullOrWhiteSpace(listName) || !_byNpc.TryGetValue(npcId, out var lists))

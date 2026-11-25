@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Fineage.Game.Economy;
 using Fineage.Game.Quests;
 using Npgsql;
 
@@ -13,6 +14,28 @@ namespace Fineage.Accounts;
 public sealed partial class PostgresAccountStore
 {
     public int NextItemObjectId => _inner.NextItemObjectId;
+
+    /// <summary>
+    /// Atomic block reservation on the shared <c>store_meta.next_item_object_id</c> row (row lock serialises login and
+    /// every zone). The local memory counter is raised past the block so snapshot counters never rewind it.
+    /// </summary>
+    public int ReserveItemObjectIds(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        long first;
+        lock (_persistGate)
+        {
+            using var conn = _dataSource.OpenConnection();
+            using var tx = conn.BeginTransaction();
+            first = NormalizedStoreMeta.ReserveItemObjectIds(conn, tx, _inner.NextItemObjectId, count);
+            tx.Commit();
+        }
+
+        if (first + count > int.MaxValue)
+            throw new InvalidOperationException($"item object id space exhausted (reserved {first}+{count}).");
+        _inner.SyncAllocationCounters(0, 0, first + count);
+        return (int)first;
+    }
 
     public bool AccountExists(string account) => _inner.AccountExists(account);
 
@@ -139,6 +162,45 @@ public sealed partial class PostgresAccountStore
                 EnsureCharacterRow(conn, record);
                 NormalizedStoreWriter.ReplaceFreightOnly(conn, characterId, record.Freight ?? []);
             });
+
+    public void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentNullException.ThrowIfNull(bags);
+        if (entries.Count == 0 && bags.Count == 0)
+            return;
+
+        // One connection and one transaction: the ledger insert and every item replace commit together.
+        // The in-memory store is not touched here. FindById reads character_items, so a rollback leaves both views.
+        // This write does not take _persistGate. Logout snapshot writers queue on that gate; the simulation
+        // thread's economy commit must not sit behind them. Postgres row locks order two writers of one character.
+        using var conn = _dataSource.OpenConnection();
+        using var tx = conn.BeginTransaction();
+        if (entries.Count > 0)
+            PostgresLedgerJournal.Write(conn, tx, entries);
+        foreach (var bag in bags)
+        {
+            if (bag.Inventory != null)
+            {
+                CharacterInventory.Validate(bag.Inventory);
+                NormalizedStoreWriter.ReplaceInventory(conn, tx, bag.CharacterId, bag.Inventory);
+            }
+
+            if (bag.Warehouse != null)
+            {
+                CharacterInventory.Validate(bag.Warehouse);
+                NormalizedStoreWriter.ReplaceWarehouse(conn, tx, bag.CharacterId, bag.Warehouse);
+            }
+
+            if (bag.Freight != null)
+            {
+                CharacterInventory.Validate(bag.Freight);
+                NormalizedStoreWriter.ReplaceFreight(conn, tx, bag.CharacterId, bag.Freight);
+            }
+        }
+
+        tx.Commit();
+    }
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess) =>
         RunSilent(

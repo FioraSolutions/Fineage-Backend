@@ -87,8 +87,6 @@ public sealed partial class ZoneWorld
 
         if (!RecordConsumeOne(player, item, item.ItemId, out bool removedEntirely))
             return InventoryProtocol.Blocked;
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-            removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
         SaveInventory(session, player.Inventory!);
 
         var post = new HiredSiegeGuard
@@ -170,7 +168,8 @@ public sealed partial class ZoneWorld
         {
             if (++spawned > limit)
                 break;
-            var placement = new CastlePlacement(post.NpcId, post.X, post.Y, post.Z, post.Heading);
+            int respawn = MercTickets.Find(post.ItemId)?.RespawnSeconds ?? 0;
+            var placement = new CastlePlacement(post.NpcId, post.X, post.Y, post.Z, post.Heading, respawn);
             SpawnSiegeGuard(run, data, placement, ClosestTower(data, placement));
         }
     }

@@ -9,16 +9,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>
-    /// Mobius <c>MapRegionManager.getTeleToLocation(creature, TOWN)</c>: the town square of the region that owns the
-    /// player's grid cell, or the Talking Island restart when the cell belongs to no region.
-    /// </summary>
-    (int X, int Y, int Z) TownDestination(ZoneEntity player)
-    {
-        var point = _mapRegions.TownRespawn(player.X, player.Y, Rng(_respawnRandom, player));
-        return (point.X, point.Y, point.Z);
-    }
-
     /// <summary>Mobius <c>teleToLocation(CLANHALL)</c> for the clan's owned hideout.</summary>
     (int X, int Y, int Z)? ClanHallDestination(ZoneEntity player)
     {
@@ -34,9 +24,6 @@ public sealed partial class ZoneWorld
         _clan.TryGet(ClanIdFor(player.ObjectId), out var clan) ? clan.D.HallId : 0;
 
     /// <summary>
-    /// Interlude item skills 2013 (SOE) / 2036 (Blessed SOE) are not in <c>skills.json</c>; hit times match Mobius XML.
-    /// </summary>
-    /// <summary>
     /// Mobius ItemSkills for Scroll of Escape: <c>MagicSkillUse</c> now, consume + <c>teleToLocation(TOWN)</c> at hitTime.
     /// </summary>
     string? TryUseEscapeTown(
@@ -50,12 +37,58 @@ public sealed partial class ZoneWorld
         if (ConsumableRules.EscapeTownError(player.Dead, now < player.CastingUntilMs) is { } escapeError)
             return escapeError;
 
-        int skillId = effect.SkillId > 0 ? effect.SkillId : 2013;
+        var skill = ItemCastSkill(item, effect);
         int level = Math.Max(1, effect.SkillLevel);
-        int hitTimeMs = ConsumableRules.EscapeHitTimeMs(skillId);
         var (x, y, z) = TownDestination(player);
 
-        // Fan the cast gesture first so the client starts long-cast / short-cast before the teleport lands.
+        // Consume + teleport land together (Mobius destroys the scroll when the cast succeeds).
+        BeginTownTeleport(player, skill, level, reuseDelayMs, now, () =>
+        {
+            if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
+                return;
+
+            player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
+            Relocate(player, x, y, z);
+            SelfUserInfo(player);
+            SaveVitals(session, player);
+            SaveInventory(session, player.Inventory);
+            ZoneLog.Info($"escape object={session.ObjectId} item={item.ItemId} skill={skill.SkillId} -> {x},{y},{z}");
+        });
+
+        return null;
+    }
+
+    /// <summary>
+    /// The Mobius skill an item casts (ItemSkills): its template must be in <c>skills.json</c>, because the cast's
+    /// hit time and name come from it. A missing template is a datapack gap, not something to improvise around.
+    /// </summary>
+    SkillDefinition ItemCastSkill(ItemInstance item, ItemSkillEffect effect) =>
+        CatalogCastSkill(effect.SkillId, $"item {item.ItemId} ({effect.Name})");
+
+    /// <summary>A skill the zone casts on the player's behalf; throws naming the skill and its caster when missing.</summary>
+    SkillDefinition CatalogCastSkill(int skillId, string castBy)
+    {
+        if (skillId <= 0)
+            throw new InvalidOperationException($"[town-teleport] {castBy} names no skill id in item-skills.json");
+        return _game.Skills.Find(skillId) ?? throw new InvalidOperationException(
+            $"[town-teleport] skill {skillId} cast by {castBy} is missing from skills.json; " +
+            "import it from Mobius with tools/import_skills.py --add-missing");
+    }
+
+    /// <summary>
+    /// Shared town teleport: <c>MagicSkillUse</c> now, <paramref name="onLand"/> at the skill's hit time.
+    /// Scroll of Escape and the unstuck user command both land through this path.
+    /// </summary>
+    void BeginTownTeleport(
+        ZoneEntity player,
+        SkillDefinition skill,
+        int level,
+        int reuseDelayMs,
+        long now,
+        Action onLand)
+    {
+        int skillId = skill.SkillId;
+        int hitTimeMs = skill.HitTimeMs;
         var cast = new MagicSkillUseMsg
         {
             CasterObjectId = player.ObjectId,
@@ -70,7 +103,7 @@ public sealed partial class ZoneWorld
 
         var template = new SkillDefinition(
             skillId,
-            effect.Name ?? "Scroll of Escape",
+            skill.Name,
             passive: false,
             operateType: "A1",
             targetType: "SELF",
@@ -83,24 +116,7 @@ public sealed partial class ZoneWorld
         {
             MagicType = 1
         };
-
-        // Consume + teleport land together (Mobius destroys the scroll when the cast succeeds).
-        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) =>
-        {
-            if (!player.Inventory!.TryReduce(item, 1, out bool removedEntirely))
-                return;
-
-            player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
-            Relocate(player, x, y, z);
-            SelfUserInfo(player);
-            SaveVitals(session, player);
-            SaveInventory(session, player.Inventory);
-            ZoneLog.Info($"escape object={session.ObjectId} item={item.ItemId} skill={skillId} -> {x},{y},{z}");
-        });
-
-        return null;
+        ScheduleEffect(player, player, template, level, now, hitTimeMs, (_, __) => onLand());
     }
 
     /// <summary>Mobius clan-hall Scroll of Escape (skills 2040 / 2177): cast + <c>teleToLocation(CLANHALL)</c> at hitTime.</summary>
@@ -116,9 +132,10 @@ public sealed partial class ZoneWorld
         if (ConsumableRules.EscapeClanHallError(player.Dead, now < player.CastingUntilMs, hasHall) is { } escapeError)
             return escapeError;
 
-        int skillId = effect.SkillId > 0 ? effect.SkillId : 2040;
+        var skill = ItemCastSkill(item, effect);
+        int skillId = skill.SkillId;
         int level = Math.Max(1, effect.SkillLevel);
-        int hitTimeMs = ConsumableRules.EscapeHitTimeMs(skillId);
+        int hitTimeMs = skill.HitTimeMs;
         var dest = ClanHallDestination(player);
         if (dest is not { } loc)
             return ConsumableRules.EscapeNoClanHall;
@@ -137,7 +154,7 @@ public sealed partial class ZoneWorld
 
         var template = new SkillDefinition(
             skillId,
-            effect.Name ?? "Scroll of Escape: Clan Hall",
+            skill.Name,
             passive: false,
             operateType: "A1",
             targetType: "SELF",
@@ -157,8 +174,6 @@ public sealed partial class ZoneWorld
                 return;
 
             player.ItemReuseUntilMs[item.ItemId] = NowUnixMs() + Math.Max(0, reuseDelayMs);
-            NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-                    removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
             Relocate(player, loc.X, loc.Y, loc.Z);
             SelfUserInfo(player);
             SaveVitals(session, player);

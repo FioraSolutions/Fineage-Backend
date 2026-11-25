@@ -2,6 +2,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Fineage.Login</RootNamespace>
+    <!-- ASP.NET defaults to server GC; keep tiered PGO explicit for parity with Zone (#867 PR10). -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Fineage.Login.Tests" />
@@ -25,5 +29,6 @@
     <Content Include="..\..\data\quests\**\*.*" Link="data\quests\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skills.json" Link="data\skills.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\skill-trees.json" Link="data\skill-trees.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\skill-transfer-trees.json" Link="data\skill-transfer-trees.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

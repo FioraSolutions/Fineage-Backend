@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// Generic Mobius-named instant effect handlers (GetAgro / TargetMe, HpDrain, Life Scavenge, CpDamPercent,
 /// Lethal, RunAway, PolearmSingleTarget). Classification is by effect name, never by skill id.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class ZoneEffectHandlerTests
 {
     const int Aggression = 28;
@@ -258,5 +259,31 @@ public sealed class ZoneEffectHandlerTests
         kit.Now = kit.Now.AddSeconds(2);
         await kit.World.RunCombatTickAsync(CancellationToken.None);
         Assert.Equal(mateHp, mate.CurHp);
+    }
+
+    [Fact]
+    public async Task Pole_swing_with_fell_swoop_splashes_onto_a_second_mob_in_reach()
+    {
+        var (kit, session, player, _, mate) = await EnterAsync();
+        var bag = player.Inventory!;
+        if (bag.GetEquipped(PaperdollSlot.RHand)?.Template.WeaponType != WeaponType.Pole)
+            bag.Equip(bag.Add(ShortSpear));
+        var fell = kit.Game.Skills.Find(FellSwoop);
+        Assert.NotNull(fell);
+        Assert.True(fell!.TryLevelData(1, out var fellLv));
+        Assert.True(kit.World.ApplyAbnormalFromSkillForTest(fell, fellLv, player, force: true));
+        Assert.Equal(4, kit.World.PlayerStats(player).AtkCountMax);
+
+        int mateHp = mate!.CurHp;
+        session.SelectedTargetId = MobId;
+        // A splash hit can miss like any swing; a few swings make at least one land.
+        for (int swing = 0; swing < 8 && mate.CurHp == mateHp; swing++)
+        {
+            Assert.Null(await kit.World.TryAttackAsync(session, MobId, CancellationToken.None));
+            kit.Now = kit.Now.AddSeconds(2);
+            await kit.World.RunCombatTickAsync(CancellationToken.None);
+        }
+
+        Assert.True(mate.CurHp < mateHp, "the pole swing never splashed onto the mob beside the target");
     }
 }

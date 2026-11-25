@@ -149,6 +149,7 @@ public sealed partial class ZoneWorld
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
         NoteBossDeath(npc);
+        NoteRaidBossPoints(npc, killer);
         int objectId = npc.ObjectId;
         int npcId = npc.NpcId;
         int x = npc.X;
@@ -225,6 +226,8 @@ public sealed partial class ZoneWorld
         _signets.Remove(objectId);
 
         _aoi.Leave(objectId);
+        NoteNpcDespawned();
+        npc.DropNetWatcherAudience();
         _byId.Remove(objectId);
         npc.SpoilerObjectId = 0;
         npc.ClearSeed();

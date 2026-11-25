@@ -78,21 +78,35 @@ internal sealed class PartyActor : GlobalActor<PartyFrame>
         }
     }
 
+    /// <summary>
+    /// Roster reads are safe from a region body as well: the roster only changes on this thread — commands and the
+    /// barrier, both of which run while no body is in flight — so a body sees a stable snapshot while it reads, and a
+    /// kill inside <c>auto-attacks</c>/<c>pending-hits</c> can decide the exp share without deferring the whole hit.
+    /// Writes and the coalesced bars/positions still require the actor thread.
+    /// </summary>
+    void RequireMemberRead() => RequireActorThread(readOnly: true);
+
     public ZoneParty? Of(int objectId)
     {
-        RequireActorThread();
+        RequireMemberRead();
         return _byPlayer.TryGetValue(objectId, out int partyId) && _parties.TryGetValue(partyId, out var party) ? party : null;
+    }
+
+    public ZoneParty? PartyById(int partyId)
+    {
+        RequireMemberRead();
+        return _parties.TryGetValue(partyId, out var party) ? party : null;
     }
 
     public bool InParty(int objectId)
     {
-        RequireActorThread();
+        RequireMemberRead();
         return _byPlayer.ContainsKey(objectId);
     }
 
     public bool SameParty(int a, int b)
     {
-        RequireActorThread();
+        RequireMemberRead();
         return _byPlayer.TryGetValue(a, out int pa) && _byPlayer.TryGetValue(b, out int pb) && pa == pb;
     }
 

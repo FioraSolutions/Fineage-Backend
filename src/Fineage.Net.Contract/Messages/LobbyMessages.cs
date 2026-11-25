@@ -124,6 +124,13 @@ namespace Fineage.Net.Contract
         public int CharacterId { get; set; }
     }
 
+    /// <summary>Retail <c>RestartResponse</c>. <see cref="Ok"/> is false when a restart gate refused.</summary>
+    public sealed class RestartResponseMsg
+    {
+        public bool Ok { get; set; }
+        public string Code { get; set; } = "";
+    }
+
     public sealed class HandoffMsg
     {
         public string Account { get; set; } = "";

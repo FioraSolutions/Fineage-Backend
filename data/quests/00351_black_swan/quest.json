@@ -40,7 +40,7 @@
       "htmlFile": "30897-talk-004.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30916,
       "hook": "event",
       "when": "absent",
       "event": "30916-02",
@@ -54,21 +54,21 @@
       "htmlFile": "30916-event-30916-02-006.htm"
     },
     {
-      "npcId": 30969,
+      "npcId": 30916,
       "hook": "event",
       "when": "absent",
       "event": "30916-02",
       "htmlFile": "30969-event-30916-02-007.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-03",
       "htmlFile": "30897-event-30969-03-008.htm"
     },
     {
-      "npcId": 30916,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-03",
@@ -82,7 +82,7 @@
       "htmlFile": "30969-event-30969-03-010.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30916,
       "hook": "event",
       "when": "absent",
       "event": "30916-03",
@@ -130,7 +130,7 @@
       "htmlFile": "30916-event-30916-03-012.htm"
     },
     {
-      "npcId": 30969,
+      "npcId": 30916,
       "hook": "event",
       "when": "absent",
       "event": "30916-03",
@@ -154,14 +154,14 @@
       "htmlFile": "30969-event-30916-03-013.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-02",
       "htmlFile": "30897-event-30969-02-014.htm"
     },
     {
-      "npcId": 30916,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-02",
@@ -175,14 +175,14 @@
       "htmlFile": "30969-event-30969-02-016.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-05",
       "htmlFile": "30897-event-30969-05-017.htm"
     },
     {
-      "npcId": 30916,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-05",
@@ -196,14 +196,14 @@
       "htmlFile": "30969-event-30969-05-019.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-07",
       "htmlFile": "30897-event-30969-07-020.htm"
     },
     {
-      "npcId": 30916,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-07",
@@ -217,7 +217,7 @@
       "htmlFile": "30969-event-30969-07-022.htm"
     },
     {
-      "npcId": 30897,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-09",
@@ -229,7 +229,7 @@
       "htmlFile": "30897-event-30969-09-023.htm"
     },
     {
-      "npcId": 30916,
+      "npcId": 30969,
       "hook": "event",
       "when": "absent",
       "event": "30969-09",
@@ -251,6 +251,70 @@
         }
       ],
       "htmlFile": "30969-event-30969-09-025.htm"
+    },
+    {
+      "npcId": 20784,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4298,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20785,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4298,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21639,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4298,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 21640,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 4298,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

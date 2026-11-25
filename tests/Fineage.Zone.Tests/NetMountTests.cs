@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Fineage.Zone.Tests;
 
+[Trait("Category", "Integration")]
 public sealed class NetMountTests
 {
     const int StriderBugle = 4422, WindStrider = 12526, BCrystal = 1460;

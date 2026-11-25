@@ -44,6 +44,14 @@ public sealed class ShopStock
         return true;
     }
 
+    /// <summary>Puts a limited count back when the buy that took it does not commit.</summary>
+    public void Return(int listId, int itemId, int count)
+    {
+        if (count < 1 || !_lines.TryGetValue((listId, itemId), out var line))
+            return;
+        line.Current = checked(line.Current + count);
+    }
+
     static void RestockIfDue(Line line, long nowUnixMs)
     {
         if (line.RestockAt > 0 && nowUnixMs >= line.RestockAt)

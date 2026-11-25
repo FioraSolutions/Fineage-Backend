@@ -390,5 +390,99 @@ namespace Fineage.Net.Contract
         public const ushort CursedWeaponList = 0x03DB;
         /// <summary>Zone → client: Mobius ExCursedWeaponLocation (wire 0xFE 0x46).</summary>
         public const ushort CursedWeaponLocation = 0x03DC;
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkillInfo</c> (wire 0xD0 0x06). ExClientPackets.java:88.</summary>
+        public const ushort RequestEnchantSkillInfo = 0x03DD;
+        /// <summary>Client → zone: Mobius <c>RequestExEnchantSkill</c> (wire 0xD0 0x07). ExClientPackets.java:89.</summary>
+        public const ushort RequestEnchantSkill = 0x03DE;
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillList</c> (wire 0xFE 0x17). ServerPackets.java:241.</summary>
+        public const ushort EnchantSkillList = 0x03DF;
+        /// <summary>Zone → client: Mobius <c>ExEnchantSkillInfo</c> (wire 0xFE 0x18). ServerPackets.java:242.</summary>
+        public const ushort EnchantSkillInfo = 0x03E0;
+        /// <summary>
+        /// Zone → client: Mobius <c>ClientSetTime</c> (wire <c>0xEC</c>).
+        /// <c>ClientSetTime.java</c> — <c>writeD(gameMinutes)</c>, <c>writeD(6)</c>.
+        /// </summary>
+        public const ushort ClientSetTime = 0x03E1;
+        /// <summary>Client → zone: retail <c>RequestRestart</c> (wire 0x46). Empty body. Returns to the character lobby.</summary>
+        public const ushort RequestRestart = 0x03E2;
+        /// <summary>Zone → client: retail <c>RestartResponse</c> (wire 0x5f). Followed by <see cref="CharacterRoster"/> when ok.</summary>
+        public const ushort RestartResponse = 0x03E3;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestBypassUserCmd</c> (retail wire <c>0xaa</c>).
+        /// Body is one int, the Interlude user-command id.
+        /// 0x03E2 and 0x03E3 are the lobby restart pair.
+        /// </summary>
+        public const ushort BypassUserCmd = 0x03E4;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestCrystallizeItem</c> (retail wire <c>0x72</c>).
+        /// Body is object id and count. 0x03E4 is the user-command opcode.
+        /// </summary>
+        public const ushort RequestCrystallizeItem = 0x03E5;
+        /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
+        public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
+        /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
+        public const ushort CommandChannelAcceptRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0E));
+        /// <summary>Client → zone: <c>RequestExOustFromMPCC</c> (wire 0xD0 0x0F). ExClientPackets.java:97.</summary>
+        public const ushort CommandChannelOustRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0F));
+        /// <summary>Zone → client: <c>ExAskJoinMPCC</c> (wire 0xFE 0x27). ServerPackets.java:257.</summary>
+        public const ushort CommandChannelAskJoin = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x27));
+        /// <summary>Zone → client: <c>ExOpenMPCC</c> (wire 0xFE 0x25). ServerPackets.java:255.</summary>
+        public const ushort CommandChannelOpen = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x25));
+        /// <summary>Zone → client: <c>ExCloseMPCC</c> (wire 0xFE 0x26). ServerPackets.java:256.</summary>
+        public const ushort CommandChannelClose = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x26));
+        /// <summary>Zone → client: <c>ExMultiPartyCommandChannelInfo</c> (wire 0xFE 0x30). ServerPackets.java:265.</summary>
+        public const ushort CommandChannelInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x30));
+        /// <summary>
+        /// Client → zone: Interlude C2S <c>RequestItemList</c>, opcode <c>0x0F</c>, empty body.
+        /// Mobius CT_0 Interlude <c>ClientPackets.REQUEST_ITEM_LIST(0x0F, RequestItemList::new)</c>
+        /// (<c>L2J_Mobius_CT_0_Interlude/.../network/ClientPackets.java</c>). On that table <c>0x14</c> is
+        /// <c>UseItem</c>, not the item-list request. The reply is <see cref="ItemList"/> at the current cursor.
+        /// </summary>
+        public const ushort RequestItemList = 0x000F;
+        /// <summary>
+        /// Zone → client: Mobius <c>AgitDecoInfo</c>.
+        /// <c>ServerPackets.AGIT_DECO_INFO(0xF7)</c>,
+        /// L2J_Mobius_CT_0_Interlude/java/org/l2jmobius/gameserver/network/ServerPackets.java:223.
+        /// </summary>
+        public const ushort AgitDecoInfo = 0xF7;
+
+        // Boat packets use the Mobius CT_0 Interlude ids from ServerPackets.java.
+
+        /// <summary>ServerPackets.java:101 <c>VEHICLE_INFO(0x59)</c>. Layout: VehicleInfo.java:47-52.</summary>
+        public const ushort VehicleInfo = 0x59;
+        /// <summary>ServerPackets.java:102 <c>VEHICLE_DEPARTURE(0x5A)</c>. Layout: VehicleDeparture.java:49-55.</summary>
+        public const ushort VehicleDeparture = 0x5A;
+        /// <summary>ServerPackets.java:103 <c>VEHICLE_CHECK_LOCATION(0x5B)</c>. Layout: VehicleCheckLocation.java:39-44.</summary>
+        public const ushort VehicleCheckLocation = 0x5B;
+        /// <summary>ServerPackets.java:104 <c>GET_ON_VEHICLE(0x5C)</c>. Layout: GetOnVehicle.java:48-53.</summary>
+        public const ushort GetOnVehicle = 0x5C;
+        /// <summary>ServerPackets.java:105 <c>GET_OFF_VEHICLE(0x5D)</c>. Layout: GetOffVehicle.java:53-58.</summary>
+        public const ushort GetOffVehicle = 0x5D;
+        /// <summary>ServerPackets.java:120 <c>MOVE_TO_LOCATION_IN_VEHICLE(0x71)</c>. Layout: MoveToLocationInVehicle.java:51-59.</summary>
+        public const ushort MoveToLocationInVehicle = 0x71;
+        /// <summary>ServerPackets.java:121 <c>STOP_MOVE_IN_VEHICLE(0x72)</c>. Layout: StopMoveInVehicle.java:46-52.</summary>
+        public const ushort StopMoveInVehicle = 0x72;
+        /// <summary>ServerPackets.java:122 <c>VALIDATE_LOCATION_IN_VEHICLE(0x73)</c>. Layout: ValidateLocationInVehicle.java:47-53.</summary>
+        public const ushort ValidateLocationInVehicle = 0x73;
+        /// <summary>ServerPackets.java:172 <c>VEHICLE_START(0xC0)</c>. Layout: VehicleStarted.java:45-47.</summary>
+        public const ushort VehicleStarted = 0xC0;
+
+        /// <summary>
+        /// Mobius <c>ClientPackets.java</c>. A separate registry from the constants above:
+        /// Interlude uses <c>0x5C</c> for both server <c>GET_ON_VEHICLE</c> and client
+        /// <c>REQUEST_MOVE_TO_LOCATION_IN_VEHICLE</c>, and <c>0x5D</c> for both
+        /// <c>GET_OFF_VEHICLE</c> and <c>CANNOT_MOVE_ANYMORE_IN_VEHICLE</c>.
+        /// </summary>
+        public static class ClientPackets
+        {
+            /// <summary>ClientPackets.java:85 <c>REQUEST_GET_ON_VEHICLE(0x42)</c>. readImpl RequestGetOnVehicle.java:40-43.</summary>
+            public const ushort RequestGetOnVehicle = 0x42;
+            /// <summary>ClientPackets.java:86 <c>REQUEST_GET_OFF_VEHICLE(0x43)</c>. readImpl RequestGetOffVehicle.java:36-42.</summary>
+            public const ushort RequestGetOffVehicle = 0x43;
+            /// <summary>ClientPackets.java:106 <c>REQUEST_MOVE_TO_LOCATION_IN_VEHICLE(0x5C)</c>. readImpl RequestMoveToLocationInVehicle.java:45-53.</summary>
+            public const ushort RequestMoveToLocationInVehicle = 0x5C;
+            /// <summary>ClientPackets.java:107 <c>CANNOT_MOVE_ANYMORE_IN_VEHICLE(0x5D)</c>. readImpl CannotMoveAnymoreInVehicle.java:35-42.</summary>
+            public const ushort CannotMoveAnymoreInVehicle = 0x5D;
+        }
     }
 }

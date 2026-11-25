@@ -22,17 +22,17 @@ public sealed class RegionSimulationDeterminismTests
 
     static readonly string[] LegacyCombatOrder =
     [
-        "commands", "movement.player", "arena", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
+        "commands", "game-time", "movement.player", "arena", "npc.paths", "movement.npc", "random-walk", "pending-hits", "melee-hits", "pvp-flags",
         "auto-attacks", "pending-casts", "queued-moves", "trade-range", "party", "pending-pickups", "pending-talks",
         "wedding-teleport", "fear", "aggression", "leash", "mob-attacks", "summons", "cubics", "duels", "corpse-decay", "attack-stance",
-        "ground-expiry", "environment.zones", "punishment", "door-auto-close", "cursed-weapons"
+        "force-charge-decay", "ground-expiry", "environment.zones", "punishment", "door-auto-close", "cursed-weapons"
     ];
 
     static readonly string[] LegacySimulationOrder =
     [
         "regen.players", "regen.npcs", "spawns", "abnormals", "bosses", "dimensional-rift", "clan.dissolutions", "clan.hall-auctions",
         "clan.hall-functions",
-        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "monster-race", "seven-signs", "seven-signs-festival", "mammon", "olympiad"
+        "sieges", "clan.ch-sieges", "manor", "fishing", "lottery", "fishing-championship", "monster-race", "seven-signs", "seven-signs-festival", "mammon", "olympiad"
     ];
 
     /// <summary>The end-of-tick barrier, after every stage of the step.</summary>
@@ -100,7 +100,7 @@ public sealed class RegionSimulationDeterminismTests
         var expected = new List<string>();
         for (int step = 1; step <= 2 * ZoneSimulationSettings.SlowPeriodTicks; step++)
         {
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
             expected.AddRange(LegacyCombatOrder);
             if (step % ZoneSimulationSettings.SlowPeriodTicks == 0)
                 expected.AddRange(LegacySimulationOrder);
@@ -228,6 +228,7 @@ public sealed class RegionSimulationDeterminismTests
                 Assert.True(kit.World.ApplyAbnormalFromSkillForTest(bleed, bleedLevel, mob));
         }
 
+        kit.World.WaitForFanoutIdle();
         lock (recorder.Calls)
             recorder.Calls.Clear();
         int[] tracked = [.. new[] { west.ObjectId, east.ObjectId }.Concat(Enumerable.Range(FirstMobId, MobCount)).Order()];

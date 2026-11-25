@@ -62,6 +62,8 @@ namespace Fineage.Net.Contract
                 w.WriteInt32(row.Option1);
                 w.WriteInt32(row.Option2);
             }
+
+            // The inventory version is not part of this body. See InventoryVersionTail.
         });
 
         public static InventoryUpdateNetMsg DecodeInventoryUpdate(ReadOnlySpan<byte> p)
@@ -129,6 +131,18 @@ namespace Fineage.Net.Contract
         {
             var r = new Reader(p);
             return new DestroyItemRequestMsg { ObjectId = r.ReadInt32(), Count = r.ReadInt32() };
+        }
+
+        public static byte[] EncodeCrystallizeItemRequest(CrystallizeItemRequestMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.ObjectId);
+            w.WriteInt32(m.Count);
+        });
+
+        public static CrystallizeItemRequestMsg DecodeCrystallizeItemRequest(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            return new CrystallizeItemRequestMsg { ObjectId = r.ReadInt32(), Count = r.ReadInt32() };
         }
 
         public static byte[] EncodeUseItem(UseItemNetMsg m) => Write(w => w.WriteInt32(m.ObjectId));

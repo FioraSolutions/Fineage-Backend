@@ -9,15 +9,13 @@ sealed partial class NetWorldEventPublisher
     void IWorldEventPublisher.FanoutSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.SkillListMsg list)
     {
         var payload = NetCodec.EncodeSkillList(NetEnterWorldProjector.ToNetSkillList(list));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SkillList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.SkillList, payload);
     }
 
     void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init)
     {
         var payload = NetCodec.EncodeShortCutInit(SessionLifecyclePacketHandler.ToNetShortcutInit(init));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.ShortCutInit, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShortCutInit, payload);
     }
 
     void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z)
@@ -31,8 +29,7 @@ sealed partial class NetWorldEventPublisher
             Y = y,
             Z = z
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.ChangeWaitType, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ChangeWaitType, payload);
     }
 
     void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId)
@@ -43,8 +40,7 @@ sealed partial class NetWorldEventPublisher
             EntityGeneration = 1,
             ActionId = actionId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.SocialAction, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.SocialAction, payload);
     }
 
     void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint)
@@ -54,8 +50,7 @@ sealed partial class NetWorldEventPublisher
             TargetObjectId = targetObjectId,
             ColorHint = colorHint
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.TargetSelected, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TargetSelected, payload);
     }
 
     void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId)
@@ -64,22 +59,31 @@ sealed partial class NetWorldEventPublisher
         {
             TargetObjectId = targetObjectId
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.TargetUnselected, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.TargetUnselected, payload);
     }
 
     void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list)
     {
         var payload = NetCodec.EncodeAcquireSkillList(ToNetAcquireSkillList(list));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.AcquireSkillList, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AcquireSkillList, payload);
     }
 
     void IWorldEventPublisher.FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info)
     {
         var payload = NetCodec.EncodeAcquireSkillInfo(ToNetAcquireSkillInfo(info));
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.AcquireSkillInfo, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.AcquireSkillInfo, payload);
+    }
+
+    void IWorldEventPublisher.FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list)
+    {
+        var payload = NetCodec.EncodeEnchantSkillList(ToNetEnchantSkillList(list));
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.EnchantSkillList, payload);
+    }
+
+    void IWorldEventPublisher.FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info)
+    {
+        var payload = NetCodec.EncodeEnchantSkillInfo(ToNetEnchantSkillInfo(info));
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.EnchantSkillInfo, payload);
     }
 
     static AcquireSkillListNetMsg ToNetAcquireSkillList(Fineage.Protocol.AcquireSkillListMsg list)
@@ -126,6 +130,50 @@ sealed partial class NetWorldEventPublisher
         };
     }
 
+    static EnchantSkillListNetMsg ToNetEnchantSkillList(Fineage.Protocol.EnchantSkillListMsg list)
+    {
+        var src = list.Skills ?? [];
+        var rows = new EnchantSkillListEntryNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            rows[i] = new EnchantSkillListEntryNet
+            {
+                SkillId = src[i].SkillId,
+                NextLevel = src[i].NextLevel,
+                Sp = src[i].Sp,
+                Exp = src[i].Exp
+            };
+        }
+
+        return new EnchantSkillListNetMsg { Skills = rows };
+    }
+
+    static EnchantSkillInfoNetMsg ToNetEnchantSkillInfo(Fineage.Protocol.EnchantSkillInfoMsg info)
+    {
+        var src = info.Requirements ?? [];
+        var reqs = new EnchantSkillRequirementNet[src.Length];
+        for (int i = 0; i < src.Length; i++)
+        {
+            reqs[i] = new EnchantSkillRequirementNet
+            {
+                Type = src[i].Type,
+                ItemId = src[i].ItemId,
+                Count = src[i].Count,
+                Unk = src[i].Unk
+            };
+        }
+
+        return new EnchantSkillInfoNetMsg
+        {
+            SkillId = info.SkillId,
+            Level = info.Level,
+            SpCost = info.SpCost,
+            ExpCost = info.ExpCost,
+            Rate = info.Rate,
+            Requirements = reqs
+        };
+    }
+
     void IWorldEventPublisher.FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result)
     {
         var payload = NetCodec.EncodeEnchantResult(new EnchantResultNetMsg
@@ -136,7 +184,6 @@ sealed partial class NetWorldEventPublisher
             CrystalItemId = result.CrystalItemId,
             CrystalCount = result.CrystalCount
         });
-        foreach (int watcher in watcherObjectIds)
-            _presence.TrySend(watcher, NetOpcode.EnchantResult, payload);
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.EnchantResult, payload);
     }
 }

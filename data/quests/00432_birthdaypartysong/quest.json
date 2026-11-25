@@ -44,6 +44,23 @@
       "when": "absent",
       "event": "31043-05",
       "htmlFile": "31043-event-31043-05-003.htm"
+    },
+    {
+      "npcId": 21103,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7541,
+          "count": 1,
+          "chance": 0.5,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

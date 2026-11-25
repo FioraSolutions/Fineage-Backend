@@ -294,6 +294,28 @@
         }
       ],
       "html": ""
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31961-talk-026.htm"
+    },
+    {
+      "npcId": 31961,
+      "hook": "talk",
+      "when": "started",
+      "ops": [
+        {
+          "op": "complete"
+        }
+      ],
+      "htmlFile": "31961-talk-027.htm"
     }
   ]
 }

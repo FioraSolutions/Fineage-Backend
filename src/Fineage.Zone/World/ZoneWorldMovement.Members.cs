@@ -7,13 +7,18 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).</summary>
+    /// <summary>
+    /// Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).
+    /// <para>
+    /// The before-list is the one <see cref="ReconcileKnownlist"/> already copied into its scratch: a refresh runs once
+    /// per moving entity per movement stage, so a second copy of the same set here was pure per-move allocation. The
+    /// scratch is only valid until the next reconcile, which is exactly the lifetime of this diff.
+    /// </para>
+    /// </summary>
     void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack)
     {
-        e.AoiRefreshX = e.X;
-        e.AoiRefreshY = e.Y;
-        var before = new HashSet<int>(e.Knownlist);
-        ReconcileKnownlist(e, ack);
+        StampKnownlistRefreshAnchor(e);
+        ReconcileKnownlist(e, ack, before: out var before);
         if (NetBridge == null || e.Session == null)
             return;
         List<int>? added = null, removed = null;
@@ -27,7 +32,6 @@ public sealed partial class ZoneWorld
             return;
         added?.Sort();
         removed?.Sort();
-        ZoneLog.Info($"[aoi] move refresh obj={e.ObjectId} at={e.X},{e.Y} +{added?.Count ?? 0} -{removed?.Count ?? 0}");
         var addedList = (IReadOnlyList<int>?)added ?? [];
         NetBridge.FanoutKnownlistDiff(e.ObjectId, addedList, (IReadOnlyList<int>?)removed ?? []);
         FanoutMoveSyncToNewWatchers(e, addedList, ack != null);
@@ -54,6 +58,23 @@ public sealed partial class ZoneWorld
             mover.Running);
     }
 
+    /// <summary>
+    /// <see cref="AdvanceMove"/> from a combat region body: the movement stages already advanced every mover at
+    /// this same tick, so the call is a no-op by construction. A real advance here would relocate an entity
+    /// inside a body, which the directory refuses — log the missed mover instead of throwing on a worker thread.
+    /// </summary>
+    void AdvanceMoveSettled(ZoneEntity e, long now)
+    {
+        if (e.MoveActive && now > e.MoveLastTickMs)
+        {
+            ZoneLog.Error(
+                $"[region] entity {e.ObjectId} has {now - e.MoveLastTickMs}ms of unadvanced movement at tick time {now}: " +
+                "a movement stage skipped a mover; positions read by this combat stage are one step stale");
+            return;
+        }
+        AdvanceMove(e, now);
+    }
+
     void AdvanceMove(ZoneEntity e, long now)
     {
         if (!e.MoveActive)
@@ -71,10 +92,11 @@ public sealed partial class ZoneWorld
         float speed = MoveSpeedOf(e);
         double step = speed * dt / 1000.0;
         double dx = e.MoveDestX - e.X, dy = e.MoveDestY - e.Y;
-        double dist = Math.Sqrt(dx * dx + dy * dy);
-        if (dist >= 1)
+        double distSq = dx * dx + dy * dy;
+        if (distSq >= 1)
             e.Heading = ZoneCombat.HeadingFrom(e.X, e.Y, e.MoveDestX, e.MoveDestY);
-        if ((dist <= step || dist < 1) && e.MovePath.Count > 0)
+        double stepSq = step * step;
+        if ((distSq <= stepSq || distSq < 1) && e.MovePath.Count > 0)
         {
             // Reached a geo-path waypoint: snap to it and start the next leg (leftover distance is dropped, ≤1 tick).
             e.X = e.MoveDestX;
@@ -89,7 +111,7 @@ public sealed partial class ZoneWorld
             }
             e.MoveSegmentDirty = true;
         }
-        else if (dist <= step || dist < 1)
+        else if (distSq <= stepSq || distSq < 1)
         {
             e.MoveCarryX = e.MoveCarryY = 0;
             e.X = e.MoveDestX;
@@ -99,6 +121,7 @@ public sealed partial class ZoneWorld
         }
         else
         {
+            double dist = Math.Sqrt(distSq);
             double k = step / dist;
             double nx = e.X + e.MoveCarryX + dx * k, ny = e.Y + e.MoveCarryY + dy * k;
             int ix = (int)Math.Round(nx), iy = (int)Math.Round(ny);
@@ -107,13 +130,14 @@ public sealed partial class ZoneWorld
             e.X = ix;
             e.Y = iy;
             e.Z += (int)Math.Round((e.MoveDestZ - e.Z) * k);
-            if (_geo.HasGeo(e.X, e.Y))
-                e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+            ApplyMoveGeoHeight(e);
         }
-        _aoi.Move(e.ObjectId, e.X, e.Y);
+        MoveAoi(e.ObjectId, e.X, e.Y);
         if (e.Session != null)
+        {
             SyncSession(e, e.Session);
-        UpdateMoveEnvironment(e);
+            UpdateMoveEnvironment(e);
+        }
     }
 
     /// <summary>
@@ -149,7 +173,7 @@ public sealed partial class ZoneWorld
     {
         if (!RefreshRunSpeed(entity))
             return;
-        ZoneLog.Info($"[speed] obj={entity.ObjectId} run={entity.RunSpeed} base={entity.BaseRunSpeed}");
+        ZoneHotPathLogs.MoveSpeedRefreshed(entity.ObjectId, entity.RunSpeed, entity.BaseRunSpeed);
         FanoutNetMoveType(entity);
     }
 
@@ -164,7 +188,7 @@ public sealed partial class ZoneWorld
         e.InWater = inWater;
         // Mobius onEnter/onExit recomputes the live speed for the new base pair: refresh first, then tell watchers.
         RefreshRunSpeed(e);
-        ZoneLog.Info($"[water] obj={e.ObjectId} {(inWater ? "enter" : "exit")} at={e.X},{e.Y},{e.Z} speed={MoveSpeedOf(e)}");
+        ZoneHotPathLogs.WaterState(e.ObjectId, inWater, e.X, e.Y, e.Z, MoveSpeedOf(e));
         FanoutNetMoveType(e);
     }
 
@@ -179,7 +203,8 @@ public sealed partial class ZoneWorld
         var door = Doors.FirstBlocking(e.X, e.Y, e.Z, destX, destY, destZ, out int sx, out int sy, out int sz);
         if (door == null)
             return false;
-        ZoneLog.Info($"[door] move blocked obj={e.ObjectId} door={door.Id}:{door.Name} from={e.X},{e.Y},{e.Z} want={destX},{destY},{destZ} stop={sx},{sy},{sz}");
+        ZoneHotPathLogs.DoorMoveBlocked(
+            e.ObjectId, door.Id, door.Name, e.X, e.Y, e.Z, destX, destY, destZ, sx, sy, sz);
         destX = sx;
         destY = sy;
         destZ = _geo.HasGeo(sx, sy) ? _geo.GetHeight(sx, sy, sz) : sz;
@@ -191,5 +216,17 @@ public sealed partial class ZoneWorld
         s.X = e.X;
         s.Y = e.Y;
         s.Z = e.Z;
+    }
+
+    /// <summary>GetHeight only when the mover enters a new grid cell; interpolation covers ticks inside a cell.</summary>
+    void ApplyMoveGeoHeight(ZoneEntity e)
+    {
+        if (!_geo.HasGeo(e.X, e.Y))
+            return;
+        long cell = AoiCellKeyAt(e.X, e.Y);
+        if (cell != 0 && cell == e.MoveGeoHeightCell)
+            return;
+        e.Z = _geo.GetHeight(e.X, e.Y, e.Z);
+        e.MoveGeoHeightCell = cell;
     }
 }

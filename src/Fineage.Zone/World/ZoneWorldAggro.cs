@@ -215,7 +215,8 @@ public sealed partial class ZoneWorld
                 !SameInstance(caller.ObjectId, other.ObjectId))
                 continue;
             ZoneLog.Info($"[aggro] clan help npc={other.ObjectId} ({other.Name}) for npc={caller.ObjectId} on player={target.ObjectId}");
-            AddHate(other, target);
+            // The helper may be owned by another region: the hate lands at the stage barrier (Mobius addDamageHate 1).
+            Post(new HateMessage(other.ObjectId, target.ObjectId, 1));
         }
     }
 

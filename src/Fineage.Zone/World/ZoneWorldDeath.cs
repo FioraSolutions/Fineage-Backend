@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -80,6 +81,11 @@ public sealed partial class ZoneWorld
 
         if (action != DeathProtocol.ReviveToVillage)
             return DeathProtocol.Unsupported;
+        if (ZoneRules.Query(player.X, player.Y, player.Z, player.Race).BlocksRestart)
+        {
+            ZoneLog.Error($"[zone] NoRestartZone refused village restart obj={player.ObjectId} at {player.X},{player.Y},{player.Z}");
+            return DeathProtocol.NoRestart;
+        }
 
         ClearReviveOffer(player);
         var (x, y, z) = TownDestination(player);
@@ -112,6 +118,9 @@ public sealed partial class ZoneWorld
         player.Sitting = false;
         player.Running = false;
         player.ActiveEnchantObjectId = 0;
+        // NoblesseBless is consumed with every other abnormal. The death penalty below has to
+        // see that it was up, because the list is empty once the effects stop.
+        bool noblesseBlessing = HasEffectAbnormal(player, PlayableAttackRules.NoblesseBlessEffect);
         player.Abnormals.Clear();
         _byId.Leave(player, ActiveSets.WithAbnormals);
         // Mobius Creature.doDie -> getEffectList().stopAllEffects() then updateEffectIcons: the corpse's abnormal bar
@@ -139,7 +148,7 @@ public sealed partial class ZoneWorld
 
         // Mobius Player.onDeath runs the exp penalty before the Die packet goes out, so the client's exp bar and the
         // Death Penalty level are already the post-death values on the death screen.
-        ApplyDeathConsequences(player, killerObjectId);
+        ApplyDeathConsequences(player, killerObjectId, noblesseBlessing);
         // Mobius Player.onDieDropItem — after exp/DP, before Die packet.
         OnDieDropItem(player, killerObjectId);
         if (killerObjectId > 0 && _byId.TryGetValue(killerObjectId, out var killerEntity))

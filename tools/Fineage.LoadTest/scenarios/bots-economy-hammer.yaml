@@ -1,0 +1,25 @@
+name: bots-economy-hammer
+extends: bots-20-smoke.yaml
+botCount: 24
+rampUpSeconds: 20
+durationSeconds: 90
+spawnLayout: economy
+spawnX: -84160
+spawnY: 240403
+spawnZ: -3720
+economy:
+  enabled: true
+  requireLedgerInvariant: true
+  flowTimeoutSeconds: 8
+actionWeights:
+  economy_hub: 0.05
+  economy_shop_buy: 0.14
+  economy_shop_sell: 0.10
+  economy_warehouse: 0.08
+  economy_trade: 0.12
+  economy_store: 0.14
+  economy_manufacture_maker: 0.04
+  economy_manufacture_customer: 0.04
+  economy_manor: 0.07
+  economy_pickup_drop: 0.10
+  move: 0.12

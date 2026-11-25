@@ -90,7 +90,7 @@
       "htmlFile": "31683-event-31683-03-008.htm"
     },
     {
-      "npcId": 31683,
+      "npcId": 31548,
       "hook": "event",
       "when": "absent",
       "event": "31548-02",
@@ -104,7 +104,7 @@
       "htmlFile": "31683-event-31548-02-009.htm"
     },
     {
-      "npcId": 31683,
+      "npcId": 31549,
       "hook": "event",
       "when": "absent",
       "event": "31549-02",
@@ -118,7 +118,7 @@
       "htmlFile": "31683-event-31549-02-010.htm"
     },
     {
-      "npcId": 31683,
+      "npcId": 31550,
       "hook": "event",
       "when": "absent",
       "event": "31550-02",
@@ -132,7 +132,7 @@
       "htmlFile": "31683-event-31550-02-011.htm"
     },
     {
-      "npcId": 31683,
+      "npcId": 31551,
       "hook": "event",
       "when": "absent",
       "event": "31551-02",
@@ -146,7 +146,7 @@
       "htmlFile": "31683-event-31551-02-012.htm"
     },
     {
-      "npcId": 31683,
+      "npcId": 31552,
       "hook": "event",
       "when": "absent",
       "event": "31552-02",
@@ -199,6 +199,57 @@
         }
       ],
       "htmlFile": "31683-event-31683-10-015.htm"
+    },
+    {
+      "npcId": 21297,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7190,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21299,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7190,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21304,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7190,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

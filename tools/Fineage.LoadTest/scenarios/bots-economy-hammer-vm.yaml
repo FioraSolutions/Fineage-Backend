@@ -1,0 +1,6 @@
+name: bots-economy-hammer-vm
+extends: bots-economy-hammer.yaml
+botCount: 12
+rampUpSeconds: 12
+durationSeconds: 45
+spawnLayout: economy

@@ -15,6 +15,7 @@ namespace Fineage.Zone.Tests;
 /// and the paperdoll. The Net transport cases live in <see cref="NetEnchantTests"/>; these assert the outcome
 /// through <see cref="IWorldEventPublisher"/> instead of reading MessagePack frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetEnchantRulesTests
 {
     const int Saber = 123;
@@ -229,8 +230,35 @@ public sealed class NetEnchantRulesTests
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
         Assert.Equal(Saber, info.Paperdoll[7].ItemId);
         Assert.Equal(1, info.Paperdoll[7].EnchantLevel);
+        Assert.True(info.PAtk > 0);
         Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutCharInfo)));
         Assert.Contains(Lines(bench.Rec), l => l.Id == EnchantProtocol.SuccessPlain);
+    }
+
+    [Fact]
+    public async Task Equipped_plus_four_enchant_raises_UserInfo_pAtk()
+    {
+        var bench = new Bench(0, 0, 0, 0);
+        var (session, player) = await bench.EnterAsync("ench", "Alden",
+            new StoredItem(Saber, 1, 7, 0), Bag(NormalD, 4));
+        var baseline = bench.World.BuildUserInfo(player).PAtk;
+
+        await OpenScrollAsync(bench, session, player, NormalD);
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
+        bench.Rec.Calls.Clear();
+        await OpenScrollAsync(bench, session, player, NormalD);
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
+        bench.Rec.Calls.Clear();
+        await OpenScrollAsync(bench, session, player, NormalD);
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
+        bench.Rec.Calls.Clear();
+        await OpenScrollAsync(bench, session, player, NormalD);
+        Assert.Null(await bench.World.TryEnchantConfirmAsync(session, SlotFor(player, Saber), default));
+
+        var info = Assert.IsType<Fineage.Protocol.UserInfoMsg>(
+            bench.Rec.Of(nameof(IWorldEventPublisher.FanoutUserInfo)).Last()[1]);
+        Assert.Equal(4, info.Paperdoll[7].EnchantLevel);
+        Assert.True(info.PAtk > baseline);
     }
 
     [Fact]
@@ -271,7 +299,9 @@ public sealed class NetEnchantRulesTests
         Assert.Equal(16, LastResult(bench.Rec).EnchantLevel);
         var update = Assert.IsType<InventoryUpdateMsg>(
             bench.Rec.Of(nameof(IWorldEventPublisher.FanoutInventoryUpdate)).Last()[1]);
-        Assert.Contains(update.Changes, row => row.ItemId == Blade && row.EnchantLevel == 16);
+        Assert.Contains(update.Changes, row => row.ItemId == CrystalS && row.Change == InventoryChange.Remove);
+        Assert.DoesNotContain(update.Changes, row => row.ItemId == Blade && row.EnchantLevel != 16);
+        Assert.Equal(16, player.Inventory!.FindByItemId(Blade)!.EnchantLevel);
         Assert.DoesNotContain(bench.Store.FindById(session.Account, session.ObjectId)!.Items!,
             item => item.ItemId == CrystalS);
     }

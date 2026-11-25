@@ -1,71 +1,471 @@
+using System.Diagnostics;
+using Fineage.Protocol.Telemetry;
+
 namespace Fineage.Zone.World;
 
+/// <summary>Submit timestamp carried on the sealed fan-out batch so mailbox delivery can record submit→mailbox.</summary>
+internal readonly record struct CommandSubmitMark(long CorrelationId, long SubmittedAtTicks);
+
 /// <summary>
-/// Player commands on their way into the simulation. Handlers submit from I/O threads and await the reply; the
-/// <c>commands</c> stage takes everything submitted so far at the start of a step, in submission order. The step that
-/// applied them takes their replies when it seals its fan-out (<see cref="TakeApplied"/>) and completes them after its
-/// inventory writes and fan-out drain: a handler's answer never overtakes what its command caused.
+/// One ordered queue per player and a deficit round-robin over ready players. The quantum is command cost
+/// units, so a flooding player cannot take the tick away from everyone else, and commands from one player
+/// stay in submission order. Consecutive pending movement commands collapse to the latest; a non-movement
+/// command between them is a boundary. The apply budget is wall-clock
+/// (<see cref="ZoneSimulationSettings.CommandApplyBudgetFraction"/> of the step, plus banked unused time while
+/// a backlog remains) clamped to the tick deadline. <c>FINEAGE_ZONE_COMMAND_APPLY_BUDGET</c> is an optional
+/// extra cost-unit cap, not the default scheduler.
+/// Region-parallel apply is out of scope: every player queue is still drained on the simulation thread.
+/// A later shard can only split ready players after this scheduler remains the single admission point,
+/// so one player is never applied by two threads.
 /// </summary>
 internal sealed class ZoneCommandIngress
 {
+    internal const string CoalescedReason = "coalesced: superseded by a later movement command";
+
     readonly object _lock = new();
-    readonly SemaphoreSlim _submitted = new(0, 1);
-    List<Submission> _queued = [];
-    List<Applied> _applied = [];
+    readonly SemaphoreSlim _submitted = new(0, int.MaxValue);
+    readonly Dictionary<int, PlayerQueue> _players = new();
+    readonly List<int> _active = [];
+    readonly CommandApplyTimebox _timebox;
+    readonly int _queueDepthLimit;
+    readonly int _maxAgeMs;
+    readonly int _quantum;
+    readonly int _costCap;
+    readonly double _stepMs;
+    int _cursor;
+    bool _visitCharged;
+    bool _cycleStarved;
     long _sequence;
     string? _closed;
+    int _depth;
+    int _coalescedThisTick;
+    long _sliceStartTicks;
+    long _clockTicks;
+    bool _clockSet;
+    List<QueueSample>? _sampleScratch;
 
-    internal sealed record Submission(long Sequence, ZoneSession Session, ZoneCommand Command, TaskCompletionSource<string?> Reply);
+    internal ZoneCommandIngress(IngressLimits? limits = null)
+    {
+        limits ??= IngressLimits.FromSettings();
+        _queueDepthLimit = limits.QueueDepthLimit;
+        _maxAgeMs = limits.MaxAgeMs;
+        _quantum = limits.Quantum;
+        _costCap = limits.CostCap;
+        _stepMs = limits.StepMs;
+        _timebox = new CommandApplyTimebox(limits.NominalBudgetMs, limits.StepMs);
+    }
+
+    /// <summary>Test clock. Unset uses <see cref="Stopwatch.GetTimestamp"/>.</summary>
+    internal long? ClockForTest
+    {
+        get
+        {
+            lock (_lock)
+                return _clockSet ? _clockTicks : null;
+        }
+        set
+        {
+            lock (_lock)
+            {
+                if (value is { } ticks)
+                {
+                    _clockTicks = ticks;
+                    _clockSet = true;
+                }
+                else
+                {
+                    _clockSet = false;
+                }
+            }
+        }
+    }
+
+    internal sealed record IngressLimits(
+        int QueueDepthLimit,
+        int MaxAgeMs,
+        int Quantum,
+        int CostCap,
+        double NominalBudgetMs,
+        double StepMs)
+    {
+        public static IngressLimits FromSettings()
+        {
+            int? cost = ZoneSimulationSettings.CommandApplyCostCapOverride;
+            return new IngressLimits(
+                ZoneSimulationSettings.CommandQueueDepthLimit,
+                ZoneSimulationSettings.CommandQueueMaxAgeMs,
+                ZoneSimulationSettings.CommandDrrQuantum,
+                cost is null or 0 ? int.MaxValue : cost.Value,
+                ZoneSimulationSettings.CommandApplyNominalMilliseconds,
+                ZoneSimulationSettings.StepMilliseconds);
+        }
+    }
+
+    internal readonly record struct ApplySlice(long DeadlineTimestamp, int CostRemaining);
+
+    internal sealed record Submission(
+        long CorrelationId,
+        ZoneSession Session,
+        ZoneCommand Command,
+        TaskCompletionSource<string?> Reply,
+        long SubmittedAtTicks);
 
     internal readonly record struct Applied(Submission Submission, string? Error, Exception? Failure);
+
+    /// <summary>
+    /// What one queue mutation has to report. Captured under <see cref="_lock"/> and recorded after it is released, so a
+    /// histogram append or a log line never makes a pump thread wait on the simulation thread's monitor.
+    /// </summary>
+    readonly record struct QueueSample(int Depth, double AgeMs, bool HasAge);
+
+    /// <summary>An enqueue that was refused before it touched a queue; the caller logs and counts it off the monitor.</summary>
+    readonly record struct Refused(string Reason);
+
+    sealed class PlayerQueue
+    {
+        public readonly List<Submission> Items = [];
+        public int Deficit;
+        public long OldestTicks;
+        public int Count => Items.Count;
+        public Submission Head => Items[0];
+        public Submission Tail => Items[^1];
+
+        public void Enqueue(Submission submission)
+        {
+            if (Items.Count == 0)
+                OldestTicks = submission.SubmittedAtTicks;
+            Items.Add(submission);
+        }
+
+        public Submission DequeueHead()
+        {
+            var head = Items[0];
+            Items.RemoveAt(0);
+            if (Items.Count > 0)
+                OldestTicks = Items[0].SubmittedAtTicks;
+            return head;
+        }
+
+        public Submission ReplaceTail(Submission newer)
+        {
+            var old = Items[^1];
+            Items[^1] = newer;
+            if (Items.Count == 1)
+                OldestTicks = newer.SubmittedAtTicks;
+            return old;
+        }
+    }
 
     public Task<string?> Submit(ZoneSession session, ZoneCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(command);
         var reply = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Submission? coalesced = null;
+        string? refusal = null;
+        QueueSample sample = default;
+        bool refused = false;
         lock (_lock)
         {
             if (_closed != null)
-                return Task.FromException<string?>(new InvalidOperationException(
-                    $"command {command.Name} for object {session.ObjectId} refused: {_closed}"));
-            _queued.Add(new Submission(++_sequence, session, command, reply));
-            if (_submitted.CurrentCount == 0)
-                _submitted.Release();
+            {
+                refusal = $"command {command.Name} for object {session.ObjectId} refused: {_closed}";
+                refused = true;
+            }
+            else
+            {
+                var submission = new Submission(++_sequence, session, command, reply, NowTicks());
+                if (EnqueueLocked(submission, out coalesced, out refusal, out sample))
+                {
+                    if (_submitted.CurrentCount == 0)
+                        _submitted.Release();
+                }
+                else
+                {
+                    refused = true;
+                }
+            }
         }
+
+        // Everything that can log or record runs off the monitor: a pump thread submitting here must never wait on a
+        // histogram append, and the simulation thread must never hold the queue while a pump writes a warning.
+        if (refused)
+        {
+            ZoneLog.Warn(refusal!);
+            FineageTelemetry.CommandRejected.Add(1, new KeyValuePair<string, object?>("reason", ReasonTag(refusal!)));
+            return Task.FromException<string?>(new ZoneIngressRefusal(refusal!));
+        }
+
+        RecordSample(sample);
+        coalesced?.Reply.TrySetResult(CoalescedReason);
 
         if (ct.CanBeCanceled)
         {
-            // A connection token lives as long as the connection: drop the registration once the reply is settled.
             var registration = ct.Register(static state => ((TaskCompletionSource<string?>)state!).TrySetCanceled(), reply);
             reply.Task.ContinueWith(static (_, state) => ((CancellationTokenRegistration)state!).Dispose(), registration,
                 CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
         }
+
         return reply.Task;
     }
 
-    /// <summary>Everything submitted so far, in submission order; later submissions wait for the next drain.</summary>
-    public IReadOnlyList<Submission> TakeQueued()
+    bool EnqueueLocked(Submission submission, out Submission? coalesced, out string? refusal, out QueueSample sample)
     {
+        coalesced = null;
+        refusal = null;
+        sample = default;
+        int sessionId = submission.Session.ObjectId;
+        if (!_players.TryGetValue(sessionId, out var queue))
+        {
+            queue = new PlayerQueue();
+            _players.Add(sessionId, queue);
+        }
+
+        if (queue.Count > 0)
+        {
+            double ageMs = AgeMs(queue.OldestTicks, submission.SubmittedAtTicks);
+            if (ageMs > _maxAgeMs && !IsConsecutiveMovement(queue.Tail.Command, submission.Command))
+            {
+                refusal = $"command {submission.Command.Name} for object {sessionId} refused: " +
+                          $"rejected: queue age {ageMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms exceeds {_maxAgeMs}ms";
+                return false;
+            }
+        }
+
+        if (queue.Count > 0 && IsConsecutiveMovement(queue.Tail.Command, submission.Command))
+        {
+            coalesced = queue.ReplaceTail(submission);
+            _coalescedThisTick++;
+            sample = SampleLocked(queue);
+            return true;
+        }
+
+        if (queue.Count >= _queueDepthLimit)
+        {
+            refusal = $"command {submission.Command.Name} for object {sessionId} refused: " +
+                      $"rejected: queue depth {queue.Count} is at the limit {_queueDepthLimit}";
+            return false;
+        }
+
+        bool wasEmpty = queue.Count == 0;
+        queue.Enqueue(submission);
+        _depth++;
+        if (wasEmpty)
+            _active.Add(sessionId);
+        sample = SampleLocked(queue);
+        return true;
+    }
+
+    static bool IsConsecutiveMovement(ZoneCommand older, ZoneCommand newer) =>
+        older.IsCoalesceableMovement && newer.IsCoalesceableMovement;
+
+    static string ReasonTag(string refusal) =>
+        refusal.Contains("queue age", StringComparison.Ordinal) ? "queue_age"
+        : refusal.Contains("queue depth", StringComparison.Ordinal) ? "queue_depth"
+        : "closed";
+
+    /// <summary>Opens the wall-clock slice for this step. <paramref name="stepStartedTimestamp"/> is 0 outside the live loop.</summary>
+    internal ApplySlice BeginApply(long stepStartedTimestamp)
+    {
+        var samples = _sampleScratch ??= [];
+        samples.Clear();
+        ApplySlice slice;
+        bool deadlineMissed = false;
+        double stepAgeMs = 0;
         lock (_lock)
         {
-            var taken = _queued;
-            _queued = [];
-            return taken;
+            _cycleStarved = false;
+            double maxAge = 0;
+            foreach (var queue in _players.Values)
+            {
+                if (queue.Count == 0)
+                    continue;
+                double age = AgeMs(queue.OldestTicks, NowTicks());
+                if (age > maxAge)
+                    maxAge = age;
+                samples.Add(SampleLocked(queue, age));
+            }
+
+            FineageTelemetry.NoteCommandQueueAge(maxAge);
+
+            bool backlog = _depth > 0;
+            double grantMs = _timebox.GrantMilliseconds(backlog);
+            long now = NowTicks();
+            _sliceStartTicks = now;
+            long budgetEnd = now + MillisecondsToTicks(grantMs);
+            long tickEnd = stepStartedTimestamp > 0
+                ? stepStartedTimestamp + MillisecondsToTicks(_stepMs)
+                : budgetEnd;
+            if (stepStartedTimestamp > 0 && now >= tickEnd)
+            {
+                deadlineMissed = true;
+                stepAgeMs = TicksToMs(now - stepStartedTimestamp);
+                tickEnd = now + MillisecondsToTicks(_timebox.NominalMs);
+            }
+
+            long deadline = Math.Min(budgetEnd, tickEnd);
+            slice = new ApplySlice(deadline, _costCap);
+        }
+
+        // The per-queue samples and the deadline warning run off the monitor, so a pump thread submitting during this
+        // step never waits on a histogram append or a log line.
+        foreach (var sample in samples)
+            RecordSample(sample);
+
+        if (deadlineMissed)
+            ZoneLog.Error(
+                $"command ingress tick deadline already passed at step start (step age {stepAgeMs.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}ms, step {_stepMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms); " +
+                $"applying the nominal {_timebox.NominalMs.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}ms budget so the per-player queues cannot stall");
+
+        return slice;
+    }
+
+    /// <summary>Deficit round-robin: one command, or false when the slice or the ready set is exhausted.</summary>
+    internal bool TryTake(ApplySlice slice, ref int costRemaining, out Submission submission)
+    {
+        double waitMs = 0;
+        string? waitClass = null;
+        bool took = false;
+        lock (_lock)
+        {
+            submission = null!;
+            if (_cycleStarved || NowTicks() >= slice.DeadlineTimestamp)
+                return false;
+
+            // One quantum per player per call. A second pass would credit a player who already could not send.
+            int advances = 0;
+            int advanceLimit = Math.Max(1, _active.Count);
+            while (_active.Count > 0 && advances < advanceLimit)
+            {
+                if (_cursor >= _active.Count)
+                    _cursor = 0;
+                int sessionId = _active[_cursor];
+                if (!_players.TryGetValue(sessionId, out var queue) || queue.Count == 0)
+                {
+                    RemoveActiveAtCursor();
+                    continue;
+                }
+
+                if (!_visitCharged)
+                {
+                    queue.Deficit += _quantum;
+                    _visitCharged = true;
+                }
+
+                int cost = Math.Max(1, queue.Head.Command.ApplyCost);
+                if (cost > queue.Deficit || cost > costRemaining)
+                {
+                    AdvanceCursor();
+                    advances++;
+                    continue;
+                }
+
+                submission = queue.DequeueHead();
+                queue.Deficit -= cost;
+                costRemaining -= cost;
+                _depth--;
+                waitMs = AgeMs(submission.SubmittedAtTicks, NowTicks());
+                waitClass = submission.Command.IngressClass.ToString().ToLowerInvariant();
+                took = true;
+
+                if (queue.Count == 0)
+                {
+                    queue.Deficit = 0;
+                    _players.Remove(sessionId);
+                    RemoveActiveAtCursor();
+                }
+                else if (Math.Max(1, queue.Head.Command.ApplyCost) > queue.Deficit)
+                {
+                    AdvanceCursor();
+                }
+
+                break;
+            }
+
+            if (!took)
+                _cycleStarved = _active.Count > 0;
+        }
+
+        // Appended off the monitor: the recording path of the collector is lock-free, but keeping it out of the queue
+        // monitor is what makes a pump thread's submit independent of the simulation thread's apply loop.
+        if (!took)
+            return false;
+
+        FineageTelemetry.CommandQueueWaitMilliseconds.Record(waitMs,
+            new KeyValuePair<string, object?>("class", waitClass!));
+        FineageTelemetry.CommandTimelineMilliseconds.Record(waitMs,
+            new KeyValuePair<string, object?>("phase", "submit_to_dequeue"));
+        return true;
+    }
+
+    internal void FinishApply()
+    {
+        int coalesced;
+        lock (_lock)
+        {
+            double usedMs = TicksToMs(NowTicks() - _sliceStartTicks);
+            _timebox.Account(usedMs);
+            coalesced = _coalescedThisTick;
+            _coalescedThisTick = 0;
+            if (_depth > 0 && _submitted.CurrentCount == 0)
+                _submitted.Release();
+        }
+
+        if (coalesced > 0)
+        {
+            RecordCoalesced(coalesced);
+            ZoneLog.Info($"command ingress coalesced {coalesced} movement command(s): {CoalescedReason}");
         }
     }
 
-    /// <summary>On the simulation thread: the outcome of an applied command; its reply waits for <see cref="TakeApplied"/>.</summary>
+    void AdvanceCursor()
+    {
+        _cursor++;
+        _visitCharged = false;
+    }
+
+    void RemoveActiveAtCursor()
+    {
+        _active.RemoveAt(_cursor);
+        _visitCharged = false;
+        if (_cursor >= _active.Count)
+            _cursor = 0;
+    }
+
+    /// <summary>
+    /// The sample for one queue. Returns a struct instead of recording: the caller holds <see cref="_lock"/>, and a
+    /// histogram append under it would make every pump thread's submit wait on telemetry.
+    /// </summary>
+    QueueSample SampleLocked(PlayerQueue queue, double? ageMs = null)
+    {
+        double age = ageMs ?? (queue.Count == 0 ? 0 : AgeMs(queue.OldestTicks, NowTicks()));
+        return new QueueSample(queue.Count, age, queue.Count > 0);
+    }
+
+    static void RecordSample(in QueueSample sample)
+    {
+        if (sample.Depth == 0)
+            return;
+        FineageTelemetry.CommandQueueDepth.Record(sample.Depth);
+        if (sample.HasAge)
+            FineageTelemetry.CommandQueueAgeMilliseconds.Record(sample.AgeMs);
+    }
+
+    /// <summary>Records the coalesces one submit performed; the count is bumped under the monitor, the append is not.</summary>
+    void RecordCoalesced(int coalesced)
+    {
+        if (coalesced > 0)
+            FineageTelemetry.CommandCoalesced.Add(coalesced);
+    }
+
+    List<Applied> _applied = [];
+
     public void Record(Submission submission, string? error, Exception? failure)
     {
         lock (_lock)
             _applied.Add(new Applied(submission, error, failure));
     }
 
-    /// <summary>
-    /// On the simulation thread, right after the step's fan-out batch was sealed: the replies of the commands it applied. The
-    /// caller completes them with <see cref="Complete"/> once its own inventory writes and fan-out drain are done.
-    /// </summary>
     public IReadOnlyList<Applied> TakeApplied()
     {
         lock (_lock)
@@ -78,49 +478,117 @@ internal sealed class ZoneCommandIngress
         }
     }
 
-    public static void Complete(IReadOnlyList<Applied> applied)
+    public static void Complete(IReadOnlyList<Applied> applied) =>
+        Answer(applied, committed: true, uncommitted: null, error: null);
+
+    public static void Complete(IReadOnlyList<Applied> applied, string uncommittedError) =>
+        Answer(applied, committed: true, uncommitted: null, uncommittedError);
+
+    /// <summary>
+    /// Answers the commands of one step after its economy flush. The list is the one taken from
+    /// <see cref="TakeApplied"/>, so it is the only owner of those replies: when the batch never reached a durable
+    /// commit, every character whose write failed hears <paramref name="error"/> instead of success. A row that
+    /// already carries its own error or failure keeps it.
+    /// </summary>
+    public static void AnswerAfterFlush(
+        IReadOnlyList<Applied> applied,
+        bool committed,
+        IReadOnlySet<int>? uncommitted,
+        string error)
     {
-        foreach (var (submission, error, failure) in applied)
+        ArgumentNullException.ThrowIfNull(applied);
+        ArgumentException.ThrowIfNullOrEmpty(error);
+        Answer(applied, committed, uncommitted, error);
+    }
+
+    static void Answer(IReadOnlyList<Applied> applied, bool committed, IReadOnlySet<int>? uncommitted, string? error)
+    {
+        foreach (var (submission, rowError, failure) in applied)
         {
+            if (!committed && failure == null && rowError == null && uncommitted != null && error != null
+                && uncommitted.Contains(submission.Session.ObjectId))
+            {
+                submission.Reply.TrySetResult(error);
+                continue;
+            }
+
             if (failure != null)
                 submission.Reply.TrySetException(failure);
             else
-                submission.Reply.TrySetResult(error);
+                submission.Reply.TrySetResult(rowError);
         }
     }
 
-    /// <summary>Waits until something was submitted since the last wait (hand-driven hosts pump with it).</summary>
     public Task WaitForSubmissionAsync(CancellationToken ct) => _submitted.WaitAsync(ct);
 
-    /// <summary>Pending wake signals for test hosts that submit without a pump.</summary>
     internal int WakeSignalCountForTest => _submitted.CurrentCount;
 
-    /// <summary>Commands waiting for the next simulation drain.</summary>
     internal int QueuedDepth
     {
         get
         {
             lock (_lock)
-                return _queued.Count;
+                return _depth;
         }
     }
 
-    /// <summary>
-    /// Refuses further submissions and fails the ones still queued with <paramref name="reason"/>, so no handler
-    /// waits on a simulation that stopped.
-    /// </summary>
+    internal double BankedApplyMsForTest
+    {
+        get
+        {
+            lock (_lock)
+                return _timebox.CreditMs;
+        }
+    }
+
     public void Close(string reason)
     {
         List<Submission> stranded;
         lock (_lock)
         {
             _closed = reason;
-            stranded = _queued;
-            _queued = [];
+            stranded = [];
+            foreach (var queue in _players.Values)
+            {
+                while (queue.Count > 0)
+                    stranded.Add(queue.DequeueHead());
+            }
+
+            _players.Clear();
+            _active.Clear();
+            _depth = 0;
         }
 
         foreach (var submission in stranded)
-            submission.Reply.TrySetException(new InvalidOperationException(
+            submission.Reply.TrySetException(new ZoneIngressRefusal(
                 $"command {submission.Command.Name} for object {submission.Session.ObjectId} was not applied: {reason}"));
     }
+
+    long NowTicks()
+    {
+        if (_clockSet)
+            return _clockTicks;
+        return Stopwatch.GetTimestamp();
+    }
+
+    double AgeMs(long submittedAtTicks, long nowTicks) =>
+        Math.Max(0, TicksToMs(nowTicks - submittedAtTicks));
+
+    static long MillisecondsToTicks(double ms) =>
+        (long)(ms * Stopwatch.Frequency / 1000.0);
+
+    static double TicksToMs(long ticks) => ticks * 1000.0 / Stopwatch.Frequency;
+}
+
+/// <summary>Ingress refused the command before it was applied. <see cref="Coalesced"/> is a superseded movement.</summary>
+internal sealed class ZoneIngressRefusal : InvalidOperationException
+{
+    public ZoneIngressRefusal(string reason) : base(reason)
+    {
+        Reason = reason;
+    }
+
+    public string Reason { get; }
+
+    public bool Coalesced => Reason.StartsWith("coalesced:", StringComparison.Ordinal);
 }

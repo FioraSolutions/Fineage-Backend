@@ -8,6 +8,7 @@ using Fineage.Accounts;
 namespace Fineage.Login.Tests;
 
 /// <summary>Requires local docker-compose postgres (FINEAGE_DATABASE_URL or defaults).</summary>
+[Trait("Category", "Integration")]
 public class PostgresNormalizedStoreTests
 {
     static string? ConnectionString()
@@ -25,6 +26,29 @@ public class PostgresNormalizedStoreTests
         {
             return null;
         }
+    }
+
+    [Fact]
+    public void Login_create_never_reuses_item_ids_a_second_process_reserved()
+    {
+        string? url = ConnectionString();
+        if (url == null)
+            return;
+
+        string suffix = Guid.NewGuid().ToString("n")[..8];
+        string account = "pgblk" + suffix;
+        using var zoneStore = PostgresAccountStore.Open(url);
+        using var loginStore = PostgresAccountStore.Open(url);
+        var zoneIds = new ItemObjectIdAllocator(zoneStore.ReserveItemObjectIds, blockSize: 64);
+        var zoneTaken = Enumerable.Range(0, 100).Select(_ => zoneIds.Next()).ToHashSet();
+
+        var service = new LoginService(loginStore, new HandoffTokens(HandoffTokens.DefaultSecret));
+        Assert.True(service.Register(account, "secret1").Ok);
+        var created = service.CreateHuman(account, "Z" + suffix, HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        Assert.NotEmpty(created.Value!.Items!);
+        Assert.DoesNotContain(created.Value.Items!, i => zoneTaken.Contains(i.ObjectId));
+        Assert.DoesNotContain(Enumerable.Range(0, 100).Select(_ => zoneIds.Next()), id => created.Value.Items!.Any(i => i.ObjectId == id));
     }
 
     [Fact]

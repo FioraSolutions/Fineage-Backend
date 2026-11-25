@@ -6,29 +6,12 @@ public sealed partial class QuestMachine
 {
     static QuestDialog? Find(QuestDefinition quest, QuestHook hook, int npcId, string eventName, QuestProgress? state, QuestActor? actor = null, PlayerInventory? inventory = null, Func<double>? random = null, string? ownedMode = null)
     {
-        foreach (var dialog in quest.Dialogs)
+        if (!quest.DialogsByKey.TryGetValue(QuestDialogKey.Of(hook, npcId, eventName), out var candidates))
+            return null;
+
+        foreach (var dialog in candidates)
         {
-            if (dialog.Hook != hook || dialog.NpcId != npcId)
-                continue;
-            // Owned steps run only for the owner of a quest spawn: "solo" credit also allows "any" rows.
-            if (ownedMode == null ? dialog.Owned != null : dialog.Owned == null || (dialog.Owned == "solo" && ownedMode != "solo"))
-                continue;
-            if (hook == QuestHook.Event && !string.Equals(dialog.Event, eventName, StringComparison.Ordinal))
-                continue;
-            if (!WhenMatches(dialog, state))
-                continue;
-            if (!ActorMatches(dialog, actor))
-                continue;
-            if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
-                continue;
-            if (!ItemsMatch(dialog, inventory))
-                continue;
-            if (!VarsMatch(dialog, state))
-                continue;
-            if (!PetMatches(dialog, actor, state) || !ExtraItemsMatch(dialog, inventory, state))
-                continue;
-            if (dialog.Weapons is { } weapons && inventory != null &&
-                !(inventory.GetEquipped(PaperdollSlot.RHand) is { } held && weapons.Contains(held.ItemId)))
+            if (!Reaches(dialog, state, actor, inventory, ownedMode))
                 continue;
             // Random branches roll only when the engine acts (talk / event / kill), never on a quest-list probe.
             if (dialog.Chance is double chance && random != null && random() >= chance)
@@ -37,6 +20,33 @@ public sealed partial class QuestMachine
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// The non-rolling gates of one step: owned mode, journal state, actor, and inventory. <see cref="Find"/> adds the
+    /// chance roll on top; a quest-list probe asks this alone, so it never consumes a draw.
+    /// </summary>
+    static bool Reaches(QuestDialog dialog, QuestProgress? state, QuestActor? actor, PlayerInventory? inventory, string? ownedMode)
+    {
+        // Owned steps run only for the owner of a quest spawn: "solo" credit also allows "any" rows.
+        if (ownedMode == null ? dialog.Owned != null : dialog.Owned == null || (dialog.Owned == "solo" && ownedMode != "solo"))
+            return false;
+        if (!WhenMatches(dialog, state))
+            return false;
+        if (!ActorMatches(dialog, actor))
+            return false;
+        if (dialog.HasItem != 0 && inventory != null && inventory.CountOf(dialog.HasItem) < dialog.MinCount)
+            return false;
+        if (!ItemsMatch(dialog, inventory))
+            return false;
+        if (!VarsMatch(dialog, state))
+            return false;
+        if (!PetMatches(dialog, actor, state) || !ExtraItemsMatch(dialog, inventory, state))
+            return false;
+        if (dialog.Weapons is { } weapons && inventory != null &&
+            !(inventory.GetEquipped(PaperdollSlot.RHand) is { } held && weapons.Contains(held.ItemId)))
+            return false;
+        return true;
     }
 
     /// <summary>
@@ -219,6 +229,10 @@ public sealed partial class QuestMachine
         }
 
         if (dialog.Cond is int cond && (state == null || state.Cond != cond))
+            return false;
+        if (dialog.MinCond > 0 && (state == null || state.Cond < dialog.MinCond))
+            return false;
+        if (dialog.MaxCond > 0 && (state == null || state.Cond > dialog.MaxCond))
             return false;
         if (dialog.WhenVar != null)
         {

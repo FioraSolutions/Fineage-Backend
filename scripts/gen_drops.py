@@ -8,9 +8,15 @@ import json, re, sys, pathlib
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/npcs"
-if not src.is_dir():
-    src = ROOT / "ref/mobius-ct0-interlude/data/stats/npcs"
+_default_npc_dirs = (
+    ROOT / "ref/mobius-ct0-interlude/L2J_Mobius_CT_0_Interlude/dist/game/data/stats/npcs",
+    ROOT / "ref/mobius-ct0-interlude/dist/game/data/stats/npcs",
+    ROOT / "ref/mobius-ct0-interlude/data/stats/npcs",
+)
+if len(sys.argv) > 1:
+    src = pathlib.Path(sys.argv[1])
+else:
+    src = next((p for p in _default_npc_dirs if p.is_dir()), _default_npc_dirs[0])
 out = ROOT / "data/drops"
 
 ids = set()
@@ -22,7 +28,11 @@ if bosses.is_file():
 
 hand = set()
 for p in out.glob("*.json"):
+    if p.name.startswith("spawn-droplist-"):
+        continue
     d = json.loads(p.read_text())
+    if "npcId" not in d:
+        continue
     if d.get("generated"):
         p.unlink()
     else:

@@ -36,7 +36,7 @@ public static class ChatProtocol
     public const int Hero = 17;
     public const int CriticalAnnounce = 18;
 
-    /// <summary>Normal say radius in world units (2D). Shout ignores this and uses the whole zone.</summary>
+    /// <summary>Normal say radius in world units (2D). Shout uses the speaker's map region (Mobius getMapRegionLocId).</summary>
     public const int LocalRange = 1250;
 
     /// <summary>
@@ -44,6 +44,9 @@ public static class ChatProtocol
     /// (Mobius Say2: 105, verified on the official client).
     /// </summary>
     public const int MaxTextLength = 105;
+
+    /// <summary>Mobius GeneralConfig.MINIMUM_CHAT_LEVEL default: shout channel opens at this level.</summary>
+    public const int ShoutMinLevel = 20;
 
     /// <summary>Mobius ChatTrade: trade channel opens at this level.</summary>
     public const int TradeMinLevel = 20;

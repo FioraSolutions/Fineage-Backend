@@ -13,6 +13,7 @@ namespace Fineage.Zone.Tests;
 /// runs on <see cref="WorldBench"/>, so these assert the recorded
 /// <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than MessagePack frames.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetDungeonTests
 {
     static readonly DateTimeOffset Start = new(2026, 10, 26, 18, 0, 0, TimeSpan.Zero);
@@ -62,6 +63,46 @@ public sealed class NetDungeonTests
         Assert.False(left.Inside);
         Assert.Equal(DungeonProtocol.ActionExit, left.Action);
         Assert.Equal(sacrifice.ExitX, left.X);
+    }
+
+    [Fact]
+    public async Task Wrong_cabal_during_seal_validation_is_refused_at_the_gate()
+    {
+        var clock = new MutableGameClock(Start);
+        var bench = World(clock, DungeonCatalog.LoadDefault());
+        BenchPlayer dawn = await bench.EnterAsync("gate", "Dawn", classId: 1);
+        BenchPlayer dusk = await bench.EnterAsync("gate2", "Dusk", classId: 1);
+        await AdvanceAsync(bench, clock);
+
+        Assert.Null(await bench.World.TryGrantItemAsync(dusk.Session, SevenSignsProtocol.RedSealStoneId, 2, CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(
+            dusk.Session, Join(SevenSignsCabal.Dusk, SevenSignsSeal.Avarice), CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(dusk.Session, new SevenSignsActionRequestMsg
+        {
+            Action = SevenSignsProtocol.ActionContribute,
+            RedStones = 2
+        }, CancellationToken.None));
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(
+            dawn.Session, Join(SevenSignsCabal.Dawn, SevenSignsSeal.Strife), CancellationToken.None));
+
+        await AdvanceAsync(bench, clock);
+        await AdvanceAsync(bench, clock);
+        Assert.Equal(SevenSignsPeriod.SealValidation, bench.World.SevenSigns.Period);
+
+        int dawnX = dawn.Session.X;
+        bench.Rec.Calls.Clear();
+        Assert.Equal(
+            DungeonProtocol.Dusk,
+            await dawn.World.TryDungeonAsync(dawn.Session, Enter(1), CancellationToken.None));
+        Assert.Equal(dawnX, dawn.Session.X);
+        var refusalIds = bench.Rec.Of("FanoutSystemMessage")
+            .Select(c => ((SystemMessageMsg)c[1]!).Id)
+            .ToList();
+        Assert.Contains(DungeonProtocol.DuskOnlyMessage, refusalIds);
+        Assert.Contains(DungeonProtocol.GateRefusedMessage, refusalIds);
+
+        Assert.Null(await dusk.World.TryDungeonAsync(dusk.Session, Enter(1), CancellationToken.None));
+        Assert.Equal(1, bench.World.PlayerDungeonId(dusk.ObjectId));
     }
 
     [Fact]
@@ -163,6 +204,15 @@ public sealed class NetDungeonTests
         Assert.Equal(20, member.Session.Y);
 
         // The fee leaves the bag, so the client must see the row it lost. A fully spent stack reports 0 left.
+        // The bag write commits on the persist worker, so the row is published when that batch drains.
+        Console.WriteLine("[diag] about to drain");
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        Console.WriteLine("[diag] updates=" + bench.Rec.Of("FanoutInventoryUpdate").Count
+            + " allCalls=" + string.Join(",", bench.Rec.Calls.Select(c => c.Method).Distinct())
+            + " pending=" + bench.World.LedgerForTests.PendingFlushCount
+            + " adena=" + member.Inventory?.CountOf(DungeonProtocol.AdenaItemId)
+            + " storeAdena=" + member.Store.FindById(member.Session.Account, member.Session.ObjectId)?.Items?
+                .Where(i => i.ItemId == DungeonProtocol.AdenaItemId).Sum(i => i.Count));
         var paid = Assert.IsType<InventoryUpdateMsg>(Assert.Single(bench.Rec.Of("FanoutInventoryUpdate"))[1]);
         var row = Assert.Single(paid.Changes);
         Assert.Equal(DungeonProtocol.AdenaItemId, row.ItemId);

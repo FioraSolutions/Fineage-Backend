@@ -31,6 +31,9 @@ public sealed partial class ZoneWorld
             return NpcHtmlProtocol.Attackable;
         if (player.Dead)
             return InventoryProtocol.Dead;
+        // Mobius RequestBypassToServer: validateHtmlAction chains the origin object, then isInsideRadiusOfObjectId
+        // (3D INTERACTION_DISTANCE) and npc_ branch is isInsideRadius2D(object, Npc.INTERACTION_DISTANCE).
+        // The radius is Npc.INTERACTION_DISTANCE = 250 (Npc.java:110).
         if (!InTalkRange(player, npc))
             return "range";
 
@@ -109,6 +112,11 @@ public sealed partial class ZoneWorld
         {
             if (festival != null)
                 SendHtml(session, player, npc, festival);
+            return;
+        }
+        if (page == 0 && RaidBossRankingFirstPage(player, npc, out var raidRanking))
+        {
+            SendHtml(session, player, npc, raidRanking!);
             return;
         }
         SendHtml(session, player, npc, _pages.ReadNpc(session.Language, npc.NpcType, npc.NpcId, page));

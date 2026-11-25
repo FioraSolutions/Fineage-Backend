@@ -82,6 +82,9 @@ interface IWorldEventPublisher
     /// <summary>Mobius InventoryUpdate to watchers. Called on the simulation thread.</summary>
     void FanoutInventoryUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.InventoryUpdateMsg update);
 
+    /// <summary>Full ItemList resync. Called on the simulation thread after a gap or <c>RequestItemList</c>.</summary>
+    void FanoutItemList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ItemListMsg list);
+
     /// <summary>Mobius CreatureSay to watchers. Called on the simulation thread.</summary>
     void FanoutCreatureSay(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CreatureSayMsg say);
 
@@ -159,6 +162,12 @@ interface IWorldEventPublisher
     /// <summary>Mobius <c>AcquireSkillInfo</c>: the confirmation page for one trainer offer. Called on the simulation thread.</summary>
     void FanoutAcquireSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillInfoMsg info);
 
+    /// <summary>Mobius <c>ExEnchantSkillList</c>: trainer enchant offers.</summary>
+    void FanoutEnchantSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillListMsg list);
+
+    /// <summary>Mobius <c>ExEnchantSkillInfo</c>: enchant confirmation page for one route.</summary>
+    void FanoutEnchantSkillInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantSkillInfoMsg info);
+
     /// <summary>Mobius EnchantResult to the enchanter. Called on the simulation thread.</summary>
     void FanoutEnchantResult(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.EnchantResultMsg result);
 
@@ -195,6 +204,11 @@ interface IWorldEventPublisher
 
     /// <summary>Clan hall auction list (Mobius AuctionManager pages, as data). Called on the simulation thread.</summary>
     void FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClanHallListNetMsg halls);
+
+    void FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.AgitDecoInfoNetMsg deco);
+
+    /// <summary>Mobius <c>ClientSetTime</c> (<see cref="Fineage.Net.Contract.NetOpcode.ClientSetTime"/>).</summary>
+    void FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.ClientSetTimeNetMsg time);
 
     /// <summary>Castle gate / wall state (<see cref="Fineage.Net.Contract.NetOpcode.DoorStatus"/>).</summary>
     void FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.DoorStatusNetMsg door);
@@ -237,6 +251,14 @@ interface IWorldEventPublisher
 
     void FanoutPartyMemberPosition(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMemberPositionMsg positions);
 
+    void FanoutCommandChannelAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelAskJoinMsg ask);
+
+    void FanoutCommandChannelOpen(IReadOnlyList<int> watcherObjectIds);
+
+    void FanoutCommandChannelClose(IReadOnlyList<int> watcherObjectIds);
+
+    void FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info);
+
     /// <summary>Interlude MagicSkillLaunched at hitTime: caster + everyone who sees the caster.</summary>
     void FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds);
 
@@ -248,6 +270,12 @@ interface IWorldEventPublisher
 
     /// <summary>Interlude MonRaceInfo (0xDD) to derby track watchers.</summary>
     void FanoutMonRaceInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.MonRaceInfoNetMsg packet);
+
+    /// <summary>Interlude <c>VehicleInfo</c> (0x59) for a boat actor. Called on the simulation thread.</summary>
+    void FanoutVehicleInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleInfoNetMsg info);
+
+    /// <summary>Interlude <c>VehicleDeparture</c> (0x5A) when a boat leg starts. Called on the simulation thread.</summary>
+    void FanoutVehicleDeparture(IReadOnlyList<int> watcherObjectIds, Fineage.Net.Contract.VehicleDepartureNetMsg departure);
 
     void FanoutTradeAsk(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.TradeAskMsg ask);
 

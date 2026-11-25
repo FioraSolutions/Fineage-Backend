@@ -29,7 +29,7 @@ static partial class NormalizedStoreWriter
         cmd.CommandText =
             """
             INSERT INTO store_meta (key, value_bigint) VALUES (@key, @value)
-            ON CONFLICT (key) DO UPDATE SET value_bigint = EXCLUDED.value_bigint
+            ON CONFLICT (key) DO UPDATE SET value_bigint = GREATEST(store_meta.value_bigint, EXCLUDED.value_bigint)
             """;
         cmd.Parameters.AddWithValue("key", key);
         cmd.Parameters.AddWithValue("value", value);

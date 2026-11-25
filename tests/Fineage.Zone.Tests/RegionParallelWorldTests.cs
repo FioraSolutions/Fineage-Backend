@@ -17,6 +17,7 @@ namespace Fineage.Zone.Tests;
 /// sequential run and a recorded command log exactly; aggression sees players across a region edge through the
 /// border snapshots, one step late.
 /// </summary>
+[Trait("Category", "Slow")]
 public sealed class RegionParallelWorldTests
 {
     const int FirstMobId = 9_810_001;
@@ -55,7 +56,7 @@ public sealed class RegionParallelWorldTests
         for (int step = 0; step < 30; step++)
         {
             now = now.AddMilliseconds(ZoneSimulationSettings.StepMilliseconds);
-            bench.World.StepSimulation();
+            bench.World.RunStepForTest();
         }
 
         Assert.Equal(nearGear, near.Player.GearSkills);
@@ -96,7 +97,7 @@ public sealed class RegionParallelWorldTests
                     CancellationToken.None));
 
             kit.Now = kit.Now.AddMilliseconds(step % 7 == 0 ? 330 : 200);
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
             await Task.WhenAll(replies);
         }
 
@@ -276,7 +277,7 @@ public sealed class RegionParallelWorldTests
         for (int step = 0; step < 20; step++)
         {
             kit.Now = kit.Now.AddMilliseconds(step % 5 == 0 ? 666 : 200);
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
         }
 
         return new Run(
@@ -308,7 +309,7 @@ public sealed class RegionParallelWorldTests
         {
             clock.Now = clock.Now.AddSeconds(1);
             bench.World.RunDuelTickForTest();
-            bench.World.StepSimulation();
+            bench.World.RunStepForTest();
         }
 
         Assert.Equal(DuelFighterState.Duelling, a.Player.DuelState);
@@ -318,7 +319,7 @@ public sealed class RegionParallelWorldTests
         {
             clock.Now = clock.Now.AddSeconds(1);
             bench.World.RunDuelTickForTest();
-            bench.World.StepSimulation();
+            bench.World.RunStepForTest();
         }
 
         lock (bench.Rec.Calls)
@@ -363,7 +364,7 @@ public sealed class RegionParallelWorldTests
 
         clock = clock.AddSeconds(wind.AbnormalTimeSeconds + 1);
         for (int step = 0; step < 8; step++)
-            bench.World.StepSimulation();
+            bench.World.RunStepForTest();
 
         lock (bench.Rec.Calls)
             bench.Rec.Calls.Clear();
@@ -382,7 +383,7 @@ public sealed class RegionParallelWorldTests
         for (int step = 0; step < 100; step++)
         {
             kit.Now = kit.Now.AddMilliseconds(step % 9 == 0 ? 450 : 200);
-            kit.World.StepSimulation();
+            kit.World.RunStepForTest();
         }
 
         return new Run(CaptureState(kit, tracked), CaptureFanout(recorder), observer.Failures, observer.MaxRegions);

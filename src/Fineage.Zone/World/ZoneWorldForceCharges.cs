@@ -9,34 +9,60 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    const int SonicFocusSkillId = 8;
-    const int FocusForceSkillId = 50;
+    const int FocusEnergyIncrement = 1;
 
-    internal int MaxForceCharges(ZoneEntity player)
+    internal bool TryResolveFocusEnergyCap(
+        int skillId,
+        int skillLevel,
+        SkillEffectCatalog.Effect[] rows,
+        out int cap)
     {
-        int cap = 0;
-        if (player.KnownSkills.TryGetValue(SonicFocusSkillId, out int sonic))
-            cap = Math.Max(cap, sonic);
-        if (player.KnownSkills.TryGetValue(FocusForceSkillId, out int force))
-            cap = Math.Max(cap, force);
-        return Math.Clamp(cap, 0, 7);
+        cap = 0;
+        if (!ForceChargeRules.TryFindFocusEnergy(rows, out var row))
+            return false;
+        if (ForceChargeRules.TryResolveCap(row, skillId, skillLevel, out cap))
+            return true;
+        ZoneLog.Warn($"FocusEnergy skill={skillId} lv={skillLevel} missing or invalid charge param");
+        return false;
     }
 
-    void ApplyFocusEnergy(ZoneEntity player, int skillId, int level)
+    void IncreaseForceCharges(ZoneSession? session, ZoneEntity player, int count, int cap)
     {
-        int cap = MaxForceCharges(player);
         if (cap <= 0)
+            return;
+
+        if (player.ForceCharges >= cap)
         {
-            ZoneLog.Warn($"FocusEnergy skill={skillId} lv={level} refused: no Sonic Focus / Focus Force level.");
+            if (session != null)
+                SelfLine(session, ForceChargeRules.SysMsgForceMaxCapacity, "Your force has reached maximum capacity.");
             return;
         }
 
-        if (player.ForceCharges >= cap)
+        int next = Math.Min(cap, player.ForceCharges + Math.Max(1, count));
+        player.ForceCharges = next;
+
+        if (session != null)
+        {
+            if (player.ForceCharges >= cap)
+                SelfLine(session, ForceChargeRules.SysMsgForceMaxCapacity, "Your force has reached maximum capacity.");
+            else
+                SelfLine(session, ForceChargeRules.SysMsgForceIncreased,
+                    $"Your force has increased to {player.ForceCharges} level.",
+                    player.ForceCharges.ToString());
+        }
+
+        RestartForceChargeDecay(player);
+        BroadcastForceCharges(player);
+        ZoneLog.Info($"force-charge object={player.ObjectId} charges={player.ForceCharges}/{cap}");
+    }
+
+    void ApplyFocusEnergy(ZoneSession? session, ZoneEntity player, int skillId, int level)
+    {
+        if (!_skillEffects.TryGet(skillId, out var rows)
+            || !TryResolveFocusEnergyCap(skillId, level, rows, out int cap))
             return;
 
-        player.ForceCharges++;
-        BroadcastForceCharges(player);
-        ZoneLog.Info($"force-charge object={player.ObjectId} skill={skillId} charges={player.ForceCharges}/{cap}");
+        IncreaseForceCharges(session, player, FocusEnergyIncrement, cap);
     }
 
     void SpendForceCharges(ZoneEntity player, int amount)
@@ -52,26 +78,50 @@ public sealed partial class ZoneWorld
         else
             player.ForceCharges -= amount;
 
+        RestartForceChargeDecay(player);
         BroadcastForceCharges(player);
+    }
+
+    void RestartForceChargeDecay(ZoneEntity player)
+    {
+        if (player.ForceCharges <= 0)
+        {
+            player.ForceChargeResetAtUnixMs = 0;
+            return;
+        }
+
+        player.ForceChargeResetAtUnixMs = NowUnixMs() + ForceChargeRules.DecayMs;
+    }
+
+    internal void ClearForceCharges(ZoneEntity player)
+    {
+        if (player.ForceCharges <= 0 && player.ForceChargeResetAtUnixMs <= 0)
+            return;
+        player.ForceCharges = 0;
+        player.ForceChargeResetAtUnixMs = 0;
+        BroadcastForceCharges(player);
+    }
+
+    void TickForceChargeDecay(long now)
+    {
+        foreach (var player in Players())
+        {
+            if (player.ForceCharges <= 0 || player.ForceChargeResetAtUnixMs <= 0)
+                continue;
+            if (now >= player.ForceChargeResetAtUnixMs)
+                ClearForceCharges(player);
+        }
     }
 
     void BroadcastForceCharges(ZoneEntity player)
     {
         if (player.Session == null)
             return;
-        NetBridge?.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player));
+        NetBridge?.FanoutEtcStatusUpdate([player.ObjectId], EtcStatusOf(player, InDangerArea(player)));
     }
 
-    static bool HasFocusEnergy(SkillEffectCatalog.Effect[] rows)
-    {
-        foreach (var row in rows)
-        {
-            if (row.Name.Equals("FocusEnergy", StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
-    }
+    static bool HasFocusEnergy(SkillEffectCatalog.Effect[] rows) =>
+        ForceChargeRules.TryFindFocusEnergy(rows, out _);
 
     string? TrySkillUseFocusEnergy(
         ZoneSession session,
@@ -88,6 +138,19 @@ public sealed partial class ZoneWorld
             return null;
         }
 
+        if (!_skillEffects.TryGet(request.SkillId, out var rows)
+            || !TryResolveFocusEnergyCap(request.SkillId, level, rows, out int cap))
+        {
+            SelfLine(session, SysMsgUnsuitableTerms, $"{template.Name} cannot be used due to unsuitable terms.");
+            return null;
+        }
+
+        if (player.ForceCharges >= cap)
+        {
+            SelfLine(session, ForceChargeRules.SysMsgForceMaxCapacity, "Your force has reached maximum capacity.");
+            return null;
+        }
+
         ConsumeSkillMp(player, template, levelData.MpConsume);
         var (hitMs, reuseMs) = ScaledSkillTimes(player, template, level);
         if (reuseMs > 0)
@@ -98,7 +161,16 @@ public sealed partial class ZoneWorld
         FanoutSkill(player, player, cast, targetStatus: null, CasterMpStatus(player));
         player.CastingUntilMs = now + Math.Max(0, hitMs);
         ScheduleEffect(player, player, template, level, now, hitMs,
-            (_, _) => ApplyFocusEnergy(player, request.SkillId, level));
+            (_, _) => ApplyFocusEnergy(session, player, request.SkillId, level));
         return null;
+    }
+
+    internal void ApplyFocusEnergyAfterCombatHit(ZoneEntity player, int skillId, int level)
+    {
+        if (player.Kind != ZoneEntityKind.Player)
+            return;
+        if (!_skillEffects.TryGet(skillId, out var rows) || !HasFocusEnergy(rows))
+            return;
+        ApplyFocusEnergy(player.Session, player, skillId, level);
     }
 }

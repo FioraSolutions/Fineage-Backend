@@ -54,7 +54,7 @@ public sealed class SocialActorTests
     }
 
     [Fact]
-    public void Region_bodies_cannot_reach_a_social_actor()
+    public void Region_bodies_cannot_write_a_social_actor()
     {
         var party = new PartyActor(new NoMembers());
         var clan = new ClanActor();
@@ -63,9 +63,10 @@ public sealed class SocialActorTests
         friends.Load(1, "Ally", null);
         Action[] requests =
         [
-            () => party.InParty(1),
             () => party.Step(new TickContext(1, 0, 0)),
-            () => clan.ClanIdOf(1),
+            () => party.Create(9, 0),
+            () => party.Changed(1),
+            () => clan.Link(1, 7),
             () => chat.Find("Scout"),
             () => friends.TryGet(1, out _),
             () => friends.Blocks(1, 2),
@@ -89,6 +90,86 @@ public sealed class SocialActorTests
         Assert.All(observer.Failures, f => Assert.Contains("reached from the body of region", f.Error.Message));
         foreach (var request in requests)
             request();
+    }
+
+    /// <summary>
+    /// The roster only changes on the scheduler thread and at the barrier, none of which run while a body is in flight,
+    /// so a body reads a stable party and a kill inside <c>auto-attacks</c> can settle its exp share there.
+    /// </summary>
+    [Fact]
+    public void Region_bodies_read_the_party_roster()
+    {
+        var party = new PartyActor(new NoMembers());
+        var partyOfOne = party.Create(1, 0);
+        party.Join(partyOfOne, 2);
+        List<int> seen = [];
+        var observer = new FailureLog();
+        var partition = new GridRegionPartition(1000);
+        var scheduler = new RegionTickScheduler(new SimulationClock(100, () => 0), new ParallelRegionExecutor(4), observer);
+        scheduler.AddRegionStage(new RegionStage("bodies",
+            (_, work) =>
+            {
+                work.Add(partition.RegionOf(0, 0, 0), 1);
+                work.Add(partition.RegionOf(0, 5_000, 0), 2);
+            },
+            (_, _) =>
+            {
+                seen.Add(party.InParty(1) ? 1 : 0);
+                seen.Add(party.SameParty(1, 2) ? 1 : 0);
+                if (party.Of(1) is { } p)
+                    seen.Add(p.PartyId);
+            },
+            parallel: true));
+
+        scheduler.Step(100);
+
+        Assert.Empty(observer.Failures);
+        Assert.Equal([1, 1, partyOfOne.PartyId, 1, 1, partyOfOne.PartyId], seen);
+    }
+
+    /// <summary>
+    /// The clan roster changes only on the scheduler thread and at the barrier, so a combat body deciding whether two
+    /// players are at mutual war (<c>auto-attacks</c> → <c>PlayerAutoAttackable</c> → <c>AtMutualWar</c>) reads it
+    /// without deferring the whole hit. Writes from a body still throw.
+    /// </summary>
+    [Fact]
+    public void Region_bodies_read_the_clan_roster()
+    {
+        var clan = new ClanActor();
+        clan.Add(new ZoneClan { Id = 7, Name = "Wardens" });
+        clan.Link(1, 7);
+        clan.Link(2, 7);
+        clan.SetJoinExpiry(2, 1_234);
+        clan.Invite(3, new PendingClanInvite(1, 7, 9_999));
+        List<int> seen = [];
+        var observer = new FailureLog();
+        var partition = new GridRegionPartition(1000);
+        var scheduler = new RegionTickScheduler(new SimulationClock(100, () => 0), new ParallelRegionExecutor(4), observer);
+        scheduler.AddRegionStage(new RegionStage("bodies",
+            (_, work) =>
+            {
+                work.Add(partition.RegionOf(0, 0, 0), 1);
+                work.Add(partition.RegionOf(0, 5_000, 0), 2);
+            },
+            (_, _) =>
+            {
+                // Each body reads its own seven values on a worker thread and leaves them in one piece, so the
+                // recorded list keeps each body's reads contiguous whichever order the executor runs the regions in.
+                List<int> reads = [clan.ClanIdOf(1), clan.ClanIdOf(2), clan.Contains(7) ? 1 : 0];
+                if (clan.TryGet(7, out var roster))
+                    reads.Add(roster.Members.Count);
+                reads.Add(clan.TryGetJoinExpiry(2, out long expiry) ? (int)expiry : 0);
+                reads.Add(clan.TryGetInvite(3, out _) ? 1 : 0);
+                reads.Add(clan.InInvite(3) ? 1 : 0);
+                lock (seen)
+                    seen.AddRange(reads);
+            },
+            parallel: true));
+
+        scheduler.Step(100);
+
+        Assert.Empty(observer.Failures);
+        Assert.Equal([7, 7, 1, 0, 1_234, 1, 1, 7, 7, 1, 0, 1_234, 1, 1], seen);
     }
 
     [Fact]

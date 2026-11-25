@@ -68,13 +68,11 @@ sealed partial class NetWorldEventPublisher
 
     void Send(IReadOnlyList<int> watchers, ushort opcode, byte[] payload)
     {
-        foreach (int watcher in watchers)
-            _presence.TrySendCritical(watcher, opcode, payload);
+        _presence.TryBroadcastCritical(watchers, opcode, payload);
     }
 
     void SendEmpty(IReadOnlyList<int> watchers, ushort opcode)
     {
-        foreach (int watcher in watchers)
-            _presence.TrySendCritical(watcher, opcode, Array.Empty<byte>());
+        _presence.TryBroadcastCritical(watchers, opcode, Array.Empty<byte>());
     }
 }

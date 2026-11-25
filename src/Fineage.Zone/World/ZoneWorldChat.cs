@@ -122,6 +122,8 @@ public sealed partial class ZoneWorld
                 SayLocal(speaker, text);
                 return null;
             case ChatProtocol.Shout:
+                if (speaker.Level < ChatProtocol.ShoutMinLevel)
+                    return Plain("chat.shout_level", $"Players can Shout after Lv. {ChatProtocol.ShoutMinLevel}.", ChatProtocol.ShoutMinLevel.ToString());
                 SayRegion(speaker, chatType, text, speakerMustNotBlock: true);
                 return null;
             case ChatProtocol.Trade:
@@ -131,6 +133,8 @@ public sealed partial class ZoneWorld
                 return null;
             case ChatProtocol.Tell:
                 return Whisper(speaker, target, text, nowMs);
+            case ChatProtocol.Friend:
+                return FriendChat(speaker, target, text, nowMs);
             case ChatProtocol.Party:
                 if (_party.Of(speaker.ObjectId) is not { } party)
                     return Plain("chat.not_party", "You are not in a party.");
@@ -167,8 +171,27 @@ public sealed partial class ZoneWorld
                     Params = [],
                     Text = "You are currently not in a petition chat."
                 };
+            case ChatProtocol.PartyRoomCommander:
+                if (_party.Of(speaker.ObjectId) is not { } ccParty)
+                    return null;
+                if (_commandChannel.OfParty(ccParty.PartyId) is not { } ccCmd)
+                    return null;
+                if (ccCmd.LeaderObjectId != speaker.ObjectId)
+                    return null;
+                SayToGroup(speaker, chatType, text, CommandChannelOnlineMembers(ccCmd));
+                return null;
+            case ChatProtocol.PartyRoomAll:
+                if (_party.Of(speaker.ObjectId) is not { } roomParty)
+                    return null;
+                if (_commandChannel.OfParty(roomParty.PartyId) is not { } ccAll)
+                    return null;
+                if (roomParty.LeaderObjectId != speaker.ObjectId)
+                    return null;
+                SayToGroup(speaker, chatType, text, CommandChannelOnlineMembers(ccAll));
+                return null;
+            case ChatProtocol.PartyMatchRoom:
+                return null;
             default:
-                // Party match room / command channel: Mobius returns silently when the speaker has none.
                 return null;
         }
     }
@@ -248,6 +271,36 @@ public sealed partial class ZoneWorld
     /// blocking the speaker or in message refusal → 176. Receiver sees the speaker's name, the speaker sees
     /// <c>-&gt;Receiver</c>.
     /// </summary>
+    /// <summary>Mobius ChatFriend: online friend by name; blocked peers rejected.</summary>
+    SystemMessageMsg? FriendChat(ZoneEntity speaker, string target, string text, long nowMs)
+    {
+        if (target.Length == 0)
+            return Plain("chat.friend_target", "Select a friend to chat with.");
+        var receiver = OnlinePlayerNamed(target);
+        if (receiver?.Session == null || !receiver.Session.InWorld)
+            return new SystemMessageMsg
+            {
+                Id = ChatProtocol.PlayerNotOnline,
+                Key = "chat.not_online",
+                Params = [],
+                Text = "That player is not online."
+            };
+        if (!Lists(speaker).Friends.ContainsKey(receiver.ObjectId))
+            return Plain("chat.not_friend", "That player is not on your friend list.");
+        if (receiver.Session.ChatBannedUntilUnixMs > nowMs || IsBlocked(receiver, speaker) || IsBlocked(speaker, receiver))
+            return new SystemMessageMsg
+            {
+                Id = ChatProtocol.MessageRefusal,
+                Key = "chat.refusal",
+                Params = [],
+                Text = "That person is in message refusal mode."
+            };
+
+        NetBridge?.FanoutCreatureSay([receiver.ObjectId], Line(speaker, ChatProtocol.Friend, text));
+        NetBridge?.FanoutCreatureSay([speaker.ObjectId], Line(speaker, ChatProtocol.Friend, text, "->" + receiver.Name));
+        return null;
+    }
+
     SystemMessageMsg? Whisper(ZoneEntity speaker, string target, string text, long nowMs)
     {
         if (target.Length == 0)

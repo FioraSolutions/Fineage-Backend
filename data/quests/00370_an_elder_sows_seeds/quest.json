@@ -89,6 +89,51 @@
         }
       ],
       "htmlFile": "30612-event-30612-10-009.htm"
+    },
+    {
+      "npcId": 20082,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20084,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20086,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20089,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [],
+      "party": true
+    },
+    {
+      "npcId": 20090,
+      "hook": "kill",
+      "when": "started",
+      "cond": 3,
+      "html": "",
+      "ops": [],
+      "party": true
     }
   ]
 }

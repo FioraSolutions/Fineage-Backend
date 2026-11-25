@@ -105,22 +105,29 @@ public sealed class WorldFanoutOutboxTests
     [Fact]
     public void A_send_outside_a_step_waits_for_sealed_batches_and_surfaces_its_own_failure()
     {
-        var (bridge, rec, fanout) = Outbox();
+        var (bridge, rec, fanout) = Outbox(failFast: true);
 
         fanout.Begin();
         bridge.FanoutAttackStance([1], 7, true);
         fanout.Seal();
+        fanout.Drain();
         bridge.FanoutAttackStance([1], 8, true);
+        fanout.Drain();
 
         Assert.Equal(["stance 7", "stance 8"], rec.Sent);
-        Assert.Throws<InvalidOperationException>(() => bridge.FanoutAttackStance([1], FakePublisher.Throws, true));
+        var failed = Assert.Throws<InvalidOperationException>(() =>
+        {
+            bridge.FanoutAttackStance([1], FakePublisher.Throws, true);
+            fanout.Drain();
+        });
+        Assert.Contains("fan-out delivery failed", failed.Message);
     }
 
     [Fact]
     public void Seal_without_begin_is_rejected()
     {
-        var fanout = new WorldFanoutSequencer();
-        Assert.Throws<InvalidOperationException>(fanout.Seal);
+        var fanout = new WorldFanoutSequencer(new FanoutDispatcher());
+        Assert.Throws<InvalidOperationException>(() => fanout.Seal());
     }
 
     [Fact]
@@ -162,6 +169,55 @@ public sealed class WorldFanoutOutboxTests
         Assert.Equal(Enumerable.Range(1, next).Select(n => $"stance {n}"), rec.Sent);
     }
 
+    [Fact]
+    public void Permuted_audiences_of_a_replaceable_write_coalesce()
+    {
+        var (bridge, rec, fanout) = Outbox();
+
+        fanout.Begin();
+        bridge.FanoutMoveState([2, 1], 7, 0, 0, 0, 4, 0, 0, true);
+        bridge.FanoutMoveState([1, 2], 7, 0, 0, 0, 9, 0, 0, true);
+        fanout.Seal();
+        fanout.Drain();
+
+        Assert.Equal(["move 7 to 9"], rec.Sent);
+    }
+
+    [Fact]
+    public void Repeated_sends_to_one_audience_allocate_under_half_the_closure_shape()
+    {
+        const int n = 200;
+        var (bridge, _, fanout) = Outbox();
+        int[] watchers = [1];
+        fanout.Begin();
+        for (int i = 0; i < 300; i++)
+            bridge.FanoutAttackStance(watchers, i, true);
+
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < n; i++)
+            bridge.FanoutAttackStance(watchers, i, true);
+        long recorded = GC.GetAllocatedBytesForCurrentThread() - before;
+        fanout.Seal();
+        fanout.Drain();
+
+        long baseline = ClosureShapedAllocations(n);
+        Assert.True(recorded * 2 < baseline, $"fan-out recorded {recorded} bytes, closure shape {baseline}");
+    }
+
+    static long ClosureShapedAllocations(int n)
+    {
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        var entries = new List<Action>(n);
+        for (int i = 0; i < n; i++)
+        {
+            int[] copied = [1];
+            int id = i;
+            entries.Add(() => _ = copied[0] + id);
+        }
+
+        return GC.GetAllocatedBytesForCurrentThread() - before;
+    }
+
     const int Hp = 9;
     const int Mp = 10;
     const int Exp = 11;
@@ -173,10 +229,11 @@ public sealed class WorldFanoutOutboxTests
         Values = [.. attributes.Select(a => a.Value)]
     };
 
-    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox()
+    static (IWorldEventPublisher Bridge, FakePublisher Rec, WorldFanoutSequencer Fanout) Outbox(bool failFast = false)
     {
         var inner = DispatchProxy.Create<IWorldEventPublisher, FakePublisher>();
-        var fanout = new WorldFanoutSequencer();
+        var dispatcher = new FanoutDispatcher { FailFast = failFast };
+        var fanout = new WorldFanoutSequencer(dispatcher);
         return (new OutboxingWorldEventPublisher(inner, fanout), (FakePublisher)(object)inner, fanout);
     }
 

@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Economy;
 using Fineage.Game.Services;
 using Fineage.Game.Skills;
 using Fineage.Protocol;
@@ -155,11 +156,19 @@ public sealed partial class ZoneWorld
         if (mpTotal > 0)
             player.CurMp = Math.Min(player.MaxMp, player.CurMp + mpTotal);
 
-        List<ItemInstance>? added = null;
         if (grants != null)
         {
-            foreach (var (itemId, count) in grants)
-                (added ??= []).Add(player.Inventory.Add(itemId, count));
+            RecordBagChange(
+                player,
+                LedgerTxKind.Consume,
+                LedgerAccount.Of(SystemAccount.Consumed),
+                () =>
+                {
+                    foreach (var (itemId, count) in grants)
+                        player.Inventory.Add(itemId, count);
+                    return item.ItemId;
+                },
+                _ => item.ItemId);
         }
 
         player.ItemReuseUntilMs[item.ItemId] = now + Math.Max(0, use.ReuseDelayMs);
@@ -173,17 +182,6 @@ public sealed partial class ZoneWorld
             FanoutNetEtcStatus(player);
             SelfUserInfo(player);
         }
-
-        if (added != null)
-        {
-            foreach (var stack in added)
-            {
-                NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(InventoryChange.Add, stack));
-            }
-        }
-
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], InventoryMessages.Update(
-                removedEntirely ? InventoryChange.Remove : InventoryChange.Modify, item));
 
         if (emptyBox)
             SelfLine(session, FishingProtocol.NothingInside, "There was nothing found inside of that.");

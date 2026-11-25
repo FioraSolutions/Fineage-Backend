@@ -39,6 +39,7 @@ public sealed partial class ZoneWorld
             ClearSpawnDue(slot);
         if (_byId.Remove(objectId))
         {
+            npc.DropNetWatcherAudience();
             _aoi.Leave(objectId);
             foreach (var player in Players())
             {

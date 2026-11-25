@@ -9,6 +9,7 @@ namespace Fineage.Zone.Tests;
 /// Block C clan window over Net (Mobius CT_0 rules): sub-unit invites, academy graduation, ranks and privileges,
 /// titles, crests, wars (war kills are PvP, not PK), clan hall auctions and the leader delegation at restart.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetPledgeTests
 {
     static (NetTestKit Kit, NetBridgeRecorder Rec) World()
@@ -233,10 +234,17 @@ public sealed class NetPledgeTests
         Assert.True(Assert.Single(wars.Declared).Mutual);
         Assert.Equal("Alpha", Assert.Single(wars.UnderAttack).Name);
 
-        // Surrender ends both sides.
+        // Surrender ends both sides and fans out cleared relation bits.
+        int relationCallsBefore = rec.Of(nameof(IWorldEventPublisher.FanoutRelationChanged)).Count;
         Assert.Null(await Cmd(kit, b.Leader, new PledgeCommandNetMsg { Kind = PledgeCommandKind.SurrenderWar, Name = "Alpha" }));
         Assert.Empty(kit.World.ClanDetailsForTest(a.ClanId)!.WarTargets);
         Assert.Empty(kit.World.ClanDetailsForTest(b.ClanId)!.WarTargets);
+        var cleared = rec.Of(nameof(IWorldEventPublisher.FanoutRelationChanged))
+            .Skip(relationCallsBefore)
+            .Select(x => (Ids: (IReadOnlyList<int>)x[0]!, M: (RelationChangedNetMsg)x[1]!))
+            .Last(x => x.Ids.Contains(killer.ObjectId) && x.M.ObjectId == victim.ObjectId).M;
+        Assert.Equal(0, cleared.Relation & (PledgeProtocol.RelationMutualWar | PledgeProtocol.RelationOneSidedWar));
+        Assert.False(cleared.AutoAttackable);
     }
 
     [Fact]

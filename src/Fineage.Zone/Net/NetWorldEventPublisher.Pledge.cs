@@ -7,8 +7,7 @@ sealed partial class NetWorldEventPublisher
 {
     void SendAll(IReadOnlyList<int> watchers, ushort opcode, byte[] payload)
     {
-        foreach (int watcher in watchers)
-            _presence.TrySend(watcher, opcode, payload);
+        _presence.TryBroadcast(watchers, opcode, payload);
     }
 
     void IWorldEventPublisher.FanoutCrestData(IReadOnlyList<int> watcherObjectIds, CrestDataNetMsg crest) =>
@@ -31,6 +30,12 @@ sealed partial class NetWorldEventPublisher
 
     void IWorldEventPublisher.FanoutClanHallList(IReadOnlyList<int> watcherObjectIds, ClanHallListNetMsg halls) =>
         SendAll(watcherObjectIds, NetOpcode.ClanHallList, NetCodec.EncodeClanHallList(halls));
+
+    void IWorldEventPublisher.FanoutAgitDecoInfo(IReadOnlyList<int> watcherObjectIds, AgitDecoInfoNetMsg deco) =>
+        SendAll(watcherObjectIds, NetOpcode.AgitDecoInfo, NetCodec.EncodeAgitDecoInfo(deco));
+
+    void IWorldEventPublisher.FanoutClientSetTime(IReadOnlyList<int> watcherObjectIds, ClientSetTimeNetMsg time) =>
+        SendAll(watcherObjectIds, NetOpcode.ClientSetTime, NetCodec.EncodeClientSetTime(time));
 
     void IWorldEventPublisher.FanoutDoorStatus(IReadOnlyList<int> watcherObjectIds, DoorStatusNetMsg door) =>
         SendAll(watcherObjectIds, NetOpcode.DoorStatus, NetCodec.EncodeDoorStatus(door));

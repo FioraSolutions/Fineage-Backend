@@ -11,6 +11,7 @@ namespace Fineage.Zone.Tests;
 /// <c>FINEAGE_ZONE_ADMIN</c> gate. The world <see cref="ZoneWorld"/> is driven through <see cref="WorldBench"/>,
 /// so these assert on the recorded <see cref="Fineage.Zone.World.IWorldEventPublisher"/> fanout rather than a frame.
 /// </summary>
+[Trait("Category", "Integration")]
 public sealed class NetBossTests
 {
     /// <summary>MinRandom, the boss actor's stream: every respawn window opens at its lower bound, so the assertion is exact.</summary>

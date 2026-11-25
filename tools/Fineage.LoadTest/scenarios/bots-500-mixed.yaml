@@ -1,0 +1,6 @@
+name: bots-500-mixed
+extends: stress-mixed-weights.yaml
+botCount: 500
+rampUpSeconds: 120
+durationSeconds: 180
+spawnLayout: spread

@@ -6,8 +6,9 @@ using NpgsqlTypes;
 namespace Fineage.Accounts;
 
 /// <summary>
-/// <see cref="ILedgerJournal"/> on the <c>economy_ledger</c> table. Appends are buffered in memory and inserted in
-/// position order by <see cref="Flush"/> in one transaction; a failed flush keeps them for the next one.
+/// <see cref="ILedgerJournal"/> on the <c>economy_ledger</c> table. Appends are buffered in memory.
+/// <see cref="Flush"/> inserts that buffer in one transaction. <see cref="CommitWith"/> hands the same buffer to
+/// the caller so the insert can share a transaction with the item rows; a failure puts the buffer back.
 /// </summary>
 public sealed class PostgresLedgerJournal : ILedgerJournal
 {
@@ -66,60 +67,76 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
             _pending.Add(entry);
     }
 
-    public void Flush()
+    public void Flush() => CommitWith(entries =>
     {
+        if (entries.Count == 0)
+            return;
+        using var conn = _dataSource.OpenConnection();
+        using var batch = conn.BeginTransaction();
+        Write(conn, batch, entries);
+        batch.Commit();
+    });
+
+    /// <summary>
+    /// Removes the buffered entries, calls <paramref name="write"/>, and puts them back if <paramref name="write"/> throws.
+    /// The caller inserts them. This method does not open a transaction of its own.
+    /// </summary>
+    public void CommitWith(Action<IReadOnlyList<LedgerEntry>> write)
+    {
+        ArgumentNullException.ThrowIfNull(write);
         lock (_flushLock)
         {
             List<LedgerEntry> taken;
             lock (_pendingLock)
             {
-                if (_pending.Count == 0)
-                    return;
                 taken = [.. _pending];
                 _pending.Clear();
             }
 
             try
             {
-                Insert(taken);
+                write(taken);
             }
             catch
             {
-                lock (_pendingLock)
-                    _pending.InsertRange(0, taken);
+                if (taken.Count > 0)
+                {
+                    lock (_pendingLock)
+                        _pending.InsertRange(0, taken);
+                }
+
                 throw;
             }
         }
     }
 
-    void Insert(List<LedgerEntry> entries)
+    internal static void Write(NpgsqlConnection conn, NpgsqlTransaction tx, IReadOnlyList<LedgerEntry> entries)
     {
-        using var conn = _dataSource.OpenConnection();
-        using var batch = conn.BeginTransaction();
+        ArgumentNullException.ThrowIfNull(conn);
+        ArgumentNullException.ThrowIfNull(tx);
+        ArgumentNullException.ThrowIfNull(entries);
         foreach (var entry in entries)
         {
-            var tx = entry.Transaction;
+            var row = entry.Transaction;
             using var insert = conn.CreateCommand();
-            insert.Transaction = batch;
+            insert.Transaction = tx;
             insert.CommandText =
                 """
                 INSERT INTO economy_ledger (position, tick, sequence, kind, caused_by, reference, wall_unix_ms, postings, hash)
                 VALUES (@position, @tick, @sequence, @kind, @caused_by, @reference, @wall, @postings, @hash)
                 """;
             insert.Parameters.AddWithValue("position", entry.Position);
-            insert.Parameters.AddWithValue("tick", tx.Id.Tick);
-            insert.Parameters.AddWithValue("sequence", tx.Id.Sequence);
-            insert.Parameters.AddWithValue("kind", tx.Kind.ToString());
-            insert.Parameters.AddWithValue("caused_by", tx.CausedBy);
-            insert.Parameters.AddWithValue("reference", tx.Reference);
-            insert.Parameters.AddWithValue("wall", tx.WallUnixMs);
+            insert.Parameters.AddWithValue("tick", row.Id.Tick);
+            insert.Parameters.AddWithValue("sequence", row.Id.Sequence);
+            insert.Parameters.AddWithValue("kind", row.Kind.ToString());
+            insert.Parameters.AddWithValue("caused_by", row.CausedBy);
+            insert.Parameters.AddWithValue("reference", row.Reference);
+            insert.Parameters.AddWithValue("wall", row.WallUnixMs);
             insert.Parameters.AddWithValue("postings", NpgsqlDbType.Jsonb,
-                JsonSerializer.Serialize(tx.Postings.Select(PostingRow.Of).ToList(), Json));
+                JsonSerializer.Serialize(row.Postings.Select(PostingRow.Of).ToList(), Json));
             insert.Parameters.AddWithValue("hash", entry.Hash);
             insert.ExecuteNonQuery();
         }
-
-        batch.Commit();
     }
 
     sealed record PostingRow(string Owner, int OwnerId, string Container, int ItemId, long Amount, int[] Instances)

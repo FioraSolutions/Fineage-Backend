@@ -80,7 +80,7 @@
       "htmlFile": "30091-event-30091-03-008.htm"
     },
     {
-      "npcId": 30091,
+      "npcId": 30879,
       "hook": "event",
       "when": "absent",
       "event": "30879-02",
@@ -130,6 +130,24 @@
         }
       ],
       "htmlFile": "30091-event-30091-11-011.htm"
+    },
+    {
+      "npcId": 20135,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 7162,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 10,
+          "condAtLimit": 3
+        }
+      ],
+      "party": true
     }
   ]
 }

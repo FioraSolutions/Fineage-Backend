@@ -25,6 +25,11 @@ namespace Fineage.Net.Contract
     public sealed class ItemListNetMsg
     {
         public ItemListEntryNet[] Items { get; set; } = System.Array.Empty<ItemListEntryNet>();
+        /// <summary>
+        /// Cursor this ItemList establishes. Not part of <c>EncodeItemList</c>.
+        /// The zone appends it as one little-endian int32 after the encoded body. 0 is not sent.
+        /// </summary>
+        public int Version { get; set; }
     }
 
     /// <summary>AutoSkills / known skill row (Mobius SkillList) for Net enter.</summary>
@@ -70,6 +75,11 @@ namespace Fineage.Net.Contract
     public sealed class InventoryUpdateNetMsg
     {
         public InventoryUpdateEntryNet[] Changes { get; set; } = System.Array.Empty<InventoryUpdateEntryNet>();
+        /// <summary>
+        /// Cursor after this commit. Not part of <c>EncodeInventoryUpdate</c>.
+        /// The zone appends it as one little-endian int32 after the encoded body.
+        /// </summary>
+        public int Version { get; set; }
     }
 
     public sealed class DropItemRequestNetMsg
@@ -84,6 +94,13 @@ namespace Fineage.Net.Contract
     /// <summary>Client → zone: Mobius <c>RequestDestroyItem</c>. No coordinates: the slot is just deleted.</summary>
 
     public sealed class DestroyItemRequestMsg
+    {
+        public int ObjectId { get; set; }
+        public int Count { get; set; } = 1;
+    }
+
+    /// <summary>Client → zone: Mobius <c>RequestCrystallizeItem</c> (retail 0x72). Object id and count.</summary>
+    public sealed class CrystallizeItemRequestMsg
     {
         public int ObjectId { get; set; }
         public int Count { get; set; } = 1;

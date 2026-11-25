@@ -4,7 +4,8 @@
   "repeatable": true,
   "abortable": true,
   "questItems": [
-    5903
+    5903,
+    6002
   ],
   "dialogs": [
     {
@@ -61,14 +62,14 @@
       "htmlFile": "30867-event-30867-08-004.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-01",
       "htmlFile": "30867-event-30929-01-005.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-02",
@@ -87,7 +88,7 @@
       "htmlFile": "30867-event-30867-09-007.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -97,7 +98,7 @@
       "htmlFile": "30867-event-30929-03-008.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -111,7 +112,7 @@
       "htmlFile": "30867-event-30929-03-009.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -125,7 +126,7 @@
       "htmlFile": "30867-event-30929-03-010.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -139,7 +140,7 @@
       "htmlFile": "30867-event-30929-03-011.htm"
     },
     {
-      "npcId": 30867,
+      "npcId": 30929,
       "hook": "event",
       "when": "absent",
       "event": "30929-03",
@@ -151,6 +152,54 @@
         }
       ],
       "htmlFile": "30867-event-30929-03-012.htm"
+    },
+    {
+      "npcId": 20818,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5903,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20820,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5903,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "npcId": 20824,
+      "hook": "kill",
+      "when": "started",
+      "cond": 1,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 5903,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ]
     }
   ]
 }

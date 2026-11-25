@@ -30,6 +30,27 @@ public sealed partial class ZoneWorld
     static readonly int[] SpiritshotSkillByGrade = [2047, 2155, 2156, 2157, 2158, 2159];
     static readonly int[] BlessedSpiritshotSkillByGrade = [2061, 2160, 2161, 2162, 2163, 2164];
 
+    /// <summary>Mobius NPC item_skill glow when a soulshot/spiritshot fires (players get this on charge).</summary>
+    internal void FanoutNpcShotGlow(ZoneEntity npc, bool soul)
+    {
+        int grade = NpcShotGrade(npc);
+        int[] table = soul ? SoulshotSkillByGrade : SpiritshotSkillByGrade;
+        int skill = table[Math.Clamp(grade, 0, table.Length - 1)];
+        var netWatchers = NetWatchersOf(npc);
+        if (netWatchers is not { Count: > 0 })
+            return;
+        NetBridge?.FanoutMagicSkillUse(netWatchers, new MagicSkillUseMsg
+        {
+            CasterObjectId = npc.ObjectId,
+            TargetObjectId = npc.ObjectId,
+            SkillId = skill,
+            SkillLevel = 1
+        });
+    }
+
+    /// <summary>Approximate weapon crystal grade from mob level when the template has no grade (Mobius glow ids 2039–2154).</summary>
+    static int NpcShotGrade(ZoneEntity npc) => Math.Clamp((npc.Level + 4) / 20, 0, SoulshotSkillByGrade.Length - 1);
+
     /// <summary>Interlude beast shot item ids (Mobius BeastSoulShot / BeastSpiritShot / BlessedBeastSpiritShot).</summary>
     internal static bool IsBeastShot(int itemId) =>
         itemId is 6645 or 6646 or 6647 or 20332 or 20333 or 20334;
@@ -119,7 +140,6 @@ public sealed partial class ZoneWorld
         else
             player.SpiritshotCharge = t.IsBlessedSpiritshot ? BlessedSpiritCharge : SpiritCharge;
         var update = InventoryMessages.Update(removed ? InventoryChange.Remove : InventoryChange.Modify, stack);
-        NetBridge?.FanoutInventoryUpdate([session.ObjectId], update);
         ShotNotice(session, soul ? SysMsgSoulshotEnabled : SysMsgSpiritshotEnabled,
             soul ? "Your soulshots are enabled." : "Your spiritshot has been enabled.");
 

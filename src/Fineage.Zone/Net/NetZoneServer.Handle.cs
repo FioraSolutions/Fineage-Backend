@@ -45,6 +45,7 @@ public sealed partial class NetZoneServer
                             {
                                 if (registeredObjectId != 0 && registeredObjectId != zoneSession.ObjectId)
                                     _presence.Unregister(registeredObjectId, conn);
+                                conn.SetPeerLabel($"account={zoneSession.Account} char={zoneSession.Name}");
                                 _presence.Register(zoneSession.ObjectId, conn, self);
                                 registeredObjectId = zoneSession.ObjectId;
                             }
@@ -53,11 +54,18 @@ public sealed partial class NetZoneServer
                         case NetOpcode.EnterWorld:
                             await _session.OnEnterAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestRestart:
+                            await _session.OnRestartAsync(conn, zoneSession, self, registeredObjectId, ct).ConfigureAwait(false);
+                            registeredObjectId = 0;
+                            break;
                         case NetOpcode.MoveInput:
                             await _movement.OnMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.SelectTarget:
                             await _combat.OnSelectTargetAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.TeleportToLocation:
+                            await _combat.OnLoadTestTeleportAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.TargetCancelRequest:
                             await _combat.OnTargetCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
@@ -73,6 +81,12 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.DestroyItemRequest:
                             await _inventoryActions.OnDestroyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestCrystallizeItem:
+                            await _inventoryActions.OnCrystallizeAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestItemList:
+                            await _inventoryActions.OnRequestItemListAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.UseItem:
                             await _inventoryActions.OnUseItemAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -94,6 +108,12 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.RequestAcquireSkill:
                             await _skillLearn.OnAcquireAsync(conn, zoneSession, envelope, informing: false, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestEnchantSkillInfo:
+                            await _skillEnchant.OnInfoAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestEnchantSkill:
+                            await _skillEnchant.OnEnchantAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.EnchantRequest:
                             await _enchant.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -206,6 +226,15 @@ public sealed partial class NetZoneServer
                         case NetOpcode.PartyChangeLeaderRequest:
                             await _party.OnChangeLeaderAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.CommandChannelAskRequest:
+                            await _commandChannel.OnAskAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.CommandChannelAcceptRequest:
+                            await _commandChannel.OnAcceptAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.CommandChannelOustRequest:
+                            await _commandChannel.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -296,6 +325,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RecipeBookOpen:
                             await _recipes.OnBookOpenAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.BypassUserCmd:
+                            await _userCommands.OnBypassAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.RecipeMakeSelf:
                             await _recipes.OnMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -330,14 +362,24 @@ public sealed partial class NetZoneServer
                             await _movement.OnStopMoveAsync(conn, zoneSession, self, envelope, ct).ConfigureAwait(false);
                             break;
                         default:
-                            await RejectAsync(conn, "unknown_opcode", $"opcode 0x{envelope.Opcode:X4}", ct)
+                            await RejectAsync(conn, "unknown_opcode", NetOpcodeTable.DescribeUnknown(envelope.Opcode), ct)
                                 .ConfigureAwait(false);
                             break;
                     }
                 }
+                catch (ZoneIngressRefusal ex) when (ex.Coalesced)
+                {
+                    // The latest movement command is still queued. Nothing to send for the one it replaced.
+                }
+                catch (ZoneIngressRefusal ex)
+                {
+                    ZoneLog.Warn(
+                        $"command refused session={zoneSession.WireSessionId} opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex.Reason}");
+                    await RejectAsync(conn, "ingress_refused", ex.Reason, ct).ConfigureAwait(false);
+                }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode=0x{envelope.Opcode:X4}: {ex}");
+                    ZoneLog.Info($"handler_error session={zoneSession.WireSessionId} opcode={NetOpcodeTable.Format(envelope.Opcode)}: {ex}");
                     await RejectAsync(conn, "handler_error", "An internal error occurred.", ct).ConfigureAwait(false);
                 }
             }
@@ -348,9 +390,14 @@ public sealed partial class NetZoneServer
         }
     }
 
+    /// <summary>
+    /// The one way a zone handler refuses a client packet: the reject counter, a log line with the code and reason,
+    /// and the <c>Reject</c> frame the client shows. A rejection is never only a counter.
+    /// </summary>
     static Task RejectAsync(NetConnection conn, string code, string message, CancellationToken ct)
     {
         NetTelemetry.PacketRejected("zone");
+        ZoneLog.Warn($"reject conn={conn.ConnectionId} code={code}: {message}");
         return conn.SendAsync(NetOpcode.Reject, NetCodec.EncodeReject(new NetReject { Code = code, Message = message }), ct: ct);
     }
 }

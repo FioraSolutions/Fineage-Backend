@@ -7,19 +7,25 @@ public sealed partial class QuestMachine
         var marks = new Dictionary<int, byte>();
         foreach (var quest in _catalog.Quests)
         {
-            foreach (var dialog in quest.Dialogs)
+            var state = journal.Find(quest.Id);
+            // One gated lookup per (hook, npc, event) key instead of one per step: a step is marked when any step of
+            // its key reaches the character, exactly as before, but the lookup only walks that key's group.
+            foreach (var (key, group) in quest.DialogsByKey)
             {
-                if (dialog.NpcId <= 0)
+                if (key.NpcId <= 0)
                     continue;
-                if (Find(quest, dialog.Hook, dialog.NpcId, dialog.Event ?? "", journal.Find(quest.Id), actor) == null)
+                if (Find(quest, key.Hook, key.NpcId, key.Event, state, actor) == null)
                     continue;
-                byte mark = journal.Find(quest.Id) switch
+                foreach (var dialog in group)
                 {
-                    { Phase: QuestPhase.Started } started when DialogCompletes(quest, dialog, started) => (byte)3,
-                    { Phase: QuestPhase.Started } => (byte)2,
-                    _ => (byte)1
-                };
-                marks[dialog.NpcId] = (byte)Math.Max(marks.GetValueOrDefault(dialog.NpcId), mark);
+                    byte mark = state switch
+                    {
+                        { Phase: QuestPhase.Started } started when DialogCompletes(quest, dialog, started) => (byte)3,
+                        { Phase: QuestPhase.Started } => (byte)2,
+                        _ => (byte)1
+                    };
+                    marks[key.NpcId] = (byte)Math.Max(marks.GetValueOrDefault(key.NpcId), mark);
+                }
             }
         }
 

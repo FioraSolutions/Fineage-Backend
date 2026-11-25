@@ -111,7 +111,7 @@
       "htmlFile": "30386-event-30386-06-011.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-02",
@@ -135,7 +135,7 @@
       "htmlFile": "30386-event-30034-02-012.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-06",
@@ -154,7 +154,7 @@
       "htmlFile": "30386-event-30034-06-013.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-10",
@@ -172,7 +172,7 @@
       "htmlFile": "30386-event-30034-10-014.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-10",
@@ -190,7 +190,7 @@
       "htmlFile": "30386-event-30034-10-015.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-10",
@@ -208,7 +208,7 @@
       "htmlFile": "30386-event-30034-10-016.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30034,
       "hook": "event",
       "when": "absent",
       "event": "30034-10",
@@ -221,12 +221,15 @@
         {
           "op": "give_adena",
           "count": 3200
+        },
+        {
+          "op": "complete"
         }
       ],
       "htmlFile": "30386-event-30034-10-017.htm"
     },
     {
-      "npcId": 30386,
+      "npcId": 30344,
       "hook": "event",
       "when": "absent",
       "event": "30344-02",

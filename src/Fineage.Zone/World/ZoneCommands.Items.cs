@@ -12,10 +12,22 @@ public sealed record PickupCommand(int GroundObjectId) : ZoneCommand
         Completed(world.TryPickupAsync(session, GroundObjectId, CancellationToken.None));
 }
 
+public sealed record RequestItemListCommand : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        world.TrySendItemList(session);
+}
+
 public sealed record DestroyItemCommand(int ObjectId, int Count) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         Completed(world.TryDestroyItemAsync(session, ObjectId, Count, CancellationToken.None));
+}
+
+public sealed record CrystallizeItemCommand(int ObjectId, int Count) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryCrystallizeItemAsync(session, ObjectId, Count, CancellationToken.None));
 }
 
 public sealed record DropItemCommand(int ObjectId, int Count, int X, int Y, int Z) : ZoneCommand

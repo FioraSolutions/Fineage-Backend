@@ -1,0 +1,237 @@
+{
+  "id": 336,
+  "name": "Coins of Magic",
+  "repeatable": true,
+  "abortable": true,
+  "questItems": [
+    3811,
+    3812,
+    3813,
+    3814,
+    3815
+  ],
+  "dialogs": [
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "maxLevel": 39,
+      "ops": [
+        {
+          "op": "exit"
+        }
+      ],
+      "htmlFile": "30232-talk-000.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "absent",
+      "minLevel": 40,
+      "htmlFile": "30232-talk-001.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "absent",
+      "event": "30232-05",
+      "minLevel": 40,
+      "ops": [
+        {
+          "op": "create"
+        },
+        {
+          "op": "start"
+        },
+        {
+          "op": "set_cond",
+          "cond": 1
+        },
+        {
+          "op": "give_item",
+          "itemId": 3811,
+          "count": 1
+        }
+      ],
+      "htmlFile": "30232-event-30232-05-002.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 3811,
+      "htmlFile": "30232-talk-c1-003.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "started",
+      "event": "30232-07",
+      "hasItems": [
+        3811,
+        3812
+      ],
+      "ops": [
+        {
+          "op": "take_all",
+          "items": [
+            3812,
+            3811
+          ]
+        },
+        {
+          "op": "give_item",
+          "itemId": 3815,
+          "count": 1
+        },
+        {
+          "op": "set",
+          "key": "grade",
+          "value": "3"
+        },
+        {
+          "op": "set_cond",
+          "cond": 4
+        }
+      ],
+      "htmlFile": "30232-event-30232-07-004.htm"
+    },
+    {
+      "npcId": 30702,
+      "hook": "talk",
+      "when": "started",
+      "cond": 1,
+      "hasItem": 3811,
+      "varBelow": {
+        "grade": 1
+      },
+      "htmlFile": "30702-talk-c1-005.htm"
+    },
+    {
+      "npcId": 30702,
+      "hook": "event",
+      "when": "started",
+      "event": "30702-02",
+      "cond": 1,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 2
+        }
+      ],
+      "htmlFile": "30702-event-30702-02-c1-006.htm"
+    },
+    {
+      "npcId": 30702,
+      "hook": "event",
+      "when": "started",
+      "event": "30702-06",
+      "cond": 2,
+      "ops": [
+        {
+          "op": "set_cond",
+          "cond": 7
+        }
+      ],
+      "htmlFile": "30702-event-30702-06-c2-007.htm"
+    },
+    {
+      "npcId": 30232,
+      "hook": "event",
+      "when": "started",
+      "event": "raise",
+      "htmlFile": "30232-event-raise-008.htm"
+    },
+    {
+      "npcId": 30078,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30078-talk-009.htm"
+    },
+    {
+      "npcId": 30092,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30092-talk-010.htm"
+    },
+    {
+      "npcId": 30165,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30165-talk-011.htm"
+    },
+    {
+      "npcId": 30183,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30183-talk-012.htm"
+    },
+    {
+      "npcId": 30200,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30200-talk-013.htm"
+    },
+    {
+      "npcId": 30673,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30673-talk-014.htm"
+    },
+    {
+      "npcId": 30688,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30688-talk-015.htm"
+    },
+    {
+      "npcId": 30696,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30696-talk-016.htm"
+    },
+    {
+      "npcId": 30847,
+      "hook": "talk",
+      "when": "started",
+      "htmlFile": "30847-talk-017.htm"
+    },
+    {
+      "npcId": 20645,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "party": false,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3812,
+          "count": 1,
+          "chance": 0.063,
+          "limit": 1,
+          "condAtLimit": 3
+        }
+      ]
+    },
+    {
+      "npcId": 20644,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "party": false,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 3812,
+          "count": 1,
+          "chance": 0.063,
+          "limit": 1,
+          "condAtLimit": 3
+        }
+      ]
+    }
+  ]
+}

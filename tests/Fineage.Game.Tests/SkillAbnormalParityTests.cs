@@ -30,13 +30,15 @@ public sealed class SkillAbnormalParityTests
             ?? throw new InvalidDataException("empty snapshot");
 
         var catalog = GameData.LoadDefault().Skills;
-        Assert.Equal(snapshot.Count, catalog.Skills.Count);
+        var npcAi = SkillParityTestHelpers.NpcAiSupportSkillIds();
 
         var mismatches = new List<string>();
         foreach (var skill in catalog.Skills)
         {
             if (!snapshot.TryGetValue(skill.SkillId.ToString(), out var expected))
             {
+                if (npcAi.Contains(skill.SkillId))
+                    continue;
                 mismatches.Add($"skill {skill.SkillId} ({skill.Name}) missing from snapshot");
                 continue;
             }

@@ -11,6 +11,7 @@ using Fineage.Zone.Spawns;
 using Fineage.Zone.Drops;
 using Fineage.Zone.Bosses;
 using Fineage.Game.Shops;
+using Fineage.Game.Services;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
@@ -21,11 +22,12 @@ using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Party;
 using Fineage.Zone.Punishment;
+using Fineage.Zone.Fishing;
 using Fineage.Zone.Lottery;
 using Fineage.Zone.MonsterRace;
-using Fineage.Game.Services;
 using Fineage.Game.Wedding;
 using Fineage.Zone.Wedding;
+using System.Reflection;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.CursedWeapons;
 
@@ -124,9 +126,13 @@ public sealed partial class ZoneWorld
     /// <summary>Every entity in the world by object id, each owned by one region (<see cref="RegionDirectory{T}"/>).</summary>
     RegionDirectory<ZoneEntity> _byId;
     readonly DropCatalog _dropCatalog;
+    readonly EventDropCatalog _eventDropCatalog;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
+    readonly SimulationSyncIoGuard _syncIo;
+    readonly CharacterPersistWorker _snapshots;
+    EconomyPersistService? _economyPersist;
     /// <summary>
     /// Nesting depth of <see cref="WithDeferredInventoryPersist{T}"/>. While positive, <see cref="SaveInventory"/> /
     /// <see cref="SaveWarehouse"/> refresh the snapshot but queue Postgres until the outermost call runs
@@ -134,11 +140,26 @@ public sealed partial class ZoneWorld
     /// </summary>
     int _deferInventoryPersistDepth;
 
+    /// <summary>
+    /// True while <see cref="ZoneWorldSimulation.RunStep"/> runs: the one place that must not wait on a durable
+    /// economy commit. Off-step callers also hold the world turn, so the turn alone says nothing about a step.
+    /// </summary>
+    bool _stepping;
+
+    /// <summary>True only inside a real simulation step body, off-step callers included in "not a step".</summary>
+    internal bool InSimulationStep => _stepping;
+
     bool InventoryPersistDeferred => _deferInventoryPersistDepth > 0;
+    readonly TrackedLock _economyLock = new("economy");
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
+    readonly List<EconomyBagWrite> _dirtyOfflineFreight = [];
     readonly bool _npcRegen;
+    /// <summary><see cref="ZoneNpcSettings.MaxDriftRange"/> read once: it was an environment lookup per NPC per think.</summary>
+    readonly int _maxDriftRange;
+    readonly int _regionWakeBudget;
+    readonly int _privatesSpawnBudget;
     readonly GeoEngine _geo;
     static readonly Lazy<GeoEngine> SharedGeo = new(GeoEngine.LoadDefault);
     static readonly Lazy<DoorTable> SharedDoors = new(DoorTable.LoadDefault);
@@ -170,6 +191,7 @@ public sealed partial class ZoneWorld
         bool? expertisePenalty = null,
         SpawnCatalog? spawnCatalog = null,
         DropCatalog? dropCatalog = null,
+        EventDropCatalog? eventDropCatalog = null,
         ZoneRates? rates = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
@@ -179,6 +201,7 @@ public sealed partial class ZoneWorld
         SevenSignsEngine? sevenSigns = null,
         SevenSignsFestivalRuntime? festivalRuntime = null,
         bool includeEnabledMaps = false,
+        bool allowAmbientBoats = true,
         DungeonCatalog? dungeons = null,
         DungeonAccessOptions? dungeonAccess = null,
         DimensionalRiftCatalog? dimensionalRift = null,
@@ -228,13 +251,18 @@ public sealed partial class ZoneWorld
         IRegionExecutor? regionExecutor = null,
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
+        Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
+        _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
         InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
             regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
         _npcRegen = npcRegen ?? ZoneNpcSettings.NpcRegenEnabled;
+        _maxDriftRange = ZoneNpcSettings.MaxDriftRange;
+        _regionWakeBudget = ZoneSimulationSettings.RegionWakeBudgetPerTick;
+        _privatesSpawnBudget = ZoneSimulationSettings.PrivatesSpawnBudgetPerTick;
         _skillCombat = skillCombat ?? SkillCombatCatalog.LoadDefault();
         _npcAiSupport = npcAiSupport ?? Fineage.Zone.Npcs.NpcAiSupportCatalog.LoadDefault();
         _minions = Fineage.Zone.Npcs.NpcMinionCatalog.LoadDefault();
@@ -254,17 +282,21 @@ public sealed partial class ZoneWorld
         _game = game ?? GameData.LoadDefault();
         _spawnRandom = Streams(spawnRandom, RandomPurpose.Spawn);
         _dropRandom = Streams(dropRandom, RandomPurpose.Drop);
-        _accounts = accounts;
-        _persist = new ZoneCharacterPersist(accounts);
+        _syncIo = new SimulationSyncIoGuard(_affinity);
+        _accounts = accounts == null ? null : SimulationGuardedAccountStore.Wrap(accounts, _syncIo);
+        _snapshots = new CharacterPersistWorker(_accounts);
+        _persist = new ZoneCharacterPersist(_accounts, _snapshots);
         _expertisePenalty = expertisePenalty ?? ZoneGearSettings.ExpertisePenalty;
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
+        _eventDropCatalog = eventDropCatalog ?? EventDropCatalog.LoadDefault();
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
         _enchantRates = enchantRates ?? EnchantRates.Default;
         _enchantRates.Validate();
         _includeEnabledMaps = includeEnabledMaps;
+        _allowAmbientBoats = allowAmbientBoats;
         _quests = new QuestMachine(_game.Quests, _game.Items, random: () => throw new InvalidOperationException(
             "quest roll without the acting character's region stream: build the QuestActor with QuestActorOf"));
         _questGeometry = QuestJournalGeometry.LoadDefault();
@@ -321,7 +353,9 @@ public sealed partial class ZoneWorld
         _teleportOffset = teleportOffset ?? ReadTeleportOffset();
         _serviceRandom = Streams(serviceRandom, RandomPurpose.Service);
         _buyLists = buyLists ?? BuyListCatalog.LoadDefault();
-        _multisells = multisells ?? MultiSellCatalog.LoadDefault();
+        _multisells = HallItemCreateCatalog.MergeInto(
+            multisells ?? MultiSellCatalog.LoadDefault(),
+            HallItemCreateCatalog.LoadDefault());
         _shopStock = new ShopStock(_buyLists);
         ILedgerJournal journal = ledgerJournal
             ?? (accounts != null
@@ -329,6 +363,8 @@ public sealed partial class ZoneWorld
                     "ILedgerJournal is required when IAccountStore is configured. Production hosts pass " +
                     "accounts.OpenLedgerJournal(); tests must pass new MemoryLedgerJournal().")
                 : new MemoryLedgerJournal());
+        _journal = journal;
+        _economyPersist = new EconomyPersistService(_accounts, journal, _affinity);
         _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);
@@ -357,7 +393,9 @@ public sealed partial class ZoneWorld
             Swamp = SharedSwamp.Value;
             Damage = SharedDamage.Value;
             NoLanding = SharedNoLanding.Value;
+            MotherTree = SharedMotherTree.Value;
         }
+        InitRuleZones();
         BootstrapSpawns();
         BootstrapBoats();
         BootstrapBosses();
@@ -369,6 +407,7 @@ public sealed partial class ZoneWorld
         InitManor(manor, manorRandom);
         _fishingRandom = fishingRandom ?? GlobalStream(RandomPurpose.Fishing);
         _lottery = new LotteryActor(new LotteryBoard(WallNow().ToUnixTimeMilliseconds()), GlobalStream(RandomPurpose.Lottery));
+        _fishingChampionship = new FishingChampionshipActor(new FishingChampionshipBoard(WallNow().ToUnixTimeMilliseconds()));
         _monsterRaceSettings = MonsterRaceSettings.Mobius;
         _monsterRaceBroadcast = _monsterRaceSettings.ResolveBroadcastZones(Peace);
         _monsterRace = new MonsterRaceActor(
@@ -384,6 +423,7 @@ public sealed partial class ZoneWorld
         _wedding = new WeddingActor(accounts?.ListWeddingCouples(), accounts?.NextWeddingCoupleId ?? 1);
         SpawnCastleDoors();
         InitPunishment(punishments);
+        InitRaidBossPoints(raidBossPoints);
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>
@@ -445,11 +485,36 @@ public sealed partial class ZoneWorld
     internal IWorldEventPublisher? NetBridge
     {
         get => _netBridge;
-        set => _netBridge = value == null ? null : new OutboxingWorldEventPublisher(value, _fanout);
+        set
+        {
+            _netBridge = value == null ? null : new OutboxingWorldEventPublisher(value, _fanout);
+            bool recording = value != null && IsRecordingNetBridge(value);
+            _awaitFanoutBeforeCommandComplete = recording;
+            _fanoutDispatcher.DeliverSynchronously = recording;
+        }
     }
 
     IWorldEventPublisher? _netBridge;
-    readonly WorldFanoutSequencer _fanout = new();
+    bool _awaitFanoutBeforeCommandComplete;
+
+    static bool IsRecordingNetBridge(IWorldEventPublisher bridge)
+    {
+        for (var t = bridge.GetType(); t != null; t = t.BaseType)
+        {
+            if (t == typeof(DispatchProxy))
+                return true;
+        }
+
+        return false;
+    }
+
+    internal void AwaitTestFanoutDelivery()
+    {
+        if (_awaitFanoutBeforeCommandComplete)
+            _fanoutDispatcher.WaitUntilIdle();
+    }
+    readonly FanoutDispatcher _fanoutDispatcher = new();
+    readonly WorldFanoutSequencer _fanout;
 
     /// <summary>
     /// Live players currently on <paramref name="session"/>'s knownlist (post-enter / post-move hysteresis).

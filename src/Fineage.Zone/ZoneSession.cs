@@ -1,3 +1,4 @@
+using Fineage.Zone.Net;
 
 namespace Fineage.Zone;
 
@@ -54,6 +55,15 @@ public sealed class ZoneSession
     /// </summary>
     public string Language { get; private set; } = Fineage.Game.L10n.PlayerLocale.Default;
 
+    /// <summary>Off-thread item list for the in-flight enter burst; cleared after CommitEnter.</summary>
+    internal EnterSelfPrepare? PendingEnterSelfPrepare { get; set; }
+
+    /// <summary>Self enter frames built off the simulation thread. Cleared after CommitEnter.</summary>
+    internal EnterProjection? PendingEnterProjection { get; set; }
+
+    /// <summary>Named reason the last enter was refused. Empty after a successful insert.</summary>
+    internal string? EnterRefusal { get; set; }
+
     public bool Bound => ObjectId != 0;
 
     public void SetLanguage(string? language) =>
@@ -77,6 +87,21 @@ public sealed class ZoneSession
     {
         if (!string.IsNullOrEmpty(account))
             Account = account;
+    }
+
+    /// <summary>
+    /// Back to the character lobby. The account stays on this connection; the character binding does not.
+    /// </summary>
+    public void ReturnToLobby()
+    {
+        ObjectId = 0;
+        Name = "";
+        ClassId = 0;
+        Race = 0;
+        Sex = 0;
+        InWorld = false;
+        SelectedTargetId = 0;
+        TrainerNpcId = 0;
     }
 
     public void Clear()

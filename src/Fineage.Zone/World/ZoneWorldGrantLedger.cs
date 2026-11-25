@@ -12,6 +12,20 @@ public sealed partial class ZoneWorld
 
     static bool NeedsStarterInventory(CharacterRecord? stored) => stored is null or { Items: null };
 
+    /// <summary>
+    /// Puts the class kit on the detached player so the off-tick self frames show the equipped weapon.
+    /// The ledger post stays on the simulation thread (<see cref="ApplyStarterKitLedger"/>).
+    /// </summary>
+    void GrantStarterKitBody(ZoneEntity player)
+    {
+        if (player.Inventory == null || player.Inventory.Items.Count > 0)
+            return;
+        var kit = _game.StarterKits.ForClass(player.ClassId);
+        if (kit.IsEmpty)
+            return;
+        player.Inventory.AddStarterKit(kit);
+    }
+
     void ApplyStarterKitLedger(ZoneEntity player)
     {
         if (player.Inventory == null)
@@ -19,15 +33,20 @@ public sealed partial class ZoneWorld
         var kit = _game.StarterKits.ForClass(player.ClassId);
         if (kit.IsEmpty)
             return;
-        RecordBagChange(
-            player,
-            LedgerTxKind.StarterKit,
-            StarterKitSource,
-            () =>
-            {
-                player.Inventory.AddStarterKit(kit);
-                return player.ClassId;
-            },
-            classId => classId);
+        // The items are already in the bag. Post that grant from an empty bag to the current one.
+        var bag = LedgerAccount.Inventory(player.ObjectId);
+        var after = LedgerInventoryChange.HoldingsFrom(player.Inventory);
+        var before = new LedgerHoldings();
+        if (after.SameAs(before))
+            return;
+        var move = BeginLedgerMove(LedgerTxKind.StarterKit, player.ObjectId, player.ClassId);
+        move.Observe(bag, before);
+        LedgerInventoryChange.PostChange(move, bag, before, after, StarterKitSource);
+        move.Commit(LedgerHoldingsOf);
+        if (player.Session != null)
+        {
+            player.Inventory.DiscardChanges();
+            SaveInventory(player.Session, player.Inventory);
+        }
     }
 }

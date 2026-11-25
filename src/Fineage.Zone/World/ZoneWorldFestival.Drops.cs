@@ -1,3 +1,4 @@
+using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.SevenSigns;
 
@@ -14,11 +15,19 @@ public sealed partial class ZoneWorld
         if (!_byId.TryGetValue(instance.LeaderObjectId, out var leader) || leader.Inventory == null || leader.Session == null)
             return;
         int count = Math.Max(1, npc.FestivalOfferingBonus);
-        var added = leader.Inventory.Add(_festivalCatalog.OfferingItemId, count);
-        instance.OfferingScore += count * _festivalCatalog.OfferingValue;
-        NetBridge?.FanoutInventoryUpdate(
-            [leader.Session.ObjectId],
-            InventoryMessages.Update(InventoryChange.Add, added));
-        SaveInventory(leader.Session, leader.Inventory);
+        int itemId = _festivalCatalog.OfferingItemId;
+        int offeringValue = _festivalCatalog.OfferingValue;
+        RecordBagChange(
+            leader,
+            LedgerTxKind.FestivalBloodOffering,
+            LedgerAccount.Of(SystemAccount.SevenSigns),
+            () =>
+            {
+                leader.Inventory.Add(itemId, count);
+                instance.OfferingScore += count * offeringValue;
+                SaveInventory(leader.Session, leader.Inventory);
+                return npc.NpcId;
+            },
+            _ => npc.NpcId);
     }
 }

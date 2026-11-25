@@ -97,12 +97,25 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, HashSet<int>? captureAfter = null) =>
+        ReconcileKnownlist(entity, ack, out _, captureAfter);
+
+    /// <summary>
+    /// The overload that also hands back the before-list. It is the reconcile scratch, so it is valid only until the
+    /// next reconcile on this thread — which is all a caller that diffs the move needs.
+    /// </summary>
+    /// <param name="before">
+    /// The mover's knownlist as it was before the AOI move. Same instance as the scratch: do not store it.
+    /// </param>
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, out HashSet<int> before, HashSet<int>? captureAfter = null)
     {
-        var before = new HashSet<int>(entity.Knownlist);
+        before = ReconcileBeforeScratch;
+        before.Clear();
+        before.UnionWith(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
-        var after = new HashSet<int>();
+        var after = captureAfter ?? ReconcileAfterScratch;
+        after.Clear();
         CollectVisible(entity, after);
         foreach (int id in before)
         {
@@ -209,9 +222,11 @@ public sealed partial class ZoneWorld
         foreach (int id in entity.Knownlist)
             UntrackWatcher(session.ObjectId, id);
         entity.Knownlist.Clear();
+        entity.DropNetWatcherAudience();
         DropWatcherIndex(session.ObjectId);
         _aoi.Leave(session.ObjectId);
         _byId.Remove(session.ObjectId);
+        ForgetInWorldPlayer(session.ObjectId);
         foreach (int id in seen)
         {
             if (_byId.TryGetValue(id, out var other))
@@ -223,6 +238,7 @@ public sealed partial class ZoneWorld
 
         PartyPlayerLeftWorld(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
+        ForgetRuleZoneState(session.ObjectId);
         PrivateStorePlayerLeftWorld(session.ObjectId);
         FriendPlayerLeftWorld(session.ObjectId);
         ClanPlayerLeftWorld(session.ObjectId, session.Name);
@@ -241,10 +257,17 @@ public sealed partial class ZoneWorld
     {
         var session = snapshot.Session;
         var entity = snapshot.Entity;
-        if (entity.Inventory != null)
-            _persist.ReplaceItemsFromInventory(session.Account, session.ObjectId, entity.Inventory);
-        SaveWarehouse(session, entity);
-        SaveFreight(session, entity);
+        using (_economyLock.Enter())
+        {
+            if (entity.Inventory != null)
+                _dirtyInventories[session.ObjectId] = (session, entity.Inventory);
+            if (entity.Warehouse != null)
+                _dirtyWarehouses[session.ObjectId] = entity;
+            if (entity.Freight != null)
+                _dirtyFreight[session.ObjectId] = entity;
+        }
+
+        TryCommitDirtyEconomy(discardWithoutPublish: session.ObjectId);
         SaveVitals(session, entity);
         SaveQuestProgress(session, entity);
         SaveEffects(session, entity);

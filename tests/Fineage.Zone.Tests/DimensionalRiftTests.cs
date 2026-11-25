@@ -16,7 +16,7 @@ public sealed class DimensionalRiftTests
         Assert.True(catalog.TryGetRoom(1, 9, out var boss));
         Assert.True(boss.Boss);
         Assert.NotEmpty(catalog.SpawnsInRoom(1, 9));
-        Assert.True(catalog.SpawnsInRoom(1, 9).Any(r => r.MobId == 25333));
+        Assert.Contains(catalog.SpawnsInRoom(1, 9), r => r.MobId == 25333);
     }
 
     [Fact]

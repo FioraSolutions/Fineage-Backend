@@ -20,6 +20,9 @@ public sealed class GridAoi : IAoi
 
     public int CellSize => _cellSize;
 
+    /// <summary>Stable spatial hash cell for <paramref name="x"/>,<paramref name="y"/> (used to gate knownlist refresh while moving).</summary>
+    public long CellKeyAt(int x, int y) => CellKey(x, y);
+
     public void Enter(int objectId, int x, int y)
     {
         Leave(objectId);
@@ -34,10 +37,12 @@ public sealed class GridAoi : IAoi
         set.Add(objectId);
     }
 
+    public bool AtCell(int objectId, int x, int y) =>
+        _entityCell.TryGetValue(objectId, out long prev) && prev == CellKey(x, y);
+
     public void Move(int objectId, int x, int y)
     {
-        long key = CellKey(x, y);
-        if (_entityCell.TryGetValue(objectId, out long prev) && prev == key)
+        if (AtCell(objectId, x, y))
             return;
         Enter(objectId, x, y);
     }
@@ -58,8 +63,17 @@ public sealed class GridAoi : IAoi
         if (!_entityCell.TryGetValue(objectId, out long key))
             return [];
 
-        Unpack(key, out int gx, out int gy);
         var visible = new List<int>();
+        CollectVisible(objectId, visible);
+        return visible;
+    }
+
+    public void CollectVisible(int objectId, List<int> visible)
+    {
+        if (!_entityCell.TryGetValue(objectId, out long key))
+            return;
+
+        Unpack(key, out int gx, out int gy);
         for (int dy = -1; dy <= 1; dy++)
         {
             for (int dx = -1; dx <= 1; dx++)
@@ -73,8 +87,6 @@ public sealed class GridAoi : IAoi
                 }
             }
         }
-
-        return visible;
     }
 
     public bool StillKnown(int objectId, int otherId)

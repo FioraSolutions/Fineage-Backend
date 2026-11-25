@@ -136,7 +136,6 @@ public sealed partial class ZoneWorld
                     Take(member.Inventory, DimensionalRiftSettings.FragmentItemId, cost, changes);
                     if (changes.Count > 0 && member.Session.ObjectId == session.ObjectId)
                     {
-                        NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
                         SaveInventory(session, member.Inventory);
                     }
                     else if (member.Session.ObjectId != session.ObjectId)

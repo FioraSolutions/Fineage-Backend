@@ -1,0 +1,32 @@
+# HELP fineage_tick_ms Zone simulation tick duration
+# TYPE fineage_tick_ms histogram
+fineage_tick_ms_bucket{le="1"} 10
+fineage_tick_ms_bucket{le="5"} 40
+fineage_tick_ms_bucket{le="10"} 80
+fineage_tick_ms_bucket{le="25"} 120
+fineage_tick_ms_bucket{le="50"} 140
+fineage_tick_ms_bucket{le="100"} 150
+fineage_tick_ms_bucket{le="250"} 155
+fineage_tick_ms_bucket{le="500"} 158
+fineage_tick_ms_bucket{le="1000"} 160
+fineage_tick_ms_bucket{le="+Inf"} 160
+fineage_tick_ms_sum 4200
+fineage_tick_ms_count 160
+fineage_tick_stage_ms_bucket{stage="commands",le="10"} 5
+fineage_tick_stage_ms_bucket{stage="commands",le="50"} 90
+fineage_tick_stage_ms_bucket{stage="commands",le="100"} 120
+fineage_tick_stage_ms_bucket{stage="commands",le="250"} 125
+fineage_tick_stage_ms_bucket{stage="commands",le="+Inf"} 125
+fineage_tick_stage_ms_sum{stage="commands"} 3100
+fineage_tick_stage_ms_count{stage="commands"} 125
+fineage_tick_stage_ms_bucket{stage="movement.npc",le="10"} 100
+fineage_tick_stage_ms_bucket{stage="movement.npc",le="+Inf"} 100
+fineage_tick_stage_ms_sum{stage="movement.npc"} 200
+fineage_tick_stage_ms_count{stage="movement.npc"} 100
+fineage_command_ingress_queued 12
+fineage_zone_online 50
+fineage_outbound_dropped_total 0
+fineage_enter_try_ms_bucket{le="100"} 50
+fineage_enter_try_ms_bucket{le="+Inf"} 50
+fineage_enter_try_ms_sum 1200
+fineage_enter_try_ms_count 50

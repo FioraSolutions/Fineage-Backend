@@ -17,5 +17,6 @@
     <Project Path="tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj" />
     <Project Path="tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj" />
     <Project Path="tests/Fineage.Net.Tests/Fineage.Net.Tests.csproj" />
+    <Project Path="tests/Fineage.LoadTest.Tests/Fineage.LoadTest.Tests.csproj" />
   </Folder>
 </Solution>

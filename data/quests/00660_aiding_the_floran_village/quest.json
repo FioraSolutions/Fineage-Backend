@@ -36,7 +36,7 @@
       "htmlFile": "30291-talk-c2-002.htm"
     },
     {
-      "npcId": 30291,
+      "npcId": 30608,
       "hook": "event",
       "when": "absent",
       "event": "30608-06",
@@ -76,7 +76,7 @@
       "htmlFile": "30608-event-30608-06-004.htm"
     },
     {
-      "npcId": 30291,
+      "npcId": 30608,
       "hook": "event",
       "when": "absent",
       "event": "30608-02",
@@ -90,7 +90,7 @@
       "htmlFile": "30608-event-30608-02-006.htm"
     },
     {
-      "npcId": 30291,
+      "npcId": 30608,
       "hook": "event",
       "when": "absent",
       "event": "30608-03",
@@ -111,7 +111,7 @@
       "htmlFile": "30291-event-30291-07-009.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-07",
@@ -125,7 +125,7 @@
       "htmlFile": "30291-event-30291-09-011.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-09",
@@ -139,7 +139,7 @@
       "htmlFile": "30291-event-30291-10-013.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-10",
@@ -153,7 +153,7 @@
       "htmlFile": "30291-event-30291-14-015.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-14",
@@ -167,7 +167,7 @@
       "htmlFile": "30291-event-30291-18-017.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-18",
@@ -188,7 +188,7 @@
       "htmlFile": "30291-event-30291-03-019.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-03",
@@ -215,7 +215,7 @@
       "htmlFile": "30291-event-30291-03-021.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-03",
@@ -235,7 +235,7 @@
       "htmlFile": "30291-event-30291-06-023.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-06",
@@ -254,7 +254,7 @@
       "htmlFile": "30291-event-30291-08a-025.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-08a",
@@ -273,7 +273,7 @@
       "htmlFile": "30291-event-30291-12-027.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-12",
@@ -298,7 +298,7 @@
       "htmlFile": "30291-event-30291-12-029.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-12",
@@ -323,7 +323,7 @@
       "htmlFile": "30291-event-30291-16-031.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-16",
@@ -348,7 +348,7 @@
       "htmlFile": "30291-event-30291-16-033.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-16",
@@ -373,7 +373,7 @@
       "htmlFile": "30291-event-30291-20-035.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-20",
@@ -398,7 +398,7 @@
       "htmlFile": "30291-event-30291-20-037.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-20",
@@ -423,11 +423,130 @@
       "htmlFile": "30291-event-30291-22-039.htm"
     },
     {
-      "npcId": 30608,
+      "npcId": 30291,
       "hook": "event",
       "when": "absent",
       "event": "30291-22",
       "htmlFile": "30608-event-30291-22-040.htm"
+    },
+    {
+      "npcId": 20781,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21102,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21103,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21104,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21105,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21106,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
+    },
+    {
+      "npcId": 21107,
+      "hook": "kill",
+      "when": "started",
+      "cond": 2,
+      "html": "",
+      "ops": [
+        {
+          "op": "drop_item",
+          "itemId": 8074,
+          "count": 1,
+          "chance": 1.0,
+          "limit": 0
+        }
+      ],
+      "party": true
     }
   ]
 }

@@ -49,6 +49,14 @@ public sealed class EconomyCodecRoundTripTests
             ]
         }));
         Assert.Equal(3, update.Changes!.Length);
+        Assert.Equal(0, update.Version);
+        var body = NetCodec.EncodeInventoryUpdate(new InventoryUpdateNetMsg { Changes = update.Changes });
+        var withVersion = InventoryVersionTail.Append(body, 7);
+        Assert.Equal(body.Length + 4, withVersion.Length);
+        Assert.Equal(body, withVersion[..body.Length]);
+        Assert.Equal(7, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(withVersion.AsSpan(body.Length)));
+        var roundTrip = NetCodec.EncodeInventoryUpdate(NetCodec.DecodeInventoryUpdate(withVersion));
+        Assert.Equal(body, roundTrip);
         Assert.Equal(57, update.Changes[0].ItemId);
         Assert.Equal(100, update.Changes[0].Count);
         Assert.Equal("etc", update.Changes[0].Kind);

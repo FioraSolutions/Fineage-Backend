@@ -8,7 +8,7 @@ namespace Fineage.Zone.World;
 /// <summary>
 /// Mobius cast interruption: Formulas.calcAtkBreak on damage taken (magic/static skills only), abortCast at launch when the
 /// target is gone / escaped / out of sight, and teleToLocation aborting the cast and queued actions.
-/// No MagicSkillCanceled exists on the Net contract yet, so the client only gets SysMsg 27 on a hit break.
+/// <see cref="IWorldEventPublisher.FanoutMagicSkillCanceled"/> (Interlude 0x03AD) reaches everyone who saw the cast start.
 /// </summary>
 public sealed partial class ZoneWorld
 {
@@ -34,7 +34,7 @@ public sealed partial class ZoneWorld
         // Mobius Creature.abortCast → broadcastPacket(MagicSkillCanceled): everyone who saw the cast start stops it.
         if (NetBridge != null && ActorAudience(player) is { Count: > 0 } watchers)
             NetBridge.FanoutMagicSkillCanceled(watchers, player.ObjectId);
-        ZoneLog.Info($"[cast] abort obj={player.ObjectId} skill={skill} reason={reason}");
+        ZoneHotPathLogs.CastAbort(player.ObjectId, skill, reason);
         return true;
     }
 
@@ -91,7 +91,7 @@ public sealed partial class ZoneWorld
             ResolvePendingHit(player, now);
     }
 
-    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, DeferredEffect effect, long now)
+    void ResolveDeferredEffect(ZoneEntity player, PendingSkillHit hit, long now)
     {
         if (!_byId.TryGetValue(hit.TargetId, out var target))
         {
@@ -131,9 +131,10 @@ public sealed partial class ZoneWorld
             return;
         }
 
-        ZoneLog.Info($"[skill] effect {hit.SkillId} lv{hit.Level} target={target!.ObjectId}");
+        ZoneHotPathLogs.SkillEffect(hit.SkillId, hit.Level, target!.ObjectId);
         FanoutSkillLaunched(player, hit.SkillId, hit.Level, target);
-        effect(target, now);
+        // The effect (heal, buff, quest effect) may write a target another region owns: it lands at the barrier.
+        Post(new SkillEffectMessage(player.ObjectId, hit, now));
     }
 
     /// <summary>Test: land the caster's in-flight skill now (as if hitTime passed) and flush the caster's frames.</summary>
