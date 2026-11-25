@@ -7,12 +7,18 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    /// <summary>Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).</summary>
+    /// <summary>
+    /// Knownlist diff at the mover's current XY; Net clients get EntitySpawn/EntityDespawn (+ MoveState for runners).
+    /// <para>
+    /// The before-list is the one <see cref="ReconcileKnownlist"/> already copied into its scratch: a refresh runs once
+    /// per moving entity per movement stage, so a second copy of the same set here was pure per-move allocation. The
+    /// scratch is only valid until the next reconcile, which is exactly the lifetime of this diff.
+    /// </para>
+    /// </summary>
     void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack)
     {
         StampKnownlistRefreshAnchor(e);
-        var before = new HashSet<int>(e.Knownlist);
-        ReconcileKnownlist(e, ack);
+        ReconcileKnownlist(e, ack, before: out var before);
         if (NetBridge == null || e.Session == null)
             return;
         List<int>? added = null, removed = null;
