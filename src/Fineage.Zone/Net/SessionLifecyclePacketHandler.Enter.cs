@@ -250,8 +250,11 @@ sealed partial class SessionLifecyclePacketHandler
                     EntityValue = self.Value,
                     EntityGeneration = self.Generation
                 });
+                // Detaching runs one player at a time (restart / server unload), so a peer from the snapshot taken
+                // before the leave may already be gone: that recipient has no live socket and is skipped, instead of
+                // reporting "presence send is missing a connection handle" for an unload that worked as designed.
                 foreach (int peer in peers)
-                    await _presence.SendAsync(peer, NetOpcode.EntityDespawn, despawn, CancellationToken.None)
+                    await _presence.TrySendToLiveAsync(peer, NetOpcode.EntityDespawn, despawn, CancellationToken.None)
                         .ConfigureAwait(false);
             }
         }

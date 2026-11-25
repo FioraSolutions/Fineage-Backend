@@ -135,6 +135,36 @@ public sealed class NetPresenceHub : IAsyncDisposable
         return new AudienceSnapshot(handles, missing);
     }
 
+    /// <summary>
+    /// Resolves a set of recipients that is expected to shrink while it is drained (leavers, stage exits).
+    /// A recipient already gone from the table is skipped silently: the send had no live connection because that
+    /// player detached earlier in the same unload, not because a delivered frame lost its handle. Returning the
+    /// handles in <paramref name="objectIds"/> order keeps the caller's send order.
+    /// </summary>
+    public AudienceSnapshot CaptureLiveAudience(IReadOnlyList<int> objectIds)
+    {
+        if (objectIds == null || objectIds.Count == 0)
+            return AudienceSnapshot.Empty;
+
+        PresenceTable table = Volatile.Read(ref _published);
+        var handles = new ConnectionHandle[objectIds.Count];
+        int count = 0;
+        for (int i = 0; i < objectIds.Count; i++)
+        {
+            if (table.TryGet(objectIds[i], out PresenceEntry entry))
+                handles[count++] = entry.Handle;
+        }
+
+        if (count == 0)
+            return AudienceSnapshot.Empty;
+        if (count != handles.Length)
+            Array.Resize(ref handles, count);
+        return new AudienceSnapshot(handles, 0);
+    }
+
+    /// <summary>True while <paramref name="objectId"/> still resolves to a published handle.</summary>
+    public bool IsRegistered(int objectId) => Volatile.Read(ref _published).TryGet(objectId, out _);
+
     /// <summary>Enqueues <paramref name="payload"/> to every handle in <paramref name="audience"/>.</summary>
     public void Deliver(in AudienceSnapshot audience, ushort opcode, byte[] payload)
     {
@@ -153,6 +183,19 @@ public sealed class NetPresenceHub : IAsyncDisposable
             ZoneLog.Error($"presence send is missing a connection handle for objectId={objectId} opcode={opcode}");
             return;
         }
+
+        await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Point-to-point fanout next to a detaching set of players. Detaching runs per player, so one peer can already be
+    /// unregistered while another is still sending to it: that recipient has no live connection and nothing is lost by
+    /// skipping it, which is not the missing-handle failure <see cref="SendAsync"/> reports.
+    /// </summary>
+    public async Task TrySendToLiveAsync(int objectId, ushort opcode, byte[] payload, CancellationToken ct)
+    {
+        if (!TryGet(objectId, out var conn, out _))
+            return;
 
         await conn.SendAsync(opcode, payload, ct: ct).ConfigureAwait(false);
     }

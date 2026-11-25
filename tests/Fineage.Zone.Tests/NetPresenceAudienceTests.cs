@@ -61,6 +61,34 @@ public sealed class NetPresenceAudienceTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ReadOneAsync(older.Client, quiet.Token));
     }
 
+    [Fact]
+    public void A_peer_that_detached_before_its_turn_is_skipped_without_a_missing_handle_error()
+    {
+        var hub = new NetPresenceHub();
+        using var stillHere = new Pair();
+        using var gone = new Pair();
+        hub.Register(11, stillHere.Connection, EntityId.FromObjectId(11));
+        hub.Register(12, gone.Connection, EntityId.FromObjectId(12));
+
+        // Detaching runs one player at a time: the snapshot taken before the leave still lists a peer whose entry the
+        // earlier player's unload already removed. That is not a lost frame, so it must not report a missing handle.
+        AudienceSnapshot ranWhileBothWereLive = hub.CaptureLiveAudience([11, 12]);
+        Assert.Equal(2, ranWhileBothWereLive.Count);
+        Assert.Equal(0, ranWhileBothWereLive.Missing);
+
+        hub.Unregister(12, gone.Connection);
+        AudienceSnapshot afterOneLeft = hub.CaptureLiveAudience([11, 12]);
+        Assert.Equal(1, afterOneLeft.Count);
+        Assert.Equal(0, afterOneLeft.Missing);
+        Assert.Same(stillHere.Connection, afterOneLeft.Handles[0].Connection);
+        Assert.False(hub.IsRegistered(12));
+        Assert.True(hub.IsRegistered(11));
+
+        // The strict audience capture keeps reporting it, so a genuinely lost handle is still visible.
+        AudienceSnapshot strict = hub.CaptureAudience([11, 12], NetOpcode.MoveState);
+        Assert.Equal(1, strict.Missing);
+    }
+
     static async Task<PacketEnvelope> ReadOneAsync(TcpClient client, CancellationToken ct)
     {
         PacketEnvelope? frame = await NetFraming.ReadAsync(client.GetStream(), ct);
