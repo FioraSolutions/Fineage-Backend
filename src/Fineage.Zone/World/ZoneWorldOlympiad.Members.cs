@@ -153,12 +153,19 @@ public sealed partial class ZoneWorld
     void CollectVisible(ZoneEntity self, HashSet<int> into)
     {
         into.Clear();
-        foreach (int id in _aoi.GetVisible(self.ObjectId))
+        // Reconcile runs per mover per movement stage; the thread-static list keeps GetVisible from renting a fresh
+        // list for every one of those calls.
+        var visible = t_reconcileVisible ??= [];
+        visible.Clear();
+        _aoi.CollectVisible(self.ObjectId, visible);
+        foreach (int id in visible)
         {
             if (_byId.TryGetValue(id, out var other) && other.InstanceId == self.InstanceId)
                 into.Add(id);
         }
     }
+
+    [ThreadStatic] static List<int>? t_reconcileVisible;
 
     bool SameInstance(int leftId, int rightId)
     {

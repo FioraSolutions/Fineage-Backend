@@ -97,11 +97,21 @@ public sealed partial class ZoneWorld
     /// After <paramref name="entity"/> moved: AOI move, CharInfo to newly visible, MoveToAck to self + stayed,
     /// DeleteObject only past the forget radius and never for a pair locked in combat (Mobius knownlist).
     /// </summary>
-    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, HashSet<int>? captureAfter = null)
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, HashSet<int>? captureAfter = null) =>
+        ReconcileKnownlist(entity, ack, out _, captureAfter);
+
+    /// <summary>
+    /// The overload that also hands back the before-list. It is the reconcile scratch, so it is valid only until the
+    /// next reconcile on this thread — which is all a caller that diffs the move needs.
+    /// </summary>
+    /// <param name="before">
+    /// The mover's knownlist as it was before the AOI move. Same instance as the scratch: do not store it.
+    /// </param>
+    void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, out HashSet<int> before, HashSet<int>? captureAfter = null)
     {
         _reconcileBefore.Clear();
         _reconcileBefore.UnionWith(entity.Knownlist);
-        var before = _reconcileBefore;
+        before = _reconcileBefore;
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
         var after = captureAfter ?? _reconcileAfter;
