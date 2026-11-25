@@ -25,6 +25,18 @@ public sealed class NpcServiceRulesTests
     }
 
     [Fact]
+    public void A_gatekeeper_list_without_destinations_fails_the_load()
+    {
+        const string emptyList = """
+            { "gatekeepers": [ { "npcId": 30080,
+              "lists": [ { "name": "NORMAL", "type": "NORMAL", "locations": [] } ] } ] }
+            """;
+        var ex = Assert.Throws<InvalidDataException>(() => TeleportCatalog.Parse(emptyList, "test"));
+        Assert.Contains("30080", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("no destinations", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Roxxy_list_matches_the_mobius_gatekeeper()
     {
         var catalog = TeleportCatalog.LoadDefault();
