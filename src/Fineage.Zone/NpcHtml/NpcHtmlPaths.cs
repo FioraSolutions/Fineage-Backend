@@ -6,6 +6,12 @@ namespace Fineage.Zone.NpcHtml;
 /// and <c>data/html/default/{id}-{page}.htm</c> otherwise, then <c>npcdefault.htm</c>.
 /// Merchant, warehouse, teleporter, guard, trainer, fisherman, adventurer, pet manager,
 /// and village master override that folder. A missing typed file falls back the same way.
+/// <para>
+/// The folder comes from which Mobius class the template instantiates, not from the type name: a
+/// <c>DungeonGatekeeper</c> is a <c>DungeonGatekeeper</c> object and writes its pages to <c>teleporter/</c>
+/// (<c>DungeonGatekeeper.getHtmlPath</c>), while <c>SepulcherNpc</c> writes to <c>SepulcherNpc/</c>. Routing
+/// them to <c>default/</c> served every one of them the "nothing to say" page.
+/// </para>
 /// </summary>
 public static class NpcHtmlPaths
 {
@@ -21,7 +27,8 @@ public static class NpcHtmlPaths
             "Merchant" => "merchant",
             "Fisherman" => "fisherman",
             "Warehouse" => "warehouse",
-            "Teleporter" => "teleporter",
+            "Teleporter" or "DungeonGatekeeper" => "teleporter",
+            "SepulcherNpc" => "SepulcherNpc",
             "Guard" => "guard",
             "Trainer" => "trainer",
             "Adventurer" => "adventurer_guildsman",

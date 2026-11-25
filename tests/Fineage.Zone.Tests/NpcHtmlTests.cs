@@ -50,6 +50,10 @@ public sealed class NpcHtmlTests
         Assert.Equal("guard", NpcHtmlPaths.Folder("Guard"));
         Assert.Equal("villagemaster", NpcHtmlPaths.Folder("VillageMasterFighter"));
         Assert.Equal("default", NpcHtmlPaths.Folder("Folk"));
+        // Mobius DungeonGatekeeper/SepulcherNpc override getHtmlPath; routing them to default/ served
+        // the "nothing to say" page to every Necropolis/Catacomb ziggurat and every tomb NPC.
+        Assert.Equal("teleporter", NpcHtmlPaths.Folder("DungeonGatekeeper"));
+        Assert.Equal("SepulcherNpc", NpcHtmlPaths.Folder("SepulcherNpc"));
         Assert.Equal("30001.htm", NpcHtmlPaths.FileName(30001, 0));
         Assert.Equal("30001-2.htm", NpcHtmlPaths.FileName(30001, 2));
 
