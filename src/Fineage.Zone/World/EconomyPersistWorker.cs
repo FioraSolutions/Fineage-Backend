@@ -294,9 +294,9 @@ internal sealed class EconomyPersistService
                 return true;
             _journal.CommitWith(entries => _store.CommitEconomy(entries, work.Batch.Bags));
             FineageTelemetry.EconomyPersistBatches.Add(1, new KeyValuePair<string, object?>("result", "written"));
-            FineageTelemetry.StageMilliseconds.Record(
+            FineageTelemetry.PersistWriteMilliseconds.Record(
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds,
-                new KeyValuePair<string, object?>("stage", "persist.economy"));
+                new KeyValuePair<string, object?>("kind", "economy"));
             return true;
         }
         catch (Exception ex)

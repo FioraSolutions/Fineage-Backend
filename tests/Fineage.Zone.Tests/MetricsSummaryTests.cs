@@ -227,6 +227,25 @@ public sealed class MetricsCollectorTests
     }
 
     [Fact]
+    public void Persist_worker_writes_are_exported_apart_from_the_tick_stage()
+    {
+        string kind = "kind" + Guid.NewGuid().ToString("N");
+        using var collector = new MetricsCollector();
+        FineageTelemetry.PersistWriteMilliseconds.Record(42.0,
+            new KeyValuePair<string, object?>("kind", kind));
+
+        MetricsSnapshot snapshot = collector.Snapshot();
+        StageMetrics row = Assert.Single(snapshot.PersistWriteByKind, r => r.Stage == kind);
+        Assert.Equal(1, row.Duration.Count);
+        Assert.Equal(42.0, row.Duration.Sum, 3);
+
+        string text = MetricsText.Prometheus(snapshot, 0, 0);
+        Assert.Contains($"fineage_persist_write_ms_count{{kind=\"{kind}\"}} 1\n", text);
+        // A durable write on a worker thread is not a step: it must not land in the tick stage histogram.
+        Assert.DoesNotContain(snapshot.Stages, s => s.Stage == "persist.snapshot" && s.Duration.Count == 1 && s.Duration.Sum == 42.0);
+    }
+
+    [Fact]
     public void Collector_exports_command_timeline_apply_and_queue_wait_histograms()
     {
         using var collector = new MetricsCollector();

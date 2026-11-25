@@ -138,6 +138,9 @@ public sealed class MetricsSnapshot
     public IReadOnlyList<StageMetrics> CommandTimelinePhases { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandApplyByName { get; init; } = [];
     public IReadOnlyList<StageMetrics> CommandQueueWaitByClass { get; init; } = [];
+
+    /// <summary>Durable write duration on a persist worker, by <c>kind</c> (snapshot, economy).</summary>
+    public IReadOnlyList<StageMetrics> PersistWriteByKind { get; init; } = [];
     public HistogramMetrics CommandPlayerQueueDepth { get; init; } = new();
     public HistogramMetrics CommandQueueAge { get; init; } = new();
     public long CommandCoalesced { get; init; }
@@ -399,6 +402,8 @@ public static class MetricsText
             }
         }
 
+        AppendLabeledStageHistograms(sb, "fineage_persist_write_ms", "kind",
+            "Durable write duration on a persist worker", snapshot.PersistWriteByKind);
         AppendHelp(sb, "fineage_ledger_flush_failures_total", "Auditable economy ledger flush failures");
         sb.Append("# TYPE fineage_ledger_flush_failures_total counter\n");
         sb.Append("fineage_ledger_flush_failures_total ")
