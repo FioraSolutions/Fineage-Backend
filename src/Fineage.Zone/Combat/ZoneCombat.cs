@@ -46,6 +46,15 @@ public static partial class ZoneCombat
     public const float MaxRunSpeed = 250f;
     /// <summary>Target drift that forces a fresh MoveToPawn during an approach (Mobius follow re-issue).</summary>
     public const int ApproachRepathDistance = 40;
+    /// <summary>
+    /// First wait after an approach attempt that closed no distance. Mobius has no such timer: it re-runs
+    /// <c>maybeMoveToPawn</c> on every AI tick and lets the geo pathfinder answer inside the tick. Fineage defers the
+    /// search to a shared per-step budget, so an unreachable pawn must not ask again every step. Doubles per consecutive
+    /// failure up to <see cref="ApproachRetryMaxMs"/>.
+    /// </summary>
+    public const int ApproachRetryMinMs = 250;
+    /// <summary>Ceiling of the approach retry backoff: one attempt per second is enough to notice a target becoming reachable.</summary>
+    public const int ApproachRetryMaxMs = 1_000;
     /// <summary>Tolerance at hitTime: swing lands only if attacker is still within melee range + this.</summary>
     public const int HitRangeTolerance = 40;
     /// <summary>Client MoveTo within this of the approach path is a position sync, not a cancel.</summary>

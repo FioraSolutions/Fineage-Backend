@@ -84,11 +84,25 @@ public sealed class MetricsSnapshot
     public IReadOnlyList<StageMetrics> PathfindWait { get; init; } = [];
     /// <summary>Per priority: age of the oldest request still queued at the end of a step.</summary>
     public IReadOnlyList<StageMetrics> PathfindOldestAge { get; init; } = [];
+    /// <summary>Per priority: wait of requests dropped before the stage ever served them (kept apart from PathfindWait).</summary>
+    public IReadOnlyList<StageMetrics> PathfindUnservedWait { get; init; } = [];
     /// <summary>
     /// Per priority: steps where that priority's request was left waiting by the node budget.
     /// </summary>
     public IReadOnlyDictionary<string, long> PathfindStarvedSteps { get; init; } =
         new Dictionary<string, long>(StringComparer.Ordinal);
+    /// <summary>Per priority: route searches the stage actually started.</summary>
+    public IReadOnlyDictionary<string, long> PathfindSearches { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    public long PathfindNoRoute { get; init; }
+    public long PathfindNoRouteCached { get; init; }
+    /// <summary>Finished searches whose smoothed path was empty.</summary>
+    public long PathfindEmptyPath { get; init; }
+    /// <summary>Per outcome: server-driven approaches asked for.</summary>
+    public IReadOnlyDictionary<string, long> ApproachAttempts { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+    /// <summary>Approaches whose straight-line destination clipped back onto the origin.</summary>
+    public long ApproachClippedToOrigin { get; init; }
     public long FanoutOverflow { get; init; }
     public long FanoutCoalesced { get; init; }
     public long ReliableOverflow { get; init; }
@@ -304,10 +318,28 @@ public static class MetricsText
             "Route request wait before the npc.paths stage took it", snapshot.PathfindWait);
         AppendLabeledStageHistograms(sb, "fineage_npc_pathfind_oldest_age_ms", "priority",
             "Age of the oldest route request still queued at the end of a step", snapshot.PathfindOldestAge);
-        AppendLabeledCounter(sb, "fineage_npc_pathfind_starved_steps_total", "priority",
-            "Steps where a route request of that priority was left waiting by the node budget", snapshot.PathfindStarvedSteps);
+        AppendLabeledStageHistograms(sb, "fineage_npc_pathfind_unserved_wait_ms", "priority",
+            "Wait of a route request dropped before the npc.paths stage ever served it", snapshot.PathfindUnservedWait);
+        AppendLabeledCounter(sb, "fineage_npc_pathfind_starved_steps_total",
+            "Steps where a route request of that priority was left waiting by the node budget",
+            "priority", snapshot.PathfindStarvedSteps);
         AppendCounterLine(sb, "fineage_npc_pathfind_budget_exhausted_total",
             "Steps where the npc.paths node budget ran out with routes still pending", snapshot.PathfindBudgetExhausted);
+        AppendCounterLine(sb, "fineage_npc_pathfind_no_route_total",
+            "Completed route searches that found no path from origin to destination", snapshot.PathfindNoRoute);
+        AppendCounterLine(sb, "fineage_npc_pathfind_no_route_cached_total",
+            "Route requests answered from the cached no-route result without running a search", snapshot.PathfindNoRouteCached);
+        AppendLabeledCounter(sb, "fineage_npc_pathfind_searches_total",
+            "Route searches the npc.paths stage actually started, by priority",
+            "priority", snapshot.PathfindSearches);
+        AppendCounterLine(sb, "fineage_npc_pathfind_empty_path_total",
+            "Completed route searches whose smoothed path had no leg", snapshot.PathfindEmptyPath);
+        AppendLabeledCounter(sb, "fineage_approach_attempts_total",
+            "Server-driven approaches asked for, by outcome",
+            "outcome", snapshot.ApproachAttempts);
+        AppendCounterLine(sb, "fineage_approach_clipped_to_origin_total",
+            "Approach attempts whose straight-line destination clipped back onto the origin",
+            snapshot.ApproachClippedToOrigin);
         AppendCounterLine(sb, "fineage_fanout_overflow_total",
             "Sealed fan-out batches rejected because the dispatcher is closed", snapshot.FanoutOverflow);
         AppendCounterLine(sb, "fineage_coalesced_total",

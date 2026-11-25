@@ -159,6 +159,58 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.npc.pathfind.starved_steps",
             description: "Steps where a route request was left waiting by the node budget, by priority");
 
+    /// <summary>
+    /// Searches that ran to completion and concluded that no route exists. Distinct from
+    /// <see cref="PathfindBudgetExhausted"/>: this is a definitive answer, and it is the one that may be cached.
+    /// </summary>
+    public static readonly Counter<long> PathfindNoRoute =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.no_route",
+            description: "Completed route searches that found no path from origin to destination");
+
+    /// <summary>
+    /// Route requests answered from the negative cache instead of running a search. A high rate is the signal that an
+    /// unreachable target is still being asked about, so the approach backoff is not holding it back.
+    /// </summary>
+    public static readonly Counter<long> PathfindNoRouteCached =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.no_route_cached",
+            description: "Route requests served from the cached \"no route\" answer without a search");
+
+    /// <summary>
+    /// Wait of a request that was dropped from the queue without the stage ever serving it. Kept apart from
+    /// <see cref="PathfindWaitMilliseconds"/> so the served-latency histogram is not polluted by work that never ran,
+    /// and a single request is never counted in both.
+    /// </summary>
+    public static readonly Histogram<double> PathfindUnservedWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.unserved_wait.ms", unit: "ms",
+            description: "Wait of a route request dropped before the npc.paths stage ever served it, by priority");
+
+    /// <summary>Route searches the npc.paths stage actually started (a fresh <c>BeginPath</c>), by priority.</summary>
+    public static readonly Counter<long> PathfindSearches =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.searches",
+            description: "Route searches started by the npc.paths stage, by priority");
+
+    /// <summary>
+    /// Finished searches whose smoothed route was empty. Kept apart from <see cref="PathfindNoRoute"/>: the search found
+    /// the destination but the pose check rejected every leg, which is a different failure from an unreachable target.
+    /// </summary>
+    public static readonly Counter<long> PathfindEmptyPath =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.empty_path",
+            description: "Completed route searches whose smoothed path had no leg");
+
+    /// <summary>
+    /// Server-driven approaches asked for, by outcome: served (the pawn started moving), pending (a search is queued),
+    /// or refused (backoff or no route). This is the counter that shows whether an unreachable target is still being
+    /// re-approached every tick.
+    /// </summary>
+    public static readonly Counter<long> ApproachAttempts =
+        Meter.CreateCounter<long>("fineage.approach.attempts",
+            description: "ApproachTarget calls by outcome and priority");
+
+    /// <summary>Approaches whose straight-line destination clipped back onto the origin (from == to).</summary>
+    public static readonly Counter<long> ApproachClippedToOrigin =
+        Meter.CreateCounter<long>("fineage.approach.clipped_to_origin",
+            description: "Approach attempts whose MoveCheck left the pawn at its origin");
+
     public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
             description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");

@@ -52,6 +52,20 @@ public sealed partial class ZoneWorld
     const int NpcPathCacheCapacity = 4096;
     static readonly int GeoPathQuantize = Math.Max(128, GridRegionPartition.MapTileSize / 4);
 
+    /// <summary>
+    /// How many "no route" answers are remembered. A negative entry is one bit of information, so it is kept separately
+    /// from the positive cache and can be larger: an unreachable mob is asked about on every approach tick, and the point
+    /// is to answer that question without spending the node budget again.
+    /// </summary>
+    internal const int NpcNoRouteCacheCapacity = 8192;
+
+    /// <summary>
+    /// How long a "no route" answer stays valid without a geometry change. A target behind a wall does not become
+    /// reachable by waiting, but dynamic blockers and a target that stepped into a doorway do, so an entry expires the
+    /// same way Mobius drops a stale <c>CellNodeBuffer</c> result instead of trusting it forever.
+    /// </summary>
+    internal const long NpcNoRouteCacheTtlMs = 5_000;
+
     /// <summary>How urgent a route is for the entity that asked for it; see the stage contract above.</summary>
     public enum PathPriority
     {
@@ -90,6 +104,8 @@ public sealed partial class ZoneWorld
     readonly Dictionary<int, PathRequest> _pathRequestsById = [];
     readonly Dictionary<NpcPathCacheKey, List<(int X, int Y, int Z)>> _npcPathCache = [];
     readonly Queue<NpcPathCacheKey> _npcPathCacheEvict = [];
+    readonly Dictionary<NpcNoRouteKey, long> _npcNoRouteCache = [];
+    readonly Queue<(NpcNoRouteKey Key, long StampMs)> _npcNoRouteCacheEvict = [];
     int _pathRequestSequence;
     long _pathfindNodesLastStep;
     long _pathfindP1NodesLastStep;
@@ -98,9 +114,21 @@ public sealed partial class ZoneWorld
     readonly record struct NpcPathCacheKey(int FromQx, int FromQy, int ToQx, int ToQy);
 
     /// <summary>
+    /// Key of a definitive "no route" answer. Unlike <see cref="NpcPathCacheKey"/> it carries the instance and the
+    /// geometry version: whether a path exists is a fact about that geometry in that world, so an entry from older
+    /// bytes — or from another instance — must never answer a newer question.
+    /// </summary>
+    readonly record struct NpcNoRouteKey(int InstanceId, int GeometryVersion, int FromQx, int FromQy, int ToQx, int ToQy);
+
+    /// <summary>
     /// Requests a route to (<paramref name="wantX"/>, <paramref name="wantY"/>, <paramref name="wantZ"/>). A request already
     /// pending for the entity keeps its queue position, takes the newest destination and the most urgent priority seen, and
     /// keeps a search that is already running, so a chase that keeps re-targeting does not restart its work.
+    /// <para>
+    /// A destination this geometry already answered "no route" for resolves immediately: the answer is a fact, not work,
+    /// so it must not spend the shared node budget again. That is what stops an unreachable target from re-running a full
+    /// A* on every approach tick — the P1 flood that starved the queue during the #971 soak.
+    /// </para>
     /// </summary>
     void RequestNpcGeoPath(ZoneEntity npc, int wantX, int wantY, int wantZ)
     {
@@ -108,6 +136,16 @@ public sealed partial class ZoneWorld
         npc.PathWantY = wantY;
         npc.PathWantZ = wantZ;
         npc.PathfindPending = true;
+        long now = NowUnixMs();
+        if (TryCachedNoRoute(npc, npc.X, npc.Y, wantX, wantY, now))
+        {
+            // Same clipped straight line a completed search would have produced, without the search.
+            DequeueNpcPathfind(npc.ObjectId);
+            FineageTelemetry.PathfindNoRouteCached.Add(1);
+            ResolveNpcPathfindWithoutRoute(npc, now);
+            return;
+        }
+
         EnqueueNpcPathfind(npc);
     }
 
@@ -171,6 +209,13 @@ public sealed partial class ZoneWorld
         if (!_pathRequestsById.Remove(objectId, out var request))
             return;
         RemovePathRequest(request);
+        // A request dropped while the stage still had it queued is a real wait that produced no work. It is reported on
+        // the unserved instrument, not on the served-latency histogram, so one request is never counted by both.
+        if (!request.WaitRecorded)
+        {
+            FineageTelemetry.PathfindUnservedWaitMilliseconds.Record(
+                Math.Max(0, NowUnixMs() - request.QueuedAtMs), PriorityTag(request.Priority));
+        }
     }
 
     /// <summary>
@@ -281,6 +326,7 @@ public sealed partial class ZoneWorld
                 request.Path.Clear();
                 request.OriginX = npc.X;
                 request.OriginY = npc.Y;
+                FineageTelemetry.PathfindSearches.Add(1, PriorityTag(request.Priority));
             }
 
             int expansionsBefore = request.Search.Expansions;
@@ -425,6 +471,15 @@ public sealed partial class ZoneWorld
         if (search.Current != GeoPathSearch.Status.Found)
         {
             DequeueNpcPathfind(request.ObjectId);
+            if (search.Current == GeoPathSearch.Status.NoRoute)
+            {
+                // The open set emptied: this is a definitive answer for this origin, destination and geometry, so it is
+                // the only outcome that may be cached. An Exhausted search ran out of iterations instead — it says the
+                // budget was too small, not that no route exists, so it is never remembered.
+                RememberNoRoute(npc, request.OriginX, request.OriginY, request.WantX, request.WantY, now);
+                FineageTelemetry.PathfindNoRoute.Add(1);
+            }
+
             // No route: keep the MoveCheck truncation, like Mobius when the node buffer runs out.
             ResolveNpcPathfindWithoutRoute(npc, now);
             return (0, true);
@@ -445,6 +500,7 @@ public sealed partial class ZoneWorld
         var path = request.Path;
         if (path.Count == 0)
         {
+            FineageTelemetry.PathfindEmptyPath.Add(1);
             ResolveNpcPathfindWithoutRoute(npc, now);
             return (walked, true);
         }
@@ -546,6 +602,59 @@ public sealed partial class ZoneWorld
         return false;
     }
 
+    /// <summary>
+    /// Answers from the cached "no route" fact for this origin, destination and geometry. A hit also drops the matching
+    /// positive entry: the two caches are answers to the same question, and keeping both would let a stale route answer a
+    /// pair the search has since proven unreachable.
+    /// </summary>
+    bool TryCachedNoRoute(ZoneEntity npc, int ox, int oy, int tx, int ty, long now)
+    {
+        var key = NoRouteKey(npc, ox, oy, tx, ty);
+        if (!_npcNoRouteCache.TryGetValue(key, out long stamp))
+            return false;
+        if (now - stamp > NpcNoRouteCacheTtlMs || now < stamp)
+        {
+            // Expired, or the clock went backwards (a test rewinding time): do not trust it, and let the next search
+            // re-establish it rather than answering from a fact of unknown age.
+            EvictNoRoute(key);
+            return false;
+        }
+
+        return true;
+    }
+
+    void RememberNoRoute(ZoneEntity npc, int ox, int oy, int tx, int ty, long now)
+    {
+        var key = NoRouteKey(npc, ox, oy, tx, ty);
+        // A positive route for the same pair is stale now: the search just proved there is none.
+        _npcPathCache.Remove(QuantizePathKey(ox, oy, tx, ty));
+        if (_npcNoRouteCache.ContainsKey(key))
+            return;
+        _npcNoRouteCache[key] = now;
+        _npcNoRouteCacheEvict.Enqueue((key, now));
+        while (_npcNoRouteCacheEvict.Count > NpcNoRouteCacheCapacity)
+            EvictNoRoute(_npcNoRouteCacheEvict.Dequeue().Key);
+    }
+
+    void EvictNoRoute(NpcNoRouteKey key) => _npcNoRouteCache.Remove(key);
+
+    NpcNoRouteKey NoRouteKey(ZoneEntity npc, int ox, int oy, int tx, int ty)
+    {
+        var from = QuantizePathKey(ox, oy, tx, ty);
+        return new NpcNoRouteKey(npc.InstanceId, _geo.GeometryVersion, from.FromQx, from.FromQy, from.ToQx, from.ToQy);
+    }
+
+    /// <summary>
+    /// Tests: whether the pair currently has a cached "no route" answer, so a regression can assert what is remembered
+    /// (and, just as important, what is not). <paramref name="now"/> of 0 means "the world clock right now".
+    /// </summary>
+    internal bool HasCachedNoRouteForTest(ZoneEntity npc, int ox, int oy, int tx, int ty, long now = 0) =>
+        TryCachedNoRoute(npc, ox, oy, tx, ty, now > 0 ? now : NowUnixMs());
+
+    /// <summary>Tests: the stamp of the cached "no route" answer, or null when there is none.</summary>
+    internal long? NoRouteCachedStampForTest(ZoneEntity npc, int ox, int oy, int tx, int ty) =>
+        _npcNoRouteCache.TryGetValue(NoRouteKey(npc, ox, oy, tx, ty), out long stamp) ? stamp : null;
+
     void CommitNpcMoveStart(ZoneEntity npc, int destX, int destY, int destZ, long now)
     {
         if (ClipDoors(npc, ref destX, ref destY, ref destZ))
@@ -624,5 +733,12 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
             RequestNpcGeoPath(npc, wantX, wantY, wantZ);
+    }
+
+    /// <summary>Tests: the production approach entry point, so the backoff on every caller is exercised, not just one.</summary>
+    internal long ApproachTargetForTest(ZoneEntity player, ZoneEntity target, int range)
+    {
+        using (_affinity.Step())
+            return ApproachTarget(player, target, range);
     }
 }
