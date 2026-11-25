@@ -114,7 +114,7 @@ public sealed partial class ZoneWorld
         if (!InTalkRange(player, npc))
         {
             // Mobius NpcAction: already targeted, not auto-attackable, !canInteract →
-            // AI_INTENTION_INTERACT → moveToPawn, then PlayerAI.thinkInteract → doInteract → onAction.
+            // AI_INTENTION_INTERACT → moveToPawn(object, 60), then PlayerAI.thinkInteract.
             // Bypass links stay a hard range check (Npc.onBypassFeedback requires canInteract).
             if (!allowApproach || eventName != null)
                 return "range";
@@ -124,7 +124,7 @@ public sealed partial class ZoneWorld
             player.Intent.AutoAttackTargetId = 0;
             player.Intent.PendingCastSkillId = 0;
             player.Intent.PendingCastAtUnixMs = 0;
-            long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
+            long ms = ApproachTarget(player, npc, InteractReach(player, npc));
             if (ms < 0)
                 return "range";
             if (ms > 0)
@@ -184,7 +184,7 @@ public sealed partial class ZoneWorld
                 continue;
             if (!InTalkRange(player, npc))
             {
-                long ms = ApproachTarget(player, npc, _game.Quests.TalkRange);
+                long ms = ApproachTarget(player, npc, InteractReach(player, npc));
                 if (ms > 0)
                 {
                     player.Intent.PendingTalkNpcId = npcId;

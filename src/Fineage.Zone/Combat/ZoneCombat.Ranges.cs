@@ -79,6 +79,22 @@ public static partial class ZoneCombat
         return dx * dx + dy * dy <= (long)range * range;
     }
 
+    /// <summary>
+    /// Mobius <c>maybeMoveToPawn</c>: <c>offsetWithCollision = offset + actorRadius + targetRadius</c> on the 2D plane.
+    /// The walk is done when the pawn is inside that circle.
+    /// </summary>
+    public static int Reach(int offset, int casterCollision, int targetCollision) =>
+        Math.Max(10, offset) + Math.Max(0, casterCollision) + Math.Max(0, targetCollision);
+
+    /// <summary>3D sphere used by <c>Npc.INTERACTION_DISTANCE</c> (<c>Npc.canInteract</c>) and <c>Util.isInsideRangeOfObjectId</c>.</summary>
+    public static bool Within3D(int ax, int ay, int az, int bx, int by, int bz, int range)
+    {
+        long dx = ax - (long)bx;
+        long dy = ay - (long)by;
+        long dz = az - (long)bz;
+        return dx * dx + dy * dy + dz * dz <= (long)range * range;
+    }
+
     /// <summary>Distance from point P to segment AB (approach path).</summary>
     public static double DistanceToSegment(int px, int py, int ax, int ay, int bx, int by)
     {

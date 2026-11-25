@@ -42,7 +42,7 @@ public sealed partial class ZoneWorld
         double dist = Math.Sqrt(dx * dx + dy * dy);
         if (dist > ZoneCombat.AggroForgetRange)
             return ApproachRefused(player, target, "out_of_range");
-        double stopAt = Math.Max(10, range - ZoneCombat.ApproachSlack);
+        double stopAt = ApproachStopDistance(range, Math.Abs(target.Z - player.Z));
         if (dist <= stopAt)
         {
             player.Intent.ClearApproach();
@@ -131,6 +131,22 @@ public sealed partial class ZoneWorld
 
     static long ApproachRefused(ZoneEntity player, ZoneEntity target, string outcome) =>
         ApproachRefused(player, target, outcome, outcome is "in_range" ? 0 : -1);
+
+    /// <summary>
+    /// Where an approach stops in the XY plane for a reach <paramref name="reach"/> and a target
+    /// <paramref name="zDelta"/> above or below the pawn. Mobius <c>Creature.moveToLocation</c>
+    /// (<c>Creature.java:4346-4368</c>) first folds the height into the offset —
+    /// <c>offset -= |dz|; if (offset &lt; 5) offset = 5;</c> — and then backs one more unit off
+    /// (<c>distance -= offset - 5</c>). So a pawn standing below a ledge keeps walking all the way under the target and
+    /// climbs the ramp, while a level approach keeps the usual <see cref="ZoneCombat.ApproachSlack"/> margin. Taking the
+    /// height out of the *stop distance* is what makes a 3D interaction gate satisfiable; a flat stop under the ledge
+    /// never gets inside the sphere no matter how long the pawn waits.
+    /// </summary>
+    internal static double ApproachStopDistance(int reach, int zDelta)
+    {
+        double offset = Math.Max(5, reach - Math.Abs(zDelta));
+        return Math.Max(10, offset - 5);
+    }
 
     static long ApproachRefused(ZoneEntity player, ZoneEntity target, string outcome, long result)
     {

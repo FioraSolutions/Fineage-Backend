@@ -1,8 +1,10 @@
 using Fineage.Game;
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Combat;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Spawns;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -231,8 +233,53 @@ public sealed class NpcHtmlTests
         // Mobius NpcAction: out of canInteract starts AI_INTENTION_INTERACT instead of refusing.
         Assert.Null(await actor.Talk(MerchantObjectId));
         Assert.Equal(MerchantObjectId, actor.Player.Intent.PendingTalkNpcId);
+        // The walk aims at moveToPawn(60) + both collision radii, not at the 250 talk radius minus the old 20 slack:
+        // aiming the walk at the gate left the pawn just outside the 3D sphere it had to reach.
+        int npcX = actor.Player.MoveDestX, npcY = actor.Player.MoveDestY;
+        int reach = ZoneCombat.Reach(ZoneCombat.InteractOffset, ZoneCombat.PlayerCollisionRadius, ZoneCombat.DefaultNpcCollision);
+        Assert.True(ZoneCombat.Within(npcX, npcY, Spawns.HumanStartX, Spawns.HumanStartY, reach + 1),
+            $"the approach must stop at the interaction reach ({reach}), not at the talk gate");
         Assert.Equal("range", await actor.BypassAsync(MerchantObjectId, "Buy 1"));
         Assert.Empty(Bench(bench, FanoutHtml));
+    }
+
+    /// <summary>
+    /// The Elven Village gatekeeper case from <c>bots-200-town-soak</c>: the NPC stands on a platform 464 units above the
+    /// ground the pawn can walk on, so a flat 230-unit stop sits outside the 3D 250 sphere and every bypass answered
+    /// "range" forever. Mobius <c>moveToLocation</c> folds <c>|dz|</c> into the offset, so the pawn keeps walking under the
+    /// target and climbs the ramp (<c>Creature.java:4346-4368</c>).
+    /// </summary>
+    [Fact]
+    public void Elevated_npc_keeps_the_walk_going_until_the_3d_gate_is_inside()
+    {
+        const int npcHeight = 464;
+        int reach = ZoneCombat.Reach(ZoneCombat.InteractOffset, ZoneCombat.PlayerCollisionRadius, ZoneCombat.DefaultNpcCollision);
+        double level = ZoneWorld.ApproachStopDistance(reach, 0);
+        double raised = ZoneWorld.ApproachStopDistance(reach, npcHeight);
+
+        // A pawn standing level stops ~60 + collisions away — the same number Mobius lands on.
+        Assert.Equal(reach - ZoneCombat.ApproachSlack, level);
+        // Under a raised NPC the height comes out of the offset, so the stop collapses to the minimum: walk in, climb.
+        Assert.Equal(10, raised);
+        Assert.True(raised < level, "a raised target must pull the pawn closer, not hold it back");
+
+        // And the number that mattered in the soak: 230 XY units under a 464-high NPC is outside the talk sphere.
+        Assert.False(NpcHtmlProtocol.InRange(0, 0, 0, 230, 0, npcHeight));
+        // Walking into the NPC's column is what makes the climb possible at all: the geo path then takes the ramp and the
+        // arrival matches what the stop promised. Standing at the stop on the NPC's own ground layer is inside the sphere.
+        int stop = (int)raised;
+        Assert.True(NpcHtmlProtocol.InRange(0, 0, npcHeight, stop, 0, npcHeight));
+    }
+
+    /// <summary>Mobius <c>Npc.canInteract</c> is a 3D sphere; the warehouse/quest-event packet gates are 2D circles.</summary>
+    [Fact]
+    public void Retail_gates_split_into_the_3d_sphere_and_the_2d_circle()
+    {
+        const int x = 0, y = 0, z = 0;
+        // 240 across and 200 up: 312 apart in space, 240 along the ground.
+        Assert.False(NpcHtmlProtocol.InRange(x, y, z, 240, 0, 200));
+        Assert.True(ZoneCombat.Within(x, y, 240, 0, NpcHtmlProtocol.InteractionDistance));
+        Assert.False(ZoneCombat.Within(x, y, 251, 0, NpcHtmlProtocol.InteractionDistance));
     }
 
     [Fact]
