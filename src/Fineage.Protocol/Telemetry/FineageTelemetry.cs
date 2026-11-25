@@ -437,6 +437,15 @@ public static class FineageTelemetry
     public static readonly Counter<long> PersistSnapshots =
         Meter.CreateCounter<long>("fineage.persist.snapshots", description: "Non-economic character snapshots (tag result)");
 
+    /// <summary>
+    /// Write duration of one durable persist call on its worker thread (tag <c>kind</c>: snapshot, economy). These run off
+    /// the simulation thread, so they must not land in <c>fineage.tick.stage.ms</c>: a slow Postgres write there would
+    /// read as a slow tick and hide the step's own cost.
+    /// </summary>
+    public static readonly Histogram<double> PersistWriteMilliseconds =
+        Meter.CreateHistogram<double>("fineage.persist.write.ms", unit: "ms",
+            description: "Durable write duration on a persist worker (tag kind: snapshot, economy)");
+
     public static readonly ObservableGauge<int> PersistPending = Meter.CreateObservableGauge(
         "fineage.persist.pending",
         ObservePersistPending,

@@ -78,6 +78,7 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandApplyByName = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandQueueWaitByClass = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _persistWriteByKind = new(StringComparer.Ordinal);
     long _tickOverruns;
     long _fanoutBacklogSoftExceeded;
     long _fanoutBacklogEmergency;
@@ -229,6 +230,7 @@ public sealed class MetricsCollector : IDisposable
                 CommandTimelinePhases = FreezeLabeled(_commandTimelinePhases),
                 CommandApplyByName = FreezeLabeled(_commandApplyByName),
                 CommandQueueWaitByClass = FreezeLabeled(_commandQueueWaitByClass),
+                PersistWriteByKind = FreezeLabeled(_persistWriteByKind),
                 CommandPlayerQueueDepth = _commandPlayerQueueDepth.Freeze(),
                 CommandQueueAge = _commandQueueAge.Freeze(),
                 CommandCoalesced = _commandCoalesced,
@@ -787,6 +789,9 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.command.queue.age.ms":
                 _commandQueueAge.Record(value);
                 break;
+            case "fineage.persist.write.ms":
+                PersistWrite(PersistKindOf(tags)).Duration.Record(value);
+                break;
             case "fineage.tick.max_ms":
                 _tickMaxMs = value;
                 break;
@@ -864,6 +869,8 @@ public sealed class MetricsCollector : IDisposable
 
     MutableStage CommandQueueWait(string ingressClass) => LabeledStage(_commandQueueWaitByClass, ingressClass);
 
+    MutableStage PersistWrite(string kind) => LabeledStage(_persistWriteByKind, kind);
+
     static MutableStage LabeledStage(Dictionary<string, MutableStage> map, string key)
     {
         if (!map.TryGetValue(key, out MutableStage? row))
@@ -902,6 +909,8 @@ public sealed class MetricsCollector : IDisposable
     static string IngressClassOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "class");
 
     static string PhaseOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "phase");
+
+    static string PersistKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "kind");
 
     static void AddLane(Dictionary<string, long> counts, string lane, long value)
     {

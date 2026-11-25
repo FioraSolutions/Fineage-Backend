@@ -400,9 +400,9 @@ sealed class CharacterPersistWorker
             long started = Stopwatch.GetTimestamp();
             LastWriterThreadId = Environment.CurrentManagedThreadId;
             bool accepted = work.Apply(_store);
-            FineageTelemetry.StageMilliseconds.Record(
+            FineageTelemetry.PersistWriteMilliseconds.Record(
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds,
-                new KeyValuePair<string, object?>("stage", "persist.snapshot"));
+                new KeyValuePair<string, object?>("kind", "snapshot"));
             if (!accepted)
             {
                 LogFailure(work, "store returned false");
