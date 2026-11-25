@@ -9,7 +9,8 @@ internal readonly record struct FanoutDescriptor(
     int SubjectId,
     AudienceSnapshotId Audience,
     int PayloadIndex,
-    bool Superseded);
+    bool Superseded,
+    bool Dropped = false);
 
 /// <summary>
 /// Arguments for one fan-out. Scalar fields cover the publisher methods; <see cref="Payload"/> holds a

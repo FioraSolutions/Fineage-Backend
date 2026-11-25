@@ -136,4 +136,18 @@ internal static class FanoutKinds
         or FanoutKind.ChangeMoveType
         or FanoutKind.StatusUpdate
         or FanoutKind.AbnormalStatusUpdate;
+
+    /// <summary>
+    /// The kinds a client can lose without desyncing: animations and markers, which is exactly the set the outbound
+    /// mailbox already sheds for a slow client (<c>OutboundLanePolicy</c>). Everything else carries gameplay state
+    /// (knownlist, death, drops, inventory, shop, quest) or a payload of its own and is never shed at seal time.
+    /// </summary>
+    public static bool IsVisual(FanoutKind kind) => kind is FanoutKind.AttackState
+        or FanoutKind.MagicSkillUse
+        or FanoutKind.MagicSkillLaunched
+        or FanoutKind.MagicSkillCanceled
+        or FanoutKind.AttackStance
+        or FanoutKind.SocialAction
+        or FanoutKind.TargetSelected
+        or FanoutKind.TargetUnselected;
 }

@@ -15,3 +15,6 @@ Every perf PR that touches simulation, pathfinding, fan-out, or persistence must
 | `perf-aoe-multiparty` soak | ≥ 15 min (report tick + fan-out) |
 
 Include a before/after table in the PR description and link artifact paths (`load-test-report.md`, commit SHA, machine notes).
+
+Stage budgets, overflow policies and the metric that measures each stage of the sim → socket chain are in
+[`nonblocking-simulation.md`](nonblocking-simulation.md).

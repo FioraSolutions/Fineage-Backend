@@ -155,6 +155,20 @@ internal static class AudienceSnapshots
         }
     }
 
+    /// <summary>Watcher count without handing out the stored list (seal-time send-work accounting).</summary>
+    public static int CountOf(AudienceSnapshotId id)
+    {
+        if (id.IsEmpty)
+            return 0;
+        lock (Gate)
+        {
+            ref var slot = ref _slots[id.Value];
+            if (slot.Refs <= 0)
+                throw new InvalidOperationException($"audience {id.Value} is not live");
+            return slot.Ids.Length;
+        }
+    }
+
     public static int[] Watchers(AudienceSnapshotId id)
     {
         if (id.IsEmpty)
