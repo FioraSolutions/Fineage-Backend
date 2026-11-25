@@ -25,11 +25,25 @@ public static partial class ZoneCombat
     public const int PickupRange = 45;
     /// <summary>Mobius AI_INTENTION_PICK_UP moveToPawn offset (36) — the approach stop distance base.</summary>
     public const int PickupReach = 36;
+    /// <summary>
+    /// Mobius <c>CreatureAI.onIntentionInteract</c> (<c>CreatureAI.java:488</c>): <c>moveToPawn(object, 60)</c>.
+    /// The walk stops at 60 + both collision radii, so the arrival check (<c>maybeMoveToPawn(target, 36)</c>) and the
+    /// 3D <c>Npc.INTERACTION_DISTANCE</c> gate both pass. The 250 talk radius is the gate, never the walk: aiming the
+    /// walk at 250 − slack left the pawn 230 away in XY, which is outside the 3D sphere as soon as the NPC stands on a
+    /// ledge or a platform, and every bypass then answered "range".
+    /// </summary>
+    public const int InteractOffset = 60;
     /// <summary>Mobius RequestDropItem: isInsideRadius3D(x, y, z, 150) and |dz| &lt;= 50, else CANNOT_DISCARD_DISTANCE_TOO_FAR.</summary>
     public const int DropRange = 150;
     public const int DropMaxZDelta = 50;
-    /// <summary>Mobius moveToPawn offset: stop a bit inside the attack range so the swing passes the check.</summary>
-    public const int ApproachSlack = 20;
+    /// <summary>
+    /// How far inside the reach an approach stops. Mobius <c>Creature.moveToLocation</c> backs off a flat 5 units
+    /// (<c>distance -= offset - 5</c> after the offset already lost the height gap), while Fineage used to subtract 20
+    /// from every reach. Twenty is nearly a third of the 80 melee reach and, on a 250 talk reach, parked the pawn 230
+    /// units away — further than the 3D gate it then had to pass. The height fold itself lives in
+    /// <see cref="World.ZoneWorld.ApproachStopDistance"/>.
+    /// </summary>
+    public const int ApproachSlack = 5;
     /// <summary>Mobius <c>CreatureTemplate</c> default <c>baseRunSpd</c> when a template has none.</summary>
     public const float DefaultPlayerRunSpeed = 120f;
     /// <summary>Mobius <c>CreatureTemplate</c> default <c>baseWalkSpd</c> when a template has none.</summary>

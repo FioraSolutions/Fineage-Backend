@@ -10,7 +10,9 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    bool TryServicePair(ZoneSession session, int npcObjectId, out ZoneEntity player, out ZoneEntity npc, out string? error)
+    bool TryServicePair(
+        ZoneSession session, int npcObjectId, out ZoneEntity player, out ZoneEntity npc, out string? error,
+        InteractGate gate = InteractGate.Sphere3D)
     {
         player = null!;
         npc = null!;
@@ -39,7 +41,7 @@ public sealed partial class ZoneWorld
             return false;
         }
 
-        if (!InTalkRange(player, npc))
+        if (!InInteractGate(player, npc, gate))
         {
             error = "range";
             return false;

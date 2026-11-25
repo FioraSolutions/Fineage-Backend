@@ -228,8 +228,42 @@ public sealed partial class ZoneWorld
         return false;
     }
 
+    /// <summary>
+    /// Mobius <c>Npc.canInteract</c>: <c>isInsideRadius3D(player, INTERACTION_DISTANCE)</c> — the talk gate, and the gate
+    /// <c>Npc.onBypassFeedback</c> / <c>Util.isInsideRangeOfObjectId</c> (chained after <c>validateHtmlAction</c>) apply to
+    /// bypass commands. Retail <c>RequestBuyItem</c> / <c>MultiSellChoose</c> / private stores use the same sphere.
+    /// </summary>
     bool InTalkRange(ZoneEntity player, ZoneEntity npc) =>
         NpcHtmlProtocol.InRange(player.X, player.Y, player.Z, npc.X, npc.Y, npc.Z, _game.Quests.TalkRange);
+
+    /// <summary>
+    /// Mobius item-gate distance: <c>isInsideRadius2D(target, Npc.INTERACTION_DISTANCE)</c>. Retail uses the flat circle for
+    /// <c>SendWareHouseDepositList</c> / <c>SendWareHouseWithDrawList</c> / <c>RequestPackageSend</c>,
+    /// <c>isInsideRadius2D(trainer, …)</c> for skill acquisition and <c>isInsideRadius2D</c> for quest events
+    /// (<c>Player.processQuestEvent</c>). Only <c>Npc.canInteract</c> and the buy/multisell/private-store packets are 3D.
+    /// </summary>
+    bool InInteractCircle(ZoneEntity player, ZoneEntity npc) =>
+        ZoneCombat.Within(player.X, player.Y, npc.X, npc.Y, _game.Quests.TalkRange);
+
+    /// <summary>The distance check an NPC interaction packet sits behind, taken from the Mobius packet it mirrors.</summary>
+    internal enum InteractGate
+    {
+        /// <summary><c>isInsideRadius3D(…, Npc.INTERACTION_DISTANCE)</c>: talk, bypass, buy/sell/multisell, teleport, buffs.</summary>
+        Sphere3D,
+        /// <summary><c>isInsideRadius2D(…, Npc.INTERACTION_DISTANCE)</c>: warehouse lists, freight send, skill learn, quest events.</summary>
+        Circle2D
+    }
+
+    bool InInteractGate(ZoneEntity player, ZoneEntity npc, InteractGate gate) =>
+        gate == InteractGate.Circle2D ? InInteractCircle(player, npc) : InTalkRange(player, npc);
+
+    /// <summary>
+    /// Where the talk walk stops: Mobius <c>moveToPawn(object, 60)</c> with both collision radii
+    /// (<c>CreatureAI.maybeMoveToPawn</c>), so a ledge or a platform NPC is walked up to instead of aimed at from
+    /// 230 XY units away — a 3D gate would then refuse the arrival as "range".
+    /// </summary>
+    int InteractReach(ZoneEntity player, ZoneEntity npc) =>
+        ZoneCombat.Reach(ZoneCombat.InteractOffset, CollisionRadiusOf(player), CollisionRadiusOf(npc));
 
     static bool EventOk(string text)
     {

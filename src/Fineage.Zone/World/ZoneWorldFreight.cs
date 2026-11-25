@@ -204,7 +204,7 @@ public sealed partial class ZoneWorld
             !_byId.TryGetValue(player.FreightKeeperNpcObjectId, out var keeper) ||
             keeper.Kind != ZoneEntityKind.Npc ||
             !IsWarehouse(keeper) ||
-            !InTalkRange(player, keeper))
+            !InInteractCircle(player, keeper))
         {
             ZoneLog.Warn($"package send too far from keeper object={player.ObjectId} keeper={player.FreightKeeperNpcObjectId}");
             return "range";
