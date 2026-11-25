@@ -118,10 +118,11 @@ public sealed partial class ZoneWorld
             bool targetMoved = !ZoneCombat.Within(target.X, target.Y, player.Intent.ApproachTargetX, player.Intent.ApproachTargetY,
                 ZoneCombat.ApproachRepathDistance);
             // A pathfind already queued for this approach is not "stuck". Re-entering here
-            // would ask for another search on every tick.
+            // would ask for another search on every tick. A pawn that failed to close the distance also waits out its
+            // backoff first: the target must actually move, or the wait expire, before the search is paid for again.
             bool stuckShort = !player.MoveActive && !player.PathfindPending
                 && !ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target));
-            if (targetMoved || stuckShort)
+            if ((targetMoved || stuckShort) && ApproachRetryDue(player, target, now))
             {
                 long re = ApproachTarget(player, target, PlayerReach(player, target));
                 if (re < 0)
@@ -140,6 +141,14 @@ public sealed partial class ZoneWorld
             return;
         if (!ZoneCombat.Within(player.X, player.Y, target.X, target.Y, PlayerReach(player, target)))
         {
+            if (!ApproachRetryDue(player, target, now))
+            {
+                // Still backing off from a failed attempt at this target; re-check once the wait is over instead of
+                // re-running the search every tick.
+                player.Intent.NextAutoAttackUnixMs = now + ApproachRetryDelayMs(player.Intent.ApproachAttempts);
+                return;
+            }
+
             // Target moved away: Mobius re-issues moveToPawn and keeps the attack intention.
             long ms = ApproachTarget(player, target, PlayerReach(player, target));
             if (ms < 0)

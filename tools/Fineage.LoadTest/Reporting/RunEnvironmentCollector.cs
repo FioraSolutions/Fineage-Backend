@@ -23,10 +23,12 @@ public sealed class RunEnvironmentInfo
 public static class RunEnvironmentCollector
 {
     /// <summary><c>Debug</c> / <c>Release</c> from <c>/proc/&lt;pid&gt;/cmdline</c> (<c>…/bin/Debug/…</c>), or null.</summary>
-    internal static string? ZoneBuildFromProcess(int? zonePid)
+    public static string? ZoneBuildFromProcess(int? zonePid)
     {
         if (zonePid is not > 0)
             return null;
+        // /proc is Linux-only. On macOS the process metadata is simply unavailable, and that is a MISSING field, never
+        // a reason to abort the report.
         string path = $"/proc/{zonePid}/cmdline";
         if (!File.Exists(path))
             return null;
@@ -37,6 +39,9 @@ public static class RunEnvironmentCollector
             return "Release";
         return null;
     }
+
+    /// <summary>Whether this host exposes <c>/proc</c>, so process introspection can be attempted at all.</summary>
+    internal static bool HasProcFileSystem => OperatingSystem.IsLinux() && Directory.Exists("/proc");
 
     public static RunEnvironmentInfo Collect(int? zonePid = null)
     {
@@ -91,7 +96,9 @@ public static class RunEnvironmentCollector
             return "MISSING: zone pid was not passed, so the zone runtimeconfig could not be read";
         string? binary = ZoneBinaryPath(zonePid.Value);
         if (binary == null)
-            return $"MISSING: /proc/{zonePid}/cmdline and /proc/{zonePid}/exe do not name Fineage.Zone or Fineage.Zone.dll";
+            return HasProcFileSystem
+                ? $"MISSING: /proc/{zonePid}/cmdline and /proc/{zonePid}/exe do not name Fineage.Zone or Fineage.Zone.dll"
+                : $"MISSING: this host has no /proc (not Linux), so the zone binary of pid {zonePid} cannot be resolved";
         string? dir = Path.GetDirectoryName(binary);
         string config = Path.Combine(dir ?? ".", "Fineage.Zone.runtimeconfig.json");
         if (!File.Exists(config))
@@ -125,8 +132,19 @@ public static class RunEnvironmentCollector
         string? fromCmd = MatchZoneBinary(ReadCmdline(pid), pid);
         if (fromCmd != null)
             return fromCmd;
-        string? exe = Directory.ResolveLinkTarget($"/proc/{pid}/exe", returnFinalTarget: true)?.FullName;
-        return exe != null && IsZoneBinary(exe) ? exe : null;
+        if (!HasProcFileSystem)
+            return null;
+        string link = $"/proc/{pid}/exe";
+        try
+        {
+            string? exe = Directory.ResolveLinkTarget(link, returnFinalTarget: true)?.FullName;
+            return exe != null && IsZoneBinary(exe) ? exe : null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The process vanished between the two reads, or /proc hides it: not knowing the binary is MISSING data.
+            return null;
+        }
     }
 
     static string? ReadCmdline(int pid)
@@ -134,7 +152,14 @@ public static class RunEnvironmentCollector
         string cmdlinePath = $"/proc/{pid}/cmdline";
         if (!File.Exists(cmdlinePath))
             return null;
-        return Encoding.UTF8.GetString(File.ReadAllBytes(cmdlinePath));
+        try
+        {
+            return Encoding.UTF8.GetString(File.ReadAllBytes(cmdlinePath));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     static string? MatchZoneBinary(string? cmdline, int pid)
@@ -148,11 +173,26 @@ public static class RunEnvironmentCollector
                 continue;
             if (Path.IsPathRooted(arg))
                 return arg;
-            cwd ??= Directory.ResolveLinkTarget($"/proc/{pid}/cwd", returnFinalTarget: true)?.FullName;
+            cwd ??= ProcCwd(pid);
             return cwd == null ? arg : Path.GetFullPath(Path.Combine(cwd, arg));
         }
 
         return null;
+    }
+
+    static string? ProcCwd(int pid)
+    {
+        string link = $"/proc/{pid}/cwd";
+        if (!HasProcFileSystem || !Directory.Exists("/proc"))
+            return null;
+        try
+        {
+            return Directory.ResolveLinkTarget(link, returnFinalTarget: true)?.FullName;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     static bool IsZoneBinary(string path)

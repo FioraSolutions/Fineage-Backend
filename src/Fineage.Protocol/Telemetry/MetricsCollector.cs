@@ -62,8 +62,15 @@ public sealed class MetricsCollector : IDisposable
     readonly BoundedCountHistogram _pathfindQueued = new(MetricsText.CountBounds);
     readonly Dictionary<string, MutableStage> _pathfindWait = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _pathfindOldestAge = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _pathfindUnservedWait = new(StringComparer.Ordinal);
     readonly Dictionary<string, long> _pathfindStarvedSteps = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _pathfindSearches = new(StringComparer.Ordinal);
     long _pathfindBudgetExhausted;
+    long _pathfindNoRoute;
+    long _pathfindNoRouteCached;
+    long _pathfindEmptyPath;
+    readonly Dictionary<string, long> _approachAttempts = new(StringComparer.Ordinal);
+    long _approachClippedToOrigin;
     long _fanoutOverflow;
     long _fanoutCoalesced;
     long _reliableOverflow;
@@ -164,7 +171,14 @@ public sealed class MetricsCollector : IDisposable
                 PathfindQueued = _pathfindQueued.Freeze(),
                 PathfindWait = FreezeLabeled(_pathfindWait),
                 PathfindOldestAge = FreezeLabeled(_pathfindOldestAge),
+                PathfindUnservedWait = FreezeLabeled(_pathfindUnservedWait),
                 PathfindStarvedSteps = new Dictionary<string, long>(_pathfindStarvedSteps, StringComparer.Ordinal),
+                PathfindSearches = new Dictionary<string, long>(_pathfindSearches, StringComparer.Ordinal),
+                PathfindNoRoute = _pathfindNoRoute,
+                PathfindNoRouteCached = _pathfindNoRouteCached,
+                PathfindEmptyPath = _pathfindEmptyPath,
+                ApproachAttempts = new Dictionary<string, long>(_approachAttempts, StringComparer.Ordinal),
+                ApproachClippedToOrigin = _approachClippedToOrigin,
                 FanoutOverflow = _fanoutOverflow,
                 FanoutCoalesced = _fanoutCoalesced,
                 ReliableOverflow = _reliableOverflow,
@@ -614,6 +628,27 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.npc.pathfind.starved_steps":
                 _pathfindStarvedSteps[PriorityOf(tags)] = _pathfindStarvedSteps.GetValueOrDefault(PriorityOf(tags)) + value;
                 break;
+            case "fineage.npc.pathfind.no_route":
+                _pathfindNoRoute += (long)value;
+                break;
+            case "fineage.npc.pathfind.no_route_cached":
+                _pathfindNoRouteCached += (long)value;
+                break;
+            case "fineage.npc.pathfind.searches":
+                _pathfindSearches[PriorityOf(tags)] = _pathfindSearches.GetValueOrDefault(PriorityOf(tags)) + value;
+                break;
+            case "fineage.npc.pathfind.empty_path":
+                _pathfindEmptyPath += (long)value;
+                break;
+            case "fineage.approach.attempts":
+                string outcome = Tag(tags, "outcome");
+                if (outcome.Length == 0)
+                    outcome = "other";
+                _approachAttempts[outcome] = _approachAttempts.GetValueOrDefault(outcome) + value;
+                break;
+            case "fineage.approach.clipped_to_origin":
+                _approachClippedToOrigin += (long)value;
+                break;
             case "fineage.fanout.coalesced":
                 _fanoutCoalesced += value;
                 break;
@@ -795,6 +830,9 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.npc.pathfind.oldest_age.ms":
                 LabeledStage(_pathfindOldestAge, PriorityOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.npc.pathfind.unserved_wait.ms":
+                LabeledStage(_pathfindUnservedWait, PriorityOf(tags)).Duration.Record(value);
                 break;
             case "fineage.outbound.queue.oldest_age.ms":
                 _outboundQueueAge.Record(value);

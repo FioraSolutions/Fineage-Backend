@@ -24,10 +24,22 @@ public sealed class PlayerIntent
     public int ApproachTargetX { get; set; }
     public int ApproachTargetY { get; set; }
 
+    /// <summary>
+    /// When the next attempt at this target may run. Set after an attempt ended without closing the distance (no route,
+    /// or a move the geo clipped to nothing), and it doubles on each consecutive failure. Without it a pawn stuck behind
+    /// a wall asks for a full A* on every tick, which is what took the shared pathfinding budget away from real chases.
+    /// </summary>
+    public long ApproachRetryAtUnixMs { get; set; }
+
+    /// <summary>Consecutive failed attempts at <see cref="ApproachTargetId"/>; the driver of the backoff interval.</summary>
+    public int ApproachAttempts { get; set; }
+
     public void ClearApproach()
     {
         ApproachTargetId = 0;
         ApproachArriveUnixMs = 0;
+        ApproachRetryAtUnixMs = 0;
+        ApproachAttempts = 0;
         PendingTalkNpcId = 0;
         PendingTalkAtUnixMs = 0;
     }

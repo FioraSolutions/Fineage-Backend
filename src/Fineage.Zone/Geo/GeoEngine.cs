@@ -158,6 +158,7 @@ public sealed partial class GeoEngine
             {
                 byte[] bytes = File.ReadAllBytes(file);
                 geo._regions[Key(rx, ry)] = ext == ".l2j" ? Region.ParseL2j(bytes) : Region.ParseL2d(bytes);
+                geo.GeometryVersion++;
                 loadedNames.Add(Path.GetFileName(file));
             }
             catch (Exception ex)
@@ -173,8 +174,19 @@ public sealed partial class GeoEngine
         return (geo, loadedNames, loadErrors);
     }
 
+    /// <summary>
+    /// Monotonic counter bumped whenever a region is installed or replaced. Anything that caches a search result
+    /// derived from the geometry must key on this: a route found (or not found) against older bytes is not valid for
+    /// newer ones, and an unreachable target can become reachable after a region swap.
+    /// </summary>
+    public int GeometryVersion { get; private set; }
+
     /// <summary>Test/tool hook: install a region built in memory.</summary>
-    internal void SetRegion(int rx, int ry, Region region) => _regions[Key(rx, ry)] = region;
+    internal void SetRegion(int rx, int ry, Region region)
+    {
+        _regions[Key(rx, ry)] = region;
+        GeometryVersion++;
+    }
 
     static int Key(int rx, int ry) => (rx << 8) | ry;
 

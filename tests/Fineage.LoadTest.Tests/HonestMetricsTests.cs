@@ -110,6 +110,26 @@ public class HonestMetricsTests
         Assert.Contains("MISSING", RunEnvironmentCollector.GcModeFromRuntimeConfig("{}", "zone.runtimeconfig.json"));
     }
 
+    /// <summary>
+    /// The report must survive a host without /proc. On macOS the old code called ResolveLinkTarget("/proc/pid/exe")
+    /// during enrichment, which threw DirectoryNotFoundException and aborted the whole report — the soak in #971 was
+    /// measured but produced no report at all. Process introspection must degrade to a MISSING field.
+    /// </summary>
+    [Fact]
+    public void Environment_collection_degrades_to_MISSING_when_proc_is_unavailable()
+    {
+        // pid 1 is not a zone process and is unreachable from a non-root test, which is exactly the "cannot introspect"
+        // case the collector has to tolerate.
+        RunEnvironmentInfo info = RunEnvironmentCollector.Collect(zonePid: 1);
+
+        Assert.Contains("MISSING", info.GcMode);
+        Assert.False(string.IsNullOrWhiteSpace(info.OsDescription));
+        Assert.True(info.ProcessorCount > 0);
+
+        // The process probe itself must not throw, whatever the host exposes.
+        Assert.Null(RunEnvironmentCollector.ZoneBuildFromProcess(1));
+    }
+
     [Fact]
     public void Csv_collect_format_supplies_real_cpu_percent()
     {
