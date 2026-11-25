@@ -29,13 +29,19 @@ public abstract class GlobalActor
     public string Name { get; }
 
     /// <summary>Throws inside a region body: other regions may be running, and the actor is single-threaded.</summary>
-    protected void RequireActorThread()
+    protected void RequireActorThread() => RequireActorThread(readOnly: false);
+
+    /// <summary>
+    /// Throws inside a region body unless the caller only reads state the actor changes on the scheduler thread and at
+    /// the barrier, which never run while a body is in flight: such a read sees a stable snapshot and finds nothing
+    /// half-applied. Writes, and anything the step coalesces, still pass <paramref name="readOnly"/> false.
+    /// </summary>
+    protected void RequireActorThread(bool readOnly)
     {
-        if (RegionTickScheduler.CurrentBody is { } region)
-        {
-            throw new InvalidOperationException(
-                $"global actor '{Name}' reached from the body of region {region}; defer the request to the barrier");
-        }
+        if (readOnly || RegionTickScheduler.CurrentBody is not { } region)
+            return;
+        throw new InvalidOperationException(
+            $"global actor '{Name}' reached from the body of region {region}; defer the request to the barrier");
     }
 }
 

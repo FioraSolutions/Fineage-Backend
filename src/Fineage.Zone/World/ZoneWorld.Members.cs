@@ -109,12 +109,12 @@ public sealed partial class ZoneWorld
     /// </param>
     void ReconcileKnownlist(ZoneEntity entity, MoveToMsg? ack, out HashSet<int> before, HashSet<int>? captureAfter = null)
     {
-        _reconcileBefore.Clear();
-        _reconcileBefore.UnionWith(entity.Knownlist);
-        before = _reconcileBefore;
+        before = ReconcileBeforeScratch;
+        before.Clear();
+        before.UnionWith(entity.Knownlist);
         _aoi.Move(entity.ObjectId, entity.X, entity.Y);
 
-        var after = captureAfter ?? _reconcileAfter;
+        var after = captureAfter ?? ReconcileAfterScratch;
         after.Clear();
         CollectVisible(entity, after);
         foreach (int id in before)
