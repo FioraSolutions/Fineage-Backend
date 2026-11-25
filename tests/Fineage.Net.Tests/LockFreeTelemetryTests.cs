@@ -36,7 +36,9 @@ public sealed class LockFreeTelemetryTests
     {
         using var meter = new Meter(FineageTelemetry.MeterName);
         Counter<long> overruns = meter.CreateCounter<long>("fineage.tick.overruns");
-        using var collector = new MetricsCollector();
+        // Scoped to this meter: a collector that follows the meter name also counts recordings from parallel test
+        // classes, which is exactly what the backlog assertion below cannot survive.
+        using var collector = new MetricsCollector(meter);
         long before = collector.Snapshot().TickOverruns;
 
         // A stopped drainer is a starved consumer: the producer now owns the whole backlog, which #972 promises to keep
