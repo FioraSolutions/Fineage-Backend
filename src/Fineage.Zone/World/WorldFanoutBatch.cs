@@ -61,13 +61,11 @@ internal sealed class WorldFanoutBatch
         _args.Add(args);
         int index = _entries.Count;
         _entries.Add(new FanoutDescriptor(kind, 0, audience, _args.Count - 1, false));
-        int work = (int)WorkOf(audience);
-        SendWork += work;
+        SendWork += WorkOf(audience);
         if (!FanoutKinds.IsVisual(kind))
             return;
         (_visuals ??= []).Add(index);
         ShedVisualsTo(SoftSendWork, keepIndex: index);
-        _ = work;
     }
 
     public void AddReplaceable(FanoutKind kind, int subjectId, AudienceSnapshotId audience, FanoutArgs args)

@@ -192,8 +192,18 @@ reachable from `ZoneWorld.RunStep` → `RegionTickScheduler.Step` → region bod
 
 - `AudienceSnapshots.Gate` is shared with the fan-out worker (see the table). It is safe today because the section
   is a lookup; a future change that computes or encodes inside it would put the sim thread behind the worker.
+  Send-work accounting added one more call site on the sim thread (`CountOf` per fan-out write at seal time), so the
+  section is now entered once per ordered write rather than once per batch. It is still a dictionary lookup and an
+  array-length read, but it is the lock to watch if the sim thread ever stalls while the worker is busy.
 - The dispatcher's hard limits are enforced by counting, not by a refusing queue. A reliable-only flood can still
   exceed them; the emergency counter is the alarm, and the fix would be a refusing queue, not a bigger bound.
+- **The shed set includes `AttackState` and `MagicSkillUse`, which the load-test consistency oracle counts as combat
+  evidence.** `ConsistencyOracle` raises `MissingCombatFanout` when a client sees no `AttackState` for an attacker
+  within 2.5 s, so a run that actually sheds will report those as hard failures even though the client only lost an
+  animation. That is the same trade the outbound mailbox already makes for a slow client, and it only bites when the
+  hand-off is at its hard limit — measured runs on this change shed nothing (see §7.1). If a future scenario starts
+  shedding in normal operation, the answer is a bigger budget or a faster worker, not a narrower shed set: dropping
+  the animation is correct, and the oracle should be told that a shed frame is not a desync.
 
 ## 6. Sustained-lag behaviour
 
@@ -222,3 +232,24 @@ mixed-batch shed.
 Heavy scenarios (`load-test-smoke`, `zone-simulation-perf`) run on push to `main`, on `main` PRs, nightly and on a
 `dev` PR labelled `perf`. An ordinary `dev` PR only runs the fast suite, so a perf PR must add the label to get the
 numbers.
+
+### 7.1 Measured on this change
+
+`bots-20-smoke`, 20 bots in world, `fineage_fanout_queue_oldest_age_ms`:
+
+| Metric | Observed | Gate |
+| --- | ---: | ---: |
+| fan-out queue age p50 | 0.3 ms | — |
+| fan-out queue age p95 | 0.5 ms | — |
+| **fan-out queue age p99** | **0.5 ms** | **≤ 40 ms** |
+| fan-out queue age max | 2.0 ms | — |
+| fan-out queue depth max | 32 batches | soft 2048 |
+| `fineage_fanout_backlog_soft_exceeded_total` | 0 | — |
+| `fineage_fanout_backlog_emergency_total` | 0 | must be 0 |
+| `fineage_fanout_shed_visual_total` | 0 | — |
+| `fineage_fanout_overflow_shed_total` | 0 | — |
+| `fineage_outbound_dropped_total` | 0 | — |
+
+The gate holds with 80× headroom and nothing shed: at 20 bots the backlog never approaches the soft budget, so the
+new bounds are insurance rather than a hot path. The bounded behaviour itself is exercised by
+`FanoutDispatcherBackpressureTests`, which drives the worker to lag deliberately.
