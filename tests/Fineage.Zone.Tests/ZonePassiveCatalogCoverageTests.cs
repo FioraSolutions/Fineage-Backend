@@ -1,6 +1,8 @@
 using Fineage.Game;
 using Fineage.Game.Services;
 using Fineage.Game.Skills;
+using Fineage.Zone;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -67,6 +69,35 @@ public sealed class ZonePassiveCatalogCoverageTests
     }
 
     [Fact]
+    public void Active_skills_learned_from_the_book_do_not_fold_as_passives()
+    {
+        // Heal 1011 / Might 1068 are actives: they reach the stat line through an abnormal, never through the
+        // passive catalog. Feeding them to the passive fold both warned and risked applying the buff func twice.
+        var (world, player, _) = Fighter();
+        player.KnownSkills[1011] = 1;
+        player.KnownSkills[1068] = 1;
+
+        var passives = world.ActivePassiveLevels(player);
+        Assert.DoesNotContain(1011, passives.Keys);
+        Assert.DoesNotContain(1068, passives.Keys);
+
+        // A real passive in the same book still folds.
+        player.KnownSkills[141] = 1; // Weapon Mastery
+        Assert.Contains(141, world.ActivePassiveLevels(player).Keys);
+    }
+
+    [Fact]
+    public void An_unknown_gear_skill_id_still_folds_as_a_passive()
+    {
+        // Gear/set/clan ids come from Mobius Inventory/Clan additions that skills.json does not list.
+        // They must not be dropped just because the book cannot classify them.
+        var (world, player, _) = Fighter();
+        player.GearSkills[3006] = 1; // Equip Set Items, granted by armor sets and absent from skills.json
+
+        Assert.Contains(3006, world.ActivePassiveLevels(player).Keys);
+    }
+
+    [Fact]
     public void A_learned_passive_without_combat_mods_still_resolves()
     {
         // Lucky 194 is a real Mobius passive (operateType P) with no <for> funcs.
@@ -97,6 +128,14 @@ public sealed class ZonePassiveCatalogCoverageTests
         passives.CollectPassives(known, wearing: _ => true, onMissing: reported.Add);
 
         Assert.Empty(reported);
+    }
+
+    static (ZoneWorld World, ZoneEntity Player, PlayerInventory Bag) Fighter()
+    {
+        var game = GameData.LoadDefault();
+        var bag = new PlayerInventory(game.Items);
+        var player = new ZoneEntity { ObjectId = 1, Kind = ZoneEntityKind.Player, ClassId = 0, Level = 40, Inventory = bag };
+        return (new ZoneWorld(), player, bag);
     }
 
     static string FindDataFile(string name)
