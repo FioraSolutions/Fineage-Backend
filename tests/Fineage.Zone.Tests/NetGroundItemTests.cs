@@ -161,8 +161,13 @@ public sealed class NetGroundItemTests
 
         Assert.Equal(1000, stack.Count);
         Assert.True(ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y));
-        Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 1000);
         Assert.False(kit.World.TryGetEntityById(groundId, out _));
+
+        // The InventoryUpdate is published from the economy commit completion, not inside the tick: the bag is
+        // saved first and the client is told only once that write is durable. Drain the worker like a live step
+        // boundary does, then the row is on the wire.
+        Assert.True(kit.World.DrainEconomyPersistForTests());
+        Assert.Contains(InvRows(rec), r => r.ObjectId == stack.ObjectId && r.Count == 1000);
     }
 
     /// <summary>

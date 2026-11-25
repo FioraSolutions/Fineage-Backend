@@ -3043,6 +3043,34 @@
    ]
   },
   {
+   "skillId": 442,
+   "name": "Sonic Barrier",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      100.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 443,
+   "name": "Force Barrier",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "cancelVuln",
+     "op": "sub",
+     "values": [
+      100.0
+     ]
+    }
+   ]
+  },
+  {
    "skillId": 446,
    "name": "Dodge",
    "levels": 1,
@@ -4709,6 +4737,20 @@
      "values": [
       10.0,
       15.0,
+      20.0
+     ]
+    }
+   ]
+  },
+  {
+   "skillId": 1285,
+   "name": "Seed of Fire",
+   "levels": 1,
+   "effects": [
+    {
+     "stat": "firePower",
+     "op": "add",
+     "values": [
       20.0
      ]
     }

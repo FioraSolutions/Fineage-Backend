@@ -156,7 +156,7 @@ public sealed partial class ZoneWorld
 
     CombatStatMods? FoldLearnedClanAndGearPassives(ZoneEntity player, CombatStatMods? mods)
     {
-        var passiveLevels = PassiveSkillLevels(player);
+        var passiveLevels = ActivePassiveLevels(player);
         return passiveLevels.Count == 0
             ? mods
             : _passives.CollectPassives(
@@ -177,10 +177,38 @@ public sealed partial class ZoneWorld
     internal static Dictionary<int, int> PassiveSkillLevels(ZoneEntity player) =>
         PlayerPassiveSources.Merge(player.KnownSkills, player.ClanSkills, player.GearSkills, player.CursedSkills);
 
+    /// <summary>
+    /// The passive subset of <see cref="PassiveSkillLevels"/>: ids the skill book marks <c>passive</c>.
+    /// <para>
+    /// Mobius folds only <c>operateType P</c> funcs into the player's stat line; actives apply their funcs
+    /// through an abnormal while the buff is on. Feeding the whole skill book here matched the actives'
+    /// buff funcs against <c>skill-passives.json</c> (which carries passives only), so every learned Heal,
+    /// Might, Shield or Wind Strike was reported as <c>skill-passives missing skillId=N</c> and — worse —
+    /// an id that happens to exist in both tables would have been applied twice: once as a known skill and
+    /// again as an abnormal.
+    /// </para>
+    /// <para>
+    /// A gear/set/clan id the skill book does not know is kept: those come from Mobius Inventory/Clan skill
+    /// additions that are not in <c>skills.json</c>, and their passives must still fold.
+    /// </para>
+    /// </summary>
+    internal Dictionary<int, int> ActivePassiveLevels(ZoneEntity player)
+    {
+        var all = PassiveSkillLevels(player);
+        var passives = new Dictionary<int, int>(all.Count);
+        foreach (var (skillId, level) in all)
+        {
+            var template = _game.Skills.Find(skillId);
+            if (template == null || template.Passive)
+                passives[skillId] = level;
+        }
+        return passives;
+    }
+
     /// <summary>Mobius player DefenceTrait map from jewelry / set passives (poison, hold, …).</summary>
     internal IReadOnlyDictionary<string, double>? PlayerDefenceTraits(ZoneEntity player)
     {
-        return _defenceTraits.Collect(PassiveSkillLevels(player));
+        return _defenceTraits.Collect(ActivePassiveLevels(player));
     }
 
     /// <summary>
