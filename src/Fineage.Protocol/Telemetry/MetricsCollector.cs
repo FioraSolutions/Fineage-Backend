@@ -60,6 +60,9 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _outboundQueueAge = new();
     readonly BoundedCountHistogram _pathfindNodes = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _pathfindQueued = new(MetricsText.CountBounds);
+    readonly Dictionary<string, MutableStage> _pathfindWait = new(StringComparer.Ordinal);
+    readonly Dictionary<string, MutableStage> _pathfindOldestAge = new(StringComparer.Ordinal);
+    readonly Dictionary<string, long> _pathfindStarvedSteps = new(StringComparer.Ordinal);
     long _pathfindBudgetExhausted;
     long _fanoutOverflow;
     long _fanoutCoalesced;
@@ -159,6 +162,9 @@ public sealed class MetricsCollector : IDisposable
                 OutboundQueueOldestAge = _outboundQueueAge.Freeze(),
                 PathfindNodes = _pathfindNodes.Freeze(),
                 PathfindQueued = _pathfindQueued.Freeze(),
+                PathfindWait = FreezeLabeled(_pathfindWait),
+                PathfindOldestAge = FreezeLabeled(_pathfindOldestAge),
+                PathfindStarvedSteps = new Dictionary<string, long>(_pathfindStarvedSteps, StringComparer.Ordinal),
                 FanoutOverflow = _fanoutOverflow,
                 FanoutCoalesced = _fanoutCoalesced,
                 ReliableOverflow = _reliableOverflow,
@@ -219,6 +225,33 @@ public sealed class MetricsCollector : IDisposable
         _listener.Dispose();
         _stop.Dispose();
         _local.Dispose();
+    }
+
+    /// <summary>
+    /// Tests: stops the drain thread so a producer can outrun it on purpose. <see cref="Snapshot"/> still drains under
+    /// the gate, so the collector stays usable; this exists only to make the backlog path reachable on demand instead of
+    /// by racing a 10 ms timer.
+    /// </summary>
+    internal void PauseDrainerForTest()
+    {
+        _stop.Set();
+        _drainer.Join();
+    }
+
+    /// <summary>
+    /// Tests and the soak harness: measurements the recording threads have published but no reader has applied yet. Zero
+    /// after a drain means the collector is keeping up; a number that only grows under load is the evidence that the
+    /// recorder, not the simulation, is the bottleneck.
+    /// </summary>
+    internal long TelemetryBacklogSlotsForTest()
+    {
+        lock (_gate)
+        {
+            long total = 0;
+            foreach (ThreadBuffer buffer in _buffers)
+                total += buffer.BacklogSlots;
+            return total;
+        }
     }
 
     void OnLong(Instrument instrument, long value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
@@ -390,6 +423,22 @@ public sealed class MetricsCollector : IDisposable
             }
         }
 
+        /// <summary>
+        /// Consumer side, under the collector gate: sealed blocks still waiting, plus what the current block holds unread.
+        /// Zero means the drain has caught up. A soak reads this as evidence the collector is not accumulating backlog
+        /// behind a busy producer — the alternative is only inferring it from a publish source that has no queue at all.
+        /// </summary>
+        public long BacklogSlots
+        {
+            get
+            {
+                long sealed_ = (long)_sealed.Count * BufferCapacity;
+                Block current = Volatile.Read(ref _current);
+                long unread = current.Count - (ReferenceEquals(_readBlock, current) ? _readAt : 0);
+                return sealed_ + Math.Max(0, unread);
+            }
+        }
+
         /// <summary>Consumer side, under the collector gate: the next published slot, or false when caught up.</summary>
         public bool TryTake(out Slot slot)
         {
@@ -444,7 +493,8 @@ public sealed class MetricsCollector : IDisposable
             if (_currentCount >= BufferCapacity)
             {
                 // Seal the full block and start a new one. The producer never writes a sealed block again, so the
-                // consumer can read it at its own pace and this path stays lock-free.
+                // consumer can read it at its own pace and this path stays lock-free. Sealing is not lossy by contract:
+                // a block waits on the lock-free queue until the drain thread reads it, however far behind it is.
                 _current.Publish(BufferCapacity);
                 _sealed.Enqueue(_current);
                 _current = new Block(_nextId++);
@@ -560,6 +610,9 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.npc.pathfind.budget_exhausted":
                 _pathfindBudgetExhausted += value;
+                break;
+            case "fineage.npc.pathfind.starved_steps":
+                _pathfindStarvedSteps[PriorityOf(tags)] = _pathfindStarvedSteps.GetValueOrDefault(PriorityOf(tags)) + value;
                 break;
             case "fineage.fanout.coalesced":
                 _fanoutCoalesced += value;
@@ -737,6 +790,12 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.fanout.queue.oldest_age.ms":
                 _fanoutQueueAge.Record(value);
                 break;
+            case "fineage.npc.pathfind.wait.ms":
+                LabeledStage(_pathfindWait, PriorityOf(tags)).Duration.Record(value);
+                break;
+            case "fineage.npc.pathfind.oldest_age.ms":
+                LabeledStage(_pathfindOldestAge, PriorityOf(tags)).Duration.Record(value);
+                break;
             case "fineage.outbound.queue.oldest_age.ms":
                 _outboundQueueAge.Record(value);
                 break;
@@ -782,6 +841,10 @@ public sealed class MetricsCollector : IDisposable
     }
 
     static string MoveKindOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "move_kind");
+
+    /// <summary>Path priority tag: <c>p1</c> / <c>p2</c> / <c>p3</c>, matching the enum's numeric value.</summary>
+    static string PriorityOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) =>
+        Tag(tags, "priority") is { Length: > 0 } priority ? priority : "unknown";
 
     static string CommandOf(ReadOnlySpan<KeyValuePair<string, object?>> tags) => Tag(tags, "command");
 

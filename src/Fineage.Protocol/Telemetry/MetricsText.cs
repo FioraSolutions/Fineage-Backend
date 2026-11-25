@@ -80,6 +80,15 @@ public sealed class MetricsSnapshot
     public HistogramMetrics OutboundQueueOldestAge { get; init; } = new();
     public HistogramMetrics PathfindNodes { get; init; } = new();
     public HistogramMetrics PathfindQueued { get; init; } = new();
+    /// <summary>Per priority: how long a request waited before the stage took it.</summary>
+    public IReadOnlyList<StageMetrics> PathfindWait { get; init; } = [];
+    /// <summary>Per priority: age of the oldest request still queued at the end of a step.</summary>
+    public IReadOnlyList<StageMetrics> PathfindOldestAge { get; init; } = [];
+    /// <summary>
+    /// Per priority: steps where that priority's request was left waiting by the node budget.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> PathfindStarvedSteps { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
     public long FanoutOverflow { get; init; }
     public long FanoutCoalesced { get; init; }
     public long ReliableOverflow { get; init; }
@@ -291,6 +300,12 @@ public static class MetricsText
             "Geo nodes the npc.paths stage expanded in one step", snapshot.PathfindNodes, CountBounds);
         AppendSingletonHistogram(sb, "fineage_npc_pathfind_queued",
             "Route requests still queued or running at the end of a step", snapshot.PathfindQueued, CountBounds);
+        AppendLabeledStageHistograms(sb, "fineage_npc_pathfind_wait_ms", "priority",
+            "Route request wait before the npc.paths stage took it", snapshot.PathfindWait);
+        AppendLabeledStageHistograms(sb, "fineage_npc_pathfind_oldest_age_ms", "priority",
+            "Age of the oldest route request still queued at the end of a step", snapshot.PathfindOldestAge);
+        AppendLabeledCounter(sb, "fineage_npc_pathfind_starved_steps_total", "priority",
+            "Steps where a route request of that priority was left waiting by the node budget", snapshot.PathfindStarvedSteps);
         AppendCounterLine(sb, "fineage_npc_pathfind_budget_exhausted_total",
             "Steps where the npc.paths node budget ran out with routes still pending", snapshot.PathfindBudgetExhausted);
         AppendCounterLine(sb, "fineage_fanout_overflow_total",
@@ -578,7 +593,11 @@ public static class MetricsText
         sb.Append('{').Append(labels).Append('}');
     }
 
-    static void AppendLane(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, long> counts)
+    static void AppendLane(StringBuilder sb, string name, string help, IReadOnlyDictionary<string, long> counts) =>
+        AppendLabeledCounter(sb, name, help, "lane", counts);
+
+    static void AppendLabeledCounter(
+        StringBuilder sb, string name, string help, string labelName, IReadOnlyDictionary<string, long> counts)
     {
         if (counts.Count == 0)
             return;
@@ -586,7 +605,7 @@ public static class MetricsText
         sb.Append("# TYPE ").Append(name).Append(" counter\n");
         foreach (KeyValuePair<string, long> pair in counts)
         {
-            sb.Append(name).Append("{lane=\"").Append(Escape(pair.Key)).Append("\"} ")
+            sb.Append(name).Append('{').Append(labelName).Append("=\"").Append(Escape(pair.Key)).Append("\"} ")
                 .Append(pair.Value.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }
     }
