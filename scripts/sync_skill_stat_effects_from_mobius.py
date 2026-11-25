@@ -123,6 +123,9 @@ def func_meta(el: ET.Element) -> tuple[str | None, list[str], list[str], int | N
     hp = None
     flags: dict[str, bool] = {}
     raw = (el.text or "").strip() or None
+    # Mobius puts the func value in the val attribute (<add stat="pAtkRange" val="#dist"/>), not in text.
+    if el.get("val") is not None:
+        raw = (el.get("val") or "").strip() or None
 
     def take_player(p: ET.Element) -> None:
         nonlocal hp
@@ -170,15 +173,20 @@ def parse_skill(skill: ET.Element) -> dict | None:
     levels = int(skill.get("levels") or 1)
     op_type = ""
     for c in skill:
-        if c.tag.split("}")[-1] == "operateType":
+        tag = c.tag.split("}")[-1]
+        # Mobius declares it as <set name="operateType" val="P"/>; older shapes used the element text.
+        if tag == "set" and c.get("name") == "operateType":
+            op_type = (c.get("val") or "").strip()
+        elif tag == "operateType" and not op_type:
             op_type = (c.text or "").strip()
     tables = tables_of(skill)
     effects: list[dict] = []
     seen_stat_ops: set[tuple] = set()
-    root_effects = skill.find("effects")
-    if root_effects is None:
-        return None
-    for effect in root_effects.findall("effect"):
+    # Mobius stores funcs under <for><effect name="Buff"><add stat=…/>. Older builds of this script looked
+    # for a literal <effects> element, which the datapack never has, so every skill parsed as "no funcs".
+    root_for = skill.find("for")
+    effect_nodes = list(root_for.findall("effect")) if root_for is not None else []
+    for effect in effect_nodes:
         for el in effect.iter():
             tag = el.tag.split("}")[-1]
             if tag not in ("add", "mul", "sub", "set"):
@@ -210,7 +218,11 @@ def parse_skill(skill: ET.Element) -> dict | None:
                 row["hpBelow"] = hp
             row.update(flags)
             effects.append(row)
-    if not effects:
+    # A passive with no combat stat funcs is still a real passive (Lucky 194, Expertise D 239, Create Item 172,
+    # Divine Inspiration 1405, Equip Set Items 3006). Returning None for it made the catalog claim the skill was
+    # missing and the stat fold warn "passive has no combat mods" on every rebuild. Keep the row so the catalog
+    # can answer for every passive id; an empty row means "this passive grants no combat stat mod".
+    if not effects and op_type.upper() != "P":
         return None
     return {
         "skillId": sid,

@@ -299,14 +299,13 @@ public sealed class SkillStatEffectCatalog
                     : null;
                 funcs.Add(new SkillStatFunc(stat, op, values, usingKinds, resting, position, hpBelow, moving, standing, notUsing, usingSlot));
             }
-            if (funcs.Count > 0)
-            {
-                // Skill-level <cond><using kind> applies to the skill itself (cast refusal), not only to its funcs.
-                string[]? skillUsing = row.TryGetProperty("using", out var su)
-                    ? su.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
-                    : null;
-                byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs) { Using = skillUsing };
-            }
+            // A passive row with no effects is a real passive that grants no combat stat mod (Lucky 194,
+            // Expertise D 239, Create Item 172, Divine Inspiration 1405, Equip Set Items 3006). Keep it in the
+            // catalog so a learned passive always resolves; an empty func list means "adds nothing".
+            string[]? skillUsing = row.TryGetProperty("using", out var su)
+                ? su.EnumerateArray().Select(k => (k.GetString() ?? "").ToUpperInvariant()).ToArray()
+                : null;
+            byId[id] = new SkillStatEffect(id, name, Math.Max(1, levels), funcs) { Using = skillUsing };
         }
         return new SkillStatEffectCatalog(byId);
     }

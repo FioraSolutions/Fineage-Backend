@@ -111,14 +111,18 @@ for f in sorted(glob.glob(sys.argv[1] + "/*.xml")):
                     if kinds: row["using"] = kinds
                     if resting: row["resting"] = True
                     funcs.append(row)
-        if not funcs and not defence and not attack:
-            continue
-        row = {"skillId": int(sk.get("id")), "name": sk.get("name"), "levels": levels, "effects": funcs}
+        # Every passive row is kept, including the ones whose Mobius funcs are not combat stat mods
+        # (Lucky 194, Expertise D 239, Create Item 172, Divine Inspiration 1405, Equip Set Items 3006).
+        # Dropping them made the stat fold warn "passive has no combat mods" for a skill that simply has
+        # no combat func — a false alarm. A row without "effects"/traits is an explicit "grants nothing".
+        row = {"skillId": int(sk.get("id")), "name": sk.get("name"), "levels": levels}
+        if funcs:
+            row["effects"] = funcs
         if defence:
             row["defenceTraits"] = defence
         if attack:
             row["attackTraits"] = attack
         out.append(row)
 
-json.dump({"reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/…).",
+json.dump({"reference": "Combat stat funcs of passive (operateType P) skills from L2J Mobius CT 0 Interlude dist/game/data/stats/skills. 'using' = Mobius <using kind> condition (weapon type of the right hand, armor type of chest+legs, SHIELD). Funcs with other conditions are skipped. defenceTraits/attackTraits carry Mobius DefenceTrait/AttackTrait percent tables (POISON/HOLD/SHOCK/…). A row with no effects and no traits is a real passive that grants no combat stat mod (Lucky, Expertise D, Create Item, Divine Inspiration, Equip Set Items 3006); it is kept so the catalog answers for every passive id.",
            "skills": out}, sys.stdout, indent=1)
