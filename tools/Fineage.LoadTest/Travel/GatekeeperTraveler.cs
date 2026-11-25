@@ -15,9 +15,16 @@ public readonly record struct TravelCommand(ushort Opcode, byte[] Payload, strin
 /// </summary>
 public sealed class GatekeeperTraveler
 {
-    public const int ApproachRange = 2500;
+    /// <summary>
+    /// Mobius <c>Npc.INTERACTION_DISTANCE</c>: talk and bypass are refused outside this 3D radius, so the bot must
+    /// be this close before it talks. Matches <c>NpcHtmlProtocol.InteractionDistance</c>.
+    /// </summary>
+    public const int TalkRange = 250;
     /// <summary>A gatekeeper this close must be in the knownlist (AOI 3×3 cells of 3000).</summary>
     public const int SightRange = 6000;
+    /// <summary>
+    /// Step length for one walk frame. Small enough that a hop never overshoots the talk radius.
+    /// </summary>
     public const int WalkHop = 1500;
     /// <summary>Slower than any Interlude run speed, so a hop is never re-issued before the pawn arrives.</summary>
     public const float MinRunSpeed = 80f;
@@ -170,16 +177,40 @@ public sealed class GatekeeperTraveler
         var near = _visibleGatekeepers.Values
             .OrderBy(g => GatekeeperDirectory.DistSq(g.X, g.Y, _x, _y))
             .FirstOrDefault();
-        if (near.ObjectId != 0 && GatekeeperDirectory.Within(near.X, near.Y, _x, _y, ApproachRange))
+        // Talk only once inside the server's interact radius. Talking from 2500 units away is refused with
+        // "range" and the retry loop used to re-enter Seek at the same spot, so the bot never actually walked
+        // (0 walk hops, one refused talk per tick). Mobius walks to the NPC first, then interacts.
+        if (near.ObjectId != 0 && GatekeeperDirectory.Within(near.X, near.Y, _x, _y, SightRange))
         {
             double dist = Math.Sqrt(GatekeeperDirectory.DistSq(near.X, near.Y, _x, _y));
+            if (dist <= TalkRange)
+            {
+                _talkObjectId = near.ObjectId;
+                _talkNpcId = near.NpcId;
+                _pages = 0;
+                _followed.Clear();
+                _pending.Clear();
+                _phase = Phase.Talking;
+                _until = now + TalkSlack;
+                Stats.Talks++;
+                return new TravelCommand(
+                    NetOpcode.NpcTalk,
+                    NetCodec.EncodeNpcTalk(new NpcTalkNetMsg { NpcObjectId = near.ObjectId }),
+                    $"talk npc={near.NpcId}");
+            }
+
+            var walk = WalkToward(near.X, near.Y, near.Z, speed, now);
+            if (walk != null)
+                return walk;
+            // Standing on the NPC and still out of the 3D gate: the height differs, retry the talk and let the
+            // server answer instead of spinning in Seek.
             _talkObjectId = near.ObjectId;
             _talkNpcId = near.NpcId;
             _pages = 0;
             _followed.Clear();
             _pending.Clear();
             _phase = Phase.Talking;
-            _until = now + TimeSpan.FromSeconds(dist / speed) + TalkSlack;
+            _until = now + TalkSlack;
             Stats.Talks++;
             return new TravelCommand(
                 NetOpcode.NpcTalk,
@@ -188,31 +219,53 @@ public sealed class GatekeeperTraveler
         }
 
         // Walk toward the nearest gatekeeper in sight, else the nearest one in the datapack, one hop at a time.
-        bool inSight = near.ObjectId != 0 && GatekeeperDirectory.Within(near.X, near.Y, _x, _y, SightRange);
-        var target = inSight
+        var target = near.ObjectId != 0
             ? new GatekeeperSpawn(near.NpcId, near.X, near.Y, near.Z)
             : _directory.Nearest(_x, _y);
-        if (!inSight && GatekeeperDirectory.Within(target.X, target.Y, _x, _y, ApproachRange))
+        if (near.ObjectId == 0 && GatekeeperDirectory.Within(target.X, target.Y, _x, _y, TalkRange))
         {
             return Unexplained(now,
                 $"gatekeeper npc={target.NpcId} spawned at {target.X},{target.Y} is not in the knownlist at {_x},{_y}");
         }
 
-        double dx = target.X - _x;
-        double dy = target.Y - _y;
+        double ddx = target.X - _x;
+        double ddy = target.Y - _y;
+        double len = Math.Sqrt(ddx * ddx + ddy * ddy);
+        if (len <= TalkRange)
+        {
+            return Unexplained(now,
+                $"gatekeeper npc={target.NpcId} at {target.X},{target.Y} not visible from {_x},{_y} inside the talk radius");
+        }
+
+        return WalkToward(target.X, target.Y, target.Z, speed, now);
+    }
+
+    /// <summary>
+    /// One walk frame toward <paramref name="tx"/>,<paramref name="ty"/>. Stops at <see cref="TalkRange"/> (and
+    /// never overshoots), so the next Seek talks instead of walking into the NPC column.
+    /// </summary>
+    TravelCommand? WalkToward(int tx, int ty, int tz, float speed, DateTimeOffset now)
+    {
+        double dx = tx - _x;
+        double dy = ty - _y;
         double len = Math.Sqrt(dx * dx + dy * dy);
-        double step = Math.Min(WalkHop, Math.Max(0, len - ApproachRange / 2.0));
-        if (step < 1)
-            step = Math.Min(WalkHop, len);
-        int destX = _x + (int)(dx / Math.Max(len, 1) * step);
-        int destY = _y + (int)(dy / Math.Max(len, 1) * step);
+        if (len <= TalkRange)
+            return null;
+
+        double stop = Math.Max(1, len - TalkRange + 50); // aim just inside the gate
+        double step = Math.Min(WalkHop, stop);
+        int destX = _x + (int)Math.Round(dx / len * step);
+        int destY = _y + (int)Math.Round(dy / len * step);
+        if (destX == _x && destY == _y)
+            return null;
+
         _phase = Phase.Wait;
         _until = now + TimeSpan.FromSeconds(step / speed) + TimeSpan.FromMilliseconds(500);
         Stats.WalkHops++;
         return new TravelCommand(
             NetOpcode.MoveInput,
-            NetCodec.EncodeMoveInput(new MoveInputMsg { DestX = destX, DestY = destY, DestZ = target.Z }),
-            $"walk toward npc={target.NpcId}");
+            NetCodec.EncodeMoveInput(new MoveInputMsg { DestX = destX, DestY = destY, DestZ = tz }),
+            $"walk toward {tx},{ty}");
     }
 
     TravelCommand? Talking(DateTimeOffset now)
@@ -226,7 +279,8 @@ public sealed class GatekeeperTraveler
                         var r = NetCodec.DecodeReject(frame.Payload);
                         if (r.Code == "range")
                         {
-                            // Server-side approach could not reach the NPC: walk closer and talk again.
+                            // The server's 3D gate refused: our 2D distance said "close enough" but the height
+                            // differs (elevated platform, stairs). Walk to the NPC column, then talk again.
                             Stats.TalkRangeRetries++;
                             _phase = Phase.Seek;
                             return Seek(now);

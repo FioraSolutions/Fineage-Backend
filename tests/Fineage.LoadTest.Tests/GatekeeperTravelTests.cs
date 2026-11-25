@@ -138,6 +138,56 @@ public class GatekeeperTravelTests
         Assert.Equal(1, stats.WalkHops);
     }
 
+    [Fact]
+    public void A_gatekeeper_in_sight_but_out_of_talk_range_is_walked_to_first()
+    {
+        // The soak regression: a visible gatekeeper within a few hundred units was talked to immediately.
+        // The server's 3D talk/bypass gate is Npc.INTERACTION_DISTANCE (250), so every talk was refused with
+        // "range"; the retry re-entered Seek at the same spot and never issued a move — 0 walk hops and one
+        // refused talk per tick, forever. The bot must walk inside the gate before it talks.
+        var stats = new TravelStats();
+        var t = new GatekeeperTraveler(Repo.Value, 1, TimeSpan.Zero, stats);
+        var gk = Repo.Value.Spawns.First(s => s.NpcId == Clarissa);
+        t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(gk.X + 900, gk.Y, gk.Z));
+        t.OnFrame(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(new EntitySpawnMsg
+        {
+            EntityValue = ClarissaObject,
+            Kind = EntityKindNet.Npc,
+            TemplateId = Clarissa,
+            X = gk.X,
+            Y = gk.Y,
+            Z = gk.Z
+        }));
+
+        var first = t.Step(DateTimeOffset.UnixEpoch);
+        Assert.NotNull(first);
+        Assert.Equal(NetOpcode.MoveInput, first!.Value.Opcode);
+        Assert.Equal(0, stats.Talks);
+        Assert.Equal(1, stats.WalkHops);
+    }
+
+    [Fact]
+    public void A_gatekeeper_inside_the_talk_radius_is_talked_to_without_walking()
+    {
+        var stats = new TravelStats();
+        var t = new GatekeeperTraveler(Repo.Value, 1, TimeSpan.Zero, stats);
+        var gk = Repo.Value.Spawns.First(s => s.NpcId == Clarissa);
+        t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(gk.X + 100, gk.Y, gk.Z));
+        t.OnFrame(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(new EntitySpawnMsg
+        {
+            EntityValue = ClarissaObject,
+            Kind = EntityKindNet.Npc,
+            TemplateId = Clarissa,
+            X = gk.X,
+            Y = gk.Y,
+            Z = gk.Z
+        }));
+
+        Assert.Equal(NetOpcode.NpcTalk, t.Step(DateTimeOffset.UnixEpoch)!.Value.Opcode);
+        Assert.Equal(1, stats.Talks);
+        Assert.Equal(0, stats.WalkHops);
+    }
+
     [Theory]
     [InlineData(30256, -12736, 122816, -3114)] // Gludio: Chat 4 is an info dead end, Chat 1 holds the list
     [InlineData(30006, -84108, 244604, -3728)] // Talking Island
