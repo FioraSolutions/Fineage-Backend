@@ -122,6 +122,10 @@ public static class FineageTelemetry
         Meter.CreateHistogram<int>("fineage.fanout.queue.depth", unit: "{batch}",
             description: "Sealed fan-out batches waiting on the dispatcher worker");
 
+    public static readonly Histogram<int> FanoutQueueWork =
+        Meter.CreateHistogram<int>("fineage.fanout.queue.work", unit: "{recipient}",
+            description: "Recipient send work waiting on the dispatcher worker (queued batches, in flight excluded)");
+
     public static readonly Histogram<double> FanoutQueueAgeMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.queue.oldest_age.ms", unit: "ms",
             description: "Age of the oldest batch still waiting on the fan-out dispatcher");
@@ -259,6 +263,10 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.fanout.coalesced",
             description: "Replaceable fan-out writes superseded before send");
 
+    public static readonly Counter<long> FanoutShedVisual =
+        Meter.CreateCounter<long>("fineage.fanout.shed_visual",
+            description: "Visual fan-out writes shed at seal time to keep a sealed batch inside its send-work budget");
+
     public static readonly Counter<long> FanoutBacklogSoftExceeded =
         Meter.CreateCounter<long>("fineage.fanout.backlog.soft_exceeded",
             description: "Sealed fan-out batches enqueued while the dispatcher backlog was above its soft limit (worker falling behind)");
@@ -278,6 +286,10 @@ public static class FineageTelemetry
     public static readonly Counter<long> FanoutQueueOverflow =
         Meter.CreateCounter<long>("fineage.fanout.queue.overflow",
             description: "Sealed fan-out batches rejected because the dispatcher is closed or shutting down");
+
+    public static readonly Counter<long> FanoutOverflowShed =
+        Meter.CreateCounter<long>("fineage.fanout.overflow.shed",
+            description: "Hand-offs that crossed the hard fan-out backlog and shed their visual writes instead of growing the backlog");
 
     public static readonly Histogram<double> SocketWriteMilliseconds =
         Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",

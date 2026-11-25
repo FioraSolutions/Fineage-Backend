@@ -52,6 +52,7 @@ public sealed class MetricsCollector : IDisposable
     readonly DurationHistogram _fanoutDispatchWait = new();
     readonly DurationHistogram _fanoutEnqueueToSocketWrite = new();
     readonly BoundedCountHistogram _fanoutQueueDepth = new(MetricsText.CountBounds);
+    readonly BoundedCountHistogram _fanoutQueueWork = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _fanoutEventsPerBatch = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _fanoutRecipientsPerEvent = new(MetricsText.CountBounds);
     readonly BoundedCountHistogram _fanoutQueueBytes = new(MetricsText.SocketWriteByteBounds);
@@ -73,6 +74,8 @@ public sealed class MetricsCollector : IDisposable
     long _approachClippedToOrigin;
     long _fanoutOverflow;
     long _fanoutCoalesced;
+    long _fanoutShedVisual;
+    long _fanoutOverflowShed;
     long _reliableOverflow;
     readonly Dictionary<string, MutableStage> _stages = new(StringComparer.Ordinal);
     readonly Dictionary<string, MutableStage> _commandTimelinePhases = new(StringComparer.Ordinal);
@@ -175,6 +178,7 @@ public sealed class MetricsCollector : IDisposable
                 FanoutDispatchWait = _fanoutDispatchWait.Freeze(),
                 FanoutEnqueueToSocketWrite = _fanoutEnqueueToSocketWrite.Freeze(),
                 FanoutQueueDepth = _fanoutQueueDepth.Freeze(),
+                FanoutQueueWork = _fanoutQueueWork.Freeze(),
                 FanoutEventsPerBatch = _fanoutEventsPerBatch.Freeze(),
                 FanoutRecipientsPerEvent = _fanoutRecipientsPerEvent.Freeze(),
                 FanoutQueueBytes = _fanoutQueueBytes.Freeze(),
@@ -195,6 +199,8 @@ public sealed class MetricsCollector : IDisposable
                 ApproachClippedToOrigin = _approachClippedToOrigin,
                 FanoutOverflow = _fanoutOverflow,
                 FanoutCoalesced = _fanoutCoalesced,
+                FanoutShedVisual = _fanoutShedVisual,
+                FanoutOverflowShed = _fanoutOverflowShed,
                 ReliableOverflow = _reliableOverflow,
                 TickOverruns = _tickOverruns,
                 FanoutBacklogSoftExceeded = _fanoutBacklogSoftExceeded,
@@ -667,6 +673,12 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.fanout.coalesced":
                 _fanoutCoalesced += value;
                 break;
+            case "fineage.fanout.shed_visual":
+                _fanoutShedVisual += value;
+                break;
+            case "fineage.fanout.overflow.shed":
+                _fanoutOverflowShed += value;
+                break;
             case "fineage.outbound.reliable_overflow":
                 _reliableOverflow += value;
                 break;
@@ -727,6 +739,9 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.fanout.queue.depth":
                 _fanoutQueueDepth.Record(value);
+                break;
+            case "fineage.fanout.queue.work":
+                _fanoutQueueWork.Record(value);
                 break;
             case "fineage.npc.pathfind.nodes":
                 _pathfindNodes.Record(value);

@@ -335,6 +335,9 @@ actors with their own state and mailbox. They act on the world through messages
   per-tick read-only snapshot.
 - The simulation never awaits a socket. `NetConnection` keeps its bounded outbound queue and drop counters, and
   coalesced MoveState already exists there.
+- **Budgets and overflow policies for every stage** of this chain (simulation → dispatcher → stripes → mailbox →
+  socket), the lock audit of `Step()`, and the metric per stage are in
+  [`docs/perf/nonblocking-simulation.md`](../perf/nonblocking-simulation.md) (issue #986).
 
 ### 3.7 Scale-out seams (defined now, built later)
 

@@ -72,6 +72,7 @@ public sealed class MetricsSnapshot
     public HistogramMetrics FanoutDispatchWait { get; init; } = new();
     public HistogramMetrics FanoutEnqueueToSocketWrite { get; init; } = new();
     public HistogramMetrics FanoutQueueDepth { get; init; } = new();
+    public HistogramMetrics FanoutQueueWork { get; init; } = new();
     public HistogramMetrics FanoutEventsPerBatch { get; init; } = new();
     public HistogramMetrics FanoutRecipientsPerEvent { get; init; } = new();
     public HistogramMetrics FanoutQueueBytes { get; init; } = new();
@@ -105,6 +106,8 @@ public sealed class MetricsSnapshot
     public long ApproachClippedToOrigin { get; init; }
     public long FanoutOverflow { get; init; }
     public long FanoutCoalesced { get; init; }
+    public long FanoutShedVisual { get; init; }
+    public long FanoutOverflowShed { get; init; }
     public long ReliableOverflow { get; init; }
     public long TickOverruns { get; init; }
     public long FanoutBacklogSoftExceeded { get; init; }
@@ -301,6 +304,8 @@ public static class MetricsText
             "Per socket write: oldest fan-out frame's dispatcher hand-off until its socket write starts", snapshot.FanoutEnqueueToSocketWrite);
         AppendSingletonHistogram(sb, "fineage_fanout_queue_depth",
             "Depth of the fan-out dispatcher batch queue at sample time", snapshot.FanoutQueueDepth, CountBounds);
+        AppendSingletonHistogram(sb, "fineage_fanout_queue_work",
+            "Recipient send work waiting on the fan-out dispatcher at sample time", snapshot.FanoutQueueWork, CountBounds);
         AppendSingletonHistogram(sb, "fineage_fanout_events_per_batch",
             "Send actions executed per sealed batch", snapshot.FanoutEventsPerBatch, CountBounds);
         AppendSingletonHistogram(sb, "fineage_fanout_recipients_per_event",
@@ -347,6 +352,11 @@ public static class MetricsText
             "Sealed fan-out batches rejected because the dispatcher is closed", snapshot.FanoutOverflow);
         AppendCounterLine(sb, "fineage_coalesced_total",
             "Replaceable fan-out writes superseded before send", snapshot.FanoutCoalesced);
+        AppendCounter(sb, "fineage_fanout_shed_visual_total",
+            "Visual fan-out writes shed at seal time to keep a batch inside its send-work budget", snapshot.FanoutShedVisual);
+        AppendCounter(sb, "fineage_fanout_overflow_shed_total",
+            "Hand-offs that crossed the hard fan-out backlog and shed visual writes instead of growing the backlog",
+            snapshot.FanoutOverflowShed);
         AppendCounterLine(sb, "fineage_reliable_overflow_total",
             "Reliable frames refused because a session outbound queue was full", snapshot.ReliableOverflow);
         AppendLane(sb, "fineage_outbound_lane_blocked_total",
