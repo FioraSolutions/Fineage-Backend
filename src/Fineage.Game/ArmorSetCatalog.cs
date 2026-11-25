@@ -44,6 +44,12 @@ public sealed class ArmorSetCatalog
 
     public int Count => _byChest.Count;
 
+    /// <summary>
+    /// Every set keyed by chest item id. Exposed for gap reports and coverage tests that must see all
+    /// granted skill ids, including sets nobody is currently wearing.
+    /// </summary>
+    public IReadOnlyCollection<ArmorSetDefinition> All => _byChest.Values;
+
     public bool TryGetByChest(int chestItemId, out ArmorSetDefinition set) =>
         _byChest.TryGetValue(chestItemId, out set!);
 
