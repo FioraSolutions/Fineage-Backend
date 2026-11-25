@@ -276,18 +276,29 @@ public sealed partial class ZoneWorld
         NetBridge?.FanoutPledgeWarList([session.ObjectId], new PledgeWarListNetMsg { Declared = declared, UnderAttack = attackers });
     }
 
-    /// <summary>Mobius war kill reputation: killer clan +1 when the victim clan's score is above 0; victim clan −1 when the killer clan's is.</summary>
+    /// <summary>
+    /// Mobius war kill reputation: killer clan +1 when the victim clan's score is above 0; victim clan −1 when the
+    /// killer clan's is. A kill lands in a combat region body (<c>auto-attacks</c>, <c>pending-hits</c>, <c>mob-attacks</c>)
+    /// and the clan roster is owned by the scheduler thread, so the ids are read there and the two reputation writes
+    /// are deferred to the stage barrier (<see cref="AtBarrier"/>); the scores are re-read when the write lands.
+    /// </summary>
     void ApplyWarKillReputation(ZoneEntity killer, ZoneEntity victim)
     {
-        if (!_clan.TryGet(ClanIdFor(killer.ObjectId), out var killerClan) ||
-            !_clan.TryGet(ClanIdFor(victim.ObjectId), out var victimClan))
+        int killerClanId = ClanIdFor(killer.ObjectId);
+        int victimClanId = ClanIdFor(victim.ObjectId);
+        if (killerClanId == 0 || victimClanId == 0)
             return;
-        bool victimHadRep = victimClan.D.Reputation > 0;
-        bool killerHadRep = killerClan.D.Reputation > 0;
-        if (victimHadRep)
-            ChangeReputation(killerClan, PledgeProtocol.ReputationPerKill);
-        if (killerHadRep)
-            ChangeReputation(victimClan, -PledgeProtocol.ReputationPerKill);
+        AtBarrier(() =>
+        {
+            if (!_clan.TryGet(killerClanId, out var killerClan) || !_clan.TryGet(victimClanId, out var victimClan))
+                return;
+            bool victimHadRep = victimClan.D.Reputation > 0;
+            bool killerHadRep = killerClan.D.Reputation > 0;
+            if (victimHadRep)
+                ChangeReputation(killerClan, PledgeProtocol.ReputationPerKill);
+            if (killerHadRep)
+                ChangeReputation(victimClan, -PledgeProtocol.ReputationPerKill);
+        });
     }
 
     /// <summary>Drops every war row naming <paramref name="clanId"/> (clan destroyed).</summary>
