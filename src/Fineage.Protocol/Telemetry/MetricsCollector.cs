@@ -110,10 +110,23 @@ public sealed class MetricsCollector : IDisposable
     long _watchdogStalls;
 
     public MetricsCollector()
+        : this(onlyMeter: null)
+    {
+    }
+
+    /// <summary>
+    /// Test seam: when <paramref name="onlyMeter"/> is given, this collector listens to that meter instance only.
+    /// Every collector otherwise subscribes by meter name, so two collectors in one process see each other's
+    /// instruments — a test that asserts on its own backlog would count a parallel test class's recordings.
+    /// </summary>
+    internal MetricsCollector(Meter? onlyMeter)
     {
         _listener.InstrumentPublished = (instrument, listener) =>
         {
-            if (instrument.Meter.Name == FineageTelemetry.MeterName)
+            bool wanted = onlyMeter != null
+                ? ReferenceEquals(instrument.Meter, onlyMeter)
+                : instrument.Meter.Name == FineageTelemetry.MeterName;
+            if (wanted)
                 listener.EnableMeasurementEvents(instrument);
         };
         _listener.SetMeasurementEventCallback<long>(OnLong);
