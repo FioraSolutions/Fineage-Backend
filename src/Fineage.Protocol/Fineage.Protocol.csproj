@@ -8,6 +8,10 @@
     <Description>Fineage protocol constants and message DTOs. The Net PacketEnvelope codec owns the wire; Interlude Blowfish is a compatibility primitive.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="Fineage.Net.Tests" />
+    <InternalsVisibleTo Include="Fineage.Zone.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Interlude/BlowfishEngine.cs">
       <Nullable>disable</Nullable>
     </Compile>

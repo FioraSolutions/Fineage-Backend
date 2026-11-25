@@ -27,6 +27,14 @@ public sealed partial class ZoneWorld
     internal const int PathfindNodeBudgetPerStep = 2400;
 
     /// <summary>
+    /// Nodes the P1 band must leave untouched while any P2/P3 request is queued. Priority is still strict — P1 goes
+    /// first, and P1 uses the whole budget when nothing lower is waiting — but a sustained P1 inflow cannot consume the
+    /// last quarter of the step: about one cross-region route keeps moving per step, so ambient NPCs and boats degrade
+    /// instead of stopping. Measured, not guessed: a flat-region route costs ~500 expansions, so 600 is one route's worth.
+    /// </summary>
+    internal const int PathfindLowerPriorityReserve = 600;
+
+    /// <summary>
     /// Line-of-sight smoothing probes the stage may spend per step, in geo cells walked. A probe walks a whole straight
     /// leg, so this has to be measured like a route, not like a single node: one leg across a village is already ~25
     /// cells, and a budget below that would starve every probe and degrade the route to per-cell legs. Shared with the
@@ -34,6 +42,12 @@ public sealed partial class ZoneWorld
     /// cells of raycast.
     /// </summary>
     internal const int PathfindProbeBudgetPerStep = 512;
+
+    /// <summary>
+    /// The same P1 reserve for the smoothing budget, at the same share (a quarter): a P1 route that already found its
+    /// way must not spend every probe cell either, or lower-priority routes sit Found-but-unsmoothed forever.
+    /// </summary>
+    internal const int PathfindLowerPriorityProbeReserve = 128;
 
     const int NpcPathCacheCapacity = 4096;
     static readonly int GeoPathQuantize = Math.Max(128, GridRegionPartition.MapTileSize / 4);
@@ -58,6 +72,12 @@ public sealed partial class ZoneWorld
         public required int Sequence { get; init; }
         public GeoPathSearch? Search { get; set; }
 
+        /// <summary>The wait this request spent before the stage first advanced it; recorded once, for telemetry.</summary>
+        public bool WaitRecorded { get; set; }
+
+        /// <summary>Whether the stage advanced this request in the current step; reset at the top of every step.</summary>
+        public bool ServedThisStep { get; set; }
+
         /// <summary>Route legs accepted so far; smoothing appends to it across steps.</summary>
         public List<(int X, int Y, int Z)> Path { get; } = [];
 
@@ -72,6 +92,7 @@ public sealed partial class ZoneWorld
     readonly Queue<NpcPathCacheKey> _npcPathCacheEvict = [];
     int _pathRequestSequence;
     long _pathfindNodesLastStep;
+    long _pathfindP1NodesLastStep;
     int _pathfindQueuedLastStep;
 
     readonly record struct NpcPathCacheKey(int FromQx, int FromQy, int ToQx, int ToQy);
@@ -113,8 +134,9 @@ public sealed partial class ZoneWorld
         {
             if (existing.WantX == npc.PathWantX && existing.WantY == npc.PathWantY && existing.WantZ == npc.PathWantZ)
             {
-                // Same destination: keep the search and the smoothed legs it already has.
-                existing.Priority = (PathPriority)Math.Min((int)existing.Priority, (int)priority);
+                // Same destination: keep the search and the smoothed legs it already has. A promotion still has to move
+                // the request into its new band, or it stays physically queued behind work it now outranks.
+                ReprioritizePathRequest(existing, priority);
                 return;
             }
 
@@ -122,7 +144,7 @@ public sealed partial class ZoneWorld
             existing.WantX = npc.PathWantX;
             existing.WantY = npc.PathWantY;
             existing.WantZ = npc.PathWantZ;
-            existing.Priority = (PathPriority)Math.Min((int)existing.Priority, (int)priority);
+            existing.Priority = MostUrgent(existing.Priority, priority);
             // A new destination invalidates the search and the legs; the next step starts over from the entity's position.
             existing.Search = null;
             existing.Path.Clear();
@@ -151,6 +173,26 @@ public sealed partial class ZoneWorld
         RemovePathRequest(request);
     }
 
+    /// <summary>
+    /// Raises a pending request's priority in place. <see cref="_pathRequests"/> is ordered by priority then sequence, and
+    /// a <see cref="List{T}"/> does not resort itself, so the request is taken out and inserted again at its new band.
+    /// <see cref="PathRequest.Sequence"/> is <c>init</c> and is left alone: a promoted request keeps its arrival order, so
+    /// promotions never jump ahead of work that was already at the same priority.
+    /// </summary>
+    void ReprioritizePathRequest(PathRequest request, PathPriority priority)
+    {
+        PathPriority promoted = MostUrgent(request.Priority, priority);
+        if (promoted == request.Priority)
+            return;
+        RemovePathRequest(request);
+        request.Priority = promoted;
+        InsertPathRequest(request);
+    }
+
+    /// <summary>Path priorities order by urgency with <c>P1</c> smallest, so the most urgent one is the minimum.</summary>
+    static PathPriority MostUrgent(PathPriority left, PathPriority right) =>
+        (PathPriority)Math.Min((int)left, (int)right);
+
     /// <summary>Keeps the list ordered by priority, then arrival, so a step always spends its budget on the most urgent work.</summary>
     void InsertPathRequest(PathRequest request)
     {
@@ -173,6 +215,7 @@ public sealed partial class ZoneWorld
         if (_pathRequests.Count == 0)
         {
             _pathfindNodesLastStep = 0;
+            _pathfindP1NodesLastStep = 0;
             _pathfindQueuedLastStep = 0;
             return;
         }
@@ -180,6 +223,25 @@ public sealed partial class ZoneWorld
         int nodesLeft = PathfindNodeBudgetPerStep;
         int probesLeft = PathfindProbeBudgetPerStep;
         long nodesSpent = 0;
+        long p1NodesSpent = 0;
+
+        // Priority stays strict — P1 is still served first — but when anything below it is waiting, the P1 band may not
+        // take the whole step. This is the measured mitigation for the starvation the flood test pins: without it a
+        // continuous P1 inflow spends every node on chases and P2/P3 never start a search at all.
+        bool lowerWaiting = false;
+        foreach (var queued in _pathRequests)
+        {
+            queued.ServedThisStep = false;
+            if (queued.Priority != PathPriority.P1)
+                lowerWaiting = true;
+        }
+
+        int p1NodesLeft = lowerWaiting
+            ? PathfindNodeBudgetPerStep - PathfindLowerPriorityReserve
+            : PathfindNodeBudgetPerStep;
+        int p1ProbesLeft = lowerWaiting
+            ? PathfindProbeBudgetPerStep - PathfindLowerPriorityProbeReserve
+            : PathfindProbeBudgetPerStep;
 
         // Iterate by index: a finished request removes itself from the same list, so the element at this index is the next
         // one and a request that still had budget left is revisited in the same step.
@@ -190,6 +252,13 @@ public sealed partial class ZoneWorld
                 break;
 
             var request = _pathRequests[index];
+            if (request.Priority == PathPriority.P1 && p1NodesLeft <= 0 && p1ProbesLeft <= 0)
+            {
+                // The P1 band spent its share of this step. Its request keeps its place and resumes next step; walking
+                // past it is what lets the reserve reach P2/P3 instead of staying unused behind a running P1 search.
+                index++;
+                continue;
+            }
             if (!_byId.TryGetValue(request.ObjectId, out var npc) || !npc.PathfindPending)
             {
                 // The entity left the world or was cancelled: nothing to move.
@@ -214,24 +283,39 @@ public sealed partial class ZoneWorld
                 request.OriginY = npc.Y;
             }
 
-            if (request.Search.Current == GeoPathSearch.Status.Running && nodesLeft > 0)
+            int expansionsBefore = request.Search.Expansions;
+            int nodesCap = request.Priority == PathPriority.P1 ? Math.Min(nodesLeft, p1NodesLeft) : nodesLeft;
+            if (request.Search.Current == GeoPathSearch.Status.Running && nodesCap > 0)
+                request.Search.Step(nodesCap);
+            int spent = request.Search.Expansions - expansionsBefore;
+            nodesLeft -= spent;
+            nodesSpent += spent;
+            if (request.Priority == PathPriority.P1)
             {
-                int before = request.Search.Expansions;
-                request.Search.Step(nodesLeft);
-                int spent = request.Search.Expansions - before;
-                nodesLeft -= spent;
-                nodesSpent += spent;
+                p1NodesLeft -= spent;
+                p1NodesSpent += spent;
             }
+            if (spent > 0)
+                request.ServedThisStep = true;
 
             if (request.Search.Current == GeoPathSearch.Status.Running)
             {
                 // Out of node budget: keep the queue position and resume next step.
+                if (spent > 0)
+                    RecordPathfindWait(request, now);
                 index++;
                 continue;
             }
 
-            var (walked, done) = FinishPathfind(request, npc, now, probesLeft);
+            int probeCap = request.Priority == PathPriority.P1 ? Math.Min(probesLeft, p1ProbesLeft) : probesLeft;
+            var (walked, done) = FinishPathfind(request, npc, now, probeCap);
             probesLeft = Math.Max(0, probesLeft - walked);
+            if (request.Priority == PathPriority.P1)
+                p1ProbesLeft = Math.Max(0, p1ProbesLeft - walked);
+            if (walked > 0)
+                request.ServedThisStep = true;
+            if (spent > 0 || walked > 0 || done)
+                RecordPathfindWait(request, now);
             if (!done)
             {
                 // The route is found but not fully smoothed yet; it resumes next step with the rest of the probe budget.
@@ -243,12 +327,92 @@ public sealed partial class ZoneWorld
         }
 
         _pathfindNodesLastStep = nodesSpent;
+        _pathfindP1NodesLastStep = p1NodesSpent;
         _pathfindQueuedLastStep = _pathRequests.Count;
         FineageTelemetry.PathfindNodes.Record((int)nodesSpent);
         FineageTelemetry.PathfindQueued.Record(_pathfindQueuedLastStep);
         if (nodesSpent >= PathfindNodeBudgetPerStep)
             FineageTelemetry.PathfindBudgetExhausted.Add(1);
+
+        RecordPathfindBacklog(now, nodesLeft);
     }
+
+    /// <summary>
+    /// Records the queue wait once, the first step the stage does real work for the request: expansions it paid for, probe
+    /// cells it smoothed, or the resolution that removed it. A request the budget never reached is still waiting and is not
+    /// recorded — logging it would hide exactly the backlog this instrument exists to show.
+    /// </summary>
+    static void RecordPathfindWait(PathRequest request, long now)
+    {
+        if (request.WaitRecorded)
+            return;
+        request.WaitRecorded = true;
+        FineageTelemetry.PathfindWaitMilliseconds.Record(
+            Math.Max(0, now - request.QueuedAtMs), PriorityTag(request.Priority));
+    }
+
+    /// <summary>
+    /// Emits the per-priority backlog of what is still queued after a step: the age of the oldest request, and whether
+    /// the node budget was what kept it waiting. Priority order alone cannot starve below P1 unless the budget is the
+    /// blocker, so this is the signal that tells the two apart. A priority with nothing queued emits nothing, so an idle
+    /// band cannot be mistaken for a satisfied one with age 0.
+    /// <para>
+    /// "Starved" means the step ended with the node budget gone and the request not advanced by it. A request the P1
+    /// reserve held back while lower priorities ran is not counted: that is the policy working, not the budget failing.
+    /// </para>
+    /// </summary>
+    void RecordPathfindBacklog(long now, int nodesLeft)
+    {
+        long p1 = 0, p2 = 0, p3 = 0;
+        bool p1Queued = false, p2Queued = false, p3Queued = false;
+        bool p1Blocked = false, p2Blocked = false, p3Blocked = false;
+        foreach (var request in _pathRequests)
+        {
+            long age = Math.Max(0, now - request.QueuedAtMs);
+            bool blockedByNodes = nodesLeft <= 0 && !request.ServedThisStep;
+            switch (request.Priority)
+            {
+                case PathPriority.P1:
+                    p1Queued = true;
+                    p1 = Math.Max(p1, age);
+                    p1Blocked |= blockedByNodes;
+                    break;
+                case PathPriority.P2:
+                    p2Queued = true;
+                    p2 = Math.Max(p2, age);
+                    p2Blocked |= blockedByNodes;
+                    break;
+                default:
+                    p3Queued = true;
+                    p3 = Math.Max(p3, age);
+                    p3Blocked |= blockedByNodes;
+                    break;
+            }
+        }
+
+        if (p1Queued)
+            Record(PathPriority.P1, p1, p1Blocked);
+        if (p2Queued)
+            Record(PathPriority.P2, p2, p2Blocked);
+        if (p3Queued)
+            Record(PathPriority.P3, p3, p3Blocked);
+
+        void Record(PathPriority priority, long age, bool blocked)
+        {
+            KeyValuePair<string, object?> tag = PriorityTag(priority);
+            FineageTelemetry.PathfindOldestAgeMilliseconds.Record(age, tag);
+            if (blocked)
+                FineageTelemetry.PathfindStarvedSteps.Add(1, tag);
+        }
+    }
+
+    static KeyValuePair<string, object?> PriorityTag(PathPriority priority) =>
+        new("priority", priority switch
+        {
+            PathPriority.P1 => "p1",
+            PathPriority.P2 => "p2",
+            _ => "p3"
+        });
 
     /// <summary>
     /// Appends finished route legs to the entity and drops the request once the route is fully smoothed. Returns the probe
@@ -399,8 +563,11 @@ public sealed partial class ZoneWorld
 
     void TickNpcPathfindStage(TickContext tick) => TickNpcPathfind(tick.NowUnixMs);
 
-    /// <summary>Tests and the perf harness: queue depth, running searches and the node budget the last step spent.</summary>
-    internal (int Queued, int Running, long NodesLastStep) PathfindDiagnostics()
+    /// <summary>
+    /// Tests and the perf harness: queue depth, running searches, and the node budget the last step spent — with the P1
+    /// share separately, so a test can prove the reserve actually capped the top band instead of trusting queue contents.
+    /// </summary>
+    internal (int Queued, int Running, long NodesLastStep, long P1NodesLastStep) PathfindDiagnostics()
     {
         int running = 0;
         foreach (var request in _pathRequests)
@@ -409,6 +576,53 @@ public sealed partial class ZoneWorld
                 running++;
         }
 
-        return (_pathfindQueuedLastStep, running, _pathfindNodesLastStep);
+        return (_pathfindQueuedLastStep, running, _pathfindNodesLastStep, _pathfindP1NodesLastStep);
+    }
+
+
+    /// <summary>
+    /// Tests: the queue in service order (priority, then arrival), so ordering regressions are observable.
+    /// <c>Served</c> is whether the stage has advanced the request at least once, which is how a starvation test tells a
+    /// request that is merely queued from one the budget never reached.
+    /// </summary>
+    internal IReadOnlyList<(int ObjectId, PathPriority Priority, int Sequence, bool Served)> PathfindQueueForTest() =>
+        _pathRequests.Select(static r => (r.ObjectId, r.Priority, r.Sequence, r.WaitRecorded)).ToList();
+
+    /// <summary>
+    /// Tests: queues a route for an entity at an explicit priority. <see cref="PathPriorityOf"/> is a pure function of
+    /// entity state, so a test cannot stand up a P2 band through the public pathing calls. This only creates a request;
+    /// a later promotion must go through <see cref="RequestNpcGeoPath"/> so the test exercises the real re-ordering.
+    /// </summary>
+    internal void EnqueueNpcPathfindForTest(ZoneEntity npc, PathPriority priority, int wantX, int wantY, int wantZ)
+    {
+        using (_affinity.Step())
+        {
+            if (_pathRequestsById.ContainsKey(npc.ObjectId))
+                throw new InvalidOperationException($"entity {npc.ObjectId} already has a pending route; promote it through RequestNpcGeoPath");
+
+            npc.PathWantX = wantX;
+            npc.PathWantY = wantY;
+            npc.PathWantZ = wantZ;
+            npc.PathfindPending = true;
+            var request = new PathRequest
+            {
+                ObjectId = npc.ObjectId,
+                WantX = wantX,
+                WantY = wantY,
+                WantZ = wantZ,
+                QueuedAtMs = NowUnixMs(),
+                Priority = priority,
+                Sequence = ++_pathRequestSequence,
+            };
+            _pathRequestsById[npc.ObjectId] = request;
+            InsertPathRequest(request);
+        }
+    }
+
+    /// <summary>Tests: asks for a route through the production path, so <see cref="PathPriorityOf"/> and the enqueue decide.</summary>
+    internal void RequestNpcGeoPathForTest(ZoneEntity npc, int wantX, int wantY, int wantZ)
+    {
+        using (_affinity.Step())
+            RequestNpcGeoPath(npc, wantX, wantY, wantZ);
     }
 }

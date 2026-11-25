@@ -138,6 +138,27 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.npc.pathfind.budget_exhausted",
             description: "Steps where the npc.paths node budget ran out with requests still pending");
 
+    /// <summary>
+    /// How long a route request waited before the stage took it, tagged by priority. This is the number that answers
+    /// whether a flood of P1 work starves P2/P3: queue depth alone cannot, because a starved request is already queued.
+    /// </summary>
+    public static readonly Histogram<double> PathfindWaitMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.wait.ms", unit: "ms",
+            description: "Route request wait before the npc.paths stage took it, by priority");
+
+    /// <summary>
+    /// Age of the oldest request still queued at the end of a step, tagged by priority, measured for every priority that
+    /// still has work. A P1 flood shows up here as a P2/P3 age that keeps climbing while P1 stays low.
+    /// </summary>
+    public static readonly Histogram<double> PathfindOldestAgeMilliseconds =
+        Meter.CreateHistogram<double>("fineage.npc.pathfind.oldest_age.ms", unit: "ms",
+            description: "Age of the oldest route request still queued at the end of a step, by priority");
+
+    /// <summary>Steps where the node budget ran out while requests were still waiting for nodes.</summary>
+    public static readonly Counter<long> PathfindStarvedSteps =
+        Meter.CreateCounter<long>("fineage.npc.pathfind.starved_steps",
+            description: "Steps where a route request was left waiting by the node budget, by priority");
+
     public static readonly Histogram<double> FanoutDispatchWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.fanout.dispatch_wait.ms", unit: "ms",
             description: "Per batch: hand-off to the fan-out dispatcher until the worker picks it up");

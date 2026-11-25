@@ -153,6 +153,57 @@ public sealed class QuestDialogIndexTests
         }
     }
 
+    [Fact]
+    public void Owned_variants_of_one_key_stay_in_datapack_order_per_owned_mode()
+    {
+        // Mobius kill credit has three rows for one NPC and event: the plain kill, the "any" party credit and the "solo"
+        // one. They share a key, so the index must keep their order and let the owned gate pick, exactly as the linear
+        // scan did — a "solo" credit also accepts an "any" row, which is order-sensitive.
+        var (machine, inventory) = Machine(
+            """
+            {"id":7,"name":"Q","dialogs":[
+              {"npcId":400,"hook":"kill","when":"absent","html":"<html><body>plain</body></html>"},
+              {"npcId":400,"hook":"kill","when":"absent","owned":"any","html":"<html><body>any</body></html>"},
+              {"npcId":400,"hook":"kill","when":"absent","owned":"solo","html":"<html><body>solo</body></html>"}
+            ]}
+            """);
+
+        var quest = machine.QuestDef(7)!;
+        var group = Assert.Single(quest.DialogsByKey).Value;
+        Assert.Equal(["plain", "any", "solo"], group.Select(static d => d.Owned ?? "plain"));
+
+        // A plain kill credit (no owned mode): only the step with no owned attribute is eligible.
+        var plain = machine.OnKill(new QuestJournal(), inventory, 400, new QuestActor(0, 1, 0));
+        Assert.True(plain.Ok, plain.Message);
+        Assert.Contains("plain", plain.Html, StringComparison.Ordinal);
+
+        // Party credit of a quest-owned spawn: the "any" row. The "solo" row is not eligible for it.
+        var party = machine.OnOwned(new QuestJournal(), inventory, 400, new QuestActor(0, 1, 0), QuestHook.Kill, solo: false);
+        Assert.True(party.Ok, party.Message);
+        Assert.Contains("any", party.Html, StringComparison.Ordinal);
+
+        // Solo credit: order decides, and the "any" row comes first in the datapack, so it wins over "solo".
+        var soloCredit = machine.OnOwned(new QuestJournal(), inventory, 400, new QuestActor(0, 1, 0), QuestHook.Kill, solo: true);
+        Assert.True(soloCredit.Ok, soloCredit.Message);
+        Assert.Contains("any", soloCredit.Html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Different_events_on_one_npc_are_checked_separately_for_marks()
+    {
+        // Two event keys on the same NPC: the gated one must not stop the open one from marking. A per-NPC index instead
+        // of a per-key one would collapse them and change which NPCs get a marker.
+        var (machine, _) = Machine(
+            """
+            {"id":7,"name":"Q","dialogs":[
+              {"npcId":401,"hook":"event","event":"go","when":"absent","minLevel":40,"html":"<html><body>high</body></html>"},
+              {"npcId":401,"hook":"event","event":"stop","when":"absent","html":"<html><body>open</body></html>"}
+            ]}
+            """);
+
+        var marks = machine.CollectNpcMarks(new QuestJournal(), new QuestActor(0, 1, 0));
+        Assert.Contains(marks, m => m.NpcId == 401 && m.Mark == 1);
+    }
     static (QuestMachine Machine, PlayerInventory Inventory) Machine(string questJson)
     {
         var items = new ItemCatalog(

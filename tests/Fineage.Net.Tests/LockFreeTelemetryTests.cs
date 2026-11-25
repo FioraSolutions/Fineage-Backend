@@ -32,6 +32,32 @@ public sealed class LockFreeTelemetryTests
     }
 
     [Fact]
+    public void A_producer_that_outruns_the_drainer_keeps_every_measurement_and_shows_a_backlog()
+    {
+        using var meter = new Meter(FineageTelemetry.MeterName);
+        Counter<long> overruns = meter.CreateCounter<long>("fineage.tick.overruns");
+        using var collector = new MetricsCollector();
+        long before = collector.Snapshot().TickOverruns;
+
+        // A stopped drainer is a starved consumer: the producer now owns the whole backlog, which #972 promises to keep
+        // lossless. Nothing may be dropped, however far the consumer lags.
+        collector.PauseDrainerForTest();
+
+        const int recorded = 20_000;
+        for (int i = 0; i < recorded; i++)
+            overruns.Add(1);
+
+        // The backlog is observable while the consumer is stopped, which is how a soak proves the drain keeps up rather
+        // than inferring it from a counter that would look the same either way.
+        Assert.True(collector.TelemetryBacklogSlotsForTest() >= recorded,
+            "sealed blocks must be visible as backlog while the consumer is behind");
+
+        // Snapshot drains under the gate: every measurement survives, and the backlog returns to zero.
+        Assert.Equal(before + recorded, collector.Snapshot().TickOverruns);
+        Assert.Equal(0, collector.TelemetryBacklogSlotsForTest());
+    }
+
+    [Fact]
     public void Wakeup_never_loses_a_signal()
     {
         using var wakeup = new WorkerWakeup();
