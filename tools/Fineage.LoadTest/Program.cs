@@ -4,7 +4,7 @@ using Fineage.LoadTest.Reporting;
 
 if (args.Length == 0 || args.Contains("-h") || args.Contains("--help"))
 {
-    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--zone-dll path] [--expect-zone-commit sha] [--require-clean-provenance] [--region-workers N]");
+    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--zone-dll path] [--expect-zone-commit sha] [--require-clean-provenance] [--region-workers N] [--consistency-trace]");
     return;
 }
 
@@ -39,6 +39,8 @@ if (!string.IsNullOrWhiteSpace(passwordOverride))
 string? layoutOverride = Arg(args, "--spawn-layout");
 if (!string.IsNullOrWhiteSpace(layoutOverride))
     scenario.SpawnLayout = layoutOverride;
+if (args.Contains("--consistency-trace"))
+    scenario.ConsistencyTrace.Enabled = true;
 
 using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>

@@ -123,6 +123,9 @@ public static class ScenarioLoader
         if (child.HeavyPlay == null && parent.HeavyPlay != null)
             child.HeavyPlay = parent.HeavyPlay;
 
+        if (!child.ConsistencyTrace.Enabled && parent.ConsistencyTrace.Enabled)
+            child.ConsistencyTrace = parent.ConsistencyTrace;
+
         if (child.Economy == null && parent.Economy != null)
             child.Economy = parent.Economy;
 

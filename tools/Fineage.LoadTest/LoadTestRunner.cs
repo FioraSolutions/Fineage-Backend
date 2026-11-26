@@ -273,6 +273,19 @@ public sealed class LoadTestRunner
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
 
+        ConsistencyTrace? consistencyTrace = null;
+        if (oracleRan && scenario.ConsistencyTrace.Enabled && consistency.Issues.Count > 0)
+        {
+            try
+            {
+                consistencyTrace = ConsistencyTraceBuilder.Build(bots, consistency, scenario.ConsistencyTrace);
+            }
+            catch (Exception ex)
+            {
+                bugs.Add($"P2 consistency trace failed: {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
         var travel = TravelSummary.From(stats.Where(s => s.Travel != null).Select(s => s.Travel!));
         if (travel.FailReason() is { } travelFail)
             failReasons.Add(travelFail);
@@ -338,6 +351,7 @@ public sealed class LoadTestRunner
             FailReasons = failReasons,
             Bugs = bugs,
             Consistency = consistency,
+            ConsistencyTrace = consistencyTrace,
             Economy = economyReport,
             StartedAt = started,
             SteadyStateStartedAt = steadyStateStarted,
