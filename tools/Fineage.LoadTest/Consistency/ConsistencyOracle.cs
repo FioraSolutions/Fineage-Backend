@@ -43,6 +43,11 @@ public static class ConsistencyOracle
         var selfUserInfo = BuildSelfUserInfoIndex(bots);
         // Every pairwise comparison below uses these self timelines, so both sides speak about the same instant.
         var timelines = bots.ToDictionary(b => b.BotId, b => PositionTimeline.From(b.ObservationLog.Snapshot()));
+        // Combat events happen throughout the run, so liveness must come from the self frames at that instant,
+        // not from the end-of-run pawn state.
+        var liveness = bots.ToDictionary(
+            b => b.BotId,
+            b => LivenessTimeline.From(b.ObservationLog.Snapshot(), (ulong)b.SelfObjectId));
 
         foreach (var bot in bots)
         {
@@ -208,7 +213,7 @@ public static class ConsistencyOracle
         // position says nothing about whether a watcher was in range when an early attack happened.
 
         foreach (var bot in bots)
-            CheckCombatFanout(bot, roster, watch, issues, combat, timelines);
+            CheckCombatFanout(bot, roster, aoiCellSize, issues, combat, timelines, liveness);
         CheckVisibilityLeaks(bots, roster, watch, issues, combat, timelines);
 
         var samples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples).ToList();
@@ -409,20 +414,19 @@ public static class ConsistencyOracle
     static void CheckCombatFanout(
         FineageBotClient observer,
         List<BotRosterEntry> roster,
-        int watch,
+        int cellSize,
         List<ConsistencyIssue> issues,
         Dictionary<int, CombatIndex> combat,
-        Dictionary<int, PositionTimeline> timelines)
+        Dictionary<int, PositionTimeline> timelines,
+        Dictionary<int, LivenessTimeline> liveness)
     {
-        var window = TimeSpan.FromMilliseconds(2500);
+        var window = TimeSpan.FromMilliseconds(ComparableWindowMs);
         int combatIssues = issues.Count(i => i.Kind == ConsistencyKind.MissingCombatFanout);
         if (combatIssues >= 25)
             return;
 
-        // A dead observer stops being a live AOI participant. Its old sightings are not evidence that a live
-        // watcher missed fanout; keep attacker liveness separate because it may have died after the attack.
         var observerEntry = roster.FirstOrDefault(r => r.BotId == observer.BotId);
-        if (observerEntry == null || !IsLive(observerEntry))
+        if (observerEntry == null)
             return;
 
         var attacks = combat[observer.BotId].Attacks;
@@ -430,6 +434,11 @@ public static class ConsistencyOracle
         for (int e = 0; e < eventCount; e++)
         {
             var (at, attackerVal) = attacks[e];
+            // A sighting is evidence only while the bot that received it was alive. Its end-of-run pawn state
+            // says nothing about an attack observed earlier (or about a watcher that died later).
+            if (!IsLiveAt(liveness[observer.BotId], observerEntry, at))
+                continue;
+
             int attackerOid = (int)attackerVal;
             var attackerEntry = roster.FirstOrDefault(r => r.ObjectId == attackerOid);
             if (attackerEntry == null)
@@ -437,13 +446,15 @@ public static class ConsistencyOracle
 
             foreach (var w in roster)
             {
-                if (w.BotId == observer.BotId || !IsLive(w))
+                if (w.BotId == observer.BotId)
                     continue;
-                // In range at the attack and still in range when the window closes (no teleport out meanwhile).
-                var (ax, ay) = PositionAt(timelines[attackerEntry.BotId], at, attackerEntry);
-                var (wx, wy) = PositionAt(timelines[w.BotId], at, w);
-                var (wx2, wy2) = PositionAt(timelines[w.BotId], at + window, w);
-                if (Distance(wx, wy, ax, ay) > watch || Distance(wx2, wy2, ax, ay) > watch)
+                if (!IsLiveAt(liveness[w.BotId], w, at))
+                    continue;
+                // Presence is the exact GridAoi 3x3 footprint, and a watcher dragged out of the footprint before
+                // the bounded delivery closes is not a missing fan-out. Both sides move, so evaluate every self
+                // sample in the interval, not only the two endpoints.
+                if (!VisibleThroughout(timelines[attackerEntry.BotId], timelines[w.BotId],
+                        attackerEntry, w, at, window, cellSize))
                     continue;
                 bool saw = combat[w.BotId].AttacksByAttacker.TryGetValue(attackerVal, out var times)
                     && SawAttackNear(times, at);
@@ -463,6 +474,69 @@ public static class ConsistencyOracle
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Whether the attacker and watcher share the GridAoi 3x3 watch at the attack and at every self-position sample
+    /// through the bounded delivery interval. The interval closes at <paramref name="at"/> + window even when the
+    /// next sample arrives later, so a watcher dragged out by a teleport cannot hide behind a sparse timeline.
+    /// </summary>
+    static bool VisibleThroughout(
+        PositionTimeline attackerTimeline,
+        PositionTimeline watcherTimeline,
+        BotRosterEntry attacker,
+        BotRosterEntry watcher,
+        DateTimeOffset at,
+        TimeSpan window,
+        int cellSize)
+    {
+        if (!VisibleAt(attackerTimeline, watcherTimeline, attacker, watcher, at, cellSize))
+            return false;
+
+        DateTimeOffset end = at + window;
+        if (!VisibleAt(attackerTimeline, watcherTimeline, attacker, watcher, end, cellSize))
+            return false;
+
+        foreach (var point in attackerTimeline.Points)
+        {
+            if (point.At > at && point.At < end &&
+                !VisibleAt(attackerTimeline, watcherTimeline, attacker, watcher, point.At, cellSize))
+                return false;
+        }
+
+        foreach (var point in watcherTimeline.Points)
+        {
+            if (point.At > at && point.At < end &&
+                !VisibleAt(attackerTimeline, watcherTimeline, attacker, watcher, point.At, cellSize))
+                return false;
+        }
+
+        return true;
+    }
+
+    static bool VisibleAt(
+        PositionTimeline attackerTimeline,
+        PositionTimeline watcherTimeline,
+        BotRosterEntry attacker,
+        BotRosterEntry watcher,
+        DateTimeOffset at,
+        int cellSize)
+    {
+        var (ax, ay) = PositionAt(attackerTimeline, at, attacker);
+        var (wx, wy) = PositionAt(watcherTimeline, at, watcher);
+        return InGridWatch(wx, wy, ax, ay, cellSize);
+    }
+
+    /// <summary>
+    /// Historical liveness for an event earlier in the run. A bot with no self liveness frame is only judged by
+    /// end state when the log carried no liveness evidence at all; a log whose first self event is later means the
+    /// pawn did not exist at the event time.
+    /// </summary>
+    static bool IsLiveAt(LivenessTimeline timeline, BotRosterEntry entry, DateTimeOffset at)
+    {
+        if (timeline.TryAt(at, out bool alive))
+            return alive;
+        return timeline.Count == 0 && IsLive(entry);
     }
 
     static void CheckVisibilityLeaks(
@@ -663,6 +737,10 @@ public static class ConsistencyOracle
     {
         groundX = subject.X;
         groundY = subject.Y;
+        // A despawn closes the view; a later origin belongs to a new visibility interval, not a frozen view.
+        if (view.Despawned)
+            return false;
+
         DateTimeOffset viewAt = view.PositionUpdatedAt;
         if (viewAt == default || subjectTimeline.Count == 0)
         {
@@ -685,6 +763,12 @@ public static class ConsistencyOracle
         if (visibleAtView &&
             (Math.Abs(view.X - groundX) > PositionTolerance || Math.Abs(view.Y - groundY) > PositionTolerance))
             return true;
+
+        // A MoveState view is the origin of a movement turn the observer received. The next origin in the subject
+        // timeline is the next turn, so comparing it as a continuous ground invents a freeze. This is checked after
+        // the same-instant mismatch above, which still fails.
+        if (view.IsMoveOrigin)
+            return false;
 
         // A view can match the ground at its own timestamp yet be frozen while the subject keeps walking in
         // front of the observer. Only a later ground origin inside the same unbroken visibility interval is stale.

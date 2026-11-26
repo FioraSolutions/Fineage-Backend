@@ -324,7 +324,8 @@ public sealed class BotObservationLog
                             LastDeathAt = previous?.LastDeathAt,
                             SpawnCount = (previous?.SpawnCount ?? 0) + 1,
                             SpawnsWithoutDespawn = openRun,
-                            Despawned = false
+                            Despawned = false,
+                            IsMoveOrigin = false
                         };
                         _spawnObservations.Add(new SpawnObservation(
                             s.EntityValue, oid, at, s.Kind, s.EntityGeneration, s.IsSelf, openedLife));
@@ -349,7 +350,8 @@ public sealed class BotObservationLog
                                 Alive = false,
                                 CurHp = 0,
                                 LastDeathAt = at,
-                                SpawnsWithoutDespawn = 0
+                                SpawnsWithoutDespawn = 0,
+                                IsMoveOrigin = false
                             };
                         }
                         break;
@@ -361,6 +363,7 @@ public sealed class BotObservationLog
                         {
                             e.Despawned = true;
                             e.SpawnsWithoutDespawn = 0;
+                            e.IsMoveOrigin = false;
                             e.LastDespawnOrdinal = ++_spawnOrdinal;
                             _byValue[d.EntityValue] = e;
                         }
@@ -381,6 +384,7 @@ public sealed class BotObservationLog
                             e.Z = m.OriginZ;
                             e.PositionUpdatedAt = at;
                             e.Despawned = false;
+                            e.IsMoveOrigin = true;
                             _byValue[key] = e;
                         }
                         else
@@ -392,7 +396,8 @@ public sealed class BotObservationLog
                                 X = m.OriginX,
                                 Y = m.OriginY,
                                 Z = m.OriginZ,
-                                PositionUpdatedAt = at
+                                PositionUpdatedAt = at,
+                                IsMoveOrigin = true
                             };
                         }
 
@@ -410,6 +415,7 @@ public sealed class BotObservationLog
                             e.Z = c.Z;
                             e.PositionUpdatedAt = at;
                             e.Despawned = false;
+                            e.IsMoveOrigin = false;
                             _byValue[key] = e;
                         }
 
@@ -426,6 +432,7 @@ public sealed class BotObservationLog
                             e.Y = t.Y;
                             e.Z = t.Z;
                             e.PositionUpdatedAt = at;
+                            e.IsMoveOrigin = false;
                             _byValue[key] = e;
                         }
 
@@ -652,6 +659,11 @@ public sealed class BotObservationLog
         public int Z { get; set; }
         /// <summary>When the position last changed (spawn/move/teleport). The oracle uses it to reject a stale ground.</summary>
         public DateTimeOffset PositionUpdatedAt { get; set; }
+        /// <summary>
+        /// True when <see cref="PositionUpdatedAt"/> came from a MoveState origin. That origin is the start of a
+        /// movement turn; a later origin is the next turn, not a continuous ground for this view.
+        /// </summary>
+        public bool IsMoveOrigin { get; set; }
         public int CurHp { get; set; }
         public int MaxHp { get; set; }
         public bool Despawned { get; set; }

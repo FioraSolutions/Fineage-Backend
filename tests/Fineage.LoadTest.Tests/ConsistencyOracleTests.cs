@@ -671,6 +671,167 @@ public sealed class ConsistencyOracleTests
         Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
     }
 
+    [Fact]
+    public void Combat_fanout_uses_exact_grid_watch_instead_of_euclidean_radius()
+    {
+        // 3002 units apart (<= the old 6000 Euclidean radius) but in cells 0 and 2: GridAoi's 3x3 watch does not
+        // include the watcher, so its missing AttackState is not a fan-out failure.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var attacker = new BotObservationLog(1);
+        var witness = new BotObservationLog(0);
+        var watcher = new BotObservationLog(2);
+        attacker.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(500, 2999, 0, true)), t0);
+        attacker.Record(NetOpcode.AttackState, Attack(500), t0);
+        witness.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1000, 0, 0, true)), t0);
+        witness.Record(NetOpcode.AttackState, Attack(500), t0);
+        watcher.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(2000, 6001, 0, true)), t0);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(attacker, inWorld: true), Bot(witness, inWorld: true), Bot(watcher, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingCombatFanout && i.ObserverBotId == 2);
+    }
+
+    [Fact]
+    public void Combat_fanout_reports_a_visible_stationary_watcher()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var attacker = new BotObservationLog(1);
+        var witness = new BotObservationLog(0);
+        var watcher = new BotObservationLog(2);
+        attacker.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(500, 0, 0, true)), t0);
+        attacker.Record(NetOpcode.AttackState, Attack(500), t0);
+        witness.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1000, 0, 0, true)), t0);
+        witness.Record(NetOpcode.AttackState, Attack(500), t0);
+        watcher.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(2000, 500, 0, true)), t0);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(attacker, inWorld: true), Bot(witness, inWorld: true), Bot(watcher, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingCombatFanout && i.ObserverBotId == 2);
+    }
+
+    [Fact]
+    public void Combat_fanout_uses_liveness_at_attack_not_end_state()
+    {
+        // Bot 2 was alive at the attack and died later: its earlier missing fan-out still counts. Bot 3 was dead
+        // at the attack and alive again at the end: the end-state pawn must not make it a live observer.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var attacker = new BotObservationLog(1);
+        var witness = new BotObservationLog(0);
+        var diedLater = new BotObservationLog(2);
+        var deadAtAttack = new BotObservationLog(3);
+        attacker.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(500, 0, 0, true)), t0);
+        attacker.Record(NetOpcode.AttackState, Attack(500), t0);
+        witness.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1000, 0, 0, true)), t0);
+        witness.Record(NetOpcode.AttackState, Attack(500), t0);
+
+        diedLater.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(2000, 500, 0, true)), t0);
+        diedLater.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 2000,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), t0.AddSeconds(1));
+
+        deadAtAttack.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(3000, 600, 0, true)), t0.AddSeconds(-2));
+        deadAtAttack.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 3000,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), t0.AddSeconds(-1));
+        deadAtAttack.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(3000, 600, 0, true)), t0.AddSeconds(1));
+
+        var report = ConsistencyOracle.Analyze(
+            [
+                Bot(attacker, inWorld: true),
+                Bot(witness, inWorld: true),
+                Bot(diedLater, inWorld: true),
+                Bot(deadAtAttack, inWorld: true)
+            ],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingCombatFanout && i.ObserverBotId == 2);
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingCombatFanout && i.ObserverBotId == 3);
+    }
+
+    [Fact]
+    public void Move_origin_view_does_not_compare_the_next_turn_as_stale()
+    {
+        // The observer received the MoveState origin (1000,1000) and is rendering that turn. The subject's later
+        // self origin is the next turn along the same leg; it is not evidence that the received view froze.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, false)), t0);
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 1000, 1000, 7000, 1000), t0.AddSeconds(1));
+        observer.Record(NetOpcode.MoveState, MoveFromTo(74, 1000, 1000, 7000, 1000), t0.AddSeconds(1));
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 4000, 1000, 7000, 1000), t0.AddSeconds(2));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
+    }
+
+    [Fact]
+    public void Move_origin_view_with_a_same_time_mismatch_still_fails()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, false)), t0);
+        // The observer's MoveState origin is 1200 units from the subject's own position at that instant.
+        observer.Record(NetOpcode.MoveState, MoveFromTo(74, 2200, 1000, 2300, 1000), t0.AddSeconds(1));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    [Fact]
+    public void Despawned_peer_view_is_not_reported_as_stale()
+    {
+        // The observer's view is closed by the despawn; a later origin belongs to a new visibility interval.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, false)), t0);
+        observer.Record(NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+        {
+            EntityValue = 74,
+            EntityGeneration = 1
+        }), t0.AddSeconds(1));
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 4000, 1000, 7000, 1000), t0.AddSeconds(2));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
     static FineageBotClient Bot(BotObservationLog log) => Bot(log, inWorld: false);
 
     static FineageBotClient Bot(BotObservationLog log, bool inWorld)
@@ -708,6 +869,18 @@ public sealed class ConsistencyOracleTests
         MaxHp = 100,
         CurHp = 100
     };
+
+    static byte[] Attack(ulong attacker) => NetCodec.EncodeAttackState(new AttackStateMsg
+    {
+        AttackerValue = attacker,
+        AttackerGeneration = 1,
+        TargetValue = 9000,
+        TargetGeneration = 1,
+        Damage = 10,
+        AttackerX = 0,
+        AttackerY = 0,
+        AttackerZ = 0
+    });
 
     static byte[] Move(ulong id, int x, int y) => MoveFromTo(id, x, y, x, y);
 
