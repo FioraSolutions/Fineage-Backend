@@ -342,6 +342,24 @@ Both columns are Debug bots-200-town, 4 cores, sequential regions. Before is the
 
 The zone step still stuck once, after the behavior window, with no region bodies in flight (watchdog 180.9 s in the zone log). The runner sampled that log before the watchdog crossed 30 s and printed stall 4.8 s, count 0.
 
+## Verified post-#1040 microregion soak (Nov 26, Debug)
+
+PR [#1040](https://github.com/FioraSolutions/Fineage-Backend/pull/1040) changed shared microregion activation. The acceptance run used the build/provenance-gated runner: the Zone assembly's loaded module id was compared to the DLL on disk and `fineage_build_info` commit was required to match the tested source. A prior 459.6 ms maximum was rejected as unverified because the Zone had been rebuilt while running.
+
+| Gate / metric | Before verified activation work | Post-#1040 clean 30-minute soak |
+| --- | ---: | ---: |
+| Bots / layout / workers | 200 / town / 0 | **200 / 0 disconnects / 0 stuck** |
+| Tick p99 | 54.7 ms | **39.6 ms** (limit 200 ms) |
+| Tick true max | 459.6 ms (invalid provenance) | **67.2 ms** |
+| `commands.apply` p99 | — | **1.9 ms** |
+| `movement.player` p99 | — | **5.0 ms** |
+| `npc.paths` p99 | — | **1.9 ms** |
+| `random-walk` p99 | — | **2.0 ms** |
+| `region_wake` backlog max | 3,089 | **0** |
+| Simulation stall | — | 2.2 s sampled, count 0 |
+
+The 30-minute artifact passed all #867 performance gates. The later 100-second `consistency-200-town-short` reproduction is a separate diagnostic, not a claim that the oracle is clean: after [#1044](https://github.com/FioraSolutions/Fineage-Backend/pull/1044), its tick p99 was **40.3 ms**, true max **178.8 ms**, drops **0**, with matching Zone DLL/commit provenance. It still reports residual MissingSpawn / DuplicateSpawn / MissingCombatFanout issues; StalePosition and HpDesync are zero. Those residuals remain under investigation and must not be conflated with the passing performance acceptance.
+
 ## Reproduce smoke
 
 ```bash
