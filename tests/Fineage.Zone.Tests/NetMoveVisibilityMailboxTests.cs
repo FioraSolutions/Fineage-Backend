@@ -1,4 +1,6 @@
 using Fineage.Protocol;
+using Fineage.Zone.Geo;
+using Fineage.Zone.Interest;
 using Fineage.Zone.World;
 using Xunit;
 
@@ -133,6 +135,81 @@ public sealed class NetMoveVisibilityMailboxTests
         for (int i = 0; i < 220 && c.Player.Knownlist.Contains(a.ObjectId); i++)
             m.Step(5);
         Assert.DoesNotContain(a.ObjectId, c.Player.Knownlist);
+    }
+
+    [Fact]
+    public async Task Grid_mover_entering_stationary_observer_aoi_spawns_each_for_the_other()
+    {
+        var m = new MoveVisibilityMailbox(new GridAoi(1000), GeoEngine.Empty);
+        var observer = await m.EnterAsync(MoveVisibilityMailbox.X0, MoveVisibilityMailbox.Y0);
+        var mover = await m.EnterAsync(MoveVisibilityMailbox.X0 + 5000, MoveVisibilityMailbox.Y0);
+        Assert.DoesNotContain(mover.ObjectId, observer.Player.Knownlist);
+        Assert.DoesNotContain(observer.ObjectId, mover.Player.Knownlist);
+
+        Assert.Null(await m.Bench.World.TryMoveAsync(mover.Session, MoveVisibilityMailbox.X0 + 1500,
+            MoveVisibilityMailbox.Y0, MoveVisibilityMailbox.Z0, CancellationToken.None));
+        for (int i = 0; i < 600 && !observer.Player.Knownlist.Contains(mover.ObjectId); i++)
+            m.Step(1);
+
+        // The recorder sees one diff for the mover; the observer's EntitySpawn is the reciprocal half of that same drain.
+        Assert.NotEmpty(MoveVisibilityMailbox.KnownAdds(m.Rec, mover.ObjectId, observer.ObjectId));
+        Assert.Empty(MoveVisibilityMailbox.KnownRemoves(m.Rec, mover.ObjectId, observer.ObjectId));
+        Assert.Contains(mover.ObjectId, observer.Player.Knownlist);
+        Assert.Contains(observer.ObjectId, mover.Player.Knownlist);
+    }
+
+    [Fact]
+    public async Task Grid_mover_entering_observer_aoi_from_negative_cell_spawns_each_for_the_other()
+    {
+        var m = new MoveVisibilityMailbox(new GridAoi(1000), GeoEngine.Empty);
+        var observer = await m.EnterAsync(MoveVisibilityMailbox.X0, MoveVisibilityMailbox.Y0);
+        var mover = await m.EnterAsync(MoveVisibilityMailbox.X0 - 5000, MoveVisibilityMailbox.Y0);
+        Assert.DoesNotContain(mover.ObjectId, observer.Player.Knownlist);
+        Assert.DoesNotContain(observer.ObjectId, mover.Player.Knownlist);
+
+        Assert.Null(await m.Bench.World.TryMoveAsync(mover.Session, MoveVisibilityMailbox.X0 - 500,
+            MoveVisibilityMailbox.Y0, MoveVisibilityMailbox.Z0, CancellationToken.None));
+        for (int i = 0; i < 600 && !observer.Player.Knownlist.Contains(mover.ObjectId); i++)
+            m.Step(1);
+
+        Assert.NotEmpty(MoveVisibilityMailbox.KnownAdds(m.Rec, mover.ObjectId, observer.ObjectId));
+        Assert.Empty(MoveVisibilityMailbox.KnownRemoves(m.Rec, mover.ObjectId, observer.ObjectId));
+        Assert.Contains(mover.ObjectId, observer.Player.Knownlist);
+        Assert.Contains(observer.ObjectId, mover.Player.Knownlist);
+    }
+
+    [Fact]
+    public async Task Grid_mover_leaving_and_reentering_observer_aoi_despawns_and_respawns_each_for_the_other()
+    {
+        var m = new MoveVisibilityMailbox(new GridAoi(1000), GeoEngine.Empty);
+        var observer = await m.EnterAsync(MoveVisibilityMailbox.X0, MoveVisibilityMailbox.Y0);
+        var mover = await m.EnterAsync(MoveVisibilityMailbox.X0 + 5000, MoveVisibilityMailbox.Y0);
+
+        Assert.Null(await m.Bench.World.TryMoveAsync(mover.Session, MoveVisibilityMailbox.X0 + 1500,
+            MoveVisibilityMailbox.Y0, MoveVisibilityMailbox.Z0, CancellationToken.None));
+        for (int i = 0; i < 600 && !observer.Player.Knownlist.Contains(mover.ObjectId); i++)
+            m.Step(1);
+        int addsBeforeLeave = MoveVisibilityMailbox.KnownAdds(m.Rec, mover.ObjectId, observer.ObjectId).Count;
+        Assert.Contains(mover.ObjectId, observer.Player.Knownlist);
+
+        Assert.Null(await m.Bench.World.TryMoveAsync(mover.Session, MoveVisibilityMailbox.X0 + 8000,
+            MoveVisibilityMailbox.Y0, MoveVisibilityMailbox.Z0, CancellationToken.None));
+        for (int i = 0; i < 800 && observer.Player.Knownlist.Contains(mover.ObjectId); i++)
+            m.Step(1);
+
+        Assert.DoesNotContain(mover.ObjectId, observer.Player.Knownlist);
+        Assert.DoesNotContain(observer.ObjectId, mover.Player.Knownlist);
+        Assert.NotEmpty(MoveVisibilityMailbox.KnownRemoves(m.Rec, mover.ObjectId, observer.ObjectId));
+
+        Assert.Null(await m.Bench.World.TryMoveAsync(mover.Session, MoveVisibilityMailbox.X0 + 1500,
+            MoveVisibilityMailbox.Y0, MoveVisibilityMailbox.Z0, CancellationToken.None));
+        for (int i = 0; i < 1200 && !observer.Player.Knownlist.Contains(mover.ObjectId); i++)
+            m.Step(1);
+        // Re-enter after the leave: the diff must spawn both sides again, not just restore the local set.
+
+        Assert.Contains(mover.ObjectId, observer.Player.Knownlist);
+        Assert.Contains(observer.ObjectId, mover.Player.Knownlist);
+        Assert.True(MoveVisibilityMailbox.KnownAdds(m.Rec, mover.ObjectId, observer.ObjectId).Count > addsBeforeLeave);
     }
 
     [Fact]
