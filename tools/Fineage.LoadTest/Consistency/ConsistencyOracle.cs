@@ -16,6 +16,13 @@ public static class ConsistencyOracle
     public const int WatchRadius = AoiCellSize * 2;
     /// <summary>World units; bots random-walk ±400 so views may lag one tick behind self-tracked move.</summary>
     public const int PositionTolerance = 900;
+    /// <summary>
+    /// Mobius <c>broadcastUserInfo</c> sends the owner's UserInfo and the peer's CharInfo from the same simulation step.
+    /// A repeated player EntitySpawn is a presence refresh only when the subject's own log carries a newer UserInfo
+    /// inside this window; a lifecycle re-add from knownlist/enter has no owner UserInfo. The window absorbs two
+    /// socket lanes.
+    /// </summary>
+    public const int PresenceRefreshWindowMs = 500;
 
     public static ConsistencyReport Analyze(
         IReadOnlyList<FineageBotClient> bots,
@@ -27,20 +34,26 @@ public static class ConsistencyOracle
         int watch = aoiCellSize * 2;
         var issues = new List<ConsistencyIssue>();
         var roster = BuildRoster(bots, scenario);
+        var selfUserInfo = BuildSelfUserInfoIndex(bots);
 
         foreach (var bot in bots)
         {
             var tracker = bot.ObservationLog.Tracker;
+            var lifecycleRuns = CountLifecycleRuns(tracker.SpawnObservations, selfUserInfo);
             foreach (var (key, ent) in tracker.Entities)
             {
-                if (ent.SpawnsWithoutDespawn > 3)
+                if (ent.SpawnsWithoutDespawn > 0 &&
+                    lifecycleRuns.TryGetValue(key, out var run) &&
+                    run.LifecycleSpawns > 3)
                 {
                     issues.Add(new ConsistencyIssue
                     {
                         Kind = ConsistencyKind.DuplicateSpawn,
                         ObserverBotId = bot.BotId,
                         SubjectObjectId = ent.ObjectId,
-                        Detail = $"entity {key} spawned {ent.SpawnsWithoutDespawn} times without an intervening despawn"
+                        Detail = run.PresenceRefreshes > 0
+                            ? $"entity {key} spawned {run.LifecycleSpawns} lifecycle times without an intervening despawn ({run.PresenceRefreshes} CharInfo refreshes)"
+                            : $"entity {key} spawned {run.LifecycleSpawns} times without an intervening despawn"
                     });
                 }
 
@@ -207,6 +220,107 @@ public static class ConsistencyOracle
             BotKillCount = bots.Sum(b => b.ObservationLog.Tracker.KillsBySelf)
         };
     }
+
+    /// <summary>
+    /// Owner-facing UserInfo timestamps keyed by entity. Every current FanoutCharInfo site is a Mobius
+    /// <c>broadcastUserInfo</c>: the subject receives UserInfo and the peers receive EntitySpawn in the same step.
+    /// The oracle uses that existing pairing instead of inventing a heuristic payload signature.
+    /// </summary>
+    static Dictionary<int, List<DateTimeOffset>> BuildSelfUserInfoIndex(IReadOnlyList<FineageBotClient> bots)
+    {
+        var index = new Dictionary<int, List<DateTimeOffset>>();
+        foreach (var bot in bots)
+        {
+            foreach (var frame in bot.ObservationLog.Snapshot())
+            {
+                if (frame.Opcode != NetOpcode.UserInfo)
+                    continue;
+                var info = NetCodec.DecodeUserInfo(frame.Payload);
+                int id = (int)info.EntityValue;
+                if (id <= 0)
+                    continue;
+                if (!index.TryGetValue(id, out var times))
+                    index[id] = times = [];
+                times.Add(frame.At);
+            }
+        }
+
+        return index;
+    }
+
+    /// <summary>
+    /// Replays a bot's spawn observations into the final open run per entity. Only spawns that are not explained by
+    /// a newer owner UserInfo count as lifecycle spawns; the first spawn of a run always does, so an initial spawn
+    /// can never disappear from the gate.
+    /// </summary>
+    static Dictionary<ulong, LifecycleRun> CountLifecycleRuns(
+        IReadOnlyList<BotObservationLog.EntityTracker.SpawnObservation> observations,
+        Dictionary<int, List<DateTimeOffset>> selfUserInfo)
+    {
+        var runs = new Dictionary<ulong, LifecycleRun>();
+        var generation = new Dictionary<ulong, uint>();
+        foreach (var obs in observations)
+        {
+            if (obs.OpenedLife || !runs.TryGetValue(obs.EntityValue, out var run))
+            {
+                runs[obs.EntityValue] = new LifecycleRun(1, 0, obs.At);
+                generation[obs.EntityValue] = obs.EntityGeneration;
+                continue;
+            }
+
+            bool refresh = obs.EntityGeneration == generation[obs.EntityValue]
+                && IsPresenceRefresh(obs, run.LastSpawnAt, selfUserInfo);
+            runs[obs.EntityValue] = refresh
+                ? run with { PresenceRefreshes = run.PresenceRefreshes + 1, LastSpawnAt = obs.At }
+                : run with { LifecycleSpawns = run.LifecycleSpawns + 1, LastSpawnAt = obs.At };
+            generation[obs.EntityValue] = obs.EntityGeneration;
+        }
+
+        return runs;
+    }
+
+    static bool IsPresenceRefresh(
+        in BotObservationLog.EntityTracker.SpawnObservation obs,
+        DateTimeOffset previousSpawnAt,
+        Dictionary<int, List<DateTimeOffset>> selfUserInfo)
+    {
+        // PrepareCharInfo rebuilds a remote Player pawn (isSelf=false) and never an NPC. A self spawn stays a
+        // lifecycle marker even when the owner also receives a char-info copy.
+        if (obs.IsSelf || obs.Kind != EntityKindNet.Player)
+            return false;
+        return selfUserInfo.TryGetValue(obs.ObjectId, out var times)
+            && HasTimestampBetween(times, previousSpawnAt, obs.At, TimeSpan.FromMilliseconds(PresenceRefreshWindowMs));
+    }
+
+    /// <summary>
+    /// A refresh needs a new owner UserInfo since the previous spawn. Using the previous spawn as the lower bound
+    /// keeps the enter UserInfo from legitimising a duplicate Enter/knownlist spawn that arrives in the same burst.
+    /// </summary>
+    static bool HasTimestampBetween(List<DateTimeOffset> sorted, DateTimeOffset after, DateTimeOffset at, TimeSpan window)
+    {
+        long low = Math.Max(after.UtcTicks + 1, at.UtcTicks - window.Ticks);
+        long high = at.UtcTicks + window.Ticks;
+        int lo = 0;
+        int hi = sorted.Count - 1;
+        int first = sorted.Count;
+        while (lo <= hi)
+        {
+            int mid = lo + ((hi - lo) / 2);
+            if (sorted[mid].UtcTicks >= low)
+            {
+                first = mid;
+                hi = mid - 1;
+            }
+            else
+            {
+                lo = mid + 1;
+            }
+        }
+
+        return first < sorted.Count && sorted[first].UtcTicks <= high;
+    }
+
+    sealed record LifecycleRun(int LifecycleSpawns, int PresenceRefreshes, DateTimeOffset LastSpawnAt);
 
     /// <summary>Attack and skill sightings decoded once per bot. Timestamps stay in log order.</summary>
     sealed class CombatIndex

@@ -208,6 +208,7 @@ public sealed class BotObservationLog
         readonly List<LatencySample> _attackSamples = [];
         readonly List<LatencySample> _skillSamples = [];
         readonly List<LatencySample> _legacyCommandToFanoutSamples = [];
+        readonly List<SpawnObservation> _spawnObservations = [];
         ulong _selfEntityValue;
         public ulong SelfEntityValue => _selfEntityValue;
         int _attackSampleCount;
@@ -253,6 +254,12 @@ public sealed class BotObservationLog
 
         public IReadOnlyList<LatencySample> AttackFanoutSamples => _attackSamples;
         public IReadOnlyList<LatencySample> SkillFanoutSamples => _skillSamples;
+        /// <summary>
+        /// Every EntitySpawn this bot received, in arrival order. The consistency oracle uses the timestamps to tell a
+        /// CharInfo presence refresh (owner UserInfo in the same tick) from a lifecycle re-add; the raw open-run counter
+        /// on <see cref="TrackedEntity"/> stays the protocol-blind count.
+        /// </summary>
+        public IReadOnlyList<SpawnObservation> SpawnObservations => _spawnObservations;
 
         public void SetSelfEntity(ulong entityValue) => _selfEntityValue = entityValue;
 
@@ -277,6 +284,7 @@ public sealed class BotObservationLog
             t._deathsSeen = _deathsSeen;
             foreach (var (skill, ready) in _skillReadyAt)
                 t._skillReadyAt[skill] = ready;
+            t._spawnObservations.AddRange(_spawnObservations);
             return t;
         }
 
@@ -293,9 +301,10 @@ public sealed class BotObservationLog
                         // A despawn closes the life. The next spawn starts a new open run.
                         // SpawnCount stays lifetime-cumulative; the oracle reads the open run,
                         // otherwise a respawn (gremlin decay + 15s) looks like a spawn with no despawn.
-                        int openRun = previous == null || previous.Despawned
+                        bool openedLife = previous == null || previous.Despawned || previous.SpawnsWithoutDespawn == 0;
+                        int openRun = openedLife
                             ? 1
-                            : previous.SpawnsWithoutDespawn + 1;
+                            : previous!.SpawnsWithoutDespawn + 1;
                         _byValue[s.EntityValue] = new TrackedEntity
                         {
                             ObjectId = oid,
@@ -317,6 +326,8 @@ public sealed class BotObservationLog
                             SpawnsWithoutDespawn = openRun,
                             Despawned = false
                         };
+                        _spawnObservations.Add(new SpawnObservation(
+                            s.EntityValue, oid, at, s.Kind, s.EntityGeneration, s.IsSelf, openedLife));
                         // The entering client's own pawn is the only spawn marked IsSelf.
                         // Target range and AttackState/MagicSkillUse pairing both key off this id.
                         if (s.IsSelf)
@@ -590,6 +601,20 @@ public sealed class BotObservationLog
             int SkillId,
             long SentAtMonotonicTicks,
             DateTimeOffset SentAt);
+
+        /// <summary>
+        /// One EntitySpawn frame as received. <see cref="OpenedLife"/> is true for the first spawn after no known
+        /// entity, a despawn, or a death; all later observations in that run are candidate duplicates until one is
+        /// classified as a CharInfo refresh by the oracle.
+        /// </summary>
+        public readonly record struct SpawnObservation(
+            ulong EntityValue,
+            int ObjectId,
+            DateTimeOffset At,
+            EntityKindNet Kind,
+            uint EntityGeneration,
+            bool IsSelf,
+            bool OpenedLife);
 
         public readonly record struct LatencySample(double Milliseconds, DateTimeOffset ObservedAt);
     }

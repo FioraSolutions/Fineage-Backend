@@ -371,6 +371,100 @@ public sealed class ConsistencyOracleTests
         Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
     }
 
+    [Fact]
+    public void Repeated_charinfo_refresh_for_a_known_player_is_not_a_duplicate_spawn()
+    {
+        var t0 = DateTimeOffset.UtcNow;
+        var subject = new BotObservationLog(2);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: true)), t0);
+        var observer = new BotObservationLog(1);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: false)), t0);
+
+        for (int i = 1; i <= 6; i++)
+        {
+            var at = t0.AddSeconds(i);
+            observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: false)), at);
+            // Mobius broadcastUserInfo: the owner's UserInfo and the peers' CharInfo come from the same step.
+            subject.Record(NetOpcode.UserInfo, UserInfo(42), at);
+        }
+
+        // The protocol-blind open-run counter still sees every spawn; the oracle classifies the paired replies.
+        Assert.Equal(7, observer.Tracker.Entities[42].SpawnsWithoutDespawn);
+
+        var report = ConsistencyOracle.Analyze([Bot(observer), Bot(subject)], new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn);
+    }
+
+    [Fact]
+    public void Repeated_lifecycle_player_spawn_without_owner_userinfo_is_still_a_duplicate()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        var spawn = NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: false));
+        for (int i = 0; i < 4; i++)
+            log.Record(NetOpcode.EntitySpawn, spawn, at.AddSeconds(i));
+
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
+    [Fact]
+    public void Enter_duplicate_is_not_explained_by_the_owner_enter_userinfo()
+    {
+        var t0 = DateTimeOffset.UtcNow;
+        var subject = new BotObservationLog(2);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: true)), t0);
+        subject.Record(NetOpcode.UserInfo, UserInfo(42), t0);
+        var observer = new BotObservationLog(1);
+        var spawn = NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: false));
+        for (int i = 0; i < 4; i++)
+            observer.Record(NetOpcode.EntitySpawn, spawn, t0.AddMilliseconds(i * 20));
+
+        var report = ConsistencyOracle.Analyze([Bot(observer), Bot(subject)], new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
+    [Fact]
+    public void Unrelated_owner_userinfo_does_not_refresh_another_entity_spawn()
+    {
+        var log = new BotObservationLog(1);
+        var other = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        other.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(7, 0, 0, isSelf: true)), at);
+        var spawn = NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: false));
+        for (int i = 0; i < 4; i++)
+        {
+            log.Record(NetOpcode.EntitySpawn, spawn, at.AddSeconds(i));
+            other.Record(NetOpcode.UserInfo, UserInfo(7), at.AddSeconds(i));
+        }
+
+        var report = ConsistencyOracle.Analyze([Bot(log), Bot(other)], new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
+    [Fact]
+    public void Owner_userinfo_does_not_classify_npc_spawns_as_charinfo_refreshes()
+    {
+        var log = new BotObservationLog(1);
+        var owner = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        owner.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(42, 0, 0, isSelf: true)), at);
+        var spawn = NetCodec.EncodeEntitySpawn(Npc(42, 0, 0));
+        for (int i = 0; i < 4; i++)
+        {
+            log.Record(NetOpcode.EntitySpawn, spawn, at.AddSeconds(i));
+            owner.Record(NetOpcode.UserInfo, UserInfo(42), at.AddSeconds(i));
+        }
+
+        var report = ConsistencyOracle.Analyze([Bot(log), Bot(owner)], new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
     static FineageBotClient Bot(BotObservationLog log) => Bot(log, inWorld: false);
 
     static FineageBotClient Bot(BotObservationLog log, bool inWorld)
@@ -386,6 +480,15 @@ public sealed class ConsistencyOracleTests
             bot.SetSelfEntityForTest(log.Tracker.SelfEntityValue);
         return bot;
     }
+
+    static byte[] UserInfo(ulong id) => NetCodec.EncodeUserInfo(new UserInfoNetMsg
+    {
+        EntityValue = id,
+        EntityGeneration = 1,
+        Name = $"Bot{id}",
+        MaxHp = 100,
+        CurHp = 100
+    });
 
     static EntitySpawnMsg Player(ulong id, int x, int y, bool isSelf) => new()
     {
