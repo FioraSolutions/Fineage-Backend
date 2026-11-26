@@ -6,6 +6,9 @@ extends: bots-200-town.yaml
 botCount: 200
 rampUpSeconds: 20
 durationSeconds: 100
+combatSkillId: 3
+requireSkillLatencySamples: false
+gatekeeperTravelShare: 0
 consistencyTrace:
   enabled: true
   maxIssues: 24
