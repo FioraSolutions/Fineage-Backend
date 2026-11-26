@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -20,10 +21,11 @@ internal sealed class MoveVisibilityMailbox
 
     readonly MutableClock _clock = new() { Now = ManualSimulationDriver.FixedStartUtc };
 
-    public MoveVisibilityMailbox()
+    public MoveVisibilityMailbox(IAoi? aoi = null, GeoEngine? geo = null)
     {
         Bench = new WorldBench(
-            aoi: new RangeAoi(Range),
+            aoi: aoi ?? new RangeAoi(Range),
+            geo: geo,
             clock: () => _clock.Now,
             spawns: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
             {
