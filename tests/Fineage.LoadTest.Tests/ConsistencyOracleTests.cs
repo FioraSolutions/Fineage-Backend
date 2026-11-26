@@ -280,6 +280,97 @@ public sealed class ConsistencyOracleTests
         Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
     }
 
+    [Fact]
+    public void Dead_observer_is_excluded_but_live_observer_still_checks_corpse_visibility()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-2);
+        var dead = new BotObservationLog(1);
+        var live = new BotObservationLog(2);
+        dead.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 1000, 1000, true)), t0);
+        dead.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 1001,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), t0.AddSeconds(1));
+        live.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 1500, 1500, true)), t0);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(dead, inWorld: true), Bot(live, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 2 && i.SubjectObjectId == 1001);
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1);
+    }
+
+    [Fact]
+    public void Death_closes_the_spawn_run_so_a_respawn_is_not_a_duplicate()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        var spawn = NetCodec.EncodeEntitySpawn(Npc(42, 0, 0));
+        log.Record(NetOpcode.EntitySpawn, spawn, at);
+        log.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 42,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), at.AddSeconds(1));
+        log.Record(NetOpcode.EntitySpawn, spawn, at.AddSeconds(2));
+
+        Assert.Equal(1, log.Tracker.Entities[42].SpawnsWithoutDespawn);
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn);
+    }
+
+    [Fact]
+    public void Four_spawns_after_a_death_are_still_a_duplicate()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        var spawn = NetCodec.EncodeEntitySpawn(Npc(42, 0, 0));
+        log.Record(NetOpcode.EntitySpawn, spawn, at);
+        log.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 42,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), at.AddSeconds(1));
+        for (int i = 0; i < 4; i++)
+            log.Record(NetOpcode.EntitySpawn, spawn, at.AddSeconds(2 + i));
+
+        Assert.Equal(4, log.Tracker.Entities[42].SpawnsWithoutDespawn);
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
+    [Fact]
+    public void Death_after_observation_suppresses_historical_stale_position()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 0, 0, true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 0, 0, false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 0, 0, true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, false)), t0.AddSeconds(1));
+        subject.Record(NetOpcode.EntityDie, NetCodec.EncodeEntityDie(new EntityDieMsg
+        {
+            EntityValue = 74,
+            EntityGeneration = 1,
+            KillerObjectId = 0
+        }), t0.AddSeconds(3));
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 5000, 5000, true)), t0.AddSeconds(4));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
+    }
+
     static FineageBotClient Bot(BotObservationLog log) => Bot(log, inWorld: false);
 
     static FineageBotClient Bot(BotObservationLog log, bool inWorld)

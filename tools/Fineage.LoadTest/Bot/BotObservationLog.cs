@@ -312,6 +312,7 @@ public sealed class BotObservationLog
                             CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
                             LastSpawnOrdinal = ++_spawnOrdinal,
                             LastDespawnOrdinal = previous?.LastDespawnOrdinal ?? 0,
+                            LastDeathAt = previous?.LastDeathAt,
                             SpawnCount = (previous?.SpawnCount ?? 0) + 1,
                             SpawnsWithoutDespawn = openRun,
                             Despawned = false
@@ -329,7 +330,17 @@ public sealed class BotObservationLog
                         if (_selfEntityValue != 0 && (ulong)(uint)die.KillerObjectId == _selfEntityValue)
                             _killsBySelf++;
                         if (_byValue.TryGetValue(die.EntityValue, out var dead))
-                            _byValue[die.EntityValue] = dead with { Alive = false, CurHp = 0 };
+                        {
+                            // Death ends the current life even though the corpse remains known. Without closing
+                            // the spawn run, a later respawn/CharInfo EntitySpawn looks like a duplicate spawn.
+                            _byValue[die.EntityValue] = dead with
+                            {
+                                Alive = false,
+                                CurHp = 0,
+                                LastDeathAt = at,
+                                SpawnsWithoutDespawn = 0
+                            };
+                        }
                         break;
                     }
                 case NetOpcode.EntityDespawn:
@@ -338,6 +349,7 @@ public sealed class BotObservationLog
                         if (_byValue.TryGetValue(d.EntityValue, out var e))
                         {
                             e.Despawned = true;
+                            e.SpawnsWithoutDespawn = 0;
                             e.LastDespawnOrdinal = ++_spawnOrdinal;
                             _byValue[d.EntityValue] = e;
                         }
@@ -600,6 +612,8 @@ public sealed class BotObservationLog
         public bool Despawned { get; set; }
         public long LastSpawnOrdinal { get; set; }
         public long LastDespawnOrdinal { get; set; }
+        /// <summary>When this entity last died. Position comparisons across this instant are cross-life.</summary>
+        public DateTimeOffset? LastDeathAt { get; set; }
         /// <summary>Lifetime EntitySpawn count, including lives closed by EntityDespawn.</summary>
         public int SpawnCount { get; set; }
         /// <summary>EntitySpawns since the last EntityDespawn. 1 on the first spawn of a life.</summary>

@@ -267,6 +267,101 @@ public sealed class ConsistencyTraceTests
         }
     }
 
+    [Fact]
+    public void Trace_keeps_the_full_duplicate_spawn_run_not_only_the_last_window()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-2);
+        var observerLog = new BotObservationLog(9);
+        for (int i = 0; i < 4; i++)
+        {
+            observerLog.Record(NetOpcode.EntitySpawn,
+                NetCodec.EncodeEntitySpawn(Player(384, 1000 + i, 1000 + i, false)), t0.AddSeconds(i * 20));
+            observerLog.Record(NetOpcode.MoveState, Move(384, 1010 + i, 1010 + i), t0.AddSeconds(i * 20 + 10));
+        }
+
+        var observer = Bot(observerLog);
+        var report = new ConsistencyReport
+        {
+            Issues =
+            [
+                new ConsistencyIssue
+                {
+                    Kind = ConsistencyKind.DuplicateSpawn,
+                    ObserverBotId = 9,
+                    SubjectObjectId = 384,
+                    Detail = "synthetic duplicate spawn"
+                }
+            ]
+        };
+
+        var trace = ConsistencyTraceBuilder.Build([observer], report, new ConsistencyTraceOptions
+        {
+            Enabled = true,
+            MaxIssues = 1,
+            MaxFramesPerIssue = 6,
+            MaxBytes = 64 * 1024,
+            WindowSeconds = 1
+        });
+
+        var issue = Assert.Single(trace.Issues);
+        Assert.Equal(4, issue.Frames.Count(f => f.Op == nameof(NetOpcode.EntitySpawn) && f.EntityId == 384));
+        Assert.True(issue.Frames.Count <= 6);
+        Assert.True(issue.WindowEnd - issue.WindowStart >= TimeSpan.FromSeconds(60));
+    }
+
+    [Fact]
+    public void Combat_trace_includes_the_observer_pawn_frames()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-2);
+        var observerLog = new BotObservationLog(29);
+        var subjectLog = new BotObservationLog(31);
+        observerLog.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(394, 1000, 1000, true)), t0);
+        observerLog.Record(NetOpcode.MoveState, Move(394, 1010, 1010), t0);
+        subjectLog.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(396, 1100, 1100, true)), t0);
+        subjectLog.Record(NetOpcode.AttackState, NetCodec.EncodeAttackState(new AttackStateMsg
+        {
+            AttackerValue = 396,
+            AttackerGeneration = 1,
+            TargetValue = 93144,
+            TargetGeneration = 1,
+            Damage = 79,
+            AttackerX = 1100,
+            AttackerY = 1100,
+            TargetX = 1100,
+            TargetY = 1100
+        }), t0);
+
+        var observer = Bot(observerLog);
+        var subject = Bot(subjectLog);
+        var report = new ConsistencyReport
+        {
+            Issues =
+            [
+                new ConsistencyIssue
+                {
+                    Kind = ConsistencyKind.MissingCombatFanout,
+                    ObserverBotId = 29,
+                    SubjectObjectId = 396,
+                    Detail = "synthetic missing combat fanout",
+                    ObservedAt = t0
+                }
+            ]
+        };
+
+        var trace = ConsistencyTraceBuilder.Build([observer, subject], report, new ConsistencyTraceOptions
+        {
+            Enabled = true,
+            MaxIssues = 1,
+            MaxFramesPerIssue = 16,
+            MaxBytes = 64 * 1024,
+            WindowSeconds = 8
+        });
+
+        var issue = Assert.Single(trace.Issues);
+        Assert.Contains(issue.Frames, f => f.Source == "observer" && f.Op == nameof(NetOpcode.MoveState) && f.EntityId == 394);
+        Assert.Contains(issue.Frames, f => f.Source == "subject" && f.Op == nameof(NetOpcode.AttackState) && f.EntityId == 396);
+    }
+
     static FineageBotClient Bot(BotObservationLog log)
     {
         var bot = new FineageBotClient(

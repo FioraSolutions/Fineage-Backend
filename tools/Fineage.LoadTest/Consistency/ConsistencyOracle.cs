@@ -80,12 +80,16 @@ public static class ConsistencyOracle
                 bool shouldSee = dist <= watch;
                 if (!shouldSee)
                     continue;
-                pairs++;
 
                 bool aSeesB = a.Tracker.Entities.ContainsKey((ulong)b.ObjectId);
                 bool bSeesA = b.Tracker.Entities.ContainsKey((ulong)a.ObjectId);
+                bool aLive = IsLive(a);
+                bool bLive = IsLive(b);
+                if (!aLive && !bLive)
+                    continue;
+                pairs++; // one pair observation is meaningful when at least one side is live
 
-                if (!aSeesB)
+                if (aLive && !aSeesB)
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -97,7 +101,7 @@ public static class ConsistencyOracle
                     });
                 }
 
-                if (!bSeesA)
+                if (bLive && !bSeesA)
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -109,13 +113,13 @@ public static class ConsistencyOracle
                     });
                 }
 
-                if (aSeesB && bSeesA)
+                if (aLive && bLive && aSeesB && bSeesA)
                 {
-                    if (!TryPeerTruth(b, out int truthX, out int truthY, out int truthHp, out DateTimeOffset truthAt))
-                        continue;
-                    if (a.Tracker.Entities.TryGetValue((ulong)b.ObjectId, out var viewB))
+                    if (TryPeerTruth(b, out int truthX, out int truthY, out int truthHp, out DateTimeOffset truthAt) &&
+                        a.Tracker.Entities.TryGetValue((ulong)b.ObjectId, out var viewB))
                     {
-                        if ((Math.Abs(viewB.X - truthX) > PositionTolerance || Math.Abs(viewB.Y - truthY) > PositionTolerance) &&
+                        if (!DiedAtOrAfter(b, viewB.PositionUpdatedAt) &&
+                            (Math.Abs(viewB.X - truthX) > PositionTolerance || Math.Abs(viewB.Y - truthY) > PositionTolerance) &&
                             GroundIsNotOlderThanView(truthAt, viewB.PositionUpdatedAt))
                         {
                             issues.Add(new ConsistencyIssue
@@ -129,7 +133,8 @@ public static class ConsistencyOracle
                             });
                         }
 
-                        if (truthHp > 0 && viewB.CurHp > 0 && Math.Abs(viewB.CurHp - truthHp) > Math.Max(50, truthHp / 10))
+                        if (!DiedAtOrAfter(b, viewB.PositionUpdatedAt) &&
+                            truthHp > 0 && viewB.CurHp > 0 && Math.Abs(viewB.CurHp - truthHp) > Math.Max(50, truthHp / 10))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -142,11 +147,11 @@ public static class ConsistencyOracle
                         }
                     }
 
-                    if (!TryPeerTruth(a, out truthX, out truthY, out truthHp, out truthAt))
-                        continue;
-                    if (b.Tracker.Entities.TryGetValue((ulong)a.ObjectId, out var viewA))
+                    if (TryPeerTruth(a, out truthX, out truthY, out truthHp, out truthAt) &&
+                        b.Tracker.Entities.TryGetValue((ulong)a.ObjectId, out var viewA))
                     {
-                        if ((Math.Abs(viewA.X - truthX) > PositionTolerance || Math.Abs(viewA.Y - truthY) > PositionTolerance) &&
+                        if (!DiedAtOrAfter(a, viewA.PositionUpdatedAt) &&
+                            (Math.Abs(viewA.X - truthX) > PositionTolerance || Math.Abs(viewA.Y - truthY) > PositionTolerance) &&
                             GroundIsNotOlderThanView(truthAt, viewA.PositionUpdatedAt))
                         {
                             issues.Add(new ConsistencyIssue
@@ -283,6 +288,12 @@ public static class ConsistencyOracle
         if (combatIssues >= 25)
             return;
 
+        // A dead observer stops being a live AOI participant. Its old sightings are not evidence that a live
+        // watcher missed fanout; keep attacker liveness separate because it may have died after the attack.
+        var observerEntry = roster.FirstOrDefault(r => r.BotId == observer.BotId);
+        if (observerEntry == null || !IsLive(observerEntry))
+            return;
+
         var attacks = combat[observer.BotId].Attacks;
         int eventCount = Math.Min(40, attacks.Count);
         for (int e = 0; e < eventCount; e++)
@@ -295,7 +306,7 @@ public static class ConsistencyOracle
 
             foreach (var w in roster)
             {
-                if (w.BotId == observer.BotId)
+                if (w.BotId == observer.BotId || !IsLive(w))
                     continue;
                 // In range at the attack and still in range when the window closes (no teleport out meanwhile).
                 var (ax, ay) = PositionAt(timelines[attackerEntry.BotId], at, attackerEntry);
@@ -388,6 +399,19 @@ public static class ConsistencyOracle
 
         return list;
     }
+
+    static bool IsLive(BotRosterEntry entry) =>
+        entry.Tracker.Entities.TryGetValue((ulong)entry.ObjectId, out var self) &&
+        !self.Despawned && self.Alive && self.CurHp > 0;
+
+    /// <summary>
+    /// True when the subject died at or after the observer's view. The observer's historical view must not be
+    /// compared with a post-death/revive ground; live disagreements without a death keep the old check.
+    /// </summary>
+    static bool DiedAtOrAfter(BotRosterEntry subject, DateTimeOffset viewAt) =>
+        subject.Tracker.Entities.TryGetValue((ulong)subject.ObjectId, out var self) &&
+        self.LastDeathAt is DateTimeOffset diedAt &&
+        (viewAt == default || diedAt >= viewAt);
 
     static bool TryPeerTruth(BotRosterEntry peer, out int x, out int y, out int hp, out DateTimeOffset updatedAt)
     {
