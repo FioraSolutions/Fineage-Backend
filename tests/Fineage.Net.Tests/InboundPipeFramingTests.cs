@@ -201,6 +201,57 @@ public class InboundPipeFramingTests
         return n;
     }
 
+    [Fact]
+    public async Task A_cancelled_read_does_not_lose_the_bytes_it_already_took()
+    {
+        // The load-test bot abandons its enter-settle read after 400 ms. NetFraming.ReadAsync reads the 4-byte
+        // length and then the body as two separate stream reads, so cancelling in between throws the prefix away
+        // and the next read starts inside the frame: it parses payload bytes as a length and dies with
+        // "bad_frame_length". That is the disconnect two bots hit in the 50-bot smoke. The reader must keep the
+        // prefix and resume at the same frame boundary.
+        byte[] first = Frame(NetOpcode.HelloAck, 1, [1, 2, 3, 4]);
+        byte[] second = Frame(NetOpcode.EntitySpawn, 2, [5, 6, 7, 8]);
+        var stream = new BlockingAfterPrefixStream(first, second);
+        var reader = new NetFrameReader(stream);
+
+        using (var cts = new CancellationTokenSource())
+        {
+            cts.CancelAfter(TimeSpan.FromMilliseconds(100));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => reader.ReadAsync(cts.Token));
+        }
+
+        // The prefix is still buffered, so the next read completes the same frame instead of misparsing it.
+        Assert.Equal(4, reader.Buffered);
+        PacketEnvelope? resumed = await reader.ReadAsync(CancellationToken.None);
+        Assert.NotNull(resumed);
+        Assert.Equal(NetOpcode.HelloAck, resumed!.Opcode);
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, resumed.Payload);
+
+        PacketEnvelope? next = await reader.ReadAsync(CancellationToken.None);
+        Assert.NotNull(next);
+        Assert.Equal(NetOpcode.EntitySpawn, next!.Opcode);
+        Assert.Equal(new byte[] { 5, 6, 7, 8 }, next.Payload);
+    }
+
+    [Fact]
+    public async Task A_cancelled_read_never_parses_payload_bytes_as_a_length()
+    {
+        // Same fault, stated as the failure the smoke actually reported: resume must not throw bad_frame_length.
+        byte[] frame = Frame(NetOpcode.HelloAck, 1, [0xFF, 0xFF, 0xFF, 0xFF]);
+        var reader = new NetFrameReader(new BlockingAfterPrefixStream(frame));
+
+        using (var cts = new CancellationTokenSource())
+        {
+            cts.CancelAfter(TimeSpan.FromMilliseconds(100));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => reader.ReadAsync(cts.Token));
+        }
+
+        PacketEnvelope? envelope = await reader.ReadAsync(CancellationToken.None);
+        Assert.Equal(NetOpcode.HelloAck, envelope!.Opcode);
+        Assert.Equal(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, envelope.Payload);
+    }
+
+
     static byte[] Frame(ushort opcode, uint sequence, byte[] payload) =>
         NetFraming.Encode(new PacketEnvelope
         {
@@ -226,6 +277,51 @@ public class InboundPipeFramingTests
             var next = new Chunk(memory) { RunningIndex = RunningIndex + Memory.Length };
             Next = next;
             return next;
+        }
+    }
+
+    /// <summary>
+    /// Hands out the 4-byte length prefix, then blocks the body read until cancelled. Reproduces a frame that
+    /// straddles the caller's read timeout. The block happens once; later reads return the buffered frame.
+    /// </summary>
+    sealed class BlockingAfterPrefixStream : Stream
+    {
+        readonly byte[] _data;
+        int _position;
+        bool _blocked;
+
+        public BlockingAfterPrefixStream(params byte[][] frames)
+        {
+            _data = frames.SelectMany(f => f).ToArray();
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => _data.Length;
+        public override long Position { get => _position; set => throw new NotSupportedException(); }
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        public override int Read(byte[] buffer, int offset, int count) =>
+            ReadAsync(buffer.AsMemory(offset, count), CancellationToken.None).AsTask().GetAwaiter().GetResult();
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            if (_position >= 4 && !_blocked)
+            {
+                _blocked = true;
+                await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+            }
+
+            int take = Math.Min(Math.Min(4, _data.Length - _position), buffer.Length);
+            if (take <= 0)
+                return 0;
+            _data.AsSpan(_position, take).CopyTo(buffer.Span);
+            _position += take;
+            return take;
         }
     }
 

@@ -14,6 +14,13 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     TcpClient _zone = new();
     NetworkStream? _loginStream;
     NetworkStream? _zoneStream;
+    /// <summary>
+    /// One per zone socket. A cancelled read (the enter-settle timer) must not drop the bytes it already took,
+    /// otherwise the next read starts mid-frame and the connection dies with <c>bad_frame_length</c>.
+    /// </summary>
+    NetFrameReader? _zoneReader;
+    /// <summary>Zone writes come from the behavior loop and the receive loop (party answers), one frame at a time.</summary>
+    readonly SemaphoreSlim _zoneWriteGate = new(1, 1);
     uint _loginSeq;
     uint _zoneSeq;
     readonly Random _rng;
@@ -84,6 +91,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
         await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
         _zoneStream = _zone.GetStream();
+        _zoneReader = new NetFrameReader(_zoneStream);
 
         await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
         await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
@@ -459,6 +467,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         await LoginHandshakeAsync(ct);
         await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
         _zoneStream = _zone.GetStream();
+        _zoneReader = new NetFrameReader(_zoneStream);
         await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
         await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
         await ZoneExchangeAsync(
@@ -507,6 +516,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         try { _zone.Dispose(); } catch { /* ignore */ }
         try { _login.Dispose(); } catch { /* ignore */ }
         _zoneStream = null;
+        _zoneReader = null;
         _loginStream = null;
     }
 
@@ -595,12 +605,23 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     async Task ZoneWriteAsync(ushort opcode, byte[] payload, CancellationToken ct)
     {
-        await NetFraming.WriteAsync(_zoneStream!, new PacketEnvelope
+        // The behavior loop and the receive loop (party answers) both write to this socket. NetFraming.WriteAsync
+        // frames and writes without a lock, so two interleaved writes would splice their bytes and the server
+        // would read a bogus length. One writer at a time.
+        await _zoneWriteGate.WaitAsync(ct).ConfigureAwait(false);
+        try
         {
-            Opcode = opcode,
-            RequestSequence = unchecked(++_zoneSeq),
-            Payload = payload
-        }, ct);
+            await NetFraming.WriteAsync(_zoneStream!, new PacketEnvelope
+            {
+                Opcode = opcode,
+                RequestSequence = unchecked(++_zoneSeq),
+                Payload = payload
+            }, ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _zoneWriteGate.Release();
+        }
     }
 
     async Task<byte[]> ZoneReadUntilAsync(ushort expected, CancellationToken ct)
@@ -617,7 +638,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     async Task<(ushort opcode, byte[] payload)> ZoneReadFrameAsync(CancellationToken ct)
     {
-        var env = await NetFraming.ReadAsync(_zoneStream!, ct)
+        var env = await _zoneReader!.ReadAsync(ct)
             ?? throw new InvalidOperationException("zone closed");
         return (env.Opcode, env.Payload);
     }
