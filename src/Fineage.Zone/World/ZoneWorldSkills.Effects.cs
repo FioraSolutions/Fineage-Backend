@@ -74,7 +74,14 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius AURA (around the caster), AREA (around the primary target) and FRONT_AREA (in front of the caster).
     /// </summary>
-    IEnumerable<ZoneEntity> HostileAffectTargets(ZoneEntity caster, ZoneEntity? primary, SkillDefinition template)
+    /// <remarks>
+    /// Candidates come from the caster's AOI neighbourhood, which is exactly the set this used to keep: the old body
+    /// walked <c>_byId.Values</c> and then dropped every entity outside <c>_aoi.GetVisible(caster)</c>, so the whole-world
+    /// scan only threw away 34k entities per cast (~19 ms p99 in <c>commands.apply</c> with one bot in the full world).
+    /// Mobius does the same: the <c>Aura</c> / <c>Area</c> target handlers read <c>World.getVisibleObjectsInRange</c>,
+    /// the caster's surrounding <c>WorldRegion</c>s. Ids stay in ascending object-id order, Mobius' iteration order.
+    /// </remarks>
+    List<ZoneEntity> HostileAffectTargets(ZoneEntity caster, ZoneEntity? primary, SkillDefinition template)
     {
         int range = ResolveAffectRange(template);
         int cx, cy;
@@ -89,8 +96,17 @@ public sealed partial class ZoneWorld
             cy = primary.Y;
         }
 
-        foreach (var entity in _byId.Values)
+        var candidates = t_affectCandidates ??= [];
+        candidates.Clear();
+        _aoi.CollectVisible(caster.ObjectId, candidates);
+        candidates.Sort();
+
+        var targets = new List<ZoneEntity>(candidates.Count);
+        foreach (int id in candidates)
         {
+            // The AOI can still list an id the world already dropped: leave is deferred to the region commit.
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
             if (entity.Dead || entity.CurHp <= 0)
                 continue;
             if (ReferenceEquals(entity, caster))
@@ -104,13 +120,33 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ZoneCombat.InCastRange(cx, cy, entity.X, entity.Y, range))
                 continue;
+            // VisibleTo also required SameInstance; AOI cells are not instance-scoped, so that check stays here.
+            if (entity.InstanceId != caster.InstanceId)
+                continue;
             if (IsFrontAreaTarget(template) &&
                 !ZoneCombat.IsInFrontOf(entity.X, entity.Y, caster.X, caster.Y, caster.Heading))
                 continue;
-            if (entity.ObjectId != caster.ObjectId && !VisibleTo(caster.ObjectId, entity.ObjectId))
-                continue;
-            yield return entity;
+            targets.Add(entity);
         }
+
+        return targets;
+    }
+
+    [ThreadStatic] static List<int>? t_affectCandidates;
+
+    /// <summary>Test/diagnostics: the object ids <see cref="HostileAffectTargets"/> picks, in order.</summary>
+    internal List<int> HostileAffectTargetIdsForTest(ZoneEntity caster, ZoneEntity? primary, int skillId)
+    {
+        var template = _game.Skills.Find(skillId)
+            ?? throw new InvalidOperationException($"skill {skillId} is not in the catalog");
+        return HostileAffectTargets(caster, primary, template).ConvertAll(static e => e.ObjectId);
+    }
+
+    /// <summary>Test hook: puts an entity into the AOI, which a spawn does through <c>MaterializeSpawn</c>.</summary>
+    internal void EnterAoiForTests(int objectId, int x, int y)
+    {
+        using (_affinity.Step())
+            _aoi.Enter(objectId, x, y);
     }
 
     /// <summary>
