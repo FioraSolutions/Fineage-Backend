@@ -1,4 +1,5 @@
 using Fineage.Zone.Combat;
+using Fineage.Zone.Npcs;
 using Fineage.Zone.Simulation;
 
 namespace Fineage.Zone.World;
@@ -14,8 +15,6 @@ namespace Fineage.Zone.World;
 /// </summary>
 public sealed partial class ZoneWorld
 {
-    readonly HashSet<int> _loggedMissingAggroRange = [];
-
     const int AggroScanIntervalMs = 500;
     const int ClanCallIntervalMs = 1000;
     /// <summary>Mobius <c>MAX_ATTACK_TIMEOUT = 1200</c> game ticks (100 ms), two minutes.</summary>
@@ -97,17 +96,15 @@ public sealed partial class ZoneWorld
     /// fake death (<c>Player.isAlikeDead()</c> includes <c>_isFakeDeath</c>), so a playing-dead pawn is never a hate
     /// target and its hate is zeroed — the mob drops it until it stands up and is hit again.
     /// </summary>
-    /// <summary>Template <c>ai aggroRange</c> for proactive scan; logs once and returns false when missing on an aggressive mob.</summary>
+    /// <summary>
+    /// Template <c>ai aggroRange</c> for the proactive scan. Mobius resolves an absent
+    /// <c>&lt;ai aggroRange&gt;</c> to 0, so 0 is non-proactive retail data (raid minions, scripted mobs),
+    /// not a missing field. <see cref="NpcCatalog"/> rejects aggressive JSON rows without the field.
+    /// </summary>
     internal bool TryGetProactiveAggroRange(ZoneEntity npc, out int aggroRange)
     {
         aggroRange = npc.AggroRange;
-        if (aggroRange > 0)
-            return true;
-        if (!npc.Aggressive || (!npc.Attackable && !IsGuard(npc)))
-            return false;
-        if (_loggedMissingAggroRange.Add(npc.NpcId))
-            ZoneLog.Warn($"[aggro] npcId={npc.NpcId} ({npc.Name}) missing ai/aggroRange — proactive acquisition skipped");
-        return false;
+        return aggroRange > 0;
     }
 
     bool ValidHateTarget(ZoneEntity npc, int targetId) =>

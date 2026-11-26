@@ -169,6 +169,13 @@ public sealed class NpcCatalog
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs run and walk speed.");
             if (row.CollisionRadius <= 0 || row.CollisionHeight <= 0)
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs collision radius and height.");
+            // Mobius resolves an absent <ai aggroRange> to 0 (NpcTemplate StatSet default),
+            // so an explicit 0 is valid non-proactive data. Only a missing JSON field is
+            // a transcription gap; refuse it instead of letting the mob silently stay idle.
+            if (row.Aggressive && row.AggroRange is null)
+                throw new InvalidDataException(
+                    $"{path} npc {row.NpcId} is aggressive but has no aggroRange " +
+                    "(emit the resolved Mobius value, including 0)");
 
             byId.Add(row.NpcId, new NpcTemplate(
                 row.NpcId,
@@ -199,7 +206,7 @@ public sealed class NpcCatalog
                 Math.Max(0, row.ShieldRate),
                 Math.Max(0, row.MAtk),
                 Math.Max(0, row.MDef),
-                Math.Max(0, row.AggroRange),
+                Math.Max(0, row.AggroRange ?? 0),
                 Math.Max(0, row.ClanHelpRange),
                 row.Clans is { Count: > 0 } ? row.Clans : null,
                 row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null,
@@ -282,8 +289,11 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>attack magical</c> / <c>defence magical</c>.</summary>
         public double MAtk { get; set; }
         public double MDef { get; set; }
-        /// <summary>Mobius <c>ai aggroRange</c> / <c>clanHelpRange</c> / <c>clanList</c>.</summary>
-        public int AggroRange { get; set; }
+        /// <summary>
+        /// Mobius <c>ai aggroRange</c>; null means the field was not transcribed (rejected for aggressive rows),
+        /// while 0 is Mobius's explicit non-proactive value.
+        /// </summary>
+        public int? AggroRange { get; set; }
         public int ClanHelpRange { get; set; }
         public List<string>? Clans { get; set; }
         public List<int>? IgnoreNpcIds { get; set; }

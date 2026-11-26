@@ -16,6 +16,10 @@ Mobius references (L2J_Mobius_CT_0_Interlude):
       <ai clanList><clan>TEXT</clan><ignoreNpcId>ID</ignoreNpcId></ai>
     `clan` and `ignoreNpcId` are siblings inside <clanList>; both are emitted,
     as separate keys (`clans`, `ignoreNpcIds`), never mixed into one list.
+    `aggroRange` is always emitted with the resolved Mobius value. NpcData sets
+    it from `<ai aggroRange>` and NpcTemplate falls back to StatSet 0 when the
+    attribute (or the whole `<ai>` node) is absent, so `0` is an explicit,
+    non-proactive retail value rather than missing metadata.
   dist/game/data/spawns/<territory>/*NPCs.xml and *VillageNPCs.xml
     SpawnData reads npc id, x, y, z, heading, respawnDelay, respawnRandom.
     Spawn.setRespawnDelay treats those numbers as seconds.
@@ -270,8 +274,10 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 row["shieldRate"] = combat_int(defence, "shieldRate")
             row["mAtk"] = combat_float(attack, "magical", 3)
             row["mDef"] = combat_float(defence, "magical", 3)
-            if attribute(ai, "aggroRange") is not None:
-                row["aggroRange"] = combat_int(ai, "aggroRange")
+            # Always emit the resolved Mobius value (missing <ai>/aggroRange -> 0).
+            # This keeps explicit non-proactive mobs distinguishable from rows the
+            # importer failed to populate; the zone validation rejects the latter.
+            row["aggroRange"] = combat_int(ai, "aggroRange")
             if attribute(ai, "clanHelpRange") is not None:
                 row["clanHelpRange"] = combat_int(ai, "clanHelpRange")
             if clans:
@@ -338,6 +344,12 @@ def check_combat_coverage(templates: list[dict]) -> None:
         )
     if not any("aggroRange" in row for row in templates):
         raise SystemExit("refusing to write npcs.json: no NPC has aggroRange (ai/aggroRange not read)")
+    missing_aggro = [row["npcId"] for row in templates if row["aggressive"] and "aggroRange" not in row]
+    if missing_aggro:
+        raise SystemExit(
+            "refusing to write npcs.json: aggressive NPCs without aggroRange: "
+            + ", ".join(str(npc_id) for npc_id in missing_aggro[:10])
+        )
     if not any(row.get("clans") for row in templates):
         raise SystemExit("refusing to write npcs.json: no NPC has clans (ai/clanList/clan not read)")
 
