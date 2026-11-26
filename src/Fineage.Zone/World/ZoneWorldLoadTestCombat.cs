@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Shops;
 using Fineage.Accounts;
 using Fineage.Protocol;
 
@@ -65,6 +66,12 @@ public sealed partial class ZoneWorld
 
         if (!weapon.IsEquipped)
             player.Inventory.Equip(weapon);
+
+        // Fee-paying flows (gatekeeper teleport, shop, private store, freight) need funds; a blank purse turns every
+        // one of them into a refusal and the perf run measures the rejection path instead of the pipeline.
+        if (player.Inventory.CountOf(ShopTrade.AdenaItemId) <= 0)
+            player.Inventory.Add(ShopTrade.AdenaItemId, LoadTestCombatSettings.StartingAdena);
+
         SaveInventory(player.Session, player.Inventory);
 
         ZoneLog.Info($"loadtest combat profile object={player.ObjectId} class={player.ClassId} level={player.Level}");

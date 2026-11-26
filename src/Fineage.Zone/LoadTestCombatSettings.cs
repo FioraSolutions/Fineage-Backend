@@ -16,6 +16,13 @@ public static class LoadTestCombatSettings
 
     /// <summary>Whirlwind (36) and Thunder Storm (48): the pole AoE rotation the perf scenarios cast.</summary>
     public static readonly IReadOnlyList<int> RequiredSkillIds = [36, 48];
+
+    /// <summary>
+    /// Adena the profile grants when the bag has none. A levelled load bot must be able to pay a gatekeeper fee,
+    /// buy from a shop and post a trade, or every economy flow is refused for funds and the run measures refusal
+    /// paths instead of the pipeline. Matches what a real character of this level carries, not a blank purse.
+    /// </summary>
+    public const int StartingAdena = 10_000_000;
     public static bool Enabled => ZoneAdmin.IsEnabled(Environment.GetEnvironmentVariable(EnvVar));
 
     /// <summary>

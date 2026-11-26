@@ -6,10 +6,27 @@ public sealed class ServerMetricsSampler
     readonly int _loginMetricsPort;
     readonly int _zoneMetricsPort;
 
-    public ServerMetricsSampler(int loginMetricsPort = 9464, int zoneMetricsPort = 9465)
+    public const int DefaultLoginMetricsPort = 9464;
+    public const int DefaultZoneMetricsPort = 9465;
+    const string LoginMetricsPortEnv = "FINEAGE_LOGIN_METRICS_PORT";
+    const string ZoneMetricsPortEnv = "FINEAGE_ZONE_METRICS_PORT";
+
+    /// <summary>
+    /// Ports come from the same environment knobs the servers read, so a stack started on non-default
+    /// ports (an isolated soak beside a running playtest stack) is scraped on the port it actually listens on.
+    /// </summary>
+    public ServerMetricsSampler(int? loginMetricsPort = null, int? zoneMetricsPort = null)
     {
-        _loginMetricsPort = loginMetricsPort;
-        _zoneMetricsPort = zoneMetricsPort;
+        _loginMetricsPort = loginMetricsPort ?? ResolvePort(LoginMetricsPortEnv, DefaultLoginMetricsPort);
+        _zoneMetricsPort = zoneMetricsPort ?? ResolvePort(ZoneMetricsPortEnv, DefaultZoneMetricsPort);
+    }
+
+    static int ResolvePort(string variable, int fallback)
+    {
+        string? text = Environment.GetEnvironmentVariable(variable);
+        if (string.IsNullOrWhiteSpace(text))
+            return fallback;
+        return int.TryParse(text.Trim(), out int port) && port is > 0 and <= 65535 ? port : fallback;
     }
 
     public async Task<List<PrometheusSample>> SampleZoneDuringAsync(TimeSpan interval, TimeSpan duration, CancellationToken ct)
