@@ -98,7 +98,7 @@ public static class ConsistencyTraceBuilder
         DateTimeOffset WindowEnd,
         List<FrameCandidate> Candidates);
 
-    readonly record struct FrameCandidate(ConsistencyTraceFrame Frame, bool IsMove);
+    readonly record struct FrameCandidate(ConsistencyTraceFrame Frame, bool IsMove, bool IsLifecycle);
 
     static Evidence Gather(
         ConsistencyIssue issue,
@@ -113,12 +113,13 @@ public static class ConsistencyTraceBuilder
         bool subjectIsObserver = subject != null && observer != null && subject.BotId == observer.BotId;
 
         // The subject's frames carry the ground truth for a failing pair. The observer's own pawn frames are
-        // included for the pair checks so the trace shows it was alive and where it was, not only what it saw.
+        // included for pair/combat checks so the trace shows where it was, not only what it saw.
         bool includeObserverSelf = issue.Kind is ConsistencyKind.MissingSpawn
             or ConsistencyKind.StalePosition
             or ConsistencyKind.GhostEntity
             or ConsistencyKind.OutOfOrderLifecycle
-            or ConsistencyKind.DuplicateSpawn;
+            or ConsistencyKind.DuplicateSpawn
+            or ConsistencyKind.MissingCombatFanout;
 
         var observerIds = new HashSet<int>();
         if (subjectId > 0)
@@ -128,20 +129,39 @@ public static class ConsistencyTraceBuilder
 
         DateTimeOffset? subjectLast = LastMatchingAt(observerLog, subjectId)
             ?? LastMatchingAt(subjectLog, subjectId);
+        DateTimeOffset? runEnd = LatestFrameAt(observerLog, subjectLog);
         DateTimeOffset anchor = issue.ObservedAt
-            ?? subjectLast
-            ?? LastFrameAt(observerLog)
-            ?? LastFrameAt(subjectLog)
+            ?? (issue.Kind == ConsistencyKind.MissingSpawn ? null : subjectLast)
+            ?? runEnd
             ?? DateTimeOffset.UtcNow;
         var half = TimeSpan.FromSeconds(options.WindowSeconds);
-        DateTimeOffset start = anchor - half;
-        DateTimeOffset end = anchor + half;
+        DateTimeOffset start = issue.Kind == ConsistencyKind.DuplicateSpawn
+            ? DateTimeOffset.MinValue
+            : anchor - half;
+        DateTimeOffset end = issue.Kind == ConsistencyKind.DuplicateSpawn
+            ? DateTimeOffset.MaxValue
+            : anchor + half;
 
         var candidates = new List<FrameCandidate>();
         if (observerLog != null && observerIds.Count > 0)
             Collect(observerLog, "observer", observerIds, start, end, candidates);
         if (!subjectIsObserver && subjectLog != null && subjectId > 0)
             Collect(subjectLog, "subject", new HashSet<int> { subjectId }, start, end, candidates);
+
+        if (issue.Kind == ConsistencyKind.DuplicateSpawn)
+        {
+            if (candidates.Count > 0)
+            {
+                start = candidates.Min(c => c.Frame.At);
+                end = candidates.Max(c => c.Frame.At);
+                anchor = end;
+            }
+            else
+            {
+                start = anchor;
+                end = anchor;
+            }
+        }
 
         return new Evidence(issue, anchor, start, end, candidates);
     }
@@ -182,8 +202,8 @@ public static class ConsistencyTraceBuilder
     }
 
     /// <summary>
-    /// Keeps every lifecycle/combat frame before spending the cap on movement frames, then restores time order so
-    /// a spawn → move → despawn sequence still reads as a sequence in the file.
+    /// Keeps every lifecycle frame (spawn/despawn) before status/combat and movement frames, then restores time
+    /// order so a spawn → move → despawn sequence still reads as a sequence in the file.
     /// </summary>
     static List<ConsistencyTraceFrame> Select(List<FrameCandidate> candidates, int frameCap)
     {
@@ -192,12 +212,20 @@ public static class ConsistencyTraceBuilder
         if (candidates.Count <= frameCap)
             return candidates.Select(c => c.Frame).OrderBy(f => f.At).ToList();
 
-        var transitions = candidates.Where(c => !c.IsMove).ToList();
+        var lifecycle = candidates.Where(c => c.IsLifecycle).ToList();
+        var transitions = candidates.Where(c => !c.IsLifecycle && !c.IsMove).ToList();
         var moves = candidates.Where(c => c.IsMove).ToList();
-        var chosen = transitions.Count <= frameCap
-            ? transitions.ToList()
-            : transitions.TakeLast(frameCap).ToList();
+        var chosen = lifecycle.Count <= frameCap
+            ? lifecycle.ToList()
+            : lifecycle.TakeLast(frameCap).ToList();
         int remaining = frameCap - chosen.Count;
+        if (remaining > 0)
+        {
+            chosen.AddRange(transitions.Count <= remaining
+                ? transitions
+                : transitions.TakeLast(remaining));
+        }
+        remaining = frameCap - chosen.Count;
         if (remaining > 0)
             chosen.AddRange(moves.TakeLast(Math.Min(remaining, moves.Count)));
         chosen.Sort((a, b) => a.Frame.At.CompareTo(b.Frame.At));
@@ -220,7 +248,8 @@ public static class ConsistencyTraceBuilder
                 continue;
             if (!matchingIds.Contains(entityId) && (targetId is not int t || !matchingIds.Contains(t)))
                 continue;
-            destination.Add(new FrameCandidate(summary, isMove));
+            bool isLifecycle = summary.Op is nameof(NetOpcode.EntitySpawn) or nameof(NetOpcode.EntityDespawn);
+            destination.Add(new FrameCandidate(summary, isMove, isLifecycle));
         }
     }
 
@@ -246,6 +275,15 @@ public static class ConsistencyTraceBuilder
     {
         var frames = log?.Snapshot();
         return frames is { Count: > 0 } ? frames[^1].At : null;
+    }
+
+    static DateTimeOffset? LatestFrameAt(BotObservationLog? first, BotObservationLog? second)
+    {
+        DateTimeOffset? a = LastFrameAt(first);
+        DateTimeOffset? b = LastFrameAt(second);
+        if (a is null) return b;
+        if (b is null) return a;
+        return a.Value >= b.Value ? a : b;
     }
 
     static bool TrySummarize(
