@@ -104,6 +104,12 @@ public sealed class TeleportCatalog
             {
                 if (string.IsNullOrWhiteSpace(list.Name) || string.IsNullOrWhiteSpace(list.Type))
                     throw new InvalidDataException($"{source} npc {keeper.NpcId} has a list without a name.");
+                // #954: a gatekeeper with no destination is never a valid catalog state. An empty list means the
+                // import dropped rows; fail the load naming the npc and the list instead of serving a blank page.
+                if (list.Locations is null || list.Locations.Count == 0)
+                    throw new InvalidDataException(
+                        $"{source} npc {keeper.NpcId} list {list.Name} has no destinations; " +
+                        "regenerate data/teleports.json with tools/import_teleports.py");
                 var locations = new List<TeleportLocation>();
                 var seen = new HashSet<int>();
                 foreach (var row in list.Locations ?? [])
