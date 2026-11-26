@@ -1,5 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
+using Fineage.Zone.Geo;
+using Fineage.Zone.Interest;
 using Fineage.Zone.Net;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -72,6 +74,30 @@ public sealed class NetDeathBroadcastTests
                                        ((IReadOnlyList<int>)d[0]!).Contains(late.ObjectId) &&
                                        (int)d[1]! == MobId);
         _ = lateSession;
+    }
+
+    [Fact]
+    public async Task Live_observer_in_range_gets_the_corpse_spawn_when_death_lands_without_a_reconcile()
+    {
+        var kit = new NetTestKit(aoi: new GridAoi(1000), geo: GeoEngine.Empty);
+        var (_, observer) = await kit.EnterAsync(x: NetTestKit.ElfX, y: NetTestKit.ElfY);
+        var (victimSession, victim) = await kit.EnterAsync(x: NetTestKit.ElfX - 5000, y: NetTestKit.ElfY);
+        Assert.DoesNotContain(victim.ObjectId, observer.Knownlist);
+
+        // A command-side advance into the observer's cell that stopped at death, so the movement stage never
+        // reconciled it. Oracle rule: a live observer in range still has to see the corpse.
+        kit.World.MovePlayerCoordsForTests(victimSession, NetTestKit.ElfX - 20, NetTestKit.ElfY, NetTestKit.ElfZ);
+        Assert.DoesNotContain(victim.ObjectId, observer.Knownlist);
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+
+        kit.World.ApplyPlayerDeathForTest(victim, killerObjectId: 0);
+
+        Assert.True(victim.Dead);
+        Assert.Contains(victim.ObjectId, observer.Knownlist);
+        Assert.Contains(observer.ObjectId, victim.Knownlist);
+        Assert.Contains(rec.Of(nameof(IWorldEventPublisher.FanoutKnownlistDiff)),
+            a => (int)a[0]! == victim.ObjectId && ((IReadOnlyList<int>)a[1]!).Contains(observer.ObjectId));
     }
 
     [Fact]
