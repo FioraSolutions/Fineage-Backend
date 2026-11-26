@@ -106,7 +106,10 @@ public static class ScenarioLoader
             child.SpawnLayout = parent.SpawnLayout;
         if (child.AoiCellSize == 3000 && parent.AoiCellSize != 3000)
             child.AoiCellSize = parent.AoiCellSize;
-        child.GatekeeperTravelShare ??= parent.GatekeeperTravelShare;
+        if (child.GatekeeperTravelShare == null && parent.GatekeeperTravelShare != null)
+            child.GatekeeperTravelShare = parent.GatekeeperTravelShare;
+        if (!child.TeleportToSpawnOnEnter && parent.TeleportToSpawnOnEnter)
+            child.TeleportToSpawnOnEnter = true;
         child.DataDir ??= parent.DataDir;
         if (child.GatekeeperTripCooldownMs == 3000 && parent.GatekeeperTripCooldownMs != 3000)
             child.GatekeeperTripCooldownMs = parent.GatekeeperTripCooldownMs;

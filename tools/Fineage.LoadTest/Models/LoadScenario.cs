@@ -53,6 +53,18 @@ public sealed class LoadScenario
     /// <summary>Datapack directory with teleports.json and spawns/ (see <c>GatekeeperDirectory.ResolveDataDir</c>).</summary>
     public string? DataDir { get; set; }
 
+    /// <summary>
+    /// Place the bot at <see cref="SpawnX"/>,<see cref="SpawnY"/>,<see cref="SpawnZ"/> right after EnterWorld.
+    /// <para>
+    /// EnterWorld carries no coordinates (Mobius <c>EnterWorld</c> resumes the persisted character position), so a
+    /// scenario's spawn point only decides where the bot believes it is, never where the server puts it. A scenario
+    /// that must start at a specific place — a gatekeeper on an upper floor, a hub — turns this on; the bot then sends
+    /// the load-test <c>TeleportToLocation</c>, which the zone accepts only when
+    /// <c>FINEAGE_ZONE_LOADTEST_TELEPORT=1</c>.
+    /// </para>
+    /// </summary>
+    public bool TeleportToSpawnOnEnter { get; set; }
+
     public double ResolvedGatekeeperTravelShare
     {
         get
