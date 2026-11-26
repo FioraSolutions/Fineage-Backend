@@ -31,10 +31,11 @@ public sealed partial class ZoneWorld
             return NpcHtmlProtocol.Attackable;
         if (player.Dead)
             return InventoryProtocol.Dead;
-        // Mobius RequestBypassToServer: validateHtmlAction chains the origin object, then isInsideRadiusOfObjectId
-        // (3D INTERACTION_DISTANCE) and npc_ branch is isInsideRadius2D(object, Npc.INTERACTION_DISTANCE).
+        // Mobius RequestBypassToServer: validateHtmlAction chains the origin object, then the npc_ branch is
+        // isInsideRadius2D(object, Npc.INTERACTION_DISTANCE) — a flat circle, not the 3D sphere Npc.canInteract uses.
+        // That is why a gatekeeper on a platform answers talk (3D) but refuses every link when the pawn stands below it.
         // The radius is Npc.INTERACTION_DISTANCE = 250 (Npc.java:110).
-        if (!InTalkRange(player, npc))
+        if (!InInteractGate(player, npc, InteractGate.Circle2D))
             return "range";
 
         if (string.Equals(verb, "DepositC", StringComparison.Ordinal) || string.Equals(verb, "WithdrawC", StringComparison.Ordinal))

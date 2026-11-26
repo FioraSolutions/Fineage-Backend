@@ -248,9 +248,9 @@ public sealed partial class ZoneWorld
     /// <summary>The distance check an NPC interaction packet sits behind, taken from the Mobius packet it mirrors.</summary>
     internal enum InteractGate
     {
-        /// <summary><c>isInsideRadius3D(…, Npc.INTERACTION_DISTANCE)</c>: talk, bypass, buy/sell/multisell, teleport, buffs.</summary>
+        /// <summary><c>isInsideRadius3D(…, Npc.INTERACTION_DISTANCE)</c>: talk, buy/sell/multisell, teleport, buffs.</summary>
         Sphere3D,
-        /// <summary><c>isInsideRadius2D(…, Npc.INTERACTION_DISTANCE)</c>: warehouse lists, freight send, skill learn, quest events.</summary>
+        /// <summary><c>isInsideRadius2D(…, Npc.INTERACTION_DISTANCE)</c>: bypass links, warehouse lists, freight send, skill learn, quest events.</summary>
         Circle2D
     }
 
