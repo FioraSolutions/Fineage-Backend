@@ -240,13 +240,86 @@ public sealed class ConsistencyOracleTests
         Assert.Equal(1, log.Tracker.AttackSampleCount);
     }
 
-    static FineageBotClient Bot(BotObservationLog log)
+    [Fact]
+    public void Stale_self_ground_does_not_flag_a_newer_peer_view()
     {
-        var bot = new FineageBotClient(new LoadScenario(), log.BotId, new BotStats { BotId = log.BotId }, new BotPeerDirectory());
+        // Bot74 in the post-#1040 soak: every peer saw the subject at the server's live position, but the subject's
+        // own self MoveState was 3m49s old. The newer peer view is the truth; the stale self must not be ground.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 45157, 41981, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 45484, 41048, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 45484, 41048, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 45157, 41981, isSelf: false)), t0);
+        observer.Record(NetOpcode.MoveState, Move(74, 45484, 41048), t0.AddMinutes(4));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
+    }
+
+    [Fact]
+    public void Newer_ground_still_reports_a_stale_peer_view()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 45157, 41981, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 45484, 41048, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 45484, 41048, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 45157, 41981, isSelf: false)), t0);
+        subject.Record(NetOpcode.MoveState, Move(74, 46000, 41000), t0.AddMinutes(4));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    static FineageBotClient Bot(BotObservationLog log) => Bot(log, inWorld: false);
+
+    static FineageBotClient Bot(BotObservationLog log, bool inWorld)
+    {
+        var bot = new FineageBotClient(
+            new LoadScenario { GatekeeperTravelShare = 0 },
+            log.BotId,
+            new BotStats { BotId = log.BotId, InWorld = inWorld, LastActionAt = inWorld ? DateTimeOffset.UtcNow : null },
+            new BotPeerDirectory());
         foreach (var frame in log.Snapshot())
             bot.ObservationLog.Record(frame.Opcode, frame.Payload, frame.At);
+        if (log.Tracker.SelfEntityValue != 0)
+            bot.SetSelfEntityForTest(log.Tracker.SelfEntityValue);
         return bot;
     }
+
+    static EntitySpawnMsg Player(ulong id, int x, int y, bool isSelf) => new()
+    {
+        EntityValue = id,
+        EntityGeneration = 1,
+        Kind = EntityKindNet.Player,
+        IsSelf = isSelf,
+        X = x,
+        Y = y,
+        Z = 0,
+        MaxHp = 100,
+        CurHp = 100
+    };
+
+    static byte[] Move(ulong id, int x, int y) => NetCodec.EncodeMoveState(new MoveStateMsg
+    {
+        EntityValue = id,
+        EntityGeneration = 1,
+        OriginX = x,
+        OriginY = y,
+        DestX = x,
+        DestY = y,
+        DestZ = 0,
+        Running = true
+    });
 
     static EntitySpawnMsg Npc(ulong id, int x, int y) => new()
     {

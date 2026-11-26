@@ -307,6 +307,7 @@ public sealed class BotObservationLog
                             X = s.X,
                             Y = s.Y,
                             Z = s.Z,
+                            PositionUpdatedAt = at,
                             MaxHp = s.MaxHp,
                             CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
                             LastSpawnOrdinal = ++_spawnOrdinal,
@@ -352,6 +353,7 @@ public sealed class BotObservationLog
                             e.X = m.DestX;
                             e.Y = m.DestY;
                             e.Z = m.DestZ;
+                            e.PositionUpdatedAt = at;
                             e.Despawned = false;
                             _byValue[key] = e;
                         }
@@ -363,7 +365,8 @@ public sealed class BotObservationLog
                                 EntityGeneration = m.EntityGeneration,
                                 X = m.DestX,
                                 Y = m.DestY,
-                                Z = m.DestZ
+                                Z = m.DestZ,
+                                PositionUpdatedAt = at
                             };
                         }
 
@@ -379,6 +382,7 @@ public sealed class BotObservationLog
                             e.X = t.X;
                             e.Y = t.Y;
                             e.Z = t.Z;
+                            e.PositionUpdatedAt = at;
                             _byValue[key] = e;
                         }
 
@@ -589,6 +593,8 @@ public sealed class BotObservationLog
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
+        /// <summary>When the position last changed (spawn/move/teleport). The oracle uses it to reject a stale ground.</summary>
+        public DateTimeOffset PositionUpdatedAt { get; set; }
         public int CurHp { get; set; }
         public int MaxHp { get; set; }
         public bool Despawned { get; set; }

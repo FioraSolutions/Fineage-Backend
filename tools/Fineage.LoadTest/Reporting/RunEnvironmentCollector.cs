@@ -1,6 +1,9 @@
 using System.Diagnostics;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Text;
+using Fineage.LoadTest.Metrics;
 
 namespace Fineage.LoadTest.Reporting;
 
@@ -9,6 +12,8 @@ public sealed class RunEnvironmentInfo
     public string? GitCommit { get; init; }
     public string? GitBranch { get; init; }
     public bool GitDirty { get; init; }
+    /// <summary>Dirty only when a compiled source/project file differs; docs and untracked scenarios do not fail a run.</summary>
+    public bool SourceDirty { get; init; }
     public string BuildConfiguration { get; init; } = "Release";
     public string OsDescription { get; init; } = "";
     public int ProcessorCount { get; init; }
@@ -18,6 +23,16 @@ public sealed class RunEnvironmentInfo
     public string? DotnetGcDynamicAdaptation { get; init; }
     public string? DotnetTieredPgo { get; init; }
     public string? DotnetReadyToRun { get; init; }
+    /// <summary>Commit compiled into the Zone assembly the process actually loaded.</summary>
+    public string? ZoneBuildCommit { get; init; }
+    /// <summary>Debug/Release compiled into the loaded Zone assembly.</summary>
+    public string? ZoneBuildConfiguration { get; init; }
+    public string? ZoneBuildModuleId { get; init; }
+    public string? ZoneBuildVersion { get; init; }
+    /// <summary>Zone binary path when it could be resolved (Linux /proc or an explicit --zone-dll).</summary>
+    public string? ZoneBinaryPath { get; init; }
+    /// <summary>MVID of the Zone DLL on disk at report time; differs from the loaded module after a rebuild.</summary>
+    public string? ZoneBinaryModuleId { get; init; }
 }
 
 public static class RunEnvironmentCollector
@@ -43,13 +58,95 @@ public static class RunEnvironmentCollector
     /// <summary>Whether this host exposes <c>/proc</c>, so process introspection can be attempted at all.</summary>
     internal static bool HasProcFileSystem => OperatingSystem.IsLinux() && Directory.Exists("/proc");
 
-    public static RunEnvironmentInfo Collect(int? zonePid = null)
+    /// <summary>The module MVID of a managed DLL, read without loading it. Null when the path is missing/not managed.</summary>
+    public static string? ModuleIdOfFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return null;
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var pe = new PEReader(stream);
+            if (!pe.HasMetadata)
+                return null;
+            MetadataReader md = pe.GetMetadataReader();
+            return md.GetGuid(md.GetModuleDefinition().Mvid).ToString();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or BadImageFormatException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// A run is only a valid before/after sample when the loaded Zone assembly is the intended build. Missing build
+    /// info, a commit different from the intended one, or a DLL whose MVID changed under the running process is loud.
+    /// </summary>
+    public static IReadOnlyList<string> ProvenanceProblems(
+        RunEnvironmentInfo? env,
+        string? expectedCommit = null,
+        bool requireClean = false)
+    {
+        var problems = new List<string>();
+        if (env == null)
+            return ["Zone provenance: RunEnvironmentCollector did not run."];
+        string? intended = expectedCommit ?? env.GitCommit;
+        if (string.IsNullOrWhiteSpace(env.ZoneBuildCommit))
+        {
+            problems.Add("Zone provenance: fineage_build_info is missing from the Zone scrape; the loaded binary cannot be tied to a commit.");
+        }
+        else if (!string.IsNullOrWhiteSpace(intended) &&
+                 !env.ZoneBuildCommit.StartsWith(intended, StringComparison.OrdinalIgnoreCase))
+        {
+            problems.Add($"Zone provenance: loaded Zone build {env.ZoneBuildCommit} != intended {intended}.");
+        }
+
+        if (env.ZoneBuildModuleId is { Length: > 0 } loaded &&
+            env.ZoneBinaryModuleId is { Length: > 0 } onDisk &&
+            !string.Equals(loaded, onDisk, StringComparison.OrdinalIgnoreCase))
+        {
+            problems.Add($"Zone provenance: loaded module {loaded} != {env.ZoneBinaryPath ?? "binary"} module {onDisk}; the DLL was rebuilt under the running Zone.");
+        }
+
+        if (requireClean)
+        {
+            if (string.IsNullOrWhiteSpace(env.ZoneBuildConfiguration) ||
+                string.Equals(env.ZoneBuildConfiguration, "unknown", StringComparison.OrdinalIgnoreCase))
+            {
+                problems.Add("Zone provenance: the loaded Zone configuration is missing from fineage_build_info.");
+            }
+
+            if (env.ZoneBuildModuleId is not { Length: > 0 })
+                problems.Add("Zone provenance: the loaded Zone module id is missing from fineage_build_info; the loaded binary cannot be tied to the --zone-dll file.");
+            if (env.ZoneBinaryModuleId is not { Length: > 0 })
+                problems.Add("Zone provenance: --zone-dll is required for a clean benchmark; the loaded binary cannot be tied to the file.");
+            if (string.IsNullOrWhiteSpace(intended))
+                problems.Add("Zone provenance: no intended commit (git HEAD unavailable and --expect-zone-commit not set).");
+            if (env.SourceDirty)
+                problems.Add("Zone provenance: compiled source is dirty; the Zone binary is not tied to a clean commit.");
+        }
+
+        return problems;
+    }
+
+    public static RunEnvironmentInfo Collect(int? zonePid = null, string? zoneDll = null, ZoneBuildInfo? zone = null)
     {
         string? commit = TryGit("rev-parse", "HEAD");
         string? branch = TryGit("branch", "--show-current");
         bool dirty = TryGit("status", "--porcelain") is { Length: > 0 };
-        // The zone binary path is the truth (run-local-net.sh defaults to Debug); the env is only a fallback.
-        string build = ZoneBuildFromProcess(zonePid)
+        var sourcePaths = new List<string>
+        {
+            "src/Fineage.Zone", "src/Fineage.Protocol", "src/Fineage.Game", "src/Fineage.Accounts",
+            "src/Fineage.Net.Host", "src/Fineage.Net.Contract", "src/Fineage.Login",
+            "tools/Fineage.LoadTest", "*.props", "*.targets"
+        };
+        var sourceArgs = new List<string> { "status", "--porcelain", "--" };
+        sourceArgs.AddRange(sourcePaths);
+        bool sourceDirty = TryGit([.. sourceArgs]) is { Length: > 0 };
+        string? binary = zoneDll ?? ZoneBinaryPath(zonePid ?? 0);
+        // The loaded zone assembly is the truth; the process cmdline/env is only a fallback.
+        string build = zone?.Configuration
+                       ?? ZoneBuildFromProcess(zonePid)
                        ?? Environment.GetEnvironmentVariable("FINEAGE_BUILD_CONFIGURATION")
                        ?? Environment.GetEnvironmentVariable("DOTNET_BUILD_CONFIGURATION")
                        ?? "unknown";
@@ -74,6 +171,7 @@ public static class RunEnvironmentCollector
             GitCommit = commit,
             GitBranch = branch,
             GitDirty = dirty,
+            SourceDirty = sourceDirty,
             BuildConfiguration = build,
             OsDescription = RuntimeInformation.OSDescription,
             ProcessorCount = Environment.ProcessorCount,
@@ -82,7 +180,13 @@ public static class RunEnvironmentCollector
             GcMode = DescribeZoneGc(zonePid),
             DotnetGcDynamicAdaptation = Environment.GetEnvironmentVariable("DOTNET_GCDynamicAdaptationMode"),
             DotnetTieredPgo = Environment.GetEnvironmentVariable("DOTNET_TieredPGO"),
-            DotnetReadyToRun = Environment.GetEnvironmentVariable("DOTNET_ReadyToRun")
+            DotnetReadyToRun = Environment.GetEnvironmentVariable("DOTNET_ReadyToRun"),
+            ZoneBuildCommit = zone?.Commit,
+            ZoneBuildConfiguration = zone?.Configuration,
+            ZoneBuildModuleId = zone?.ModuleId,
+            ZoneBuildVersion = zone?.Version,
+            ZoneBinaryPath = binary,
+            ZoneBinaryModuleId = ModuleIdOfFile(binary)
         };
     }
 

@@ -111,11 +111,12 @@ public static class ConsistencyOracle
 
                 if (aSeesB && bSeesA)
                 {
-                    if (!TryPeerTruth(b, out int truthX, out int truthY, out int truthHp))
+                    if (!TryPeerTruth(b, out int truthX, out int truthY, out int truthHp, out DateTimeOffset truthAt))
                         continue;
                     if (a.Tracker.Entities.TryGetValue((ulong)b.ObjectId, out var viewB))
                     {
-                        if (Math.Abs(viewB.X - truthX) > PositionTolerance || Math.Abs(viewB.Y - truthY) > PositionTolerance)
+                        if ((Math.Abs(viewB.X - truthX) > PositionTolerance || Math.Abs(viewB.Y - truthY) > PositionTolerance) &&
+                            GroundIsNotOlderThanView(truthAt, viewB.PositionUpdatedAt))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -139,11 +140,12 @@ public static class ConsistencyOracle
                         }
                     }
 
-                    if (!TryPeerTruth(a, out truthX, out truthY, out truthHp))
+                    if (!TryPeerTruth(a, out truthX, out truthY, out truthHp, out truthAt))
                         continue;
                     if (b.Tracker.Entities.TryGetValue((ulong)a.ObjectId, out var viewA))
                     {
-                        if (Math.Abs(viewA.X - truthX) > PositionTolerance || Math.Abs(viewA.Y - truthY) > PositionTolerance)
+                        if ((Math.Abs(viewA.X - truthX) > PositionTolerance || Math.Abs(viewA.Y - truthY) > PositionTolerance) &&
+                            GroundIsNotOlderThanView(truthAt, viewA.PositionUpdatedAt))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -381,21 +383,31 @@ public static class ConsistencyOracle
         return list;
     }
 
-    static bool TryPeerTruth(BotRosterEntry peer, out int x, out int y, out int hp)
+    static bool TryPeerTruth(BotRosterEntry peer, out int x, out int y, out int hp, out DateTimeOffset updatedAt)
     {
         if (peer.Tracker.Entities.TryGetValue((ulong)peer.ObjectId, out var self))
         {
             x = self.X;
             y = self.Y;
             hp = self.CurHp;
+            updatedAt = self.PositionUpdatedAt;
             return true;
         }
 
         x = peer.X;
         y = peer.Y;
         hp = 0;
+        updatedAt = default;
         return true;
     }
+
+    /// <summary>
+    /// A peer view newer than the subject's own last MoveState means the *ground* is stale, not the observer.
+    /// The soak's 198 Bot74 errors were exactly that: the subject's self state was 3m49s older than every peer view.
+    /// Unknown timestamps keep the old comparison so a genuinely stale observer is still reported.
+    /// </summary>
+    static bool GroundIsNotOlderThanView(DateTimeOffset groundAt, DateTimeOffset viewAt) =>
+        groundAt == default || viewAt == default || groundAt >= viewAt;
 
     public static bool IsHardFailure(ConsistencyKind kind) => kind is
         ConsistencyKind.GhostEntity or

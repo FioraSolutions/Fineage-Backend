@@ -66,6 +66,8 @@ public static class CompactMarkdownRenderer
             sb.AppendLine($"| git commit | `{e.GitCommit ?? "MISSING"}`{(e.GitDirty ? " (dirty)" : "")} |");
             sb.AppendLine($"| branch | `{e.GitBranch ?? "MISSING"}` |");
             sb.AppendLine($"| build | **{e.BuildConfiguration}** |");
+            sb.AppendLine($"| zone build | `{e.ZoneBuildCommit ?? "MISSING"}` · {e.ZoneBuildConfiguration ?? "unknown"} · module `{e.ZoneBuildModuleId ?? "MISSING"}` |");
+            sb.AppendLine($"| zone binary | `{e.ZoneBinaryPath ?? "unknown"}` · module `{e.ZoneBinaryModuleId ?? "MISSING"}` |");
             sb.AppendLine($"| scenario | **{r.ScenarioName}** |");
             sb.AppendLine($"| bots | **{r.BotCount}** (in world {r.BotsInWorld}, peak online {r.PeakZoneOnline}) |");
             sb.AppendLine($"| region workers | **{r.RegionWorkers}** |");

@@ -78,6 +78,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     public BotObservationLog ObservationLog => _observation;
     public BotBagTracker Bag => _bag;
     public int SelfObjectId => (int)_selfEntity;
+    /// <summary>Tests replay a log without the enter handshake; lets the roster select the replayed self pawn.</summary>
+    internal void SetSelfEntityForTest(ulong entityValue) => _selfEntity = entityValue;
     internal Random Rng => _rng;
     internal BotPeerDirectory Peers => _peers;
 
