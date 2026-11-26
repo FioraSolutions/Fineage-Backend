@@ -12,6 +12,7 @@ sealed class EnterSnapshot
         SessionObjectId = 0,
         Self = [],
         SelfRemoteSpawn = new EntitySpawnMsg(),
+        SelfRemoteFollowUps = [],
         Known = [],
         PeerFanout = []
     };
@@ -19,6 +20,8 @@ sealed class EnterSnapshot
     public int SessionObjectId { get; init; }
     public required IReadOnlyList<EnterSelfSlot> Self { get; init; }
     public required EntitySpawnMsg SelfRemoteSpawn { get; init; }
+    /// <summary>The entrant's live presence state, sent to existing peers just as it is on the later move diff path.</summary>
+    public required IReadOnlyList<PresenceWireSlot> SelfRemoteFollowUps { get; init; }
     public required IReadOnlyList<KnownPresenceSlot> Known { get; init; }
     public required IReadOnlyList<PeerFanoutSlot> PeerFanout { get; init; }
     public int KnownEntityCount { get; init; }
