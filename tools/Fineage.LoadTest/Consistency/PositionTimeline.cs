@@ -35,8 +35,9 @@ public sealed class PositionTimeline
                 case NetOpcode.MoveState:
                     {
                         var m = NetCodec.DecodeMoveState(f.Payload);
+                        // Origin is the server's actual pawn position for this leg; Dest may be an unreached tip.
                         if (self.Contains(m.EntityValue))
-                            t.Add(f.At, m.DestX, m.DestY);
+                            t.Add(f.At, m.OriginX, m.OriginY);
                         break;
                     }
                 case NetOpcode.PositionCorrection:
