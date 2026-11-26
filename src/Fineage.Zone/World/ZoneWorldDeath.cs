@@ -166,6 +166,11 @@ public sealed partial class ZoneWorld
         if (wasFlagged)
             BroadcastPvpAppearance(player);
 
+        // A player can die in a cell whose watch was never reconciled (the stop that ended the run was the death
+        // itself). Death is a presence change like arrival: live observers in range must get the corpse spawn.
+        if (NetBridge != null && player.Session != null)
+            RefreshMovingKnownlist(player, ack: null, syncNewWatchers: false);
+
         RiftOnPlayerDeath(player);
         FanoutPlayerDeath(player, killerObjectId);
         if (player.Session != null)
