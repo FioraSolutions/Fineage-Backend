@@ -56,12 +56,79 @@ public sealed class SimulationHangGateTests
     }
 
     [Fact]
-    public void Empty_observation_longer_than_the_limit_fails()
+    public void Zero_samples_is_metrics_unavailable_not_a_stall()
     {
         var verdict = SimulationHangGate.Evaluate([], T0, T0.AddSeconds(31), TimeSpan.FromSeconds(30));
 
+        Assert.False(verdict.Hung);
+        Assert.Equal(0, verdict.StallCount);
+        Assert.Equal(TickSeriesStatus.NoScrapes, verdict.TickSeries);
+        Assert.True(verdict.MetricsUnavailable);
+        Assert.Contains("No Zone metrics scrape", verdict.MetricsUnavailableReason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Scrape_without_tick_counter_is_metrics_unavailable_not_a_stall()
+    {
+        var verdict = SimulationHangGate.Evaluate(
+            [],
+            T0,
+            T0.AddSeconds(31),
+            TimeSpan.FromSeconds(30),
+            scrapesObserved: 3);
+
+        Assert.False(verdict.Hung);
+        Assert.Equal(TickSeriesStatus.MissingTickCounter, verdict.TickSeries);
+        Assert.True(verdict.MetricsUnavailable);
+        Assert.Contains("fineage_tick_ms_count is missing", verdict.MetricsUnavailableReason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Late_first_scrape_starts_observation_at_the_first_observed_counter()
+    {
+        var samples = new[] { new TickObservation(T0.AddSeconds(45), 100) };
+
+        var verdict = SimulationHangGate.Evaluate(samples, T0, T0.AddSeconds(60), TimeSpan.FromSeconds(30));
+
+        Assert.False(verdict.Hung);
+        Assert.Equal(TickSeriesStatus.Available, verdict.TickSeries);
+        Assert.InRange(verdict.StallSeconds, 14.9, 15.1);
+    }
+
+    [Fact]
+    public void Repeated_identical_observed_counts_past_the_limit_are_a_stall()
+    {
+        var samples = new[]
+        {
+            new TickObservation(T0, 10),
+            new TickObservation(T0.AddSeconds(10), 10),
+            new TickObservation(T0.AddSeconds(20), 10)
+        };
+
+        var verdict = SimulationHangGate.Evaluate(samples, T0, T0.AddSeconds(51), TimeSpan.FromSeconds(30));
+
         Assert.True(verdict.Hung);
-        Assert.InRange(verdict.StallSeconds, 30.9, 31.1);
+        Assert.Equal(TickSeriesStatus.Available, verdict.TickSeries);
+        Assert.Equal(1, verdict.StallCount);
+        Assert.InRange(verdict.StallSeconds, 50.9, 51.1);
+    }
+
+    [Fact]
+    public void Counter_recovery_after_a_short_freeze_resets_the_tail()
+    {
+        var samples = new[]
+        {
+            new TickObservation(T0, 10),
+            new TickObservation(T0.AddSeconds(10), 10),
+            new TickObservation(T0.AddSeconds(20), 11),
+            new TickObservation(T0.AddSeconds(30), 12)
+        };
+
+        var verdict = SimulationHangGate.Evaluate(samples, T0, T0.AddSeconds(50), TimeSpan.FromSeconds(30));
+
+        Assert.False(verdict.Hung);
+        Assert.Equal(TickSeriesStatus.Available, verdict.TickSeries);
+        Assert.InRange(verdict.StallSeconds, 19.9, 20.1);
     }
 
     [Fact]
@@ -205,5 +272,64 @@ public sealed class SimulationHangGateTests
         Assert.True(final.Hung);
         Assert.True(final.StallSeconds >= signal.StallSeconds);
         Assert.True(final.StallSeconds > 0.08);
+    }
+
+    [Fact]
+    public async Task Watch_does_not_abort_when_no_scrape_is_available()
+    {
+        using var abort = new CancellationTokenSource();
+        using var stop = new CancellationTokenSource();
+        var hung = new TaskCompletionSource<SimulationHangVerdict>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var watch = SimulationHangGate.WatchTicksAsync(
+            abort,
+            DateTimeOffset.UtcNow,
+            stop.Token,
+            hung,
+            poll: TimeSpan.FromMilliseconds(10),
+            stallLimit: TimeSpan.FromMilliseconds(40),
+            readTickCount: _ => Task.FromResult<long?>(null));
+
+        await Task.Delay(150);
+        Assert.False(abort.IsCancellationRequested);
+        Assert.False(hung.Task.IsCompleted);
+        stop.Cancel();
+        var final = await watch.WaitAsync(TimeSpan.FromSeconds(2));
+
+        Assert.False(final.Hung);
+        Assert.Equal(TickSeriesStatus.NoScrapes, final.TickSeries);
+        Assert.True(final.MetricsUnavailable);
+    }
+
+    [Fact]
+    public async Task Preflight_reports_no_scrape_as_metrics_unavailable()
+    {
+        string? reason = await LoadTestRunner.ProbeZoneMetricsAsync(
+            CancellationToken.None,
+            _ => Task.FromResult<string?>(null));
+
+        Assert.NotNull(reason);
+        Assert.Contains("Zone metrics unavailable", reason, StringComparison.Ordinal);
+        Assert.Contains("/metrics", reason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Preflight_reports_scrape_without_tick_counter_as_metrics_unavailable()
+    {
+        string? reason = await LoadTestRunner.ProbeZoneMetricsAsync(
+            CancellationToken.None,
+            _ => Task.FromResult<string?>("fineage_zone_online 1\n"));
+
+        Assert.NotNull(reason);
+        Assert.Contains("fineage_tick_ms_count is missing", reason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Preflight_accepts_a_scrape_with_a_tick_counter()
+    {
+        string? reason = await LoadTestRunner.ProbeZoneMetricsAsync(
+            CancellationToken.None,
+            _ => Task.FromResult<string?>("fineage_tick_ms_count 42\n"));
+
+        Assert.Null(reason);
     }
 }

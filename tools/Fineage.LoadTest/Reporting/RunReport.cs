@@ -376,7 +376,7 @@ public static class ReportWriter
             return Enumerable.Repeat(b.RttAvgMs, (int)Math.Min(b.RttSamples, 100));
         }).OrderBy(v => v).ToList();
         if (samples.Count == 0)
-            return (0, 0, 0, bots.Max(b => b.RttMaxMs));
+            return (0, 0, 0, bots.Count > 0 ? bots.Max(b => b.RttMaxMs) : 0);
         double At(double q)
         {
             int idx = (int)Math.Ceiling(q * samples.Count) - 1;
