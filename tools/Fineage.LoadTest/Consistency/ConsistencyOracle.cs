@@ -90,7 +90,10 @@ public static class ConsistencyOracle
                 var a = roster[i];
                 var b = roster[j];
                 int dist = Distance(a.X, a.Y, b.X, b.Y);
-                bool shouldSee = dist <= watch;
+                // Presence is not a Euclidean radius: GridAoi.GetVisible returns the 3x3 cells around the observer's
+                // own cell. A pair can be 3000..6000 apart across two cell edges (not visible), and two diagonal
+                // neighbours can be >6000 apart but still visible. Both cases were false pair decisions at 6000.
+                bool shouldSee = InGridWatch(a.X, a.Y, b.X, b.Y, aoiCellSize);
                 if (!shouldSee)
                     continue;
 
@@ -560,6 +563,27 @@ public static class ConsistencyOracle
         ConsistencyKind.DuplicateSpawn or
         ConsistencyKind.VisibilityLeak or
         ConsistencyKind.MissingCombatFanout;
+
+    /// <summary>
+    /// Exact <see cref="Fineage.Zone.Interest.GridAoi.GetVisible"/> footprint: same cell or one cell on each axis.
+    /// The oracle has no world reference, so it mirrors GridAoi's floor division instead of a distance radius.
+    /// </summary>
+    static bool InGridWatch(int ax, int ay, int bx, int by, int cellSize)
+    {
+        if (cellSize <= 0)
+            return true; // FINEAGE_ZONE_AOI_CELL=0 means SingleCellAoi: the whole zone is visible.
+        int acx = FloorDiv(ax, cellSize), acy = FloorDiv(ay, cellSize);
+        int bcx = FloorDiv(bx, cellSize), bcy = FloorDiv(by, cellSize);
+        return Math.Abs(acx - bcx) <= 1 && Math.Abs(acy - bcy) <= 1;
+    }
+
+    static int FloorDiv(int value, int divisor)
+    {
+        int q = value / divisor;
+        if (value < 0 && value % divisor != 0)
+            q--;
+        return q;
+    }
 
     static int Distance(int x0, int y0, int x1, int y1)
     {

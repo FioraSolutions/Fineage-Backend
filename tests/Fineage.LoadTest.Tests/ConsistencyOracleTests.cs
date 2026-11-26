@@ -281,6 +281,44 @@ public sealed class ConsistencyOracleTests
     }
 
     [Fact]
+    public void Missing_spawn_ignores_pairs_two_cells_apart_even_when_euclidean_distance_is_under_6000()
+    {
+        // Observer at the east edge of cell 0, subject just inside cell 2: 3002 units, but GridAoi's 3x3 watch
+        // stops at cell 1, so neither can see the other. The old distance<=6000 rule invented this pair.
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 2999, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 6001, 0, isSelf: true)), at);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.MissingSpawn);
+    }
+
+    [Fact]
+    public void Missing_spawn_expects_diagonal_neighbour_cells_beyond_6000_units()
+    {
+        // (5999,5999) is the far corner of the adjacent cell: 8484 units away, but GridAoi's 3x3 watch includes it.
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 0, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 5999, 5999, isSelf: true)), at);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 2 && i.SubjectObjectId == 1001);
+    }
+
+    [Fact]
     public void Dead_observer_is_excluded_but_live_observer_still_checks_corpse_visibility()
     {
         var t0 = DateTimeOffset.UtcNow.AddMinutes(-2);
