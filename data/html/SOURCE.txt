@@ -25,3 +25,10 @@ HTML text only. Rules reimplemented after ClanMaster/AllianceMaster scripts and 
 Subclass and grand master pages (Block G1): every remaining villagemaster/*.htm, including SubClass*.htm, from
 dist/game/data/html/villagemaster (existing files kept). HTML text only. Subclass rules reimplemented after
 VillageMaster / Player.addSubClass / setActiveClass (not copied).
+
+Every spawned NPC (issue #954 follow-up): tools/import_npc_html.py over all of data/spawns, with the folder each
+Mobius class writes to (DungeonGatekeeper -> teleporter/, SepulcherNpc -> SepulcherNpc/) so every Necropolis,
+Catacomb and Seven Signs tomb page is imported. `Link` targets that Mobius' Link bypass whitelist does not serve
+are dropped from the imported page (they drew an empty window); the list is in docs/gaps/npc-html-dead-links.tsv.
+Remaining legacy `goto <id>` rows that no teleports.json location matches are in
+docs/gaps/npc-html-unmapped-goto.tsv.

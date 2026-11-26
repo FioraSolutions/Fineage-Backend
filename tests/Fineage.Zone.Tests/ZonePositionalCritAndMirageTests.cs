@@ -171,8 +171,10 @@ public sealed class ZonePositionalCritAndMirageTests
     [Fact]
     public async Task Mirage_cancels_the_attackers_target_when_it_hits_the_owner_with_a_max_roll()
     {
-        // Random(0) always rolls 0, which is < 80 → the 80% trigger fires deterministically.
-        var (kit, rec) = Kit(new Random(0));
+        // A literal `Random(0)` rolls 72 on the first draw and 81 on the second — the region stream is seeded from a
+        // mixed hash, not by the raw seed, so the 80% trigger is a coin flip. Script the stream instead: 0 always
+        // passes the chance roll so this test only asserts the cancel path.
+        var (kit, rec) = Kit(new RollZeroRandom());
         var (attackerSession, attacker) = await kit.EnterAsync(classId: 0, race: 0, level: 60, x: NetTestKit.ElfX + 200);
         var (_, defender) = await kit.EnterAsync(classId: 7, race: 0, level: 60, x: NetTestKit.ElfX + 60);
         defender.Abnormals.Add(new ZoneAbnormalEntry
@@ -215,5 +217,15 @@ public sealed class ZonePositionalCritAndMirageTests
         kit.World.RunDamageTriggersForTest(defender, attacker, 10);
         Assert.DoesNotContain(rec.Of(nameof(IWorldEventPublisher.FanoutMagicSkillLaunched)),
             a => (int)a[2]! == MirageTrigger);
+    }
+
+    /// <summary>A stream that always rolls the bottom of the range: scripted "the chance roll always passes".</summary>
+    sealed class RollZeroRandom : Random
+    {
+        public override int Next() => 0;
+
+        public override int Next(int maxValue) => 0;
+
+        public override int Next(int minValue, int maxValue) => minValue;
     }
 }
