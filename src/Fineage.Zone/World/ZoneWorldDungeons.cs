@@ -190,6 +190,10 @@ public sealed partial class ZoneWorld
             removed.Add(id);
         }
 
+        // Teleport reconciled the knownlist at the landing cell; later move starts use this as their anchor so a
+        // same-cell move does not re-plan (and a boundary crossed while running is not mistaken for no change).
+        StampKnownlistRefreshAnchor(entity);
+
         // Mobius onTeleported rebuilds the knownlist. Without this the client keeps the old
         // square's bodies (or drops them with the tile) and never receives them again on the way back.
         if (added.Count > 0 || removed.Count > 0)

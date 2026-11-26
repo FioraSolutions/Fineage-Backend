@@ -53,6 +53,7 @@ public sealed partial class ZoneWorld
         if (!player.Sitting && player.MoveActive)
         {
             AdvanceMove(player, now);
+            ReconcileKnownlistAfterCommandAdvance(player);
             if (player.MoveActive && player.Session != null)
             {
                 // Mobius RequestActionUse case 0: moving → NextAction(EVT_ARRIVED) sit on arrival.
@@ -128,6 +129,7 @@ public sealed partial class ZoneWorld
         // Settle the in-flight segment at the old speed before switching gait (Mobius setWalking/setRunning).
         long now = NowUnixMs();
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
         player.Running = !player.Running;
         ZoneLog.Info($"[move] obj={player.ObjectId} {(player.Running ? "run" : "walk")} speed={MoveSpeedOf(player)}");
         FanoutMoveType(player);
@@ -197,6 +199,7 @@ public sealed partial class ZoneWorld
         // and AI intention IDLE (not sitting / running / attacking).
         long now = NowUnixMs();
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (player.Sitting || player.MoveActive || IsCasting(player, now) ||
             player.PrivateStoreType != PrivateStoreProtocol.TypeNone ||
             _tradeByPlayer.ContainsKey(player.ObjectId) || _pendingTradeAsk.ContainsKey(player.ObjectId) ||

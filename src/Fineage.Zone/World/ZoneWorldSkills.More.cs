@@ -218,6 +218,7 @@ public sealed partial class ZoneWorld
 
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
 
         // Mobius Skill.checkCondition (single <see cref="SkillCastConditionEvaluator"/> path).
         var condTarget = ResolveSkillConditionTarget(session, player, request, liveTemplate);

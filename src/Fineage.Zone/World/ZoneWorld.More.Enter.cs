@@ -404,6 +404,10 @@ public sealed partial class ZoneWorld
             else
                 TrackThink(other);
         }
+
+        // Enter bound the knownlist at this position; later move starts compare their destination cell to this
+        // anchor instead of the AOI store so a boundary crossed before the first tick is not skipped.
+        StampKnownlistRefreshAnchor(entity);
     }
 
 }

@@ -131,6 +131,7 @@ public sealed partial class ZoneWorld
         int dropY = useCoords ? y : player.Y;
         int dropZ = useCoords ? z : player.Z;
         AdvanceMove(player, NowUnixMs());
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
         {
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
