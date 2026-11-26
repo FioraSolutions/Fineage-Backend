@@ -63,6 +63,12 @@ static class EnterEncoder
             foreach (var peer in snapshot.PeerFanout)
             {
                 frames.Add(new NetFrame(peer.PeerObjectId, NetOpcode.EntitySpawn, selfRemote));
+                foreach (var follow in snapshot.SelfRemoteFollowUps)
+                {
+                    byte[] payload = EnterWire.EncodePresence(follow);
+                    frames.Add(new NetFrame(peer.PeerObjectId, follow.Opcode, payload));
+                    bytes += payload.Length;
+                }
                 if (peer.RelationPayload is { } relation)
                 {
                     frames.Add(new NetFrame(peer.PeerObjectId, NetOpcode.RelationChanged, relation));

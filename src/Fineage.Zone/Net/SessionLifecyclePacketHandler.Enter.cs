@@ -153,11 +153,16 @@ sealed partial class SessionLifecyclePacketHandler
 
         knownPlayers = known.Count(row => row is { GroundItem: false, Kind: EntityKindNet.Player });
 
+        IReadOnlyList<PresenceWireSlot> selfFollowUps;
+        using (EnterMetrics.MeasureKnownSnapshot())
+            selfFollowUps = NetEnterWorldProjector.PlanPresenceFollowUps(entity, self, _world);
+
         return new EnterSnapshot
         {
             SessionObjectId = zoneSession.ObjectId,
             Self = projected.Slots,
             SelfRemoteSpawn = projected.Remote,
+            SelfRemoteFollowUps = selfFollowUps,
             Known = known,
             PeerFanout = peerFanout,
             KnownEntityCount = known.Count,
