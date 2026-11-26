@@ -292,6 +292,13 @@ public static class CompactMarkdownRenderer
                 $"- Client consistency oracle (labeled separately from server histograms): **{r.Consistency.PairwiseObserversCompared}** pairwise checks, **{r.Consistency.Issues.Count}** issues ({(r.Consistency.Passed ? "PASS" : "FAIL")}).");
         }
 
+        if (r.ConsistencyTrace is { } trace)
+        {
+            sb.AppendLine(
+                $"- Frame trace: **{trace.TracedIssues}/{trace.TotalIssues}** issues, **{trace.FrameCount}** decoded frames, " +
+                $"**{trace.Bytes}** bytes → `consistency-trace.jsonl`{(trace.Truncated ? " (truncated)" : "")}.");
+        }
+
         if (r.Consistency != null && (r.Consistency.AttackSampleCount + r.Consistency.AttackTimeoutCount +
                                       r.Consistency.SkillSampleCount + r.Consistency.SkillTimeoutCount) > 0)
         {

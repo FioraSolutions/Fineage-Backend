@@ -20,6 +20,12 @@ public sealed class ConsistencyIssue
     public int? OtherBotId { get; init; }
     public int? SubjectObjectId { get; init; }
     public string Detail { get; init; } = "";
+    /// <summary>
+    /// When the triggering frame was observed, when the check had one. The opt-in trace uses it to centre the
+    /// evidence window; checks that only compare end state leave it null and the trace anchors on the last
+    /// frame that mentioned the subject instead.
+    /// </summary>
+    public DateTimeOffset? ObservedAt { get; init; }
 }
 
 public sealed class ConsistencyReport

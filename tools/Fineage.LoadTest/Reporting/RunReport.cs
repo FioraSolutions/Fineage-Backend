@@ -32,6 +32,9 @@ public sealed class RunReport
     public List<string> FailReasons { get; set; } = [];
     public List<string> Bugs { get; init; } = [];
     public ConsistencyReport? Consistency { get; init; }
+    /// <summary>Opt-in bounded frame evidence; written separately as consistency-trace.jsonl, not into report.json.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public ConsistencyTrace? ConsistencyTrace { get; init; }
     public EconomyConsistencyReport? Economy { get; set; }
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset SteadyStateStartedAt { get; init; }
@@ -234,6 +237,8 @@ public static class ReportWriter
         Directory.CreateDirectory(directory);
         if (report.PeakMetricsText != null)
             File.WriteAllText(Path.Combine(directory, "metrics-peak.txt"), report.PeakMetricsText);
+        if (report.ConsistencyTrace is { } trace)
+            File.WriteAllText(Path.Combine(directory, "consistency-trace.jsonl"), ConsistencyTraceJson.ToJsonLines(trace));
 
         string jsonPath = Path.Combine(directory, "report.json");
         string mdPath = Path.Combine(directory, "report.md");
@@ -371,7 +376,7 @@ public static class ReportWriter
             return Enumerable.Repeat(b.RttAvgMs, (int)Math.Min(b.RttSamples, 100));
         }).OrderBy(v => v).ToList();
         if (samples.Count == 0)
-            return (0, 0, 0, bots.Max(b => b.RttMaxMs));
+            return (0, 0, 0, bots.Count > 0 ? bots.Max(b => b.RttMaxMs) : 0);
         double At(double q)
         {
             int idx = (int)Math.Ceiling(q * samples.Count) - 1;

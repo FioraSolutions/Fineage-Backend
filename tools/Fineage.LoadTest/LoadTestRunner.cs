@@ -51,6 +51,9 @@ public sealed class LoadTestRunner
         ct = runCts.Token;
         SimulationHangVerdict hang = SimulationHangVerdict.Clear;
         Exception? runFault = null;
+        string? metricsPreflightFailure = await ProbeZoneMetricsAsync(ct);
+        if (metricsPreflightFailure != null)
+            runFault = new InvalidOperationException(metricsPreflightFailure);
 
         var started = DateTimeOffset.UtcNow;
         var peers = new BotPeerDirectory();
@@ -61,74 +64,85 @@ public sealed class LoadTestRunner
         if (runtimeSampler != null)
             await runtimeSampler.StartAsync(ct);
 
-        var gatekeepers = scenario.ResolvedGatekeeperTravelShare > 0
-            ? GatekeeperDirectory.Load(GatekeeperDirectory.ResolveDataDir(scenario.DataDir))
-            : null;
-        for (int i = 0; i < scenario.BotCount; i++)
+        if (metricsPreflightFailure == null)
         {
-            var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
-            stats.Add(botStats);
-            bots.Add(new FineageBotClient(scenario, i, botStats, peers, gatekeepers));
-        }
-
-        int concurrency = ResolveEnterConcurrency(scenario);
-        int delayMs = scenario.RampUpSeconds <= 0 || scenario.BotCount <= 1
-            ? 0
-            : (int)(scenario.RampUpSeconds * 1000.0 / scenario.BotCount);
-        using var slots = new SemaphoreSlim(concurrency);
-        var enters = new List<Task>();
-        for (int i = 0; i < scenario.BotCount; i++)
-        {
-            if (i > 0 && delayMs > 0)
+            var gatekeepers = scenario.ResolvedGatekeeperTravelShare > 0
+                ? GatekeeperDirectory.Load(GatekeeperDirectory.ResolveDataDir(scenario.DataDir))
+                : null;
+            for (int i = 0; i < scenario.BotCount; i++)
             {
+                var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
+                stats.Add(botStats);
+                bots.Add(new FineageBotClient(scenario, i, botStats, peers, gatekeepers));
+            }
+
+            int concurrency = ResolveEnterConcurrency(scenario);
+            int delayMs = scenario.RampUpSeconds <= 0 || scenario.BotCount <= 1
+                ? 0
+                : (int)(scenario.RampUpSeconds * 1000.0 / scenario.BotCount);
+            using var slots = new SemaphoreSlim(concurrency);
+            var enters = new List<Task>();
+            for (int i = 0; i < scenario.BotCount; i++)
+            {
+                if (i > 0 && delayMs > 0)
+                {
+                    try
+                    {
+                        await Task.Delay(delayMs, ct);
+                    }
+                    catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                }
+
                 try
                 {
-                    await Task.Delay(delayMs, ct);
+                    await slots.WaitAsync(ct);
                 }
                 catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
                 {
                     break;
                 }
+
+                enters.Add(EnterOneAsync(bots[i], slots, ct));
             }
 
             try
             {
-                await slots.WaitAsync(ct);
+                await Task.WhenAll(enters);
             }
             catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
             {
-                break;
             }
 
-            enters.Add(EnterOneAsync(bots[i], slots, ct));
+            if (scenario.HeavyPlay is { IsHeavyPlay: true })
+                await HeavyPlayBehavior.FormPartiesAsync(bots, scenario, ct);
         }
-
-        try
-        {
-            await Task.WhenAll(enters);
-        }
-        catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
-        {
-        }
-
-        if (scenario.HeavyPlay is { IsHeavyPlay: true })
-            await HeavyPlayBehavior.FormPartiesAsync(bots, scenario, ct);
 
         DateTimeOffset behaviorStart = DateTimeOffset.UtcNow;
         DateTimeOffset steadyStateStarted = behaviorStart.AddSeconds(scenario.RampUpSeconds);
         DateTimeOffset behaviorEnd = behaviorStart + TimeSpan.FromSeconds(scenario.DurationSeconds);
         int scrapeSeconds = scenario.DurationSeconds + scenario.RampUpSeconds + 10;
 
-        var metricsCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        var metricsTask = Task.Run(async () =>
+        using var metricsCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        Task<(List<PrometheusSample> samples, List<string> rawScrapes)> metricsTask;
+        if (metricsPreflightFailure == null)
         {
-            var sampler = new ServerMetricsSampler();
-            var samples = await sampler.SampleZoneDuringAsync(
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(scrapeSeconds),
-                metricsCts.Token);
-            return (samples, sampler.RawScrapes);
-        }, ct);
+            metricsTask = Task.Run(async () =>
+            {
+                var sampler = new ServerMetricsSampler();
+                var samples = await sampler.SampleZoneDuringAsync(
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(scrapeSeconds),
+                    metricsCts.Token);
+                return (samples, sampler.RawScrapes);
+            }, ct);
+        }
+        else
+        {
+            metricsTask = Task.FromResult((new List<PrometheusSample>(), new List<string>()));
+        }
 
         var behaviorLoops = bots
             .Where(b => !b.Stats.Disconnected)
@@ -188,7 +202,7 @@ public sealed class LoadTestRunner
         hang = SimulationHangGate.Combine(
             SimulationHangGate.Combine(
                 tickHang,
-                SimulationHangGate.Evaluate(tickSeries, observedFrom, DateTimeOffset.UtcNow),
+                SimulationHangGate.Evaluate(tickSeries, observedFrom, DateTimeOffset.UtcNow, scrapesObserved: rawScrapes.Count),
                 SimulationHangGate.FromTickMax(tickSeries)),
             SimulationHangGate.FromLogFile(zoneLog));
 
@@ -215,6 +229,10 @@ public sealed class LoadTestRunner
         var (p50, p95, p99, max) = ReportWriter.ClientRtt(stats);
         var failReasons = new List<string>();
         var bugs = new List<string>();
+        if (metricsPreflightFailure != null)
+            bugs.Add($"P0: {metricsPreflightFailure}");
+        if (hang.MetricsUnavailable && metricsPreflightFailure == null)
+            failReasons.Add(hang.MetricsUnavailableReason ?? "Zone metrics were unavailable during the run.");
 
         if (logIssues.Any(i => i.Key is "exception" or "handler_error" && i.Count > 0))
             failReasons.Add("Server logs contain exceptions or handler errors.");
@@ -242,7 +260,12 @@ public sealed class LoadTestRunner
 
         ConsistencyReport consistency;
         bool oracleRan = false;
-        if (hang.Hung)
+        if (metricsPreflightFailure != null)
+        {
+            consistency = new ConsistencyReport();
+            bugs.Add("P0: consistency oracle skipped: Zone metrics preflight failed before bots entered.");
+        }
+        else if (hang.Hung)
         {
             // A stalled step used to leave the runner inside the per-frame oracle, so the report was never written.
             consistency = new ConsistencyReport();
@@ -272,6 +295,19 @@ public sealed class LoadTestRunner
 
         if (hardIssues.Count > 0)
             failReasons.Add($"Consistency oracle (hard): {hardIssues.Count} issue(s).");
+
+        ConsistencyTrace? consistencyTrace = null;
+        if (oracleRan && scenario.ConsistencyTrace.Enabled && consistency.Issues.Count > 0)
+        {
+            try
+            {
+                consistencyTrace = ConsistencyTraceBuilder.Build(bots, consistency, scenario.ConsistencyTrace);
+            }
+            catch (Exception ex)
+            {
+                bugs.Add($"P2 consistency trace failed: {ex.GetType().Name}: {ex.Message}");
+            }
+        }
 
         var travel = TravelSummary.From(stats.Where(s => s.Travel != null).Select(s => s.Travel!));
         if (travel.FailReason() is { } travelFail)
@@ -338,6 +374,7 @@ public sealed class LoadTestRunner
             FailReasons = failReasons,
             Bugs = bugs,
             Consistency = consistency,
+            ConsistencyTrace = consistencyTrace,
             Economy = economyReport,
             StartedAt = started,
             SteadyStateStartedAt = steadyStateStarted,
@@ -376,6 +413,41 @@ public sealed class LoadTestRunner
             throw new InvalidOperationException(
                 $"scenario enterConcurrency={scenario.EnterConcurrency} must be an integer >= 1.");
         return scenario.EnterConcurrency;
+    }
+
+    internal static async Task<string?> ProbeZoneMetricsAsync(
+        CancellationToken ct,
+        Func<CancellationToken, Task<string?>>? scrape = null)
+    {
+        var sampler = new ServerMetricsSampler();
+        string url = sampler.ZoneMetricsUrl;
+        string? body;
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            body = scrape != null ? await scrape(ct) : await sampler.FetchZoneRawOnceAsync(ct);
+            ct.ThrowIfCancellationRequested();
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return $"Zone metrics unavailable at {url}: {ex.GetType().Name}: {ex.Message}. Tick progress and Zone provenance cannot be verified.";
+        }
+
+        if (body == null)
+        {
+            return $"Zone metrics unavailable at {url}: no HTTP scrape (connection refused, timeout, or metrics HTTP disabled). Tick progress and Zone provenance cannot be verified.";
+        }
+
+        if (SimulationHangGate.ParseTickCount(body) is null)
+        {
+            return $"Zone metrics unavailable at {url}: scrape is up but fineage_tick_ms_count is missing. Tick progress and Zone provenance cannot be verified.";
+        }
+
+        return null;
     }
 
     static async Task EnterOneAsync(FineageBotClient bot, SemaphoreSlim slots, CancellationToken ct)

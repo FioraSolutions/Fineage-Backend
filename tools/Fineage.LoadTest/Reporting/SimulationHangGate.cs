@@ -16,10 +16,30 @@ public readonly record struct TickObservation(DateTimeOffset At, long TickCount,
 /// <summary>
 /// Whether the zone simulation stalled, and for how long. <see cref="StallSeconds"/> is the
 /// measured freeze (until the counter moved again, or until observation ended), not the threshold.
+/// <para>
+/// No tick observations are not a stall: <see cref="TickSeries"/> reports
+/// <see cref="TickSeriesStatus.NoScrapes"/> or <see cref="TickSeriesStatus.MissingTickCounter"/> so the
+/// runner can fail with a concrete metrics/provenance error instead of treating a disabled metrics
+/// endpoint as a frozen simulation. Freeze detection starts only once an observed tick counter exists.
+/// </para>
 /// </summary>
 public sealed record SimulationHangVerdict(bool Hung, double StallSeconds, int StallCount, string? Reason)
 {
+    public TickSeriesStatus TickSeries { get; init; } = TickSeriesStatus.Available;
+    public string? MetricsUnavailableReason { get; init; }
+    public bool MetricsUnavailable => TickSeries != TickSeriesStatus.Available;
+
     public static SimulationHangVerdict Clear { get; } = new(false, 0, 0, null);
+}
+
+public enum TickSeriesStatus
+{
+    /// <summary>At least one scrape carried <c>fineage_tick_ms_count</c>; freeze detection is meaningful.</summary>
+    Available,
+    /// <summary>No HTTP scrape succeeded during the observation window.</summary>
+    NoScrapes,
+    /// <summary>A scrape succeeded but omitted <c>fineage_tick_ms_count</c>.</summary>
+    MissingTickCounter
 }
 
 /// <summary>
@@ -115,17 +135,24 @@ public static class SimulationHangGate
     }
 
     /// <summary>
-    /// Longest span in which the tick counter did not advance. The span from the last advance
-    /// (or the only sample) through <paramref name="observedUntil"/> is included, so a freeze
-    /// that is still going at the end of the behavior window counts.
-    /// A series with no samples counts only when the whole observation exceeds the limit:
-    /// metrics that appear late are not themselves a stall.
+    /// Longest span in which an observed tick counter did not advance. The span from the last advance
+    /// through <paramref name="observedUntil"/> is included, so a freeze that is still going at the end
+    /// of the behavior window counts.
+    /// <para>
+    /// Zero tick samples are <em>not</em> a stall. They mean the metrics endpoint was unavailable
+    /// (<paramref name="scrapesObserved"/> is 0) or was up but omitted <c>fineage_tick_ms_count</c>
+    /// (<paramref name="scrapesObserved"/> &gt; 0). In both cases the runner must fail with a concrete
+    /// metrics/provenance error; only a repeated observed count past the limit is a simulation hang.
+    /// A first scrape that arrives late starts the observation at that sample, not at
+    /// <paramref name="observedFrom"/>.
+    /// </para>
     /// </summary>
     public static SimulationHangVerdict Evaluate(
         IReadOnlyList<TickObservation> samples,
         DateTimeOffset observedFrom,
         DateTimeOffset observedUntil,
-        TimeSpan? stallLimit = null)
+        TimeSpan? stallLimit = null,
+        int scrapesObserved = 0)
     {
         TimeSpan limit = stallLimit ?? StallLimit;
         double limitSeconds = limit.TotalSeconds;
@@ -142,30 +169,35 @@ public static class SimulationHangGate
 
         if (samples.Count == 0)
         {
-            Consider((observedUntil - observedFrom).TotalSeconds);
-        }
-        else
-        {
-            DateTimeOffset freezeStart = samples[0].At;
-            long count = samples[0].TickCount;
-            bool sawRepeat = false;
-            for (int i = 1; i < samples.Count; i++)
+            bool scraped = scrapesObserved > 0;
+            return new SimulationHangVerdict(false, 0, 0, null)
             {
-                if (samples[i].TickCount == count)
-                {
-                    sawRepeat = true;
-                    continue;
-                }
+                TickSeries = scraped ? TickSeriesStatus.MissingTickCounter : TickSeriesStatus.NoScrapes,
+                MetricsUnavailableReason = scraped
+                    ? "Zone metrics scrape is available but fineage_tick_ms_count is missing; tick progress and Zone provenance cannot be verified."
+                    : "No Zone metrics scrape was available; tick progress and Zone provenance cannot be verified."
+            };
+        }
 
-                if (sawRepeat)
-                    Consider((samples[i].At - freezeStart).TotalSeconds);
-                freezeStart = samples[i].At;
-                count = samples[i].TickCount;
-                sawRepeat = false;
+        DateTimeOffset freezeStart = samples[0].At;
+        long count = samples[0].TickCount;
+        bool sawRepeat = false;
+        for (int i = 1; i < samples.Count; i++)
+        {
+            if (samples[i].TickCount == count)
+            {
+                sawRepeat = true;
+                continue;
             }
 
-            Consider((observedUntil - freezeStart).TotalSeconds);
+            if (sawRepeat)
+                Consider((samples[i].At - freezeStart).TotalSeconds);
+            freezeStart = samples[i].At;
+            count = samples[i].TickCount;
+            sawRepeat = false;
         }
+
+        Consider((observedUntil - freezeStart).TotalSeconds);
 
         if (longest < 0)
             longest = 0;
@@ -238,7 +270,11 @@ public static class SimulationHangGate
         if ((watchdog.Hung || tickMax.Hung) && count == 0)
             count = 1;
         if (!hung)
-            return new SimulationHangVerdict(false, seconds, 0, null);
+            return new SimulationHangVerdict(false, seconds, 0, null)
+            {
+                TickSeries = ticks.TickSeries,
+                MetricsUnavailableReason = ticks.MetricsUnavailableReason
+            };
 
         var sb = new StringBuilder();
         sb.Append("Simulation hang: true stall duration ");
@@ -265,7 +301,11 @@ public static class SimulationHangGate
             sb.Append(watchdog.Reason);
         }
 
-        return new SimulationHangVerdict(true, seconds, count, sb.ToString());
+        return new SimulationHangVerdict(true, seconds, count, sb.ToString())
+        {
+            TickSeries = ticks.TickSeries,
+            MetricsUnavailableReason = ticks.MetricsUnavailableReason
+        };
     }
 
     public static RunReport RunnerFault(
@@ -315,6 +355,7 @@ public static class SimulationHangGate
         TimeSpan interval = poll ?? TimeSpan.FromSeconds(2);
         TimeSpan limit = stallLimit ?? StallLimit;
         var samples = new List<TickObservation>();
+        int scrapes = 0;
         bool signaled = false;
         using var http = readTickCount == null ? new HttpClient { Timeout = TimeSpan.FromSeconds(2) } : null;
         int port = MetricsPort;
@@ -329,10 +370,15 @@ public static class SimulationHangGate
             try
             {
                 if (readTickCount != null)
+                {
                     count = await readTickCount(stop).ConfigureAwait(false);
+                    if (count is not null)
+                        scrapes++;
+                }
                 else if (http != null)
                 {
                     string body = await http.GetStringAsync($"http://127.0.0.1:{port}/metrics", stop).ConfigureAwait(false);
+                    scrapes++;
                     count = ParseTickCount(body);
                     tickMaxMs = ParseTickMaxMs(body) ?? 0;
                 }
@@ -349,7 +395,7 @@ public static class SimulationHangGate
             if (count is long n)
                 samples.Add(new TickObservation(DateTimeOffset.UtcNow, n, tickMaxMs));
 
-            SimulationHangVerdict verdict = Current(samples, observedFrom, DateTimeOffset.UtcNow, limit);
+            SimulationHangVerdict verdict = Current(samples, observedFrom, DateTimeOffset.UtcNow, limit, scrapes);
             if (verdict.Hung && !signaled)
             {
                 signaled = true;
@@ -374,16 +420,17 @@ public static class SimulationHangGate
             }
         }
 
-        return Current(samples, observedFrom, DateTimeOffset.UtcNow, limit);
+        return Current(samples, observedFrom, DateTimeOffset.UtcNow, limit, scrapes);
     }
 
     static SimulationHangVerdict Current(
         IReadOnlyList<TickObservation> samples,
         DateTimeOffset observedFrom,
         DateTimeOffset observedUntil,
-        TimeSpan limit) =>
+        TimeSpan limit,
+        int scrapesObserved) =>
         Combine(
-            Evaluate(samples, observedFrom, observedUntil, limit),
+            Evaluate(samples, observedFrom, observedUntil, limit, scrapesObserved),
             SimulationHangVerdict.Clear,
             FromTickMax(samples, limit));
 }

@@ -123,7 +123,9 @@ public static class ConsistencyOracle
                                 Kind = ConsistencyKind.StalePosition,
                                 ObserverBotId = a.BotId,
                                 OtherBotId = b.BotId,
-                                Detail = $"peer view ({viewB.X},{viewB.Y}) vs ground ({truthX},{truthY})"
+                                SubjectObjectId = b.ObjectId,
+                                Detail = $"peer view ({viewB.X},{viewB.Y}) vs ground ({truthX},{truthY})",
+                                ObservedAt = viewB.PositionUpdatedAt != default ? viewB.PositionUpdatedAt : null
                             });
                         }
 
@@ -152,7 +154,9 @@ public static class ConsistencyOracle
                                 Kind = ConsistencyKind.StalePosition,
                                 ObserverBotId = b.BotId,
                                 OtherBotId = a.BotId,
-                                Detail = $"peer view ({viewA.X},{viewA.Y}) vs ground ({truthX},{truthY})"
+                                SubjectObjectId = a.ObjectId,
+                                Detail = $"peer view ({viewA.X},{viewA.Y}) vs ground ({truthX},{truthY})",
+                                ObservedAt = viewA.PositionUpdatedAt != default ? viewA.PositionUpdatedAt : null
                             });
                         }
                     }
@@ -308,7 +312,8 @@ public static class ConsistencyOracle
                         Kind = ConsistencyKind.MissingCombatFanout,
                         ObserverBotId = w.BotId,
                         SubjectObjectId = attackerOid,
-                        Detail = $"no AttackState for attacker {attackerOid} within 2.5s"
+                        Detail = $"no AttackState for attacker {attackerOid} within 2.5s",
+                        ObservedAt = at
                     });
                     combatIssues++;
                     if (combatIssues >= 25)
@@ -348,7 +353,8 @@ public static class ConsistencyOracle
                         Kind = ConsistencyKind.VisibilityLeak,
                         ObserverBotId = bot.BotId,
                         SubjectObjectId = actorOid,
-                        Detail = $"{opcode} from distance {dist} (> {watch * 2})"
+                        Detail = $"{opcode} from distance {dist} (> {watch * 2})",
+                        ObservedAt = at
                     });
                 }
             }

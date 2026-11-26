@@ -57,6 +57,13 @@ public sealed class ServerMetricsSampler
 
     public List<string> RawScrapes { get; } = [];
 
+    /// <summary>The exact endpoint the sampler polls; used by the runner's metrics preflight error.</summary>
+    public string ZoneMetricsUrl => $"http://127.0.0.1:{_zoneMetricsPort}/metrics";
+
+    /// <summary>One raw scrape for startup preflight. Null means the endpoint did not answer.</summary>
+    public async Task<string?> FetchZoneRawOnceAsync(CancellationToken ct) =>
+        await FetchAsync(ZoneMetricsUrl, ct);
+
     public async Task<PrometheusSample?> SampleZoneOnceAsync(CancellationToken ct) =>
         await FetchAsync($"http://127.0.0.1:{_zoneMetricsPort}/metrics", ct) is { } t ? PrometheusParser.Parse(t) : null;
 

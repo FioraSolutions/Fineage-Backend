@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.LoadTest.Consistency;
 
 namespace Fineage.LoadTest.Models;
 
@@ -110,6 +111,9 @@ public sealed class LoadScenario
 
     /// <summary>Optional sibling YAML under scenarios/; merges action weights and layout defaults.</summary>
     public string? Extends { get; set; }
+
+    /// <summary>Opt-in bounded per-issue frame trace written next to the report (see <see cref="ConsistencyTraceOptions"/>).</summary>
+    public ConsistencyTraceOptions ConsistencyTrace { get; set; } = new();
 
     /// <summary>Full-economy hammer (#955): P2P trade, shops, stores, manufacture, manor, warehouse.</summary>
     public EconomyHammerConfig? Economy { get; set; }
