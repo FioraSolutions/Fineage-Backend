@@ -21,6 +21,7 @@ public static class ExpectedMetricsCatalog
         "fineage_command_coalesced_total",
         "fineage_command_rejected_total",
         "fineage_tick_max_ms",
+        "fineage_build_info",
         "fineage_step_watchdog_stalls"
     ];
 

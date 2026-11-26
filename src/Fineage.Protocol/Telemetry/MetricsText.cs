@@ -248,6 +248,13 @@ public static class MetricsText
     public static string Prometheus(MetricsSnapshot snapshot, double inPacketsPerSecond, double outPacketsPerSecond)
     {
         var sb = new StringBuilder(2048);
+        AppendHelp(sb, "fineage_build_info", "Provenance of the loaded process: commit, configuration, module id (module id changes on every build)");
+        sb.Append("# TYPE fineage_build_info gauge\n");
+        sb.Append("fineage_build_info{commit=\"").Append(Escape(BuildInfo.Commit))
+            .Append("\",configuration=\"").Append(Escape(BuildInfo.Configuration))
+            .Append("\",module_id=\"").Append(Escape(BuildInfo.ModuleId))
+            .Append("\",version=\"").Append(Escape(BuildInfo.InformationalVersion))
+            .Append("\"} 1\n");
         AppendGauge(sb, "fineage_connections", "Open TCP sessions", snapshot.Endpoints, static e => e.Connections);
         AppendCounter(sb, "fineage_connections_rejected_total", "Accepts dropped because the process was at its connection cap", snapshot.Endpoints, static e => e.ConnectionsRejected);
         AppendCounter(sb, "fineage_frames_in_total", "Decoded inbound packets", snapshot.Endpoints, static e => e.FramesIn);

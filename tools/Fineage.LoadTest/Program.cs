@@ -4,7 +4,7 @@ using Fineage.LoadTest.Reporting;
 
 if (args.Length == 0 || args.Contains("-h") || args.Contains("--help"))
 {
-    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--region-workers N]");
+    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--zone-dll path] [--expect-zone-commit sha] [--require-clean-provenance] [--region-workers N]");
     return;
 }
 
@@ -22,6 +22,10 @@ string? loginLog = Arg(args, "--login-log");
 string? zoneLog = Arg(args, "--zone-log");
 int regionWorkers = int.TryParse(Arg(args, "--region-workers"), out int rw) ? rw : 0;
 int? zonePid = int.TryParse(Arg(args, "--zone-pid"), out int pid) ? pid : null;
+string? zoneDll = Arg(args, "--zone-dll") ?? Environment.GetEnvironmentVariable("FINEAGE_ZONE_DLL");
+string? expectedZoneCommit = Arg(args, "--expect-zone-commit")
+                            ?? Environment.GetEnvironmentVariable("FINEAGE_EXPECT_ZONE_COMMIT");
+bool requireCleanProvenance = args.Contains("--require-clean-provenance");
 
 var scenario = ScenarioLoader.Load(scenarioPath);
 if (string.IsNullOrWhiteSpace(scenario.Name))
@@ -47,7 +51,8 @@ var runner = new LoadTestRunner();
 RunReport report;
 try
 {
-    report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token);
+    report = await runner.RunAsync(scenario, target, regionWorkers, loginLog, zoneLog, zonePid, cts.Token,
+        zoneDll, expectedZoneCommit, requireCleanProvenance);
 }
 catch (Exception ex)
 {

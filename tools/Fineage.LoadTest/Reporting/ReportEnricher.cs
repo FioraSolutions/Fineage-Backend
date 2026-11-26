@@ -17,9 +17,15 @@ public static class ReportEnricher
         string? zoneLogPath,
         IEnumerable<string> logPaths,
         RuntimeCounterStats? runtime,
-        int? zonePid = null)
+        int? zonePid = null,
+        string? zoneDll = null,
+        string? expectedZoneCommit = null,
+        bool requireCleanProvenance = false)
     {
-        report.Environment = RunEnvironmentCollector.Collect(zonePid);
+        ZoneBuildInfo? zoneBuild = report.PeakMetricsText is { } peakText
+            ? PrometheusParser.ParseBuildInfo(peakText)
+            : null;
+        report.Environment = RunEnvironmentCollector.Collect(zonePid, zoneDll, zoneBuild);
         report.DurationSeconds = scenario.DurationSeconds;
         report.RampUpSeconds = scenario.RampUpSeconds;
         report.LatencyTable = LatencyTableBuilder.FromPeakMetrics(report.PeakMetricsText, zoneLogPath);
@@ -71,6 +77,13 @@ public static class ReportEnricher
             report.WatchdogStallMaxMs = Math.Max(report.WatchdogStallMaxMs ?? 0, promSamples.Max(s => s.WatchdogStallMaxMs));
             report.WatchdogStalls = Math.Max(report.WatchdogStalls, promSamples.Max(s => s.WatchdogStalls));
             report.FanoutDropped = Math.Max(report.FanoutDropped, promSamples.Max(s => s.FanoutDropped));
+        }
+
+        foreach (string problem in RunEnvironmentCollector.ProvenanceProblems(
+                     report.Environment, expectedZoneCommit, requireCleanProvenance))
+        {
+            report.FailReasons.Add(problem);
+            report.Bugs.Add($"P1 provenance: {problem}");
         }
 
         report.GateVerdicts = PerformanceGates.Evaluate(report).ToList();

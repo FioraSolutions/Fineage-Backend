@@ -4,6 +4,8 @@ using Fineage.Protocol.Telemetry;
 
 namespace Fineage.LoadTest.Metrics;
 
+public sealed record ZoneBuildInfo(string Commit, string Configuration, string ModuleId, string Version);
+
 public sealed record HistogramStats(
     double Sum,
     long Count,
@@ -57,6 +59,9 @@ public sealed class PrometheusSample
     public long WatchdogStalls { get; init; }
     public long CommandCoalesced { get; init; }
     public long CommandRejected { get; init; }
+
+    /// <summary>The loaded Zone process build, from <c>fineage_build_info</c>; null when the scrape did not carry it.</summary>
+    public ZoneBuildInfo? Build { get; init; }
 }
 
 public static class PrometheusParser
@@ -121,8 +126,30 @@ public static class PrometheusParser
             WatchdogStallMaxMs = ParseDouble(text, "fineage_step_watchdog_stall_max_ms"),
             WatchdogStalls = ParseLong(text, "fineage_step_watchdog_stalls"),
             CommandCoalesced = ParseLong(text, "fineage_command_coalesced_total"),
-            CommandRejected = ParseCounterSum(text, "fineage_command_rejected_total")
+            CommandRejected = ParseCounterSum(text, "fineage_command_rejected_total"),
+            Build = ParseBuildInfo(text)
         };
+    }
+
+    /// <summary>
+    /// <c>fineage_build_info{commit="…",configuration="…",module_id="…"}</c> is emitted by the process that rendered
+    /// the scrape, so it identifies the loaded assembly, not a DLL that was rebuilt after the process started.
+    /// </summary>
+    public static ZoneBuildInfo? ParseBuildInfo(string text)
+    {
+        Match line = Regex.Match(text, @"^fineage_build_info\{(?<labels>[^}]*)\}\s+1\s*$", RegexOptions.Multiline);
+        if (!line.Success)
+            return null;
+        var labels = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (Match label in Regex.Matches(line.Groups["labels"].Value, "(\\w+)=\"([^\"]*)\""))
+            labels[label.Groups[1].Value] = label.Groups[2].Value;
+        if (!labels.TryGetValue("commit", out string? commit) || string.IsNullOrWhiteSpace(commit))
+            return null;
+        return new ZoneBuildInfo(
+            commit,
+            labels.GetValueOrDefault("configuration", "unknown"),
+            labels.GetValueOrDefault("module_id", ""),
+            labels.GetValueOrDefault("version", ""));
     }
 
     static HistogramStats? Phase(string text, string phase) =>

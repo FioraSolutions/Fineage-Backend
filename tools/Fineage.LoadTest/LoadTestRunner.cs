@@ -16,7 +16,10 @@ public sealed class LoadTestRunner
         string? loginLog,
         string? zoneLog,
         int? zonePid,
-        CancellationToken ct)
+        CancellationToken ct,
+        string? zoneDll = null,
+        string? expectedZoneCommit = null,
+        bool requireCleanProvenance = false)
     {
         if (scenario.Economy is { Enabled: true })
         {
@@ -347,7 +350,8 @@ public sealed class LoadTestRunner
         var attackSamples = bots.SelectMany(b => b.ObservationLog.Tracker.AttackFanoutSamples);
         var skillSamples = bots.SelectMany(b => b.ObservationLog.Tracker.SkillFanoutSamples);
         var legacySamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
-        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples, zoneLog, logPaths, runtimeStats, zonePid);
+        ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples,
+            zoneLog, logPaths, runtimeStats, zonePid, zoneDll, expectedZoneCommit, requireCleanProvenance);
 
         report.SimulationStallSeconds = hang.StallSeconds;
         report.SimulationStallCount = hang.StallCount;
