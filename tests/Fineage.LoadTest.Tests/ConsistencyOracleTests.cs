@@ -281,6 +281,111 @@ public sealed class ConsistencyOracleTests
     }
 
     [Fact]
+    public void Moving_peer_at_prior_leg_is_not_compared_with_a_later_self_origin()
+    {
+        // The observer's view is the origin of the leg both sides saw at t+1. The subject's later self origin
+        // is on the next leg while the pair is no longer visible, then they meet again at the end. Comparing
+        // the old view with the final from-origin invents a stale follower; at a common instant the view was exact.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, isSelf: false)), t0);
+        // Same first leg on both lanes: the view and the ground agree at t+1.
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 1000, 1000, 1400, 1000), t0.AddSeconds(1));
+        observer.Record(NetOpcode.MoveState, MoveFromTo(74, 1000, 1000, 1400, 1000), t0.AddSeconds(1));
+        // Next leg moves the subject out of the observer's watch; only the subject receives that origin.
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 7000, 1000, 7400, 1000), t0.AddSeconds(2));
+        // They meet again at the end, but the subject has not emitted a move since the view.
+        observer.Record(NetOpcode.MoveState, MoveFromTo(1, 6800, 1000, 6900, 1000), t0.AddSeconds(3));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
+    }
+
+    [Fact]
+    public void Frozen_follower_still_fails_while_the_subject_stays_visible()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, isSelf: false)), t0);
+        // The subject walks in front of the observer and the observer never receives the move.
+        subject.Record(NetOpcode.MoveState, MoveFromTo(74, 2500, 1000, 2900, 1000), t0.AddSeconds(1));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    [Fact]
+    public void Stationary_same_time_position_mismatch_still_fails()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 2200, 1000, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, 1200, 1000, isSelf: true)), t0);
+        // The observer's spawn of the subject carries a position 1200 units away at the same instant.
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, 1000, 1000, isSelf: false)), t0);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    [Fact]
+    public void Missing_spawn_skips_pairs_whose_self_positions_are_from_different_eras()
+    {
+        // The subject's last self position is two minutes old; the observer only reaches its area near the end.
+        // There is no common instant where both timelines carry a fresh position, so no pair is invented.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(2);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 10000, 10000, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 1000, 1000, isSelf: true)), t0);
+        observer.Record(NetOpcode.MoveState, MoveFromTo(1001, 10000, 10000, 10100, 10000), t0.AddMinutes(2));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+    }
+
+    [Fact]
+    public void Missing_spawn_still_fails_at_a_comparable_time()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(2);
+        var observer = new BotObservationLog(1);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 1000, 1000, isSelf: true)), t0);
+        observer.Record(NetOpcode.MoveState, MoveFromTo(1001, 1000, 1000, 1100, 1000), t0.AddSeconds(1));
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 1500, 1000, isSelf: true)), t0);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+    }
+
+    [Fact]
     public void Missing_spawn_ignores_pairs_two_cells_apart_even_when_euclidean_distance_is_under_6000()
     {
         // Observer at the east edge of cell 0, subject just inside cell 2: 3002 units, but GridAoi's 3x3 watch

@@ -23,6 +23,12 @@ public static class ConsistencyOracle
     /// socket lanes.
     /// </summary>
     public const int PresenceRefreshWindowMs = 500;
+    /// <summary>
+    /// Bounded fan-out latency used to decide whether two samples describe the same instant. A position seen
+    /// minutes apart is not evidence of divergence: the pawn may have crossed several AOI cells in between.
+    /// This is a causal-comparison window, not a position tolerance; distances still use <see cref="PositionTolerance"/>.
+    /// </summary>
+    public const int ComparableWindowMs = 2500;
 
     public static ConsistencyReport Analyze(
         IReadOnlyList<FineageBotClient> bots,
@@ -35,6 +41,8 @@ public static class ConsistencyOracle
         var issues = new List<ConsistencyIssue>();
         var roster = BuildRoster(bots, scenario);
         var selfUserInfo = BuildSelfUserInfoIndex(bots);
+        // Every pairwise comparison below uses these self timelines, so both sides speak about the same instant.
+        var timelines = bots.ToDictionary(b => b.BotId, b => PositionTimeline.From(b.ObservationLog.Snapshot()));
 
         foreach (var bot in bots)
         {
@@ -89,11 +97,16 @@ public static class ConsistencyOracle
             {
                 var a = roster[i];
                 var b = roster[j];
-                int dist = Distance(a.X, a.Y, b.X, b.Y);
+                // Both endpoints must be sampled at one common instant. Comparing A's newest frame with B's
+                // newest frame invents pairs when one bot has already moved away from the other's last update.
+                if (!TryPairPositionsAtCommonTime(timelines[a.BotId], timelines[b.BotId], a, b,
+                        out int ax, out int ay, out int bx, out int by, out DateTimeOffset pairAt))
+                    continue;
+                int dist = Distance(ax, ay, bx, by);
                 // Presence is not a Euclidean radius: GridAoi.GetVisible returns the 3x3 cells around the observer's
                 // own cell. A pair can be 3000..6000 apart across two cell edges (not visible), and two diagonal
                 // neighbours can be >6000 apart but still visible. Both cases were false pair decisions at 6000.
-                bool shouldSee = InGridWatch(a.X, a.Y, b.X, b.Y, aoiCellSize);
+                bool shouldSee = InGridWatch(ax, ay, bx, by, aoiCellSize);
                 if (!shouldSee)
                     continue;
 
@@ -105,7 +118,8 @@ public static class ConsistencyOracle
                     continue;
                 pairs++; // one pair observation is meaningful when at least one side is live
 
-                if (aLive && !aSeesB)
+                if (aLive && !aSeesB &&
+                    HasComparableWatchEvidence(timelines[a.BotId], timelines[b.BotId], a, b, pairAt, aoiCellSize))
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -117,7 +131,8 @@ public static class ConsistencyOracle
                     });
                 }
 
-                if (bLive && !bSeesA)
+                if (bLive && !bSeesA &&
+                    HasComparableWatchEvidence(timelines[b.BotId], timelines[a.BotId], b, a, pairAt, aoiCellSize))
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -131,12 +146,12 @@ public static class ConsistencyOracle
 
                 if (aLive && bLive && aSeesB && bSeesA)
                 {
-                    if (TryPeerTruth(b, out int truthX, out int truthY, out int truthHp, out DateTimeOffset truthAt) &&
+                    if (TryPeerTruth(b, out _, out _, out int truthHp, out _) &&
                         a.Tracker.Entities.TryGetValue((ulong)b.ObjectId, out var viewB))
                     {
                         if (!DiedAtOrAfter(b, viewB.PositionUpdatedAt) &&
-                            (Math.Abs(viewB.X - truthX) > PositionTolerance || Math.Abs(viewB.Y - truthY) > PositionTolerance) &&
-                            GroundIsNotOlderThanView(truthAt, viewB.PositionUpdatedAt))
+                            TryStalePeerView(a, b, timelines[a.BotId], timelines[b.BotId], viewB, aoiCellSize,
+                                out int truthX, out int truthY))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -163,12 +178,12 @@ public static class ConsistencyOracle
                         }
                     }
 
-                    if (TryPeerTruth(a, out truthX, out truthY, out truthHp, out truthAt) &&
+                    if (TryPeerTruth(a, out _, out _, out truthHp, out _) &&
                         b.Tracker.Entities.TryGetValue((ulong)a.ObjectId, out var viewA))
                     {
                         if (!DiedAtOrAfter(a, viewA.PositionUpdatedAt) &&
-                            (Math.Abs(viewA.X - truthX) > PositionTolerance || Math.Abs(viewA.Y - truthY) > PositionTolerance) &&
-                            GroundIsNotOlderThanView(truthAt, viewA.PositionUpdatedAt))
+                            TryStalePeerView(b, a, timelines[b.BotId], timelines[a.BotId], viewA, aoiCellSize,
+                                out int truthX, out int truthY))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -191,7 +206,6 @@ public static class ConsistencyOracle
         var combat = IndexCombat(bots);
         // Positions at the time of each event: economy bots teleport hub/warehouse/manor/arena, so the end-of-run
         // position says nothing about whether a watcher was in range when an early attack happened.
-        var timelines = bots.ToDictionary(b => b.BotId, b => PositionTimeline.From(b.ObservationLog.Snapshot()));
 
         foreach (var bot in bots)
             CheckCombatFanout(bot, roster, watch, issues, combat, timelines);
@@ -549,12 +563,213 @@ public static class ConsistencyOracle
     }
 
     /// <summary>
-    /// A peer view newer than the subject's own last MoveState means the *ground* is stale, not the observer.
-    /// The soak's 198 Bot74 errors were exactly that: the subject's self state was 3m49s older than every peer view.
-    /// Unknown timestamps keep the old comparison so a genuinely stale observer is still reported.
+    /// Selects one instant both timelines can answer and returns both positions at that instant. The newest
+    /// sample of either side is the reference so an old stationary observer still has a valid position, while
+    /// missing-spawn evidence is accepted only from a comparable instant by <see cref="HasComparableWatchEvidence"/>.
     /// </summary>
-    static bool GroundIsNotOlderThanView(DateTimeOffset groundAt, DateTimeOffset viewAt) =>
-        groundAt == default || viewAt == default || groundAt >= viewAt;
+    static bool TryPairPositionsAtCommonTime(
+        PositionTimeline aTimeline,
+        PositionTimeline bTimeline,
+        BotRosterEntry a,
+        BotRosterEntry b,
+        out int ax,
+        out int ay,
+        out int bx,
+        out int by,
+        out DateTimeOffset at)
+    {
+        ax = a.X;
+        ay = a.Y;
+        bx = b.X;
+        by = b.Y;
+        at = default;
+        DateTimeOffset? aLast = aTimeline.LastAt;
+        DateTimeOffset? bLast = bTimeline.LastAt;
+        if (aLast is null || bLast is null)
+            return true; // a bot whose self spawn was never observed keeps the roster position.
+
+        DateTimeOffset latest = aLast.Value.UtcTicks >= bLast.Value.UtcTicks ? aLast.Value : bLast.Value;
+        if (!aTimeline.TryAt(latest, out ax, out ay) || !bTimeline.TryAt(latest, out bx, out by))
+            return false;
+        at = latest;
+        return true;
+    }
+
+    /// <summary>
+    /// A missing spawn needs an instant where both timelines carry a position sample inside the fan-out
+    /// window and the pair is inside the same 3x3 watch. The newest instant is tried first, then the samples
+    /// that led to it, so a subject that stopped updating before the observer arrived is not paired across eras.
+    /// </summary>
+    static bool HasComparableWatchEvidence(
+        PositionTimeline observerTimeline,
+        PositionTimeline subjectTimeline,
+        BotRosterEntry observer,
+        BotRosterEntry subject,
+        DateTimeOffset latest,
+        int cellSize)
+    {
+        if (BothFreshAt(observerTimeline, subjectTimeline, latest) &&
+            PairVisibleAt(observerTimeline, subjectTimeline, latest, observer, subject, cellSize))
+            return true;
+
+        foreach (var point in subjectTimeline.Points)
+        {
+            if (point.At.UtcTicks > latest.UtcTicks)
+                break;
+            if (BothFreshAt(observerTimeline, subjectTimeline, point.At) &&
+                PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
+                return true;
+        }
+
+        foreach (var point in observerTimeline.Points)
+        {
+            if (point.At.UtcTicks > latest.UtcTicks)
+                break;
+            if (BothFreshAt(observerTimeline, subjectTimeline, point.At) &&
+                PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
+                return true;
+        }
+
+        return false;
+    }
+
+    static bool BothFreshAt(PositionTimeline aTimeline, PositionTimeline bTimeline, DateTimeOffset at)
+    {
+        if (at == default)
+            return false;
+        long window = TimeSpan.FromMilliseconds(ComparableWindowMs).Ticks;
+        return FreshAt(aTimeline, at, window) && FreshAt(bTimeline, at, window);
+    }
+
+    static bool FreshAt(PositionTimeline timeline, DateTimeOffset at, long windowTicks) =>
+        timeline.TryAt(at, out _, out _, out DateTimeOffset sampleAt) &&
+        at.UtcTicks - sampleAt.UtcTicks <= windowTicks;
+
+    /// <summary>
+    /// A peer's remembered position is stale only while the subject stayed visible from that view onward.
+    /// Moving legs are asynchronous: a view captured at one leg is still the correct ground for that instant
+    /// even when the subject's current origin is the next leg. If the pair left visibility in between, the old
+    /// view belongs to a closed visibility interval and is not compared with a later origin.
+    /// </summary>
+    static bool TryStalePeerView(
+        BotRosterEntry observer,
+        BotRosterEntry subject,
+        PositionTimeline observerTimeline,
+        PositionTimeline subjectTimeline,
+        BotObservationLog.TrackedEntity view,
+        int cellSize,
+        out int groundX,
+        out int groundY)
+    {
+        groundX = subject.X;
+        groundY = subject.Y;
+        DateTimeOffset viewAt = view.PositionUpdatedAt;
+        if (viewAt == default || subjectTimeline.Count == 0)
+        {
+            // No timestamps: retain the end-state comparison so a genuinely frozen watcher is still reported.
+            return PairVisibleAt(observerTimeline, subjectTimeline, viewAt, observer, subject, cellSize) &&
+                   (Math.Abs(view.X - groundX) > PositionTolerance || Math.Abs(view.Y - groundY) > PositionTolerance);
+        }
+
+        long window = TimeSpan.FromMilliseconds(ComparableWindowMs).Ticks;
+        DateTimeOffset subjectLast = subjectTimeline.LastAt!.Value;
+        // The subject's own last position is older than the observer's view, so the *ground* is stale.
+        // Comparing against it was the Bot74 artifact (self state 3m49s behind every peer view).
+        if (subjectLast.UtcTicks < viewAt.UtcTicks - window)
+            return false;
+
+        if (!subjectTimeline.TryAt(viewAt, out groundX, out groundY, out _))
+            return false;
+
+        bool visibleAtView = PairVisibleAt(observerTimeline, subjectTimeline, viewAt, observer, subject, cellSize);
+        if (visibleAtView &&
+            (Math.Abs(view.X - groundX) > PositionTolerance || Math.Abs(view.Y - groundY) > PositionTolerance))
+            return true;
+
+        // A view can match the ground at its own timestamp yet be frozen while the subject keeps walking in
+        // front of the observer. Only a later ground origin inside the same unbroken visibility interval is stale.
+        foreach (var point in subjectTimeline.Points)
+        {
+            if (point.At.UtcTicks <= viewAt.UtcTicks)
+                continue;
+            if (Math.Abs(view.X - point.X) <= PositionTolerance && Math.Abs(view.Y - point.Y) <= PositionTolerance)
+                continue;
+            if (!PairVisibleThroughout(observerTimeline, subjectTimeline, viewAt, point.At,
+                    observer, subject, cellSize))
+                return false; // visibility ended: the old view is from the prior interval, not a frozen follower.
+            groundX = point.X;
+            groundY = point.Y;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether both timelines place the pair inside the same 3x3 GridAoi watch at one instant.</summary>
+    static bool PairVisibleAt(
+        PositionTimeline observerTimeline,
+        PositionTimeline subjectTimeline,
+        DateTimeOffset at,
+        BotRosterEntry observer,
+        BotRosterEntry subject,
+        int cellSize)
+    {
+        int ox = observer.X;
+        int oy = observer.Y;
+        int sx = subject.X;
+        int sy = subject.Y;
+        if (at != default)
+        {
+            if (observerTimeline.TryAt(at, out int tx, out int ty))
+            {
+                ox = tx;
+                oy = ty;
+            }
+
+            if (subjectTimeline.TryAt(at, out tx, out ty))
+            {
+                sx = tx;
+                sy = ty;
+            }
+        }
+
+        return InGridWatch(ox, oy, sx, sy, cellSize);
+    }
+
+    /// <summary>Every sample between two instants must still be visible for a view to count as continuously stale.</summary>
+    static bool PairVisibleThroughout(
+        PositionTimeline observerTimeline,
+        PositionTimeline subjectTimeline,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        BotRosterEntry observer,
+        BotRosterEntry subject,
+        int cellSize)
+    {
+        if (!PairVisibleAt(observerTimeline, subjectTimeline, from, observer, subject, cellSize) ||
+            !PairVisibleAt(observerTimeline, subjectTimeline, to, observer, subject, cellSize))
+            return false;
+
+        long low = from.UtcTicks;
+        long high = to.UtcTicks;
+        foreach (var point in observerTimeline.Points)
+        {
+            if (point.At.UtcTicks <= low || point.At.UtcTicks >= high)
+                continue;
+            if (!PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
+                return false;
+        }
+
+        foreach (var point in subjectTimeline.Points)
+        {
+            if (point.At.UtcTicks <= low || point.At.UtcTicks >= high)
+                continue;
+            if (!PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
+                return false;
+        }
+
+        return true;
+    }
 
     public static bool IsHardFailure(ConsistencyKind kind) => kind is
         ConsistencyKind.GhostEntity or
