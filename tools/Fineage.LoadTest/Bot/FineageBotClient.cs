@@ -107,6 +107,37 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         if (_selfEntity != 0)
             _peers.Register(BotId, SelfObjectId);
         _receiveTask = Task.Run(() => ReceiveLoopAsync(_receiveCts.Token), CancellationToken.None);
+        await PlaceAtScenarioSpawnAsync(ct);
+    }
+
+    /// <summary>
+    /// EnterWorld resumes the persisted character position, so a scenario that needs a specific start sends the
+    /// load-test relocation and waits for the arrival frame before any behaviour starts. Without it a bot whose
+    /// character was last saved on a lower geo layer, or in another town, plays from a place the scenario never
+    /// intended and every proximity gate (talk, shop, quest) refuses for range.
+    /// </summary>
+    async Task PlaceAtScenarioSpawnAsync(CancellationToken ct)
+    {
+        if (!Scenario.TeleportToSpawnOnEnter)
+            return;
+        int mark = _observation.FrameCount;
+        await TeleportToAsync(_spawnX, _spawnY, _spawnZ, ct);
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(10);
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (_observation.ContainsOpcodeAfter(mark, NetOpcode.TeleportToLocation))
+                return;
+            if (_observation.ContainsRejectAfter(mark, out string? code))
+                throw new InvalidOperationException(
+                    $"scenario spawn relocation to {_spawnX},{_spawnY},{_spawnZ} rejected: {code}; " +
+                    "start the zone with FINEAGE_ZONE_LOADTEST_TELEPORT=1");
+            await Task.Delay(25, ct).ConfigureAwait(false);
+        }
+
+        throw new TimeoutException(
+            $"scenario spawn relocation to {_spawnX},{_spawnY},{_spawnZ}: no TeleportToLocation within 10s; " +
+            "start the zone with FINEAGE_ZONE_LOADTEST_TELEPORT=1");
     }
 
     async Task ReceiveLoopAsync(CancellationToken ct)

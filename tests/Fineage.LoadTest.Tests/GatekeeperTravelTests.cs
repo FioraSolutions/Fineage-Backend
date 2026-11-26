@@ -122,6 +122,88 @@ public class GatekeeperTravelTests
         Assert.Equal(0, t.Stats.Attempted);
     }
 
+    /// <summary>
+    /// Mobius gates both NpcTalk and every bypass link on Npc.INTERACTION_DISTANCE (250) in 3D
+    /// (<c>Npc.canInteract</c>). Two soak defects hid behind that: a traveller that talked from its walk-trigger
+    /// distance (2500) never opened a page, and one that compared only XY kept retrying a talk it could never land.
+    /// </summary>
+    [Fact]
+    public void The_traveller_walks_into_the_interaction_gate_before_talking()
+    {
+        Assert.True(GatekeeperTraveler.ApproachRange < NpcHtmlProtocol.InteractionDistance,
+            $"talk trigger {GatekeeperTraveler.ApproachRange} must sit inside the {NpcHtmlProtocol.InteractionDistance} gate");
+
+        var stats = new TravelStats();
+        var t = new GatekeeperTraveler(Repo.Value, 1, TimeSpan.Zero, stats);
+        var gk = Repo.Value.Nearest(46045, 41251);
+        t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(46045, 41251, -3440));
+        t.OnFrame(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(new EntitySpawnMsg
+        {
+            EntityValue = ClarissaObject,
+            Kind = EntityKindNet.Npc,
+            TemplateId = gk.NpcId,
+            Name = "gatekeeper",
+            X = gk.X,
+            Y = gk.Y,
+            Z = gk.Z
+        }));
+
+        // Walk in hops until the bot reaches the gate; the talk must not come earlier, and every hop must cut the
+        // distance (a hop that does not move is the infinite retry the soak hit).
+        int x = 46045, y = 41251, z = -3440;
+        long previous = long.MaxValue;
+        DateTimeOffset now = DateTimeOffset.UnixEpoch;
+        for (int hop = 0; hop < 64; hop++)
+        {
+            var cmd = t.Step(now);
+            Assert.NotNull(cmd);
+            if (cmd!.Value.Opcode == NetOpcode.NpcTalk)
+            {
+                long dx = gk.X - x, dy = gk.Y - y, dz = gk.Z - z;
+                long distSq = dx * dx + dy * dy + dz * dz;
+                Assert.True(distSq <= (long)GatekeeperTraveler.ApproachRange * GatekeeperTraveler.ApproachRange,
+                    $"talked from {Math.Sqrt(distSq):0} units, outside the {GatekeeperTraveler.ApproachRange} trigger");
+                return;
+            }
+
+            Assert.Equal(NetOpcode.MoveInput, cmd.Value.Opcode);
+            var move = NetCodec.DecodeMoveInput(cmd.Value.Payload);
+            long remaining = GatekeeperDirectory.DistSq(gk.X, gk.Y, move.DestX, move.DestY);
+            Assert.True(remaining < previous, $"a walk hop must cut the distance to the gatekeeper (hop={hop} prev={previous} now={remaining} at {x},{y},{z})");
+            previous = remaining;
+            (x, y, z) = (move.DestX, move.DestY, move.DestZ);
+            t.OnFrame(NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+            {
+                EntityValue = SelfId,
+                OriginX = x,
+                OriginY = y,
+                OriginZ = z,
+                DestX = move.DestX,
+                DestY = move.DestY,
+                DestZ = move.DestZ
+            }));
+            now += TimeSpan.FromSeconds(30);
+        }
+
+        Assert.Fail("the traveller never reached the interaction gate");
+    }
+
+    /// <summary>A range refusal must produce a walk toward the gatekeeper, never the same talk again.</summary>
+    [Fact]
+    public void A_range_refusal_makes_the_traveller_walk_closer_instead_of_repeating_the_talk()
+    {
+        var (t, now) = AtGiranGatekeeper();
+        t.Step(now);
+        t.OnFrame(NetOpcode.Reject, NetCodec.EncodeReject(new RejectMsg { Code = "range", Message = "NpcTalk failed." }));
+
+        var closer = t.Step(now);
+        Assert.NotNull(closer);
+        Assert.Equal(NetOpcode.MoveInput, closer!.Value.Opcode);
+        Assert.Equal(1, t.Stats.TalkRangeRetries);
+        Assert.Equal(1, t.Stats.WalkHops);
+        Assert.Equal(0, t.Stats.UnexplainedCount);
+    }
+
     [Fact]
     public void Far_from_any_gatekeeper_the_traveller_walks_toward_the_nearest()
     {
@@ -136,6 +218,84 @@ public class GatekeeperTravelTests
         Assert.True(GatekeeperDirectory.DistSq(move.DestX, move.DestY, gk.X, gk.Y) <
                     GatekeeperDirectory.DistSq(46045, 41251, gk.X, gk.Y));
         Assert.Equal(1, stats.WalkHops);
+    }
+
+    /// <summary>
+    /// The zone acknowledges a leg with <c>MoveState</c> only while the pawn stays inside one AOI cell, and geo may
+    /// truncate the destination it acknowledges. Treating the ack's dest as "I am here" made the soak's traveller
+    /// drift ahead of the server and never reach a gatekeeper. The bot must interpolate its own leg at run speed.
+    /// </summary>
+    [Fact]
+    public void A_walk_leg_is_interpolated_not_snapped_to_the_acknowledged_destination()
+    {
+        var stats = new TravelStats();
+        var t = new GatekeeperTraveler(Repo.Value, 1, TimeSpan.Zero, stats);
+        var start = DateTimeOffset.UnixEpoch;
+        t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(46045, 41251, -3440));
+
+        var hop = t.Step(start);
+        Assert.Equal(NetOpcode.MoveInput, hop!.Value.Opcode);
+        var move = NetCodec.DecodeMoveInput(hop.Value.Payload);
+
+        // One second in, the pawn has run ~120 units, not the whole hop.
+        var after1s = start.AddSeconds(1);
+        Assert.Null(t.Step(after1s));
+        Assert.True(t.Position.X > 46045, "the pawn must have moved");
+        Assert.True(t.Position.X < move.DestX, $"the pawn cannot be at the hop destination ({move.DestX}) one second in");
+
+        // A late ack that re-states the same leg must not teleport the pawn forward either.
+        t.OnFrame(NetOpcode.MoveState, NetCodec.EncodeMoveState(new MoveStateMsg
+        {
+            EntityValue = SelfId,
+            OriginX = 46045,
+            OriginY = 41251,
+            OriginZ = -3440,
+            DestX = move.DestX,
+            DestY = move.DestY,
+            DestZ = move.DestZ
+        }));
+        var after2s = start.AddSeconds(2);
+        t.Step(after2s);
+        Assert.True(t.Position.X < move.DestX,
+            $"a MoveState ack must not snap the pawn to its destination (x={t.Position.X}, dest={move.DestX})");
+
+        // And a PositionCorrection is authoritative: it does move the pawn.
+        t.OnFrame(NetOpcode.PositionCorrection, NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
+        {
+            EntityValue = SelfId,
+            X = 46050,
+            Y = 41251,
+            Z = -3440
+        }));
+        t.Step(start.AddSeconds(3));
+        Assert.Equal(46050, t.Position.X);
+    }
+
+    /// <summary>A hop that geo keeps refusing must be reported, not retried until the run ends.</summary>
+    [Fact]
+    public void A_walk_that_cannot_close_the_distance_is_reported_instead_of_looping()
+    {
+        var stats = new TravelStats();
+        var t = new GatekeeperTraveler(Repo.Value, 1, TimeSpan.Zero, stats);
+        var now = DateTimeOffset.UnixEpoch;
+        t.OnFrame(NetOpcode.EntitySpawn, SelfSpawn(46045, 41251, -3440));
+
+        for (int i = 0; i <= GatekeeperTraveler.MaxStalledHops; i++)
+        {
+            t.Step(now);
+            // The server truncates every hop to nothing: the pawn stands still.
+            t.OnFrame(NetOpcode.PositionCorrection, NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
+            {
+                EntityValue = SelfId,
+                X = 46045,
+                Y = 41251,
+                Z = -3440
+            }));
+            now += TimeSpan.FromSeconds(30);
+        }
+
+        Assert.Equal(1, stats.UnexplainedCount);
+        Assert.Contains("cannot close on gatekeeper", stats.Unexplained.Single());
     }
 
     [Theory]
