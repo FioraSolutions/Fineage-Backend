@@ -199,7 +199,8 @@ public sealed class LoadTestRunner
         var logs = new List<string>();
         if (loginLog != null) logs.Add(loginLog);
         if (zoneLog != null) logs.Add(zoneLog);
-        var logIssues = LogScanner.ScanFiles(logs);
+        // The log files are shared with earlier runs: only the entries this run produced may fail it.
+        var logIssues = LogScanner.ScanFiles(logs, started, DateTimeOffset.UtcNow);
 
         int inWorld = stats.Count(s => s.InWorld && !s.Disconnected);
         int peakOnline = promSamples.Count > 0 ? promSamples.Max(s => s.ZoneOnline) : 0;
