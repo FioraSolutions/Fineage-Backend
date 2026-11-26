@@ -371,11 +371,14 @@ public sealed class BotObservationLog
                     {
                         var m = NetCodec.DecodeMoveState(payload);
                         ulong key = m.EntityValue;
+                        // Origin is where the server says the pawn is when it emits the leg. Dest is only the
+                        // requested endpoint and can be thousands of units away (re-targets, approach toggles);
+                        // treating it as the current position invents pairs along a point never reached.
                         if (_byValue.TryGetValue(key, out var e))
                         {
-                            e.X = m.DestX;
-                            e.Y = m.DestY;
-                            e.Z = m.DestZ;
+                            e.X = m.OriginX;
+                            e.Y = m.OriginY;
+                            e.Z = m.OriginZ;
                             e.PositionUpdatedAt = at;
                             e.Despawned = false;
                             _byValue[key] = e;
@@ -386,11 +389,28 @@ public sealed class BotObservationLog
                             {
                                 ObjectId = (int)m.EntityValue,
                                 EntityGeneration = m.EntityGeneration,
-                                X = m.DestX,
-                                Y = m.DestY,
-                                Z = m.DestZ,
+                                X = m.OriginX,
+                                Y = m.OriginY,
+                                Z = m.OriginZ,
                                 PositionUpdatedAt = at
                             };
+                        }
+
+                        break;
+                    }
+                case NetOpcode.PositionCorrection:
+                    {
+                        // Server-authoritative XYZ after a drift check: the client must treat this as the pawn.
+                        var c = NetCodec.DecodePositionCorrection(payload);
+                        ulong key = c.EntityValue;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = c.X;
+                            e.Y = c.Y;
+                            e.Z = c.Z;
+                            e.PositionUpdatedAt = at;
+                            e.Despawned = false;
+                            _byValue[key] = e;
                         }
 
                         break;

@@ -281,6 +281,107 @@ public sealed class ConsistencyOracleTests
     }
 
     [Fact]
+    public void Missing_spawn_ignores_pairs_two_cells_apart_even_when_euclidean_distance_is_under_6000()
+    {
+        // Observer at the east edge of cell 0, subject just inside cell 2: 3002 units, but GridAoi's 3x3 watch
+        // stops at cell 1, so neither can see the other. The old distance<=6000 rule invented this pair.
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 2999, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 6001, 0, isSelf: true)), at);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.MissingSpawn);
+    }
+
+    [Fact]
+    public void Missing_spawn_expects_diagonal_neighbour_cells_beyond_6000_units()
+    {
+        // (5999,5999) is the far corner of the adjacent cell: 8484 units away, but GridAoi's 3x3 watch includes it.
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 0, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 5999, 5999, isSelf: true)), at);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 2 && i.SubjectObjectId == 1001);
+    }
+
+    [Fact]
+    public void Alternating_long_leg_destinations_do_not_invent_a_missing_spawn_at_the_unreached_tip()
+    {
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 6000, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 0, 0, isSelf: true)), at);
+        // Server origin stays in cell 0 while the requested leg tip is in cell 2. Dest is not the pawn.
+        for (int i = 1; i <= 5; i++)
+            subject.Record(NetOpcode.MoveState, MoveFromTo(1002, 0, 0, 6000, 0), at.AddMilliseconds(i * 200));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.MissingSpawn);
+    }
+
+    [Fact]
+    public void Stationary_players_in_the_same_watch_still_report_missing_spawn()
+    {
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 0, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 500, 500, isSelf: true)), at);
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 2 && i.SubjectObjectId == 1001);
+    }
+
+    [Fact]
+    public void Position_correction_is_authoritative_for_missing_spawn_pairs()
+    {
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        var at = DateTimeOffset.UtcNow;
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 0, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 6000, 0, isSelf: true)), at);
+        subject.Record(NetOpcode.PositionCorrection, NetCodec.EncodePositionCorrection(new PositionCorrectionMsg
+        {
+            EntityValue = 1002,
+            EntityGeneration = 1,
+            X = 500,
+            Y = 400,
+            Z = 0
+        }), at.AddSeconds(1));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+    }
+
+    [Fact]
     public void Dead_observer_is_excluded_but_live_observer_still_checks_corpse_visibility()
     {
         var t0 = DateTimeOffset.UtcNow.AddMinutes(-2);
@@ -503,17 +604,21 @@ public sealed class ConsistencyOracleTests
         CurHp = 100
     };
 
-    static byte[] Move(ulong id, int x, int y) => NetCodec.EncodeMoveState(new MoveStateMsg
-    {
-        EntityValue = id,
-        EntityGeneration = 1,
-        OriginX = x,
-        OriginY = y,
-        DestX = x,
-        DestY = y,
-        DestZ = 0,
-        Running = true
-    });
+    static byte[] Move(ulong id, int x, int y) => MoveFromTo(id, x, y, x, y);
+
+    static byte[] MoveFromTo(ulong id, int originX, int originY, int destX, int destY) =>
+        NetCodec.EncodeMoveState(new MoveStateMsg
+        {
+            EntityValue = id,
+            EntityGeneration = 1,
+            OriginX = originX,
+            OriginY = originY,
+            OriginZ = 0,
+            DestX = destX,
+            DestY = destY,
+            DestZ = 0,
+            Running = true
+        });
 
     static EntitySpawnMsg Npc(ulong id, int x, int y) => new()
     {
