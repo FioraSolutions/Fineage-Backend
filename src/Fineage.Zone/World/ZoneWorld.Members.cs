@@ -141,6 +141,10 @@ public sealed partial class ZoneWorld
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id);
 
+        // The anchor advances with the reconcile, not with the AOI store: a move-start shortcut compares the
+        // destination cell against this value, so it must name the cell whose watch set is actually in Knownlist.
+        StampKnownlistRefreshAnchor(entity);
+
         if (netWatchers is { Count: > 0 } && NetBridge != null && ack != null)
         {
             NetBridge.FanoutMoveState(

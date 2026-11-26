@@ -163,6 +163,7 @@ public sealed partial class ZoneWorld
             return "slots";
         }
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (!ZoneCombat.InPickupRange(player.X, player.Y, ground.X, ground.Y))
         {
             if (!allowApproach)

@@ -105,6 +105,7 @@ public sealed partial class ZoneWorld
         if (player.CurMp < levelData.MpConsume)
             return SkillProtocol.Mp;
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (!InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
