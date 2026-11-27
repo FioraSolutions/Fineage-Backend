@@ -26,13 +26,17 @@ public sealed partial class ZoneWorld
         }
 
         if (rows != null)
-            freight.Restore(rows.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+            RestoreFreight(freight, rows);
         LogWarehouseLoad("freight", player.ObjectId, freight);
         player.Freight = freight;
     }
 
     PrivateWarehouse FreightWarehouse(ZoneEntity player) =>
         player.Freight ?? throw new InvalidOperationException($"player {player.ObjectId} freight is not loaded");
+
+    /// <summary>Warehouse/freight stacks have no durable piece ownership, unlike an online player's bag.</summary>
+    static void RestoreFreight(PrivateWarehouse freight, IEnumerable<StoredItem> rows) =>
+        freight.Restore(rows.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, ObjectId: 0)));
 
     PrivateWarehouse ResolveRecipientFreight(string account, int recipientId, out ZoneEntity? online)
     {
@@ -47,7 +51,7 @@ public sealed partial class ZoneWorld
         var stored = _accounts?.FindById(account, recipientId);
         var freight = new PrivateWarehouse(_game.Items, _itemIds);
         if (stored?.Freight != null)
-            freight.Restore(stored.Freight.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
+            RestoreFreight(freight, stored.Freight);
         LogWarehouseLoad("freight", recipientId, freight);
         return freight;
     }
@@ -269,32 +273,37 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(LedgerTxKind.FreightDeposit, player.ObjectId, recipientId);
         ObserveLedger(move, bag);
         ObserveLedger(move, store);
-        if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
+        if (!CommitLedgerMutation(move, $"freight send object={player.ObjectId} recipient={recipientId}", () =>
         {
-            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText);
-            return null;
-        }
-
-        move.Post(bag, WarehouseRules.AdenaItemId, -fee);
-        move.Post(LedgerAccount.Of(SystemAccount.Fees), WarehouseRules.AdenaItemId, fee);
-        foreach (var (item, count, _) in planned)
+            move.Post(bag, WarehouseRules.AdenaItemId, -fee);
+            move.Post(LedgerAccount.Of(SystemAccount.Fees), WarehouseRules.AdenaItemId, fee);
+            foreach (var (item, count, _) in planned)
+            {
+                move.Post(bag, item.ItemId, -count, PiecesOf([item]));
+                move.Post(store, item.ItemId, count);
+            }
+        }, () =>
         {
-            if (!player.Inventory.TryTakeFrom(item.ObjectId, count, out var taken, out bool removed) || taken == null)
-                return "bad_request";
-            changes.Add(removed
-                ? InventoryMessages.RemoveRow(taken, -1)
-                : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
-            freight.Add(taken.ItemId, count, taken.EnchantLevel, out _);
-            move.Post(bag, taken.ItemId, -count, PiecesOf([taken]));
-            move.Post(store, taken.ItemId, count);
-        }
+            if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
+                throw new InvalidOperationException($"freight fee plan failed for object {player.ObjectId}");
+            foreach (var (item, count, _) in planned)
+            {
+                if (!player.Inventory.TryTakeFrom(item.ObjectId, count, out var taken, out bool removed) || taken == null)
+                    throw new InvalidOperationException($"freight item object={item.ObjectId} changed after preflight");
+                changes.Add(removed
+                    ? InventoryMessages.RemoveRow(taken, -1)
+                    : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
+                freight.Add(taken.ItemId, count, taken.EnchantLevel, out _);
+                if (onlineRecipient != null)
+                    onlineRecipient.Freight = freight;
+                else
+                    PersistFreightStacks(session.Account, recipientId, freight);
+            }
+        }, LedgerHoldingsOf))
+            return "ledger_refused";
 
         if (onlineRecipient != null)
-            onlineRecipient.Freight = freight;
-        else
-            PersistFreightStacks(session.Account, recipientId, freight);
-
-        move.Commit(LedgerHoldingsOf);
+            SaveFreight(onlineRecipient.Session!, onlineRecipient);
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);

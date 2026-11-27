@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Freight } freightAccount =>
             _byId.TryGetValue(freightAccount.OwnerId, out var freightOwner) && freightOwner.Freight != null
                 ? HoldingsOf(freightOwner.Freight)
-                : HoldingsFromStored(QueuedFreight(freightAccount.OwnerId)
+                : HoldingsOfStoredWarehouse(QueuedFreight(freightAccount.OwnerId)
                     ?? _accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight
                     ?? []),
         { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
@@ -84,6 +84,14 @@ public sealed partial class ZoneWorld
 
     static LedgerHoldings ProgressHoldingsOf(ZoneEntity player) =>
         new LedgerHoldings().Add(LedgerResourceIds.Sp, player.Sp).Add(LedgerResourceIds.Exp, player.Exp);
+
+    static LedgerHoldings HoldingsOfStoredWarehouse(IReadOnlyList<StoredItem> items)
+    {
+        var holdings = new LedgerHoldings();
+        foreach (var row in items)
+            holdings.Add(row.ItemId, row.Count);
+        return holdings;
+    }
 
     static LedgerHoldings HoldingsFromStored(IReadOnlyList<StoredItem> items)
     {
@@ -160,6 +168,29 @@ public sealed partial class ZoneWorld
         player, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests), step, outcome => outcome.QuestId);
 
     void ObserveLedger(LedgerMove move, LedgerAccount account) => move.Observe(account, LedgerHoldingsOf(account));
+
+    /// <summary>
+    /// One simulation-thread, no-I/O container transfer: all postings and destination ids are planned first;
+    /// only an accepted ledger move may execute the prevalidated inventory mutations.
+    /// </summary>
+    static bool CommitLedgerMutation(
+        LedgerMove move,
+        string operation,
+        Action plan,
+        Action apply,
+        Func<LedgerAccount, LedgerHoldings> holdings)
+    {
+        plan();
+        var rejection = move.CheckCommit();
+        if (rejection != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"{operation} refused: ledger rejected the planned postings ({rejection})");
+            return false;
+        }
+        apply();
+        move.Commit(holdings);
+        return true;
+    }
 
     /// <summary>Opens a shop move: the buyer's inventory and every treasury the shop's tax can reach.</summary>
     LedgerMove BeginShopMove(LedgerTxKind kind, ZoneEntity player, int npcId, int castleId)

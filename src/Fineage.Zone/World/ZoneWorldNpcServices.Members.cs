@@ -77,18 +77,39 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(moveKind, player.ObjectId, npc.NpcId);
         ObserveLedger(move, bag);
         ObserveLedger(move, store);
-        foreach (var (stack, count, stackable) in planned)
+        // A non-stackable withdrawal gets fresh bag ids. Reserve them for the preflight postings rather than
+        // mutating the bag before the ledger has accepted the move. Stackable rows have no durable piece ids.
+        var reserved = planned.ToDictionary(
+            line => line.Stack.ObjectId,
+            line => line.Stackable ? [] : Enumerable.Range(0, line.Count).Select(_ => _itemIds.Next()).ToList());
+        if (!CommitLedgerMutation(move, $"warehouse withdraw object={player.ObjectId} keeper={npc.ObjectId}", () =>
         {
-            if (!wh.TryTake(stack.ObjectId, count, out _, out _))
-                return "bad_request";
-            bool existed = stackable && player.Inventory.FindByItemId(stack.ItemId) != null;
-            var added = player.Inventory.Add(stack.ItemId, count, stack.EnchantLevel);
-            changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
-            move.Post(store, stack.ItemId, -count);
-            move.Post(bag, stack.ItemId, count, PiecesOf([added]));
-        }
-
-        move.Commit(LedgerHoldingsOf);
+            foreach (var (stack, count, stackable) in planned)
+            {
+                move.Post(store, stack.ItemId, -count);
+                move.Post(bag, stack.ItemId, count, reserved[stack.ObjectId]);
+            }
+        }, () =>
+        {
+            foreach (var (stack, count, stackable) in planned)
+            {
+                if (!wh.TryTake(stack.ObjectId, count, out _, out _))
+                    throw new InvalidOperationException($"warehouse stack object={stack.ObjectId} changed after preflight");
+                bool existed = stackable && player.Inventory.FindByItemId(stack.ItemId) != null;
+                if (stackable)
+                {
+                    var added = player.Inventory.Add(stack.ItemId, count, stack.EnchantLevel);
+                    changes.Add(InventoryMessages.ChangeRow(existed ? InventoryChange.Modify : InventoryChange.Add, added));
+                    continue;
+                }
+                foreach (int objectId in reserved[stack.ObjectId])
+                {
+                    var added = player.Inventory.AddRestored(objectId, stack.ItemId, 1, stack.EnchantLevel);
+                    changes.Add(InventoryMessages.ChangeRow(InventoryChange.Add, added));
+                }
+            }
+        }, LedgerHoldingsOf))
+            return "ledger_refused";
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);
