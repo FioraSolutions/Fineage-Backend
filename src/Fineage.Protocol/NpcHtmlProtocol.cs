@@ -21,6 +21,9 @@ public static class NpcHtmlProtocol
     /// <summary>The object is an attackable. Talk and bypass do not open a dialog.</summary>
     public const string Attackable = "npc_attackable";
 
+    /// <summary>Mobius setIntentionInteract while casting: ActionFailed, the talk is not queued for after the cast.</summary>
+    public const string Busy = "npc_busy";
+
     public static bool InRange(int x1, int y1, int z1, int x2, int y2, int z2, int range = InteractionDistance)
     {
         long dx = x1 - (long)x2;

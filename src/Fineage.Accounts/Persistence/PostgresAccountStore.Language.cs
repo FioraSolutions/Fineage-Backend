@@ -10,9 +10,8 @@ public sealed partial class PostgresAccountStore
         if (string.IsNullOrWhiteSpace(account))
             return PlayerLocale.Default;
 
-        using (EnterPersist())
+        using (var conn = OpenReadConnection())
         {
-            using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText =
                 """

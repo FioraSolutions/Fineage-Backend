@@ -200,7 +200,7 @@ public sealed partial class ZoneWorld
         _economyPersist?.DrainCompletions(this);
 
         long flushStart = Stopwatch.GetTimestamp();
-        var applied = _ingress.TakeApplied();
+        var applied = TakeAppliedWithCarried();
         bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied, out bool repliesHeld);
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
@@ -222,8 +222,21 @@ public sealed partial class ZoneWorld
         // alone; everything else answers here, including a commit that failed. The test is whether *these* replies
         // rode on a queued batch: "any batch pending" stranded a step's replies forever whenever it had no economy to
         // commit while someone else's logout batch was in flight (#990 reconnect storm: enters that never answered).
-        if (applied.Count > 0 && !repliesHeld)
-            ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
+        // Inside a step a batch that was not queued (a reservation held by another commit, a full worker queue) is
+        // restored dirty and rides the next step's commit, so its replies wait for that commit instead of hearing a
+        // failure for a change that is about to land (#1112).
+        if (repliesHeld)
+            ForgetCarriedSince(applied);
+        else if (applied.Count > 0)
+        {
+            if (committed)
+            {
+                ForgetCarriedSince(applied);
+                ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
+            }
+            else
+                AnswerOrCarryUncommitted(applied, uncommitted!);
+        }
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);
         return (flushMs, sealMs, replyMs);

@@ -22,6 +22,9 @@ public sealed class GatekeeperTraveler
     /// hundreds of units away once the height is counted, which is exactly the refusal a flat check never predicts.
     /// </summary>
     public const int ApproachRange = 200;
+
+    /// <summary>Interlude SystemMessage 22, "Your target is out of range."</summary>
+    public const int TargetOutOfRangeMessageId = 22;
     /// <summary>A gatekeeper this close must be in the knownlist (AOI 3×3 cells of 3000).</summary>
     public const int SightRange = 6000;
     public const int WalkHop = 1500;
@@ -386,6 +389,14 @@ public sealed class GatekeeperTraveler
                         return Unexplained(now, $"talk npc={_talkNpcId} reject {r.Code}: {r.Message}");
                     }
                 case NetOpcode.SystemMessage:
+                    // A talk that walked to the gatekeeper and still cannot reach its interaction sphere is refused
+                    // on arrival with the ActionFailed equivalent (SystemMessage 22): walk into it like a range reject.
+                    if (NetCodec.DecodeSystemMessage(frame.Payload).Id == TargetOutOfRangeMessageId)
+                    {
+                        Stats.TalkRangeRetries++;
+                        _phase = Phase.Wait;
+                        return WalkTowardTalkTarget(now);
+                    }
                     if (Refusal(frame.Payload, now, out var refused))
                         return refused;
                     break;

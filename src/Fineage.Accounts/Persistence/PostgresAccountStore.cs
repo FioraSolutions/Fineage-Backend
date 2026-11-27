@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Fineage.Game.Quests;
+using Fineage.Protocol.Telemetry;
 using Npgsql;
 
 namespace Fineage.Accounts;
@@ -80,13 +82,39 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     /// there. Any caller that enters this gate while already holding the memory store lock would recreate the
     /// register/create inversion and is rejected instead of deadlocking.
     /// </summary>
+    static readonly KeyValuePair<string, object?> GateWait = new("kind", "store_gate_wait");
+    static readonly KeyValuePair<string, object?> GateHold = new("kind", "store_gate_hold");
+
     readonly struct PersistGuard : IDisposable
     {
         readonly object _gate;
+        readonly long _entered;
 
-        internal PersistGuard(object gate) => _gate = gate;
+        internal PersistGuard(object gate, long entered)
+        {
+            _gate = gate;
+            _entered = entered;
+        }
 
-        public void Dispose() => Monitor.Exit(_gate);
+        public void Dispose()
+        {
+            FineageTelemetry.PersistWriteMilliseconds.Record(Stopwatch.GetElapsedTime(_entered).TotalMilliseconds, GateHold);
+            Monitor.Exit(_gate);
+        }
+    }
+
+    /// <summary>
+    /// A single-statement read on its own pooled connection, outside the write gate (#1112). Every write commits before
+    /// it releases the gate, so a read that starts after a write returned already sees it; holding the gate added
+    /// nothing but a place in the queue. On enter-world that queue was behind every logout write in the process:
+    /// 23 handler threads sat in <c>GetLanguage</c> waiting for the gate during a reconnect storm.
+    /// </summary>
+    NpgsqlConnection OpenReadConnection()
+    {
+        if (Monitor.IsEntered(_inner.SyncRoot))
+            throw new InvalidOperationException(
+                "durable store read opened while holding the memory store lock; lock order is persist -> memory");
+        return _dataSource.OpenConnection();
     }
 
     PersistGuard EnterPersist()
@@ -94,8 +122,12 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
         if (Monitor.IsEntered(_inner.SyncRoot))
             throw new InvalidOperationException(
                 "durable store gate entered while holding the memory store lock; lock order is persist -> memory");
+        long waitStart = Stopwatch.GetTimestamp();
         Monitor.Enter(_persistGate);
-        return new PersistGuard(_persistGate);
+        long entered = Stopwatch.GetTimestamp();
+        // #1112: every durable write in the process queues on this one gate; wait and hold are what size it.
+        FineageTelemetry.PersistWriteMilliseconds.Record(Stopwatch.GetElapsedTime(waitStart, entered).TotalMilliseconds, GateWait);
+        return new PersistGuard(_persistGate, entered);
     }
 
     static void ApplyMigrations(NpgsqlDataSource dataSource)
