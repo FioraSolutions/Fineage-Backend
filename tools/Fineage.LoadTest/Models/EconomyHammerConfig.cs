@@ -41,6 +41,13 @@ public sealed class EconomyHammerConfig
     public int ShopBuyCount { get; set; } = 1;
 
     public int RecipeListId { get; set; } = 1;
+
+    /// <summary>
+    /// What one order of <see cref="RecipeListId"/> takes from the customer (<c>data/recipes.json</c> recipe 1: 4 stem,
+    /// 2 iron ore). The enter kit (<c>ZoneWorldLoadTestEconomy</c>) covers two orders; a customer whose bag no longer
+    /// holds an order's worth skips the order instead of collecting a <c>craft_materials</c> refusal (#955).
+    /// </summary>
+    public Dictionary<int, int> ManufactureIngredients { get; set; } = new() { [1864] = 4, [1869] = 2 };
     public long ManufactureFee { get; set; } = 50;
 
     /// <summary>Every Nth bot is created as the dwarf crafter the manufacture flow needs.</summary>
