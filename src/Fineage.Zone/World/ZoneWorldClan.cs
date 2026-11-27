@@ -155,11 +155,15 @@ public sealed partial class ZoneWorld
         return due.Count;
     }
 
+    internal bool TryGetClanCreateExpiryForTests(int characterId, out long unixMs) =>
+        _clan.TryGetCreateExpiry(characterId, out unixMs);
+
     void RememberPenalties(ZoneSession session, CharacterRecord? stored = null)
     {
         if (stored == null)
             return;
 
+        _affinity.Require("clan penalty write");
         _clan.SetJoinExpiry(session.ObjectId, stored.ClanJoinExpiryUnixMs);
         _clan.SetCreateExpiry(session.ObjectId, stored.ClanCreateExpiryUnixMs);
         int clanId = ClanIdFor(session.ObjectId);
