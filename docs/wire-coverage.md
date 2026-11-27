@@ -2,13 +2,18 @@
 
 Fineage `dev` @ `8daf4209`. Mobius `L2J_Mobius_CT_0_Interlude` @ `5c019037`. Unity client `FioraSolutions/Fineage` `dev` @ `c1e79fe` (`l2-unity`, Net contract via `scripts/sync-net-contract.py`).
 
-Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`), not the retail byte ids. A packet is **server yes** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
+Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`), not the retail byte ids. A packet is **server handler** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). That proves wiring only. **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
 
-The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). **contract** means the synced contract defines the opcode and no gameplay file reads or writes it. Client and server contracts match (252 opcode constants on both sides).
+The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). That also proves wiring only. **contract** means the synced contract defines the opcode and no gameplay file reads or writes it. Client and server contracts match (252 opcode constants on both sides).
 
-## Counts
+## Counts — handler coverage only
 
-| Direction | Packets | Server yes | partial | no | n/a | Client yes | contract-only | client no | client n/a |
+These counters prove **implementation/handler wiring only**: a `yes` cell means a server or client handler
+exists, not that its behaviour matches Mobius and not that it has run under production conditions. A
+`partial`/`no` cell is a coverage gap. Behavioural parity and production verification live only in
+[`mobius-parity-matrix.md`](mobius-parity-matrix.md); this file never proves either.
+
+| Direction | Packets | Server handler | partial | no | n/a | Client handler | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | C2S | 158 | 104 | 34 | 17 | 3 | 91 | 28 | 36 | 3 |
 | C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
@@ -24,7 +29,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Client → server
 
-| Opcode | Mobius class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|
 | 0x00 | ProtocolVersion | yes | yes | Hello | Fineage Hello, not retail 0x00 |
 | 0x08 | AuthLogin | yes | yes | Auth,ZoneAuth | Login Auth + zone ZoneAuth |
@@ -187,7 +192,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Client → server, extended 0xD0
 
-| Opcode | Mobius class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|
 | 0xd0/0x01 | RequestOustFromPartyRoom | no | no |  |  |
 | 0xd0/0x02 | RequestDismissPartyRoom | no | no |  |  |
@@ -238,7 +243,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Server → client
 
-| Opcode | Mobius enum | Java class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius enum | Java class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|---|
 | 0x00 | KEY_PACKET | KeyPacket | partial | yes | HelloAck | login hello ack, not a cipher key packet |
 | 0x01 | CHAR_MOVE_TO_LOCATION | MoveToLocation | yes | yes | MoveState |  |
