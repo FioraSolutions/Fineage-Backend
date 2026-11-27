@@ -154,7 +154,8 @@ public sealed partial class ZoneWorld
         || _dirtyInventories.Count > 0
         || _dirtyWarehouses.Count > 0
         || _dirtyFreight.Count > 0
-        || _dirtyOfflineBags.Count > 0;
+        || _dirtyOfflineBags.Count > 0
+        || _worldState.HasDirty;
 
     /// <summary>
     /// Commits every dirty economic container with the pending ledger entries. <paramref name="discardWithoutPublish"/>
@@ -284,6 +285,7 @@ public sealed partial class ZoneWorld
     internal void PublishStolenEconomyInternal(EconomyPersistBatch stolen, int? discardWithoutPublish)
     {
         PublishStolenEconomy(stolen, discardWithoutPublish);
+        _worldState.Committed(stolen.WorldState);
         using (_economyLock.Enter())
             EndInFlightLocked(stolen);
     }
@@ -399,6 +401,7 @@ public sealed partial class ZoneWorld
         _dirtyFreight.Clear();
         _dirtyOfflineBags.Clear();
         stolen.Bags = BagsOf(stolen);
+        stolen.WorldState = _worldState.Steal();
         // Taken with the bags, under the economy lock: the rows up to here are exactly the moves these bags show.
         stolen.LedgerThrough = _ledger.Position;
         stolen.InFlightIds = EconomyPersistService.CharacterIdsOfBatch(stolen);
@@ -420,6 +423,7 @@ public sealed partial class ZoneWorld
             // Stolen writes are older than anything queued since: they go first so a later snapshot of the same
             // character still wins in BagsOf, and a different character's write is never dropped.
             _dirtyOfflineBags.InsertRange(0, stolen.OfflineBags);
+            _worldState.Restore(stolen.WorldState);
             // Dirty again in the same lock hold, so a reply check never sees the change as neither dirty nor in flight.
             EndInFlightLocked(stolen);
         }

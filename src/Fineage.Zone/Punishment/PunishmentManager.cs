@@ -1,6 +1,7 @@
 using Fineage.Accounts;
 using Fineage.Game.Punishment;
 using Fineage.Zone.Time;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.Punishment;
 
@@ -46,12 +47,16 @@ public sealed class PunishmentManager
             _sink.OnPunishmentStarted(row);
     }
 
-    public static PunishmentManager OpenInStateDirectory(string stateDirectory, IZoneTime? time = null)
+    /// <summary>
+    /// Punishments saved in the database (#996), shared with login. The GM audit stays an append-only file in
+    /// <paramref name="stateDirectory"/>: it is a log, not state anything reads back.
+    /// </summary>
+    public static PunishmentManager Open(WorldStateStore state, string stateDirectory, IZoneTime? time = null)
     {
         string dir = PunishmentStatePaths.ResolveStateDirectory(stateDirectory);
         IZoneTime clock = time ?? SystemZoneTime.Instance;
         return new PunishmentManager(
-          new JsonPunishmentStore(PunishmentStatePaths.PunishmentsJsonPath(dir)),
+          new StoredPunishmentStore(state),
           JailZoneCatalog.LoadDefault(),
           GmAuditLog.ForStateDirectory(dir, clock),
           clock);

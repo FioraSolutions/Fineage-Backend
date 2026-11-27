@@ -267,7 +267,7 @@ public sealed class StoredStateAuditTests
                     }
 
                     // The entries are the journal's: TxJournal keeps them once this returns.
-                    _owner.Inner.CommitEconomy([], (IReadOnlyList<EconomyBagWrite>)args![1]!);
+                    _owner.Inner.CommitEconomy([], (IReadOnlyList<EconomyBagWrite>)args![1]!, (IReadOnlyList<WorldStateDocument>?)args[2]);
                     return null;
                 }
 

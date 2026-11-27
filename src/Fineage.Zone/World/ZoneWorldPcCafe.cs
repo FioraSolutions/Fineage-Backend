@@ -11,7 +11,7 @@ public sealed partial class ZoneWorld
 
     void InitPcCafe(PcCafePointsManager? manager, PcCafeCouponCatalog? coupons)
     {
-        _pcCafe = manager ?? new PcCafePointsManager(Path.Combine(Path.GetTempPath(), "fineage-pc-cafe-test"));
+        _pcCafe = manager ?? new PcCafePointsManager(new MemoryPcCafeStore());
         _pcCafeCoupons = coupons ?? PcCafeCouponCatalog.LoadDefault();
     }
 

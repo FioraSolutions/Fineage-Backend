@@ -63,7 +63,8 @@ public static partial class Cli
             return false;
         }
 
-        var accountBans = AccountBanGate.FromEnvironment(message => error.WriteLine("[LOGIN] " + message));
+        // #996: the zone's punishments in the shared database, not a punishments.json beside the zone.
+        var accountBans = WorldStatePunishments.Gate(accounts);
         EconomyLedger? ledger = null;
         LedgerTxSequence? ledgerIds = null;
         if (accounts is PostgresAccountStore postgres)
@@ -99,8 +100,7 @@ public static partial class Cli
         // here while the log used AdvertisePort let a stale env var advertise a dead source port.
         var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: ZoneHandoff.AdvertisePort);
         var netTcp = new NetTcpServer { Endpoint = "login" };
-        if (accountBans.StorePath is { } punishmentsPath)
-            output.WriteLine($"[LOGIN] account login bans from {punishmentsPath}");
+        output.WriteLine("[LOGIN] account login bans from database world_state 'punishment'");
 
         output.WriteLine($"[LOGIN] net listen {bindDisplay}:{NetSettings.LoginPort} (PacketEnvelope)");
         Task netTask = netTcp.RunAsync(

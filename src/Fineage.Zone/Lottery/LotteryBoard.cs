@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Fineage.Game.Persistence;
 using Fineage.Protocol;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.Lottery;
 
@@ -97,34 +98,6 @@ public sealed class MemoryLotteryStore : ILotteryStore
     public void Save(LotterySnapshot snapshot) => _json = JsonSerializer.Serialize(snapshot);
 }
 
-public sealed class JsonLotteryStore(string path) : ILotteryStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-    readonly object _gate = new();
-
-    public LotterySnapshot Load()
-    {
-        lock (_gate)
-        {
-            var data = AtomicJsonFile.Load(
-                path,
-                "lottery",
-                1,
-                JsonOptions,
-                static () => new LotterySnapshot());
-            data.Draws ??= [];
-            data.Tickets ??= [];
-            return data;
-        }
-    }
-
-    public void Save(LotterySnapshot snapshot)
-    {
-        lock (_gate)
-            AtomicJsonFile.Write(path, snapshot, JsonOptions);
-    }
-}
-
 /// <summary>A board event the world announces to everyone online.</summary>
 public readonly record struct LotteryNotice(int MessageId, string Text, string[] Params);
 
@@ -160,10 +133,10 @@ public sealed class LotteryBoard
         }
     }
 
-    public static LotteryBoard OpenInStateDirectory(string stateDirectory, long loadedAtUnixMs, LotterySettings? settings = null)
+    /// <summary>Opens the lottery saved in the database (#996).</summary>
+    public static LotteryBoard Open(WorldStateStore state, long loadedAtUnixMs, LotterySettings? settings = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "lottery.json");
-        return new LotteryBoard(loadedAtUnixMs, settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path));
+        return new LotteryBoard(loadedAtUnixMs, settings ?? LotterySettings.FromEnvironment(), new StoredLotteryStore(state));
     }
 
     public LotterySettings Settings => _settings;

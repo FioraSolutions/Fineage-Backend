@@ -163,11 +163,17 @@ public sealed partial class PostgresAccountStore
                 NormalizedStoreWriter.ReplaceFreightOnly(conn, characterId, record.Freight ?? []);
             });
 
-    public void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags)
+    public void CommitEconomy(
+        IReadOnlyList<LedgerEntry> entries,
+        IReadOnlyList<EconomyBagWrite> bags,
+        IReadOnlyList<WorldStateDocument>? worldState = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
         ArgumentNullException.ThrowIfNull(bags);
-        if (entries.Count == 0 && bags.Count == 0)
+        worldState ??= [];
+        foreach (var document in worldState)
+            document.Validate();
+        if (entries.Count == 0 && bags.Count == 0 && worldState.Count == 0)
             return;
 
         // One connection and one transaction: the ledger insert and every item replace commit together.
@@ -199,6 +205,9 @@ public sealed partial class PostgresAccountStore
             }
         }
 
+        // #996: the world subsystems this batch changed (a lottery ticket, a race bet) commit with the ledger rows.
+        if (worldState.Count > 0)
+            WriteWorldState(conn, tx, worldState);
         tx.Commit();
     }
 

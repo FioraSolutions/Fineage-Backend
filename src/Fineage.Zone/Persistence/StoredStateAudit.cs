@@ -27,6 +27,15 @@ public sealed record StoredStateIssue(StoredStateSeverity Severity, string Code,
     public const string LedgerInvariant = "ledger-invariant";
     public const string Unjournaled = "unjournaled";
 
+    /// <summary>#996: a saved world subsystem disagrees with the ledger moves that changed it.</summary>
+    public const string WorldStateLedger = "world-state-ledger";
+
+    /// <summary>#996: a saved world subsystem breaks its own rules (duplicate serial, negative points, unreadable).</summary>
+    public const string WorldStateInvalid = "world-state-invalid";
+
+    /// <summary>#996: a saved world subsystem names a character the store does not have.</summary>
+    public const string WorldStateOrphan = "world-state-orphan";
+
     public override string ToString() => $"{Code} {Owner} {Container} id={Id}: {Detail}";
 }
 
@@ -246,6 +255,7 @@ public static class StoredStateAudit
             issues.AddRange(QuestReferences(character, game));
         }
 
+        issues.AddRange(WorldStateAudit.Check(store.LoadWorldState(), ledger, characters.Select(c => c.Id).ToHashSet()));
         foreach (var pet in pets)
             issues.AddRange(References(pet, game.Items));
         foreach (var clan in clans)

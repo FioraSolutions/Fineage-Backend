@@ -1,3 +1,5 @@
+using Fineage.Zone.Persistence;
+
 namespace Fineage.Zone.Bosses;
 
 public sealed partial class BossSchedule
@@ -42,19 +44,12 @@ public sealed partial class BossSchedule
         IBossSpawnPolicy? spawnPolicy = null) =>
         new(BossCatalog.LoadDefault(), store ?? new MemoryBossStore(), loadedAtUnixMs, spawnPolicy: spawnPolicy);
 
-    /// <summary>
-    /// Opens the respawn schedule in <paramref name="stateDirectory"/> unless <c>FINEAGE_BOSS_STORE</c>
-    /// names an explicit file.
-    /// </summary>
-    public static BossSchedule OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt, IBossSpawnPolicy? spawnPolicy = null)
+    /// <summary>Opens the respawn schedule saved in the database (#996).</summary>
+    public static BossSchedule Open(WorldStateStore state, DateTimeOffset loadedAt, IBossSpawnPolicy? spawnPolicy = null)
     {
-        string? configured = Environment.GetEnvironmentVariable("FINEAGE_BOSS_STORE");
-        string path = string.IsNullOrWhiteSpace(configured)
-            ? Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "boss-schedule.json")
-            : configured.Trim();
         return new BossSchedule(
             BossCatalog.LoadDefault(),
-            new JsonBossStore(path),
+            new StoredBossStore(state),
             loadedAt.ToUnixTimeMilliseconds(),
             ReadMultiplier("FINEAGE_RAID_MIN_RESPAWN_MULTIPLIER", DefaultRaidMinRespawnMultiplier),
             ReadMultiplier("FINEAGE_RAID_MAX_RESPAWN_MULTIPLIER", DefaultRaidMaxRespawnMultiplier),

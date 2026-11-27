@@ -1,7 +1,8 @@
 namespace Fineage.Zone.Persistence;
 
 /// <summary>
-/// The closed list of stateful world subsystems with a JSON sidecar in <c>FINEAGE_STATE_DIR</c>.
+/// The closed list of stateful world subsystems, saved in the database <c>world_state</c> table (#996; before, JSON
+/// sidecars in <c>FINEAGE_STATE_DIR</c>).
 /// Adding a subsystem means adding it here and to <see cref="ShutdownFlushRegistry"/>; the startup guard rejects a
 /// registry that omits one, so a new sidecar cannot silently miss graceful shutdown.
 /// </summary>
@@ -15,6 +16,7 @@ public static class WorldStateSystems
     public const string Punishment = "punishment";
     public const string MonsterRace = "monster-race";
     public const string FishingChampionship = "fishing-championship";
+    public const string PcCafe = "pc-cafe";
 
     public static IReadOnlyList<string> All { get; } =
     [
@@ -25,7 +27,8 @@ public static class WorldStateSystems
         RaidBossPoints,
         Punishment,
         MonsterRace,
-        FishingChampionship
+        FishingChampionship,
+        PcCafe
     ];
 }
 
