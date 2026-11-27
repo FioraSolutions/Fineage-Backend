@@ -164,6 +164,13 @@ public sealed partial class OlympiadBoard
         }
     }
 
+    /// <summary>Writes the current olympiad state; the shutdown registry calls this once the world is drained.</summary>
+    public void Save()
+    {
+        lock (_gate)
+            _store.Save(Export());
+    }
+
     bool Persist()
     {
         try

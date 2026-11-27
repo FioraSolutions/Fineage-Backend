@@ -1,5 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fineage.Game;
+using Fineage.Game.Persistence;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
 
@@ -29,9 +31,18 @@ public sealed class MonsterRaceRunner
     public double CollisionRadius { get; set; }
 }
 
-public sealed class MonsterRaceSnapshot
+public sealed class MonsterRaceSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int RaceNumber { get; set; } = 1;
     public long CycleStartUnixMs { get; set; }
     public int LastHandledCountdown { get; set; } = -1;
@@ -70,12 +81,12 @@ public sealed class JsonMonsterRaceStore(string path) : IMonsterRaceStore
     {
         lock (_gate)
         {
-            if (!File.Exists(path))
-                return new MonsterRaceSnapshot();
-            var data = JsonSerializer.Deserialize<MonsterRaceSnapshot>(File.ReadAllText(path), JsonOptions)
-                       ?? throw new InvalidDataException($"empty monster race store: {path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported monster race store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                path,
+                "monster-race",
+                1,
+                JsonOptions,
+                static () => new MonsterRaceSnapshot());
             data.History ??= [];
             data.BetsPerLane ??= new();
             data.Runners ??= [];
@@ -86,14 +97,7 @@ public sealed class JsonMonsterRaceStore(string path) : IMonsterRaceStore
     public void Save(MonsterRaceSnapshot snapshot)
     {
         lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, path, overwrite: true);
-        }
+            AtomicJsonFile.Write(path, snapshot, JsonOptions);
     }
 }
 
@@ -154,7 +158,8 @@ public sealed class MonsterRaceBoard
         Func<int> allocateObjectId,
         MonsterRaceSettings? settings = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "monster-race.json");
+        // Separate from the data/monster-race.json settings catalog: the state directory defaults to data/.
+        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "monster-race-state.json");
         return new MonsterRaceBoard(loadedAtUnixMs, items, npcs, allocateObjectId, settings ?? MonsterRaceSettings.Mobius,
             new JsonMonsterRaceStore(path));
     }
@@ -359,5 +364,6 @@ public sealed class MonsterRaceBoard
         }
     }
 
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current race board to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
 }

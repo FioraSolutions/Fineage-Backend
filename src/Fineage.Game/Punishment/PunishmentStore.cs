@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Game.Punishment;
 
@@ -36,11 +37,12 @@ public sealed class JsonPunishmentStore : IPunishmentStore
     {
         lock (_gate)
         {
-            if (!File.Exists(_path)) return new PunishmentSnapshot();
-            string json = File.ReadAllText(_path);
-            var data = JsonSerializer.Deserialize<PunishmentSnapshot>(json, JsonOptions)
-              ?? throw new InvalidDataException($"empty punishment store: {_path}");
-            if (data.Version != 1) throw new InvalidDataException($"unsupported punishment store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                _path,
+                "punishment",
+                1,
+                JsonOptions,
+                static () => new PunishmentSnapshot());
             data.Rows ??= [];
             return data;
         }
@@ -49,12 +51,6 @@ public sealed class JsonPunishmentStore : IPunishmentStore
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         lock (_gate)
-        {
-            string? dir = System.IO.Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
+            AtomicJsonFile.Write(_path, snapshot, JsonOptions);
     }
 }

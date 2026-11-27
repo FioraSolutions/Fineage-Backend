@@ -13,6 +13,7 @@ using Fineage.Zone.Bosses;
 using Fineage.Game.Shops;
 using Fineage.Game.Services;
 using Fineage.Zone.NpcHtml;
+using Fineage.Zone.Persistence;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
@@ -58,6 +59,7 @@ public sealed partial class ZoneWorld
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
+    readonly ShutdownFlushRegistry _stateFlushes = new();
     readonly SevenSignsFestivalCatalog _festivalCatalog;
     readonly SevenSignsFestivalSpawnCatalog _festivalSpawns;
     readonly SevenSignsFestivalRuntime _festivalRuntime;
@@ -433,6 +435,7 @@ public sealed partial class ZoneWorld
         SpawnCastleDoors();
         InitPunishment(punishments);
         InitRaidBossPoints(raidBossPoints);
+        RegisterStateShutdownFlushes();
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>

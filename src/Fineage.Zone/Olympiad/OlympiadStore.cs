@@ -1,11 +1,21 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Zone.Olympiad;
 
-public sealed class OlympiadSnapshot
+public sealed class OlympiadSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int Cycle { get; set; } = 1;
     public int Period { get; set; }
     public long OlympiadEndUnixMs { get; set; }
@@ -94,12 +104,12 @@ public sealed class JsonOlympiadStore : IOlympiadStore
     {
         lock (_gate)
         {
-            if (!File.Exists(_path))
-                return new OlympiadSnapshot();
-            var data = JsonSerializer.Deserialize<OlympiadSnapshot>(File.ReadAllText(_path), JsonOptions)
-                ?? throw new InvalidDataException($"empty olympiad store: {_path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported olympiad store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                _path,
+                "olympiad",
+                1,
+                JsonOptions,
+                static () => new OlympiadSnapshot());
             data.Granted ??= [];
             data.Nobles ??= [];
             data.Heroes ??= [];
@@ -113,13 +123,6 @@ public sealed class JsonOlympiadStore : IOlympiadStore
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
+            AtomicJsonFile.Write(_path, snapshot, JsonOptions);
     }
 }
