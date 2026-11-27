@@ -15,6 +15,10 @@ public sealed class PetitionQueue
 
     public int PendingCount => _pending.Count;
 
+    /// <summary>Pending petitions in id order (Mobius <c>admin_view_petitions</c>).</summary>
+    public IReadOnlyList<PetitionEntry> PendingOrdered() =>
+        _pending.Values.OrderBy(p => p.Id).ToList();
+
     public bool TryGet(int petitionId, out PetitionEntry entry) =>
         _pending.TryGetValue(petitionId, out entry!);
 
@@ -70,6 +74,18 @@ public sealed class PetitionQueue
         entry.ResponderName = gmName;
         entry.State = PetitionState.InProcess;
         return true;
+    }
+
+    public bool Reject(int gmObjectId, int petitionId, out PetitionEntry? entry) =>
+        End(petitionId, PetitionState.ResponderReject, out entry);
+
+    /// <summary>Mobius <c>admin_reset_petitions</c>: drop every pending petition.</summary>
+    public int ResetPending()
+    {
+        int n = _pending.Count;
+        foreach (var id in _pending.Keys.ToArray())
+            End(id, PetitionState.ResponderCancel, out _);
+        return n;
     }
 
     public bool End(int petitionId, PetitionState endState, out PetitionEntry? entry)

@@ -158,10 +158,15 @@ public sealed partial class ZoneWorld
         var visible = t_reconcileVisible ??= [];
         visible.Clear();
         _aoi.CollectVisible(self.ObjectId, visible);
+        bool selfIsGm = self.Kind == ZoneEntityKind.Player && ZoneAdmin.IsAdminCharacter(self.Name);
         foreach (int id in visible)
         {
-            if (_byId.TryGetValue(id, out var other) && other.InstanceId == self.InstanceId)
-                into.Add(id);
+            if (!_byId.TryGetValue(id, out var other) || other.InstanceId != self.InstanceId)
+                continue;
+            // Mobius BuilderUtil hiding / admin_invis: invisible GMs stay out of non-GM knownlists.
+            if (other.Invisible && !selfIsGm)
+                continue;
+            into.Add(id);
         }
     }
 

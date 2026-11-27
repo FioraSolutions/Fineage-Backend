@@ -197,4 +197,18 @@ sealed partial class ZoneEntity
         get => Status?.ChannelAffectRange ?? 0;
         set => EnsureStatus().ChannelAffectRange = value;
     }
+
+    /// <summary>Mobius <c>Player._isInvul</c>.</summary>
+    public bool Invulnerable
+    {
+        get => Status?.Invulnerable ?? false;
+        set => EnsureStatus().Invulnerable = value;
+    }
+
+    /// <summary>Mobius GM hide / <c>admin_invis</c>: hidden from non-GM knownlists.</summary>
+    public bool Invisible
+    {
+        get => Status?.Invisible ?? false;
+        set => EnsureStatus().Invisible = value;
+    }
 }

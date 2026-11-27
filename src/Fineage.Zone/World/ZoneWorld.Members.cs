@@ -170,8 +170,12 @@ public sealed partial class ZoneWorld
         TrackWatcher(self.ObjectId, otherId);
         if (other.Session != null)
         {
-            other.Knownlist.Add(self.ObjectId);
-            TrackWatcher(other.ObjectId, self.ObjectId);
+            // Invisible self must not appear on a non-GM peer's knownlist (Mobius hide / admin_invis).
+            if (!(self.Invisible && !ZoneAdmin.IsAdminCharacter(other.Name)))
+            {
+                other.Knownlist.Add(self.ObjectId);
+                TrackWatcher(other.ObjectId, self.ObjectId);
+            }
         }
         else
             TrackThink(other);
