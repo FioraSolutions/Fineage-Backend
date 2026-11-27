@@ -73,7 +73,8 @@ public sealed partial class ZoneWorld
         DateTimeOffset? access = null;
         if (touchAccess)
         {
-            access = DateTimeOffset.UtcNow;
+            // Last-access is account metadata, not a gameplay timer: wall-only.
+            access = _clock.UtcNow;
             _pendingPresenceAccess[session.ObjectId] = access.Value;
         }
         else if (_pendingPresenceAccess.TryGetValue(session.ObjectId, out var known))

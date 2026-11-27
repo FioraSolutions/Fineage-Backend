@@ -16,12 +16,22 @@ public sealed partial class OlympiadBoard
                     EndCompetition(step, announce);
                 if (now >= _validationEnd)
                 {
+                    if (now - _validationEnd > 3_600_000)
+                    {
+                        ZoneLog.Warn(
+                            $"[olympiad] validation overdue due={_validationEnd} now={now}; finishing once");
+                    }
                     FinishValidation(now);
                     moved = true;
                 }
             }
             else if (now >= _olympiadEnd)
             {
+                if (now - _olympiadEnd > 3_600_000)
+                {
+                    ZoneLog.Warn(
+                        $"[olympiad] period overdue due={_olympiadEnd} now={now}; closing once");
+                }
                 if (_inComp)
                     EndCompetition(step, announce);
                 BeginValidation(now, step);
@@ -31,6 +41,11 @@ public sealed partial class OlympiadBoard
             {
                 if (_nextWeekly > 0 && now >= _nextWeekly)
                 {
+                    if (now - _nextWeekly > Settings.WeeklyMillis)
+                    {
+                        ZoneLog.Warn(
+                            $"[olympiad] weekly point change overdue due={_nextWeekly} now={now}; applying once");
+                    }
                     ApplyWeekly();
                     _nextWeekly = now + OlympiadSchedule.WeeklyDelay(Settings);
                     Persist();

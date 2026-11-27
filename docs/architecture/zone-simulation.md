@@ -504,13 +504,15 @@ not a ledger kind; the next observation records them as adjustments. Mail joins 
    across restarts. Stages run at `TickContext.NowUnixMs`, the tick time; the wall sample travels as
    `TickContext.WallUnixMs` and is used only for calendar schedules (clan dissolution deadlines, hall auctions,
    sieges, manor, lottery, seven signs, mammon); no system keeps a clock of its own (step 9). Inside a step the clock is pinned for the scheduler thread, so every rule a stage reaches reads the tick
-   time; parallel region bodies use the `TickContext` they are given. The loop sleeps until the next tick is due. A
-   late step jumps to the tick the wall clock is in and reports the skipped ticks (a stage whose period was crossed
-   runs once); a step while the wall clock is behind still advances one tick. Commands run inside the step that
+   time; parallel region bodies use the `TickContext` they are given. The loop sleeps until the next tick is due.
+   Simulation time advances from the monotonic side of `IZoneTime`; a wall-clock jump forward/back only changes the
+   wall sample, not the tick. A real scheduling stall still jumps to the tick the monotonic elapsed time is in and
+   reports the skipped ticks (a stage whose period was crossed runs once). Commands run inside the step that
    drains them, so they read its tick time and, for calendar rules (clan deadlines, teleport fee hours), its wall
    sample: `SimulationClock.Pin` pins both, and world code reads them through `NowUnixMs`/`WallNow`, never the live
    clock. Enter, leave and handler projections are requests applied by a step, so they read its time too; only a world
-   nothing drives (tests, tools) is touched outside a step, at the wall clock.
+   nothing drives (tests, tools) is touched outside a step, at the wall clock. See
+   [`time-model.md`](time-model.md) for the timer persistence and clock-jump policy.
 2. **Ordered iteration.** Region work runs in ascending `RegionId`, entities in ascending object id
    (`RegionWorkCollector.Drain`), never in hash order. Inbound messages are sorted by `(source, sequence)`.
 3. **Seeded randomness** per region and purpose (section 3.2), never `Random.Shared` in rules. Outcomes of

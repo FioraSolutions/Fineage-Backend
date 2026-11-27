@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fineage.Zone.Time;
 
 namespace Fineage.Zone.Punishment;
 
@@ -6,26 +7,29 @@ namespace Fineage.Zone.Punishment;
 public sealed class GmAuditLog
 {
     readonly string _path;
+    readonly IZoneTime _time;
     readonly object _gate = new();
 
-    public GmAuditLog(string path)
+    public GmAuditLog(string path, IZoneTime? time = null)
     {
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("GM audit path is required.", nameof(path));
         _path = path;
+        _time = time ?? SystemZoneTime.Instance;
     }
 
-    public static GmAuditLog ForStateDirectory(string stateDirectory)
+    public static GmAuditLog ForStateDirectory(string stateDirectory, IZoneTime? time = null)
     {
         string dir = string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory;
-        return new GmAuditLog(Path.Combine(dir, "gm-audit.jsonl"));
+        return new GmAuditLog(Path.Combine(dir, "gm-audit.jsonl"), time);
     }
 
     public void Append(string gmName, int gmObjectId, string action, string target, string detail)
     {
         var row = new
         {
-            atUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+            // Audit timestamps are wall-only telemetry; gameplay never reads them.
+            atUnixMs = _time.UtcNow.ToUnixTimeMilliseconds(),
             gm = gmName,
             gmObjectId,
             action,

@@ -22,7 +22,8 @@ public sealed partial class ZoneWorld : IPunishmentSink
         _punishments = manager ?? new PunishmentManager(
           new MemoryPunishmentStore(),
           JailZoneCatalog.LoadDefault(),
-          new GmAuditLog(Path.Combine(Path.GetTempPath(), "fineage-gm-audit-test.jsonl")));
+          new GmAuditLog(Path.Combine(Path.GetTempPath(), "fineage-gm-audit-test.jsonl"), _clock),
+          _clock);
         _punishmentActor = new PunishmentActor(_punishments);
         _punishments.Bind(_accounts, this);
     }

@@ -130,12 +130,18 @@ public sealed partial class OlympiadBoard
         if (_period == OlympiadProtocol.PeriodValidation)
         {
             if (now >= _validationEnd)
+            {
+                ZoneLog.Warn(
+                    $"[olympiad] validation overdue due={_validationEnd} now={now}; finishing once at startup");
                 FinishValidation(now);
+            }
             return;
         }
 
         if (now >= _olympiadEnd)
         {
+            ZoneLog.Warn(
+                $"[olympiad] period overdue due={_olympiadEnd} now={now}; closing once at startup");
             // Down through the period end: settle it (heroes, ranking, passes) before the next one starts.
             CloseOlympiadPeriod(new OlympiadStep());
             _olympiadEnd = OlympiadSchedule.MonthEnd(now, Settings);
@@ -147,6 +153,11 @@ public sealed partial class OlympiadBoard
 
         if (_nextWeekly > 0 && now >= _nextWeekly)
         {
+            if (now - _nextWeekly > Settings.WeeklyMillis)
+            {
+                ZoneLog.Warn(
+                    $"[olympiad] weekly point change overdue due={_nextWeekly} now={now}; applying once at startup");
+            }
             ApplyWeekly();
             _nextWeekly = now + OlympiadSchedule.WeeklyDelay(Settings);
             Persist();

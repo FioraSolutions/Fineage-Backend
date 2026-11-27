@@ -59,6 +59,6 @@ public sealed partial class ZoneWorld
         var list = _accounts.List(session.Account);
         if (list.Count == 0)
             ZoneLog.Error($"[restart] account {session.Account} has no character roster");
-        return LobbyRoster.Rows(list, _clock());
+        return LobbyRoster.Rows(list, _clock.UtcNow);
     }
 }

@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game.Punishment;
+using Fineage.Zone.Time;
 
 namespace Fineage.Zone.Punishment;
 
@@ -17,16 +18,18 @@ public sealed class PunishmentManager
     readonly IPunishmentStore _store;
     readonly JailZoneCatalog _jail;
     readonly GmAuditLog _audit;
+    readonly IZoneTime _time;
     readonly object _gate = new();
     readonly List<PunishmentRow> _rows = [];
     IPunishmentSink? _sink;
     IAccountStore? _accounts;
 
-    public PunishmentManager(IPunishmentStore store, JailZoneCatalog jail, GmAuditLog audit)
+    public PunishmentManager(IPunishmentStore store, JailZoneCatalog jail, GmAuditLog audit, IZoneTime? time = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _jail = jail ?? throw new ArgumentNullException(nameof(jail));
         _audit = audit ?? throw new ArgumentNullException(nameof(audit));
+        _time = time ?? SystemZoneTime.Instance;
         Load();
     }
 
@@ -40,18 +43,20 @@ public sealed class PunishmentManager
             _sink.OnPunishmentStarted(row);
     }
 
-    public static PunishmentManager OpenInStateDirectory(string stateDirectory)
+    public static PunishmentManager OpenInStateDirectory(string stateDirectory, IZoneTime? time = null)
     {
         string dir = PunishmentStatePaths.ResolveStateDirectory(stateDirectory);
+        IZoneTime clock = time ?? SystemZoneTime.Instance;
         return new PunishmentManager(
           new JsonPunishmentStore(PunishmentStatePaths.PunishmentsJsonPath(dir)),
           JailZoneCatalog.LoadDefault(),
-          GmAuditLog.ForStateDirectory(dir));
+          GmAuditLog.ForStateDirectory(dir, clock),
+          clock);
     }
 
     void Load()
     {
-        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        long now = _time.UtcNow.ToUnixTimeMilliseconds();
         var snapshot = _store.Load();
         int expired = 0;
         lock (_gate)
@@ -210,7 +215,7 @@ public sealed class PunishmentManager
     }
 
     public IReadOnlyList<PunishmentRow> SnapshotActive() =>
-      SnapshotAt(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+      SnapshotAt(_time.UtcNow.ToUnixTimeMilliseconds());
 
     public IReadOnlyList<PunishmentRow> SnapshotAt(long nowUnixMs)
     {

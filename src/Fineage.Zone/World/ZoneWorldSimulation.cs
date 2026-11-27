@@ -276,7 +276,7 @@ public sealed partial class ZoneWorld
         nameof(_borders), nameof(_pendingHitStage), nameof(_autoAttackStage), nameof(_mobAttackStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
-        _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
+        _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, _clock);
         _regions = partition;
         _byId = new RegionDirectory<ZoneEntity>(partition, requireOwner: _affinity.Require);
         _simulationObserver = observer;

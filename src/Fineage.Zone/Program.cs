@@ -77,21 +77,22 @@ Console.CancelKeyPress += (_, e) =>
     shutdown.Cancel();
 };
 
+var time = Fineage.Zone.Time.SystemZoneTime.Instance;
 var festivalCatalog = SevenSignsFestivalCatalog.LoadDefault();
 var festivalRuntime = new SevenSignsFestivalRuntime(festivalCatalog);
-var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow, festivalRuntime);
+var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, time.UtcNow, festivalRuntime);
 festivalRuntime.BindEngine(sevenSigns);
 bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
 var bosses = BossSchedule.OpenInStateDirectory(
     stateDir,
-    DateTimeOffset.UtcNow,
+    time.UtcNow,
     new MapFilteredBossSpawnPolicy(includeEnabledMapsBoot));
-var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow);
+var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, time.UtcNow);
 // Hosted zone always loads every enabled spawn map (TI, Elven Village, Giran, …).
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
 bool includeEnabledMaps = includeEnabledMapsBoot;
-var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
+var punishments = PunishmentManager.OpenInStateDirectory(stateDir, time);
 var raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
 ZoneWorld world;
 Required.SilentFallbackObserver = static (kind, key) =>
@@ -102,7 +103,7 @@ try
     Required.Registry.AssertBootPacksPresent(dataDir);
     _ = GeoEngine.LoadDefault();
     world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
-        ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);
+        ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints, time: time);
 }
 catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or DirectoryNotFoundException or FileNotFoundException)
 {
@@ -110,8 +111,8 @@ catch (Exception ex) when (ex is InvalidOperationException or RequiredDataExcept
     Environment.ExitCode = 1;
     return;
 }
-world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
-world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, time.UtcNow.ToUnixTimeMilliseconds()));
+world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, time.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;

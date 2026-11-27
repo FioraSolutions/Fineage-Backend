@@ -14,6 +14,13 @@ public sealed partial class SevenSignsEngine
             if (utcNow < _nextChange)
                 return false;
 
+            if (utcNow - _nextChange > TimeSpan.FromMinutes(1))
+            {
+                ZoneLog.Warn(
+                    $"[seven-signs] period change overdue by={(utcNow - _nextChange).TotalMinutes:F1}min " +
+                    $"scheduled={_nextChange:O} now={utcNow:O}; advancing once");
+            }
+
             ended = _period;
             _period = ended == SevenSignsPeriod.SealValidation
                 ? SevenSignsPeriod.Recruiting
