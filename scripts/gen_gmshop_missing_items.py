@@ -89,6 +89,11 @@ def referenced_item_ids() -> set[int]:
         walk(json.loads(path.read_text()), ("itemId",))
     walk(json.loads((data / "item-equip-skills.json").read_text())["items"], ("itemId",))
     walk(json.loads((data / "cursed-weapons.json").read_text())["blades"], ("itemId",))
+    walk(json.loads((data / "herbs.json").read_text())["items"], ("itemId",))
+    for row in json.loads((data / "pledge-skills.json").read_text())["skills"]:
+        walk(row.get("items") or [], ("id",))
+    for row in json.loads((data / "summons.json").read_text())["summons"]:
+        walk(row.get("levels") or [], ("itemId", "upkeepItemId"))
     return want
 
 

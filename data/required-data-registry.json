@@ -33,7 +33,7 @@
       "file": "teleports.json",
       "policy": "refuse-action",
       "keyName": "npcId",
-      "note": "Gatekeeper destination lists; empty/missing list is a named refuse, not a silent no-op."
+      "note": "Gatekeeper destination lists; key 'npcId:LIST' for an html teleport bypass. Empty/missing list is a named refuse, not a silent no-op."
     },
     {
       "id": "droplist",
@@ -69,6 +69,77 @@
       "policy": "fail-fast-boot",
       "keyName": "map",
       "note": "Spawn map packs; missing enabled map refuses zone boot."
+    },
+    {
+      "id": "buylist",
+      "file": "buylists.json",
+      "policy": "refuse-action",
+      "keyName": "listId",
+      "note": "NPC html Buy/Wear bypass targets; key 'list@npc' when the list exists but does not allow that NPC.",
+      "knownAbsent": [
+        {
+          "key": "3198900@32007",
+          "reason": "Mobius html/fisherman/32007-2/-3/-5.htm (Galba) link Buy 3198900, a list Mobius buylists/3198900.xml allows only for npc 31989; Mobius refuses it for Galba too (Galba's own list is 3200700)."
+        }
+      ]
+    },
+    {
+      "id": "multisell",
+      "file": "multisell.json",
+      "policy": "refuse-action",
+      "keyName": "listId",
+      "note": "NPC html multisell/exc_multisell bypass targets.",
+      "knownAbsent": [
+        {
+          "key": "517",
+          "reason": "Mobius html/fisherman/32007-2/-3/-5.htm (Galba) link multisell 517; Mobius CT0 multisell/ has no 517.xml."
+        }
+      ]
+    },
+    {
+      "id": "npc-script",
+      "file": "npc-scripts.json",
+      "policy": "refuse-action",
+      "keyName": "scriptId",
+      "note": "NPC html 'Script <id>' bypass targets; unregistered scripts refuse with the unavailable page and a named log line.",
+      "knownAbsent": [
+        {
+          "key": "0",
+          "reason": "Mobius html/default/30601-1.htm and guard/30348-1.htm link npc_%objectId%_Quest 0; Mobius has no quest or script named 0 either."
+        },
+        {
+          "key": "225_TestOfSearcher",
+          "reason": "Mobius html/default/30627-1.htm links Quest 225_TestOfSearcher; the Mobius quest is Q00225_TestOfTheSearcher, so the original link dangles too."
+        },
+        {
+          "key": "IceFairySirra",
+          "reason": "Mobius html/default/32029.htm links Script IceFairySirra; Mobius CT0 ships no IceFairySirra script."
+        },
+        {
+          "key": "ToIVortex",
+          "reason": "Mobius ai/areas/TowerOfInsolence/ToIVortex is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        },
+        {
+          "key": "EchoCrystals",
+          "reason": "Mobius custom/EchoCrystals is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        },
+        {
+          "key": "ValakasTeleporters",
+          "reason": "Mobius ai/others/ValakasTeleporters is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        },
+        {
+          "key": "Baium",
+          "reason": "Mobius ai/bosses/Baium is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        },
+        {
+          "key": "Frintezza",
+          "reason": "Mobius ai/bosses/Frintezza is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        },
+        {
+          "key": "PaganTeleporters",
+          "reason": "Mobius ai/areas/PaganTemple/PaganTeleporters is not ported yet (scripted area/boss AI, #919); the bypass refuses with the 'not implemented' page and a named unknown-script log line."
+        }
+      ]
     }
   ]
 }

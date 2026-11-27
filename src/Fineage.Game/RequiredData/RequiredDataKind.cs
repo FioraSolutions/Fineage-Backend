@@ -11,5 +11,8 @@ public enum RequiredDataKind
     SkillPassive,
     NpcAi,
     Quest,
-    Spawn
+    Spawn,
+    BuyList,
+    MultiSell,
+    NpcScript
 }

@@ -100,6 +100,7 @@ try
 {
     string dataDir = Path.Combine(AppContext.BaseDirectory, "data");
     Required.Registry.AssertBootPacksPresent(dataDir);
+    Fineage.Zone.RequiredData.RequiredDataCrossCheck.AssertClean(dataDir, Required.Registry);
     _ = GeoEngine.LoadDefault();
     world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
         ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);

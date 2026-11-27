@@ -91,13 +91,25 @@ public sealed class RequiredDataRegistry
                     $"{source} kind '{row.Id}' has unknown policy '{row.Policy}' (use fail-fast-boot or refuse-action).")
             };
 
+            var knownAbsent = new List<RequiredDataKnownAbsent>();
+            foreach (var hole in row.KnownAbsent ?? [])
+            {
+                if (string.IsNullOrWhiteSpace(hole.Key))
+                    throw new InvalidDataException($"{source} kind '{row.Id}' has a knownAbsent row without key.");
+                if (string.IsNullOrWhiteSpace(hole.Reason))
+                    throw new InvalidDataException(
+                        $"{source} kind '{row.Id}' knownAbsent key '{hole.Key}' has no reason; every hole must say why.");
+                knownAbsent.Add(new RequiredDataKnownAbsent(hole.Key.Trim(), hole.Reason.Trim()));
+            }
+
             entries.Add(new RequiredDataEntry(
                 kind,
                 row.Id.Trim(),
                 row.File.Trim(),
                 policy,
                 row.KeyName.Trim(),
-                row.Note?.Trim() ?? ""));
+                row.Note?.Trim() ?? "",
+                knownAbsent));
         }
 
         // Every RequiredDataKind must appear so new enum members cannot ship without a registry row.
@@ -177,5 +189,12 @@ public sealed class RequiredDataRegistry
         public string? Policy { get; set; }
         public string? KeyName { get; set; }
         public string? Note { get; set; }
+        public List<KnownAbsentDto>? KnownAbsent { get; set; }
+    }
+
+    sealed class KnownAbsentDto
+    {
+        public string? Key { get; set; }
+        public string? Reason { get; set; }
     }
 }

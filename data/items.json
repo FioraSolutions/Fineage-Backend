@@ -77858,6 +77858,15 @@
       "weight": 0
     },
     {
+      "id": 8175,
+      "name": "Cradle of Creation",
+      "kind": "etc",
+      "icon": "icon.etc_raid_g_i00",
+      "stackable": true,
+      "price": 50000,
+      "weight": 0
+    },
+    {
       "id": 8176,
       "name": "Destruction Tombstone",
       "kind": "etc",
@@ -85662,6 +85671,24 @@
       "price": 0,
       "weight": 10,
       "bodySlot": "hairall"
+    },
+    {
+      "id": 8952,
+      "name": "Greater Herb of Life",
+      "kind": "etc",
+      "icon": "icon.item_8952",
+      "price": 0,
+      "weight": 0,
+      "sellable": false
+    },
+    {
+      "id": 8953,
+      "name": "Greater Herb of Mana",
+      "kind": "etc",
+      "icon": "icon.item_8953",
+      "price": 0,
+      "weight": 0,
+      "sellable": false
     },
     {
       "id": 8954,
