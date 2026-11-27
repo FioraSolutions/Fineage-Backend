@@ -2,6 +2,7 @@ using System.Net;
 using Fineage.Game.Punishment;
 using Fineage.Login.Net;
 using Fineage.Net.Host;
+using Fineage.Protocol.Health;
 using Fineage.Protocol.Telemetry;
 using Fineage.Accounts;
 using Fineage.Game.Economy;
@@ -10,6 +11,26 @@ namespace Fineage.Login;
 
 public static partial class Cli
 {
+    /// <summary>
+    /// #989 Login readiness: the database answers and every migration of this build is applied (checked at most every
+    /// 2 s, 3 s connect limit). An in-memory store (tests, tools) has no database to lose.
+    /// </summary>
+    internal static HealthBoard LoginHealth(IAccountStore accounts)
+    {
+        var board = new HealthBoard();
+        if (accounts is PostgresAccountStore postgres)
+        {
+            var probe = new CachedProbe(() => postgres.CheckDatabase(TimeSpan.FromSeconds(3)), TimeSpan.FromSeconds(2));
+            board.AddReadyProbe("database", probe.Read);
+        }
+        else
+        {
+            board.AddReadyProbe("database", () => new HealthCheck("database", true, $"{accounts.GetType().Name}: no external database"));
+        }
+
+        return board;
+    }
+
     static async Task<bool> ListenAsync(
         IAccountStore? store,
         string? databaseUrl,
@@ -101,7 +122,8 @@ public static partial class Cli
                 service,
                 bindAddress,
                 httpPort,
-                zoneStatus: zoneStatus).ConfigureAwait(false);
+                zoneStatus: zoneStatus,
+                health: LoginHealth(accounts)).ConfigureAwait(false);
             zoneProbe = null;
         }
         catch (Exception ex)

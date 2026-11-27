@@ -66,6 +66,9 @@ jobs:
           FINEAGE_DEPLOY_USER: ${{ vars.FINEAGE_DEPLOY_USER || 'nikita' }}
           FINEAGE_APP_ROOT: ${{ vars.FINEAGE_APP_ROOT || '/home/nikita/fineage-backend/deploy' }}
           FINEAGE_SSH_KEY: ~/.ssh/id_ed25519
+          # One release directory per commit (#989): releases/<sha>, `current` switched atomically, health-gated,
+          # rolled back to the previous release when /health/ready does not answer 200 in time.
+          FINEAGE_RELEASE_ID: ${{ github.sha }}
         run: |
-          chmod +x deploy/deploy-to-host.sh deploy/run-login.sh deploy/run-zone.sh
+          chmod +x deploy/deploy-to-host.sh deploy/release-switch.sh deploy/run-login.sh deploy/run-zone.sh
           deploy/deploy-to-host.sh publish/login publish/zone
