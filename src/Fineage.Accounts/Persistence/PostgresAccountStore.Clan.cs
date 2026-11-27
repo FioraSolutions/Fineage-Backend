@@ -208,7 +208,7 @@ public sealed partial class PostgresAccountStore
     {
         try
         {
-            lock (_persistGate)
+            using (EnterPersist())
             {
                 using var conn = _dataSource.OpenConnection();
                 sql(conn);

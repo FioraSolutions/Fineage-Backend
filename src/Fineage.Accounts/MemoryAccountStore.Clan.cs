@@ -9,13 +9,13 @@ public sealed partial class MemoryAccountStore
 {
     public IReadOnlyList<ClanRecord> ListClans()
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.Clans.Select(ToClan).ToArray();
     }
 
     public ClanRecord? FindClan(int clanId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var clan = _data.Clans.FirstOrDefault(c => c.Id == clanId);
             return clan == null ? null : ToClan(clan);
@@ -24,7 +24,7 @@ public sealed partial class MemoryAccountStore
 
     public ClanRecord? FindClanByName(string name)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var clan = FindClanDto(name);
             return clan == null ? null : ToClan(clan);
@@ -38,7 +38,7 @@ public sealed partial class MemoryAccountStore
         if (draft.Members.Count == 0 || string.IsNullOrWhiteSpace(draft.Name))
             return null;
 
-        lock (_gate)
+        using (EnterStore())
         {
             if (FindClanDto(draft.Name) != null)
                 return null;
@@ -72,7 +72,7 @@ public sealed partial class MemoryAccountStore
     {
         ArgumentNullException.ThrowIfNull(clan);
         ArgumentNullException.ThrowIfNull(characters);
-        lock (_gate)
+        using (EnterStore())
         {
             int index = _data.Clans.FindIndex(c => c.Id == clan.Id);
             if (index < 0)
@@ -97,7 +97,7 @@ public sealed partial class MemoryAccountStore
     public bool DeleteClan(int clanId, IReadOnlyList<CharacterClanState> characters)
     {
         ArgumentNullException.ThrowIfNull(characters);
-        lock (_gate)
+        using (EnterStore())
         {
             int index = _data.Clans.FindIndex(c => c.Id == clanId);
             if (index < 0)
@@ -121,7 +121,7 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<CastleSave> ListCastles()
     {
-        lock (_gate)
+        using (EnterStore())
         {
             return _data.Castles.Select(castle => new CastleSave(
                 castle.Id,
@@ -142,7 +142,7 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<SiegeClanSave> ListSiegeClans()
     {
-        lock (_gate)
+        using (EnterStore())
         {
             return _data.SiegeClans.Select(row => new SiegeClanSave(row.CastleId, row.ClanId, row.Side)).ToArray();
         }
@@ -150,7 +150,7 @@ public sealed partial class MemoryAccountStore
 
     public StoredPet? FindPet(int controlObjectId)
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.Pets.FirstOrDefault(p => p.ControlObjectId == controlObjectId);
     }
 
@@ -159,7 +159,7 @@ public sealed partial class MemoryAccountStore
         ArgumentNullException.ThrowIfNull(pet);
         if (pet.ControlObjectId <= 0 || pet.NpcId <= 0 || pet.Level <= 0 || pet.Exp < 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var copy = pet with { Name = pet.Name ?? "", Items = (pet.Items ?? []).ToArray() };
             int index = _data.Pets.FindIndex(p => p.ControlObjectId == pet.ControlObjectId);
@@ -179,7 +179,7 @@ public sealed partial class MemoryAccountStore
 
     public bool DeletePet(int controlObjectId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             if (_data.Pets.RemoveAll(p => p.ControlObjectId == controlObjectId) == 0)
                 return false;
@@ -190,13 +190,13 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<ManorProductionSave> ListManorProduction()
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.ManorProduction.ToArray();
     }
 
     public IReadOnlyList<ManorProcureSave> ListManorProcure()
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.ManorProcure.ToArray();
     }
 
@@ -204,7 +204,7 @@ public sealed partial class MemoryAccountStore
     {
         ArgumentNullException.ThrowIfNull(production);
         ArgumentNullException.ThrowIfNull(procure);
-        lock (_gate)
+        using (EnterStore())
         {
             if (production.Any(p => p.CastleId <= 0 || p.SeedId <= 0 || p.Amount < 0 || p.Price < 0) ||
                 procure.Any(p => p.CastleId <= 0 || p.CropId <= 0 || p.Amount < 0 || p.Price < 0))
@@ -221,7 +221,7 @@ public sealed partial class MemoryAccountStore
         ArgumentNullException.ThrowIfNull(castles);
         ArgumentNullException.ThrowIfNull(clans);
         ArgumentNullException.ThrowIfNull(clanCastleIds);
-        lock (_gate)
+        using (EnterStore())
         {
             var ids = new HashSet<int>();
             foreach (var castle in castles)
@@ -277,7 +277,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySetCharacterClanState(CharacterClanState state)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(state.Account, state.CharacterId);
             if (character == null)
@@ -344,7 +344,7 @@ public sealed partial class MemoryAccountStore
     public CrestSave? InsertCrest(int kind, byte[] data)
     {
         ArgumentNullException.ThrowIfNull(data);
-        lock (_gate)
+        using (EnterStore())
         {
             _data.Crests ??= [];
             if (_data.NextCrestId < 1)
@@ -358,7 +358,7 @@ public sealed partial class MemoryAccountStore
 
     public CrestSave? FindCrest(int crestId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var dto = _data.Crests?.FirstOrDefault(c => c.Id == crestId);
             return dto == null ? null : new CrestSave(dto.Id, dto.Kind, dto.Data.ToArray());
@@ -367,13 +367,13 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<CrestSave> ListCrests()
     {
-        lock (_gate)
+        using (EnterStore())
             return (_data.Crests ?? []).Select(dto => new CrestSave(dto.Id, dto.Kind, dto.Data.ToArray())).ToArray();
     }
 
     public bool DeleteCrest(int crestId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             int removed = _data.Crests?.RemoveAll(c => c.Id == crestId) ?? 0;
             if (removed > 0)
@@ -384,14 +384,14 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<ClanHallSave> ListClanHalls()
     {
-        lock (_gate)
+        using (EnterStore())
             return (_data.ClanHalls ?? []).Select(CloneHall).ToArray();
     }
 
     public bool SaveClanHalls(IReadOnlyList<ClanHallSave> halls)
     {
         ArgumentNullException.ThrowIfNull(halls);
-        lock (_gate)
+        using (EnterStore())
         {
             _data.ClanHalls = halls.Select(CloneHall).ToList();
             Save();
@@ -401,14 +401,14 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<SiegableClanHallSave> ListSiegableClanHalls()
     {
-        lock (_gate)
+        using (EnterStore())
             return (_data.SiegableClanHalls ?? []).Select(CloneSiegableHall).ToArray();
     }
 
     public bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls)
     {
         ArgumentNullException.ThrowIfNull(halls);
-        lock (_gate)
+        using (EnterStore())
         {
             _data.SiegableClanHalls = halls.Select(CloneSiegableHall).ToList();
             Save();
@@ -453,7 +453,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySetCharacterTitle(string account, int characterId, string title)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)

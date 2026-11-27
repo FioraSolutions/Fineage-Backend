@@ -60,7 +60,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     {
         string snapshotJson = _inner.ExportSnapshot();
         using var _ = JsonDocument.Parse(snapshotJson);
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -74,6 +74,30 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     public PostgresLedgerJournal OpenLedgerJournal() => new(_dataSource);
 
     public void Dispose() => _dataSource.Dispose();
+
+    /// <summary>
+    /// Lock order is strict: durable persistence first, memory second. Snapshot callbacks run after the memory
+    /// lock is released (see <see cref="MemoryAccountStore.AfterSaveSnapshot"/>), so the adapter may take this gate
+    /// there. Any caller that enters this gate while already holding the memory store lock would recreate the
+    /// register/create inversion and is rejected instead of deadlocking.
+    /// </summary>
+    readonly struct PersistGuard : IDisposable
+    {
+        readonly object _gate;
+
+        internal PersistGuard(object gate) => _gate = gate;
+
+        public void Dispose() => Monitor.Exit(_gate);
+    }
+
+    PersistGuard EnterPersist()
+    {
+        if (Monitor.IsEntered(_inner.SyncRoot))
+            throw new InvalidOperationException(
+                "durable store gate entered while holding the memory store lock; lock order is persist -> memory");
+        Monitor.Enter(_persistGate);
+        return new PersistGuard(_persistGate);
+    }
 
     static void ApplyMigrations(NpgsqlDataSource dataSource)
     {
@@ -279,7 +303,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     void WriteSnapshotBackup(string snapshotJson)
     {
         using var _ = JsonDocument.Parse(snapshotJson);
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -320,7 +344,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
 
         // Hot paths write normalized SQL only. Rewriting store_snapshot from this process's
         // partial MemoryAccountStore would clobber the other process's backup JSON (Claude B9).
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             sql(conn);

@@ -42,7 +42,7 @@ public sealed partial class MemoryAccountStore
         if (items != null)
             CharacterInventory.Validate(items);
 
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             if (row == null)
@@ -98,7 +98,7 @@ public sealed partial class MemoryAccountStore
     {
         ArgumentNullException.ThrowIfNull(items);
         CharacterInventory.Validate(items);
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -114,7 +114,7 @@ public sealed partial class MemoryAccountStore
     {
         ArgumentNullException.ThrowIfNull(items);
         CharacterInventory.Validate(items);
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -130,7 +130,7 @@ public sealed partial class MemoryAccountStore
     {
         ArgumentNullException.ThrowIfNull(items);
         CharacterInventory.Validate(items);
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -193,7 +193,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -211,7 +211,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySaveVitals(string account, int characterId, int hp, int mp, int cp)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -228,7 +228,7 @@ public sealed partial class MemoryAccountStore
     {
         if (level < 1 || exp < 0 || sp < 0 || maxHp < 0 || hp < 0 || maxMp < 0 || mp < 0 || maxCp < 0 || cp < 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -251,7 +251,7 @@ public sealed partial class MemoryAccountStore
     {
         if (classId < 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -265,7 +265,7 @@ public sealed partial class MemoryAccountStore
     public bool TrySaveClassState(string account, int characterId, CharacterClassState state)
     {
         ArgumentNullException.ThrowIfNull(state);
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -278,7 +278,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySaveHenna(string account, int characterId, int dye1, int dye2, int dye3)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -295,7 +295,7 @@ public sealed partial class MemoryAccountStore
     {
         if (level < 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -310,7 +310,7 @@ public sealed partial class MemoryAccountStore
     {
         if (karma < 0 || pkKills < 0 || pvpKills < 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
