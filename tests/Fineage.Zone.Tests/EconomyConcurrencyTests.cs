@@ -217,6 +217,7 @@ public sealed class EconomyConcurrencyTests
         int piece = seller.Slot(Harvester);
         int scrolls = seller.Slot(Scroll);
         int pieceSales, scrollSales;
+        string?[] pieceRace, scrollRace;
 
         await using (var live = new Live(bench))
         {
@@ -233,13 +234,13 @@ public sealed class EconomyConcurrencyTests
                 Assert.Null(await live.Run(buyer, new PrivateStoreListCommand(
                     new PrivateStoreListRequestMsg { StoreObjectId = seller.ObjectId })));
 
-            var pieceRace = await Race(Each(buyers, buyer => live.Run(buyer, new PrivateStoreBuyCommand(new PrivateStoreBuyMsg
+            pieceRace = await Race(Each(buyers, buyer => live.Run(buyer, new PrivateStoreBuyCommand(new PrivateStoreBuyMsg
             {
                 StoreObjectId = seller.ObjectId,
                 Items = [new PrivateStoreSellRowMsg { InventoryObjectId = piece, Count = 1, Price = 300 }]
             }))));
             pieceSales = pieceRace.Count(result => result == null);
-            var scrollRace = await Race(Each(buyers, buyer => live.Run(buyer, new PrivateStoreBuyCommand(new PrivateStoreBuyMsg
+            scrollRace = await Race(Each(buyers, buyer => live.Run(buyer, new PrivateStoreBuyCommand(new PrivateStoreBuyMsg
             {
                 StoreObjectId = seller.ObjectId,
                 Items = [new PrivateStoreSellRowMsg { InventoryObjectId = scrolls, Count = 2, Price = 10 }]
@@ -247,8 +248,9 @@ public sealed class EconomyConcurrencyTests
             scrollSales = scrollRace.Count(result => result == null);
         }
 
-        Assert.Equal(1, pieceSales);
-        Assert.Equal(2, scrollSales);
+        string Codes() => $"piece=[{string.Join(",", pieceRace)}] scrolls=[{string.Join(",", scrollRace)}]";
+        Assert.True(pieceSales == 1, Codes());
+        Assert.True(scrollSales == 2, Codes());
         Assert.Single(buyers, buyer => buyer.Inventory.Find(piece) != null);
         Assert.Equal(1, seller.Inventory.CountOf(Scroll));
         Assert.Equal(4, buyers.Sum(buyer => buyer.Inventory.CountOf(Scroll)));
