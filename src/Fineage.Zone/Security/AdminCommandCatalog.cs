@@ -10,7 +10,8 @@ public sealed record AdminCommandSpec(
     string Name,
     AdminRole MinimumRole,
     AdminCommandSurface Surface,
-    string Description);
+    string Description,
+    AdminCommandFamily Family = AdminCommandFamily.Core);
 
 public enum AdminCommandSurface
 {
@@ -20,6 +21,24 @@ public enum AdminCommandSurface
     Chat,
     /// <summary>Dedicated Net admin opcode.</summary>
     NetOpcode
+}
+
+/// <summary>
+/// The handler family a bypass verb routes to. Registration in the catalog is what makes a verb
+/// reachable: <see cref="Fineage.Zone.World.ZoneWorld"/> dispatches by this family instead of keeping
+/// a second verb list, so a new verb cannot be handled without also passing the role gate.
+/// </summary>
+public enum AdminCommandFamily
+{
+    Core,
+    Punishment,
+    Festival,
+    Teleport,
+    Combat,
+    Announce,
+    Status,
+    Petition,
+    Ride
 }
 
 public static class AdminCommandCatalog
@@ -50,61 +69,70 @@ public static class AdminCommandCatalog
         new("admin_spawn", AdminRole.Gm, AdminCommandSurface.Bypass, "spawn NPCs"),
         new("admin_spawn_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "spawn NPCs alias"),
         new("admin_kick", AdminRole.Gm, AdminCommandSurface.Bypass, "kick a player"),
-        new("admin_jail", AdminRole.Gm, AdminCommandSurface.Bypass, "jail a character"),
-        new("admin_unjail", AdminRole.Gm, AdminCommandSurface.Bypass, "release a character from jail"),
-        new("admin_ban_chat", AdminRole.Gm, AdminCommandSurface.Bypass, "ban chat for a character"),
-        new("admin_unban_chat", AdminRole.Gm, AdminCommandSurface.Bypass, "unban chat for a character"),
-        new("admin_ban_char", AdminRole.Gm, AdminCommandSurface.Bypass, "ban a character"),
-        new("admin_unban_char", AdminRole.Gm, AdminCommandSurface.Bypass, "unban a character"),
-        new("admin_ban_acc", AdminRole.Admin, AdminCommandSurface.Bypass, "ban an account"),
-        new("admin_unban_acc", AdminRole.Admin, AdminCommandSurface.Bypass, "unban an account"),
-        new("admin_festival_enter", AdminRole.Gm, AdminCommandSurface.Bypass, "enter the festival"),
-        new("admin_festival_end", AdminRole.Gm, AdminCommandSurface.Bypass, "end the festival"),
-        new("admin_show_moves", AdminRole.Helper, AdminCommandSurface.Bypass, "open the teleport menu"),
-        new("admin_show_moves_other", AdminRole.Helper, AdminCommandSurface.Bypass, "open the other-player teleport menu"),
-        new("admin_show_teleport", AdminRole.Helper, AdminCommandSurface.Bypass, "show the teleport-character form"),
-        new("admin_tele", AdminRole.Helper, AdminCommandSurface.Bypass, "open the move menu"),
-        new("admin_move_to", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to coordinates"),
-        new("admin_teleportto", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to a player"),
-        new("admin_teleport_to_character", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to the selected character"),
-        new("admin_teleport_character", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport the selected character"),
-        new("admin_recall", AdminRole.Gm, AdminCommandSurface.Bypass, "recall a player"),
-        new("admin_sendhome", AdminRole.Gm, AdminCommandSurface.Bypass, "send a player home"),
-        new("admin_gonorth", AdminRole.Gm, AdminCommandSurface.Bypass, "move north"),
-        new("admin_gosouth", AdminRole.Gm, AdminCommandSurface.Bypass, "move south"),
-        new("admin_goeast", AdminRole.Gm, AdminCommandSurface.Bypass, "move east"),
-        new("admin_gowest", AdminRole.Gm, AdminCommandSurface.Bypass, "move west"),
-        new("admin_goup", AdminRole.Gm, AdminCommandSurface.Bypass, "move up"),
-        new("admin_godown", AdminRole.Gm, AdminCommandSurface.Bypass, "move down"),
-        // #931 combat / announce / status / petition / ride
-        new("admin_heal", AdminRole.Gm, AdminCommandSurface.Bypass, "heal self or a player"),
-        new("admin_kill", AdminRole.Gm, AdminCommandSurface.Bypass, "kill a player or monster"),
-        new("admin_kill_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "kill a monster only"),
-        new("admin_res", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a player or monster"),
-        new("admin_res_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a monster only"),
-        new("admin_delete", AdminRole.Gm, AdminCommandSurface.Bypass, "delete a target NPC or ground item"),
-        new("admin_announce", AdminRole.Gm, AdminCommandSurface.Bypass, "announce to all players"),
-        new("admin_announce_crit", AdminRole.Gm, AdminCommandSurface.Bypass, "critical announce to all players"),
-        new("admin_online", AdminRole.Helper, AdminCommandSurface.Bypass, "report online player count"),
-        new("admin_invul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle self invulnerability"),
-        new("admin_setinvul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle target invulnerability"),
-        new("admin_hide", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility"),
-        new("admin_invis", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility alias"),
-        new("admin_invisible", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility alias"),
-        new("admin_setinvis", AdminRole.Gm, AdminCommandSurface.Bypass, "set invisibility on or off"),
-        new("admin_vis", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible"),
-        new("admin_visible", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible alias"),
-        new("admin_view_petitions", AdminRole.Gm, AdminCommandSurface.Bypass, "list pending petitions"),
-        new("admin_view_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "view one petition"),
-        new("admin_accept_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "accept a petition"),
-        new("admin_reject_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "reject a petition"),
-        new("admin_reset_petitions", AdminRole.Gm, AdminCommandSurface.Bypass, "reset the petition queue"),
-        new("admin_force_peti", AdminRole.Gm, AdminCommandSurface.Bypass, "force-open a petition"),
-        new("admin_ride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "mount a wyvern"),
-        new("admin_ride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "mount a strider"),
-        new("admin_unride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a wyvern"),
-        new("admin_unride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a strider"),
-        new("admin_unride", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount")
+        new("admin_jail", AdminRole.Gm, AdminCommandSurface.Bypass, "jail a character", AdminCommandFamily.Punishment),
+        new("admin_unjail", AdminRole.Gm, AdminCommandSurface.Bypass, "release a character from jail", AdminCommandFamily.Punishment),
+        new("admin_ban_chat", AdminRole.Gm, AdminCommandSurface.Bypass, "ban chat for a character", AdminCommandFamily.Punishment),
+        new("admin_unban_chat", AdminRole.Gm, AdminCommandSurface.Bypass, "unban chat for a character", AdminCommandFamily.Punishment),
+        new("admin_ban_char", AdminRole.Gm, AdminCommandSurface.Bypass, "ban a character", AdminCommandFamily.Punishment),
+        new("admin_unban_char", AdminRole.Gm, AdminCommandSurface.Bypass, "unban a character", AdminCommandFamily.Punishment),
+        new("admin_ban_acc", AdminRole.Admin, AdminCommandSurface.Bypass, "ban an account", AdminCommandFamily.Punishment),
+        new("admin_unban_acc", AdminRole.Admin, AdminCommandSurface.Bypass, "unban an account", AdminCommandFamily.Punishment),
+        new("admin_festival_enter", AdminRole.Gm, AdminCommandSurface.Bypass, "enter the festival", AdminCommandFamily.Festival),
+        new("admin_festival_end", AdminRole.Gm, AdminCommandSurface.Bypass, "end the festival", AdminCommandFamily.Festival),
+        new("admin_show_moves", AdminRole.Helper, AdminCommandSurface.Bypass, "open the teleport menu", AdminCommandFamily.Teleport),
+        new("admin_show_moves_other", AdminRole.Helper, AdminCommandSurface.Bypass, "open the other-player teleport menu", AdminCommandFamily.Teleport),
+        new("admin_show_teleport", AdminRole.Helper, AdminCommandSurface.Bypass, "show the teleport-character form", AdminCommandFamily.Teleport),
+        new("admin_tele", AdminRole.Helper, AdminCommandSurface.Bypass, "open the move menu", AdminCommandFamily.Teleport),
+        new("admin_move_to", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to coordinates", AdminCommandFamily.Teleport),
+        new("admin_teleportto", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to a player", AdminCommandFamily.Teleport),
+        new("admin_teleport_to_character", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport self to the selected character", AdminCommandFamily.Teleport),
+        new("admin_teleport_character", AdminRole.Gm, AdminCommandSurface.Bypass, "teleport the selected character", AdminCommandFamily.Teleport),
+        new("admin_recall", AdminRole.Gm, AdminCommandSurface.Bypass, "recall a player", AdminCommandFamily.Teleport),
+        new("admin_sendhome", AdminRole.Gm, AdminCommandSurface.Bypass, "send a player home", AdminCommandFamily.Teleport),
+        new("admin_gonorth", AdminRole.Gm, AdminCommandSurface.Bypass, "move north", AdminCommandFamily.Teleport),
+        new("admin_gosouth", AdminRole.Gm, AdminCommandSurface.Bypass, "move south", AdminCommandFamily.Teleport),
+        new("admin_goeast", AdminRole.Gm, AdminCommandSurface.Bypass, "move east", AdminCommandFamily.Teleport),
+        new("admin_gowest", AdminRole.Gm, AdminCommandSurface.Bypass, "move west", AdminCommandFamily.Teleport),
+        new("admin_goup", AdminRole.Gm, AdminCommandSurface.Bypass, "move up", AdminCommandFamily.Teleport),
+        new("admin_godown", AdminRole.Gm, AdminCommandSurface.Bypass, "move down", AdminCommandFamily.Teleport),
+
+        // Mobius AdminHeal / AdminKill / AdminRes / AdminDelete.
+        new("admin_heal", AdminRole.Gm, AdminCommandSurface.Bypass, "heal self, a target or a radius", AdminCommandFamily.Combat),
+        new("admin_kill", AdminRole.Gm, AdminCommandSurface.Bypass, "kill a target or a radius", AdminCommandFamily.Combat),
+        new("admin_kill_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "kill monsters in a radius", AdminCommandFamily.Combat),
+        new("admin_res", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a player or a radius", AdminCommandFamily.Combat),
+        new("admin_res_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a monster target", AdminCommandFamily.Combat),
+        new("admin_delete", AdminRole.Gm, AdminCommandSurface.Bypass, "delete NPCs", AdminCommandFamily.Combat),
+
+        // Mobius AdminAnnounce.
+        new("admin_announce", AdminRole.Gm, AdminCommandSurface.Bypass, "announce to all players", AdminCommandFamily.Announce),
+        new("admin_announce_crit", AdminRole.Gm, AdminCommandSurface.Bypass, "critical announce to all players", AdminCommandFamily.Announce),
+
+        // Mobius AdminAdmin (online report, invulnerability, hide/invisible).
+        new("admin_online", AdminRole.Helper, AdminCommandSurface.Bypass, "report online players", AdminCommandFamily.Status),
+        new("admin_invul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invulnerability", AdminCommandFamily.Status),
+        new("admin_setinvul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invulnerability on a target", AdminCommandFamily.Status),
+        new("admin_hide", AdminRole.Gm, AdminCommandSurface.Bypass, "hide or show self", AdminCommandFamily.Status),
+        new("admin_invis", AdminRole.Gm, AdminCommandSurface.Bypass, "become invisible", AdminCommandFamily.Status),
+        new("admin_invisible", AdminRole.Gm, AdminCommandSurface.Bypass, "become invisible alias", AdminCommandFamily.Status),
+        new("admin_setinvis", AdminRole.Gm, AdminCommandSurface.Bypass, "become invisible alias", AdminCommandFamily.Status),
+        new("admin_vis", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible", AdminCommandFamily.Status),
+        new("admin_visible", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible alias", AdminCommandFamily.Status),
+
+        // Mobius AdminPetition.
+        new("admin_view_petitions", AdminRole.Helper, AdminCommandSurface.Bypass, "list pending petitions", AdminCommandFamily.Petition),
+        new("admin_view_petition", AdminRole.Helper, AdminCommandSurface.Bypass, "show one petition", AdminCommandFamily.Petition),
+        new("admin_accept_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "accept a petition", AdminCommandFamily.Petition),
+        new("admin_reject_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "reject a petition", AdminCommandFamily.Petition),
+        new("admin_reset_petitions", AdminRole.Gm, AdminCommandSurface.Bypass, "reset pending petitions", AdminCommandFamily.Petition),
+        new("admin_force_peti", AdminRole.Gm, AdminCommandSurface.Bypass, "force a petition for a player", AdminCommandFamily.Petition),
+
+        // Mobius AdminRide.
+        new("admin_ride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "ride a wyvern", AdminCommandFamily.Ride),
+        new("admin_ride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "ride a strider", AdminCommandFamily.Ride),
+        new("admin_unride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a wyvern", AdminCommandFamily.Ride),
+        new("admin_unride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a strider", AdminCommandFamily.Ride),
+        new("admin_unride", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount", AdminCommandFamily.Ride)
     ];
 
     static readonly AdminCommandSpec[] ChatCommands =

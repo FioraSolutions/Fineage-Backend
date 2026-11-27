@@ -6,16 +6,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminPunishmentVerb(string verb) =>
-      verb.Equals("admin_jail", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_unjail", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_ban_chat", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_unban_chat", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_ban_char", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_unban_char", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_ban_acc", StringComparison.OrdinalIgnoreCase)
-      || verb.Equals("admin_unban_acc", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminPunishment(ZoneSession gmSession, ZoneEntity gm, string verb, string args)
     {
         long now = NowUnixMs();

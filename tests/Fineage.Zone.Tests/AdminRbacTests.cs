@@ -139,6 +139,76 @@ public sealed class AdminRbacTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData("admin_heal", AdminRole.Gm)]
+    [InlineData("admin_kill", AdminRole.Gm)]
+    [InlineData("admin_kill_monster", AdminRole.Gm)]
+    [InlineData("admin_res", AdminRole.Gm)]
+    [InlineData("admin_res_monster", AdminRole.Gm)]
+    [InlineData("admin_delete", AdminRole.Gm)]
+    [InlineData("admin_announce", AdminRole.Gm)]
+    [InlineData("admin_announce_crit", AdminRole.Gm)]
+    [InlineData("admin_online", AdminRole.Helper)]
+    [InlineData("admin_invul", AdminRole.Gm)]
+    [InlineData("admin_setinvul", AdminRole.Gm)]
+    [InlineData("admin_hide", AdminRole.Gm)]
+    [InlineData("admin_invis", AdminRole.Gm)]
+    [InlineData("admin_invisible", AdminRole.Gm)]
+    [InlineData("admin_setinvis", AdminRole.Gm)]
+    [InlineData("admin_vis", AdminRole.Gm)]
+    [InlineData("admin_visible", AdminRole.Gm)]
+    [InlineData("admin_view_petitions", AdminRole.Helper)]
+    [InlineData("admin_view_petition", AdminRole.Helper)]
+    [InlineData("admin_accept_petition", AdminRole.Gm)]
+    [InlineData("admin_reject_petition", AdminRole.Gm)]
+    [InlineData("admin_reset_petitions", AdminRole.Gm)]
+    [InlineData("admin_force_peti", AdminRole.Gm)]
+    [InlineData("admin_ride_wyvern", AdminRole.Gm)]
+    [InlineData("admin_ride_strider", AdminRole.Gm)]
+    [InlineData("admin_unride_wyvern", AdminRole.Gm)]
+    [InlineData("admin_unride_strider", AdminRole.Gm)]
+    [InlineData("admin_unride", AdminRole.Gm)]
+    public void Tail_bypass_verbs_are_registered_in_the_central_catalog(string verb, AdminRole minimum)
+    {
+        Assert.True(
+            AdminCommandCatalog.TryGetBypass(verb, out AdminCommandSpec spec),
+            $"{verb} must be registered in AdminCommandCatalog; the dispatcher only routes catalog entries");
+        Assert.Equal(minimum, spec.MinimumRole);
+        Assert.Equal(AdminCommandSurface.Bypass, spec.Surface);
+    }
+
+    [Fact]
+    public async Task Development_legacy_name_policy_reaches_tail_verbs_through_common_dispatch()
+    {
+        ZoneAdmin.SetPolicyForTest(["KuK"]);
+        var kit = new WorldBench(punishments: OpenManager());
+        BenchPlayer gm = await kit.EnterAsync(name: "KuK");
+
+        Assert.Null(await gm.BypassAsync(0, "admin_online"));
+        Assert.Null(await gm.BypassAsync(0, "admin_heal"));
+
+        string audit = await File.ReadAllTextAsync(Path.Combine(_stateDir, "gm-audit.jsonl"));
+        Assert.Contains("\"action\":\"online\"", audit);
+        Assert.Contains("\"action\":\"heal\"", audit);
+    }
+
+    [Fact]
+    public async Task Helper_may_read_online_and_petitions_but_not_mutate_state()
+    {
+        ZoneAdmin.SetPolicyForTest(
+            [],
+            new Dictionary<string, string> { ["HelperOne"] = "helper" });
+        var kit = new WorldBench(punishments: OpenManager());
+        BenchPlayer helper = await kit.EnterAsync(name: "HelperOne");
+
+        Assert.Null(await helper.BypassAsync(0, "admin_online"));
+        Assert.Null(await helper.BypassAsync(0, "admin_view_petitions"));
+        Assert.Equal("forbidden", await helper.BypassAsync(0, "admin_heal"));
+        Assert.Equal("forbidden", await helper.BypassAsync(0, "admin_announce hello"));
+        Assert.Equal("forbidden", await helper.BypassAsync(0, "admin_hide on"));
+        Assert.Equal("forbidden", await helper.BypassAsync(0, "admin_accept_petition 1"));
+    }
+
     [Fact]
     public async Task Helper_and_gm_cannot_reach_a_higher_role_command()
     {

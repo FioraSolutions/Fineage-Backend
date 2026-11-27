@@ -2,10 +2,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminAnnounceVerb(string verb) =>
-        verb.Equals("admin_announce", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_announce_crit", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminAnnounce(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         string text = args.Trim();

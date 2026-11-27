@@ -8,13 +8,6 @@ public sealed partial class ZoneWorld
     const int AdminRideWyvernNpcId = 12621;
     const int AdminRideStriderNpcId = 12526;
 
-    static bool IsAdminRideVerb(string verb) =>
-        verb.Equals("admin_ride_wyvern", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_ride_strider", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_unride_wyvern", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_unride_strider", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_unride", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminRide(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         ZoneEntity rider = ResolveAdminRideTarget(gm);
