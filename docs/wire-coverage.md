@@ -478,7 +478,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xfe/0x33 | EX_GET_BOSS_RECORD | ExGetBossRecord | yes | yes | BossStatus |  |
 | 0xfe/0x34 | EX_ASK_JOIN_PARTY_ROOM | ExAskJoinPartyRoom | no | no |  |  |
 | 0xfe/0x35 | EX_LIST_PARTY_MATCHING_WAITING_ROOM | ExListPartyMatchingWaitingRoom | no | no |  |  |
-| 0xfe/0x37 | EX_SHOW_ADVENTURER_GUIDE_BOOK | ExShowAdventurerGuideBook | no | no |  | RaidbossInfo 31775/31776 still unavailable HTML |
+| 0xfe/0x37 | EX_SHOW_ADVENTURER_GUIDE_BOOK | ExShowAdventurerGuideBook | no | no |  | Adventurer guide book packet still absent; RaidbossInfo HTML via Script host (#919) |
 | 0xfe/0x38 | EX_SHOW_SCREEN_MESSAGE | ExShowScreenMessage | partial | yes | SystemMessage |  |
 | 0xfe/0x39 | PLEDGE_SKILL_LIST | PledgeSkillList | partial | yes | SkillList | clan skills are on the skill list |
 | 0xfe/0x3a | PLEDGE_SKILL_LIST_ADD | PledgeSkillListAdd | partial | yes | SkillList |  |

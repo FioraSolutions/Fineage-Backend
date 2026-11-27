@@ -18,7 +18,7 @@
         "scriptId": "RaidbossInfo",
         "pipeline": "raid_boss_info",
         "npcIds": [31775, 31776],
-        "note": "Adventurer guild raid ranking HTML — stub until ranking actor lands"
+        "note": "Adventurer guild raid location HTML + radar marker (Mobius custom.RaidbossInfo). Points ranking stays on npc 31603."
       },
       {
         "scriptId": "TeleportToRaceTrack",
@@ -31,7 +31,7 @@
       {
         "scriptId": "DungeonGatekeeper",
         "pipeline": "dungeon_gate",
-        "note": "Catacomb/necropolis Gatekeeper Ziggurats — DungeonEnterRequest + DungeonAccess rules, not Script bypass"
+        "note": "Catacomb/necropolis Gatekeeper Ziggurats — HTML necro/cata/exit → DungeonAccess via BypassRegistry (same as DungeonEnterRequest packet)"
       }
     ]
   },
@@ -58,7 +58,7 @@
     { "id": "OracleTeleport", "pipeline": "oracle_teleport", "status": "implemented", "mobiusRef": "ai/others/OracleTeleport" },
     { "id": "OrcChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange1" },
     { "id": "OrcChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange2" },
-    { "id": "RaidbossInfo", "pipeline": "raid_boss_info", "status": "stub", "mobiusRef": "ai/others/RaidbossInfo" },
+    { "id": "RaidbossInfo", "pipeline": "raid_boss_info", "status": "implemented", "mobiusRef": "custom/RaidbossInfo" },
     { "id": "ShadowWeapons", "pipeline": "stub", "status": "stub", "mobiusRef": "ai/others/ShadowWeapons" },
     { "id": "SymbolMaker", "pipeline": "symbol_maker", "status": "implemented", "mobiusRef": "ai/others/SymbolMaker" },
     { "id": "TeleportToRaceTrack", "pipeline": "monster_race_teleport", "status": "implemented", "mobiusRef": "ai/others/TeleportToRaceTrack" },
