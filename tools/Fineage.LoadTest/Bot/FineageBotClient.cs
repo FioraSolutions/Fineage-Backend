@@ -109,30 +109,38 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     async Task ConnectAndEnterCoreAsync(CancellationToken ct)
     {
+        EnterPhase("login_connect");
         await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
         _loginStream = _login.GetStream();
         await LoginHandshakeAsync(ct);
 
+        EnterPhase("zone_connect");
         await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
         _zoneStream = _zone.GetStream();
         _zoneReader = new NetFrameReader(_zoneStream);
 
+        EnterPhase("zone_hello");
         await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
         await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
 
+        EnterPhase("zone_auth");
         await ZoneExchangeAsync(
             NetOpcode.ZoneAuth,
             NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
             NetOpcode.ZoneAuthResult,
             ct);
 
+        EnterPhase("enter_world");
         await EnterWorldAsync(ct);
         _stats.InWorld = true;
         if (_selfEntity != 0)
             _peers.Register(BotId, SelfObjectId);
         _receiveTask = Task.Run(() => ReceiveLoopAsync(_receiveCts.Token), CancellationToken.None);
+        EnterPhase("place_at_spawn");
         await PlaceAtScenarioSpawnAsync(ct);
     }
+
+    void EnterPhase(string phase) => _stats.EntryPhase = phase;
 
     /// <summary>
     /// EnterWorld resumes the persisted character position, so a scenario that needs a specific start sends the
@@ -223,6 +231,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     async Task LoginHandshakeAsync(CancellationToken ct)
     {
+        EnterPhase("login_hello");
         await LoginExchangeAsync(NetOpcode.Hello,
             NetCodec.EncodeHello(new HelloMsg
             {
@@ -231,7 +240,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
             }),
             NetOpcode.HelloAck, ct);
 
-        await LoginExchangeAsync(NetOpcode.Auth,
+        EnterPhase("login_auth");
+        var authPayload = await LoginExchangePayloadAsync(NetOpcode.Auth,
             NetCodec.EncodeAuth(new AuthMsg
             {
                 Account = Account,
@@ -239,7 +249,12 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                 RegisterIfMissing = true
             }),
             NetOpcode.AuthResult, ct);
+        var auth = NetCodec.DecodeAuthResult(authPayload);
+        if (!auth.Ok)
+            throw new InvalidOperationException(
+                $"bot {BotId}: login auth rejected: {auth.Code} {auth.Message}");
 
+        EnterPhase("login_list_characters");
         await LoginWriteAsync(NetOpcode.ListCharacters, [], ct);
         var rosterPayload = await LoginReadUntilAsync(NetOpcode.CharacterRoster, ct);
         var roster = NetCodec.DecodeCharacterRoster(rosterPayload);
@@ -247,7 +262,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         if (roster.Characters.Length == 0)
         {
             var (classId, race) = Scenario.ResolveClassAndRace(BotId);
-            await LoginExchangeAsync(NetOpcode.CreateCharacter,
+            EnterPhase("login_create_character");
+            var createPayload = await LoginExchangePayloadAsync(NetOpcode.CreateCharacter,
                 NetCodec.EncodeCreateCharacter(new CreateCharacterMsg
                 {
                     Name = CharacterName,
@@ -256,14 +272,27 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                     Sex = HumanClasses.SexMale
                 }),
                 NetOpcode.CreateResult, ct);
+            var created = NetCodec.DecodeCreateResult(createPayload);
+            if (!created.Ok)
+                throw new InvalidOperationException(
+                    $"bot {BotId}: character create rejected for {CharacterName} " +
+                    $"(class={classId} race={race}): {created.Code} {created.Message}");
+
+            EnterPhase("login_list_characters");
             await LoginWriteAsync(NetOpcode.ListCharacters, [], ct);
             rosterPayload = await LoginReadUntilAsync(NetOpcode.CharacterRoster, ct);
             roster = NetCodec.DecodeCharacterRoster(rosterPayload);
         }
 
+        if (roster.Characters.Length == 0)
+            throw new InvalidOperationException(
+                $"bot {BotId}: account {Account} returned an empty character roster; " +
+                $"cannot select {CharacterName} and there is no character to fall back to");
+
         var pick = roster.Characters.FirstOrDefault(c => c.Name == CharacterName)
             ?? roster.Characters[0];
 
+        EnterPhase("login_select_character");
         var handoffPayload = await LoginExchangePayloadAsync(NetOpcode.SelectCharacter,
             NetCodec.EncodeSelectCharacter(new SelectCharacterMsg { CharacterId = pick.CharacterId }),
             NetOpcode.Handoff, ct);
@@ -521,19 +550,24 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         handshake.CancelAfter(HandshakeTimeout);
         try
         {
+            EnterPhase("login_connect");
             await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, handshake.Token);
             _loginStream = _login.GetStream();
             await LoginHandshakeAsync(handshake.Token);
+            EnterPhase("zone_connect");
             await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, handshake.Token);
             _zoneStream = _zone.GetStream();
             _zoneReader = new NetFrameReader(_zoneStream);
+            EnterPhase("zone_hello");
             await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), handshake.Token);
             await ZoneReadUntilAsync(NetOpcode.HelloAck, handshake.Token);
+            EnterPhase("zone_auth");
             await ZoneExchangeAsync(
                 NetOpcode.ZoneAuth,
                 NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
                 NetOpcode.ZoneAuthResult,
                 handshake.Token);
+            EnterPhase("enter_world");
             await EnterWorldAsync(handshake.Token);
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)

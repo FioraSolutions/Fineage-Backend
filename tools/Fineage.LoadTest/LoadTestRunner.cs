@@ -268,12 +268,19 @@ public sealed class LoadTestRunner
         {
             bugs.Add($"P2: {disconnected} bots disconnected during {scenario.Name} — check rate limits and handoff TTL.");
             foreach (var group in bots.Where(b => b.Stats.Disconnected)
-                         .GroupBy(b => b.Stats.LastError ?? "(no error recorded)")
+                         .GroupBy(b => (Error: b.Stats.LastError ?? "(no error recorded)", b.Stats.EntryPhase))
                          .OrderByDescending(g => g.Count())
                          .Take(5))
             {
-                string error = group.Key.Length > 200 ? group.Key[..200] : group.Key;
-                bugs.Add($"P2:   {group.Count()} disconnected bot(s) last error: {error} (bots {string.Join(",", group.Select(b => b.BotId).Take(8))})");
+                string error = group.Key.Error.Length > 200 ? group.Key.Error[..200] : group.Key.Error;
+                bugs.Add($"P2:   {group.Count()} disconnected bot(s) phase={group.Key.EntryPhase} last error: {error} (bots {string.Join(",", group.Select(b => b.BotId).Take(8))})");
+            }
+
+            // The grouped line truncates; keep the first real stack so the entry exception can be traced to a frame.
+            if (stats.FirstOrDefault(s => s.EntryFailure != null) is { } failedEntry)
+            {
+                string stack = failedEntry.EntryFailure!.Replace("\r\n", " | ").Replace('\n', ' ');
+                bugs.Add($"P0 entry failure bot={failedEntry.BotId} phase={failedEntry.EntryPhase}: {(stack.Length > 4000 ? stack[..4000] + "…" : stack)}");
             }
         }
         if (promSamples.Count > 0 && promSamples.Max(s => s.TickP99) > 500)
@@ -490,7 +497,7 @@ public sealed class LoadTestRunner
         return null;
     }
 
-    static async Task EnterOneAsync(FineageBotClient bot, SemaphoreSlim slots, CancellationToken ct)
+    internal static async Task EnterOneAsync(FineageBotClient bot, SemaphoreSlim slots, CancellationToken ct)
     {
         try
         {
@@ -498,7 +505,10 @@ public sealed class LoadTestRunner
         }
         catch (Exception ex)
         {
+            // The message alone ("Index was outside the bounds of the array.") cannot be traced to a protocol step.
+            // Keep the full type+stack and the phase the bot was in so the report names the real failure.
             bot.Stats.LastError = ex.Message;
+            bot.Stats.EntryFailure = ex.ToString();
             bot.Stats.Disconnected = true;
         }
         finally
