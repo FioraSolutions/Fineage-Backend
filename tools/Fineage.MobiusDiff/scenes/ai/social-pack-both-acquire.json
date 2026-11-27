@@ -1,0 +1,69 @@
+{
+  "id": "social-pack-both-acquire",
+  "description": "Two aggressive pack members independently acquire the same player through the aggro scan.",
+  "category": "social",
+  "seed": 9833,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200161,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    },
+    {
+      "key": "mate",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200162,
+      "x": 100500,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mate.target",
+      "npc.mate.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/social-pack-both-acquire.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

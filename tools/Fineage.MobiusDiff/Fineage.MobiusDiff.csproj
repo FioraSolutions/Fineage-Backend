@@ -10,6 +10,7 @@
   <ItemGroup>
     <None Update="scenarios\**\*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="oracle\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="scenes\**\*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="java\**\*.java" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

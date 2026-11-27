@@ -42,6 +42,9 @@ public static class Program
     static int Run(string[] args)
     {
         string root = RepoPaths.FindRoot();
+        if (args.Any(static a => a is "--ai-all" or "--ai-scene" or "--refresh-ai-oracle" or "--ai-report-dir"))
+            return AiProgram.Run(root, args);
+
         string? scenarioPath = null;
         bool all = false;
         bool refresh = false;
@@ -190,5 +193,11 @@ public static class Program
               --refresh-oracle          regenerate the golden with the Java formula driver
               --ref <dir>               Mobius ref tree (default <root>/ref/mobius-ct0-interlude)
               --java <exe>              Java executable (default: java)
+
+            AI behavioural reference scenes:
+              --ai-all                  run every tools/Fineage.MobiusDiff/scenes/ai/*.json
+              --ai-scene <file>         run one AI scene
+              --refresh-ai-oracle       regenerate AI goldens with the independent Mobius rule model
+              --ai-report-dir <dir>     AI report output (default local-logs/ai-reference-diff)
             """);
 }

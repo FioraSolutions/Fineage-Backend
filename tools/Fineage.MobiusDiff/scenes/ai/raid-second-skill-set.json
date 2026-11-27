@@ -1,0 +1,52 @@
+{
+  "id": "raid-second-skill-set",
+  "description": "Second raid boss source skill set.",
+  "category": "raid",
+  "seed": 9871,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "boss",
+      "mobiusId": 25035,
+      "fineageId": 25035,
+      "source": "stats/npcs/250xx.xml",
+      "objectId": 9200301,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      5
+    ],
+    "fields": [
+      "npc.boss.aiSkills",
+      "npc.boss.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/raid-second-skill-set.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

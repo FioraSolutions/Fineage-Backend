@@ -1,0 +1,61 @@
+{
+  "id": "service-scripted-folk-immune",
+  "description": "Folk/monster script target flagged non-attackable takes no damage and no hate.",
+  "category": "npc-services",
+  "seed": 9862,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "npc",
+      "mobiusId": 30608,
+      "fineageId": 30608,
+      "source": "stats/npcs/306xx.xml",
+      "objectId": 9200281,
+      "x": 100200,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "npc",
+      "amount": 9999
+    }
+  ],
+  "observe": {
+    "ticks": [
+      12
+    ],
+    "fields": [
+      "npc.npc.target",
+      "npc.npc.hate.player",
+      "npc.npc.hp",
+      "npc.npc.dead"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/service-scripted-folk-immune.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

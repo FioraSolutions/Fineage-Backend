@@ -1,0 +1,95 @@
+name: ai-heavy-nightly
+
+# #980 behavioural AI reference differential. This is a heavy job: it drives the production
+# ZoneWorld through the full 30-50 scene catalog and must not be part of the fast PR gate.
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-heavy-nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  AI_REPORT_DIR: local-logs/ai-reference-diff
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+      - name: Build AI differential and Slow tests
+        run: |
+          dotnet build tools/Fineage.MobiusDiff/Fineage.MobiusDiff.csproj --configuration Release
+          dotnet build tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj --configuration Release
+
+  ai-reference-differential:
+    name: ai-reference-differential
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+      - name: Run every AI reference scene
+        # No continue-on-error and no skip: a real divergence must fail this job.
+        run: >-
+          dotnet run --project tools/Fineage.MobiusDiff --configuration Release
+          -- --ai-all --ai-report-dir "$AI_REPORT_DIR"
+      - name: Upload AI differential reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-reference-differential
+          path: local-logs/ai-reference-diff/
+          retention-days: 30
+      - name: Publish AI differential summary
+        if: always()
+        run: |
+          if [ -f "$AI_REPORT_DIR/summary.md" ]; then
+            cat "$AI_REPORT_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'AI differential summary was not produced.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  ai-slow-tests:
+    name: ai-slow-tests
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+      - name: AI catalog, coverage, provenance and negative-control tests
+        run: >-
+          dotnet test tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj
+          --configuration Release --verbosity normal
+          --filter "Category=Slow" -- xUnit.ParallelizeTestCollections=false

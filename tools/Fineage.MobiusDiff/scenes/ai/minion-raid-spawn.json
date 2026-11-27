@@ -1,0 +1,52 @@
+{
+  "id": "minion-raid-spawn",
+  "description": "A raid boss spawns all configured private minions (3+1).",
+  "category": "minions",
+  "seed": 9841,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "boss",
+      "mobiusId": 25001,
+      "fineageId": 25001,
+      "source": "stats/npcs/250xx.xml",
+      "objectId": 9200181,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      40
+    ],
+    "fields": [
+      "npc.boss.minionCount",
+      "npc.boss.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/minion-raid-spawn.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

@@ -1,0 +1,52 @@
+{
+  "id": "minion-spawn-idempotent",
+  "description": "Repeated think passes do not duplicate private minions.",
+  "category": "minions",
+  "seed": 9844,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "master",
+      "mobiusId": 22196,
+      "fineageId": 22196,
+      "source": "stats/npcs/221xx.xml",
+      "objectId": 9200211,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20,
+      80
+    ],
+    "fields": [
+      "npc.master.minionCount"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/minion-spawn-idempotent.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

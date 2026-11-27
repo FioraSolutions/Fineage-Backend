@@ -15,6 +15,25 @@ Both sides emit the same normalized metric names. The runner compares them with
 `|actual − expected| <= absolute + relative·|expected|` and writes JSON + Markdown reports with
 parameter, expected, actual, tolerance, delta and PASS/FAIL.
 
+## Behavioural AI reference set (#980)
+
+`scenes/ai/` is a separate deterministic scene format for NPC behaviour: initial state, Mobius and
+Fineage NPC ids, ticked player actions, normalized per-step observations (aggro/hate, chase/return,
+social/clan help, leader/minions, guards/services, raid death/respawn, region activation) and a strict
+`manifest.json` coverage contract. `AiSceneProbe` drives the production `ZoneWorld`; `MobiusAiReferenceModel`
+produces independent source-backed goldens. The model is not a headless Mobius runtime, so every golden is
+committed with `fullServerVerified=false` and the missing-runtime blocker. See
+`docs/MOBIUS_DIFFERENTIAL_TESTING.md`.
+
+```bash
+dotnet run --project tools/Fineage.MobiusDiff -c Release -- --ai-all
+dotnet run --project tools/Fineage.MobiusDiff -c Release -- --ai-all --refresh-ai-oracle
+dotnet test tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj -c Release --filter Category=Slow
+```
+
+The full catalog runs in `.github/workflows/ai-heavy-nightly.yml` (nightly/manual only), not in the fast
+PR gate.
+
 ## Run
 
 ```bash

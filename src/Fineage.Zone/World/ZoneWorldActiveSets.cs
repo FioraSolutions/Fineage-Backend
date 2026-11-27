@@ -19,6 +19,8 @@ public sealed partial class ZoneWorld
     /// <summary>Counts included in simulation overrun warnings.</summary>
     int _spawnedNpcCount;
 
+    internal int SpawnedNpcCount => _spawnedNpcCount;
+
     internal void NoteNpcSpawned() => _spawnedNpcCount++;
 
     internal void NoteNpcDespawned()

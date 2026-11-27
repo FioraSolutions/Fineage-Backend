@@ -1,0 +1,53 @@
+{
+  "id": "minion-normal-spawn",
+  "description": "A master with Mobius Privates spawns its configured minion count once.",
+  "category": "minions",
+  "seed": 9840,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "master",
+      "mobiusId": 22196,
+      "fineageId": 22196,
+      "source": "stats/npcs/221xx.xml",
+      "objectId": 9200171,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20,
+      60
+    ],
+    "fields": [
+      "npc.master.minionCount",
+      "npc.master.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/minion-normal-spawn.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

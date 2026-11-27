@@ -1,0 +1,68 @@
+{
+  "id": "social-different-clan-ignored",
+  "description": "A different-clan idle monster does not answer clan help.",
+  "category": "social",
+  "seed": 9832,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200151,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    },
+    {
+      "key": "helper",
+      "mobiusId": 20004,
+      "fineageId": 20004,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200152,
+      "x": 100450,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.helper.target"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/social-different-clan-ignored.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

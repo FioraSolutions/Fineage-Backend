@@ -1,0 +1,53 @@
+{
+  "id": "raid-special-skill-set",
+  "description": "Raid boss exposes its source skill list; AI scene records the ordered set, not a phase gate (CT0 has no phase counter here).",
+  "category": "raid",
+  "seed": 9870,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "boss",
+      "mobiusId": 25004,
+      "fineageId": 25004,
+      "source": "stats/npcs/250xx.xml",
+      "objectId": 9200291,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      5
+    ],
+    "fields": [
+      "npc.boss.aiSkills",
+      "npc.boss.raidMinion",
+      "npc.boss.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/raid-special-skill-set.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

@@ -1,0 +1,17 @@
+{
+  "source": "Mobius CT0 behavioural reference scenes (#980)",
+  "totalMin": 30,
+  "totalMax": 50,
+  "requiredCategories": {
+    "aggro": 5,
+    "hate": 4,
+    "chase-return": 4,
+    "social": 4,
+    "minions": 5,
+    "guards": 4,
+    "npc-services": 3,
+    "raid": 5,
+    "activation": 6,
+    "death-respawn": 3
+  }
+}

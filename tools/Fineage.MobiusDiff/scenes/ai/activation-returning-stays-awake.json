@@ -1,0 +1,68 @@
+{
+  "id": "activation-returning-stays-awake",
+  "description": "returnHome remains a think job after the player leaves the region.",
+  "category": "activation",
+  "seed": 9885,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200391,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 50
+    },
+    {
+      "tick": 20,
+      "type": "move",
+      "x": 200000,
+      "y": 200000,
+      "z": -3000
+    }
+  ],
+  "observe": {
+    "ticks": [
+      170
+    ],
+    "fields": [
+      "npc.mob.thinking",
+      "npc.mob.returningHome"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/activation-returning-stays-awake.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {
+    "npc.mob.returningHome": "Mobius returnHome starts a return-home walk and clears hate. The current Fineage trace drops the target but reports returningHome=false; keep this as a real AI divergence with separate ownership."
+  }
+}
