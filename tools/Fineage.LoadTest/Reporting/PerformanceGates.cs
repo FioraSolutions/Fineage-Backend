@@ -25,6 +25,17 @@ public static class PerformanceGates
 
     public const double FanoutQueueAgeP99GateMs = 40;
 
+    /// <summary>
+    /// #1110: the longest single tick while every bot logs out and back in. A p99 hides a lone stall (the #990 matrix
+    /// saw one 30.8 s tick under a p99 that passed), so churn profiles gate the true max. Debug, local stack.
+    /// </summary>
+    public const double ReconnectChurnTickMaxGateMs = 1000;
+
+    static readonly Dictionary<string, double> TickMaxByScenario = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["reconnect-storm"] = ReconnectChurnTickMaxGateMs
+    };
+
     /// <summary>RSS/queue/GC trend gates are evidence gates only once a run is long enough to show a trend.</summary>
     public const int TrendGateMinDurationSeconds = 300;
 
@@ -69,6 +80,22 @@ public static class PerformanceGates
                 Observed = tickMax,
                 Unit = "ms",
                 Passed = true
+            });
+        }
+
+        if (TickMaxByScenario.TryGetValue(scenario, out double tickMaxLimit))
+        {
+            bool missingMax = tickMax <= 0;
+            verdicts.Add(new GateVerdict
+            {
+                Gate = $"tick max <= {tickMaxLimit:0} ms ({scenario})",
+                Limit = tickMaxLimit,
+                Observed = tickMax,
+                Unit = "ms",
+                Passed = !missingMax && tickMax <= tickMaxLimit,
+                Note = missingMax
+                    ? "MISSING: fineage_tick_max_ms gauge and tick histogram max; a churn run without the longest tick proves nothing"
+                    : "longest single tick (fineage_tick_max_ms), not a percentile"
             });
         }
 

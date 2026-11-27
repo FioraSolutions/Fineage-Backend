@@ -77,4 +77,50 @@ public class CompactReportTests
         Assert.False(fanout.Passed);
         Assert.Contains("MISSING", fanout.Note ?? "");
     }
+
+    [Theory]
+    [InlineData(30_800.0, false)]
+    [InlineData(1_200.0, false)]
+    [InlineData(236.8, true)]
+    public void Reconnect_churn_gates_the_longest_tick_not_a_percentile(double tickMax, bool passes)
+    {
+        var report = new RunReport
+        {
+            ScenarioName = "reconnect-storm",
+            Target = "fineage",
+            BotCount = 200,
+            // #990: one 30.8 s tick under a p99 that still passed.
+            Server = new PrometheusAggregate { TickP99Ms = 57.6 },
+            TickTrueMaxMs = tickMax,
+            Passed = true
+        };
+
+        var gate = Assert.Single(PerformanceGates.Evaluate(report), g => g.Gate.StartsWith("tick max", StringComparison.Ordinal));
+        Assert.Equal(PerformanceGates.ReconnectChurnTickMaxGateMs, gate.Limit);
+        Assert.Equal(passes, gate.Passed);
+    }
+
+    [Fact]
+    public void Reconnect_churn_without_a_tick_max_fails_its_gate()
+    {
+        var report = new RunReport
+        {
+            ScenarioName = "reconnect-storm",
+            Target = "fineage",
+            BotCount = 200,
+            Server = new PrometheusAggregate { TickP99Ms = 40 },
+            Passed = true
+        };
+
+        var gate = Assert.Single(PerformanceGates.Evaluate(report), g => g.Gate.StartsWith("tick max", StringComparison.Ordinal));
+        Assert.False(gate.Passed);
+        Assert.Contains("MISSING", gate.Note ?? "");
+    }
+
+    [Fact]
+    public void Other_profiles_have_no_tick_max_gate()
+    {
+        var report = new RunReport { ScenarioName = "bots-50-town", Target = "fineage", Server = new PrometheusAggregate { TickP99Ms = 40 } };
+        Assert.DoesNotContain(PerformanceGates.Evaluate(report), g => g.Gate.StartsWith("tick max", StringComparison.Ordinal));
+    }
 }
