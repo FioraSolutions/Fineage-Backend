@@ -149,6 +149,24 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 107 | Player mail | n/a | — | `EX_MAIL_ARRIVED` / `CustomMailManager` are not a Fineage Net target |
 | 108 | Mobius-only extras | n/a | — | captcha, rebirth, premium, sell-buffs, fake players, offline play, banking voiced, GameGuard, HackShield, GM snoop, Kamael slideshow. Not retail Interlude gameplay |
 
+## Movement A/B — #1051 (scoped)
+
+> Pins for this slice only: Fineage `f5759056` (`origin/dev` at run time) and local Mobius `L2J_Mobius_CT_0_Interlude` `84d79a21`. Other rows were not re-verified against these pins.
+
+**Method:** identical 2-D scenarios on a flat `20_18`/`21_19` region (16-unit geo cells, fixed tick, no randomness, no wall-clock measurements), comparing Mobius source behaviour to deterministic Fineage tests. Mobius: `Creature.updatePosition`/`moveToLocation` (`Creature.java:3945`, `:4291`), `MovementTaskManager` (100 ms pools), `GeoEngine.getValidLocation`/`canMoveToTarget` (`GeoEngine.java:431`, `:487`), `DoorData.checkIfDoorsBetween` (`DoorData.java:170`).
+
+| Scenario | Mobius evidence | Fineage before | Fineage now | Test |
+|---|---|---|---|---|
+| Open field | `distPassed = moveSpeed * (gameTicks - moveTimestamp) / 10`; snap to dest at `distFraction > 1.79` | `step = speed * dt / 1000`; snap when remaining ≤ step | unchanged | `GeoEngineTests.Open_move_reaches_dest_on_ground_z`, `Open_move_path_is_single_leg` |
+| Wall / closed door | `getValidLocation` checks doors first (`:441`) and cells next; returns origin/previous cell. `moveToLocation` pathfinds when the straight line lost > 30 units (`:4452`) | walls truncated and pathfound; **doors were ignored by `MoveCheck`**, so `ClipDoors` shortened the leg only after the route was chosen and the rest of the move was dropped — the pawn stopped at a closed door instead of routing around | `MoveCheck(..., DoorTable)` refuses the segment at the origin when a closed door crosses it, taking the existing blocked→A* branch; `CanStep`/`MoveCheck` used by the search reject the same door footprint | `GeoEngineTests.Closed_door_blocks_straight_move_and_path_routes_around_it`, `ZoneDoorMovementTests.Closed_door_on_the_line_queues_a_route_instead_of_stopping_at_the_clip` |
+| Open door | `checkIfDoorsBetween` returns false; direct move | direct move | direct move | `GeoEngineTests.Open_door_does_not_change_straight_move_or_path`, `ZoneDoorMovementTests.Open_door_on_the_line_keeps_the_direct_move` |
+| Blocked corridor / A* | `PathFinding` over `CellNodeBuffer`, bounded by `MAX_ITERATIONS`; per-tick door check remains (`Creature.java:4069`) | resumable A* on NSWE/`MaxClimb`, budgeted per step | same search plus an optional door predicate; no door-aware rewrite of the algorithm. Doors indexed in 128-unit buckets so no-door regions keep the old hot path | `GeoPathSearchTests`, `ZoneNoRouteCacheTests`, `ZonePathPriorityTests`, `ZonePathfindStarvationTests` |
+| Follow offset | `offset -= abs(dz); if (offset < 5) offset = 5; distance -= offset - 5` (`Creature.java:4353-4375`) | `ApproachStopDistance` already reproduces it | unchanged | `NetMeleeApproachTests` |
+| Slope | server Z advances from the client `ValidatePosition` Z (`Creature.java:3941-3942`) | server Z snaps to geo ground and interpolates between cells | unchanged — position-consistency scope | — |
+| Water | swim pair when `isInsideZone(WATER)` (`CreatureStat.java:484-492`); water legs clamp to 700 and skip geodata (`Creature.java:4323-4335`, `:4394`) | swim pair via `InWater`; **no 700-unit clamp / no water geodata bypass** | unchanged — source diff recorded, not part of the reproduced visible defect | — |
+
+**Root cause of the fixed diff:** door collision lived only in `ClipDoors` after the movement leg was selected; the shared `GeoEngine` path search had no door input. The fix moves door validity into the shared geo segment check (single `DoorTable.Blocks`), leaving the existing post-leg `ClipDoors` and per-tick checks as safety nets for doors that change state mid-move.
+
 ## Walked and folded into the rows above
 
 These Mobius trees were walked. They do not get their own row when the mechanism already has one.

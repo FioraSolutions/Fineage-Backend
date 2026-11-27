@@ -27,7 +27,7 @@ public sealed partial class ZoneWorld
         if (_geo.HasGeo(npc.X, npc.Y))
         {
             npc.Z = _geo.GetHeight(npc.X, npc.Y, npc.Z);
-            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out bool blocked);
+            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out bool blocked, Doors);
             if (blocked)
             {
                 if (TryNpcPathCacheOnly(npc.X, npc.Y, wantX, wantY, out var cached) && cached.Count > 0)
