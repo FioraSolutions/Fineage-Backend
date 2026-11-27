@@ -19,7 +19,7 @@ public sealed class EconomyReconcileTests
     const int Scroll = 736;
     const int Harvester = 5125;
 
-    sealed class Rig
+    internal sealed class Rig
     {
         public List<LedgerEntry> Durable { get; } = [];
         public DurableStore Store { get; } = new();
@@ -56,7 +56,7 @@ public sealed class EconomyReconcileTests
         return (a, b, ground);
     }
 
-    static EconomyReconcileReport Reconciled(WorldBench bench, string phase)
+    internal static EconomyReconcileReport Reconciled(WorldBench bench, string phase)
     {
         Assert.True(bench.World.FlushEconomyForReconcile(TimeSpan.FromSeconds(10)));
         var report = bench.World.ReconcileEconomy(phase);

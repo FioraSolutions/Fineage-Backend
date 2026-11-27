@@ -101,6 +101,18 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Off-step: commits every dirty container and waits until no economy batch is in flight.</summary>
+    /// <summary>
+    /// <see cref="FlushEconomyForReconcile"/> then <see cref="ReconcileEconomy"/>. Boot posts Expire moves for the
+    /// ground that did not survive and shutdown leaves the last logouts' journal rows: both have to be durable before
+    /// the store can be compared with the ledger. A failed flush shows up as a not-quiescent violation.
+    /// </summary>
+    public EconomyReconcileReport ReconcileEconomyFlushed(string phase, TimeSpan? budget = null)
+    {
+        if (!FlushEconomyForReconcile(budget ?? TimeSpan.FromSeconds(30)))
+            ZoneLog.Error($"economy reconcile phase={phase}: the economy flush before reconciling failed");
+        return ReconcileEconomy(phase);
+    }
+
     public bool FlushEconomyForReconcile(TimeSpan budget)
     {
         if (!TryCommitDirtyEconomy(discardWithoutPublish: null))
@@ -120,11 +132,7 @@ public sealed partial class ZoneWorld
     /// <summary>Reconcile and log; with <c>FINEAGE_STATE_AUDIT=block</c> a violation throws (startup refuses to run).</summary>
     public EconomyReconcileReport ReconcileEconomyAndLog(string phase, Func<string, string?>? environment = null)
     {
-        // Boot posts Expire moves for the ground that did not survive; shutdown leaves the last logouts' journal rows.
-        // Both have to be durable before the store can be compared with the ledger.
-        if (!FlushEconomyForReconcile(TimeSpan.FromSeconds(30)))
-            ZoneLog.Error($"economy reconcile phase={phase}: the economy flush before reconciling failed");
-        var report = ReconcileEconomy(phase);
+        var report = ReconcileEconomyFlushed(phase);
         foreach (var violation in report.Violations)
             ZoneLog.Error($"economy reconcile violation phase={phase} {violation}");
         if (report.Ok)
