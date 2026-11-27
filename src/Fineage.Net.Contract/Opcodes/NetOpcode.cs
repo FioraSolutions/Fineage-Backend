@@ -508,6 +508,10 @@ namespace Fineage.Net.Contract
         public const ushort CommandChannelClose = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x26));
         /// <summary>Zone → client: <c>ExMultiPartyCommandChannelInfo</c> (wire 0xFE 0x30). ServerPackets.java:265.</summary>
         public const ushort CommandChannelInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x30));
+        /// <summary>Client → zone: Mobius <c>RequestPCCafeCouponUse</c> (wire 0xD0 0x20). ExClientPackets.java:63.</summary>
+        public const ushort RequestPCCafeCouponUse = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x20));
+        /// <summary>Zone → client: Mobius <c>ExPCCafePointInfo</c> (wire 0xFE 0x31). ServerPackets.java:257.</summary>
+        public const ushort ExPCCafePointInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x31));
         /// <summary>
         /// Client → zone: Interlude C2S <c>RequestItemList</c>, opcode <c>0x0F</c>, empty body.
         /// Mobius CT_0 Interlude <c>ClientPackets.REQUEST_ITEM_LIST(0x0F, RequestItemList::new)</c>

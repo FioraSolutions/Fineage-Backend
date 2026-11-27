@@ -220,7 +220,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0/0x1d | RequestPledgeMemberInfo | yes | yes | PledgeCommand |  |
 | 0xd0/0x1e | RequestPledgeWarList | yes | yes | PledgeWarList |  |
 | 0xd0/0x1f | RequestExFishRanking | partial | no |  | FishingChampionshipBoard has no client ranking packet |
-| 0xd0/0x20 | RequestPCCafeCouponUse | no | no |  | PC cafe points |
+| 0xd0/0x20 | RequestPCCafeCouponUse | yes | yes |  | PC cafe coupon redeem #933 |
 | 0xd0/0x22 | RequestCursedWeaponList | partial | yes | CursedWeaponList | S2C list exists; no C2S refresh |
 | 0xd0/0x23 | RequestCursedWeaponLocation | partial | yes | CursedWeaponLocation | S2C locations; no C2S refresh |
 | 0xd0/0x24 | RequestPledgeReorganizeMember | yes | yes | PledgeCommand |  |
@@ -473,7 +473,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xfe/0x2d | EX_MAIL_ARRIVED | ExMailArrived | n/a | n/a |  | player mail is not a Fineage Net target |
 | 0xfe/0x2e | EX_STORAGE_MAX_COUNT | ExStorageMaxCount | partial | yes | InventoryUpdate | slot caps are server-side |
 | 0xfe/0x30 | EX_MULTI_PARTY_COMMAND_CHANNEL_INFO | ExMultiPartyCommandChannelInfo | yes | contract | CommandChannelInfo |  |
-| 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | no | no |  |  |
+| 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | yes | yes | ExPCCafePointInfo | PC cafe points #933 |
 | 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | zone rules are server-side (`ZoneTypeRegistry`); compass byte is still not sent |
 | 0xfe/0x33 | EX_GET_BOSS_RECORD | ExGetBossRecord | yes | yes | BossStatus |  |
 | 0xfe/0x34 | EX_ASK_JOIN_PARTY_ROOM | ExAskJoinPartyRoom | no | no |  |  |

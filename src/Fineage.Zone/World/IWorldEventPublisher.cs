@@ -400,4 +400,7 @@ interface IWorldEventPublisher
 
     /// <summary>Mobius <c>ExCursedWeaponLocation</c>.</summary>
     void FanoutCursedWeaponLocation(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CursedWeaponLocationMsg location);
+
+    /// <summary>Mobius <c>ExPCCafePointInfo</c>.</summary>
+    void FanoutPcCafePointInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PcCafePointInfoMsg info);
 }

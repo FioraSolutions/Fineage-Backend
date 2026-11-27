@@ -388,6 +388,9 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutShowBoard(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowBoardMsg board) =>
         Record(FanoutKind.ShowBoard, 0, watcherObjectIds, new FanoutArgs(Payload: board), replaceable: false);
 
+    void IWorldEventPublisher.FanoutPcCafePointInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PcCafePointInfoMsg info) =>
+        Record(FanoutKind.PcCafePointInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
     {
         int[] targetObjectIdsCopy = [.. targetObjectIds];

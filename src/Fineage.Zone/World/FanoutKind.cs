@@ -143,6 +143,7 @@ internal enum FanoutKind : byte
     PartyRoomAskJoin = 136,
     PartyMatchWaitingRoom = 137,
     ShowBoard = 138,
+    PcCafePointInfo = 139,
 }
 
 internal static class FanoutKinds

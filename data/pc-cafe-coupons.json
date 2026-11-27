@@ -1,0 +1,11 @@
+{
+  "coupons": [
+    {
+      "code": "FINEAGE-TEST-ADENA",
+      "points": 100,
+      "items": [
+        { "itemId": 57, "count": 1000 }
+      ]
+    }
+  ]
+}

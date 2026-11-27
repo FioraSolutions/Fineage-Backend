@@ -329,6 +329,9 @@ internal static class FanoutDispatch
             case FanoutKind.ShowBoard:
                 publisher.FanoutShowBoard(watchers, ((Fineage.Protocol.ShowBoardMsg)args.Payload!));
                 return;
+            case FanoutKind.PcCafePointInfo:
+                publisher.FanoutPcCafePointInfo(watchers, ((Fineage.Protocol.PcCafePointInfoMsg)args.Payload!));
+                return;
             case FanoutKind.MagicSkillLaunched:
                 publisher.FanoutMagicSkillLaunched(watchers, args.A, args.B, args.C, ((int[])args.Payload!));
                 return;
