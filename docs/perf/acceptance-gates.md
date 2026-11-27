@@ -52,8 +52,10 @@ pretending to measure 8–24 h.
 
 ### Reconnect churn: longest tick (#1110)
 
-`reconnect-storm` also gates the **longest single tick** (`fineage_tick_max_ms`): **≤ 1000 ms**, and a run
-without that gauge fails. A p99 hides one stall: the #990 matrix recorded a single 30.8 s tick under a passing p99.
+`reconnect-storm` also gates the **longest single step** (`fineage_tick_max_ms` ≤ 1000 ms; a run without that
+gauge fails) and the **longest freeze of the tick counter** between scrapes (≤ 10 s). A p99 hides one slow step,
+and the #990 stall was not a slow step: every step stayed under 100 ms while the counter froze for 30.8 s, and a
+29 s freeze would still pass the 30 s hang gate.
 The cause was the thread pool, not the step: logout writes ran synchronously on pool threads behind the store's
 single write gate, and the simulation loop, its watchdog and the economy persist worker all resumed through the
 pool. They now block on their own threads, logout writes run on a dedicated lane the handler awaits, and

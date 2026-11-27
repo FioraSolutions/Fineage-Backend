@@ -26,10 +26,15 @@ public static class PerformanceGates
     public const double FanoutQueueAgeP99GateMs = 40;
 
     /// <summary>
-    /// #1110: the longest single tick while every bot logs out and back in. A p99 hides a lone stall (the #990 matrix
-    /// saw one 30.8 s tick under a p99 that passed), so churn profiles gate the true max. Debug, local stack.
+    /// #1110: reconnect churn gates the longest single step (<c>fineage_tick_max_ms</c>) because a p99 hides one slow
+    /// step, and the longest freeze of the tick counter between scrapes (<see cref="RunReport.SimulationStallSeconds"/>)
+    /// because the #990 stall was not a slow step at all: the loop could not get a thread to run its next tick for
+    /// 30.8 s while every step stayed under 100 ms. The hang gate only fails at 30 s; churn must stay far below it.
     /// </summary>
     public const double ReconnectChurnTickMaxGateMs = 1000;
+
+    /// <summary>Scrape-measured freeze limit for churn profiles; Debug runs after #1110 measured 1.4–4.9 s.</summary>
+    public const double ReconnectChurnStallGateSeconds = 10;
 
     static readonly Dictionary<string, double> TickMaxByScenario = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -96,6 +101,15 @@ public static class PerformanceGates
                 Note = missingMax
                     ? "MISSING: fineage_tick_max_ms gauge and tick histogram max; a churn run without the longest tick proves nothing"
                     : "longest single tick (fineage_tick_max_ms), not a percentile"
+            });
+            verdicts.Add(new GateVerdict
+            {
+                Gate = $"longest tick freeze <= {ReconnectChurnStallGateSeconds:0} s ({scenario})",
+                Limit = ReconnectChurnStallGateSeconds,
+                Observed = report.SimulationStallSeconds,
+                Unit = "s",
+                Passed = report.SimulationStallSeconds <= ReconnectChurnStallGateSeconds,
+                Note = "fineage_tick_ms_count not advancing between scrapes; catches a loop that cannot get a thread, which no step timer sees"
             });
         }
 

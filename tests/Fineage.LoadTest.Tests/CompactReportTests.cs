@@ -123,4 +123,28 @@ public class CompactReportTests
         var report = new RunReport { ScenarioName = "bots-50-town", Target = "fineage", Server = new PrometheusAggregate { TickP99Ms = 40 } };
         Assert.DoesNotContain(PerformanceGates.Evaluate(report), g => g.Gate.StartsWith("tick max", StringComparison.Ordinal));
     }
+
+    [Theory]
+    [InlineData(30.8, false)]
+    [InlineData(12.0, false)]
+    [InlineData(4.9, true)]
+    public void Reconnect_churn_gates_a_tick_freeze_that_no_step_timer_sees(double stallSeconds, bool passes)
+    {
+        // #990/#1110: every step stayed under 100 ms while the counter froze for 30.8 s.
+        var report = new RunReport
+        {
+            ScenarioName = "reconnect-storm",
+            Target = "fineage",
+            BotCount = 200,
+            Server = new PrometheusAggregate { TickP99Ms = 35.6 },
+            TickTrueMaxMs = 58.7,
+            SimulationStallSeconds = stallSeconds,
+            Passed = true
+        };
+
+        var gates = PerformanceGates.Evaluate(report);
+        var freeze = Assert.Single(gates, g => g.Gate.StartsWith("longest tick freeze", StringComparison.Ordinal));
+        Assert.Equal(passes, freeze.Passed);
+        Assert.True(Assert.Single(gates, g => g.Gate.StartsWith("tick max", StringComparison.Ordinal)).Passed);
+    }
 }
