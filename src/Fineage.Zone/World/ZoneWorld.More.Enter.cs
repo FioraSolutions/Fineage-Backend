@@ -121,12 +121,15 @@ public sealed partial class ZoneWorld
         if (entered == null)
             return null;
 
-        if (entered.Evicted is { Count: > 0 })
+        if (entered.Evicted is { Count: > 0 } evicted)
         {
-            foreach (var snapshot in entered.Evicted)
-                PersistUnlinkSnapshot(snapshot);
-            foreach (var snapshot in entered.Evicted)
-                FlushCharacterSnapshots(snapshot.Session.ObjectId);
+            await _logoutPersist.RunAsync(() =>
+            {
+                foreach (var snapshot in evicted)
+                    PersistUnlinkSnapshot(snapshot);
+                foreach (var snapshot in evicted)
+                    FlushCharacterSnapshots(snapshot.Session.ObjectId);
+            }).ConfigureAwait(false);
         }
 
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
@@ -289,13 +292,19 @@ public sealed partial class ZoneWorld
         if (snapshot == null)
             return projection;
 
-        PersistUnlinkSnapshot(snapshot.Value);
-        // Logout writes the pending snapshots on this caller, skipping backoff, so the leave does not return
-        // while they are still only queued. A failure is logged with the character id and stays pending.
-        FlushCharacterSnapshots(session.ObjectId);
+        var unlinked = snapshot.Value;
+        // The writes are synchronous and wait on Postgres, so they run on the logout lane while this handler awaits;
+        // on the thread pool a reconnect storm parked every pool thread here (#1110).
+        await _logoutPersist.RunAsync(() =>
+        {
+            PersistUnlinkSnapshot(unlinked);
+            // Logout writes the pending snapshots, skipping backoff, so the leave does not return while they are
+            // still only queued. A failure is logged with the character id and stays pending.
+            FlushCharacterSnapshots(session.ObjectId);
 
-        _sevenSigns.Engine.Save();
-        _bosses.Schedule.Save();
+            _sevenSigns.Engine.Save();
+            _bosses.Schedule.Save();
+        }).ConfigureAwait(false);
         ZoneLog.LeaveWorld(session);
         return projection;
     }

@@ -11,6 +11,7 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     Task? _simulation;
+    readonly BlockingWorkLane _logoutPersist = new("fineage-logout-persist", threads: 2);
     long _stepStartedTimestamp;
 
     /// <summary>Stopwatch timestamp of the simulation loop's last pass (#989 liveness/readiness); 0 before start.</summary>
@@ -32,6 +33,7 @@ public sealed partial class ZoneWorld
         _affinity.Drive();
         _snapshots.Start();
         _economyPersist?.Start();
+        _logoutPersist.Start();
         // #1110: the loop and its watchdog each own a thread. On the thread pool a reconnect storm that parked the
         // pool's threads in synchronous logout writes left the loop's next wake-up queued behind them, and the tick
         // stopped for the 30 s those writes waited; the watchdog, also on the pool, could not even report it.
@@ -178,6 +180,8 @@ public sealed partial class ZoneWorld
         finally
         {
             ShutdownSaveOnlinePlayers();
+            // Logouts already handed to the lane finish while the persist workers still run.
+            _logoutPersist.Stop(TimeSpan.FromSeconds(30));
             _snapshots.Stop();
             _economyPersist?.Stop();
             FlushLedgerOnShutdown();
