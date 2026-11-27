@@ -39,6 +39,36 @@ internal sealed class WorldFanoutBatch
     /// </summary>
     public long SendWork { get; private set; }
 
+    /// <summary>
+    /// Keeps exactly the recipient work that still fits <paramref name="remainingWork"/> and disconnects the rest.
+    /// Returns the work the batch now delivers. Descriptor entries and prepared closures with a declared audience
+    /// resolve their own recipients; an entry with no declared audience is one opaque unit that cannot be split.
+    /// </summary>
+    internal long AdmitAudience(long remainingWork, int limit, string reason, Fineage.Net.Host.FanoutReliableAdmission admission)
+    {
+        long admitted = 0;
+        foreach (var entry in _entries)
+        {
+            if (entry.Superseded || entry.Dropped)
+                continue;
+
+            long room = remainingWork - admitted;
+            if (entry.Audience.IsEmpty)
+            {
+                // No declared recipients: either a descriptor with nobody to send to, or a closure whose audience
+                // is inside the delegate. Charge one unit and never invent recipients to disconnect.
+                if (room > 0)
+                    admitted++;
+                continue;
+            }
+
+            admitted += admission.Admit(
+                AudienceSnapshots.Watchers(entry.Audience), null, room, limit, reason);
+        }
+
+        return admitted;
+    }
+
     public int SoftSendWork { get; }
 
     /// <summary>Visual events shed inside this batch to keep <see cref="SendWork"/> inside the budget.</summary>
@@ -49,11 +79,19 @@ internal sealed class WorldFanoutBatch
 
     public void Bind(IWorldEventPublisher publisher) => _publisher ??= publisher;
 
-    public void AddPrepared(Action send)
+    /// <summary>
+    /// Adds a send already prepared on the simulation thread. <paramref name="audienceIds"/> lets the dispatcher
+    /// treat it like any other reliable write when the hand-off is full: recipients above the retained work are
+    /// disconnected. A closure with no declared audience is one opaque unit that can only be kept or dropped whole.
+    /// </summary>
+    public void AddPrepared(Action send, IReadOnlyList<int>? audienceIds = null)
     {
+        var audience = audienceIds is { Count: > 0 }
+            ? AudienceSnapshots.Capture(audienceIds, sort: false)
+            : default;
         _args.Add(new FanoutArgs(Payload: send));
-        _entries.Add(new FanoutDescriptor(FanoutKind.Prepared, 0, default, _args.Count - 1, false));
-        SendWork += 1;
+        _entries.Add(new FanoutDescriptor(FanoutKind.Prepared, 0, audience, _args.Count - 1, false));
+        SendWork += WorkOf(audience);
     }
 
     public void AddOrdered(FanoutKind kind, AudienceSnapshotId audience, FanoutArgs args)

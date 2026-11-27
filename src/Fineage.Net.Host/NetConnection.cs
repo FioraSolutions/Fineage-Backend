@@ -247,6 +247,12 @@ public sealed class NetConnection : IAsyncDisposable
     }
 
     /// <summary>
+    /// The dispatcher could not retain this client's reliable ordered view. Close only this connection; later
+    /// batches skip it through <see cref="IsBoundTo"/> while every other recipient keeps its ordered delivery.
+    /// </summary>
+    public void ShedReliableAudience(string reason) => FailOutbound(reason);
+
+    /// <summary>
     /// The outbound budget for this connection is exhausted, or the stripe could not take a reliable batch.
     /// Close the socket and keep going. The world tick must not wait on this client.
     /// </summary>

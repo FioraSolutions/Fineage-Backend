@@ -300,6 +300,10 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.fanout.overflow.shed",
             description: "Hand-offs that crossed the hard fan-out backlog and shed their visual writes instead of growing the backlog");
 
+    public static readonly Counter<long> FanoutReliableAudienceShed =
+        Meter.CreateCounter<long>("fineage.fanout.reliable.audience_shed",
+            description: "Sealed batches whose recipients above the bounded retained-work limit were disconnected instead of growing the queue");
+
     public static readonly Histogram<double> SocketWriteMilliseconds =
         Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",
             description: "TCP socket write duration for one outbound frame batch (tag endpoint)");
