@@ -560,43 +560,6 @@ public static class FineageTelemetry
         yield return new Measurement<double>(PersistOldestAgeMs?.Invoke() ?? 0);
     }
 
-    public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
-        "fineage.packets.per_second",
-        ObservePacketRates,
-        unit: "{packet}/s",
-        description: "Packet rate over the most recent console summary or /metrics scrape window");
-
-    static readonly object RateGate = new();
-    static double _inboundPacketsPerSecond;
-    static double _outboundPacketsPerSecond;
-
-    public static void SetPacketRates(double inboundPerSecond, double outboundPerSecond)
-    {
-        if (double.IsNaN(inboundPerSecond) || inboundPerSecond < 0)
-            inboundPerSecond = 0;
-        if (double.IsNaN(outboundPerSecond) || outboundPerSecond < 0)
-            outboundPerSecond = 0;
-        lock (RateGate)
-        {
-            _inboundPacketsPerSecond = inboundPerSecond;
-            _outboundPacketsPerSecond = outboundPerSecond;
-        }
-    }
-
-    static IEnumerable<Measurement<double>> ObservePacketRates()
-    {
-        double inbound;
-        double outbound;
-        lock (RateGate)
-        {
-            inbound = _inboundPacketsPerSecond;
-            outbound = _outboundPacketsPerSecond;
-        }
-
-        yield return new Measurement<double>(inbound, new KeyValuePair<string, object?>("direction", "in"));
-        yield return new Measurement<double>(outbound, new KeyValuePair<string, object?>("direction", "out"));
-    }
-
     public static readonly ObservableGauge<int> ZoneOnline = Meter.CreateObservableGauge(
         "fineage.zone.online",
         ObserveOnline,

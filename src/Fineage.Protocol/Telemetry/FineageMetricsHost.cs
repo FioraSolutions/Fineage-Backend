@@ -125,7 +125,6 @@ public sealed class FineageMetricsHost : IAsyncDisposable
             _previousScrape = current;
             double inbound = MetricsText.Rate(current.FramesIn, previous.FramesIn, elapsed);
             double outbound = MetricsText.Rate(current.FramesOut, previous.FramesOut, elapsed);
-            FineageTelemetry.SetPacketRates(inbound, outbound);
             return MetricsText.Prometheus(snapshot, inbound, outbound, _role);
         }
     }
@@ -143,9 +142,6 @@ public sealed class FineageMetricsHost : IAsyncDisposable
                 clock.Restart();
                 MetricsSnapshot snapshot = _collector.Snapshot();
                 TrafficTotals current = MetricsText.Totals(snapshot);
-                double inbound = MetricsText.Rate(current.FramesIn, previous.FramesIn, elapsed);
-                double outbound = MetricsText.Rate(current.FramesOut, previous.FramesOut, elapsed);
-                FineageTelemetry.SetPacketRates(inbound, outbound);
                 output.WriteLine(MetricsText.FormatSummary(previous, current, elapsed));
                 previous = current;
             }

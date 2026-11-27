@@ -1,0 +1,24 @@
+# Fineage recording rules (#992). Pre-computed percentiles keep weeks of history cheap to query: the dashboard's
+# long-range panels and the gate alerts read these series instead of re-aggregating raw buckets.
+groups:
+  - name: fineage-recording
+    interval: 30s
+    rules:
+      - record: fineage:tick_ms:p50_5m
+        expr: histogram_quantile(0.50, sum by (instance, le) (rate(fineage_tick_ms_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:tick_ms:p99_5m
+        expr: histogram_quantile(0.99, sum by (instance, le) (rate(fineage_tick_ms_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:tick_ms:p999_5m
+        expr: histogram_quantile(0.999, sum by (instance, le) (rate(fineage_tick_ms_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:tick:rate_1m
+        expr: sum by (instance) (rate(fineage_tick_ms_count{job="fineage-zone"}[1m]))
+      - record: fineage:fanout_queue_oldest_age_ms:p99_5m
+        expr: histogram_quantile(0.99, sum by (instance, le) (rate(fineage_fanout_queue_oldest_age_ms_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:fanout_queue_depth:p99_5m
+        expr: histogram_quantile(0.99, sum by (instance, le) (rate(fineage_fanout_queue_depth_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:command_timeline_ms:p99_5m
+        expr: histogram_quantile(0.99, sum by (instance, phase, le) (rate(fineage_command_timeline_ms_bucket{job="fineage-zone"}[5m])))
+      - record: fineage:persist_write_ms:p99_5m
+        expr: histogram_quantile(0.99, sum by (job, instance, kind, le) (rate(fineage_persist_write_ms_bucket[5m])))
+      - record: fineage:zone_online:max_5m
+        expr: max by (instance) (max_over_time(fineage_zone_online{job="fineage-zone"}[5m]))

@@ -299,7 +299,7 @@ public static class MetricsText
 
         AppendCounter(sb, "fineage_packets_rejected_total", "Packets refused before normal handling", snapshot.Endpoints, static e => e.PacketsRejected);
         AppendCounter(sb, "fineage_packets_errored_total", "Packets that produced an error response or failed while handling", snapshot.Endpoints, static e => e.PacketsErrored);
-        AppendHelp(sb, "fineage_packets_per_second", "Packet rate over the most recent summary or scrape window");
+        AppendHelp(sb, "fineage_packets_per_second", "Packet rate since the previous /metrics scrape by any client; use rate(fineage_frames_*_total) for dashboards");
         sb.Append("# TYPE fineage_packets_per_second gauge\n");
         sb.Append("fineage_packets_per_second{direction=\"in\"} ").Append(Num(inPacketsPerSecond)).Append('\n');
         sb.Append("fineage_packets_per_second{direction=\"out\"} ").Append(Num(outPacketsPerSecond)).Append('\n');

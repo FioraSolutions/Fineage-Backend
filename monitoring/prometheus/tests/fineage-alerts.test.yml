@@ -1,0 +1,182 @@
+# promtool unit tests for the Fineage rules (#992): `promtool test rules monitoring/prometheus/tests/*.test.yml`.
+# Each alert family the issue names gets an injected series that must fire and a healthy series that must not.
+rule_files:
+  - ../rules/fineage-recording.yml
+  - ../rules/fineage-alerts.yml
+
+evaluation_interval: 30s
+
+tests:
+  # Ledger divergence injection: a store-divergence finding and an audit error appear at the startup reconcile.
+  - interval: 15s
+    input_series:
+      - series: 'fineage_economy_reconcile_violations_total{job="fineage-zone",instance="zone:9465",phase="startup",code="store-divergence"}'
+        values: '_x8 1x40'
+      - series: 'fineage_economy_reconcile_runs_total{job="fineage-zone",instance="zone:9465",phase="startup",result="violations"}'
+        values: '_x8 1x40'
+      - series: 'fineage_state_audit_issues_total{job="fineage-zone",instance="zone:9465",code="ledger-divergence",container="inventory",severity="error"}'
+        values: '_x8 1x40'
+      - series: 'fineage_state_audit_issues_total{job="fineage-zone",instance="zone:9465",code="unjournaled",container="inventory",severity="notice"}'
+        values: '3x48'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: FineageReconcileViolations
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: FineageReconcileViolations
+        exp_alerts:
+          - exp_labels: {severity: critical, instance: "zone:9465", phase: startup, code: store-divergence}
+            exp_annotations:
+              summary: "zone:9465: startup reconcile found 1 store-divergence finding(s)"
+              runbook: docs/operations/monitoring.md#fineagereconcileviolations
+      - eval_time: 3m
+        alertname: FineageStoredStateAuditErrors
+        exp_alerts:
+          - exp_labels: {severity: critical, instance: "zone:9465", code: ledger-divergence, container: inventory}
+            exp_annotations:
+              summary: "zone:9465: startup state audit error ledger-divergence in inventory"
+              runbook: docs/operations/monitoring.md#fineagereconcileviolations
+
+  # Ledger flush failure: the counter steps from 0 to 1; a clean zone stays quiet.
+  - interval: 15s
+    input_series:
+      - series: 'fineage_ledger_flush_failures_total{job="fineage-zone",instance="zone:9465"}'
+        values: '0x20 1x20'
+      - series: 'fineage_ledger_flush_failures_total{job="fineage-zone",instance="clean:9465"}'
+        values: '0x40'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: FineageLedgerFlushFailures
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: FineageLedgerFlushFailures
+        exp_alerts:
+          - exp_labels: {severity: critical, job: fineage-zone, instance: "zone:9465"}
+            exp_annotations:
+              summary: "zone:9465: auditable economy ledger commits failed and are being retried"
+              runbook: docs/operations/monitoring.md#fineageledgerflushfailures
+
+  # Tick freeze: steps stop finishing at 2.5 min. Tick p99 above the 50 ms gate on a second zone.
+  - interval: 15s
+    input_series:
+      - series: 'fineage_tick_ms_count{job="fineage-zone",instance="frozen:9465"}'
+        values: '0+75x10 750x40'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="slow:9465",le="25"}'
+        values: '0+50x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="slow:9465",le="50"}'
+        values: '0+90x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="slow:9465",le="100"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="slow:9465",le="+Inf"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_count{job="fineage-zone",instance="slow:9465"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="fast:9465",le="25"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="fast:9465",le="50"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="fast:9465",le="100"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_bucket{job="fineage-zone",instance="fast:9465",le="+Inf"}'
+        values: '0+100x100'
+      - series: 'fineage_tick_ms_count{job="fineage-zone",instance="fast:9465"}'
+        values: '0+100x100'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: FineageTickFrozen
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: FineageTickFrozen
+        exp_alerts:
+          - exp_labels: {severity: critical, instance: "frozen:9465"}
+            exp_annotations:
+              summary: "frozen:9465: no simulation step finished for over a minute"
+              runbook: docs/operations/monitoring.md#fineagetickfrozen
+      - eval_time: 20m
+        alertname: FineageTickP99AboveGate
+        exp_alerts:
+          - exp_labels: {severity: warning, instance: "slow:9465"}
+            exp_annotations:
+              summary: "slow:9465: tick p99 95 ms is above the 50 ms gate"
+              runbook: docs/operations/monitoring.md#fineagetickp99abovegate
+
+  # Health: Zone not ready for 3 minutes; Login stays ready.
+  - interval: 15s
+    input_series:
+      - series: 'fineage_health_ready{job="fineage-zone",instance="zone:9465"}'
+        values: '1x4 0x20'
+      - series: 'fineage_health_ready{job="fineage-login",instance="login:9464"}'
+        values: '1x24'
+      - series: 'up{job="fineage-login",instance="login:9464"}'
+        values: '1x4 0x20'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: FineageNotReady
+        exp_alerts:
+          - exp_labels: {severity: critical, job: fineage-zone, instance: "zone:9465"}
+            exp_annotations:
+              summary: "fineage-zone zone:9465: not ready; failing checks are fineage_health_check == 0"
+              runbook: docs/operations/monitoring.md#fineagenotready
+      - eval_time: 4m
+        alertname: FineageTargetDown
+        exp_alerts:
+          - exp_labels: {severity: critical, job: fineage-login, instance: "login:9464"}
+            exp_annotations:
+              summary: "fineage-login login:9464: /metrics is not answering"
+              runbook: docs/operations/monitoring.md#fineagetargetdown
+
+  # Slow-client disconnect spike and a full fan-out backlog that sheds reliable recipients.
+  - interval: 15s
+    input_series:
+      - series: 'fineage_outbound_slow_client_disconnect_total{job="fineage-zone",instance="zone:9465",endpoint="zone"}'
+        values: '0x8 0+2x12'
+      - series: 'fineage_fanout_reliable_audience_shed_total{job="fineage-zone",instance="zone:9465"}'
+        values: '0x8 1x12'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: FineageSlowClientDisconnectSpike
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: FineageSlowClientDisconnectSpike
+        exp_alerts:
+          - exp_labels: {severity: warning, instance: "zone:9465"}
+            exp_annotations:
+              summary: "zone:9465: 22 slow-client disconnects in 5 minutes"
+              runbook: docs/operations/monitoring.md#fineageslowclientdisconnectspike
+      - eval_time: 3m
+        alertname: FineageReliableAudienceShed
+        exp_alerts:
+          - exp_labels: {severity: warning, job: fineage-zone, instance: "zone:9465"}
+            exp_annotations:
+              summary: "zone:9465: the fan-out backlog was full and recipients were disconnected"
+              runbook: docs/operations/monitoring.md#fineageslowclientdisconnectspike
+
+  # Disk: 8 % free is low, not critical; RSS grows 1 GiB over its low and keeps rising.
+  - interval: 1m
+    input_series:
+      - series: 'fineage_disk_free_bytes{job="fineage-zone",instance="zone:9465",path="state"}'
+        values: '8x20'
+      - series: 'fineage_disk_size_bytes{job="fineage-zone",instance="zone:9465",path="state"}'
+        values: '100x20'
+      - series: 'process_resident_memory_bytes{job="fineage-zone",instance="zone:9465"}'
+        values: '1073741824+8947849x240'
+      - series: 'process_resident_memory_bytes{job="fineage-login",instance="login:9464"}'
+        values: '268435456x240'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: FineageDiskLow
+        exp_alerts:
+          - exp_labels: {severity: warning, job: fineage-zone, instance: "zone:9465", path: state}
+            exp_annotations:
+              summary: "zone:9465: state has 8% free"
+              runbook: docs/operations/monitoring.md#fineagedisklow
+      - eval_time: 10m
+        alertname: FineageDiskCritical
+        exp_alerts: []
+      - eval_time: 3h
+        alertname: FineageRssGrowth
+        exp_alerts:
+          - exp_labels: {severity: warning, job: fineage-zone, instance: "zone:9465"}
+            exp_annotations:
+              summary: "fineage-zone zone:9465: RSS grew 1.5GiB over its 6 h low and is still rising"
+              runbook: docs/operations/monitoring.md#fineagerssgrowth

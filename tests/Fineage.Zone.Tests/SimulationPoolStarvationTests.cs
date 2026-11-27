@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Zone.World;
+using Fineage.Protocol.Telemetry;
 using Xunit;
 using Rig = Fineage.Zone.Tests.EconomyReconcileTests.Rig;
 
@@ -79,6 +80,8 @@ public sealed class SimulationPoolStarvationTests
 
         const int windowMs = 3_000;
         long before, after;
+        using var metrics = new MetricsCollector();
+        long tickCountBefore = metrics.Snapshot().Tick.Count;
         using (new StarvedPool())
         {
             before = world.SimulationTicks.Tick;
@@ -90,6 +93,11 @@ public sealed class SimulationPoolStarvationTests
         long expected = windowMs / ZoneSimulationSettings.StepMilliseconds;
         Assert.True(after - before >= expected / 2,
             $"the loop ran {after - before} steps in {windowMs} ms with the pool starved; a free loop runs about {expected}");
+        // #992: the tick alerts read fineage_tick_ms_count; the loop itself must move it, one sample per step.
+        var snapshot = metrics.Snapshot();
+        Assert.True(snapshot.Tick.Count - tickCountBefore >= after - before,
+            $"fineage_tick_ms_count moved {snapshot.Tick.Count - tickCountBefore} for {after - before} steps");
+        Assert.True(snapshot.TickMaxMs > 0, "fineage_tick_max_ms stayed 0 while the loop ran");
     }
 
     [Fact]

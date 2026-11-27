@@ -141,6 +141,43 @@ public sealed class StoredStateAuditTests
         Assert.Throws<InvalidOperationException>(() => StoredStateAudit.BlockOnError(_ => "maybe"));
     }
 
+    /// <summary>
+    /// #992 injection for the divergence alerts: a store row edited behind the ledger must reach /metrics as
+    /// <c>fineage_economy_reconcile_violations_total{code="store-divergence"}</c> (FineageReconcileViolations) and
+    /// <c>fineage_state_audit_issues_total{severity="error"}</c> (FineageStoredStateAuditErrors).
+    /// </summary>
+    [Fact]
+    public async Task Store_edit_behind_the_ledger_reaches_the_divergence_alert_metrics()
+    {
+        var durable = new List<LedgerEntry>();
+        var store = new DurableStore();
+        var first = new WorldBench(accounts: store.Proxy, store: store.Inner, ledgerJournal: new TxJournal(durable));
+        var player = await first.EnterAsync(items: [new StoredItem(Adena, 100, -1)]);
+        Assert.Null(await first.World.TryGiveItemAsync(player.Session, Adena, 1, CancellationToken.None));
+        Assert.True(first.World.FlushDirtyInventoriesForTests());
+        Assert.True(first.World.DrainEconomyPersistForTests());
+        using var metrics = new Fineage.Protocol.Telemetry.MetricsCollector();
+        string phase = "inject-" + Guid.NewGuid().ToString("N")[..8];
+
+        Assert.True(first.World.ReconcileEconomyAndLog(phase, _ => "log").Ok);
+        var rows = store.Inner.FindByCharacterId(player.ObjectId)!.Items!
+            .Select(row => row.ItemId == Adena ? row with { Count = row.Count + 1_000 } : row).ToList();
+        Assert.True(store.Inner.TryReplaceItems(player.Ticket.Account, player.ObjectId, rows));
+        var tampered = first.World.ReconcileEconomyAndLog(phase, _ => "log");
+        Assert.Contains(tampered.Violations, v => v.Code == EconomyReconcileViolation.StoreDivergence);
+
+        var second = new WorldBench(accounts: store.Proxy, store: store.Inner, ledgerJournal: new TxJournal(durable));
+        second.World.AuditStoredStateAtStartup(_ => "log");
+
+        string text = Fineage.Protocol.Telemetry.MetricsText.Prometheus(metrics.Snapshot(), 0, 0, Fineage.Protocol.Telemetry.MetricsRole.Zone);
+        Assert.Contains($"fineage_economy_reconcile_runs_total{{phase=\"{phase}\",result=\"ok\"}} 1\n", text, StringComparison.Ordinal);
+        Assert.Contains($"fineage_economy_reconcile_runs_total{{phase=\"{phase}\",result=\"violations\"}} 1\n", text, StringComparison.Ordinal);
+        Assert.Contains($"fineage_economy_reconcile_violations_total{{phase=\"{phase}\",code=\"store-divergence\"}} ", text, StringComparison.Ordinal);
+        Assert.Matches(
+            $@"(?m)^fineage_state_audit_issues_total\{{code=""{StoredStateIssue.LedgerDivergence}"",container=""inventory"",severity=""error""\}} [1-9]",
+            text);
+    }
+
     [Fact]
     public void Ledger_account_without_a_stored_owner_is_an_orphan()
     {

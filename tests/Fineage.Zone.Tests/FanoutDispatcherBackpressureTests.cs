@@ -123,6 +123,8 @@ public sealed class FanoutDispatcherBackpressureTests
             HoldWorkerBeforeReadForTest = holdWorker,
         };
         var delivered = new List<ulong>();
+        using var metrics = new MetricsCollector();
+        var before = metrics.Snapshot();
 
         for (ulong id = 1; id <= 5; id++)
         {
@@ -137,6 +139,10 @@ public sealed class FanoutDispatcherBackpressureTests
         Assert.Equal(3, dispatcher.ReliableDrops);
         Assert.Equal(0, dispatcher.EmergencyEnqueues);
         Assert.True(dispatcher.OverflowDrops >= 3);
+        // #992: the queue-shed alerts read these; the meter is process-wide, so check at least this test's share.
+        var after = metrics.Snapshot();
+        Assert.True(after.FanoutOverflowShed - before.FanoutOverflowShed >= 3);
+        Assert.True(ShedCount(after, "fineage.fanout.reliable.audience_shed") - ShedCount(before, "fineage.fanout.reliable.audience_shed") >= 3);
 
         holdWorker.Set();
         dispatcher.WaitUntilIdle();
@@ -144,6 +150,9 @@ public sealed class FanoutDispatcherBackpressureTests
         Assert.Equal(0, dispatcher.RetainedItems);
         Assert.Equal(0, dispatcher.RetainedWork);
     }
+
+    static long ShedCount(MetricsSnapshot snapshot, string instrument) =>
+        snapshot.OperationalCounters.TryGetValue(instrument, out var series) ? series.Values.Sum() : 0;
 
     [Fact]
     public void Work_limit_sheds_visuals_then_refuses_reliable_work_that_cannot_fit()
