@@ -236,6 +236,16 @@ public sealed partial class ZoneWorld
                 LogEconomyCommitFailure(stolen);
             else
             {
+                // The conflict restored the batch into the dirty maps. Steal again rather than re-sending the old batch:
+                // re-sending left those restored rows dirty as well, so a relog saw this character's economy as
+                // still pending until some later step wrote the same rows a second time (#1116).
+                using (_economyLock.Enter())
+                {
+                    if (!HasDirtyEconomy())
+                        return true;
+                    stolen = StealDirtyEconomy();
+                }
+
                 result = _economyPersist.TryEnqueue(
                     stolen,
                     discardWithoutPublish,

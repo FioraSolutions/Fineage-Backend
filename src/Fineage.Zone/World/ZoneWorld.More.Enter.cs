@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Fineage.Zone.Geo;
 using Fineage.Game;
 using Fineage.Game.Quests;
@@ -32,7 +33,7 @@ public sealed partial class ZoneWorld
     public async Task<bool> TryEnterAsync(ZoneSession session, CancellationToken ct) =>
         await EnterWithSnapshotAsync(session, static _ => Fineage.Zone.Net.EnterSnapshot.ForTestEnter(), ct).ConfigureAwait(false) != null;
 
-    sealed record EnterOutcome<T>(T Projection, int Known, int X, int Y, int Z, List<UnlinkPersistSnapshot>? Evicted);
+    sealed record EnterOutcome<T>(T Projection, int Known, int X, int Y, int Z);
 
     /// <summary>A character loaded off the simulation thread, not yet in the world.</summary>
     internal sealed class EnteringPlayer
@@ -58,8 +59,18 @@ public sealed partial class ZoneWorld
     {
         session.EnterRefusal = null;
         EnterOutcome<Fineage.Zone.Net.EnterSnapshot>? entered = null;
-        for (int attempt = 0; attempt < 2; attempt++)
+        long deadline = Stopwatch.GetTimestamp() + (long)(EnterChainBudget.TotalSeconds * Stopwatch.Frequency);
+        while (true)
         {
+            // #1116: chain after this character's previous logout save, and read the store only once it is durable.
+            string? waitRefusal = await AwaitPreviousSaveAsync(session.ObjectId, deadline, ct).ConfigureAwait(false);
+            if (waitRefusal != null)
+            {
+                session.EnterRefusal = waitRefusal;
+                ZoneLog.Warn(waitRefusal);
+                return null;
+            }
+
             EnteringPlayer loaded = await LoadEnteringPlayerAsync(session, ct).ConfigureAwait(false);
             if (loaded.Failure != null || loaded.Entity == null)
             {
@@ -86,17 +97,18 @@ public sealed partial class ZoneWorld
                 return null;
             }
             bool stale = false;
+            List<(UnlinkPersistSnapshot Snapshot, LogoutSave Save)>? evictedForReload = null;
             try
             {
                 using var enterScope = _syncIo.EnterScope();
                 entered = await OnSimulationAsync(session, "enter", () =>
                 {
-                    if (!TryInsertEnteringPlayer(session, loaded, out int known, out int x, out int y, out int z, out var evicted, out stale))
+                    if (!TryInsertEnteringPlayer(session, loaded, out int known, out int x, out int y, out int z, out evictedForReload, out stale))
                         return null;
                     CountOnlinePlayers();
                     if (!TryGetLivePlayer(session, out var player))
                         throw new InvalidOperationException($"object {session.ObjectId} entered without a live player");
-                    return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z, evicted);
+                    return new EnterOutcome<Fineage.Zone.Net.EnterSnapshot>(commit(player), known, x, y, z);
                 }, ct).ConfigureAwait(false);
             }
             finally
@@ -108,11 +120,15 @@ public sealed partial class ZoneWorld
                     ZoneLog.Warn($"enter object={session.ObjectId} sync-io on simulation thread: {syncIo}");
             }
 
+            // Another session still held this character: it was evicted now, so this load predates its last state.
+            // Its save runs before the next load (AwaitPreviousSaveAsync waits for the save registered at the evict).
+            if (evictedForReload != null)
+                await PersistEvictedAsync(evictedForReload).ConfigureAwait(false);
             if (!stale)
                 break;
-            if (attempt == 0)
+            if (Stopwatch.GetTimestamp() < deadline)
                 continue;
-            string changed = $"enter refused: character {session.ObjectId} changed while loading";
+            string changed = $"enter refused: character {session.ObjectId} changed while loading for {EnterChainBudget.TotalSeconds:0.#}s";
             session.EnterRefusal = changed;
             ZoneLog.Warn(changed);
             return null;
@@ -120,17 +136,6 @@ public sealed partial class ZoneWorld
 
         if (entered == null)
             return null;
-
-        if (entered.Evicted is { Count: > 0 } evicted)
-        {
-            await _logoutPersist.RunAsync(() =>
-            {
-                foreach (var snapshot in evicted)
-                    PersistUnlinkSnapshot(snapshot);
-                foreach (var snapshot in evicted)
-                    FlushCharacterSnapshots(snapshot.Session.ObjectId);
-            }).ConfigureAwait(false);
-        }
 
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
         ZoneLog.EnterWorld(session, entered.Known);
@@ -282,12 +287,14 @@ public sealed partial class ZoneWorld
     {
         if (session.ObjectId == 0)
             return null;
-        var (projection, snapshot) = await OnSimulationAsync(session, "leave", () =>
+        var (projection, snapshot, save) = await OnSimulationAsync(session, "leave", () =>
         {
             var before = projectBefore != null && TryGetLivePlayer(session, out var player) ? projectBefore(player) : null;
             TryDetachPlayer(session, capturePersist: true, out _, out var captured);
             CountOnlinePlayers();
-            return (before, captured);
+            // Registered in the detach step, so an enter of this character inserting from now on sees the save (#1116).
+            var registered = captured != null ? BeginLogoutSave(session.ObjectId) : null;
+            return (before, captured, registered);
         }, ct).ConfigureAwait(false);
         if (snapshot == null)
             return projection;
@@ -295,16 +302,31 @@ public sealed partial class ZoneWorld
         var unlinked = snapshot.Value;
         // The writes are synchronous and wait on Postgres, so they run on the logout lane while this handler awaits;
         // on the thread pool a reconnect storm parked every pool thread here (#1110).
-        await _logoutPersist.RunAsync(() =>
+        try
         {
-            PersistUnlinkSnapshot(unlinked);
-            // Logout writes the pending snapshots, skipping backoff, so the leave does not return while they are
-            // still only queued. A failure is logged with the character id and stays pending.
-            FlushCharacterSnapshots(session.ObjectId);
+            await _logoutPersist.RunAsync(() =>
+            {
+                try
+                {
+                    PersistUnlinkSnapshot(unlinked);
+                    // Logout writes the pending snapshots, skipping backoff, so the leave does not return while they
+                    // are still only queued. A failure is logged with the character id and stays pending.
+                    FlushCharacterSnapshots(session.ObjectId);
+                }
+                finally
+                {
+                    // The character's own writes are done; the world sidecars below do not hold its enter.
+                    EndLogoutSave(session.ObjectId, save!);
+                }
 
-            _sevenSigns.Engine.Save();
-            _bosses.Schedule.Save();
-        }).ConfigureAwait(false);
+                _sevenSigns.Engine.Save();
+                _bosses.Schedule.Save();
+            }).ConfigureAwait(false);
+        }
+        finally
+        {
+            EndLogoutSave(session.ObjectId, save!);
+        }
         ZoneLog.LeaveWorld(session);
         return projection;
     }
@@ -326,19 +348,26 @@ public sealed partial class ZoneWorld
         out int enterX,
         out int enterY,
         out int enterZ,
-        out List<UnlinkPersistSnapshot>? pendingUnlink,
+        out List<(UnlinkPersistSnapshot Snapshot, LogoutSave Save)>? evictedForReload,
         out bool stale)
     {
         using var tryTimer = Fineage.Zone.Net.EnterMetrics.MeasureTryEnter();
         known = 0;
         enterX = enterY = enterZ = 0;
-        pendingUnlink = null;
+        evictedForReload = null;
         stale = false;
         var entity = loaded.Entity;
         if (entity == null || session.ObjectId <= 0)
             return false;
         if (!TryPrepareSameSessionReenter(session, loaded.CharacterEpoch, loaded.PetEpoch, out stale))
             return false;
+        // A logout save registered after the enter's wait began, or economy not durable yet: the load may be older
+        // than the store is about to be. Load again after it lands (#1116).
+        if (PreviousSaveInFlight(session.ObjectId))
+        {
+            stale = true;
+            return false;
+        }
 
         long enterNow = NowUnixMs();
         if (PunishmentBlocksEnter(session, enterNow))
@@ -351,7 +380,12 @@ public sealed partial class ZoneWorld
                  !ReferenceEquals(current.Session, session) &&
                  TryDetachPlayer(current.Session, capturePersist: true, out _, out var evicted))
         {
-            pendingUnlink = [evicted!.Value];
+            // The load ran while that session was live, so it misses whatever that session changed. Evict it,
+            // register its save, and load again once the save lands instead of inserting the stale body.
+            CountOnlinePlayers();
+            evictedForReload = [(evicted!.Value, BeginLogoutSave(session.ObjectId))];
+            stale = true;
+            return false;
         }
 
         _byId[entity.ObjectId] = entity;
