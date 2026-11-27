@@ -521,6 +521,9 @@ internal sealed class ZoneCommandIngress
 
     public Task WaitForSubmissionAsync(CancellationToken ct) => _submitted.WaitAsync(ct);
 
+    /// <summary>Blocks the caller until a command is submitted (true) or <paramref name="timeoutMs"/> passes (false).</summary>
+    public bool WaitForSubmission(int timeoutMs, CancellationToken ct) => _submitted.Wait(timeoutMs, ct);
+
     internal int WakeSignalCountForTest => _submitted.CurrentCount;
 
     internal int QueuedDepth
