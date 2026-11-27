@@ -174,7 +174,7 @@ public sealed class StoredStateAuditTests
     /// Journal with the Postgres contract: <see cref="ILedgerJournal.Append"/> buffers, and only a successful
     /// <see cref="ILedgerJournal.CommitWith"/> makes the rows durable in <c>durable</c>, which outlives the world.
     /// </summary>
-    sealed class TxJournal(List<LedgerEntry> durable) : MemoryLedgerJournal, ILedgerJournal
+    internal sealed class TxJournal(List<LedgerEntry> durable) : MemoryLedgerJournal, ILedgerJournal
     {
         readonly List<LedgerEntry> _buffer = [];
         readonly Lock _sync = new();
@@ -216,7 +216,7 @@ public sealed class StoredStateAuditTests
     }
 
     /// <summary>Memory store whose economy commit takes the journal rows with the bags, all or nothing.</summary>
-    sealed class DurableStore
+    internal sealed class DurableStore
     {
         public MemoryAccountStore Inner { get; } = MemoryAccountStore.InMemory();
         public IAccountStore Proxy { get; }

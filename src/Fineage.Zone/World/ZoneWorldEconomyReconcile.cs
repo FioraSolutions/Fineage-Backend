@@ -120,6 +120,10 @@ public sealed partial class ZoneWorld
     /// <summary>Reconcile and log; with <c>FINEAGE_STATE_AUDIT=block</c> a violation throws (startup refuses to run).</summary>
     public EconomyReconcileReport ReconcileEconomyAndLog(string phase, Func<string, string?>? environment = null)
     {
+        // Boot posts Expire moves for the ground that did not survive; shutdown leaves the last logouts' journal rows.
+        // Both have to be durable before the store can be compared with the ledger.
+        if (!FlushEconomyForReconcile(TimeSpan.FromSeconds(30)))
+            ZoneLog.Error($"economy reconcile phase={phase}: the economy flush before reconciling failed");
         var report = ReconcileEconomy(phase);
         foreach (var violation in report.Violations)
             ZoneLog.Error($"economy reconcile violation phase={phase} {violation}");
