@@ -33,6 +33,10 @@ internal sealed class EconomyPersistService
     readonly EconomyReservation _reservations;
     readonly Channel<EconomyPersistWork> _queue;
     readonly ConcurrentQueue<EconomyPersistCompletion> _completions = new();
+    // One count per queued work item, plus one at Stop. The worker blocks on it on its own thread; waiting on the
+    // channel's WaitToReadAsync there resumed through the thread pool, so a starved pool left queued batches
+    // unwritten until their logout callers timed out (#1110).
+    readonly SemaphoreSlim _available = new(0);
     readonly ConcurrentDictionary<ulong, PendingBatch> _pending = new();
     readonly Action<string> _warn;
     Thread? _thread;
@@ -106,6 +110,7 @@ internal sealed class EconomyPersistService
         DrainWorkerOnCallerThread();
         _running = 0;
         _queue.Writer.TryComplete();
+        _available.Release();
         _thread?.Join(TimeSpan.FromSeconds(5));
         _thread = null;
     }
@@ -194,6 +199,7 @@ internal sealed class EconomyPersistService
             return EconomyFlushResult.QueueFull;
         }
 
+        _available.Release();
         finished = pendingBatch.Finished.Task;
         return EconomyFlushResult.Queued;
     }
@@ -369,27 +375,25 @@ internal sealed class EconomyPersistService
 
     void Loop()
     {
-        try
+        while (true)
         {
-            while (_queue.Reader.WaitToReadAsync().AsTask().GetAwaiter().GetResult())
+            _available.Wait();
+            while (_queue.Reader.TryRead(out var work))
             {
-                while (_queue.Reader.TryRead(out var work))
-                {
-                    Interlocked.Decrement(ref _queued);
-                    Interlocked.Increment(ref _inFlight);
-                    if (_queued == 0)
-                        Volatile.Write(ref _oldestEnqueueTimestamp, 0);
+                Interlocked.Decrement(ref _queued);
+                Interlocked.Increment(ref _inFlight);
+                if (_queued == 0)
+                    Volatile.Write(ref _oldestEnqueueTimestamp, 0);
 
-                    bool ok = Apply(work);
-                    if (!ok)
-                        Interlocked.Increment(ref _commitFailures);
-                    _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
-                    Interlocked.Decrement(ref _inFlight);
-                }
+                bool ok = Apply(work);
+                if (!ok)
+                    Interlocked.Increment(ref _commitFailures);
+                _completions.Enqueue(new EconomyPersistCompletion(work.BatchId, ok));
+                Interlocked.Decrement(ref _inFlight);
             }
-        }
-        catch (ChannelClosedException)
-        {
+
+            if (_queue.Reader.Completion.IsCompleted)
+                return;
         }
     }
 

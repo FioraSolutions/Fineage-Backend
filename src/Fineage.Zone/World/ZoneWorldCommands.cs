@@ -74,28 +74,14 @@ public sealed partial class ZoneWorld
     /// Returns true when the tick is due. Returns false when a command should be admitted and the loop should
     /// look again. Cancelling <paramref name="ct"/> throws.
     /// </summary>
-    async Task<bool> WaitForTickOrCommandAsync(long waitMs, CancellationToken ct)
+    /// <remarks>
+    /// A blocking wait on the loop's own thread: neither the tick nor the wake-up needs a thread-pool thread, so a pool
+    /// starved by blocked handlers cannot hold the next step back (#1110).
+    /// </remarks>
+    bool WaitForTickOrCommand(long waitMs, CancellationToken ct)
     {
-        using var wake = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        Task delay = Task.Delay(TimeSpan.FromMilliseconds(waitMs), wake.Token);
-        Task submitted = _ingress.WaitForSubmissionAsync(wake.Token);
-        Task finished = await Task.WhenAny(delay, submitted).ConfigureAwait(false);
-        wake.Cancel();
-        await ObserveWaitAsync(delay).ConfigureAwait(false);
-        await ObserveWaitAsync(submitted).ConfigureAwait(false);
-        ct.ThrowIfCancellationRequested();
-        return finished == delay && delay.IsCompletedSuccessfully;
-    }
-
-    static async Task ObserveWaitAsync(Task wait)
-    {
-        try
-        {
-            await wait.ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-        }
+        bool submitted = _ingress.WaitForSubmission((int)Math.Min(waitMs, int.MaxValue), ct);
+        return !submitted;
     }
 
     /// <summary>
