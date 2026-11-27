@@ -50,6 +50,26 @@ RESTART="$3"
 LOGIN_UNIT="$4"
 ZONE_UNIT="$5"
 
+# Load the same environment the services use so the migration plan targets the live database.
+if [[ -f "${APP_ROOT}/fineage.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${APP_ROOT}/fineage.env"
+  set +a
+else
+  echo "warning: ${APP_ROOT}/fineage.env is missing; migration preflight uses the default database URL" >&2
+fi
+
+# Preflight the staged build before replacing live binaries. `migrate --plan` is read-only:
+# it lists pending migrations and fails on duplicate prefixes, checksum tamper, missing applied
+# files or an unreachable database. The plan never creates tables or records checksums.
+chmod +x "${STAGING}/login/Fineage.Login"
+if ! "${STAGING}/login/Fineage.Login" migrate --plan; then
+  echo "migration preflight failed; live binaries were not replaced" >&2
+  rm -rf "${STAGING}"
+  exit 1
+fi
+
 # Binaries are replaced while the processes are down; systemd units point at these paths.
 rsync -a --delete "${STAGING}/login/" "${APP_ROOT}/login/"
 rsync -a --delete "${STAGING}/zone/" "${APP_ROOT}/zone/"
