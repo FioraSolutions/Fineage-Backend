@@ -20,6 +20,23 @@ public sealed partial class ZoneWorld
 
     internal MonsterRaceBoard MonsterRace => _monsterRace.Board;
 
+    /// <summary>Swap in the persisted board (host: <c>monster-race-state.json</c> in the state directory).</summary>
+    public void UseMonsterRace(MonsterRaceBoard board)
+    {
+        using (_affinity.Step())
+            _monsterRace.Use(board);
+    }
+
+    /// <summary>Production wiring for the persisted monster race sidecar.</summary>
+    public void UseMonsterRaceInStateDirectory(string stateDirectory, long loadedAtUnixMs) =>
+        UseMonsterRace(MonsterRaceBoard.OpenInStateDirectory(
+            stateDirectory,
+            loadedAtUnixMs,
+            _game.Items,
+            Npcs.NpcCatalog.LoadDefault(),
+            () => _itemIds.Next(),
+            _monsterRaceSettings));
+
     int AnnounceMonsterRace(IReadOnlyList<MonsterRaceEffect> batches)
     {
         if (batches.Count == 0)

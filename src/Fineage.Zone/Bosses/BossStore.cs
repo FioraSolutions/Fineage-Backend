@@ -1,11 +1,20 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Zone.Bosses;
 
-public sealed class BossScheduleSnapshot
+public sealed class BossScheduleSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
 
     public List<BossScheduleRow> Bosses { get; set; } = [];
 }
@@ -69,13 +78,12 @@ public sealed class JsonBossStore : IBossStore
     {
         lock (_gate)
         {
-            if (!File.Exists(_path))
-                return new BossScheduleSnapshot();
-
-            var data = JsonSerializer.Deserialize<BossScheduleSnapshot>(File.ReadAllText(_path), JsonOptions)
-                ?? throw new InvalidDataException($"empty boss schedule store: {_path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported boss schedule store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                _path,
+                "boss-schedule",
+                1,
+                JsonOptions,
+                static () => new BossScheduleSnapshot());
             data.Bosses ??= [];
             return data;
         }
@@ -85,13 +93,6 @@ public sealed class JsonBossStore : IBossStore
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
+            AtomicJsonFile.Write(_path, snapshot, JsonOptions);
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Game.Punishment;
 
@@ -16,8 +17,17 @@ public sealed class PunishmentRow
     public string PunishedBy { get; set; } = "";
 }
 
-public sealed class PunishmentSnapshot
+public sealed class PunishmentSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public List<PunishmentRow> Rows { get; set; } = [];
 }

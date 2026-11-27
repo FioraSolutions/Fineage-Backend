@@ -3,4 +3,7 @@
     <RootNamespace>Fineage.Game</RootNamespace>
     <Description>Fineage game rules: item templates, paperdoll, inventory, and starter kits.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Fineage.Game.Tests" />
+  </ItemGroup>
 </Project>

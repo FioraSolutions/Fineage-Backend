@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 using Fineage.Game.Services;
 
 namespace Fineage.Zone.Fishing;
@@ -38,7 +40,22 @@ public sealed class FishingChampionshipSettings
 }
 
 public sealed class FishingChampionshipEntry { public string Name { get; set; } = ""; public double Length { get; set; } public bool Claimed { get; set; } }
-public sealed class FishingChampionshipSnapshot { public int Version { get; set; } = 1; public long PeriodEndUnixMs; public List<FishingChampionshipEntry> Current { get; set; } = []; public List<FishingChampionshipEntry> Winners { get; set; } = []; }
+public sealed class FishingChampionshipSnapshot : IVersionedStateSnapshot
+{
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
+    public long PeriodEndUnixMs;
+    public List<FishingChampionshipEntry> Current { get; set; } = [];
+    public List<FishingChampionshipEntry> Winners { get; set; } = [];
+}
 
 public interface IFishingChampionshipStore { FishingChampionshipSnapshot Load(); void Save(FishingChampionshipSnapshot snapshot); }
 public sealed class MemoryFishingChampionshipStore : IFishingChampionshipStore { string _json = ""; public FishingChampionshipSnapshot Load() => _json.Length == 0 ? new() : JsonSerializer.Deserialize<FishingChampionshipSnapshot>(_json) ?? new(); public void Save(FishingChampionshipSnapshot s) => _json = JsonSerializer.Serialize(s); }
@@ -72,6 +89,7 @@ public sealed class FishingChampionshipBoard
     public long TryClaim(string playerName, out int rank) { rank = 0; var ordered = SortDesc(_s.Winners); for (int i = 0; i < ordered.Count; i++) { if (!ordered[i].Name.Equals(playerName, StringComparison.OrdinalIgnoreCase)) continue; rank = i + 1; if (ordered[i].Claimed || rank > _settings.Rewards.Length) return 0; ordered[i].Claimed = true; Save(); return _settings.Rewards[rank - 1]; } return 0; }
     public bool Tick(long nowUnixMs) { if (nowUnixMs < _s.PeriodEndUnixMs) return false; if (nowUnixMs - _s.PeriodEndUnixMs >= _settings.PeriodMs) ZoneLog.Warn($"[fishing-championship] period overdue due={_s.PeriodEndUnixMs} now={nowUnixMs}; settling once and starting the next period"); _s.Winners = SortDesc(_s.Current).Select(e => new FishingChampionshipEntry { Name = e.Name, Length = e.Length }).ToList(); _s.Current.Clear(); _s.PeriodEndUnixMs = nowUnixMs + _settings.PeriodMs; Save(); return true; }
     static List<FishingChampionshipEntry> SortDesc(List<FishingChampionshipEntry> list) => [.. list.OrderByDescending(e => e.Length).ThenBy(e => e.Name, StringComparer.OrdinalIgnoreCase)];
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current championship to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
     public static string FormatLength(double length) => length.ToString("0.00", CultureInfo.InvariantCulture);
 }

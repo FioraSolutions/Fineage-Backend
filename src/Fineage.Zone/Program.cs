@@ -52,8 +52,9 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
     return;
 }
 
-// Accounts are PostgreSQL-only. --state-dir (default data/) holds the world sidecar files:
-// seven-signs.json, olympiad.json, boss-schedule.json.
+// Accounts are PostgreSQL-only. --state-dir (default data/) holds every JSON world sidecar:
+// boss-schedule.json, seven-signs.json, olympiad.json, lottery.json, raid-boss-points-store.json,
+// punishments.json, monster-race-state.json, and fishing-championship.json.
 string stateDir = Arg(args, "--state-dir")
     ?? Environment.GetEnvironmentVariable("FINEAGE_STATE_DIR")
     ?? Path.Combine("data");
@@ -78,22 +79,38 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 var time = Fineage.Zone.Time.SystemZoneTime.Instance;
-var festivalCatalog = SevenSignsFestivalCatalog.LoadDefault();
-var festivalRuntime = new SevenSignsFestivalRuntime(festivalCatalog);
-var sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, time.UtcNow, festivalRuntime);
-festivalRuntime.BindEngine(sevenSigns);
 bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
     Environment.GetEnvironmentVariable("FINEAGE_ZONE_INCLUDE_ENABLED_MAPS"));
-var bosses = BossSchedule.OpenInStateDirectory(
-    stateDir,
-    time.UtcNow,
-    new MapFilteredBossSpawnPolicy(includeEnabledMapsBoot));
-var olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, time.UtcNow);
 // Hosted zone always loads every enabled spawn map (TI, Elven Village, Giran, …).
 // Opt out with FINEAGE_ZONE_INCLUDE_ENABLED_MAPS=0, or narrow with FINEAGE_ZONE_MAPS.
 bool includeEnabledMaps = includeEnabledMapsBoot;
-var punishments = PunishmentManager.OpenInStateDirectory(stateDir, time);
-var raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
+SevenSignsEngine sevenSigns;
+SevenSignsFestivalRuntime festivalRuntime;
+BossSchedule bosses;
+OlympiadBoard olympiad;
+PunishmentManager punishments;
+Fineage.Zone.RaidBossPoints.RaidBossPointsManager raidBossPoints;
+try
+{
+    var festivalCatalog = SevenSignsFestivalCatalog.LoadDefault();
+    festivalRuntime = new SevenSignsFestivalRuntime(festivalCatalog);
+    sevenSigns = SevenSignsEngine.OpenInStateDirectory(stateDir, time.UtcNow, festivalRuntime);
+    festivalRuntime.BindEngine(sevenSigns);
+    bosses = BossSchedule.OpenInStateDirectory(
+        stateDir,
+        time.UtcNow,
+        new MapFilteredBossSpawnPolicy(includeEnabledMapsBoot));
+    olympiad = OlympiadBoard.OpenInStateDirectory(stateDir, time.UtcNow);
+    punishments = PunishmentManager.OpenInStateDirectory(stateDir, time);
+    raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
+}
+catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+{
+    Console.Error.WriteLine($"[ZONE] {ex.Message}");
+    Environment.ExitCode = 1;
+    return;
+}
+
 ZoneWorld world;
 Required.SilentFallbackObserver = static (kind, key) =>
     FineageTelemetry.DataSilentFallback.Add(1, new KeyValuePair<string, object?>("kind", kind.ToId()));
@@ -104,15 +121,17 @@ try
     _ = GeoEngine.LoadDefault();
     world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
         ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints, time: time);
+    long loadedAtUnixMs = time.UtcNow.ToUnixTimeMilliseconds();
+    world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
+    world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
+    world.UseMonsterRaceInStateDirectory(stateDir, loadedAtUnixMs);
 }
-catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or DirectoryNotFoundException or FileNotFoundException)
+catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or IOException or UnauthorizedAccessException)
 {
     Console.Error.WriteLine($"[ZONE] {ex.Message}");
     Environment.ExitCode = 1;
     return;
 }
-world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, time.UtcNow.ToUnixTimeMilliseconds()));
-world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, time.UtcNow.ToUnixTimeMilliseconds()));
 world.StartSimulation(shutdown.Token);
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;
@@ -201,9 +220,19 @@ finally
         Console.Error.WriteLine($"[ZONE] simulation shutdown: {ex.Message}");
     }
 
-    world.ShutdownGracefully();
-    world.FlushLedgerOnShutdown();
-    bosses.Save();
+    try
+    {
+        world.ShutdownGracefully();
+    }
+    catch (Exception ex) when (ex is not OperationCanceledException)
+    {
+        Console.Error.WriteLine($"[ZONE] shutdown save: {ex.Message}");
+        Environment.ExitCode = 1;
+    }
+    finally
+    {
+        world.FlushLedgerOnShutdown();
+    }
 }
 
 static string? Arg(string[] args, string name)

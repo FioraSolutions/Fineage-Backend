@@ -1,5 +1,7 @@
 using System.Numerics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.Lottery;
@@ -58,9 +60,18 @@ public sealed class LotteryTicket
     public int Mask { get; set; }
 }
 
-public sealed class LotterySnapshot
+public sealed class LotterySnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int Number { get; set; } = 1;
     public long Prize { get; set; }
     public long EndUnixMs { get; set; }
@@ -95,12 +106,12 @@ public sealed class JsonLotteryStore(string path) : ILotteryStore
     {
         lock (_gate)
         {
-            if (!File.Exists(path))
-                return new LotterySnapshot();
-            var data = JsonSerializer.Deserialize<LotterySnapshot>(File.ReadAllText(path), JsonOptions)
-                ?? throw new InvalidDataException($"empty lottery store: {path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported lottery store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                path,
+                "lottery",
+                1,
+                JsonOptions,
+                static () => new LotterySnapshot());
             data.Draws ??= [];
             data.Tickets ??= [];
             return data;
@@ -110,14 +121,7 @@ public sealed class JsonLotteryStore(string path) : ILotteryStore
     public void Save(LotterySnapshot snapshot)
     {
         lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, path, overwrite: true);
-        }
+            AtomicJsonFile.Write(path, snapshot, JsonOptions);
     }
 }
 
@@ -348,5 +352,6 @@ public sealed class LotteryBoard
         _s.Number++;
     }
 
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current board to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
 }

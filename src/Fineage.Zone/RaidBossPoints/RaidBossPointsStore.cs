@@ -1,11 +1,21 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Zone.RaidBossPoints;
 
-public sealed class RaidBossPointsSnapshot
+public sealed class RaidBossPointsSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public List<RaidBossPointsRow> Characters { get; set; } = [];
 }
 
@@ -61,12 +71,12 @@ public sealed class JsonRaidBossPointsStore : IRaidBossPointsStore
     {
         lock (_gate)
         {
-            if (!File.Exists(_path))
-                return new RaidBossPointsSnapshot();
-            var data = JsonSerializer.Deserialize<RaidBossPointsSnapshot>(File.ReadAllText(_path), JsonOptions)
-                ?? throw new InvalidDataException($"empty raid boss points store: {_path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported raid boss points store version {data.Version}");
+            var data = AtomicJsonFile.Load(
+                _path,
+                "raid-boss-points",
+                1,
+                JsonOptions,
+                static () => new RaidBossPointsSnapshot());
             data.Characters ??= [];
             foreach (var row in data.Characters)
                 row.ByBoss ??= [];
@@ -78,13 +88,6 @@ public sealed class JsonRaidBossPointsStore : IRaidBossPointsStore
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
+            AtomicJsonFile.Write(_path, snapshot, JsonOptions);
     }
 }
