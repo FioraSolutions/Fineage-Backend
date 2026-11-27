@@ -107,8 +107,8 @@ public sealed class DungeonAccessRuleTests
     {
         var priced = new DungeonCatalog(
         [
-            new DungeonSite(3, DungeonKind.Necropolis, "Priced", 1, 2, 1, 2, 3, 4, 5, 6, DungeonProtocol.AdenaItemId, 100),
-            new DungeonSite(4, DungeonKind.Catacomb, "Ancient", 1, 2, 1, 2, 3, 4, 5, 6, DungeonProtocol.AncientAdenaItemId, 10)
+            new DungeonSite(3, DungeonKind.Necropolis, "Priced", 10, 11, 1, 2, 3, 4, 5, 6, DungeonProtocol.AdenaItemId, 100),
+            new DungeonSite(4, DungeonKind.Catacomb, "Ancient", 20, 21, 1, 2, 3, 4, 5, 6, DungeonProtocol.AncientAdenaItemId, 10)
         ]);
         var access = new DungeonAccess(priced);
         access.Use(new DungeonAccessState(SevenSignsPeriod.Competition, SevenSignsCabal.None, SevenSignsCabal.None, SevenSignsCabal.None));
