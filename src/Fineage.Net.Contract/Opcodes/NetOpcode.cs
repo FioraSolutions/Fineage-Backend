@@ -464,6 +464,10 @@ namespace Fineage.Net.Contract
         public const ushort RequestBBSwrite = 0x03F8;
         /// <summary>Zone → client: Mobius <c>ShowBoard</c> (retail <c>0x6E</c>).</summary>
         public const ushort ShowBoard = 0x03F9;
+        /// <summary>Client → zone: Mobius <c>RequestPetition</c> (retail <c>0x7F</c>).</summary>
+        public const ushort RequestPetition = 0x03FA;
+        /// <summary>Client → zone: Mobius <c>RequestPetitionCancel</c> (retail <c>0x80</c>).</summary>
+        public const ushort RequestPetitionCancel = 0x03FB;
         /// <summary>Client → zone: <c>RequestOustFromPartyRoom</c> (wire 0xD0 0x01).</summary>
         public const ushort RequestPartyRoomOust = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x01));
         /// <summary>Client → zone: <c>RequestDismissPartyRoom</c> (wire 0xD0 0x02).</summary>

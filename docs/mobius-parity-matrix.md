@@ -94,7 +94,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 60 | Wedding | ✅ | — | `CoupleManager` / voiced Wedding → `ZoneWorldWedding` |
 | 61 | Chat channels including hero | ✅ | — | `Say2.java`, `ChatHeroVoice.java` → `ZoneWorldChat` |
 | 62 | Chat ban, jail, character and account ban | ✅ | — | `PunishmentManager.java` → `ZoneWorldPunishment` |
-| 63 | Petitions | ❌ | S | `RequestPetition.java` → `Say` petition types return `NotInPetitionChat` (`ZoneWorldChat`) — #930 |
+| 63 | Petitions | ✅ | — | `RequestPetition` / `RequestPetitionCancel` / `PetitionManager` → `PetitionQueue` + `ZoneWorldPetitions`; missing petition id logged; petition chat requires consultation — #930 |
 | 64 | Duels | ✅ | — | `DuelManager.java` → `ZoneWorldDuels` |
 | 65 | Clan wars | ✅ | — | `ClanWar` → `ZoneWorldPledge.Wars` |
 | 66 | Alliance | ✅ | — | `Alliance` → `ZoneWorldAlly` |
@@ -193,7 +193,7 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 4. ~~Macros (row 69) — #927~~ (done).
 5. ~~Party matching rooms (row 67) — #928~~ (done).
 6. ~~Community board (row 70) — #929~~ (done).
-7. Petitions (row 63) — #930.
+7. ~~Petitions (row 63) — #930~~ (done).
 8. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935 (rows 98, 71, 105, 54).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
