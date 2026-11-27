@@ -78,6 +78,15 @@ Console.CancelKeyPress += (_, e) =>
     e.Cancel = true;
     shutdown.Cancel();
 };
+// A service manager or container stops the zone with SIGTERM. Without this the runtime exits on it straight away:
+// no shutdown save, no final economy commit, no shutdown reconcile (#955).
+using var sigterm = System.Runtime.InteropServices.PosixSignalRegistration.Create(
+    System.Runtime.InteropServices.PosixSignal.SIGTERM,
+    context =>
+    {
+        context.Cancel = true;
+        shutdown.Cancel();
+    });
 
 var time = Fineage.Zone.Time.SystemZoneTime.Instance;
 bool includeEnabledMapsBoot = !ZoneMapFilter.IsExplicitlyOff(
