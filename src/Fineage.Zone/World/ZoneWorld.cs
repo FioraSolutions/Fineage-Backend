@@ -437,6 +437,7 @@ public sealed partial class ZoneWorld
         SpawnCastleDoors();
         InitPunishment(punishments);
         InitRaidBossPoints(raidBossPoints);
+        InitPcCafe(null, null);
         RegisterStateShutdownFlushes();
     }
 

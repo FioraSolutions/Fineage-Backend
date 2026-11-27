@@ -340,6 +340,10 @@ public enum MsgType : ushort
     RequestPetitionCancel = 1131,
     /// <summary>Hero writes the monument inscription. Body is <see cref="WriteHeroWordsMsg"/>.</summary>
     RequestWriteHeroWords = 1132,
+    /// <summary>Client redeems a PC Cafe coupon. Body is <see cref="PCCafeCouponUseMsg"/>.</summary>
+    RequestPCCafeCouponUse = 1134,
+    /// <summary>Zone → client PC Cafe point balance. Body is <see cref="PcCafePointInfoMsg"/>.</summary>
+    ExPCCafePointInfo = 1135,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

@@ -131,6 +131,7 @@ public sealed partial class ZoneWorld
 
         SavePresence(session, entered.X, entered.Y, entered.Z, touchAccess: true);
         ZoneLog.EnterWorld(session, entered.Known);
+        SendPcCafeOnEnter(session);
         return entered.Projection;
     }
 

@@ -52,6 +52,12 @@ public sealed record WriteHeroWordsCommand(string Text) : ZoneCommand
         Completed(world.TryWriteHeroWordsAsync(session, Text, CancellationToken.None));
 }
 
+public sealed record PCCafeCouponUseCommand(string Code) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryPcCafeCouponAsync(session, Code, CancellationToken.None));
+}
+
 public sealed record OlympiadRegisterCommand(OlympiadRegisterRequestMsg Request) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
