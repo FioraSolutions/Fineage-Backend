@@ -107,6 +107,10 @@ public sealed partial class ZoneWorld
     /// </summary>
     void DamageNpcBy(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
+        // Mobius Creature.reduceCurrentHp: once _isDead is set, later hits in the same tick (queued melee,
+        // cubic/signet/skill messages at the stage barrier) are not applied to the corpse at all.
+        if (target.Dead)
+            return;
         var credit = CreditOf(attacker);
         DuelNoteOutsideHit(attacker, target);
         // Castle gates / walls, towers and headquarters have their own Mobius reduceHp rules.
@@ -137,14 +141,26 @@ public sealed partial class ZoneWorld
         {
             if (attacker.Summon != null)
                 attacker.Summon.TargetId = 0;
-            RemoveDeadNpc(target, killer: credit);
-            TryGrantFestivalBloodOffering(credit, target);
-            GrantKillReward(credit, target);
+            if (RemoveDeadNpc(target, killer: credit))
+            {
+                TryGrantFestivalBloodOffering(credit, target);
+                GrantKillReward(credit, target);
+            }
         }
     }
 
-    void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
+    /// <summary>
+    /// Mobius <c>Creature.doDie</c>: "killing is only possible one time" — the synchronized guard sets the dead flag
+    /// before rewards, drops or decay, so a second damage source in the same tick cannot roll loot or pay XP again.
+    /// A respawn materializes a fresh entity, so the flag does not leak into the next lifecycle.
+    /// </summary>
+    /// <returns><c>true</c> when this call performed the death transition; <c>false</c> when the NPC was already dead.</returns>
+    bool RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
     {
+        if (npc.Dead)
+            return false;
+        npc.Dead = true;
+        npc.CurHp = 0;
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
@@ -218,6 +234,8 @@ public sealed partial class ZoneWorld
                     DespawnNpc(minion);
             }
         }
+
+        return true;
     }
 
     void DespawnNpc(ZoneEntity npc)

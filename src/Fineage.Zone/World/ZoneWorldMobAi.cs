@@ -130,6 +130,10 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ApplyPlayerSkillDamage(ZoneEntity player, ZoneEntity target, int damage, int skillId, int level, long now)
     {
+        // Two pending hits due in the same tick both reach the barrier before either is applied; the first one's
+        // death flag makes the second a no-op instead of a second death/drop/reward roll.
+        if (target.Dead)
+            return;
         if (target.Summon != null)
         {
             UpdatePvPStatus(player, CreditOf(target), now);
@@ -170,11 +174,8 @@ public sealed partial class ZoneWorld
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
-        if (target.CurHp <= 0)
-        {
-            RemoveDeadNpc(target, killer: player);
+        if (target.CurHp <= 0 && RemoveDeadNpc(target, killer: player))
             GrantKillReward(player, target);
-        }
     }
 
     /// <summary>Offensive skill landing on a player: HP, purple name, cast break, death. Same gate as a melee hit.</summary>
