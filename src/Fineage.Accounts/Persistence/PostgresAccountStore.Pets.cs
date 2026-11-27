@@ -14,20 +14,14 @@ public sealed partial class PostgresAccountStore
     {
         if (controlObjectId <= 0)
             return null;
-        using (EnterPersist())
-        {
-            using var conn = _dataSource.OpenConnection();
-            return NormalizedStoreWriter.LoadPet(conn, controlObjectId);
-        }
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.LoadPet(conn, controlObjectId);
     }
 
     public IReadOnlyList<StoredPet> ListAllPets()
     {
-        using (EnterPersist())
-        {
-            using var conn = _dataSource.OpenConnection();
-            return NormalizedStoreWriter.LoadAllPets(conn);
-        }
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.LoadAllPets(conn);
     }
 
     public bool SavePet(StoredPet pet) =>
@@ -50,11 +44,8 @@ public sealed partial class PostgresAccountStore
     {
         if (string.IsNullOrEmpty(name) || npcId <= 0)
             return false;
-        using (EnterPersist())
-        {
-            using var conn = _dataSource.OpenConnection();
-            return NormalizedStoreWriter.PetNameExists(conn, name, npcId, exceptControlObjectId);
-        }
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.PetNameExists(conn, name, npcId, exceptControlObjectId);
     }
 }
 

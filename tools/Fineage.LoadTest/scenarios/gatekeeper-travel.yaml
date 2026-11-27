@@ -1,0 +1,12 @@
+# #1112 — Gatekeeper travel: every bot walks to the nearest gatekeeper, opens its dialog and teleports town to town,
+# paying the fee through the auditable economy ledger. Every NpcTalk must end in a page, a reject or a refusal message.
+name: gatekeeper-travel
+botCount: 150
+rampUpSeconds: 30
+durationSeconds: 120
+spawnLayout: town
+enterConcurrency: 32
+gatekeeperTravelShare: 1.0
+gatekeeperTripCooldownMs: 1000
+actionWeights:
+  move: 1.0

@@ -185,6 +185,7 @@ public sealed partial class ZoneWorld
             _snapshots.Stop();
             _economyPersist?.Stop();
             FlushLedgerOnShutdown();
+            AnswerCarriedEconomyRepliesOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }
     }
