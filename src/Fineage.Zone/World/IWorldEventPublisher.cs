@@ -120,6 +120,18 @@ interface IWorldEventPublisher
     /// <summary>Mobius ShopPreviewInfo (Wear paperdoll overlay). Called on the simulation thread.</summary>
     void FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info);
 
+    /// <summary>Mobius Dice broadcast after RollingDice. Called on the simulation thread.</summary>
+    void FanoutDice(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DiceMsg dice);
+
+    /// <summary>Mobius ShowMiniMap from a map item. Called on the simulation thread.</summary>
+    void FanoutShowMiniMap(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowMiniMapMsg map);
+
+    /// <summary>Mobius ShowCalculator. Called on the simulation thread.</summary>
+    void FanoutShowCalculator(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowCalculatorMsg calc);
+
+    /// <summary>Mobius ShowXMasSeal. Called on the simulation thread.</summary>
+    void FanoutShowXMasSeal(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowXMasSealMsg seal);
+
     /// <summary>Shop window adena/weight/slots snapshot. Called on the simulation thread.</summary>
     void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
 

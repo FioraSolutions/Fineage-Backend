@@ -434,6 +434,14 @@ namespace Fineage.Net.Contract
         public const ushort ShopPreviewInfo = 0x03E9;
         /// <summary>Client → zone: Mobius <c>RequestPreviewItem</c> (retail <c>0xC6</c>). Pay wear fee and preview.</summary>
         public const ushort RequestPreviewItem = 0x03EA;
+        /// <summary>Zone → client: Mobius <c>Dice</c> (retail <c>0xD4</c>).</summary>
+        public const ushort Dice = 0x03EB;
+        /// <summary>Zone → client: Mobius <c>ShowMiniMap</c> (retail <c>0x9D</c>).</summary>
+        public const ushort ShowMiniMap = 0x03EC;
+        /// <summary>Zone → client: Mobius <c>ShowCalculator</c> (retail <c>0xDC</c>).</summary>
+        public const ushort ShowCalculator = 0x03ED;
+        /// <summary>Zone → client: Mobius <c>ShowXMasSeal</c> (retail <c>0xF2</c>).</summary>
+        public const ushort ShowXMasSeal = 0x03EE;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

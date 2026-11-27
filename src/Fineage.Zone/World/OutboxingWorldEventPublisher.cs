@@ -151,6 +151,18 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info) =>
         Record(FanoutKind.ShopPreviewInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
+    void IWorldEventPublisher.FanoutDice(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DiceMsg dice) =>
+        Record(FanoutKind.Dice, dice.ObjectId, watcherObjectIds, new FanoutArgs(Payload: dice), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowMiniMap(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowMiniMapMsg map) =>
+        Record(FanoutKind.ShowMiniMap, 0, watcherObjectIds, new FanoutArgs(Payload: map), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowCalculator(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowCalculatorMsg calc) =>
+        Record(FanoutKind.ShowCalculator, 0, watcherObjectIds, new FanoutArgs(Payload: calc), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowXMasSeal(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowXMasSealMsg seal) =>
+        Record(FanoutKind.ShowXMasSeal, 0, watcherObjectIds, new FanoutArgs(Payload: seal), replaceable: false);
+
     void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance) =>
         Record(FanoutKind.ShopBalance, 0, watcherObjectIds, new FanoutArgs(Payload: balance), replaceable: false);
 

@@ -77,6 +77,11 @@ public sealed partial class ZoneWorld
             return TryUseMercTicket(session, player, item);
         if (_game.TransferSkillTrees.IsKnownCertificate(item.ItemId))
             return TryUseTransferCertificate(session, player, item);
+        // Mobius ItemHandler table (Book / Maps / RollingDice / Calculator / SpecialXMas).
+        if (TryNamedItemHandler(session, player, item) is { } handlerError)
+            return handlerError;
+        if (_itemHandlers.IsCatalogued(item.ItemId))
+            return null;
         if (!item.Template.Equippable)
         {
             if (_game.Recipes.TryGetByRecipeItem(item.ItemId, out _))

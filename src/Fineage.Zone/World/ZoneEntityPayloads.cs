@@ -288,6 +288,8 @@ sealed class ZonePlayerStatusPayload
     public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius RollingDice flood gate: unix ms when the next roll is allowed.</summary>
+    public long DiceReadyAtMs { get; set; }
     /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
     public int ForceCharges { get; set; }
     /// <summary>Mobius <c>ResetChargesTask</c>: unix ms when stacks clear after 10 min idle (0 = none scheduled).</summary>

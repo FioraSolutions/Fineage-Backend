@@ -130,6 +130,10 @@ internal enum FanoutKind : byte
     CursedWeaponLocation = 123,
     ShopPreviewList = 124,
     ShopPreviewInfo = 125,
+    Dice = 126,
+    ShowMiniMap = 127,
+    ShowCalculator = 128,
+    ShowXMasSeal = 129,
 }
 
 internal static class FanoutKinds

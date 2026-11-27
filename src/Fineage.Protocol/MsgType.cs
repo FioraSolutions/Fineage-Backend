@@ -294,6 +294,14 @@ public enum MsgType : ushort
     ShopPreviewList = 1100,
     /// <summary>Wear try-on paperdoll overlay. Body is <see cref="ShopPreviewInfoMsg"/>.</summary>
     ShopPreviewInfo = 1101,
+    /// <summary>Rolling dice broadcast. Body is <see cref="DiceMsg"/>.</summary>
+    Dice = 1110,
+    /// <summary>World map from a map item. Body is <see cref="ShowMiniMapMsg"/>.</summary>
+    ShowMiniMap = 1111,
+    /// <summary>Calculator UI. Body is <see cref="ShowCalculatorMsg"/>.</summary>
+    ShowCalculator = 1112,
+    /// <summary>Christmas seal UI. Body is <see cref="ShowXMasSealMsg"/>.</summary>
+    ShowXMasSeal = 1113,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

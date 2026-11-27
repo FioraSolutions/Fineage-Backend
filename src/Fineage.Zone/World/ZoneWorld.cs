@@ -20,6 +20,7 @@ using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Zone.Items;
 using Fineage.Zone.Party;
 using Fineage.Zone.Punishment;
 using Fineage.Zone.Fishing;
@@ -82,6 +83,8 @@ public sealed partial class ZoneWorld
     readonly ItemWeights _weights;
     /// <summary>Mobius <c>handler="ItemSkills"</c> items: what a potion or scroll actually does (data/item-skills.json).</summary>
     readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
+    /// <summary>Mobius named etc-item handlers (Book / Maps / RollingDice / Calculator / SpecialXMas).</summary>
+    readonly ItemHandlerRegistry _itemHandlers;
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
     /// <summary>Mobius clan hall owner restart points (<c>data/clan-hall-spawns.json</c>).</summary>
@@ -383,6 +386,7 @@ public sealed partial class ZoneWorld
         SoulCrystalRandom = Streams(null, RandomPurpose.SoulCrystal);
         RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
+        _itemHandlers = ItemHandlerRegistry.CreateDefault(ItemHandlerCatalog.LoadDefault());
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
         _clanHallSpawns = clanHallSpawns ?? Fineage.Game.Services.ClanHallSpawnCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
