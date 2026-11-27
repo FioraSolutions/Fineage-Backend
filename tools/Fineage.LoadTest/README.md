@@ -43,6 +43,14 @@ After the run, `EconomyConsistencyOracle` fails hard on unexplained zone `reject
 
 Start Zone with `FINEAGE_LOADTEST_ECONOMY_HAMMER=1` so dwarf manufacturers (bot id % 6 == 0) and manufacture customers (bot id % 6 == 1) are provisioned on enter.
 
+## Identity namespace
+
+Accounts are `<accountPrefix><botId:D5>`. Character names are derived from the same prefix, because Login keeps one
+global case-insensitive character-name index: a second run with a fresh account prefix must not try to create the
+first run's names. The default `loadbot` prefix keeps the historical `Bot0000` names; every other prefix gets
+`<readable prefix><stable prefix hash><botId:D4>` (3-16 alphanumerics, deterministic across reconnects and reruns).
+An account that already has a character reuses its roster instead of creating another one.
+
 ## Safety
 
 Run only against **local** `./scripts/run-local-net.sh`. Do not point bots at public hosts.

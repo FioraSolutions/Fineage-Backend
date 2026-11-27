@@ -51,8 +51,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _stats = stats;
         BotId = botId;
         Scenario = scenario;
-        Account = $"{scenario.AccountPrefix}{botId:D5}";
-        CharacterName = $"Bot{botId:D4}";
+        Account = BotIdentity.AccountName(scenario.AccountPrefix, botId);
+        CharacterName = BotIdentity.CharacterName(scenario.AccountPrefix, botId);
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
         _observation = new BotObservationLog(botId, _bag);
         if (scenario.IsGatekeeperTraveler(botId))
