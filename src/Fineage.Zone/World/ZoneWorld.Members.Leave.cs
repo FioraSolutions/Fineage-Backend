@@ -156,6 +156,8 @@ public sealed partial class ZoneWorld
 
     internal int EconomyPersistWriterThreadForTests => _economyPersist?.LastWriterThreadId ?? 0;
 
+    internal int EconomyPersistPendingForTests => _economyPersist?.PendingCount ?? 0;
+
     internal bool DrainEconomyPersistForTests()
     {
         if (_economyPersist == null)

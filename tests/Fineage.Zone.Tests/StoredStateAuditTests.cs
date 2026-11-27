@@ -202,11 +202,15 @@ public sealed class StoredStateAuditTests
 
         public override void Flush() => ((ILedgerJournal)this).CommitWith(_ => { });
 
-        void ILedgerJournal.CommitWith(Action<IReadOnlyList<LedgerEntry>> write)
+        void ILedgerJournal.CommitWith(Action<IReadOnlyList<LedgerEntry>> write) =>
+            ((ILedgerJournal)this).CommitThrough(long.MaxValue, write);
+
+        /// <summary>The same prefix rule as the Postgres journal.</summary>
+        void ILedgerJournal.CommitThrough(long position, Action<IReadOnlyList<LedgerEntry>> write)
         {
             List<LedgerEntry> pending;
             lock (_sync)
-                pending = _buffer.ToList();
+                pending = _buffer.TakeWhile(entry => entry.Position <= position).ToList();
             write(pending);
             lock (durable)
                 durable.AddRange(pending);
@@ -221,6 +225,16 @@ public sealed class StoredStateAuditTests
         public MemoryAccountStore Inner { get; } = MemoryAccountStore.InMemory();
         public IAccountStore Proxy { get; }
         public bool FailCommits { get; set; }
+
+        /// <summary>When set, an economy commit waits here (after <see cref="Entered"/>) before it writes.</summary>
+        public ManualResetEventSlim? Gate { get; set; }
+        public ManualResetEventSlim Entered { get; } = new(false);
+
+        /// <summary>A commit whose bags match dies inside the transaction.</summary>
+        public Func<IReadOnlyList<EconomyBagWrite>, bool>? FailWhen { get; set; }
+
+        int _failed;
+        public int Failed => Volatile.Read(ref _failed);
 
         public DurableStore()
         {
@@ -240,8 +254,18 @@ public sealed class StoredStateAuditTests
                 ArgumentNullException.ThrowIfNull(targetMethod);
                 if (targetMethod.Name == nameof(IAccountStore.CommitEconomy))
                 {
-                    if (_owner.FailCommits)
+                    if (_owner.Gate is { } gate)
+                    {
+                        _owner.Entered.Set();
+                        gate.Wait();
+                    }
+
+                    if (_owner.FailCommits || _owner.FailWhen?.Invoke((IReadOnlyList<EconomyBagWrite>)args![1]!) == true)
+                    {
+                        Interlocked.Increment(ref _owner._failed);
                         throw new InvalidOperationException("simulated crash inside the economy commit");
+                    }
+
                     // The entries are the journal's: TxJournal keeps them once this returns.
                     _owner.Inner.CommitEconomy([], (IReadOnlyList<EconomyBagWrite>)args![1]!);
                     return null;

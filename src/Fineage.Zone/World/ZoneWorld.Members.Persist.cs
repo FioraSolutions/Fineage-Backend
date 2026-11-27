@@ -293,6 +293,8 @@ public sealed partial class ZoneWorld
         _dirtyFreight.Clear();
         _dirtyOfflineBags.Clear();
         stolen.Bags = BagsOf(stolen);
+        // Taken with the bags, under the economy lock: the rows up to here are exactly the moves these bags show.
+        stolen.LedgerThrough = _ledger.Position;
         return stolen;
     }
 

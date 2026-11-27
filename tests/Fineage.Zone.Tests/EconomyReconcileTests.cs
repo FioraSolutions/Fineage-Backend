@@ -143,6 +143,96 @@ public sealed class EconomyReconcileTests
         Assert.Equal(expected, second.World.LedgerForTests.HoldingsOf(LedgerAccount.Inventory(a.ObjectId)).CountOf(Adena));
     }
 
+    /// <summary>
+    /// #955 root cause: the persist worker used to hand a batch every journal row buffered when it ran, not the rows
+    /// that were buffered when the batch's bags were taken. A batch queued behind a slow commit then wrote a later
+    /// move's row without that move's bag; dying before the later bag's own batch left the store and the journal
+    /// apart (seen on the local server as two death drops in the journal with the items still in the saved bag).
+    /// </summary>
+    [Fact]
+    public async Task A_commit_writes_only_the_journal_rows_of_the_bags_it_carries()
+    {
+        var rig = new Rig();
+        var first = rig.Boot();
+        var a = await first.EnterAsync("bnda", "BndA", items: [new StoredItem(Adena, 500, -1)], x: 0, y: 0, z: 0);
+        var b = await first.EnterAsync("bndb", "BndB", items: [new StoredItem(Adena, 500, -1)], x: 20, y: 0, z: 0);
+        var c = await first.EnterAsync("bndc", "BndC", items: [new StoredItem(Adena, 500, -1)], x: 40, y: 0, z: 0);
+        first.World.StartEconomyPersistForTests();
+        Reconciled(first, "start");
+        long bSaved = rig.Store.Inner.FindByCharacterId(b.ObjectId)!.Items!.Where(r => r.ItemId == Adena).Sum(r => (long)r.Count);
+
+        // W (C's drop) holds the worker inside its commit; X (A's drop) and then Y (B's drop) queue behind it.
+        rig.Store.Gate = new ManualResetEventSlim(false);
+        _ = first.World.ExecuteAsync(c.Session, new DropItemCommand(c.Slot(Adena), 5, 40, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+        Assert.True(rig.Store.Entered.Wait(TimeSpan.FromSeconds(10)));
+        _ = first.World.ExecuteAsync(a.Session, new DropItemCommand(a.Slot(Adena), 10, 0, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+        _ = first.World.ExecuteAsync(b.Session, new DropItemCommand(b.Slot(Adena), 20, 20, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+
+        // W and X commit, Y (B's bag) dies inside the database, then the process dies.
+        rig.Store.FailWhen = bags => bags.Any(bag => bag.CharacterId == b.ObjectId);
+        var gate = rig.Store.Gate;
+        rig.Store.Gate = null;
+        gate.Set();
+        Assert.True(SpinWait.SpinUntil(() => rig.Store.Failed > 0, TimeSpan.FromSeconds(10)), "B's batch never ran");
+        Assert.True(SpinWait.SpinUntil(() => first.World.EconomyPersistPendingForTests == 0, TimeSpan.FromSeconds(10)));
+        rig.Store.FailWhen = null;
+
+        var drops = rig.Durable.Where(e => e.Transaction.Kind == LedgerTxKind.Drop).Select(e => e.Transaction.CausedBy).ToList();
+        Assert.Contains(a.ObjectId, drops);
+        Assert.DoesNotContain(b.ObjectId, drops);
+        var second = rig.Boot();
+        Reconciled(second, "after-crash");
+        // B's drop never happened durably: its bag and the journal both still show the 500.
+        Assert.Equal(bSaved, rig.Store.Inner.FindByCharacterId(b.ObjectId)!.Items!.Where(r => r.ItemId == Adena).Sum(r => (long)r.Count));
+    }
+
+    /// <summary>
+    /// The other half of the same rule: a failed batch leaves its rows first in the buffer, so a batch queued behind it
+    /// would write them without their bags. It is held back until the world has restored the failed bags.
+    /// </summary>
+    [Fact]
+    public async Task A_batch_behind_a_failed_one_does_not_write_the_failed_rows()
+    {
+        var rig = new Rig();
+        var first = rig.Boot();
+        var a = await first.EnterAsync("hbka", "HbkA", items: [new StoredItem(Adena, 500, -1)], x: 0, y: 0, z: 0);
+        var b = await first.EnterAsync("hbkb", "HbkB", items: [new StoredItem(Adena, 500, -1)], x: 20, y: 0, z: 0);
+        var c = await first.EnterAsync("hbkc", "HbkC", items: [new StoredItem(Adena, 500, -1)], x: 40, y: 0, z: 0);
+        first.World.StartEconomyPersistForTests();
+        Reconciled(first, "start");
+
+        rig.Store.Gate = new ManualResetEventSlim(false);
+        _ = first.World.ExecuteAsync(c.Session, new DropItemCommand(c.Slot(Adena), 5, 40, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+        Assert.True(rig.Store.Entered.Wait(TimeSpan.FromSeconds(10)));
+        _ = first.World.ExecuteAsync(a.Session, new DropItemCommand(a.Slot(Adena), 10, 0, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+        _ = first.World.ExecuteAsync(b.Session, new DropItemCommand(b.Slot(Adena), 20, 20, 0, 0), CancellationToken.None);
+        first.World.StepSimulationRawForTests();
+
+        // A's batch dies inside the database; B's runs right behind it, before the world restores A's bag.
+        rig.Store.FailWhen = bags => bags.Any(bag => bag.CharacterId == a.ObjectId);
+        var gate = rig.Store.Gate;
+        rig.Store.Gate = null;
+        gate.Set();
+        Assert.True(SpinWait.SpinUntil(() => first.World.EconomyPersistPendingForTests == 0, TimeSpan.FromSeconds(10)));
+        rig.Store.FailWhen = null;
+
+        var drops = rig.Durable.Where(e => e.Transaction.Kind == LedgerTxKind.Drop).Select(e => e.Transaction.CausedBy).ToList();
+        Assert.Equal([c.ObjectId], drops);
+        var second = rig.Boot();
+        Reconciled(second, "after-crash");
+
+        // A world that lives on retries both once the failed bag is restored, rows and bags together.
+        first.World.StepSimulationRawForTests();
+        Reconciled(first, "retried");
+        drops = rig.Durable.Where(e => e.Transaction.Kind == LedgerTxKind.Drop).Select(e => e.Transaction.CausedBy).ToList();
+        Assert.Equal([c.ObjectId, a.ObjectId, b.ObjectId], drops);
+    }
+
     [Fact]
     public async Task Divergences_fail_loudly_with_the_container_and_entity_id()
     {

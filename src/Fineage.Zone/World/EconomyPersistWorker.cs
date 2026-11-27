@@ -43,6 +43,13 @@ internal sealed class EconomyPersistService
     long _oldestEnqueueTimestamp;
     long _nextBatchId;
 
+    // A failed batch leaves its journal rows buffered and its bags dirty until the world restores them. A batch taken
+    // before that restore carries later rows but not those bags; writing it would put the failed batch's rows (the
+    // buffered prefix) on disk without their bags. Such batches fail too and are retaken after the restore.
+    readonly Lock _holdBack = new();
+    ulong _failedBatch;
+    ulong _heldBackUntil;
+
     public EconomyPersistService(IAccountStore? store, ILedgerJournal journal, WorldAffinity affinity)
     {
         ArgumentNullException.ThrowIfNull(journal);
@@ -287,6 +294,35 @@ internal sealed class EconomyPersistService
         }
     }
 
+    /// <summary>The failed batch a later one waits on, or null when <paramref name="batchId"/> may write.</summary>
+    ulong? HeldBack(ulong batchId)
+    {
+        lock (_holdBack)
+            return batchId > _failedBatch && batchId < _heldBackUntil ? _failedBatch : null;
+    }
+
+    void HoldBackAfter(ulong batchId)
+    {
+        lock (_holdBack)
+        {
+            // A batch that was itself held back never wrote, so it opens no new gap.
+            if (batchId > _failedBatch && batchId < _heldBackUntil)
+                return;
+            _failedBatch = batchId;
+            _heldBackUntil = ulong.MaxValue;
+        }
+    }
+
+    /// <summary>World turn, after a failed batch's bags are dirty again: every batch taken from now on carries them.</summary>
+    void ReleaseHoldBack(ulong restoredBatchId)
+    {
+        lock (_holdBack)
+        {
+            if (restoredBatchId == _failedBatch)
+                _heldBackUntil = (ulong)Interlocked.Read(ref _nextBatchId) + 1;
+        }
+    }
+
     internal static List<int> CharacterIdsOfBatch(EconomyPersistBatch batch) => CharacterIdsOf(batch);
 
     void Finish(ZoneWorld world, EconomyPersistCompletion completion)
@@ -304,6 +340,7 @@ internal sealed class EconomyPersistService
         else
         {
             world.RestoreDirtyEconomyInternal(pending.Batch);
+            ReleaseHoldBack(completion.BatchId);
             // Only the characters whose economy write was in this batch hear the failure; a command from anyone else
             // that merely shared the step still answers with its own result.
             if (pending.HeldReplies is { Count: > 0 })
@@ -379,7 +416,13 @@ internal sealed class EconomyPersistService
             LastWriterThreadId = Environment.CurrentManagedThreadId;
             if (_store == null)
                 return true;
-            _journal.CommitWith(entries => _store.CommitEconomy(entries, work.Batch.Bags));
+            if (HeldBack(work.BatchId) is { } failed)
+            {
+                _warn($"economy persist batch={work.BatchId} held back: batch={failed} failed and its bags are not restored yet");
+                return false;
+            }
+
+            _journal.CommitThrough(work.Batch.LedgerThrough, entries => _store.CommitEconomy(entries, work.Batch.Bags));
             FineageTelemetry.EconomyPersistBatches.Add(1, new KeyValuePair<string, object?>("result", "written"));
             FineageTelemetry.PersistWriteMilliseconds.Record(
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds,
@@ -388,6 +431,7 @@ internal sealed class EconomyPersistService
         }
         catch (Exception ex)
         {
+            HoldBackAfter(work.BatchId);
             _warn(
                 $"economy persist failed batch={work.BatchId} bags={work.Batch.Bags.Count}: {ex.GetType().Name}: {ex.Message}");
             FineageTelemetry.EconomyPersistFailures.Add(1, new KeyValuePair<string, object?>("reason", ex.GetType().Name));
@@ -429,4 +473,10 @@ internal sealed class EconomyPersistBatch
     public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
     public List<EconomyBagWrite> OfflineBags { get; } = [];
     public List<EconomyBagWrite> Bags { get; set; } = [];
+
+    /// <summary>
+    /// Ledger position when the bags were taken: the batch writes the journal rows up to here and no later one.
+    /// A row after it belongs to a move whose bag is in a later batch (#955).
+    /// </summary>
+    public long LedgerThrough { get; set; } = long.MaxValue;
 }
