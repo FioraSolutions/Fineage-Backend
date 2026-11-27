@@ -180,7 +180,7 @@ Both processes log through `Microsoft.Extensions.Logging`. The default console f
 
 Connect, disconnect, enter world, and packet errors carry `session`, `account`, `character`, and `packet`. Passwords, handoff tokens, and session keys are not logged. A field named `password`, `token`, `secret`, or `session_key` is dropped, and `password=` / `token=` assignments inside a message are rewritten to `[redacted]`.
 
-Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below):
+Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below). The full list of exported families, with units, sources and tests, is [`docs/operations/metrics.md`](docs/operations/metrics.md); dashboards and alert rules are in [`monitoring/`](docs/operations/monitoring.md):
 
 | Instrument | Kind | Meaning |
 |------------|------|---------|
@@ -188,7 +188,6 @@ Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below)
 | `fineage.zone.online` | Gauge | Players in the zone simulation |
 | `fineage.frames.in` / `fineage.frames.out` | Counter | Packets by direction |
 | `fineage.bytes.in` / `fineage.bytes.out` | Counter | Packet bytes, header included |
-| `fineage.packets.per_second` | Gauge | Packets/s. Tag `direction` = `in` or `out`. Updated on each summary line and each `/metrics` scrape |
 | `fineage.handler.ms` | Histogram | Packet handler duration |
 | `fineage.tick.ms` | Histogram | Zone simulation tick (HP/MP regen). Zone only |
 | `fineage.packets.rejected` | Counter | Rate limit, unknown opcode, or wrong port |

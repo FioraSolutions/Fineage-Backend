@@ -558,7 +558,6 @@ Implemented in step 1 (OTEL and `/metrics`):
 |---|---|
 | `fineage.tick.ms` | Whole simulation step including lock wait (existing) |
 | `fineage.tick.stage.ms{stage}` | Duration per stage |
-| `fineage.tick.stage.regions{stage}` | Regions a stage ran in |
 | `fineage.tick.stage.failures{stage}` | Stage or region bodies that threw (also logged with stage, scope, tick and the exception) |
 | `fineage.tick.overruns` | Steps longer than the fixed step (also logged with the three slowest stages) |
 | `fineage.tick.skipped` | Ticks a late step jumped over (step 5; also logged). Tick time running ahead of the wall clock by a step or more is logged when it starts and ends. |

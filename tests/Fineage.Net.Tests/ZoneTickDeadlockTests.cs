@@ -75,6 +75,8 @@ public sealed class ZoneTickDeadlockTests
         var slowHandle = new ConnectionHandle(3, 1, slow.Connection);
         var healthyHandle = new ConnectionHandle(4, 1, healthy.Connection);
         byte[] heavy = new byte[40_000];
+        using var metrics = new MetricsCollector();
+        long disconnectsBefore = metrics.Snapshot().OutboundSlowClientDisconnect;
 
         var elapsed = Stopwatch.StartNew();
         // 40 x 40 KB is past the 1 MiB hard limit even if the stripe worker keeps up with the producer.
@@ -113,6 +115,8 @@ public sealed class ZoneTickDeadlockTests
         }, cts.Token);
 
         await closed.Task.WaitAsync(TimeSpan.FromSeconds(5), cts.Token);
+        // #992: the slow-client alert reads this counter; the overflow close itself must move it.
+        Assert.True(metrics.Snapshot().OutboundSlowClientDisconnect - disconnectsBefore >= 1);
     }
 
     [Fact]

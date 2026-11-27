@@ -428,9 +428,6 @@ public static class FineageTelemetry
         yield return new Measurement<double>(BitConverter.Int64BitsToDouble(Interlocked.Read(ref bits)));
     }
 
-    public static readonly Histogram<int> StageRegions =
-        Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
-
     public static readonly Counter<long> StageFailures =
         Meter.CreateCounter<long>("fineage.tick.stage.failures", description: "Simulation stage or region bodies that threw (tag stage)");
 
@@ -444,7 +441,15 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.region.handoffs", description: "Entities handed to another region at the end of a step");
 
     public static readonly Counter<long> StoredStateIssues =
-        Meter.CreateCounter<long>("fineage.state.audit_issues", description: "Saved state that disagrees with the data catalogs or the replayed ledger (tags code, container)");
+        Meter.CreateCounter<long>("fineage.state.audit_issues", description: "Saved state that disagrees with the data catalogs or the replayed ledger (tags code, container, severity)");
+
+    /// <summary>#992: every ledger ↔ store ↔ live-world reconciliation run (tags phase, result: ok or violations).</summary>
+    public static readonly Counter<long> EconomyReconcileRuns =
+        Meter.CreateCounter<long>("fineage.economy.reconcile.runs", description: "Economy reconciliation runs (tags phase, result)");
+
+    /// <summary>#992: findings of those runs, one per violation (tags phase, code).</summary>
+    public static readonly Counter<long> EconomyReconcileViolations =
+        Meter.CreateCounter<long>("fineage.economy.reconcile.violations", description: "Economy reconciliation violations (tags phase, code)");
 
     public static readonly Counter<long> LedgerAdjustments =
         Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
@@ -555,43 +560,6 @@ public static class FineageTelemetry
         yield return new Measurement<double>(PersistOldestAgeMs?.Invoke() ?? 0);
     }
 
-    public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
-        "fineage.packets.per_second",
-        ObservePacketRates,
-        unit: "{packet}/s",
-        description: "Packet rate over the most recent console summary or /metrics scrape window");
-
-    static readonly object RateGate = new();
-    static double _inboundPacketsPerSecond;
-    static double _outboundPacketsPerSecond;
-
-    public static void SetPacketRates(double inboundPerSecond, double outboundPerSecond)
-    {
-        if (double.IsNaN(inboundPerSecond) || inboundPerSecond < 0)
-            inboundPerSecond = 0;
-        if (double.IsNaN(outboundPerSecond) || outboundPerSecond < 0)
-            outboundPerSecond = 0;
-        lock (RateGate)
-        {
-            _inboundPacketsPerSecond = inboundPerSecond;
-            _outboundPacketsPerSecond = outboundPerSecond;
-        }
-    }
-
-    static IEnumerable<Measurement<double>> ObservePacketRates()
-    {
-        double inbound;
-        double outbound;
-        lock (RateGate)
-        {
-            inbound = _inboundPacketsPerSecond;
-            outbound = _outboundPacketsPerSecond;
-        }
-
-        yield return new Measurement<double>(inbound, new KeyValuePair<string, object?>("direction", "in"));
-        yield return new Measurement<double>(outbound, new KeyValuePair<string, object?>("direction", "out"));
-    }
-
     public static readonly ObservableGauge<int> ZoneOnline = Meter.CreateObservableGauge(
         "fineage.zone.online",
         ObserveOnline,
@@ -601,6 +569,27 @@ public static class FineageTelemetry
         "fineage.command.ingress.queued",
         ObserveCommandIngressQueued,
         description: "Player commands waiting for the next simulation drain");
+
+    /// <summary>#992: the process's health contract, exported as <c>fineage_health_*</c> gauges on every scrape.</summary>
+    public static Fineage.Protocol.Health.HealthBoard? Health { get; set; }
+
+    static readonly Lock DiskGate = new();
+    static readonly Dictionary<string, string> Disks = new(StringComparer.Ordinal);
+
+    /// <summary>#992: a directory whose file system free/size bytes are exported as <c>fineage_disk_*{path=label}</c>.</summary>
+    public static void RegisterDiskPath(string label, string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(label);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        lock (DiskGate)
+            Disks[label] = Path.GetFullPath(path);
+    }
+
+    public static IReadOnlyList<KeyValuePair<string, string>> DiskPaths()
+    {
+        lock (DiskGate)
+            return Disks.OrderBy(pair => pair.Key, StringComparer.Ordinal).ToList();
+    }
 
     public static Func<int>? OnlineCount { get; set; }
     public static Func<int>? CommandIngressDepth { get; set; }

@@ -148,6 +148,12 @@ health.AddReadyProbe("simulation", () => liveWorld?.SimulationHealth(readyLag)
     ?? new HealthCheck("simulation", false, "world not built"));
 var databaseProbe = new CachedProbe(() => accounts.CheckDatabase(TimeSpan.FromSeconds(3)), TimeSpan.FromSeconds(2));
 health.AddReadyProbe("database", databaseProbe.Read);
+// #992: /metrics exports the health contract and the state directory's free space.
+FineageTelemetry.Health = health;
+FineageTelemetry.RegisterDiskPath("state", stateDir);
+// #992: the collector only sees measurements made after it exists. Start /metrics before the boot so the startup state
+// audit, the startup reconcile and silent data fallbacks reach it, and a booting zone scrapes as not ready.
+await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 
 int statusPort = ZoneStatus.ResolvePort(Environment.GetEnvironmentVariable(ZoneStatus.PortVariable), out string? statusPortError);
 if (statusPortError != null)
@@ -239,7 +245,6 @@ Console.WriteLine("[ZONE] GM punishments are stored in database world_state 'pun
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
 
-await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var netZone = new NetZoneServer(handoffStore, world, accounts);
 var netTcp = new NetTcpServer { Endpoint = "zone" };
 Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");

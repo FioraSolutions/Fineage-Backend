@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game.Economy;
+using Fineage.Protocol.Telemetry;
 using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.World;
@@ -133,6 +134,7 @@ public sealed partial class ZoneWorld
     public EconomyReconcileReport ReconcileEconomyAndLog(string phase, Func<string, string?>? environment = null)
     {
         var report = ReconcileEconomyFlushed(phase);
+        RecordReconcileMetrics(report);
         foreach (var violation in report.Violations)
             ZoneLog.Error($"economy reconcile violation phase={phase} {violation}");
         if (report.Ok)
@@ -142,6 +144,15 @@ public sealed partial class ZoneWorld
         if (!report.Ok && StoredStateAudit.BlockOnError(environment))
             report.ThrowIfViolations();
         return report;
+    }
+
+    /// <summary>#992: one run and every violation go to /metrics (<c>fineage_economy_reconcile_*</c>).</summary>
+    internal static void RecordReconcileMetrics(EconomyReconcileReport report)
+    {
+        var phase = new KeyValuePair<string, object?>("phase", report.Phase);
+        FineageTelemetry.EconomyReconcileRuns.Add(1, phase, new KeyValuePair<string, object?>("result", report.Ok ? "ok" : "violations"));
+        foreach (var violation in report.Violations)
+            FineageTelemetry.EconomyReconcileViolations.Add(1, phase, new KeyValuePair<string, object?>("code", violation.Code));
     }
 
     static void ReconcilePieces(EconomyReconcileReport report, List<(LedgerAccount Account, LedgerHoldings Holdings)> accounts)

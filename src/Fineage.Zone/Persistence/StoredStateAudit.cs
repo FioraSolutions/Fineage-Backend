@@ -315,7 +315,8 @@ public static class StoredStateAudit
         {
             FineageTelemetry.StoredStateIssues.Add(1,
                 new KeyValuePair<string, object?>("code", issue.Code),
-                new KeyValuePair<string, object?>("container", issue.Container));
+                new KeyValuePair<string, object?>("container", issue.Container),
+                new KeyValuePair<string, object?>("severity", issue.Severity == StoredStateSeverity.Error ? "error" : "notice"));
         }
     }
 
