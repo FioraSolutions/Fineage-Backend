@@ -200,8 +200,11 @@ public sealed partial class ZoneWorld
         _economyPersist?.DrainCompletions(this);
 
         long flushStart = Stopwatch.GetTimestamp();
-        var applied = TakeAppliedWithCarried();
-        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied, out bool repliesHeld);
+        BeforeEconomyReplyReleaseForTests?.Invoke();
+        var taken = TakeAppliedWithCarried();
+        bool committed = TryCommitDirtyEconomy(
+            discardWithoutPublish: null, heldReplies: taken, out bool repliesHeld, out var own, out var onOtherCommit);
+        var applied = own ?? taken;
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
@@ -225,6 +228,10 @@ public sealed partial class ZoneWorld
         // Inside a step a batch that was not queued (a reservation held by another commit, a full worker queue) is
         // restored dirty and rides the next step's commit, so its replies wait for that commit instead of hearing a
         // failure for a change that is about to land (#1112).
+        // A change another commit already took (a logout steals every dirty bag) is not durable until that commit
+        // finishes: those replies wait for it across steps instead of hearing success now (#1114).
+        if (onOtherCommit != null)
+            AnswerOrCarryUncommitted(onOtherCommit, OnOtherCommit(onOtherCommit));
         if (repliesHeld)
             ForgetCarriedSince(applied);
         else if (applied.Count > 0)

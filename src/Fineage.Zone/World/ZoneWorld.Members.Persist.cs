@@ -112,6 +112,8 @@ public sealed partial class ZoneWorld
         using (_economyLock.Enter())
         {
             _dirtyInventories[session.ObjectId] = (session, inventory);
+            if (_stepping)
+                _economyTouched.Add(session.ObjectId);
             commitNow = !InventoryPersistDeferred;
         }
 
@@ -161,21 +163,51 @@ public sealed partial class ZoneWorld
     /// logout commit cannot pin the simulation step's flush behind that write.
     /// </summary>
     bool TryCommitDirtyEconomy(int? discardWithoutPublish) =>
-        TryCommitDirtyEconomy(discardWithoutPublish, heldReplies: null, out _);
+        TryCommitDirtyEconomy(discardWithoutPublish, heldReplies: null, out _, out _, out _);
 
     /// <param name="repliesHeld">
     /// True only when <paramref name="heldReplies"/> rode on a batch that was queued: that batch's completion answers
     /// them. Otherwise (no dirty economy, queue full, reservation conflict) the caller still owns every reply.
     /// </param>
+    /// <param name="ownReplies">
+    /// <paramref name="heldReplies"/> without <paramref name="deferred"/>: the replies whose outcome this call decides.
+    /// </param>
+    /// <param name="deferred">
+    /// Replies of characters whose economy was already taken by another commit that is not durable yet (#1114: a
+    /// logout steals every dirty bag, so the step that applied the change finds nothing of it to commit). They must not
+    /// hear success from this call: neither "nothing to commit" nor this step's batch makes that change durable. The
+    /// caller carries them until that commit finishes. Decided under the same <see cref="_economyLock"/> hold as this
+    /// call's own steal, so no other commit can take the change in between.
+    /// </param>
     bool TryCommitDirtyEconomy(
         int? discardWithoutPublish,
         IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies,
-        out bool repliesHeld)
+        out bool repliesHeld,
+        out IReadOnlyList<ZoneCommandIngress.Applied>? ownReplies,
+        out List<ZoneCommandIngress.Applied>? deferred)
     {
         repliesHeld = false;
+        ownReplies = heldReplies;
+        deferred = null;
         EconomyPersistBatch stolen;
         using (_economyLock.Enter())
         {
+            if (heldReplies != null)
+            {
+                if (heldReplies.Count > 0 && _economyInFlight.Count > 0)
+                {
+                    deferred = SplitRepliesOnOtherCommits(heldReplies, out var own);
+                    if (deferred != null)
+                    {
+                        ownReplies = own;
+                        heldReplies = own;
+                    }
+                }
+
+                // The step's commit is the boundary: what its commands touched is now either in its batch or deferred.
+                _economyTouched.Clear();
+            }
+
             if (!HasDirtyEconomy())
                 return true;
             stolen = StealDirtyEconomy();
@@ -239,8 +271,69 @@ public sealed partial class ZoneWorld
         return true;
     }
 
-    internal void PublishStolenEconomyInternal(EconomyPersistBatch stolen, int? discardWithoutPublish) =>
+    internal void PublishStolenEconomyInternal(EconomyPersistBatch stolen, int? discardWithoutPublish)
+    {
         PublishStolenEconomy(stolen, discardWithoutPublish);
+        using (_economyLock.Enter())
+            EndInFlightLocked(stolen);
+    }
+
+    /// <summary>
+    /// Characters whose economy sits in a stolen batch that has not finished yet (queued, being written, or about to be
+    /// handed to the worker). Guarded by <see cref="_economyLock"/>; a count because a restored batch can be re-taken
+    /// while an older one for the same character is still being decided.
+    /// </summary>
+    readonly Dictionary<int, int> _economyInFlight = new();
+
+    /// <summary>
+    /// Characters whose bag, warehouse, or freight a simulation step saved since that step's commit. Guarded by
+    /// <see cref="_economyLock"/>. Only these replies can depend on a change another commit took; a character whose
+    /// earlier economy is still in flight but whose command this step changed nothing economic answers now (#990).
+    /// </summary>
+    readonly HashSet<int> _economyTouched = [];
+
+    /// <summary>Tests: whether a stolen, not yet durable batch holds this character's economy.</summary>
+    internal bool IsEconomyInFlightForTests(int characterId)
+    {
+        using (_economyLock.Enter())
+            return _economyInFlight.ContainsKey(characterId);
+    }
+
+    /// <summary>Caller holds <see cref="_economyLock"/>.</summary>
+    List<ZoneCommandIngress.Applied>? SplitRepliesOnOtherCommits(
+        IReadOnlyList<ZoneCommandIngress.Applied> replies,
+        out List<ZoneCommandIngress.Applied> own)
+    {
+        List<ZoneCommandIngress.Applied>? deferred = null;
+        own = new List<ZoneCommandIngress.Applied>(replies.Count);
+        foreach (var row in replies)
+        {
+            // A command that failed changed nothing, so its refusal is true whatever the economy does.
+            int id = row.Submission.Session.ObjectId;
+            bool dependsOnEconomy = _economyTouched.Contains(id) || _economyCarriedSince.ContainsKey(row.Submission);
+            if (row.Error == null && row.Failure == null && dependsOnEconomy && _economyInFlight.ContainsKey(id))
+                (deferred ??= []).Add(row);
+            else
+                own.Add(row);
+        }
+
+        return deferred;
+    }
+
+    /// <summary>Caller holds <see cref="_economyLock"/>. Exactly once per steal: publish or restore ends it.</summary>
+    void EndInFlightLocked(EconomyPersistBatch batch)
+    {
+        if (batch.InFlightIds is not { } ids)
+            return;
+        batch.InFlightIds = null;
+        foreach (int id in ids)
+        {
+            if (_economyInFlight.TryGetValue(id, out int n) && n > 1)
+                _economyInFlight[id] = n - 1;
+            else
+                _economyInFlight.Remove(id);
+        }
+    }
 
     internal void RestoreDirtyEconomyInternal(EconomyPersistBatch stolen) => RestoreDirtyEconomy(stolen);
 
@@ -298,6 +391,9 @@ public sealed partial class ZoneWorld
         stolen.Bags = BagsOf(stolen);
         // Taken with the bags, under the economy lock: the rows up to here are exactly the moves these bags show.
         stolen.LedgerThrough = _ledger.Position;
+        stolen.InFlightIds = EconomyPersistService.CharacterIdsOfBatch(stolen);
+        foreach (int id in stolen.InFlightIds)
+            _economyInFlight[id] = _economyInFlight.GetValueOrDefault(id) + 1;
         return stolen;
     }
 
@@ -314,6 +410,8 @@ public sealed partial class ZoneWorld
             // Stolen writes are older than anything queued since: they go first so a later snapshot of the same
             // character still wins in BagsOf, and a different character's write is never dropped.
             _dirtyOfflineBags.InsertRange(0, stolen.OfflineBags);
+            // Dirty again in the same lock hold, so a reply check never sees the change as neither dirty nor in flight.
+            EndInFlightLocked(stolen);
         }
     }
 

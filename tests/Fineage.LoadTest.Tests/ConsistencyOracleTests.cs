@@ -532,6 +532,59 @@ public sealed class ConsistencyOracleTests
     }
 
     [Fact]
+    public void Relog_session_boundary_ends_every_life_so_reentry_spawns_are_not_duplicates()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        var npc = NetCodec.EncodeEntitySpawn(Npc(42, 0, 0));
+        // Ten relogs: each new zone session re-sends the NPC in view with no despawn on the dropped connection.
+        for (int session = 0; session < 10; session++)
+        {
+            if (session > 0)
+                log.BeginSession(at.AddSeconds(session * 5 - 1));
+            log.Record(NetOpcode.EntitySpawn, npc, at.AddSeconds(session * 5));
+        }
+
+        var ent = log.Tracker.Entities[42];
+        Assert.Equal(10, ent.SpawnCount);
+        Assert.Equal(1, ent.SpawnsWithoutDespawn);
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn);
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.GhostEntity);
+    }
+
+    [Fact]
+    public void Duplicate_spawns_inside_one_session_after_a_relog_are_still_flagged()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        var npc = NetCodec.EncodeEntitySpawn(Npc(42, 0, 0));
+        log.Record(NetOpcode.EntitySpawn, npc, at);
+        log.BeginSession(at.AddMilliseconds(500));
+        for (int i = 0; i < 4; i++)
+            log.Record(NetOpcode.EntitySpawn, npc, at.AddSeconds(1 + i));
+
+        Assert.Equal(4, log.Tracker.Entities[42].SpawnsWithoutDespawn);
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.DuplicateSpawn && i.SubjectObjectId == 42);
+    }
+
+    [Fact]
+    public void Object_not_seen_again_after_relog_is_not_a_ghost()
+    {
+        var log = new BotObservationLog(1);
+        var at = DateTimeOffset.UtcNow;
+        log.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Npc(42, 0, 0)), at);
+        log.BeginSession(at.AddMilliseconds(500));
+        log.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Npc(43, 0, 0)), at.AddSeconds(1));
+
+        var report = ConsistencyOracle.Analyze([Bot(log)], new LoadScenario());
+        Assert.DoesNotContain(report.Issues, i => i.SubjectObjectId == 42 &&
+            (i.Kind == ConsistencyKind.GhostEntity || i.Kind == ConsistencyKind.OutOfOrderLifecycle ||
+             i.Kind == ConsistencyKind.DuplicateSpawn));
+    }
+
+    [Fact]
     public void Four_spawns_after_a_death_are_still_a_duplicate()
     {
         var log = new BotObservationLog(1);

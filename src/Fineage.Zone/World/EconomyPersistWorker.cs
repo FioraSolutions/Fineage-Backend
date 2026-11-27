@@ -483,4 +483,10 @@ internal sealed class EconomyPersistBatch
     /// A row after it belongs to a move whose bag is in a later batch (#955).
     /// </summary>
     public long LedgerThrough { get; set; } = long.MaxValue;
+
+    /// <summary>
+    /// Characters counted in the world's in-flight set when this batch was stolen; cleared when its publish or restore
+    /// ends that (#1114).
+    /// </summary>
+    public List<int>? InFlightIds { get; set; }
 }

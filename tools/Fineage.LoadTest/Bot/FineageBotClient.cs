@@ -103,8 +103,32 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
         {
             throw new TimeoutException(
-                $"bot {BotId}: login/zone enter handshake exceeded {HandshakeTimeout.TotalSeconds:0}s");
+                $"bot {BotId}: login/zone enter handshake exceeded {HandshakeTimeout.TotalSeconds:0}s; {HandshakeTimeline()}");
         }
+    }
+
+    readonly List<(string Phase, long At)> _handshakeMarks = [];
+
+    /// <summary>
+    /// Where the handshake budget went. Each phase is listed with how long it took, the last one still open at the
+    /// timeout. It also gives the seconds this process was not running, so a box freeze is told apart from a slow segment
+    /// of the login chain (#1114).
+    /// </summary>
+    internal string HandshakeTimeline()
+    {
+        long now = Stopwatch.GetTimestamp();
+        var parts = new List<string>(_handshakeMarks.Count + 1);
+        for (int i = 0; i < _handshakeMarks.Count; i++)
+        {
+            long end = i + 1 < _handshakeMarks.Count ? _handshakeMarks[i + 1].At : now;
+            double ms = Stopwatch.GetElapsedTime(_handshakeMarks[i].At, end).TotalMilliseconds;
+            parts.Add($"{_handshakeMarks[i].Phase}={ms:0}ms{(i + 1 == _handshakeMarks.Count ? "(open)" : "")}");
+        }
+
+        string timeline = parts.Count == 0 ? "phases: none" : "phases: " + string.Join(" ", parts);
+        if (_handshakeMarks.Count > 0 && Diagnostics.HostPauseDetector.Current is { } pauses)
+            timeline += $"; host paused {pauses.PausedSecondsSince(_handshakeMarks[0].At):0.0}s inside it";
+        return timeline;
     }
 
     async Task ConnectAndEnterCoreAsync(CancellationToken ct)
@@ -140,7 +164,14 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         await PlaceAtScenarioSpawnAsync(ct);
     }
 
-    void EnterPhase(string phase) => _stats.EntryPhase = phase;
+    void EnterPhase(string phase)
+    {
+        // login_connect opens every handshake (first login and relog), so it starts a fresh timeline.
+        if (phase == "login_connect")
+            _handshakeMarks.Clear();
+        _handshakeMarks.Add((phase, Stopwatch.GetTimestamp()));
+        _stats.EntryPhase = phase;
+    }
 
     /// <summary>
     /// EnterWorld resumes the persisted character position, so a scenario that needs a specific start sends the
@@ -339,6 +370,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
             {
                 sawWelcome = true;
                 welcomeAt = enterStarted.Elapsed;
+                // The welcome closes the server's part of the enter; what follows is the bot's own settle wait.
+                EnterPhase("enter_settle");
             }
             if (opcode == NetOpcode.EntitySpawn)
             {
@@ -537,6 +570,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _peers.Unregister(BotId);
         await StopReceiveLoopAsync();
         TearDownConnections();
+        _observation.BeginSession(DateTimeOffset.UtcNow);
 
         _login = new TcpClient();
         _zone = new TcpClient();
@@ -573,7 +607,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
         {
             throw new TimeoutException(
-                $"bot {BotId}: relog handshake exceeded {HandshakeTimeout.TotalSeconds:0}s");
+                $"bot {BotId}: relog handshake exceeded {HandshakeTimeout.TotalSeconds:0}s; {HandshakeTimeline()}");
         }
 
         _stats.InWorld = true;
