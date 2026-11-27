@@ -223,7 +223,15 @@ public sealed partial class ZoneWorld
         long now = NowUnixMs();
         var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
         if (killer != null && !seeded)
+        {
             rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
+            // Mobius LongTimeEvent → EventDropManager.addDrops while the seasonal window is active (#934).
+            foreach (var window in _seasonalEvents.ActiveDropWindows(now))
+            {
+                rolls.AddRange(DropRoller.RollEventDeath(
+                    window.Groups, dropRng, _dropRates, victimLevel, killerLevel, raid: false));
+            }
+        }
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();

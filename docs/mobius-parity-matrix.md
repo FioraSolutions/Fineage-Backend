@@ -144,7 +144,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 103 | Item-handler tail | ✅ | — | `ItemHandlerCatalog` + `ItemHandlerRegistry` → Book/Maps/RollingDice/Calculator/SpecialXMas; Net `Dice`/`ShowMiniMap`/`ShowCalculator`/`ShowXMasSeal` 0x03EB–0x03EE — #925 |
 | **Meta** |
 | 104 | GM admin commands | 🟡 | L | `handlers/chat/commands/admin` (77 handlers) → heal/kill/res/delete/announce/online/invul/invis/hide/petition/ride + prior live-ops set in `ZoneWorldAdmin` (#931). Remaining HTML/reload/manor/siege/… still open |
-| 105 | Seasonal events | ❌ | S | `scripts/events/{Christmas,L2Day,HeavyMedal}.java` → not present. Time-boxed `EventDropCatalog` is separate and done — #934 |
+| 105 | Seasonal events | ✅ | — | `LongTimeEvent` / `scripts/events/{Christmas,L2Day,HeavyMedal}` → `SeasonalEventHost` + config.xml windows; missing event data logs event id. Local CT0 has no Christmas folder (logged) — #934 |
 | 106 | Event drop windows | ✅ | — | `EventDropManager.java` → `Drops/EventDropCatalog.cs` |
 | 107 | Player mail | n/a | — | `EX_MAIL_ARRIVED` / `CustomMailManager` are not a Fineage Net target |
 | 108 | Mobius-only extras | n/a | — | captcha, rebirth, premium, sell-buffs, fake players, offline play, banking voiced, GameGuard, HackShield, GM snoop, Kamael slideshow. Not retail Interlude gameplay |
@@ -194,7 +194,7 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 5. ~~Party matching rooms (row 67) — #928~~ (done).
 6. ~~Community board (row 70) — #929~~ (done).
 7. ~~Petitions (row 63) — #930~~ (done).
-8. ~~GM admin verb tail (row 104) — #931~~ (done). ~~Hero words #932~~ / ~~PC cafe #933~~ (done). Seasonal events #934, forget-recipe #935 (rows 105, 54).
+8. ~~GM admin verb tail (row 104) — #931~~ (done). ~~Hero words #932~~ / ~~PC cafe #933~~ (done). ~~Seasonal events #934~~ (done). Forget-recipe #935 (row 54).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

@@ -59,6 +59,8 @@ data/*
 !data/augmentation/**
 !data/html/
 !data/html/**
+!data/scripts/
+!data/scripts/**
 !data/l10n/
 !data/l10n/**
 !data/buylists.json

@@ -133,6 +133,7 @@ public sealed partial class ZoneWorld
     RegionDirectory<ZoneEntity> _byId;
     readonly DropCatalog _dropCatalog;
     readonly EventDropCatalog _eventDropCatalog;
+    readonly Fineage.Zone.SeasonalEvents.SeasonalEventHost _seasonalEvents;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
@@ -198,6 +199,7 @@ public sealed partial class ZoneWorld
         SpawnCatalog? spawnCatalog = null,
         DropCatalog? dropCatalog = null,
         EventDropCatalog? eventDropCatalog = null,
+        Fineage.Zone.SeasonalEvents.SeasonalEventHost? seasonalEvents = null,
         ZoneRates? rates = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
@@ -301,6 +303,7 @@ public sealed partial class ZoneWorld
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
         _eventDropCatalog = eventDropCatalog ?? EventDropCatalog.LoadDefault();
+        _seasonalEvents = seasonalEvents ?? Fineage.Zone.SeasonalEvents.SeasonalEventHost.LoadDefault();
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
