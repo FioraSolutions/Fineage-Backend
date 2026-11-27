@@ -78,7 +78,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 45 | Clan warehouse, crest, skills, academy | ✅ | — | `Clan.java` → `ZoneWorldPledge` |
 | 46 | Freight warehouse | ✅ | — | freight warehouse → `FreightBypassHandler` |
 | 47 | Shops, multisell, buylists | ✅ | — | `Buy.java` / `Multisell` → `ZoneWorldShops` |
-| 48 | Shop wear / try-on | 🟡 | S | `handlers/bypass/npc/Wear.java` → `StubBypassHandler("Wear")` in `BypassRegistry.cs`. `SHOP_PREVIEW_LIST` is not sent — #924 |
+| 48 | Shop wear / try-on | ✅ | S | `Wear` → `ShopPreviewList` / `RequestPreviewItem` → `ShopPreviewInfo` (#924) |
 | 49 | Trade, private store, manufacture | ✅ | — | trade and private-store packets → `ZoneWorldTrade`, `ZoneWorldPrivateStore`, `ZoneWorldManufacture` |
 | 50 | Item enchant | ✅ | — | `RequestEnchantItem.java` → `ZoneWorldEnchant` |
 | 51 | Crystallize from inventory | ✅ | — | `RequestCrystallizeItem.java` → `CrystallizeRules` + `LedgerTxKind.Crystallize`. Enchant-fail crystals stay on `ZoneWorldEnchant` — #921 |
@@ -188,8 +188,8 @@ These Mobius trees were walked. They do not get their own row when the mechanism
 PvE and character leveling first. Siege, olympiad, and clan are last because those stacks are already on `dev`.
 
 1. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
-2. Shop wear preview (row 48) — #924.
-3. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+2. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+3. ~~Shop wear preview (row 48) — #924~~ (done).
 4. Macros (row 69) — #927.
 5. Party matching rooms (row 67) — #928.
 6. Community board (row 70) — #929.

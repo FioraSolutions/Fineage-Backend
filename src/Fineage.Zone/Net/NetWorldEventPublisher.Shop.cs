@@ -24,6 +24,38 @@ sealed partial class NetWorldEventPublisher
         _presence.TryBroadcast(watcherObjectIds, NetOpcode.MultiSellList, payload);
     }
 
+    void IWorldEventPublisher.FanoutShopPreviewList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewListMsg list)
+    {
+        var items = list.Items ?? [];
+        var rows = new ShopPreviewListItemNet[items.Length];
+        for (int i = 0; i < items.Length; i++)
+        {
+            rows[i] = new ShopPreviewListItemNet
+            {
+                ItemId = items[i].ItemId,
+                Price = items[i].Price
+            };
+        }
+
+        var payload = NetCodec.EncodeShopPreviewList(new ShopPreviewListNetMsg
+        {
+            NpcObjectId = list.NpcObjectId,
+            ListId = list.ListId,
+            Adena = list.Adena,
+            Items = rows
+        });
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShopPreviewList, payload);
+    }
+
+    void IWorldEventPublisher.FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info)
+    {
+        var payload = NetCodec.EncodeShopPreviewInfo(new ShopPreviewInfoNetMsg
+        {
+            ItemIdsBySlot = info.ItemIdsBySlot ?? new int[17]
+        });
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShopPreviewInfo, payload);
+    }
+
     void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance)
     {
         var payload = NetCodec.EncodeShopBalance(new ShopBalanceNetMsg

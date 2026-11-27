@@ -272,6 +272,9 @@ internal sealed class BenchPlayer
     public Task<string?> MultiSell(int npcObjectId, int listId, int entryId, int amount) =>
         World.TryMultiSellAsync(Session, npcObjectId, listId, entryId, amount, CancellationToken.None);
 
+    public Task<string?> Preview(int npcObjectId, int listId, params int[] itemIds) =>
+        World.TryPreviewAsync(Session, npcObjectId, listId, itemIds, CancellationToken.None);
+
     /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
     public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>
         World.TryTeleportSelectAsync(Session, npcObjectId, listName, locationId, CancellationToken.None);

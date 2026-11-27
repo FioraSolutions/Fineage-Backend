@@ -138,6 +138,12 @@ public sealed record MultiSellCommand(int NpcObjectId, int ListId, int EntryId, 
         Completed(world.TryMultiSellAsync(session, NpcObjectId, ListId, EntryId, Amount, CancellationToken.None));
 }
 
+public sealed record PreviewCommand(int NpcObjectId, int ListId, int[] ItemIds) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryPreviewAsync(session, NpcObjectId, ListId, ItemIds, CancellationToken.None));
+}
+
 public sealed record TradeRequestCommand(TradeRequestMsg Request) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

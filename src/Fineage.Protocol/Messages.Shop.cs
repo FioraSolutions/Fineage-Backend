@@ -45,12 +45,38 @@ public sealed class RequestMultiSellChooseMsg
     public int Amount { get; set; }
 }
 
-/// <summary>Opcode <see cref="MsgType.RequestPreviewItem"/> (99). Wear stays stubbed.</summary>
+/// <summary>Opcode <see cref="MsgType.RequestPreviewItem"/> (99). Mobius try-on: one or more template ids.</summary>
 public sealed class RequestPreviewItemMsg
 {
     public int NpcObjectId { get; set; }
     public int ListId { get; set; }
+    public int[] ItemIds { get; set; } = [];
+}
+
+/// <summary>Opcode <see cref="MsgType.ShopPreviewList"/> (1100). Equipable buylist rows for try-on.</summary>
+public sealed class ShopPreviewListMsg
+{
+    public int NpcObjectId { get; set; }
+    public int ListId { get; set; }
+    public int Adena { get; set; }
+    public ShopPreviewListItemMsg[] Items { get; set; } = [];
+}
+
+/// <summary>One try-on row. <see cref="Price"/> is Mobius <c>WEAR_PRICE</c> per item.</summary>
+public sealed class ShopPreviewListItemMsg
+{
     public int ItemId { get; set; }
+    public int Price { get; set; }
+}
+
+/// <summary>
+/// Opcode <see cref="MsgType.ShopPreviewInfo"/> (1101). Paperdoll template ids, index = <c>PaperdollSlot</c>.
+/// Zero means the slot is empty in the try-on overlay.
+/// </summary>
+public sealed class ShopPreviewInfoMsg
+{
+    /// <summary>Length is Mobius <c>PAPERDOLL_TOTALSLOTS</c> (17).</summary>
+    public int[] ItemIdsBySlot { get; set; } = new int[17];
 }
 
 /// <summary>Opcode <see cref="MsgType.BuyList"/> (1095). <see cref="Price"/> is the taxed unit price.</summary>

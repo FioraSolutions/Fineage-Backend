@@ -114,6 +114,12 @@ interface IWorldEventPublisher
 
     void FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list);
 
+    /// <summary>Mobius ShopPreviewList (Wear try-on catalog). Called on the simulation thread.</summary>
+    void FanoutShopPreviewList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewListMsg list);
+
+    /// <summary>Mobius ShopPreviewInfo (Wear paperdoll overlay). Called on the simulation thread.</summary>
+    void FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info);
+
     /// <summary>Shop window adena/weight/slots snapshot. Called on the simulation thread.</summary>
     void FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance);
 

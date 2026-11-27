@@ -98,6 +98,12 @@ internal static class FanoutDispatch
             case FanoutKind.MultiSellList:
                 publisher.FanoutMultiSellList(watchers, ((Fineage.Protocol.MultiSellListMsg)args.Payload!));
                 return;
+            case FanoutKind.ShopPreviewList:
+                publisher.FanoutShopPreviewList(watchers, ((Fineage.Protocol.ShopPreviewListMsg)args.Payload!));
+                return;
+            case FanoutKind.ShopPreviewInfo:
+                publisher.FanoutShopPreviewInfo(watchers, ((Fineage.Protocol.ShopPreviewInfoMsg)args.Payload!));
+                return;
             case FanoutKind.ShopBalance:
                 publisher.FanoutShopBalance(watchers, ((Fineage.Protocol.ShopBalanceMsg)args.Payload!));
                 return;

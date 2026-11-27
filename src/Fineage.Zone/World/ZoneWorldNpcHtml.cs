@@ -85,6 +85,8 @@ public sealed partial class ZoneWorld
 
         if (reply.BuyListId is int buyListId)
             return OpenBuyList(session, player, npc, buyListId);
+        if (reply.WearListId is int wearListId)
+            return OpenWearList(session, player, npc, wearListId);
         if (reply.OpenSell)
             return OpenSellList(session, player, npc);
         if (reply.MultiSellListId is int multiListId)

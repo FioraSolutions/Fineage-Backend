@@ -193,6 +193,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestMultiSellChoose:
                             await _shop.OnMultiSellAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestPreviewItem:
+                            await _shop.OnPreviewAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.WarehouseDepositRequest:
                             await _warehouse.OnDepositAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

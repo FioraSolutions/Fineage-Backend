@@ -178,7 +178,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xc2 | RequestDeleteMacro | no | no |  |  |
 | 0xc4 | RequestBuySeed | yes | contract | ManorCommand |  |
 | 0xc5 | DlgAnswer | partial | no |  | confirms are per-feature (party, trade, augment), no general ConfirmDlg |
-| 0xc6 | RequestPreviewItem | partial | no |  | Wear bypass is StubBypassHandler; ShopPreviewList not sent |
+| 0xc6 | RequestPreviewItem | yes | yes |  | Wear → ShopPreviewList / ShopPreviewInfo (#924) |
 | 0xc7 | RequestSSQStatus | yes | contract | SevenSignsStatusRequest |  |
 | 0xca | GameGuardReply | n/a | n/a |  | GameGuard is not part of Fineage Net |
 | 0xcc | RequestSendFriendMsg | yes | yes | Say | ChatProtocol.Friend / Tell |
@@ -424,8 +424,8 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xec | CLIENT_SET_TIME | ClientSetTime | yes | yes | ClientSetTime |  |
 | 0xed | CONFIRM_DLG | ConfirmDlg | partial | no |  | no general confirm dialog |
 | 0xee | PARTY_SPELLED | PartySpelled | yes | yes | PartySpelled |  |
-| 0xef | SHOP_PREVIEW_LIST | ShopPreviewList | no | no |  | Wear stub |
-| 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | no | no |  |  |
+| 0xef | SHOP_PREVIEW_LIST | ShopPreviewList | yes | yes |  | Net 0x03E8 (#924) |
+| 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | yes | yes |  | Net 0x03E9 (#924) |
 | 0xf1 | CAMERA_MODE | CameraMode | no | no |  |  |
 | 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | no | no |  | SpecialXMas item |
 | 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate | danger area follows an enabled EffectZone (`showDangerIcon`) |

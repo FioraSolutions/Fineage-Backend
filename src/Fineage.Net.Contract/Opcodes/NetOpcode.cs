@@ -428,6 +428,12 @@ namespace Fineage.Net.Contract
         /// Body is one string (the new name). Owner-only; pet must be out and unnamed.
         /// </summary>
         public const ushort RequestChangePetName = 0x03E7;
+        /// <summary>Zone → client: Mobius <c>ShopPreviewList</c> (retail <c>0xEF</c>). Wear try-on catalog.</summary>
+        public const ushort ShopPreviewList = 0x03E8;
+        /// <summary>Zone → client: Mobius <c>ShopPreviewInfo</c> (retail <c>0xF0</c>). Try-on paperdoll overlay.</summary>
+        public const ushort ShopPreviewInfo = 0x03E9;
+        /// <summary>Client → zone: Mobius <c>RequestPreviewItem</c> (retail <c>0xC6</c>). Pay wear fee and preview.</summary>
+        public const ushort RequestPreviewItem = 0x03EA;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

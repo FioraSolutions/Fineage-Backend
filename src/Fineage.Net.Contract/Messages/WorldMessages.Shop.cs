@@ -33,6 +33,35 @@ namespace Fineage.Net.Contract
         public int Amount { get; set; }
     }
 
+    /// <summary>Client → zone: Mobius <c>RequestPreviewItem</c>.</summary>
+    public sealed class RequestPreviewItemNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public int ListId { get; set; }
+        public int[] ItemIds { get; set; } = System.Array.Empty<int>();
+    }
+
+    public sealed class ShopPreviewListItemNet
+    {
+        public int ItemId { get; set; }
+        public int Price { get; set; }
+    }
+
+    /// <summary>Zone → client: Mobius <c>ShopPreviewList</c>.</summary>
+    public sealed class ShopPreviewListNetMsg
+    {
+        public int NpcObjectId { get; set; }
+        public int ListId { get; set; }
+        public int Adena { get; set; }
+        public ShopPreviewListItemNet[] Items { get; set; } = System.Array.Empty<ShopPreviewListItemNet>();
+    }
+
+    /// <summary>Zone → client: Mobius <c>ShopPreviewInfo</c>. Index = paperdoll slot.</summary>
+    public sealed class ShopPreviewInfoNetMsg
+    {
+        public int[] ItemIdsBySlot { get; set; } = new int[17];
+    }
+
     public sealed class BuyListItemNet
     {
         public int ItemId { get; set; }

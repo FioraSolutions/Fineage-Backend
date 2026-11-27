@@ -145,6 +145,12 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list) =>
         Record(FanoutKind.MultiSellList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
+    void IWorldEventPublisher.FanoutShopPreviewList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewListMsg list) =>
+        Record(FanoutKind.ShopPreviewList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info) =>
+        Record(FanoutKind.ShopPreviewInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
     void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance) =>
         Record(FanoutKind.ShopBalance, 0, watcherObjectIds, new FanoutArgs(Payload: balance), replaceable: false);
 

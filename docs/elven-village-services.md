@@ -92,7 +92,7 @@ filter is process-global and xUnit runs collections in parallel.
 ## Merchant extras + quest-item flag
 
 - `TerritoryStatus` bypass is live (TerritoryBypassHandler → `territorystatus.htm` / `territorynoclan.htm` from Mobius): castle from MerchantTowns (Elven Village → Oren), owner clan + leader + tax from siege state.
-- `Wear` stays a stub: Net has no ShopPreviewList and the client has no preview UI yet.
+- `Wear` opens `ShopPreviewList`; `RequestPreviewItem` charges the wear fee and sends `ShopPreviewInfo` (client try-on UI may still be thin).
 - Equipment exchange link `exc_multisell 003` already works (multisell 3 allows NPCs 30147–30149).
 - Items now carry `quest` (scripts/gen_quest_item_flags.py marks it from Mobius `is_questitem`; 11 items so far, including 7586 Sweet Fluid). Quest items can't be sold, dropped, traded, or put in the warehouse. The flag isn't sent over the Net wire yet, so the client has no quest tab.
 
