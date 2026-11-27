@@ -208,6 +208,12 @@ public interface IAccountStore
     /// <summary>Deletes the pet row (Mobius <c>destroyControlItem</c> / decayed corpse).</summary>
     bool DeletePet(int controlObjectId);
 
+    /// <summary>
+    /// Mobius <c>PetNameTable.doesPetNameExist</c>: another pet of the same npc already uses <paramref name="name"/>
+    /// (excluding <paramref name="exceptControlObjectId"/>).
+    /// </summary>
+    bool PetNameExists(string name, int npcId, int exceptControlObjectId);
+
     /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
     bool TrySetCharacterTitle(string account, int characterId, string title);
 

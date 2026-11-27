@@ -423,6 +423,11 @@ namespace Fineage.Net.Contract
         /// Body is one int32 recipe list id. Reply is <see cref="RecipeBookList"/> for that tab.
         /// </summary>
         public const ushort RecipeBookDestroy = 0x03E6;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestChangePetName</c> (retail wire <c>0x89</c>).
+        /// Body is one string (the new name). Owner-only; pet must be out and unnamed.
+        /// </summary>
+        public const ushort RequestChangePetName = 0x03E7;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
