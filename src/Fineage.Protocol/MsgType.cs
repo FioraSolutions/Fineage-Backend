@@ -338,6 +338,8 @@ public enum MsgType : ushort
     RequestPetition = 1130,
     /// <summary>Client cancels a pending petition.</summary>
     RequestPetitionCancel = 1131,
+    /// <summary>Hero writes the monument inscription. Body is <see cref="WriteHeroWordsMsg"/>.</summary>
+    RequestWriteHeroWords = 1132,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

@@ -52,6 +52,32 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
+    /// <summary>Mobius <c>RequestWriteHeroWords</c> — claimed heroes only; persists on the olympiad board.</summary>
+    public Task<string?> TryWriteHeroWordsAsync(ZoneSession session, string text, CancellationToken ct)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
+            return Task.FromResult<string?>("world");
+
+        text ??= "";
+        if (text.Length > OlympiadProtocol.HeroMessageMaxLength)
+            return Task.FromResult<string?>("bad_request");
+
+        if (!player.Hero || !_olympiad.Board.IsHero(player.ObjectId))
+        {
+            ZoneLog.Warn($"[olympiad] write hero words rejected non-hero characterId={player.ObjectId}");
+            return Task.FromResult<string?>("forbidden");
+        }
+
+        if (!_olympiad.Board.SetHeroMessage(player.ObjectId, text))
+        {
+            ZoneLog.Warn($"[olympiad] write hero words missing hero row characterId={player.ObjectId}");
+            return Task.FromResult<string?>("forbidden");
+        }
+
+        ZoneLog.Info($"olympiad hero words object={player.ObjectId} len={text.Length}");
+        return Task.FromResult<string?>(null);
+    }
+
     public Task<string?> TryOlympiadRegisterAsync(ZoneSession session, OlympiadRegisterRequestMsg request, CancellationToken ct)
     {
         if (request == null)

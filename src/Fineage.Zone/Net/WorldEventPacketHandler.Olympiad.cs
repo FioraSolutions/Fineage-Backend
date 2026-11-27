@@ -73,6 +73,28 @@ public sealed partial class WorldEventPacketHandler
             await _reject(conn, error, "Olympiad leave was rejected.", ct).ConfigureAwait(false);
     }
 
+    public async Task OnWriteHeroWordsAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeWriteHeroWords(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new WriteHeroWordsCommand(request.Text ?? ""),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Write hero words was rejected.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnAdminReportOlympiadAsync(
         NetConnection conn,
         ZoneSession zoneSession,

@@ -88,6 +88,9 @@ public static class OlympiadProtocol
 
     /// <summary>Mobius <c>OLYMPIAD_GET_HEROS</c>: a hero needs this many matches and at least one win.</summary>
     public const int HeroMinMatches = 9;
+
+    /// <summary>Mobius <c>RequestWriteHeroWords</c>: inscription max length.</summary>
+    public const int HeroMessageMaxLength = 300;
     /// <summary>Interlude third-class ids that crown a hero each period (Mobius <c>HERO_IDS</c>).</summary>
     public const int FirstHeroClassId = 88;
     public const int LastHeroClassId = 118;

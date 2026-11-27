@@ -343,6 +343,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.OlympiadLeaveRequest:
                             await _worldEvents.OnOlympiadLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestWriteHeroWords:
+                            await _worldEvents.OnWriteHeroWordsAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.AdminReportOlympiadResult:
                             await _worldEvents.OnAdminReportOlympiadAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

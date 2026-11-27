@@ -492,6 +492,8 @@ namespace Fineage.Net.Contract
         public const ushort PartyRoomAskJoin = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x34));
         /// <summary>Zone → client: <c>ExListPartyMatchingWaitingRoom</c> (wire 0xFE 0x35).</summary>
         public const ushort PartyMatchWaitingRoom = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x35));
+        /// <summary>Client → zone: Mobius <c>RequestWriteHeroWords</c> (wire 0xD0 0x0C). ExClientPackets.java:43.</summary>
+        public const ushort RequestWriteHeroWords = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0C));
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

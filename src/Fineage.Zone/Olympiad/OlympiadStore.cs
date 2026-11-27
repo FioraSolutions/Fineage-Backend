@@ -41,6 +41,8 @@ public sealed class OlympiadHeroRow
     public string Name { get; set; } = "";
     public bool Claimed { get; set; }
     public int Count { get; set; }
+    /// <summary>Mobius <c>heroes.message</c> / <c>RequestWriteHeroWords</c> (max 300).</summary>
+    public string Message { get; set; } = "";
 }
 
 public sealed class OlympiadPassRow

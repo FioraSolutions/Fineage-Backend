@@ -46,6 +46,12 @@ public sealed record OlympiadStatusCommand : ZoneCommand
         Completed(world.TryOlympiadStatusAsync(session, CancellationToken.None));
 }
 
+public sealed record WriteHeroWordsCommand(string Text) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryWriteHeroWordsAsync(session, Text, CancellationToken.None));
+}
+
 public sealed record OlympiadRegisterCommand(OlympiadRegisterRequestMsg Request) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
