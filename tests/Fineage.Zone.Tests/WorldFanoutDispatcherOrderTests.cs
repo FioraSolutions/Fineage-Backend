@@ -28,12 +28,18 @@ public sealed class WorldFanoutDispatcherOrderTests
 
         List<(string Method, object?[] Args)> fanout;
         lock (recorder.Calls)
-            fanout = recorder.Calls.Where(c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected)).ToList();
+            // Self MyTargetSelected mirror only (selector 0). Peer TargetSelected is a second fanout per click.
+            fanout = recorder.Calls
+                .Where(c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && IsSelfTargetSelected(c.Args))
+                .ToList();
 
         Assert.Equal(2, fanout.Count);
         Assert.Equal(peer.ObjectId, fanout[0].Args[1]);
         Assert.Equal(peer.ObjectId, fanout[1].Args[1]);
         Assert.Equal(2, barriers.Count);
+        lock (recorder.Calls)
+            Assert.Equal(2, recorder.Calls.Count(c =>
+                c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && !IsSelfTargetSelected(c.Args)));
     }
 
     [Fact]
@@ -57,12 +63,16 @@ public sealed class WorldFanoutDispatcherOrderTests
         List<int> recorded;
         lock (recorder.Calls)
             recorded = recorder.Calls
-                .Where(c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected))
+                .Where(c => c.Method == nameof(IWorldEventPublisher.FanoutTargetSelected) && IsSelfTargetSelected(c.Args))
                 .Select(c => (int)c.Args[1]!)
                 .ToList();
 
         Assert.Equal(sequence, recorded);
     }
+
+    /// <summary>SelectorObjectId == 0 (or omitted) is the owner's MyTargetSelected mirror.</summary>
+    static bool IsSelfTargetSelected(object?[] args) =>
+        args.Length <= 3 || args[3] is null or 0;
 
     static async Task<(NetTestKit Kit, ZoneSession Session, ZoneEntity Peer, NetBridgeRecorder Recorder)> SetupAsync()
     {
