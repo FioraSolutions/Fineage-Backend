@@ -88,13 +88,66 @@ the registry is the single shutdown save path.
 - Online player rows are persisted through the normal character save/ledger path; the sidecar layer does not
   change Mobius gameplay formulas, schedules, or reward rules.
 
-## Still required for full #984 acceptance
+## World ↔ PostgreSQL coherence (startup state audit)
 
-This change is the durability/plumbing half. The world ↔ PostgreSQL coherence half remains:
+`Fineage.Zone.Persistence.StoredStateAudit` is the one check between saved state and the running world. The zone
+runs it in `Program.cs` right after the world is built (the journal has been replayed into the ledger) and before
+the simulation starts, through `ZoneWorld.AuditStoredStateAtStartup()`.
 
-- a startup reconciler that compares the ledger projection with persisted inventory/adena;
-- per-config logging/blocking when the projection diverges;
-- the fault-injection reconciliation scenario from `docs/testing/economy-fault-injection.md`.
+It reads every saved character, pet and clan (`IAccountStore.ListAllCharacters`, `ListAllPets`, `ListClans`) and
+reports one `StoredStateIssue` per finding — `code owner container id=…: detail`, for example
+`ledger-divergence character 12 'Hero' (account bob) inventory id=0: ledger projects …, store holds …`:
 
-Those are domain/ledger invariants and belong to the #955 work; this document does not claim that a partial
-sidecar-plumbing change closes the entire issue.
+| Code | Severity | Meaning |
+|------|----------|---------|
+| `missing-reference` | error | A saved row names an item, skill, effect, recipe or henna id the loaded data does not have (inventory, warehouse, freight, pet bag, clan warehouse, learned skills, effects, recipes, dyes). |
+| `missing-reference` (quest) | notice | A saved quest row names a quest not in the catalog. The journal keeps the row inactive and saves it back unchanged. |
+| `ledger-divergence` | error | The replayed ledger projects different holdings than the store row (bag by template rule: stackables by count, the rest by instance id; warehouse, freight and clan warehouse by count). |
+| `ledger-orphan` | error | A character / pet / clan ledger account holds value but the store has no such owner. |
+| `ledger-invariant` | error | `EconomyInvariantChecker` found an overdraft or an instance owned twice. |
+| `unjournaled` | notice | The store holds a container that has no journal history (pre-ledger rows). Its first ledger move aligns it with an `Untracked` adjustment, which is logged and counted as before. |
+
+Every finding is logged (`state audit …`, errors at Error level), counted in the `fineage.state.audit_issues`
+metric (tags `code`, `container`), and summed up in one line:
+`state audit characters=N pets=N clans=N errors=N notices=N policy=log|block`.
+
+Policy is `FINEAGE_STATE_AUDIT`:
+
+- `log` (default) — the zone starts; the findings are in the log and the metric.
+- `block` — the zone exits with `StoredStateException` listing the errors while any error remains. Notices never
+  block. Any other value fails start with a message naming the variable.
+
+The audit never writes. Nothing is corrected or deleted; an operator fixes the data (restore the template, or move
+the rows) and restarts.
+
+### Saved rows that name removed ids
+
+The same check guards each enter: `LoadEnteringPlayer` calls `StoredStateAudit.RequireLoadable` before anything is
+built, so a character with such a row is refused with every name in `EnterRefusal` and the log
+(`enter refused: … StoredStateException: character 12 'Hero' (account bob) cannot be loaded: … learned-skill id=…`).
+Before #984 inventory, pet-bag, recipe and effect rows like that were skipped with at most a warning and the next
+save of that container deleted them; learned skills and dyes stayed in the row but were silently inactive. Summoning a pet whose saved bag names a missing item is
+refused the same way. The loaders behind the check (`LoadInventory`, `EnterSelfPrepare`, `RefreshKnownSkills`,
+`RestoreStoredEffects`, `LoadKnownRecipes`) now `Require` the id, so a missing one is an exception, never a skip.
+
+### Offline container writes
+
+Every economic write for a character who is not in the world goes through the economy commit, in the same
+transaction as its journal rows: offline freight already did; the offline castle-regalia removal
+(`RemoveStoredCastleRegalia`) used to call `TryReplaceItems` directly beside the ledger move and now queues the bag
+(`_dirtyOfflineBags`, generalised from the freight-only queue). Ledger reads of an offline bag see that queue first.
+A failed commit puts stolen offline writes back in front of anything queued since, so none is lost.
+
+### Proof
+
+`tests/Fineage.Zone.Tests/StoredStateAuditTests.cs` restarts a world over the same store and the same durable
+journal (a journal with the Postgres contract: rows become durable only inside the economy commit):
+
+- crash after COMMIT — the first world is dropped without leave or shutdown; the restart's audit is clean and the
+  ledger matches the stored bag;
+- crash during COMMIT — the commit throws; neither the journal rows nor the bag land; the restart's audit is clean;
+- a store row edited behind the ledger is a named `ledger-divergence`, and `block` refuses start;
+- an orphan ledger account, a pre-ledger bag (notice only), and saved rows with removed item / skill / effect /
+  recipe ids (enter refused, rows kept).
+
+The sidecar crash cases (temp write killed before or after the replace) are in `AtomicJsonFileTests`.
