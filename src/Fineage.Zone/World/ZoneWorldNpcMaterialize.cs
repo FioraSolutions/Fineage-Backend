@@ -39,6 +39,9 @@ public sealed partial class ZoneWorld
             NpcId = def.NpcId,
             CreatureRace = NpcMaterializeCatalog.ById.TryGetValue(def.NpcId, out var raceRow) ? raceRow.Race : "",
             Attackable = def.Attackable,
+            // A respawn materializes a fresh ZoneEntity: reset the Mobius _isDead transition so the new lifecycle can
+            // take damage and die again. The old corpse instance is removed by DespawnNpc and never reused.
+            Dead = false,
             MaxHp = def.MaxHp,
             CurHp = Math.Clamp(curHp, 1, Math.Max(1, def.MaxHp)),
             MaxMp = def.MaxMp,

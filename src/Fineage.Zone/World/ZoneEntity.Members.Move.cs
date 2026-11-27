@@ -265,8 +265,9 @@ sealed partial class ZoneEntity
     public ZoneSession? Session { get; init; }
     public PlayerInventory? Inventory { get; init; }
     /// <summary>
-    /// Player is dead. Equip and unequip are rejected. Combat sets this; spawn leaves it false.
-    /// CurHp is not the signal: a living player can sit at low HP while regen heals them.
+    /// Pawn is dead (Mobius <c>_isDead</c>): players reject equip/unequip, NPCs are past the single death transition.
+    /// Combat sets this; a spawn materializes a fresh entity with it false. CurHp is not the signal: a living player
+    /// can sit at low HP while regen heals them.
     /// </summary>
     public bool Dead
     {
