@@ -29,6 +29,14 @@ public interface IWorldStateKind
     /// saves it. Throws <see cref="StateFileException"/> naming the file on any defect.
     /// </summary>
     string ReadLegacy(string path);
+
+    /// <summary>
+    /// The legacy file name is also a shipped content catalog (<c>data/fishing-championship.json</c> holds the
+    /// championship settings). When the state directory is the content directory, a file without a top-level
+    /// <c>schemaVersion</c>/<c>version</c> is that catalog, not state: every snapshot the pre-#996 writer saved carried
+    /// the key.
+    /// </summary>
+    bool SharesNameWithContent { get; }
 }
 
 /// <summary>A typed <see cref="IWorldStateKind"/>.</summary>
@@ -42,8 +50,10 @@ public sealed class WorldStateKind<T> : IWorldStateKind
         JsonSerializerOptions options,
         Func<T> createFresh,
         Action<T>? normalize = null,
-        bool legacyUnversioned = false)
+        bool legacyUnversioned = false,
+        bool sharesNameWithContent = false)
     {
+        SharesNameWithContent = sharesNameWithContent;
         System = system;
         LegacyFileName = legacyFileName;
         SchemaVersion = schemaVersion;
@@ -67,6 +77,8 @@ public sealed class WorldStateKind<T> : IWorldStateKind
 
     /// <summary>The legacy file never carried a version (PC cafe): a file without one is version 1, anything else is checked.</summary>
     public bool LegacyUnversioned { get; }
+
+    public bool SharesNameWithContent { get; }
 
     public WorldStateSlot<T> Slot(WorldStateStore store) => new(store, System, SchemaVersion, Options, CreateFresh, Normalize);
 
@@ -157,7 +169,8 @@ public static class WorldStateCatalog
         {
             data.Current ??= [];
             data.Winners ??= [];
-        });
+        },
+        sharesNameWithContent: true);
 
     public static WorldStateKind<PcCafeSnapshot> PcCafe { get; } = new(
         WorldStateSystems.PcCafe, "pc-cafe.json", 1, new JsonSerializerOptions(), static () => new(),

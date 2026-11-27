@@ -226,6 +226,33 @@ public sealed class WorldStateDurabilityTests
         }
     }
 
+    [Fact]
+    public void Cutover_leaves_the_fishing_settings_catalog_alone_when_the_state_directory_is_the_content_directory()
+    {
+        string directory = TempStateDirectory();
+        try
+        {
+            var store = MemoryAccountStore.InMemory();
+            string path = Path.Combine(directory, "fishing-championship.json");
+            File.WriteAllText(path, "{\"enabled\":true,\"rewardItemId\":57,\"rewards\":[800000]}");
+
+            var fishing = Assert.Single(WorldStateCutover.Run(store, directory, () => Now), r => r.System == WorldStateSystems.FishingChampionship);
+
+            Assert.Equal(WorldStateCutoverAction.None, fishing.Action);
+            Assert.True(File.Exists(path));
+            Assert.Null(store.LoadWorldState(WorldStateSystems.FishingChampionship));
+
+            // A real pre-#996 championship snapshot under the same name is still imported.
+            WriteLegacy(directory, WorldStateCatalog.FishingChampionship);
+            Assert.Equal(WorldStateCutoverAction.Imported,
+                Assert.Single(WorldStateCutover.Run(store, directory, () => Now), r => r.System == WorldStateSystems.FishingChampionship).Action);
+        }
+        finally
+        {
+            Delete(directory);
+        }
+    }
+
     [Theory]
     [InlineData("{ truncated")]
     [InlineData("{\"Number\":3}")]

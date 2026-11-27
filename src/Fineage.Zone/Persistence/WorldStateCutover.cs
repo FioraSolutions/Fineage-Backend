@@ -74,6 +74,8 @@ public static class WorldStateCutover
             return new(kind.System, WorldStateCutoverAction.None, null, null);
 
         string full = Path.GetFullPath(path);
+        if (kind.SharesNameWithContent && IsContentCatalog(full))
+            return new(kind.System, WorldStateCutoverAction.None, null, null);
         string sha = Sha256(full);
         var saved = accounts.LoadWorldState(kind.System);
         if (saved != null)
@@ -130,5 +132,25 @@ public static class WorldStateCutover
     {
         using var stream = File.OpenRead(path);
         return "sha256:" + Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// <see cref="IWorldStateKind.SharesNameWithContent"/>: a JSON object with neither <c>schemaVersion</c> nor
+    /// <c>version</c> is the content catalog of the same name. Anything else (a versioned snapshot, or a file that is
+    /// not a JSON object at all) is treated as a legacy sidecar and read strictly.
+    /// </summary>
+    static bool IsContentCatalog(string full)
+    {
+        try
+        {
+            using var json = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(full));
+            return json.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object
+                   && !json.RootElement.TryGetProperty("schemaVersion", out _)
+                   && !json.RootElement.TryGetProperty("version", out _);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return false;
+        }
     }
 }
