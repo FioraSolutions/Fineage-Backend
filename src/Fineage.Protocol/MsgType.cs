@@ -334,6 +334,10 @@ public enum MsgType : ushort
     RequestBBSwrite = 1128,
     /// <summary>Zone → client community board HTML. Body is <see cref="ShowBoardMsg"/>.</summary>
     ShowBoard = 1129,
+    /// <summary>Client opens a petition. Body is <see cref="PetitionRequestMsg"/>.</summary>
+    RequestPetition = 1130,
+    /// <summary>Client cancels a pending petition.</summary>
+    RequestPetitionCancel = 1131,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

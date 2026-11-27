@@ -274,6 +274,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestBBSwrite:
                             await _communityBoard.OnBBSwriteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestPetition:
+                            await _petition.OnPetitionAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPetitionCancel:
+                            await _petition.OnCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

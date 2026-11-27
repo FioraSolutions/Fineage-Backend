@@ -122,8 +122,8 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x7c | RequestTutorialPassCmdToServer | partial | yes | TutorialUi |  |
 | 0x7d | RequestTutorialQuestionMark | partial | yes | TutorialUi |  |
 | 0x7e | RequestTutorialClientEvent | partial | yes | TutorialUi |  |
-| 0x7f | RequestPetition | no | no |  | Say petition types return NotInPetitionChat |
-| 0x80 | RequestPetitionCancel | no | no |  |  |
+| 0x7f | RequestPetition | yes | yes | RequestPetition | petition queue #930 |
+| 0x80 | RequestPetitionCancel | yes | yes | RequestPetitionCancel | petition queue #930 |
 | 0x81 | RequestGmList | partial | no |  | GmListTowns is an admin bypass, not the petition GM list |
 | 0x82 | RequestJoinAlly | yes | yes | AllyInfo | ZoneWorldAlly |
 | 0x83 | RequestAnswerJoinAlly | yes | yes | AllyAskJoin |  |

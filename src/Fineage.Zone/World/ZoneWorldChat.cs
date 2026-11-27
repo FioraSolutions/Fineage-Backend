@@ -164,6 +164,8 @@ public sealed partial class ZoneWorld
                 return null;
             case ChatProtocol.PetitionPlayer:
             case ChatProtocol.PetitionGm:
+                if (TryPetitionChat(speaker, chatType, text))
+                    return null;
                 return new SystemMessageMsg
                 {
                     Id = ChatProtocol.NotInPetitionChat,
