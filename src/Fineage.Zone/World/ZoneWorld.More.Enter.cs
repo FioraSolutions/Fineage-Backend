@@ -214,7 +214,6 @@ public sealed partial class ZoneWorld
         if (stored?.Warehouse != null)
             warehouse.Restore(stored.Warehouse.Select(item => new WarehouseRow(item.ItemId, item.Count, item.EnchantLevel, item.ObjectId)));
         LogWarehouseLoad("warehouse", session.ObjectId, warehouse);
-        RememberPenalties(session, stored);
         var entity = new ZoneEntity
         {
             ObjectId = session.ObjectId,
@@ -389,6 +388,9 @@ public sealed partial class ZoneWorld
             return false;
         }
 
+        // On the simulation thread (#1116): the clan actor's penalty maps are plain dictionaries the step owns. Written
+        // from the parallel enter loads, a reconnect storm corrupted them and every later enter threw.
+        RememberPenalties(session, loaded.Stored);
         _byId[entity.ObjectId] = entity;
         if (entity.Abnormals.Count > 0)
             _byId.Join(entity, ActiveSets.WithAbnormals);
