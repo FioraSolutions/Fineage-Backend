@@ -1,0 +1,52 @@
+{
+  "id": "service-teleporter-no-aggro",
+  "description": "Teleporter (Folk) never acquires a player.",
+  "category": "npc-services",
+  "seed": 9861,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "npc",
+      "mobiusId": 30006,
+      "fineageId": 30006,
+      "source": "stats/npcs/300xx.xml",
+      "objectId": 9200271,
+      "x": 100200,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20
+    ],
+    "fields": [
+      "npc.npc.target",
+      "npc.npc.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/service-teleporter-no-aggro.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

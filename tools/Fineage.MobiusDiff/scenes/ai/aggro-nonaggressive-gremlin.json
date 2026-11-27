@@ -1,0 +1,54 @@
+{
+  "id": "aggro-nonaggressive-gremlin",
+  "description": "Non-aggressive Gremlin in range must not acquire a player. Mobius autoAttackCondition requires ai isAggressive.",
+  "category": "aggro",
+  "seed": 9802,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20001,
+      "fineageId": 20001,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200011,
+      "x": 100250,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      10,
+      20
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mob.hate.player",
+      "npc.mob.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/aggro-nonaggressive-gremlin.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

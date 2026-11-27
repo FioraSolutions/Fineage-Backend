@@ -1,0 +1,63 @@
+{
+  "id": "activation-idle-leave-30s",
+  "description": "Player leaves an idle mob's region. Mobius keeps the region active for 90 s; Fineage currently releases immediately. This is the explicit deactivation divergence.",
+  "category": "activation",
+  "seed": 9880,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200341,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 20,
+      "type": "move",
+      "x": 200000,
+      "y": 200000,
+      "z": -3000
+    }
+  ],
+  "observe": {
+    "ticks": [
+      10,
+      170
+    ],
+    "fields": [
+      "npc.mob.thinking",
+      "npc.mob.present"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/activation-idle-leave-30s.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {
+    "npc.mob.thinking": "Mobius keeps an idle region active for 90 s; current Fineage scene trace shows a different activation lifetime. Preserve the observed divergence and file it separately."
+  }
+}

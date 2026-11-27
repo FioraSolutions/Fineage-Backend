@@ -1,0 +1,61 @@
+{
+  "id": "raid-death-flags",
+  "description": "Raid death sets dead, clears target and keeps the corpse present during decay.",
+  "category": "raid",
+  "seed": 9873,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "boss",
+      "mobiusId": 29056,
+      "fineageId": 29056,
+      "source": "stats/npcs/290xx.xml",
+      "objectId": 9200321,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "boss",
+      "amount": 999999
+    }
+  ],
+  "observe": {
+    "ticks": [
+      11
+    ],
+    "fields": [
+      "npc.boss.dead",
+      "npc.boss.present",
+      "npc.boss.hp",
+      "npc.boss.target"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/raid-death-flags.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

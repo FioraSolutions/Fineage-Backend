@@ -1,0 +1,69 @@
+{
+  "id": "minion-leader-follow-link",
+  "description": "An explicitly spawned pet carries the leader object id and the non-raid minion flag.",
+  "category": "minions",
+  "seed": 9843,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "master",
+      "mobiusId": 20738,
+      "fineageId": 20738,
+      "source": "stats/npcs/207xx.xml",
+      "objectId": 9200201,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    },
+    {
+      "key": "pet",
+      "mobiusId": 20739,
+      "fineageId": 20739,
+      "source": "stats/npcs/207xx.xml",
+      "objectId": 9200202,
+      "x": 100700,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": "master"
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      5
+    ],
+    "fields": [
+      "npc.pet.leader",
+      "npc.pet.raidMinion",
+      "npc.master.target"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/minion-leader-follow-link.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

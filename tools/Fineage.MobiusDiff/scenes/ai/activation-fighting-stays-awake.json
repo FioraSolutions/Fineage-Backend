@@ -1,0 +1,67 @@
+{
+  "id": "activation-fighting-stays-awake",
+  "description": "A mob with a hate target stays in the think set while the player leaves the region.",
+  "category": "activation",
+  "seed": 9884,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200381,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 50
+    },
+    {
+      "tick": 20,
+      "type": "move",
+      "x": 200000,
+      "y": 200000,
+      "z": -3000
+    }
+  ],
+  "observe": {
+    "ticks": [
+      12,
+      170
+    ],
+    "fields": [
+      "npc.mob.thinking",
+      "npc.mob.target"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/activation-fighting-stays-awake.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}

@@ -1,0 +1,70 @@
+{
+  "id": "return-clears-hate",
+  "description": "returnHome clears the Mobius AggroList, including the old hate.",
+  "category": "chase-return",
+  "seed": 9823,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200121,
+      "x": 100250,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 5,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 500
+    },
+    {
+      "tick": 12,
+      "type": "move",
+      "x": 105000,
+      "y": 100000,
+      "z": -3000
+    }
+  ],
+  "observe": {
+    "ticks": [
+      12,
+      20
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mob.hate.player",
+      "npc.mob.returningHome"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/return-clears-hate.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {
+    "npc.mob.hate.player": "Mobius returnHome clears the AggroList; the Fineage trace leaves hate 1 after the target leaves forget range. Real divergence, separate AI issue."
+  }
+}

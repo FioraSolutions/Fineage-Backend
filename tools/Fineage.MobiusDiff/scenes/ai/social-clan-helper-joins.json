@@ -1,0 +1,70 @@
+{
+  "id": "social-clan-helper-joins",
+  "description": "An idle same-clan mob inside clanHelpRange joins a fighting clan mate with hate 1.",
+  "category": "social",
+  "seed": 9830,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200131,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    },
+    {
+      "key": "helper",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200132,
+      "x": 100450,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [],
+  "observe": {
+    "ticks": [
+      20
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.helper.target",
+      "npc.helper.hate.player",
+      "npc.helper.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/social-clan-helper-joins.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}
