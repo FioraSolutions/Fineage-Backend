@@ -84,7 +84,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 51 | Crystallize from inventory | ✅ | — | `RequestCrystallizeItem.java` → `CrystallizeRules` + `LedgerTxKind.Crystallize`. Enchant-fail crystals stay on `ZoneWorldEnchant` — #921 |
 | 52 | Augmentation (life stones) | ✅ | — | `RequestRefine.java` → `AugmentPacketHandler`, `AugmentationCatalog` |
 | 53 | Skill enchant | ✅ | — | `RequestExEnchantSkill.java` → `SkillEnchantService` |
-| 54 | Craft and recipes | 🟡 | S | `RecipeManager.java` → `ZoneWorldCraft`. Forget-recipe (`RequestRecipeBookDestroy`) has no opcode — #935 |
+| 54 | Craft and recipes | ✅ | — | `RecipeManager.java` → `ZoneWorldCraft`. Forget-recipe is Net `RecipeBookDestroy` 0x03E6 (`RequestRecipeBookDestroy` 0xad) — #935 |
 | 55 | Manor | ✅ | — | `CastleManorManager.java` → `Manor/*`, `ZoneWorldManor` |
 | 56 | Auditable economy ledgers | ✅ | — | Fineage `*Ledger.cs` on consume, grant, fee, and trade. Not a Mobius type |
 | **Social** |

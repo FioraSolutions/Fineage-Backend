@@ -33,6 +33,15 @@ public sealed partial class ZoneWorld
         return Task.FromResult(WithDeferredInventoryPersist(() => TryRecipeMakeSelf(session, request)));
     }
 
+    public Task<string?> TryRecipeBookDestroyAsync(ZoneSession session, RecipeBookDestroyMsg request, CancellationToken ct)
+    {
+        if (request == null)
+            return Task.FromResult<string?>("bad_request");
+        if (!session.InWorld)
+            return Task.FromResult<string?>("world");
+        return Task.FromResult(TryRecipeBookDestroy(session, request));
+    }
+
     /// <summary>Mobius recipe-scroll use: register the recipe list id and consume one scroll.</summary>
     string? TryLearnRecipeFromItem(ZoneSession session, ZoneEntity player, ItemInstance item)
     {
@@ -61,16 +70,49 @@ public sealed partial class ZoneWorld
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
             return "world";
+        SendRecipeBookList(player, request.Dwarven);
+        return null;
+    }
+
+    /// <summary>
+    /// Mobius <c>RequestRecipeBookDestroy</c>: drop one list id from the book, persist, refresh that tab.
+    /// Unknown / unlearned ids log and leave the book unchanged (#935).
+    /// </summary>
+    string? TryRecipeBookDestroy(ZoneSession session, RecipeBookDestroyMsg request)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
+            return "world";
+
+        if (!_game.Recipes.TryGet(request.RecipeId, out var recipe))
+        {
+            ZoneLog.Error(
+                $"[craft] recipe-book destroy: recipe {request.RecipeId} missing from recipes.json — book unchanged");
+            return null;
+        }
+
+        if (!player.KnownRecipes.Remove(request.RecipeId))
+        {
+            ZoneLog.Error(
+                $"[craft] recipe-book destroy: recipe {request.RecipeId} not in KnownRecipes for object={player.ObjectId} — book unchanged");
+            return null;
+        }
+
+        PersistKnownRecipes(session, player);
+        SendRecipeBookList(player, recipe.Dwarven);
+        return null;
+    }
+
+    void SendRecipeBookList(ZoneEntity player, bool dwarven)
+    {
         var ids = player.KnownRecipes
-            .Where(id => _game.Recipes.TryGet(id, out var r) && r.Dwarven == request.Dwarven)
+            .Where(id => _game.Recipes.TryGet(id, out var r) && r.Dwarven == dwarven)
             .OrderBy(id => id)
             .ToArray();
         NetBridge?.FanoutRecipeBookList([player.ObjectId], new RecipeBookListMsg
         {
-            Dwarven = request.Dwarven ? 1 : 0,
+            Dwarven = dwarven ? 1 : 0,
             RecipeIds = ids
         });
-        return null;
     }
 
     string? TryRecipeMakeSelf(ZoneSession session, RecipeMakeSelfMsg request)

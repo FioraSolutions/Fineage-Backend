@@ -331,6 +331,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RecipeMakeSelf:
                             await _recipes.OnMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RecipeBookDestroy:
+                            await _recipes.OnBookDestroyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.SetRecipeShop:
                             await _recipes.OnSetShopAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
