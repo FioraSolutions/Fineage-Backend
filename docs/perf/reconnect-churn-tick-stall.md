@@ -48,3 +48,39 @@ So 2 of 5 runs on `dev` froze for 32 s, and 4 of 5 lost 160 relogs at the 30 s h
 froze, and relog throughput rose from at most about 5300 to about 10000 per run. The longest step grew from about
 85 ms to about 215 ms because the zone now serves those relogs instead of waiting. The pre-existing consistency
 oracle (#1047) and gatekeeper-travel failures are separate from this issue.
+
+## Follow-up (#1112): enter-world reads behind the write gate, NpcTalk replies, carried economy replies
+
+Two more reconnect-storm runs on dev after #1111 still dropped 160/200 bots at the 30 s handshake, with the tick
+running. Stack samples showed 23–39 pool threads in `PostgresAccountStore.GetLanguage` → `EnterPersist`. The
+enter-world handler queued a one-row read behind every write in the process. Pure reads (`GetLanguage`,
+`FindPet`, `ListAllPets`, `PetNameExists`) now open their own pooled connection outside the write gate.
+
+In those runs the gatekeeper "no dialog after 0 page(s)" failures were the same starvation: the talk reply came
+after the bot's 10 s window. The server also had three ways to answer a talk with nothing. They are now refusals,
+matching Mobius `setIntentionInteract` / `canInteract`:
+- Out of range and sitting → `action_sitting`. Out of range and casting → `npc_busy`.
+- Standing under a ledge the sphere cannot reach → `range`.
+- A pending talk refused on arrival → SystemMessage 22 instead of a discarded result.
+
+`economy_commit_failed` on teleport fees came from the step's economy batch when it could not be queued: a logout
+commit had stolen those characters' dirty bags and still held them, or the worker queue was full. The batch was
+already restored and was committed one step later, so the client heard a failure for a fee that landed. Those
+replies now wait for the commit that carries them, and are refused only after 10 s without one
+(`ZoneWorldEconomyCarry`).
+
+The write gate itself is not the limit at this load once reads leave it. Measured in rs-after2 (Debug, 200 bots,
+reconnect-storm, `fineage_persist_write_ms{kind="store_gate_*"}`):
+- 61,526 writes, wait avg 0.32 ms and p99 ≤ 5 ms.
+- Hold avg 0.61 ms and p99 ≤ 5 ms.
+- The gate was busy about 25 % of the run.
+
+| Run (Debug, reconnect-storm, 200 bots) | Disconnects | Relogs ok / attempted | Teleports ok / attempted | Gatekeeper unexplained | `economy_commit_failed` rejects |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| rs-before1 (dev 84e60e76) | 160 | 8744 / 8904 | 620 / 647 | 62 | 27 |
+| rs-before2 (dev 84e60e76) | 160 | 5587 / 5747 | 582 / 584 | 41 | 15 |
+| rs-after2 (#1112) | 5 | 10074 / 10079 | 912 / 912 | 0 | 0 |
+| rs-after3 (#1112) | 14 (initial enter, bots 99–112) | 6429 / 6429 | 596 / 599 | 0 | 0 |
+
+`gatekeeper-travel` (150 travellers, no churn) was already clean on dev and stays clean: 5707/5725 → 5727/5738
+teleports, 0 unexplained.
