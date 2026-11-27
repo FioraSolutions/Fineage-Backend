@@ -45,6 +45,9 @@ public sealed partial class ZoneWorld
         player.MaxMp = template.ModifiedMp(player.Level);
         player.CurHp = player.MaxHp;
         player.CurMp = player.MaxMp;
+        // Mobius trainer mode (#1049) no longer auto-grants NPC-tree skills. Perf bots still need the rotation
+        // on KnownSkills: seed LearnedSkills from the class tree at combat level, then refresh.
+        GrantLoadTestRotationSkills(player);
         RefreshKnownSkills(player);
         foreach (int skillId in LoadTestCombatSettings.RequiredSkillIds)
         {
@@ -97,4 +100,28 @@ public sealed partial class ZoneWorld
 
     internal bool LoadTestCombatProfileNeeded(ZoneEntity player) =>
         LoadTestCombatSettings.AppliesToAccount(player.Session?.Account);
+
+    void GrantLoadTestRotationSkills(ZoneEntity player)
+    {
+        var tree = _game.SkillTrees.FindClass(player.ClassId)
+            ?? throw new InvalidOperationException(
+                $"loadtest combat profile: skill tree for class {player.ClassId} is missing from the datapack.");
+        foreach (int skillId in LoadTestCombatSettings.RequiredSkillIds)
+        {
+            int level = 0;
+            foreach (var row in tree.Skills)
+            {
+                if (row.SkillId != skillId || row.GetLevel > player.Level)
+                    continue;
+                if (row.Level > level)
+                    level = row.Level;
+            }
+
+            if (level <= 0)
+                throw new InvalidOperationException(
+                    $"loadtest combat profile: class {player.ClassId} level {player.Level} has no tree row for skill {skillId}.");
+            if (!player.LearnedSkills.TryGetValue(skillId, out int have) || have < level)
+                player.LearnedSkills[skillId] = level;
+        }
+    }
 }
