@@ -98,7 +98,7 @@ public sealed partial class ZoneWorld
         {
             player.AutoShots.Remove(shotId);
             if (player.Session is { } shotSession)
-                SendAutoShotState(shotSession, player, shotId, _game.Items.TryGet(shotId, out var shot) ? shot!.Name : "", false);
+                SendAutoShotState(shotSession, player, shotId, _game.Items.Require(shotId).Name, false);
         }
         UnequipOlympiadRestricted(player);
         ResetOlympiadReuse(player);

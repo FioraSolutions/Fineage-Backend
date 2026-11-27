@@ -239,14 +239,9 @@ public sealed partial class ZoneWorld
         if (prior != null && prior.Phase == QuestPhase.Completed)
             return;
 
-        if (!_game.Items.TryGet(NewbieHelperGift.ScrollRecovery, out _) ||
-            !_game.Items.TryGet(NewbieHelperGift.TravelToken, out _) ||
-            !_game.Items.TryGet(NewbieHelperGift.SoulshotNovice, out _) ||
-            !_game.Items.TryGet(NewbieHelperGift.SpiritshotNovice, out _))
-        {
-            ZoneLog.Info($"newbie-helper-gift skipped — missing item templates (npc={npc.NpcId})");
-            return;
-        }
+        foreach (int giftItem in (ReadOnlySpan<int>)[NewbieHelperGift.ScrollRecovery, NewbieHelperGift.TravelToken,
+                     NewbieHelperGift.SoulshotNovice, NewbieHelperGift.SpiritshotNovice])
+            _ = _game.Items.Require(giftItem);
 
         var (shotId, shotCount) = NewbieHelperGift.ShotForClass(_newbieBuffs, player.ClassId);
         var changes = new List<InventoryUpdateEntryMsg>(3);

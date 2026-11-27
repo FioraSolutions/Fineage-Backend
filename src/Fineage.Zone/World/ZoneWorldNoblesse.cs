@@ -34,7 +34,8 @@ public sealed partial class ZoneWorld
     {
         foreach (int id in ids)
         {
-            if (_game.Skills.Find(id) != null && !entity.KnownSkills.ContainsKey(id))
+            _ = _game.Skills.Require(id);
+            if (!entity.KnownSkills.ContainsKey(id))
                 entity.KnownSkills[id] = 1;
         }
     }
@@ -118,7 +119,7 @@ public sealed partial class ZoneWorld
             return null;
         }
 
-        var quest = _game.Quests.Find(NoblesseGrant.GateQuestId);
+        var quest = _game.Quests.Require(NoblesseGrant.GateQuestId);
         if (!NoblesseGrant.TryReadVillageMasterCosts(quest, out var costs))
             return "bad_request";
 

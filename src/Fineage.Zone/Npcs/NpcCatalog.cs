@@ -104,7 +104,8 @@ public sealed class NpcCatalog
     public NpcTemplate Get(int npcId)
     {
         if (!ById.TryGetValue(npcId, out var template))
-            throw new KeyNotFoundException($"NPC template {npcId} is not in the catalog.");
+            throw Fineage.Game.RequiredData.Required.Missing(
+                Fineage.Game.RequiredData.RequiredDataKind.Npc, npcId, $"NPC template {npcId} is missing from {FileName}");
         return template;
     }
 

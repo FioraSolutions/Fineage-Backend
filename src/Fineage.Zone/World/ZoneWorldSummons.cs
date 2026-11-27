@@ -115,11 +115,7 @@ public sealed partial class ZoneWorld
     ZoneEntity? SpawnServitor(ZoneEntity owner, SummonSkill skill, SummonLevel row, int skillLevel, long now)
     {
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(row.NpcId, out var template))
-        {
-            ZoneLog.Info($"summon skip unknown npcId={row.NpcId}");
-            return null;
-        }
+        var template = _summonTemplates.Get(row.NpcId);
 
         int objectId = AllocateQuestNpcObjectId();
         // Mobius Summon effect: spawnMe(owner + 20, owner + 20, owner z).
@@ -469,7 +465,7 @@ public sealed partial class ZoneWorld
                 {
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);
-                    string item = _game.Items.TryGet(st.UpkeepItemId, out var def) && def != null ? def.Name : st.UpkeepItemId.ToString();
+                    string item = _game.Items.Require(st.UpkeepItemId).Name;
                     SelfLine(session, SysMsgSummonedMonsterUses, $"A summoned monster uses {item}.", item);
                     st.UpkeepRemainingMs = st.UpkeepIntervalMs;
                 }

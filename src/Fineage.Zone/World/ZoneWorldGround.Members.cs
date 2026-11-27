@@ -22,8 +22,7 @@ public sealed partial class ZoneWorld
 
     void NotifyObtained(ZoneSession session, int itemId, int count)
     {
-        _game.Items.TryGet(itemId, out var template);
-        string name = template?.Name ?? $"item {itemId}";
+        string name = _game.Items.Require(itemId).Name;
         if (itemId == WarehouseRules.AdenaItemId)
             ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {count} adena.");
         else if (count > 1)
@@ -39,7 +38,7 @@ public sealed partial class ZoneWorld
             player.Intent.PendingPickupId = 0;
             player.Intent.PendingPickupAtUnixMs = 0;
         }
-        string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
+        string name = _game.Items.Require(ground.GroundItemId).Name;
         ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.");
     }
 
@@ -247,8 +246,7 @@ public sealed partial class ZoneWorld
         ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
         foreach (var stack in rolls)
         {
-            if (!_game.Items.TryGet(stack.ItemId, out var template))
-                continue;
+            var template = _game.Items.Require(stack.ItemId);
             bool herb = IsHerb(stack.ItemId);
             if (autoLooter != null
                 && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
@@ -336,11 +334,7 @@ public sealed partial class ZoneWorld
     {
         if (count <= 0)
             return null;
-        if (!_game.Items.TryGet(itemId, out var template))
-        {
-            ZoneLog.Info($"drop skip unknown item={itemId}");
-            return null;
-        }
+        var template = _game.Items.Require(itemId);
 
         if (piece != null && (template.Stackable || count != 1 || piece.ItemId != itemId))
             throw new ArgumentException($"item {piece.ObjectId} is not one piece of {itemId}", nameof(piece));

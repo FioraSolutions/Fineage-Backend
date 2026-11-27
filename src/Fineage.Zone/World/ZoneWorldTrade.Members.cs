@@ -40,7 +40,7 @@ public sealed partial class ZoneWorld
         {
             incoming = checked(incoming + (long)_weights.Of(row.ItemId) * row.Count);
             bool alreadyCarried = receiver.Inventory.FindByItemId(row.ItemId) != null;
-            bool stackable = _game.Items.TryGet(row.ItemId, out var template) && template != null && template.Stackable;
+            bool stackable = _game.Items.Require(row.ItemId).Stackable;
             slots += WarehouseRules.SlotsFor(stackable, alreadyCarried, (int)Math.Min(int.MaxValue, row.Count));
         }
 

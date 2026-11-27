@@ -40,11 +40,7 @@ public sealed partial class ZoneWorld
                 continue;
             }
 
-            if (!_game.Items.TryGet(itemId, out var template) || template == null)
-            {
-                ZoneLog.Error($"[wear] item template {itemId} missing from items catalog");
-                continue;
-            }
+            var template = _game.Items.Require(itemId);
 
             if (!template.Equippable)
                 continue;
@@ -102,11 +98,7 @@ public sealed partial class ZoneWorld
         var rows = new List<ShopPreviewListItemMsg>();
         foreach (var product in list.Products)
         {
-            if (!_game.Items.TryGet(product.ItemId, out var template) || template == null)
-            {
-                ZoneLog.Error($"[wear] buylist {list.Id} product {product.ItemId} missing from items catalog");
-                continue;
-            }
+            var template = _game.Items.Require(product.ItemId);
 
             if (!template.Equippable)
                 continue;

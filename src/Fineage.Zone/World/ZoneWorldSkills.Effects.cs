@@ -640,8 +640,8 @@ public sealed partial class ZoneWorld
         FanoutAbnormal(target);
 
         int range = 2000;
-        var template = _game.Skills.Find(skillId);
-        if (template != null && template.EffectRange > 0)
+        var template = _game.Skills.Require(skillId);
+        if (template.EffectRange > 0)
             range = template.EffectRange;
         var candidates = new List<ZoneEntity>();
         foreach (var entity in _byId.Values)

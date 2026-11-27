@@ -389,6 +389,6 @@ public sealed partial class ZoneWorld
         if (index < 0 || index >= board.Runners.Count)
             return "?";
         int npcId = board.Runners[index].NpcId;
-        return NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var t) ? t.Name : npcId.ToString(CultureInfo.InvariantCulture);
+        return NpcCatalog.LoadDefault().Get(npcId).Name;
     }
 }

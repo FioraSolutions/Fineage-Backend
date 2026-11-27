@@ -101,7 +101,7 @@ public sealed partial class ZoneWorld
                 int matured = (int)((crop.StartAmount - crop.Amount) * ManorProtocol.MatureShare);
                 if (matured < 1 && _manorRandom.Next(99) < 90)
                     matured = 1;
-                if (matured > 0 && _game.Items.TryGet(seed.MatureId, out _))
+                if (matured > 0 && _game.Items.Require(seed.MatureId) is not null)
                 {
                     warehouse.Add(seed.MatureId, matured, 0, out _);
                     warehouseChanged = true;
@@ -379,8 +379,7 @@ public sealed partial class ZoneWorld
         long load = 0;
         foreach (var (itemId, count) in incoming)
         {
-            if (!_game.Items.TryGet(itemId, out var t))
-                return false;
+            var t = _game.Items.Require(itemId);
             load += (long)_weights.Of(itemId) * count;
             if (!t.Stackable)
                 slots += (int)Math.Min(count, int.MaxValue);
@@ -541,8 +540,8 @@ public sealed partial class ZoneWorld
         bool sold = false;
         foreach (var (row, procure, rewardId) in plan)
         {
-            string cropName = _game.Items.TryGet(row.ItemId, out var ct) ? ct.Name : row.ItemId.ToString();
-            int rewardPrice = _game.Items.TryGet(rewardId, out var rt) ? rt.ReferencePrice : 0;
+            string cropName = _game.Items.Require(row.ItemId).Name;
+            int rewardPrice = _game.Items.Require(rewardId).ReferencePrice;
             if (rewardPrice <= 0)
                 continue;
             long price = row.Count * procure.Price;

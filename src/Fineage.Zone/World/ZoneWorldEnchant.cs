@@ -195,13 +195,10 @@ public sealed partial class ZoneWorld
                             : EnchantLines.Disarmed(targetName));
                     crystalCount = EnchantRules.CrystallizedCount(target.Template, oldLevel);
                     crystalId = crystalCount > 0 ? EnchantRules.CrystalItemId(target.Template.Crystal) : 0;
-                    ItemTemplate? crystalTemplate = null;
-                    if (crystalId == 0 || !_game.Items.TryGet(crystalId, out crystalTemplate))
-                    {
-                        crystalId = 0;
+                    // No-grade gear (crystalId 0) yields nothing; a graded crystal id must exist in items.json.
+                    ItemTemplate? crystalTemplate = crystalId == 0 ? null : _game.Items.Require(crystalId);
+                    if (crystalTemplate == null)
                         crystalCount = 0;
-                        crystalTemplate = null;
-                    }
 
                     int wornSlot = SlotOf(target);
                     if (wasEquipped)

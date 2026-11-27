@@ -207,7 +207,7 @@ public sealed partial class ZoneWorld
         html.Append("SP: ").Append(player.Sp).Append("<br>");
         foreach (var r in rows)
         {
-            string name = _game.Skills.Find(r.SkillId)?.Name ?? $"Skill {r.SkillId}";
+            string name = _game.Skills.Require(r.SkillId).Name;
             html.Append("<a action=\"bypass -h npc_%objectId%_learn_skill ").Append(r.SkillId).Append("\">")
                 .Append(HtmlText(name)).Append(" Lv ").Append(r.Level).Append(" - ").Append(r.LevelUpSp).Append(" SP</a><br>");
         }

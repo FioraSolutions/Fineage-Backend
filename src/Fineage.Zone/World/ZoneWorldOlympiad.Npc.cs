@@ -160,7 +160,7 @@ public sealed partial class ZoneWorld
             case 10:
                 {
                     int passes = _olympiad.Board.TakePasses(player.ObjectId);
-                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.TryGet(_olympiad.Board.Settings.RewardItemId, out var _))
+                    if (passes > 0 && player.Inventory != null && player.Session != null && _game.Items.Require(_olympiad.Board.Settings.RewardItemId) is not null)
                     {
                         int itemId = _olympiad.Board.Settings.RewardItemId;
                         RecordBagChange(
@@ -244,7 +244,8 @@ public sealed partial class ZoneWorld
 
     void GrantHeroItem(ZoneSession session, ZoneEntity player, int itemId)
     {
-        if (player.Inventory == null || !_game.Items.TryGet(itemId, out _))
+        _ = _game.Items.Require(itemId);
+        if (player.Inventory == null)
             return;
         RecordBagChange(
             player,

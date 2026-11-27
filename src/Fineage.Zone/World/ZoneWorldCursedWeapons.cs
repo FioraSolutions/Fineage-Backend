@@ -87,11 +87,7 @@ public sealed partial class ZoneWorld
 
     void SpawnCursedBladeDrop(CursedWeaponRuntime runtime, int x, int y, int z, ZoneEntity killer)
     {
-        if (!_game.Items.TryGet(runtime.Definition.ItemId, out var template))
-        {
-            ZoneLog.Warn($"cursed weapon drop missing item template {runtime.Definition.ItemId}");
-            return;
-        }
+        var template = _game.Items.Require(runtime.Definition.ItemId);
 
         int groundId = _itemIds.Next();
         var watchers = WatchingPlayers(killer.ObjectId);
@@ -230,13 +226,10 @@ public sealed partial class ZoneWorld
 
     int ResolveCursedSkillMaxLevel(int skillId)
     {
-        if (_game.Skills.Find(skillId) is { } skill && skill.MaxLevel > 0)
-            return skill.MaxLevel;
-        // #985 migration: skill 3603 (Zariche) is still absent from skills.json. Track via the
-        // silent-fallback metric; replace with Skills.Require once the Mobius row is imported.
-        Required.NoteSilentFallback(RequiredDataKind.Skill, skillId.ToString());
-        ZoneLog.Warn($"cursed weapon skill {skillId} missing from catalogs; defaulting max level to 10");
-        return 10;
+        var skill = _game.Skills.Require(skillId);
+        if (skill.MaxLevel <= 0)
+            throw Required.Missing(RequiredDataKind.Skill, skillId, $"cursed weapon skill {skillId} has no levels in skills.json");
+        return skill.MaxLevel;
     }
 
     void RecordCursedKill(ZoneEntity killer, CursedWeaponRuntime? runtime = null)

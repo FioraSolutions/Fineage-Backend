@@ -388,8 +388,7 @@ public sealed partial class ZoneWorld
     /// <summary>Spawns a template NPC that belongs to the siege (tower, guard, headquarters).</summary>
     ZoneEntity? SpawnSiegeNpc(int npcId, int x, int y, int z, int heading, SiegeNpcInfo info, string? title = null)
     {
-        if (!Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
-            return null;
+        var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().Get(npcId);
         int objectId = AllocateQuestNpcObjectId();
         var def = SpawnCatalog.FromTemplate(objectId, template, x, y, z, heading, attackable: true);
         MaterializeSpawn(def, _activeMapId);

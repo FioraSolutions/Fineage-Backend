@@ -189,7 +189,7 @@ public sealed partial class ZoneWorld
         {
             foreach (var (itemId, count) in grants)
             {
-                string name = _game.Items.TryGet(itemId, out var t) ? t.Name : itemId.ToString();
+                string name = _game.Items.Require(itemId).Name;
                 if (count > 1)
                     SelfLine(session, ManorProtocol.ObtainedMany, $"You have obtained {count} {name}.", name, count.ToString());
                 else

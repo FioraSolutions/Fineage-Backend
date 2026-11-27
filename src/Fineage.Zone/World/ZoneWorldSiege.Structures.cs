@@ -630,7 +630,7 @@ public sealed partial class ZoneWorld
         using (_affinity.Step())
         {
             int npcId = CastleTable.Find(castleId)!.ArtifactNpcIds[0];
-            var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
+            var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().Get(npcId);
             int objectId = AllocateQuestNpcObjectId();
             MaterializeSpawn(Fineage.Zone.Spawns.SpawnCatalog.FromTemplate(objectId, template, x, y, z, 0), _activeMapId);
             var npc = _byId[objectId];

@@ -194,7 +194,7 @@ public sealed partial class ZoneWorld
 
         if (sendAbort && player.Session != null)
         {
-            string name = template?.Name ?? _game.Skills.Find(skillId)?.Name ?? $"Skill {skillId}";
+            string name = (template ?? _game.Skills.Require(skillId)).Name;
             ShotNotice(player.Session, SysMsgToggleDeactivated, $"{name} has been aborted.");
         }
 

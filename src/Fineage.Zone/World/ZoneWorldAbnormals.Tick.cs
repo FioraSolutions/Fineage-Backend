@@ -252,8 +252,7 @@ public sealed partial class ZoneWorld
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
-        var skill = _game.Skills.Find(effectId)
-            ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (duration).");
+        var skill = _game.Skills.Require(effectId);
         if (skill.AbnormalTimeSeconds <= 0)
             throw new InvalidOperationException($"skill {effectId} has no abnormalTimeSeconds.");
         return skill.AbnormalTimeSeconds;
@@ -263,8 +262,7 @@ public sealed partial class ZoneWorld
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
-        var skill = _game.Skills.Find(effectId)
-            ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (abnormalLevel).");
+        var skill = _game.Skills.Require(effectId);
         if (!skill.TryLevelData(1, out var level) || level.AbnormalLevel <= 0)
             throw new InvalidOperationException($"skill {effectId} lv1 missing abnormalLevel.");
         return level.AbnormalLevel;

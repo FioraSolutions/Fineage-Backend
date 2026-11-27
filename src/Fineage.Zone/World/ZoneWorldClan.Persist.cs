@@ -217,15 +217,16 @@ public sealed partial class ZoneWorld
         bool changed = false;
         foreach (int id in (ReadOnlySpan<int>)[SiegeProtocol.SealOfRulerSkillId, SiegeProtocol.BuildHeadquartersSkillId])
         {
-            if (grant && _game.Skills.Find(id) != null)
+            if (grant)
             {
+                _ = _game.Skills.Require(id);
                 if (!entity.KnownSkills.TryGetValue(id, out int have) || have < 1)
                 {
                     entity.KnownSkills[id] = 1;
                     changed = true;
                 }
             }
-            else if (!grant && entity.KnownSkills.Remove(id))
+            else if (entity.KnownSkills.Remove(id))
                 changed = true;
         }
 

@@ -13,6 +13,9 @@ public static class RequiredDataKindIds
         RequiredDataKind.NpcAi => "npc-ai",
         RequiredDataKind.Quest => "quest",
         RequiredDataKind.Spawn => "spawn",
+        RequiredDataKind.BuyList => "buylist",
+        RequiredDataKind.MultiSell => "multisell",
+        RequiredDataKind.NpcScript => "npc-script",
         _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown required-data kind.")
     };
 
@@ -27,6 +30,9 @@ public static class RequiredDataKindIds
         "npc-ai" => RequiredDataKind.NpcAi,
         "quest" => RequiredDataKind.Quest,
         "spawn" => RequiredDataKind.Spawn,
+        "buylist" => RequiredDataKind.BuyList,
+        "multisell" => RequiredDataKind.MultiSell,
+        "npc-script" => RequiredDataKind.NpcScript,
         _ => throw new InvalidDataException($"required-data-registry.json has unknown kind id '{id}'.")
     };
 }
