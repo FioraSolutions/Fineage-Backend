@@ -146,15 +146,24 @@ interface IWorldEventPublisher
     void FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId);
 
     /// <summary>
-    /// Mobius <c>MyTargetSelected</c>: the owner's own click answer (nameplate colour for the target window).
-    /// Called on the simulation thread.
+    /// Mobius <c>MyTargetSelected</c> (selector 0 + colour) or peer <c>TargetSelected</c>
+    /// (selector = aiming player + pose). Called on the simulation thread.
     /// </summary>
-    void FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint);
+    void FanoutTargetSelected(
+        IReadOnlyList<int> watcherObjectIds,
+        int targetObjectId,
+        int colorHint,
+        int selectorObjectId = 0,
+        int x = 0,
+        int y = 0,
+        int z = 0);
 
     /// <summary>
-    /// Mobius <c>TargetUnselected</c>: the selection was dropped. Called on the simulation thread.
+    /// Mobius <c>TargetUnselected</c>: the selection was dropped. Self clears
+    /// <paramref name="targetObjectId"/>; peers get <paramref name="selectorObjectId"/> of the player who cleared.
+    /// Called on the simulation thread.
     /// </summary>
-    void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId);
+    void FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int selectorObjectId = 0);
 
     /// <summary>Mobius <c>AcquireSkillList</c>: the trainer's learnable rows. Called on the simulation thread.</summary>
     void FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list);

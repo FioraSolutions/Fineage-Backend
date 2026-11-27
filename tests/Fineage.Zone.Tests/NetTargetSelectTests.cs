@@ -50,7 +50,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(MobId, (int)selected[1]!);
         Assert.Equal(3, (int)selected[2]!);
 
@@ -71,7 +71,7 @@ public sealed class NetTargetSelectTests
 
         Assert.Null(await kit.World.TrySelectTargetAsync(session, GuideId, default));
 
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(GuideId, (int)selected[1]!);
         Assert.Equal(0, (int)selected[2]!);
     }
@@ -91,7 +91,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(otherSession.ObjectId, (int)selected[1]!);
         // A flagged player is auto-attackable, so the colour is the level delta rather than the friendly 0.
         Assert.Equal(-4, (int)selected[2]!);
@@ -111,9 +111,35 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, otherSession.ObjectId, default));
 
         Assert.Equal(otherSession.ObjectId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(0, (int)selected[2]!);
     }
+
+    [Fact]
+    public async Task Peer_in_aoi_receives_target_selected_with_selector_id()
+    {
+        var (kit, session, player, rec) = await SetupAsync();
+        var (otherSession, _) = await kit.EnterAsync();
+        Assert.Contains(otherSession.ObjectId, player.Knownlist);
+        lock (rec.Calls)
+            rec.Calls.Clear();
+
+        Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
+
+        var peer = Assert.Single(
+            rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)),
+            c => c.Length > 3 && (int)c[3]! == session.ObjectId);
+        Assert.Equal(MobId, (int)peer[1]!);
+        Assert.Equal(0, (int)peer[2]!);
+        var audience = Assert.IsAssignableFrom<IReadOnlyList<int>>(peer[0]);
+        Assert.Contains(otherSession.ObjectId, audience);
+        Assert.DoesNotContain(session.ObjectId, audience);
+    }
+
+    static object?[] SelfTargetSelected(NetBridgeRecorder rec) =>
+        Assert.Single(
+            rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)),
+            c => c.Length <= 3 || (int)c[3]! == 0);
 
     [Fact]
     public async Task Selecting_yourself_is_colour_zero()
@@ -135,7 +161,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TryCharacterActionAsync(session, ActionProtocol.NextTarget, 0, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(MobId, (int)selected[1]!);
     }
 
@@ -205,7 +231,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, MobId, default));
 
         Assert.Equal(MobId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(MobId, (int)selected[1]!);
         var hp = Assert.IsType<StatusUpdateMsg>(
             Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)))[1]);
@@ -232,7 +258,7 @@ public sealed class NetTargetSelectTests
         Assert.Null(await kit.World.TrySelectTargetAsync(session, groundId, default));
 
         Assert.Equal(groundId, session.SelectedTargetId);
-        var selected = Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutTargetSelected)));
+        var selected = SelfTargetSelected(rec);
         Assert.Equal(groundId, (int)selected[1]!);
         Assert.Equal(0, (int)selected[2]!);
         Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutStatusUpdate)));

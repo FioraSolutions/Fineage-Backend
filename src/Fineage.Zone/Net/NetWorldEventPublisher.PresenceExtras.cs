@@ -43,21 +43,33 @@ sealed partial class NetWorldEventPublisher
         _presence.TryBroadcast(watcherObjectIds, NetOpcode.SocialAction, payload);
     }
 
-    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint)
+    void IWorldEventPublisher.FanoutTargetSelected(
+        IReadOnlyList<int> watcherObjectIds,
+        int targetObjectId,
+        int colorHint,
+        int selectorObjectId,
+        int x,
+        int y,
+        int z)
     {
         var payload = NetCodec.EncodeTargetSelected(new TargetSelectedNetMsg
         {
             TargetObjectId = targetObjectId,
-            ColorHint = colorHint
+            ColorHint = colorHint,
+            SelectorObjectId = selectorObjectId,
+            X = x,
+            Y = y,
+            Z = z
         });
         _presence.TryBroadcast(watcherObjectIds, NetOpcode.TargetSelected, payload);
     }
 
-    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId)
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int selectorObjectId)
     {
         var payload = NetCodec.EncodeTargetUnselected(new TargetUnselectedNetMsg
         {
-            TargetObjectId = targetObjectId
+            TargetObjectId = targetObjectId,
+            SelectorObjectId = selectorObjectId
         });
         _presence.TryBroadcast(watcherObjectIds, NetOpcode.TargetUnselected, payload);
     }
