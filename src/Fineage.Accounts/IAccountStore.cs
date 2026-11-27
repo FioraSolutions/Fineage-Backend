@@ -202,6 +202,15 @@ public interface IAccountStore
 
     bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls);
 
+    /// <summary>
+    /// Every character on every account, ordered by id, deleted-pending rows included: the startup state audit
+    /// (#984) reads all saved bags at once to check them against the data catalogs and the replayed ledger.
+    /// </summary>
+    IReadOnlyList<CharacterRecord> ListAllCharacters();
+
+    /// <summary>Every stored pet row, ordered by control object id (startup state audit, #984).</summary>
+    IReadOnlyList<StoredPet> ListAllPets();
+
     /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
     StoredPet? FindPet(int controlObjectId);
 

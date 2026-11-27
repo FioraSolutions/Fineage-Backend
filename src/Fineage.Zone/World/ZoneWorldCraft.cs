@@ -262,8 +262,16 @@ public sealed partial class ZoneWorld
             return;
         foreach (int id in stored.KnownRecipes)
         {
-            if (id > 0 && _game.Recipes.TryGet(id, out _))
-                entity.KnownRecipes.Add(id);
+            if (id <= 0)
+                continue;
+            // Saved rows were checked at enter (StoredStateAudit), so a missing recipe here is a bug, not data.
+            if (!_game.Recipes.TryGet(id, out _))
+                throw new Fineage.Zone.Persistence.StoredStateException(
+                    $"character {entity.ObjectId} '{entity.Name}' cannot load its recipe book",
+                    [new Fineage.Zone.Persistence.StoredStateIssue(Fineage.Zone.Persistence.StoredStateSeverity.Error,
+                        Fineage.Zone.Persistence.StoredStateIssue.MissingReference, $"character {entity.ObjectId}", "recipe", id,
+                        "no recipe in data/recipes.json")]);
+            entity.KnownRecipes.Add(id);
         }
     }
 

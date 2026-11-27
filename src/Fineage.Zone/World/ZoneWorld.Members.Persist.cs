@@ -88,20 +88,11 @@ public sealed partial class ZoneWorld
         if (stored == null || stored.Items == null)
             return new PlayerInventory(_game.Items, _itemIds);
 
-        var known = new List<StoredItem>(stored.Items.Count);
+        // StoredStateAudit.RequireLoadable refused the enter already when a row names a missing template.
         foreach (var row in stored.Items)
-        {
-            if (_game.Items.TryGet(row.ItemId, out _))
-            {
-                known.Add(row);
-                continue;
-            }
+            _game.Items.Require(row.ItemId);
 
-            ZoneLog.Warn(
-                $"inventory drop unknown template char={session.ObjectId} item={row.ItemId} objectId={row.ObjectId} count={row.Count}");
-        }
-
-        var inventory = CharacterInventory.Restore(_game.Items, _itemIds, known);
+        var inventory = CharacterInventory.Restore(_game.Items, _itemIds, stored.Items);
         foreach (var collapsed in inventory.CollapsedStacks)
         {
             ZoneLog.Warn(
@@ -161,7 +152,7 @@ public sealed partial class ZoneWorld
         || _dirtyInventories.Count > 0
         || _dirtyWarehouses.Count > 0
         || _dirtyFreight.Count > 0
-        || _dirtyOfflineFreight.Count > 0;
+        || _dirtyOfflineBags.Count > 0;
 
     /// <summary>
     /// Commits every dirty economic container with the pending ledger entries. <paramref name="discardWithoutPublish"/>
@@ -291,11 +282,11 @@ public sealed partial class ZoneWorld
             stolen.Warehouses.Add((objectId, player));
         foreach (var (objectId, player) in _dirtyFreight)
             stolen.Freight.Add((objectId, player));
-        stolen.OfflineFreight.AddRange(_dirtyOfflineFreight);
+        stolen.OfflineBags.AddRange(_dirtyOfflineBags);
         _dirtyInventories.Clear();
         _dirtyWarehouses.Clear();
         _dirtyFreight.Clear();
-        _dirtyOfflineFreight.Clear();
+        _dirtyOfflineBags.Clear();
         stolen.Bags = BagsOf(stolen);
         return stolen;
     }
@@ -310,8 +301,9 @@ public sealed partial class ZoneWorld
                 _dirtyWarehouses.TryAdd(objectId, player);
             foreach (var (objectId, player) in stolen.Freight)
                 _dirtyFreight.TryAdd(objectId, player);
-            if (_dirtyOfflineFreight.Count == 0 && stolen.OfflineFreight.Count > 0)
-                _dirtyOfflineFreight.AddRange(stolen.OfflineFreight);
+            // Stolen writes are older than anything queued since: they go first so a later snapshot of the same
+            // character still wins in BagsOf, and a different character's write is never dropped.
+            _dirtyOfflineBags.InsertRange(0, stolen.OfflineBags);
         }
     }
 
@@ -340,11 +332,13 @@ public sealed partial class ZoneWorld
             BagFor(byId, player.Session.Account, objectId).Freight = WarehouseRows(player.Freight);
         }
 
-        foreach (var extra in stolen.OfflineFreight)
+        foreach (var extra in stolen.OfflineBags)
         {
-            if (extra.Freight == null)
-                continue;
-            BagFor(byId, extra.Account, extra.CharacterId).Freight = extra.Freight;
+            var bag = BagFor(byId, extra.Account, extra.CharacterId);
+            if (extra.Inventory != null)
+                bag.Inventory = extra.Inventory;
+            if (extra.Freight != null)
+                bag.Freight = extra.Freight;
         }
 
         return byId.Values.ToList();

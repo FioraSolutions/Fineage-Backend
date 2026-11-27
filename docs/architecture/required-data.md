@@ -84,10 +84,13 @@ Code sites that substituted a default for a data-driven id, migrated to `Require
 | quests | 1 | noblesse gate quest missing → `bad_request` |
 
 Left as-is on purpose (not game-data defaults): GM/user-input validation (`//create`,
-admin buy, pet restore of persisted rows), persisted player state that names a removed id
-(learned skills, stored effects — #984 owns state coherence), transport `catch {}` in
+admin buy), transport `catch {}` in
 Net/Login (socket shutdown), and genuinely optional catalogs (`npc-ai-support` row absent =
 no support casts, no droplist = no drop, abnormal visual effect = cosmetic).
+
+Persisted player state that names a removed id (bag, warehouse, freight, pet bag, learned skills, effects,
+recipes, dyes) is #984's `StoredStateAudit`: the enter (or pet summon) is refused with every name and the rows
+stay in the store; the startup audit lists them all. See `docs/architecture/world-state-durability.md`.
 
 ## Metric
 

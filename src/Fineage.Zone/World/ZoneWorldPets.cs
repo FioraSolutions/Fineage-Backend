@@ -211,10 +211,13 @@ public sealed partial class ZoneWorld
                     _petMemory[stored.ControlObjectId] = stored;
             }
         }
+        // #984: a saved pet item without a template refuses the summon with the names; skipping it would let the
+        // next pet save delete the row.
+        Fineage.Zone.Persistence.StoredStateAudit.RequireLoadable(stored, _game.Items);
         var bag = new PlayerInventory(_game.Items, _itemIds);
         foreach (var row in stored?.Items ?? [])
         {
-            if (!_game.Items.TryGet(row.ItemId, out _) || row.Count < 1 || row.ObjectId <= 0 || bag.Find(row.ObjectId) != null)
+            if (row.Count < 1 || row.ObjectId <= 0 || bag.Find(row.ObjectId) != null)
                 continue;
             bag.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel);
         }

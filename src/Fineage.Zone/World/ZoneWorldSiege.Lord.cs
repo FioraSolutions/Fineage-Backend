@@ -331,7 +331,7 @@ public sealed partial class ZoneWorld
 
     void RemoveStoredCastleRegalia(ZoneClan clan, ZoneClanMember roster, int circletId, int castleId)
     {
-        if (_accounts?.FindById(roster.Account, roster.CharacterId) is not { Items: { } items })
+        if (_accounts == null || OfflineInventoryRows(roster.CharacterId) is not { } items)
             return;
         var kept = new List<StoredItem>();
         bool changed = false;
@@ -351,14 +351,24 @@ public sealed partial class ZoneWorld
         }
         if (!changed)
             return;
-        var before = HoldingsFromStored(items);
-        var after = HoldingsFromStored(kept);
+        var before = Fineage.Zone.Persistence.StoredStateAudit.BagHoldings(items, _game.Items);
+        var after = Fineage.Zone.Persistence.StoredStateAudit.BagHoldings(kept, _game.Items);
         var bag = LedgerAccount.Inventory(roster.CharacterId);
         var move = BeginLedgerMove(LedgerTxKind.Destroy, roster.CharacterId, castleId);
         move.Observe(bag, before);
         PostChange(move, bag, before, after, LedgerAccount.Of(SystemAccount.Destroyed));
-        _accounts.TryReplaceItems(roster.Account, roster.CharacterId, kept);
+        // #984: the bag row is written by the economy commit, in the same transaction as this move's journal row;
+        // a direct TryReplaceItems here could land without the journal row (or the reverse) across a crash.
+        bool commitNow;
+        using (_economyLock.Enter())
+        {
+            _dirtyOfflineBags.Add(new EconomyBagWrite(roster.Account, roster.CharacterId) { Inventory = kept });
+            commitNow = !InventoryPersistDeferred;
+        }
+
         move.Commit(LedgerHoldingsOf);
+        if (commitNow)
+            TryCommitDirtyEconomy(discardWithoutPublish: null);
     }
 
     /// <summary>Test hook for circlet removal (Mobius <c>CastleManager.removeCirclet</c>).</summary>

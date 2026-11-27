@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <Description>Child process for the AtomicJsonFile kill -9 test: rewrites one snapshot until it is killed.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Fineage.Game\Fineage.Game.csproj" />
+  </ItemGroup>
+</Project>

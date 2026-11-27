@@ -100,7 +100,7 @@ public sealed partial class ZoneWorld
         }
 
         using (_economyLock.Enter())
-            _dirtyOfflineFreight.Add(new EconomyBagWrite(account, characterId) { Freight = stored });
+            _dirtyOfflineBags.Add(new EconomyBagWrite(account, characterId) { Freight = stored });
     }
 
     string? OpenPackageDeposit(ZoneSession session, ZoneEntity player, ZoneEntity npc)

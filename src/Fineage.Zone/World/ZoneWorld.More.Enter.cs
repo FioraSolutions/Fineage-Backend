@@ -182,6 +182,9 @@ public sealed partial class ZoneWorld
         long characterEpoch = _snapshots.OwnerEpoch(CharacterPersistWorker.CharacterDomain, session.ObjectId);
         long petEpoch = _snapshots.DomainEpoch(CharacterPersistWorker.PetDomain);
         CharacterRecord? stored = _accounts?.FindById(session.Account, session.ObjectId);
+        // #984: a saved row naming an id the data no longer has refuses the enter with every name, before anything is
+        // built. Loading without it would drop the row from the live state and the next save would delete it.
+        Fineage.Zone.Persistence.StoredStateAudit.RequireLoadable(stored, _game, _henna);
         var entity = BuildEnteringPlayer(session, stored);
         return new EnteringPlayer
         {

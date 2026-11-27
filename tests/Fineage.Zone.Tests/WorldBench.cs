@@ -62,10 +62,12 @@ internal sealed class WorldBench
         Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
-        IAccountStore? accounts = null)
+        IAccountStore? accounts = null,
+        MemoryAccountStore? store = null)
     {
         Game = game ?? TestCatalogs.Game;
-        Store = MemoryAccountStore.InMemory();
+        // A restart test hands the previous bench's store in, so the new world loads what the old one committed.
+        Store = store ?? MemoryAccountStore.InMemory();
         Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
         IRegionExecutor resolvedExecutor = regionExecutor ??
