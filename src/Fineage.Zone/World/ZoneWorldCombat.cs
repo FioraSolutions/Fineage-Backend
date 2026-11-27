@@ -28,7 +28,14 @@ public sealed partial class ZoneWorld
         session.SelectedTargetId = 0;
         player.Intent.AutoAttackTargetId = 0;
         player.Intent.ClearApproach();
+        // Self: close target window. Peers: Mobius TargetUnselected only when a real target was dropped.
         NetBridge?.FanoutTargetUnselected([session.ObjectId], previous);
+        if (previous != 0)
+        {
+            var peers = PeerWatchers(player.ObjectId);
+            if (peers.Count > 0)
+                NetBridge?.FanoutTargetUnselected(peers, previous, selectorObjectId: player.ObjectId);
+        }
 
         return Task.FromResult<string?>(null);
     }
@@ -134,9 +141,29 @@ public sealed partial class ZoneWorld
                 NetBridge.FanoutAbnormalStatusUpdate(self, AbnormalFor(target));
         }
 
-        // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror, so it carries the
-        // same id + colour. Mobius also broadcasts TargetSelected to peers; that fanout stays out of scope here.
+        // Net has no MyTargetSelected opcode: TargetSelected (0x030F) is its self-side mirror (selector 0 + colour).
+        // Mobius Broadcast.toKnownPlayers(TargetSelected(selector, target, xyz)) for peers.
         NetBridge.FanoutTargetSelected(self, target.ObjectId, colour);
+        var peers = PeerWatchers(player.ObjectId);
+        if (peers.Count > 0)
+        {
+            NetBridge.FanoutTargetSelected(
+                peers,
+                target.ObjectId,
+                colorHint: 0,
+                selectorObjectId: player.ObjectId,
+                x: player.X,
+                y: player.Y,
+                z: player.Z);
+        }
+    }
+
+    /// <summary>AOI watchers of <paramref name="subjectId"/> excluding the subject (Mobius toKnownPlayers).</summary>
+    List<int> PeerWatchers(int subjectId)
+    {
+        var peers = CopyNetWatcherIds(subjectId);
+        peers.Remove(subjectId);
+        return peers;
     }
 
     /// <summary>

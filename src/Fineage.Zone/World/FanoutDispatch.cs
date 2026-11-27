@@ -138,10 +138,10 @@ internal static class FanoutDispatch
                 publisher.FanoutSocialAction(watchers, args.A, args.B);
                 return;
             case FanoutKind.TargetSelected:
-                publisher.FanoutTargetSelected(watchers, args.A, args.B);
+                publisher.FanoutTargetSelected(watchers, args.A, args.B, args.C, args.D, args.E, args.F);
                 return;
             case FanoutKind.TargetUnselected:
-                publisher.FanoutTargetUnselected(watchers, args.A);
+                publisher.FanoutTargetUnselected(watchers, args.A, args.B);
                 return;
             case FanoutKind.AcquireSkillList:
                 publisher.FanoutAcquireSkillList(watchers, ((Fineage.Protocol.AcquireSkillListMsg)args.Payload!));

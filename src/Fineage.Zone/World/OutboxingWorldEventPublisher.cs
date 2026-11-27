@@ -184,11 +184,23 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId) =>
         Record(FanoutKind.SocialAction, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: actionId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint) =>
-        Record(FanoutKind.TargetSelected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId, B: colorHint), replaceable: false);
+    void IWorldEventPublisher.FanoutTargetSelected(
+        IReadOnlyList<int> watcherObjectIds,
+        int targetObjectId,
+        int colorHint,
+        int selectorObjectId,
+        int x,
+        int y,
+        int z) =>
+        Record(
+            FanoutKind.TargetSelected,
+            0,
+            watcherObjectIds,
+            new FanoutArgs(A: targetObjectId, B: colorHint, C: selectorObjectId, D: x, E: y, F: z),
+            replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId) =>
-        Record(FanoutKind.TargetUnselected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId), replaceable: false);
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int selectorObjectId) =>
+        Record(FanoutKind.TargetUnselected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId, B: selectorObjectId), replaceable: false);
 
     void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list) =>
         Record(FanoutKind.AcquireSkillList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
