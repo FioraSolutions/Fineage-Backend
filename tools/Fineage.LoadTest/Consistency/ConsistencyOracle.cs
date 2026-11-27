@@ -37,6 +37,7 @@ public static class ConsistencyOracle
         DateTimeOffset? runStarted = null)
     {
         DateTimeOffset steadyAfter = runStarted ?? DateTimeOffset.MinValue;
+        DateTimeOffset analysisNow = DateTimeOffset.UtcNow;
         int watch = aoiCellSize * 2;
         var issues = new List<ConsistencyIssue>();
         var roster = BuildRoster(bots, scenario);
@@ -124,7 +125,8 @@ public static class ConsistencyOracle
                 pairs++; // one pair observation is meaningful when at least one side is live
 
                 if (aLive && !aSeesB &&
-                    HasComparableWatchEvidence(timelines[a.BotId], timelines[b.BotId], a, b, pairAt, aoiCellSize))
+                    HasComparableWatchEvidence(timelines[a.BotId], timelines[b.BotId],
+                        liveness[a.BotId], liveness[b.BotId], a, b, pairAt, aoiCellSize))
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -132,12 +134,14 @@ public static class ConsistencyOracle
                         ObserverBotId = a.BotId,
                         OtherBotId = b.BotId,
                         SubjectObjectId = b.ObjectId,
-                        Detail = $"distance {dist} ≤ {watch}: missing peer spawn"
+                        Detail = $"distance {dist} ≤ {watch}: missing peer spawn",
+                        ObservedAt = pairAt != default ? pairAt : null
                     });
                 }
 
                 if (bLive && !bSeesA &&
-                    HasComparableWatchEvidence(timelines[b.BotId], timelines[a.BotId], b, a, pairAt, aoiCellSize))
+                    HasComparableWatchEvidence(timelines[b.BotId], timelines[a.BotId],
+                        liveness[b.BotId], liveness[a.BotId], b, a, pairAt, aoiCellSize))
                 {
                     issues.Add(new ConsistencyIssue
                     {
@@ -145,13 +149,14 @@ public static class ConsistencyOracle
                         ObserverBotId = b.BotId,
                         OtherBotId = a.BotId,
                         SubjectObjectId = a.ObjectId,
-                        Detail = $"distance {dist} ≤ {watch}: missing peer spawn"
+                        Detail = $"distance {dist} ≤ {watch}: missing peer spawn",
+                        ObservedAt = pairAt != default ? pairAt : null
                     });
                 }
 
                 if (aLive && bLive && aSeesB && bSeesA)
                 {
-                    if (TryPeerTruth(b, out _, out _, out int truthHp, out _) &&
+                    if (TryPeerTruth(b, out _, out _, out _, out _) &&
                         a.Tracker.Entities.TryGetValue((ulong)b.ObjectId, out var viewB))
                     {
                         if (!DiedAtOrAfter(b, viewB.PositionUpdatedAt) &&
@@ -169,8 +174,15 @@ public static class ConsistencyOracle
                             });
                         }
 
-                        if (!DiedAtOrAfter(b, viewB.PositionUpdatedAt) &&
-                            truthHp > 0 && viewB.CurHp > 0 && Math.Abs(viewB.CurHp - truthHp) > Math.Max(50, truthHp / 10))
+                        // Compare the observer's timestamped bar with the latest HP state the server was
+                        // expected to fan out, not with the subject's end-of-run self HP. A level-up/kill
+                        // reward is owner-only and does not create an expected peer state.
+                        if (!DiedAtOrAfter(b, viewB.HpUpdatedAt) &&
+                            TryExpectedPeerHp(b, out int expectedHp, out DateTimeOffset expectedAt) &&
+                            expectedAt > viewB.HpUpdatedAt &&
+                            analysisNow - expectedAt >= TimeSpan.FromMilliseconds(ComparableWindowMs) &&
+                            expectedHp > 0 && viewB.CurHp > 0 &&
+                            Math.Abs(viewB.CurHp - expectedHp) > Math.Max(50, expectedHp / 10))
                         {
                             issues.Add(new ConsistencyIssue
                             {
@@ -178,12 +190,13 @@ public static class ConsistencyOracle
                                 ObserverBotId = a.BotId,
                                 OtherBotId = b.BotId,
                                 SubjectObjectId = b.ObjectId,
-                                Detail = $"HP view {viewB.CurHp} vs ground {truthHp}"
+                                Detail = $"HP view {viewB.CurHp} vs expected {expectedHp}",
+                                ObservedAt = expectedAt
                             });
                         }
                     }
 
-                    if (TryPeerTruth(a, out _, out _, out truthHp, out _) &&
+                    if (TryPeerTruth(a, out _, out _, out _, out _) &&
                         b.Tracker.Entities.TryGetValue((ulong)a.ObjectId, out var viewA))
                     {
                         if (!DiedAtOrAfter(a, viewA.PositionUpdatedAt) &&
@@ -637,9 +650,28 @@ public static class ConsistencyOracle
     }
 
     /// <summary>
+    /// The latest HP state the server was expected to send to peers, timestamped. Owner-only kill/level updates
+    /// advance <see cref="BotObservationLog.TrackedEntity.CurHp"/> but not this state.
+    /// </summary>
+    static bool TryExpectedPeerHp(BotRosterEntry peer, out int hp, out DateTimeOffset at)
+    {
+        if (peer.Tracker.Entities.TryGetValue((ulong)peer.ObjectId, out var self) &&
+            self.ExpectedPeerHpAt != default)
+        {
+            hp = self.ExpectedPeerHp;
+            at = self.ExpectedPeerHpAt;
+            return true;
+        }
+
+        hp = 0;
+        at = default;
+        return false;
+    }
+
+    /// <summary>
     /// Selects one instant both timelines can answer and returns both positions at that instant. The newest
-    /// sample of either side is the reference so an old stationary observer still has a valid position, while
-    /// missing-spawn evidence is accepted only from a comparable instant by <see cref="HasComparableWatchEvidence"/>.
+    /// sample of either side is the reference so an old stationary observer still has a valid position; the
+    /// missing-spawn check separately requires both sides live and fresh at that instant.
     /// </summary>
     static bool TryPairPositionsAtCommonTime(
         PositionTimeline aTimeline,
@@ -670,51 +702,43 @@ public static class ConsistencyOracle
     }
 
     /// <summary>
-    /// A missing spawn needs an instant where both timelines carry a position sample inside the fan-out
-    /// window and the pair is inside the same 3x3 watch. The newest instant is tried first, then the samples
-    /// that led to it, so a subject that stopped updating before the observer arrived is not paired across eras.
+    /// A missing spawn needs one live common instant where both self timelines are fresh and the pair is inside
+    /// the same 3x3 watch. It must not be inferred from current membership plus a co-visible moment minutes ago:
+    /// that is the long-soak case where a peer's self timeline ended while the observer kept moving.
     /// </summary>
     static bool HasComparableWatchEvidence(
         PositionTimeline observerTimeline,
         PositionTimeline subjectTimeline,
+        LivenessTimeline observerLiveness,
+        LivenessTimeline subjectLiveness,
         BotRosterEntry observer,
         BotRosterEntry subject,
-        DateTimeOffset latest,
+        DateTimeOffset at,
         int cellSize)
-    {
-        if (BothFreshAt(observerTimeline, subjectTimeline, latest) &&
-            PairVisibleAt(observerTimeline, subjectTimeline, latest, observer, subject, cellSize))
-            return true;
-
-        foreach (var point in subjectTimeline.Points)
-        {
-            if (point.At.UtcTicks > latest.UtcTicks)
-                break;
-            if (BothFreshAt(observerTimeline, subjectTimeline, point.At) &&
-                PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
-                return true;
-        }
-
-        foreach (var point in observerTimeline.Points)
-        {
-            if (point.At.UtcTicks > latest.UtcTicks)
-                break;
-            if (BothFreshAt(observerTimeline, subjectTimeline, point.At) &&
-                PairVisibleAt(observerTimeline, subjectTimeline, point.At, observer, subject, cellSize))
-                return true;
-        }
-
-        return false;
-    }
-
-    static bool BothFreshAt(PositionTimeline aTimeline, PositionTimeline bTimeline, DateTimeOffset at)
     {
         if (at == default)
             return false;
+        if (!IsLiveAt(observerLiveness, observer, at) || !IsLiveAt(subjectLiveness, subject, at))
+            return false;
         long window = TimeSpan.FromMilliseconds(ComparableWindowMs).Ticks;
-        return FreshAt(aTimeline, at, window) && FreshAt(bTimeline, at, window);
+        if (!ObserverFreshAt(observerTimeline, at, window) || !FreshAt(subjectTimeline, at, window))
+            return false;
+        return PairVisibleAt(observerTimeline, subjectTimeline, at, observer, subject, cellSize);
     }
 
+    /// <summary>
+    /// An observer whose only self sample is its spawn has not moved: that origin remains its current position.
+    /// Once the observer moved, an old last sample is an unobserved interval and cannot anchor a pair.
+    /// </summary>
+    static bool ObserverFreshAt(PositionTimeline timeline, DateTimeOffset at, long windowTicks) =>
+        timeline.Count <= 1 ||
+        (timeline.TryAt(at, out _, out _, out DateTimeOffset sampleAt) &&
+         at.UtcTicks - sampleAt.UtcTicks <= windowTicks);
+
+    /// <summary>
+    /// The subject must have a self sample inside the window regardless of count. Its last origin is the pair
+    /// ground, so a subject that stopped minutes ago must not be paired with the observer's current position.
+    /// </summary>
     static bool FreshAt(PositionTimeline timeline, DateTimeOffset at, long windowTicks) =>
         timeline.TryAt(at, out _, out _, out DateTimeOffset sampleAt) &&
         at.UtcTicks - sampleAt.UtcTicks <= windowTicks;

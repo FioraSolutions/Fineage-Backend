@@ -319,6 +319,9 @@ public sealed class BotObservationLog
                             PositionUpdatedAt = at,
                             MaxHp = s.MaxHp,
                             CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
+                            HpUpdatedAt = at,
+                            ExpectedPeerHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
+                            ExpectedPeerHpAt = at,
                             LastSpawnOrdinal = ++_spawnOrdinal,
                             LastDespawnOrdinal = previous?.LastDespawnOrdinal ?? 0,
                             LastDeathAt = previous?.LastDeathAt,
@@ -349,6 +352,9 @@ public sealed class BotObservationLog
                             {
                                 Alive = false,
                                 CurHp = 0,
+                                HpUpdatedAt = at,
+                                ExpectedPeerHp = 0,
+                                ExpectedPeerHpAt = at,
                                 LastDeathAt = at,
                                 SpawnsWithoutDespawn = 0,
                                 IsMoveOrigin = false
@@ -444,12 +450,39 @@ public sealed class BotObservationLog
                         ulong key = st.EntityValue;
                         if (_byValue.TryGetValue(key, out var e))
                         {
+                            // Kill/level updates carry Level/Exp/Sp and are sent to the owner only (Mobius
+                            // PlayerStat.addLevel -> updateUserInfo), so they must not become the HP state peers
+                            // are expected to hold.
+                            bool selfOnly = false;
+                            bool sawHp = false;
                             for (int i = 0; i < st.AttributeIds.Length && i < st.Values.Length; i++)
                             {
-                                if (st.AttributeIds[i] == InterludeStatus.CurHp)
-                                    e.CurHp = st.Values[i];
-                                else if (st.AttributeIds[i] == InterludeStatus.MaxHp)
-                                    e.MaxHp = st.Values[i];
+                                switch (st.AttributeIds[i])
+                                {
+                                    case InterludeStatus.CurHp:
+                                        e.CurHp = st.Values[i];
+                                        sawHp = true;
+                                        break;
+                                    case InterludeStatus.MaxHp:
+                                        e.MaxHp = st.Values[i];
+                                        sawHp = true;
+                                        break;
+                                    case InterludeStatus.Level:
+                                    case InterludeStatus.Exp:
+                                    case InterludeStatus.Sp:
+                                        selfOnly = true;
+                                        break;
+                                }
+                            }
+
+                            if (sawHp)
+                            {
+                                e.HpUpdatedAt = at;
+                                if (!selfOnly)
+                                {
+                                    e.ExpectedPeerHp = e.CurHp;
+                                    e.ExpectedPeerHpAt = at;
+                                }
                             }
 
                             _byValue[key] = e;
@@ -666,6 +699,14 @@ public sealed class BotObservationLog
         public bool IsMoveOrigin { get; set; }
         public int CurHp { get; set; }
         public int MaxHp { get; set; }
+        /// <summary>When the last spawn/status/die frame for this entity carried HP.</summary>
+        public DateTimeOffset HpUpdatedAt { get; set; }
+        /// <summary>
+        /// Latest HP the server was expected to fan out to peers for this entity. Owner-only kill/level updates
+        /// update <see cref="CurHp"/> but leave this untouched, so a stale peer bar is not called a desync.
+        /// </summary>
+        public int ExpectedPeerHp { get; set; }
+        public DateTimeOffset ExpectedPeerHpAt { get; set; }
         public bool Despawned { get; set; }
         public long LastSpawnOrdinal { get; set; }
         public long LastDespawnOrdinal { get; set; }
