@@ -29,6 +29,7 @@ public sealed partial class NetZoneServer
     readonly PartyPacketHandler _party;
     readonly CommandChannelPacketHandler _commandChannel;
     readonly PartyMatchPacketHandler _partyMatch;
+    readonly CommunityBoardPacketHandler _communityBoard;
     readonly FriendPacketHandler _friends;
     readonly WeddingPacketHandler _wedding;
     readonly ShortcutActionPacketHandler _shortcutActions;
@@ -79,6 +80,7 @@ public sealed partial class NetZoneServer
         _party = new PartyPacketHandler(_world, RejectAsync);
         _commandChannel = new CommandChannelPacketHandler(_world, RejectAsync);
         _partyMatch = new PartyMatchPacketHandler(_world, RejectAsync);
+        _communityBoard = new CommunityBoardPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
         _wedding = new WeddingPacketHandler(_world, RejectAsync);
         _shortcutActions = new ShortcutActionPacketHandler(_world, RejectAsync);

@@ -326,6 +326,9 @@ internal static class FanoutDispatch
             case FanoutKind.PartyMatchWaitingRoom:
                 publisher.FanoutPartyMatchWaitingRoom(watchers, ((Fineage.Protocol.PartyMatchWaitingRoomMsg)args.Payload!));
                 return;
+            case FanoutKind.ShowBoard:
+                publisher.FanoutShowBoard(watchers, ((Fineage.Protocol.ShowBoardMsg)args.Payload!));
+                return;
             case FanoutKind.MagicSkillLaunched:
                 publisher.FanoutMagicSkillLaunched(watchers, args.A, args.B, args.C, ((int[])args.Payload!));
                 return;

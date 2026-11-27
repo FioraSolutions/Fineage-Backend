@@ -216,6 +216,7 @@ public sealed partial class ZoneWorld
         BossSchedule? bosses = null,
         Random? bossRandom = null,
         NpcHtmlCatalog? html = null,
+        Fineage.Zone.CommunityBoard.CommunityBoardCatalog? communityBoard = null,
         BypassRegistry? bypasses = null,
         OlympiadBoard? olympiad = null,
         OlympiadSettings? olympiadSettings = null,
@@ -348,6 +349,7 @@ public sealed partial class ZoneWorld
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _l10n = localization ?? LoadLocalization();
         _pages = new LocalizedHtml(_l10n, _html);
+        InitCommunityBoard(communityBoard);
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_pages);
         _party = new PartyActor(new PartyMembers(this));
         var resolvedOlympiadSettings = olympiadSettings ?? OlympiadSettings.FromEnvironment();

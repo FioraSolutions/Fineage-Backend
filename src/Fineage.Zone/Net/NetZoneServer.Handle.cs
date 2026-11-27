@@ -268,6 +268,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestPartyMatchWaitingExit:
                             await _partyMatch.OnWaitingExitAsync(conn, zoneSession, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestShowBoard:
+                            await _communityBoard.OnShowBoardAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestBBSwrite:
+                            await _communityBoard.OnBBSwriteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

@@ -328,6 +328,12 @@ public enum MsgType : ushort
     PartyRoomAskJoin = 1125,
     /// <summary>Zone → client waiting-room list. Body is <see cref="PartyMatchWaitingRoomMsg"/>.</summary>
     PartyMatchWaitingRoom = 1126,
+    /// <summary>Client opens the community board. Body is <see cref="ShowBoardRequestMsg"/>.</summary>
+    RequestShowBoard = 1127,
+    /// <summary>Client posts a community-board form. Body is <see cref="BBSwriteMsg"/>.</summary>
+    RequestBBSwrite = 1128,
+    /// <summary>Zone → client community board HTML. Body is <see cref="ShowBoardMsg"/>.</summary>
+    ShowBoard = 1129,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

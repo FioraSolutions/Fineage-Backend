@@ -303,6 +303,9 @@ interface IWorldEventPublisher
 
     void FanoutPartyMatchWaitingRoom(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchWaitingRoomMsg list);
 
+    /// <summary>Mobius <c>ShowBoard</c> (community board HTML chunk).</summary>
+    void FanoutShowBoard(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowBoardMsg board);
+
     /// <summary>Interlude MagicSkillLaunched at hitTime: caster + everyone who sees the caster.</summary>
     void FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds);
 
