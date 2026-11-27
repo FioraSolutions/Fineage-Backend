@@ -76,10 +76,11 @@ public sealed partial class ZoneWorld
 
         if (Petitions.IsPlayerInConsultation(session.ObjectId))
         {
-            if (ZoneAdmin.IsAdminCharacter(player.Name))
+            // Mobius RequestPetitionCancel: only the GM responder ends an active consultation.
+            if (Petitions.TryActiveFor(session.ObjectId, out var active)
+                && active.ResponderObjectId == session.ObjectId)
             {
-                if (Petitions.TryActiveFor(session.ObjectId, out var active))
-                    Petitions.End(active.Id, PetitionState.Completed, out _);
+                Petitions.End(active.Id, PetitionState.Completed, out _);
             }
             else
             {
@@ -114,7 +115,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var gm)
             || gm.Kind != ZoneEntityKind.Player)
             return Task.FromResult<string?>("world");
-        if (!ZoneAdmin.IsAdminCharacter(gm.Name) && PetitionRequireOnlineGm)
+        if (PetitionRequireOnlineGm && !ZoneAdmin.IsAdminCharacter(gm.Name))
             return Task.FromResult<string?>("forbidden");
 
         if (!Petitions.Accept(session.ObjectId, gm.Name, petitionId, out var entry) || entry == null)
