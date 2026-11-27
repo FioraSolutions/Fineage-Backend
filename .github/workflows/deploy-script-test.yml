@@ -1,0 +1,35 @@
+name: deploy-script-test
+
+# Proves deploy/release-switch.sh (#989) locally on the runner: atomic switch, readiness gate, rollback,
+# refused rollback after forward-only migrations, pruning, failed preflight. No host, no secrets, no deploy.
+on:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'deploy/**'
+      - 'tests/deploy/**'
+      - '.github/workflows/deploy-script-test.yml'
+      - '.github/workflows/deploy.yml'
+  push:
+    branches: [main, dev]
+    paths:
+      - 'deploy/**'
+      - 'tests/deploy/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-switch:
+    name: release-switch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax and lint
+        run: |
+          bash -n deploy/release-switch.sh deploy/deploy-to-host.sh tests/deploy/release-switch.test.sh
+          shellcheck -S warning deploy/release-switch.sh deploy/deploy-to-host.sh
+      - name: Release switch scenarios
+        run: bash tests/deploy/release-switch.test.sh
