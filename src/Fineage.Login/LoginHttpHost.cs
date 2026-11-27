@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Fineage.Accounts;
+using Fineage.Protocol.Health;
 
 namespace Fineage.Login;
 
@@ -16,10 +17,21 @@ public sealed record AuthOkBody(bool Ok, string Username, string Mode);
 public sealed record AuthErrBody(bool Ok, string Error);
 
 /// <summary>
-/// Play-landing status. <paramref name="Ok"/> and <paramref name="Login"/> are true when this process answers.
-/// <paramref name="Zone"/> is Zone reachability. <paramref name="PlayersOnline"/> is the live count, or 0 when Zone is down.
+/// Play-landing status. <paramref name="Ok"/> is true only when Login and Zone are both ready.
+/// <paramref name="Login"/> is Login readiness (database, migrations, ledger, listener, handoff).
+/// <paramref name="Zone"/> is Zone readiness, not merely an open port; <paramref name="Database"/> and
+/// <paramref name="Migrations"/> expose the two dependency flags separately. <paramref name="Reasons"/>
+/// names every failed check. <paramref name="PlayersOnline"/> is the live count, or 0 when Zone is not ready.
 /// </summary>
-public sealed record StatusBody(bool Ok, bool Login, bool Zone, int PlayersOnline);
+public sealed record StatusBody(
+    bool Ok,
+    bool Login,
+    bool Zone,
+    int PlayersOnline,
+    bool Database,
+    bool Migrations,
+    bool Ready,
+    IReadOnlyList<string> Reasons);
 
 /// <summary>Kestrel surface for the play-landing auth contract. Same <see cref="LoginService"/> as TCP login.</summary>
 public sealed class LoginHttpHost : IAsyncDisposable
@@ -28,11 +40,18 @@ public sealed class LoginHttpHost : IAsyncDisposable
 
     readonly WebApplication _app;
     readonly IZoneStatusSource _zoneStatus;
+    readonly ILoginReadinessSource _loginReadiness;
 
-    LoginHttpHost(WebApplication app, string baseUrl, IZoneStatusSource zoneStatus, string? zoneStatusProbe)
+    LoginHttpHost(
+        WebApplication app,
+        string baseUrl,
+        IZoneStatusSource zoneStatus,
+        ILoginReadinessSource loginReadiness,
+        string? zoneStatusProbe)
     {
         _app = app;
         _zoneStatus = zoneStatus;
+        _loginReadiness = loginReadiness;
         BaseUrl = baseUrl;
         ZoneStatusProbe = zoneStatusProbe;
     }
@@ -47,7 +66,8 @@ public sealed class LoginHttpHost : IAsyncDisposable
         IPAddress address,
         int port,
         CancellationToken ct = default,
-        IZoneStatusSource? zoneStatus = null)
+        IZoneStatusSource? zoneStatus = null,
+        ILoginReadinessSource? loginReadiness = null)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
@@ -58,15 +78,25 @@ public sealed class LoginHttpHost : IAsyncDisposable
         builder.WebHost.UseUrls(Url(address, port));
         var app = builder.Build();
         IZoneStatusSource source = zoneStatus ?? (IZoneStatusSource?)HttpZoneStatusSource.FromEnvironment() ?? UnavailableZoneStatus.Instance;
+        ILoginReadinessSource readiness = loginReadiness ?? UnconfiguredLoginReadiness.Instance;
         string? probeUrl = source is HttpZoneStatusSource http ? http.Url.AbsoluteUri : null;
         app.Use(async (ctx, next) =>
         {
             ctx.Response.Headers.CacheControl = "no-store";
             await next().ConfigureAwait(false);
         });
+        app.MapGet("/livez", () => Results.Json(HealthBody.Live("login"), StatusJson));
+        app.MapGet("/healthz", () => Results.Json(HealthBody.Live("login"), StatusJson));
+        app.MapGet("/readyz", async (HttpContext http, CancellationToken token) =>
+        {
+            ReadinessReport report = await ReadReadinessAsync(readiness, token).ConfigureAwait(false);
+            HealthBody body = HealthBody.From("login", report);
+            return Results.Json(body, StatusJson, statusCode: body.Ready ? 200 : 503);
+        });
         app.MapGet("/api/status", async (HttpContext http, CancellationToken token) =>
         {
             http.Response.Headers.CacheControl = "no-store";
+            ReadinessReport login = await ReadReadinessAsync(readiness, token).ConfigureAwait(false);
             ZoneStatusReading reading;
             try
             {
@@ -76,13 +106,27 @@ public sealed class LoginHttpHost : IAsyncDisposable
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                reading = ZoneStatusReading.Down;
+                reading = ZoneStatusReading.Unreachable("zone status probe failed: " + ex.Message);
             }
 
-            int players = reading.Reachable ? Math.Max(0, reading.PlayersOnline) : 0;
-            return Results.Json(new StatusBody(true, true, reading.Reachable, players), StatusJson);
+            bool zoneReady = reading.Reachable;
+            int players = zoneReady ? Math.Max(0, reading.PlayersOnline) : 0;
+            var reasons = new List<string>(login.Reasons);
+            if (!zoneReady)
+                reasons.AddRange(reading.Reasons.Count > 0 ? reading.Reasons : ["zone: status endpoint reported not ready"]);
+            bool ready = login.Ready && zoneReady;
+            var body = new StatusBody(
+                Ok: ready,
+                Login: login.Ready,
+                Zone: zoneReady,
+                PlayersOnline: players,
+                Database: CheckOk(login, "database"),
+                Migrations: CheckOk(login, "migrations"),
+                Ready: ready,
+                Reasons: reasons);
+            return Results.Json(body, StatusJson, statusCode: login.Ready ? 200 : 503);
         });
         app.MapPost("/api/auth/register", (HttpRequest request, CancellationToken token) =>
             HandleAsync(request, token, (user, email, password) => service.RegisterLanding(user, email, password), successStatus: 201));
@@ -104,8 +148,27 @@ public sealed class LoginHttpHost : IAsyncDisposable
         string bound = app.Urls.FirstOrDefault()
             ?? app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()?.Addresses.FirstOrDefault()
             ?? throw new InvalidOperationException("HTTP listener did not bind.");
-        return new LoginHttpHost(app, bound.TrimEnd('/'), source, probeUrl);
+        return new LoginHttpHost(app, bound.TrimEnd('/'), source, readiness, probeUrl);
     }
+
+    static async ValueTask<ReadinessReport> ReadReadinessAsync(ILoginReadinessSource source, CancellationToken token)
+    {
+        try
+        {
+            return await source.ReadAsync(token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return new ReadinessReport(false, [new ReadinessCheck("probe", false, "readiness probe threw: " + ex.Message)]);
+        }
+    }
+
+    static bool CheckOk(ReadinessReport report, string name) =>
+        report.Checks.Any(check => check.Name == name && check.Ok);
 
     public async ValueTask DisposeAsync()
     {

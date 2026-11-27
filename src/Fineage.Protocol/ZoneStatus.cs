@@ -12,9 +12,13 @@ public static class ZoneStatus
     public const string PortVariable = "FINEAGE_ZONE_STATUS_PORT";
     public const string UrlVariable = "FINEAGE_ZONE_STATUS_URL";
     public const string Path = "/status";
+    public const string ReadinessPath = "/readyz";
+    public const string LivenessPath = "/livez";
     public const string PlayersProperty = "playersOnline";
 
     public static string LoopbackUrl(int port) => $"http://127.0.0.1:{port}{Path}";
+
+    public static string ReadinessUrl(int port) => $"http://127.0.0.1:{port}{ReadinessPath}";
 
     /// <summary>
     /// Unset means <see cref="DefaultPort"/>. <c>0</c> or <c>off</c> disables the listener.

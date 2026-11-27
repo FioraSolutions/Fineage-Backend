@@ -1,15 +1,20 @@
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
+using Fineage.Protocol.Health;
 
 namespace Fineage.Protocol;
 
 /// <summary>
-/// Tiny loopback HTTP server. <c>GET /status</c> returns <c>{"playersOnline":n}</c> from the zone simulation.
+/// Tiny loopback HTTP server for Zone operations. <c>GET /status</c> returns the established compact
+/// play-landing count, <c>GET /livez</c> is cheap process liveness, and <c>GET /readyz</c> is the deploy
+/// contract: 200 only when every required dependency and startup stage is ready, otherwise 503 with reasons.
 /// </summary>
 public sealed class ZoneStatusHost : IAsyncDisposable
 {
+    static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+
     readonly TcpListener _listener;
     readonly CancellationTokenSource _cts;
     readonly Task _loop;
@@ -26,8 +31,15 @@ public sealed class ZoneStatusHost : IAsyncDisposable
 
     public string Url => ZoneStatus.LoopbackUrl(Port);
 
-    /// <summary>Binds <c>127.0.0.1</c>. Port <c>0</c> picks an ephemeral port. Returns null when the bind fails.</summary>
-    public static ZoneStatusHost? TryStart(int port, Func<int> playersOnline, TextWriter error)
+    /// <summary>
+    /// Binds <c>127.0.0.1</c>. Port <c>0</c> picks an ephemeral port. Returns null when the bind fails.
+    /// A null <paramref name="readiness"/> reports a failed probe; it never defaults to healthy.
+    /// </summary>
+    public static ZoneStatusHost? TryStart(
+        int port,
+        Func<int> playersOnline,
+        TextWriter error,
+        Func<ValueTask<ReadinessReport>>? readiness = null)
     {
         ArgumentNullException.ThrowIfNull(playersOnline);
         ArgumentNullException.ThrowIfNull(error);
@@ -50,7 +62,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
 
         int bound = ((IPEndPoint)listener.LocalEndpoint).Port;
         var cts = new CancellationTokenSource();
-        var loop = Task.Run(() => AcceptAsync(listener, playersOnline, cts.Token));
+        var loop = Task.Run(() => AcceptAsync(listener, playersOnline, readiness, cts.Token));
         return new ZoneStatusHost(listener, cts, loop, bound);
     }
 
@@ -69,21 +81,29 @@ public sealed class ZoneStatusHost : IAsyncDisposable
         _cts.Dispose();
     }
 
-    public static bool IsStatusGet(string requestLine)
+    public static bool IsStatusGet(string requestLine) =>
+        TryGetPath(requestLine, out string path) && path is "/status" or "/status/";
+
+    static bool TryGetPath(string requestLine, out string path)
     {
+        path = "";
         if (!requestLine.StartsWith("GET ", StringComparison.Ordinal))
             return false;
         int pathEnd = requestLine.IndexOf(' ', 4);
         if (pathEnd < 0)
             return false;
-        string path = requestLine[4..pathEnd];
+        path = requestLine[4..pathEnd];
         int query = path.IndexOf('?');
         if (query >= 0)
             path = path[..query];
-        return path is "/status" or "/status/";
+        return true;
     }
 
-    static async Task AcceptAsync(TcpListener listener, Func<int> playersOnline, CancellationToken ct)
+    static async Task AcceptAsync(
+        TcpListener listener,
+        Func<int> playersOnline,
+        Func<ValueTask<ReadinessReport>>? readiness,
+        CancellationToken ct)
     {
         try
         {
@@ -99,7 +119,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
                     break;
                 }
 
-                _ = Task.Run(() => RespondAsync(client, playersOnline, ct), ct);
+                _ = Task.Run(() => RespondAsync(client, playersOnline, readiness, ct), ct);
             }
         }
         catch (ObjectDisposedException)
@@ -107,7 +127,11 @@ public sealed class ZoneStatusHost : IAsyncDisposable
         }
     }
 
-    static async Task RespondAsync(TcpClient client, Func<int> playersOnline, CancellationToken ct)
+    static async Task RespondAsync(
+        TcpClient client,
+        Func<int> playersOnline,
+        Func<ValueTask<ReadinessReport>>? readiness,
+        CancellationToken ct)
     {
         using var _ = client;
         try
@@ -121,35 +145,74 @@ public sealed class ZoneStatusHost : IAsyncDisposable
             string head = Encoding.ASCII.GetString(buffer, 0, Math.Max(0, read));
             int lineEnd = head.IndexOf('\r');
             string request = lineEnd >= 0 ? head[..lineEnd] : head;
-            if (!IsStatusGet(request))
+            if (!TryGetPath(request, out string path))
             {
                 await WriteAsync(stream, "404 Not Found", "text/plain; charset=utf-8", "not found\n", ct).ConfigureAwait(false);
                 return;
             }
 
-            string body;
-            string status;
-            string type;
+            ReadinessReport report = await ReadReadinessAsync(readiness).ConfigureAwait(false);
+            if (path is "/livez" or "/livez/" or "/healthz" or "/healthz/")
+            {
+                await WriteAsync(stream, "200 OK", "application/json; charset=utf-8",
+                    HealthBody.Live("zone").ToJson(), ct).ConfigureAwait(false);
+                return;
+            }
+
+            if (path is "/readyz" or "/readyz/")
+            {
+                HealthBody body = HealthBody.From("zone", report);
+                await WriteAsync(stream, body.Ready ? "200 OK" : "503 Service Unavailable",
+                    "application/json; charset=utf-8", body.ToJson(), ct).ConfigureAwait(false);
+                return;
+            }
+
+            if (path is not ("/status" or "/status/"))
+            {
+                await WriteAsync(stream, "404 Not Found", "text/plain; charset=utf-8", "not found\n", ct).ConfigureAwait(false);
+                return;
+            }
+
             try
             {
                 int count = playersOnline();
                 if (count < 0)
                     count = 0;
-                body = "{\"" + ZoneStatus.PlayersProperty + "\":" + count.ToString(CultureInfo.InvariantCulture) + "}";
-                status = "200 OK";
-                type = "application/json; charset=utf-8";
+                // Keep the established compact status contract used by Login and the play landing.
+                // Detailed readiness has its own /readyz endpoint; /status must stay compatible.
+                await WriteAsync(stream, "200 OK", "application/json; charset=utf-8",
+                    JsonSerializer.Serialize(new { playersOnline = count }, Json), ct).ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                body = "unavailable\n";
-                status = "503 Service Unavailable";
-                type = "text/plain; charset=utf-8";
+                var failed = new ReadinessReport(false,
+                    [.. report.Checks, new ReadinessCheck("players", false, "playersOnline callback failed: " + ex.Message)]);
+                HealthBody body = HealthBody.From("zone", failed, playersOnline: 0);
+                await WriteAsync(stream, "503 Service Unavailable", "application/json; charset=utf-8", body.ToJson(), ct)
+                    .ConfigureAwait(false);
             }
-
-            await WriteAsync(stream, status, type, body, ct).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException or SocketException)
         {
+        }
+    }
+
+    static async ValueTask<ReadinessReport> ReadReadinessAsync(Func<ValueTask<ReadinessReport>>? readiness)
+    {
+        if (readiness == null)
+            return ReadinessReport.NotConfigured("zone");
+        try
+        {
+            return await readiness().ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            return new ReadinessReport(false,
+                [new ReadinessCheck("probe", false, "zone readiness probe threw: " + ex.Message)]);
         }
     }
 

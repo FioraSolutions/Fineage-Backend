@@ -31,12 +31,14 @@ jobs:
 
       # The live host is homeserver (Debian 13, x86-64). An arm64 publish made the
       # binaries unrunnable there, so keep the runtime identifier aligned with the host.
-      - name: Publish Login and Zone (linux-x64 self-contained)
+      - name: Publish Login, Zone and LoadTest smoke (linux-x64 self-contained)
         run: |
           dotnet publish src/Fineage.Login/Fineage.Login.csproj \
             -c Release -r linux-x64 --self-contained true -o publish/login
           dotnet publish src/Fineage.Zone/Fineage.Zone.csproj \
             -c Release -r linux-x64 --self-contained true -o publish/zone
+          dotnet publish tools/Fineage.LoadTest/Fineage.LoadTest.csproj \
+            -c Release -r linux-x64 --self-contained true -o publish/smoke
 
       # Reaching the host over the tailnet means the deploy works from any runner network
       # and needs no public SSH exposure. The OAuth client is tagged so the node appears
@@ -66,6 +68,7 @@ jobs:
           FINEAGE_DEPLOY_USER: ${{ vars.FINEAGE_DEPLOY_USER || 'nikita' }}
           FINEAGE_APP_ROOT: ${{ vars.FINEAGE_APP_ROOT || '/home/nikita/fineage-backend/deploy' }}
           FINEAGE_SSH_KEY: ~/.ssh/id_ed25519
+          FINEAGE_RELEASE_ID: ${{ github.sha }}
         run: |
-          chmod +x deploy/deploy-to-host.sh deploy/run-login.sh deploy/run-zone.sh
-          deploy/deploy-to-host.sh publish/login publish/zone
+          chmod +x deploy/deploy-to-host.sh deploy/release-manager.sh deploy/run-login.sh deploy/run-zone.sh
+          deploy/deploy-to-host.sh publish/login publish/zone publish/smoke

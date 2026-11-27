@@ -60,7 +60,7 @@ dotnet run --project src/Fineage.Zone -- --selftest
 
 HTTP register body is `{ "username", "email", "password" }`. Login body is `{ "username", "password" }` where `username` may be the email. Success is `{ "ok": true, "username", "mode": "live" }` with **201** (register) or **200** (login). Failures are `{ "ok": false, "error" }`: **400** (`invalid_body`, `invalid_username`, `invalid_email`, `invalid_password`, `password_matches_username`), **409** (`username_taken`, `email_taken`), **401** (`invalid_credentials`). Usernames are a letter then letters, digits, or `_` (3–24). Register passwords are 8–72 characters with no whitespace. TCP `Auth` still accepts the shorter passwords already in the store.
 
-`GET /api/status` returns `{ "ok": true, "login": true, "zone": <bool>, "playersOnline": <int> }` with `Cache-Control: no-store`. `ok` and `login` are true when Login HTTP answers. `zone` is true when Zone answers its loopback status. `playersOnline` is the live count of players in the world, or **0** when Zone is down (an empty world is `zone: true` and `playersOnline: 0`). The response is **200** in both cases. The play-landing Worker should proxy this GET to `FINEAGE_LOGIN_API_URL` the same way it proxies `POST /api/auth/*`. This process does not send CORS headers.
+`GET /api/status` returns `{ "ok", "login", "zone", "playersOnline", "database", "migrations", "ready", "reasons" }` with `Cache-Control: no-store`. `login` is Login readiness (PostgreSQL, migrations, ledger, listener, handoff), `zone` is Zone readiness, and `ready` is both. `ok` is true only when both are ready; `reasons` names every failed check. `playersOnline` is the live count, or **0** when Zone is not ready. A ready Login with a down Zone returns **200** with `zone:false` and `ready:false`; a Login that is not ready returns **503**. `GET /livez` and `GET /healthz` are cheap process liveness; `GET /readyz` is the dependency-aware contract and returns **503** with the failed checks. The play-landing Worker should proxy `/api/status` to `FINEAGE_LOGIN_API_URL` the same way it proxies `POST /api/auth/*`. This process does not send CORS headers.
 
 The ticket’s zone address comes from `FINEAGE_ZONE_HOST` (default `127.0.0.1`) and `FINEAGE_ZONE_PORT` (default `9777`). Set the host to the address clients can dial. It is not the bind address.
 
@@ -147,7 +147,8 @@ reach `homeserver:22`.
 # on homeserver, x86-64
 dotnet publish src/Fineage.Login/Fineage.Login.csproj -c Release -o publish/login
 dotnet publish src/Fineage.Zone/Fineage.Zone.csproj -c Release -o publish/zone
-./deploy/deploy-to-host.sh publish/login publish/zone
+dotnet publish tools/Fineage.LoadTest/Fineage.LoadTest.csproj -c Release -o publish/smoke
+./deploy/deploy-to-host.sh publish/login publish/zone publish/smoke
 ```
 
 Cross-machine, same script with explicit targets:
@@ -155,13 +156,16 @@ Cross-machine, same script with explicit targets:
 ```bash
 FINEAGE_HOST=homeserver FINEAGE_DEPLOY_USER=nikita \
   FINEAGE_APP_ROOT=/home/nikita/fineage-backend/deploy \
-  ./deploy/deploy-to-host.sh publish/login publish/zone
+  ./deploy/deploy-to-host.sh publish/login publish/zone publish/smoke
 ```
 
-`deploy/deploy-to-host.sh` rsyncs the two publish trees, preserves `data/`, `logs/`, `fineage.env`,
-restarts `fineage-login` / `fineage-zone` through systemd, then health-checks
-`FINEAGE_NET_LOGIN_PORT` / `FINEAGE_NET_ZONE_PORT` / `FINEAGE_LOGIN_HTTP_PORT` on loopback.
-Set `FINEAGE_RESTART=scripts` to fall back to `run-login.sh` / `run-zone.sh` on a host without units.
+`deploy/deploy-to-host.sh` stages immutable `releases/<id>/` trees, runs the staged
+`migrate --plan` preflight, atomically switches the `current` symlink, restarts
+`fineage-login` / `fineage-zone` through systemd, waits for real `/readyz` on Login and Zone,
+and runs a one-bot world-entry smoke. Any failure switches `current` back to `previous` and
+verifies the old release becomes ready again. See
+[`docs/operations/deployment.md`](docs/operations/deployment.md). Set
+`FINEAGE_RESTART=scripts` to fall back to `run-login.sh` / `run-zone.sh` on a host without units.
 
 **Restart only** (binaries already in place):
 

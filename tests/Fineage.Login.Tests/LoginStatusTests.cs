@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Fineage.Protocol;
+using Fineage.Protocol.Health;
 using Xunit;
 using Fineage.Accounts;
 
@@ -15,14 +16,17 @@ public sealed class LoginStatusTests
     public async Task Status_shape_cache_control_and_zone_down_zero_players()
     {
         var zone = new MutableZone();
+        var readiness = new MutableReadiness();
         await using var host = await LoginHttpHost.StartAsync(
             new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)),
             IPAddress.Loopback,
             0,
-            zoneStatus: zone);
+            zoneStatus: zone,
+            loginReadiness: readiness);
         using var client = new HttpClient { BaseAddress = new Uri(host.BaseUrl + "/") };
 
         zone.Reading = new ZoneStatusReading(true, 4);
+        readiness.Report = Ready("login");
         using (HttpResponseMessage up = await client.GetAsync("/api/status"))
         {
             Assert.Equal(HttpStatusCode.OK, up.StatusCode);
@@ -30,9 +34,11 @@ public sealed class LoginStatusTests
             Assert.True(up.Headers.CacheControl?.NoStore);
             Assert.Null(up.Headers.CacheControl?.MaxAge);
             string text = await up.Content.ReadAsStringAsync();
-            Assert.Equal("{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":4}", text);
+            Assert.Equal(
+                "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":4,\"database\":true,\"migrations\":true,\"ready\":true,\"reasons\":[]}",
+                text);
             using var doc = JsonDocument.Parse(text);
-            Assert.Equal(4, doc.RootElement.EnumerateObject().Count());
+            Assert.Equal(8, doc.RootElement.EnumerateObject().Count());
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("ok").ValueKind);
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("login").ValueKind);
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("zone").ValueKind);
@@ -43,25 +49,88 @@ public sealed class LoginStatusTests
         using (HttpResponseMessage empty = await client.GetAsync("/api/status"))
         {
             Assert.Equal(
-                "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0}",
+                "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0,\"database\":true,\"migrations\":true,\"ready\":true,\"reasons\":[]}",
                 await empty.Content.ReadAsStringAsync());
         }
 
-        zone.Reading = ZoneStatusReading.Down;
+        zone.Reading = ZoneStatusReading.Unreachable("zone status endpoint is not ready");
         using (HttpResponseMessage down = await client.GetAsync("/api/status"))
         {
             Assert.Equal(HttpStatusCode.OK, down.StatusCode);
             Assert.True(down.Headers.CacheControl?.NoStore);
-            Assert.Equal(
-                "{\"ok\":true,\"login\":true,\"zone\":false,\"playersOnline\":0}",
-                await down.Content.ReadAsStringAsync());
+            string text = await down.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(text);
+            Assert.False(doc.RootElement.GetProperty("ok").GetBoolean());
+            Assert.True(doc.RootElement.GetProperty("login").GetBoolean());
+            Assert.False(doc.RootElement.GetProperty("zone").GetBoolean());
+            Assert.False(doc.RootElement.GetProperty("ready").GetBoolean());
+            Assert.Equal(0, doc.RootElement.GetProperty("playersOnline").GetInt32());
+            Assert.Contains(
+                doc.RootElement.GetProperty("reasons").EnumerateArray().Select(r => r.GetString()),
+                reason => reason == "zone status endpoint is not ready");
         }
 
         zone.Reading = new ZoneStatusReading(true, -3);
         using HttpResponseMessage clamped = await client.GetAsync("/api/status");
-        Assert.Equal(
-            "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0}",
-            await clamped.Content.ReadAsStringAsync());
+        Assert.Contains("\"playersOnline\":0", await clamped.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Readyz_is_503_with_reason_when_database_or_migrations_fail()
+    {
+        var readiness = new MutableReadiness { Report = NotReady("login") };
+        await using var host = await LoginHttpHost.StartAsync(
+            new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)),
+            IPAddress.Loopback,
+            0,
+            zoneStatus: new MutableZone { Reading = new ZoneStatusReading(true, 0) },
+            loginReadiness: readiness);
+        using var client = new HttpClient { BaseAddress = new Uri(host.BaseUrl + "/") };
+
+        using (HttpResponseMessage ready = await client.GetAsync("/readyz"))
+        {
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, ready.StatusCode);
+            using var doc = JsonDocument.Parse(await ready.Content.ReadAsStringAsync());
+            Assert.False(doc.RootElement.GetProperty("ready").GetBoolean());
+            Assert.Equal("not_ready", doc.RootElement.GetProperty("status").GetString());
+            Assert.False(doc.RootElement.GetProperty("checks").GetProperty("database").GetBoolean());
+            Assert.Contains(
+                doc.RootElement.GetProperty("reasons").EnumerateArray().Select(r => r.GetString()),
+                reason => reason == "database: connection refused");
+        }
+
+        readiness.Report = Ready("login");
+        using (HttpResponseMessage ready = await client.GetAsync("/readyz"))
+        {
+            Assert.Equal(HttpStatusCode.OK, ready.StatusCode);
+            using var doc = JsonDocument.Parse(await ready.Content.ReadAsStringAsync());
+            Assert.True(doc.RootElement.GetProperty("ready").GetBoolean());
+            Assert.Equal("ready", doc.RootElement.GetProperty("status").GetString());
+        }
+    }
+
+    [Fact]
+    public async Task Livez_and_healthz_are_cheap_liveness_not_readiness()
+    {
+        var readiness = new MutableReadiness { Report = NotReady("login") };
+        await using var host = await LoginHttpHost.StartAsync(
+            new LoginService(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret)),
+            IPAddress.Loopback,
+            0,
+            loginReadiness: readiness);
+        using var client = new HttpClient { BaseAddress = new Uri(host.BaseUrl + "/") };
+
+        foreach (string path in new[] { "/livez", "/healthz" })
+        {
+            using HttpResponseMessage live = await client.GetAsync(path);
+            Assert.Equal(HttpStatusCode.OK, live.StatusCode);
+            using var doc = JsonDocument.Parse(await live.Content.ReadAsStringAsync());
+            Assert.Equal("live", doc.RootElement.GetProperty("status").GetString());
+            Assert.True(doc.RootElement.GetProperty("checks").GetProperty("process").GetBoolean());
+        }
+
+        using HttpResponseMessage notReady = await client.GetAsync("/readyz");
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, notReady.StatusCode);
     }
 
     [Fact]
@@ -70,28 +139,34 @@ public sealed class LoginStatusTests
         var script = new ScriptedHandler();
         using var source = new HttpZoneStatusSource(new Uri("http://127.0.0.1:9/status"), TimeSpan.FromSeconds(1), script);
 
-        script.Body = "{\"playersOnline\":2}";
+        script.Body = "{\"playersOnline\":2,\"ready\":true}";
         Assert.Equal(new ZoneStatusReading(true, 2), await source.ReadAsync(CancellationToken.None));
 
-        script.Body = "{\"PlayersOnline\":6}";
+        script.Body = "{\"PlayersOnline\":6,\"ready\":true}";
         Assert.Equal(new ZoneStatusReading(true, 6), await source.ReadAsync(CancellationToken.None));
 
-        script.Body = "{\"playersOnline\":0}";
+        script.Body = "{\"playersOnline\":0,\"ready\":true}";
         Assert.Equal(new ZoneStatusReading(true, 0), await source.ReadAsync(CancellationToken.None));
 
-        script.Body = "{\"playersOnline\":-4}";
+        script.Body = "{\"playersOnline\":-4,\"ready\":true}";
         Assert.Equal(new ZoneStatusReading(true, 0), await source.ReadAsync(CancellationToken.None));
+
+        script.Body = "{\"playersOnline\":2}";
+        ZoneStatusReading legacy = await source.ReadAsync(CancellationToken.None);
+        Assert.Equal(new ZoneStatusReading(true, 2), legacy);
 
         script.Status = HttpStatusCode.ServiceUnavailable;
-        script.Body = "unavailable";
-        Assert.Equal(ZoneStatusReading.Down, await source.ReadAsync(CancellationToken.None));
+        script.Body = "{\"playersOnline\":0,\"ready\":false,\"reasons\":[\"database: down\"]}";
+        ZoneStatusReading notReady = await source.ReadAsync(CancellationToken.None);
+        Assert.False(notReady.Reachable);
+        Assert.Contains(notReady.Reasons, reason => reason.Contains("database: down", StringComparison.Ordinal));
 
         script.Status = HttpStatusCode.OK;
         script.Body = "not-json";
-        Assert.Equal(ZoneStatusReading.Down, await source.ReadAsync(CancellationToken.None));
+        Assert.False((await source.ReadAsync(CancellationToken.None)).Reachable);
 
         script.Body = "{}";
-        Assert.Equal(ZoneStatusReading.Down, await source.ReadAsync(CancellationToken.None));
+        Assert.False((await source.ReadAsync(CancellationToken.None)).Reachable);
 
         script.Error = new HttpRequestException("down");
         Assert.Equal(ZoneStatusReading.Down, await source.ReadAsync(CancellationToken.None));
@@ -145,6 +220,32 @@ public sealed class LoginStatusTests
         Assert.Equal(ZoneStatus.DefaultPort, ZoneStatus.ResolvePort(null, out _));
     }
 
+    static ReadinessReport Ready(string role) => ReadinessReport.From(
+    [
+        new ReadinessCheck("database", true),
+        new ReadinessCheck("migrations", true),
+        new ReadinessCheck("ledger", true),
+        new ReadinessCheck("net_listener", true),
+        new ReadinessCheck("handoff", true)
+    ]);
+
+    static ReadinessReport NotReady(string role) => ReadinessReport.From(
+    [
+        new ReadinessCheck("database", false, "connection refused"),
+        new ReadinessCheck("migrations", false, "database has 2 pending migration(s)"),
+        new ReadinessCheck("ledger", false, "cannot verify the economy ledger"),
+        new ReadinessCheck("net_listener", true),
+        new ReadinessCheck("handoff", true)
+    ]);
+
+    sealed class MutableReadiness : ILoginReadinessSource
+    {
+        public ReadinessReport Report { get; set; } = Ready("login");
+
+        public ValueTask<ReadinessReport> ReadAsync(CancellationToken cancellationToken) =>
+            ValueTask.FromResult(Report);
+    }
+
     sealed class MutableZone : IZoneStatusSource
     {
         public ZoneStatusReading Reading { get; set; }
@@ -156,7 +257,7 @@ public sealed class LoginStatusTests
     sealed class ScriptedHandler : HttpMessageHandler
     {
         public HttpStatusCode Status { get; set; } = HttpStatusCode.OK;
-        public string Body { get; set; } = "{\"playersOnline\":0}";
+        public string Body { get; set; } = "{\"playersOnline\":0,\"ready\":true}";
         public Exception? Error { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

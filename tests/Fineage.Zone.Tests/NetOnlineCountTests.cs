@@ -4,6 +4,7 @@ using System.Text.Json;
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
+using Fineage.Protocol.Health;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -46,14 +47,16 @@ public sealed class NetOnlineCountTests
         ZoneStatusHost? zoneStatus = ZoneStatusHost.TryStart(
             0,
             () => host.World.OnlinePlayerCount,
-            TextWriter.Null);
+            TextWriter.Null,
+            () => ValueTask.FromResult(Ready()));
         Assert.NotNull(zoneStatus);
         var probe = new HttpZoneStatusSource(new Uri(zoneStatus.Url), TimeSpan.FromSeconds(2));
         await using var http = await LoginHttpHost.StartAsync(
             new LoginService(MemoryAccountStore.InMemory(), host.Tokens),
             IPAddress.Loopback,
             0,
-            zoneStatus: probe);
+            zoneStatus: probe,
+            loginReadiness: new ReadyLogin());
         using var client = new HttpClient { BaseAddress = new Uri(http.BaseUrl + "/"), Timeout = TimeSpan.FromSeconds(5) };
 
         try
@@ -90,10 +93,28 @@ public sealed class NetOnlineCountTests
         Assert.True(response.Headers.CacheControl?.NoStore);
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         JsonElement body = doc.RootElement;
-        Assert.Equal(4, body.EnumerateObject().Count());
-        Assert.True(body.GetProperty("ok").GetBoolean());
+        Assert.Equal(8, body.EnumerateObject().Count());
+        Assert.Equal(zone, body.GetProperty("ok").GetBoolean());
         Assert.True(body.GetProperty("login").GetBoolean());
         Assert.Equal(zone, body.GetProperty("zone").GetBoolean());
         Assert.Equal(players, body.GetProperty("playersOnline").GetInt32());
+        Assert.True(body.GetProperty("database").GetBoolean());
+        Assert.True(body.GetProperty("migrations").GetBoolean());
+        Assert.Equal(zone, body.GetProperty("ready").GetBoolean());
+    }
+
+    static ReadinessReport Ready() => ReadinessReport.From(
+    [
+        new ReadinessCheck("database", true),
+        new ReadinessCheck("migrations", true),
+        new ReadinessCheck("ledger", true),
+        new ReadinessCheck("net_listener", true),
+        new ReadinessCheck("handoff", true)
+    ]);
+
+    sealed class ReadyLogin : ILoginReadinessSource
+    {
+        public ValueTask<ReadinessReport> ReadAsync(CancellationToken cancellationToken) =>
+            ValueTask.FromResult(Ready());
     }
 }

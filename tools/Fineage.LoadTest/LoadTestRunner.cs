@@ -524,4 +524,45 @@ public sealed class LoadTestRunner
             }
         }
     }
+
+    /// <summary>
+    /// Minimal deploy smoke: authenticate one bot and enter the world. It deliberately skips the
+    /// metrics preflight, consistency oracle, and behavior loops so it can run on a live host that
+    /// has no load-test metrics endpoint. It still uses the real Net login/zone handshake.
+    /// </summary>
+    public async Task<SmokeResult> RunSmokeAsync(LoadScenario scenario, CancellationToken ct)
+    {
+        var stats = new List<BotStats>();
+        var botStats = new BotStats { BotId = 0, Account = BotIdentity.AccountName(scenario.AccountPrefix, 0) };
+        stats.Add(botStats);
+        var peers = new BotPeerDirectory();
+        await using var bot = new FineageBotClient(scenario, 0, botStats, peers);
+        try
+        {
+            await bot.ConnectAndEnterAsync(ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            botStats.LastError = ex.Message;
+            botStats.EntryFailure = ex.ToString();
+            botStats.Disconnected = true;
+        }
+
+        bool inWorld = botStats.InWorld && !botStats.Disconnected;
+        return new SmokeResult(
+            Passed: inWorld,
+            Account: botStats.Account,
+            Character: bot.CharacterName,
+            InWorld: inWorld,
+            ObjectId: bot.SelfObjectId,
+            Error: inWorld ? null : (botStats.LastError ?? botStats.EntryPhase ?? "bot did not enter the world"));
+    }
 }
+
+public sealed record SmokeResult(
+    bool Passed,
+    string Account,
+    string Character,
+    bool InWorld,
+    int ObjectId,
+    string? Error);

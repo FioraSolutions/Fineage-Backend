@@ -12,6 +12,7 @@ using Fineage.Zone.Net;
 using Fineage.Zone.Olympiad;
 using Fineage.Zone.Punishment;
 using Fineage.Zone.Geo;
+using Fineage.Zone.Health;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 
@@ -70,6 +71,8 @@ catch (Exception ex)
     return;
 }
 string storeLabel = "postgres";
+var netTcp = new NetTcpServer { Endpoint = "zone" };
+var readiness = new ZoneReadinessState(accounts, () => netTcp.BoundPort > 0);
 TryMobiusCatalogImportAtBoot(stateDir);
 using var shutdown = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
@@ -111,6 +114,8 @@ catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
     return;
 }
 
+readiness.MarkSidecarsLoaded();
+
 ZoneWorld world;
 Required.SilentFallbackObserver = static (kind, key) =>
     FineageTelemetry.DataSilentFallback.Add(1, new KeyValuePair<string, object?>("kind", kind.ToId()));
@@ -120,6 +125,7 @@ try
     Required.Registry.AssertBootPacksPresent(dataDir);
     Fineage.Zone.RequiredData.RequiredDataCrossCheck.AssertClean(dataDir, Required.Registry);
     _ = GeoEngine.LoadDefault();
+    readiness.MarkCatalogsLoaded();
     world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
         ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints, time: time);
     long loadedAtUnixMs = time.UtcNow.ToUnixTimeMilliseconds();
@@ -128,6 +134,7 @@ try
     world.UseMonsterRaceInStateDirectory(stateDir, loadedAtUnixMs);
     // #984: saved state vs data catalogs vs replayed ledger, before any player can enter.
     world.AuditStoredStateAtStartup();
+    readiness.MarkWorldLoaded(world.NpcObjectIds.Count);
 }
 catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or IOException or UnauthorizedAccessException)
 {
@@ -136,6 +143,7 @@ catch (Exception ex) when (ex is InvalidOperationException or RequiredDataExcept
     return;
 }
 world.StartSimulation(shutdown.Token);
+readiness.MarkSimulationStarted();
 FineageTelemetry.OnlineCount = () => world.OnlinePlayerCount;
 FineageTelemetry.CommandIngressDepth = () => world.CommandIngressQueuedDepth;
 FineageTelemetry.BeforeMetricsScrape = world.PublishLedgerInvariantsForMetrics;
@@ -157,6 +165,8 @@ catch (InvalidOperationException ex)
     Environment.ExitCode = 1;
     return;
 }
+
+readiness.MarkHandoffReady();
 
 if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("FINEAGE_HANDOFF_SECRET")) &&
     IPAddress.IsLoopback(bindAddress))
@@ -184,14 +194,13 @@ else if (statusPort <= 0)
     Console.WriteLine("[ZONE] status disabled");
 
 await using ZoneStatusHost? zoneStatus = statusPort > 0
-    ? ZoneStatusHost.TryStart(statusPort, () => world.OnlinePlayerCount, Console.Error)
+    ? ZoneStatusHost.TryStart(statusPort, () => world.OnlinePlayerCount, Console.Error, () => readiness.ReadAsync())
     : null;
 if (zoneStatus != null)
-    Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
+    Console.WriteLine($"[ZONE] status {zoneStatus.Url} readyz {ZoneStatus.ReadinessUrl(zoneStatus.Port)}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var netZone = new NetZoneServer(handoffStore, world, accounts);
-var netTcp = new NetTcpServer { Endpoint = "zone" };
 Console.WriteLine($"[ZONE] net listen {bindDisplay}:{NetSettings.ZonePort} (PacketEnvelope)");
 Task netTask = netTcp.RunAsync(
     host,

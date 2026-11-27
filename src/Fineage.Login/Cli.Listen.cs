@@ -92,6 +92,7 @@ public static partial class Cli
             outboundQueue);
 
         HttpZoneStatusSource? zoneProbe = HttpZoneStatusSource.FromEnvironment(error);
+        var readiness = new LoginReadinessProbe(accounts, () => netTcp.BoundPort > 0, handoffReady: true);
         try
         {
             IZoneStatusSource zoneStatus = zoneProbe != null
@@ -101,7 +102,8 @@ public static partial class Cli
                 service,
                 bindAddress,
                 httpPort,
-                zoneStatus: zoneStatus).ConfigureAwait(false);
+                zoneStatus: zoneStatus,
+                loginReadiness: readiness).ConfigureAwait(false);
             zoneProbe = null;
         }
         catch (Exception ex)

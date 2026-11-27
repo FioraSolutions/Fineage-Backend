@@ -4,7 +4,7 @@ using Fineage.LoadTest.Reporting;
 
 if (args.Length == 0 || args.Contains("-h") || args.Contains("--help"))
 {
-    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--zone-dll path] [--expect-zone-commit sha] [--require-clean-provenance] [--region-workers N] [--consistency-trace]");
+    Console.WriteLine("Fineage.LoadTest — run --scenario <yaml> [--smoke] [--target fineage|mobius] [--report-dir dir] [--login-log path] [--zone-log path] [--zone-pid N] [--zone-dll path] [--expect-zone-commit sha] [--require-clean-provenance] [--region-workers N] [--consistency-trace]");
     return;
 }
 
@@ -41,6 +41,21 @@ if (!string.IsNullOrWhiteSpace(layoutOverride))
     scenario.SpawnLayout = layoutOverride;
 if (args.Contains("--consistency-trace"))
     scenario.ConsistencyTrace.Enabled = true;
+
+if (args.Contains("--smoke"))
+{
+    scenario.BotCount = 1;
+    scenario.RampUpSeconds = 0;
+    scenario.DurationSeconds = 0;
+    using var smokeCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+    SmokeResult smoke = await new LoadTestRunner().RunSmokeAsync(scenario, smokeCts.Token);
+    if (smoke.Passed)
+        Console.WriteLine($"SMOKE PASS account={smoke.Account} character={smoke.Character} objectId={smoke.ObjectId}");
+    else
+        Console.Error.WriteLine($"SMOKE FAIL account={smoke.Account} inWorld={smoke.InWorld} error={smoke.Error}");
+    Environment.ExitCode = smoke.Passed ? 0 : 1;
+    return;
+}
 
 using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
