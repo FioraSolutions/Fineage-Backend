@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
         while (true)
         {
             // #1116: chain after this character's previous logout save, and read the store only once it is durable.
-            string? waitRefusal = await AwaitPreviousSaveAsync(session.ObjectId, deadline, ct).ConfigureAwait(false);
+            string? waitRefusal = await AwaitPreviousSaveAsync(session.ObjectId, session.InWorld, deadline, ct).ConfigureAwait(false);
             if (waitRefusal != null)
             {
                 session.EnterRefusal = waitRefusal;
@@ -361,13 +361,6 @@ public sealed partial class ZoneWorld
             return false;
         if (!TryPrepareSameSessionReenter(session, loaded.CharacterEpoch, loaded.PetEpoch, out stale))
             return false;
-        // A logout save registered after the enter's wait began, or economy not durable yet: the load may be older
-        // than the store is about to be. Load again after it lands (#1116).
-        if (PreviousSaveInFlight(session.ObjectId))
-        {
-            stale = true;
-            return false;
-        }
 
         long enterNow = NowUnixMs();
         if (PunishmentBlocksEnter(session, enterNow))
@@ -384,6 +377,14 @@ public sealed partial class ZoneWorld
             // register its save, and load again once the save lands instead of inserting the stale body.
             CountOnlinePlayers();
             evictedForReload = [(evicted!.Value, BeginLogoutSave(session.ObjectId))];
+            stale = true;
+            return false;
+        }
+
+        // A logout save registered after the enter's wait began, or economy not durable yet: the load may be older
+        // than the store is about to be. Load again after it lands (#1116). A live holder was evicted just above.
+        if (PreviousSaveInFlight(session.ObjectId))
+        {
             stale = true;
             return false;
         }

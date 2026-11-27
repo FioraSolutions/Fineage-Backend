@@ -91,7 +91,12 @@ public sealed partial class ZoneWorld
     /// returned and its economy is durable. Returns the refusal when that takes past <paramref name="deadline"/>
     /// (a <see cref="Stopwatch"/> timestamp).
     /// </summary>
-    async Task<string?> AwaitPreviousSaveAsync(int objectId, long deadline, CancellationToken ct)
+    /// <param name="liveSession">
+    /// The entering session is itself still in the world (a same-session re-enter). Its own dirty economy is expected.
+    /// The insert flushes it behind the persist barrier (<see cref="TryPrepareSameSessionReenter"/>), so only the
+    /// logout save is waited for here.
+    /// </param>
+    async Task<string?> AwaitPreviousSaveAsync(int objectId, bool liveSession, long deadline, CancellationToken ct)
     {
         while (true)
         {
@@ -114,7 +119,7 @@ public sealed partial class ZoneWorld
                        $"{EnterChainBudget.TotalSeconds:0.#}s (logout lane pending={_logoutPersist.Pending})";
             }
 
-            if (EconomyPendingFor(objectId))
+            if (!liveSession && EconomyPendingFor(objectId))
             {
                 if (remaining <= TimeSpan.Zero)
                 {
