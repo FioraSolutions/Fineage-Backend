@@ -18,6 +18,12 @@ sealed partial class NetWorldEventPublisher
         _presence.TryBroadcast(watcherObjectIds, NetOpcode.ShortCutInit, payload);
     }
 
+    void IWorldEventPublisher.FanoutMacroList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MacroListMsg list)
+    {
+        var payload = NetCodec.EncodeMacroList(SessionLifecyclePacketHandler.ToNetMacroList(list));
+        _presence.TryBroadcast(watcherObjectIds, NetOpcode.MacroList, payload);
+    }
+
     void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z)
     {
         var payload = NetCodec.EncodeChangeWaitType(new ChangeWaitTypeNetMsg

@@ -442,6 +442,12 @@ namespace Fineage.Net.Contract
         public const ushort ShowCalculator = 0x03ED;
         /// <summary>Zone → client: Mobius <c>ShowXMasSeal</c> (retail <c>0xF2</c>).</summary>
         public const ushort ShowXMasSeal = 0x03EE;
+        /// <summary>Client → zone: Mobius <c>RequestMakeMacro</c> (retail <c>0xC1</c>).</summary>
+        public const ushort RequestMakeMacro = 0x03EF;
+        /// <summary>Client → zone: Mobius <c>RequestDeleteMacro</c> (retail <c>0xC2</c>).</summary>
+        public const ushort RequestDeleteMacro = 0x03F0;
+        /// <summary>Zone → client: Mobius <c>SendMacroList</c> (retail <c>0xE7</c>).</summary>
+        public const ushort MacroList = 0x03F1;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

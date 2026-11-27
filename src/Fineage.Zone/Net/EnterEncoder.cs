@@ -106,6 +106,7 @@ static class EnterEncoder
                 _ => throw new InvalidOperationException("enter SkillList slot requires SkillListMsg or EnterSkillCapture")
             })),
             NetOpcode.ShortCutInit => NetCodec.EncodeShortCutInit(SessionLifecyclePacketHandler.ToNetShortcutInit((ShortCutInitMsg)slot.Message!)),
+            NetOpcode.MacroList => NetCodec.EncodeMacroList((MacroListNetMsg)slot.Message!),
             NetOpcode.PlayerActionState => NetCodec.EncodePlayerActionState((PlayerActionStateNetMsg)slot.Message!),
             NetOpcode.AbnormalStatusUpdate => NetCodec.EncodeAbnormalStatusUpdate(
                 SessionLifecyclePacketHandler.ToNetAbnormal((AbnormalStatusUpdateMsg)slot.Message!)),

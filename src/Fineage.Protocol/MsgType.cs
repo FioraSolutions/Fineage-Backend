@@ -302,6 +302,12 @@ public enum MsgType : ushort
     ShowCalculator = 1112,
     /// <summary>Christmas seal UI. Body is <see cref="ShowXMasSealMsg"/>.</summary>
     ShowXMasSeal = 1113,
+    /// <summary>Client creates or updates a macro. Body is <see cref="MakeMacroMsg"/>.</summary>
+    RequestMakeMacro = 1114,
+    /// <summary>Client deletes a macro. Body is <see cref="DeleteMacroMsg"/>.</summary>
+    RequestDeleteMacro = 1115,
+    /// <summary>Zone → client macro list packet. Body is <see cref="MacroListMsg"/>.</summary>
+    MacroList = 1116,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

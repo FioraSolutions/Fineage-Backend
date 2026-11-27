@@ -256,6 +256,11 @@ public sealed partial class MemoryAccountStore
             character.Shortcuts == null
                 ? null
                 : character.Shortcuts.Select(s => new StoredShortcut(s.Slot, s.Page, s.Type, s.Id, s.Level)).ToArray(),
+            character.Macros == null
+                ? null
+                : character.Macros.Select(m => new StoredMacro(
+                    m.Id, m.Icon, m.Name ?? "", m.Descr ?? "", m.Acronym ?? "",
+                    (m.Commands ?? []).Select(c => new StoredMacroCmd(c.Entry, c.Type, c.D1, c.D2, c.Cmd ?? "")).ToArray())).ToArray(),
             character.LearnedSkills == null
                 ? null
                 : character.LearnedSkills.Select(s => new StoredSkill(s.SkillId, s.Level)).ToArray(),

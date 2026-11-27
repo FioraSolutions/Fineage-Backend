@@ -128,6 +128,9 @@ public interface IAccountStore
     /// <summary>Replaces the character's hotbar (Mobius character_shortcuts). An empty list is a real save.</summary>
     bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts);
 
+    /// <summary>Replaces the character's macros (Mobius character_macroses). An empty list is a real save.</summary>
+    bool TryReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros);
+
     /// <summary>Replaces the character's learned skills (Mobius character_skills). An empty list is a real save.</summary>
     bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills);
 

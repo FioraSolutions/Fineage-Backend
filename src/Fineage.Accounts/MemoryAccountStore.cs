@@ -295,6 +295,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
+            Macros = character.Macros?.Select(CopyMacroDto).ToList(),
             LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
             DeathPenaltyLevel = character.DeathPenaltyLevel,
             Karma = character.Karma,
