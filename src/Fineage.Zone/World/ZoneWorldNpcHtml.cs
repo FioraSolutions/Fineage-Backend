@@ -23,6 +23,10 @@ public sealed partial class ZoneWorld
         if (TryNormalizeAdminCommand(command, out string adminCmd))
             return TryAdminBypass(session, player, adminCmd);
 
+        // Mobius RequestBypassToServer: community board commands skip NPC / HTML-action validation.
+        if (!string.IsNullOrWhiteSpace(command) && CommunityBoard.IsBoardCommand(command))
+            return TryCommunityBoardBypass(session, player, command.Trim());
+
         if (!BypassCommands.TrySplit(npcObjectId, command, out int resolvedId, out var verb))
             return "bad_request";
         if (!_byId.TryGetValue(resolvedId, out var npc) || npc.Kind != ZoneEntityKind.Npc)

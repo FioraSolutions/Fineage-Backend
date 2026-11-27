@@ -53,7 +53,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x1f | RequestBuyItem | yes | yes | RequestBuyItem |  |
 | 0x20 | RequestLinkHtml | yes | yes | BypassRequest | LinkBypassHandler |
 | 0x21 | RequestBypassToServer | yes | yes | BypassRequest |  |
-| 0x22 | RequestBBSwrite | no | no |  | community board |
+| 0x22 | RequestBBSwrite | yes | yes | RequestBBSwrite | community board #929 |
 | 0x24 | RequestJoinPledge | yes | yes | ClanInviteRequest |  |
 | 0x25 | RequestAnswerJoinPledge | yes | yes | ClanAnswerJoinRequest |  |
 | 0x26 | RequestWithdrawalPledge | yes | yes | ClanLeaveRequest |  |
@@ -91,7 +91,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x52 | RequestReplySurrenderPledgeWar | yes | yes | PledgeCommand |  |
 | 0x53 | RequestSetPledgeCrest | yes | yes | PledgeCommand | ZoneWorldPledge.Crests |
 | 0x55 | RequestGiveNickName | yes | yes | PledgeCommand | ZoneWorldPledge.Commands |
-| 0x57 | RequestShowBoard | no | no |  | community board |
+| 0x57 | RequestShowBoard | yes | yes | RequestShowBoard | community board #929 |
 | 0x58 | RequestEnchantItem | yes | yes | EnchantRequest | confirm/cancel are EnchantConfirm / EnchantCancel |
 | 0x59 | RequestDestroyItem | yes | yes | DestroyItemRequest |  |
 | 0x5b | SendBypassBuildCmd | partial | no |  | GM commands are admin_* HTML bypasses, not this packet |
@@ -326,7 +326,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x69 | SURRENDER_PLEDGE_WAR | SurrenderPledgeWar | yes | yes | PledgeWarList |  |
 | 0x6c | PLEDGE_CREST | PledgeCrest | yes | yes | CrestData |  |
 | 0x6d | SETUP_GAUGE | SetupGauge | partial | yes | MagicSkillUse | cast time is inside MagicSkillUse |
-| 0x6e | SHOW_BOARD | ShowBoard | no | no |  | community board |
+| 0x6e | SHOW_BOARD | ShowBoard | yes | yes | ShowBoard | community board #929 |
 | 0x6f | CHOOSE_INVENTORY_ITEM | ChooseInventoryItem | partial | yes | EnchantResult | enchant window is EnchantRequest/Result, not ChooseInventoryItem |
 | 0x71 | MOVE_TO_LOCATION_IN_VEHICLE | MoveToLocationInVehicle | partial | yes | MoveToLocationInVehicle |  |
 | 0x72 | STOP_MOVE_IN_VEHICLE | StopMoveInVehicle | partial | yes | StopMoveInVehicle |  |

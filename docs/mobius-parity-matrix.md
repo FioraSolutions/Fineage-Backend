@@ -101,7 +101,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 67 | Party matching rooms | ✅ | — | `PartyMatchRoomList` / waiting list → `ZoneWorldPartyMatch` + `PartyMatchRoomActor`; PartyMatchRoom chat requires a room (logged when missing) — #928 |
 | 68 | User commands | ✅ | — | `handlers/chat/commands/user/*.java` → `UserCommandRegistry` dispatches ids onto teleport, mount, party, clan, channel, olympiad, and siege. Unstuck shares `BeginTownTeleport`. Unknown id is logged — #920 |
 | 69 | Macros | ✅ | — | `RequestMakeMacro.java` / `RequestDeleteMacro.java` / `SendMacroList.java` → `ZoneWorldMacros`, `character_macros`, enter MacroList — #927 |
-| 70 | Community board | ❌ | L | `communitybbs/` and `RequestShowBoard.java` → no board — #929 |
+| 70 | Community board | ✅ | — | `CommunityBoardHandler` / `RequestShowBoard` / `RequestBBSwrite` / `ShowBoard` → `CommunityBoardService` + `ZoneWorldCommunityBoard`; missing page logs the page name — #929 |
 | 71 | PC cafe points and coupons | ❌ | S | `PcCafePointsManager.java`, `RequestPCCafeCouponUse.java` → no points — #933 |
 | **Companions** |
 | 72 | Servitors | ✅ | — | `Servitor.java` → `ZoneWorldSummons` |
@@ -192,7 +192,7 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 3. ~~Shop wear preview (row 48) — #924~~ (done).
 4. ~~Macros (row 69) — #927~~ (done).
 5. ~~Party matching rooms (row 67) — #928~~ (done).
-6. Community board (row 70) — #929.
+6. ~~Community board (row 70) — #929~~ (done).
 7. Petitions (row 63) — #930.
 8. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935 (rows 98, 71, 105, 54).
 
