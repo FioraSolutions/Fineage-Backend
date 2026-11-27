@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Npgsql;
 
 namespace Fineage.Login;
 
@@ -37,6 +38,8 @@ public static partial class Cli
             return await ListenAsync(store, databaseUrl, bindAddress, bindDisplay, httpPort, output, error).ConfigureAwait(false) ? 0 : 1;
 
         string cmd = rest[0].ToLowerInvariant();
+        if (cmd == "migrate")
+            return RunMigrations(rest[1..], databaseUrl, output, error);
         if (cmd is not ("register" or "login" or "create" or "select" or "play" or "backfill-normalized"))
             return Usage(error);
 
@@ -101,6 +104,83 @@ public static partial class Cli
             default:
                 return Usage(error);
         }
+    }
+
+    static int RunMigrations(List<string> args, string? databaseUrl, TextWriter output, TextWriter error)
+    {
+        bool planOnly = false;
+        bool adoptChecksums = false;
+        foreach (string arg in args)
+        {
+            switch (arg)
+            {
+                case "--plan":
+                case "--dry-run":
+                    planOnly = true;
+                    break;
+                case "--adopt-checksums":
+                    adoptChecksums = true;
+                    break;
+                default:
+                    return Usage(error);
+            }
+        }
+
+        if (planOnly && adoptChecksums)
+            return Usage(error);
+
+        try
+        {
+            MigrationRunner runner = MigrationRunner.CreateDefault();
+            using var conn = new NpgsqlConnection(AccountStoreFactory.ResolveConnectionString(databaseUrl));
+            conn.Open();
+            var database = new NpgsqlMigrationDatabase(conn);
+
+            if (planOnly)
+            {
+                ReportPlan(runner, runner.Plan(database), output, error);
+                return 0;
+            }
+
+            if (adoptChecksums)
+            {
+                int adopted = runner.AdoptChecksums(database);
+                output.WriteLine(adopted == 0
+                    ? "migrations: every applied migration already has a checksum"
+                    : $"migrations: adopted checksums for {adopted} legacy migration(s)");
+                return 0;
+            }
+
+            MigrationPlan applied = runner.Apply(database);
+            foreach (string warning in runner.Warnings(applied))
+                error.WriteLine("warning: " + warning);
+            output.WriteLine(applied.Pending.Count == 0
+                ? $"migrations: up to date ({applied.Applied.Count} applied)"
+                : $"migrations: applied {applied.Pending.Count} pending migration(s)");
+            return 0;
+        }
+        catch (MigrationException ex)
+        {
+            error.WriteLine("migration check failed: " + ex.Message);
+            return 1;
+        }
+        catch (Exception ex)
+        {
+            error.WriteLine("migrate failed: " + ex.Message);
+            return 1;
+        }
+    }
+
+    static void ReportPlan(MigrationRunner runner, MigrationPlan plan, TextWriter output, TextWriter error)
+    {
+        foreach (string warning in runner.Warnings(plan))
+            error.WriteLine("warning: " + warning);
+        output.WriteLine(
+            $"migrations: applied={plan.Applied.Count} pending={plan.Pending.Count} unverified={plan.AppliedWithoutChecksum.Count}");
+        foreach (MigrationScript script in plan.Pending)
+            output.WriteLine("  pending " + script.Id);
+        if (plan.Pending.Count == 0)
+            output.WriteLine("migrations: up to date");
     }
 
     static int Create(TextWriter output, TextWriter error, LoginService service, string account, string password, string name, string archetype)
@@ -170,6 +250,9 @@ public static partial class Cli
               Fineage.Login play <account> <password> <name> <fighter|mystic>
               Fineage.Login [--bind 0.0.0.0] [--http-port 5080] [--database <conn>]
               Fineage.Login backfill-normalized           # re-project characters/items/quests from store_snapshot
+              Fineage.Login migrate --plan                # non-mutating pending/checksum plan (deploy preflight)
+              Fineage.Login migrate                       # apply pending migrations
+              Fineage.Login migrate --adopt-checksums     # explicitly stamp checksums on pre-checksum rows
               # PostgreSQL only. FINEAGE_DATABASE_URL=Host=...;Database=fineage;...
               # Net TCP login port: FINEAGE_NET_LOGIN_PORT (default 9106)
             """);
