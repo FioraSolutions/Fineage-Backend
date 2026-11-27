@@ -25,7 +25,8 @@ public static class ScenarioLoader
         {
             string basePath = Path.Combine(Path.GetDirectoryName(path) ?? ".", scenario.Extends);
             var parent = Load(basePath);
-            scenario = Merge(parent, scenario, DeclaresKey(path, text, "actionWeights"));
+            var declared = DeclaredKeys(path, text);
+            scenario = Merge(parent, scenario, declared);
         }
 
         Validate(scenario);
@@ -76,25 +77,39 @@ public static class ScenarioLoader
         "economy_manor", "economy_pickup_drop"
     };
 
-    /// <summary>True when the scenario file itself sets top-level <paramref name="key"/> (not a class default).</summary>
-    static bool DeclaresKey(string path, string text, string key)
+    /// <summary>Top-level keys the scenario file itself sets (not class defaults), case-insensitive.</summary>
+    static HashSet<string> DeclaredKeys(string path, string text)
     {
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
             using var doc = System.Text.Json.JsonDocument.Parse(text);
-            return doc.RootElement.EnumerateObject().Any(p => string.Equals(p.Name, key, StringComparison.OrdinalIgnoreCase));
+            foreach (var property in doc.RootElement.EnumerateObject())
+                keys.Add(property.Name);
+            return keys;
         }
 
         var raw = new DeserializerBuilder().Build().Deserialize<Dictionary<string, object?>>(text);
-        return raw != null && raw.Keys.Any(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase));
+        if (raw != null)
+        {
+            foreach (string key in raw.Keys)
+                keys.Add(key);
+        }
+
+        return keys;
     }
 
     /// <summary>
     /// Child values win. <c>actionWeights</c> is a whole mix: a child that declares it replaces the parent's
     /// mix, a child that omits it inherits the parent's. Mixing the two let the base smoke mix
     /// (attack/skill/pickup/trade/party, summing to 1.03) shadow every economy action of the hammer.
+    /// <para>
+    /// <c>loginPort</c>/<c>zonePort</c> need the declared-key check: their class defaults (9106/9777) are real
+    /// values, so a value comparison cannot tell an omitted port from an explicit one and a child that omitted
+    /// them silently re-pointed the run at the default endpoint instead of the prepared parent's.
+    /// </para>
     /// </summary>
-    static LoadScenario Merge(LoadScenario parent, LoadScenario child, bool childDeclaresActionWeights)
+    static LoadScenario Merge(LoadScenario parent, LoadScenario child, HashSet<string> declaredKeys)
     {
         if (child.BotCount == 0)
             child.BotCount = parent.BotCount;
@@ -113,7 +128,11 @@ public static class ScenarioLoader
         child.DataDir ??= parent.DataDir;
         if (child.GatekeeperTripCooldownMs == 3000 && parent.GatekeeperTripCooldownMs != 3000)
             child.GatekeeperTripCooldownMs = parent.GatekeeperTripCooldownMs;
-        if (!childDeclaresActionWeights)
+        if (!declaredKeys.Contains("loginPort"))
+            child.LoginPort = parent.LoginPort;
+        if (!declaredKeys.Contains("zonePort"))
+            child.ZonePort = parent.ZonePort;
+        if (!declaredKeys.Contains("actionWeights"))
             child.ActionWeights = new Dictionary<string, double>(parent.ActionWeights, StringComparer.OrdinalIgnoreCase);
         else
             child.ActionWeights = new Dictionary<string, double>(child.ActionWeights, StringComparer.OrdinalIgnoreCase);
