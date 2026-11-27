@@ -30,6 +30,7 @@ using Fineage.Zone.Wedding;
 using System.Reflection;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.CursedWeapons;
+using Fineage.Net.Host;
 
 namespace Fineage.Zone.World;
 
@@ -254,6 +255,7 @@ public sealed partial class ZoneWorld
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
+        _fanoutDispatcher = new FanoutDispatcher(reliableAdmission: (_, _, _) => _reliableAudienceAdmission);
         _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -491,6 +493,9 @@ public sealed partial class ZoneWorld
             bool recording = value != null && IsRecordingNetBridge(value);
             _awaitFanoutBeforeCommandComplete = recording;
             _fanoutDispatcher.DeliverSynchronously = recording;
+            _reliableAudienceAdmission = value is Net.NetWorldEventPublisher publisher
+                ? publisher.ReliableAudienceAdmission
+                : new FanoutReliableAdmission();
         }
     }
 
@@ -513,7 +518,8 @@ public sealed partial class ZoneWorld
         if (_awaitFanoutBeforeCommandComplete)
             _fanoutDispatcher.WaitUntilIdle();
     }
-    readonly FanoutDispatcher _fanoutDispatcher = new();
+    FanoutReliableAdmission _reliableAudienceAdmission = new();
+    FanoutDispatcher _fanoutDispatcher;
     readonly WorldFanoutSequencer _fanout;
 
     /// <summary>

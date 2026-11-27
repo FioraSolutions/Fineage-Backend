@@ -1,4 +1,5 @@
 using Fineage.Net.Contract;
+using Fineage.Net.Host;
 using Fineage.Protocol;
 using Fineage.Zone.World;
 
@@ -14,6 +15,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
     readonly EntityIdMap _ids;
     readonly NetPresenceHub _presence;
     readonly Func<ZoneEntity, int> _playerSpawnPAtkSpd;
+    internal FanoutReliableAdmission ReliableAudienceAdmission { get; }
 
     /// <summary>EntitySpawn frames emitted at the last knownlist diff drain (Fineage.Zone.Tests).</summary>
     internal int KnownlistSpawnCountAtDrain { get; private set; }
@@ -28,6 +30,7 @@ sealed partial class NetWorldEventPublisher : IWorldEventPublisher
         _ids = ids ?? throw new ArgumentNullException(nameof(ids));
         _presence = presence ?? throw new ArgumentNullException(nameof(presence));
         _playerSpawnPAtkSpd = playerSpawnPAtkSpd ?? throw new ArgumentNullException(nameof(playerSpawnPAtkSpd));
+        ReliableAudienceAdmission = new FanoutReliableAdmission(presence.CaptureAudience);
     }
 
     void IWorldEventPublisher.FanoutMoveState(

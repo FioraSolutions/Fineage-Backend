@@ -26,14 +26,15 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
             sequencer.Submit(batch);
     }
 
-    void RecordPrepared(Action send)
+    Action RecordPrepared(Action send, IReadOnlyList<int> audienceIds)
     {
         var recording = sequencer.Recording;
         var batch = recording ?? new WorldFanoutBatch();
         batch.Bind(inner);
-        batch.AddPrepared(send);
+        batch.AddPrepared(send, audienceIds);
         if (recording == null)
             sequencer.Submit(batch);
+        return send;
     }
 
     /// <summary>StatusUpdate carries a subset of attributes: the merged frame keeps earlier attributes the new one omits.</summary>
@@ -88,7 +89,7 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Record(FanoutKind.UserInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
     void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
-        RecordPrepared(inner.PrepareCharInfo(watcherObjectIds, objectId));
+        RecordPrepared(inner.PrepareCharInfo(watcherObjectIds, objectId), watcherObjectIds);
 
     void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack) =>
         Record(FanoutKind.AttackState, 0, watcherObjectIds, new FanoutArgs(Payload: attack), replaceable: false);
