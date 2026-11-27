@@ -31,18 +31,16 @@ jobs:
     name: load-test-smoke-skipped
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Load-test smoke skipped (dev PR fast gate)."
+      - run: echo "Load-test smoke skipped (ordinary dev PR fast gate)."
 
-  load-test-smoke:
-    name: load-test-smoke
+  load-test-fast:
+    name: load-test-fast-5min
     if: >-
-      ${{ github.event_name == 'schedule' ||
-          github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-          (github.event_name == 'pull_request' && github.base_ref == 'main') ||
+      ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') ||
           (github.event_name == 'pull_request' && github.base_ref == 'dev' &&
             contains(github.event.pull_request.labels.*.name, 'perf')) }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16-alpine
@@ -65,6 +63,8 @@ jobs:
       FINEAGE_LOGIN_METRICS_PORT: 9464
       FINEAGE_ZONE_METRICS_PORT: 9465
       FINEAGE_ZONE_REGION_WORKERS: '0'
+      FINEAGE_BUILD_CONFIGURATION: Release
+      FAST_DURATION_SECONDS: '60'
     steps:
       - uses: actions/checkout@v4
 
@@ -77,29 +77,90 @@ jobs:
             **/*.csproj
             Fineage.Backend.slnx
 
+      - name: Install dotnet-counters
+        run: |
+          dotnet tool install --global dotnet-counters
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
       - name: Build stack
         run: |
           dotnet build src/Fineage.Login -c Release -v q
           dotnet build src/Fineage.Zone -c Release -v q
           dotnet build tools/Fineage.LoadTest -c Release -v q
 
-      - name: Start Login+Zone
-        run: |
-          ./scripts/run-local-net.sh start
-          ./scripts/run-local-net.sh status
+      - name: Release 5-minute profile matrix
+        run: ./scripts/run-load-test.sh fast
 
-      - name: Load test (short)
-        run: |
-          mkdir -p local-logs/loadtest-ci
-          dotnet tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll \
-            --scenario tools/Fineage.LoadTest/scenarios/bots-20-smoke.yaml \
-            --target fineage \
-            --report-dir local-logs/loadtest-ci \
-            --login-log local-logs/login-net.log \
-            --zone-log local-logs/zone-net.log \
-            --zone-pid "$(cat local-logs/zone-net.pid)" \
-            --region-workers 0
-
-      - name: Stop stack
+      - name: Upload load-test artifacts
         if: always()
-        run: ./scripts/run-local-net.sh stop || true
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-fast
+          path: local-logs/loadtest-runs/
+          retention-days: 14
+
+  load-test-soak:
+    name: load-test-soak-30min
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      FINEAGE_DATABASE_URL: Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+      FINEAGE_HANDOFF_SECRET: FineageLoginHandoffV1
+      FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX: loadbot
+      FINEAGE_LOGIN_LOADTEST_PASSWORD: loadtest-pass-v1
+      FINEAGE_LOGIN_METRICS_PORT: 9464
+      FINEAGE_ZONE_METRICS_PORT: 9465
+      FINEAGE_ZONE_REGION_WORKERS: '0'
+      FINEAGE_BUILD_CONFIGURATION: Release
+      SOAK_DURATION_SECONDS: '240'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Install dotnet-counters
+        run: |
+          dotnet tool install --global dotnet-counters
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build stack
+        run: |
+          dotnet build src/Fineage.Login -c Release -v q
+          dotnet build src/Fineage.Zone -c Release -v q
+          dotnet build tools/Fineage.LoadTest -c Release -v q
+
+      - name: Release soak matrix (20-30 min)
+        run: ./scripts/run-load-test.sh soak
+
+      - name: Upload load-test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-soak
+          path: local-logs/loadtest-runs/
+          retention-days: 14

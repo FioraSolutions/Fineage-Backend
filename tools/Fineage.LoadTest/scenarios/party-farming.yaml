@@ -1,0 +1,22 @@
+# #990 — Party farming: 4 real 9-bot parties formed by the existing heavy-play party path.
+# Zone env: FINEAGE_ZONE_LOADTEST_COMBAT=1 FINEAGE_ZONE_EXTRA_MAPS=loadtest_aoe_arena
+# Covers party formation, shared XP and combat fan-out. Buff rotation and loot distribution are not
+# implemented by the load-test bot yet and are reported as profile gaps, not simulated.
+name: party-farming
+botCount: 36
+rampUpSeconds: 30
+durationSeconds: 180
+spawnLayout: aoe-multiparty
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+aoiCellSize: 3000
+requireSkillLatencySamples: true
+heavyPlay:
+  mode: aoe-multiparty
+  partySize: 9
+  partyCount: 4
+  skillRotation: [36, 48]
+actionWeights:
+  sit: 0.92
+  social: 0.08

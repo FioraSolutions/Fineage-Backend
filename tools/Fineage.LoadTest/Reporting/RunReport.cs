@@ -48,6 +48,7 @@ public sealed class RunReport
     public List<TimeSeriesWindow> TimeSeriesWindows { get; set; } = [];
     public string? TimeSeriesBacklogTrend { get; set; }
     public RuntimeCounterStats? Runtime { get; set; }
+    public ResourceTrendSummary? ResourceTrend { get; set; }
     public StructuredLogSummary? StructuredLogs { get; set; }
     public List<GateVerdict> GateVerdicts { get; set; } = [];
     public double? CommandToMailboxesP99Ms { get; set; }

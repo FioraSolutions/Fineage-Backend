@@ -1,0 +1,10 @@
+# #990 — Reconnect storm: every bot repeatedly logs out, gets a new login handoff, re-enters the zone
+# and replays its behavior. This is the real relog path; it does not restart the Zone process.
+name: reconnect-storm
+botCount: 200
+rampUpSeconds: 30
+durationSeconds: 120
+spawnLayout: town
+enterConcurrency: 32
+actionWeights:
+  relog: 1.0

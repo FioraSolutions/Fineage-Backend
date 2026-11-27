@@ -25,6 +25,15 @@ public static class PerformanceGates
 
     public const double FanoutQueueAgeP99GateMs = 40;
 
+    /// <summary>RSS/queue/GC trend gates are evidence gates only once a run is long enough to show a trend.</summary>
+    public const int TrendGateMinDurationSeconds = 300;
+
+    public const double RssGrowthPercentLimit = 10;
+    public const double RssGrowthAbsoluteToleranceMb = 64;
+    public const double GcHeapGrowthPercentLimit = 10;
+    public const double GcHeapAbsoluteToleranceMb = 32;
+    public const double AllocRateGrowthRatioLimit = 1.5;
+
     public static IReadOnlyList<GateVerdict> Evaluate(RunReport report)
     {
         var verdicts = new List<GateVerdict>();
@@ -120,6 +129,8 @@ public static class PerformanceGates
             Note = fanoutAge <= 0 ? "MISSING: fineage_fanout_queue_oldest_age_ms not on scrape (PR #862)" : null
         });
 
+        AppendResourceTrendGates(verdicts, report);
+
         long reliableDrops = report.ReliableOverflowTotal ?? report.Server?.OutboundDropped ?? 0;
         verdicts.Add(new GateVerdict
         {
@@ -147,6 +158,154 @@ public static class PerformanceGates
         }
 
         return verdicts;
+    }
+
+    static void AppendResourceTrendGates(List<GateVerdict> verdicts, RunReport report)
+    {
+        bool evidenceRun = report.DurationSeconds >= TrendGateMinDurationSeconds;
+        var trend = report.ResourceTrend;
+
+        if (trend is { HasRssTrend: true })
+        {
+            double start = trend.RssMbStart ?? 0;
+            double growth = trend.RssGrowthMb ?? 0;
+            double allowed = Math.Max(RssGrowthAbsoluteToleranceMb, start * RssGrowthPercentLimit / 100.0);
+            verdicts.Add(new GateVerdict
+            {
+                Gate = "RSS steady-state growth <= max(10%, 64 MiB)",
+                Limit = allowed,
+                Observed = growth,
+                Unit = "MiB",
+                Passed = growth <= allowed,
+                Note =
+                    $"start **{start:0.0}** MiB → end **{trend.RssMbEnd ?? 0:0.0}** MiB, max **{trend.RssMbMax ?? 0:0.0}** MiB, " +
+                    $"**{trend.RssGrowthPercent ?? 0:0.0}%** over {trend.RssSampleCount} steady-state samples"
+            });
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "RSS steady-state growth", evidenceRun,
+                "MISSING: no steady-state RSS samples; pass --zone-pid and ensure /proc or ps can read the Zone process");
+        }
+
+        if (trend is { HasGcTrend: true })
+        {
+            double start = trend.GcHeapMbStart ?? 0;
+            double growth = trend.GcHeapGrowthMb ?? 0;
+            double allowed = Math.Max(GcHeapAbsoluteToleranceMb, start * GcHeapGrowthPercentLimit / 100.0);
+            verdicts.Add(new GateVerdict
+            {
+                Gate = "GC heap steady-state growth <= max(10%, 32 MiB)",
+                Limit = allowed,
+                Observed = growth,
+                Unit = "MiB",
+                Passed = growth <= allowed,
+                Note =
+                    $"start **{start:0.0}** MiB → end **{trend.GcHeapMbEnd ?? 0:0.0}** MiB, " +
+                    $"gen2 Δ **{trend.Gen2CountDelta}** over {trend.GcHeapSampleCount} steady-state samples"
+            });
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "GC heap steady-state growth", evidenceRun,
+                "MISSING: no steady-state dotnet-counters gc-heap-size samples (install dotnet-counters and pass --zone-pid)");
+        }
+
+        if (trend is { HasAllocTrend: true } && trend.AllocRateGrowthRatio is { } ratio)
+        {
+            verdicts.Add(new GateVerdict
+            {
+                Gate = "allocation rate last third / first third <= 1.5",
+                Limit = AllocRateGrowthRatioLimit,
+                Observed = ratio,
+                Unit = "ratio",
+                Passed = ratio <= AllocRateGrowthRatioLimit,
+                Note =
+                    $"first third **{trend.AllocRateFirstThirdMbPerSec ?? 0:0.0}** MiB/s, " +
+                    $"last third **{trend.AllocRateLastThirdMbPerSec ?? 0:0.0}** MiB/s over {trend.AllocRateSampleCount} samples"
+            });
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "allocation rate trend", evidenceRun,
+                "MISSING: no steady-state alloc-rate samples, or fewer than 3 samples");
+        }
+
+        AppendQueueTrendGate(verdicts, report, "fanout depth", w => w.FanoutQueueDepthMax,
+            "fanout_queue_depth metric absent", "fineage_fanout_queue_depth", evidenceRun);
+        AppendQueueTrendGate(verdicts, report, "command depth", w => w.CommandQueueDepthMax,
+            "command_queue_depth metric absent", "fineage_command_queue_depth", evidenceRun);
+        AppendQueueTrendGate(verdicts, report, "command ingress depth", w => w.CommandIngressQueuedMax,
+            "fineage_command_ingress_queued metric absent", "fineage_command_ingress_queued", evidenceRun);
+    }
+
+    static void AppendQueueTrendGate(
+        List<GateVerdict> verdicts,
+        RunReport report,
+        string label,
+        Func<TimeSeriesWindow, double> selector,
+        string absentText,
+        string metricName,
+        bool evidenceRun)
+    {
+        var windows = report.TimeSeriesWindows;
+        string trend = TimeSeriesSummaryBuilder.Trend(windows, selector, absentText);
+        // A present metric with an all-zero histogram is flat, not missing. The peak scrape is the
+        // presence evidence; the numeric series alone cannot distinguish zero from absent.
+        if (trend == absentText &&
+            report.PeakMetricsText?.Contains(metricName, StringComparison.Ordinal) == true)
+            trend = "flat";
+        double first = ThirdMax(windows, selector, first: true);
+        double last = ThirdMax(windows, selector, first: false);
+        double limit = first * 1.25 + 1;
+        bool trendKnown = trend is not ("insufficient windows" or "growing") && !trend.Contains("absent", StringComparison.Ordinal);
+        bool passed = trend == "flat" || trend == "shrinking" || (trendKnown && last <= limit);
+        string note =
+            $"early third max **{first:0}**, late third max **{last:0}**, trend **{trend}**; " +
+            "gate fails on 'growing' over a run of at least 5 minutes";
+        if (!evidenceRun && (windows.Count < 2 || !trendKnown))
+        {
+            passed = true;
+            note = $"informative only: run is shorter than {TrendGateMinDurationSeconds}s ({note})";
+        }
+        else if (!trendKnown)
+        {
+            passed = false;
+        }
+
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"queue trend: {label} not growing",
+            Limit = first > 0 ? limit : null,
+            Observed = last,
+            Unit = "depth",
+            Passed = passed,
+            Note = note
+        });
+    }
+
+    static double ThirdMax(IReadOnlyList<TimeSeriesWindow> windows, Func<TimeSeriesWindow, double> selector, bool first)
+    {
+        if (windows.Count == 0)
+            return 0;
+        int size = Math.Max(1, windows.Count / 3);
+        var slice = first ? windows.Take(size) : windows.TakeLast(size);
+        return slice.Max(selector);
+    }
+
+    static void AddMissingTrendGate(List<GateVerdict> verdicts, string name, bool evidenceRun, string missing)
+    {
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"{name} (evidence)",
+            Limit = null,
+            Observed = 0,
+            Unit = "",
+            Passed = !evidenceRun,
+            Note = evidenceRun
+                ? missing
+                : $"informative only: run is shorter than {TrendGateMinDurationSeconds}s; {missing}"
+        });
     }
 }
 

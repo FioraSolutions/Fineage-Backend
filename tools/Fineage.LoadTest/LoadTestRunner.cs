@@ -63,6 +63,9 @@ public sealed class LoadTestRunner
         RuntimeCountersSampler? runtimeSampler = zonePid is > 0 ? new RuntimeCountersSampler(zonePid.Value) : null;
         if (runtimeSampler != null)
             await runtimeSampler.StartAsync(ct);
+        ProcessRssSampler? rssSampler = zonePid is > 0 ? new ProcessRssSampler(zonePid.Value) : null;
+        if (rssSampler != null)
+            await rssSampler.StartAsync(ct);
 
         if (metricsPreflightFailure == null)
         {
@@ -378,6 +381,13 @@ public sealed class LoadTestRunner
             await runtimeSampler.DisposeAsync();
         }
 
+        IReadOnlyList<RssSample> rssSamples = [];
+        if (rssSampler != null)
+        {
+            rssSamples = await rssSampler.StopAsync();
+            await rssSampler.DisposeAsync();
+        }
+
         var report = new RunReport
         {
             ScenarioName = scenario.Name,
@@ -418,7 +428,7 @@ public sealed class LoadTestRunner
         var skillSamples = bots.SelectMany(b => b.ObservationLog.Tracker.SkillFanoutSamples);
         var legacySamples = bots.SelectMany(b => b.ObservationLog.Tracker.CommandToFanoutSamples);
         ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples,
-            zoneLog, logPaths, runtimeStats, zonePid, zoneDll, expectedZoneCommit, requireCleanProvenance);
+            zoneLog, logPaths, runtimeStats, zonePid, zoneDll, expectedZoneCommit, requireCleanProvenance, rssSamples);
 
         report.SimulationStallSeconds = hang.StallSeconds;
         report.SimulationStallCount = hang.StallCount;

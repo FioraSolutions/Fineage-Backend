@@ -186,12 +186,12 @@ public static class CompactMarkdownRenderer
             return;
         }
 
-        sb.AppendLine("| start (UTC) | tick p99 | commands p99 | submit→mailbox p99 | fanout_enqueue→mailbox p99 | fanout age p99 | fanout depth max |");
-        sb.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
+        sb.AppendLine("| start (UTC) | tick p99 | commands p99 | submit→mailbox p99 | fanout_enqueue→mailbox p99 | fanout age p99 | fanout depth | command depth | ingress depth |");
+        sb.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |");
         foreach (var w in r.TimeSeriesWindows.Take(24))
         {
             sb.AppendLine(
-                $"| {w.WindowStart:HH:mm:ss} | {w.TickP99Ms:0.0} | {w.CommandsStageP99Ms:0.0} | {w.SubmitToMailboxP99Ms:0.0} | {w.FanoutEnqueueToMailboxP99Ms:0.0} | {w.FanoutQueueAgeP99Ms:0.0} | {w.FanoutQueueDepthMax:0} |");
+                $"| {w.WindowStart:HH:mm:ss} | {w.TickP99Ms:0.0} | {w.CommandsStageP99Ms:0.0} | {w.SubmitToMailboxP99Ms:0.0} | {w.FanoutEnqueueToMailboxP99Ms:0.0} | {w.FanoutQueueAgeP99Ms:0.0} | {w.FanoutQueueDepthMax:0} | {w.CommandQueueDepthMax:0} | {w.CommandIngressQueuedMax:0} |");
         }
 
         sb.AppendLine();
@@ -222,6 +222,21 @@ public static class CompactMarkdownRenderer
         sb.AppendLine($"| threadpool queue | — | — | {rt.ThreadPoolQueueMax:0} |");
         sb.AppendLine($"| threadpool threads | — | — | {rt.ThreadPoolThreadsMax:0} |");
         sb.AppendLine($"| lock contention | — | — | {rt.LockContentionMax:0} |");
+        if (r.ResourceTrend is { } trend)
+        {
+            sb.AppendLine();
+            sb.AppendLine("### Steady-state resource trend");
+            sb.AppendLine($"- RSS: **{trend.RssMbStart ?? 0:0.0}** → **{trend.RssMbEnd ?? 0:0.0}** MiB " +
+                          $"(growth **{trend.RssGrowthMb ?? 0:0.0}** MiB / **{trend.RssGrowthPercent ?? 0:0.0}%**, " +
+                          $"{trend.RssSampleCount} samples)");
+            sb.AppendLine($"- GC heap: **{trend.GcHeapMbStart ?? 0:0.0}** → **{trend.GcHeapMbEnd ?? 0:0.0}** MiB " +
+                          $"(growth **{trend.GcHeapGrowthMb ?? 0:0.0}** MiB, gen2 Δ **{trend.Gen2CountDelta}**, " +
+                          $"{trend.GcHeapSampleCount} samples)");
+            sb.AppendLine($"- Alloc rate: first third **{trend.AllocRateFirstThirdMbPerSec ?? 0:0.0}** MiB/s → " +
+                          $"last third **{trend.AllocRateLastThirdMbPerSec ?? 0:0.0}** MiB/s " +
+                          $"(**{trend.AllocRateGrowthRatio ?? 0:0.00}×**, {trend.AllocRateSampleCount} samples)");
+        }
+
         if (r.ZoneProcess != null)
         {
             sb.AppendLine();
@@ -358,8 +373,8 @@ public static class CompactMarkdownRenderer
         foreach (var g in r.GateVerdicts)
         {
             string mark = g.Passed ? "PASS" : "FAIL";
-            string obs = g.Unit == "ms" ? $"{g.Observed:0.0} ms" : $"{g.Observed:0}";
-            string lim = g.Limit.HasValue ? $" (limit {g.Limit:0}{g.Unit switch { "ms" => " ms", _ => "" }})" : "";
+            string obs = FormatGateValue(g.Observed, g.Unit, decimals: 2);
+            string lim = g.Limit.HasValue ? $" (limit {FormatGateValue(g.Limit.Value, g.Unit, decimals: 2)})" : "";
             sb.AppendLine($"- **{mark}** — {g.Gate}: observed **{obs}**{lim}");
             if (g.Note != null)
                 sb.AppendLine($"  - {g.Note}");
@@ -367,6 +382,16 @@ public static class CompactMarkdownRenderer
 
         sb.AppendLine();
     }
+
+    static string FormatGateValue(double value, string unit, int decimals) => unit switch
+    {
+        "ms" => $"{value.ToString($"F{decimals}")} ms",
+        "MiB" => $"{value.ToString($"F{decimals}")} MiB",
+        "ratio" => $"{value.ToString($"F{decimals}")}×",
+        "%" => $"{value.ToString($"F{decimals}")}%",
+        "depth" or "count" or "fail_reasons" => $"{value:0}",
+        _ => value.ToString($"F{decimals}")
+    };
 
     static void AppendMissingMetrics(StringBuilder sb, RunReport r)
     {
