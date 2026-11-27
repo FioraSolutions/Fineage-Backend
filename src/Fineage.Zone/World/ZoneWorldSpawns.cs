@@ -1,5 +1,6 @@
 using Fineage.Protocol;
 using Fineage.Zone.Shops;
+using Fineage.Zone.Simulation;
 using Fineage.Zone.Spawns;
 
 namespace Fineage.Zone.World;
@@ -85,6 +86,10 @@ public sealed partial class ZoneWorld
         if (!_spawnSlots.TryGetValue(objectId, out var slot))
             return;
 
+        // Mobius Spawn.decreaseCount stores an absolute deadline (System.currentTimeMillis() + delay) in the
+        // in-memory RespawnTaskManager. The deadline is absolute, and #983 measures it on the simulation clock so a
+        // wall jump cannot move it. It is deliberately not restored across a restart: BootstrapSpawns re-runs the
+        // Mobius Spawn.init path and the boot spawn table is authoritative (see docs/architecture/time-model.md).
         int delaySeconds = slot.Definition.RespawnDelaySeconds;
         int jitter = slot.Definition.RespawnRandomSeconds;
         if (jitter > 0)
@@ -158,24 +163,41 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Test hook: despawn an NPC (corpse decay path) so its respawn timer starts.</summary>
-    internal void DespawnNpcForTests(int objectId)
+    internal void DespawnNpcForTests(int objectId) => RunSpawnTestHook(() =>
     {
-        using (_affinity.Step())
-        {
-            if (_byId.TryGetValue(objectId, out var npc))
-                DespawnNpc(npc);
-        }
-    }
+        if (_byId.TryGetValue(objectId, out var npc))
+            DespawnNpc(npc);
+    });
 
     /// <summary>Test hook: advance respawn timers without waiting on the simulation loop.</summary>
-    internal void AdvanceSpawnsForTests()
+    internal void AdvanceSpawnsForTests() => RunSpawnTestHook(() =>
     {
+        TickDayNightSpawns();
+        TickCorpseDecay(NowUnixMs());
+        TickSpawns();
+    });
+
+    /// <summary>Number of NPC spawn slots waiting on an absolute respawn deadline (test evidence).</summary>
+    internal int PendingSpawnRespawnsForTests => _spawnDue.Count;
+
+    /// <summary>The absolute respawn deadline of a slot, or null when it is alive / not scheduled (test evidence).</summary>
+    internal long? SpawnRespawnDueUnixMsForTests(int objectId) =>
+        _spawnSlots.TryGetValue(objectId, out var slot) ? slot.RespawnAt?.ToUnixTimeMilliseconds() : null;
+
+    /// <summary>
+    /// Runs a spawn test hook at the time the next production step would see, pinned like a real stage. Without the pin
+    /// <see cref="NowUnixMs"/> falls back to the wall clock outside a step, which would make a wall jump look like
+    /// simulation progress and hide the very bug the hooks are used to test.
+    /// </summary>
+    void RunSpawnTestHook(Action body)
+    {
+        long wallUnixMs = WallNow().ToUnixTimeMilliseconds();
+        long nowUnixMs = _simulationClock.SimulationNowUnixMs(wallUnixMs);
+        long tick = _simulationClock.TickAt(nowUnixMs);
+        var context = new TickContext(tick, _simulationClock.TimeOf(tick), wallUnixMs);
         using (_affinity.Step())
-        {
-            TickDayNightSpawns();
-            TickCorpseDecay(NowUnixMs());
-            TickSpawns();
-        }
+        using (_simulationClock.Pin(context))
+            body();
     }
 
     /// <summary>
