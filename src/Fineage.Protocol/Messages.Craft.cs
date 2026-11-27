@@ -16,6 +16,12 @@ public sealed class RecipeMakeSelfMsg
     public int RecipeId { get; set; }
 }
 
+/// <summary>Forget one recipe (Mobius RequestRecipeBookDestroy). <see cref="RecipeId"/> is the list id.</summary>
+public sealed class RecipeBookDestroyMsg
+{
+    public int RecipeId { get; set; }
+}
+
 /// <summary>One manufacture listing (Mobius <c>ManufactureItem</c>: recipe list id + fee).</summary>
 public sealed class RecipeShopRowMsg
 {

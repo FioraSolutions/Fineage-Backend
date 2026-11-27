@@ -418,6 +418,11 @@ namespace Fineage.Net.Contract
         /// Body is object id and count. 0x03E4 is the user-command opcode.
         /// </summary>
         public const ushort RequestCrystallizeItem = 0x03E5;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestRecipeBookDestroy</c> (retail wire <c>0xad</c>).
+        /// Body is one int32 recipe list id. Reply is <see cref="RecipeBookList"/> for that tab.
+        /// </summary>
+        public const ushort RecipeBookDestroy = 0x03E6;
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>

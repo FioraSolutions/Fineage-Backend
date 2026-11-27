@@ -156,7 +156,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xaa | BypassUserCmd | yes | no | BypassUserCmd | `UserCommandRegistry`. Unity client does not send `BypassUserCmd` / retail 0xaa yet |
 | 0xab | SnoopQuit | n/a | n/a |  | GM snoop is not a Fineage target |
 | 0xac | RequestRecipeBookOpen | yes | yes | RecipeBookOpen |  |
-| 0xad | RequestRecipeBookDestroy | no | no |  | no forget-recipe opcode |
+| 0xad | RequestRecipeBookDestroy | yes | yes | Net `RecipeBookDestroy` 0x03E6 | #935 |
 | 0xae | RequestRecipeItemMakeInfo | partial | yes | RecipeBookOpen | make info is RecipeItemMakeInfo S2C |
 | 0xaf | RequestRecipeItemMakeSelf | yes | yes | RecipeMakeSelf |  |
 | 0xb1 | RequestRecipeShopMessageSet | partial | yes | SetRecipeShop |  |
