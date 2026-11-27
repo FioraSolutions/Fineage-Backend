@@ -832,6 +832,173 @@ public sealed class ConsistencyOracleTests
             i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
     }
 
+    [Fact]
+    public void Missing_spawn_does_not_pair_an_observer_at_run_end_with_a_subject_that_stopped_long_ago()
+    {
+        // Long-soak sample: subject 544's self timeline ends early while the observer keeps moving. Current
+        // membership (observer does not know the subject) must not be combined with a co-visible moment long ago.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-30);
+        var subject = new BotObservationLog(179);
+        var observer = new BotObservationLog(29);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(544, 46453, 45307, isSelf: true)), t0);
+        subject.Record(NetOpcode.MoveState, Move(544, 46453, 45307), t0.AddSeconds(55));
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(394, 47000, 45307, isSelf: true)), t0);
+        observer.Record(NetOpcode.MoveState, Move(394, 46453, 45307), t0.AddMinutes(29));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 29 && i.SubjectObjectId == 544);
+    }
+
+    [Fact]
+    public void Missing_spawn_ignores_a_subject_that_left_the_world_before_the_pair_anchor()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-30);
+        var subject = new BotObservationLog(179);
+        var observer = new BotObservationLog(29);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(544, 46453, 45307, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntityDespawn, NetCodec.EncodeEntityDespawn(new EntityDespawnMsg
+        {
+            EntityValue = 544,
+            EntityGeneration = 1
+        }), t0.AddSeconds(55));
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(394, 47000, 45307, isSelf: true)), t0);
+        observer.Record(NetOpcode.MoveState, Move(394, 46453, 45307), t0.AddMinutes(29));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 29 && i.SubjectObjectId == 544);
+    }
+
+    [Fact]
+    public void Missing_spawn_still_flags_two_live_bots_with_fresh_self_samples()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var observer = new BotObservationLog(1);
+        var subject = new BotObservationLog(2);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1001, 1000, 1000, isSelf: true)), t0);
+        observer.Record(NetOpcode.MoveState, Move(1001, 1050, 1050), t0.AddSeconds(2));
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1002, 1500, 1000, isSelf: true)), t0);
+        subject.Record(NetOpcode.MoveState, Move(1002, 1550, 1050), t0.AddSeconds(2));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues,
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1 && i.SubjectObjectId == 1002);
+        Assert.NotNull(report.Issues.First(
+            i => i.Kind == ConsistencyKind.MissingSpawn && i.ObserverBotId == 1).ObservedAt);
+    }
+
+    [Fact]
+    public void Hp_desync_does_not_treat_a_self_only_level_up_as_a_missed_fanout()
+    {
+        // Kill/level status carries Level/Exp/Sp and is sent to the owner only. The observer's last bar (56)
+        // matches the last peer-visible state even though the subject's end self HP is 111.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-30);
+        var subject = new BotObservationLog(134);
+        var observer = new BotObservationLog(9);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: false)), t0);
+        subject.Record(NetOpcode.StatusUpdate, NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = 499,
+            EntityGeneration = 1,
+            AttributeIds = [Fineage.Protocol.InterludeStatus.CurHp],
+            Values = [56]
+        }), t0.AddSeconds(1));
+        observer.Record(NetOpcode.StatusUpdate, NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = 499,
+            EntityGeneration = 1,
+            AttributeIds = [Fineage.Protocol.InterludeStatus.CurHp],
+            Values = [56]
+        }), t0.AddSeconds(29));
+        subject.Record(NetOpcode.StatusUpdate, NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = 499,
+            EntityGeneration = 1,
+            AttributeIds =
+            [
+                Fineage.Protocol.InterludeStatus.Level,
+                Fineage.Protocol.InterludeStatus.Exp,
+                Fineage.Protocol.InterludeStatus.Sp,
+                Fineage.Protocol.InterludeStatus.CurHp,
+                Fineage.Protocol.InterludeStatus.MaxHp
+            ],
+            Values = [2, 1200, 300, 111, 111]
+        }), t0.AddSeconds(30));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Equal(111, subject.Tracker.Entities[499].CurHp);
+        Assert.Equal(56, subject.Tracker.Entities[499].ExpectedPeerHp);
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.HpDesync);
+    }
+
+    [Fact]
+    public void Hp_desync_flags_a_missed_peer_visible_hp_loss()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(134);
+        var observer = new BotObservationLog(9);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: false)), t0);
+        subject.Record(NetOpcode.StatusUpdate, NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = 499,
+            EntityGeneration = 1,
+            AttributeIds = [Fineage.Protocol.InterludeStatus.CurHp],
+            Values = [40]
+        }), t0.AddSeconds(5));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        var issue = Assert.Single(report.Issues,
+            i => i.Kind == ConsistencyKind.HpDesync && i.ObserverBotId == 9 && i.SubjectObjectId == 499);
+        Assert.Contains("expected 40", issue.Detail);
+    }
+
+    [Fact]
+    public void Hp_desync_respects_the_bounded_delivery_window()
+    {
+        var t0 = DateTimeOffset.UtcNow.AddSeconds(-2);
+        var subject = new BotObservationLog(134);
+        var observer = new BotObservationLog(9);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(374, 46010, 42060, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(499, 46002, 42065, isSelf: false)), t0);
+        subject.Record(NetOpcode.StatusUpdate, NetCodec.EncodeStatusUpdate(new StatusUpdateNetMsg
+        {
+            EntityValue = 499,
+            EntityGeneration = 1,
+            AttributeIds = [Fineage.Protocol.InterludeStatus.CurHp],
+            Values = [40]
+        }), t0.AddSeconds(2));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(observer, inWorld: true), Bot(subject, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.HpDesync);
+    }
+
     static FineageBotClient Bot(BotObservationLog log) => Bot(log, inWorld: false);
 
     static FineageBotClient Bot(BotObservationLog log, bool inWorld)
