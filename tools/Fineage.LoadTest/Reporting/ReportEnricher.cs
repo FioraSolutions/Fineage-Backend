@@ -20,7 +20,8 @@ public static class ReportEnricher
         int? zonePid = null,
         string? zoneDll = null,
         string? expectedZoneCommit = null,
-        bool requireCleanProvenance = false)
+        bool requireCleanProvenance = false,
+        IReadOnlyList<RssSample>? rssSamples = null)
     {
         ZoneBuildInfo? zoneBuild = report.PeakMetricsText is { } peakText
             ? PrometheusParser.ParseBuildInfo(peakText)
@@ -43,6 +44,7 @@ public static class ReportEnricher
         report.TimeSeriesWindows = TimeSeriesSummaryBuilder.Build(promSamples);
         report.TimeSeriesBacklogTrend = TimeSeriesSummaryBuilder.BacklogTrend(report.TimeSeriesWindows);
         report.Runtime = runtime;
+        report.ResourceTrend = ResourceTrendSummaryBuilder.Build(report.SteadyStateStartedAt, rssSamples, runtime);
         report.StructuredLogs = StructuredLogScanner.Scan(logPaths);
 
         if (report.PeakMetricsText != null)

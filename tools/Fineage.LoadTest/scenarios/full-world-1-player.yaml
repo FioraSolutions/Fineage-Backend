@@ -1,0 +1,14 @@
+# #990 — Full world + 1 player: one real client keeps the full enabled spawn world ticking.
+# The background-simulation cost must be measured with the normal map pack (do not shard the world
+# for this profile). This profile never asserts a player ceiling; it is the 1-player baseline.
+name: full-world-1-player
+botCount: 1
+rampUpSeconds: 0
+durationSeconds: 120
+spawnLayout: town
+enterConcurrency: 1
+actionWeights:
+  move: 0.20
+  sit: 0.50
+  say: 0.10
+  social: 0.20
