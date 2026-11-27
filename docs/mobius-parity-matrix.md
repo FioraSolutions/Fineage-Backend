@@ -14,8 +14,8 @@
 
 | Status | Rows |
 |--------|-----:|
-| ✅ done | 91 |
-| 🟡 partial | 5 |
+| ✅ done | 92 |
+| 🟡 partial | 4 |
 | ❌ missing | 9 |
 | n/a | 3 |
 | **total** | **108** |
@@ -38,7 +38,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 8 | Peace, arena, water, swamp, damage, no-landing, mother tree, jail, siege, fishing, olympiad, HQ | ✅ | — | matching `entity/zone/type/*Zone.java` → `Geo/MoveZones.cs`, `JailZoneCatalog`, `FishingTable`, `OlympiadStadiums`, `ZoneWorldSiege.Structures` |
 | 9 | Remaining zone types | ✅ | — | `entity/zone/type/*Zone.java` + `zones/*.xml` → `ZoneTypeRegistry` (`data/zone-types.json`). One profile class per type. Unknown type is logged and skipped. Wedding summon reads the no-summon flag. #917 |
 | 10 | NPC spawns | ✅ | — | `data/spawns` (186 xml) → 189 spawn JSON files, none left `enabled: false` |
-| 11 | Raid / grand boss schedule | 🟡 | S | `RaidBossSpawnManager.java` → `data/raidbosses.json` 216/223 enabled. Anakazel 25333–25338 stay off (script minions). **25512 Gigantic Chaos Golem** is `enabled: false` at 0,0,0 — the import has no coordinates — #926 |
+| 11 | Raid / grand boss schedule | ✅ | — | `RaidBossSpawnManager.java` → `data/raidbosses.json` 216/223 enabled. Anakazel 25333–25338 stay off (script minions). **25512 Gigantic Chaos Golem** is script-owned (`DrChaos` at 96320,-110912,-3328): catalog keeps `enabled: false` at 0,0,0 and load logs `raid 25512 has no coordinates` — #926 |
 | 12 | Day/night spawn swap | ✅ | — | `DayNightSpawnManager.java` → `ZoneWorldSpawns.DayNight` |
 | 13 | Walking routes | ✅ | — | `WalkingManager.java` → `ZoneWorldWalking` |
 | 14 | Boats | ✅ | — | `BoatManager.java` → `ZoneWorldBoats` + vehicle opcodes in `NetOpcode` |
@@ -172,12 +172,11 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 1. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
 2. Shop wear preview (row 48) — #924.
 3. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
-4. One raid row with no coordinates: Gigantic Chaos Golem 25512 (row 11) — #926.
-5. Macros (row 69) — #927.
-6. Party matching rooms (row 67) — #928.
-7. Community board (row 70) — #929.
-8. Petitions (row 63) — #930.
-9. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+4. Macros (row 69) — #927.
+5. Party matching rooms (row 67) — #928.
+6. Community board (row 70) — #929.
+7. Petitions (row 63) — #930.
+8. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

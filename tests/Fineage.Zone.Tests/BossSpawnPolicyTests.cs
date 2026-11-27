@@ -74,4 +74,25 @@ public sealed class BossSpawnPolicyTests
         Assert.Contains(29_001, ids);
         Assert.DoesNotContain(25_333, ids);
     }
+
+    /// <summary>
+    /// #926: Gigantic Chaos Golem is spawned by Mobius <c>DrChaos</c> at 96320,-110912,-3328 —
+    /// not by the raid schedule. Keep the row disabled at the origin so it never materializes at 0,0,0.
+    /// </summary>
+    [Fact]
+    public void Dr_chaos_golem_stays_script_owned_without_schedule_spawn()
+    {
+        var golem = BossCatalog.LoadDefault().Get(25_512);
+        Assert.False(golem.Enabled);
+        Assert.False(golem.HasWorldSpawnPoint);
+        Assert.False(DatapackBossSpawnPolicy.Instance.ShouldSpawn(golem));
+        Assert.False(new MapFilteredBossSpawnPolicy(includeEnabledMaps: true).ShouldSpawn(golem));
+
+        var schedule = new BossSchedule(
+            BossCatalog.LoadDefault(),
+            new MemoryBossStore(),
+            1_800_000_000_000,
+            spawnPolicy: new MapFilteredBossSpawnPolicy(includeEnabledMaps: true));
+        Assert.DoesNotContain(25_512, schedule.StartupOrders().Select(o => o.NpcId));
+    }
 }

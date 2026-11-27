@@ -150,7 +150,7 @@ public sealed class BossCatalog
                 ? ParseStatus(path, row.NpcId, row.InitialStatus)
                 : BossLifeStatus.Alive;
 
-            bosses.Add(new BossDefinition(
+            var definition = new BossDefinition(
                 row.NpcId,
                 kind,
                 row.Enabled,
@@ -169,7 +169,16 @@ public sealed class BossCatalog
                 template.WalkSpeed,
                 min,
                 max,
-                initial));
+                initial);
+            // Script-owned rows (Dr Chaos golem 25512, Anakazel, Frintezza, …) stay at 0,0,0.
+            // Name them on load so a missing import is never silent; spawn policy still refuses origin.
+            if (!definition.HasWorldSpawnPoint)
+            {
+                ZoneLog.Info(
+                    $"{(kind == BossKind.Raid ? "raid" : "grand")} {definition.NpcId} has no coordinates");
+            }
+
+            bosses.Add(definition);
         }
 
         return From(bosses);
