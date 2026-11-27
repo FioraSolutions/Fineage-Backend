@@ -14674,6 +14674,13 @@
       "weight": 10
     },
     {
+      "id": 1665,
+      "name": "World Map",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "price": 1000
+    },
+    {
       "id": 1666,
       "name": "Recipe: Wooden Arrow",
       "kind": "etc",
@@ -16345,6 +16352,13 @@
       "icon": "icon.etc_orcish_talisman_i00",
       "price": 800,
       "weight": 120
+    },
+    {
+      "id": 1863,
+      "name": "Map: Elmore",
+      "kind": "etc",
+      "icon": "icon.etc_letter_red_i00",
+      "price": 1000
     },
     {
       "id": 1864,
@@ -49031,6 +49045,14 @@
       "stackable": true,
       "price": 884000,
       "weight": 2
+    },
+    {
+      "id": 5555,
+      "name": "Token of Love",
+      "kind": "etc",
+      "icon": "icon.etc_x_mas_2004_i00",
+      "stackable": true,
+      "price": 1
     },
     {
       "id": 5556,

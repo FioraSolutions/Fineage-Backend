@@ -104,6 +104,18 @@ internal static class FanoutDispatch
             case FanoutKind.ShopPreviewInfo:
                 publisher.FanoutShopPreviewInfo(watchers, ((Fineage.Protocol.ShopPreviewInfoMsg)args.Payload!));
                 return;
+            case FanoutKind.Dice:
+                publisher.FanoutDice(watchers, ((Fineage.Protocol.DiceMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowMiniMap:
+                publisher.FanoutShowMiniMap(watchers, ((Fineage.Protocol.ShowMiniMapMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowCalculator:
+                publisher.FanoutShowCalculator(watchers, ((Fineage.Protocol.ShowCalculatorMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowXMasSeal:
+                publisher.FanoutShowXMasSeal(watchers, ((Fineage.Protocol.ShowXMasSealMsg)args.Payload!));
+                return;
             case FanoutKind.ShopBalance:
                 publisher.FanoutShopBalance(watchers, ((Fineage.Protocol.ShopBalanceMsg)args.Payload!));
                 return;

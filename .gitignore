@@ -100,6 +100,7 @@ publish/
 !data/cubics.json
 !data/xp-percent-lost.json
 !data/item-skills.json
+!data/item-handlers.json
 !data/map-regions.json
 !data/geodata-regions.json
 !data/clan-hall-spawns.json

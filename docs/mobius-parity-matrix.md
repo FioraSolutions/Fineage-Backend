@@ -141,7 +141,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 100 | Fishing championship | ✅ | — | `FishingChampionshipManager.java` → `ZoneWorldFishingChampionship.cs`. NPC HTML board, weekly reset, prize via `LedgerTxKind.FishingChampionshipPrize`. The ranking is the NPC page, not `RequestExFishRanking` |
 | 101 | Soul crystals (Q350) | ✅ | — | `Q00350` → `ZoneWorldSoulCrystals` |
 | 102 | Shots, arrows, consumables, seeds, merc tickets | ✅ | — | `handlers/items/{SoulShots,SpiritShot,EnchantScrolls,Seed,MercTicket,SummonItems}.java` → `ZoneWorldShots`, `ZoneWorldConsumables`, `ZoneWorldPets` |
-| 103 | Item-handler tail | ❌ | S | `Book.java`, `Calculator.java`, `Maps.java`, `RollingDice.java`, `SpecialXMas.java` → no handlers (`DICE`, `SHOW_CALCULATOR`, `SHOW_XMAS_SEAL` absent) — #925 |
+| 103 | Item-handler tail | ✅ | — | `ItemHandlerCatalog` + `ItemHandlerRegistry` → Book/Maps/RollingDice/Calculator/SpecialXMas; Net `Dice`/`ShowMiniMap`/`ShowCalculator`/`ShowXMasSeal` 0x03EB–0x03EE — #925 |
 | **Meta** |
 | 104 | GM admin commands | 🟡 | L | `handlers/chat/commands/admin` (77 handlers) → 34 `admin_*` verbs in `ZoneWorldAdmin`. Missing verbs are not dispatched — #931 |
 | 105 | Seasonal events | ❌ | S | `scripts/events/{Christmas,L2Day,HeavyMedal}.java` → not present. Time-boxed `EventDropCatalog` is separate and done — #934 |
@@ -188,7 +188,7 @@ These Mobius trees were walked. They do not get their own row when the mechanism
 PvE and character leveling first. Siege, olympiad, and clan are last because those stacks are already on `dev`.
 
 1. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
-2. Book / map / dice / calculator / xmas item handlers (row 103) — #925.
+2. ~~Book / map / dice / calculator / xmas item handlers (row 103) — #925~~ (done).
 3. ~~Shop wear preview (row 48) — #924~~ (done).
 4. Macros (row 69) — #927.
 5. Party matching rooms (row 67) — #928.

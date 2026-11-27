@@ -361,7 +361,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x9a | PRIVATE_STORE_MANAGE_LIST_SELL | PrivateStoreManageListSell | yes | yes | PrivateStoreListSell |  |
 | 0x9b | PRIVATE_STORE_LIST_SELL | PrivateStoreListSell | yes | yes | PrivateStoreListSell |  |
 | 0x9c | PRIVATE_STORE_MSG_SELL | PrivateStoreMsgSell | yes | yes | PrivateStoreInfo |  |
-| 0x9d | SHOW_MINI_MAP | ShowMiniMap | no | no |  |  |
+| 0x9d | SHOW_MINI_MAP | ShowMiniMap | yes | yes | Net `ShowMiniMap` 0x03EC | #925 Maps |
 | 0xa0 | TUTORIAL_SHOW_HTML | TutorialShowHtml | yes | yes | TutorialUi |  |
 | 0xa1 | TUTORIAL_SHOW_QUESTION_MARK | TutorialShowQuestionMark | yes | yes | TutorialUi |  |
 | 0xa2 | TUTORIAL_ENABLE_CLIENT_EVENT | TutorialEnableClientEvent | yes | yes | TutorialUi |  |
@@ -397,7 +397,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0 | MULTI_SELL_LIST | MultiSellList | yes | yes | MultiSellList |  |
 | 0xd1 | SET_SUMMON_REMAIN_TIME | SetSummonRemainTime | partial | yes | SummonInfo |  |
 | 0xd3 | NET_PING | NetPing | n/a | n/a |  | not retail NetPing |
-| 0xd4 | DICE | Dice | no | no |  | RollingDice item handler absent |
+| 0xd4 | DICE | Dice | yes | yes | Net `Dice` 0x03EB | #925 RollingDice |
 | 0xd5 | SNOOP | Snoop | n/a | n/a |  | GM snoop |
 | 0xd6 | RECIPE_BOOK_ITEM_LIST | RecipeBookItemList | yes | yes | RecipeBookList |  |
 | 0xd7 | RECIPE_ITEM_MAKE_INFO | RecipeItemMakeInfo | yes | yes | RecipeItemMakeInfo |  |
@@ -405,7 +405,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd9 | RECIPE_SHOP_SELL_LIST | RecipeShopSellList | yes | yes | RecipeShopSellList |  |
 | 0xda | RECIPE_SHOP_ITEM_INFO | RecipeShopItemInfo | yes | yes | RecipeShopItemInfo |  |
 | 0xdb | RECIPE_SHOP_MSG | RecipeShopMsg | partial | yes | RecipeShopItemInfo |  |
-| 0xdc | SHOW_CALCULATOR | ShowCalculator | no | no |  |  |
+| 0xdc | SHOW_CALCULATOR | ShowCalculator | yes | yes | Net `ShowCalculator` 0x03ED | #925 Calculator |
 | 0xdd | MON_RACE_INFO | MonRaceInfo | yes | yes | MonRaceInfo |  |
 | 0xde | SHOW_TOWN_MAP | ShowTownMap | no | no |  |  |
 | 0xdf | OBSERVATION_MODE | ObservationEnter | partial | yes | OlympiadMatch | olympiad observe only |
@@ -427,7 +427,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xef | SHOP_PREVIEW_LIST | ShopPreviewList | yes | yes |  | Net 0x03E8 (#924) |
 | 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | yes | yes |  | Net 0x03E9 (#924) |
 | 0xf1 | CAMERA_MODE | CameraMode | no | no |  |  |
-| 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | no | no |  | SpecialXMas item |
+| 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | yes | yes | Net `ShowXMasSeal` 0x03EE | #925 SpecialXMas |
 | 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate | danger area follows an enabled EffectZone (`showDangerIcon`) |
 | 0xf4 | SHORT_BUFF_STATUS_UPDATE | ShortBuffStatusUpdate | partial | yes | AbnormalStatusUpdate |  |
 | 0xf5 | SSQ_STATUS | SSQStatus | yes | yes | SevenSignsStatus |  |
