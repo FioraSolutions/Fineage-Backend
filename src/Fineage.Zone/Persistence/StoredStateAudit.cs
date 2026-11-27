@@ -146,7 +146,7 @@ public static class StoredStateAudit
         if (issues.Count > 0)
         {
             Record(issues);
-            throw new StoredStateException($"character {CharacterOwner(character)} cannot be loaded", issues);
+            throw new StoredStateException($"{CharacterOwner(character)} cannot be loaded", issues);
         }
     }
 
@@ -159,7 +159,7 @@ public static class StoredStateAudit
         if (issues.Count > 0)
         {
             Record(issues);
-            throw new StoredStateException($"pet {PetOwner(pet)} cannot be loaded", issues);
+            throw new StoredStateException($"{PetOwner(pet)} cannot be loaded", issues);
         }
     }
 
