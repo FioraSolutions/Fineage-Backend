@@ -5,14 +5,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminPetitionVerb(string verb) =>
-        verb.Equals("admin_view_petitions", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_view_petition", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_accept_petition", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_reject_petition", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_reset_petitions", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_force_peti", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminPetition(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         if (verb.Equals("admin_view_petitions", StringComparison.OrdinalIgnoreCase))

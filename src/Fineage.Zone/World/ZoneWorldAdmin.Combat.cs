@@ -2,14 +2,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminCombatVerb(string verb) =>
-        verb.Equals("admin_heal", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_kill", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_kill_monster", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_res", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_res_monster", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_delete", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminCombat(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         if (verb.Equals("admin_heal", StringComparison.OrdinalIgnoreCase))

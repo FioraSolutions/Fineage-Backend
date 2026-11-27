@@ -2,17 +2,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminStatusVerb(string verb) =>
-        verb.Equals("admin_online", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_invul", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_setinvul", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_hide", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_invis", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_invisible", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_setinvis", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_vis", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_visible", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminStatus(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         if (verb.Equals("admin_online", StringComparison.OrdinalIgnoreCase))

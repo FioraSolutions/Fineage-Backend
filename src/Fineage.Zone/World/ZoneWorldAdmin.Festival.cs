@@ -4,10 +4,6 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    static bool IsAdminFestivalVerb(string verb) =>
-        verb.Equals("admin_festival_enter", StringComparison.OrdinalIgnoreCase)
-        || verb.Equals("admin_festival_end", StringComparison.OrdinalIgnoreCase);
-
     string? TryAdminFestival(ZoneSession session, ZoneEntity player, string verb, string args)
     {
         if (verb.Equals("admin_festival_end", StringComparison.OrdinalIgnoreCase))
