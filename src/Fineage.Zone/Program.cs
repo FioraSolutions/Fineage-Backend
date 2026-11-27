@@ -1,6 +1,7 @@
 using System.Net;
 using Fineage.Game;
 using Fineage.Game.Mobius;
+using Fineage.Game.RequiredData;
 using Fineage.Accounts;
 using Fineage.Net.Host;
 using Fineage.Protocol;
@@ -93,13 +94,17 @@ bool includeEnabledMaps = includeEnabledMapsBoot;
 var punishments = PunishmentManager.OpenInStateDirectory(stateDir);
 var raidBossPoints = Fineage.Zone.RaidBossPoints.RaidBossPointsManager.OpenInStateDirectory(stateDir);
 ZoneWorld world;
+Required.SilentFallbackObserver = static (kind, key) =>
+    FineageTelemetry.DataSilentFallback.Add(1, new KeyValuePair<string, object?>("kind", kind.ToId()));
 try
 {
+    string dataDir = Path.Combine(AppContext.BaseDirectory, "data");
+    Required.Registry.AssertBootPacksPresent(dataDir);
     _ = GeoEngine.LoadDefault();
     world = ZoneAoiSettings.CreateWorld(accounts: accounts, sevenSigns: sevenSigns, festivalRuntime: festivalRuntime, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad,
         ledgerJournal: accounts.OpenLedgerJournal(), punishments: punishments, raidBossPoints: raidBossPoints);
 }
-catch (InvalidOperationException ex)
+catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or DirectoryNotFoundException or FileNotFoundException)
 {
     Console.Error.WriteLine($"[ZONE] {ex.Message}");
     Environment.ExitCode = 1;

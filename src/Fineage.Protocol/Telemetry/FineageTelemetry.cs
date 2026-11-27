@@ -61,6 +61,15 @@ public static class FineageTelemetry
     public static readonly Counter<long> PacketsErrored =
         Meter.CreateCounter<long>("fineage.packets.errored", description: "Packets that produced an error response or failed while handling");
 
+    /// <summary>
+    /// Silent substitution of missing required game data (#985). Must stay at zero;
+    /// any growth means a call site still defaults instead of refusing through
+    /// <c>Fineage.Game.RequiredData</c>.
+    /// </summary>
+    public static readonly Counter<long> DataSilentFallback =
+        Meter.CreateCounter<long>("fineage.data.silent_fallback",
+            description: "Silent fallbacks of required game data (tag kind); target is zero");
+
     public static readonly Histogram<double> HandlerMilliseconds =
         Meter.CreateHistogram<double>("fineage.handler.ms", unit: "ms", description: "Packet handler duration");
 

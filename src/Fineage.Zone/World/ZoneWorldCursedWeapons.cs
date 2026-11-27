@@ -1,5 +1,6 @@
 using Fineage.Accounts;
 using Fineage.Game;
+using Fineage.Game.RequiredData;
 using Fineage.Protocol;
 using Fineage.Zone.CursedWeapons;
 using Fineage.Zone.Inventory;
@@ -231,6 +232,9 @@ public sealed partial class ZoneWorld
     {
         if (_game.Skills.Find(skillId) is { } skill && skill.MaxLevel > 0)
             return skill.MaxLevel;
+        // #985 migration: skill 3603 (Zariche) is still absent from skills.json. Track via the
+        // silent-fallback metric; replace with Skills.Require once the Mobius row is imported.
+        Required.NoteSilentFallback(RequiredDataKind.Skill, skillId.ToString());
         ZoneLog.Warn($"cursed weapon skill {skillId} missing from catalogs; defaulting max level to 10");
         return 10;
     }

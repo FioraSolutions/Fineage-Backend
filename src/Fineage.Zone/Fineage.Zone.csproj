@@ -57,6 +57,7 @@
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\geodata-regions.json" Link="data\geodata-regions.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\required-data-registry.json" Link="data\required-data-registry.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\gm-teleports.json" Link="data\gm-teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\village-masters.json" Link="data\village-masters.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\wedding.json" Link="data\wedding.json" CopyToOutputDirectory="PreserveNewest" />
