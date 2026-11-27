@@ -135,7 +135,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 96 | Fortress siege | n/a | — | not an Interlude castle-scope target |
 | **Olympiad and hero** |
 | 97 | Olympiad, stadium, hero weapons | ✅ | — | `OlympiadGameManager` → `Olympiad/*`, `ZoneWorldOlympiad.Npc` hero weapon grant |
-| 98 | Hero inscription | ❌ | S | `RequestWriteHeroWords.java` → no hero-words store. `EX_HERO_LIST` is only the olympiad status sheet — #932 |
+| 98 | Hero inscription | ✅ | — | `RequestWriteHeroWords` → olympiad board `Message` + monument hero list HTML (#932) |
 | **Activities and items** |
 | 99 | Fishing | ✅ | — | fishing packets → `ZoneWorldFishing` |
 | 100 | Fishing championship | ✅ | — | `FishingChampionshipManager.java` → `ZoneWorldFishingChampionship.cs`. NPC HTML board, weekly reset, prize via `LedgerTxKind.FishingChampionshipPrize`. The ranking is the NPC page, not `RequestExFishRanking` |

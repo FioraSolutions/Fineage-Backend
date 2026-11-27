@@ -35,9 +35,30 @@ public sealed partial class OlympiadBoard
             if (!_heroes.TryGetValue(characterId, out var hero) || hero.Claimed)
                 return false;
             hero.Claimed = true;
+            hero.Message ??= "";
             Persist();
             return true;
         }
+    }
+
+    /// <summary>Mobius <c>Hero.setHeroMessage</c> — claimed heroes only; persists immediately.</summary>
+    public bool SetHeroMessage(int characterId, string message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        lock (_gate)
+        {
+            if (!_heroes.TryGetValue(characterId, out var hero) || !hero.Claimed)
+                return false;
+            hero.Message = message;
+            Persist();
+            return true;
+        }
+    }
+
+    public string HeroMessage(int characterId)
+    {
+        lock (_gate)
+            return _heroes.TryGetValue(characterId, out var hero) ? hero.Message ?? "" : "";
     }
 
     /// <summary>Current heroes (Mobius <c>ExHeroList</c> / "who is the hero of this era").</summary>
@@ -192,7 +213,8 @@ public sealed partial class OlympiadBoard
         ClassId = row.ClassId,
         Name = row.Name,
         Claimed = row.Claimed,
-        Count = row.Count
+        Count = row.Count,
+        Message = row.Message ?? ""
     };
 
     void LoadHeroes(OlympiadSnapshot snap)

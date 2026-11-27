@@ -200,7 +200,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0/0x09 | RequestProcureCropList | yes | contract | ManorCommand |  |
 | 0xd0/0x0a | RequestSetSeed | yes | contract | ManorCommand |  |
 | 0xd0/0x0b | RequestSetCrop | yes | contract | ManorCommand |  |
-| 0xd0/0x0c | RequestWriteHeroWords | no | no |  |  |
+| 0xd0/0x0c | RequestWriteHeroWords | yes | yes |  | hero inscription #932 |
 | 0xd0/0x0d | RequestExAskJoinMPCC | yes | contract | CommandChannelAskRequest |  |
 | 0xd0/0x0e | RequestExAcceptJoinMPCC | yes | contract | CommandChannelAcceptRequest |  |
 | 0xd0/0x0f | RequestExOustFromMPCC | yes | contract | CommandChannelOustRequest |  |

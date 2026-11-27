@@ -91,11 +91,17 @@ public sealed partial class ZoneWorld
                 return BeginOlympiadObserve(session, player, arg);
             case 4:
                 {
-                    // Net has no ExHeroList: the current heroes go out as a page.
+                    // Net has no ExHeroList: the current heroes go out as a page (with Mobius heroes.message).
                     var rows = _olympiad.Board.Heroes().Where(h => h.Claimed).ToList();
                     string body = rows.Count == 0
                         ? "There is no Hero in this era yet.<br>"
-                        : string.Concat(rows.Select(h => $"{ClassName(h.ClassId)}: {h.Name}<br>"));
+                        : string.Concat(rows.Select(h =>
+                        {
+                            string line = $"{ClassName(h.ClassId)}: {h.Name}";
+                            if (!string.IsNullOrEmpty(h.Message))
+                                line += $" — {h.Message}";
+                            return line + "<br>";
+                        }));
                     SendHtml(session, player, npc, $"<html><body>{npc.Name}:<br>{body}</body></html>");
                     return null;
                 }
