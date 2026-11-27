@@ -71,7 +71,7 @@ public sealed class LoadTestRunner
                 : null;
             for (int i = 0; i < scenario.BotCount; i++)
             {
-                var botStats = new BotStats { BotId = i, Account = $"{scenario.AccountPrefix}{i:D5}" };
+                var botStats = new BotStats { BotId = i, Account = BotIdentity.AccountName(scenario.AccountPrefix, i) };
                 stats.Add(botStats);
                 bots.Add(new FineageBotClient(scenario, i, botStats, peers, gatekeepers));
             }
