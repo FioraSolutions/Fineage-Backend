@@ -316,6 +316,12 @@ sealed class ZonePlayerStatusPayload
     /// <summary>Mobius player element-seed expiry timestamps (FIRE/WATER/WIND/EARTH), unix ms.</summary>
     public Dictionary<string, List<long>> ElementSeedUntilMs { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Mobius <c>Player._isInvul</c> (admin_invul / skills). Blocks incoming HP damage.</summary>
+    public bool Invulnerable { get; set; }
+
+    /// <summary>Mobius GM hide / invis: non-GM peers omit this player from their knownlist.</summary>
+    public bool Invisible { get; set; }
+
     /// <summary>Mobius CA1 channel: skill still ticking until this unix ms. 0 = not channeling.</summary>
     public long ChannelUntilMs { get; set; }
     public int ChannelSkillId { get; set; }

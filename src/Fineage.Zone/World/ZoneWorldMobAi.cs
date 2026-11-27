@@ -193,6 +193,8 @@ public sealed partial class ZoneWorld
 
         if (DuelBlocksHit(attacker, target))
             return;
+        if (target.Invulnerable)
+            return;
         // Mobius CreatureAI.checkTargetLostOrDead with Config.FAKE_DEATH_DAMAGE_STAND=true (CT0 default): a hit on a
         // playing-dead pawn stands it up (stopFakeDeath(true)) instead of killing the corpse.
         if (target.FakeDeath)

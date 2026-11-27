@@ -123,6 +123,21 @@ public sealed partial class ZoneWorld
         if (IsAdminTeleportVerb(verb))
             return TryAdminTeleport(session, player, verb, args);
 
+        if (IsAdminCombatVerb(verb))
+            return TryAdminCombat(session, player, verb, args);
+
+        if (IsAdminAnnounceVerb(verb))
+            return TryAdminAnnounce(session, player, verb, args);
+
+        if (IsAdminStatusVerb(verb))
+            return TryAdminStatus(session, player, verb, args);
+
+        if (IsAdminPetitionVerb(verb))
+            return TryAdminPetition(session, player, verb, args);
+
+        if (IsAdminRideVerb(verb))
+            return TryAdminRide(session, player, verb, args);
+
         ZoneLog.Warn($"admin unknown cmd={verb} object={player.ObjectId}");
         FanGmSystem(session, $"Unknown admin command: {verb}" + AdminTeleportHint(verb));
         return "bad_request";

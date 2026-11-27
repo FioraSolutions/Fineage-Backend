@@ -69,6 +69,9 @@ public sealed partial class ZoneWorld
 
         if (DuelBlocksHit(attacker, target))
             return;
+        // Mobius Creature.isInvul: admin_invul / setInvul blocks HP loss (hits still start combat / hate above).
+        if (target.Invulnerable)
+            return;
         // Mobius CreatureAI.checkTargetLostOrDead (FAKE_DEATH_DAMAGE_STAND=true): a melee hit on a playing-dead pawn
         // stands it up before the damage lands.
         if (target.FakeDeath)

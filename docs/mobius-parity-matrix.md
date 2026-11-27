@@ -143,7 +143,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 102 | Shots, arrows, consumables, seeds, merc tickets | ✅ | — | `handlers/items/{SoulShots,SpiritShot,EnchantScrolls,Seed,MercTicket,SummonItems}.java` → `ZoneWorldShots`, `ZoneWorldConsumables`, `ZoneWorldPets` |
 | 103 | Item-handler tail | ✅ | — | `ItemHandlerCatalog` + `ItemHandlerRegistry` → Book/Maps/RollingDice/Calculator/SpecialXMas; Net `Dice`/`ShowMiniMap`/`ShowCalculator`/`ShowXMasSeal` 0x03EB–0x03EE — #925 |
 | **Meta** |
-| 104 | GM admin commands | 🟡 | L | `handlers/chat/commands/admin` (77 handlers) → 34 `admin_*` verbs in `ZoneWorldAdmin`. Missing verbs are not dispatched — #931 |
+| 104 | GM admin commands | 🟡 | L | `handlers/chat/commands/admin` (77 handlers) → heal/kill/res/delete/announce/online/invul/invis/hide/petition/ride + prior live-ops set in `ZoneWorldAdmin` (#931). Remaining HTML/reload/manor/siege/… still open |
 | 105 | Seasonal events | ❌ | S | `scripts/events/{Christmas,L2Day,HeavyMedal}.java` → not present. Time-boxed `EventDropCatalog` is separate and done — #934 |
 | 106 | Event drop windows | ✅ | — | `EventDropManager.java` → `Drops/EventDropCatalog.cs` |
 | 107 | Player mail | n/a | — | `EX_MAIL_ARRIVED` / `CustomMailManager` are not a Fineage Net target |
