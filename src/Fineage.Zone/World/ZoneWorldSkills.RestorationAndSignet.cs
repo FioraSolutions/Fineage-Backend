@@ -113,7 +113,7 @@ public sealed partial class ZoneWorld
             }
             foreach (var item in group.Items)
             {
-                string name = _game.Items.TryGet(item.Id, out var type) ? type.Name : item.Id.ToString();
+                string name = _game.Items.Require(item.Id).Name;
                 if (item.Count > 1)
                     SelfLine(session, ManorProtocol.ObtainedMany, $"You have obtained {item.Count} {name}.", name,
                         item.Count.ToString());
@@ -268,7 +268,7 @@ public sealed partial class ZoneWorld
         npc.HomeSet = false;
         // Mobius EffectPoint: setInvul(true) and attackable=false, so the aggression scan never picks it up.
         SetAggroTarget(npc, 0);
-        if (NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var template))
+        var template = NpcCatalog.LoadDefault().Get(npcId);
         {
             int despawnSeconds = template.DespawnTimeSeconds > 0 ? template.DespawnTimeSeconds : 20;
             if (npc.QuestSpawn != null)

@@ -194,11 +194,7 @@ public sealed partial class ZoneWorld
     ZoneEntity? SpawnPet(ZoneEntity owner, ItemInstance collar, PetTemplate template, long now)
     {
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(template.NpcId, out var npc))
-        {
-            ZoneLog.Info($"pet skip unknown npcId={template.NpcId}");
-            return null;
-        }
+        var npc = _summonTemplates.Get(template.NpcId);
 
         var stored = LoadPet(collar.ObjectId);
         if (stored != null && stored.NpcId != template.NpcId)
@@ -467,7 +463,7 @@ public sealed partial class ZoneWorld
 
     string ItemName(string? locale, int itemId)
     {
-        string english = _game.Items.TryGet(itemId, out var def) && def != null ? def.Name : itemId.ToString();
+        string english = _game.Items.Require(itemId).Name;
         return _pages.Name(locale, "item", itemId, english);
     }
 
@@ -572,8 +568,7 @@ public sealed partial class ZoneWorld
             bool up = level > s.Level;
             double hp = s.CurHp, mp = s.CurMp;
             _summonTemplates ??= NpcCatalog.LoadDefault();
-            if (_summonTemplates.ById.TryGetValue(s.NpcId, out var npc))
-                ApplyPetLevel(s, pet, npc, level);
+            ApplyPetLevel(s, pet, _summonTemplates.Get(s.NpcId), level);
             if (!up)
             {
                 s.CurHp = (int)Math.Min(s.MaxHp, hp);
@@ -612,8 +607,7 @@ public sealed partial class ZoneWorld
             if (newLevel != level)
             {
                 _summonTemplates ??= NpcCatalog.LoadDefault();
-                if (_summonTemplates.ById.TryGetValue(s.NpcId, out var npc))
-                    ApplyPetLevel(s, pet, npc, newLevel);
+                ApplyPetLevel(s, pet, _summonTemplates.Get(s.NpcId), newLevel);
                 s.CurHp = 0;
                 s.CurMp = 0;
                 SetCollarLevel(owner, pet, newLevel);
@@ -722,7 +716,7 @@ public sealed partial class ZoneWorld
     }
 
     long WeightOf(int itemId, int count) =>
-        _game.Items.TryGet(itemId, out var def) && def != null ? (long)def.Weight * count : 0;
+        (long)_game.Items.Require(itemId).Weight * count;
 
     bool PetBagFits(PetState pet, ItemInstance item, int count, ZoneSession session)
     {

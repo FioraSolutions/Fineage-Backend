@@ -305,11 +305,7 @@ public sealed class MonsterRaceBoard
         for (int i = 0; i < MonsterRaceProtocol.RunnerCount; i++)
         {
             int npcId = pool[i];
-            if (!_npcs.ById.TryGetValue(npcId, out var template))
-            {
-                ZoneLog.Warn($"[monster-race] runner npc {npcId} missing from catalog");
-                continue;
-            }
+            var template = _npcs.Get(npcId);
 
             _s.Runners.Add(new MonsterRaceRunner
             {

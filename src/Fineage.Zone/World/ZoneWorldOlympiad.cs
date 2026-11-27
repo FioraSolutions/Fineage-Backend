@@ -181,8 +181,7 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(grant.CharacterId, out var entity) || entity.Session == null || entity.Inventory == null)
             return;
-        if (!_game.Items.TryGet(grant.ItemId, out _))
-            return;
+        _ = _game.Items.Require(grant.ItemId);
         RecordBagChange(
             entity,
             LedgerTxKind.OlympiadGrant,

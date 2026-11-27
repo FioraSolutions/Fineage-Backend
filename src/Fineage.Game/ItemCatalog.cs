@@ -52,6 +52,17 @@ public sealed class ItemCatalog
 
     public bool TryGet(int itemId, out ItemTemplate template) => _byId.TryGetValue(itemId, out template!);
 
+    /// <summary>
+    /// Required item template. Missing id throws <see cref="Fineage.Game.RequiredData.RequiredDataException"/>
+    /// naming <c>items.json</c>; use for ids that come from game data (drops, shops, rewards, crafts), never a
+    /// fallback name or skip.
+    /// </summary>
+    public ItemTemplate Require(int itemId) =>
+        _byId.TryGetValue(itemId, out var template)
+            ? template
+            : throw Fineage.Game.RequiredData.Required.Missing(
+                Fineage.Game.RequiredData.RequiredDataKind.Item, itemId, $"item {itemId} is missing from items.json");
+
     public ItemTemplate Get(int itemId)
     {
         if (_byId.TryGetValue(itemId, out var template))

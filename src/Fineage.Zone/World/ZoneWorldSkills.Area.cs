@@ -219,16 +219,14 @@ public sealed partial class ZoneWorld
             target.Abnormals,
             entry =>
             {
-                var skill = _game.Skills.Find(entry.Id);
-                if (skill == null)
-                    return wantBuff; // unknown → treat as buff strip candidate
+                var skill = _game.Skills.Require(entry.Id);
                 return wantBuff ? !skill.IsDebuff : skill.IsDebuff;
             },
             entry =>
             {
-                var skill = _game.Skills.Find(entry.Id);
+                var skill = _game.Skills.Require(entry.Id);
                 int buffMl = 0;
-                if (skill != null && skill.TryLevelData(Math.Max(1, entry.SkillLevel), out var ld))
+                if (skill.TryLevelData(Math.Max(1, entry.SkillLevel), out var ld))
                     buffMl = ld.MagicLevel;
                 return ZoneCombat.RollCancelSuccess(Rng(_combatRandom, caster), rate, cancelMagicLevel, buffMl);
             },

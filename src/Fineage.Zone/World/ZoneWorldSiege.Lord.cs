@@ -278,8 +278,7 @@ public sealed partial class ZoneWorld
             return SiegeProtocol.Inventory;
         if (inventory.CountOf(itemId) > 0)
             return SiegeProtocol.HasItem;
-        if (!_game.Items.TryGet(itemId, out _))
-            return SiegeProtocol.Inventory;
+        _ = _game.Items.Require(itemId);
         RecordBagChange(
             player,
             LedgerTxKind.CastleGrant,

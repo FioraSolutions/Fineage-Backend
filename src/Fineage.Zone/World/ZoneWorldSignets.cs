@@ -102,7 +102,7 @@ public sealed partial class ZoneWorld
         int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
         string slot = skill.Slot;
         if (slot.Length == 0)
-            slot = _game.Skills.Find(skill.SkillId)?.AbnormalType ?? "";
+            slot = _game.Skills.Require(skill.SkillId).AbnormalType;
         foreach (var target in targets)
         {
             ZoneAbnormals.Apply(target.Abnormals, skill.SkillId, abnormal, skill.AbnormalTimeSeconds, now,

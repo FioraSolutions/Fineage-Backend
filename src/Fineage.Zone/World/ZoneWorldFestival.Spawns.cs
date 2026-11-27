@@ -51,8 +51,7 @@ public sealed partial class ZoneWorld
             return;
         var tier = _festivalCatalog.Tier(instance.TierId);
         var side = _festivalCatalog.Side(tier, instance.Cabal);
-        if (!NpcCatalog.LoadDefault().ById.TryGetValue(side.WitchNpcId, out var template))
-            return;
+        var template = NpcCatalog.LoadDefault().Get(side.WitchNpcId);
         int objectId = AllocateQuestNpcObjectId();
         var def = SpawnCatalog.FromTemplate(objectId, template, side.WitchX, side.WitchY, side.WitchZ, 0, attackable: false);
         MaterializeSpawn(MergeSpawnCombatStats(def), mapId: _activeMapId);
