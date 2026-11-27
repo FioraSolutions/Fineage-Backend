@@ -1,10 +1,9 @@
 # Mobius CT_0 Interlude ↔ Fineage — parity matrix
 
-> **2026-11-23** — re-verified against Fineage `dev` @ `8daf4209` and  
+> **2026-11-27** — refresh against Fineage `dev` @ `503496ce` and  
 > Mobius `L2J_Mobius_CT_0_Interlude` @ `5c019037` (gitlab.com/MobiusDevelopment/L2J_Mobius, `master`).  
-> Unity client `FioraSolutions/Fineage` `dev` @ `c1e79fe`.  
 > Method: source and data diff, not issue trackers. Wire: [`wire-coverage.md`](wire-coverage.md).  
-> Quests: [`QUEST_STATUS.md`](QUEST_STATUS.md) (344 / 0 / 0 / 0).  
+> Quests: [`QUEST_STATUS.md`](QUEST_STATUS.md). Required data: [`architecture/required-data.md`](architecture/required-data.md) (#985 foundation).  
 > Prior snapshots: [`mobius-gap-audit-2026-11-22.md`](mobius-gap-audit-2026-11-22.md), [`mobius-gap-audit-2026-11-21.md`](mobius-gap-audit-2026-11-21.md).
 
 **Legend:** ✅ done · 🟡 partial · ❌ missing · n/a (not an Interlude Net target, or a Mobius-only extra)
@@ -116,7 +115,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 79 | Subclass | ✅ | — | `SubClass` → `ZoneWorldSubclass` |
 | 80 | Noblesse | ✅ | — | village-master noblesse → `ZoneWorldNoblesse` |
 | 81 | Henna / symbol maker | ✅ | — | `Henna.java` → `ZoneWorldHenna` / `ZoneWorldSymbolMaker` (lists are HTML, not `HennaEquipList`) |
-| 82 | Skill learn trees and transfer skills | ✅ | — | `SkillTreeData` → `ZoneWorld` skill learn + `ZoneWorldTransferSkills` |
+| 82 | Skill learn trees and transfer skills | ✅ | — | `SkillTreeData` → `ZoneWorld` skill learn + `ZoneWorldTransferSkills`. Default `FINEAGE_TRAINER_SP_LEARN` is Mobius SP purchase at trainers (#1049 / #1064); load-test bots seed `LearnedSkills` (#1063) |
 | 83 | NPC HTML, teleport, warehouse, buff, territory status | ✅ | — | `handlers/bypass/npc/{Buy,Sell,Link,Teleport,SupportMagic,TerritoryStatus}.java` → `BypassRegistry`, `ZoneWorldNpcServices` |
 | **Quests** |
 | 84 | Quest packs | ✅ | — | 344 Mobius quest scripts → 344 implemented, 0 partial, 0 stub, 0 missing (`tools/quest_status.py`). The heuristic checks talk NPCs, kill targets, and engine calls, not drop rates |
