@@ -124,16 +124,16 @@ archiving. A manual run before a risky change lowers it to the time since that r
 **RTO:** 9 s to restored listeners and 10 s to the smoke/checkpoint on this fixture;
 production RTO must be re-measured on production-sized data.
 
-The world-entry bot smoke was attempted during this drill and failed on this macOS host.
-The endpoint evidence rules out a scenario port mismatch: Login advertised
-`127.0.0.1:52680`, the restored Zone logged `net listen 127.0.0.1:52680`, and the temporary
-scenario declared `zonePort: 52680`. The restored Zone process nevertheless stopped shortly
-after the listener line, before the bots connected (`zone_connect` connection refused).
-The same stack was manually started in the same worktree and accepted a TCP connection, and
-a manual bot run reached `botsInWorld=4`; that run then failed its consistency oracle. The
-drill therefore reports `PASS_WITH_OPEN_ACCEPTANCE` and keeps "world entry after restore" as
-an explicit open acceptance item. The CI workflow can require it with
-`require_world_entry=true`.
+A repeated bounded smoke (8 bots, 3 s ramp-up, 15 s) reached the restored world but did not
+pass the load-test acceptance gates: `botsInWorld=3`, 5/8 disconnected, and the existing hard
+consistency oracle reported 113 `DuplicateSpawn` issues. This is the known AOI lifecycle bug
+tracked by #1047, not a database or sidecar restore difference: all five database comparisons
+remained byte-identical. The run also exposed and fixed a shared Login endpoint precedence bug:
+`NetLoginServer` now defaults to `ZoneHandoff.AdvertisePort`, so `FINEAGE_ZONE_PORT` wins over a
+stale `FINEAGE_NET_ZONE_PORT` for both tickets and the startup endpoint. Keep the smoke honest:
+the drill reports `PASS_WITH_OPEN_ACCEPTANCE` unless explicitly required, and
+`FINEAGE_DRILL_REQUIRE_SMOKE=1` / `require_world_entry=true` fails on this unresolved #1047
+oracle rather than disguising it as a backup success.
 
 ## Invariant / reconciler boundary
 

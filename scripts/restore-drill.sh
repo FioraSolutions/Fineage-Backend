@@ -108,16 +108,16 @@ cleanup() {
   local status=$?
   set +e
   local pidfile pid
+  if [[ "$KEEP" == "1" ]]; then
+    log "keeping run artifacts; leaving service PIDs running for inspection: ${SERVICE_PIDS[*]:-none}"
+    exit "$status"
+  fi
   for pidfile in "$RUN_DIR"/*.pid; do
     [[ -f "$pidfile" ]] || continue
     pid="$(cat "$pidfile")"
     stop_proc "$pid"
   done
-  if [[ "$KEEP" != "1" ]]; then
-    docker rm -f "$SOURCE_CONTAINER" "$TARGET_CONTAINER" >/dev/null 2>&1 || true
-  else
-    log "keeping containers: $SOURCE_CONTAINER $TARGET_CONTAINER; run dir $RUN_DIR"
-  fi
+  docker rm -f "$SOURCE_CONTAINER" "$TARGET_CONTAINER" >/dev/null 2>&1 || true
   exit "$status"
 }
 trap cleanup EXIT
@@ -264,6 +264,7 @@ export FINEAGE_DATABASE_URL="$DST_URL"
 export FINEAGE_HANDOFF_SECRET="drill-$RUN_ID"
 export FINEAGE_ZONE_HOST=127.0.0.1
 export FINEAGE_ZONE_PORT="$ZONE_PORT"
+export FINEAGE_NET_ZONE_PORT="$ZONE_PORT"
 export FINEAGE_NET_LOGIN_PORT="$LOGIN_PORT"
 export FINEAGE_LOGIN_HTTP_PORT="$HTTP_PORT"
 export FINEAGE_LOGIN_METRICS_PORT="$LOGIN_METRICS"
@@ -299,10 +300,14 @@ if [[ "$SKIP_SMOKE" != "1" ]]; then
     die "restored Zone exited before the world-entry smoke (tail $ZONE_LOG)"
   port_open "$ZONE_PORT" ||
     die "restored Zone stopped listening on $ZONE_PORT before the world-entry smoke (tail $ZONE_LOG)"
+  log "pre-smoke: zone pid=$(cat "$RUN_DIR/zone.pid") listener=$ZONE_PORT login=$LOGIN_PORT"
+  command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$ZONE_PORT" -sTCP:LISTEN >"$RUN_DIR/pre-smoke-listeners.txt" 2>&1 || true
   SCENARIO="$RUN_DIR/backup-restore-smoke.yaml"
   cat >"$SCENARIO" <<EOF
 name: backup-restore-smoke
 extends: $ROOT/tools/Fineage.LoadTest/scenarios/bots-20-smoke.yaml
+# Keep the restore check a short, bounded smoke. Omitting these keys inherits the
+# 50-bot stress defaults from the transitive stress-mixed-weights.yaml parent.
 botCount: 8
 rampUpSeconds: 3
 durationSeconds: 15

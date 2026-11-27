@@ -73,7 +73,10 @@ public static partial class Cli
         };
 
         // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
-        var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: NetSettings.ZonePort);
+        // One zone endpoint for the handoff ticket, the startup log and the clients: ZoneHandoff
+        // owns the FINEAGE_ZONE_PORT / FINEAGE_NET_ZONE_PORT precedence. Using NetSettings.ZonePort
+        // here while the log used AdvertisePort let a stale env var advertise a dead source port.
+        var netLogin = new NetLoginServer(service, zoneHost: ZoneHandoff.AdvertiseHost, zonePort: ZoneHandoff.AdvertisePort);
         var netTcp = new NetTcpServer { Endpoint = "login" };
         if (accountBans.StorePath is { } punishmentsPath)
             output.WriteLine($"[LOGIN] account login bans from {punishmentsPath}");
