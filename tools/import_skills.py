@@ -241,6 +241,40 @@ def main() -> None:
                 if isinstance(sid, int) and 0 < sid < 10000:
                     referenced.add(sid)
 
+    # #985 required-data: every other catalog that grants a skill by id must find its template here.
+    def add_ids(node, keys):
+        if isinstance(node, dict):
+            for key in keys:
+                value = node.get(key)
+                if isinstance(value, int) and 0 < value < 10000:
+                    referenced.add(value)
+            for value in node.values():
+                add_ids(value, keys)
+        elif isinstance(node, list):
+            for value in node:
+                add_ids(value, keys)
+
+    for name, root_key, keys in (
+        ("item-equip-skills.json", "items", ("id",)),
+        ("pledge-skills.json", "skills", ("skillId",)),
+        ("herbs.json", "items", ("skillId",)),
+        ("cursed-weapons.json", "blades", ("skillId",)),
+        ("fishing.json", "skillTree", ("skillId",)),
+    ):
+        path = repo / "data" / name
+        if path.is_file():
+            rows = json.loads(path.read_text()).get(root_key) or []
+            if name == "item-equip-skills.json":
+                rows = [row.get("skills") or [] for row in rows]
+            add_ids(rows, keys)
+    # Mobius itself points at templates it never defines (e.g. 3498 "Special Ability Light" on *-Light weapons).
+    # Those are listed in data/required-data-registry.json knownAbsent with the reason; never import a guess.
+    registry = json.loads((repo / "data" / "required-data-registry.json").read_text())
+    for kind in registry.get("kinds") or []:
+        if kind.get("id") == "skill":
+            for row in kind.get("knownAbsent") or []:
+                referenced.discard(int(row["key"]))
+
     # Skills the zone casts itself: Mobius Unstuck (/unstuck) casts 2099, and 2100 for a GM.
     referenced.update(ZONE_CAST_SKILLS)
 

@@ -6,7 +6,13 @@
       "file": "skills.json",
       "policy": "refuse-action",
       "keyName": "skillId",
-      "note": "SkillDefinition rows used for cast, abnormal, consumable, and AI casts."
+      "note": "SkillDefinition rows used for cast, abnormal, consumable, and AI casts.",
+      "knownAbsent": [
+        {
+          "key": "3498",
+          "reason": "Mobius CT0 stats/items item_skill 3498-1 (Special Ability Light) on Stormbringer/Sword of Nightmare/Flamberge/Scythe/Bec de Corbin/Great Axe/Carnage Bow - Light; Mobius stats/skills defines no template 3498, so Mobius grants nothing either."
+        }
+      ]
     },
     {
       "id": "item",
