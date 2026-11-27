@@ -64,4 +64,4 @@ Failures use `Error` **1099**: `world`, `bad_request`, `unknown_boss`, `forbidde
 
 ## Persistence
 
-`boss-schedule.json` sits beside the account store unless `FINEAGE_BOSS_STORE` is set. Version is 1. Each row stores `npcId`, `status`, `respawnUnixMs`, `currentHp`, and `currentMp`. The file is written when a boss dies, when one is force-spawned, when vitals are noted, when a due boss spawns, when a player leaves, and when the zone process stops.
+The schedule is the `boss-schedule` row of PostgreSQL `world_state` (#996, `docs/architecture/world-state-storage.md`); `FINEAGE_BOSS_STORE` is gone. Version is 1. Each row stores `npcId`, `status`, `respawnUnixMs`, `currentHp`, and `currentMp`. It is saved (and committed with the next economy commit) when a boss dies, when one is force-spawned, when vitals are noted, when a due boss spawns, when a player leaves, and when the zone process stops.

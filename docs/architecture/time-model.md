@@ -63,7 +63,7 @@ Only absolute UTC timestamps are persisted; no parallel timer store was added.
 
 | Timer | Existing seam | Restart / overdue policy |
 |---|---|---|
-| Raid/grand boss respawn | `boss-schedule.json` (`BossScheduleRow.RespawnUnixMs`) | future deadline stays dead; overdue becomes alive once at boot, logs `[boss] saved respawn overdue`, then spawns through `StartupOrders` |
+| Raid/grand boss respawn | `world_state` `boss-schedule` (`BossScheduleRow.RespawnUnixMs`) | future deadline stays dead; overdue becomes alive once at boot, logs `[boss] saved respawn overdue`, then spawns through `StartupOrders` |
 | Buffs/debuffs and skill reuse | Postgres `character_skills_save` (`StoredEffect`) | Mobius semantics: effect remaining time is frozen offline and restored on enter; reuse `systime` continues while offline. Not a world timer. |
 | Regular NPC respawns | spawn catalog, process-local `SpawnSlotState.RespawnAt` (absolute epoch ms on the simulation clock) | Mobius `Spawn.decreaseCount` stores `System.currentTimeMillis() + delay` in `RespawnTaskManager`'s in-memory map, and `SpawnTable` re-runs `Spawn.init` at boot. A pending deadline is therefore **not** restored; the restarted spawn table is authoritative. Wall jumps cannot move the deadline because it is measured on simulation time. |
 | Olympiad | `olympiad.json` (`OlympiadEndUnixMs`, `ValidationEndUnixMs`, `NextWeeklyUnixMs`) | one missed period/validation/weekly step is applied at load or first step and logs `[olympiad] ... overdue`; it is not replayed repeatedly |
@@ -71,7 +71,7 @@ Only absolute UTC timestamps are persisted; no parallel timer store was added.
 | Siege schedule | Postgres castles (`SiegeUnixMs`, `EndsUnixMs`, `InProgress`) | overdue scheduled siege/end is handled once at `Restore` and logs `[siege] ... overdue`; `SiegeSchedule.NextFrom` moves it into the future |
 | Manor cycles | `ManorBoard.RestoreFromWall` derives mode and next change at boot; manor production/procure rows persist through `castle_manor_*` | Mobius `CastleManorManager`'s constructor reads the current wall clock and `scheduleModeChange`; a restart enters the period the wall clock is in and never replays missed cycles. No separate mode/timer row is stored. |
 | Clan hall auctions / hall function leases | Postgres `clan_halls` (`AuctionEndUnixMs`, function `EndUnixMs`) | due auctions settle once, log `[hall-auction] ... overdue`, then restart a 7-day auction or assign the winner |
-| Lottery | `lottery.json` (`EndUnixMs`) | one draw is run for an overdue board, log `[lottery] draw overdue`, next draw is computed from now (missed weeks are skipped, not replayed) |
+| Lottery | `world_state` `lottery` (`EndUnixMs`) | one draw is run for an overdue board, log `[lottery] draw overdue`, next draw is computed from now (missed weeks are skipped, not replayed) |
 | Fishing championship | `fishing-championship.json` (`PeriodEndUnixMs`) | one overdue settlement, log, next period starts from now |
 | Playable quests/items/skills cooldowns | character durable state / live entity | gameplay deadlines are simulation-time; session cooldowns follow Mobius logout rules |
 

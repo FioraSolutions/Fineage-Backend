@@ -1,11 +1,32 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 using Fineage.Protocol;
 
 namespace Fineage.Zone.PcCafe;
 
-public sealed class PcCafeSnapshot
+public sealed class PcCafeSnapshot : IVersionedStateSnapshot
 {
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
     public List<PcCafeCharacterRow> Characters { get; set; } = [];
+}
+
+public interface IPcCafeStore
+{
+    PcCafeSnapshot Load();
+    void Save(PcCafeSnapshot snapshot);
+}
+
+public sealed class MemoryPcCafeStore : IPcCafeStore
+{
+    string _json = "";
+
+    public PcCafeSnapshot Load() =>
+        _json.Length == 0 ? new PcCafeSnapshot() : JsonSerializer.Deserialize<PcCafeSnapshot>(_json) ?? new PcCafeSnapshot();
+
+    public void Save(PcCafeSnapshot snapshot) => _json = JsonSerializer.Serialize(snapshot);
 }
 
 public sealed class PcCafeCharacterRow
@@ -19,16 +40,24 @@ public sealed class PcCafeCharacterRow
 public sealed class PcCafePointsManager
 {
     readonly object _gate = new();
-    readonly string _path;
+    readonly IPcCafeStore _store;
     readonly Dictionary<int, PcCafeCharacterRow> _byId = [];
-    readonly Action<string> _warn;
 
-    public PcCafePointsManager(string stateDirectory, Action<string>? warn = null)
+    /// <summary>
+    /// #996: the points live in the database (<see cref="Persistence.StoredPcCafeStore"/>). Before, the zone never wired
+    /// this manager at all and every world kept them in <c>pc-cafe.json</c> under the temp directory, and a file that
+    /// did not parse was logged and treated as nobody having points.
+    /// </summary>
+    public PcCafePointsManager(IPcCafeStore store)
     {
-        Directory.CreateDirectory(stateDirectory);
-        _path = Path.Combine(stateDirectory, "pc-cafe.json");
-        _warn = warn ?? (msg => ZoneLog.Warn(msg));
-        Load();
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        foreach (var row in _store.Load().Characters ?? [])
+        {
+            if (row.CharacterId <= 0)
+                throw new InvalidDataException($"pc-cafe state: character id {row.CharacterId} is not valid");
+            row.RedeemedCodes ??= [];
+            _byId[row.CharacterId] = row;
+        }
     }
 
     public int PointsOf(int characterId)
@@ -59,7 +88,7 @@ public sealed class PcCafePointsManager
             if (next > PcCafeProtocol.MaxPoints)
                 next = PcCafeProtocol.MaxPoints;
             row.Points = (int)next;
-            Save();
+            SaveLocked();
             return row.Points - before;
         }
     }
@@ -71,8 +100,25 @@ public sealed class PcCafePointsManager
             var row = Ensure(characterId);
             if (!row.RedeemedCodes.Contains(code, StringComparer.OrdinalIgnoreCase))
                 row.RedeemedCodes.Add(code);
-            Save();
+            SaveLocked();
         }
+    }
+
+    /// <summary>Every character's row, for the stored-state audit.</summary>
+    public IReadOnlyList<PcCafeCharacterRow> Rows
+    {
+        get
+        {
+            lock (_gate)
+                return _byId.Values.OrderBy(r => r.CharacterId).ToList();
+        }
+    }
+
+    /// <summary>The shutdown registry's flush.</summary>
+    public void Save()
+    {
+        lock (_gate)
+            SaveLocked();
     }
 
     PcCafeCharacterRow Ensure(int characterId)
@@ -84,31 +130,9 @@ public sealed class PcCafePointsManager
         return row;
     }
 
-    void Load()
-    {
-        if (!File.Exists(_path))
-            return;
-        try
-        {
-            var snap = JsonSerializer.Deserialize<PcCafeSnapshot>(File.ReadAllText(_path)) ?? new();
-            foreach (var row in snap.Characters)
-            {
-                if (row.CharacterId > 0)
-                    _byId[row.CharacterId] = row;
-            }
-        }
-        catch (Exception ex)
-        {
-            _warn($"[pc-cafe] failed to load {_path}: {ex.Message}");
-        }
-    }
-
-    void Save()
-    {
-        var snap = new PcCafeSnapshot
+    void SaveLocked() =>
+        _store.Save(new PcCafeSnapshot
         {
             Characters = _byId.Values.OrderBy(r => r.CharacterId).ToList()
-        };
-        File.WriteAllText(_path, JsonSerializer.Serialize(snap, new JsonSerializerOptions { WriteIndented = true }));
-    }
+        });
 }

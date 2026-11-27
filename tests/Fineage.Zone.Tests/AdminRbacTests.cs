@@ -1,3 +1,4 @@
+using Fineage.Zone.Persistence;
 using System.Text.Json;
 using Fineage.Game.Punishment;
 using Fineage.Zone.Punishment;
@@ -17,6 +18,7 @@ public sealed class AdminRbacTests : IDisposable
 {
     readonly string? _prevEnv;
     readonly string _stateDir;
+    readonly WorldStateStore _worldState = WorldStateStore.FromDocuments();
 
     public AdminRbacTests()
     {
@@ -36,7 +38,7 @@ public sealed class AdminRbacTests : IDisposable
 
     PunishmentManager OpenManager() =>
         new(
-            new JsonPunishmentStore(Path.Combine(_stateDir, "punishments.json")),
+            new StoredPunishmentStore(_worldState),
             JailZoneCatalog.LoadDefault(),
             GmAuditLog.ForStateDirectory(_stateDir));
 

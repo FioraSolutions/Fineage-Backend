@@ -5,42 +5,30 @@ using Xunit;
 namespace Fineage.Zone.Tests;
 
 /// <summary>
-/// The backup drill keeps its own copy of the canonical sidecar list because it is a shell
-/// script. That list must stay identical to <see cref="WorldStateSystems.All"/>; a new
-/// sidecar that is not backed up is silent data loss on restore.
+/// #996: world subsystem state is the <c>world_state</c> table, so the backup must prove the dump holds it, and the shell
+/// scripts must not go back to requiring the pre-#996 sidecar files (a backup that only works while a legacy file exists
+/// would refuse every post-cutover state directory).
 /// </summary>
 public sealed class BackupRestoreScriptTests
 {
     [Fact]
-    public void Backup_script_archives_every_world_state_sidecar()
+    public void Backup_script_requires_world_state_in_the_dump_and_no_legacy_sidecar()
     {
         string script = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "backup-state.sh"));
-        Match block = Regex.Match(
-            script,
-            @"REQUIRED_SIDECARS=\((?<body>.*?)\)",
-            RegexOptions.Singleline);
+        Match block = Regex.Match(script, @"REQUIRED_SIDECARS=\((?<body>.*?)\)", RegexOptions.Singleline);
         Assert.True(block.Success, "backup-state.sh has no REQUIRED_SIDECARS array");
+        Assert.Equal("", block.Groups["body"].Value.Trim());
 
-        var listed = Regex.Matches(block.Groups["body"].Value, @"(?m)^\s*(?<name>[a-z0-9-]+\.json)\s*$")
-            .Select(match => match.Groups["name"].Value)
-            .ToHashSet(StringComparer.Ordinal);
+        var tableLists = Regex.Matches(script, @"for required in (?<tables>[a-z_ ]+); do");
+        Assert.NotEmpty(tableLists);
+        Assert.All(tableLists, list => Assert.Contains("world_state", list.Groups["tables"].Value.Split(' ')));
 
-        var expected = WorldStateSystems.All
-            .Select(FileName)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToArray();
-
-        Assert.Equal(expected, listed.OrderBy(name => name, StringComparer.Ordinal).ToArray());
+        foreach (string legacy in WorldStateCatalog.All.Select(kind => kind.LegacyFileName))
+        {
+            Assert.DoesNotContain(legacy, script, StringComparison.Ordinal);
+            Assert.DoesNotContain(legacy, File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "restore-drill.sh")), StringComparison.Ordinal);
+        }
     }
-
-    /// <summary>Only two sidecar files have historical names that differ from the system id.</summary>
-    static string FileName(string system) => system switch
-    {
-        WorldStateSystems.MonsterRace => "monster-race-state.json",
-        WorldStateSystems.Punishment => "punishments.json",
-        WorldStateSystems.RaidBossPoints => "raid-boss-points-store.json",
-        _ => system + ".json",
-    };
 
     [Fact]
     public void Drill_workflow_is_scheduled_and_manual_only()

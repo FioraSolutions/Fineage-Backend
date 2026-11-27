@@ -1,3 +1,4 @@
+using Fineage.Zone.Persistence;
 using Fineage.Game.Punishment;
 using Fineage.Protocol;
 using Fineage.Zone;
@@ -13,6 +14,7 @@ public sealed class AdminVerbTailTests : IDisposable
 {
     readonly string? _prevEnv;
     readonly string _stateDir;
+    readonly WorldStateStore _worldState = WorldStateStore.FromDocuments();
 
     public AdminVerbTailTests()
     {
@@ -32,7 +34,7 @@ public sealed class AdminVerbTailTests : IDisposable
 
     PunishmentManager OpenManager() =>
         new(
-            new JsonPunishmentStore(Path.Combine(_stateDir, "punishments.json")),
+            new StoredPunishmentStore(_worldState),
             JailZoneCatalog.LoadDefault(),
             GmAuditLog.ForStateDirectory(_stateDir));
 

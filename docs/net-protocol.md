@@ -16,7 +16,7 @@ and `FINEAGE_STORE` are gone, and a JSON file is never read or written at runtim
 | Env | Meaning |
 |-----|---------|
 | `FINEAGE_DATABASE_URL` | Npgsql connection string (default `Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage`) |
-| `FINEAGE_STATE_DIR` | Directory for world sidecars: `seven-signs.json`, `olympiad.json`, `boss-schedule.json` (default `data`) |
+| `FINEAGE_STATE_DIR` | State directory (default `data`): `gm-audit.jsonl` and the one-time #996 import of pre-#996 world sidecars; world state itself is in PostgreSQL `world_state` |
 
 Login and Zone both fail fast at boot with a readable message when PostgreSQL is unreachable.
 

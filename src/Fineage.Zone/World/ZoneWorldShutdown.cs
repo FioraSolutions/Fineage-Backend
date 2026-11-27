@@ -56,6 +56,7 @@ public sealed partial class ZoneWorld
         _stateFlushes.Register(WorldStateSystems.Punishment, () => _punishments.Save());
         _stateFlushes.Register(WorldStateSystems.MonsterRace, () => _monsterRace.Board.Save());
         _stateFlushes.Register(WorldStateSystems.FishingChampionship, () => _fishingChampionship.Board.Save());
+        _stateFlushes.Register(WorldStateSystems.PcCafe, () => _pcCafe.Save());
         _stateFlushes.AssertComplete();
     }
 

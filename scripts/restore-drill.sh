@@ -184,7 +184,7 @@ UPDATE store_meta SET value_bigint = 10201 WHERE key = 'next_character_id';
 UPDATE store_meta SET value_bigint = 600000 WHERE key = 'next_item_object_id';
 SQL
 
-log "starting source Zone once to persist all eight canonical sidecars"
+log "starting source Zone once to persist every world_state system"
 SRC_ZONE_PORT="$(free_port)"
 SRC_STATUS_PORT="$(free_port)"
 SRC_METRICS_PORT="$(free_port)"
@@ -202,12 +202,10 @@ start_proc source-zone "$SOURCE_ZONE_LOG" \
 wait_tcp "$SRC_ZONE_PORT" "source Zone" 180
 SRC_ZONE_PID="$(cat "$RUN_DIR/source-zone.pid")"
 stop_proc "$SRC_ZONE_PID"
-for required in boss-schedule.json seven-signs.json olympiad.json lottery.json \
-  raid-boss-points-store.json punishments.json monster-race-state.json fishing-championship.json; do
-  [[ -f "$SOURCE_STATE/$required" ]] ||
-    die "source Zone graceful shutdown did not write $required (see $SOURCE_ZONE_LOG)"
-done
-log "source sidecars persisted: $(ls "$SOURCE_STATE" | tr '\n' ' ')"
+WORLD_STATE_ROWS="$(psql_exec "$SOURCE_CONTAINER" 'SELECT count(*) FROM world_state;')"
+[[ "$WORLD_STATE_ROWS" -ge 9 ]] ||
+  die "source Zone graceful shutdown committed $WORLD_STATE_ROWS world_state row(s), expected 9 (see $SOURCE_ZONE_LOG)"
+log "source world_state rows: $WORLD_STATE_ROWS"
 
 T_BACKUP_START=$SECONDS
 log "taking backup"
@@ -252,6 +250,8 @@ compare_query accounts \
   "SELECT name,coalesce(email,''),password_hash,password_salt,iterations FROM accounts ORDER BY name"
 compare_query store_snapshot \
   "SELECT version,payload::text FROM store_snapshot"
+compare_query world_state \
+  "SELECT system,schema_version,revision,payload::text FROM world_state ORDER BY system"
 compare_query schema_migrations \
   "SELECT id,coalesce(checksum,'') FROM schema_migrations ORDER BY id"
 CHARACTER_COUNT="$(psql_exec "$TARGET_CONTAINER" 'SELECT count(*) FROM characters;')"
@@ -396,7 +396,7 @@ cat >"$RUN_DIR/report.md" <<EOF
 - Characters restored: $CHARACTER_COUNT
 - Inventory rows restored: $ITEM_COUNT
 - Restored migrations: up to date (see \`migrate-plan.txt\`)
-- Restored sidecars loaded with \`FINEAGE_STATE_REQUIRE_EXISTING=1\`
+- Restored world_state loaded with \`FINEAGE_STATE_REQUIRE_EXISTING=1\`
 - World entry: $WORLD_ENTRY
 - Existing ledger invariant metric: \`fineage_ledger_invariant_violations_total $INVARIANTS\`
 

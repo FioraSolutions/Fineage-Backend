@@ -4,6 +4,7 @@ using Fineage.Game;
 using Fineage.Game.Persistence;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.MonsterRace;
 
@@ -72,35 +73,6 @@ public sealed class MemoryMonsterRaceStore : IMonsterRaceStore
     public void Save(MonsterRaceSnapshot snapshot) => _json = JsonSerializer.Serialize(snapshot);
 }
 
-public sealed class JsonMonsterRaceStore(string path) : IMonsterRaceStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-    readonly object _gate = new();
-
-    public MonsterRaceSnapshot Load()
-    {
-        lock (_gate)
-        {
-            var data = AtomicJsonFile.Load(
-                path,
-                "monster-race",
-                1,
-                JsonOptions,
-                static () => new MonsterRaceSnapshot());
-            data.History ??= [];
-            data.BetsPerLane ??= new();
-            data.Runners ??= [];
-            return data;
-        }
-    }
-
-    public void Save(MonsterRaceSnapshot snapshot)
-    {
-        lock (_gate)
-            AtomicJsonFile.Write(path, snapshot, JsonOptions);
-    }
-}
-
 public readonly record struct MonsterRaceSystemNotice(int MessageId, string[] Params, string Text = "");
 
 public readonly record struct MonsterRacePacketOrder(int CodeA, int CodeB, bool SendSpeeds);
@@ -150,18 +122,17 @@ public sealed class MonsterRaceBoard
         }
     }
 
-    public static MonsterRaceBoard OpenInStateDirectory(
-        string stateDirectory,
+    /// <summary>Opens the monster race saved in the database (#996).</summary>
+    public static MonsterRaceBoard Open(
+        WorldStateStore state,
         long loadedAtUnixMs,
         ItemCatalog items,
         NpcCatalog npcs,
         Func<int> allocateObjectId,
         MonsterRaceSettings? settings = null)
     {
-        // Separate from the data/monster-race.json settings catalog: the state directory defaults to data/.
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "monster-race-state.json");
         return new MonsterRaceBoard(loadedAtUnixMs, items, npcs, allocateObjectId, settings ?? MonsterRaceSettings.Mobius,
-            new JsonMonsterRaceStore(path));
+            new StoredMonsterRaceStore(state));
     }
 
     public MonsterRaceSettings Settings => _settings;

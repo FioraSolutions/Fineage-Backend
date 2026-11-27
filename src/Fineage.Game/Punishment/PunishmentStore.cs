@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Fineage.Game.Persistence;
 
 namespace Fineage.Game.Punishment;
 
@@ -18,39 +17,17 @@ public sealed class MemoryPunishmentStore : IPunishmentStore
     }
 }
 
-public sealed class JsonPunishmentStore : IPunishmentStore
+/// <summary>
+/// The saved punishment layout (#996: the database <c>world_state</c> row <c>punishment</c>, written by the zone and
+/// read by login). Enums are names so a reordered enum cannot turn a ban into a chat ban.
+/// </summary>
+public static class PunishmentStateJson
 {
-    public static readonly JsonSerializerOptions JsonOptions = new()
+    public const string System = "punishment";
+    public const int SchemaVersion = 1;
+
+    public static JsonSerializerOptions Options { get; } = new()
     {
-        WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
-    readonly string _path;
-    readonly object _gate = new();
-    public string Path => _path;
-    public JsonPunishmentStore(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Punishment store path is required.", nameof(path));
-        _path = path;
-    }
-    public PunishmentSnapshot Load()
-    {
-        lock (_gate)
-        {
-            var data = AtomicJsonFile.Load(
-                _path,
-                "punishment",
-                1,
-                JsonOptions,
-                static () => new PunishmentSnapshot());
-            data.Rows ??= [];
-            return data;
-        }
-    }
-    public void Save(PunishmentSnapshot snapshot)
-    {
-        ArgumentNullException.ThrowIfNull(snapshot);
-        lock (_gate)
-            AtomicJsonFile.Write(_path, snapshot, JsonOptions);
-    }
 }

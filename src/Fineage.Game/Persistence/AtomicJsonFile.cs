@@ -92,7 +92,32 @@ public static class AtomicJsonFile
         }
     }
 
-    static T LoadCore<T>(string path, string system, int expectedSchemaVersion, JsonSerializerOptions options)
+    /// <summary>
+    /// Reads an existing file with no fallback of any kind: missing, unreadable, malformed or of another schema version
+    /// throws <see cref="StateFileException"/> whatever <see cref="StateFilePolicy"/> says. The one-time import of a
+    /// sidecar into the database (#996) uses this, so bad data stops the cutover instead of importing a default.
+    /// </summary>
+    public static T LoadStrict<T>(string path, string system, int expectedSchemaVersion, JsonSerializerOptions options)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!File.Exists(path))
+            throw new StateFileException(system, path, "file is missing");
+        return LoadCore<T>(path, system, expectedSchemaVersion, options);
+    }
+
+    /// <summary>
+    /// <see cref="LoadStrict"/> for a sidecar whose format never had a version key: a file without one is read as
+    /// <paramref name="expectedSchemaVersion"/>; a file that carries one must match it.
+    /// </summary>
+    public static T LoadUnversionedStrict<T>(string path, string system, int expectedSchemaVersion, JsonSerializerOptions options)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!File.Exists(path))
+            throw new StateFileException(system, path, "file is missing");
+        return LoadCore<T>(path, system, expectedSchemaVersion, options, versionOptional: true);
+    }
+
+    static T LoadCore<T>(string path, string system, int expectedSchemaVersion, JsonSerializerOptions options, bool versionOptional = false)
     {
         string json;
         try
@@ -110,7 +135,9 @@ public static class AtomicJsonFile
             using var document = JsonDocument.Parse(json);
             if (document.RootElement.ValueKind != JsonValueKind.Object)
                 throw new StateFileException(system, path, "root JSON value must be an object");
-            schemaVersion = ReadSchemaVersion(document.RootElement, system, path);
+            schemaVersion = versionOptional && !HasSchemaVersion(document.RootElement)
+                ? expectedSchemaVersion
+                : ReadSchemaVersion(document.RootElement, system, path);
         }
         catch (JsonException ex)
         {
@@ -135,6 +162,9 @@ public static class AtomicJsonFile
             throw new StateFileException(system, path, "does not match the snapshot schema: " + ex.Message, ex);
         }
     }
+
+    static bool HasSchemaVersion(JsonElement root) =>
+        root.TryGetProperty("schemaVersion", out _) || root.TryGetProperty("version", out _);
 
     static int ReadSchemaVersion(JsonElement root, string system, string path)
     {

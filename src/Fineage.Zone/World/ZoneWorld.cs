@@ -380,7 +380,8 @@ public sealed partial class ZoneWorld
                 : new MemoryLedgerJournal());
         _journal = journal;
         _economyPersist = new EconomyPersistService(_accounts, journal, _affinity);
-        _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
+        _ledger = new EconomyLedger(
+            journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds, WorldStateAudit.TalliedKinds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);
         ExpireOrphanGroundJournalAccounts();

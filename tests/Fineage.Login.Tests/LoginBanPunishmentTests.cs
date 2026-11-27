@@ -7,31 +7,38 @@ using Fineage.Accounts;
 
 namespace Fineage.Login.Tests;
 
-public sealed class LoginBanPunishmentTests : IDisposable
+public sealed class LoginBanPunishmentTests
 {
-    readonly string _stateDir = Path.Combine(Path.GetTempPath(), "fineage-login-ban-" + Guid.NewGuid().ToString("N"));
     readonly DateTimeOffset _now = DateTimeOffset.Parse("2026-06-01T12:00:00Z");
-    public LoginBanPunishmentTests() => Directory.CreateDirectory(_stateDir);
-    public void Dispose() { try { Directory.Delete(_stateDir, recursive: true); } catch { } }
-    string PunishmentsPath => Path.Combine(_stateDir, "punishments.json");
-    LoginService Service() => new(MemoryAccountStore.InMemory(), new HandoffTokens(HandoffTokens.DefaultSecret), () => _now, accountBans: AccountBanGate.ForPath(PunishmentsPath));
-    static void WriteBan(string path, string account, string reason)
+    readonly MemoryAccountStore _store = MemoryAccountStore.InMemory();
+    long _revision;
+
+    // #996: login reads the punishments the zone committed to the shared store, not a punishments.json file.
+    LoginService Service() => new(_store, new HandoffTokens(HandoffTokens.DefaultSecret), () => _now, accountBans: WorldStatePunishments.Gate(_store));
+
+    void WriteBans(params PunishmentRow[] rows)
     {
-        var snapshot = new PunishmentSnapshot { Rows = [new PunishmentRow { Key = account, Affect = PunishmentAffect.Account, Type = PunishmentType.Ban, Reason = reason }] };
-        File.WriteAllText(path, JsonSerializer.Serialize(snapshot, JsonPunishmentStore.JsonOptions));
+        var snapshot = new PunishmentSnapshot { Rows = [.. rows] };
+        _store.CommitEconomy([], [], [new WorldStateDocument(
+            PunishmentStateJson.System, PunishmentStateJson.SchemaVersion, ++_revision,
+            JsonSerializer.Serialize(snapshot, PunishmentStateJson.Options))]);
     }
+
+    void WriteBan(string account, string reason) =>
+        WriteBans(new PunishmentRow { Key = account, Affect = PunishmentAffect.Account, Type = PunishmentType.Ban, Reason = reason });
+
     [Fact]
     public void Login_ban_and_unban_cycle_via_punishments_fixture()
     {
         var service = Service();
         Assert.True(service.Register("banned", "secret1").Ok);
         Assert.True(service.Login("banned", "secret1").Ok);
-        WriteBan(PunishmentsPath, "banned", "Policy violation");
+        WriteBan("banned", "Policy violation");
         var refused = service.Login("banned", "secret1");
         Assert.False(refused.Ok);
         Assert.Equal("account_banned", refused.Code);
         Assert.Equal("Policy violation", refused.Message);
-        File.Delete(PunishmentsPath);
+        WriteBans();
         Assert.True(service.Login("banned", "secret1").Ok);
     }
     [Fact]
@@ -39,7 +46,7 @@ public sealed class LoginBanPunishmentTests : IDisposable
     {
         var service = Service();
         Assert.True(service.Register("netban", "secret1").Ok);
-        WriteBan(PunishmentsPath, "netban", "Login suspended by GM");
+        WriteBan("netban", "Login suspended by GM");
         await using var link = await NetLink.OpenAsync(new NetLoginServer(service, clock: () => _now));
         await link.SendAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { Major = 1, Minor = 0, ClientName = "tests", FeatureFlags = ProtocolCapabilities.FeatureSession | ProtocolCapabilities.FeatureLobby }));
         Assert.Equal(NetOpcode.HelloAck, (await link.ExpectAsync(NetOpcode.HelloAck)).Opcode);
@@ -48,5 +55,17 @@ public sealed class LoginBanPunishmentTests : IDisposable
         Assert.False(auth.Ok);
         Assert.Equal("account_banned", auth.Code);
         Assert.Equal("Login suspended by GM", auth.Message);
+    }
+
+    [Fact]
+    public void Unreadable_saved_punishments_fail_the_login_instead_of_skipping_the_check()
+    {
+        var service = Service();
+        Assert.True(service.Register("someone", "secret1").Ok);
+        _store.CommitEconomy([], [], [new WorldStateDocument(PunishmentStateJson.System, 2, ++_revision, "{\"schemaVersion\":2,\"Rows\":[]}")]);
+
+        var failed = Assert.Throws<InvalidOperationException>(() => service.Login("someone", "secret1"));
+        Assert.Contains("world_state system='punishment'", failed.Message);
+        Assert.Contains("schema version 2", failed.Message);
     }
 }

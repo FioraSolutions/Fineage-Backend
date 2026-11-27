@@ -426,7 +426,9 @@ internal sealed class EconomyPersistService
                 return false;
             }
 
-            _journal.CommitThrough(work.Batch.LedgerThrough, entries => _store.CommitEconomy(entries, work.Batch.Bags));
+            _journal.CommitThrough(
+                work.Batch.LedgerThrough,
+                entries => _store.CommitEconomy(entries, work.Batch.Bags, work.Batch.WorldState));
             FineageTelemetry.EconomyPersistBatches.Add(1, new KeyValuePair<string, object?>("result", "written"));
             FineageTelemetry.PersistWriteMilliseconds.Record(
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds,
@@ -477,6 +479,12 @@ internal sealed class EconomyPersistBatch
     public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
     public List<EconomyBagWrite> OfflineBags { get; } = [];
     public List<EconomyBagWrite> Bags { get; set; } = [];
+
+    /// <summary>
+    /// The world subsystems saved since the last steal (#996), newest per system. They commit in this batch's
+    /// transaction with its ledger rows and bags.
+    /// </summary>
+    public List<WorldStateDocument> WorldState { get; set; } = [];
 
     /// <summary>
     /// Ledger position when the bags were taken: the batch writes the journal rows up to here and no later one.

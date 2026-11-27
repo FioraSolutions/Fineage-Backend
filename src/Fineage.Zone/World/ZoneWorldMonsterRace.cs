@@ -9,6 +9,7 @@ using Fineage.Zone.Inventory;
 using Fineage.Zone.MonsterRace;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.World;
 
@@ -27,10 +28,10 @@ public sealed partial class ZoneWorld
             _monsterRace.Use(board);
     }
 
-    /// <summary>Production wiring for the persisted monster race sidecar.</summary>
-    public void UseMonsterRaceInStateDirectory(string stateDirectory, long loadedAtUnixMs) =>
-        UseMonsterRace(MonsterRaceBoard.OpenInStateDirectory(
-            stateDirectory,
+    /// <summary>Production wiring: the monster race saved in the database (#996).</summary>
+    public void UseStoredMonsterRace(WorldStateStore state, long loadedAtUnixMs) =>
+        UseMonsterRace(MonsterRaceBoard.Open(
+            state,
             loadedAtUnixMs,
             _game.Items,
             Npcs.NpcCatalog.LoadDefault(),

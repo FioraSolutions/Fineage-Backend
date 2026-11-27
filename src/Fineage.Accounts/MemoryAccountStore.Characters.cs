@@ -142,15 +142,21 @@ public sealed partial class MemoryAccountStore
         }
     }
 
-    public void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags)
+    public void CommitEconomy(
+        IReadOnlyList<LedgerEntry> entries,
+        IReadOnlyList<EconomyBagWrite> bags,
+        IReadOnlyList<WorldStateDocument>? worldState = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
         ArgumentNullException.ThrowIfNull(bags);
         if (entries.Count > 0)
             throw new InvalidOperationException(
                 $"memory account store cannot commit {entries.Count} ledger entries; those entries stay in the memory journal until a database commit writes them with the bags");
-        if (bags.Count == 0)
+        foreach (var document in worldState ?? [])
+            document.Validate();
+        if (bags.Count == 0 && worldState is not { Count: > 0 })
             return;
+        using var _ = EnterStore();
 
         // Apply every container, and put the previous rows back if a later write throws.
         var undo = new List<Action>();
@@ -171,6 +177,14 @@ public sealed partial class MemoryAccountStore
             for (int i = undo.Count - 1; i >= 0; i--)
                 undo[i]();
             throw;
+        }
+
+        // Validated above and nothing below can fail: the documents land with the bags or, when a bag threw, not at all.
+        if (worldState is { Count: > 0 })
+        {
+            foreach (var document in worldState)
+                ApplyWorldStateLocked(document);
+            Save();
         }
     }
 

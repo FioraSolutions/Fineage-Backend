@@ -74,7 +74,31 @@ public interface IAccountStore
     /// A failure leaves the ledger and every bag, warehouse, and freight hold as they were.
     /// A null list on a bag means that container is not part of this commit. An empty list clears it.
     /// </summary>
-    void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags);
+    /// <remarks>
+    /// <paramref name="worldState"/> is every dirty world subsystem the same batch saw (#996): the lottery ticket, the
+    /// monster race bet or the championship claim commits with the ledger rows that paid for it, or not at all. A
+    /// document older than the stored one (lower revision) is skipped, never written over a newer one.
+    /// </remarks>
+    void CommitEconomy(
+        IReadOnlyList<LedgerEntry> entries,
+        IReadOnlyList<EconomyBagWrite> bags,
+        IReadOnlyList<WorldStateDocument>? worldState = null);
+
+    /// <summary>Every saved world subsystem document (#996). Read at zone start and by the login ban gate.</summary>
+    IReadOnlyList<WorldStateDocument> LoadWorldState();
+
+    /// <summary>One saved world subsystem document, or null when that system has never been saved.</summary>
+    WorldStateDocument? LoadWorldState(string system);
+
+    /// <summary>
+    /// Writes <paramref name="document"/> and its import record in one transaction when the system has no saved
+    /// document yet. False (nothing written) when it already has one: the caller decides whether that is the same
+    /// import finishing or a second source of truth.
+    /// </summary>
+    bool TryImportWorldState(WorldStateDocument document, WorldStateImport import);
+
+    /// <summary>Every legacy sidecar imported so far.</summary>
+    IReadOnlyList<WorldStateImport> ListWorldStateImports();
 
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);

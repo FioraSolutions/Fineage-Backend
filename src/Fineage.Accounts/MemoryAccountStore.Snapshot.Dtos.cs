@@ -25,6 +25,8 @@ public sealed partial class MemoryAccountStore
         public List<WeddingCoupleRecord> WeddingCouples { get; set; } = [];
         public int NextWeddingCoupleId { get; set; } = 1;
         public List<CursedWeaponRecord> CursedWeapons { get; set; } = [];
+        public List<WorldStateDocument> WorldState { get; set; } = [];
+        public List<WorldStateImport> WorldStateImports { get; set; } = [];
     }
 
     sealed class AccountDto

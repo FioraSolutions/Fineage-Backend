@@ -1,3 +1,4 @@
+using Fineage.Zone.Persistence;
 using Fineage.Game.Economy;
 using Fineage.Protocol;
 using Fineage.Zone.PcCafe;
@@ -28,7 +29,7 @@ public sealed class PcCafeTests
     {
         string dir = Path.Combine(Path.GetTempPath(), "fineage-pc-cafe-" + Guid.NewGuid().ToString("N"));
         var kit = new WorldBench();
-        kit.World.UsePcCafe(new PcCafePointsManager(dir), TestCatalog());
+        kit.World.UsePcCafe(new PcCafePointsManager(new StoredPcCafeStore(kit.World.WorldState)), TestCatalog());
         return (kit, dir);
     }
 
