@@ -308,6 +308,26 @@ public enum MsgType : ushort
     RequestDeleteMacro = 1115,
     /// <summary>Zone → client macro list packet. Body is <see cref="MacroListMsg"/>.</summary>
     MacroList = 1116,
+    /// <summary>Client opens party matching / room list. Body is <see cref="PartyMatchConfigMsg"/>.</summary>
+    RequestPartyMatchConfig = 1117,
+    /// <summary>Client creates or revises a party room. Body is <see cref="PartyMatchListMsg"/>.</summary>
+    RequestPartyMatchList = 1118,
+    /// <summary>Client joins a listed room. Body is <see cref="PartyMatchDetailRequestMsg"/>.</summary>
+    RequestPartyMatchDetail = 1119,
+    /// <summary>Zone → client room sheet. Body is <see cref="PartyMatchDetailMsg"/>.</summary>
+    PartyMatchDetail = 1120,
+    /// <summary>Zone → client room list. Body is <see cref="PartyMatchRoomListMsg"/>.</summary>
+    PartyMatchRoomList = 1121,
+    /// <summary>Zone → client room member roster. Body is <see cref="PartyRoomMemberListMsg"/>.</summary>
+    PartyRoomMemberList = 1122,
+    /// <summary>Zone → client room member delta. Body is <see cref="PartyRoomMemberUpdateMsg"/>.</summary>
+    PartyRoomMemberUpdate = 1123,
+    /// <summary>Zone → client close room UI.</summary>
+    PartyRoomClose = 1124,
+    /// <summary>Zone → client invite to room. Body is <see cref="PartyRoomAskJoinMsg"/>.</summary>
+    PartyRoomAskJoin = 1125,
+    /// <summary>Zone → client waiting-room list. Body is <see cref="PartyMatchWaitingRoomMsg"/>.</summary>
+    PartyMatchWaitingRoom = 1126,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

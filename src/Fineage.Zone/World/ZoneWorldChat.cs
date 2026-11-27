@@ -190,7 +190,18 @@ public sealed partial class ZoneWorld
                 SayToGroup(speaker, chatType, text, CommandChannelOnlineMembers(ccAll));
                 return null;
             case ChatProtocol.PartyMatchRoom:
+            {
+                var roomMembers = PartyMatchRoomOnlineMembers(speaker.ObjectId);
+                if (roomMembers == null)
+                {
+                    ZoneLog.Warn(
+                        $"[chat] PartyMatchRoom say rejected: characterId={speaker.ObjectId} has no party-match room");
+                    return null;
+                }
+
+                SayToGroup(speaker, chatType, text, roomMembers);
                 return null;
+            }
             default:
                 return null;
         }
