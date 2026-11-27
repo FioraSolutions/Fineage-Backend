@@ -282,14 +282,22 @@ public sealed class MetricsCollector : IDisposable
     }
 
 
+    /// <remarks>
+    /// <see cref="MeterListener.Dispose"/> does not wait for callbacks already running on other threads, so a producer
+    /// can still be inside <see cref="Buffer"/> after it returns. The thread-local slot is therefore left to its
+    /// finalizer instead of being disposed here (disposing it crashed the test host with ObjectDisposedException on a
+    /// recording thread, #992); <see cref="_disposed"/> makes late callbacks drop their measurement.
+    /// </remarks>
     public void Dispose()
     {
+        _disposed = true;
+        _listener.Dispose();
         _stop.Set();
         _drainer.Join();
-        _listener.Dispose();
         _stop.Dispose();
-        _local.Dispose();
     }
+
+    volatile bool _disposed;
 
     /// <summary>
     /// Tests: stops the drain thread so a producer can outrun it on purpose. <see cref="Snapshot"/> still drains under
@@ -320,19 +328,19 @@ public sealed class MetricsCollector : IDisposable
 
     void OnLong(Instrument instrument, long value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (IsOurs(instrument))
+        if (!_disposed && IsOurs(instrument))
             Buffer().Append(instrument, ThreadBuffer.KindLong, value, 0, tags);
     }
 
     void OnInt(Instrument instrument, int value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (IsOurs(instrument))
+        if (!_disposed && IsOurs(instrument))
             Buffer().Append(instrument, ThreadBuffer.KindInt, value, 0, tags);
     }
 
     void OnDouble(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
     {
-        if (IsOurs(instrument))
+        if (!_disposed && IsOurs(instrument))
             Buffer().Append(instrument, ThreadBuffer.KindDouble, 0, value, tags);
     }
 
