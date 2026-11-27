@@ -150,4 +150,6 @@ journal (a journal with the Postgres contract: rows become durable only inside t
 - an orphan ledger account, a pre-ledger bag (notice only), and saved rows with removed item / skill / effect /
   recipe ids (enter refused, rows kept).
 
-The sidecar crash cases (temp write killed before or after the replace) are in `AtomicJsonFileTests`.
+The sidecar crash cases are in `AtomicJsonFileTests`: a crash hook before and after the replace, and a real child
+process (`tests/Fineage.StateWriteProbe`) rewriting one snapshot in a loop and killed with SIGKILL at random moments;
+every restart reads one complete snapshot.

@@ -15,6 +15,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fineage.Game\Fineage.Game.csproj" />
+    <!-- Child process for the kill -9 crash test (AtomicJsonFileTests); copied next to the test assembly. -->
+    <ProjectReference Include="..\Fineage.StateWriteProbe\Fineage.StateWriteProbe.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\data\items.json" Link="data\items.json" CopyToOutputDirectory="PreserveNewest" />

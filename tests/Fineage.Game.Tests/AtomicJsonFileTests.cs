@@ -98,6 +98,53 @@ public sealed class AtomicJsonFileTests
     }
 
     [Fact]
+    public void Kill_9_during_writes_leaves_the_old_or_the_new_complete_snapshot()
+    {
+        // A real child process rewrites the snapshot in a loop and is SIGKILLed at a random moment, several times:
+        // every restart must read one complete snapshot (both ends of the payload carry the same counter).
+        string probe = Path.Combine(AppContext.BaseDirectory, "Fineage.StateWriteProbe.dll");
+        Assert.True(File.Exists(probe), $"probe missing: {probe}");
+        string path = TempPath(out string directory);
+        var random = new Random(984);
+        try
+        {
+            long last = 0;
+            for (int round = 0; round < 5; round++)
+            {
+                var start = new System.Diagnostics.ProcessStartInfo(Environment.ProcessPath ?? "dotnet")
+                {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                if (!Path.GetFileNameWithoutExtension(start.FileName).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                    start.FileName = "dotnet";
+                start.ArgumentList.Add(probe);
+                start.ArgumentList.Add(path);
+                using var child = System.Diagnostics.Process.Start(start)!;
+                Assert.Equal("ready", child.StandardOutput.ReadLine());
+                Thread.Sleep(random.Next(20, 200));
+                child.Kill(entireProcessTree: true);
+                child.WaitForExit();
+
+                string value = Load(path).Value;
+                int head = value.IndexOf(':', StringComparison.Ordinal);
+                int tail = value.LastIndexOf(':');
+                Assert.True(head > 0 && tail > head, "snapshot payload is not complete");
+                Assert.Equal(value[..head], value[(tail + 1)..]);
+                long counter = long.Parse(value[..head], System.Globalization.CultureInfo.InvariantCulture);
+                Assert.True(counter >= 1);
+                last = counter;
+            }
+
+            Assert.True(last >= 1);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Missing_required_sidecar_names_the_system_path()
     {
         string path = TempPath(out string directory);
