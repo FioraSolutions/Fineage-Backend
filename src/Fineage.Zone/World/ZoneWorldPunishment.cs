@@ -24,6 +24,7 @@ public sealed partial class ZoneWorld : IPunishmentSink
           JailZoneCatalog.LoadDefault(),
           new GmAuditLog(Path.Combine(Path.GetTempPath(), "fineage-gm-audit-test.jsonl"), _clock),
           _clock);
+        _gmAudit = _punishments.AuditLog;
         _punishmentActor = new PunishmentActor(_punishments);
         _punishments.Bind(_accounts, this);
     }
@@ -31,6 +32,7 @@ public sealed partial class ZoneWorld : IPunishmentSink
     public void UsePunishments(PunishmentManager manager)
     {
         _punishments = manager ?? throw new ArgumentNullException(nameof(manager));
+        _gmAudit = _punishments.AuditLog;
         _punishmentActor = new PunishmentActor(_punishments);
         _punishments.Bind(_accounts, this);
     }
@@ -185,7 +187,7 @@ public sealed partial class ZoneWorld : IPunishmentSink
     {
         foreach (var player in Players())
         {
-            if (player.Session == null || ZoneAdmin.IsAdminCharacter(player.Name))
+            if (player.Session == null || ZoneAdmin.IsGmCharacter(player.Name))
                 continue;
             if (!_punishments.IsJailed(player.ObjectId, nowUnixMs))
                 continue;

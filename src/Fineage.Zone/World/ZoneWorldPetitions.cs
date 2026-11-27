@@ -115,7 +115,7 @@ public sealed partial class ZoneWorld
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var gm)
             || gm.Kind != ZoneEntityKind.Player)
             return Task.FromResult<string?>("world");
-        if (PetitionRequireOnlineGm && !ZoneAdmin.IsAdminCharacter(gm.Name))
+        if (PetitionRequireOnlineGm && !ZoneAdmin.IsGmCharacter(gm.Name))
             return Task.FromResult<string?>("forbidden");
 
         if (!Petitions.Accept(session.ObjectId, gm.Name, petitionId, out var entry) || entry == null)
@@ -162,7 +162,7 @@ public sealed partial class ZoneWorld
     {
         foreach (var e in _byId.Values)
         {
-            if (e.Kind == ZoneEntityKind.Player && ZoneAdmin.IsAdminCharacter(e.Name))
+            if (e.Kind == ZoneEntityKind.Player && ZoneAdmin.IsGmCharacter(e.Name))
                 return true;
         }
 
@@ -175,7 +175,7 @@ public sealed partial class ZoneWorld
         {
             if (e.Kind != ZoneEntityKind.Player || e.Session == null)
                 continue;
-            if (!ZoneAdmin.IsAdminCharacter(e.Name))
+            if (!ZoneAdmin.IsGmCharacter(e.Name))
                 continue;
             NetBridge?.FanoutCreatureSay([e.ObjectId], new CreatureSayMsg
             {

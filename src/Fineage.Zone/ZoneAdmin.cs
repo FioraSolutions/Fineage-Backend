@@ -1,24 +1,27 @@
 using System.Text.Json;
 using Fineage.Game;
+using Fineage.Zone.Security;
 
 namespace Fineage.Zone;
 
 /// <summary>
-/// Debug admin gate: <c>FINEAGE_ZONE_ADMIN</c> must be on, and the character name must be in
-/// <c>data/admin-characters.json</c> (default: KuK). A lone <c>*</c> entry allows any name
-/// (local/dev). Used for Mobius-style <c>admin_*</c> bypasses.
+/// Debug/admin gate: <c>FINEAGE_ZONE_ADMIN</c> must be on, and the character must have a role in
+/// <c>data/admin-characters.json</c>. The legacy <c>{"names":["KuK"]}</c> file still grants Admin; a new
+/// optional <c>{"roles":{"Helper":"helper","Gm":"gm","KuK":"admin"}}</c> map grants the explicit hierarchy.
+/// A wildcard <c>*</c> is accepted only outside production; production logs a concrete error and denies
+/// every wildcard character. A missing / malformed allowlist is fail-closed (no default KuK name).
 /// </summary>
 public static class ZoneAdmin
 {
     public const string EnvVar = "FINEAGE_ZONE_ADMIN";
     public const string CharactersFileName = "admin-characters.json";
-    public const string AnyCharacter = "*";
+    public const string AnyCharacter = AdminPolicy.AnyCharacter;
 
     static readonly object Gate = new();
-    static HashSet<string>? _names;
+    static AdminPolicy? _policy;
     static string? _loadedFrom;
 
-    public static bool Enabled => IsEnabled(Environment.GetEnvironmentVariable(EnvVar));
+    public static bool Enabled => IsEnabled(System.Environment.GetEnvironmentVariable(EnvVar));
 
     public static bool IsEnabled(string? text)
     {
@@ -31,72 +34,100 @@ public static class ZoneAdmin
             || token.Equals("yes", StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>True when env admin is on and <paramref name="characterName"/> is allowlisted (or <c>*</c>).</summary>
-    public static bool IsAdminCharacter(string? characterName)
+    public static DeploymentEnvironment Environment => AdminPolicy.ResolveEnvironment();
+
+    /// <summary>Resolved role for a character. Disabled admin env or no policy entry means Player.</summary>
+    public static AdminRole RoleOf(string? characterName)
     {
         if (!Enabled || string.IsNullOrWhiteSpace(characterName))
-            return false;
-        EnsureNamesLoaded();
-        if (_names!.Contains(AnyCharacter))
-            return true;
-        return _names.Contains(characterName.Trim());
+            return AdminRole.Player;
+        EnsurePolicy();
+        return _policy!.RoleOf(characterName);
     }
 
+    /// <summary>Admin role (the top of the hierarchy).</summary>
+    public static bool IsAdminCharacter(string? characterName) => RoleOf(characterName) >= AdminRole.Admin;
+
+    /// <summary>GM or Admin. Used for server-authoritative gameplay bypasses (jail guard, unstuck).</summary>
+    public static bool IsGmCharacter(string? characterName) => RoleOf(characterName) >= AdminRole.Gm;
+
     /// <summary>
-    /// Mobius <c>AccessLevel.allowPeaceAttack</c>. A process-wide <c>*</c> opens admin commands and does not
-    /// grant peace-zone attacks; only an explicit name does.
+    /// Mobius <c>AccessLevel.allowPeaceAttack</c>. An explicit Gm/Admin grant opens it; a development
+    /// wildcard deliberately does not.
     /// </summary>
     public static bool AllowPeaceAttack(string? characterName)
     {
         if (!Enabled || string.IsNullOrWhiteSpace(characterName))
             return false;
-        EnsureNamesLoaded();
-        return _names!.Contains(characterName.Trim());
+        EnsurePolicy();
+        return _policy!.HasExplicitName(characterName) && RoleOf(characterName) >= AdminRole.Gm;
     }
 
-    /// <summary>Test seam: replace allowlist (null restores file load).</summary>
+    /// <summary>Concrete description for boot logs and the status endpoint; never contains a secret.</summary>
+    public static string DescribePolicy()
+    {
+        EnsurePolicy();
+        AdminPolicy policy = _policy!;
+        return $"environment={policy.Environment} explicit={policy.ExplicitNameCount} wildcard={policy.HasWildcard}"
+            + (policy.Error == null ? "" : $" error=\"{policy.Error}\"");
+    }
+
+    /// <summary>Test seam: replace the allowlist with explicit admin names (null restores file load).</summary>
     internal static void SetNamesForTest(IEnumerable<string>? names)
+    {
+        SetPolicyForTest(names);
+    }
+
+    /// <summary>Test seam: replace the policy, including explicit helper/gm/admin grants.</summary>
+    internal static void SetPolicyForTest(
+        IEnumerable<string>? names,
+        IReadOnlyDictionary<string, string>? roles = null,
+        DeploymentEnvironment environment = DeploymentEnvironment.Development)
     {
         lock (Gate)
         {
-            if (names == null)
+            if (names == null && roles == null)
             {
-                _names = null;
+                _policy = null;
                 _loadedFrom = null;
                 return;
             }
 
-            _names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (string name in names)
-            {
-                if (!string.IsNullOrWhiteSpace(name))
-                    _names.Add(name.Trim());
-            }
-
+            _policy = AdminPolicy.Parse(names, roles, environment);
             _loadedFrom = "<test>";
         }
     }
 
-    static void EnsureNamesLoaded()
+    static void EnsurePolicy()
     {
         lock (Gate)
         {
-            if (_names != null)
+            if (_policy != null)
                 return;
 
-            _names = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "KuK" };
+            DeploymentEnvironment environment = AdminPolicy.ResolveEnvironment();
             string? dataDir = GameData.FindDataDirectory(AppContext.BaseDirectory)
                 ?? GameData.FindDataDirectory(Directory.GetCurrentDirectory());
             if (dataDir == null)
+            {
+                string error = "data directory not found; admin commands are disabled";
+                _policy = AdminPolicy.Parse([], null, environment);
+                ZoneLog.Error($"[admin] {CharactersFileName}: {error}");
                 return;
+            }
 
             string path = Path.Combine(dataDir, CharactersFileName);
             if (!File.Exists(path))
+            {
+                _policy = AdminPolicy.Parse([], null, environment);
+                ZoneLog.Error($"[admin] allowlist file is missing path={path}; admin commands are disabled");
                 return;
+            }
 
+            FileDto? dto;
             try
             {
-                var dto = JsonSerializer.Deserialize<FileDto>(
+                dto = JsonSerializer.Deserialize<FileDto>(
                     File.ReadAllText(path),
                     new JsonSerializerOptions
                     {
@@ -105,31 +136,24 @@ public static class ZoneAdmin
                         ReadCommentHandling = JsonCommentHandling.Skip,
                         AllowTrailingCommas = true
                     });
-                if (dto?.Names == null || dto.Names.Count == 0)
-                    return;
-
-                var loaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (string name in dto.Names)
-                {
-                    if (!string.IsNullOrWhiteSpace(name))
-                        loaded.Add(name.Trim());
-                }
-
-                if (loaded.Count > 0)
-                {
-                    _names = loaded;
-                    _loadedFrom = path;
-                }
             }
-            catch
+            catch (Exception ex)
             {
-                // Keep default KuK allowlist.
+                _policy = AdminPolicy.Parse([], null, environment);
+                ZoneLog.Error($"[admin] allowlist is unreadable path={path} error={ex.GetType().Name}: {ex.Message}");
+                return;
             }
+
+            _policy = AdminPolicy.Parse(dto?.Names, dto?.Roles, environment);
+            _loadedFrom = path;
+            if (_policy.Error != null)
+                ZoneLog.Error($"[admin] allowlist rejected path={path} error=\"{_policy.Error}\"; denied characters are Player");
         }
     }
 
     sealed class FileDto
     {
         public List<string>? Names { get; set; }
+        public Dictionary<string, string>? Roles { get; set; }
     }
 }

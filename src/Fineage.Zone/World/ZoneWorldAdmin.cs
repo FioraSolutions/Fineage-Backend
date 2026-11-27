@@ -3,6 +3,7 @@ using Fineage.Game.Economy;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.NpcHtml;
+using Fineage.Zone.Security;
 
 namespace Fineage.Zone.World;
 
@@ -18,12 +19,40 @@ public sealed partial class ZoneWorld
     /// </summary>
     string? TryAdminBypass(ZoneSession session, ZoneEntity player, string command)
     {
-        if (!ZoneAdmin.IsAdminCharacter(player.Name))
-            return "forbidden";
-
         string verb = BypassCommands.Token(command);
         string args = ArgsAfter(command, verb);
+        AdminRole role = ZoneAdmin.RoleOf(player.Name);
+        if (role == AdminRole.Player)
+        {
+            AuditAdminDenied(session, verb, AdminAuditTarget(session, args), role, AdminRole.Helper, AdminSourceBypass);
+            return "forbidden";
+        }
 
+        if (!AdminCommandCatalog.TryGetBypass(verb, out AdminCommandSpec spec))
+        {
+            ZoneLog.Warn($"admin unknown cmd={verb} object={player.ObjectId}");
+            FanGmSystem(session, $"Unknown admin command: {verb}" + AdminTeleportHint(verb));
+            AuditAdmin(session, player, verb, AdminAuditTarget(session, args), "", "", AdminSourceBypass,
+                "unknown command");
+            return "bad_request";
+        }
+
+        if (!AdminCommandCatalog.Allows(role, spec.MinimumRole))
+        {
+            AuditAdminDenied(session, verb, AdminAuditTarget(session, args), role, spec.MinimumRole, AdminSourceBypass);
+            return "forbidden";
+        }
+
+        string target = AdminAuditTarget(session, args);
+        string before = AdminAuditState(session, player, target);
+        string? result = DispatchAdminBypass(session, player, verb, args);
+        string after = AdminAuditState(session, player, target);
+        AuditAdmin(session, player, verb, target, before, after, AdminSourceBypass, result);
+        return result;
+    }
+
+    string? DispatchAdminBypass(ZoneSession session, ZoneEntity player, string verb, string args)
+    {
         if (verb.Equals("admin_gmshop", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_admin", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_admin7", StringComparison.OrdinalIgnoreCase))
