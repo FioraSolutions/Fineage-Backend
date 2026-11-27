@@ -93,6 +93,10 @@ public sealed class NetObserverParityTests
         foreach (var p in new[] { a, b, w, far })
             await p.DrainAsync();
         b.Entity.MaxHp = b.Entity.CurHp = 1_000_000;
+        // A player's hit on a player takes CP first, then HP (Mobius PlayerStatus.reduceHp, #979): the "hit you for"
+        // lines add up to the CP and HP the victim lost together.
+        int cpBefore = b.Entity.CurCp;
+        Assert.True(cpBefore > 0, "the victim starts with CP, so the CP-first split is exercised");
 
         var fa = await AttackAsync(a, b.ObjectId, forced: true);
         await rig.AdvanceAsync(8000);
@@ -131,7 +135,8 @@ public sealed class NetObserverParityTests
         Assert.InRange(hitYou + avoided, hits.Count - perSwing, hits.Count);
         Assert.All(victim.Where(l => l.Id == CombatProtocol.HitYouForDamage), l => Assert.Equal(a.Entity.Name, l.Params[0]));
         Assert.DoesNotContain(victim, l => l.Id is CombatProtocol.HitTargetForDamage or CombatProtocol.YouMissed);
-        int dealt = 1_000_000 - b.Entity.CurHp;
+        int dealt = (1_000_000 - b.Entity.CurHp) + (cpBefore - b.Entity.CurCp);
+        Assert.Equal(0, b.Entity.CurCp);
         Assert.Equal(dealt, victim.Where(l => l.Id == CombatProtocol.HitYouForDamage).Sum(l => int.Parse(l.Params[1])));
 
         // Watchers read the numbers from the Attack packet only.
