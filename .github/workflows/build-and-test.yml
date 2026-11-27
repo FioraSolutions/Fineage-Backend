@@ -36,6 +36,8 @@ jobs:
             project: tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj
           - id: zone
             project: tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj
+          - id: mobiusdiff
+            project: tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj
     steps:
       - uses: actions/checkout@v4
 

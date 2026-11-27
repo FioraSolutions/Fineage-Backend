@@ -1,0 +1,112 @@
+{
+  "id": "physical-stats-human-fighter-40",
+  "description": "Passing dev case: the deterministic stat/probability half of the level-40 Human Fighter pilot. It exercises the same scenario format without the known #979 damage-core divergence, so the comparator has a green path.",
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "classId": 0,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 2,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 58,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 59,
+        "enchant": 0
+      },
+      {
+        "slot": "gloves",
+        "itemId": 61,
+        "enchant": 0
+      },
+      {
+        "slot": "feet",
+        "itemId": 62,
+        "enchant": 0
+      }
+    ],
+    "buffs": [
+      {
+        "skillId": 1068,
+        "level": 3
+      },
+      {
+        "skillId": 1077,
+        "level": 3
+      },
+      {
+        "skillId": 1086,
+        "level": 2
+      }
+    ]
+  },
+  "target": {
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false,
+    "attackerBow": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "golden": "tools/Fineage.MobiusDiff/oracle/physical-stats-human-fighter-40.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "metrics": [
+    "pAtk",
+    "pDef",
+    "pAtkSpd",
+    "accuracy",
+    "evasion",
+    "critPermille",
+    "hitChancePermille",
+    "critChancePermille"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.5,
+      "relative": 0.0
+    },
+    "pAtk": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pDef": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pAtkSpd": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "accuracy": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "evasion": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "critPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "critChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    }
+  }
+}

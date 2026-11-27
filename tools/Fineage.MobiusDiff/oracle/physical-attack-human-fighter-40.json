@@ -1,0 +1,36 @@
+{
+  "scenario": "physical-attack-human-fighter-40",
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "driver": "tools/Fineage.MobiusDiff/java/MobiusFormulaDriver.java",
+    "formulas": [
+      "Formulas.calcPhysDam",
+      "Formulas.calcCrit",
+      "Formulas.calcHitMiss",
+      "FuncPAtkMod",
+      "FuncPDefMod",
+      "FuncAtkAccuracy",
+      "FuncAtkEvasion",
+      "FuncAtkCritical",
+      "FuncPAtkSpeed",
+      "CreatureStat.getCriticalHit",
+      "CreatureStat.getPAtk",
+      "CreatureStat.getPAtkSpd"
+    ],
+    "fullServerVerified": false,
+    "blocker": "Full Mobius GameServer startup is not reproducible in this tree: ref/mobius-ct0-interlude/dist/libs is absent (build.xml/.classpath require mariadb-java-client-2.7.5.jar) and the server needs MySQL. This driver evaluates the pure formula layer from Mobius XML/formulas; it is not a full-server run."
+  },
+  "metrics": {
+    "pAtk": 42.7248000000,
+    "pDef": 300.5700000000,
+    "pAtkSpd": 554.0000000000,
+    "accuracy": 73.0000000000,
+    "evasion": 73.0000000000,
+    "critPermille": 114.0000000000,
+    "hitChancePermille": 980.0000000000,
+    "critChancePermille": 114.0000000000,
+    "damageNoCrit": 73.0000000000,
+    "damageMeanPerSwing": 79.7604248778
+  }
+}

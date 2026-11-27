@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Fineage.MobiusDiff</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Fineage.Game\Fineage.Game.csproj" />
+    <ProjectReference Include="..\..\src\Fineage.Zone\Fineage.Zone.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="scenarios\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="oracle\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="java\**\*.java" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -11,6 +11,7 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Fineage.LoadTest/Fineage.LoadTest.csproj" />
+    <Project Path="tools/Fineage.MobiusDiff/Fineage.MobiusDiff.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
@@ -18,6 +19,7 @@
     <Project Path="tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj" />
     <Project Path="tests/Fineage.Net.Tests/Fineage.Net.Tests.csproj" />
     <Project Path="tests/Fineage.LoadTest.Tests/Fineage.LoadTest.Tests.csproj" />
+    <Project Path="tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj" />
     <Project Path="tests/Fineage.StateWriteProbe/Fineage.StateWriteProbe.csproj" />
   </Folder>
 </Solution>
