@@ -21,6 +21,16 @@ public sealed partial class ZoneWorld
 
     internal EconomyReservation? EconomyReservationsForTests => _economyPersist?.Reservations;
 
+    /// <summary>
+    /// Tests: runs on the simulation thread after the commands stage applied, before its economy commit and replies —
+    /// the window in which another character's logout commit can take this step's dirty bags.
+    /// </summary>
+    internal Action? BeforeEconomyReplyReleaseForTests { get; set; }
+
+    /// <summary>Tests: a logout commit for <paramref name="leavingObjectId"/>, which steals every dirty bag.</summary>
+    internal bool CommitEconomyAsLogoutForTests(int leavingObjectId) =>
+        TryCommitDirtyEconomy(discardWithoutPublish: leavingObjectId);
+
     readonly List<ZoneCommandIngress.Applied> _economyCarried = [];
     readonly Dictionary<ZoneCommandIngress.Submission, long> _economyCarriedSince = new(ReferenceEqualityComparer.Instance);
 
@@ -93,6 +103,14 @@ public sealed partial class ZoneWorld
         _economyCarriedTotal += newlyCarried;
     }
 
+    static HashSet<int> OnOtherCommit(List<ZoneCommandIngress.Applied> rows)
+    {
+        var ids = new HashSet<int>(rows.Count);
+        foreach (var row in rows)
+            ids.Add(row.Submission.Session.ObjectId);
+        return ids;
+    }
+
     /// <summary>A queued batch took the carried replies with it; they answer from its completion.</summary>
     void ForgetCarriedSince(IReadOnlyList<ZoneCommandIngress.Applied> applied)
     {
@@ -115,6 +133,8 @@ public sealed partial class ZoneWorld
         _economyCarried.Clear();
         _economyCarriedSince.Clear();
         var stillDirty = HasDirtyEconomy() ? UncommittedEconomicCharacters() : [];
+        using (_economyLock.Enter())
+            stillDirty.UnionWith(_economyInFlight.Keys);
         ZoneCommandIngress.AnswerAfterFlush(rows, committed: stillDirty.Count == 0, stillDirty, EconomyCommitFailed);
     }
 }
