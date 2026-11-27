@@ -12,6 +12,9 @@ public sealed partial class ZoneWorld
 {
     Task? _simulation;
     long _stepStartedTimestamp;
+
+    /// <summary>Stopwatch timestamp of the simulation loop's last pass (#989 liveness/readiness); 0 before start.</summary>
+    long _loopHeartbeat;
     string _stepPhase = "idle";
 
     internal string StepPhase => Volatile.Read(ref _stepPhase);
@@ -124,6 +127,7 @@ public sealed partial class ZoneWorld
         {
             while (true)
             {
+                Volatile.Write(ref _loopHeartbeat, Stopwatch.GetTimestamp());
                 ct.ThrowIfCancellationRequested();
                 long wait = _simulationTicks.MillisecondsUntilNextSimulationTick(_simulationClock.WallUnixMs());
                 NotePhase("waiting-for-tick");

@@ -5,6 +5,7 @@ using Fineage.Game.RequiredData;
 using Fineage.Accounts;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Protocol.Health;
 using Fineage.Protocol.Telemetry;
 using Fineage.Zone;
 using Fineage.Zone.Bosses;
@@ -111,6 +112,38 @@ catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
     return;
 }
 
+// #989: the loopback status host starts before anything loads, so /health/ready answers 503 with the stage that is
+// still pending (or failed) instead of refusing the connection; /health/live is the process + simulation heartbeat.
+var health = new HealthBoard();
+health.Require("world", "loading catalogs, boot validation and sidecars");
+health.Require("state-audit", "waiting for the world");
+ZoneWorld? liveWorld = null;
+TimeSpan liveLag = HealthSettings.LiveTickLag();
+TimeSpan readyLag = HealthSettings.ReadyTickLag();
+health.AddLiveProbe("simulation-heartbeat", () => liveWorld is { SimulationStarted: true } running
+    ? running.SimulationHealth(liveLag)
+    : new HealthCheck("simulation-heartbeat", true, "booting: simulation not started yet"));
+health.AddReadyProbe("simulation", () => liveWorld?.SimulationHealth(readyLag)
+    ?? new HealthCheck("simulation", false, "world not built"));
+var databaseProbe = new CachedProbe(() => accounts.CheckDatabase(TimeSpan.FromSeconds(3)), TimeSpan.FromSeconds(2));
+health.AddReadyProbe("database", databaseProbe.Read);
+
+int statusPort = ZoneStatus.ResolvePort(Environment.GetEnvironmentVariable(ZoneStatus.PortVariable), out string? statusPortError);
+if (statusPortError != null)
+    Console.Error.WriteLine($"[ZONE] ignoring {ZoneStatus.PortVariable}: {statusPortError}");
+else if (statusPort <= 0)
+    Console.WriteLine("[ZONE] status disabled (no /health/live or /health/ready either)");
+
+await using ZoneStatusHost? zoneStatus = statusPort > 0
+    ? ZoneStatusHost.TryStart(
+        statusPort,
+        () => liveWorld?.OnlinePlayerCount ?? throw new InvalidOperationException("world not built"),
+        Console.Error,
+        health)
+    : null;
+if (zoneStatus != null)
+    Console.WriteLine($"[ZONE] status {zoneStatus.Url} health {zoneStatus.BaseUrl}/health/live {zoneStatus.BaseUrl}/health/ready");
+
 ZoneWorld world;
 Required.SilentFallbackObserver = static (kind, key) =>
     FineageTelemetry.DataSilentFallback.Add(1, new KeyValuePair<string, object?>("kind", kind.ToId()));
@@ -126,8 +159,11 @@ try
     world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
     world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
     world.UseMonsterRaceInStateDirectory(stateDir, loadedAtUnixMs);
+    liveWorld = world;
+    health.Complete("world", $"catalogs, boot validation and sidecars loaded (npcs={world.NpcObjectIds.Count})");
     // #984: saved state vs data catalogs vs replayed ledger, before any player can enter.
-    world.AuditStoredStateAtStartup();
+    var audit = world.AuditStoredStateAtStartup();
+    health.Complete("state-audit", $"characters={audit.Characters} errors={audit.Errors.Count} notices={audit.Issues.Count - audit.Errors.Count}");
 }
 catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or IOException or UnauthorizedAccessException)
 {
@@ -176,18 +212,6 @@ Console.WriteLine("[ZONE] Raid boss points ranking totals are stored as raid-bos
 Console.WriteLine("[ZONE] GM punishments are stored as punishments.json; audit lines append to gm-audit.jsonl in the state directory.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
-
-int statusPort = ZoneStatus.ResolvePort(Environment.GetEnvironmentVariable(ZoneStatus.PortVariable), out string? statusPortError);
-if (statusPortError != null)
-    Console.Error.WriteLine($"[ZONE] ignoring {ZoneStatus.PortVariable}: {statusPortError}");
-else if (statusPort <= 0)
-    Console.WriteLine("[ZONE] status disabled");
-
-await using ZoneStatusHost? zoneStatus = statusPort > 0
-    ? ZoneStatusHost.TryStart(statusPort, () => world.OnlinePlayerCount, Console.Error)
-    : null;
-if (zoneStatus != null)
-    Console.WriteLine($"[ZONE] status {zoneStatus.Url}");
 
 await using FineageMetricsHost? metrics = FineageMetricsHost.Start("zone", Console.Out, Console.Error);
 var netZone = new NetZoneServer(handoffStore, world, accounts);

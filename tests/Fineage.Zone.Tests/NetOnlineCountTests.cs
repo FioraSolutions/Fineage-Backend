@@ -90,7 +90,7 @@ public sealed class NetOnlineCountTests
         Assert.True(response.Headers.CacheControl?.NoStore);
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         JsonElement body = doc.RootElement;
-        Assert.Equal(4, body.EnumerateObject().Count());
+        Assert.Equal(5, body.EnumerateObject().Count());
         Assert.True(body.GetProperty("ok").GetBoolean());
         Assert.True(body.GetProperty("login").GetBoolean());
         Assert.Equal(zone, body.GetProperty("zone").GetBoolean());
