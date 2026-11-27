@@ -229,14 +229,14 @@ public sealed partial class ZoneWorld
         using (_economyLock.Enter())
         {
             var ids = new HashSet<int>(
-                _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineFreight.Count);
+                _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineBags.Count);
             foreach (int id in _dirtyInventories.Keys)
                 ids.Add(id);
             foreach (int id in _dirtyWarehouses.Keys)
                 ids.Add(id);
             foreach (int id in _dirtyFreight.Keys)
                 ids.Add(id);
-            foreach (var bag in _dirtyOfflineFreight)
+            foreach (var bag in _dirtyOfflineBags)
                 ids.Add(bag.CharacterId);
             return ids;
         }

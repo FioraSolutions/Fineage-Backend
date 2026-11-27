@@ -126,6 +126,8 @@ try
     world.UseLottery(Fineage.Zone.Lottery.LotteryBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
     world.UseFishingChampionship(Fineage.Zone.Fishing.FishingChampionshipBoard.OpenInStateDirectory(stateDir, loadedAtUnixMs));
     world.UseMonsterRaceInStateDirectory(stateDir, loadedAtUnixMs);
+    // #984: saved state vs data catalogs vs replayed ledger, before any player can enter.
+    world.AuditStoredStateAtStartup();
 }
 catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or IOException or UnauthorizedAccessException)
 {

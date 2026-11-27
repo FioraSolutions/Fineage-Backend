@@ -286,6 +286,8 @@ public sealed partial class PostgresAccountStore
     public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
         _inner.TryReplaceBlocked(account, characterId, blocked, blockAll);
 
+    public IReadOnlyList<CharacterRecord> ListAllCharacters() => _inner.ListAllCharacters();
+
     public CharacterRecord? FindByCharacterId(int characterId) =>
         _inner.FindByCharacterId(characterId);
 

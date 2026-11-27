@@ -443,6 +443,9 @@ public static class FineageTelemetry
     public static readonly Counter<long> RegionHandoffs =
         Meter.CreateCounter<long>("fineage.region.handoffs", description: "Entities handed to another region at the end of a step");
 
+    public static readonly Counter<long> StoredStateIssues =
+        Meter.CreateCounter<long>("fineage.state.audit_issues", description: "Saved state that disagrees with the data catalogs or the replayed ledger (tags code, container)");
+
     public static readonly Counter<long> LedgerAdjustments =
         Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
 

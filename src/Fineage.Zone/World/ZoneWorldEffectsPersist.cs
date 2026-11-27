@@ -75,7 +75,7 @@ public sealed partial class ZoneWorld
 
             if (!e.IsEffect)
                 continue;
-            var template = _game.Skills.Find(e.SkillId);
+            var template = _game.Skills.Require(e.SkillId);
             if (!SkillPersistRules.CanStoreEffect(template, e.SkillId, _herbs.IsHerbSkill(e.SkillId)))
                 continue;
             string slot = template?.AbnormalType ?? "";

@@ -160,7 +160,7 @@ public sealed partial class ZoneWorld
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
-    readonly List<EconomyBagWrite> _dirtyOfflineFreight = [];
+    readonly List<EconomyBagWrite> _dirtyOfflineBags = [];
     readonly bool _npcRegen;
     /// <summary><see cref="ZoneNpcSettings.MaxDriftRange"/> read once: it was an environment lookup per NPC per think.</summary>
     readonly int _maxDriftRange;

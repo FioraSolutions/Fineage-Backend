@@ -66,8 +66,8 @@ public sealed partial class ZoneWorld
             entity.KnownSkills[row.SkillId] = row.Level;
         foreach (var pair in entity.LearnedSkills)
         {
-            if (_game.Skills.Find(pair.Key) == null)
-                continue;
+            // Saved rows were checked at enter (StoredStateAudit); a learned id without a skill is a bug, not data.
+            _game.Skills.Require(pair.Key);
             if (!entity.KnownSkills.TryGetValue(pair.Key, out int have) || have < pair.Value)
                 entity.KnownSkills[pair.Key] = pair.Value;
         }

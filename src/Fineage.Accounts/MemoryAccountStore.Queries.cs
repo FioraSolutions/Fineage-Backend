@@ -50,6 +50,23 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<CharacterRecord> List(string account) => List(account, DateTimeOffset.UtcNow);
 
+    public IReadOnlyList<CharacterRecord> ListAllCharacters()
+    {
+        using (EnterStore())
+        {
+            return _data.Accounts
+                .SelectMany(account => account.Characters.Select(character => ToRecord(account.Name, character)))
+                .OrderBy(character => character.Id)
+                .ToList();
+        }
+    }
+
+    public IReadOnlyList<StoredPet> ListAllPets()
+    {
+        using (EnterStore())
+            return _data.Pets.OrderBy(pet => pet.ControlObjectId).ToList();
+    }
+
     public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now)
     {
         using (EnterStore())

@@ -239,7 +239,7 @@ internal sealed class EconomyPersistService
             ids.Add(objectId);
         foreach (var (objectId, _) in batch.Freight)
             ids.Add(objectId);
-        foreach (var bag in batch.OfflineFreight)
+        foreach (var bag in batch.OfflineBags)
             ids.Add(bag.CharacterId);
         foreach (var bag in batch.Bags)
             ids.Add(bag.CharacterId);
@@ -337,6 +337,6 @@ internal sealed class EconomyPersistBatch
     public List<(int ObjectId, ZoneSession Session, PlayerInventory Inventory)> Inventories { get; } = [];
     public List<(int ObjectId, ZoneEntity Player)> Warehouses { get; } = [];
     public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
-    public List<EconomyBagWrite> OfflineFreight { get; } = [];
+    public List<EconomyBagWrite> OfflineBags { get; } = [];
     public List<EconomyBagWrite> Bags { get; set; } = [];
 }
