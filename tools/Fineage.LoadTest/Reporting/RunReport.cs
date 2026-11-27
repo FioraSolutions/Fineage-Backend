@@ -67,6 +67,12 @@ public sealed class RunReport
     /// <summary>Longest tick freeze or step-watchdog stall seen in the run, in seconds.</summary>
     public double SimulationStallSeconds { get; set; }
 
+    /// <summary>
+    /// Spans in which the load-test process itself did not run (box paused or frozen); every timeout in flight then
+    /// expires on resume. See <see cref="Fineage.LoadTest.Diagnostics.HostPauseDetector"/>.
+    /// </summary>
+    public List<Fineage.LoadTest.Diagnostics.HostPause> HostPauses { get; set; } = [];
+
     /// <summary>Tick-freeze episodes over the stall limit. A step-watchdog hit counts as one when the tick series did not.</summary>
     public int SimulationStallCount { get; set; }
 }

@@ -42,6 +42,7 @@ public sealed class LoadTestRunner
             return MobiusRunReport.ScenarioNotSupported(scenario, regionWorkers);
 
         var callerCt = ct;
+        using var hostPauses = Diagnostics.HostPauseDetector.Start();
         using var runCts = CancellationTokenSource.CreateLinkedTokenSource(callerCt);
         using var watchStop = new CancellationTokenSource();
         var observedFrom = DateTimeOffset.UtcNow;
@@ -286,6 +287,13 @@ public sealed class LoadTestRunner
                 bugs.Add($"P0 entry failure bot={failedEntry.BotId} phase={failedEntry.EntryPhase}: {(stack.Length > 4000 ? stack[..4000] + "…" : stack)}");
             }
         }
+        foreach (var pause in hostPauses.Pauses)
+        {
+            bugs.Add(
+                $"P1 environment: the load-test process did not run for {pause.Seconds:0.0}s from {pause.StartedAt:HH:mm:ss.fff}Z " +
+                "(the box was paused or frozen); handshake and reply timeouts in flight expire on resume, and server " +
+                "numbers inside that window describe the host, not the Zone.");
+        }
         if (promSamples.Count > 0 && promSamples.Max(s => s.TickP99) > 500)
             bugs.Add($"P1: tick p99 exceeded 500ms (max {promSamples.Max(s => s.TickP99):0}ms) under {scenario.BotCount} bots.");
 
@@ -430,6 +438,7 @@ public sealed class LoadTestRunner
         ReportEnricher.Enrich(report, scenario, promSamples, rawScrapes, attackSamples, skillSamples, legacySamples,
             zoneLog, logPaths, runtimeStats, zonePid, zoneDll, expectedZoneCommit, requireCleanProvenance, rssSamples);
 
+        report.HostPauses = hostPauses.Pauses.ToList();
         report.SimulationStallSeconds = hang.StallSeconds;
         report.SimulationStallCount = hang.StallCount;
         report.FailReasons = failReasons;
