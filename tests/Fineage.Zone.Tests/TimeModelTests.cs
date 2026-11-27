@@ -8,7 +8,9 @@ using Fineage.Zone.Olympiad;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Simulation;
+using Fineage.Zone.Spawns;
 using Fineage.Zone.Time;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
@@ -179,6 +181,123 @@ public sealed class TimeModelTests
         Assert.Equal(1, Assert.Single(actor.Step(tick)).HallId);
         actor.Halls[1].AuctionEndUnixMs = now + 7L * 24 * 3600 * 1000;
         Assert.Empty(actor.Step(tick));
+    }
+
+    [Fact]
+    public void Regular_npc_respawn_keeps_its_absolute_simulation_deadline_across_wall_jumps()
+    {
+        var (catalog, row) = SpawnFixture(respawnSeconds: 30);
+        var time = new SplitZoneTime(T0, timestamp: 1_000);
+        var world = new ZoneWorld(spawnCatalog: catalog, time: time);
+
+        Assert.Contains(row.ObjectId, world.NpcObjectIds);
+        world.DespawnNpcForTests(row.ObjectId);
+        Assert.DoesNotContain(row.ObjectId, world.NpcObjectIds);
+
+        // Mobius Spawn.decreaseCount stores an absolute deadline. Fineage measures it on the simulation clock, so a
+        // wall jump is not progress: the slot stays dead until the simulation deadline is reached.
+        long due = Assert.NotNull(world.SpawnRespawnDueUnixMsForTests(row.ObjectId));
+        Assert.Equal(T0.AddSeconds(30).ToUnixTimeMilliseconds(), due);
+        time.JumpWall(TimeSpan.FromHours(6));
+        time.AdvanceMonotonic(29_000);
+        world.AdvanceSpawnsForTests();
+        Assert.DoesNotContain(row.ObjectId, world.NpcObjectIds);
+        Assert.Equal(1, world.PendingSpawnRespawnsForTests);
+
+        time.AdvanceMonotonic(1_000);
+        world.AdvanceSpawnsForTests();
+        Assert.Contains(row.ObjectId, world.NpcObjectIds);
+        Assert.Equal(0, world.PendingSpawnRespawnsForTests);
+    }
+
+    [Fact]
+    public void Regular_npc_respawn_restart_rebuilds_the_spawn_table_like_mobius_spawn_init()
+    {
+        var (catalog, row) = SpawnFixture(respawnSeconds: 30);
+        var first = new ZoneWorld(spawnCatalog: catalog, time: new SplitZoneTime(T0, timestamp: 1_000));
+        first.DespawnNpcForTests(row.ObjectId);
+        Assert.Equal(1, first.PendingSpawnRespawnsForTests);
+
+        // Mobius keeps pending respawns only in RespawnTaskManager's memory and SpawnTable calls Spawn.init() at
+        // boot, which spawns the full table. A restart before the old deadline therefore shows the NPC immediately
+        // and starts with no carried-over timer; a spawn-timer sidecar would be a parity change, not a fix.
+        var restarted = new ZoneWorld(spawnCatalog: catalog, time: new SplitZoneTime(T0.AddSeconds(5), timestamp: 5_000));
+        Assert.Contains(row.ObjectId, restarted.NpcObjectIds);
+        Assert.Equal(0, restarted.PendingSpawnRespawnsForTests);
+        Assert.Null(restarted.SpawnRespawnDueUnixMsForTests(row.ObjectId));
+    }
+
+    [Fact]
+    public void Manor_restart_enters_the_wall_clock_period_and_schedules_the_next_boundary_from_it()
+    {
+        var board = new ManorBoard(ManorData.Empty, new ManorSettings { Enabled = true });
+
+        // Stale values from a previous process are not authoritative: Mobius CastleManorManager derives mode and
+        // next mode change in its constructor from Calendar.getInstance().
+        board.Mode = ManorProtocol.ModeApproved;
+        board.NextChangeMs = 1;
+        var afterMaintenance = new DateTimeOffset(2026, 10, 26, 20, 10, 0, TimeSpan.Zero);
+        board.RestoreFromWall(afterMaintenance.ToUnixTimeMilliseconds());
+
+        Assert.Equal(ManorProtocol.ModeModifiable, board.Mode);
+        Assert.Equal(new DateTimeOffset(2026, 10, 27, 4, 30, 0, TimeSpan.Zero).ToUnixTimeMilliseconds(),
+            board.NextChangeMs);
+
+        var duringMaintenance = new DateTimeOffset(2026, 10, 27, 20, 3, 0, TimeSpan.Zero);
+        board.RestoreFromWall(duringMaintenance.ToUnixTimeMilliseconds());
+        Assert.Equal(ManorProtocol.ModeMaintenance, board.Mode);
+        Assert.Equal(new DateTimeOffset(2026, 10, 27, 20, 6, 0, TimeSpan.Zero).ToUnixTimeMilliseconds(),
+            board.NextChangeMs);
+
+        var disabled = new ManorBoard(ManorData.Empty, new ManorSettings { Enabled = false });
+        disabled.RestoreFromWall(duringMaintenance.ToUnixTimeMilliseconds());
+        Assert.Equal(ManorProtocol.ModeDisabled, disabled.Mode);
+        Assert.Equal(0, disabled.NextChangeMs);
+    }
+
+    [Fact]
+    public void Manor_mode_change_runs_on_the_step_wall_sample_not_the_simulation_tick()
+    {
+        var board = new ManorBoard(ManorData.Empty, new ManorSettings { Enabled = true });
+        var wallBefore = new DateTimeOffset(2026, 10, 26, 19, 59, 0, TimeSpan.Zero);
+        board.RestoreFromWall(wallBefore.ToUnixTimeMilliseconds());
+        Assert.Equal(ManorProtocol.ModeApproved, board.Mode);
+
+        var actor = new ManorActor(board);
+        long wall = wallBefore.AddMinutes(1).ToUnixTimeMilliseconds();
+        long simulation = wallBefore.AddHours(5).ToUnixTimeMilliseconds();
+        var change = Assert.Single(actor.Step(new TickContext(1, simulation, wall)));
+
+        Assert.Equal(ManorProtocol.ModeApproved, change.From);
+        Assert.Equal(ManorProtocol.ModeMaintenance, change.To);
+        Assert.Equal(new DateTimeOffset(2026, 10, 26, 20, 6, 0, TimeSpan.Zero).ToUnixTimeMilliseconds(),
+            board.NextChangeMs);
+    }
+
+    static (SpawnCatalog Catalog, SpawnNpcDefinition Row) SpawnFixture(int respawnSeconds)
+    {
+        var gremlin = TalkingIsland.Gremlins[0];
+        var row = new SpawnNpcDefinition(
+            gremlin.ObjectId,
+            gremlin.NpcId,
+            gremlin.Name,
+            gremlin.X,
+            gremlin.Y,
+            gremlin.Z,
+            gremlin.Heading,
+            gremlin.Attackable,
+            TalkingIsland.GremlinMaxHp,
+            gremlin.RunSpeed,
+            gremlin.WalkSpeed,
+            RespawnDelaySeconds: respawnSeconds,
+            RespawnRandomSeconds: 0,
+            Title: gremlin.Title ?? "",
+            NpcType: string.IsNullOrEmpty(gremlin.NpcType) ? "Monster" : gremlin.NpcType);
+        var catalog = SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+        {
+            [SpawnCatalog.DefaultMapId] = new(SpawnCatalog.DefaultMapId, Enabled: true, [row])
+        });
+        return (catalog, row);
     }
 
     static BossDefinition Boss()

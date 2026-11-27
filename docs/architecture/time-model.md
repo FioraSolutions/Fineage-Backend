@@ -65,11 +65,11 @@ Only absolute UTC timestamps are persisted; no parallel timer store was added.
 |---|---|---|
 | Raid/grand boss respawn | `boss-schedule.json` (`BossScheduleRow.RespawnUnixMs`) | future deadline stays dead; overdue becomes alive once at boot, logs `[boss] saved respawn overdue`, then spawns through `StartupOrders` |
 | Buffs/debuffs and skill reuse | Postgres `character_skills_save` (`StoredEffect`) | Mobius semantics: effect remaining time is frozen offline and restored on enter; reuse `systime` continues while offline. Not a world timer. |
-| Regular NPC respawns | spawn catalog, process-local `SpawnSlotState.RespawnAt` | Mobius recreates the spawn table at boot; a mob corpse does not survive a restart. Durations use simulation time. |
+| Regular NPC respawns | spawn catalog, process-local `SpawnSlotState.RespawnAt` (absolute epoch ms on the simulation clock) | Mobius `Spawn.decreaseCount` stores `System.currentTimeMillis() + delay` in `RespawnTaskManager`'s in-memory map, and `SpawnTable` re-runs `Spawn.init` at boot. A pending deadline is therefore **not** restored; the restarted spawn table is authoritative. Wall jumps cannot move the deadline because it is measured on simulation time. |
 | Olympiad | `olympiad.json` (`OlympiadEndUnixMs`, `ValidationEndUnixMs`, `NextWeeklyUnixMs`) | one missed period/validation/weekly step is applied at load or first step and logs `[olympiad] ... overdue`; it is not replayed repeatedly |
 | Seven Signs | `seven-signs.json` (`NextChangeUnixMs`) | stored boundary is preserved; an overdue boundary advances one period and logs `[seven-signs] ... overdue`; the next boundary is computed from now |
 | Siege schedule | Postgres castles (`SiegeUnixMs`, `EndsUnixMs`, `InProgress`) | overdue scheduled siege/end is handled once at `Restore` and logs `[siege] ... overdue`; `SiegeSchedule.NextFrom` moves it into the future |
-| Manor cycles | derived from wall at boot (Mobius also derives mode from the current time); rows persist through `castle_manor_*` | mode is recomputed with `ManorRules.ModeAt`, next change with `ManorRules.NextChange`; no invented timer row |
+| Manor cycles | `ManorBoard.RestoreFromWall` derives mode and next change at boot; manor production/procure rows persist through `castle_manor_*` | Mobius `CastleManorManager`'s constructor reads the current wall clock and `scheduleModeChange`; a restart enters the period the wall clock is in and never replays missed cycles. No separate mode/timer row is stored. |
 | Clan hall auctions / hall function leases | Postgres `clan_halls` (`AuctionEndUnixMs`, function `EndUnixMs`) | due auctions settle once, log `[hall-auction] ... overdue`, then restart a 7-day auction or assign the winner |
 | Lottery | `lottery.json` (`EndUnixMs`) | one draw is run for an overdue board, log `[lottery] draw overdue`, next draw is computed from now (missed weeks are skipped, not replayed) |
 | Fishing championship | `fishing-championship.json` (`PeriodEndUnixMs`) | one overdue settlement, log, next period starts from now |
@@ -78,9 +78,14 @@ Only absolute UTC timestamps are persisted; no parallel timer store was added.
 ## 5. Scheduling rules from Mobius
 
 - `RaidBossSpawnManager` stores `respawn_time` in the DB and spawns once when it is in the past.
+- `Spawn.decreaseCount` schedules the next regular NPC with an absolute deadline
+  (`System.currentTimeMillis() + respawnDelay`) in `RespawnTaskManager`; the map is memory-only and
+  `SpawnTable` calls `Spawn.init` at boot, so a restart rebuilds the full spawn table instead of restoring pending
+  respawns. Fineage keeps the same policy (see `BootstrapSpawns`/`ScheduleRespawn`).
 - `SevenSigns` logs a next change in the past and changes periods once at boot, then recomputes the next boundary.
 - `Olympiad` persists `olympiad_end`, `validation_end`, `next_weekly_change` and schedules from the current time.
-- `CastleManorManager` recomputes its mode from the current wall clock at construction; only manor rows are stored.
+- `CastleManorManager`'s constructor derives the mode from `Calendar.getInstance()` and `scheduleModeChange` sets the
+  next boundary; `changeMode` advances one period and reschedules. Only the manor production/procure rows are stored.
 - `Lottery` finishes an overdue draw once and creates the next lottery; it does not replay every missed week.
 - `Siege` persists the next siege/end dates and reschedules past dates from now.
 
@@ -90,22 +95,33 @@ Only absolute UTC timestamps are persisted; no parallel timer store was added.
 
 - forward and backward wall jumps leave the simulation tick monotonic (combat scheduling independence);
 - raid boss respawn is an absolute UTC deadline that survives a restart without re-rolling;
+- regular NPC respawn keeps its absolute simulation deadline across a wall jump and only fires at that deadline;
+- restarting before a regular NPC respawn deadline rebuilds the spawn table (Mobius `Spawn.init`) and carries no
+  pending timer;
 - seven signs keeps its persisted boundary and advances a missed period once;
 - olympiad closes one missed period and does not replay it on the next restart;
 - siege reschedules a past schedule once into the future;
-- manor recomputes mode/next change after a wall jump;
+- manor restart enters the wall-clock period and schedules the next boundary from that sample;
+- manor mode changes read the step's wall sample, not the simulation tick;
 - lottery draws once after three missed weeks;
 - hall auction due is read from absolute UTC and fires once.
 
 Existing regression suites also cover `RegionTickScheduler`, `BossScheduleTests`, `ZoneEffectPersistTests`,
 `ZoneSpawnRespawnTests`, and the sidecar stores.
 
-## 7. Known acceptance gaps
+## 7. Decisions and remaining gaps
 
-- Regular NPC respawn deadlines are not persisted across process restart; this matches Mobius' boot-time spawn
-  table rather than the literal wording of #983. Adding a spawn-timer sidecar would be a deliberate parity change
-  and is not part of this milestone.
-- Manor mode/next-change is not stored separately; it is derived from wall time exactly as Mobius does. Only the
-  manor production/procure rows are durable.
-- In-game time is still derived from the wall sample (Mobius `GameTimeController`), not from simulation ticks. A
+- **Regular NPC respawns are intentionally not persisted.** The absolute deadline is a process-local
+  `SpawnSlotState.RespawnAt`; a restart rebuilds the spawn table (`BootstrapSpawns` mirrors Mobius `Spawn.init`) and
+  starts with no pending timer. Mobius keeps pending respawns only in `RespawnTaskManager`'s memory, so a spawn-timer
+  sidecar would be a parity change rather than a fix. Restart evidence:
+  `Regular_npc_respawn_restart_rebuilds_the_spawn_table_like_mobius_spawn_init`.
+- **Manor mode and next change are not stored separately.** `ManorBoard.RestoreFromWall` derives both from the wall
+  sample at boot, and `ManorActor` advances on the step's wall sample, exactly as Mobius
+  `CastleManorManager`/`scheduleModeChange` do. Only the manor production/procure rows are durable. Restart evidence:
+  `Manor_restart_enters_the_wall_clock_period_and_schedules_the_next_boundary_from_it`.
+- **In-game time is still derived from the wall sample** (Mobius `GameTimeController`), not from simulation ticks. A
   wall jump can therefore move game day/night; this is intentional and documented here.
+
+This milestone closes the restart evidence for regular NPC respawns and manor; #983 should not be called closed until
+every acceptance timer class has equivalent restart coverage.

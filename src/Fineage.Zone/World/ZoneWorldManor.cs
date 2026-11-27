@@ -29,12 +29,9 @@ public sealed partial class ZoneWorld
         _manor = new ManorActor(new ManorBoard(ManorData.Default, settings ?? ManorSettings.FromEnvironment()));
         if (_accounts != null)
             _manor.Board.Import(_accounts.ListManorProduction(), _accounts.ListManorProcure());
-        if (_manor.Board.Settings.Enabled)
-        {
-            long now = NowUnixMs();
-            _manor.Board.Mode = ManorRules.ModeAt(now, _manor.Board.Settings.UtcOffsetMinutes);
-            _manor.Board.NextChangeMs = ManorRules.NextChange(_manor.Board.Mode, now, _manor.Board.Settings.UtcOffsetMinutes);
-        }
+        // Mobius CastleManorManager reads Calendar.getInstance() in its constructor: boot/restart alignment is a
+        // calendar rule, so it takes the wall sample, never the simulation tick.
+        _manor.Board.RestoreFromWall(WallNow().ToUnixTimeMilliseconds());
     }
 
     bool PersistManor() =>
