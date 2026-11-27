@@ -96,6 +96,56 @@ public sealed class EconomyCommitTests
         }
     }
 
+    /// <summary>#955: lookups by id and the full list read the bag the economy commit wrote, not the account snapshot.</summary>
+    [Fact]
+    [Trait("Category", "Integration")]
+    public void Lookups_by_id_and_the_character_list_see_the_committed_bag()
+    {
+        string? baseUrl = ConnectionString();
+        if (baseUrl == null)
+        {
+            throw Xunit.Sdk.SkipException.ForSkip(
+                "PostgreSQL is not reachable. Start `docker compose up -d postgres` or set FINEAGE_DATABASE_URL.");
+        }
+
+        string schema = "econ_" + Guid.NewGuid().ToString("n")[..8];
+        Execute(baseUrl, $"CREATE SCHEMA {schema}");
+        try
+        {
+            string url = new NpgsqlConnectionStringBuilder(baseUrl) { SearchPath = schema }.ConnectionString;
+            int id;
+            using (var store = PostgresAccountStore.Open(url))
+            {
+                Assert.Equal(AddAccountStatus.Created, store.TryAddAccount("eco", "hash", "salt", 1, null));
+                Assert.Equal(CreateCharacterStatus.Ok, store.TryAddCharacter(
+                    "eco", "Eco", 0, 0, 0, out var created, items: [new StoredItem(57, 10, -1, 0, 100_001)]));
+                id = created!.Id;
+                store.CommitEconomy([],
+                [
+                    new EconomyBagWrite("eco", id)
+                    {
+                        Inventory = [new StoredItem(57, 7, -1, 0, 100_001)],
+                        Warehouse = [new StoredItem(57, 3, -1, 0, 100_002)],
+                    }
+                ]);
+
+                Assert.Equal(7, store.FindByCharacterId(id)!.Items!.Single().Count);
+                Assert.Equal(3, store.ListAllCharacters().Single(c => c.Id == id).Warehouse!.Single().Count);
+            }
+
+            using (var reopened = PostgresAccountStore.Open(url))
+            {
+                var listed = reopened.ListAllCharacters().Single(c => c.Id == id);
+                Assert.Equal(7, listed.Items!.Single().Count);
+                Assert.Equal(3, listed.Warehouse!.Single().Count);
+            }
+        }
+        finally
+        {
+            Execute(baseUrl, $"DROP SCHEMA {schema} CASCADE");
+        }
+    }
+
     static LedgerTransaction Tx(int characterId, long tick, int sequence, params LedgerPosting[] postings) =>
         new(new LedgerTxId(tick, sequence), LedgerTxKind.ShopBuy, characterId, 30001, tick * 200, postings);
 

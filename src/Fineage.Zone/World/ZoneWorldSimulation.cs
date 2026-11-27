@@ -73,6 +73,9 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>Test hook: one live-loop step, leaving the durable economy on the worker queue.</summary>
+    internal void StepSimulationRawForTests() => StepSimulationRaw();
+
     /// <summary>The step alone: what the live loop runs, leaving the durable economy on the worker queue.</summary>
     void StepSimulationRaw() => RunStep(wall =>
     {
@@ -198,7 +201,7 @@ public sealed partial class ZoneWorld
 
         long flushStart = Stopwatch.GetTimestamp();
         var applied = _ingress.TakeApplied();
-        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied);
+        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied, out bool repliesHeld);
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
@@ -216,8 +219,10 @@ public sealed partial class ZoneWorld
 
         long replyStart = Stopwatch.GetTimestamp();
         // A batch still on the worker queue answers through its own completion, so this step leaves those replies
-        // alone; everything else answers here, including a commit that failed.
-        if (applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
+        // alone; everything else answers here, including a commit that failed. The test is whether *these* replies
+        // rode on a queued batch: "any batch pending" stranded a step's replies forever whenever it had no economy to
+        // commit while someone else's logout batch was in flight (#990 reconnect storm: enters that never answered).
+        if (applied.Count > 0 && !repliesHeld)
             ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);

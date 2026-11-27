@@ -161,12 +161,18 @@ public sealed partial class ZoneWorld
     /// logout commit cannot pin the simulation step's flush behind that write.
     /// </summary>
     bool TryCommitDirtyEconomy(int? discardWithoutPublish) =>
-        TryCommitDirtyEconomy(discardWithoutPublish, heldReplies: null);
+        TryCommitDirtyEconomy(discardWithoutPublish, heldReplies: null, out _);
 
+    /// <param name="repliesHeld">
+    /// True only when <paramref name="heldReplies"/> rode on a batch that was queued: that batch's completion answers
+    /// them. Otherwise (no dirty economy, queue full, reservation conflict) the caller still owns every reply.
+    /// </param>
     bool TryCommitDirtyEconomy(
         int? discardWithoutPublish,
-        IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies)
+        IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies,
+        out bool repliesHeld)
     {
+        repliesHeld = false;
         EconomyPersistBatch stolen;
         using (_economyLock.Enter())
         {
@@ -185,14 +191,16 @@ public sealed partial class ZoneWorld
             stolen,
             discardWithoutPublish,
             heldReplies,
-            RestoreDirtyEconomy);
+            RestoreDirtyEconomy,
+            out var finished);
 
         // A character with a durable commit still in flight cannot start another. Off the step the caller has to
-        // see its own write land, so it waits for that batch and retries instead of reporting a lost commit;
-        // that batch published the earlier state, and the retry carries the newer one.
+        // see its own write land, so it waits for the batches holding those characters and retries instead of
+        // reporting a lost commit; that batch published the earlier state, and the retry carries the newer one.
         if (result is EconomyFlushResult.ReservationConflict && !_stepping)
         {
-            if (!_economyPersist.WaitForAllBatches(TimeSpan.FromSeconds(10), this))
+            if (!_economyPersist.WaitForReservations(
+                    EconomyPersistService.CharacterIdsOfBatch(stolen), TimeSpan.FromSeconds(10), this))
                 LogEconomyCommitFailure(stolen);
             else
             {
@@ -200,7 +208,8 @@ public sealed partial class ZoneWorld
                     stolen,
                     discardWithoutPublish,
                     heldReplies,
-                    RestoreDirtyEconomy);
+                    RestoreDirtyEconomy,
+                    out finished);
             }
         }
 
@@ -210,22 +219,18 @@ public sealed partial class ZoneWorld
             return false;
         }
 
+        repliesHeld = result is EconomyFlushResult.Queued && heldReplies is { Count: > 0 };
+
         // Off the step the caller must return with its write durable (shutdown drain, TryFlushLedger, a request path).
         // Inside a step the batch stays on the worker queue: RunStep drains the completion at its boundaries and the
-        // step never waits on Postgres.
-        if (!_stepping && result is EconomyFlushResult.Queued)
+        // step never waits on Postgres. Off the step the wait is for this batch only, and the world turn is held only
+        // while completions drain: a logout that held the turn across a wait for every batch in flight froze the
+        // simulation for up to the 30 s budget while a reconnect storm kept queueing logout batches (#990).
+        if (!_stepping && result is EconomyFlushResult.Queued && finished != null
+            && !_economyPersist.WaitForBatch(finished, TimeSpan.FromSeconds(30), this))
         {
-            // The drain publishes the committed bags, which is world state, so it runs with the turn. Taking the turn
-            // here is safe on a caller that already holds it (a monitor is reentrant for its owner) and on a bare
-            // shutdown/test thread that does not.
-            bool durable;
-            using (_affinity.Step())
-                durable = AwaitEconomyPersistOffStepBlocking();
-            if (!durable)
-            {
-                LogEconomyCommitFailure(stolen);
-                return false;
-            }
+            LogEconomyCommitFailure(stolen);
+            return false;
         }
 
         return true;
@@ -288,6 +293,8 @@ public sealed partial class ZoneWorld
         _dirtyFreight.Clear();
         _dirtyOfflineBags.Clear();
         stolen.Bags = BagsOf(stolen);
+        // Taken with the bags, under the economy lock: the rows up to here are exactly the moves these bags show.
+        stolen.LedgerThrough = _ledger.Position;
         return stolen;
     }
 

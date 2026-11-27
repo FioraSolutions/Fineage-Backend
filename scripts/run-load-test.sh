@@ -151,9 +151,9 @@ scenario_env() {
       ;;
   esac
   if [[ "$scenario" == bots-economy-hammer || "$scenario" == bots-economy-hammer-vm ]]; then
-    export FINEAGE_ZONE_LOADTEST_ECONOMY_HAMMER=1
+    export FINEAGE_LOADTEST_ECONOMY_HAMMER=1
   else
-    unset FINEAGE_ZONE_LOADTEST_ECONOMY_HAMMER
+    unset FINEAGE_LOADTEST_ECONOMY_HAMMER
   fi
   export FINEAGE_ZONE_LOADTEST_TELEPORT=1
 }

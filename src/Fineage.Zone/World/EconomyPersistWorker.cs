@@ -43,6 +43,13 @@ internal sealed class EconomyPersistService
     long _oldestEnqueueTimestamp;
     long _nextBatchId;
 
+    // A failed batch leaves its journal rows buffered and its bags dirty until the world restores them. A batch taken
+    // before that restore carries later rows but not those bags; writing it would put the failed batch's rows (the
+    // buffered prefix) on disk without their bags. Such batches fail too and are retaken after the restore.
+    readonly Lock _holdBack = new();
+    ulong _failedBatch;
+    ulong _heldBackUntil;
+
     public EconomyPersistService(IAccountStore? store, ILedgerJournal journal, WorldAffinity affinity)
     {
         ArgumentNullException.ThrowIfNull(journal);
@@ -65,8 +72,6 @@ internal sealed class EconomyPersistService
     public bool IsRunning => Volatile.Read(ref _running) == 1;
 
     public int PendingCount => _queued + _inFlight;
-
-    public bool HasAwaitingHeldReplies => !_pending.IsEmpty;
 
     public double OldestAgeMilliseconds
     {
@@ -115,9 +120,23 @@ internal sealed class EconomyPersistService
         EconomyPersistBatch batch,
         int? discardWithoutPublish,
         IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies,
-        Action<EconomyPersistBatch> restore)
+        Action<EconomyPersistBatch> restore) =>
+        TryEnqueue(batch, discardWithoutPublish, heldReplies, restore, out _);
+
+    /// <summary>
+    /// The same hand-off, also returning this batch's own outcome: it completes once <see cref="DrainCompletions"/> has
+    /// finished the batch (published on success, restored on failure). Null unless the result is
+    /// <see cref="EconomyFlushResult.Queued"/>.
+    /// </summary>
+    public EconomyFlushResult TryEnqueue(
+        EconomyPersistBatch batch,
+        int? discardWithoutPublish,
+        IReadOnlyList<ZoneCommandIngress.Applied>? heldReplies,
+        Action<EconomyPersistBatch> restore,
+        out Task<bool>? finished)
     {
         ArgumentNullException.ThrowIfNull(batch);
+        finished = null;
 
         // A world with no hosted simulation (tests, admin hooks, tools) has no worker thread. Enqueueing there would
         // leave the batch in the queue until some later drain the caller does not run, so the write is committed on
@@ -134,8 +153,10 @@ internal sealed class EconomyPersistService
             bool committed = Apply(inline);
             if (!committed)
                 Interlocked.Increment(ref _commitFailures);
-            _pending[inlineId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), []);
+            var inlinePending = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), []);
+            _pending[inlineId] = inlinePending;
             _completions.Enqueue(new EconomyPersistCompletion(inlineId, committed));
+            finished = inlinePending.Finished.Task;
             return EconomyFlushResult.Queued;
         }
 
@@ -158,7 +179,8 @@ internal sealed class EconomyPersistService
         // commits the batch and enqueues its completion as soon as it reads it; a completion that arrives before its
         // entry exists is dropped by Finish, which strands the held command replies forever (the caller waits on a
         // reply no one will complete).
-        _pending[batchId] = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), charIds);
+        var pendingBatch = new PendingBatch(batch, discardWithoutPublish, heldReplies?.ToList(), charIds);
+        _pending[batchId] = pendingBatch;
         Interlocked.Increment(ref _queued);
         if (_oldestEnqueueTimestamp == 0)
             Volatile.Write(ref _oldestEnqueueTimestamp, work.EnqueuedAt);
@@ -172,6 +194,7 @@ internal sealed class EconomyPersistService
             return EconomyFlushResult.QueueFull;
         }
 
+        finished = pendingBatch.Finished.Task;
         return EconomyFlushResult.Queued;
     }
 
@@ -207,6 +230,101 @@ internal sealed class EconomyPersistService
         return Volatile.Read(ref _commitFailures) == failuresBefore;
     }
 
+    /// <summary>
+    /// Off-step callers (logout, kick, an admin or request path): wait for one batch of their own, not for every batch
+    /// in flight. The world turn is taken only around each <see cref="DrainCompletions"/> (completions publish world
+    /// state) and never across the sleep, so the simulation step and other leavers keep running while this caller
+    /// waits on Postgres. A caller that already holds the turn keeps it (the monitor is reentrant), as before.
+    /// </summary>
+    public bool WaitForBatch(Task<bool> finished, TimeSpan budget, ZoneWorld world)
+    {
+        ArgumentNullException.ThrowIfNull(finished);
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(world.InSimulationStep, nameof(WaitForBatch));
+        long deadline = Stopwatch.GetTimestamp() + (long)(budget.TotalSeconds * Stopwatch.Frequency);
+        while (!finished.IsCompleted)
+        {
+            if (!_completions.IsEmpty)
+            {
+                using (_affinity.Step())
+                    DrainCompletions(world);
+                continue;
+            }
+
+            if (Stopwatch.GetTimestamp() >= deadline)
+                return false;
+            finished.Wait(TimeSpan.FromMilliseconds(5));
+        }
+
+        return finished.Result;
+    }
+
+    /// <summary>
+    /// Off-step: wait until no batch in flight holds a reservation on any of <paramref name="characterIds"/>, draining
+    /// completions under the world turn only (same rule as <see cref="WaitForBatch"/>).
+    /// </summary>
+    public bool WaitForReservations(IReadOnlyCollection<int> characterIds, TimeSpan budget, ZoneWorld world)
+    {
+        ArgumentNullException.ThrowIfNull(characterIds);
+        EconomyPersistThreading.AssertNoBlockingWaitOnSimulationThread(world.InSimulationStep, nameof(WaitForReservations));
+        long deadline = Stopwatch.GetTimestamp() + (long)(budget.TotalSeconds * Stopwatch.Frequency);
+        while (true)
+        {
+            Task<bool>? blocking = null;
+            foreach (var pending in _pending.Values)
+            {
+                if (pending.CharacterIds.Exists(characterIds.Contains))
+                {
+                    blocking = pending.Finished.Task;
+                    break;
+                }
+            }
+
+            if (blocking == null)
+                return true;
+            if (!_completions.IsEmpty)
+            {
+                using (_affinity.Step())
+                    DrainCompletions(world);
+                continue;
+            }
+
+            if (Stopwatch.GetTimestamp() >= deadline)
+                return false;
+            blocking.Wait(TimeSpan.FromMilliseconds(5));
+        }
+    }
+
+    /// <summary>The failed batch a later one waits on, or null when <paramref name="batchId"/> may write.</summary>
+    ulong? HeldBack(ulong batchId)
+    {
+        lock (_holdBack)
+            return batchId > _failedBatch && batchId < _heldBackUntil ? _failedBatch : null;
+    }
+
+    void HoldBackAfter(ulong batchId)
+    {
+        lock (_holdBack)
+        {
+            // A batch that was itself held back never wrote, so it opens no new gap.
+            if (batchId > _failedBatch && batchId < _heldBackUntil)
+                return;
+            _failedBatch = batchId;
+            _heldBackUntil = ulong.MaxValue;
+        }
+    }
+
+    /// <summary>World turn, after a failed batch's bags are dirty again: every batch taken from now on carries them.</summary>
+    void ReleaseHoldBack(ulong restoredBatchId)
+    {
+        lock (_holdBack)
+        {
+            if (restoredBatchId == _failedBatch)
+                _heldBackUntil = (ulong)Interlocked.Read(ref _nextBatchId) + 1;
+        }
+    }
+
+    internal static List<int> CharacterIdsOfBatch(EconomyPersistBatch batch) => CharacterIdsOf(batch);
+
     void Finish(ZoneWorld world, EconomyPersistCompletion completion)
     {
         if (!_pending.TryRemove(completion.BatchId, out var pending))
@@ -222,12 +340,15 @@ internal sealed class EconomyPersistService
         else
         {
             world.RestoreDirtyEconomyInternal(pending.Batch);
+            ReleaseHoldBack(completion.BatchId);
             // Only the characters whose economy write was in this batch hear the failure; a command from anyone else
             // that merely shared the step still answers with its own result.
             if (pending.HeldReplies is { Count: > 0 })
                 ZoneCommandIngress.AnswerAfterFlush(
                     pending.HeldReplies, committed: false, pending.CharacterIds.ToHashSet(), EconomyCommitFailed);
         }
+
+        pending.Finished.TrySetResult(completion.Success);
     }
 
     static List<int> CharacterIdsOf(EconomyPersistBatch batch)
@@ -277,6 +398,9 @@ internal sealed class EconomyPersistService
         // Stop runs on the shutdown thread, never inside a step body.
         while (_queue.Reader.TryRead(out var work))
         {
+            // The worker loop counts its reads down; this drain has to as well, or PendingCount stays above zero
+            // forever after a stop and a shutdown reconcile reads a quiescent economy as in flight.
+            Interlocked.Decrement(ref _queued);
             bool ok = Apply(work);
             if (!ok)
                 Interlocked.Increment(ref _commitFailures);
@@ -292,7 +416,13 @@ internal sealed class EconomyPersistService
             LastWriterThreadId = Environment.CurrentManagedThreadId;
             if (_store == null)
                 return true;
-            _journal.CommitWith(entries => _store.CommitEconomy(entries, work.Batch.Bags));
+            if (HeldBack(work.BatchId) is { } failed)
+            {
+                _warn($"economy persist batch={work.BatchId} held back: batch={failed} failed and its bags are not restored yet");
+                return false;
+            }
+
+            _journal.CommitThrough(work.Batch.LedgerThrough, entries => _store.CommitEconomy(entries, work.Batch.Bags));
             FineageTelemetry.EconomyPersistBatches.Add(1, new KeyValuePair<string, object?>("result", "written"));
             FineageTelemetry.PersistWriteMilliseconds.Record(
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds,
@@ -301,6 +431,7 @@ internal sealed class EconomyPersistService
         }
         catch (Exception ex)
         {
+            HoldBackAfter(work.BatchId);
             _warn(
                 $"economy persist failed batch={work.BatchId} bags={work.Batch.Bags.Count}: {ex.GetType().Name}: {ex.Message}");
             FineageTelemetry.EconomyPersistFailures.Add(1, new KeyValuePair<string, object?>("reason", ex.GetType().Name));
@@ -328,6 +459,9 @@ internal sealed class EconomyPersistService
         public int? DiscardWithoutPublish { get; } = discardWithoutPublish;
         public List<ZoneCommandIngress.Applied>? HeldReplies { get; } = heldReplies;
         public List<int> CharacterIds { get; } = characterIds;
+
+        /// <summary>Completed by <see cref="Finish"/> after the batch is published or restored.</summary>
+        public TaskCompletionSource<bool> Finished { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 }
 
@@ -339,4 +473,10 @@ internal sealed class EconomyPersistBatch
     public List<(int ObjectId, ZoneEntity Player)> Freight { get; } = [];
     public List<EconomyBagWrite> OfflineBags { get; } = [];
     public List<EconomyBagWrite> Bags { get; set; } = [];
+
+    /// <summary>
+    /// Ledger position when the bags were taken: the batch writes the journal rows up to here and no later one.
+    /// A row after it belongs to a move whose bag is in a later batch (#955).
+    /// </summary>
+    public long LedgerThrough { get; set; } = long.MaxValue;
 }
