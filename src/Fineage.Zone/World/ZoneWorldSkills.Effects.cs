@@ -277,7 +277,7 @@ public sealed partial class ZoneWorld
         int damage = (int)(target.CurCp * power / 100d);
         if (damage <= 0)
             return;
-        target.CurCp = Math.Max(0, target.CurCp - damage);
+        ReduceCp(target, damage);
         FanoutVitals(target, PlayerVitalsStatus(target));
         MaybeBreakCast(target, damage);
     }
@@ -302,7 +302,7 @@ public sealed partial class ZoneWorld
             if (outcome == ZoneCombat.LethalOutcome.Full)
             {
                 target.CurCp = 1;
-                target.CurHp = 1;
+                target.CurHp = 1; // hp-write: Lethal sets HP directly, it is not damage routed through CP
             }
             else
                 target.CurCp = 1;
@@ -311,7 +311,7 @@ public sealed partial class ZoneWorld
         else
         {
             if (extra > 0)
-                target.CurHp = Math.Max(1, target.CurHp - extra);
+                target.CurHp = Math.Max(1, target.CurHp - extra); // hp-write: Lethal half-kill sets the remainder
             FanoutVitals(target, StatusFor(target));
         }
         if (caster.Session != null)
@@ -370,7 +370,8 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius HpDrain: of the landed magic damage, only the HP portion (after CP) is absorbed, × effect power (0.2).
+    /// Mobius HpDrain effect: of the landed magic damage, only the HP portion (after CP) is absorbed, × effect power
+    /// (0.2). Callers pass the actual HP loss returned by <see cref="ApplyTargetDamage"/>, never the raw roll.
     /// </summary>
     internal void ApplyHpDrainAfterDamage(ZoneEntity caster, ZoneEntity target, int damage, int skillId)
     {
@@ -389,15 +390,7 @@ public sealed partial class ZoneWorld
         }
         if (ratio <= 0)
             return;
-        int hpPortion = damage;
-        if (target.Kind == ZoneEntityKind.Player)
-        {
-            // Damage is applied to HP after CP in some paths; we approximate the Mobius split:
-            // drain is 0 when the hit only shaved CP, else damage − cp (already spent) is not recoverable here.
-            // Callers pass the HP actually removed when possible; when only the raw roll is known, assume no CP.
-            hpPortion = damage;
-        }
-        int drain = (int)(ratio * hpPortion);
+        int drain = (int)(ratio * damage);
         if (drain <= 0)
             return;
         int room = Math.Max(0, caster.MaxHp - caster.CurHp);

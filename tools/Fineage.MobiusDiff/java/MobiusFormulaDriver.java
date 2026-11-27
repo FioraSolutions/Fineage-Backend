@@ -37,6 +37,7 @@ public final class MobiusFormulaDriver
         String buffSpec = opt.getOrDefault("buffs", "");
         String side = opt.getOrDefault("side", "front");
         boolean soulshot = Boolean.parseBoolean(opt.getOrDefault("soulshot", "false"));
+        String cpSplitSpec = opt.getOrDefault("cp-splits", "");
 
         ClassData cls = readClass(ref, classId);
         Map<String, ItemData> gear = readGear(ref, gearSpec);
@@ -95,9 +96,14 @@ public final class MobiusFormulaDriver
         metrics.put("critChancePermille", (double) critChance);
         metrics.put("damageNoCrit", (double) damageNoCrit);
         metrics.put("damageMeanPerSwing", damageMean);
+        for (Map.Entry<String, int[]> split : readCpSplits(cpSplitSpec).entrySet())
+        {
+            metrics.put("cpLoss_" + split.getKey(), (double) split.getValue()[0]);
+            metrics.put("hpLoss_" + split.getKey(), (double) split.getValue()[1]);
+        }
 
         String out = opt.get("out");
-        String json = toJson(scenario, referenceLabel, metrics);
+        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank());
         if (out == null)
         {
             System.out.println(json);
@@ -140,6 +146,38 @@ public final class MobiusFormulaDriver
         if ("behind".equalsIgnoreCase(side))
             return 1.2;
         throw new IllegalArgumentException("side must be front, side or behind: " + side);
+    }
+
+    /**
+     * Independent evaluator of the CP barrier in Mobius {@code PlayerStatus.reduceHp}
+     * ({@code PlayerStatus.java:212-222}). Only a playable attacker (player or summon) and a non-ignored
+     * call spend CP; the remainder lands on HP. Entry format: {@code key:hp:cp:damage:playable:ignore}.
+     */
+    private static Map<String, int[]> readCpSplits(String spec)
+    {
+        Map<String, int[]> out = new LinkedHashMap<>();
+        if (spec == null || spec.isBlank())
+            return out;
+        for (String entry : spec.split(";"))
+        {
+            String[] parts = entry.split(":");
+            if (parts.length != 6)
+                throw new IllegalArgumentException(
+                    "cp-splits entry must be key:hp:cp:damage:playable:ignore: " + entry);
+            String key = parts[0].trim();
+            int hp = Integer.parseInt(parts[1].trim());
+            int cp = Integer.parseInt(parts[2].trim());
+            int damage = Integer.parseInt(parts[3].trim());
+            boolean playable = Boolean.parseBoolean(parts[4].trim());
+            boolean ignoreCp = Boolean.parseBoolean(parts[5].trim());
+
+            int amount = Math.max(0, damage);
+            int cpLoss = (playable && !ignoreCp) ? Math.min(Math.max(0, cp), amount) : 0;
+            amount -= cpLoss;
+            int hpLoss = Math.min(Math.max(0, hp), amount);
+            out.put(key, new int[] { cpLoss, hpLoss });
+        }
+        return out;
     }
 
     private static void applyBuffs(Map<String, Double> stats, List<BuffFunc> buffs)
@@ -406,7 +444,7 @@ public final class MobiusFormulaDriver
         return Double.parseDouble(value);
     }
 
-    private static String toJson(String scenario, String referenceLabel, Map<String, Double> metrics)
+    private static String toJson(String scenario, String referenceLabel, Map<String, Double> metrics, boolean cpBarrier)
     {
         StringBuilder b = new StringBuilder();
         b.append("{\n");
@@ -416,15 +454,18 @@ public final class MobiusFormulaDriver
         b.append("    \"reference\": ").append(q(referenceLabel)).append(",\n");
         b.append("    \"driver\": \"tools/Fineage.MobiusDiff/java/MobiusFormulaDriver.java\",\n");
         b.append("    \"formulas\": [\n");
-        String[] formulas =
-        {
+        List<String> formulas = new ArrayList<>(List.of(
             "Formulas.calcPhysDam", "Formulas.calcCrit", "Formulas.calcHitMiss",
             "FuncPAtkMod", "FuncPDefMod", "FuncAtkAccuracy", "FuncAtkEvasion",
             "FuncAtkCritical", "FuncPAtkSpeed", "CreatureStat.getCriticalHit",
-            "CreatureStat.getPAtk", "CreatureStat.getPAtkSpd"
-        };
-        for (int i = 0; i < formulas.length; i++)
-            b.append("      ").append(q(formulas[i])).append(i + 1 == formulas.length ? "\n" : ",\n");
+            "CreatureStat.getPAtk", "CreatureStat.getPAtkSpd"));
+        if (cpBarrier)
+        {
+            formulas.add("PlayerStatus.reduceHp (CP barrier, PlayerStatus.java:212-222)");
+            formulas.add("PlayerStatus.reduceCp (PlayerStatus.java:49-53)");
+        }
+        for (int i = 0; i < formulas.size(); i++)
+            b.append("      ").append(q(formulas.get(i))).append(i + 1 == formulas.size() ? "\n" : ",\n");
         b.append("    ],\n");
         b.append("    \"fullServerVerified\": false,\n");
         b.append("    \"blocker\": ")

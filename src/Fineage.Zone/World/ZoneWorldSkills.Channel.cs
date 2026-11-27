@@ -155,7 +155,7 @@ public sealed partial class ZoneWorld
                 ApplySkillDamageToPlayer(caster, entity, damage, now);
             else
             {
-                entity.CurHp = Math.Max(0, entity.CurHp - damage);
+                ApplyTargetDamage(entity, caster, damage);
                 FanoutVitals(entity, StatusFor(entity));
                 AddHate(entity, caster, DamageHate(damage, entity.Level));
                 if (entity.CurHp <= 0 && RemoveDeadNpc(entity, killer: caster))

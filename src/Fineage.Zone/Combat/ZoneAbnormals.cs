@@ -36,7 +36,8 @@ public static class ZoneAbnormals
         int durationSeconds,
         long nowUnixMs,
         int skillLevel = 0,
-        string slot = "")
+        string slot = "",
+        int effectorObjectId = 0)
     {
         if (effectId <= 0 || durationSeconds <= 0)
             return false;
@@ -66,7 +67,8 @@ public static class ZoneAbnormals
             SkillLevel = skillLevel,
             Slot = slot ?? "",
             ExpiresAtUnixMs = expires,
-            NextDotAtUnixMs = 0
+            NextDotAtUnixMs = 0,
+            EffectorObjectId = effectorObjectId
         });
         return true;
     }

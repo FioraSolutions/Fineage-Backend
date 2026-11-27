@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
         foreach (var target in targets)
         {
             ZoneAbnormals.Apply(target.Abnormals, skill.SkillId, abnormal, skill.AbnormalTimeSeconds, now,
-                skill.Level, slot);
+                skill.Level, slot, effectorObjectId: signet.ObjectId);
             FanoutAbnormal(target);
         }
         ZoneHotPathLogs.SignetPulse(skill.SkillId, skill.Level, signet.NpcId, range, targets.Count);

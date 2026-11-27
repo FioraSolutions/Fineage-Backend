@@ -1,0 +1,75 @@
+{
+  "id": "cp-reducehp-human-fighter-40",
+  "description": "Deterministic CP barrier from Mobius CT0 PlayerStatus.reduceHp (PlayerStatus.java:212-222): a playable attacker spends CP before HP, overflow lands on HP, an NPC attacker bypasses CP and an explicit ignoreCP call bypasses the pool. Damage is a fixed scenario input, not a Fineage roll; the oracle reads the same documented branch.",
+  "seed": 9792026,
+  "samples": 0,
+  "attacker": {
+    "classId": 0,
+    "level": 40,
+    "gear": [],
+    "buffs": []
+  },
+  "target": {
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false,
+    "attackerBow": false
+  },
+  "cpSplits": [
+    {
+      "key": "fullAp",
+      "targetHp": 1000,
+      "targetCp": 200,
+      "damage": 150,
+      "attackerPlayable": true,
+      "ignoreCp": false
+    },
+    {
+      "key": "overflow",
+      "targetHp": 1000,
+      "targetCp": 40,
+      "damage": 100,
+      "attackerPlayable": true,
+      "ignoreCp": false
+    },
+    {
+      "key": "npcBypass",
+      "targetHp": 1000,
+      "targetCp": 200,
+      "damage": 100,
+      "attackerPlayable": false,
+      "ignoreCp": false
+    },
+    {
+      "key": "explicitIgnore",
+      "targetHp": 1000,
+      "targetCp": 200,
+      "damage": 100,
+      "attackerPlayable": true,
+      "ignoreCp": true
+    }
+  ],
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "golden": "tools/Fineage.MobiusDiff/oracle/cp-reducehp-human-fighter-40.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "metrics": [
+    "cpLoss_fullAp",
+    "hpLoss_fullAp",
+    "cpLoss_overflow",
+    "hpLoss_overflow",
+    "cpLoss_npcBypass",
+    "hpLoss_npcBypass",
+    "cpLoss_explicitIgnore",
+    "hpLoss_explicitIgnore"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    }
+  }
+}

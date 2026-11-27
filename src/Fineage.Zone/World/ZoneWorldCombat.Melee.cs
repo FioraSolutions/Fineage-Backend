@@ -76,7 +76,7 @@ public sealed partial class ZoneWorld
         // stands it up before the damage lands.
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        ApplyTargetDamage(target, attacker, hit.Damage);
         ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.Board.NoteDamage(attacker.ObjectId, hit.Damage);
@@ -130,7 +130,7 @@ public sealed partial class ZoneWorld
         if (TryExplodeTreasureBox(attacker, target, now))
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyTargetDamage(target, attacker, damage);
         ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);

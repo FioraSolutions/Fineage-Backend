@@ -156,6 +156,9 @@ public static class Program
         Add(psi, "--buffs", string.Join(",", scenario.Attacker.Buffs.Select(static b => $"{b.SkillId}:{b.Level}")));
         Add(psi, "--side", scenario.Contact.Side);
         Add(psi, "--soulshot", scenario.Contact.Soulshot.ToString().ToLowerInvariant());
+        if (scenario.CpSplits.Count > 0)
+            Add(psi, "--cp-splits", string.Join(";", scenario.CpSplits.Select(static c =>
+                $"{c.Key}:{c.TargetHp}:{c.TargetCp}:{c.Damage}:{c.AttackerPlayable.ToString().ToLowerInvariant()}:{c.IgnoreCp.ToString().ToLowerInvariant()}")));
         Add(psi, "--out", golden);
 
         using var process = Process.Start(psi)
