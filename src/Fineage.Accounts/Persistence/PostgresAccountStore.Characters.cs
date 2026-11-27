@@ -286,10 +286,38 @@ public sealed partial class PostgresAccountStore
     public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
         _inner.TryReplaceBlocked(account, characterId, blocked, blockAll);
 
-    public IReadOnlyList<CharacterRecord> ListAllCharacters() => _inner.ListAllCharacters();
+    /// <summary>
+    /// Every character as the normalized tables hold it. <see cref="CommitEconomy"/> writes only those tables, so the
+    /// in-memory snapshot's containers go stale as soon as the zone commits; reading them made the startup audit and
+    /// the economy reconcile report the pre-commit bags (#955). The snapshot only names the characters.
+    /// </summary>
+    public IReadOnlyList<CharacterRecord> ListAllCharacters()
+    {
+        var names = _inner.ListAllCharacters();
+        var records = new List<CharacterRecord>(names.Count);
+        using var conn = _dataSource.OpenConnection();
+        foreach (var known in names)
+            records.Add(LoadNormalized(conn, known.Account, known.Id));
+        return records;
+    }
 
-    public CharacterRecord? FindByCharacterId(int characterId) =>
-        _inner.FindByCharacterId(characterId);
+    CharacterRecord LoadNormalized(NpgsqlConnection conn, string account, int characterId)
+    {
+        var record = NormalizedStoreReader.TryLoadById(conn, account, characterId)
+            ?? throw new InvalidOperationException(
+                $"character {characterId} (account {account}) is in the account snapshot but not in the characters table");
+        Hydrate(conn, record);
+        return record;
+    }
+
+    /// <summary>The normalized row, for the same reason as <see cref="ListAllCharacters"/>.</summary>
+    public CharacterRecord? FindByCharacterId(int characterId)
+    {
+        if (_inner.FindByCharacterId(characterId) is not { } known)
+            return null;
+        using var conn = _dataSource.OpenConnection();
+        return LoadNormalized(conn, known.Account, characterId);
+    }
 
     public CharacterRecord? FindByCharacterName(string name) =>
         _inner.FindByCharacterName(name);
