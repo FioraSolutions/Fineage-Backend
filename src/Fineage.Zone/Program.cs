@@ -117,6 +117,7 @@ catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 var health = new HealthBoard();
 health.Require("world", "loading catalogs, boot validation and sidecars");
 health.Require("state-audit", "waiting for the world");
+health.Require("economy-reconcile", "waiting for the state audit");
 ZoneWorld? liveWorld = null;
 TimeSpan liveLag = HealthSettings.LiveTickLag();
 TimeSpan readyLag = HealthSettings.ReadyTickLag();
@@ -164,6 +165,9 @@ try
     // #984: saved state vs data catalogs vs replayed ledger, before any player can enter.
     var audit = world.AuditStoredStateAtStartup();
     health.Complete("state-audit", $"characters={audit.Characters} errors={audit.Errors.Count} notices={audit.Issues.Count - audit.Errors.Count}");
+    // #955: ledger vs store vs the booted world (ground expired, nobody online) before any player can enter.
+    var reconcile = world.ReconcileEconomyAndLog("startup");
+    health.Complete("economy-reconcile", reconcile.Summary);
 }
 catch (Exception ex) when (ex is InvalidOperationException or RequiredDataException or IOException or UnauthorizedAccessException)
 {
@@ -259,6 +263,18 @@ finally
     finally
     {
         world.FlushLedgerOnShutdown();
+    }
+
+    try
+    {
+        // #955: every player saved and every economy batch committed: the store must equal the ledger now.
+        if (!world.ReconcileEconomyAndLog("shutdown", _ => "log").Ok)
+            Environment.ExitCode = 1;
+    }
+    catch (Exception ex) when (ex is InvalidOperationException)
+    {
+        Console.Error.WriteLine($"[ZONE] shutdown economy reconcile: {ex.Message}");
+        Environment.ExitCode = 1;
     }
 }
 

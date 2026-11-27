@@ -361,6 +361,9 @@ internal sealed class EconomyPersistService
         // Stop runs on the shutdown thread, never inside a step body.
         while (_queue.Reader.TryRead(out var work))
         {
+            // The worker loop counts its reads down; this drain has to as well, or PendingCount stays above zero
+            // forever after a stop and a shutdown reconcile reads a quiescent economy as in flight.
+            Interlocked.Decrement(ref _queued);
             bool ok = Apply(work);
             if (!ok)
                 Interlocked.Increment(ref _commitFailures);
