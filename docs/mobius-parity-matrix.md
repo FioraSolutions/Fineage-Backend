@@ -66,7 +66,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 34 | NPC shots | ✅ | — | `Npc` recharge shots → `ZoneWorldNpcSkills` |
 | 35 | NPC heal / buff / debuff | ✅ | — | `NpcAI` → `ZoneWorldNpcSkills` |
 | 36 | Guards | ✅ | — | `ai/others` guards → `ScanAggression` |
-| 37 | Scripted NPC / boss / area AI | 🟡 | L | Script host `#805` + `npc-scripts.json`. `RaidbossInfo` (31775/31776) serves Mobius level HTML + radar via `BossCatalog` — #919. Remaining gap: area/boss combat AI under `ai/areas` / `ai/bosses` (not named Script bypass) |
+| 37 | Scripted NPC / boss / area AI | 🟡 | L | Script host `#805` + `npc-scripts.json`. `RaidbossInfo` HTML+radar + Gatekeeper `necro`/`cata`/`exit` → `DungeonAccess` — #919. Remaining: area/boss combat AI (`ai/areas`/`ai/bosses`) |
 | **Drops and economy** |
 | 38 | Droplists | ✅ | — | per-NPC drop XML → 1518 `data/drops` JSON files via `DropCatalog`. A kill with no file logs `drop miss npc={id} (no droplist)`. #803 closed the spawn-set holes |
 | 39 | Herbs | ✅ | — | herb items → `ZoneWorldHerbs` |

@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Protocol;
 using Fineage.Zone.Dungeons;
+using Fineage.Zone.NpcHtml;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.World;
 using Xunit;
@@ -249,6 +250,37 @@ public sealed class NetDungeonTests
             Action = 0
         }, CancellationToken.None));
         Assert.Empty(bench.Rec.Of("FanoutDungeonEntered"));
+    }
+
+    [Fact]
+    public async Task Html_necro_on_entrance_npc_enters_via_shared_dungeon_path()
+    {
+        var clock = new MutableGameClock(Start);
+        DungeonCatalog catalog = DungeonCatalog.LoadDefault();
+        Assert.True(catalog.TryGet(1, out var sacrifice));
+        Assert.True(catalog.TryGetByEntranceNpc(sacrifice.EntranceNpcId, out _));
+        var bench = World(clock, catalog);
+        BenchPlayer member = await bench.EnterAsync("gate", "Necro", classId: 1);
+        await AdvanceAsync(bench, clock);
+        Assert.Null(await bench.World.TrySevenSignsActionAsync(
+            member.Session, Join(SevenSignsCabal.Dusk, SevenSignsSeal.Avarice), CancellationToken.None));
+
+        var reply = new DungeonGateBypassHandler().Handle(new BypassCall
+        {
+            NpcObjectId = 1,
+            NpcId = sacrifice.EntranceNpcId,
+            NpcName = "Gate",
+            NpcType = "teleporter",
+            PlayerName = member.Player.Name,
+            Command = "necro 262"
+        });
+        Assert.Equal(NpcServiceIntent.DungeonEnter, reply.Service);
+        Assert.Equal("necro", reply.ServiceArg);
+
+        Assert.Null(bench.World.NpcServiceForTest(
+            member.Session, sacrifice.EntranceNpcId, NpcServiceIntent.DungeonEnter, serviceArg: "necro"));
+        Assert.Equal(1, bench.World.PlayerDungeonId(member.ObjectId));
+        Assert.Equal(sacrifice.EntranceX, member.Session.X);
     }
 
     [Fact]

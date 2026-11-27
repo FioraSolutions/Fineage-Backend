@@ -31,7 +31,7 @@
       {
         "scriptId": "DungeonGatekeeper",
         "pipeline": "dungeon_gate",
-        "note": "Catacomb/necropolis Gatekeeper Ziggurats — DungeonEnterRequest + DungeonAccess rules, not Script bypass"
+        "note": "Catacomb/necropolis Gatekeeper Ziggurats — HTML necro/cata/exit → DungeonAccess via BypassRegistry (same as DungeonEnterRequest packet)"
       }
     ]
   },

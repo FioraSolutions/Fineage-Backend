@@ -88,6 +88,10 @@ public sealed partial class ZoneWorld
                 return OlympiadNpcBypass(session, player, npc, reply.ServiceArg);
             case NpcServiceIntent.RaidBossRanking:
                 return ShowRaidBossRanking(session, player, npc);
+            case NpcServiceIntent.DungeonEnter:
+                return ApplyDungeonGate(session, player, npc, enter: true, reply.ServiceArg);
+            case NpcServiceIntent.DungeonExit:
+                return ApplyDungeonGate(session, player, npc, enter: false, reply.ServiceArg);
             case NpcServiceIntent.Subclass:
                 return SubclassBypass(session, player, npc, reply.ServiceId, reply.ServiceArg);
             case NpcServiceIntent.AncientAdenaToAdena:
@@ -131,7 +135,12 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>Test: run one bypass command against the first spawned NPC with this template id.</summary>
-    internal string? NpcServiceForTest(ZoneSession session, int npcId, string intent, string mapId = "elven_village")
+    internal string? NpcServiceForTest(
+        ZoneSession session,
+        int npcId,
+        string intent,
+        string mapId = "elven_village",
+        string serviceArg = "")
     {
         using (_affinity.Step())
         {
@@ -146,7 +155,7 @@ public sealed partial class ZoneWorld
                     MerchantCastleId = Fineage.Zone.Shops.MerchantTowns.For(mapId).CastleId,
                     MerchantTown = Fineage.Zone.Shops.MerchantTowns.TownName(mapId)
                 };
-            var reply = BypassReply.ServiceCall(intent);
+            var reply = BypassReply.ServiceCall(intent, serviceArg);
             return ApplyNpcService(session, player, npc, reply);
         }
     }

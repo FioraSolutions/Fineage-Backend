@@ -138,6 +138,29 @@ public sealed class RaidBossRankingBypassHandler : IBypassHandler
             : BypassReply.Fail("bad_request");
 }
 
+/// <summary>
+/// Gatekeeper Ziggurat <c>necro</c>/<c>cata</c>/<c>exit</c> (Mobius Seven Signs dungeon HTML).
+/// The dungeon is resolved from the talking NPC in <c>dungeons.json</c>; the trailing zone id is ignored.
+/// </summary>
+public sealed class DungeonGateBypassHandler : IBypassHandler
+{
+    public IReadOnlyList<string> Commands { get; } = ["necro", "cata", "exit"];
+
+    public BypassReply Handle(BypassCall call)
+    {
+        var parts = call.Command.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0)
+            return BypassReply.Fail("bad_request");
+        string token = parts[0];
+        if (token.Equals("exit", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.DungeonExit);
+        if (token.Equals("necro", StringComparison.OrdinalIgnoreCase)
+            || token.Equals("cata", StringComparison.OrdinalIgnoreCase))
+            return BypassReply.ServiceCall(NpcServiceIntent.DungeonEnter, token.ToLowerInvariant());
+        return BypassReply.Fail("bad_request");
+    }
+}
+
 /// <summary>Race Manager <c>BuyTicket</c> / <c>ShowOdds</c> / … (Mobius <c>RaceManager</c>).</summary>
 public sealed class MonsterRaceBypassHandler : IBypassHandler
 {
