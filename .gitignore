@@ -89,6 +89,7 @@ TestResults/
 # Local run artifacts
 local-data/
 local-logs/
+local-backups/
 .cache/
 publish/
 !data/spoil.json
