@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Text.Json;
+using Fineage.Game.RequiredData;
 
 namespace Fineage.Game.Skills;
 
@@ -26,6 +27,17 @@ public sealed class SkillCatalog
     public IReadOnlyList<SkillDefinition> Skills { get; }
 
     public SkillDefinition? Find(int skillId) => _byId.TryGetValue(skillId, out var skill) ? skill : null;
+
+    /// <summary>
+    /// Required skill row. Missing id throws <see cref="RequiredDataException"/> naming
+    /// <c>skills.json</c> — never a silent null.
+    /// </summary>
+    public SkillDefinition Require(int skillId) =>
+        Required.RequireValue(
+            RequiredDataKind.Skill,
+            skillId,
+            Find(skillId),
+            $"skill {skillId} is missing from {FileName}");
 
     public static SkillCatalog Load(string path)
     {

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "kinds": [
+    {
+      "id": "skill",
+      "file": "skills.json",
+      "policy": "refuse-action",
+      "keyName": "skillId",
+      "note": "SkillDefinition rows used for cast, abnormal, consumable, and AI casts."
+    },
+    {
+      "id": "item",
+      "file": "items.json",
+      "policy": "refuse-action",
+      "keyName": "itemId",
+      "note": "Item templates for inventory, shop, drop, and equip."
+    },
+    {
+      "id": "npc",
+      "file": "npcs.json",
+      "policy": "refuse-action",
+      "keyName": "npcId",
+      "note": "NPC templates for spawn, AI, and services."
+    },
+    {
+      "id": "teleport",
+      "file": "teleports.json",
+      "policy": "refuse-action",
+      "keyName": "npcId",
+      "note": "Gatekeeper destination lists; empty/missing list is a named refuse, not a silent no-op."
+    },
+    {
+      "id": "droplist",
+      "file": "drops/",
+      "policy": "refuse-action",
+      "keyName": "npcId",
+      "note": "Per-NPC droplist files under data/drops."
+    },
+    {
+      "id": "skill-passive",
+      "file": "skill-passives.json",
+      "policy": "refuse-action",
+      "keyName": "skillId",
+      "note": "Passive combat modifiers; a row without skillId is corrupt data."
+    },
+    {
+      "id": "npc-ai",
+      "file": "npc-ai-support.json",
+      "policy": "refuse-action",
+      "keyName": "npcId",
+      "note": "Aggressive NPC AI / aggroRange support rows."
+    },
+    {
+      "id": "quest",
+      "file": "quests/",
+      "policy": "refuse-action",
+      "keyName": "questId",
+      "note": "Quest bindings under data/quests."
+    },
+    {
+      "id": "spawn",
+      "file": "spawns/",
+      "policy": "fail-fast-boot",
+      "keyName": "map",
+      "note": "Spawn map packs; missing enabled map refuses zone boot."
+    }
+  ]
+}

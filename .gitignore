@@ -44,6 +44,7 @@ data/*
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/required-data-registry.json
 !data/walking-routes.json
 !data/boats.json
 !data/gm-teleports.json
