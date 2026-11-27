@@ -113,6 +113,27 @@ public sealed class MetricsCollector : IDisposable
     double _watchdogStallMaxMs;
     long _watchdogStalls;
 
+    /// <summary>
+    /// #992: operational counters whose series are their tag values (economy persist, audit, reconcile, data
+    /// fallbacks, audience shed). Before #992 these instruments were recorded but never reached /metrics.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, string[]> OperationalCounterTags = new Dictionary<string, string[]>(StringComparer.Ordinal)
+    {
+        ["fineage.data.silent_fallback"] = ["kind"],
+        ["fineage.fanout.reliable.audience_shed"] = [],
+        ["fineage.state.audit_issues"] = ["code", "container", "severity"],
+        ["fineage.economy.persist.batches"] = ["result"],
+        ["fineage.economy.persist.failures"] = ["reason"],
+        ["fineage.economy.reconcile.runs"] = ["phase", "result"],
+        ["fineage.economy.reconcile.violations"] = ["phase", "code"],
+    };
+
+    readonly Dictionary<string, Dictionary<string, long>> _operationalCounters = new(StringComparer.Ordinal);
+    int _economyPersistPending;
+    double _economyPersistOldestAgeMs;
+    readonly DurationHistogram _fanoutDispatcherEnqueueWait = new();
+    readonly DurationHistogram _fanoutStripeEnqueueWait = new();
+
     public MetricsCollector()
         : this(onlyMeter: null)
     {
@@ -247,6 +268,14 @@ public sealed class MetricsCollector : IDisposable
                 CommandQueueAgeMaxMs = _commandQueueAgeMaxMs,
                 WatchdogStallMaxMs = _watchdogStallMaxMs,
                 WatchdogStalls = _watchdogStalls,
+                OperationalCounters = _operationalCounters.ToDictionary(
+                    pair => pair.Key,
+                    pair => (IReadOnlyDictionary<string, long>)new SortedDictionary<string, long>(pair.Value, StringComparer.Ordinal),
+                    StringComparer.Ordinal),
+                EconomyPersistPending = _economyPersistPending,
+                EconomyPersistOldestAgeMs = _economyPersistOldestAgeMs,
+                FanoutDispatcherEnqueueWait = _fanoutDispatcherEnqueueWait.Freeze(),
+                FanoutStripeEnqueueWait = _fanoutStripeEnqueueWait.Freeze(),
                 Endpoints = endpoints
             };
         }
@@ -567,6 +596,15 @@ public sealed class MetricsCollector : IDisposable
 
     void ApplyLong(Instrument instrument, long value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
     {
+        if (OperationalCounterTags.TryGetValue(instrument.Name, out string[]? tagNames))
+        {
+            if (!_operationalCounters.TryGetValue(instrument.Name, out var series))
+                _operationalCounters[instrument.Name] = series = new Dictionary<string, long>(StringComparer.Ordinal);
+            string key = SeriesKey(tags, tagNames);
+            series[key] = series.GetValueOrDefault(key) + value;
+            return;
+        }
+
         string endpoint = EndpointOf(tags);
         switch (instrument.Name)
         {
@@ -731,6 +769,9 @@ public sealed class MetricsCollector : IDisposable
             case "fineage.persist.pending":
                 _persistPending = value;
                 break;
+            case "fineage.economy.persist.pending":
+                _economyPersistPending = value;
+                break;
             case "fineage.socket_write.bytes":
                 Row(EndpointOf(tags)).SocketWriteBytes.Record(value);
                 break;
@@ -773,6 +814,15 @@ public sealed class MetricsCollector : IDisposable
         {
             case "fineage.persist.oldest_age_ms":
                 _persistOldestAgeMs = value;
+                break;
+            case "fineage.economy.persist.oldest_age_ms":
+                _economyPersistOldestAgeMs = value;
+                break;
+            case "fineage.fanout.dispatcher.enqueue_wait.ms":
+                _fanoutDispatcherEnqueueWait.Record(value);
+                break;
+            case "fineage.fanout.stripe.enqueue_wait.ms":
+                _fanoutStripeEnqueueWait.Record(value);
                 break;
             case "fineage.handler.ms":
                 Row(EndpointOf(tags)).Handler.Record(value);
@@ -937,6 +987,30 @@ public sealed class MetricsCollector : IDisposable
     static Dictionary<string, long> FreezeLane(Dictionary<string, long> counts) =>
         counts.OrderBy(pair => pair.Key, StringComparer.Ordinal)
             .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+
+    /// <summary>The tag values in <paramref name="names"/> order, unit-separator joined; a missing tag is "unspecified".</summary>
+    internal static string SeriesKey(ReadOnlySpan<KeyValuePair<string, object?>> tags, string[] names)
+    {
+        if (names.Length == 0)
+            return "";
+        var values = new string[names.Length];
+        for (int i = 0; i < names.Length; i++)
+        {
+            string value = "";
+            foreach (KeyValuePair<string, object?> tag in tags)
+            {
+                if (tag.Key == names[i])
+                {
+                    value = Convert.ToString(tag.Value, System.Globalization.CultureInfo.InvariantCulture) ?? "";
+                    break;
+                }
+            }
+
+            values[i] = value.Length == 0 ? "unspecified" : value;
+        }
+
+        return string.Join('\u001f', values);
+    }
 
     static string Tag(ReadOnlySpan<KeyValuePair<string, object?>> tags, string name)
     {

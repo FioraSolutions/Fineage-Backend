@@ -148,6 +148,9 @@ health.AddReadyProbe("simulation", () => liveWorld?.SimulationHealth(readyLag)
     ?? new HealthCheck("simulation", false, "world not built"));
 var databaseProbe = new CachedProbe(() => accounts.CheckDatabase(TimeSpan.FromSeconds(3)), TimeSpan.FromSeconds(2));
 health.AddReadyProbe("database", databaseProbe.Read);
+// #992: /metrics exports the health contract and the state directory's free space.
+FineageTelemetry.Health = health;
+FineageTelemetry.RegisterDiskPath("state", stateDir);
 
 int statusPort = ZoneStatus.ResolvePort(Environment.GetEnvironmentVariable(ZoneStatus.PortVariable), out string? statusPortError);
 if (statusPortError != null)

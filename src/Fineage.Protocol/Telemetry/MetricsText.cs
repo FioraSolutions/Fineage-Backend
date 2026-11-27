@@ -153,6 +153,14 @@ public sealed class MetricsSnapshot
     public double CommandQueueAgeMaxMs { get; init; }
     public double WatchdogStallMaxMs { get; init; }
     public long WatchdogStalls { get; init; }
+
+    /// <summary>#992: operational counters by instrument name, then by tag values (see <c>MetricsCollector.OperationalCounterTags</c>).</summary>
+    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, long>> OperationalCounters { get; init; } =
+        new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal);
+    public int EconomyPersistPending { get; init; }
+    public double EconomyPersistOldestAgeMs { get; init; }
+    public HistogramMetrics FanoutDispatcherEnqueueWait { get; init; } = new();
+    public HistogramMetrics FanoutStripeEnqueueWait { get; init; } = new();
     public IReadOnlyList<EndpointMetrics> Endpoints { get; init; } = [];
 }
 
@@ -245,7 +253,15 @@ public static class MetricsText
         return sumDelta / countDelta;
     }
 
-    public static string Prometheus(MetricsSnapshot snapshot, double inPacketsPerSecond, double outPacketsPerSecond)
+    public static string Prometheus(MetricsSnapshot snapshot, double inPacketsPerSecond, double outPacketsPerSecond) =>
+        Prometheus(snapshot, inPacketsPerSecond, outPacketsPerSecond, MetricsRole.Zone);
+
+    /// <summary>
+    /// The /metrics text for one process. <paramref name="role"/> scopes the families (#992): a login process does not
+    /// export the zone's simulation, fan-out, pathfinding and ledger families, which it never records — before #992 it
+    /// served them all as constant zeros, indistinguishable from a healthy zone.
+    /// </summary>
+    public static string Prometheus(MetricsSnapshot snapshot, double inPacketsPerSecond, double outPacketsPerSecond, MetricsRole role)
     {
         var sb = new StringBuilder(2048);
         AppendHelp(sb, "fineage_build_info", "Provenance of the loaded process: commit, configuration, module id (module id changes on every build)");
@@ -294,6 +310,22 @@ public static class MetricsText
             snapshot.Endpoints, static e => e.SocketWriteBytes, SocketWriteByteBounds);
         AppendHistogram(sb, "fineage_socket_write_frames", "Frames combined in one socket write",
             snapshot.Endpoints, static e => e.SocketWriteFrames, SocketWriteFrameBounds);
+        AppendLabeledStageHistograms(sb, "fineage_persist_write_ms", "kind",
+            "Durable write duration on a persist worker", snapshot.PersistWriteByKind);
+        if (role == MetricsRole.Zone)
+        {
+            AppendZone(sb, snapshot);
+            AppendOperational(sb, snapshot);
+        }
+
+        AppendHealth(sb);
+        AppendDisks(sb);
+        AppendProcess(sb);
+        return sb.ToString();
+    }
+
+    static void AppendZone(StringBuilder sb, MetricsSnapshot snapshot)
+    {
         AppendHelp(sb, "fineage_tick_ms", "Zone simulation tick duration");
         sb.Append("# TYPE fineage_tick_ms histogram\n");
         AppendHistogramSamples(sb, "fineage_tick_ms", "", snapshot.Tick, DurationBoundsMs);
@@ -419,8 +451,6 @@ public static class MetricsText
             }
         }
 
-        AppendLabeledStageHistograms(sb, "fineage_persist_write_ms", "kind",
-            "Durable write duration on a persist worker", snapshot.PersistWriteByKind);
         AppendHelp(sb, "fineage_ledger_flush_failures_total", "Auditable economy ledger flush failures");
         sb.Append("# TYPE fineage_ledger_flush_failures_total counter\n");
         sb.Append("fineage_ledger_flush_failures_total ")
@@ -491,7 +521,144 @@ public static class MetricsText
         AppendHelp(sb, "fineage_persist_oldest_age_ms", "Age of the oldest character or pet snapshot that has not been written");
         sb.Append("# TYPE fineage_persist_oldest_age_ms gauge\n");
         sb.Append("fineage_persist_oldest_age_ms ").Append(Num(snapshot.PersistOldestAgeMs)).Append('\n');
-        return sb.ToString();
+    }
+
+    /// <summary>#992: Prometheus family, help and tag names of each operational counter instrument.</summary>
+    internal static readonly IReadOnlyList<(string Instrument, string Family, string Help)> OperationalCounters =
+    [
+        ("fineage.data.silent_fallback", "fineage_data_silent_fallback_total", "Silent fallbacks of required game data; target is zero"),
+        ("fineage.fanout.reliable.audience_shed", "fineage_fanout_reliable_audience_shed_total",
+            "Sealed batches whose recipients above the retained-work limit were disconnected instead of growing the queue"),
+        ("fineage.state.audit_issues", "fineage_state_audit_issues_total",
+            "Startup stored-state audit findings (saved state vs data catalogs, replayed ledger and world-state documents)"),
+        ("fineage.economy.persist.batches", "fineage_economy_persist_batches_total", "Economy durable commits (ledger rows, bags, world state)"),
+        ("fineage.economy.persist.failures", "fineage_economy_persist_failures_total", "Economy durable commits that threw and were put back for retry"),
+        ("fineage.economy.reconcile.runs", "fineage_economy_reconcile_runs_total", "Ledger vs store vs live world reconciliations"),
+        ("fineage.economy.reconcile.violations", "fineage_economy_reconcile_violations_total", "Findings of those reconciliations; target is zero"),
+    ];
+
+    static void AppendOperational(StringBuilder sb, MetricsSnapshot snapshot)
+    {
+        foreach (var (instrument, family, help) in OperationalCounters)
+        {
+            string[] tagNames = MetricsCollector.OperationalCounterTags[instrument];
+            AppendHelp(sb, family, help);
+            sb.Append("# TYPE ").Append(family).Append(" counter\n");
+            snapshot.OperationalCounters.TryGetValue(instrument, out var series);
+            if (tagNames.Length == 0)
+            {
+                sb.Append(family).Append(' ').Append((series?.GetValueOrDefault("") ?? 0).ToString(CultureInfo.InvariantCulture)).Append('\n');
+                continue;
+            }
+
+            if (series == null)
+                continue;
+            foreach (var (key, value) in series)
+            {
+                string[] values = key.Split('\u001f');
+                sb.Append(family).Append('{');
+                for (int i = 0; i < tagNames.Length; i++)
+                {
+                    if (i > 0)
+                        sb.Append(',');
+                    sb.Append(tagNames[i]).Append("=\"").Append(Escape(i < values.Length ? values[i] : "")).Append('"');
+                }
+
+                sb.Append("} ").Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+            }
+        }
+
+        AppendHelp(sb, "fineage_economy_persist_pending", "Economy commit batches waiting on the persist worker, including the one in flight");
+        sb.Append("# TYPE fineage_economy_persist_pending gauge\n");
+        sb.Append("fineage_economy_persist_pending ").Append(snapshot.EconomyPersistPending.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_economy_persist_oldest_age_ms", "Age of the oldest economy commit batch not yet durable");
+        sb.Append("# TYPE fineage_economy_persist_oldest_age_ms gauge\n");
+        sb.Append("fineage_economy_persist_oldest_age_ms ").Append(Num(snapshot.EconomyPersistOldestAgeMs)).Append('\n');
+        AppendSingletonHistogram(sb, "fineage_fanout_dispatcher_enqueue_wait_ms",
+            "Simulation thread time handing a sealed fan-out batch to the dispatcher", snapshot.FanoutDispatcherEnqueueWait);
+        AppendSingletonHistogram(sb, "fineage_fanout_stripe_enqueue_wait_ms",
+            "Stripe worker time enqueueing one connection fan-out frame", snapshot.FanoutStripeEnqueueWait);
+    }
+
+    /// <summary>#992: liveness, readiness and every readiness check as 0/1 gauges, evaluated at scrape time.</summary>
+    static void AppendHealth(StringBuilder sb)
+    {
+        if (FineageTelemetry.Health is not { } board)
+            return;
+        var live = board.Liveness();
+        var ready = board.Readiness();
+        AppendHelp(sb, "fineage_health_live", "1 when every liveness check passes (the /health/live contract)");
+        sb.Append("# TYPE fineage_health_live gauge\n");
+        sb.Append("fineage_health_live ").Append(live.Ok ? '1' : '0').Append('\n');
+        AppendHelp(sb, "fineage_health_ready", "1 when every boot stage completed and every readiness probe passes (the /health/ready contract)");
+        sb.Append("# TYPE fineage_health_ready gauge\n");
+        sb.Append("fineage_health_ready ").Append(ready.Ok ? '1' : '0').Append('\n');
+        AppendHelp(sb, "fineage_health_check", "1 when that readiness check (boot stage or probe) passes");
+        sb.Append("# TYPE fineage_health_check gauge\n");
+        foreach (var check in ready.Checks)
+            sb.Append("fineage_health_check{check=\"").Append(Escape(check.Name)).Append("\"} ").Append(check.Ok ? '1' : '0').Append('\n');
+    }
+
+    /// <summary>#992: free and total bytes of each registered directory's file system.</summary>
+    static void AppendDisks(StringBuilder sb)
+    {
+        var paths = FineageTelemetry.DiskPaths();
+        if (paths.Count == 0)
+            return;
+        var rows = new List<(string Label, bool Ok, long Free, long Size)>(paths.Count);
+        foreach (var (label, path) in paths)
+        {
+            try
+            {
+                var drive = new DriveInfo(path);
+                rows.Add((label, true, drive.AvailableFreeSpace, drive.TotalSize));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                rows.Add((label, false, 0, 0));
+            }
+        }
+
+        AppendHelp(sb, "fineage_disk_probe_ok", "1 when the file system of that directory could be read");
+        sb.Append("# TYPE fineage_disk_probe_ok gauge\n");
+        foreach (var row in rows)
+            sb.Append("fineage_disk_probe_ok{path=\"").Append(Escape(row.Label)).Append("\"} ").Append(row.Ok ? '1' : '0').Append('\n');
+        AppendHelp(sb, "fineage_disk_free_bytes", "Bytes available to this process on the file system of that directory");
+        sb.Append("# TYPE fineage_disk_free_bytes gauge\n");
+        foreach (var row in rows.Where(r => r.Ok))
+            sb.Append("fineage_disk_free_bytes{path=\"").Append(Escape(row.Label)).Append("\"} ").Append(row.Free.ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendHelp(sb, "fineage_disk_size_bytes", "Total bytes of the file system of that directory");
+        sb.Append("# TYPE fineage_disk_size_bytes gauge\n");
+        foreach (var row in rows.Where(r => r.Ok))
+            sb.Append("fineage_disk_size_bytes{path=\"").Append(Escape(row.Label)).Append("\"} ").Append(row.Size.ToString(CultureInfo.InvariantCulture)).Append('\n');
+    }
+
+    /// <summary>#992: process memory, CPU, GC and thread-pool state, read at scrape time (Prometheus client naming).</summary>
+    static void AppendProcess(StringBuilder sb)
+    {
+        using var process = System.Diagnostics.Process.GetCurrentProcess();
+        AppendRaw(sb, "process_resident_memory_bytes", "gauge", "Resident set size", process.WorkingSet64);
+        AppendRaw(sb, "process_cpu_seconds_total", "counter", "User and system CPU time", process.TotalProcessorTime.TotalSeconds);
+        AppendRaw(sb, "process_start_time_seconds", "gauge", "Process start, unix seconds",
+            new DateTimeOffset(process.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds() / 1000.0);
+        AppendRaw(sb, "process_threads", "gauge", "Operating system threads", process.Threads.Count);
+        AppendHelp(sb, "dotnet_gc_collections_total", "Garbage collections by generation");
+        sb.Append("# TYPE dotnet_gc_collections_total counter\n");
+        for (int generation = 0; generation <= GC.MaxGeneration; generation++)
+            sb.Append("dotnet_gc_collections_total{generation=\"").Append(generation).Append("\"} ")
+                .Append(GC.CollectionCount(generation).ToString(CultureInfo.InvariantCulture)).Append('\n');
+        AppendRaw(sb, "dotnet_gc_allocated_bytes_total", "counter", "Bytes allocated on the managed heap since start", GC.GetTotalAllocatedBytes());
+        AppendRaw(sb, "dotnet_gc_heap_size_bytes", "gauge", "Managed heap size after the last collection", GC.GetGCMemoryInfo().HeapSizeBytes);
+        AppendRaw(sb, "dotnet_gc_pause_seconds_total", "counter", "Time the runtime paused threads for garbage collection", GC.GetTotalPauseDuration().TotalSeconds);
+        AppendRaw(sb, "dotnet_threadpool_threads", "gauge", "Thread-pool threads", ThreadPool.ThreadCount);
+        AppendRaw(sb, "dotnet_threadpool_queue_length", "gauge", "Work items queued on the thread pool", ThreadPool.PendingWorkItemCount);
+    }
+
+    static void AppendRaw(StringBuilder sb, string name, string type, string help, double value)
+    {
+        AppendHelp(sb, name, help);
+        sb.Append("# TYPE ").Append(name).Append(' ').Append(type).Append('\n');
+        sb.Append(name).Append(' ').Append(Num(value)).Append('\n');
     }
 
     static void AppendGauge(StringBuilder sb, string name, string help, IReadOnlyList<EndpointMetrics> endpoints, Func<EndpointMetrics, long> value)
@@ -696,4 +863,11 @@ public static class MetricsText
 
     static string Escape(string value) =>
         value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\n", "\\n", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+}
+
+/// <summary>Which families a process exports (#992).</summary>
+public enum MetricsRole
+{
+    Zone,
+    Login,
 }

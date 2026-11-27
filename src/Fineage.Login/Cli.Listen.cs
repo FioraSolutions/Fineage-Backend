@@ -118,12 +118,15 @@ public static partial class Cli
             IZoneStatusSource zoneStatus = zoneProbe != null
                 ? zoneProbe
                 : UnavailableZoneStatus.Instance;
+            var loginHealth = LoginHealth(accounts);
+            // #992: /metrics exports the same liveness/readiness the HTTP host serves.
+            Fineage.Protocol.Telemetry.FineageTelemetry.Health = loginHealth;
             http = await LoginHttpHost.StartAsync(
                 service,
                 bindAddress,
                 httpPort,
                 zoneStatus: zoneStatus,
-                health: LoginHealth(accounts)).ConfigureAwait(false);
+                health: loginHealth).ConfigureAwait(false);
             zoneProbe = null;
         }
         catch (Exception ex)
