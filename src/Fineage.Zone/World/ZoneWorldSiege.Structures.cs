@@ -351,7 +351,7 @@ public sealed partial class ZoneWorld
         if (!allowed || damage <= 0)
             return true;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyTargetDamage(target, attacker, damage);
         FanoutVitals(target, StatusFor(target));
         if (info.Role == SiegeNpcRole.Door)
         {

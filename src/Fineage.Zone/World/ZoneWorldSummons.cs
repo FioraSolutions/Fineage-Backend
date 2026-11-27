@@ -316,21 +316,22 @@ public sealed partial class ZoneWorld
         SendSummonInfo(summon);
     }
 
-    /// <summary>Hit on a summon (melee, skill): HP, bars to the owner, PvP for a player attacker, death.</summary>
-    void DamageSummon(ZoneEntity attacker, ZoneEntity summon, int damage, long now)
+    /// <summary>Hit on a summon (melee, skill): CP/HP, bars to the owner, PvP for a player attacker, death.</summary>
+    DamageSplit DamageSummon(ZoneEntity attacker, ZoneEntity summon, int damage, long now)
     {
         DuelNoteOutsideHit(attacker, summon);
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         summon.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         if (damage <= 0 || summon.Dead)
-            return;
-        summon.CurHp = Math.Max(0, summon.CurHp - damage);
+            return DamageSplit.None;
+        var dealt = ApplyTargetDamage(summon, attacker, damage);
         FanoutVitals(summon, StatusFor(summon));
         SyncNeedRegen(summon);
         if (summon.CurHp <= 0)
             SummonDied(summon, attacker, now);
         else
             SendSummonInfo(summon);
+        return dealt;
     }
 
     void UnsummonOnLeave(ZoneEntity player)

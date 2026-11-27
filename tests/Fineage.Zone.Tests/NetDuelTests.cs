@@ -89,11 +89,14 @@ public sealed class NetDuelTests
         Assert.Contains(Events(bench, b), e => e.Kind == DuelEventKind.Start && e.Team == 2);
         Assert.Equal((byte)2, bench.World.NetUserInfo(b.Player).Team);
 
-        // The other side is hostile without Ctrl and hits never flag.
+        // The other side is hostile without Ctrl and hits never flag. A playable attacker spends CP before HP.
         Assert.True(bench.World.PlayerAutoAttackableForTest(a.Player, b.Player));
+        int savedCp = b.Player.CurCp;
+        Assert.True(savedCp > 0);
         bench.World.SkillDamagePlayerForTest(a.Player, b.Player, 1000);
         Assert.False(a.Player.PvpFlagged);
-        Assert.Equal(2000, b.Player.CurHp);
+        Assert.Equal(0, b.Player.CurCp);
+        Assert.Equal(3000 - Math.Max(0, 1000 - savedCp), b.Player.CurHp);
         Assert.NotEmpty(bench.Rec.Of(nameof(IWorldEventPublisher.FanoutDuelUserInfo)));
 
         // Lethal hit: stays at 1 HP, beaten, not dead, no karma.
@@ -113,6 +116,7 @@ public sealed class NetDuelTests
         Assert.Equal(0, b.Player.DuelId);
         Assert.Equal((byte)0, b.Player.DuelTeam);
         Assert.Equal(3000, b.Player.CurHp); // restored
+        Assert.Equal(savedCp, b.Player.CurCp); // CP is part of the Mobius duel restore too
         Assert.Contains(Lines(bench, b), l => l.Id == ZoneWorld.DuelSysWon && l.Params.Contains("Alpha"));
         Assert.Contains(Events(bench, b), e => e.Kind == DuelEventKind.End && e.Name == "Alpha");
         Assert.Equal(0, bench.World.DuelCountForTest);
@@ -188,11 +192,13 @@ public sealed class NetDuelTests
         await StartAsync(bench, clock, a, b);
         // A fighter cannot pick on an outsider; an outsider's hit interrupts the duel.
         Assert.True(bench.World.DuelTargetRefusedForTest(a.Player, c.Player));
+        int savedCp = a.Player.CurCp;
         bench.World.SkillDamagePlayerForTest(c.Player, a.Player, 500);
         Assert.Equal(DuelFighterState.Interrupted, a.Player.DuelState);
         Advance(bench, clock, 1);
         Assert.Equal(0, a.Player.DuelId);
-        Assert.Equal(2500, a.Player.CurHp); // canceled: no restore
+        Assert.Equal(3000, a.Player.CurHp); // canceled: no restore, but the hit only spent CP
+        Assert.Equal(Math.Max(0, savedCp - 500), a.Player.CurCp);
         Assert.Contains(Lines(bench, a), l => l.Id == ZoneWorld.DuelSysTie);
 
         a.Player.CurHp = 3000;

@@ -67,7 +67,7 @@ public sealed partial class ZoneWorld
         public byte SurrenderTeam;
         public byte WinnerTeam;
         public DuelResult Result;
-        public readonly Dictionary<int, (int X, int Y, int Z, int Inst, int Hp, int Mp)> Saved = [];
+        public readonly Dictionary<int, (int X, int Y, int Z, int Inst, int Hp, int Mp, int Cp)> Saved = [];
         public IEnumerable<int> All => TeamA.Concat(TeamB);
         public List<int> TeamOf(byte team) => team == 1 ? TeamA : TeamB;
     }
@@ -353,7 +353,7 @@ public sealed partial class ZoneWorld
             foreach (int id in duel.All)
             {
                 var m = _byId[id];
-                duel.Saved[id] = (m.X, m.Y, m.Z, m.InstanceId, m.CurHp, m.CurMp);
+                duel.Saved[id] = (m.X, m.Y, m.Z, m.InstanceId, m.CurHp, m.CurMp, m.CurCp);
             }
             duel.Countdown = 3;
             if (duel.Party)
@@ -537,6 +537,7 @@ public sealed partial class ZoneWorld
             {
                 m.CurHp = Math.Max(m.CurHp, Math.Min(saved.Hp, m.MaxHp));
                 m.CurMp = Math.Max(m.CurMp, Math.Min(saved.Mp, m.MaxMp));
+                m.CurCp = Math.Max(m.CurCp, Math.Min(saved.Cp, PartyMaxCp(m)));
                 FanoutVitals(m, PlayerVitalsStatus(m));
                 if (m.Session != null)
                     SaveVitals(m.Session, m);
@@ -574,7 +575,7 @@ public sealed partial class ZoneWorld
             MaxHp = m.MaxHp,
             Mp = m.CurMp,
             MaxMp = m.MaxMp,
-            Cp = maxCp,
+            Cp = m.CurCp,
             MaxCp = maxCp
         });
     }

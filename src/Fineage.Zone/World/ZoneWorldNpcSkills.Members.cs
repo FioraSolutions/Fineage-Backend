@@ -50,7 +50,8 @@ public sealed partial class ZoneWorld
                     skill.AbnormalTimeSeconds,
                     now,
                     skill.Level,
-                    slot);
+                    slot,
+                    effectorObjectId: caster.ObjectId);
                 if (kind is NpcSupportKind.Immobilize or NpcSupportKind.Silence)
                     StopTimedMove(target);
                 FanoutAbnormal(target);
@@ -194,7 +195,7 @@ public sealed partial class ZoneWorld
         if (damage <= 0 || DuelBlocksHit(npc, target))
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyTargetDamage(target, npc, damage);
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(npc, target, damage, 0);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;

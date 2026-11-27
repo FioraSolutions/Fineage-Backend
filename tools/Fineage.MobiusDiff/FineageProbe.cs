@@ -77,6 +77,14 @@ public static class FineageProbe
             ["critChancePermille"] = critChance,
             ["damageNoCrit"] = damageNoCrit
         };
+        foreach (var cp in scenario.CpSplits)
+        {
+            if (string.IsNullOrWhiteSpace(cp.Key))
+                throw new InvalidDataException($"{scenario.Id}: every cpSplits row needs a key.");
+            var split = TargetDamage.Split(cp.Damage, cp.TargetCp, cp.TargetHp, cp.AttackerPlayable, cp.IgnoreCp);
+            metrics["cpLoss_" + cp.Key] = split.CpLoss;
+            metrics["hpLoss_" + cp.Key] = split.HpLoss;
+        }
 
         if (scenario.Samples > 0)
         {

@@ -112,6 +112,7 @@ public static class ScenarioRunner
     {
         "hitChancePermille" or "critChancePermille" => "permille",
         "damageNoCrit" or "damageMeanPerSwing" => "hp",
+        _ when metric.StartsWith("cpLoss_", StringComparison.Ordinal) || metric.StartsWith("hpLoss_", StringComparison.Ordinal) => "hp",
         _ => "points"
     };
 }

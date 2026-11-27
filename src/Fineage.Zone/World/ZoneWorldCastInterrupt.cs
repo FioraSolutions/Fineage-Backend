@@ -63,7 +63,7 @@ public sealed partial class ZoneWorld
     /// <summary>Test hook: hand damage to a player from an attacker (Mobius onCreatureDamageReceived path).</summary>
     internal void RunDamageTriggersForTest(ZoneEntity owner, ZoneEntity attacker, int damage) =>
         RunDamageTriggers(owner, attacker, damage);
-    internal void HitPlayerForTest(ZoneEntity player, int damage) { using (_affinity.Step()) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } }
+    internal void HitPlayerForTest(ZoneEntity player, int damage) { using (_affinity.Step()) { player.CurHp = Math.Max(1, player.CurHp - damage); MaybeBreakCast(player, damage); } } // hp-write: test hook
 
     /// <summary>Effect run at hitTime for a non-damage skill (Mobius onMagicHitTimer → callSkill).</summary>
     delegate void DeferredEffect(ZoneEntity target, long now);

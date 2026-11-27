@@ -24,6 +24,12 @@ public sealed class Scenario
 
     public ContactSpec Contact { get; set; } = new();
 
+    /// <summary>
+    /// Mobius <c>PlayerStatus.reduceHp</c> CP split cases. Each case emits <c>cpLoss_&lt;key&gt;</c> and
+    /// <c>hpLoss_&lt;key&gt;</c> from the same source-verified barrier; empty for ordinary combat scenarios.
+    /// </summary>
+    public List<CpSplitSpec> CpSplits { get; set; } = new();
+
     public OracleSpec Oracle { get; set; } = new();
 
     /// <summary>Metric name → tolerance. A <c>default</c> entry covers metrics without their own row.</summary>
@@ -72,6 +78,18 @@ public sealed class ContactSpec
     public string Side { get; set; } = "front";
     public bool Soulshot { get; set; }
     public bool AttackerBow { get; set; }
+}
+
+/// <summary>One deterministic CP-barrier input: damage, target bars and the attacker kind gate.</summary>
+public sealed class CpSplitSpec
+{
+    public string Key { get; set; } = "";
+    public int TargetHp { get; set; }
+    public int TargetCp { get; set; }
+    public int Damage { get; set; }
+    /// <summary>Mobius <c>attacker.isPlayable()</c>: player or summon.</summary>
+    public bool AttackerPlayable { get; set; }
+    public bool IgnoreCp { get; set; }
 }
 
 public sealed class OracleSpec
