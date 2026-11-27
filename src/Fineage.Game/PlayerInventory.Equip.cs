@@ -227,6 +227,7 @@ public sealed partial class PlayerInventory
         (weapon.Template.WeaponType == WeaponType.Bow && offhand.Template.EtcType == EtcItemType.Arrow)
         || (weapon.Template.WeaponType == WeaponType.FishingRod && offhand.Template.EtcType == EtcItemType.Lure);
 
+    /// <summary>Single-slot body parts only. Dual / full-armor / hair paths use their own cases above.</summary>
     static PaperdollSlot? DirectSlot(BodySlot body) => body switch
     {
         BodySlot.Underwear => PaperdollSlot.Under,

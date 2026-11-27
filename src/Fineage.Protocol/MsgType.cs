@@ -144,7 +144,7 @@ public enum MsgType : ushort
     RequestSellItem = 97,
     /// <summary>Choose one prepared multisell row. Body is <see cref="RequestMultiSellChooseMsg"/>.</summary>
     RequestMultiSellChoose = 98,
-    /// <summary>Wear preview. The service stays stubbed. Body is <see cref="RequestPreviewItemMsg"/>.</summary>
+    /// <summary>Wear try-on pay. Body is <see cref="RequestPreviewItemMsg"/>.</summary>
     RequestPreviewItem = 99,
     /// <summary>Pick a gatekeeper destination. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportSelectRequest = 105,
@@ -290,6 +290,10 @@ public enum MsgType : ushort
     MultiSellList = 1097,
     /// <summary>Adena, weight, and slots after a shop window or a trade. Body is <see cref="ShopBalanceMsg"/>.</summary>
     ShopBalance = 1098,
+    /// <summary>Wear try-on catalog. Body is <see cref="ShopPreviewListMsg"/>.</summary>
+    ShopPreviewList = 1100,
+    /// <summary>Wear try-on paperdoll overlay. Body is <see cref="ShopPreviewInfoMsg"/>.</summary>
+    ShopPreviewInfo = 1101,
     /// <summary>Gatekeeper destinations. See <see cref="NpcServiceProtocol"/>.</summary>
     TeleportList = 1105,
     /// <summary>Items the player may deposit, plus the fee and slot counts.</summary>

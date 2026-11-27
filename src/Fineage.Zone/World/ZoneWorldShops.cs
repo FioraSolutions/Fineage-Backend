@@ -38,12 +38,12 @@ public sealed partial class ZoneWorld
     }
 
     public Task<string?> TryPreviewAsync(
-        ZoneSession session, int npcObjectId, int listId, int itemId, CancellationToken ct)
+        ZoneSession session, int npcObjectId, int listId, int[] itemIds, CancellationToken ct)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
-        string? error = Preview(session, npcObjectId);
-        return Task.FromResult<string?>(error);
+        return Task.FromResult(WithDeferredInventoryPersist(
+            () => Preview(session, npcObjectId, listId, itemIds)));
     }
 
     string? OpenBuyList(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId)
@@ -59,6 +59,29 @@ public sealed partial class ZoneWorld
         var buy = BuyList(npc, list, baseTax, castleTax);
         var balance = Balance(player, npc);
         FanNetBuy(session, buy, balance);
+        return null;
+    }
+
+    /// <summary>Mobius <c>Wear</c> → <c>ShopPreviewList</c> (equipable rows ≤ expertise).</summary>
+    string? OpenWearList(ZoneSession session, ZoneEntity player, ZoneEntity npc, int listId)
+    {
+        ClearWearPreviewIfDue(session, player);
+        if (!_buyLists.TryGet(listId, out var list) || !list.Allows(npc.NpcId))
+        {
+            SendHtml(session, player, npc, ShopProtocol.NoListHtml);
+            return null;
+        }
+
+        player.Shop = new ShopSession
+        {
+            NpcObjectId = npc.ObjectId,
+            BuyListId = listId,
+            WearOpen = true,
+            SellOpen = player.Shop?.SellOpen ?? false
+        };
+        var preview = BuildWearList(npc, player, list);
+        var balance = Balance(player, npc);
+        FanNetWear(session, preview, balance);
         return null;
     }
 

@@ -93,6 +93,28 @@ public sealed class ShopPacketHandler
             await _reject(conn, error, "MultiSell failed.", ct).ConfigureAwait(false);
     }
 
+    public async Task OnPreviewAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var preview = NetCodec.DecodeRequestPreviewItem(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new PreviewCommand(preview.NpcObjectId, preview.ListId, preview.ItemIds ?? []),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Wear preview failed.", ct).ConfigureAwait(false);
+    }
+
     static void RequireHello(NetConnection conn)
     {
         if (!conn.HelloCompleted)

@@ -244,6 +244,77 @@ namespace Fineage.Net.Contract
             };
         }
 
+        public static byte[] EncodeRequestPreviewItem(RequestPreviewItemNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.NpcObjectId);
+            w.WriteInt32(m.ListId);
+            var ids = m.ItemIds ?? Array.Empty<int>();
+            w.WriteInt32(ids.Length);
+            for (int i = 0; i < ids.Length; i++)
+                w.WriteInt32(ids[i]);
+        });
+
+        public static RequestPreviewItemNetMsg DecodeRequestPreviewItem(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int npc = r.ReadInt32();
+            int listId = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var ids = new int[n];
+            for (int i = 0; i < n; i++)
+                ids[i] = r.ReadInt32();
+            return new RequestPreviewItemNetMsg { NpcObjectId = npc, ListId = listId, ItemIds = ids };
+        }
+
+        public static byte[] EncodeShopPreviewList(ShopPreviewListNetMsg m) => Write(w =>
+        {
+            w.WriteInt32(m.NpcObjectId);
+            w.WriteInt32(m.ListId);
+            w.WriteInt32(m.Adena);
+            var items = m.Items ?? Array.Empty<ShopPreviewListItemNet>();
+            w.WriteInt32(items.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = items[i] ?? new ShopPreviewListItemNet();
+                w.WriteInt32(row.ItemId);
+                w.WriteInt32(row.Price);
+            }
+        });
+
+        public static ShopPreviewListNetMsg DecodeShopPreviewList(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int npc = r.ReadInt32();
+            int listId = r.ReadInt32();
+            int adena = r.ReadInt32();
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var items = new ShopPreviewListItemNet[n];
+            for (int i = 0; i < n; i++)
+                items[i] = new ShopPreviewListItemNet { ItemId = r.ReadInt32(), Price = r.ReadInt32() };
+            return new ShopPreviewListNetMsg { NpcObjectId = npc, ListId = listId, Adena = adena, Items = items };
+        }
+
+        public static byte[] EncodeShopPreviewInfo(ShopPreviewInfoNetMsg m) => Write(w =>
+        {
+            var slots = m.ItemIdsBySlot ?? Array.Empty<int>();
+            w.WriteInt32(slots.Length);
+            for (int i = 0; i < slots.Length; i++)
+                w.WriteInt32(slots[i]);
+        });
+
+        public static ShopPreviewInfoNetMsg DecodeShopPreviewInfo(ReadOnlySpan<byte> p)
+        {
+            var r = new Reader(p);
+            int n = r.ReadInt32();
+            if (n < 0) n = 0;
+            var slots = new int[n];
+            for (int i = 0; i < n; i++)
+                slots[i] = r.ReadInt32();
+            return new ShopPreviewInfoNetMsg { ItemIdsBySlot = slots };
+        }
+
         static void WriteItemListEntries(Writer w, ItemListEntryNet[]? items)
         {
             items ??= Array.Empty<ItemListEntryNet>();

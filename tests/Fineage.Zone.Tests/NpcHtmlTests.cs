@@ -142,7 +142,7 @@ public sealed class NpcHtmlTests
         var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
         Assert.Equal(3, exchange.MultiSellListId);
         Assert.True(exchange.MultiSellInventoryOnly);
-        Assert.Contains("Wear is not implemented yet.", registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).Html, StringComparison.Ordinal);
+        Assert.Equal(3000100, registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).WearListId);
         Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
         Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
         Assert.Equal(NpcServiceIntent.PackageDeposit, registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Service);
