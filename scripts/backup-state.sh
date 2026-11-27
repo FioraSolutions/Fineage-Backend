@@ -7,7 +7,7 @@
 #   backup-state.sh restore --backup-dir DIR --pg-container NAME --pg-user U --pg-db D --state-dir DIR
 #
 # A backup is one timestamped directory: postgres.dump (pg_dump custom format), sidecar.tar.gz
-# (the FINEAGE_STATE_DIR sidecars), pg_restore.list (TOC integrity proof), sidecars.tsv and
+# (the FINEAGE_STATE_DIR logs and archives), pg_restore.list (TOC integrity proof), sidecars.tsv and
 # manifest.json (checksums + sizes). Restore is deliberately restricted to a disposable,
 # labelled PostgreSQL container; it cannot be pointed at the live database.
 set -euo pipefail
@@ -20,18 +20,12 @@ PG_IMAGE="${FINEAGE_PG_IMAGE:-postgres:16-alpine}"
 DRILL_CONTAINER_PREFIX="${FINEAGE_RESTORE_CONTAINER_PREFIX:-fineage-drill-}"
 DRILL_ROLE_LABEL="backup-restore-drill"
 
-# Mirrors WorldStateSystems.All in src/Fineage.Zone/Persistence/WorldStateShutdown.cs.
-# tests/Fineage.Zone.Tests/BackupRestoreScriptTests.cs fails if the two lists drift.
-REQUIRED_SIDECARS=(
-  boss-schedule.json
-  seven-signs.json
-  olympiad.json
-  lottery.json
-  raid-boss-points-store.json
-  punishments.json
-  monster-race-state.json
-  fishing-championship.json
-)
+# #996: world subsystem state (lottery, monster race, Seven Signs, olympiad, raid points,
+# punishments, fishing championship, boss schedule, PC cafe) lives in the world_state table and
+# is inside postgres.dump. The state directory keeps only append-only logs (gm-audit.jsonl) and
+# archived *.imported-* copies of the pre-#996 sidecars; it is still archived, but no file in it
+# is required. tests/Fineage.Zone.Tests/BackupRestoreScriptTests.cs pins this.
+REQUIRED_SIDECARS=()
 
 log() { printf '[backup] %s\n' "$*"; }
 die() { printf '[backup] ERROR: %s\n' "$*" >&2; exit 1; }
@@ -152,14 +146,14 @@ verify_archive() {
   rm -f "$dir/pg_restore.list.verify"
 
   local required
-  for required in schema_migrations characters character_items store_snapshot economy_ledger; do
+  for required in schema_migrations characters character_items store_snapshot economy_ledger world_state; do
     grep -q "TABLE DATA public $required" "$list" ||
       die "pg_restore --list is missing TABLE DATA public $required"
   done
 
   local members sidecar
   members="$(tar -tzf "$tarfile" | sed 's#^\./##')"
-  for sidecar in "${REQUIRED_SIDECARS[@]}"; do
+  for sidecar in "${REQUIRED_SIDECARS[@]+"${REQUIRED_SIDECARS[@]}"}"; do
     grep -qx "$sidecar" <<<"$members" || die "sidecar archive is missing required file: $sidecar"
   done
 
@@ -224,7 +218,7 @@ cmd_backup() {
   fi
 
   local missing=() sidecar
-  for sidecar in "${REQUIRED_SIDECARS[@]}"; do
+  for sidecar in "${REQUIRED_SIDECARS[@]+"${REQUIRED_SIDECARS[@]}"}"; do
     [[ -f "$state_dir/$sidecar" ]] || missing+=("$sidecar")
   done
   ((${#missing[@]} == 0)) ||
@@ -244,7 +238,7 @@ cmd_backup() {
   log "archiving state directory $state_dir"
   tar -C "$state_dir" -czf "$out/sidecar.tar.gz" --exclude '*.tmp-*' --exclude '.DS_Store' .
   : >"$out/sidecars.tsv"
-  for sidecar in "${REQUIRED_SIDECARS[@]}"; do
+  for sidecar in "${REQUIRED_SIDECARS[@]+"${REQUIRED_SIDECARS[@]}"}"; do
     printf '%s\t%s\t%s\n' "$(sha256_file "$state_dir/$sidecar")" \
       "$(file_size "$state_dir/$sidecar")" "$sidecar" >>"$out/sidecars.tsv"
   done
@@ -257,7 +251,7 @@ cmd_backup() {
   run_pg_restore_list "$out/postgres.dump" "$out/pg_restore.list" ||
     die "pg_restore --list failed: the dump is not a readable custom-format archive"
   local required
-  for required in schema_migrations characters character_items store_snapshot economy_ledger; do
+  for required in schema_migrations characters character_items store_snapshot economy_ledger world_state; do
     grep -q "TABLE DATA public $required" "$out/pg_restore.list" ||
       die "pg_restore --list does not contain TABLE DATA public $required"
   done

@@ -54,9 +54,9 @@ if (!BindAddress.TryResolve(bindText, out var bindAddress, out string bindDispla
     return;
 }
 
-// Accounts are PostgreSQL-only. --state-dir (default data/) holds every JSON world sidecar:
-// boss-schedule.json, seven-signs.json, olympiad.json, lottery.json, raid-boss-points-store.json,
-// punishments.json, monster-race-state.json, and fishing-championship.json.
+// Accounts and world subsystem state are PostgreSQL-only (#996: world_state, written with the economy
+// commit). --state-dir (default data/) keeps gm-audit.jsonl and is where the one-time cutover looks for the
+// pre-#996 JSON sidecars to import and archive (docs/architecture/world-state-storage.md).
 string stateDir = Arg(args, "--state-dir")
     ?? Environment.GetEnvironmentVariable("FINEAGE_STATE_DIR")
     ?? Path.Combine("data");
@@ -135,7 +135,7 @@ catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or I
 // #989: the loopback status host starts before anything loads, so /health/ready answers 503 with the stage that is
 // still pending (or failed) instead of refusing the connection; /health/live is the process + simulation heartbeat.
 var health = new HealthBoard();
-health.Require("world", "loading catalogs, boot validation and sidecars");
+health.Require("world", "loading catalogs, boot validation and world state");
 health.Require("state-audit", "waiting for the world");
 health.Require("economy-reconcile", "waiting for the state audit");
 ZoneWorld? liveWorld = null;
@@ -183,7 +183,7 @@ try
     world.UseStoredMonsterRace(worldState, loadedAtUnixMs);
     world.UsePcCafe(new Fineage.Zone.PcCafe.PcCafePointsManager(new StoredPcCafeStore(worldState)));
     liveWorld = world;
-    health.Complete("world", $"catalogs, boot validation and sidecars loaded (npcs={world.NpcObjectIds.Count})");
+    health.Complete("world", $"catalogs, boot validation and world state loaded (npcs={world.NpcObjectIds.Count})");
     // #984: saved state vs data catalogs vs replayed ledger, before any player can enter.
     var audit = world.AuditStoredStateAtStartup();
     health.Complete("state-audit", $"characters={audit.Characters} errors={audit.Errors.Count} notices={audit.Issues.Count - audit.Errors.Count}");
@@ -235,7 +235,7 @@ Console.WriteLine("[ZONE] Olympiad registration and points are stored as olympia
 Console.WriteLine("[ZONE] Catacomb and necropolis gates follow that cabal.");
 Console.WriteLine("[ZONE] Raid and grand boss respawn state is stored as boss-schedule.json in the state directory.");
 Console.WriteLine("[ZONE] Raid boss points ranking totals are stored as raid-boss-points-store.json in the state directory.");
-Console.WriteLine("[ZONE] GM punishments are stored as punishments.json; audit lines append to gm-audit.jsonl in the state directory.");
+Console.WriteLine("[ZONE] GM punishments are stored in database world_state 'punishment'; audit lines append to gm-audit.jsonl in the state directory.");
 if (adminCommands)
     Console.WriteLine("[ZONE] admin commands enabled (GiveItem, AdminCaptureCastle, AdminBossSchedule, AdminReportOlympiadResult, AdminKillPlayer).");
 

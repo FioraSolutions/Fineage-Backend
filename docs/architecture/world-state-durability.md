@@ -1,78 +1,15 @@
 # World state durability
 
-Issue #984. This document is the inventory and contract for the JSON sidecars the Zone keeps beside PostgreSQL.
-It covers the durable writer, the explicit load/fresh-state policy, the shutdown flush registry, and what is still
-outside this change (the world ↔ Postgres reconciler).
+Issue #984, updated for #996. Since #996 the world subsystems (bosses, Seven Signs, olympiad, lottery, raid points, punishments, monster race, fishing championship, PC cafe) are stored in PostgreSQL `world_state` and committed with the economy ledger. See [world-state-storage.md](world-state-storage.md) for the table, the write path, the sidecar cutover and the load rules. This page keeps the shutdown flush registry and the account-side startup audit.
 
-## What is stored where
-
-PostgreSQL owns accounts, characters, inventories, quests, clan/siege rows, and the ledger
-(`src/Fineage.Accounts/Persistence`). A process restart reads them from Postgres.
-
-`FINEAGE_STATE_DIR` (CLI `--state-dir`, default `data/`) owns the world subsystems that are not account rows.
-Every file below is written through `Fineage.Game.Persistence.AtomicJsonFile`:
-
-| File | System id | Owner | Snapshot |
-| --- | --- | --- | --- |
-| `boss-schedule.json` | `boss-schedule` | `BossSchedule` / `BossActor` | raid and grand-boss life status, respawn time, HP/MP |
-| `seven-signs.json` | `seven-signs` | `SevenSignsEngine` | cycle, period, cabal/seal scores and owners, player contributions, next change |
-| `olympiad.json` | `olympiad` | `OlympiadBoard` | period, nobles, heroes, ranking, unclaimed passes |
-| `lottery.json` | `lottery` | `LotteryBoard` | running lottery, draws, sold tickets, next serial |
-| `raid-boss-points-store.json` | `raid-boss-points` | `RaidBossPointsManager` | per-character points by boss |
-| `punishments.json` | `punishment` | `PunishmentManager` | active account/character bans, chat bans and jails |
-| `monster-race-state.json` | `monster-race` | `MonsterRaceBoard` | race number/state, bets, runners, speeds, history (separate from the `data/monster-race.json` settings catalog) |
-| `fishing-championship.json` | `fishing-championship` | `FishingChampionshipBoard` | current top five, winners, period end |
-
-`gm-audit.jsonl` is an append-only audit stream, not a snapshot; it is not rewritten or versioned by the snapshot
-mechanism. Data catalogs (`items.json`, `npcs.json`, …) are read-only inputs and are not world state.
-
-`monster-race-state.json` is deliberately separate from the `data/monster-race.json` settings catalog because the
-default state directory is `data/`. `fishing-championship.json` keeps its historical state filename; production
-deployments should point `FINEAGE_STATE_DIR` outside `data/` so state does not share a directory with the catalogs.
-
-## Source of truth
-
-- PostgreSQL is the source of truth for account/character/economy rows.
-- The sidecar is the source of truth for the world subsystem it owns: after a restart the subsystem resumes from the
-  last durably replaced snapshot, exactly as Mobius reloads its managers from its saved state.
-- The sidecar is not a second copy of inventory or adena. World operations that move adena or items still use the
-  ledger (issue #955); this document only makes the surrounding non-account state durable.
-
-## Durable write
-
-`AtomicJsonFile.Write` is the only writer:
-
-1. Serialize to a uniquely named temp file in the **same directory** as the target.
-2. `FileStream.Flush(flushToDisk: true)` before the replacement, so the temp contents are on disk.
-3. Replace the target with the atomic same-directory rename (`File.Move(..., overwrite: true)`).
-4. fsync the directory on Unix where the platform/filesystem supports it; Windows relies on the NTFS journal.
-
-A reader therefore sees either the complete old snapshot or the complete new snapshot. A crash before step 3 leaves
-the old file; a crash after step 3 leaves the new file. A temp file is never treated as the live snapshot and is
-deleted when the write fails.
-
-Each snapshot writes `schemaVersion` (currently `1`). Readers also accept the pre-#984 key `version`, so existing
-`data/` directories upgrade in place; the next write emits `schemaVersion`.
-
-## Load errors and fresh-state policy
-
-- **Missing file:** first boot starts that subsystem from its documented fresh snapshot. This is the default because
-  a new deployment has no sidecars yet. Set `FINEAGE_STATE_REQUIRE_EXISTING=1` once the state directory has been
-  initialized to make a missing sidecar a hard startup error.
-- **Corrupt / unreadable file:** startup fails with `StateFileException` naming the system and the exact path, e.g.
-  `World state 'boss-schedule' at '/srv/fineage/data/boss-schedule.json' is unusable: invalid JSON: …`.
-  The process exits instead of silently starting with an empty schedule.
-- **Unsupported `schemaVersion`:** startup fails with the file path, the found version, and the version this build
-  supports. There is no automatic downgrade or alias.
-- **Explicit escape hatch:** `FINEAGE_STATE_ALLOW_FRESH_ON_CORRUPT=1` logs the rejected path and starts that
-  subsystem fresh. Do not use it in production without preserving/analyzing the corrupt file first.
+`AtomicJsonFile` remains the durable writer for the files that are still files, and `AtomicJsonFile.LoadStrict` is how the #996 cutover reads a legacy sidecar exactly once.
 
 ## Shutdown flush registry
 
-`Fineage.Zone.Persistence.WorldStateSystems` is the closed list of the eight stateful sidecars above.
-`ShutdownFlushRegistry` maps each system id to its existing save operation. `ZoneWorld` registers all eight and calls
+`Fineage.Zone.Persistence.WorldStateSystems` is the closed list of the nine world-state systems.
+`ShutdownFlushRegistry` maps each system id to its save operation. `ZoneWorld` registers all nine and calls
 `AssertComplete()` during construction, so the Zone cannot start if a subsystem is missing from the registry. A
-future sidecar must be added to the closed list and registered; a test also asserts the world exposes the full list.
+future system must be added to the closed list and registered; a test also asserts the world exposes the full list.
 
 `ZoneWorld.ShutdownGracefully()` detaches and persists online players, then calls `FlushAll()` on the registry.
 `FlushAll()` attempts every subsystem even if one fails; failures are logged with the system id and the concrete
@@ -82,11 +19,7 @@ the registry is the single shutdown save path.
 
 ## After a kill -9
 
-- The next start reads the last atomically replaced snapshot; partial temp files are ignored.
-- Boss respawn times, Seven Signs cycle, Olympiad period, lottery tickets/draw, raid points, punishments, monster
-  race and fishing championship resume from that snapshot.
-- Online player rows are persisted through the normal character save/ledger path; the sidecar layer does not
-  change Mobius gameplay formulas, schedules, or reward rules.
+The next start reads the last committed economy transaction. The world-state rows, ledger rows and bags of one commit land together, so there is never a lottery ticket in a bag without its lottery row, or the reverse. A graceful shutdown flushes first and then reaches the same state. The difference is only how recent that state is.
 
 ## World ↔ PostgreSQL coherence (startup state audit)
 
@@ -105,6 +38,7 @@ reports one `StoredStateIssue` per finding — `code owner container id=…: det
 | `ledger-divergence` | error | The replayed ledger projects different holdings than the store row (bag by template rule: stackables by count, the rest by instance id; warehouse, freight and clan warehouse by count). |
 | `ledger-orphan` | error | A character / pet / clan ledger account holds value but the store has no such owner. |
 | `ledger-invariant` | error | `EconomyInvariantChecker` found an overdraft or an instance owned twice. |
+| `world-state-ledger` / `world-state-invalid` / `world-state-orphan` | error / error / notice | #996 world-state rows against the ledger tallies and their own rules; see world-state-storage.md. |
 | `unjournaled` | notice | The store holds a container that has no journal history (pre-ledger rows). Its first ledger move aligns it with an `Untracked` adjustment, which is logged and counted as before. |
 
 Every finding is logged (`state audit …`, errors at Error level), counted in the `fineage.state.audit_issues`
@@ -150,6 +84,6 @@ journal (a journal with the Postgres contract: rows become durable only inside t
 - an orphan ledger account, a pre-ledger bag (notice only), and saved rows with removed item / skill / effect /
   recipe ids (enter refused, rows kept).
 
-The sidecar crash cases are in `AtomicJsonFileTests`: a crash hook before and after the replace, and a real child
+The world-state cases (#996: kill after commit, fault-injected commit, cutover, version refusal, the world-state audit codes) are in `WorldStateDurabilityTests`. The `AtomicJsonFile` crash cases are in `AtomicJsonFileTests`: a crash hook before and after the replace, and a real child
 process (`tests/Fineage.StateWriteProbe`) rewriting one snapshot in a loop and killed with SIGKILL at random moments;
 every restart reads one complete snapshot.
