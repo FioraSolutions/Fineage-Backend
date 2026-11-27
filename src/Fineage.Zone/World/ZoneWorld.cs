@@ -255,7 +255,9 @@ public sealed partial class ZoneWorld
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
         Fineage.Game.L10n.LocalizationCatalog? localization = null)
     {
-        _fanoutDispatcher = new FanoutDispatcher(reliableAdmission: (_, _, _) => _reliableAudienceAdmission);
+        // A reference, not a lambda: a closure here would be rooted by the fan-out worker thread and keep the whole
+        // world alive when a caller drops it without disposing (the full Zone test suite creates hundreds).
+        _fanoutDispatcher = new FanoutDispatcher { ReliableAdmission = _reliableAudienceAdmission };
         _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
@@ -496,6 +498,7 @@ public sealed partial class ZoneWorld
             _reliableAudienceAdmission = value is Net.NetWorldEventPublisher publisher
                 ? publisher.ReliableAudienceAdmission
                 : new FanoutReliableAdmission();
+            _fanoutDispatcher.ReliableAdmission = _reliableAudienceAdmission;
         }
     }
 

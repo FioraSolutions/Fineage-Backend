@@ -236,6 +236,10 @@ and only runs when the retained hand-off is full. It never encodes, sends, or wa
   grow without bound: no connected client is left with a silently reordered or missing reliable frame.
 - `BacklogWork` (telemetry) includes the one batch the worker already dequeued. It is bounded by
   `hardBacklogWork + DefaultSoftSendWork`, not by `hardBacklogWork` alone; `RetainedWork` is the strict bound.
+- The dispatcher stores its reliable admission as a **reference**, not a capturing delegate. A delegate would be
+  rooted by the parked `fanout-dispatcher` thread and keep the whole `ZoneWorld` (and every catalog/knownlist it
+  owns) alive after a caller drops the world without disposal. Tests that create hundreds of worlds rely on the
+  world being collectible; `Dropped_world_is_not_rooted_by_its_fanout_worker` guards this.
 - **The shed set includes `AttackState` and `MagicSkillUse`, which the load-test consistency oracle counts as combat
   evidence.** `ConsistencyOracle` raises `MissingCombatFanout` when a client sees no `AttackState` for an attacker
   within 2.5 s, so a run that actually sheds will report those as hard failures even though the client only lost an

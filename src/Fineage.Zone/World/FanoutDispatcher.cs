@@ -45,7 +45,7 @@ internal sealed class FanoutDispatcher : IDisposable
     readonly Thread _worker;
     readonly CancellationTokenSource _cts = new();
     readonly object _enqueueOrder = new();
-    readonly Func<long, int, string, FanoutReliableAdmission>? _reliableAdmission;
+    FanoutReliableAdmission? _reliableAdmission;
     readonly int _softBacklog;
     readonly int _hardBacklog;
     readonly int _softWork;
@@ -81,7 +81,7 @@ internal sealed class FanoutDispatcher : IDisposable
         int? hardBacklogBatches = null,
         int? softBacklogWork = null,
         int? hardBacklogWork = null,
-        Func<long, int, string, FanoutReliableAdmission>? reliableAdmission = null)
+        FanoutReliableAdmission? reliableAdmission = null)
     {
         _reliableAdmission = reliableAdmission;
         _softBacklog = softBacklogBatches ?? ReadLimit(SoftBacklogEnv, DefaultSoftBacklogBatches, "batch");
@@ -111,6 +111,17 @@ internal sealed class FanoutDispatcher : IDisposable
         if (!int.TryParse(text, out int value) || value < 1)
             throw new InvalidOperationException($"{name}='{text}' is not a positive {what} count");
         return value;
+    }
+
+    /// <summary>
+    /// Per-recipient admission used when the retained hand-off is full. It is set as a plain reference (never as a
+    /// delegate) so the dispatcher worker thread cannot root the owning world; the world must stay collectible when
+    /// tests or callers drop it without disposing.
+    /// </summary>
+    internal FanoutReliableAdmission? ReliableAdmission
+    {
+        get => Volatile.Read(ref _reliableAdmission);
+        set => Volatile.Write(ref _reliableAdmission, value);
     }
 
     internal int SoftBacklog => _softBacklog;
@@ -234,10 +245,8 @@ internal sealed class FanoutDispatcher : IDisposable
     /// </summary>
     long AdmitReliable(SealedWorldFanoutBatch batch, long remainingWork, string reason)
     {
-        if (_reliableAdmission == null)
-            return 0;
-        var admission = _reliableAdmission(remainingWork, _hardWork, reason);
-        return admission.CanShedRecipients
+        var admission = ReliableAdmission;
+        return admission is { CanShedRecipients: true }
             ? batch.AdmitAudience(remainingWork, _hardWork, reason, admission)
             : 0;
     }

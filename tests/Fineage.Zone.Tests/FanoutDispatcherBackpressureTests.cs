@@ -276,7 +276,7 @@ public sealed class FanoutDispatcherBackpressureTests
             hardBacklogBatches: 100,
             softBacklogWork: 3,
             hardBacklogWork: 3,
-            reliableAdmission: (_, _, _) => admission)
+            reliableAdmission: admission)
         {
             HoldWorkerBeforeReadForTest = holdWorker,
         };
@@ -498,6 +498,25 @@ public sealed class FanoutDispatcherBackpressureTests
         Assert.Equal(0, dispatcher.RetainedWork);
         Assert.Equal(0, dispatcher.BacklogWork);
     }
+
+    [Fact]
+    public void Dropped_world_is_not_rooted_by_its_fanout_worker()
+    {
+        WeakReference world = CreateWorldReference();
+        for (int i = 0; i < 3; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        // The worker thread is still parked (worlds have no required Dispose in tests); it must not keep the world
+        // alive through a capturing admission delegate. Before this regression test the whole ZoneWorld graph, its
+        // catalogs and its batches stayed reachable from the thread, which is what filled the full suite's heap.
+        Assert.False(world.IsAlive, "the fan-out worker rooted a dropped ZoneWorld");
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    static WeakReference CreateWorldReference() => new(new ZoneWorld());
 
     static SealedWorldFanoutBatch Batch(ulong sequence, Action send)
     {
