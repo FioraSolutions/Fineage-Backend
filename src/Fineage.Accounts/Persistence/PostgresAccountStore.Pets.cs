@@ -36,6 +36,17 @@ public sealed partial class PostgresAccountStore
             cmd.Parameters.AddWithValue("id", controlObjectId);
             cmd.ExecuteNonQuery();
         });
+
+    public bool PetNameExists(string name, int npcId, int exceptControlObjectId)
+    {
+        if (string.IsNullOrEmpty(name) || npcId <= 0)
+            return false;
+        using (EnterPersist())
+        {
+            using var conn = _dataSource.OpenConnection();
+            return NormalizedStoreWriter.PetNameExists(conn, name, npcId, exceptControlObjectId);
+        }
+    }
 }
 
 static partial class NormalizedStoreWriter
@@ -77,6 +88,18 @@ static partial class NormalizedStoreWriter
         var items = JsonSerializer.Deserialize<List<StoredItem>>(reader.GetString(8), PetJson) ?? [];
         return new StoredPet(controlObjectId, reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3),
             reader.GetInt64(4), reader.GetInt32(5), reader.GetInt32(6), reader.GetInt32(7), items);
+    }
+
+    public static bool PetNameExists(NpgsqlConnection conn, string name, int npcId, int exceptControlObjectId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT 1 FROM pets WHERE name = @name AND npc_id = @npc AND control_object_id <> @except LIMIT 1";
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("npc", npcId);
+        cmd.Parameters.AddWithValue("except", exceptControlObjectId);
+        using var reader = cmd.ExecuteReader();
+        return reader.Read();
     }
 
     /// <summary>Bootstrap / recovery: the snapshot's pets into <c>pets</c> (rows already there are replaced).</summary>

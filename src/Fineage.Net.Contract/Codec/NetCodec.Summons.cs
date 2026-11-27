@@ -36,6 +36,12 @@ namespace Fineage.Net.Contract
             return m;
         }
 
+        public static byte[] EncodeChangePetName(ChangePetNameNetMsg m) =>
+            Write(w => w.WriteString(m.Name ?? ""));
+
+        public static ChangePetNameNetMsg DecodeChangePetName(System.ReadOnlySpan<byte> p) =>
+            new() { Name = new Reader(p).ReadString() };
+
         public static byte[] EncodeSummonInfo(SummonInfoNetMsg m) => Write(w =>
         {
             w.WriteInt32(m.ObjectId);

@@ -43,6 +43,24 @@ public static class NameRules
 
     public static bool IsCharacterName(string? name) => IsAlnum(name, min: 1, max: 16);
 
+    /// <summary>
+    /// Mobius <c>RequestChangePetName</c> name charset: ASCII letters/digits, length 3–16 (no trim —
+    /// spaces / punctuation fail like an invalid character).
+    /// </summary>
+    public static bool IsPetName(string? name)
+    {
+        if (name == null || name.Length < 3 || name.Length > 16)
+            return false;
+        foreach (char ch in name)
+        {
+            if (ch is >= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9')
+                continue;
+            return false;
+        }
+
+        return true;
+    }
+
     public static bool IsPassword(string? password)
     {
         if (string.IsNullOrEmpty(password) || password.Length < 4 || password.Length > 64)

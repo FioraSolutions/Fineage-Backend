@@ -216,6 +216,12 @@ public sealed record RecipeBookDestroyCommand(RecipeBookDestroyMsg Request) : Zo
         Completed(world.TryRecipeBookDestroyAsync(session, Request, CancellationToken.None));
 }
 
+public sealed record ChangePetNameCommand(ChangePetNameMsg Request) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryChangePetNameAsync(session, Request, CancellationToken.None));
+}
+
 public sealed record SetRecipeShopCommand(SetRecipeShopMsg Request) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>

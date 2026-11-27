@@ -188,6 +188,19 @@ public sealed partial class MemoryAccountStore
         }
     }
 
+    public bool PetNameExists(string name, int npcId, int exceptControlObjectId)
+    {
+        if (string.IsNullOrEmpty(name) || npcId <= 0)
+            return false;
+        using (EnterStore())
+        {
+            return _data.Pets.Any(p =>
+                p.ControlObjectId != exceptControlObjectId
+                && p.NpcId == npcId
+                && string.Equals(p.Name, name, StringComparison.Ordinal));
+        }
+    }
+
     public IReadOnlyList<ManorProductionSave> ListManorProduction()
     {
         using (EnterStore())
