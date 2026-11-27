@@ -90,7 +90,7 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 34 | NPC shots | ✅ [src](../src/Fineage.Zone/World/ZoneWorldNpcSkills.cs) | unverified | unverified | — | `Npc` recharge shots → `ZoneWorldNpcSkills` |
 | 35 | NPC heal / buff / debuff | ✅ [src](../src/Fineage.Zone/World/ZoneWorldNpcSkills.cs) | unverified | unverified | — | `NpcAI` → `ZoneWorldNpcSkills` |
 | 36 | Guards | ✅ [src](../src/Fineage.Zone/World/ZoneWorldAggro.cs) | unverified | unverified | — | `ai/others` guards → `ScanAggression` |
-| 37 | Scripted NPC / boss / area AI | 🟡 [src](../src/Fineage.Zone/World/ZoneWorldNpcScripts.cs) | unverified | unverified | L | Script host `#805` + `npc-scripts.json`. `RaidbossInfo` HTML+radar + Gatekeeper `necro`/`cata`/`exit` → `DungeonAccess` — #919. Remaining: area/boss combat AI (`ai/areas`/`ai/bosses`) |
+| 37 | Scripted NPC / boss / area AI | 🟡 [src](../src/Fineage.Zone/World/ZoneWorldNpcScripts.cs) | unverified | unverified | L | Script host `#805` + `npc-scripts.json`. `RaidbossInfo` HTML+radar + `NpcLocationInfo` guide/radar + `ShadowWeapons` coupons + Gatekeeper `necro`/`cata`/`exit` → `DungeonAccess` — #919. Remaining: area/boss combat AI (`ai/areas`/`ai/bosses`) |
 | **Drops and economy** |
 | 38 | Droplists | ✅ [src](../src/Fineage.Zone/Drops/DropCatalog.cs) | unverified | unverified | — | per-NPC drop XML → 1518 `data/drops` JSON files via `DropCatalog`. A kill with no file logs `drop miss npc={id} (no droplist)`. #803 closed the spawn-set holes |
 | 39 | Herbs | ✅ [src](../src/Fineage.Zone/World/ZoneWorldHerbs.cs) | unverified | unverified | — | herb items → `ZoneWorldHerbs` |

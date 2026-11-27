@@ -14,6 +14,7 @@ data/*
 !data/fishing.json
 !data/raid-boss-points.json
 !data/pc-cafe-coupons.json
+!data/npc-location-info.json
 !data/monster-race.json
 !data/recipes.json
 !data/starter-kits.json

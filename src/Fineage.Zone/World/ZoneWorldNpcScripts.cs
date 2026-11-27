@@ -33,6 +33,8 @@ public sealed partial class ZoneWorld
             "oracle_teleport" => OracleTeleportBypass(session, player, npc, scriptEvent),
             "monster_race_teleport" => TeleportToRaceTrackBypass(session, player, npc, scriptEvent),
             "raid_boss_info" => RaidbossInfoBypass(session, player, npc, scriptEvent),
+            "npc_location_info" => NpcLocationInfoBypass(session, player, npc, scriptEvent),
+            "shadow_weapons" => ShadowWeaponsBypass(session, player, npc, scriptEvent),
             "stub" => FinishStubScript(session, player, npc),
             _ => FinishUnhandledScriptPage(session, player, npc, scriptName, scriptEvent, $"unknown pipeline '{entry.Pipeline}'")
         };
