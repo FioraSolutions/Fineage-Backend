@@ -70,6 +70,13 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     public bool IsTraveler => _traveler != null;
 
+    /// <summary>
+    /// Hard ceiling for one login+zone enter handshake. Without it a bot whose Login connection is accepted but no
+    /// reply arrives (or whose registration deadlocks server-side) blocks <see cref="LoadTestRunner"/> forever and
+    /// no failure report is written.
+    /// </summary>
+    public TimeSpan HandshakeTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
     public int BotId { get; }
     public LoadScenario Scenario { get; }
     public string Account { get; }
@@ -86,6 +93,21 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     ulong _selfEntity;
 
     public async Task ConnectAndEnterAsync(CancellationToken ct)
+    {
+        using var handshake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        handshake.CancelAfter(HandshakeTimeout);
+        try
+        {
+            await ConnectAndEnterCoreAsync(handshake.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"bot {BotId}: login/zone enter handshake exceeded {HandshakeTimeout.TotalSeconds:0}s");
+        }
+    }
+
+    async Task ConnectAndEnterCoreAsync(CancellationToken ct)
     {
         await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
         _loginStream = _login.GetStream();
@@ -495,20 +517,31 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _receiveCts = new CancellationTokenSource();
         _stats.Disconnected = false;
 
-        await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
-        _loginStream = _login.GetStream();
-        await LoginHandshakeAsync(ct);
-        await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
-        _zoneStream = _zone.GetStream();
-        _zoneReader = new NetFrameReader(_zoneStream);
-        await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
-        await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
-        await ZoneExchangeAsync(
-            NetOpcode.ZoneAuth,
-            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
-            NetOpcode.ZoneAuthResult,
-            ct);
-        await EnterWorldAsync(ct);
+        using var handshake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        handshake.CancelAfter(HandshakeTimeout);
+        try
+        {
+            await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, handshake.Token);
+            _loginStream = _login.GetStream();
+            await LoginHandshakeAsync(handshake.Token);
+            await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, handshake.Token);
+            _zoneStream = _zone.GetStream();
+            _zoneReader = new NetFrameReader(_zoneStream);
+            await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), handshake.Token);
+            await ZoneReadUntilAsync(NetOpcode.HelloAck, handshake.Token);
+            await ZoneExchangeAsync(
+                NetOpcode.ZoneAuth,
+                NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
+                NetOpcode.ZoneAuthResult,
+                handshake.Token);
+            await EnterWorldAsync(handshake.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"bot {BotId}: relog handshake exceeded {HandshakeTimeout.TotalSeconds:0}s");
+        }
+
         _stats.InWorld = true;
         if (_selfEntity != 0)
             _peers.Register(BotId, SelfObjectId);

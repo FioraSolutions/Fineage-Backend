@@ -108,12 +108,32 @@ public sealed class LoadTestRunner
                 enters.Add(EnterOneAsync(bots[i], slots, ct));
             }
 
-            try
+            // Each bot has its own handshake ceiling, but a wedged socket/read must never keep the whole run from
+            // reaching the report writer. Bound the phase as a whole and fail the report instead of awaiting forever.
+            TimeSpan enterLimit = TimeSpan.FromSeconds(
+                Math.Max(30, scenario.RampUpSeconds) + 30.0 * (scenario.BotCount / Math.Max(1, concurrency) + 1));
+            var enterPhase = Task.WhenAll(enters);
+            if (!await CompletesWithinAsync(enterPhase, enterLimit, ct))
             {
-                await Task.WhenAll(enters);
+                runFault = new TimeoutException(
+                    $"enter handshake phase exceeded {enterLimit.TotalSeconds:0}s " +
+                    $"({stats.Count(s => s.InWorld)}/{scenario.BotCount} bots in world)");
+                foreach (var bot in bots.Where(b => !b.Stats.InWorld))
+                    bot.Stats.Disconnected = true;
             }
-            catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+            else
             {
+                try
+                {
+                    await enterPhase;
+                }
+                catch (OperationCanceledException) when (!callerCt.IsCancellationRequested)
+                {
+                }
+                catch (Exception ex)
+                {
+                    runFault = ex;
+                }
             }
 
             if (scenario.HeavyPlay is { IsHeavyPlay: true })
@@ -163,12 +183,12 @@ public sealed class LoadTestRunner
             }
             catch (Exception ex)
             {
-                runFault = ex;
+                runFault ??= ex;
             }
         }
         else
         {
-            runFault = new TimeoutException(
+            runFault ??= new TimeoutException(
                 "behavior loops stayed blocked for 5s after a simulation stall; the run stopped so a report could be written");
         }
 
@@ -238,6 +258,9 @@ public sealed class LoadTestRunner
             failReasons.Add("Server logs contain exceptions or handler errors.");
         if (disconnected > scenario.BotCount / 10)
             failReasons.Add($"High disconnect rate: {disconnected}/{scenario.BotCount}");
+        int failedToEnter = stats.Count(s => s.Disconnected && !s.InWorld);
+        if (failedToEnter > 0)
+            failReasons.Add($"Login/zone handshake failed for {failedToEnter}/{scenario.BotCount} bot(s).");
         if (stuck > scenario.BotCount / 5)
             failReasons.Add($"Many bots stuck: {stuck}/{scenario.BotCount}");
 
@@ -398,6 +421,23 @@ public sealed class LoadTestRunner
         return report;
     }
 
+    /// <summary>
+    /// Waits for <paramref name="task"/> at most <paramref name="timeout"/>. Returns false instead of hanging so the
+    /// caller can write a failure report. The pending task is intentionally left to its own bounded timeout.
+    /// </summary>
+    internal static async Task<bool> CompletesWithinAsync(Task task, TimeSpan timeout, CancellationToken ct)
+    {
+        if (task.IsCompleted)
+            return true;
+        if (timeout <= TimeSpan.Zero)
+            return false;
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeoutCts.CancelAfter(timeout);
+        var delay = Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token);
+        var completed = await Task.WhenAny(task, delay);
+        return completed == task;
+    }
+
     static int ResolveEnterConcurrency(LoadScenario scenario)
     {
         string? text = Environment.GetEnvironmentVariable("FINEAGE_LOADTEST_ENTER_CONCURRENCY");
@@ -463,7 +503,15 @@ public sealed class LoadTestRunner
         }
         finally
         {
-            slots.Release();
+            try
+            {
+                slots.Release();
+            }
+            catch (ObjectDisposedException)
+            {
+                // The enter phase timed out and its gate was disposed; the late handshake is deliberately abandoned
+                // to its own bounded timeout so the failure report could already be written.
+            }
         }
     }
 }

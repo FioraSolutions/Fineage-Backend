@@ -33,9 +33,49 @@ public sealed partial class MemoryAccountStore
     /// </summary>
     void Save()
     {
-        if (!EmitSnapshots || _afterSaveSnapshot is not { } handler)
+        if (!EmitSnapshots || _afterSaveSnapshot is null)
             return;
-        handler(JsonSerializer.Serialize(_data, JsonOptions));
+        string json = JsonSerializer.Serialize(_data, JsonOptions);
+        lock (_snapshotGate)
+        {
+            _pendingSnapshot = json;
+            _pendingSnapshotSequence++;
+        }
+
+        MarkSnapshotDirty(this);
+    }
+
+    /// <summary>
+    /// Runs the snapshot callback with no store lock held. Snapshots are serialized (a newer sequence always wins)
+    /// so a slow durable write cannot publish an older image after a newer one.
+    /// </summary>
+    void FlushPendingSnapshot()
+    {
+        lock (_snapshotWriteGate)
+        {
+            while (true)
+            {
+                string? json;
+                long sequence;
+                lock (_snapshotGate)
+                {
+                    if (_pendingSnapshot is null)
+                        return;
+                    json = _pendingSnapshot;
+                    sequence = _pendingSnapshotSequence;
+                    _pendingSnapshot = null;
+                    if (sequence <= _lastWrittenSnapshotSequence)
+                        continue;
+                    _lastWrittenSnapshotSequence = sequence;
+                }
+
+                System.Diagnostics.Debug.Assert(
+                    !Monitor.IsEntered(_gate),
+                    "AfterSaveSnapshot must run after the memory store lock is released");
+                if (_afterSaveSnapshot is { } handler)
+                    handler(json);
+            }
+        }
     }
 
     List<StoredItemDto>? CopyItemsAssigningIds(IReadOnlyList<StoredItem>? items, HashSet<int>? releaseObjectIds)

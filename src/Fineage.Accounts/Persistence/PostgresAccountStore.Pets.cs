@@ -14,7 +14,7 @@ public sealed partial class PostgresAccountStore
     {
         if (controlObjectId <= 0)
             return null;
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             return NormalizedStoreWriter.LoadPet(conn, controlObjectId);

@@ -23,7 +23,7 @@ public sealed partial class PostgresAccountStore
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
         long first;
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -48,7 +48,7 @@ public sealed partial class PostgresAccountStore
         // Memory + snapshot JSON are not enough: characters.account FKs this row.
         string account = name.Trim();
         object? canonicalEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -114,7 +114,7 @@ public sealed partial class PostgresAccountStore
             return status;
 
         WriteSnapshotBackup(_inner.ExportSnapshot());
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();

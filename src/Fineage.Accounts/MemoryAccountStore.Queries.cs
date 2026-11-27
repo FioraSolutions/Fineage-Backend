@@ -9,7 +9,7 @@ public sealed partial class MemoryAccountStore
 {
     public bool TryHardDelete(string account, int characterId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             var character = row?.Characters.FirstOrDefault(c => c.Id == characterId);
@@ -27,7 +27,7 @@ public sealed partial class MemoryAccountStore
 
     public CharacterRecord? FindById(string account, int characterId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             var character = row?.Characters.FirstOrDefault(c => c.Id == characterId);
@@ -37,7 +37,7 @@ public sealed partial class MemoryAccountStore
 
     public CharacterRecord? FindByName(string account, string name)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             if (row == null)
@@ -52,7 +52,7 @@ public sealed partial class MemoryAccountStore
 
     public IReadOnlyList<CharacterRecord> List(string account, DateTimeOffset now)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             if (row == null)
