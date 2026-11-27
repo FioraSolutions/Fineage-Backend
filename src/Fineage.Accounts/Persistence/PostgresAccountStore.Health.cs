@@ -12,13 +12,18 @@ public sealed partial class PostgresAccountStore
     /// this build's migration files (the same plan as <c>migrate --plan</c>, read-only). Ok only when the database
     /// answers and nothing is pending; a tampered or unknown applied migration is a failed check with its message.
     /// </summary>
-    public HealthCheck CheckDatabase(TimeSpan timeout)
+    public HealthCheck CheckDatabase(TimeSpan timeout) => CheckDatabase(_dataSource, _healthRunner.Value, timeout);
+
+    /// <summary>The same probe over any data source (tests point it at a dead port).</summary>
+    public static HealthCheck CheckDatabase(Npgsql.NpgsqlDataSource dataSource, MigrationRunner runner, TimeSpan timeout)
     {
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ArgumentNullException.ThrowIfNull(runner);
         using var cts = new CancellationTokenSource(timeout);
         try
         {
-            using var conn = _dataSource.OpenConnectionAsync(cts.Token).AsTask().GetAwaiter().GetResult();
-            var plan = _healthRunner.Value.Plan(new NpgsqlMigrationDatabase(conn));
+            using var conn = dataSource.OpenConnectionAsync(cts.Token).AsTask().GetAwaiter().GetResult();
+            var plan = runner.Plan(new NpgsqlMigrationDatabase(conn));
             return plan.IsUpToDate
                 ? new HealthCheck("database", true, $"reachable, {plan.Applied.Count} migrations applied")
                 : new HealthCheck("database", false,
