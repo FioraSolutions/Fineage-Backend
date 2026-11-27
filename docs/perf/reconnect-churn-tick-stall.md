@@ -84,3 +84,24 @@ reconnect-storm, `fineage_persist_write_ms{kind="store_gate_*"}`):
 
 `gatekeeper-travel` (150 travellers, no churn) was already clean on dev and stays clean: 5707/5725 → 5727/5738
 teleports, 0 unexplained.
+
+## #1114: consistency oracle under relog, ack-before-durable, ramp handshake timeouts
+
+Debug, reconnect-storm (200 bots, 30 s ramp, 120 s, relog 1.0, 20 % gatekeeper travellers).
+
+| | dev 2db35263 (rs-after2 / rs-after3) | cons-1114 (cons-b) |
+| --- | --- | --- |
+| Consistency issues | 12,216 / 6,672 (all DuplicateSpawn, plus 2 StalePosition) | **0** |
+| Runner | FAIL / FAIL | **PASS** |
+| First-login handshake timeouts | 0 / 14 | 0 (no host pause in this run) |
+| Disconnects | 5 / 14 | 6 (`enter_failed: character N changed while loading`) |
+| Relogs ok / attempted | 10074/10079, 6429/6429 | 10553/10559 |
+| Gatekeeper teleports ok / attempted, unexplained | 912/912, 0 | 916/916, 0 |
+| `economy_commit_failed` replies | 0 / 0 | 0 (171 replies carried to their own commit, 0 refused) |
+| tick p99 / max ms | 204 / 213, 214 / 749 | 206 / 221 |
+
+gatekeeper-travel (150 bots): 5705/5718 teleports, 0 unexplained, runner PASS, 18 StalePosition. Before: 14 StalePosition, below the gate. These are teleport views and were left as is.
+
+1. **DuplicateSpawn was an oracle false positive.** Every issue had a relogging observer. Travellers never relog, and they had 0. The bot tracker kept the previous zone connection's knownlist through `RelogAsync`. A new session starts with an empty client world (Mobius `RequestRestart` → `RestartResponse`, then `EnterWorld` re-adds everything in view), so each relog counted one spawn without a despawn for every object in view. The fix: a local session-boundary frame (`BotObservationLog.SessionBoundaryOpcode`) ends every life at the relog. A duplicate inside one session is still flagged. Gates are unchanged.
+2. **Ack before durable.** A logout commit steals every dirty bag. When it took the bag that a step's command had just dirtied, the step found nothing to commit. It answered success while that logout batch was still in the worker. If the batch failed, it restored the bag and the client had already heard success. The world now counts characters whose economy is in a stolen, unfinished batch (`_economyInFlight`, ended exactly once by publish or restore under `_economyLock`). A step reply whose character the step touched (`_economyTouched`) and whose change sits in another commit's batch is carried (`ZoneWorldEconomyCarry`) until that batch is durable or restored and re-committed. `EconomyAckAfterDurableTests` fails on dev with an early `success`.
+3. **The 14 ramp handshake timeouts happened during a box-wide freeze, not in a slow segment of the login chain.** The Zone log went silent from 19:58:08.7 to 19:59:49.0 UTC. Then the tick clock skipped 500 steps with only 178 ms of lateness. The bot launcher, auth, and the independent 1 s tick sampler stopped at the same moment (the sampler recorded no stall). Bots 99–117 had their enter accepted (`enter ok` at 19:58:05.9–08.7) and were in the 3 s settle after the welcome. On resume, their 30 s handshake budget (monotonic) had expired, so the read was cancelled at phase `enter_world`. A second freeze happened at 20:01:11–20:01:39: Zone LateMs 28 s, and the load-test time series is missing that window. The load test now runs a `HostPauseDetector` thread that records such spans in `report.HostPauses` and as a P1 environment bug. Every handshake timeout also lists its per-phase durations (`login_connect … enter_world, enter_settle(open)`) and the host pause inside it, so the next one names its segment directly.
