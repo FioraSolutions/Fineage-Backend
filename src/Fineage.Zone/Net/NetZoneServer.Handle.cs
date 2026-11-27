@@ -238,6 +238,36 @@ public sealed partial class NetZoneServer
                         case NetOpcode.CommandChannelOustRequest:
                             await _commandChannel.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestPartyMatchConfig:
+                            await _partyMatch.OnConfigAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchList:
+                            await _partyMatch.OnListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchDetail:
+                            await _partyMatch.OnDetailAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomDismiss:
+                            await _partyMatch.OnDismissAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomWithdraw:
+                            await _partyMatch.OnWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomOust:
+                            await _partyMatch.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomAskJoin:
+                            await _partyMatch.OnAskJoinAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomAnswerJoin:
+                            await _partyMatch.OnAnswerJoinAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchWaitingList:
+                            await _partyMatch.OnWaitingListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchWaitingExit:
+                            await _partyMatch.OnWaitingExitAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

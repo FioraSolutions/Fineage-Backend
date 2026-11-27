@@ -135,6 +135,13 @@ internal enum FanoutKind : byte
     ShowCalculator = 128,
     ShowXMasSeal = 129,
     MacroList = 130,
+    PartyMatchDetail = 131,
+    PartyMatchRoomList = 132,
+    PartyRoomMemberList = 133,
+    PartyRoomMemberUpdate = 134,
+    PartyRoomClose = 135,
+    PartyRoomAskJoin = 136,
+    PartyMatchWaitingRoom = 137,
 }
 
 internal static class FanoutKinds

@@ -364,6 +364,27 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info) =>
         Record(FanoutKind.CommandChannelInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
+    void IWorldEventPublisher.FanoutPartyMatchDetail(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchDetailMsg detail) =>
+        Record(FanoutKind.PartyMatchDetail, 0, watcherObjectIds, new FanoutArgs(Payload: detail), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyMatchRoomList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchRoomListMsg list) =>
+        Record(FanoutKind.PartyMatchRoomList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomMemberListMsg list) =>
+        Record(FanoutKind.PartyRoomMemberList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomMemberUpdateMsg update) =>
+        Record(FanoutKind.PartyRoomMemberUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomClose(IReadOnlyList<int> watcherObjectIds) =>
+        Record(FanoutKind.PartyRoomClose, 0, watcherObjectIds, default, replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomAskJoinMsg ask) =>
+        Record(FanoutKind.PartyRoomAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyMatchWaitingRoom(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchWaitingRoomMsg list) =>
+        Record(FanoutKind.PartyMatchWaitingRoom, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
     {
         int[] targetObjectIdsCopy = [.. targetObjectIds];

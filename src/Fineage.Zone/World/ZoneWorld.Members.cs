@@ -241,6 +241,7 @@ public sealed partial class ZoneWorld
         _chat.Left(session.ObjectId);
 
         PartyPlayerLeftWorld(session.ObjectId);
+        ClearPartyMatchOnLeave(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
         ForgetRuleZoneState(session.ObjectId);
         PrivateStorePlayerLeftWorld(session.ObjectId);
