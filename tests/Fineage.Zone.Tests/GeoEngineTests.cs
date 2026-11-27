@@ -100,4 +100,58 @@ public sealed class GeoEngineTests
         var path = geo.FindPath(8, 40, 96, 150, 400, 96);
         Assert.Equal([(150, 400, 96)], path!);
     }
+
+    static DoorTable DoorAcrossField(bool open) => new([
+        new DoorInstance
+        {
+            Id = 1, Name = "gate", X = 100, Y = 0, Z = 0,
+            Nodes = [(95, -50), (105, -50), (105, 50), (95, 50)],
+            MinZ = 0, MaxZ = 150, Open = open,
+            MinX = 95, MaxX = 105, MinY = -50, MaxY = 50
+        }
+    ]);
+
+    [Fact]
+    public void Closed_door_blocks_straight_move_and_path_routes_around_it()
+    {
+        var geo = new GeoEngine();
+        geo.SetRegion(20, 18, GeoEngine.Region.Flat1(96));
+        var closed = DoorAcrossField(open: false);
+
+        // Mobius getValidLocation checks checkIfDoorsBetween first: the straight move is refused at the origin,
+        // which is what makes moveToLocation ask PathFinding for a route around the door.
+        var (mx, my, mz) = geo.MoveCheck(8, 40, 96, 400, 40, 96, out bool blocked, closed);
+        Assert.True(blocked);
+        Assert.Equal((8, 40, 96), (mx, my, mz));
+
+        // Without door awareness the same line is open (old Fineage behavior: clip at the door afterwards).
+        geo.MoveCheck(8, 40, 96, 400, 40, 96, out bool noDoorBlocked);
+        Assert.False(noDoorBlocked);
+        Assert.Single(geo.FindPath(8, 40, 96, 400, 40, 96)!);
+
+        // The route search must treat the closed door as a wall and stay walkable under the same door check.
+        var path = geo.FindPath(8, 40, 96, 400, 40, 96, closed);
+        Assert.NotNull(path);
+        Assert.True(path!.Count >= 2);
+        int ax = 8, ay = 40, az = 96;
+        foreach (var (x, y, z) in path)
+        {
+            geo.MoveCheck(ax, ay, az, x, y, z, out bool legBlocked, closed);
+            Assert.False(legBlocked);
+            (ax, ay, az) = (x, y, z);
+        }
+        Assert.Equal((400, 40), (ax, ay));
+    }
+
+    [Fact]
+    public void Open_door_does_not_change_straight_move_or_path()
+    {
+        var geo = new GeoEngine();
+        geo.SetRegion(20, 18, GeoEngine.Region.Flat1(96));
+        var open = DoorAcrossField(open: true);
+
+        geo.MoveCheck(8, 40, 96, 400, 40, 96, out bool blocked, open);
+        Assert.False(blocked);
+        Assert.Single(geo.FindPath(8, 40, 96, 400, 40, 96, open)!);
+    }
 }

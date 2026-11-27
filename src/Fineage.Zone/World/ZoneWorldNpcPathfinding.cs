@@ -322,7 +322,7 @@ public sealed partial class ZoneWorld
             if (request.Search == null || npc.X != request.OriginX || npc.Y != request.OriginY)
             {
                 // First step for this request, or the entity moved while it waited: a route from the old origin is worthless.
-                request.Search = _geo.BeginPath(npc.X, npc.Y, npc.Z, request.WantX, request.WantY, request.WantZ);
+                request.Search = _geo.BeginPath(npc.X, npc.Y, npc.Z, request.WantX, request.WantY, request.WantZ, doors: Doors);
                 request.Path.Clear();
                 request.OriginX = npc.X;
                 request.OriginY = npc.Y;
@@ -527,7 +527,7 @@ public sealed partial class ZoneWorld
         if (_geo.HasGeo(npc.X, npc.Y))
         {
             npc.Z = _geo.GetHeight(npc.X, npc.Y, npc.Z);
-            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out _);
+            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out _, Doors);
         }
         else
         {
@@ -543,6 +543,11 @@ public sealed partial class ZoneWorld
     /// <summary>The budgeted search finished. Replace the MoveCheck clip with the first waypoint.</summary>
     void ApplyResolvedPlayerPath(ZoneEntity player, int destX, int destY, int destZ)
     {
+        // Same safety net as CommitNpcMoveStart: the search ran against the door table captured at its start, so a
+        // door that closed while the route was queued must still clip the first leg instead of being run through.
+        if (ClipDoors(player, ref destX, ref destY, ref destZ))
+            player.MovePath.Clear();
+
         player.MoveDestX = destX;
         player.MoveDestY = destY;
         player.MoveDestZ = destZ;

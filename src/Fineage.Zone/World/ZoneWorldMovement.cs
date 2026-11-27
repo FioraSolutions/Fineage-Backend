@@ -37,7 +37,7 @@ public sealed partial class ZoneWorld
         {
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
-            (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
+            (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked, Doors);
             if (blocked && TryNpcPathCacheOnly(entity.X, entity.Y, move.DestX, move.DestY, out var path) && path.Count > 0)
             {
                 // A path computed for this cell pair already. Walk it now; a miss waits for the

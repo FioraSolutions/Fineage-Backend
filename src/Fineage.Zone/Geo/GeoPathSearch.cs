@@ -27,6 +27,7 @@ public sealed class GeoPathSearch
     static readonly (int Dx, int Dy)[] Dirs = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)];
 
     readonly GeoEngine _geo;
+    readonly DoorTable? _doors;
     readonly int _ox, _oy, _oz, _tx, _ty, _tz;
     readonly int _sgx, _sgy, _tgx, _tgy;
     readonly int _minX, _maxX, _minY, _maxY;
@@ -44,7 +45,7 @@ public sealed class GeoPathSearch
 
     Status _status = Status.Running;
 
-    internal GeoPathSearch(GeoEngine geo, int ox, int oy, int oz, int tx, int ty, int tz, int? maxNodes = null)
+    internal GeoPathSearch(GeoEngine geo, int ox, int oy, int oz, int tx, int ty, int tz, int? maxNodes = null, DoorTable? doors = null)
     {
         ArgumentNullException.ThrowIfNull(geo);
         _geo = geo;
@@ -63,6 +64,14 @@ public sealed class GeoPathSearch
         _maxX = Math.Max(_sgx, _tgx) + GeoEngine.PathMargin;
         _minY = Math.Min(_sgy, _tgy) - GeoEngine.PathMargin;
         _maxY = Math.Max(_sgy, _tgy) + GeoEngine.PathMargin;
+
+        // Door-aware only where a closed door can matter: no closed door in the search box keeps the hot CanStep
+        // path free of the door index.
+        _doors = doors != null &&
+                 doors.AnyClosedIn(_minX * GeoEngine.CellSize, _minY * GeoEngine.CellSize,
+                     _maxX * GeoEngine.CellSize, _maxY * GeoEngine.CellSize)
+            ? doors
+            : null;
 
         _g[(_sgx, _sgy)] = 0;
         _zAt[(_sgx, _sgy)] = oz;
@@ -114,7 +123,7 @@ public sealed class GeoPathSearch
                 if (nx < _minX || nx > _maxX || ny < _minY || ny > _maxY)
                     continue;
                 var n = (nx, ny);
-                if (_closed.Contains(n) || !_geo.CanStep(cur.X, cur.Y, cz, nx, ny, out int nz))
+                if (_closed.Contains(n) || !_geo.CanStep(cur.X, cur.Y, cz, nx, ny, out int nz, _doors))
                     continue;
                 int ng = cg + (dx != 0 && dy != 0 ? 14 : 10);
                 if (_g.TryGetValue(n, out int old) && old <= ng)
@@ -177,7 +186,7 @@ public sealed class GeoPathSearch
                 probed++;
                 SmoothingCellsWalked += cost;
                 var (jx, jy) = Pt(_cells[j], j == last);
-                _geo.MoveCheck(_anchorX, _anchorY, _anchorZ, jx, jy, _zAt[_cells[j]], out bool blocked);
+                _geo.MoveCheck(_anchorX, _anchorY, _anchorZ, jx, jy, _zAt[_cells[j]], out bool blocked, _doors);
                 if (!blocked)
                 {
                     best = j;
