@@ -24,12 +24,32 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Trainer mode. false (default) keeps the pre-trainer behaviour: NPC-learned tree skills are granted free at their
-    /// level. true = Mobius: only autoGet rows are free; NPC rows must be bought with SP at a trainer (learn_skill).
-    /// Env <c>FINEAGE_TRAINER_SP_LEARN=1</c>. Learned skills are persisted either way (character_skills).
+    /// Trainer mode (Interlude / Mobius parity). <c>true</c> (default): only <c>autoGet</c> rows are free; NPC tree
+    /// rows must be bought with SP at a trainer. <c>false</c>: NPC-learned tree skills are granted free at level
+    /// (pre-trainer Fineage behaviour). Env <c>FINEAGE_TRAINER_SP_LEARN</c>: unset/`1`/`true` → on; `0`/`false` → off.
+    /// Learned skills are persisted either way (<c>character_skills</c>).
     /// </summary>
-    public bool TrainerSpLearn { get; set; } =
-        Environment.GetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN") is "1" or "true";
+    public bool TrainerSpLearn { get; set; } = ResolveTrainerSpLearnFromEnv();
+
+    /// <summary>Effective boot value from <c>FINEAGE_TRAINER_SP_LEARN</c> (default on).</summary>
+    public static bool ResolveTrainerSpLearnFromEnv()
+    {
+        string? raw = Environment.GetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN");
+        if (string.IsNullOrWhiteSpace(raw))
+            return true;
+        if (raw is "0" or "false" or "False" or "FALSE" or "off" or "OFF")
+            return false;
+        if (raw is "1" or "true" or "True" or "TRUE" or "on" or "ON")
+            return true;
+        throw new InvalidOperationException(
+            $"FINEAGE_TRAINER_SP_LEARN={raw} is not a boolean; use 1/true/on or 0/false/off.");
+    }
+
+    /// <summary>One-line boot diagnostic for the resolved trainer-learn mode (no secrets).</summary>
+    public static string DescribeTrainerSpLearnMode(bool enabled) =>
+        enabled
+            ? "trainer-learn=mobius (NPC tree skills cost SP; only autoGet free; FINEAGE_TRAINER_SP_LEARN default on)"
+            : "trainer-learn=free-grants (NPC tree skills free at level; FINEAGE_TRAINER_SP_LEARN=0)";
 
     /// <summary>
     /// Rebuild the live skill book from the class auto-tree + persisted learned rows.

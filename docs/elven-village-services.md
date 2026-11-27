@@ -75,9 +75,9 @@ filter is process-global and xUnit runs collections in parallel.
 - `data/skill-trees.json` rows carry Mobius `levelUpSp` (`scripts/gen_skill_sp.py`, 13528 rows).
 - Learned skills persist per character: `CharacterRecord.LearnedSkills`, JSON `learnedSkills`, Postgres `character_skills` (migration 004). Loaded at enter and merged into known skills (max level wins) on top of the class tree.
 - Trainer page `SkillList` bypass (Ellenia 30155, Cobendell 30156, Greenis 30157, Esrandell 30158 pages link it) → `TrainerBypassHandler`:
-  - **Default (`FINEAGE_TRAINER_SP_LEARN` unset)**: NPC-tree skills stay free at their level, exactly as before (Wind Strike etc.). SkillList shows an HTML note with the next level that brings a new skill. `learn_skill` does nothing.
-  - **`FINEAGE_TRAINER_SP_LEARN=1`**: Mobius mode. Only autoGet rows are free; SkillList is an interim HTML list (next level per skill, getLevel reached, SP cost) with `learn_skill <id>` links. Learning spends SP, saves `character_skills`, re-sends `SkillList` (V2 + Net `FanoutSkillList`), SysMsg 277 / 278.
-- **Open question for Nikita: keep free trainer skills or switch to SP-buy?** To flip: set `FINEAGE_TRAINER_SP_LEARN=1` for Zone (e.g. in `run-local-net.sh`). Characters then lose NPC skills they have not bought; consider a one-time grant of currently-known NPC skills into `character_skills` before flipping. Real Mobius UI (AcquireSkillList / RequestAcquireSkillInfo / RequestAcquireSkill) needs Net opcodes + a client window; the HTML list is the stopgap.
+  - **Default (`FINEAGE_TRAINER_SP_LEARN` unset / `1` / `true`)**: Mobius / Interlude parity. Only autoGet rows are free; NPC-tree skills cost SP at a trainer (`learn_skill` / AcquireSkill). Zone boots with `[ZONE] trainer-learn=mobius …`.
+  - **`FINEAGE_TRAINER_SP_LEARN=0` / `false`**: pre-parity Fineage behaviour — NPC-tree skills stay free at level; `learn_skill` does nothing useful. Use only as an explicit divergence.
+- **Migration:** characters that never bought NPC skills under free-grants mode will not have them after the default flip until they learn at a trainer (or an admin grants into `character_skills`). Unit tests force free-grants via `FINEAGE_TRAINER_SP_LEARN=0` in `TestHostDefaults`.
 - Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
 
 ## Missing (next bricks, in order)
@@ -133,7 +133,7 @@ Not done / next:
 - Mobius `setClassId` extras: MagicSkillUse 5103 class-change effect broadcast, party/clan member-list refresh,
   `checkPlayerSkills` (drop skills above the new tree), sub-class / `setBaseClass` (we only have one class id).
 - Net client has no dedicated class-change UI: everything is NpcHtml + UserInfo/SkillList it already handles.
-- `FINEAGE_TRAINER_SP_LEARN` stays off by default. Hosted Zone defaults `FINEAGE_ZONE_AOI_CELL` to 3000.
+- `FINEAGE_TRAINER_SP_LEARN` defaults **on** (Mobius SP purchase). Hosted Zone defaults `FINEAGE_ZONE_AOI_CELL` to 3000.
 
 ## Other elven first-job paths (Q406 / Q407 / Q409)
 
