@@ -133,6 +133,16 @@ public sealed class BotObservationLog
             _tracker.NoteLocalCommand(opcode, at, targetObjectId, skillId);
     }
 
+    /// <summary>
+    /// Local-only marker frame for a zone session boundary. It is never on the wire (server opcodes stop at the
+    /// 0xFE00 extended block); recording it as a frame keeps the boundary in <see cref="Snapshot"/> so every replay
+    /// of the log (trace builder, tests) sees the same lifecycle the live tracker saw.
+    /// </summary>
+    public const ushort SessionBoundaryOpcode = 0xFFFF;
+
+    /// <summary>A new zone session (relog): every object seen on the previous connection is gone from view.</summary>
+    public void BeginSession(DateTimeOffset at) => Record(SessionBoundaryOpcode, [], at);
+
     public void SetSelfEntity(ulong entityValue)
     {
         lock (_stateGate)
@@ -263,6 +273,34 @@ public sealed class BotObservationLog
 
         public void SetSelfEntity(ulong entityValue) => _selfEntityValue = entityValue;
 
+        /// <summary>
+        /// A relog closes the zone connection and opens a new session whose knownlist starts empty: the server's
+        /// enter-world sends every object in view again, exactly as the Interlude client sees after a restart
+        /// (Mobius <c>RequestRestart</c> → <c>RestartResponse</c> wipes the client world; <c>EnterWorld</c> re-adds it).
+        /// Every life seen on the old connection ends here. Without this the oracle counted one "duplicate spawn"
+        /// per relog for every object in view (#1114: all 12,216 reconnect-storm issues were from relogging observers).
+        /// Duplicates inside one session are still counted.
+        /// </summary>
+        public void BeginSession()
+        {
+            foreach (var key in _byValue.Keys.ToList())
+            {
+                var e = _byValue[key];
+                if (e.Despawned && e.SpawnsWithoutDespawn == 0)
+                    continue;
+                _byValue[key] = e with
+                {
+                    Despawned = true,
+                    SpawnsWithoutDespawn = 0,
+                    IsMoveOrigin = false,
+                    LastDespawnOrdinal = ++_spawnOrdinal
+                };
+            }
+
+            _pendingCombat.Clear();
+            _selfEntityValue = 0;
+        }
+
         public EntityTracker Clone()
         {
             var t = new EntityTracker();
@@ -293,6 +331,9 @@ public sealed class BotObservationLog
             ExpirePending(at);
             switch (opcode)
             {
+                case SessionBoundaryOpcode:
+                    BeginSession();
+                    break;
                 case NetOpcode.EntitySpawn:
                     {
                         var s = NetCodec.DecodeEntitySpawn(payload);

@@ -537,6 +537,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _peers.Unregister(BotId);
         await StopReceiveLoopAsync();
         TearDownConnections();
+        _observation.BeginSession(DateTimeOffset.UtcNow);
 
         _login = new TcpClient();
         _zone = new TcpClient();
