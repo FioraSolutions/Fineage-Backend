@@ -66,7 +66,7 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 34 | NPC shots | ✅ | — | `Npc` recharge shots → `ZoneWorldNpcSkills` |
 | 35 | NPC heal / buff / debuff | ✅ | — | `NpcAI` → `ZoneWorldNpcSkills` |
 | 36 | Guards | ✅ | — | `ai/others` guards → `ScanAggression` |
-| 37 | Scripted NPC / boss / area AI | 🟡 | L | `dist/game/data/scripts/ai` (90 java) → `data/npc-scripts.json` (32 rows) and `ZoneWorldNpcScripts`. An unknown script id logs `[npc-script] unhandled script id`. `RaidbossInfo` on 31775/31776 still calls `SendScriptUnavailable`; ranking HTML is only for npc 31603 — #919 |
+| 37 | Scripted NPC / boss / area AI | 🟡 | L | Script host `#805` + `npc-scripts.json`. `RaidbossInfo` (31775/31776) serves Mobius level HTML + radar via `BossCatalog` — #919. Remaining gap: area/boss combat AI under `ai/areas` / `ai/bosses` (not named Script bypass) |
 | **Drops and economy** |
 | 38 | Droplists | ✅ | — | per-NPC drop XML → 1518 `data/drops` JSON files via `DropCatalog`. A kill with no file logs `drop miss npc={id} (no droplist)`. #803 closed the spawn-set holes |
 | 39 | Herbs | ✅ | — | herb items → `ZoneWorldHerbs` |
@@ -187,7 +187,7 @@ These Mobius trees were walked. They do not get their own row when the mechanism
 
 PvE and character leveling first. Siege, olympiad, and clan are last because those stacks are already on `dev`.
 
-1. Scripted boss / area / other AI still outside `npc-scripts.json` (row 37) — #919. Host is #805.
+1. Area / boss combat AI still outside the script host (row 37 residual after RaidbossInfo) — follow #919 / #805.
 2. ~~Book / map / dice / calculator / xmas item handlers (row 103) — #925~~ (done).
 3. ~~Shop wear preview (row 48) — #924~~ (done).
 4. Macros (row 69) — #927.
