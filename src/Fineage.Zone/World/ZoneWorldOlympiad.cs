@@ -82,18 +82,29 @@ public sealed partial class ZoneWorld
         return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now));
     }
 
-    public Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
+    public Task<string?> TryAdminReportOlympiadAsync(
+        ZoneSession session,
+        int matchId,
+        int winnerObjectId,
+        CancellationToken ct,
+        string source = AdminSourceInternal)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         // Rewards may SaveInventory → flush after the change (B8).
-        return Task.FromResult(WithDeferredInventoryPersist(() =>
+        string target = $"match:{matchId} winner:{winnerObjectId}";
+        string before = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
+        string? error = WithDeferredInventoryPersist(() =>
         {
             var step = _olympiad.Board.Report(matchId, winnerObjectId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
             return step.Error;
-        }));
+        });
+        string after = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
+        AuditAdmin(session, _byId.GetValueOrDefault(session.ObjectId), "AdminReportOlympiadResult", target,
+            before, after, source, error);
+        return Task.FromResult(error);
     }
 
     void ApplyOlympiad(IReadOnlyList<OlympiadStep> steps)

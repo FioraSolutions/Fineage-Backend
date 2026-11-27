@@ -77,17 +77,37 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryAdminBossAsync(ZoneSession session, AdminBossScheduleMsg request, CancellationToken ct)
+    public Task<string?> TryAdminBossAsync(
+        ZoneSession session,
+        AdminBossScheduleMsg request,
+        CancellationToken ct,
+        string source = AdminSourceInternal)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
 
+        string target = $"npc:{request.NpcId} action:{request.Action}";
+        string before = BossAuditState(request.NpcId);
         string? error = ApplyAdminBoss(request);
-        if (error != null)
-            return Task.FromResult<string?>(error);
-
-        return Task.FromResult<string?>(null);
+        string after = BossAuditState(request.NpcId);
+        AuditAdmin(session, ActorOf(session), "AdminBossSchedule", target, before, after, source, error);
+        return Task.FromResult(error);
     }
+
+    string BossAuditState(int npcId)
+    {
+        if (!_bosses.Schedule.TryView(npcId, out var view))
+            return AdminStateSnapshot(_byId.GetValueOrDefault(BossObjectIdOf(npcId)));
+        var entity = _byId.GetValueOrDefault(view.ObjectId);
+        return $"npc={view.NpcId} status={view.Status} spawned={entity != null} hp={view.CurrentHp}/{view.MaxHp}"
+            + (entity == null ? "" : " " + AdminStateSnapshot(entity));
+    }
+
+    int BossObjectIdOf(int npcId) =>
+        _bosses.Catalog.TryGet(npcId, out var definition) ? definition.ObjectId : 0;
+
+    ZoneEntity? ActorOf(ZoneSession session) =>
+        _byId.TryGetValue(session.ObjectId, out var actor) ? actor : null;
 
     /// <summary>Test hook: run the boss actor's stage now, without the simulation loop.</summary>
     internal void AdvanceBossesForTests()

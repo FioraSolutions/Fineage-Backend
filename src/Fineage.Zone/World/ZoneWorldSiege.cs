@@ -129,18 +129,25 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> TryAdminCaptureAsync(ZoneSession session, int castleId, int clanId, CancellationToken ct)
+    public Task<string?> TryAdminCaptureAsync(
+        ZoneSession session,
+        int castleId,
+        int clanId,
+        CancellationToken ct,
+        string source = AdminSourceInternal)
     {
         if (!session.InWorld)
             return Task.FromResult<string?>("world");
 
+        string target = $"castle:{castleId} clan:{clanId}";
+        string before = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
         string? error = _chSiege.Board.IsSiegableHall(castleId)
             ? CaptureClanHall(clanId, castleId, NowUnixMs())
             : CaptureLocked(clanId, castleId, NowUnixMs(), session);
-
-        if (error != null)
-            return Task.FromResult<string?>(error);
-        return Task.FromResult<string?>(null);
+        string after = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
+        AuditAdmin(session, _byId.GetValueOrDefault(session.ObjectId), "AdminCaptureCastle", target,
+            before, after, source, error);
+        return Task.FromResult(error);
     }
 
 }

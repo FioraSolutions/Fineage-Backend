@@ -35,6 +35,9 @@ public sealed class PunishmentManager
 
     public JailZoneCatalog Jail => _jail;
 
+    /// <summary>The shared append-only GM audit sink. Admin dispatch uses the same file as punishments.</summary>
+    public GmAuditLog AuditLog => _audit;
+
     public void Bind(IAccountStore? accounts, IPunishmentSink sink)
     {
         _accounts = accounts;

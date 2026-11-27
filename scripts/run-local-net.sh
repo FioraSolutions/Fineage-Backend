@@ -22,6 +22,8 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 # Non-loopback binds refuse DefaultSecret; local SoT binds 0.0.0.0 so set the shared secret.
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
 # Local playtest: GM chat (//gmshop, //setlevel, …) for allowlisted chars in data/admin-characters.json (KuK).
+# Local playtest is development: the wildcard allowlist stays usable here.
+export FINEAGE_ENV="${FINEAGE_ENV:-development}"
 export FINEAGE_ZONE_ADMIN="${FINEAGE_ZONE_ADMIN:-1}"
 export FINEAGE_ZONE_OUTBOUND_QUEUE="${FINEAGE_ZONE_OUTBOUND_QUEUE:-512}"
 # Do not export DOTNET_GCDynamicAdaptationMode=0 here — Zone keeps DATAS unless a perf run measures otherwise (#867).

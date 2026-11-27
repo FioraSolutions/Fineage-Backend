@@ -1,6 +1,7 @@
 using System.Globalization;
 using Fineage.Game.Services;
 using Fineage.Protocol;
+using Fineage.Zone.Security;
 
 namespace Fineage.Zone.World;
 
@@ -50,19 +51,27 @@ public sealed partial class ZoneWorld
         if (!GmChatCommand.TrySplit(text, out string verb, out string args))
             return Plain("Unknown GM command.");
 
-        if (!ZoneAdmin.IsAdminCharacter(player.Name))
+        AdminRole role = ZoneAdmin.RoleOf(player.Name);
+        if (role < AdminRole.Gm)
         {
-            ZoneLog.Info($"gmchat denied object={player.ObjectId} name={player.Name} cmd={verb}");
+            ZoneLog.Info($"gmchat denied object={player.ObjectId} name={player.Name} cmd={verb} role={role}");
+            AuditAdminDenied(session, "chat:" + verb, AdminAuditTarget(session, args), role, AdminRole.Gm, AdminSourceChat);
             return Plain(AdminDenied);
         }
 
         if (!_gmChatByVerb.TryGetValue(verb, out var command))
         {
             ZoneLog.Info($"gmchat unknown object={player.ObjectId} cmd={verb}");
+            AuditAdmin(session, player, "chat:" + verb, AdminAuditTarget(session, args), "", "", AdminSourceChat,
+                "unknown command");
             return Plain($"Unknown GM command: {verb}");
         }
 
+        string target = AdminAuditTarget(session, args);
+        string before = AdminAuditState(session, player, target);
         string? err = command.Handler(this, player, session, args);
+        string after = AdminAuditState(session, player, target);
+        AuditAdmin(session, player, "chat:" + verb, target, before, after, AdminSourceChat, err);
         if (err != null)
         {
             ZoneLog.Info($"gmchat fail object={player.ObjectId} cmd={verb} reason={err}");
