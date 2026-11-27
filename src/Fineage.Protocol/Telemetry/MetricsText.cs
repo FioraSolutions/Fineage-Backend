@@ -633,15 +633,17 @@ public static class MetricsText
             sb.Append("fineage_disk_size_bytes{path=\"").Append(Escape(row.Label)).Append("\"} ").Append(row.Size.ToString(CultureInfo.InvariantCulture)).Append('\n');
     }
 
-    /// <summary>#992: process memory, CPU, GC and thread-pool state, read at scrape time (Prometheus client naming).</summary>
+    /// <summary>
+    /// #992: process memory, CPU, GC and thread-pool state, read at scrape time (Prometheus client naming). The readers
+    /// are the cheap ones: <see cref="Environment.WorkingSet"/> and <see cref="Environment.CpuUsage"/> instead of a
+    /// <see cref="System.Diagnostics.Process"/> snapshot, which allocates about 150 KB per scrape on Linux.
+    /// </summary>
     static void AppendProcess(StringBuilder sb)
     {
-        using var process = System.Diagnostics.Process.GetCurrentProcess();
-        AppendRaw(sb, "process_resident_memory_bytes", "gauge", "Resident set size", process.WorkingSet64);
-        AppendRaw(sb, "process_cpu_seconds_total", "counter", "User and system CPU time", process.TotalProcessorTime.TotalSeconds);
-        AppendRaw(sb, "process_start_time_seconds", "gauge", "Process start, unix seconds",
-            new DateTimeOffset(process.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds() / 1000.0);
-        AppendRaw(sb, "process_threads", "gauge", "Operating system threads", process.Threads.Count);
+        AppendRaw(sb, "process_resident_memory_bytes", "gauge", "Resident set size", Environment.WorkingSet);
+        AppendRaw(sb, "process_cpu_seconds_total", "counter", "User and system CPU time", Environment.CpuUsage.TotalTime.TotalSeconds);
+        AppendRaw(sb, "process_start_time_seconds", "gauge", "Process start, unix seconds", ProcessStartUnixSeconds);
+        AppendRaw(sb, "process_threads", "gauge", "Operating system threads", OperatingSystemThreads());
         AppendHelp(sb, "dotnet_gc_collections_total", "Garbage collections by generation");
         sb.Append("# TYPE dotnet_gc_collections_total counter\n");
         for (int generation = 0; generation <= GC.MaxGeneration; generation++)
@@ -652,6 +654,29 @@ public static class MetricsText
         AppendRaw(sb, "dotnet_gc_pause_seconds_total", "counter", "Time the runtime paused threads for garbage collection", GC.GetTotalPauseDuration().TotalSeconds);
         AppendRaw(sb, "dotnet_threadpool_threads", "gauge", "Thread-pool threads", ThreadPool.ThreadCount);
         AppendRaw(sb, "dotnet_threadpool_queue_length", "gauge", "Work items queued on the thread pool", ThreadPool.PendingWorkItemCount);
+    }
+
+    static readonly double ProcessStartUnixSeconds = ReadProcessStart();
+
+    static double ReadProcessStart()
+    {
+        using var process = System.Diagnostics.Process.GetCurrentProcess();
+        return new DateTimeOffset(process.StartTime.ToUniversalTime()).ToUnixTimeMilliseconds() / 1000.0;
+    }
+
+    /// <summary>Linux: the entries of <c>/proc/self/task</c>; elsewhere the process snapshot's thread list.</summary>
+    static int OperatingSystemThreads()
+    {
+        if (OperatingSystem.IsLinux())
+        {
+            int count = 0;
+            foreach (string _ in Directory.EnumerateDirectories("/proc/self/task"))
+                count++;
+            return count;
+        }
+
+        using var process = System.Diagnostics.Process.GetCurrentProcess();
+        return process.Threads.Count;
     }
 
     static void AppendRaw(StringBuilder sb, string name, string type, string help, double value)

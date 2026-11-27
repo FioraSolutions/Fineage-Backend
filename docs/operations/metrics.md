@@ -25,6 +25,9 @@ How to read the table:
 - Histograms have `_bucket{le}`, `_sum` and `_count` samples. A per-endpoint family (`endpoint` label) and a histogram
   appear after the first measurement; a counter with labels appears with its first labelled series. Alert rules on
   such counters compare the cumulative value (`> 0`), not `increase()`, so the first event fires the alert.
+- The collector only sees measurements made after it starts. Zone starts `/metrics` before the boot (#992), so the
+  startup state audit, the startup reconcile and silent data fallbacks are counted and a booting zone scrapes as not
+  ready; before #992 they were recorded before the listener existed and never reached `/metrics`.
 - Counters are cumulative since process start; a restart resets them (Prometheus `rate`/`increase` handle that).
 - `fineage_packets_per_second` is the frame rate since the previous scrape by **any** client (load-test tool or
   Prometheus). Dashboards use `rate(fineage_frames_in_total[1m])` instead.
@@ -192,10 +195,10 @@ Debug load-run evidence (before/after scrape of a `bots-economy-hammer` run) is 
 
 | Family | Type | Unit | Process | Instrument | Source | Meaning | Verified by |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `process_resident_memory_bytes` | gauge | bytes | zone, login | — | Process.WorkingSet64 at scrape time | Resident set size | `Health_disk_and_process_families_follow_the_process_state`, `Every_exported_family_is_in_the_inventory_for_its_process` |
-| `process_cpu_seconds_total` | counter | seconds | zone, login | — | Process.TotalProcessorTime at scrape time | User and system CPU time | `Every_exported_family_is_in_the_inventory_for_its_process` |
-| `process_start_time_seconds` | gauge | seconds | zone, login | — | Process.StartTime | Process start, unix seconds | `Every_exported_family_is_in_the_inventory_for_its_process` |
-| `process_threads` | gauge | count | zone, login | — | Process.Threads.Count at scrape time | Operating system threads | `Every_exported_family_is_in_the_inventory_for_its_process` |
+| `process_resident_memory_bytes` | gauge | bytes | zone, login | — | Environment.WorkingSet at scrape time | Resident set size | `Health_disk_and_process_families_follow_the_process_state`, `Every_exported_family_is_in_the_inventory_for_its_process` |
+| `process_cpu_seconds_total` | counter | seconds | zone, login | — | Environment.CpuUsage.TotalTime at scrape time | User and system CPU time | `Every_exported_family_is_in_the_inventory_for_its_process` |
+| `process_start_time_seconds` | gauge | seconds | zone, login | — | Process.StartTime, read once | Process start, unix seconds | `Every_exported_family_is_in_the_inventory_for_its_process` |
+| `process_threads` | gauge | count | zone, login | — | Linux: entries of /proc/self/task; elsewhere Process.Threads.Count | Operating system threads | `Every_exported_family_is_in_the_inventory_for_its_process` |
 | `dotnet_gc_collections_total` | counter | count | zone, login | — | GC.CollectionCount(generation) | Garbage collections by generation. Labels: `generation` | `Health_disk_and_process_families_follow_the_process_state`, `Every_exported_family_is_in_the_inventory_for_its_process` |
 | `dotnet_gc_allocated_bytes_total` | counter | bytes | zone, login | — | GC.GetTotalAllocatedBytes() | Bytes allocated on the managed heap since start | `Health_disk_and_process_families_follow_the_process_state`, `Every_exported_family_is_in_the_inventory_for_its_process` |
 | `dotnet_gc_heap_size_bytes` | gauge | bytes | zone, login | — | GC.GetGCMemoryInfo().HeapSizeBytes | Managed heap size after the last collection | `Every_exported_family_is_in_the_inventory_for_its_process` |
