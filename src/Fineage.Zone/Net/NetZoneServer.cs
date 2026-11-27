@@ -66,7 +66,8 @@ public sealed partial class NetZoneServer
         // Character durable state is loaded by ZoneWorld.TryEnterAsync via the shared store.
         _ = accounts;
         _presence = presence ?? new NetPresenceHub();
-        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        // Auth handoff expiry and idle are real time, not simulation time: wall-only.
+        _clock = clock ?? (() => Fineage.Zone.Time.SystemZoneTime.Instance.UtcNow);
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;

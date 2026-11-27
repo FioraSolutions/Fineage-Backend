@@ -13,7 +13,7 @@ public static class ZoneAcceptance
         // Mint handoffs in-process via Fineage.Accounts — Zone must not reference Fineage.Login.
         // Auth is HMAC-only; loopback ZoneHost runs with accounts=null and grants starter kits on enter.
         var tokens = new HandoffTokens(HandoffTokens.DefaultSecret);
-        var now = DateTimeOffset.UtcNow;
+        var now = Fineage.Zone.Time.SystemZoneTime.Instance.UtcNow;
         var fighter = SeedHandoff(tokens, now, characterId: 1, "selftest", "HumanOne", HumanClasses.Fighter, HumanClasses.RaceHuman);
         var mystic = SeedHandoff(tokens, now, characterId: 2, "selftest2", "HumanTwo", HumanClasses.Mystic, HumanClasses.RaceHuman);
 

@@ -51,7 +51,8 @@ public static class ZoneAoiSettings
         OlympiadBoard? olympiad = null,
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
-        RaidBossPointsManager? raidBossPoints = null)
+        RaidBossPointsManager? raidBossPoints = null,
+        Fineage.Zone.Time.IZoneTime? time = null)
     {
         if (aoi != null)
         {
@@ -65,7 +66,8 @@ public static class ZoneAoiSettings
                 olympiad: olympiad,
                 ledgerJournal: ledgerJournal,
                 punishments: punishments,
-                raidBossPoints: raidBossPoints);
+                raidBossPoints: raidBossPoints,
+                time: time);
         }
 
         int cell = AoiCellSize;
@@ -81,13 +83,14 @@ public static class ZoneAoiSettings
                 olympiad: olympiad,
                 ledgerJournal: ledgerJournal,
                 punishments: punishments,
-                raidBossPoints: raidBossPoints);
+                raidBossPoints: raidBossPoints,
+                time: time);
         }
 
         int range = InterestRange;
         return range <= 0
-            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints)
-            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints);
+            ? new ZoneWorld(accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints, time: time)
+            : new ZoneWorld(new RangeAoi(range), accounts: accounts, sevenSigns: sevenSigns, includeEnabledMaps: includeEnabledMaps, bosses: bosses, olympiad: olympiad, ledgerJournal: ledgerJournal, punishments: punishments, raidBossPoints: raidBossPoints, time: time);
     }
 
     static int ReadInt(string name, int fallback, int min, int max)

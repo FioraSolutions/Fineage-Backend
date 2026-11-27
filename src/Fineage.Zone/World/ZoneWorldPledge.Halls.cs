@@ -182,6 +182,11 @@ public sealed partial class ZoneWorld
         foreach (var ended in due)
         {
             var hall = halls[ended.HallId];
+            if (now - hall.AuctionEndUnixMs > 24L * 3600 * 1000)
+            {
+                ZoneLog.Warn(
+                    $"[hall-auction] hall={hall.Id} auction overdue due={hall.AuctionEndUnixMs} now={now}; settling once");
+            }
             var winner = hall.Bids
                 .Where(b => _clan.TryGet(b.ClanId, out var c) && c.D.HallId == 0)
                 .OrderByDescending(b => b.Amount).ThenBy(b => b.TimeUnixMs).FirstOrDefault();

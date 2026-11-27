@@ -9,7 +9,7 @@ public sealed partial class ZoneWorld
     readonly SpawnCatalog _spawnCatalog;
     readonly string _activeMapId;
     readonly bool _includeEnabledMaps;
-    readonly Func<DateTimeOffset> _clock;
+    readonly Fineage.Zone.Time.IZoneTime _clock;
     readonly Dictionary<int, SpawnSlotState> _spawnSlots = [];
     /// <summary>Due-ordered respawn index so <see cref="TickSpawns"/> does not scan every slot (B10).</summary>
     readonly SortedSet<(long DueUnixMs, int ObjectId)> _spawnDue = [];

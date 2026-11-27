@@ -277,6 +277,12 @@ public sealed class LotteryBoard
 
         while (now >= _s.EndUnixMs)
         {
+            long overdue = now - _s.EndUnixMs;
+            if (overdue >= 7L * 24 * 3600 * 1000)
+            {
+                ZoneLog.Warn(
+                    $"[lottery] draw overdue by={overdue / 3_600_000}min lottery={_s.Number} due={_s.EndUnixMs} now={now}; drawing once and skipping missed draws");
+            }
             Finish(random, notices);
             _s.EndUnixMs = NextDraw(Math.Max(now, _s.EndUnixMs));
             _s.SuspendAnnounced = now >= _s.EndUnixMs - LotteryProtocol.SalesCloseMs;

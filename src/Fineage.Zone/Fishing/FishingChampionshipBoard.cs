@@ -70,7 +70,7 @@ public sealed class FishingChampionshipBoard
         _s.Current.Remove(_s.Current.OrderBy(e => e.Length).First()); _s.Current.Add(new() { Name = playerName, Length = len }); Save(); return len;
     }
     public long TryClaim(string playerName, out int rank) { rank = 0; var ordered = SortDesc(_s.Winners); for (int i = 0; i < ordered.Count; i++) { if (!ordered[i].Name.Equals(playerName, StringComparison.OrdinalIgnoreCase)) continue; rank = i + 1; if (ordered[i].Claimed || rank > _settings.Rewards.Length) return 0; ordered[i].Claimed = true; Save(); return _settings.Rewards[rank - 1]; } return 0; }
-    public bool Tick(long nowUnixMs) { if (nowUnixMs < _s.PeriodEndUnixMs) return false; _s.Winners = SortDesc(_s.Current).Select(e => new FishingChampionshipEntry { Name = e.Name, Length = e.Length }).ToList(); _s.Current.Clear(); _s.PeriodEndUnixMs = nowUnixMs + _settings.PeriodMs; Save(); return true; }
+    public bool Tick(long nowUnixMs) { if (nowUnixMs < _s.PeriodEndUnixMs) return false; if (nowUnixMs - _s.PeriodEndUnixMs >= _settings.PeriodMs) ZoneLog.Warn($"[fishing-championship] period overdue due={_s.PeriodEndUnixMs} now={nowUnixMs}; settling once and starting the next period"); _s.Winners = SortDesc(_s.Current).Select(e => new FishingChampionshipEntry { Name = e.Name, Length = e.Length }).ToList(); _s.Current.Clear(); _s.PeriodEndUnixMs = nowUnixMs + _settings.PeriodMs; Save(); return true; }
     static List<FishingChampionshipEntry> SortDesc(List<FishingChampionshipEntry> list) => [.. list.OrderByDescending(e => e.Length).ThenBy(e => e.Name, StringComparer.OrdinalIgnoreCase)];
     void Save() => _store.Save(_s);
     public static string FormatLength(double length) => length.ToString("0.00", CultureInfo.InvariantCulture);

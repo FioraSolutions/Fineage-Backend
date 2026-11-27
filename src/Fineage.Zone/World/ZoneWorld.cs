@@ -256,13 +256,14 @@ public sealed partial class ZoneWorld
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
-        Fineage.Game.L10n.LocalizationCatalog? localization = null)
+        Fineage.Game.L10n.LocalizationCatalog? localization = null,
+        Fineage.Zone.Time.IZoneTime? time = null)
     {
         // A reference, not a lambda: a closure here would be rooted by the fan-out worker thread and keep the whole
         // world alive when a caller drops it without disposing (the full Zone test suite creates hundreds).
         _fanoutDispatcher = new FanoutDispatcher { ReliableAdmission = _reliableAudienceAdmission };
         _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
-        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _clock = time ?? (clock is null ? Fineage.Zone.Time.SystemZoneTime.Instance : new Fineage.Zone.Time.WallClockZoneTime(clock));
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
         InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
             regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));

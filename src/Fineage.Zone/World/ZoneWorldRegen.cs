@@ -116,14 +116,16 @@ public sealed partial class ZoneWorld
     /// </summary>
     async Task SimulationLoopAsync(CancellationToken ct)
     {
+        long wall = _simulationClock.WallUnixMs();
+        _simulationClock.Reanchor(wall);
         using (_affinity.Step())
-            _simulationTicks.Resume(_simulationClock.WallUnixMs());
+            _simulationTicks.Resume(wall);
         try
         {
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
+                long wait = _simulationTicks.MillisecondsUntilNextSimulationTick(_simulationClock.WallUnixMs());
                 NotePhase("waiting-for-tick");
                 if (wait >= AdmissionGapMs && _ingress.QueuedDepth > 0)
                 {
