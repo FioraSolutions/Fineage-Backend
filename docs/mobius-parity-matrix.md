@@ -100,14 +100,14 @@ Since the 2026-11-21 matrix (and the 2026-11-22 audit), the shared handlers for 
 | 66 | Alliance | ✅ | — | `Alliance` → `ZoneWorldAlly` |
 | 67 | Party matching rooms | ❌ | M | `RequestAskJoinPartyRoom.java` and `EX_PARTY_ROOM_MEMBER` → no room manager. Chat types exist and then have nowhere to go — #928 |
 | 68 | User commands | ✅ | — | `handlers/chat/commands/user/*.java` → `UserCommandRegistry` dispatches ids onto teleport, mount, party, clan, channel, olympiad, and siege. Unstuck shares `BeginTownTeleport`. Unknown id is logged — #920 |
-| 69 | Macros | ❌ | S | `RequestMakeMacro.java`, `SendMacroList.java` → no macro store — #927 |
+| 69 | Macros | ✅ | — | `RequestMakeMacro.java` / `RequestDeleteMacro.java` / `SendMacroList.java` → `ZoneWorldMacros`, `character_macros`, enter MacroList — #927 |
 | 70 | Community board | ❌ | L | `communitybbs/` and `RequestShowBoard.java` → no board — #929 |
 | 71 | PC cafe points and coupons | ❌ | S | `PcCafePointsManager.java`, `RequestPCCafeCouponUse.java` → no points — #933 |
 | **Companions** |
 | 72 | Servitors | ✅ | — | `Servitor.java` → `ZoneWorldSummons` |
 | 73 | Cubics | ✅ | — | `Cubic.java` → `ZoneWorldCubics` (owner M.Atk is in the success roll) |
 | 74 | Pets (hunger, exp, evolve, feed) | ✅ | — | `Pet.java` → `ZoneWorldPets`, `ZoneWorldPets.Evolve` |
-| 75 | Pet rename | ❌ | S | `RequestChangePetName.java` → `ZoneEntity.Summon` has a name field and no rename request — #936 |
+| 75 | Pet rename | ✅ | — | `RequestChangePetName.java` → `ZoneWorldPets.TryChangePetName` — #936 |
 | 76 | Mounts and wyvern | ✅ | — | `Ride` → `ZoneWorldMounts` |
 | **Progression and services** |
 | 77 | 1st and 2nd class village masters | ✅ | — | `village_master/*` → `ZoneWorldVillageMasters`, quests 211–233 and 401–418 |
@@ -190,11 +190,11 @@ PvE and character leveling first. Siege, olympiad, and clan are last because tho
 1. Area / boss combat AI still outside the script host (row 37 residual after RaidbossInfo) — follow #919 / #805.
 2. ~~Book / map / dice / calculator / xmas item handlers (row 103) — #925~~ (done).
 3. ~~Shop wear preview (row 48) — #924~~ (done).
-4. Macros (row 69) — #927.
+4. ~~Macros (row 69) — #927~~ (done).
 5. Party matching rooms (row 67) — #928.
 6. Community board (row 70) — #929.
 7. Petitions (row 63) — #930.
-8. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935, pet rename #936 (rows 98, 71, 105, 54, 75).
+8. GM admin verb tail (row 104) — #931. Then hero words #932, PC cafe #933, seasonal events #934, forget-recipe #935 (rows 98, 71, 105, 54).
 
 Siege, olympiad matches, and clan halls are already on `dev` (rows 92–95, 97) and stay last. #299 (early quests) matches the 344/0/0/0 quest heuristic and should be closed. #296 stays open for private-store UI; manufacture windows already exist on the Unity client.
 

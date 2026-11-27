@@ -265,6 +265,12 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestShortCutDel:
                             await _shortcutActions.OnShortCutDelAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestMakeMacro:
+                            await _shortcutActions.OnMakeMacroAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestDeleteMacro:
+                            await _shortcutActions.OnDeleteMacroAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.BossStatusRequest:
                             await _worldEvents.OnBossStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;

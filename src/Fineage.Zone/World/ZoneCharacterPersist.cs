@@ -175,6 +175,13 @@ sealed class ZoneCharacterPersist
             store => store.TryReplaceShortcuts(account, characterId, copy));
     }
 
+    public bool ReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros)
+    {
+        var copy = Copy(macros);
+        return Write(nameof(ReplaceMacros), Character, characterId, account, economic: false,
+            store => store.TryReplaceMacros(account, characterId, copy));
+    }
+
     public void ReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects)
     {
         var copy = Copy(effects);

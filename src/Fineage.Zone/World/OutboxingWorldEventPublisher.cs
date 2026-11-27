@@ -196,6 +196,9 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init) =>
         Record(FanoutKind.ShortcutInit, 0, watcherObjectIds, new FanoutArgs(Payload: init), replaceable: false);
 
+    void IWorldEventPublisher.FanoutMacroList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MacroListMsg list) =>
+        Record(FanoutKind.MacroList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
     void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z) =>
         Record(FanoutKind.ChangeWaitType, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: waitType, C: x, D: y, E: z), replaceable: false);
 

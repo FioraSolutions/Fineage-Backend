@@ -134,6 +134,7 @@ internal enum FanoutKind : byte
     ShowMiniMap = 127,
     ShowCalculator = 128,
     ShowXMasSeal = 129,
+    MacroList = 130,
 }
 
 internal static class FanoutKinds

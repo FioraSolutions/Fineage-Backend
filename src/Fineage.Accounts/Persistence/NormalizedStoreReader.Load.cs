@@ -157,4 +157,53 @@ static partial class NormalizedStoreReader
 
         return rows.Count == 0 ? null : rows;
     }
+
+    static List<StoredMacro>? LoadMacros(NpgsqlConnection conn, int characterId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            """
+            SELECT macro_id, icon, name, descr, acronym, commands
+            FROM character_macros
+            WHERE character_id = @cid
+            ORDER BY macro_id
+            """;
+        cmd.Parameters.AddWithValue("cid", characterId);
+        var rows = new List<StoredMacro>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            int id = reader.GetInt32(0);
+            int icon = reader.GetInt32(1);
+            string name = reader.IsDBNull(2) ? "" : reader.GetString(2);
+            string descr = reader.IsDBNull(3) ? "" : reader.GetString(3);
+            string acronym = reader.IsDBNull(4) ? "" : reader.GetString(4);
+            string commands = reader.IsDBNull(5) ? "" : reader.GetString(5);
+            rows.Add(new StoredMacro(id, icon, name, descr, acronym, DecodeMacroCommands(commands)));
+        }
+
+        return rows.Count == 0 ? null : rows;
+    }
+
+    /// <summary>Mobius commands column: <c>type,d1,d2[,cmd];...</c>.</summary>
+    internal static List<StoredMacroCmd> DecodeMacroCommands(string? raw)
+    {
+        var list = new List<StoredMacroCmd>();
+        if (string.IsNullOrEmpty(raw))
+            return list;
+        foreach (var part in raw.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var bits = part.Split(',');
+            if (bits.Length < 3)
+                continue;
+            if (!int.TryParse(bits[0], out int type)
+                || !int.TryParse(bits[1], out int d1)
+                || !int.TryParse(bits[2], out int d2))
+                continue;
+            string cmd = bits.Length > 3 ? bits[3] : "";
+            list.Add(new StoredMacroCmd(list.Count, type, d1, d2, cmd));
+        }
+
+        return list;
+    }
 }

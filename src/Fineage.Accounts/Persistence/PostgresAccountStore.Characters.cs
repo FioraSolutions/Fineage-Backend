@@ -303,6 +303,17 @@ public sealed partial class PostgresAccountStore
                 tx.Commit();
             });
 
+    public bool TryReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros) =>
+        RunSilent(
+            () => _inner.TryReplaceMacros(account, characterId, macros),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
+                NormalizedStoreWriter.ReplaceMacros(conn, tx, characterId, macros);
+                tx.Commit();
+            });
+
     public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when) =>
         _inner.TrySetLastAccess(account, characterId, when);
 

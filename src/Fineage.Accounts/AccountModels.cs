@@ -37,6 +37,25 @@ public sealed record StoredItem(
     int Option1 = 0,
     int Option2 = 0);
 
+/// <summary>One Mobius <c>character_macroses</c> row (id, icon, name, descr, acronym, commands).</summary>
+public sealed record StoredMacro(
+    int Id,
+    int Icon,
+    string Name,
+    string Descr,
+    string Acronym,
+    IReadOnlyList<StoredMacroCmd> Commands)
+{
+    public const int MaxMacros = 48;
+    public const int MaxCommands = 12;
+    public const int MaxCommandsLength = 255;
+    public const int MaxDescrLength = 32;
+    public const int FirstId = 1000;
+}
+
+/// <summary>One command inside a <see cref="StoredMacro"/> (Mobius <c>MacroCmd</c>).</summary>
+public sealed record StoredMacroCmd(int Entry, int Type, int D1, int D2, string Cmd);
+
 /// <summary>
 /// One Mobius <c>character_shortcuts</c> row. <see cref="Slot"/> is 0..11 on <see cref="Page"/> 0..9.
 /// <see cref="Type"/> is 1 item (id = item object id), 2 skill (id = skill id, level = skill level),
@@ -132,6 +151,8 @@ public sealed record CharacterRecord(
     IReadOnlyList<StoredItem>? Freight = null,
     bool Newbie = true,
     IReadOnlyList<StoredShortcut>? Shortcuts = null,
+    /// <summary>Mobius <c>character_macroses</c>. Null = never saved.</summary>
+    IReadOnlyList<StoredMacro>? Macros = null,
     IReadOnlyList<StoredSkill>? LearnedSkills = null,
     int DeathPenaltyLevel = 0,
     int Karma = 0,

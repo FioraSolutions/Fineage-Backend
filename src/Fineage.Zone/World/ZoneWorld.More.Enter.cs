@@ -258,6 +258,7 @@ public sealed partial class ZoneWorld
         }
 
         LoadShortcuts(entity, stored);
+        LoadMacros(entity, stored);
         RefreshGradePenalty(entity);
         EnsureFreightLoaded(entity, stored);
         return entity;

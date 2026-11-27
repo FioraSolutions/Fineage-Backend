@@ -149,6 +149,9 @@ internal static class FanoutDispatch
             case FanoutKind.ShortcutInit:
                 publisher.FanoutShortcutInit(watchers, ((Fineage.Protocol.ShortCutInitMsg)args.Payload!));
                 return;
+            case FanoutKind.MacroList:
+                publisher.FanoutMacroList(watchers, ((Fineage.Protocol.MacroListMsg)args.Payload!));
+                return;
             case FanoutKind.ChangeWaitType:
                 publisher.FanoutChangeWaitType(watchers, args.A, args.B, args.C, args.D, args.E);
                 return;

@@ -157,6 +157,9 @@ interface IWorldEventPublisher
     /// <summary>Full ShortCutInit re-send (Mobius setActiveClass restores the shortcuts of the new class index).</summary>
     void FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init);
 
+    /// <summary>Mobius <c>SendMacroList</c> (one packet per macro, or one empty).</summary>
+    void FanoutMacroList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MacroListMsg list);
+
     /// <summary>Mobius ChangeWaitType (sit/stand) for <paramref name="objectId"/>. Called on the simulation thread.</summary>
     void FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z);
 

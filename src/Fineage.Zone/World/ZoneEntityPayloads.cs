@@ -251,6 +251,12 @@ sealed class ZoneEntityMovePayload
 sealed class ZonePlayerSkillsPayload
 {
     public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
+    /// <summary>Mobius MacroList keyed by macro id.</summary>
+    public Dictionary<int, Fineage.Accounts.StoredMacro> Macros { get; } = [];
+    /// <summary>Mobius MacroList._revision (starts at 1).</summary>
+    public int MacroRevision { get; set; } = 1;
+    /// <summary>Next id when creating (Mobius starts at 1000).</summary>
+    public int MacroNextId { get; set; } = Fineage.Accounts.StoredMacro.FirstId;
     public Dictionary<int, int> LearnedSkills { get; } = [];
     public bool HasStatAbnormal { get; set; }
     public List<ZoneAbnormalEntry> Abnormals { get; } = [];
