@@ -154,7 +154,8 @@ public sealed partial class ZoneWorld
         RecordCommandPhaseTicks(PhaseDequeue, dequeueTicks);
         double applyMs = RecordCommandPhaseTicks(PhaseApply, applyTicks);
         double flushMs = 0, sealMs = 0, replyMs = 0;
-        if (applied)
+        // Replies carried from an earlier step still need a commit when no new command arrived (#1112).
+        if (applied || _economyCarried.Count > 0)
             (flushMs, sealMs, replyMs) = ReleaseAppliedCommandReplies(submits);
 
         string? syncIo = _syncIo.ConsumeSummary();

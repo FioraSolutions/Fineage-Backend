@@ -17,7 +17,9 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     /// <summary>How long a reply may wait for its economy commit across steps before it is refused.</summary>
-    internal static readonly TimeSpan EconomyReplyCarryBudget = TimeSpan.FromSeconds(10);
+    internal TimeSpan EconomyReplyCarryBudget { get; set; } = TimeSpan.FromSeconds(10);
+
+    internal EconomyReservation? EconomyReservationsForTests => _economyPersist?.Reservations;
 
     readonly List<ZoneCommandIngress.Applied> _economyCarried = [];
     readonly Dictionary<ZoneCommandIngress.Submission, long> _economyCarriedSince = new(ReferenceEqualityComparer.Instance);

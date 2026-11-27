@@ -215,7 +215,10 @@ public sealed partial class ZoneWorld
 
         if (result is EconomyFlushResult.QueueFull or EconomyFlushResult.ReservationConflict)
         {
-            LogEconomyCommitFailure(stolen);
+            // Inside a step the batch is restored dirty and the next step commits it; its replies wait for that commit
+            // (ZoneWorldEconomyCarry), so nothing failed yet. Off the step the caller needed the write now.
+            if (!_stepping)
+                LogEconomyCommitFailure(stolen);
             return false;
         }
 
