@@ -75,7 +75,36 @@ public static class AdminCommandCatalog
         new("admin_goeast", AdminRole.Gm, AdminCommandSurface.Bypass, "move east"),
         new("admin_gowest", AdminRole.Gm, AdminCommandSurface.Bypass, "move west"),
         new("admin_goup", AdminRole.Gm, AdminCommandSurface.Bypass, "move up"),
-        new("admin_godown", AdminRole.Gm, AdminCommandSurface.Bypass, "move down")
+        new("admin_godown", AdminRole.Gm, AdminCommandSurface.Bypass, "move down"),
+        // #931 combat / announce / status / petition / ride
+        new("admin_heal", AdminRole.Gm, AdminCommandSurface.Bypass, "heal self or a player"),
+        new("admin_kill", AdminRole.Gm, AdminCommandSurface.Bypass, "kill a player or monster"),
+        new("admin_kill_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "kill a monster only"),
+        new("admin_res", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a player or monster"),
+        new("admin_res_monster", AdminRole.Gm, AdminCommandSurface.Bypass, "resurrect a monster only"),
+        new("admin_delete", AdminRole.Gm, AdminCommandSurface.Bypass, "delete a target NPC or ground item"),
+        new("admin_announce", AdminRole.Gm, AdminCommandSurface.Bypass, "announce to all players"),
+        new("admin_announce_crit", AdminRole.Gm, AdminCommandSurface.Bypass, "critical announce to all players"),
+        new("admin_online", AdminRole.Helper, AdminCommandSurface.Bypass, "report online player count"),
+        new("admin_invul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle self invulnerability"),
+        new("admin_setinvul", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle target invulnerability"),
+        new("admin_hide", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility"),
+        new("admin_invis", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility alias"),
+        new("admin_invisible", AdminRole.Gm, AdminCommandSurface.Bypass, "toggle invisibility alias"),
+        new("admin_setinvis", AdminRole.Gm, AdminCommandSurface.Bypass, "set invisibility on or off"),
+        new("admin_vis", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible"),
+        new("admin_visible", AdminRole.Gm, AdminCommandSurface.Bypass, "become visible alias"),
+        new("admin_view_petitions", AdminRole.Gm, AdminCommandSurface.Bypass, "list pending petitions"),
+        new("admin_view_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "view one petition"),
+        new("admin_accept_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "accept a petition"),
+        new("admin_reject_petition", AdminRole.Gm, AdminCommandSurface.Bypass, "reject a petition"),
+        new("admin_reset_petitions", AdminRole.Gm, AdminCommandSurface.Bypass, "reset the petition queue"),
+        new("admin_force_peti", AdminRole.Gm, AdminCommandSurface.Bypass, "force-open a petition"),
+        new("admin_ride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "mount a wyvern"),
+        new("admin_ride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "mount a strider"),
+        new("admin_unride_wyvern", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a wyvern"),
+        new("admin_unride_strider", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount a strider"),
+        new("admin_unride", AdminRole.Gm, AdminCommandSurface.Bypass, "dismount")
     ];
 
     static readonly AdminCommandSpec[] ChatCommands =
