@@ -114,10 +114,14 @@ public sealed class SocialActorTests
             },
             (_, _) =>
             {
-                seen.Add(party.InParty(1) ? 1 : 0);
-                seen.Add(party.SameParty(1, 2) ? 1 : 0);
+                // Each body reads its own three values on a worker thread and leaves them in one piece, so the
+                // recorded list keeps each body's reads contiguous whichever order the executor runs the regions
+                // in. A bare List.Add per value is not thread-safe and drops writes.
+                List<int> reads = [party.InParty(1) ? 1 : 0, party.SameParty(1, 2) ? 1 : 0];
                 if (party.Of(1) is { } p)
-                    seen.Add(p.PartyId);
+                    reads.Add(p.PartyId);
+                lock (seen)
+                    seen.AddRange(reads);
             },
             parallel: true));
 
