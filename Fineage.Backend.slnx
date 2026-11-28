@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Fineage.Agent.Contracts/Fineage.Agent.Contracts.csproj" />
+    <Project Path="src/Fineage.Agent.Identity/Fineage.Agent.Identity.csproj" />
     <Project Path="src/Fineage.Accounts/Fineage.Accounts.csproj" />
     <Project Path="src/Fineage.Game/Fineage.Game.csproj" />
     <Project Path="src/Fineage.Login/Fineage.Login.csproj" />
@@ -16,6 +17,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj" />
+    <Project Path="tests/Fineage.Agent.Identity.Tests/Fineage.Agent.Identity.Tests.csproj" />
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
     <Project Path="tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj" />
     <Project Path="tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj" />

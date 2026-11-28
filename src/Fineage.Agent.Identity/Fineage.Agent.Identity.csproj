@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Agent.Identity</RootNamespace>
+    <Description>Agent identity, tenant binding, scopes, and credential lifecycle. Isolated from the auditable economy ledger and from game-account credentials.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Agent.Contracts\Fineage.Agent.Contracts.csproj" />
+  </ItemGroup>
+</Project>
