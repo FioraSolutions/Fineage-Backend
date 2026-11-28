@@ -122,3 +122,14 @@ memory only; the comparator turns red, proving it can fail.
   server parity is not claimed.
 - `ref/` is read-only and gitignored. Golden files are the committed, reviewable output; regenerate
   them only from the reference tree and review the diff.
+
+## Physical auto-attack matrix
+
+`scenarios/phys-auto-*.json` (`--matrix true`) emit deterministic calcPhysDam / hit / crit / shield /
+timing / range / CP-split metrics for the attacker×target and weapon cells listed in
+`docs/combat-parity.md`. Refresh with `--refresh-oracle --ref <mobius tree> --scenario <file>`.
+
+When `ref/dist/game/data/stats` is missing, the Java driver reads Fineage's Mobius-transcribed
+JSON catalogs via `--data <repo>/data` (always passed by `Program.cs`). Buffed scenarios still
+need Mobius skill XML and cannot be refreshed from JSON alone.
+

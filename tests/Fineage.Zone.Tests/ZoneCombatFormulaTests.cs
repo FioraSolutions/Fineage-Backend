@@ -72,4 +72,15 @@ public sealed class ZoneCombatFormulaTests
         Assert.Contains("PDef missing", ex.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("fallback", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void Bow_auto_attack_interval_is_timeAtk_plus_default_1500_reuse()
+    {
+        const double pAtkSpd = 322.3;
+        int timeAtk = ZoneCombat.AttackTimeMs(pAtkSpd);
+        int reuse = ZoneCombat.WeaponReuseMs(ZoneCombat.DefaultBowReuseDelayMs, pAtkSpd);
+        Assert.Equal(timeAtk + reuse, ZoneCombat.AttackIntervalMs(pAtkSpd, WeaponType.Bow));
+        Assert.Equal((int)(1500 * 333d / pAtkSpd), reuse);
+        Assert.Equal(0, ZoneCombat.WeaponReuseDelayMs(WeaponType.Sword));
+    }
 }
