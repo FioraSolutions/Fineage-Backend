@@ -15,6 +15,23 @@ namespace Fineage.Zone.NpcHtml;
 /// </summary>
 public static class NpcHtmlPaths
 {
+    /// <summary>
+    /// CT 0 Interlude Four Sepulchers NPCs are plain <c>Folk</c>; the <c>FourSepulchers</c> AI script answers
+    /// <c>onFirstTalk</c> with <c>{npcId}.html</c> from its own folder (managers 31921-31924 plus
+    /// <c>FIRST_TALK_NPCS</c>). Fineage keeps those pages under <c>SepulcherNpc/</c>, so routing is by id, not by
+    /// the HighFive-only <c>SepulcherNpc</c> instance type.
+    /// </summary>
+    public static readonly IReadOnlySet<int> FourSepulchersTalkIds = new HashSet<int>
+    {
+        31452, 31453, 31454, 31919, 31920, 31921, 31922, 31923, 31924, 31925, 31926, 31927, 31928,
+        31929, 31930, 31931, 31932, 31933, 31934, 31935, 31936, 31937, 31938, 31939, 31940, 31941,
+        31942, 31943, 31944
+    };
+
+    /// <summary>Typed folder for an NPC: the Four Sepulchers script ids first, then the instance type.</summary>
+    public static string Folder(string? npcType, int npcId) =>
+        FourSepulchersTalkIds.Contains(npcId) ? "SepulcherNpc" : Folder(npcType);
+
     public static string Folder(string? npcType)
     {
         if (string.IsNullOrWhiteSpace(npcType))
@@ -49,7 +66,7 @@ public static class NpcHtmlPaths
     public static IReadOnlyList<string> Candidates(string? npcType, int npcId, int page)
     {
         string file = FileName(npcId, page);
-        string folder = Folder(npcType);
+        string folder = Folder(npcType, npcId);
         if (string.Equals(folder, "default", StringComparison.Ordinal))
             return [$"{folder}/{file}", DefaultPage];
         return [$"{folder}/{file}", $"default/{file}", DefaultPage];

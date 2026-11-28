@@ -54,6 +54,10 @@ public sealed class NpcHtmlTests
         // the "nothing to say" page to every Necropolis/Catacomb ziggurat and every tomb NPC.
         Assert.Equal("teleporter", NpcHtmlPaths.Folder("DungeonGatekeeper"));
         Assert.Equal("SepulcherNpc", NpcHtmlPaths.Folder("SepulcherNpc"));
+        // CT 0: Four Sepulchers NPCs are Folk; the FourSepulchers script serves {id}.html.
+        Assert.Equal("SepulcherNpc", NpcHtmlPaths.Folder("Folk", 31921));
+        Assert.Equal("SepulcherNpc", NpcHtmlPaths.Folder("Folk", 31452));
+        Assert.Equal("default", NpcHtmlPaths.Folder("Folk", 31147));
         Assert.Equal("30001.htm", NpcHtmlPaths.FileName(30001, 0));
         Assert.Equal("30001-2.htm", NpcHtmlPaths.FileName(30001, 2));
 
