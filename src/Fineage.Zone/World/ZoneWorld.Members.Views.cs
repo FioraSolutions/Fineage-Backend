@@ -73,6 +73,8 @@ public sealed partial class ZoneWorld
             if (_inWorldPlayers[i].ObjectId == objectId)
                 _inWorldPlayers.RemoveAt(i);
         }
+
+        _observationPublisher.Remove(objectId);
     }
 
     List<ZoneEntity> Players() => new(_inWorldPlayers);

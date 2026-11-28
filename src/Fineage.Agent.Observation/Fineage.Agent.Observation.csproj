@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Agent.Observation</RootNamespace>
+    <Description>Zone agent read adapter: projects a published knownlist snapshot into a bounded AgentObservation. Isolated from the game assemblies' dependency rules (Zone does not reference Contracts).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Agent.Contracts\Fineage.Agent.Contracts.csproj" />
+    <ProjectReference Include="..\Fineage.Agent.Identity\Fineage.Agent.Identity.csproj" />
+    <ProjectReference Include="..\Fineage.Zone\Fineage.Zone.csproj" />
+  </ItemGroup>
+</Project>
