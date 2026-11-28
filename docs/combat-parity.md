@@ -45,6 +45,7 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 - `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
 - Aggressive mobs (isAggressive and aggroRange > 0) scan every 500 ms and attack the first live player inside aggroRange (3D).
 - AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → returnHome.
+- Death (Mobius `Creature.doDie`, `Attackable.java:876` `getMostHated` is null for `isAlikeDead`; `Creature.decayMe` `Creature.java:2465` and `Attackable.onSpawn` `Attackable.java:1455` clear the list): `RemoveDeadNpc` clears `HateList`, so a corpse carries no hate into decay or respawn. `DamageBy` is kept because `Attackable.calculateRewards` splits the kill over the AggroInfo damage shares. Test: `DeathClearsAggroTests`; scenes `death-aggro-cleared`, `hate-clear-on-kill`.
 - Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
 - Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
 - Gaps: no LOS/geo check on aggro, no peace-zone or level-gap rules, no stance re-send to a watcher who comes into view mid-fight, V2 gets no stance packets, mob-vs-mob hate not modelled.
