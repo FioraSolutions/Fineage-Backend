@@ -13,6 +13,8 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | Doc | Role |
 |-----|------|
 | [`docs/net-protocol.md`](docs/net-protocol.md) | **Live wire SoT** — lobby/zone Net opcodes, presence, Postgres, enter-world order |
+| [`docs/adr/0001-custom-net-wire.md`](docs/adr/0001-custom-net-wire.md) | Why Login+Zone speak `PacketEnvelope` 1.0, not retail Interlude framing |
+| [`docs/wire-coverage.md`](docs/wire-coverage.md) | Retail packet → `NetOpcode` mapping and handler wiring (not gameplay parity) |
 | [`docs/spawn-world-coverage.md`](docs/spawn-world-coverage.md) | Mobius spawn maps, hosted defaults, starter continents |
 | [`docs/MOBIUS_XML_REF.md`](docs/MOBIUS_XML_REF.md) | Mobius CT0 XML → `data/` |
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |

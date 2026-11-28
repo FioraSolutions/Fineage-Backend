@@ -71,10 +71,14 @@ public sealed partial class NetLoginServer
     {
         var hello = NetCodec.DecodeHello(envelope.Payload);
         uint granted = ProtocolCapabilities.FeatureSession | ProtocolCapabilities.FeatureLobby;
+        if (!NetProtocol.TryAcceptHello(hello, granted, out uint featureFlags, out RejectMsg? reject))
+        {
+            await RejectAsync(conn, reject!.Code, reject.Message, ct).ConfigureAwait(false);
+            return;
+        }
+
         conn.HelloCompleted = true;
-        conn.FeatureFlags = granted & hello.FeatureFlags;
-        if (conn.FeatureFlags == 0)
-            conn.FeatureFlags = granted;
+        conn.FeatureFlags = featureFlags;
 
         await conn.SendAsync(
             NetOpcode.HelloAck,
