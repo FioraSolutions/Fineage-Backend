@@ -96,6 +96,25 @@ public class LoadProfileTests
     }
 
     [Fact]
+    public void Lifetime_histogram_high_water_moving_one_bucket_is_not_queue_growth()
+    {
+        // Mirrors the #951 Debug 300 s run: one sample in (2, 4] ratcheted the
+        // cumulative fineage_fanout_queue_depth max from 2 to 4. That is not a backlog.
+        var windows = Enumerable.Range(0, 9)
+            .Select(i => new TimeSeriesWindow
+            {
+                FanoutQueueDepthMax = i < 5 ? 2 : 4,
+                CommandQueueDepthMax = 1,
+                CommandIngressQueuedMax = 0
+            })
+            .ToList();
+        var gates = PerformanceGates.Evaluate(Report(HealthyTrend(), durationSeconds: 300, windows: windows));
+        var gate = Assert.Single(gates, g => g.Gate.Contains("queue trend: fanout depth", StringComparison.Ordinal));
+        Assert.True(gate.Passed, gate.Note);
+        Assert.Contains("flat", gate.Note ?? "");
+    }
+
+    [Fact]
     public void Zero_queue_with_the_metric_present_is_flat_not_missing()
     {
         var windows = Enumerable.Range(0, 6)
@@ -119,6 +138,71 @@ public class LoadProfileTests
         var soakGates = PerformanceGates.Evaluate(Report(null, durationSeconds: 900, windows: StableQueues()));
         Assert.Contains(soakGates, gate => gate.Gate.Contains("RSS", StringComparison.Ordinal) && !gate.Passed);
     }
+
+    [Fact]
+    public void Growing_heap_on_a_short_run_is_informative_and_fails_a_soak()
+    {
+        var trend = HealthyTrend() with { GcHeapGrowthMb = 200, GcHeapMbEnd = 400 };
+        var shortGates = PerformanceGates.Evaluate(Report(trend, durationSeconds: 120, windows: StableQueues()));
+        var shortHeap = Assert.Single(shortGates, g => g.Gate.Contains("GC heap", StringComparison.Ordinal));
+        Assert.True(shortHeap.Passed, shortHeap.Note);
+        Assert.Contains("informative only", shortHeap.Note);
+
+        var soakGates = PerformanceGates.Evaluate(Report(trend, durationSeconds: 300, windows: StableQueues()));
+        var soakHeap = Assert.Single(soakGates, g => g.Gate.Contains("GC heap", StringComparison.Ordinal));
+        Assert.False(soakHeap.Passed, soakHeap.Note);
+        Assert.DoesNotContain("informative only", soakHeap.Note ?? "");
+    }
+
+    [Fact]
+    public void Full_world_one_player_gates_use_honest_histogram_windows()
+    {
+        var pass = FullWorldReport(overallP99: 11.9, steadyP99: 1.9, steadyP999: 7.9, tickMax: 81.7);
+        var passGates = PerformanceGates.Evaluate(pass);
+        Assert.All(passGates.Where(g => g.Gate.StartsWith("full-world", StringComparison.Ordinal)),
+            g => Assert.True(g.Passed, $"{g.Gate}: {g.Observed} ({g.Note})"));
+
+        var fail = FullWorldReport(overallP99: 80, steadyP99: 60, steadyP999: 150, tickMax: 250);
+        var failGates = PerformanceGates.Evaluate(fail);
+        Assert.Contains(failGates, g => g.Gate.StartsWith("full-world overall tick p99", StringComparison.Ordinal) && !g.Passed);
+        Assert.Contains(failGates, g => g.Gate.StartsWith("full-world steady tick p99 ", StringComparison.Ordinal) && !g.Passed);
+        Assert.Contains(failGates, g => g.Gate.StartsWith("full-world steady tick p99.9", StringComparison.Ordinal) && !g.Passed);
+        Assert.Contains(failGates, g => g.Gate.StartsWith("full-world tick max", StringComparison.Ordinal) && !g.Passed);
+    }
+
+    static RunReport FullWorldReport(double overallP99, double steadyP99, double steadyP999, double tickMax) =>
+        new()
+        {
+            ScenarioName = "full-world-1-player",
+            Target = "fineage",
+            BotCount = 1,
+            DurationSeconds = 120,
+            ResourceTrend = HealthyTrend(),
+            TimeSeriesWindows = StableQueues(),
+            Server = new PrometheusAggregate { TickP99Ms = 10 },
+            TickTrueMaxMs = tickMax,
+            Honest = new HonestLoadSummary
+            {
+                TickOverall = new TickWindowStats
+                {
+                    Rule = "whole run, ramp included",
+                    Ticks = 588,
+                    P99Ms = overallP99,
+                    P999Ms = 88,
+                    MaxMs = tickMax,
+                    MaxExact = true
+                },
+                TickSteady = new TickWindowStats
+                {
+                    Rule = "from first scrape with zone online = 1 + 30 s",
+                    Ticks = 426,
+                    P99Ms = steadyP99,
+                    P999Ms = steadyP999,
+                    MaxMs = 10,
+                    MaxExact = false
+                }
+            }
+        };
 
     [Fact]
     public void Csv_runtime_samples_expose_gc_and_allocation_series()

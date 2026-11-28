@@ -8,7 +8,7 @@ Every perf PR that touches simulation, pathfinding, fan-out, or persistence must
 | Tick work p99.9 | ≤ 100 ms |
 | Submit → apply p99 | ≤ 100 ms |
 | Fanout queue age p99 | ≤ 40 ms |
-| Queue depth under steady load | Flat (no growth) |
+| Queue depth under steady load | Flat (no growth). Lifetime histogram high-water may move by one CountBounds step (slack 8) without counting as growth; see [`full-world-1-player-951.md`](full-world-1-player-951.md). |
 | Reliable message loss (normal load) | 0 |
 | Deadlock / infinite wait | 0 |
 | `bots-200-town` soak | ≥ 15–30 min green |
@@ -62,6 +62,32 @@ pool. They now block on their own threads, logout writes run on a dedicated lane
 `SimulationPoolStarvationTests` starve the pool on purpose. Debug numbers are in
 [`reconnect-churn-tick-stall.md`](reconnect-churn-tick-stall.md).
 
+### Full world, one player (#951)
+
+`full-world-1-player` is gated on the **honest histogram windows**, not the peak-scrape /
+cumulative-window tick p99:
+
+| Gate | Limit |
+| --- | ---: |
+| Overall tick p99 (whole run, enter included) | ≤ 50 ms |
+| Steady tick p99 (first online=1 scrape + 30 s) | ≤ 50 ms |
+| Steady tick p99.9 | ≤ 100 ms |
+| Longest single tick (`fineage_tick_max_ms`) | ≤ 200 ms |
+
+Missing honest windows fail the run. Debug numbers on current `dev` (commit `1c3e6ae8`,
+34 054 NPCs, 20 geodata regions, 8 cores / 16 GiB, Server GC, workers=0):
+
+- 300 s 1-player: overall p99 **4.6 ms**, steady p99 **2.0 ms**, true max **58.7 ms**.
+  Heap shrank 40.5 MiB; RSS +86 MiB inside the 10 % / 64 MiB rule.
+- 180 s 0-player idle (no official YAML; same full world, online=0): mean after 30 s
+  **0.38 ms**, true max **83.8 ms** on the first four ticks, never rose. The original
+  200–415 ms idle is gone.
+
+The 58–84 ms true max is the enter / first-wake burst (`handoff` 40 ms, `commands` 25 ms,
+`random-walk` 20 ms). `random-walk` into Giran was 2000 ms on the #951 baseline;
+`npc.paths` was 173 ms and is now ≤ 2 ms. Detail, including the short-run 120 s
+profile, is in [`full-world-1-player-951.md`](full-world-1-player-951.md).
+
 ### Trend gates (evidence, not a ceiling)
 
 After the ramp, the report evaluates steady-state trends:
@@ -71,21 +97,25 @@ After the ramp, the report evaluates steady-state trends:
 | RSS growth | growth > max(10 %, 64 MiB) between first and last steady-state sample | `fineage_zone` RSS via `/proc` or `ps` |
 | GC heap growth | growth > max(10 %, 32 MiB) | `dotnet-counters` `gc-heap-size` |
 | Allocation rate | last-third average > 1.5× first-third average | `dotnet-counters` `alloc-rate` |
-| Fan-out queue depth | early-third vs late-third max is `growing` | `fineage_fanout_queue_depth` |
-| Command queue depth | early-third vs late-third max is `growing` | `fineage_command_queue_depth` |
-| Command ingress depth | early-third vs late-third max is `growing` | `fineage_command_ingress_queued` |
+| Fan-out queue depth | late-third max > early-third × 1.25 + 8 | `fineage_fanout_queue_depth` (lifetime histogram high-water, not a windowed gauge) |
+| Command queue depth | late-third max > early-third × 1.25 + 8 | `fineage_command_queue_depth` (same high-water) |
+| Command ingress depth | late-third max > early-third × 1.25 + 8 | `fineage_command_ingress_queued` |
 
-A run shorter than 5 minutes emits these as **informative**; from 5 minutes they are hard gates and missing
-evidence fails the run. A missing metric or a Zone without `--zone-pid` is named in the gate note; it is not
-silently treated as zero.
+A run shorter than 5 minutes emits these as **informative**, including a *measured* RSS / GC / alloc
+growth that would fail a soak; from 5 minutes they are hard gates and missing evidence fails the run.
+A missing metric or a Zone without `--zone-pid` is named in the gate note; it is not silently treated
+as zero. A 2 → 4 ratchet on fan-out depth is one histogram bucket and is flat under the slack of 8;
+10 → 30 is still growing.
 
 ### Measured versus scheduled targets
 
-This PR adds the measurement mechanism. It does **not** claim measured soak/endurance results or a concurrency
-ceiling. The only measured data quoted here is the #951 baseline (Debug, one player, full world): tick
-61–83 ms with 200–415 ms bursts at 0 players. Any player ceiling must come from a recorded ramp
-(`LEVELS="100 300 500 1000" ./scripts/run-load-stress.sh`), with the same hardware/commit/environment and the
-trend gates green; until then the profiles are workloads, not published capacity numbers.
+This section describes the measurement mechanism. It does **not** claim a concurrency ceiling.
+The #951 Debug baseline (one player, full world, geodata on) was tick 61–83 ms with 200–415 ms
+bursts at 0 players; that is historical. Current Debug numbers are in the #951 section above
+and in [`full-world-1-player-951.md`](full-world-1-player-951.md). Any multi-player ceiling must
+still come from a recorded ramp (`LEVELS="100 300 500 1000" ./scripts/run-load-stress.sh`), with
+the same hardware/commit/environment and the trend gates green; until then the other profiles
+are workloads, not published capacity numbers.
 
 Reference acceptance for a recorded soak/endurance artifact:
 

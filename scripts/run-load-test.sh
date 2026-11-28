@@ -53,8 +53,8 @@ PROFILE_SCENARIOS=(
 # The five profiles added by #990. Fast/soak/endurance run these first.
 NEW_PROFILES=(pve-farming party-farming raid-boss-observe reconnect-storm full-world-1-player)
 
-DURATION=""
-RAMP=""
+DURATION="${SCENARIO_DURATION_SECONDS:-}"
+RAMP="${SCENARIO_RAMP_SECONDS:-}"
 BOT_COUNT=""
 SCENARIOS=()
 TIMEOUT_SECONDS="${SCENARIO_TIMEOUT_SECONDS:-0}"
