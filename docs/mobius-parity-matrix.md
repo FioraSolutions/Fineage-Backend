@@ -34,11 +34,12 @@ behavioural parity or production verification.
 | Level | ✅ verified | 🟡 partial | unverified / ❌ | n/a | Total |
 |-------|------------:|-----------:|----------------:|----:|------:|
 | Implemented | 103 | 2 | 0 | 3 | 108 |
-| Parity verified | 2 | 0 | 103 | 3 | 108 |
+| Parity verified | 2 | 3 | 100 | 3 | 108 |
 | Production verified | 0 | 0 | 105 | 3 | 108 |
 
-**Current claim:** 103 of 108 systems are implemented; 2 have linked parity evidence (movement A/B #1051 and
-weight penalty); **no system has linked production evidence**. The 0 production rows are intentionally
+**Current claim:** 103 of 108 systems are implemented; 2 have full linked parity evidence (movement A/B #1051 and
+weight penalty) and 3 have partial linked parity evidence (physical auto-attack matrix, rows 16/17/72, #979);
+**no system has linked production evidence**. The 0 production rows are intentionally
 unverified, not failures. The old 92/4/9/3 counter was stale; the validator now derives these counts from
 the rows.
 
