@@ -77,6 +77,7 @@ public static class AiSceneProbe
             accounts: store,
             spawnCatalog: spawnCatalog,
             activeMapId: MapId,
+            aoi: new Fineage.Zone.Interest.GridAoi(3000),
             geo: GeoEngine.Empty,
             clock: () => now,
             ledgerJournal: new MemoryLedgerJournal(),

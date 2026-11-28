@@ -33,13 +33,14 @@ behavioural parity or production verification.
 
 | Level | ✅ verified | 🟡 partial | unverified / ❌ | n/a | Total |
 |-------|------------:|-----------:|----------------:|----:|------:|
-| Implemented | 103 | 2 | 0 | 3 | 108 |
-| Parity verified | 3 | 5 | 97 | 3 | 108 |
-| Production verified | 0 | 0 | 105 | 3 | 108 |
+| Implemented | 104 | 2 | 0 | 3 | 109 |
+| Parity verified | 4 | 5 | 97 | 3 | 109 |
+| Production verified | 0 | 0 | 106 | 3 | 109 |
 
-**Current claim:** 103 of 108 systems are implemented; 3 have full linked parity evidence (movement A/B #1051,
-weight penalty, and mob death AggroList clear #1105) and 5 have partial linked parity evidence (physical
-auto-attack matrix, rows 16/17/72, the magic damage matrix, row 20, #979, and character-create initial equipment, row 2); **no system has linked production evidence**. Row 32 additionally has
+**Current claim:** 104 of 109 systems are implemented; 4 have full linked parity evidence (movement A/B #1051,
+weight penalty, mob death AggroList clear #1105, and the WorldRegion 90 s AI lease #1106) and 5 have partial linked
+parity evidence (physical auto-attack matrix, rows 16/17/72, the magic damage matrix, row 20, #979, and
+character-create initial equipment, row 2); **no system has linked production evidence**. Row 32 additionally has
 the #1104 lost-target disengage evidence (walk-home drift gate + arrival). The 0 production rows are intentionally
 unverified, not failures. The old 92/4/9/3 counter was stale; the validator now derives these counts from
 the rows.
@@ -173,7 +174,8 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 105 | Seasonal events | ✅ [src](../src/Fineage.Zone/SeasonalEvents/SeasonalEventHost.cs) | unverified | unverified | — | `LongTimeEvent` / `scripts/events/{Christmas,L2Day,HeavyMedal}` → `SeasonalEventHost` + config.xml windows; missing event data logs event id. Local CT0 has no Christmas folder (logged) — #934 |
 | 106 | Event drop windows | ✅ [src](../src/Fineage.Zone/Drops/EventDropCatalog.cs) | unverified | unverified | — | `EventDropManager.java` → `Drops/EventDropCatalog.cs` |
 | 107 | Player mail | n/a | n/a | n/a | — | `EX_MAIL_ARRIVED` / `CustomMailManager` are not a Fineage Net target |
-| 108 | Mobius-only extras | n/a | n/a | n/a | — | captcha, rebirth, premium, sell-buffs, fake players, offline play, banking voiced, GameGuard, HackShield, GM snoop, Kamael slideshow. Not retail Interlude gameplay |
+| 108 | World region activation / 90 s AI lease | ✅ [src](../src/Fineage.Zone/World/ZoneWorldRegionActivation.cs) | ✅ [ZoneRegionDeactivationHysteresisTests](../tests/Fineage.Zone.Tests/ZoneRegionDeactivationHysteresisTests.cs) | unverified | — | `model/WorldRegion.java` (`startActivation` 208-231, `startDeactivation` 237-260, `switchAI(false)` 58-109) + `General.ini GridNeighborTurnOffTime = 90` (`Config.java:2053`) → `ZoneWorldRegionActivation`: 2048-unit microregions (`World.SHIFT_BY = 11`), the region a player stands in active at once and its 1-ring after `GridNeighborTurnOnTime = 1 s`, and a retired region only after the 90 s `areNeighborsEmpty()` lease. Re-entry inside the window cancels the timer. Lease expiry runs `switchAI(false)` per attackable: target null, `stopMove`, `stopAllEffects`, `clearAggroList`, `stopAITask`, `abortAttack`, and `teleToLocation(spawn)` past `MaxDriftRange`. Scenes `activation-idle-leave-30s` / `activation-idle-leave-92s` / `activation-reentry-30s` / `activation-no-duplicate-reentry` / `activation-fighting-stays-awake` / `activation-returning-stays-awake`; details in [`combat-parity.md`](combat-parity.md#slice--world-region-activation-90-s-ai-lease-1106) |
+| 109 | Mobius-only extras | n/a | n/a | n/a | — | captcha, rebirth, premium, sell-buffs, fake players, offline play, banking voiced, GameGuard, HackShield, GM snoop, Kamael slideshow. Not retail Interlude gameplay |
 
 ## Movement A/B — #1051 (scoped)
 
@@ -216,14 +218,16 @@ These Mobius trees were walked. They do not get their own row when the mechanism
 This is the canonical text to post on issue [#174](https://github.com/FioraSolutions/Fineage-Backend/issues/174)
 (the parent/linker posts it; this PR only changes the document):
 
-> **Parity matrix status — 2026-11-27 (#977).** The live home remains
+> **Parity matrix status — 2026-11-28 (#977, #1106).** The live home remains
 > `docs/mobius-parity-matrix.md`. It now tracks three independent levels instead of one `✅ done`:
-> **Implemented** (structural/code) 103 ✅, 2 🟡, 0 ❌, 3 n/a; **Parity verified** (behavioural
-> against pinned Mobius) 3 verified, 3 partial, 99 unverified, 3 n/a; **Production verified**
-> (production-like run/fault artefact) 0 verified, 105 unverified, 3 n/a. Full parity evidence is the
+> **Implemented** (structural/code) 104 ✅, 2 🟡, 0 ❌, 3 n/a; **Parity verified** (behavioural
+> against pinned Mobius) 4 verified, 5 partial, 97 unverified, 3 n/a; **Production verified**
+> (production-like run/fault artefact) 0 verified, 106 unverified, 3 n/a. Full parity evidence is the
 > pinned movement A/B #1051 slice (row 5), `WeightPenaltyTests` against the Mobius weight-penalty
-> formula (row 31) and `DeathClearsAggroTests` against
-> `Creature.doDie`/`decayMe`/`Attackable.onSpawn` (row 32); rows 16/17/72 are partial (#979 physical
+> formula (row 31), `DeathClearsAggroTests` against
+> `Creature.doDie`/`decayMe`/`Attackable.onSpawn` (row 32) and
+> `ZoneRegionDeactivationHysteresisTests` against `WorldRegion.startDeactivation`/`switchAI(false)`
+> (row 108, #1106); rows 16/17/72 are partial (#979 physical
 > auto-attack matrix). `docs/QUEST_STATUS.md` and `docs/wire-coverage.md` counters are implementation
 > coverage only, not parity or production evidence. All other rows stay explicitly unverified at the
 > higher levels; no unrun check is marked verified.

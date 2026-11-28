@@ -65,15 +65,18 @@ public sealed class AiReferenceSceneTests
         }
     }
 
+    /// <summary>
+    /// The activation scenes now match Mobius <c>WorldRegion</c> (#1106): the 90 s
+    /// <c>GridNeighborTurnOffTime</c> lease keeps the region — and its AI — alive after the last playable leaves.
+    /// A scene that regresses into the old immediate-release behaviour fails on the assertion below instead of
+    /// being hidden by a "known red" list.
+    /// </summary>
     [Fact]
-    public async Task Full_catalog_runs_and_known_real_divergences_remain_red()
+    public async Task Full_catalog_runs_and_declared_divergences_match_the_declaration()
     {
         var game = GameData.LoadDefault();
         var npcs = NpcCatalog.LoadDefault();
-        var knownRed = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "activation-idle-leave-92s" // #1106: Mobius 90 s region hysteresis vs current activation lifetime
-        };
+        var knownRed = new HashSet<string>(StringComparer.Ordinal);
 
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var (path, scene) in LoadScenes())

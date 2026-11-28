@@ -139,17 +139,27 @@ public sealed class ZoneMicroRegionActivationTests
         RegionId neighbour = new(self.InstanceId, self.X + 1, self.Y);
         AssertActiveOnly(kit.World, self);
 
-        // Moving out before the grace ends must not leave the old region's neighbours scheduled.
+        // Moving out before the Mobius GridNeighborTurnOffTime window expires must not leave the old region's
+        // neighbours scheduled; the region keeps its AI (WorldRegion.startDeactivation) until the timer runs out.
         kit.World.MovePlayerCoordsForTests(session, BaseX + 50_000, BaseY, Z);
         At(kit, start + ZoneWorld.NeighborActivationGraceMs - 1);
+        await kit.World.RunCombatTickAsync(CancellationToken.None);
+        Assert.DoesNotContain(neighbour, kit.World.PlayerActiveRegions);
+        long leaseStart = kit.Now.ToUnixTimeMilliseconds();
+
+        At(kit, leaseStart + ZoneWorld.RegionDeactivationGraceMs - 1);
+        await kit.World.RunCombatTickAsync(CancellationToken.None);
+        Assert.Contains(self, kit.World.PlayerActiveRegions);
+
+        At(kit, leaseStart + ZoneWorld.RegionDeactivationGraceMs);
         await kit.World.RunCombatTickAsync(CancellationToken.None);
         Assert.DoesNotContain(self, kit.World.PlayerActiveRegions);
         Assert.DoesNotContain(neighbour, kit.World.PlayerActiveRegions);
 
-        // Leaving the world cancels everything; no stale timer may wake the old neighbourhood later.
+        // Leaving the world starts the same lease for the region the player was standing in; no stale wake may fire.
         await kit.World.LeaveAsync(session, CancellationToken.None);
-        Assert.Empty(kit.World.PlayerActiveRegions);
-        At(kit, start + ZoneWorld.NeighborActivationGraceMs + 5_000);
+        Assert.False(kit.World.PlayerActiveRegions.Count > 0 && kit.World.PlayerActiveRegions.Contains(neighbour));
+        At(kit, leaseStart + 2 * ZoneWorld.RegionDeactivationGraceMs);
         await kit.World.RunCombatTickAsync(CancellationToken.None);
         Assert.Empty(kit.World.PlayerActiveRegions);
         Assert.DoesNotContain(neighbour, kit.World.PlayerActiveRegions);
@@ -172,6 +182,11 @@ public sealed class ZoneMicroRegionActivationTests
         kit.World.MovePlayerCoordsForTests(session0, BaseX + 50_000, BaseY, Z);
         await kit.World.RunCombatTickAsync(CancellationToken.None);
         RegionId moved0 = ZoneWorld.MicroRegionAt(0, BaseX + 50_000, BaseY);
-        AssertActiveOnly(kit.World, moved0, instance1);
+        // The left region (and its ring) stays active for the Mobius GridNeighborTurnOffTime window.
+        Assert.Contains(instance0, kit.World.PlayerActiveRegions);
+        Assert.Contains(moved0, kit.World.PlayerActiveRegions);
+        Assert.Contains(instance1, kit.World.PlayerActiveRegions);
+        Assert.DoesNotContain(new RegionId(0, instance0.X + 1, instance0.Y), kit.World.PlayerActiveRegions);
+        Assert.DoesNotContain(new RegionId(1, instance1.X + 1, instance1.Y), kit.World.PlayerActiveRegions);
     }
 }

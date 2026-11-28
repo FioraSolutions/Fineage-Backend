@@ -1,6 +1,6 @@
 {
   "id": "activation-idle-leave-30s",
-  "description": "Player leaves an idle mob's region. Mobius keeps the region active for 90 s; Fineage currently releases immediately. This is the explicit deactivation divergence.",
+  "description": "Player leaves an idle mob's region. Mobius keeps the region (and its AI) active for GridNeighborTurnOffTime = 90 s (WorldRegion.startDeactivation), so the mob is still thinking 30 s after the last playable left.",
   "category": "activation",
   "seed": 9880,
   "player": {
@@ -57,7 +57,5 @@
     "reference": "ref/mobius-ct0-interlude"
   },
   "tolerances": {},
-  "knownDivergences": {
-    "npc.mob.thinking": "Mobius keeps an idle region active for 90 s; current Fineage scene trace shows a different activation lifetime. Preserve the observed divergence and file it separately."
-  }
+  "knownDivergences": {}
 }

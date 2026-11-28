@@ -313,6 +313,39 @@ weightproc   = (load - bonusPenalty) * 1000 / maxLoad                    -- Java
 - Still open here: pets (Mobius `Pet.refreshOverloaded`, `Pet.java:1205`) — no summon/pet inventory yet; `_dietMode`;
   `EtcStatusUpdate` charges/danger-area/charm/death-penalty stay 0 until those systems exist.
 
+## Slice — world region activation / 90 s AI lease (#1106)
+
+Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/WorldRegion.java`,
+`Config.java:2053`, `dist/game/config/General.ini`.
+
+- Mobius regions are 2048 units (`World.SHIFT_BY = 11`). `addVisibleObject` calls `startActivation` for the first
+  playable: the region itself goes active at once, and a `1000 * Config.GRID_NEIGHBOR_TURNON_TIME` (1 s) timer turns
+  the 1-ring on. `removeVisibleObject` calls `startDeactivation` when `areNeighborsEmpty()` — no playable anywhere in
+  the 3×3 neighbourhood — and starts a `1000 * Config.GRID_NEIGHBOR_TURNOFF_TIME` timer
+  (`General.ini GridNeighborTurnOffTime = 90`). Both write the same `_neighborsTask`, so `startActivation` cancels a
+  pending deactivation on the way back in.
+- Fineage already had the 2048-unit microregions and the 1 s neighbour grace; it retired a region on the first tick
+  that saw the neighbourhood empty, i.e. it had no turn-off timer at all. That is the divergence: a player who stepped
+  out and back found a frozen mob instead of the state Mobius preserved for 90 s.
+- Now `RegionDeactivationGraceMs = 90_000` and `_regionLeftAtMs` hold the per-region lease. A region that stops being
+  desired keeps its AI until the lease runs out; becoming desired again removes the entry (Mobius
+  `_neighborsTask.cancel(true)`). Only the expiring regions run `OnRegionDeactivated`.
+- `ZoneWorldRegionActivation.SleepNpc` (`switchAI(false)`, `WorldRegion.java:58-109`) runs per attackable and without
+  a fight gate — the region
+  is retired because no playable is left, so a held target is out of reach by construction: `setTarget(null)`,
+  `clearAggroList()` (`Attackable.java:1141`: list plus overhit state), `getAttackByList().clear()`, `stopMove(null)`,
+  `stopAllEffects()`, `getAI().setIntention(IDLE)` + `stopAITask()`, `abortAttack()`, and `teleToLocation(spawn)`
+  when `calculateDistance2D(spawn) > Config.MAX_DRIFT_RANGE` (`NPC.ini MaxDriftRange = 300`). HP and the spawn row are
+  untouched, so the pawn returns with the state the lease preserved.
+- Walking-route NPCs and boats are excluded: Mobius moves them from `WalkingManager` / `BoatManager`, which
+  `switchAI(false)` does not stop.
+- Tests: `ZoneRegionDeactivationHysteresisTests` (lease keeps AI at +30 s and +89.999 s, expiry at +90 s runs the full
+  `switchAI(false)` state wipe, re-entry at +60 s cancels the timer for good, drift past `MaxDriftRange` snaps home,
+  a target held without a watcher is dropped) and the existing `ZoneMicroRegionActivationTests` (1 s neighbour grace,
+  1-ring ring, per-instance independence). AI reference scenes `activation-idle-leave-30s`,
+  `activation-idle-leave-92s`, `activation-reentry-30s`, `activation-no-duplicate-reentry`,
+  `activation-fighting-stays-awake`, `activation-returning-stays-awake` all pass with no declared divergence.
+
 ## Slice — CP-aware target damage (Mobius `PlayerStatus.reduceHp`)
 
 Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/status/PlayerStatus.java`

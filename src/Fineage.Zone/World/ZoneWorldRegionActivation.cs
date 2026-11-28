@@ -23,11 +23,22 @@ public sealed partial class ZoneWorld
     /// <summary>Mobius default <c>GridNeighborTurnOnTime</c> (seconds): neighbours wake after self has stayed active.</summary>
     internal const int NeighborActivationGraceMs = 1000;
 
+    /// <summary>
+    /// Mobius <c>General.ini GridNeighborTurnOffTime = 90</c> (<c>Config.java:2053</c>,
+    /// <c>WorldRegion.startDeactivation</c>): after the last playable leaves a region's 3×3 neighbourhood the region
+    /// keeps its AI for 90 s, so a player who steps out and back in finds the same state. A re-entry inside the window
+    /// cancels the timer (<c>WorldRegion.startActivation</c>).
+    /// </summary>
+    internal const int RegionDeactivationGraceMs = 90_000;
+
     /// <summary>Currently active microregions (instance + Mobius region coordinates).</summary>
     readonly HashSet<RegionId> _playerActiveRegions = [];
 
     /// <summary>Microregions directly occupied by a live player, with the time that occupancy started.</summary>
     readonly Dictionary<RegionId, long> _playerMicroRegionSinceMs = [];
+
+    /// <summary>Active microregions whose neighbourhood has no player, with the time that started (the Mobius timer).</summary>
+    readonly Dictionary<RegionId, long> _regionLeftAtMs = [];
 
     // Per-refresh scratch, reused so an idle world does not allocate in the AI stage.
     readonly HashSet<RegionId> _desiredRegions = [];
@@ -87,25 +98,36 @@ public sealed partial class ZoneWorld
             AddOneRingNeighbours(_desiredRegions, id);
         }
 
-        // Retire before adding so a microregion that is still desired never churns.
+        // Mobius startDeactivation: a region (and its neighbourhood) that just lost the last playable keeps its AI for
+        // GridNeighborTurnOffTime, so the region only retires once the timer has run out. Mobius startActivation
+        // cancels the pending deactivation on the way in, so a newcomer inside the window keeps the old state.
         _retiredRegions.Clear();
+        _newRegions.Clear();
+        foreach (var id in _desiredRegions)
+        {
+            _regionLeftAtMs.Remove(id);
+            if (!_playerActiveRegions.Contains(id))
+                _newRegions.Add(id);
+        }
         foreach (var id in _playerActiveRegions)
         {
-            if (!_desiredRegions.Contains(id))
+            if (_desiredRegions.Contains(id))
+                continue;
+            if (!_regionLeftAtMs.TryGetValue(id, out long leftAt))
+            {
+                _regionLeftAtMs[id] = now;
+                continue;
+            }
+            if (now - leftAt >= RegionDeactivationGraceMs)
                 _retiredRegions.Add(id);
         }
         foreach (var id in _retiredRegions)
         {
+            _regionLeftAtMs.Remove(id);
             _playerActiveRegions.Remove(id);
             OnRegionDeactivated(id);
         }
 
-        _newRegions.Clear();
-        foreach (var id in _desiredRegions)
-        {
-            if (!_playerActiveRegions.Contains(id))
-                _newRegions.Add(id);
-        }
         _newRegions.Sort();
         foreach (var id in _newRegions)
         {
@@ -200,6 +222,12 @@ public sealed partial class ZoneWorld
         NoteActivationBacklog();
     }
 
+    /// <summary>
+    /// Mobius <c>WorldRegion.setActive(false)</c> → <c>switchAI(false)</c> for every attackable in a region that has
+    /// just run out its <c>GridNeighborTurnOffTime</c> lease. Mobius does not ask whether the pawn is fighting: the
+    /// region is retired precisely because no playable is left in its 3×3 neighbourhood, so a held target is already
+    /// out of reach. The AI is unfrozen the same way (<c>getAI().stopAITask()</c>).
+    /// </summary>
     void OnRegionDeactivated(RegionId microRegion)
     {
         CollectMicroRegionMembers(microRegion);
@@ -207,15 +235,63 @@ public sealed partial class ZoneWorld
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 continue;
-            ReleaseThink(npc);
-            if (npc.MoveActive && !NpcRegionAwake(npc))
-                SuspendIdleNpcMove(npc);
-            if (npc.PathfindPending && !NpcRegionAwake(npc))
-            {
-                npc.PathfindPending = false;
-                DequeueNpcPathfind(npc.ObjectId);
-            }
+            ReleaseThink(npc, force: true);
+            SleepNpc(npc);
         }
+    }
+
+    /// <summary>
+    /// Mobius <c>WorldRegion.switchAI(false)</c> for one attackable: target null, movement stopped, active effects
+    /// cleared, AggroList dropped, and — only when it drifted past <c>MaxDriftRange</c> — <c>teleToLocation(spawn)</c>.
+    /// Mobius does not heal or respawn here; HP and the spawn row are untouched, so the pawn keeps the state the
+    /// 90-second window preserved. Guards and scripted walkers keep their own stage.
+    /// </summary>
+    void SleepNpc(ZoneEntity npc)
+    {
+        // switchAI(false) iterates _visibleObjects and only touches wo.isAttackable(). Scripted walkers and boats are
+        // driven by their own stage, and a non-attackable NPC has no AI to stop.
+        if (!npc.Attackable || npc.WalkingRouteName != null || npc.IsBoat)
+            return;
+        if (npc.PathfindPending)
+        {
+            npc.PathfindPending = false;
+            DequeueNpcPathfind(npc.ObjectId);
+        }
+        // setTarget(null) + clearAggroList() + getAttackByList().clear() + stopMove(null).
+        SetAggroTarget(npc, 0);
+        npc.HateList.Clear();
+        npc.DamageBy.Clear();
+        npc.Chasing = false;
+        npc.AttackTimeoutAtMs = 0;
+        SetReturningHome(npc, false);
+        if (npc.MoveActive)
+            StopTimedMove(npc);
+        if (npc.Running)
+        {
+            npc.Running = false;
+            FanoutMoveType(npc);
+        }
+        // stopAllEffects(): a sleeping region does not hold debuffs and their ticks.
+        if (npc.Abnormals.Count > 0)
+        {
+            npc.Abnormals.Clear();
+            _byId.Leave(npc, ActiveSets.WithAbnormals);
+            FanoutAbnormal(npc);
+        }
+        // setIntention(IDLE) stops an in-flight swing/cast (onIntentionIdle -> clientStopMoving/clientStopAutoAttack).
+        AbortCast(npc, "region-sleep", notify: false);
+
+        // teleToLocation(spawn) when too far away. Mobius fixes the position without clearing the spawn row, so the
+        // pawn comes back to the spawn point and keeps its HP/aggression state for the next player.
+        if (DriftedBeyondMaxRange(npc) && npc.HomeSet)
+        {
+            npc.X = npc.HomeX;
+            npc.Y = npc.HomeY;
+            npc.Z = npc.HomeZ;
+            _aoi.Move(npc.ObjectId, npc.X, npc.Y);
+            RefreshNpcWatchers(npc);
+        }
+        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
     }
 
     /// <summary>
