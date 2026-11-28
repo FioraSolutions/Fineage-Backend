@@ -60,7 +60,15 @@ public static class TimeSeriesSummaryBuilder
     public static string BacklogTrend(IReadOnlyList<TimeSeriesWindow> windows) =>
         Trend(windows, w => w.FanoutQueueDepthMax, "fanout_queue_depth metric absent");
 
-    /// <summary>Early-third vs late-third max. Used by the queue-depth soak gate (#990).</summary>
+    /// <summary>
+    /// One CountBounds step (see <c>MetricsText</c>) allowed on a lifetime histogram high-water
+    /// before early-third vs late-third max is called growing. <c>fineage_fanout_queue_depth</c>
+    /// (and the command-depth twin) expose a cumulative max, so a single mid-run sample of depth 4
+    /// ratchets every later scrape from 2 to 4 and is not a backlog.
+    /// </summary>
+    public const double QueueTrendAbsoluteSlack = 8;
+
+    /// <summary>Early-third vs late-third max. Used by the queue-depth soak gate (#990, #951).</summary>
     public static string Trend(
         IReadOnlyList<TimeSeriesWindow> windows,
         Func<TimeSeriesWindow, double> selector,
@@ -72,10 +80,13 @@ public static class TimeSeriesSummaryBuilder
         double last = windows.TakeLast(windows.Count / 3).DefaultIfEmpty().Max(w => w == null ? 0 : selector(w));
         if (last <= 0 && first <= 0)
             return absentText;
-        if (last > first * 1.25 + 1)
+        if (last > GrowthLimit(first))
             return "growing";
         if (last < first * 0.75)
             return "shrinking";
         return "flat";
     }
+
+    public static double GrowthLimit(double earlyThirdMax) =>
+        earlyThirdMax * 1.25 + QueueTrendAbsoluteSlack;
 }
