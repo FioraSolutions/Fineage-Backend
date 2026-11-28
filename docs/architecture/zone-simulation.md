@@ -9,7 +9,7 @@ Scope: the tick part of `Fineage.Zone` (simulation loops, NPC AI, combat resolut
 fan-out) and the boundaries it needs: scale-out seams and the economy ledger. Quests, NPC HTML and catalogs are out
 of scope. Mobius CT0 Interlude is the behavioural reference only (GPLv3): rules are re-derived, never copied.
 
-Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region hosts over a transport").
+Related: [`docs/ZONE_MODULARIZATION.md`](../ZONE_MODULARIZATION.md) (row "Region hosts over a transport"); [`agent-runtime-reconnaissance.md`](agent-runtime-reconnaissance.md) and [ADR 0002–0004](../adr/0002-agent-runtime-host.md) (Agent Runtime seams, #998).
 
 ---
 
