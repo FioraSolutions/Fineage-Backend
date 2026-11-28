@@ -10,7 +10,10 @@ spawnX: -71100
 spawnY: 258400
 spawnZ: -3148
 aoiCellSize: 3000
-classId: 3
+# Human Fighter at create (Login only allows a base class). Zone promotes load-test
+# accounts to level 77 Warlord (class 3) when FINEAGE_ZONE_LOADTEST_COMBAT=1,
+# same as perf-aoe-train.
+classId: 0
 combatSkillId: 3
 actionWeights:
   move: 0.20
