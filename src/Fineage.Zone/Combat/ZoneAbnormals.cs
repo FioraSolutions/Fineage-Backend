@@ -136,6 +136,15 @@ public static class ZoneAbnormals
         return removed;
     }
 
+    public static bool RemoveBySkillId(IList<ZoneAbnormalEntry> list, int skillId)
+    {
+        int index = FindIndex(list, skillId);
+        if (index < 0)
+            return false;
+        list.RemoveAt(index);
+        return true;
+    }
+
     static int FindIndex(IList<ZoneAbnormalEntry> list, int effectId)
     {
         for (int i = 0; i < list.Count; i++)

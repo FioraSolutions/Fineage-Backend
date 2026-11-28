@@ -337,8 +337,15 @@ Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/stat
 - Tests: `TargetDamageSplitTests`, `TargetDamageWorldTests`, `DirectHpWriteGuardTests`, `ZoneCpRegen*`, duel tests,
   and the MobiusDiff CP/pilot tests. The source guard rejects new subtractive `CurHp` writes outside
   `ZoneWorldTargetDamage.cs` unless the line carries an explicit `hp-write: <reason>` marker.
-- Still open for #979: CP transfer to a party member / servitor (`TRANSFER_DAMAGE_PERCENT`, `TRANSFER_DAMAGE_TO_PLAYER`),
-  Arcane Shield MP absorption, CP-damage effect coverage beyond `CpDamPercent`, and full-server verification of the
-  differential oracle. DOT now stores the effector object id on the shared abnormal and routes the CT0 five-argument
-  `reduceCurrentHpByDOT` path with that attacker (playable → CP first, NPC/missing → HP); a persisted abnormal with no
-  effector keeps the no-attacker bypass.
+- Incoming redirects now follow the CT0 order in `IncomingDamage.PlanPlayer` / `PlanSummon` and `ApplyTargetDamage`:
+  Transfer Pain (`transDam`, skill 1262) to an in-range servitor (never a pet, never fatal), then Arcane Shield
+  (`manaShield` add 70 on skill 1556: 30% of the remainder is paid as MP; if MP covers it the hit is fully absorbed
+  and the party transfer is skipped; if not, the shield is removed and the leftover continues), then
+  `TRANSFER_DAMAGE_TO_PLAYER` to `TransferDamageToObjectId` (party + range checks, `reduceCp` (which mutates the transferred amount when CP cannot cover it) then
+  `reduceCurrentHp(share)` on the caster, same integer split as `PlayerStatus` / `SummonStatus`). Tests:
+  `IncomingDamagePlanTests`, `IncomingDamageWorldTests`.
+- Still open for #979: CP-damage effect coverage beyond `CpDamPercent`, full-server verification of the differential
+  oracle, remaining golden categories (stats, crit, bow, shots, buff/debuff, cast-break), and the physical
+  `70 * pAtk / pDef` vs Mobius `76 * damage * proximity / defence` finding. DOT still stores the effector object id
+  and routes the CT0 five-argument `reduceCurrentHpByDOT` path with that attacker (playable → CP first, NPC/missing →
+  HP); a persisted abnormal with no effector keeps the no-attacker bypass.

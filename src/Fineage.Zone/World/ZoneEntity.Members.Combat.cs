@@ -52,6 +52,16 @@ sealed partial class ZoneEntity
     public int DungeonId { get; set; }
     /// <summary>0 is the open world. An Olympiad stadium uses its zone id so the pair does not share knownlist with the town.</summary>
     public int InstanceId { get; set; }
+
+    /// <summary>
+    /// Mobius <c>Playable.setTransferDamageTo</c>: the party member (or owner) who receives
+    /// <c>TRANSFER_DAMAGE_TO_PLAYER</c>. 0 means no redirect.
+    /// </summary>
+    public int TransferDamageToObjectId { get; set; }
+
+    /// <summary>Test-only combat funcs folded after abnormals (party transDamToPlayer injection).</summary>
+    internal List<SkillStatFunc>? TestCombatFuncs { get; set; }
+
     /// <summary>Private warehouse. Null on NPCs.</summary>
     public PrivateWarehouse? Warehouse { get; set; }
     /// <summary>Freight packages addressed to this character. Null on NPCs until loaded.</summary>
