@@ -36,16 +36,17 @@ public final class MobiusFormulaDriver
         String attackerKind = kind(opt.getOrDefault("attacker-kind", "player"));
         String targetKind = kind(opt.getOrDefault("target-kind", "npc"));
         boolean matrix = Boolean.parseBoolean(opt.getOrDefault("matrix", "false"));
+        boolean statsMatrix = Boolean.parseBoolean(opt.getOrDefault("stats-matrix", "false"));
         String side = opt.getOrDefault("side", "front");
         boolean soulshot = Boolean.parseBoolean(opt.getOrDefault("soulshot", "false"));
         String cpSplitSpec = opt.getOrDefault("cp-splits", "");
 
         ActorStats attacker = resolveActor(source, attackerKind,
             intOpt(opt, "class-id", 0), intOpt(opt, "level", 0), intOpt(opt, "attacker-npc", 0),
-            opt.getOrDefault("gear", ""), opt.getOrDefault("buffs", ""));
+            opt.getOrDefault("gear", ""), opt.getOrDefault("buffs", ""), opt.getOrDefault("passives", ""));
         ActorStats target = resolveActor(source, targetKind,
             intOpt(opt, "target-class-id", 0), intOpt(opt, "target-level", 0), intOpt(opt, "npc", 0),
-            opt.getOrDefault("target-gear", ""), opt.getOrDefault("target-buffs", ""));
+            opt.getOrDefault("target-gear", ""), opt.getOrDefault("target-buffs", ""), "");
 
         double prox = proximity(side);
         int hitChance = hitChance(attacker.accuracy, target.evasion, 1.0);
@@ -57,7 +58,7 @@ public final class MobiusFormulaDriver
         Map<String, Double> metrics = new LinkedHashMap<>();
         metrics.put("pAtk", attacker.pAtk);
         metrics.put("pDef", attacker.pDef);
-        metrics.put("pAtkSpd", matrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
+        metrics.put("pAtkSpd", matrix || statsMatrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
         metrics.put("accuracy", attacker.accuracy);
         metrics.put("evasion", attacker.evasion);
         metrics.put("critPermille", (double) attacker.critPermille);
@@ -78,9 +79,11 @@ public final class MobiusFormulaDriver
 
         if (matrix)
             addMatrix(metrics, attacker, target, opt);
+        if (statsMatrix)
+            addStatMatrix(metrics, attacker);
 
         String out = opt.get("out");
-        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix);
+        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix || statsMatrix);
         if (out == null)
             System.out.println(json);
         else
@@ -208,15 +211,15 @@ public final class MobiusFormulaDriver
     }
 
     private static ActorStats resolveActor(DataSource source, String kind, int classId, int level, int npcId,
-        String gearSpec, String buffSpec) throws Exception
+        String gearSpec, String buffSpec, String passiveSpec) throws Exception
     {
         if (kind.equals("player"))
-            return measurePlayer(source, classId, level, gearSpec, buffSpec);
+            return measurePlayer(source, classId, level, gearSpec, buffSpec, passiveSpec);
         return measureNpc(source, npcId, playable(kind));
     }
 
-    private static ActorStats measurePlayer(DataSource source, int classId, int level, String gearSpec, String buffSpec)
-        throws Exception
+    private static ActorStats measurePlayer(DataSource source, int classId, int level, String gearSpec, String buffSpec,
+        String passiveSpec) throws Exception
     {
         if (level < 1)
             throw new IllegalArgumentException("player level must be positive");
@@ -226,39 +229,62 @@ public final class MobiusFormulaDriver
         List<BuffFunc> buffs = source.readBuffs(buffSpec);
         double strBonus = bonus.bonus("STR", cls.str);
         double dexBonus = bonus.bonus("DEX", cls.dex);
+        double conBonus = bonus.bonus("CON", cls.con);
+        double intBonus = bonus.bonus("INT", cls.intel);
+        double witBonus = bonus.bonus("WIT", cls.wit);
+        double menBonus = bonus.bonus("MEN", cls.men);
         double levelMod = (level + 89) / 100.0;
 
         ItemData weapon = gear.get("rhand");
         if (weapon == null)
             weapon = gear.get("lrhand");
-        // Wooden Arrow etc. in rhand would be wrong; ignore non-weapons with no pAtk/pAtkSpd.
         if (weapon != null && weapon.pAtk <= 0 && weapon.pAtkSpd <= 0 && !weapon.bow)
             weapon = null;
 
-        double pAtk = (weapon != null && weapon.pAtk > 0 ? weapon.pAtk : cls.basePAtk) * strBonus * levelMod;
+        double weaponPAtk = weapon != null && weapon.pAtk > 0
+            ? weapon.pAtk + enchantPhysical(weapon) : cls.basePAtk;
+        double weaponMAtk = weapon != null && weapon.mAtk > 0
+            ? weapon.mAtk + enchantMagic(weapon) : cls.baseMAtk;
+        double pAtk = weaponPAtk * strBonus * levelMod;
         double pDef = (cls.basePDefSum + gearPDefDelta(cls, gear)) * levelMod;
+        double mAtk = weaponMAtk * intBonus * intBonus * levelMod * levelMod;
+        double mDef = Math.max(1.0, cls.baseMDef * menBonus * levelMod);
         double pAtkSpdBase = weapon != null && weapon.pAtkSpd > 0 ? weapon.pAtkSpd : cls.basePAtkSpd;
         double pAtkSpd = pAtkSpdBase * dexBonus;
+        double mAtkSpd = Math.max(1.0, cls.baseMAtkSpd * witBonus);
         double critBeast = weapon != null && weapon.critRate > 0 ? weapon.critRate : cls.baseCritRate;
         double crit = critBeast * dexBonus * 10.0;
+        double accuracy = (int) (Math.sqrt(Math.max(0, cls.dex)) * 6.0 + Math.max(1, level));
+        double evasion = accuracy;
 
         Map<String, Double> stats = new HashMap<>();
         stats.put("pAtk", pAtk);
         stats.put("pDef", pDef);
         stats.put("pAtkSpd", pAtkSpd);
+        stats.put("mAtk", mAtk);
+        stats.put("mDef", mDef);
+        stats.put("mAtkSpd", mAtkSpd);
         stats.put("critRate", crit);
+        stats.put("accuracy", accuracy);
+        stats.put("evasion", evasion);
         applyBuffs(stats, buffs);
+        applyBuffs(stats, source.readPassives(passiveSpec, gear));
         pAtk = stats.get("pAtk");
         pDef = stats.get("pDef");
         pAtkSpd = stats.get("pAtkSpd");
+        mAtk = stats.get("mAtk");
+        mDef = stats.get("mDef");
+        mAtkSpd = stats.get("mAtkSpd");
         crit = stats.get("critRate");
+        accuracy = stats.get("accuracy");
+        evasion = stats.get("evasion");
 
         ActorStats a = new ActorStats();
         a.pAtk = pAtk;
         a.pDef = Math.max(1.0, pDef);
         a.pAtkSpdRaw = pAtkSpd;
-        a.accuracy = (int) (Math.sqrt(Math.max(0, cls.dex)) * 6.0 + Math.max(1, level));
-        a.evasion = a.accuracy;
+        a.accuracy = accuracy;
+        a.evasion = evasion;
         ItemData shield = gear.get("lhand");
         if (shield != null && shield.shieldDef > 0)
         {
@@ -274,6 +300,27 @@ public final class MobiusFormulaDriver
         a.reuseDelayMs = a.bow ? 1500 : 0;
         a.critDamageMod = 1.0;
         a.critDamageAdd = 0.0;
+        a.str = cls.str;
+        a.dex = cls.dex;
+        a.con = cls.con;
+        a.intel = cls.intel;
+        a.wit = cls.wit;
+        a.men = cls.men;
+        a.strBonus = strBonus;
+        a.dexBonus = dexBonus;
+        a.conBonus = conBonus;
+        a.intBonus = intBonus;
+        a.witBonus = witBonus;
+        a.menBonus = menBonus;
+        a.mAtk = mAtk;
+        a.mDef = Math.max(1.0, mDef);
+        a.mAtkSpd = mAtkSpd;
+        double magicCritBase = weapon != null ? witBonus : 1.0;
+        a.mCritPermille = (int) magicCritBase * 10;
+        int idx = Math.max(0, Math.min(level, cls.hp.length) - 1);
+        a.maxHp = (int) (cls.hp[idx] * conBonus);
+        a.maxMp = (int) (cls.mp[idx] * menBonus);
+        a.maxCp = (int) (cls.cp[idx] * conBonus);
         return a;
     }
 
@@ -400,7 +447,7 @@ public final class MobiusFormulaDriver
             ItemData item = gear.get(slot);
             if (item == null)
                 continue;
-            delta += item.pDef - cls.basePDef.getOrDefault(slot, 0);
+            delta += item.pDef + enchantDefence(item.enchant) - cls.basePDef.getOrDefault(slot, 0);
         }
         return delta;
     }
@@ -456,10 +503,9 @@ public final class MobiusFormulaDriver
             String slot = parts[0].trim();
             int itemId = Integer.parseInt(parts[1].trim());
             int enchant = parts.length > 2 ? Integer.parseInt(parts[2].trim()) : 0;
-            if (enchant != 0)
-                throw new IllegalArgumentException(
-                    "Oracle driver currently supports enchant 0 only (entry " + entry + ").");
-            gear.put(slot, readItem(ref, itemId));
+            ItemData item = readItem(ref, itemId);
+            item.enchant = enchant;
+            gear.put(slot, item);
         }
         return gear;
     }
@@ -791,10 +837,16 @@ public final class MobiusFormulaDriver
         int intel;
         int wit;
         int basePAtk;
+        int baseMAtk;
+        int baseMDef = 41;
         int baseCritRate;
         int basePAtkSpd;
+        int baseMAtkSpd = 333;
         final Map<String, Integer> basePDef = new LinkedHashMap<>();
         int basePDefSum;
+        double[] hp = new double[0];
+        double[] mp = new double[0];
+        double[] cp = new double[0];
     }
 
     private static final class ItemData
@@ -812,6 +864,11 @@ public final class MobiusFormulaDriver
         int shieldRate;
         int shieldEvasionPenalty;
         boolean bow;
+        int enchant;
+        String bodySlot = "";
+        String weaponType = "";
+        String armorType = "";
+        String crystal = "";
     }
 
     private static final class NpcData
@@ -853,6 +910,10 @@ public final class MobiusFormulaDriver
         double critDamageAdd;
         boolean playable;
         boolean bow;
+        int str, dex, con, intel, wit, men;
+        double strBonus, dexBonus, conBonus, intBonus, witBonus, menBonus;
+        double mAtk, mDef, mAtkSpd;
+        int mCritPermille, maxHp, maxMp, maxCp;
     }
 
     private static final class StatBonus
@@ -885,6 +946,7 @@ public final class MobiusFormulaDriver
         String classesJson;
         String itemsJson;
         String npcsJson;
+        String passivesJson;
         StatBonus bonus;
 
         static DataSource open(Path ref, Path data) throws Exception
@@ -926,10 +988,9 @@ public final class MobiusFormulaDriver
                 String slot = parts[0].trim();
                 int itemId = Integer.parseInt(parts[1].trim());
                 int enchant = parts.length > 2 ? Integer.parseInt(parts[2].trim()) : 0;
-                if (enchant != 0)
-                    throw new IllegalArgumentException(
-                        "Oracle driver currently supports enchant 0 only (entry " + entry + ").");
-                gear.put(slot, readItem(itemId));
+                ItemData item = readItem(itemId);
+                item.enchant = enchant;
+                gear.put(slot, item);
             }
             return gear;
         }
@@ -966,6 +1027,30 @@ public final class MobiusFormulaDriver
             return MobiusFormulaDriver.readBuffs(ref, spec);
         }
 
+        List<BuffFunc> readPassives(String spec, Map<String, ItemData> gear) throws Exception
+        {
+            List<BuffFunc> out = new ArrayList<>();
+            if (spec == null || spec.isBlank())
+                return out;
+            if (passivesJson == null)
+                passivesJson = Files.readString(data.resolve("skill-passives.json"), StandardCharsets.UTF_8);
+            for (String entry : spec.split(","))
+            {
+                if (entry.isBlank())
+                    continue;
+                String[] parts = entry.split(":");
+                if (parts.length != 2)
+                    throw new IllegalArgumentException("passive entry must be skillId:level: " + entry);
+                int skillId = Integer.parseInt(parts[0].trim());
+                int level = Integer.parseInt(parts[1].trim());
+                String obj = jsonObjectInArray(passivesJson, "skills", "skillId", skillId);
+                if (obj == null)
+                    throw new IllegalArgumentException("Passive " + skillId + " not found in skill-passives.json");
+                out.addAll(parsePassiveFuncs(obj, level, gear));
+            }
+            return out;
+        }
+
         ClassData readClassJson(int classId) throws Exception
         {
             if (classesJson == null)
@@ -982,8 +1067,14 @@ public final class MobiusFormulaDriver
             c.intel = jsonInt(obj, "int", 1);
             c.wit = jsonInt(obj, "wit", 1);
             c.basePAtk = jsonInt(obj, "pAtk", 0);
+            c.baseMAtk = jsonInt(obj, "mAtk", 0);
+            c.baseMDef = jsonInt(obj, "mDef", 41);
             c.baseCritRate = jsonInt(obj, "crit", 0);
             c.basePAtkSpd = jsonInt(obj, "pAtkSpd", 300);
+            c.baseMAtkSpd = jsonInt(obj, "mAtkSpd", 333);
+            c.hp = toArray(jsonNumberArray(obj, "hp"));
+            c.mp = toArray(jsonNumberArray(obj, "mp"));
+            c.cp = toArray(jsonNumberArray(obj, "cp"));
             int pDefSum = jsonInt(obj, "pDef", 80);
             boolean mystic = pDefSum < 80;
             c.basePDef.put("chest", mystic ? 15 : 31);
@@ -1018,6 +1109,10 @@ public final class MobiusFormulaDriver
             dataItem.shieldRate = jsonInt(obj, "shieldRate", 0);
             dataItem.shieldEvasionPenalty = jsonInt(obj, "shieldEvasionPenalty", 0);
             dataItem.bow = "bow".equalsIgnoreCase(jsonString(obj, "weaponType", ""));
+            dataItem.weaponType = jsonString(obj, "weaponType", "");
+            dataItem.bodySlot = jsonString(obj, "bodySlot", "");
+            dataItem.armorType = jsonString(obj, "armorType", "");
+            dataItem.crystal = jsonString(obj, "crystal", "");
             return dataItem;
         }
 
@@ -1187,6 +1282,245 @@ public final class MobiusFormulaDriver
                 out.add(Double.parseDouble(t));
         }
         return out;
+    }
+
+
+    private static void addStatMatrix(Map<String, Double> metrics, ActorStats a)
+    {
+        metrics.put("str", (double) a.str);
+        metrics.put("dex", (double) a.dex);
+        metrics.put("con", (double) a.con);
+        metrics.put("int", (double) a.intel);
+        metrics.put("wit", (double) a.wit);
+        metrics.put("men", (double) a.men);
+        metrics.put("strBonus", a.strBonus);
+        metrics.put("dexBonus", a.dexBonus);
+        metrics.put("conBonus", a.conBonus);
+        metrics.put("intBonus", a.intBonus);
+        metrics.put("witBonus", a.witBonus);
+        metrics.put("menBonus", a.menBonus);
+        metrics.put("mAtk", a.mAtk);
+        metrics.put("mDef", a.mDef);
+        metrics.put("mAtkSpd", a.mAtkSpd);
+        metrics.put("mCritPermille", (double) a.mCritPermille);
+        metrics.put("maxHp", (double) a.maxHp);
+        metrics.put("maxMp", (double) a.maxMp);
+        metrics.put("maxCp", (double) a.maxCp);
+    }
+
+    private static int enchantDefence(int enchantLevel)
+    {
+        if (enchantLevel <= 0)
+            return 0;
+        int over = enchantLevel > 3 ? enchantLevel - 3 : 0;
+        int enchant = enchantLevel > 3 ? 3 : enchantLevel;
+        return enchant + 3 * over;
+    }
+
+    private static int enchantPhysical(ItemData weapon)
+    {
+        if (weapon.enchant <= 0)
+            return 0;
+        int over = weapon.enchant > 3 ? weapon.enchant - 3 : 0;
+        int enchant = weapon.enchant > 3 ? 3 : weapon.enchant;
+        boolean twoHand = "lrhand".equalsIgnoreCase(weapon.bodySlot);
+        boolean bow = weapon.bow;
+        String c = weapon.crystal == null ? "" : weapon.crystal.toLowerCase();
+        if ("s".equals(c))
+        {
+            if (twoHand)
+                return bow ? 10 * enchant + 20 * over : 6 * enchant + 12 * over;
+            return 5 * enchant + 10 * over;
+        }
+        if ("a".equals(c))
+        {
+            if (twoHand)
+                return bow ? 8 * enchant + 16 * over : 5 * enchant + 10 * over;
+            return 4 * enchant + 8 * over;
+        }
+        if ("b".equals(c) || "c".equals(c))
+        {
+            if (twoHand)
+                return bow ? 6 * enchant + 12 * over : 4 * enchant + 8 * over;
+            return 3 * enchant + 6 * over;
+        }
+        return bow ? 4 * enchant + 8 * over : 2 * enchant + 4 * over;
+    }
+
+    private static int enchantMagic(ItemData weapon)
+    {
+        if (weapon.enchant <= 0)
+            return 0;
+        int over = weapon.enchant > 3 ? weapon.enchant - 3 : 0;
+        int enchant = weapon.enchant > 3 ? 3 : weapon.enchant;
+        String c = weapon.crystal == null ? "" : weapon.crystal.toLowerCase();
+        if ("s".equals(c))
+            return 4 * enchant + 8 * over;
+        if ("a".equals(c) || "b".equals(c) || "c".equals(c))
+            return 3 * enchant + 6 * over;
+        return 2 * enchant + 4 * over;
+    }
+
+    private static List<BuffFunc> parsePassiveFuncs(String obj, int level, Map<String, ItemData> gear)
+    {
+        List<BuffFunc> out = new ArrayList<>();
+        int key = obj.indexOf("\"effects\"");
+        if (key < 0)
+            return out;
+        int start = obj.indexOf('[', key);
+        if (start < 0)
+            return out;
+        for (String effect : jsonObjectList(obj.substring(start)))
+        {
+            String stat = jsonString(effect, "stat", "");
+            String opName = jsonString(effect, "op", "");
+            String op = switch (opName)
+            {
+                case "mul" -> "m";
+                case "add" -> "a";
+                case "sub" -> "s";
+                case "set" -> "=";
+                default -> "";
+            };
+            if (stat.isEmpty() || op.isEmpty())
+                continue;
+            if (!usingMatches(effect, gear))
+                continue;
+            List<Double> values = jsonNumberArray(effect, "values");
+            if (values.isEmpty())
+                continue;
+            int idx = Math.max(0, Math.min(level, values.size()) - 1);
+            out.add(new BuffFunc(stat, op, values.get(idx)));
+        }
+        return out;
+    }
+
+    private static boolean usingMatches(String effect, Map<String, ItemData> gear)
+    {
+        List<String> kinds = jsonStringArray(effect, "using");
+        List<String> slots = jsonStringArray(effect, "usingSlot");
+        if (kinds.isEmpty() && slots.isEmpty())
+            return true;
+        ItemData weapon = gear.get("rhand");
+        if (weapon == null)
+            weapon = gear.get("lrhand");
+        ItemData chest = gear.get("chest");
+        ItemData legs = gear.get("legs");
+        ItemData lhand = gear.get("lhand");
+        for (String slot : slots)
+        {
+            if (weapon != null && slot.equalsIgnoreCase(weapon.bodySlot))
+                return true;
+        }
+        if (!slots.isEmpty() && kinds.isEmpty())
+            return false;
+        for (String kind : kinds)
+        {
+            String k = kind.toUpperCase();
+            if (k.equals("HEAVY") || k.equals("LIGHT") || k.equals("MAGIC"))
+            {
+                String want = k.equals("HEAVY") ? "heavy" : k.equals("LIGHT") ? "light" : "magic";
+                boolean fullBody = chest != null && "fullarmor".equalsIgnoreCase(chest.bodySlot);
+                if (chest != null && want.equalsIgnoreCase(nullToEmpty(chest.armorType))
+                    && (fullBody || (legs != null && want.equalsIgnoreCase(nullToEmpty(legs.armorType)))))
+                    return true;
+            }
+            else if (k.equals("SHIELD"))
+            {
+                if (lhand != null && lhand.shieldDef > 0)
+                    return true;
+            }
+            else if (weapon != null && weaponKindMatches(k, nullToEmpty(weapon.weaponType)))
+                return true;
+        }
+        return kinds.isEmpty();
+    }
+
+    private static boolean weaponKindMatches(String kind, String weaponType)
+    {
+        String wt = weaponType.toLowerCase();
+        return switch (kind)
+        {
+            case "SWORD" -> wt.equals("sword");
+            case "BLUNT" -> wt.equals("blunt");
+            case "DAGGER", "DUALDAGGER" -> wt.equals("dagger");
+            case "BOW" -> wt.equals("bow");
+            case "POLE" -> wt.equals("pole");
+            case "DUAL" -> wt.equals("dual");
+            case "FIST", "DUALFIST" -> wt.equals("fist");
+            case "FISHINGROD" -> wt.equals("fishingrod");
+            case "ETC" -> wt.equals("etc");
+            default -> false;
+        };
+    }
+
+    private static String nullToEmpty(String value)
+    {
+        return value == null ? "" : value;
+    }
+
+    private static List<String> jsonObjectList(String array)
+    {
+        List<String> out = new ArrayList<>();
+        int i = 0;
+        while (i < array.length() && array.charAt(i) != '[')
+            i++;
+        if (i >= array.length())
+            return out;
+        i++;
+        int depth = 0;
+        int start = -1;
+        for (; i < array.length(); i++)
+        {
+            char c = array.charAt(i);
+            if (c == '{')
+            {
+                if (depth == 0)
+                    start = i;
+                depth++;
+            }
+            else if (c == '}')
+            {
+                depth--;
+                if (depth == 0 && start >= 0)
+                {
+                    out.add(array.substring(start, i + 1));
+                    start = -1;
+                }
+            }
+            else if (c == ']' && depth == 0)
+                break;
+        }
+        return out;
+    }
+
+    private static List<String> jsonStringArray(String json, String field)
+    {
+        List<String> out = new ArrayList<>();
+        String needle = "\"" + field + "\"";
+        int key = json.indexOf(needle);
+        if (key < 0)
+            return out;
+        int bracket = json.indexOf('[', key);
+        int end = json.indexOf(']', bracket);
+        if (bracket < 0 || end < 0)
+            return out;
+        String body = json.substring(bracket + 1, end);
+        for (String part : body.split(","))
+        {
+            String t = part.trim();
+            if (t.startsWith("\"") && t.endsWith("\"") && t.length() >= 2)
+                out.add(t.substring(1, t.length() - 1));
+        }
+        return out;
+    }
+
+    private static double[] toArray(List<Double> list)
+    {
+        double[] a = new double[list.size()];
+        for (int i = 0; i < list.size(); i++)
+            a[i] = list.get(i);
+        return a;
     }
 
 }

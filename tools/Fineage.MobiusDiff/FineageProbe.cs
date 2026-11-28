@@ -62,6 +62,8 @@ public static class FineageProbe
 
         if (scenario.Matrix)
             PhysAutoMatrix.Add(metrics, scenario, attacker, target);
+        if (scenario.StatsMatrix)
+            AttrStatsMatrix.Add(metrics, attacker);
 
         return metrics;
     }
@@ -72,20 +74,21 @@ public static class FineageProbe
         {
             return scenario.Attacker.Kind == "player"
                 ? MeasurePlayer(scenario.Id, scenario.Attacker.ClassId, scenario.Attacker.Level,
-                    scenario.Attacker.Gear, scenario.Attacker.Buffs, data)
+                    scenario.Attacker.Gear, scenario.Attacker.Buffs, scenario.Attacker.Passives, data)
                 : MeasureNpc(scenario.Id, scenario.Attacker.NpcId, playable: scenario.Attacker.Kind == "summon",
                     data, npcs);
         }
 
         return scenario.Target.Kind == "player"
             ? MeasurePlayer(scenario.Id, scenario.Target.ClassId, scenario.Target.Level,
-                scenario.Target.Gear, scenario.Target.Buffs, data)
+                scenario.Target.Gear, scenario.Target.Buffs, passives: [], data)
             : MeasureNpc(scenario.Id, scenario.Target.NpcId, playable: scenario.Target.Kind == "summon",
                 data, npcs);
     }
 
     static ActorSnapshot MeasurePlayer(
-        string scenarioId, int classId, int level, List<GearSpec> gearList, List<BuffSpec> buffs, GameData data)
+        string scenarioId, int classId, int level, List<GearSpec> gearList, List<BuffSpec> buffs,
+        List<BuffSpec> passives, GameData data)
     {
         if (classId < 0)
             throw new InvalidDataException($"{scenarioId}: classId must be non-negative.");
@@ -123,13 +126,18 @@ public static class FineageProbe
             ZoneCombat.DefaultPlayerPDef);
         var formula = PlayerFormulaBases.From(attrs, gearBases, template.MAtkSpd, level);
         var mods = BuffMods(scenarioId, buffs, inventory);
+        mods = PassiveMods(scenarioId, passives, inventory, mods);
 
         double pAtk = mods.Apply(CombatStat.PAtk, formula.PAtk);
         double pDef = Math.Max(1d, mods.Apply(CombatStat.PDef, formula.PDef));
         double pAtkSpd = Math.Max(1d, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd));
+        double mAtk = mods.Apply(CombatStat.MAtk, formula.MAtk);
+        double mDef = Math.Max(1d, mods.Apply(CombatStat.MDef, formula.MDef));
+        double mAtkSpd = Math.Max(1d, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd));
         int accuracy = mods.Apply(CombatStat.Accuracy, formula.Accuracy);
         int evasion = mods.Apply(CombatStat.Evasion, formula.Evasion);
         int critPermille = mods.Apply(CombatStat.CritRate, formula.CritRate);
+        int mCritPermille = (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10;
         double critDamageMod = mods.Apply(CombatStat.CritDmg, 1d);
         double critDamageAdd = mods.Apply(CombatStat.CritDmgAdd, 0d);
         int attackRange = Math.Max(0, mods.Apply(CombatStat.PAtkRange, gearBases.AttackRange));
@@ -140,7 +148,11 @@ public static class FineageProbe
         return new ActorSnapshot(
             pAtk, pDef, pAtkSpd, accuracy, evasion, critPermille, critDamageMod, critDamageAdd,
             attackRange, shieldDef, shieldRate, gearBases.RandomDamage, Playable: true, bow,
-            ZoneCombat.WeaponReuseDelayMs(gearBases.Weapon));
+            ZoneCombat.WeaponReuseDelayMs(gearBases.Weapon),
+            attrs.Str, attrs.Dex, attrs.Con, attrs.Int, attrs.Wit, attrs.Men,
+            attrs.StrBonus, attrs.DexBonus, attrs.ConBonus, attrs.IntBonus, attrs.WitBonus, attrs.MenBonus,
+            mAtk, mDef, mAtkSpd, mCritPermille,
+            template.ModifiedHp(level), template.ModifiedMp(level), template.ModifiedCp(level));
     }
 
     static ActorSnapshot MeasureNpc(string scenarioId, int npcId, bool playable, GameData data, NpcCatalog npcs)
@@ -158,6 +170,24 @@ public static class FineageProbe
             playable, bow, ZoneCombat.WeaponReuseDelayMs(bow ? WeaponType.Bow : WeaponType.None));
     }
 
+
+    static CombatStatMods PassiveMods(
+        string scenarioId, List<BuffSpec> passives, PlayerInventory inventory, CombatStatMods mods)
+    {
+        if (passives.Count == 0)
+            return mods;
+        var catalog = SkillStatEffectCatalog.LoadPassives();
+        var levels = new Dictionary<int, int>();
+        foreach (var p in passives)
+            levels[p.SkillId] = p.Level;
+        return catalog.CollectPassives(
+            levels,
+            kinds => ConditionUsingItemType.Matches(inventory, kinds),
+            ReferenceEquals(mods, CombatStatMods.None) ? null : mods,
+            wearingSlot: slots => ConditionUsingItemType.MatchesSlot(inventory, slots),
+            onMissing: id => throw new InvalidDataException(
+                $"{scenarioId}: passive skill {id} is missing from {SkillStatEffectCatalog.PassivesFileName}."));
+    }
     static CombatStatMods BuffMods(string scenarioId, List<BuffSpec> buffs, PlayerInventory inventory)
     {
         if (buffs.Count == 0)
@@ -196,7 +226,26 @@ internal readonly record struct ActorSnapshot(
     int RandomDamage,
     bool Playable,
     bool Bow,
-    int ReuseDelayMs);
+    int ReuseDelayMs,
+    int Str = 0,
+    int Dex = 0,
+    int Con = 0,
+    int Int = 0,
+    int Wit = 0,
+    int Men = 0,
+    double StrBonus = 0,
+    double DexBonus = 0,
+    double ConBonus = 0,
+    double IntBonus = 0,
+    double WitBonus = 0,
+    double MenBonus = 0,
+    double MAtk = 0,
+    double MDef = 0,
+    double MAtkSpd = 0,
+    int MCritPermille = 0,
+    int MaxHp = 0,
+    int MaxMp = 0,
+    int MaxCp = 0);
 
 /// <summary>Normalized metric bag. Values are doubles so the same comparator handles points, permille and HP.</summary>
 public sealed class ActualMetrics : Dictionary<string, double>
@@ -268,5 +317,31 @@ internal static class PhysAutoMatrix
         if (attacker.CritDamageAdd > 0)
             damage += attacker.CritDamageAdd * 77d / defence;
         return Math.Max(1, (int)damage);
+    }
+}
+
+internal static class AttrStatsMatrix
+{
+    public static void Add(ActualMetrics metrics, ActorSnapshot a)
+    {
+        metrics["str"] = a.Str;
+        metrics["dex"] = a.Dex;
+        metrics["con"] = a.Con;
+        metrics["int"] = a.Int;
+        metrics["wit"] = a.Wit;
+        metrics["men"] = a.Men;
+        metrics["strBonus"] = a.StrBonus;
+        metrics["dexBonus"] = a.DexBonus;
+        metrics["conBonus"] = a.ConBonus;
+        metrics["intBonus"] = a.IntBonus;
+        metrics["witBonus"] = a.WitBonus;
+        metrics["menBonus"] = a.MenBonus;
+        metrics["mAtk"] = a.MAtk;
+        metrics["mDef"] = a.MDef;
+        metrics["mAtkSpd"] = a.MAtkSpd;
+        metrics["mCritPermille"] = a.MCritPermille;
+        metrics["maxHp"] = a.MaxHp;
+        metrics["maxMp"] = a.MaxMp;
+        metrics["maxCp"] = a.MaxCp;
     }
 }

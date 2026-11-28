@@ -18,7 +18,8 @@ public readonly record struct PlayerCombatStats(
     double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double ManaShield = 0d,
     double TransDamToPlayer = 0d, double DamageZoneVuln = 0d,
     double HolyPower = 0d, double FirePower = 0d,
-    double PAtkPrecise = 0d, double PDefPrecise = 0d, double PAtkSpdPrecise = 0d);
+    double PAtkPrecise = 0d, double PDefPrecise = 0d, double PAtkSpdPrecise = 0d,
+    double MAtkPrecise = 0d, double MDefPrecise = 0d, double MAtkSpdPrecise = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -45,17 +46,23 @@ public sealed partial class ZoneWorld
         double pAtkPrecise = mods.Apply(CombatStat.PAtk, formula.PAtk);
         double pDefPrecise = Math.Max(1d, mods.Apply(CombatStat.PDef, formula.PDef));
         double pAtkSpdPrecise = Math.Max(1d, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd));
+        double mAtkPrecise = mods.Apply(CombatStat.MAtk, formula.MAtk);
+        double mDefPrecise = Math.Max(1d, mods.Apply(CombatStat.MDef, formula.MDef));
+        double mAtkSpdPrecise = Math.Max(1d, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd));
 
         return new PlayerCombatStats(
             PAtk: (int)pAtkPrecise,
             PAtkPrecise: pAtkPrecise,
-            MAtk: mods.Apply(CombatStat.MAtk, formula.MAtk),
+            MAtk: (int)mAtkPrecise,
+            MAtkPrecise: mAtkPrecise,
             PDef: (int)pDefPrecise,
             PDefPrecise: pDefPrecise,
-            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, formula.MDef)),
+            MDef: (int)mDefPrecise,
+            MDefPrecise: mDefPrecise,
             PAtkSpd: (int)pAtkSpdPrecise,
             PAtkSpdPrecise: pAtkSpdPrecise,
-            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd)),
+            MAtkSpd: (int)mAtkSpdPrecise,
+            MAtkSpdPrecise: mAtkSpdPrecise,
             Accuracy: mods.Apply(CombatStat.Accuracy, formula.Accuracy),
             CritRate: mods.Apply(CombatStat.CritRate, formula.CritRate),
             AttackRange: Math.Max(0, mods.Apply(CombatStat.PAtkRange, gear.AttackRange)),
