@@ -23,7 +23,7 @@ public sealed class RestorationAndSignetTests
     const int BattleSymbol = 8875;
     const int ChestKeyGrade5 = 6669;
     const int SignetNpc = 13024;
-    const int DebuffSignetNpc = 13028;
+    const int DebuffSignetNpc = 13025; // CT 0: Day of Doom signet NPC (HighFive numbered it 13028; CT 0 13028 is Cyclone)
     const int DebuffSignetSkill = 5145;
     const int BattleForce = 5104;
 

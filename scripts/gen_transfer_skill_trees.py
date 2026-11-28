@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """Import Mobius transferSkillTree.xml into data/skill-transfer-trees.json and ensure pomander items exist.
 
-Mobius CT0 Interlude references Holy Pomander ids on healer trainers but ships transferSkillTree.xml
-in the CT2.6 High Five datapack (rows tagged Confirmed CT2.5). Certificate ids 15307–15309 match CT0 npc params.
+STATUS: Mobius CT_0_Interlude ships the transfer-skill code (SkillTreeData, HealerTrainer script, npc
+`skill_sharing_item` params) but NO `transferSkillTree.xml` and no Holy Pomander items 15307-15309, so
+there is no Interlude source for this file. The committed data/skill-transfer-trees.json is a legacy
+import from the CT2.6 HighFive datapack (rows tagged "Confirmed CT2.5") with the HighFive-only skills
+stripped by hand; see docs/data/skill-transfer-trees.md.
 
-Usage: gen_transfer_skill_trees.py [transferSkillTree.xml]
+This generator therefore only accepts a `transferSkillTree.xml` that lives inside the pinned
+L2J_Mobius_CT_0_Interlude checkout (tools/mobius_pin.py). It refuses HighFive/Epilogue/any other
+chronicle, so the file can never be silently re-contaminated by a re-run.
+
+Usage: gen_transfer_skill_trees.py <L2J_Mobius_CT_0_Interlude>/dist/game/data/stats/players/skillTrees/transferSkillTree.xml [--allow-unpinned]
 """
 from __future__ import annotations
 
@@ -14,18 +21,22 @@ import sys
 import xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_XML = (
-    ROOT.parent.parent
-    / "Fineage-Backend/.cache/l2j-mobius/L2J_Mobius_CT_2.6_HighFive/dist/game/data/stats/players/skillTrees/transferSkillTree.xml"
-)
-if not DEFAULT_XML.is_file():
-    DEFAULT_XML = pathlib.Path(
-        "/agent/repos/Fineage-Backend/.cache/l2j-mobius/L2J_Mobius_CT_2.6_HighFive/dist/game/data/stats/players/skillTrees/transferSkillTree.xml"
-    )
+sys.path.insert(0, str(ROOT / "tools"))
+import mobius_pin  # noqa: E402
 
-src = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_XML
+_args = [a for a in sys.argv[1:] if not a.startswith("--")]
+if len(_args) != 1 or set(a for a in sys.argv[1:] if a.startswith("--")) - {"--allow-unpinned"}:
+    raise SystemExit(__doc__)
+src = pathlib.Path(_args[0])
+mobius_pin.require_pinned_ct0(
+    src, "dist/game/data/stats/players/skillTrees", allow_unpinned="--allow-unpinned" in sys.argv
+)
 if not src.is_file():
-    raise SystemExit(f"transferSkillTree.xml not found: {src}")
+    raise SystemExit(
+        f"transferSkillTree.xml not found: {src}\n"
+        "Mobius CT_0_Interlude does not ship one; refusing to fall back to another chronicle. "
+        "See docs/data/skill-transfer-trees.md."
+    )
 
 POMANDERS = {
     15307: "Holy Pomander - Cardinal",
@@ -78,7 +89,7 @@ for tree in ET.parse(src).getroot().iter("skillTree"):
         trees.append({"classId": class_id, "skills": skills})
 
 out = {
-    "reference": f"Mobius transferSkillTree from {src.name} (CT2.5 rows; pomanders match CT0 Interlude healer trainers).",
+    "reference": f"Mobius CT_0_Interlude {src.name}",
     "certificates": [
         {"itemId": item_id, "classId": class_id} for item_id, class_id in sorted(certificates.items())
     ],

@@ -2,6 +2,21 @@
  "reference": "Mobius AISkillScope HEAL/BUFF/DEBUFF/IMMOBILIZE/COT/SUICIDE from skillList",
  "npcs": [
   {
+   "npcId": 12564,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 12,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 387,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
    "npcId": 13018,
    "buff": [
     {
@@ -70,7 +85,7 @@
    ]
   },
   {
-   "npcId": 13028,
+   "npcId": 13025,
    "debuff": [
     {
      "id": 5145,
@@ -117,54 +132,538 @@
    ]
   },
   {
+   "npcId": 14704,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 6,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 255,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14705,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 7,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 305,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14706,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 7,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 305,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14707,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14708,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14709,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14710,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14711,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14712,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 8,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14713,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14714,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14715,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14716,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14717,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14718,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 9,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14719,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14720,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14721,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14722,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14723,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14724,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14725,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14726,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14727,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14728,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14729,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14730,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14731,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14732,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14733,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14734,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14735,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
+   "npcId": 14736,
+   "suicide": [
+    {
+     "id": 4139,
+     "level": 1,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 0,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 150
+    }
+   ]
+  },
+  {
    "npcId": 16013,
    "heal": [
     {
      "id": 5195,
-     "level": 6,
+     "level": 3,
      "hitTimeMs": 5000,
      "reuseDelayMs": 10000,
-     "mp": 39,
-     "mpInitial": 10,
-     "amount": 380
+     "mp": 18,
+     "mpInitial": 5,
+     "amount": 148
     }
    ],
    "buff": [
     {
      "id": 5186,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "ATTACK_TIME_DOWN"
     },
     {
      "id": 5191,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 14,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "HIT_UP"
     }
    ],
    "debuff": [
-    {
-     "id": 5196,
-     "level": 2,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
-    },
     {
      "id": 5197,
      "level": 2,
@@ -175,6 +674,17 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
      "slot": "PD_DOWN"
+    },
+    {
+     "id": 5196,
+     "level": 2,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 49,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 3,
+     "slot": "ATTACK_TIME_UP"
     }
    ]
   },
@@ -182,37 +692,37 @@
    "npcId": 16014,
    "buff": [
     {
-     "id": 5192,
-     "level": 2,
+     "id": 5194,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 11,
+     "mp": 9,
      "mpInitial": 3,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "SPEED_UP"
+     "abnormalLevel": 1,
+     "slot": "MA_UP"
     },
     {
      "id": 5193,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 18,
-     "mpInitial": 5,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "CASTING_TIME_DOWN"
     },
     {
-     "id": 5194,
-     "level": 3,
+     "id": 5192,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "MA_UP"
+     "abnormalLevel": 1,
+     "slot": "SPEED_UP"
     }
    ],
    "debuff": [
@@ -245,50 +755,39 @@
    "heal": [
     {
      "id": 5195,
-     "level": 6,
+     "level": 3,
      "hitTimeMs": 5000,
      "reuseDelayMs": 10000,
-     "mp": 39,
-     "mpInitial": 10,
-     "amount": 380
+     "mp": 18,
+     "mpInitial": 5,
+     "amount": 148
     }
    ],
    "buff": [
     {
      "id": 5186,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "ATTACK_TIME_DOWN"
     },
     {
      "id": 5191,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 14,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "HIT_UP"
     }
    ],
    "debuff": [
-    {
-     "id": 5196,
-     "level": 3,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 51,
-     "mpInitial": 13,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
-    },
     {
      "id": 5197,
      "level": 3,
@@ -299,6 +798,17 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
      "slot": "PD_DOWN"
+    },
+    {
+     "id": 5196,
+     "level": 3,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 51,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 3,
+     "slot": "ATTACK_TIME_UP"
     }
    ]
   },
@@ -306,37 +816,37 @@
    "npcId": 16016,
    "buff": [
     {
-     "id": 5192,
-     "level": 2,
+     "id": 5194,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 11,
+     "mp": 9,
      "mpInitial": 3,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "SPEED_UP"
+     "abnormalLevel": 1,
+     "slot": "MA_UP"
     },
     {
      "id": 5193,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 18,
-     "mpInitial": 5,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "CASTING_TIME_DOWN"
     },
     {
-     "id": 5194,
-     "level": 3,
+     "id": 5192,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "MA_UP"
+     "abnormalLevel": 1,
+     "slot": "SPEED_UP"
     }
    ],
    "debuff": [
@@ -369,50 +879,39 @@
    "heal": [
     {
      "id": 5195,
-     "level": 6,
+     "level": 3,
      "hitTimeMs": 5000,
      "reuseDelayMs": 10000,
-     "mp": 39,
-     "mpInitial": 10,
-     "amount": 380
+     "mp": 18,
+     "mpInitial": 5,
+     "amount": 148
     }
    ],
    "buff": [
     {
      "id": 5186,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "ATTACK_TIME_DOWN"
     },
     {
      "id": 5191,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 14,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "HIT_UP"
     }
    ],
    "debuff": [
-    {
-     "id": 5196,
-     "level": 1,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 48,
-     "mpInitial": 12,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
-    },
     {
      "id": 5197,
      "level": 1,
@@ -423,6 +922,17 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
      "slot": "PD_DOWN"
+    },
+    {
+     "id": 5196,
+     "level": 1,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 48,
+     "mpInitial": 12,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 3,
+     "slot": "ATTACK_TIME_UP"
     }
    ]
   },
@@ -430,271 +940,37 @@
    "npcId": 16018,
    "buff": [
     {
-     "id": 5192,
-     "level": 2,
+     "id": 5194,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 11,
+     "mp": 9,
      "mpInitial": 3,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "SPEED_UP"
+     "abnormalLevel": 1,
+     "slot": "MA_UP"
     },
     {
      "id": 5193,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 18,
-     "mpInitial": 5,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "CASTING_TIME_DOWN"
     },
-    {
-     "id": 5194,
-     "level": 3,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "MA_UP"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 5198,
-     "level": 1,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 7000,
-     "mp": 48,
-     "mpInitial": 12,
-     "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
-    },
-    {
-     "id": 5199,
-     "level": 1,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 48,
-     "mpInitial": 12,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "MD_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 16019,
-   "buff": [
-    {
-     "id": 4074,
-     "level": 2,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 16020,
-   "heal": [
-    {
-     "id": 5195,
-     "level": 6,
-     "hitTimeMs": 5000,
-     "reuseDelayMs": 10000,
-     "mp": 39,
-     "mpInitial": 10,
-     "amount": 380
-    }
-   ],
-   "buff": [
-    {
-     "id": 5186,
-     "level": 2,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
-    },
-    {
-     "id": 5191,
-     "level": 3,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 21,
-     "mpInitial": 6,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "HIT_UP"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 5196,
-     "level": 2,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
-    },
-    {
-     "id": 5197,
-     "level": 2,
-     "hitTimeMs": 1200,
-     "reuseDelayMs": 6000,
-     "mp": 25,
-     "mpInitial": 7,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "PD_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 16021,
-   "buff": [
-    {
-     "id": 4074,
-     "level": 2,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 16022,
-   "heal": [
-    {
-     "id": 5195,
-     "level": 6,
-     "hitTimeMs": 5000,
-     "reuseDelayMs": 10000,
-     "mp": 39,
-     "mpInitial": 10,
-     "amount": 380
-    }
-   ],
-   "buff": [
-    {
-     "id": 5186,
-     "level": 2,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN"
-    },
-    {
-     "id": 5191,
-     "level": 3,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 21,
-     "mpInitial": 6,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "HIT_UP"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 5196,
-     "level": 3,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 51,
-     "mpInitial": 13,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "ATTACK_TIME_UP"
-    },
-    {
-     "id": 5197,
-     "level": 3,
-     "hitTimeMs": 1200,
-     "reuseDelayMs": 6000,
-     "mp": 26,
-     "mpInitial": 7,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "PD_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 16023,
-   "buff": [
-    {
-     "id": 4633,
-     "level": 3,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "MULTI_BUFF"
-    }
-   ]
-  },
-  {
-   "npcId": 16024,
-   "buff": [
     {
      "id": 5192,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 6000,
-     "mp": 11,
-     "mpInitial": 3,
+     "mp": 8,
+     "mpInitial": 2,
      "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "SPEED_UP"
-    },
-    {
-     "id": 5193,
-     "level": 3,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 18,
-     "mpInitial": 5,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "CASTING_TIME_DOWN"
-    },
-    {
-     "id": 5194,
-     "level": 3,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 6000,
-     "mp": 19,
-     "mpInitial": 5,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "MA_UP"
     }
    ],
    "debuff": [
@@ -724,25 +1000,14 @@
   },
   {
    "npcId": 18006,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -754,9 +1019,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -814,7 +1079,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -825,7 +1090,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -836,7 +1101,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -943,7 +1208,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -954,7 +1219,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -965,7 +1230,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -1072,7 +1337,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1083,7 +1348,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -1094,7 +1359,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -1201,7 +1466,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1212,7 +1477,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -1223,7 +1488,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -1330,8 +1595,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ],
@@ -1341,8 +1606,8 @@
      "level": 9,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 109,
-     "mpInitial": 0,
+     "mp": 87,
+     "mpInitial": 22,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -1359,7 +1624,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -1427,6 +1692,21 @@
    ]
   },
   {
+   "npcId": 18149,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 18158,
    "buff": [
     {
@@ -1434,7 +1714,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1450,7 +1730,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1479,7 +1759,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1495,7 +1775,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1524,7 +1804,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1540,7 +1820,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1569,7 +1849,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1585,7 +1865,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -1616,7 +1896,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -1630,9 +1910,9 @@
      "level": 9,
      "hitTimeMs": 4000,
      "reuseDelayMs": 0,
-     "mp": 145,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 30,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 15,
      "abnormalLevel": 3,
      "slot": "PA_DOWN"
     }
@@ -1646,9 +1926,9 @@
      "level": 9,
      "hitTimeMs": 4000,
      "reuseDelayMs": 0,
-     "mp": 145,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 30,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 15,
      "abnormalLevel": 3,
      "slot": "PA_DOWN"
     }
@@ -1678,9 +1958,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -1773,9 +2053,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -1868,9 +2148,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -1963,9 +2243,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2058,8 +2338,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ]
@@ -2072,8 +2352,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ],
@@ -2101,7 +2381,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -2124,6 +2404,21 @@
    ]
   },
   {
+   "npcId": 18195,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 18212,
    "buff": [
     {
@@ -2131,9 +2426,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2161,9 +2456,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2191,9 +2486,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2221,9 +2516,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2251,9 +2546,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2281,9 +2576,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2311,9 +2606,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2341,9 +2636,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -2371,8 +2666,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ],
@@ -2398,8 +2693,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ]
@@ -2414,7 +2709,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -2438,6 +2733,21 @@
    ]
   },
   {
+   "npcId": 18230,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 18243,
    "immobilize": [
     {
@@ -2445,9 +2755,9 @@
      "level": 9,
      "hitTimeMs": 6000,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 10,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "PARALYZE"
     }
@@ -2461,9 +2771,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2475,9 +2797,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2489,9 +2823,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2503,9 +2849,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2517,9 +2875,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2531,9 +2901,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2545,9 +2927,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2559,9 +2953,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2573,9 +2979,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2587,9 +3005,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2601,9 +3031,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2615,9 +3057,21 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2629,10 +3083,10 @@
      "level": 4,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 57,
+     "mp": 64,
      "mpInitial": 0,
      "power": 155,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
@@ -2644,10 +3098,55 @@
      "level": 5,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 74,
+     "mp": 82,
      "mpInitial": 0,
      "power": 203,
-     "affectRange": 150
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 18303,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 6,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 101,
+     "mpInitial": 0,
+     "power": 255,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 18305,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 7,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 118,
+     "mpInitial": 0,
+     "power": 305,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 18307,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2659,10 +3158,10 @@
      "level": 4,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 57,
+     "mp": 64,
      "mpInitial": 0,
      "power": 155,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
@@ -2674,90 +3173,55 @@
      "level": 5,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 74,
+     "mp": 82,
      "mpInitial": 0,
      "power": 203,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
   {
-   "npcId": 18329,
-   "buff": [
+   "npcId": 18313,
+   "suicide": [
     {
-     "id": 4028,
-     "level": 3,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 8000,
-     "mp": 33,
+     "id": 4614,
+     "level": 6,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 101,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "PA_UP"
+     "power": 255,
+     "affectRange": 300
     }
    ]
   },
   {
-   "npcId": 18331,
-   "buff": [
+   "npcId": 18315,
+   "suicide": [
     {
-     "id": 4028,
-     "level": 3,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 8000,
-     "mp": 33,
+     "id": 4614,
+     "level": 7,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 118,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "PA_UP"
+     "power": 305,
+     "affectRange": 300
     }
    ]
   },
   {
-   "npcId": 18332,
-   "buff": [
+   "npcId": 18317,
+   "suicide": [
     {
-     "id": 4028,
-     "level": 3,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 8000,
-     "mp": 33,
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "PA_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 18335,
-   "buff": [
-    {
-     "id": 4028,
-     "level": 3,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "PA_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 18336,
-   "buff": [
-    {
-     "id": 4028,
-     "level": 3,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
-     "slot": "PA_UP"
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -2801,8 +3265,8 @@
      "level": 2,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 20,
-     "mpInitial": 0,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -2897,8 +3361,8 @@
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -2929,7 +3393,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -3027,7 +3491,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -3041,8 +3505,8 @@
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "ROOT_MAGICALLY"
@@ -3153,8 +3617,8 @@
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -3185,11 +3649,35 @@
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
+    },
+    {
+     "id": 4047,
+     "level": 4,
+     "hitTimeMs": 2500,
+     "reuseDelayMs": 8000,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 1,
+     "slot": "ROOT_MAGICALLY"
+    }
+   ],
+   "silence": [
+    {
+     "id": 4098,
+     "level": 4,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 1,
+     "slot": "SILENCE"
     }
    ]
   },
@@ -3201,9 +3689,9 @@
      "level": 4,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -3222,6 +3710,19 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "ROOT_MAGICALLY"
+    }
+   ],
+   "silence": [
+    {
+     "id": 4098,
+     "level": 4,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 1,
+     "slot": "SILENCE"
     }
    ]
   },
@@ -3297,7 +3798,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -3377,27 +3878,11 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
      "slot": "RAGE_MIGHT"
-    }
-   ]
-  },
-  {
-   "npcId": 20270,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
     }
    ]
   },
@@ -3409,8 +3894,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -3425,8 +3910,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -3441,8 +3926,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -3487,8 +3972,8 @@
      "level": 2,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 20,
-     "mpInitial": 0,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -3572,22 +4057,6 @@
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
      "slot": "PA_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 20495,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
     }
    ]
   },
@@ -3679,9 +4148,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3690,9 +4159,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3703,7 +4172,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3712,9 +4181,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -3886,9 +4355,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3897,9 +4366,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3910,7 +4379,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -3919,22 +4388,11 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
-    },
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
     }
    ]
   },
@@ -3962,7 +4420,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -3972,25 +4430,14 @@
   },
   {
    "npcId": 20610,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 3,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 9,
-     "amount": 245
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4002,9 +4449,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 22,
+     "mpInitial": 5,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4018,8 +4465,8 @@
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "ROOT_MAGICALLY"
@@ -4031,9 +4478,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 22,
+     "mpInitial": 5,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4041,25 +4488,14 @@
   },
   {
    "npcId": 20617,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 3,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 9,
-     "amount": 245
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4116,25 +4552,14 @@
   },
   {
    "npcId": 20627,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4146,9 +4571,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4191,7 +4616,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -4213,25 +4638,14 @@
   },
   {
    "npcId": 20639,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 4,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "amount": 362
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4318,25 +4732,14 @@
   },
   {
    "npcId": 20658,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4367,9 +4770,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4377,25 +4780,14 @@
   },
   {
    "npcId": 20672,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4407,9 +4799,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4423,8 +4815,8 @@
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4439,9 +4831,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -4487,9 +4879,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -4536,22 +4928,6 @@
      "mp": 24,
      "mpInitial": 6,
      "amount": 151
-    }
-   ]
-  },
-  {
-   "npcId": 20751,
-   "buff": [
-    {
-     "id": 4091,
-     "level": 1,
-     "hitTimeMs": 1500,
-     "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "POSSESSION"
     }
    ]
   },
@@ -4623,9 +4999,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -4648,18 +5024,16 @@
    ]
   },
   {
-   "npcId": 20778,
-   "buff": [
+   "npcId": 20774,
+   "heal": [
     {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
+     "id": 4065,
+     "level": 5,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 64,
+     "mpInitial": 16,
+     "amount": 494
     }
    ]
   },
@@ -4735,9 +5109,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -4783,9 +5157,9 @@
      "level": 4,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4793,17 +5167,6 @@
   },
   {
    "npcId": 20797,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 4,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "amount": 362
-    }
-   ],
    "debuff": [
     {
      "id": 4076,
@@ -4823,8 +5186,8 @@
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -4836,9 +5199,9 @@
      "level": 4,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 28,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -4879,25 +5242,14 @@
   },
   {
    "npcId": 20802,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 4,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "amount": 362
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5002,9 +5354,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -5012,25 +5364,14 @@
   },
   {
    "npcId": 20810,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5042,9 +5383,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -5058,9 +5399,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5076,7 +5417,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5090,9 +5431,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5123,9 +5464,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5162,25 +5503,14 @@
   },
   {
    "npcId": 20822,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5214,7 +5544,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5222,25 +5552,14 @@
   },
   {
    "npcId": 20828,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 7,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 91,
-     "mpInitial": 23,
-     "amount": 743
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5255,9 +5574,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5271,9 +5590,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5287,9 +5606,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5361,17 +5680,6 @@
   },
   {
    "npcId": 20847,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "debuff": [
     {
      "id": 4076,
@@ -5391,8 +5699,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5455,9 +5763,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5471,9 +5779,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5518,7 +5826,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5526,25 +5834,14 @@
   },
   {
    "npcId": 20859,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 7,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 91,
-     "mpInitial": 23,
-     "amount": 743
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -5576,9 +5873,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -5714,9 +6011,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5730,9 +6027,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5760,9 +6057,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5776,9 +6073,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5812,7 +6109,7 @@
    ]
   },
   {
-   "npcId": 20972,
+   "npcId": 20968,
    "heal": [
     {
      "id": 4065,
@@ -5822,6 +6119,51 @@
      "mp": 97,
      "mpInitial": 25,
      "amount": 789
+    }
+   ],
+   "debuff": [
+    {
+     "id": 4037,
+     "level": 2,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 35,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 2,
+     "slot": "PA_DOWN"
+    }
+   ]
+  },
+  {
+   "npcId": 20970,
+   "buff": [
+    {
+     "id": 4030,
+     "level": 3,
+     "hitTimeMs": 2500,
+     "reuseDelayMs": 8000,
+     "mp": 33,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 300,
+     "abnormalLevel": 3,
+     "slot": "PA_UP"
+    }
+   ]
+  },
+  {
+   "npcId": 20972,
+   "debuff": [
+    {
+     "id": 4076,
+     "level": 3,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 65,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 60,
+     "abnormalLevel": 3,
+     "slot": "SPEED_DOWN"
     }
    ]
   },
@@ -5847,9 +6189,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5863,9 +6205,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -5950,25 +6292,14 @@
   },
   {
    "npcId": 21003,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6033,7 +6364,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6063,8 +6394,8 @@
      "level": 2,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 20,
-     "mpInitial": 0,
+     "mp": 16,
+     "mpInitial": 4,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6092,9 +6423,9 @@
      "level": 2,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 20,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 16,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6126,7 +6457,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6142,6 +6473,22 @@
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 2,
      "slot": "SPEED_DOWN"
+    }
+   ]
+  },
+  {
+   "npcId": 21036,
+   "buff": [
+    {
+     "id": 4091,
+     "level": 1,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 18,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "POSSESSION"
     }
    ]
   },
@@ -6205,9 +6552,9 @@
      "level": 5,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 36,
+     "mpInitial": 9,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6221,9 +6568,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6237,9 +6584,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6266,9 +6613,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6301,7 +6648,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6309,25 +6656,14 @@
   },
   {
    "npcId": 21068,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 7,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 91,
-     "mpInitial": 23,
-     "amount": 743
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6342,9 +6678,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6459,9 +6795,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6475,9 +6811,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6491,9 +6827,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6534,9 +6870,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6629,20 +6965,9 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
-    },
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
     }
    ]
   },
@@ -6744,25 +7069,14 @@
   },
   {
    "npcId": 21165,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 9,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 101,
-     "mpInitial": 26,
-     "amount": 826
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 9,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
+     "mp": 58,
+     "mpInitial": 15,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6774,9 +7088,9 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6832,25 +7146,14 @@
   },
   {
    "npcId": 21176,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6862,9 +7165,9 @@
      "level": 5,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 36,
+     "mpInitial": 9,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6878,9 +7181,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6888,25 +7191,14 @@
   },
   {
    "npcId": 21179,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6918,9 +7210,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6934,9 +7226,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -6944,25 +7236,14 @@
   },
   {
    "npcId": 21182,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -6974,9 +7255,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -6990,9 +7271,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7000,25 +7281,14 @@
   },
   {
    "npcId": 21185,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 8,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 97,
-     "mpInitial": 25,
-     "amount": 789
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 8,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 69,
-     "mpInitial": 0,
+     "mp": 55,
+     "mpInitial": 14,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7030,9 +7300,9 @@
      "level": 8,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 69,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 55,
+     "mpInitial": 14,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7046,9 +7316,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7134,8 +7404,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7147,9 +7417,9 @@
      "level": 5,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 36,
+     "mpInitial": 9,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7165,7 +7435,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7203,8 +7473,8 @@
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7216,9 +7486,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7234,7 +7504,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7272,8 +7542,8 @@
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7285,9 +7555,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7303,7 +7573,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7341,8 +7611,8 @@
      "level": 8,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 69,
-     "mpInitial": 0,
+     "mp": 55,
+     "mpInitial": 14,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7354,9 +7624,9 @@
      "level": 8,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 69,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 55,
+     "mpInitial": 14,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7372,7 +7642,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7386,7 +7656,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7402,9 +7672,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -7418,7 +7688,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7434,9 +7704,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -7450,7 +7720,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7466,9 +7736,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7482,7 +7752,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7498,9 +7768,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7514,7 +7784,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7530,9 +7800,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7546,7 +7816,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7562,9 +7832,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7578,7 +7848,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7594,9 +7864,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -7610,7 +7880,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7626,9 +7896,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -7642,7 +7912,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7658,9 +7928,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7674,7 +7944,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7690,9 +7960,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7706,7 +7976,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7722,9 +7992,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -7738,7 +8008,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7754,11 +8024,59 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
+    }
+   ]
+  },
+  {
+   "npcId": 21262,
+   "buff": [
+    {
+     "id": 4091,
+     "level": 1,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 18,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "POSSESSION"
+    }
+   ]
+  },
+  {
+   "npcId": 21263,
+   "buff": [
+    {
+     "id": 4091,
+     "level": 1,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 18,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "POSSESSION"
+    }
+   ]
+  },
+  {
+   "npcId": 21264,
+   "buff": [
+    {
+     "id": 4091,
+     "level": 1,
+     "hitTimeMs": 1500,
+     "reuseDelayMs": 8000,
+     "mp": 18,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 600,
+     "abnormalLevel": 1,
+     "slot": "POSSESSION"
     }
    ]
   },
@@ -7770,7 +8088,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7786,7 +8104,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -7804,7 +8122,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7818,9 +8136,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7834,9 +8152,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7868,7 +8186,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -7882,33 +8200,22 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 170,
-     "mpInitial": 0,
+     "mp": 136,
+     "mpInitial": 34,
      "amount": 743
     }
    ]
   },
   {
    "npcId": 21301,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 7,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 91,
-     "mpInitial": 23,
-     "amount": 743
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7931,9 +8238,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7941,25 +8248,14 @@
   },
   {
    "npcId": 21302,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 7,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 91,
-     "mpInitial": 23,
-     "amount": 743
-    }
-   ],
    "immobilize": [
     {
      "id": 4046,
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -7982,9 +8278,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -7998,9 +8294,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -8009,9 +8305,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -8022,7 +8318,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -8031,9 +8327,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8047,8 +8343,8 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 170,
-     "mpInitial": 0,
+     "mp": 136,
+     "mpInitial": 34,
      "amount": 743
     }
    ]
@@ -8112,7 +8408,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8198,9 +8494,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8225,9 +8521,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8268,9 +8564,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8295,9 +8591,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8311,9 +8607,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8365,9 +8661,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8381,9 +8677,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8397,9 +8693,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8413,7 +8709,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8485,7 +8781,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8531,9 +8827,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8547,7 +8843,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8604,7 +8900,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8633,7 +8929,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8764,9 +9060,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -8780,7 +9076,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8833,9 +9129,9 @@
      "level": 8,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 69,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 55,
+     "mpInitial": 14,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -8865,7 +9161,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8911,9 +9207,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -8927,7 +9223,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -8997,7 +9293,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -9026,7 +9322,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -9149,6 +9445,19 @@
      "slot": "ATTACK_TIME_DOWN",
      "affectRange": 900
     }
+   ],
+   "debuff": [
+    {
+     "id": 4119,
+     "level": 3,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 65,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 3,
+     "slot": "HIT_DOWN"
+    }
    ]
   },
   {
@@ -9159,11 +9468,26 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
+    }
+   ]
+  },
+  {
+   "npcId": 21376,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
     }
    ]
   },
@@ -9181,6 +9505,18 @@
      "abnormalLevel": 3,
      "slot": "PA_DOWN"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9196,6 +9532,18 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "ROOT_MAGICALLY"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
     }
    ]
   },
@@ -9226,6 +9574,18 @@
      "abnormalLevel": 1,
      "slot": "PARALYZE"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9242,6 +9602,33 @@
      "abnormalLevel": 3,
      "slot": "HIT_DOWN"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 21381,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9252,7 +9639,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -9271,6 +9658,18 @@
      "abnormalLevel": 2,
      "slot": "PA_DOWN"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9286,6 +9685,18 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
      "slot": "AVOID_DOWN"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9303,6 +9714,18 @@
      "abnormalLevel": 3,
      "slot": "PD_UP"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9318,6 +9741,18 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
      "slot": "PD_DOWN"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9335,6 +9770,18 @@
      "abnormalLevel": 3,
      "slot": "SPEED_DOWN"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9350,6 +9797,18 @@
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
      "slot": "SPEED_DOWN"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9368,6 +9827,18 @@
      "slot": "MULTI_BUFF",
      "affectRange": 900
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9383,6 +9854,18 @@
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
      "slot": "SPEED_DOWN"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9400,6 +9883,18 @@
      "abnormalLevel": 3,
      "slot": "PA_UP"
     }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
    ]
   },
   {
@@ -9410,12 +9905,39 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 21392,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9432,6 +9954,48 @@
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
      "slot": "SPEED_DOWN"
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 1,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 21,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 21394,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 21395,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -9459,9 +10023,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -9523,7 +10087,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -9565,8 +10129,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ],
@@ -9622,8 +10186,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ],
@@ -9633,9 +10197,9 @@
      "level": 9,
      "hitTimeMs": 4000,
      "reuseDelayMs": 0,
-     "mp": 145,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 30,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 15,
      "abnormalLevel": 3,
      "slot": "PA_DOWN"
     }
@@ -9649,7 +10213,7 @@
      "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 1,
@@ -9723,8 +10287,8 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
+     "mp": 151,
+     "mpInitial": 38,
      "amount": 823
     }
    ]
@@ -9737,9 +10301,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -9766,9 +10330,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -9779,9 +10343,9 @@
      "level": 9,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 58,
+     "mpInitial": 15,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -9836,9 +10400,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 98,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -9877,7 +10441,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -9904,7 +10468,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -9922,7 +10486,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -9936,9 +10500,21 @@
      "level": 8,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 182,
-     "mpInitial": 0,
+     "mp": 146,
+     "mpInitial": 36,
      "amount": 789
+    }
+   ],
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 8,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 126,
+     "mpInitial": 0,
+     "power": 328,
+     "affectRange": 300
     }
    ]
   },
@@ -9950,9 +10526,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -9966,9 +10542,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -9982,9 +10558,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -9998,9 +10574,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10014,9 +10590,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10030,9 +10606,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10046,9 +10622,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10062,9 +10638,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10094,9 +10670,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10126,9 +10702,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10158,9 +10734,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10190,9 +10766,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10206,7 +10782,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10235,7 +10811,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10264,9 +10840,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10280,9 +10856,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10296,9 +10872,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10312,9 +10888,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10328,9 +10904,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10344,9 +10920,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10360,9 +10936,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10376,9 +10952,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -10408,9 +10984,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10440,9 +11016,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10472,9 +11048,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10504,9 +11080,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10520,7 +11096,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10549,7 +11125,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10578,9 +11154,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10594,9 +11170,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10610,9 +11186,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10626,9 +11202,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10642,9 +11218,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10658,9 +11234,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10674,9 +11250,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10690,9 +11266,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -10722,9 +11298,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10754,9 +11330,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10786,9 +11362,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10818,9 +11394,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10834,7 +11410,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10863,7 +11439,7 @@
      "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 50,
      "mpInitial": 0,
      "abnormalTimeSeconds": 15,
      "abnormalLevel": 1,
@@ -10892,9 +11468,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10908,26 +11484,12 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
-    }
-   ]
-  },
-  {
-   "npcId": 21522,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
     }
    ]
   },
@@ -10939,9 +11501,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -10987,9 +11549,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11003,25 +11565,11 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
-    }
-   ]
-  },
-  {
-   "npcId": 21528,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
     }
    ]
   },
@@ -11033,9 +11581,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11049,9 +11597,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11094,9 +11642,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -11111,9 +11659,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11133,20 +11681,6 @@
    ]
   },
   {
-   "npcId": 21534,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
-    }
-   ]
-  },
-  {
    "npcId": 21535,
    "buff": [
     {
@@ -11154,9 +11688,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11170,9 +11704,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11186,26 +11720,12 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
-    }
-   ]
-  },
-  {
-   "npcId": 21538,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 6,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
     }
    ]
   },
@@ -11249,9 +11769,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 124,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 99,
+     "mpInitial": 25,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF",
      "affectRange": 900
@@ -11266,9 +11786,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11279,8 +11799,8 @@
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
+     "mp": 66,
+     "mpInitial": 17,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -11356,9 +11876,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -11388,9 +11908,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -11404,9 +11924,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11481,9 +12001,9 @@
      "level": 6,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 44,
+     "mpInitial": 11,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -11622,9 +12142,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -11654,9 +12174,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -11702,9 +12222,9 @@
      "level": 7,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
+     "mp": 52,
+     "mpInitial": 13,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SILENCE"
     }
@@ -11747,9 +12267,9 @@
      "level": 2,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 26,
+     "mpInitial": 7,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 2,
      "slot": "BERSERKER"
     }
@@ -11982,17 +12502,6 @@
   },
   {
    "npcId": 21635,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "debuff": [
     {
      "id": 4076,
@@ -12012,8 +12521,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12022,17 +12531,6 @@
   },
   {
    "npcId": 21636,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "debuff": [
     {
      "id": 4076,
@@ -12052,8 +12550,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12062,17 +12560,6 @@
   },
   {
    "npcId": 21637,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ],
    "debuff": [
     {
      "id": 4076,
@@ -12092,8 +12579,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12108,9 +12595,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -12139,7 +12626,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -12188,7 +12675,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -12202,9 +12689,9 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
     }
@@ -12245,8 +12732,8 @@
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 27,
-     "mpInitial": 0,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12261,10 +12748,10 @@
      "level": 3,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 42,
+     "mp": 47,
      "mpInitial": 0,
      "power": 112,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
@@ -12335,8 +12822,8 @@
      "level": 4,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 35,
-     "mpInitial": 0,
+     "mp": 28,
+     "mpInitial": 7,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12351,10 +12838,10 @@
      "level": 4,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 57,
+     "mp": 64,
      "mpInitial": 0,
      "power": 155,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
@@ -12425,8 +12912,8 @@
      "level": 5,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 45,
-     "mpInitial": 0,
+     "mp": 36,
+     "mpInitial": 9,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
@@ -12441,10 +12928,10 @@
      "level": 5,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 74,
+     "mp": 82,
      "mpInitial": 0,
      "power": 203,
-     "affectRange": 150
+     "affectRange": 300
     }
    ]
   },
@@ -12515,11 +13002,26 @@
      "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 55,
-     "mpInitial": 0,
+     "mp": 44,
+     "mpInitial": 11,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
+    }
+   ]
+  },
+  {
+   "npcId": 21735,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 6,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 101,
+     "mpInitial": 0,
+     "power": 255,
+     "affectRange": 300
     }
    ]
   },
@@ -12590,11 +13092,26 @@
      "level": 7,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 65,
-     "mpInitial": 0,
+     "mp": 52,
+     "mpInitial": 13,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
+    }
+   ]
+  },
+  {
+   "npcId": 21758,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 7,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 118,
+     "mpInitial": 0,
+     "power": 305,
+     "affectRange": 300
     }
    ]
   },
@@ -12665,11 +13182,26 @@
      "level": 9,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 73,
-     "mpInitial": 0,
+     "mp": 58,
+     "mpInitial": 15,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "SLEEP"
+    }
+   ]
+  },
+  {
+   "npcId": 21781,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -12729,199 +13261,11 @@
      "level": 3,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 83,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 66,
+     "mpInitial": 17,
+     "abnormalTimeSeconds": 120,
      "abnormalLevel": 3,
      "slot": "MULTI_BUFF"
-    }
-   ]
-  },
-  {
-   "npcId": 21823,
-   "heal": [
-    {
-     "id": 4613,
-     "level": 9,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
-     "amount": 823
-    }
-   ]
-  },
-  {
-   "npcId": 21824,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 4589,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 165,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 21825,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "immobilize": [
-    {
-     "id": 4657,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 106,
-     "mpInitial": 27,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
-    }
-   ]
-  },
-  {
-   "npcId": 21826,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 4589,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 165,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 21827,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "immobilize": [
-    {
-     "id": 4657,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 106,
-     "mpInitial": 27,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
-    }
-   ]
-  },
-  {
-   "npcId": 21828,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "debuff": [
-    {
-     "id": 4589,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 165,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
-     "slot": "SPEED_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 21829,
-   "buff": [
-    {
-     "id": 4318,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 15,
-     "abnormalLevel": 1,
-     "slot": "ULTIMATE_BUFF"
-    }
-   ],
-   "immobilize": [
-    {
-     "id": 4657,
-     "level": 6,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 8000,
-     "mp": 106,
-     "mpInitial": 27,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY"
     }
    ]
   },
@@ -12930,13 +13274,13 @@
    "buff": [
     {
      "id": 4028,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     }
    ]
@@ -12949,9 +13293,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -12960,9 +13304,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -12973,7 +13317,7 @@
      "reuseDelayMs": 8000,
      "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     },
@@ -12982,9 +13326,9 @@
      "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 8000,
-     "mp": 0,
+     "mp": 18,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "abnormalTimeSeconds": 600,
      "abnormalLevel": 1,
      "slot": "POSSESSION"
     }
@@ -12995,13 +13339,13 @@
    "buff": [
     {
      "id": 4028,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     }
    ]
@@ -13014,9 +13358,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -13027,12 +13371,12 @@
    "heal": [
     {
      "id": 4065,
-     "level": 4,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "amount": 362
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
@@ -13041,13 +13385,13 @@
    "buff": [
     {
      "id": 4028,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     }
    ]
@@ -13057,12 +13401,12 @@
    "heal": [
     {
      "id": 4065,
-     "level": 4,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 49,
-     "mpInitial": 13,
-     "amount": 362
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
@@ -13071,13 +13415,13 @@
    "buff": [
     {
      "id": 4029,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PD_UP"
     }
    ]
@@ -13090,9 +13434,9 @@
      "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 18,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
      "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
@@ -13103,24 +13447,24 @@
    "buff": [
     {
      "id": 4028,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     },
     {
      "id": 4029,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 18,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "PD_UP"
     }
    ],
@@ -13135,129 +13479,6 @@
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "PA_DOWN"
-    },
-    {
-     "id": 4054,
-     "level": 2,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 3,
-     "slot": "PD_DOWN"
-    }
-   ]
-  },
-  {
-   "npcId": 22059,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22063,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22064,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22065,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22076,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22077,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22078,
-   "buff": [
-    {
-     "id": 4471,
-     "level": 1,
-     "hitTimeMs": 1800,
-     "reuseDelayMs": 0,
-     "mp": 10,
-     "mpInitial": 3,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 1,
-     "slot": "PA_PD_UP"
     }
    ]
   },
@@ -13266,13 +13487,13 @@
    "buff": [
     {
      "id": 4074,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 14,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "ATTACK_TIME_DOWN"
     }
    ]
@@ -13282,43 +13503,12 @@
    "heal": [
     {
      "id": 4065,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
-    }
-   ]
-  },
-  {
-   "npcId": 22100,
-   "immobilize": [
-    {
-     "id": 4483,
-     "level": 6,
-     "hitTimeMs": 3300,
-     "reuseDelayMs": 8000,
-     "mp": 88,
-     "mpInitial": 22,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY",
-     "affectRange": 200
-    }
-   ]
-  },
-  {
-   "npcId": 22103,
-   "heal": [
-    {
-     "id": 4065,
-     "level": 5,
-     "hitTimeMs": 2000,
-     "reuseDelayMs": 8000,
-     "mp": 64,
-     "mpInitial": 16,
-     "amount": 494
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
@@ -13327,13 +13517,13 @@
    "buff": [
     {
      "id": 4029,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PD_UP"
     }
    ]
@@ -13343,13 +13533,13 @@
    "buff": [
     {
      "id": 4030,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     }
    ]
@@ -13359,13 +13549,13 @@
    "buff": [
     {
      "id": 4028,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     }
    ]
@@ -13375,31 +13565,14 @@
    "buff": [
     {
      "id": 4029,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PD_UP"
-    }
-   ]
-  },
-  {
-   "npcId": 22119,
-   "debuff": [
-    {
-     "id": 4486,
-     "level": 7,
-     "hitTimeMs": 1200,
-     "reuseDelayMs": 6000,
-     "mp": 104,
-     "mpInitial": 26,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "PD_DOWN",
-     "affectRange": 200
     }
    ]
   },
@@ -13408,13 +13581,13 @@
    "buff": [
     {
      "id": 4585,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
+     "mp": 23,
+     "mpInitial": 6,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "MULTI_BUFF",
      "affectRange": 900
     }
@@ -13425,12 +13598,12 @@
    "heal": [
     {
      "id": 4065,
-     "level": 9,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 101,
-     "mpInitial": 26,
-     "amount": 826
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
@@ -13439,13 +13612,13 @@
    "debuff": [
     {
      "id": 4589,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 224,
+     "mp": 35,
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "SPEED_DOWN"
     }
    ]
@@ -13455,12 +13628,12 @@
    "heal": [
     {
      "id": 4613,
-     "level": 9,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
-     "amount": 823
+     "mp": 20,
+     "mpInitial": 5,
+     "amount": 83
     }
    ]
   },
@@ -13469,14 +13642,43 @@
    "debuff": [
     {
      "id": 4589,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 224,
+     "mp": 35,
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "SPEED_DOWN"
+    }
+   ]
+  },
+  {
+   "npcId": 22127,
+   "heal": [
+    {
+     "id": 4613,
+     "level": 1,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 20,
+     "mpInitial": 5,
+     "amount": 83
+    }
+   ]
+  },
+  {
+   "npcId": 22128,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 1,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 21,
+     "mpInitial": 0,
+     "power": 52,
+     "affectRange": 300
     }
    ]
   },
@@ -13485,12 +13687,12 @@
    "heal": [
     {
      "id": 4065,
-     "level": 6,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 78,
-     "mpInitial": 20,
-     "amount": 628
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
@@ -13499,46 +13701,46 @@
    "buff": [
     {
      "id": 4028,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PA_UP"
     },
     {
      "id": 4029,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 1800,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 10,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "PD_UP"
     },
     {
      "id": 4074,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 33,
+     "mp": 14,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "abnormalLevel": 1,
      "slot": "ATTACK_TIME_DOWN"
     },
     {
      "id": 4099,
-     "level": 2,
+     "level": 1,
      "hitTimeMs": 4000,
      "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 2,
+     "mp": 14,
+     "mpInitial": 4,
+     "abnormalTimeSeconds": 1200,
+     "abnormalLevel": 1,
      "slot": "BERSERKER"
     }
    ]
@@ -13548,29 +13750,27 @@
    "heal": [
     {
      "id": 4065,
-     "level": 9,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 101,
-     "mpInitial": 26,
-     "amount": 826
+     "mp": 13,
+     "mpInitial": 4,
+     "amount": 83
     }
    ]
   },
   {
    "npcId": 22133,
-   "immobilize": [
+   "suicide": [
     {
-     "id": 4488,
-     "level": 10,
+     "id": 4614,
+     "level": 1,
      "hitTimeMs": 0,
      "reuseDelayMs": 0,
-     "mp": 124,
+     "mp": 21,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY",
-     "affectRange": 150
+     "power": 52,
+     "affectRange": 300
     }
    ]
   },
@@ -13579,12 +13779,12 @@
    "heal": [
     {
      "id": 4613,
-     "level": 9,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 189,
-     "mpInitial": 0,
-     "amount": 823
+     "mp": 20,
+     "mpInitial": 5,
+     "amount": 83
     }
    ]
   },
@@ -13621,6 +13821,36 @@
    ]
   },
   {
+   "npcId": 22144,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 22145,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 22146,
    "immobilize": [
     {
@@ -13653,6 +13883,21 @@
    ]
   },
   {
+   "npcId": 22154,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 22155,
    "heal": [
     {
@@ -13677,6 +13922,35 @@
      "mp": 101,
      "mpInitial": 26,
      "amount": 826
+    }
+   ]
+  },
+  {
+   "npcId": 22160,
+   "heal": [
+    {
+     "id": 4065,
+     "level": 9,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 101,
+     "mpInitial": 26,
+     "amount": 826
+    }
+   ]
+  },
+  {
+   "npcId": 22161,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -13709,6 +13983,21 @@
    ]
   },
   {
+   "npcId": 22169,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
    "npcId": 22171,
    "heal": [
     {
@@ -13719,6 +14008,21 @@
      "mp": 101,
      "mpInitial": 26,
      "amount": 826
+    }
+   ]
+  },
+  {
+   "npcId": 22172,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -13739,33 +14043,75 @@
    ]
   },
   {
-   "npcId": 22214,
-   "buff": [
+   "npcId": 22176,
+   "suicide": [
     {
-     "id": 5080,
-     "level": 1,
-     "hitTimeMs": 3000,
-     "reuseDelayMs": 20000,
-     "mp": 0,
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 2,
-     "slot": "ATTACK_TIME_DOWN",
-     "affectRange": 900
+     "power": 348,
+     "affectRange": 300
     }
-   ],
-   "debuff": [
+   ]
+  },
+  {
+   "npcId": 22188,
+   "heal": [
     {
-     "id": 4486,
-     "level": 10,
-     "hitTimeMs": 1200,
-     "reuseDelayMs": 6000,
-     "mp": 120,
-     "mpInitial": 30,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
-     "slot": "PD_DOWN",
-     "affectRange": 200
+     "id": 4065,
+     "level": 9,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 101,
+     "mpInitial": 26,
+     "amount": 826
+    }
+   ]
+  },
+  {
+   "npcId": 22190,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
+    }
+   ]
+  },
+  {
+   "npcId": 22191,
+   "heal": [
+    {
+     "id": 4065,
+     "level": 9,
+     "hitTimeMs": 2000,
+     "reuseDelayMs": 8000,
+     "mp": 101,
+     "mpInitial": 26,
+     "amount": 826
+    }
+   ]
+  },
+  {
+   "npcId": 22195,
+   "suicide": [
+    {
+     "id": 4614,
+     "level": 9,
+     "hitTimeMs": 0,
+     "reuseDelayMs": 0,
+     "mp": 133,
+     "mpInitial": 0,
+     "power": 348,
+     "affectRange": 300
     }
    ]
   },
@@ -13865,6 +14211,20 @@
      "slot": "PA_DOWN",
      "affectRange": 200
     }
+   ],
+   "immobilize": [
+    {
+     "id": 4189,
+     "level": 3,
+     "hitTimeMs": 3300,
+     "reuseDelayMs": 0,
+     "mp": 39,
+     "mpInitial": 0,
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 1,
+     "slot": "PARALYZE",
+     "affectRange": 200
+    }
    ]
   },
   {
@@ -13889,10 +14249,10 @@
    "immobilize": [
     {
      "id": 4197,
-     "level": 5,
+     "level": 6,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 67,
+     "mp": 83,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -13906,10 +14266,10 @@
    "debuff": [
     {
      "id": 4199,
-     "level": 5,
+     "level": 6,
      "hitTimeMs": 2500,
      "reuseDelayMs": 0,
-     "mp": 67,
+     "mp": 83,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 3,
@@ -14814,10 +15174,10 @@
    "buff": [
     {
      "id": 4213,
-     "level": 5,
+     "level": 6,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 23,
+     "mp": 28,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -15225,10 +15585,10 @@
    "buff": [
     {
      "id": 4212,
-     "level": 5,
+     "level": 6,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 23,
+     "mp": 28,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -15716,10 +16076,10 @@
    "buff": [
     {
      "id": 4173,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 38,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -15766,10 +16126,10 @@
    "buff": [
     {
      "id": 4175,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 38,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -15782,13 +16142,13 @@
    "debuff": [
     {
      "id": 4187,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 112,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
+     "abnormalLevel": 1,
      "slot": "SPEED_DOWN",
      "affectRange": 200
     }
@@ -15799,10 +16159,10 @@
    "immobilize": [
     {
      "id": 4189,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 112,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -16598,13 +16958,13 @@
    "debuff": [
     {
      "id": 4187,
-     "level": 4,
+     "level": 3,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 53,
+     "mp": 39,
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
+     "abnormalLevel": 2,
      "slot": "SPEED_DOWN",
      "affectRange": 200
     }
@@ -16612,10 +16972,10 @@
    "immobilize": [
     {
      "id": 4185,
-     "level": 4,
+     "level": 3,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 53,
+     "mp": 39,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -16735,10 +17095,10 @@
    "debuff": [
     {
      "id": 4187,
-     "level": 6,
+     "level": 5,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 83,
+     "mp": 67,
      "mpInitial": 0,
      "abnormalTimeSeconds": 60,
      "abnormalLevel": 3,
@@ -17353,10 +17713,10 @@
    "immobilize": [
     {
      "id": 4197,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 39,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -17370,10 +17730,10 @@
    "immobilize": [
     {
      "id": 4197,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 39,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -17387,10 +17747,10 @@
    "immobilize": [
     {
      "id": 4202,
-     "level": 3,
+     "level": 1,
      "hitTimeMs": 2500,
      "reuseDelayMs": 0,
-     "mp": 39,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -17403,10 +17763,10 @@
    "immobilize": [
     {
      "id": 4186,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 67,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -17420,10 +17780,10 @@
    "buff": [
     {
      "id": 4173,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 25,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -17436,10 +17796,10 @@
    "immobilize": [
     {
      "id": 4197,
-     "level": 8,
+     "level": 1,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 103,
+     "mp": 17,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
@@ -17453,10 +17813,10 @@
    "buff": [
     {
      "id": 4173,
-     "level": 7,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 34,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -17469,21 +17829,21 @@
    "heal": [
     {
      "id": 4780,
-     "level": 8,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 125,
+     "mp": 21,
      "mpInitial": 0,
-     "amount": 11314
+     "amount": 1382
     }
    ],
    "buff": [
     {
      "id": 4211,
-     "level": 8,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 35,
+     "mp": 6,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -17497,10 +17857,10 @@
    "buff": [
     {
      "id": 4173,
-     "level": 10,
+     "level": 4,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 38,
+     "mp": 20,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -17516,8 +17876,8 @@
      "level": 3,
      "hitTimeMs": 2500,
      "reuseDelayMs": 8000,
-     "mp": 21,
-     "mpInitial": 6,
+     "mp": 22,
+     "mpInitial": 5,
      "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
      "slot": "ROOT_MAGICALLY"
@@ -17951,57 +18311,6 @@
    ]
   },
   {
-   "npcId": 29001,
-   "debuff": [
-    {
-     "id": 4019,
-     "level": 1,
-     "hitTimeMs": 1700,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 60,
-     "abnormalLevel": 3,
-     "slot": "SPEED_DOWN",
-     "affectRange": 200
-    }
-   ]
-  },
-  {
-   "npcId": 29014,
-   "immobilize": [
-    {
-     "id": 4064,
-     "level": 1,
-     "hitTimeMs": 4000,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 1,
-     "slot": "PARALYZE",
-     "affectRange": 200
-    }
-   ]
-  },
-  {
-   "npcId": 29019,
-   "debuff": [
-    {
-     "id": 4109,
-     "level": 1,
-     "hitTimeMs": 2800,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 120,
-     "abnormalLevel": 1,
-     "slot": "ANTARAS_DEBUFF",
-     "affectRange": 850
-    }
-   ]
-  },
-  {
    "npcId": 29031,
    "heal": [
     {
@@ -18133,10 +18442,10 @@
    "buff": [
     {
      "id": 4175,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 38,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -18193,21 +18502,21 @@
    "heal": [
     {
      "id": 4780,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 2000,
      "reuseDelayMs": 8000,
-     "mp": 86,
+     "mp": 21,
      "mpInitial": 0,
-     "amount": 7881
+     "amount": 1382
     }
    ],
    "buff": [
     {
      "id": 4213,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 23,
+     "mp": 6,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -18221,10 +18530,10 @@
    "buff": [
     {
      "id": 4173,
-     "level": 5,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 25,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -18237,31 +18546,29 @@
    "debuff": [
     {
      "id": 4183,
-     "level": 10,
+     "level": 3,
      "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 112,
+     "mp": 39,
      "mpInitial": 0,
      "abnormalTimeSeconds": 30,
-     "abnormalLevel": 3,
+     "abnormalLevel": 2,
      "slot": "PA_DOWN",
      "affectRange": 200
     }
-   ]
-  },
-  {
-   "npcId": 29065,
-   "buff": [
+   ],
+   "immobilize": [
     {
-     "id": 5122,
-     "level": 1,
-     "hitTimeMs": 2500,
+     "id": 4189,
+     "level": 3,
+     "hitTimeMs": 3300,
      "reuseDelayMs": 0,
-     "mp": 0,
+     "mp": 39,
      "mpInitial": 0,
-     "abnormalTimeSeconds": 300,
-     "abnormalLevel": 99,
-     "slot": "PA_UP"
+     "abnormalTimeSeconds": 30,
+     "abnormalLevel": 1,
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
@@ -18270,10 +18577,10 @@
    "buff": [
     {
      "id": 4174,
-     "level": 10,
+     "level": 1,
      "hitTimeMs": 1500,
      "reuseDelayMs": 0,
-     "mp": 38,
+     "mp": 8,
      "mpInitial": 0,
      "abnormalTimeSeconds": 300,
      "abnormalLevel": 99,
@@ -18528,40 +18835,6 @@
    ]
   },
   {
-   "npcId": 35060,
-   "immobilize": [
-    {
-     "id": 5112,
-     "level": 7,
-     "hitTimeMs": 1000,
-     "reuseDelayMs": 6000,
-     "mp": 36,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 9,
-     "abnormalLevel": 1,
-     "slot": "STUN",
-     "affectRange": 200
-    }
-   ]
-  },
-  {
-   "npcId": 35061,
-   "immobilize": [
-    {
-     "id": 5114,
-     "level": 7,
-     "hitTimeMs": 2500,
-     "reuseDelayMs": 8000,
-     "mp": 33,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 30,
-     "abnormalLevel": 1,
-     "slot": "ROOT_MAGICALLY",
-     "affectRange": 200
-    }
-   ]
-  },
-  {
    "npcId": 35413,
    "buff": [
     {
@@ -18594,18 +18867,19 @@
    ]
   },
   {
-   "npcId": 35594,
+   "npcId": 35416,
    "immobilize": [
     {
-     "id": 4992,
-     "level": 1,
-     "hitTimeMs": 0,
-     "reuseDelayMs": 0,
-     "mp": 0,
-     "mpInitial": 0,
-     "abnormalTimeSeconds": 9,
+     "id": 4118,
+     "level": 7,
+     "hitTimeMs": 6000,
+     "reuseDelayMs": 8000,
+     "mp": 78,
+     "mpInitial": 20,
+     "abnormalTimeSeconds": 30,
      "abnormalLevel": 1,
-     "slot": "STUN"
+     "slot": "PARALYZE",
+     "affectRange": 200
     }
    ]
   },
