@@ -85,7 +85,7 @@ public sealed class NetCraftTests
 
         Assert.Equal(CraftProtocol.Materials,
             await kit.World.TryRecipeMakeSelfAsync(session, new RecipeMakeSelfMsg { RecipeId = RecipeListId }, default));
-        Assert.Empty(kit.Ledger.Entries);
+        Assert.DoesNotContain(kit.Ledger.Entries, e => e.Transaction.Kind != LedgerTxKind.StarterKit);
     }
 
 }

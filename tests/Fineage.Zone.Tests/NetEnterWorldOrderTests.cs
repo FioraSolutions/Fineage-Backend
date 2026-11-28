@@ -98,8 +98,9 @@ public sealed class NetEnterWorldOrderTests
             order.IndexOf(NetOpcode.EtcStatusUpdate) > order.IndexOf(NetOpcode.ShortCutInit),
             $"EtcStatusUpdate must follow ShortCutInit (got {string.Join(",", order)})");
 
-        // Human Fighter CON 43 → limit floor(1.58 * 69000) = 109020; the starter kit is ~40k, so a fresh character is
-        // not overloaded, but the packet still goes out with level 0 so the client clears any stale icon.
+        // Human Fighter CON 43 → limit floor(1.58 * 69000) = 109020; official Interlude create gear is well under
+        // that, so a fresh character is not overloaded, but the packet still goes out with level 0 so the client
+        // clears any stale icon.
         Assert.True(NetOpcode.EtcStatusUpdate == 0x035D);
         Assert.InRange(etc!.WeightPenalty, 0, 4);
         Assert.True(world.TryGetLivePlayerById(ticket.Value.CharacterId, out var live));

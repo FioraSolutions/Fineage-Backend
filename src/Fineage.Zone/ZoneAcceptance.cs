@@ -144,10 +144,12 @@ public static class ZoneAcceptance
             Require(welcome!.Id == 1 && welcome.Params.Length == 1 && welcome.Params[0] == name,
                 $"welcome id={welcome.Id} text={welcome.Text}");
 
-            bool fighter = items!.Items.Any(item => item.ItemId == 219);
-            int weaponId = fighter ? 219 : 177;
-            var weapon = items.Items.FirstOrDefault(item => item.ItemId == weaponId);
-            Require(weapon != null && weapon.EquippedSlot == 7, $"starter weapon {weaponId} must be equipped in the right hand");
+            // Official Interlude create weapons: Squire's Sword, Apprentice's Wand,
+            // Training Gloves (orc), Guild Member's Club (dwarf).
+            int[] starterWeapons = [2369, 6, 2368, 2370];
+            var weapon = items!.Items.FirstOrDefault(item => starterWeapons.Contains(item.ItemId) && item.EquippedSlot == 7);
+            Require(weapon != null, "starter weapon must be equipped in the right hand");
+            int weaponId = weapon!.ItemId;
             Require(selfUser.Paperdoll.Length == InventoryMessages.PaperdollSlotCount && selfUser.Paperdoll[7].ItemId == weaponId,
                 "UserInfo paperdoll must show the equipped weapon");
 

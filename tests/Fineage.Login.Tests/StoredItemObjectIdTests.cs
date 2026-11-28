@@ -20,10 +20,10 @@ public class StoredItemObjectIdTests
         Assert.All(items, item => Assert.True(item.ObjectId >= PlayerInventory.FirstObjectId));
         Assert.Equal(items.Count, items.Select(item => item.ObjectId).Distinct().Count());
 
-        int swordOid = items.Single(item => item.ItemId == 219).ObjectId;
+        int swordOid = items.Single(item => item.ItemId == 2369).ObjectId;
         var ids = new ItemObjectIdAllocator(PlayerInventory.FirstObjectId);
         var restored = CharacterInventory.Restore(GameData.LoadDefault().Items, ids, items);
-        Assert.Equal(swordOid, restored.Items.Single(item => item.ItemId == 219).ObjectId);
+        Assert.Equal(swordOid, restored.Items.Single(item => item.ItemId == 2369).ObjectId);
         Assert.True(ids.PeekNext() > swordOid);
     }
 

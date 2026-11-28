@@ -1,61 +1,32 @@
 {
-  "reference": "Synced from Mobius CT0 Interlude ref/mobius-ct0-interlude/data/stats/initialEquipment.xml. Equipped rows use item bodySlot via PlayerInventory.Equip. Starting adena matches Mobius dist/game/config/Player.ini StartingAdena.",
+  "reference": "Mobius CT0 Interlude L2J_Mobius_CT_0_Interlude/dist/game/data/stats/players/initialEquipment.xml. Equipped rows use item bodySlot via PlayerInventory.Equip. Starting adena matches Mobius PlayerConfig StartingAdena default (0). No custom cubes, mid-level gear, potions, or shot stacks \u2014 those are not in the official Interlude create table.",
   "mobiusStartingAdena": 0,
   "kits": [
     {
       "classId": 0,
       "items": [
         {
-          "itemId": 43,
+          "itemId": 2369,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 26,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 34,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 219,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 68,
+          "itemId": 10,
           "count": 1
         },
         {
-          "itemId": 1835,
-          "count": 5000
+          "itemId": 1146,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 1538,
-          "count": 50
+          "itemId": 1147,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -63,52 +34,23 @@
       "classId": 10,
       "items": [
         {
-          "itemId": 44,
+          "itemId": 6,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1101,
+          "itemId": 425,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1104,
+          "itemId": 461,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 177,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 3947,
-          "count": 3000
-        },
-        {
-          "itemId": 1538,
-          "count": 50
-        },
-        {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -116,56 +58,27 @@
       "classId": 18,
       "items": [
         {
-          "itemId": 43,
+          "itemId": 2369,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 26,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 34,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 219,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 68,
+          "itemId": 10,
           "count": 1
         },
         {
-          "itemId": 1835,
-          "count": 5000
+          "itemId": 1146,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 1538,
-          "count": 50
+          "itemId": 1147,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -173,52 +86,23 @@
       "classId": 25,
       "items": [
         {
-          "itemId": 44,
+          "itemId": 6,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1101,
+          "itemId": 425,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1104,
+          "itemId": 461,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 177,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 3947,
-          "count": 3000
-        },
-        {
-          "itemId": 1538,
-          "count": 50
-        },
-        {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -226,56 +110,27 @@
       "classId": 31,
       "items": [
         {
-          "itemId": 43,
+          "itemId": 2369,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 26,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 34,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 219,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 68,
+          "itemId": 10,
           "count": 1
         },
         {
-          "itemId": 1835,
-          "count": 5000
+          "itemId": 1146,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 1538,
-          "count": 50
+          "itemId": 1147,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -283,52 +138,23 @@
       "classId": 38,
       "items": [
         {
-          "itemId": 44,
+          "itemId": 6,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1101,
+          "itemId": 425,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1104,
+          "itemId": 461,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 177,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 3947,
-          "count": 3000
-        },
-        {
-          "itemId": 1538,
-          "count": 50
-        },
-        {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -336,56 +162,27 @@
       "classId": 44,
       "items": [
         {
-          "itemId": 43,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 26,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 34,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 257,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 68,
+          "itemId": 2369,
           "count": 1
         },
         {
-          "itemId": 1835,
-          "count": 5000
+          "itemId": 2368,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 1538,
-          "count": 50
+          "itemId": 1146,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 4627,
+          "itemId": 1147,
+          "count": 1,
+          "equipped": true
+        },
+        {
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -393,52 +190,23 @@
       "classId": 49,
       "items": [
         {
-          "itemId": 44,
+          "itemId": 2368,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1101,
+          "itemId": 425,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 1104,
+          "itemId": 461,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 177,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 3947,
-          "count": 3000
-        },
-        {
-          "itemId": 1538,
-          "count": 50
-        },
-        {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     },
@@ -446,56 +214,27 @@
       "classId": 53,
       "items": [
         {
-          "itemId": 43,
+          "itemId": 2370,
           "count": 1,
           "equipped": true
         },
         {
-          "itemId": 26,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 34,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 87,
-          "count": 1,
-          "equipped": true
-        },
-        {
-          "itemId": 68,
+          "itemId": 10,
           "count": 1
         },
         {
-          "itemId": 1835,
-          "count": 5000
+          "itemId": 1146,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 1538,
-          "count": 50
+          "itemId": 1147,
+          "count": 1,
+          "equipped": true
         },
         {
-          "itemId": 4627,
+          "itemId": 5588,
           "count": 1
-        },
-        {
-          "itemId": 1539,
-          "count": 100
-        },
-        {
-          "itemId": 728,
-          "count": 100
-        },
-        {
-          "itemId": 736,
-          "count": 10
-        },
-        {
-          "itemId": 737,
-          "count": 10
         }
       ]
     }

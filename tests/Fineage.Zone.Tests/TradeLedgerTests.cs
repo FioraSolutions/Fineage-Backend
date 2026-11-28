@@ -36,7 +36,7 @@ public sealed class TradeLedgerTests
         var sellerBag = LedgerAccount.Inventory(sellerEntity.ObjectId);
         var buyerBag = LedgerAccount.Inventory(buyerEntity.ObjectId);
         var kinds = kit.Ledger.Entries.Select(entry => entry.Transaction.Kind).ToList();
-        Assert.Equal([LedgerTxKind.GmGrant, LedgerTxKind.Adjustment, LedgerTxKind.TradeSettle], kinds);
+        Assert.Equal([LedgerTxKind.StarterKit, LedgerTxKind.GmGrant, LedgerTxKind.TradeSettle], kinds);
         var settle = kit.Ledger.Entries[^1].Transaction;
         Assert.Equal((sellerEntity.ObjectId, buyerEntity.ObjectId), (settle.CausedBy, settle.Reference));
         Assert.Equal(
@@ -52,7 +52,8 @@ public sealed class TradeLedgerTests
         var ledger = kit.World.LedgerForTests;
         Assert.Equal(buyerBag, ledger.OwnerOf(piece.ObjectId));
         Assert.Equal(sellerStackBefore + 200, ledger.HoldingsOf(sellerBag).CountOf(stackItem));
-        Assert.Contains(kit.Ledger.Entries[0].Transaction.Postings,
+        var grant = Assert.Single(kit.Ledger.Entries, e => e.Transaction.Kind == LedgerTxKind.GmGrant).Transaction;
+        Assert.Contains(grant.Postings,
             posting => posting.Account == buyerBag && posting.ItemId == Adena && posting.Amount == 500);
         Assert.Equal(sellerEntity.Inventory.CountOf(stackItem), ledger.HoldingsOf(sellerBag).CountOf(stackItem));
         Assert.Equal(buyerEntity.Inventory.CountOf(stackItem), ledger.HoldingsOf(buyerBag).CountOf(stackItem));
@@ -67,14 +68,14 @@ public sealed class TradeLedgerTests
 
         await OpenAsync(kit, seller, buyer, sellerEntity);
         await ConfirmAsync(kit, seller, buyer);
-        Assert.Empty(kit.Ledger.Entries);
+        Assert.DoesNotContain(kit.Ledger.Entries, e => e.Transaction.Kind != LedgerTxKind.StarterKit);
 
         var piece = sellerEntity.Inventory!.Items.First(item => Offerable(item) && !item.Template.Stackable);
         await OpenAsync(kit, seller, buyer, sellerEntity);
         Assert.Null(await kit.World.TryTradeAddItemAsync(
             seller, new TradeAddItemRequestMsg { InventoryObjectId = piece.ObjectId, Count = 1 }, default));
         Assert.Null(await kit.World.TryTradeDoneAsync(seller, new TradeDoneRequestMsg { Response = 0 }, default));
-        Assert.Empty(kit.Ledger.Entries);
+        Assert.DoesNotContain(kit.Ledger.Entries, e => e.Transaction.Kind != LedgerTxKind.StarterKit);
     }
 
     static bool Offerable(ItemInstance item) => !item.IsEquipped && item.Template.CanDropTradeStore && item.Count >= 1;

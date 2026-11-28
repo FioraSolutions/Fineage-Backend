@@ -44,7 +44,8 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 ## Slice 8 — aggro range, hate list / clan help, attack stance on Net
 - `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
 - Aggressive mobs (isAggressive and aggroRange > 0) scan every 500 ms and attack the first live player inside aggroRange (3D).
-- AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → returnHome.
+- AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → disengage.
+- Disengage (`GoActiveAfterFight`, #1104): Mobius has no "return home" state — losing the last target goes to `AI_INTENTION_ACTIVE` (`AttackableAI.java:797-802`), and `thinkActive` starts the walk back only past `MaxDriftRange = 300` of the spawn (`AttackableAI.java:625-631`, `NPC.ini`). Inside that box the mob just stands: it does not invent a short walk to the exact spawn point. Arrival ends the walk (`CreatureAI.onEvtArrived` → `ACTIVE`, `CreatureAI.java:717-724`), so the flag never outlives the trip. `returnHome` clears hate *and* the damage shares (`clearAggroList`, `Attackable.java:1141/:1685`) and never heals. Same entry point serves the `reduceHate`/`stopHating` path. Tests: `ReturnHomeClearsAggroTests`; scenes `return-target-out-of-forget-range`, `return-drifted-walks-home`, `return-clears-hate`, `activation-returning-stays-awake`.
 - Death (Mobius `Creature.doDie`, `Attackable.java:876` `getMostHated` is null for `isAlikeDead`; `Creature.decayMe` `Creature.java:2465` and `Attackable.onSpawn` `Attackable.java:1455` clear the list): `RemoveDeadNpc` clears `HateList`, so a corpse carries no hate into decay or respawn. `DamageBy` is kept because `Attackable.calculateRewards` splits the kill over the AggroInfo damage shares. Test: `DeathClearsAggroTests`; scenes `death-aggro-cleared`, `hate-clear-on-kill`.
 - Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
 - Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
@@ -305,9 +306,10 @@ weightproc   = (load - bonusPenalty) * 1000 / maxLoad                    -- Java
   composition with Wind Walk; NPCs never penalised; live `ZoneWorld` — enter, relog, level-1 vs level-2 fanout shapes,
   recovery, level 4 stops the pawn, give/drop/grant through the bag hooks, `MaxLoadOf` folding 150, `BonusWeightPenaltyOf`
   folding 3512, `EtcStatusUpdate` projection + codec roundtrip, and regen halving with carry.
-- **Observation worth knowing:** the shipped starter kit (`initialEquipment.xml:33-45`: 5000 soulshots at weight 4, 50
-  Blessed Scrolls of Escape at 120, potions) weighs 46080 against an 88320 elven-fighter limit — **52%**, so a brand-new
-  character is already at weight-penalty level 1 and regenerates at half rate. That is genuine Mobius behaviour.
+- **Observation worth knowing:** the official Interlude starter kit (`stats/players/initialEquipment.xml`: Squire's
+  Sword, Dagger, Squire's Shirt/Pants, Tutorial Guide) weighs 7821 against an 88320 elven-fighter limit — about **9%**,
+  so a brand-new character is at weight-penalty level 0. The previous custom pack (5000 soulshots, potions, Dice
+  (Clover)) is no longer granted on create.
 - Still open here: pets (Mobius `Pet.refreshOverloaded`, `Pet.java:1205`) — no summon/pet inventory yet; `_dietMode`;
   `EtcStatusUpdate` charges/danger-area/charm/death-penalty stay 0 until those systems exist.
 

@@ -17,7 +17,7 @@ namespace Fineage.Zone.Tests;
 public sealed class NetInventoryPersistTests
 {
     const int Adena = 57;
-    const int StarterWeapon = 219;
+    const int StarterWeapon = 2369;
     const int RightHand = 7;
 
     [Fact]

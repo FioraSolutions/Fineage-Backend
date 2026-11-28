@@ -72,9 +72,7 @@ public sealed class AiReferenceSceneTests
         var npcs = NpcCatalog.LoadDefault();
         var knownRed = new HashSet<string>(StringComparer.Ordinal)
         {
-            "activation-idle-leave-92s",          // Mobius 90 s region hysteresis vs current activation lifetime
-            "activation-returning-stays-awake",   // returnHome intent after the target leaves
-            "return-clears-hate"                  // returnHome clears hate / starts return
+            "activation-idle-leave-92s" // #1106: Mobius 90 s region hysteresis vs current activation lifetime
         };
 
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -90,7 +88,7 @@ public sealed class AiReferenceSceneTests
             if (knownRed.Contains(scene.Id))
                 Assert.False(report.Pass, $"{scene.Id} must stay red until the real AI divergence is fixed");
         }
-        Assert.Equal(43, seen.Count);
+        Assert.Equal(44, seen.Count);
     }
 
     [Fact]

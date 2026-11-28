@@ -240,7 +240,7 @@ public sealed class NetEnchantRulesTests
     {
         var bench = new Bench(0, 0, 0, 0);
         var (session, player) = await bench.EnterAsync("ench", "Alden",
-            new StoredItem(Saber, 1, 7, 0), Bag(NormalD, 4));
+            new StoredItem(Saber, 1, 7, 0), Bag(NormalD), Bag(NormalD), Bag(NormalD), Bag(NormalD));
         var baseline = bench.World.BuildUserInfo(player).PAtk;
 
         await OpenScrollAsync(bench, session, player, NormalD);

@@ -68,7 +68,7 @@ public sealed class NetQuestTests
         Assert.Equal(2, update.Changes.Length);
         Assert.Contains(update.Changes,
             row => row.ItemId == 57 && row.Count == 25 && row.Change == InventoryChange.Add);
-        Assert.Contains(update.Changes, row => row.ItemId == 736 && row.Change == InventoryChange.Modify);
+        Assert.Contains(update.Changes, row => row.ItemId == 736 && row.Count == 1 && row.Change == InventoryChange.Add);
         // The reward notices arrive in order on their own run; the earlier accept notice is still in the recorder.
         var notices = SystemMessageIds(bench.Rec);
         int reward = notices.IndexOf(QuestProtocol.ItemEarned);
@@ -97,7 +97,7 @@ public sealed class NetQuestTests
         // Only the reward moved items, against the quests account; talking and accepting recorded nothing.
         var bag = LedgerAccount.Inventory(actor.Player.ObjectId);
         var quests = LedgerAccount.Of(SystemAccount.Quests);
-        var rewarded = Assert.Single(bench.Ledger.Entries, entry => entry.Transaction.Kind != LedgerTxKind.Adjustment).Transaction;
+        var rewarded = Assert.Single(bench.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.QuestReward).Transaction;
         Assert.Equal((LedgerTxKind.QuestReward, actor.Player.ObjectId, QuestId), (rewarded.Kind, rewarded.CausedBy, rewarded.Reference));
         Assert.Equal(
             [(bag, 57, 25L), (quests, 57, -25L), (bag, 736, 1L), (quests, 736, -1L)],

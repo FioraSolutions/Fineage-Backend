@@ -10,26 +10,26 @@ public class InventoryRulesTests
     {
         var inventory = GameData.LoadDefault().CreateStarterInventory(0);
         var sword = inventory.GetEquipped(PaperdollSlot.RHand)!;
-        var falchion = inventory.Items.Single(item => item.ItemId == 68);
+        var dagger = inventory.Items.Single(item => item.ItemId == 10);
 
-        inventory.Equip(falchion);
+        inventory.Equip(dagger);
 
-        Assert.Equal(falchion, inventory.GetEquipped(PaperdollSlot.RHand));
-        Assert.Equal(PaperdollSlot.RHand, falchion.EquippedSlot);
+        Assert.Equal(dagger, inventory.GetEquipped(PaperdollSlot.RHand));
+        Assert.Equal(PaperdollSlot.RHand, dagger.EquippedSlot);
         Assert.Null(sword.EquippedSlot);
         Assert.Contains(sword, inventory.Items);
-        Assert.Equal(26, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
-        Assert.Equal(34, inventory.GetEquipped(PaperdollSlot.Legs)!.ItemId);
+        Assert.Equal(1146, inventory.GetEquipped(PaperdollSlot.Chest)!.ItemId);
+        Assert.Equal(1147, inventory.GetEquipped(PaperdollSlot.Legs)!.ItemId);
     }
 
     [Fact]
-    public void Dice_cannot_be_equipped()
+    public void Tutorial_guide_cannot_be_equipped()
     {
         var inventory = GameData.LoadDefault().CreateStarterInventory(0);
-        var dice = inventory.Items.Single(item => item.ItemId == 4627);
-        var error = Assert.Throws<InvalidOperationException>(() => inventory.Equip(dice));
-        Assert.Contains("4627", error.Message);
-        Assert.False(dice.IsEquipped);
+        var guide = inventory.Items.Single(item => item.ItemId == 5588);
+        var error = Assert.Throws<InvalidOperationException>(() => inventory.Equip(guide));
+        Assert.Contains("5588", error.Message);
+        Assert.False(guide.IsEquipped);
     }
 
     [Fact]

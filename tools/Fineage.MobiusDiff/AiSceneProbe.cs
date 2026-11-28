@@ -40,7 +40,9 @@ public static class AiSceneProbe
             string account = "ai_probe" + playerNumber.ToString(CultureInfo.InvariantCulture);
             if (store.TryAddAccount(account, "hash", "salt", 1, null) != AddAccountStatus.Created)
                 throw new InvalidOperationException($"{scene.Id}: could not create scene account '{account}'.");
-            var starter = CharacterInventory.Rows(game.CreateStarterInventory(playerSpec.ClassId));
+            var starter = game.StarterKits.Contains(playerSpec.ClassId)
+                ? CharacterInventory.Rows(game.CreateStarterInventory(playerSpec.ClassId))
+                : [];
             string name = "AiProbe" + playerNumber.ToString(CultureInfo.InvariantCulture);
             var createdStatus = store.TryAddCharacter(
                 account, name, playerSpec.ClassId, race: 1, sex: 0, out var character,
