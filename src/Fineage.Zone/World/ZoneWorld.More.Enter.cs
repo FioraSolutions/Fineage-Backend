@@ -439,18 +439,25 @@ public sealed partial class ZoneWorld
     void BindKnownlistOnEnter(ZoneEntity entity)
     {
         using var aoiTimer = Fineage.Zone.Net.EnterMetrics.MeasureTryAoiBind();
+        bool selfIsGm = entity.Kind == ZoneEntityKind.Player && ZoneAdmin.IsAdminCharacter(entity.Name);
         foreach (int id in _aoi.GetVisible(entity.ObjectId))
         {
             if (!_byId.TryGetValue(id, out var other) || other.InstanceId != entity.InstanceId)
                 continue;
             if (other.Kind == ZoneEntityKind.Player && other.Session is not { InWorld: true })
                 continue;
+            // Same hide rule as CollectVisible / LinkSeen: invisible entities stay off a non-GM knownlist.
+            if (other.Invisible && !selfIsGm)
+                continue;
             entity.Knownlist.Add(id);
             TrackWatcher(entity.ObjectId, id);
             if (other.Session != null)
             {
-                other.Knownlist.Add(entity.ObjectId);
-                TrackWatcher(id, entity.ObjectId);
+                if (!(entity.Invisible && !ZoneAdmin.IsAdminCharacter(other.Name)))
+                {
+                    other.Knownlist.Add(entity.ObjectId);
+                    TrackWatcher(id, entity.ObjectId);
+                }
             }
             else
                 TrackThink(other);

@@ -32,6 +32,8 @@ jobs:
             project: tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj
           - id: agent-identity
             project: tests/Fineage.Agent.Identity.Tests/Fineage.Agent.Identity.Tests.csproj
+          - id: agent-observation
+            project: tests/Fineage.Agent.Observation.Tests/Fineage.Agent.Observation.Tests.csproj
           - id: game
             project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
           - id: net
