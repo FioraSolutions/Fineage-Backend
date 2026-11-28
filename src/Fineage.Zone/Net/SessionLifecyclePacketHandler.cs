@@ -44,8 +44,14 @@ sealed partial class SessionLifecyclePacketHandler
     {
         var hello = NetCodec.DecodeHello(envelope.Payload);
         uint granted = ProtocolCapabilities.FeatureSession | ProtocolCapabilities.FeatureWorldPresence;
+        if (!NetProtocol.TryAcceptHello(hello, granted, out uint featureFlags, out RejectMsg? reject))
+        {
+            await _reject(conn, reject!.Code, reject.Message, ct).ConfigureAwait(false);
+            return;
+        }
+
         conn.HelloCompleted = true;
-        conn.FeatureFlags = granted & (hello.FeatureFlags == 0 ? granted : hello.FeatureFlags);
+        conn.FeatureFlags = featureFlags;
 
         await conn.SendAsync(
             NetOpcode.HelloAck,

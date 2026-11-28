@@ -2,6 +2,12 @@
 
 PacketEnvelope login/zone path. Durable accounts use PostgreSQL by default for local Net.
 
+The decision to speak this wire (and not retail Interlude framing) is
+[`adr/0001-custom-net-wire.md`](adr/0001-custom-net-wire.md). The live opcode
+and payload descriptions in this file are the Net contract; retail `0x` ids
+are a mapping only, in [`wire-coverage.md`](wire-coverage.md) and
+[`data/retail-net-opcode-map.json`](data/retail-net-opcode-map.json).
+
 ## Ports
 
 | Stack | Login | Zone |

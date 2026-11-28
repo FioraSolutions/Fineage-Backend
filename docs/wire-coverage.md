@@ -1,25 +1,39 @@
 # Wire coverage — Mobius CT_0 Interlude packets
 
-Fineage `dev` @ `8daf4209`. Mobius `L2J_Mobius_CT_0_Interlude` @ `5c019037`. Unity client `FioraSolutions/Fineage` `dev` @ `c1e79fe` (`l2-unity`, Net contract via `scripts/sync-net-contract.py`).
+Machine-readable copy of the tables below: [`data/retail-net-opcode-map.json`](data/retail-net-opcode-map.json). Decision record: [`adr/0001-custom-net-wire.md`](adr/0001-custom-net-wire.md). The JSON and these tables must agree; `tools/check_retail_opcode_map.py` and the Net test suite fail when they drift or when a listed Fineage name is missing from `NetOpcode`.
 
-Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`), not the retail byte ids. A packet is **server handler** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). That proves wiring only. **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
+Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`) on the `PacketEnvelope` wire, not the retail byte ids or the retail frame layout. A packet is **server handler** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). That proves wiring only. **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
 
-The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). That also proves wiring only. **contract** means the synced contract defines the opcode and no gameplay file reads or writes it. Client and server contracts match (252 opcode constants on both sides).
+The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). That also proves wiring only. **contract** means the synced contract defines the opcode and no gameplay file reads or writes it.
+
+## Wire parity versus gameplay parity
+
+These are two different checks. Do not read a `yes` in the tables below, or a name in the `Fineage opcode` column, as "behaviour verified".
+
+| Check | What it measures | Where it lives |
+|---|---|---|
+| **Wire / contract agreement** | Fineage Login+Zone speak `PacketEnvelope` 1.0. Client and backend share `Fineage.Net.Contract`. Retail Interlude packets are mapped to `NetOpcode` names in this file and in the JSON map. | This file, [`data/retail-net-opcode-map.json`](data/retail-net-opcode-map.json), [`adr/0001-custom-net-wire.md`](adr/0001-custom-net-wire.md), `scripts/check-net-contract-sync.py` |
+| **Gameplay / behavioural parity** | A handler's behaviour matches Mobius CT_0 Interlude (and has evidence). | [`mobius-parity-matrix.md`](mobius-parity-matrix.md) only |
+
+**Wire mapping counts** (name present in the `Fineage opcode` column, not "the packet is implemented" and not "the behaviour is verified"): **386** retail packets map to at least one `NetOpcode`; **88** have no Fineage name yet (gap, n/a, or unused). Those 386 mappings collapse onto **237** distinct `NetOpcode` names, because several retail packets fold into one Fineage message.
+
+Client and backend `NetOpcode` constants are **not** currently identical. Backend `NetOpcode` has **293** constants; the Unity client `dev` tree is behind, and the pending file list is [`data/net-contract-client-gap.txt`](data/net-contract-client-gap.txt). Backend CI compares the two trees with the client's `scripts/sync-net-contract.py`.
 
 ## Counts — handler coverage only
 
 These counters prove **implementation/handler wiring only**: a `yes` cell means a server or client handler
 exists, not that its behaviour matches Mobius and not that it has run under production conditions. A
 `partial`/`no` cell is a coverage gap. Behavioural parity and production verification live only in
-[`mobius-parity-matrix.md`](mobius-parity-matrix.md); this file never proves either.
+[`mobius-parity-matrix.md`](mobius-parity-matrix.md); this file never proves either. The numbers must
+match a recount of the tables (enforced by `tools/check_retail_opcode_map.py`).
 
 | Direction | Packets | Server handler | partial | no | n/a | Client handler | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| C2S | 158 | 104 | 34 | 17 | 3 | 91 | 28 | 36 | 3 |
-| C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
-| S2C | 270 | 178 | 54 | 31 | 7 | 210 | 6 | 47 | 7 |
+| C2S | 158 | 110 | 33 | 12 | 3 | 97 | 28 | 30 | 3 |
+| C2S extended (0xD0) | 46 | 34 | 5 | 7 | 0 | 15 | 23 | 8 | 0 |
+| S2C | 270 | 186 | 54 | 23 | 7 | 218 | 6 | 39 | 7 |
 
-**In-scope gaps:** server not fully implemented (partial+no) **150**, of which server absent (**no**) **57**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
+**In-scope gaps:** server not fully implemented (partial+no) **134**, of which server absent (**no**) **42**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **134**, of which client absent (**no**) **77**.
 
 Geodata LOS and pathfinding are server-side region files (`scripts/fetch-geodata.sh`). They have no retail packet of their own.
 
@@ -245,7 +259,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 | Opcode | Mobius enum | Java class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|---|
-| 0x00 | KEY_PACKET | KeyPacket | partial | yes | HelloAck | login hello ack, not a cipher key packet |
+| 0x00 | KEY_PACKET | KeyPacket | partial | yes | HelloAck | login hello ack, not the retail key handshake |
 | 0x01 | CHAR_MOVE_TO_LOCATION | MoveToLocation | yes | yes | MoveState |  |
 | 0x02 | NPC_SAY | NpcSay | yes | yes | CreatureSay |  |
 | 0x03 | CHAR_INFO | CharInfo | yes | yes | EntitySpawn | players |
