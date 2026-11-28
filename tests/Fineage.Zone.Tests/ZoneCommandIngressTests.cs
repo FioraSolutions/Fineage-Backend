@@ -184,7 +184,7 @@ public sealed class ZoneCommandIngressTests
     {
         const int attempts = 10;
         var scrolls = Enumerable.Repeat(0, attempts).Select(_ => new StoredItem(BlessedD, 1, -1)).ToArray();
-        var smith = await bench.EnterAsync(items: [new StoredItem(Saber, 1, -1, 4), ..scrolls]);
+        var smith = await bench.EnterAsync(items: [new StoredItem(Saber, 1, -1, 4), .. scrolls]);
         int saber = smith.Slot(Saber);
         var levels = new List<int>();
         for (int i = 0; i < attempts; i++)
