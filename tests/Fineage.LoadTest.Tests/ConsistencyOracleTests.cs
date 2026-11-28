@@ -348,6 +348,78 @@ public sealed class ConsistencyOracleTests
     }
 
     [Fact]
+    public void Teleport_reaching_the_watcher_before_the_subject_is_not_stale()
+    {
+        // #1120 bots-economy-hammer: the hub TeleportToLocation is one server event written to the subject's and
+        // the watcher's sockets independently; the watcher received it 42 ms first, so at the watcher's instant
+        // the subject's own timeline was still the pre-teleport point. The view is the subject's next position.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -82104, 242635, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -82104, 242635, isSelf: false)), t0);
+        observer.Record(NetOpcode.TeleportToLocation, Teleport(74, -84160, 240403), t0.AddSeconds(1));
+        subject.Record(NetOpcode.TeleportToLocation, Teleport(74, -84160, 240403), t0.AddSeconds(1).AddMilliseconds(42));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.DoesNotContain(report.Issues, i => i.Kind == ConsistencyKind.StalePosition);
+    }
+
+    [Fact]
+    public void Teleport_view_the_subject_never_reaches_in_the_causal_window_still_fails()
+    {
+        // Same frames, but the subject's own teleport lands after the comparable window: the watcher rendered a
+        // position the subject was not at, which is a real desync and must still be reported.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -82104, 242635, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -82104, 242635, isSelf: false)), t0);
+        observer.Record(NetOpcode.TeleportToLocation, Teleport(74, -84160, 240403), t0.AddSeconds(1));
+        subject.Record(NetOpcode.TeleportToLocation, Teleport(74, -84160, 240403),
+            t0.AddSeconds(1).AddMilliseconds(ConsistencyOracle.ComparableWindowMs + 500));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    [Fact]
+    public void Watcher_frozen_at_an_earlier_position_than_the_subjects_next_still_fails()
+    {
+        // The skew allowance only accepts the subject's next own position. A view equal to an older point while the
+        // subject's next sample is elsewhere is a frozen view, not a socket-order artifact.
+        var t0 = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var subject = new BotObservationLog(74);
+        var observer = new BotObservationLog(1);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -84160, 240403, isSelf: true)), t0);
+        subject.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: false)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(1, -84160, 240403, isSelf: true)), t0);
+        observer.Record(NetOpcode.EntitySpawn, NetCodec.EncodeEntitySpawn(Player(74, -84160, 240403, isSelf: false)), t0);
+        subject.Record(NetOpcode.TeleportToLocation, Teleport(74, -82104, 242635), t0.AddSeconds(1));
+        observer.Record(NetOpcode.TeleportToLocation, Teleport(74, -84160, 240403), t0.AddSeconds(1).AddMilliseconds(10));
+        subject.Record(NetOpcode.TeleportToLocation, Teleport(74, -81470, 243424), t0.AddSeconds(1).AddMilliseconds(40));
+
+        var report = ConsistencyOracle.Analyze(
+            [Bot(subject, inWorld: true), Bot(observer, inWorld: true)],
+            new LoadScenario());
+
+        Assert.Contains(report.Issues, i => i.Kind == ConsistencyKind.StalePosition && i.OtherBotId == 74);
+    }
+
+    static byte[] Teleport(int objectId, int x, int y) =>
+        NetCodec.EncodeTeleportToLocation(new TeleportToLocationNetMsg { ObjectId = objectId, X = x, Y = y, Z = -3720 });
+
+    [Fact]
     public void Missing_spawn_skips_pairs_whose_self_positions_are_from_different_eras()
     {
         // The subject's last self position is two minutes old; the observer only reaches its area near the end.
