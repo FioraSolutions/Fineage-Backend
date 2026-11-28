@@ -140,7 +140,7 @@ public sealed class ZoneProactiveAggroTests
 
         // Mobius has no <ai> for these nine; NpcTemplate resolves isAggressive=true and aggroRange=0.
         // They are script-driven/raid minions, not transcription gaps, so no positive value is invented.
-        Assert.Equal(new[] { 18119, 20964, 25224, 25225, 25232, 25239, 25240, 25258, 25262 }, zero);
+        Assert.Equal(new[] { 18119, 18256, 25224, 25225, 25232, 25239, 25240, 25258, 25262 }, zero);
         Assert.Contains(catalog.ById.Values, t => t.NpcId == KabooCaptainNpcId && t.AggroRange == 1000);
     }
 

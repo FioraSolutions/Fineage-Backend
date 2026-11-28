@@ -74,6 +74,28 @@ CUSTOM_NPC_IDS: dict[int, str] = {
     50007: "Andromeda, Wedding Manager (Mobius custom/custom.xml, ported in f4d127fc)",
 }
 
+# Documented per-id deviations from the pinned CT 0 XML. Only for rows where the CT 0
+# datapack is clearly a placeholder; each entry is listed with its sources in
+# docs/npc-data-overrides.md. Never add a row here without that doc entry.
+_TINY_BABY_SOURCE = (
+    "CT0 XML is a shared placeholder (level 99, hp 253165, mp 9999, P.Atk 4500, P.Def 3000) while its own "
+    "exp/sp are the level 65-69 rewards; Interlude databases list the values below "
+    "(lineage2scarlet.com/npc/list/<id>, l2sanctum.net/wiki/interlude/monsters/<name>)"
+)
+NPC_OVERRIDES: dict[int, dict] = {
+    16019: {"level": 67, "hp": 2295.48154, "mp": 1251, "hpRegen": 7.5, "mpRegen": 2.7, "pAtk": 624.93199,
+            "pDef": 281.55251, "mAtk": 426.74754, "mDef": 206.02791, "randomDamage": 10, "accuracy": 4.75, "men": 25},
+    16020: {"level": 67, "hp": 2295.48154, "mp": 1251, "hpRegen": 7.5, "mpRegen": 2.7, "pAtk": 624.93199,
+            "pDef": 281.55251, "mAtk": 426.74754, "mDef": 206.02791, "randomDamage": 10, "accuracy": 4.75, "men": 25},
+    16021: {"level": 69, "hp": 2395.45533, "mp": 1314, "hpRegen": 7.5, "mpRegen": 2.7, "pAtk": 667.50361,
+            "pDef": 291.15063, "mAtk": 455.81844, "mDef": 213.05139, "randomDamage": 10, "accuracy": 4.75, "men": 25},
+    16022: {"level": 69, "hp": 2395.45533, "mp": 1314, "hpRegen": 7.5, "mpRegen": 2.7, "pAtk": 667.50361,
+            "pDef": 291.15063, "mAtk": 455.81844, "mDef": 213.05139, "randomDamage": 10, "accuracy": 4.75, "men": 25},
+    16023: {"level": 65, "hp": 2193.43142, "mp": 1188.8, "hpRegen": 7.5, "mpRegen": 2.7, "pAtk": 582.81759,
+            "pDef": 271.89033, "mAtk": 397.98887, "mDef": 198.95754, "randomDamage": 10, "accuracy": 4.75, "men": 25},
+}
+NPC_OVERRIDE_SOURCES: dict[int, str] = {npc_id: _TINY_BABY_SOURCE for npc_id in range(16019, 16024)}
+
 # Mobius NpcData always reads str/con/int/men from <stats>; Fineage's NpcCatalog
 # defaults (40/43/21/10) apply when the key is absent, so only other values are written.
 ATTRIBUTE_DEFAULTS: tuple[tuple[str, int], ...] = (("str", 40), ("con", 43), ("int", 21), ("men", 10))
@@ -398,6 +420,23 @@ COMBAT_FIELDS: tuple[str, ...] = (
 )
 
 
+def apply_overrides(templates: list[dict]) -> list[dict]:
+    """Apply NPC_OVERRIDES (documented in docs/npc-data-overrides.md) on top of the CT 0 rows."""
+    by_id = {row["npcId"]: row for row in templates}
+    if set(NPC_OVERRIDES) != set(NPC_OVERRIDE_SOURCES):
+        raise SystemExit("every NPC_OVERRIDES row needs an NPC_OVERRIDE_SOURCES entry")
+    doc = Path(__file__).resolve().parents[1] / "docs" / "npc-data-overrides.md"
+    doc_text = doc.read_text(encoding="utf-8") if doc.is_file() else ""
+    undocumented = [i for i in NPC_OVERRIDES if f"| {i} |" not in doc_text]
+    if undocumented:
+        raise SystemExit(f"NPC_OVERRIDES {undocumented} have no row in {doc}")
+    for npc_id, fields in NPC_OVERRIDES.items():
+        if npc_id not in by_id:
+            raise SystemExit(f"override for npc {npc_id} but it is not in the datapack")
+        by_id[npc_id].update(fields)
+    return templates
+
+
 def check_combat_coverage(templates: list[dict]) -> None:
     """Refuse to overwrite data/npcs.json with combat stats stripped.
 
@@ -652,8 +691,9 @@ def main() -> None:
         raise SystemExit(f"{root} has no spawns tree (needed by --write-towns)")
 
     repo = Path(__file__).resolve().parents[1]
-    templates = load_templates(npc_dir)
+    templates = apply_overrides(load_templates(npc_dir))
     check_combat_coverage(templates)
+    print(f"documented overrides: {sorted(NPC_OVERRIDES)} (docs/npc-data-overrides.md)")
 
     if check_only:
         path = repo / "data" / "npcs.json"

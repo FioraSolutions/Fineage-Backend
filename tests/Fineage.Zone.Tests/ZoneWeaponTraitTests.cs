@@ -45,26 +45,31 @@ public sealed class ZoneWeaponTraitTests
     [Fact]
     public void Catalog_loads_bow_resist_on_dismal_pole()
     {
-        // 21004 Dismal Pole — Resist Bow Weapons lv5 → BOW 1.5
+        // 21004 Dismal Pole — Resist Bow Weapons lv5 (BOW 1.5) × CT 0 race passive 4416 (BOW "1" → 1.01)
         var npc = NpcCatalog.LoadDefault().Get(21004);
         Assert.NotNull(npc.DefenceTraits);
-        Assert.Equal(1.5, npc.DefenceTraits!["bow"], 3);
-        Assert.Equal(0.5, ZoneCombat.WeaponTraitBonus(WeaponType.Bow, npc.DefenceTraits), 3);
+        Assert.Equal(1.515, npc.DefenceTraits!["bow"], 3);
+        Assert.Equal(0.485, ZoneCombat.WeaponTraitBonus(WeaponType.Bow, npc.DefenceTraits), 3);
     }
 
     [Fact]
     public void Catalog_bow_weak_point_on_magical_eye()
     {
-        // 21012 Magical Eye — Bow Weak Point lv1 → BOW 0.89 → bonus 1.11
+        // 21012 Magical Eye — Bow Weak Point lv1 (0.89) × CT 0 race passive (1.01) → 0.8989 → bonus 1.1011
         var npc = NpcCatalog.LoadDefault().Get(21012);
-        Assert.Equal(0.89, npc.DefenceTraits!["bow"], 3);
-        Assert.Equal(1.11, ZoneCombat.WeaponTraitBonus(WeaponType.Bow, npc.DefenceTraits), 3);
+        Assert.Equal(0.8989, npc.DefenceTraits!["bow"], 4);
+        Assert.Equal(1.1011, ZoneCombat.WeaponTraitBonus(WeaponType.Bow, npc.DefenceTraits), 4);
     }
 
     [Fact]
-    public void Gremlin_has_no_weapon_traits()
+    public void Gremlin_carries_only_the_ct0_race_passive()
     {
-        Assert.Null(NpcCatalog.LoadDefault().Get(20001).DefenceTraits);
+        // CT 0 race passive 4416 tables hold "1" for neutral traits; DefenceTrait folds (1+100)/100 = 1.01,
+        // so Mobius CT 0 gives every raced NPC a 0.99 weapon-trait factor. We mirror the oracle.
+        var traits = NpcCatalog.LoadDefault().Get(20001).DefenceTraits;
+        Assert.NotNull(traits);
+        Assert.Equal(1.01, traits!["sword"], 4);
+        Assert.Equal(0.99, ZoneCombat.WeaponTraitBonus(WeaponType.Sword, traits), 4);
     }
 
     [Fact]
@@ -91,7 +96,8 @@ public sealed class ZoneWeaponTraitTests
     public void Catalog_loads_animal_weakness_on_wolf()
     {
         var npc = NpcCatalog.LoadDefault().Get(12077);
-        Assert.Equal(0.85, npc.DefenceTraits!["animalWeakness"], 3);
+        // CT 0 race passive: animal row "0.85" → (0.85+100)/100 = 1.0085 (Mobius CT 0 DefenceTrait).
+        Assert.Equal(1.0085, npc.DefenceTraits!["animalWeakness"], 4);
     }
 
     [Fact]

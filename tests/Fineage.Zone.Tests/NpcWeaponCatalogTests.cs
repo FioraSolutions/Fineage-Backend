@@ -72,8 +72,8 @@ public sealed class NpcWeaponCatalogTests
             if (string.Equals(npc.AttackType, "BOW", StringComparison.OrdinalIgnoreCase))
                 bows++;
         }
-        // Mobius Interlude stats/npcs: 296 attack type=BOW templates.
-        Assert.Equal(296, bows);
+        // Mobius Interlude stats/npcs: 299 attack type=BOW templates (top-level <npc> only).
+        Assert.Equal(299, bows);
     }
 
     [Fact]

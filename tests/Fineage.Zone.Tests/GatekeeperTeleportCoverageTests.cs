@@ -18,8 +18,8 @@ public sealed class GatekeeperTeleportCoverageTests
     const string NothingToSay = "I have nothing to say to you.";
 
     /// <summary>Every Mobius type whose class overrides <c>getHtmlPath</c>: it owns a typed folder.</summary>
-    static bool OwnsTypedPage(string? npcType) =>
-        npcType is not null && NpcHtmlPaths.Folder(npcType) != "default";
+    static bool OwnsTypedPage(string? npcType, int npcId) =>
+        npcType is not null && NpcHtmlPaths.Folder(npcType, npcId) != "default";
 
     /// <summary>
     /// Types / npc ids that must never fall through to <c>npcdefault.htm</c>. Ziggurats and tomb NPCs are typed
@@ -27,7 +27,7 @@ public sealed class GatekeeperTeleportCoverageTests
     /// Full Ketra/Varka reputation first-talk still needs the support AI; the empty dialog is not acceptable.
     /// </summary>
     static bool MustOwnPage(string? npcType, int npcId) =>
-        npcType is "DungeonGatekeeper" or "SepulcherNpc" || npcId is 31376 or 31383;
+        npcType is "DungeonGatekeeper" || NpcHtmlPaths.FourSepulchersTalkIds.Contains(npcId) || npcId is 31376 or 31383;
     [Fact]
     public async Task Every_gatekeeper_page_and_every_destination_lands_or_refuses_with_a_reason()
     {
@@ -42,7 +42,7 @@ public sealed class GatekeeperTeleportCoverageTests
             Assert.True(bench.World.TryGetEntityById(objectId, out var npc));
             if (teleports.ListsOf(npc.NpcId).Count > 0 && seen.Add(npc.NpcId))
                 gatekeepers.Add(npc);
-            if (OwnsTypedPage(npc.NpcType) && pageSeen.Add(npc.NpcId))
+            if (OwnsTypedPage(npc.NpcType, npc.NpcId) && pageSeen.Add(npc.NpcId))
                 pageOwners.Add(npc);
         }
 
