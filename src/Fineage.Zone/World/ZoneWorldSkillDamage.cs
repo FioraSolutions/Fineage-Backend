@@ -79,13 +79,25 @@ public sealed partial class ZoneWorld
                 if (spirit > 0)
                     RechargeAutoShots(player);
             }
-            double mAtk = ps.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
+            double mAtk = ps.MAtkPrecise * ZoneCombat.SpiritshotMAtkMultiplier(spirit);
             // Mobius skill magicLevel (skill-combat.json); missing table → attacker level.
             int magicLevel = combat.MagicLevelAt(level);
             if (magicLevel <= 0)
                 magicLevel = player.Level;
+            // Mobius calcMagicDam: a shield block adds sDef to mDef, a perfect block deals 1.
+            var magicShield = ZoneCombat.RollShield(Rng(_combatRandom, player),
+                ShieldRateInArc(target, player, NpcShieldRate(target), 0),
+                ps.Weapon == Fineage.Game.WeaponType.Bow);
+            if (magicShield == ZoneCombat.ShieldResult.Perfect)
+                return 1;
+            if (magicShield == ZoneCombat.ShieldResult.Block)
+                mDef += target.ShieldDef;
+            int randomPercent = ZoneCombat.MagicRandomPercent(
+                ps.Weapon != Fineage.Game.WeaponType.None, ps.RandomDamage, player.Level);
             var (damage, outcome) = ZoneCombat.RollMagicDamage(Rng(_combatRandom, player), mAtk, mDef, power,
-                player.Level, magicLevel, target.Level, ps.MCritRate, magicCritDmg: ps.MagicCritDmg);
+                player.Level, magicLevel, target.Level, ps.MCritRate,
+                targetIsPlayer: target.Kind == ZoneEntityKind.Player, magicCritDmg: ps.MagicCritDmg,
+                randomPercent: randomPercent);
             if (player.Session != null)
                 MagicOutcomeNotice(player.Session, target, combat, outcome);
             return damage;

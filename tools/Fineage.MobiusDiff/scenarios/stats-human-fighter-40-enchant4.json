@@ -1,0 +1,137 @@
+{
+  "id": "stats-human-fighter-40-enchant4",
+  "description": "#979 attribute goldens: Human Fighter lv40, Long Sword + mithril set enchanted +4 (FuncEnchant). Attrs unchanged; P.Atk/P.Def/M.Atk rise.",
+  "statsMatrix": true,
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 0,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 2,
+        "enchant": 4
+      },
+      {
+        "slot": "chest",
+        "itemId": 58,
+        "enchant": 4
+      },
+      {
+        "slot": "legs",
+        "itemId": 59,
+        "enchant": 4
+      },
+      {
+        "slot": "gloves",
+        "itemId": 61,
+        "enchant": 4
+      },
+      {
+        "slot": "feet",
+        "itemId": 62,
+        "enchant": 4
+      }
+    ]
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/stats-human-fighter-40-enchant4.json"
+  },
+  "metrics": [
+    "str",
+    "dex",
+    "con",
+    "int",
+    "wit",
+    "men",
+    "strBonus",
+    "dexBonus",
+    "conBonus",
+    "intBonus",
+    "witBonus",
+    "menBonus",
+    "pAtk",
+    "pDef",
+    "pAtkSpd",
+    "mAtk",
+    "mDef",
+    "mAtkSpd",
+    "accuracy",
+    "evasion",
+    "critPermille",
+    "mCritPermille",
+    "maxHp",
+    "maxMp",
+    "maxCp"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 1e-06,
+      "relative": 0.0
+    },
+    "maxHp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "evasion": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mCritPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "con": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "men": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "int": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "maxCp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "str": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "accuracy": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "critPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "wit": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "dex": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "maxMp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    }
+  }
+}

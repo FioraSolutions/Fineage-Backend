@@ -161,6 +161,12 @@ public static class Program
         Add(psi, "--side", scenario.Contact.Side);
         Add(psi, "--soulshot", scenario.Contact.Soulshot.ToString().ToLowerInvariant());
         Add(psi, "--matrix", scenario.Matrix.ToString().ToLowerInvariant());
+        Add(psi, "--stats-matrix", scenario.StatsMatrix.ToString().ToLowerInvariant());
+        Add(psi, "--magic-matrix", scenario.MagicMatrix.ToString().ToLowerInvariant());
+        Add(psi, "--magic-skill", scenario.Magic.SkillId.ToString());
+        Add(psi, "--magic-level", scenario.Magic.Level.ToString());
+        Add(psi, "--magic-crit-power", scenario.Magic.CritPower.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        Add(psi, "--passives", string.Join(",", scenario.Attacker.Passives.Select(static b => $"{b.SkillId}:{b.Level}")));
         Add(psi, "--attacker-kind", scenario.Attacker.Kind);
         Add(psi, "--target-kind", scenario.Target.Kind);
         Add(psi, "--attacker-npc", scenario.Attacker.NpcId.ToString());

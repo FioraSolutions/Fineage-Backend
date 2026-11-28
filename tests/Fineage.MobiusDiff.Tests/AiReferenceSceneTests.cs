@@ -74,8 +74,6 @@ public sealed class AiReferenceSceneTests
         {
             "activation-idle-leave-92s",          // Mobius 90 s region hysteresis vs current activation lifetime
             "activation-returning-stays-awake",   // returnHome intent after the target leaves
-            "death-aggro-cleared",                // AggroList cleared on death
-            "hate-clear-on-kill",                 // AggroList cleared on death
             "return-clears-hate"                  // returnHome clears hate / starts return
         };
 

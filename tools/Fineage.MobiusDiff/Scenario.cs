@@ -31,6 +31,22 @@ public sealed class Scenario
     public bool Matrix { get; set; }
 
     /// <summary>
+    /// When true, both probes emit the six base attributes, their bonus-table multipliers,
+    /// and the derived combat/vital stats (P.Atk … M.Atk.Spd, accuracy, max HP/MP/CP).
+    /// </summary>
+    public bool StatsMatrix { get; set; }
+
+    /// <summary>
+    /// When true, both probes emit the deterministic <c>calcMagicDam</c> cells for <see cref="Magic"/>:
+    /// success rate, base / spiritshot / blessed spiritshot damage, crit (NPC ×3, PvP ×2.5), half-fail,
+    /// resisted, shield block / perfect block, and the random-spread bounds.
+    /// </summary>
+    public bool MagicMatrix { get; set; }
+
+    /// <summary>The magic skill row (power / magicLevel from <c>skill-combat.json</c>) driving <see cref="MagicMatrix"/>.</summary>
+    public MagicSpec Magic { get; set; } = new();
+
+    /// <summary>
     /// Mobius <c>PlayerStatus.reduceHp</c> CP split cases. Each case emits <c>cpLoss_&lt;key&gt;</c> and
     /// <c>hpLoss_&lt;key&gt;</c> from the same source-verified barrier; empty for ordinary combat scenarios.
     /// </summary>
@@ -48,6 +64,15 @@ public sealed class Scenario
     public Dictionary<string, string> KnownDivergences { get; set; } = new();
 }
 
+public sealed class MagicSpec
+{
+    public int SkillId { get; set; }
+    public int Level { get; set; } = 1;
+
+    /// <summary><c>MAGIC_CRIT_DMG</c> stat multiplier folded on a crit (1 = no buff).</summary>
+    public double CritPower { get; set; } = 1d;
+}
+
 public sealed class AttackerSpec
 {
     /// <summary><c>player</c> (default), <c>npc</c>, or <c>summon</c> (pet/servitor catalog row).</summary>
@@ -63,6 +88,9 @@ public sealed class AttackerSpec
 
     /// <summary>Active abnormals applied through <c>skill-stat-effects.json</c>.</summary>
     public List<BuffSpec> Buffs { get; set; } = new();
+
+    /// <summary>Learned operateType-P skills folded through <c>skill-passives.json</c>.</summary>
+    public List<BuffSpec> Passives { get; set; } = new();
 }
 
 public sealed class GearSpec

@@ -45,6 +45,7 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 - `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
 - Aggressive mobs (isAggressive and aggroRange > 0) scan every 500 ms and attack the first live player inside aggroRange (3D).
 - AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → returnHome.
+- Death (Mobius `Creature.doDie`, `Attackable.java:876` `getMostHated` is null for `isAlikeDead`; `Creature.decayMe` `Creature.java:2465` and `Attackable.onSpawn` `Attackable.java:1455` clear the list): `RemoveDeadNpc` clears `HateList`, so a corpse carries no hate into decay or respawn. `DamageBy` is kept because `Attackable.calculateRewards` splits the kill over the AggroInfo damage shares. Test: `DeathClearsAggroTests`; scenes `death-aggro-cleared`, `hate-clear-on-kill`.
 - Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
 - Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
 - Gaps: no LOS/geo check on aggro, no peace-zone or level-gap rules, no stance re-send to a watcher who comes into view mid-fight, V2 gets no stance packets, mob-vs-mob hate not modelled.
@@ -397,10 +398,51 @@ Attacker × target cells (and the weapon used when the attacker is a player):
 | level-gap HF1→gremlin | `phys-auto-p2m-sword-lv1` | 44 | 48 | 53 | 88 | 88 | 782 | 1199 | accuracy uses level 1 |
 | same-level HF40→alligator | `phys-auto-p2m-sword-alligator` | 18 | 19 | 21 | 36 | 36 | 782 | 1199 | Alligator 20135 lv 40 |
 
-Out of this slice (still open for #979): six attributes, gear/enchant/passives as a full grid,
-buffs/debuffs, blow/lethal (some coverage already), cast-break, a full-server oracle
-(Java driver is not a GameServer; `dist/libs` absent), DualFist as a distinct type (Interlude
-catalog folds cestus into `Fist`), and servitor features beyond auto-attack (siege, pet inventory).
+### Attribute / derived-stat goldens (slice 1)
+
+Java-driver oracles for the nine Interlude base classes at level 40, Human Fighter / Human Mystic
+at level 1, Human Fighter +4 enchant, and Human Fighter Weapon Mastery 141 L1 + Heavy Armor
+Mastery 231 L1. Fighters wear Long Sword 2 + mithril 58/59/61/62; mystics wear Willow Staff 8 +
+Tunic 426 / Stockings 462. Metrics: STR/DEX/CON/INT/WIT/MEN and bonus-table multipliers; P.Atk,
+P.Def, P.Atk.Spd, M.Atk, M.Def, M.Atk.Spd; accuracy / evasion / crit ‰ / mCrit ‰; max HP/MP/CP.
+Scenarios: `stats-*-40`, `stats-human-*-1`, `stats-human-fighter-40-enchant4`,
+`stats-human-fighter-40-passives` (`AttrStatsMatrixTests`). M.Atk / M.Def / M.Atk.Spd stay as
+untruncated doubles in the formula layer (same class of fix as P.Atk in the auto-attack matrix).
+Do not mark a full matrix row in `docs/mobius-parity-matrix.md` from this slice; there is no
+dedicated six-attribute row.
+
+### Magic damage differential matrix (#979 slice 2)
+
+Seven scenarios (`magic-*`, `MagicMatrixTests`) compare Fineage with a Java oracle that reads the Mobius
+skill XML (`power`, `magicLevel`) and NPC XML (raw stats), folds NPC M.Atk / M.Def like `FuncMAtkMod` /
+`FuncMDefMod`, and evaluates `calcMagicSuccess` + `calcMagicDam` + the `MagicalDamage` effect's `(int)` cast.
+Cells: success rate, normal / spiritshot / blessed spiritshot damage, crit (NPC ×3, player→player ×2.5, with
+`MAGIC_CRIT_DMG`), half-fail, resisted, shield block (`mDef += sDef`) and perfect block, random-damage
+spread bounds. Casters: Human / Elven / Dark Mystic with Willow Staff, unarmed Human Mystic; targets: Gremlin,
+Validus, Skeleton Royal Guard (shield), Basilisk, Ant Recruit, an HF40 player.
+
+Divergences found and fixed:
+
+| Divergence | Mobius | Fineage before | Fix |
+|---|---|---|---|
+| NPC M.Atk / M.Def | `FuncMAtkMod` `mAtk·INT.bonus²·levelMod²`, `FuncMDefMod` `mDef·MEN.bonus·levelMod` (Gremlin mDef 29.59 → 29.56) | raw XML value | folded in `NpcCatalog`; per-NPC `int` / `men` added to `npcs.json` where not 21 / 10 |
+| Player caster M.Atk | untruncated double | cast path used the int display value | `PlayerCombatStats.MAtkPrecise` |
+| Shield vs magic | `mDef += shldDef`, perfect block = 1 | ignored | `RollSkillDamage` rolls the shield |
+| Random damage | `getRandomDamageMultiplier` (weapon `RANDOM_DAMAGE`, else `5+(int)√level`) | none | `MagicRandomPercent` |
+| Failure branch | only a **player** caster halves / resists; an NPC caster keeps full damage and no crit | applied to NPC casters too | `casterIsPlayer` |
+| Crit ×2.5 | only when attacker **and** target are players | any player target | `casterIsPlayer && targetIsPlayer` |
+| Magic crit cap | `getMCriticalHit` capped by `MaxMCritRate` (200 ‰) | uncapped | `MaxMCritRate` in player/world stats and roll |
+| Zero damage | `(int)` damage; `if (damage > 0)` so 0 = no hit | `Math.Max(1, …)` | `MagicDamageFor` returns 0 |
+
+Found but **not** fixed here (NPC derived stats still raw XML in Fineage; Mobius folds them):
+P.Atk `·STR.bonus·levelMod`, P.Def `·levelMod`, P.Atk.Spd `·DEX.bonus`, max HP `·CON.bonus`, max MP `·MEN.bonus`.
+The physical auto-attack matrix NPC-defence cells compared catalog values on both sides, so the NPC side of
+rows 16 / 17 / 72 is not independently Mobius-verified until that fold lands.
+
+Out of this slice (still open for #979): blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
+shots consume/auto-charge/grade; cast-break from damage/stun/target death; a full-server oracle
+(Java driver is not a GameServer; `dist/libs` absent). DualFist as a distinct type (Interlude
+catalog folds cestus into `Fist`) and servitor features beyond auto-attack stay out of scope.
 Arrow consume/wrong-grade/last-arrow already has Mobius-traced world tests in
 `NetBowArrowTests.cs`.
 

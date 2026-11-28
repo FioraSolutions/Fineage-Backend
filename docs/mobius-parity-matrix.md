@@ -34,12 +34,12 @@ behavioural parity or production verification.
 | Level | ✅ verified | 🟡 partial | unverified / ❌ | n/a | Total |
 |-------|------------:|-----------:|----------------:|----:|------:|
 | Implemented | 103 | 2 | 0 | 3 | 108 |
-| Parity verified | 2 | 3 | 100 | 3 | 108 |
+| Parity verified | 3 | 4 | 98 | 3 | 108 |
 | Production verified | 0 | 0 | 105 | 3 | 108 |
 
-**Current claim:** 103 of 108 systems are implemented; 2 have full linked parity evidence (movement A/B #1051 and
-weight penalty) and 3 have partial linked parity evidence (physical auto-attack matrix, rows 16/17/72, #979);
-**no system has linked production evidence**. The 0 production rows are intentionally
+**Current claim:** 103 of 108 systems are implemented; 3 have full linked parity evidence (movement A/B #1051,
+weight penalty, and mob death AggroList clear #1105) and 4 have partial linked parity evidence (physical
+auto-attack matrix, rows 16/17/72, and the magic damage matrix, row 20, #979); **no system has linked production evidence**. The 0 production rows are intentionally
 unverified, not failures. The old 92/4/9/3 counter was stale; the validator now derives these counts from
 the rows.
 
@@ -73,7 +73,7 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 17 | Bow and arrows | ✅ [src](../src/Fineage.Zone/World/ZoneWorldArrows.cs) | 🟡 [PhysAutoMatrixTests](../tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs) + [NetBowArrowTests](../tests/Fineage.Zone.Tests/NetBowArrowTests.cs) | unverified | — | Formula cells: bow range 500, default reuse 1500, interval `timeAtk + (1500*333)/Pspd`, 76·proximity/SS/crit vs Gremlin (`phys-auto-p2m-bow`). Arrow consume/grade/last-arrow already Mobius-traced in `NetBowArrowTests`. Distance-scaled bow damage is Mobius-off by default and not asserted. `Creature` bow branch → `ZoneWorldArrows` / `AttackIntervalMs` |
 | 18 | Physical/magic skill catalog | ✅ [src](../src/Fineage.Zone/Combat/SkillCombatCatalog.cs) | unverified | unverified | — | skill XML → `data/skill-combat.json`; a missing row refuses the cast |
 | 19 | Blow / lethal | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Rolls.cs) | unverified | unverified | — | blow handlers → `ZoneWorldSkills` |
-| 20 | Magic crit / fail | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Magic.cs) | unverified | unverified | — | `Formulas` magic crit → `ZoneWorldSkillDamage` |
+| 20 | Magic crit / fail | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Magic.cs) | 🟡 [MagicMatrixTests](../tests/Fineage.MobiusDiff.Tests/MagicMatrixTests.cs) + [ZoneMagicCritFailTests](../tests/Fineage.Zone.Tests/ZoneMagicCritFailTests.cs) | unverified | — | Seven Java-traced scenarios (HM/EM/DM casters, Willow Staff and unarmed, NPC and player targets, shield-block target): `calcMagicSuccess` rate (incl. negative), `calcMagicDam` base / spiritshot ×2 / blessed ×4 inside √mAtk, crit ×3 (×2.5 player→player) × `MAGIC_CRIT_DMG`, half-fail, resisted, shield mDef-add / perfect block, random-damage spread, `(int)` truncation. NPC M.Atk / M.Def now folded with INT/MEN bonus and levelMod. Not asserted: elemental bonus, PvP/PvE class-balance multipliers (1.0), drain/MP-damage/cubic/signet variants, `MaxMCritRate` only unit-tested. Evidence: [combat-parity.md](combat-parity.md#magic-damage-differential-matrix-979-slice-2). `Formulas.calcMagicDam` → `ZoneWorldSkillDamage.RollSkillDamage` |
 | 21 | Buffs, debuffs, stat funcs, hit-time apply | ✅ [src](../src/Fineage.Zone/World/ZoneWorldAbnormals.cs) | unverified | unverified | — | `handlers/skill/effects` → `ZoneWorldSkills` `ScheduleEffect`; 111/112 effect names full in `skill-effect-coverage.json` |
 | 22 | BlockBuffSlot family | ✅ [src](../src/Fineage.Zone/Combat/PlayableAttackRules.cs) | unverified | unverified | — | `BlockBuffSlot` / `NoblesseBless` / `ProtectionBlessing` → `ZoneWorldAbnormals` slot block, death consume, `PlayableAttackRules` via the effect name |
 | 23 | Cast conditions | ✅ [src](../src/Fineage.Game/Skills/SkillCastConditionEvaluator.cs) | unverified | unverified | — | skill XML `<conditions>` → `SkillCastConditionEvaluator` (37/37 kinds, 189 imported trees) |
@@ -86,7 +86,7 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 30 | PvP flag / karma | ✅ [src](../src/Fineage.Zone/World/ZoneWorldPvp.cs) | unverified | unverified | — | `Player.updatePvPStatus` → `ZoneWorldPvp` |
 | 31 | Weight and grade penalty | ✅ [src](../src/Fineage.Zone/World/ZoneWorldWeight.cs) | ✅ [WeightPenaltyTests](../tests/Fineage.Zone.Tests/WeightPenaltyTests.cs) | unverified | — | weight penalty → `ZoneWorldWeight`; Mobius formula and test scope in [`combat-parity.md`](combat-parity.md) slice 9 |
 | **AI and NPC combat** |
-| 32 | Mob aggro / hate / clan / LOS | ✅ [src](../src/Fineage.Zone/World/ZoneWorldMobAi.cs) | unverified | unverified | — | `ai/AttackableAI.java` → `ZoneWorldMobAi`, `ZoneWorldAggro` |
+| 32 | Mob aggro / hate / clan / LOS | ✅ [src](../src/Fineage.Zone/World/ZoneWorldMobAi.cs) | ✅ [DeathClearsAggroTests](../tests/Fineage.Zone.Tests/DeathClearsAggroTests.cs) | unverified | — | `ai/AttackableAI.java` → `ZoneWorldMobAi`, `ZoneWorldAggro`; death/decay AggroList clear traced to `Creature.doDie`/`decayMe` and `Attackable.onSpawn` (#1105, [`combat-parity.md`](combat-parity.md) slice 8) |
 | 33 | Minion follow and raid minion buff | ✅ [src](../src/Fineage.Zone/Npcs/NpcMinionCatalog.cs) | unverified | unverified | — | `AttackableAI` follow → `ZoneWorldNpcMovement` |
 | 34 | NPC shots | ✅ [src](../src/Fineage.Zone/World/ZoneWorldNpcSkills.cs) | unverified | unverified | — | `Npc` recharge shots → `ZoneWorldNpcSkills` |
 | 35 | NPC heal / buff / debuff | ✅ [src](../src/Fineage.Zone/World/ZoneWorldNpcSkills.cs) | unverified | unverified | — | `NpcAI` → `ZoneWorldNpcSkills` |
@@ -218,12 +218,14 @@ This is the canonical text to post on issue [#174](https://github.com/FioraSolut
 > **Parity matrix status — 2026-11-27 (#977).** The live home remains
 > `docs/mobius-parity-matrix.md`. It now tracks three independent levels instead of one `✅ done`:
 > **Implemented** (structural/code) 103 ✅, 2 🟡, 0 ❌, 3 n/a; **Parity verified** (behavioural
-> against pinned Mobius) 2 verified, 103 unverified, 3 n/a; **Production verified** (production-like
-> run/fault artefact) 0 verified, 105 unverified, 3 n/a. The only parity evidence is the pinned
-> movement A/B #1051 slice (row 5) and `WeightPenaltyTests` against the Mobius weight-penalty formula
-> (row 31). `docs/QUEST_STATUS.md` and `docs/wire-coverage.md` counters are implementation coverage
-> only, not parity or production evidence. All other rows stay explicitly unverified at the higher
-> levels; no unrun check is marked verified.
+> against pinned Mobius) 3 verified, 3 partial, 99 unverified, 3 n/a; **Production verified**
+> (production-like run/fault artefact) 0 verified, 105 unverified, 3 n/a. Full parity evidence is the
+> pinned movement A/B #1051 slice (row 5), `WeightPenaltyTests` against the Mobius weight-penalty
+> formula (row 31) and `DeathClearsAggroTests` against
+> `Creature.doDie`/`decayMe`/`Attackable.onSpawn` (row 32); rows 16/17/72 are partial (#979 physical
+> auto-attack matrix). `docs/QUEST_STATUS.md` and `docs/wire-coverage.md` counters are implementation
+> coverage only, not parity or production evidence. All other rows stay explicitly unverified at the
+> higher levels; no unrun check is marked verified.
 
 ## Ordered next work
 

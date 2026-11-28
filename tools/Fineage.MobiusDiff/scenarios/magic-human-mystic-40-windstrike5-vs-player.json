@@ -1,0 +1,120 @@
+{
+  "id": "magic-human-mystic-40-windstrike5-vs-player",
+  "description": "#979 magic goldens: HM40 Wind Strike 5 vs HF40 player (PvP): target M.Def folded from class/armor, crit x2.5, success rate < 0 when level gap is huge.",
+  "magicMatrix": true,
+  "magic": {
+    "skillId": 1177,
+    "level": 5,
+    "critPower": 1.0
+  },
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 10,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 8,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 426,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 462,
+        "enchant": 0
+      }
+    ]
+  },
+  "target": {
+    "kind": "player",
+    "classId": 0,
+    "level": 40,
+    "hp": 200,
+    "cp": 200,
+    "gear": [
+      {
+        "slot": "chest",
+        "itemId": 58,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 59,
+        "enchant": 0
+      },
+      {
+        "slot": "gloves",
+        "itemId": 61,
+        "enchant": 0
+      },
+      {
+        "slot": "feet",
+        "itemId": 62,
+        "enchant": 0
+      },
+      {
+        "slot": "rhand",
+        "itemId": 2,
+        "enchant": 0
+      },
+      {
+        "slot": "lhand",
+        "itemId": 18,
+        "enchant": 0
+      }
+    ],
+    "buffs": []
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/magic-human-mystic-40-windstrike5-vs-player.json"
+  },
+  "metrics": [
+    "magicPower",
+    "magicLevel",
+    "casterLevel",
+    "targetLevel",
+    "mAtk",
+    "targetMDef",
+    "magicSuccessRate",
+    "magicHalfFailEligible",
+    "damageNormal",
+    "damageSps",
+    "damageBss",
+    "damageCrit",
+    "damageCritBss",
+    "damageCritPvp",
+    "damageHalfFail",
+    "damageResisted",
+    "randomPercent",
+    "damageRandomMin",
+    "damageRandomMax",
+    "damageShieldBlock",
+    "damagePerfectBlock"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "targetMDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    }
+  }
+}

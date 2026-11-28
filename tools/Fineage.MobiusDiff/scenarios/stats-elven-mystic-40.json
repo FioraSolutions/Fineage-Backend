@@ -1,0 +1,127 @@
+{
+  "id": "stats-elven-mystic-40",
+  "description": "#979 attribute goldens: Elven Mystic lv40, Willow Staff + Tunic/Stockings, no buffs/passives. Six attrs, bonuses, derived combat stats, HP/MP/CP.",
+  "statsMatrix": true,
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 25,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 8,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 426,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 462,
+        "enchant": 0
+      }
+    ]
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/stats-elven-mystic-40.json"
+  },
+  "metrics": [
+    "str",
+    "dex",
+    "con",
+    "int",
+    "wit",
+    "men",
+    "strBonus",
+    "dexBonus",
+    "conBonus",
+    "intBonus",
+    "witBonus",
+    "menBonus",
+    "pAtk",
+    "pDef",
+    "pAtkSpd",
+    "mAtk",
+    "mDef",
+    "mAtkSpd",
+    "accuracy",
+    "evasion",
+    "critPermille",
+    "mCritPermille",
+    "maxHp",
+    "maxMp",
+    "maxCp"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 1e-06,
+      "relative": 0.0
+    },
+    "maxHp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "evasion": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mCritPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "con": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "men": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "int": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "maxCp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "str": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "accuracy": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "critPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "wit": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "dex": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "maxMp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    }
+  }
+}

@@ -190,6 +190,12 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
         SetAggroTarget(npc, 0);
         npc.Chasing = false;
+        // Mobius Attackable.getMostHated returns null for a dead owner (isAlikeDead), and the list itself is dropped by
+        // Creature.decayMe (Creature.java:2465) and rebuilt empty by Attackable.onSpawn (Attackable.java:1455). Ending the
+        // fight at the death transition is the same observable state, and it means a corpse can never carry hate into
+        // decay or respawn (no ghost aggro). DamageBy stays: Mobius Attackable.calculateRewards runs inside doDie over
+        // the AggroInfo damage shares, and Fineage pays the kill after the transition.
+        npc.HateList.Clear();
         List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
