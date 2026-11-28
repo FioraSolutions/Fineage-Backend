@@ -14,7 +14,7 @@ public sealed partial class ZoneWorld
     long PlayerAttackTimeMs(int objectId) =>
         _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
 
-    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtk;
+    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtkPrecise;
 
     double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
 
@@ -95,13 +95,14 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
-        return ZoneCombat.RollMelee(Rng(_combatRandom, player), ps.PAtk, pDef,
+        return ZoneCombat.RollMelee(Rng(_combatRandom, player), ps.PAtkPrecise, pDef,
             ps.Accuracy, evasion, critPermille, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
             critDamageMod,
             ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits),
-            ps.CritDmgAdd);
+            ps.CritDmgAdd,
+            ZoneCombat.ProximityBonus(position));
     }
 
     /// <summary>

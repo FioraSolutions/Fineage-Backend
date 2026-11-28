@@ -50,8 +50,10 @@ public static class FineageProbe
         var formula = PlayerFormulaBases.From(attrs, gearBases, template.MAtkSpd, level);
         var mods = BuffMods(scenario, inventory);
 
-        int pAtk = mods.Apply(CombatStat.PAtk, formula.PAtk);
-        int pDef = Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef));
+        // Mobius getPAtk/getPDef stay doubles through calcPhysDam; truncating here was the 71-vs-73 leftover
+        // after the 76-coefficient fix.
+        double pAtk = mods.Apply(CombatStat.PAtk, formula.PAtk);
+        double pDef = Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef));
         int pAtkSpd = Math.Max(1, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd));
         int accuracy = mods.Apply(CombatStat.Accuracy, formula.Accuracy);
         int evasion = mods.Apply(CombatStat.Evasion, formula.Evasion);

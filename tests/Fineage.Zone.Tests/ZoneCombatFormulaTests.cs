@@ -17,12 +17,20 @@ public sealed class ZoneCombatFormulaTests
     }
 
     [Fact]
-    public void PhysicalDamageIs70PAtkOverPDef()
+    public void PhysicalDamageIs76PAtkTimesProximityOverPDef()
     {
-        Assert.Equal(6, ZoneCombat.PhysicalDamage(4, 44.444));
-        Assert.Equal(7, ZoneCombat.PhysicalDamage(8.475, 80));
+        // CT0 Formulas.calcPhysDam: 76 * pAtk * proximity / pDef, min 1. Front proximity is 1.
+        Assert.Equal(6, ZoneCombat.PhysicalDamage(4, 44.444));           // 76*4/44.444 = 6.84
+        Assert.Equal(8, ZoneCombat.PhysicalDamage(8.475, 80));           // 76*8.475/80 = 8.05
         Assert.Equal(1, ZoneCombat.PhysicalDamage(0.1, 1000));
         Assert.Equal(ZoneCombat.SampleMeleeDamage, ZoneCombat.PhysicalDamage(ZoneCombat.DefaultPlayerPAtk, ZoneCombat.GremlinPDef));
+
+        Assert.Equal(6, ZoneCombat.PhysicalDamage(4, 44.444, ZoneCombat.ProximityBonus(SkillPosition.Front)));
+        Assert.Equal(7, ZoneCombat.PhysicalDamage(4, 44.444, ZoneCombat.ProximityBonus(SkillPosition.Side)));   // *1.1 = 7.52
+        Assert.Equal(8, ZoneCombat.PhysicalDamage(4, 44.444, ZoneCombat.ProximityBonus(SkillPosition.Behind))); // *1.2 = 8.21
+
+        // Human Fighter 40 vs Gremlin from the MobiusDiff oracle: 76 * 42.7248 / 44.444 = 73.06
+        Assert.Equal(73, ZoneCombat.PhysicalDamage(42.7248, 44.444));
     }
 
     [Fact]

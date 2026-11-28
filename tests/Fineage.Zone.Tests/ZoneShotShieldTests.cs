@@ -20,7 +20,7 @@ public sealed class ZoneShotShieldTests
     {
         // hit, no crit (0 > 999 false), spread 0
         var (dmg, flags) = ZoneCombat.RollMelee(new Scripted(0, 999, 0), 29, 44.444, 10, 10, 0, 10, true, 1, 0, 0, false);
-        Assert.Equal((int)(70d * 58 / 44.444), dmg);
+        Assert.Equal((int)(76d * 58 / 44.444), dmg);
         Assert.Equal(ZoneCombat.HitFlagSoulshot | 1, flags);
     }
 
@@ -29,7 +29,7 @@ public sealed class ZoneShotShieldTests
     {
         // hit, shield: perfect? 10 (no), block 5 < 20 → block, no crit, spread 0
         var (blocked, bf) = ZoneCombat.RollMelee(new Scripted(0, 10, 5, 999, 0), 8.475, 134, 10, 10, 0, 30, false, 0, 20, 47, false);
-        Assert.Equal((int)(70d * 8.475 / (134 + 47)), blocked);
+        Assert.Equal((int)(76d * 8.475 / (134 + 47)), blocked);
         Assert.Equal(ZoneCombat.HitFlagShield, bf);
         // hit, perfect (99 > 95)
         var (perfect, pf) = ZoneCombat.RollMelee(new Scripted(0, 99), 100, 10, 10, 10, 0, 0, false, 0, 20, 47, false);

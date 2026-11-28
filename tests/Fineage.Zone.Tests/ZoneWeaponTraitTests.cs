@@ -70,10 +70,10 @@ public sealed class ZoneWeaponTraitTests
     [Fact]
     public void RollMelee_applies_weapon_trait_bonus()
     {
-        // hit, no shield, no crit, no random: 70*100/50 = 140 → ×0.5 = 70
+        // hit, no shield, no crit, no random: 76*100/50 = 152 → ×0.5 = 76
         var (dmg, _) = ZoneCombat.RollMelee(new Seq(0, 999, 0), 100, 50, 100, 0, 0, 0,
             false, 0, 0, 0, false, 1d, 1d, 0.5);
-        Assert.Equal(70, dmg);
+        Assert.Equal(76, dmg);
     }
 
     [Fact]

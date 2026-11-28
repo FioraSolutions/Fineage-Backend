@@ -17,7 +17,8 @@ public readonly record struct PlayerCombatStats(
     double DarkRes = 0d, double HolyRes = 0d, double FireRes = 0d, double WaterRes = 0d,
     double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double ManaShield = 0d,
     double TransDamToPlayer = 0d, double DamageZoneVuln = 0d,
-    double HolyPower = 0d, double FirePower = 0d);
+    double HolyPower = 0d, double FirePower = 0d,
+    double PAtkPrecise = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -41,9 +42,11 @@ public sealed partial class ZoneWorld
         var gear = GearBases(player, t);
         var formula = PlayerFormulaBases.From(attrs, gear, t.MAtkSpd, level);
         var mods = PlayerStatMods(player);
+        double pAtkPrecise = mods.Apply(CombatStat.PAtk, formula.PAtk);
 
         return new PlayerCombatStats(
-            PAtk: mods.Apply(CombatStat.PAtk, formula.PAtk),
+            PAtk: (int)pAtkPrecise,
+            PAtkPrecise: pAtkPrecise,
             MAtk: mods.Apply(CombatStat.MAtk, formula.MAtk),
             PDef: Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef)),
             MDef: Math.Max(1, mods.Apply(CombatStat.MDef, formula.MDef)),

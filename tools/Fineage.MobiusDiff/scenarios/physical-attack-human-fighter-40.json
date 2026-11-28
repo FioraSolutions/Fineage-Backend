@@ -108,7 +108,7 @@
     }
   },
   "knownDivergences": {
-    "damageNoCrit": "Fineage uses 70 * pAtk / pDef and drops Mobius proximity; CT0 calcPhysDam uses 76 * damage * proximity / defence. Tracked for #979.",
-    "damageMeanPerSwing": "Seeded Fineage sample mean vs Mobius analytic mean; the gap is the 70-vs-76 core and missing proximity, not RNG noise. Tracked for #979."
+    "damageNoCrit": "CT0 Formulas.calcPhysDam: 76 * pAtk * proximity / pDef (front proximity 1 for this pilot).",
+    "damageMeanPerSwing": "Seeded Fineage sample mean vs Mobius analytic mean of the same 76·proximity core."
   }
 }
