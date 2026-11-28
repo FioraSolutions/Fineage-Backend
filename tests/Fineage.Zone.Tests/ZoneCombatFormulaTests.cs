@@ -38,9 +38,12 @@ public sealed class ZoneCombatFormulaTests
     {
         var dir = GameData.FindDataDirectory(AppContext.BaseDirectory)!;
         var gremlin = NpcCatalog.Load(dir).Get(20001);
-        Assert.Equal(8.475, gremlin.PAtk, 3);
-        Assert.Equal(44.444, gremlin.PDef, 3);
-        Assert.Equal(253, gremlin.AttackSpeed);
+        // Folded like Mobius NPC_STD_CALCULATOR: (int)8 * STR bonus 1.2 * levelMod 0.9, (int)44 * 0.9, round(253 * DEX bonus).
+        Assert.Equal(8.64, gremlin.PAtk, 3);
+        Assert.Equal(39.6, gremlin.PDef, 3);
+        Assert.Equal(278, gremlin.AttackSpeed);
+        Assert.Equal(62, gremlin.Hp);
+        Assert.Equal(44, gremlin.Mp);
         Assert.Equal(40, gremlin.AttackRange);
     }
 

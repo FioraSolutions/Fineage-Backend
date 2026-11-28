@@ -152,12 +152,13 @@ public sealed class ZoneMagicCritFailTests
     {
         var npcs = Fineage.Zone.Npcs.NpcCatalog.LoadDefault();
         var bonuses = ClassCatalog.LoadStatBonuses(Fineage.Zone.Spawns.GameDataPaths.FindDataDirectory(AppContext.BaseDirectory)!);
-        // Gremlin 20001 (L1): XML mAtk 5.78704, mDef 29.5916164, int 21, men 10, levelMod 0.9.
+        // Gremlin 20001 (L1): XML mAtk 5.78704, mDef 29.5916164 truncate to int 5 / 29 (CreatureTemplate StatSet.getInt),
+        // int 21, men 10, levelMod 0.9.
         var gremlin = npcs.Get(20001);
         double intB = bonuses.Bonus(StatSlot.Int, 21);
         double menB = bonuses.Bonus(StatSlot.Men, 10);
-        Assert.Equal(5.78704 * intB * intB * 0.9 * 0.9, gremlin.MAtk, 3);
-        Assert.Equal(29.5916164 * menB * 0.9, gremlin.MDef, 3);
+        Assert.Equal(5 * intB * intB * 0.9 * 0.9, gremlin.MAtk, 3);
+        Assert.Equal(29 * menB * 0.9, gremlin.MDef, 3);
         // A caster-type NPC with non-default INT/MEN keeps its own attributes (Skeleton Royal Guard is default; a mage is not).
         Assert.Contains(npcs.ById.Values, n => n.Int != Fineage.Zone.Npcs.NpcCatalog.DefaultInt);
         Assert.Contains(npcs.ById.Values, n => n.Men != Fineage.Zone.Npcs.NpcCatalog.DefaultMen);

@@ -162,6 +162,7 @@ public static class Program
         Add(psi, "--soulshot", scenario.Contact.Soulshot.ToString().ToLowerInvariant());
         Add(psi, "--matrix", scenario.Matrix.ToString().ToLowerInvariant());
         Add(psi, "--stats-matrix", scenario.StatsMatrix.ToString().ToLowerInvariant());
+        Add(psi, "--npc-stats-matrix", scenario.NpcStatsMatrix.ToString().ToLowerInvariant());
         Add(psi, "--magic-matrix", scenario.MagicMatrix.ToString().ToLowerInvariant());
         Add(psi, "--magic-skill", scenario.Magic.SkillId.ToString());
         Add(psi, "--magic-level", scenario.Magic.Level.ToString());

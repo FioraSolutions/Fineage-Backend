@@ -38,6 +38,7 @@ public final class MobiusFormulaDriver
         boolean matrix = Boolean.parseBoolean(opt.getOrDefault("matrix", "false"));
         boolean statsMatrix = Boolean.parseBoolean(opt.getOrDefault("stats-matrix", "false"));
         boolean magicMatrix = Boolean.parseBoolean(opt.getOrDefault("magic-matrix", "false"));
+        boolean npcStatsMatrix = Boolean.parseBoolean(opt.getOrDefault("npc-stats-matrix", "false"));
         String side = opt.getOrDefault("side", "front");
         boolean soulshot = Boolean.parseBoolean(opt.getOrDefault("soulshot", "false"));
         String cpSplitSpec = opt.getOrDefault("cp-splits", "");
@@ -59,7 +60,7 @@ public final class MobiusFormulaDriver
         Map<String, Double> metrics = new LinkedHashMap<>();
         metrics.put("pAtk", attacker.pAtk);
         metrics.put("pDef", attacker.pDef);
-        metrics.put("pAtkSpd", matrix || statsMatrix || magicMatrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
+        metrics.put("pAtkSpd", matrix || statsMatrix || magicMatrix || npcStatsMatrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
         metrics.put("accuracy", attacker.accuracy);
         metrics.put("evasion", attacker.evasion);
         metrics.put("critPermille", (double) attacker.critPermille);
@@ -82,11 +83,13 @@ public final class MobiusFormulaDriver
             addMatrix(metrics, attacker, target, opt);
         if (statsMatrix)
             addStatMatrix(metrics, attacker);
+        if (npcStatsMatrix)
+            addNpcStatMatrix(metrics, attacker, target);
         if (magicMatrix)
             addMagicMatrix(metrics, attacker, target, source, opt);
 
         String out = opt.get("out");
-        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix || statsMatrix || magicMatrix);
+        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix || statsMatrix || magicMatrix || npcStatsMatrix);
         if (out == null)
             System.out.println(json);
         else
@@ -258,6 +261,18 @@ public final class MobiusFormulaDriver
         metrics.put("damageRandomMax", (double) truncate(dNormal * (1 + (double) random / 100)));
     }
 
+    /** NPC derived stats as folded by Formulas.getStdNPCCalculators (attacker side NPC; target echoed as defence cells). */
+    private static void addNpcStatMatrix(Map<String, Double> metrics, ActorStats a, ActorStats t)
+    {
+        metrics.put("npcLevel", (double) a.level);
+        metrics.put("mAtk", a.mAtk);
+        metrics.put("mDef", a.mDef);
+        metrics.put("maxHp", (double) a.maxHp);
+        metrics.put("maxMp", (double) a.maxMp);
+        metrics.put("targetPDef", t.pDef);
+        metrics.put("targetEvasion", t.evasion);
+    }
+
     private static double magicBase(double mAtk, double mDef, double power)
     {
         return ((91 * Math.sqrt(mAtk)) / mDef) * power;
@@ -402,12 +417,30 @@ public final class MobiusFormulaDriver
         NpcData npc = source.readNpc(npcId);
         StatBonus bonus = source.readStatBonus();
         double dexBonus = bonus.bonus("DEX", npc.dex);
+        // NpcTemplate keeps base P.Atk / M.Atk / P.Def / M.Def as int (StatSet.getInt truncates) and HP / MP as float;
+        // the NPC standard calculators (Formulas.getStdNPCCalculators) then fold them.
+        double levelMod = (npc.level + 89) / 100.0;
+        double strBonus = bonus.bonus("STR", npc.str);
+        double conBonus = bonus.bonus("CON", npc.con);
+        double intBonus = bonus.bonus("INT", npc.intel);
+        double menBonus = bonus.bonus("MEN", npc.men);
         ActorStats a = new ActorStats();
-        a.pAtk = npc.pAtk;
-        a.pDef = Math.max(1.0, npc.pDef);
-        a.pAtkSpdRaw = Math.max(1, npc.attackSpeed);
-        a.accuracy = npc.accuracy + Math.sqrt(Math.max(0, npc.dex)) * 6.0 + Math.max(1, npc.level);
-        a.evasion = npc.evasion + Math.sqrt(Math.max(0, npc.dex)) * 6.0 + Math.max(1, npc.level);
+        a.pAtk = ((int) npc.pAtk) * strBonus * levelMod;
+        a.pDef = Math.max(1.0, ((int) npc.pDef) * levelMod);
+        // FuncPAtkSpeed, then CreatureStat.getPAtkSpd -> Math.round; NPC speeds are NOT folded elsewhere.
+        a.pAtkSpdRaw = Math.max(1, Math.round(npc.attackSpeed * dexBonus));
+        // FuncAtkAccuracy / FuncAtkEvasion with the XML accuracy / evasion ignored ("TODO: Implement me" in NpcData),
+        // then CreatureStat.getAccuracy / getEvasionRate round (evasion capped by MaxEvasion 250).
+        double acc = Math.sqrt(npc.dex) * 6 + npc.level;
+        if (npc.level > 77)
+            acc += npc.level - 76;
+        if (npc.level > 69)
+            acc += npc.level - 69;
+        double eva = Math.sqrt(npc.dex) * 6 + npc.level;
+        if (npc.level > 69)
+            eva += (npc.level - 69) + 2;
+        a.accuracy = Math.round(acc);
+        a.evasion = Math.min(Math.round(eva), 250);
         a.critPermille = (int) (npc.critical * 10 * dexBonus);
         a.attackRange = npc.attackRange > 0 ? npc.attackRange : 40;
         a.randomDamage = npc.randomDamage;
@@ -416,12 +449,10 @@ public final class MobiusFormulaDriver
         a.reuseDelayMs = a.bow ? 1500 : 0;
         a.shieldDef = npc.shieldDef;
         a.shieldRate = npc.shieldRate * dexBonus;
-        // FuncMAtkMod / FuncMDefMod on a non-player: mAtk * INT.bonus^2 * levelMod^2, mDef * MEN.bonus * levelMod.
-        double levelMod = (npc.level + 89) / 100.0;
-        double intBonus = bonus.bonus("INT", npc.intel);
-        double menBonus = bonus.bonus("MEN", npc.men);
-        a.mAtk = npc.mAtk * intBonus * intBonus * levelMod * levelMod;
-        a.mDef = Math.max(1.0, npc.mDef * menBonus * levelMod);
+        a.mAtk = ((int) npc.mAtk) * intBonus * intBonus * levelMod * levelMod;
+        a.mDef = Math.max(1.0, ((int) npc.mDef) * menBonus * levelMod);
+        a.maxHp = (int) (((float) npc.hp) * conBonus);
+        a.maxMp = (int) (((float) npc.mp) * menBonus);
         a.level = npc.level;
         a.armed = false;
         return a;
@@ -667,6 +698,9 @@ public final class MobiusFormulaDriver
         data.con = intAttr(stats, "con", 1);
         data.men = intAttr(stats, "men", 1);
         data.intel = intAttr(stats, "int", 1);
+        Element vitals = child(stats, "vitals");
+        data.hp = doubleAttr(vitals, "hp", 0);
+        data.mp = doubleAttr(vitals, "mp", 0);
         Element defence = child(stats, "defence");
         data.pDef = doubleAttr(defence, "physical", 0);
         data.mDef = doubleAttr(defence, "magical", 0);
@@ -833,6 +867,12 @@ public final class MobiusFormulaDriver
             formulas.add("Creature.calculateReuseTime (bow default reuse 1500)");
             formulas.add("ClassBalanceConfig PvP/PvE multipliers treated as 1.0");
         }
+        if (metrics.containsKey("npcLevel"))
+        {
+            formulas.add("FuncPAtkMod / FuncPDefMod / FuncMAtkMod / FuncMDefMod / FuncPAtkSpeed / FuncMaxHpMul / FuncMaxMpMul on NPC_STD_CALCULATOR");
+            formulas.add("NpcTemplate base stats: int P.Atk/M.Atk/P.Def/M.Def (StatSet.getInt), float HP/MP");
+            formulas.add("FuncAtkAccuracy / FuncAtkEvasion for non-players (XML accuracy/evasion unused), CreatureStat.getPAtkSpd round");
+        }
         if (metrics.containsKey("magicSuccessRate"))
         {
             formulas.add("Formulas.calcMagicDam (mAtk x2 sps / x4 bss, 91*sqrt(mAtk)/mDef*power, crit x3 / x2.5 PvP, half-fail, resisted, shield, random)");
@@ -878,11 +918,10 @@ public final class MobiusFormulaDriver
 
     private static Element firstById(Element root, String tag, int id)
     {
-        NodeList nodes = root.getElementsByTagName(tag);
-        for (int i = 0; i < nodes.getLength(); i++)
+        // Direct children only: an NPC's <parameters> minion list also holds <npc id="..."> elements.
+        for (Element e : children(root))
         {
-            Element e = (Element) nodes.item(i);
-            if (("" + id).equals(e.getAttribute("id")))
+            if (tag.equals(e.getTagName()) && ("" + id).equals(e.getAttribute("id")))
                 return e;
         }
         return null;
@@ -1000,6 +1039,8 @@ public final class MobiusFormulaDriver
         double pDef;
         double mAtk;
         double mDef;
+        double hp;
+        double mp;
         int critical;
         double accuracy;
         double evasion;
@@ -1280,6 +1321,8 @@ public final class MobiusFormulaDriver
             dataNpc.men = jsonInt(obj, "men", 10);
             dataNpc.intel = jsonInt(obj, "int", 21);
             dataNpc.mAtk = jsonDouble(obj, "mAtk", 0);
+            dataNpc.hp = jsonDouble(obj, "hp", 0);
+            dataNpc.mp = jsonDouble(obj, "mp", 0);
             dataNpc.pAtk = jsonDouble(obj, "pAtk", 0);
             dataNpc.pDef = jsonDouble(obj, "pDef", 0);
             dataNpc.mDef = jsonDouble(obj, "mDef", 0);

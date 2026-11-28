@@ -1,0 +1,65 @@
+{
+  "id": "npc-stats-validus-l46",
+  "description": "#979 NPC stat fold: Validus L46. Mobius NPC_STD_CALCULATOR: int base P.Atk/M.Atk/P.Def/M.Def, float HP/MP, STR/CON/INT/MEN/DEX bonuses, levelMod, accuracy/evasion without the XML values.",
+  "npcStatsMatrix": true,
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "npc",
+    "npcId": 20219
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/npc-stats-validus-l46.json"
+  },
+  "metrics": [
+    "pAtk",
+    "pDef",
+    "pAtkSpd",
+    "accuracy",
+    "evasion",
+    "critPermille",
+    "npcLevel",
+    "mAtk",
+    "mDef",
+    "maxHp",
+    "maxMp",
+    "targetPDef",
+    "targetEvasion"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "pAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "pDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "mAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "mDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "targetPDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    }
+  }
+}

@@ -8,6 +8,9 @@ namespace Fineage.Zone.Npcs;
 /// <see cref="Type"/> is the Mobius instance (Merchant, Guard, Teleporter, Folk, …).
 /// <see cref="Attackable"/> follows Mobius: missing <c>status attackable</c> means true.
 /// <see cref="Aggressive"/> follows Mobius: missing <c>ai isAggressive</c> means true.
+/// <see cref="Hp"/>, <see cref="Mp"/>, <see cref="PAtk"/>, <see cref="PDef"/>, <see cref="MAtk"/>, <see cref="MDef"/> and
+/// <see cref="AttackSpeed"/> are the folded <c>NPC_STD_CALCULATOR</c> results (stat bonuses, level modifier, int truncation),
+/// not the raw XML numbers. <see cref="Accuracy"/> / <see cref="Evasion"/> are unused XML values in Mobius.
 /// </summary>
 public sealed record NpcTemplate(
     int NpcId,
@@ -141,24 +144,59 @@ public sealed class NpcCatalog
         return Load(directory);
     }
 
+    public const int DefaultStr = 40;
+    public const int DefaultCon = 43;
     public const int DefaultInt = 21;
     public const int DefaultMen = 10;
 
-    /// <summary>Mobius <c>FuncMAtkMod</c> for a non-player: <c>mAtk · INT.bonus² · levelMod²</c>.</summary>
-    static double FoldMAtk(NpcDto row, Fineage.Game.StatBonusTable bonuses)
+    /// <summary>
+    /// Mobius <c>NpcTemplate</c> keeps P.Atk / M.Atk / P.Def / M.Def as <c>int</c> (StatSet.getInt truncates the XML
+    /// decimal) and max HP / MP as <c>float</c>; the NPC standard calculators then fold them with the attribute
+    /// bonuses and <c>levelMod = (level + 89) / 100</c>. These helpers are that fold; the catalog stores the
+    /// folded value, so every consumer sees what <c>Creature.getPAtk()</c> etc. return.
+    /// </summary>
+    public static double LevelMod(int level) => (level + 89) / 100d;
+
+    /// <summary><c>FuncPAtkMod</c>: <c>(int)pAtk · STR.bonus · levelMod</c>.</summary>
+    public static double FoldPAtk(double xmlPAtk, double strBonus, int level) =>
+        (int)Math.Max(0, xmlPAtk) * strBonus * LevelMod(level);
+
+    /// <summary><c>FuncPDefMod</c> for a non-player: <c>(int)pDef · levelMod</c>.</summary>
+    public static double FoldPDef(double xmlPDef, int level) => (int)Math.Max(0, xmlPDef) * LevelMod(level);
+
+    /// <summary><c>FuncMAtkMod</c>: <c>(int)mAtk · INT.bonus² · levelMod²</c>.</summary>
+    public static double FoldMAtk(double xmlMAtk, double intBonus, int level) =>
+        (int)Math.Max(0, xmlMAtk) * intBonus * intBonus * LevelMod(level) * LevelMod(level);
+
+    /// <summary><c>FuncMDefMod</c> for a non-player: <c>(int)mDef · MEN.bonus · levelMod</c>.</summary>
+    public static double FoldMDef(double xmlMDef, double menBonus, int level) =>
+        (int)Math.Max(0, xmlMDef) * menBonus * LevelMod(level);
+
+    /// <summary><c>FuncPAtkSpeed</c> + <c>getPAtkSpd</c>: <c>round(attackSpeed · DEX.bonus)</c>.</summary>
+    public static int FoldAttackSpeed(int xmlAttackSpeed, double dexBonus) =>
+        (int)Math.Floor(Math.Max(0, xmlAttackSpeed) * dexBonus + 0.5);
+
+    /// <summary><c>FuncMaxHpMul</c> / <c>FuncMaxMpMul</c>: <c>(int)((float)vital · bonus)</c>.</summary>
+    public static int FoldVital(double xmlVital, double bonus) => (int)((float)xmlVital * bonus);
+
+    static NpcFolds FoldRow(NpcDto row, Fineage.Game.StatBonusTable bonuses)
     {
-        double intBonus = bonuses.BonusClamped(Fineage.Game.StatSlot.Int, row.Int is > 0 ? row.Int.Value : DefaultInt, out _);
-        double levelMod = (row.Level + 89) / 100d;
-        return Math.Max(0, row.MAtk) * intBonus * intBonus * levelMod * levelMod;
+        double str = bonuses.BonusClamped(Fineage.Game.StatSlot.Str, row.Str is > 0 ? row.Str.Value : DefaultStr, out _);
+        double con = bonuses.BonusClamped(Fineage.Game.StatSlot.Con, row.Con is > 0 ? row.Con.Value : DefaultCon, out _);
+        double intel = bonuses.BonusClamped(Fineage.Game.StatSlot.Int, row.Int is > 0 ? row.Int.Value : DefaultInt, out _);
+        double men = bonuses.BonusClamped(Fineage.Game.StatSlot.Men, row.Men is > 0 ? row.Men.Value : DefaultMen, out _);
+        double dex = bonuses.BonusClamped(Fineage.Game.StatSlot.Dex, row.Dex > 0 ? row.Dex : 30, out _);
+        return new NpcFolds(
+            Math.Max(1, FoldVital(row.Hp, con)),
+            Math.Max(1, FoldVital(row.Mp, men)),
+            FoldPAtk(row.PAtk, str, row.Level),
+            FoldPDef(row.PDef, row.Level),
+            FoldMAtk(row.MAtk, intel, row.Level),
+            FoldMDef(row.MDef, men, row.Level),
+            FoldAttackSpeed(row.AttackSpeed, dex));
     }
 
-    /// <summary>Mobius <c>FuncMDefMod</c> for a non-player: <c>mDef · MEN.bonus · levelMod</c>.</summary>
-    static double FoldMDef(NpcDto row, Fineage.Game.StatBonusTable bonuses)
-    {
-        double menBonus = bonuses.BonusClamped(Fineage.Game.StatSlot.Men, row.Men is > 0 ? row.Men.Value : DefaultMen, out _);
-        double levelMod = (row.Level + 89) / 100d;
-        return Math.Max(0, row.MDef) * menBonus * levelMod;
-    }
+    readonly record struct NpcFolds(int Hp, int Mp, double PAtk, double PDef, double MAtk, double MDef, int AttackSpeed);
 
     static NpcCatalog Read(string path)
     {
@@ -192,7 +230,7 @@ public sealed class NpcCatalog
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs a type.");
             if (row.Level < 0)
                 throw new InvalidDataException($"{path} npc {row.NpcId} has a negative level.");
-            if (row.Hp < 1 || row.Mp < 1)
+            if (row.Hp <= 0 || row.Mp <= 0)
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs hp and mp.");
             if (row.RunSpeed <= 0 || row.WalkSpeed <= 0)
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs run and walk speed.");
@@ -206,6 +244,7 @@ public sealed class NpcCatalog
                     $"{path} npc {row.NpcId} is aggressive but has no aggroRange " +
                     "(emit the resolved Mobius value, including 0)");
 
+            var fold = FoldRow(row, bonuses);
             byId.Add(row.NpcId, new NpcTemplate(
                 row.NpcId,
                 (row.Name ?? "").Trim(),
@@ -216,15 +255,15 @@ public sealed class NpcCatalog
                 row.CollisionHeight,
                 row.Attackable,
                 row.Aggressive,
-                row.Hp,
-                row.Mp,
+                fold.Hp,
+                fold.Mp,
                 row.RunSpeed,
                 row.WalkSpeed,
                 Math.Max(0, row.Exp),
                 Math.Max(0, row.Sp),
-                Math.Max(0, row.PAtk),
-                Math.Max(0, row.PDef),
-                Math.Max(0, row.AttackSpeed),
+                fold.PAtk,
+                fold.PDef,
+                fold.AttackSpeed,
                 Math.Max(0, row.AttackRange),
                 row.Accuracy,
                 row.Evasion,
@@ -233,8 +272,8 @@ public sealed class NpcCatalog
                 row.Dex > 0 ? row.Dex : 30,
                 Math.Max(0, row.ShieldDef),
                 Math.Max(0, row.ShieldRate),
-                FoldMAtk(row, bonuses),
-                FoldMDef(row, bonuses),
+                fold.MAtk,
+                fold.MDef,
                 Math.Max(0, row.AggroRange ?? 0),
                 Math.Max(0, row.ClanHelpRange),
                 row.Clans is { Count: > 0 } ? row.Clans : null,
@@ -291,8 +330,9 @@ public sealed class NpcCatalog
         public float CollisionHeight { get; set; }
         public bool Attackable { get; set; } = true;
         public bool Aggressive { get; set; } = true;
-        public int Hp { get; set; }
-        public int Mp { get; set; }
+        /// <summary>Mobius <c>stats/vitals</c> hp / mp as transcribed (float precision); folded with CON / MEN at load.</summary>
+        public double Hp { get; set; }
+        public double Mp { get; set; }
         public float RunSpeed { get; set; }
         public float WalkSpeed { get; set; }
         public long Exp { get; set; }
@@ -314,7 +354,9 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>attack random</c> damage spread in percent.</summary>
         public int RandomDamage { get; set; }
         public int Dex { get; set; }
-        /// <summary>Mobius <c>stats int</c> / <c>men</c> when not the template default (21 / 10).</summary>
+        /// <summary>Mobius <c>stats str</c> / <c>con</c> when not 40 / 43.</summary>
+        public int? Str { get; set; }
+        public int? Con { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("int")] public int? Int { get; set; }
         public int? Men { get; set; }
         /// <summary>Mobius <c>defence shield</c> / <c>shieldRate</c>.</summary>

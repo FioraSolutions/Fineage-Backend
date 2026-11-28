@@ -1,0 +1,52 @@
+{
+  "scenario": "npc-stats-validus-l46",
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "driver": "tools/Fineage.MobiusDiff/java/MobiusFormulaDriver.java",
+    "formulas": [
+      "Formulas.calcPhysDam",
+      "Formulas.calcCrit",
+      "Formulas.calcHitMiss",
+      "FuncPAtkMod",
+      "FuncPDefMod",
+      "FuncAtkAccuracy",
+      "FuncAtkEvasion",
+      "FuncAtkCritical",
+      "FuncPAtkSpeed",
+      "CreatureStat.getCriticalHit",
+      "CreatureStat.getPAtk",
+      "CreatureStat.getPAtkSpd",
+      "Formulas.calcPhysDam proximity / soulshot / crit / shield",
+      "Formulas.calcShldUse",
+      "HitConditionBonusData.getConditionBonus",
+      "Creature.calculateTimeBetweenAttacks",
+      "Creature.calculateReuseTime (bow default reuse 1500)",
+      "ClassBalanceConfig PvP/PvE multipliers treated as 1.0",
+      "FuncPAtkMod / FuncPDefMod / FuncMAtkMod / FuncMDefMod / FuncPAtkSpeed / FuncMaxHpMul / FuncMaxMpMul on NPC_STD_CALCULATOR",
+      "NpcTemplate base stats: int P.Atk/M.Atk/P.Def/M.Def (StatSet.getInt), float HP/MP",
+      "FuncAtkAccuracy / FuncAtkEvasion for non-players (XML accuracy/evasion unused), CreatureStat.getPAtkSpd round"
+    ],
+    "fullServerVerified": false,
+    "blocker": "Full Mobius GameServer startup is not reproducible in this tree: ref/mobius-ct0-interlude/dist/libs is absent (build.xml/.classpath require mariadb-java-client-2.7.5.jar) and the server needs MySQL. This driver evaluates the pure formula layer from Mobius XML/formulas; it is not a full-server run."
+  },
+  "metrics": {
+    "pAtk": 401.7600000000,
+    "pDef": 245.7000000000,
+    "pAtkSpd": 278.0000000000,
+    "accuracy": 79.0000000000,
+    "evasion": 79.0000000000,
+    "critPermille": 44.0000000000,
+    "hitChancePermille": 980.0000000000,
+    "critChancePermille": 44.0000000000,
+    "damageNoCrit": 771.0000000000,
+    "damageMeanPerSwing": 788.8813265455,
+    "npcLevel": 46.0000000000,
+    "mAtk": 202.0804402500,
+    "mDef": 199.3005000000,
+    "maxHp": 1943.0000000000,
+    "maxMp": 707.0000000000,
+    "targetPDef": 39.6000000000,
+    "targetEvasion": 34.0000000000
+  }
+}

@@ -34,8 +34,8 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal(24f, lector.CollisionHeight);
         Assert.False(lector.Attackable);
         Assert.False(lector.Aggressive);
-        Assert.Equal(2444, lector.Hp);
-        Assert.Equal(1346, lector.Mp);
+        Assert.Equal(3862, lector.Hp);
+        Assert.Equal(1493, lector.Mp);
         Assert.Equal(120f, lector.RunSpeed);
         Assert.Equal(50f, lector.WalkSpeed);
 
@@ -45,7 +45,7 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal("Monster", gremlin.Type);
         Assert.True(gremlin.Attackable);
         Assert.False(gremlin.Aggressive);
-        Assert.Equal(40, gremlin.Hp);
+        Assert.Equal(62, gremlin.Hp); // 40 · CON bonus 1.58, Mobius max HP
         Assert.Equal(50f, gremlin.RunSpeed);
         Assert.Equal(20f, gremlin.WalkSpeed);
 
@@ -102,7 +102,7 @@ public sealed class NpcTemplateSpawnTests
         Assert.Equal("Trader", silvia.Title);
         Assert.Equal("Merchant", silvia.NpcType);
         Assert.False(silvia.Attackable);
-        Assert.Equal(2444, silvia.MaxHp);
+        Assert.Equal(3862, silvia.MaxHp);
         Assert.Equal(120f, silvia.RunSpeed);
         Assert.Equal(50f, silvia.WalkSpeed);
         Assert.Equal(-83789, silvia.X);
@@ -256,7 +256,7 @@ public sealed class NpcTemplateSpawnTests
             Assert.Equal("Silvia", rows[0].Name);
             Assert.Equal("Trader", rows[0].Title);
             Assert.False(rows[0].Attackable);
-            Assert.Equal(2444, rows[0].MaxHp);
+            Assert.Equal(3861, rows[0].MaxHp);
         }
         finally
         {

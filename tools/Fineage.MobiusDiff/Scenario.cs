@@ -43,6 +43,13 @@ public sealed class Scenario
     /// </summary>
     public bool MagicMatrix { get; set; }
 
+    /// <summary>
+    /// When true, both probes also emit the NPC attacker's folded stats (<c>mAtk</c>, <c>mDef</c>, <c>maxHp</c>,
+    /// <c>maxMp</c>, <c>npcLevel</c>) and the target's defence cells, next to the always-emitted
+    /// P.Atk / P.Def / P.Atk.Spd / accuracy / evasion / crit.
+    /// </summary>
+    public bool NpcStatsMatrix { get; set; }
+
     /// <summary>The magic skill row (power / magicLevel from <c>skill-combat.json</c>) driving <see cref="MagicMatrix"/>.</summary>
     public MagicSpec Magic { get; set; } = new();
 

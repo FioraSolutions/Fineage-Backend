@@ -99,9 +99,9 @@ public sealed partial class ZoneWorld
     }
 
     double NpcAccuracy(ZoneEntity npc) =>
-        StatMods(npc).Apply(CombatStat.Accuracy, ZoneCombat.AccuracyOrEvasion(npc.BaseAccuracy, npc.Dex, npc.Level));
+        ZoneCombat.RoundedAccuracy(StatMods(npc).Apply(CombatStat.Accuracy, ZoneCombat.NpcAccuracyBase(npc.Dex, npc.Level)));
     double NpcEvasion(ZoneEntity npc) =>
-        StatMods(npc).Apply(CombatStat.Evasion, ZoneCombat.AccuracyOrEvasion(npc.BaseEvasion, npc.Dex, npc.Level));
+        ZoneCombat.RoundedEvasion(StatMods(npc).Apply(CombatStat.Evasion, ZoneCombat.NpcEvasionBase(npc.Dex, npc.Level)));
     int NpcCritPermille(ZoneEntity npc) =>
         StatMods(npc).Apply(CombatStat.CritRate, (int)(npc.BaseCritical * 10 * StatBonus(PlayerClasses.StatBonuses, StatSlot.Dex, npc.Dex)));
 
