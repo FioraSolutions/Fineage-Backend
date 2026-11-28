@@ -1,0 +1,82 @@
+{
+  "id": "magic-elven-mystic-20-icebolt6-basilisk",
+  "description": "#979 magic goldens: Elven Mystic L20 Willow Staff, Ice Bolt 6 (power 16, magicLevel 20) vs Basilisk L28.",
+  "magicMatrix": true,
+  "magic": {
+    "skillId": 1184,
+    "level": 6,
+    "critPower": 1.0
+  },
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 25,
+    "level": 20,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 8,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 426,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 462,
+        "enchant": 0
+      }
+    ]
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20072
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/magic-elven-mystic-20-icebolt6-basilisk.json"
+  },
+  "metrics": [
+    "magicPower",
+    "magicLevel",
+    "casterLevel",
+    "targetLevel",
+    "mAtk",
+    "targetMDef",
+    "magicSuccessRate",
+    "magicHalfFailEligible",
+    "damageNormal",
+    "damageSps",
+    "damageBss",
+    "damageCrit",
+    "damageCritBss",
+    "damageCritPvp",
+    "damageHalfFail",
+    "damageResisted",
+    "randomPercent",
+    "damageRandomMin",
+    "damageRandomMax"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "targetMDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    }
+  }
+}

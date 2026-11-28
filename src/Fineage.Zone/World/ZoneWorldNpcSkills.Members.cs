@@ -245,7 +245,7 @@ public sealed partial class ZoneWorld
                 magicLevel = npc.Level;
             // NPC mCritRate table not imported — use unarmed base 10‰ (Mobius default).
             var (damage, _) = ZoneCombat.RollMagicDamage(Rng(_combatRandom, npc), mAtk, targetMDef, power,
-                npc.Level, magicLevel, player.Level, mCritRate: 10);
+                npc.Level, magicLevel, player.Level, mCritRate: 10, casterIsPlayer: false);
             return damage;
         }
 

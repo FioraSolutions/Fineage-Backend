@@ -1,0 +1,82 @@
+{
+  "id": "magic-dark-mystic-40-blaze1-critpower",
+  "description": "#979 magic goldens: Dark Mystic L40 Blaze 1 vs Ant Recruit L33; MAGIC_CRIT_DMG 1.5 folded on crit; low success rate.",
+  "magicMatrix": true,
+  "magic": {
+    "skillId": 1220,
+    "level": 1,
+    "critPower": 1.5
+  },
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 38,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 8,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 426,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 462,
+        "enchant": 0
+      }
+    ]
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20082
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/magic-dark-mystic-40-blaze1-critpower.json"
+  },
+  "metrics": [
+    "magicPower",
+    "magicLevel",
+    "casterLevel",
+    "targetLevel",
+    "mAtk",
+    "targetMDef",
+    "magicSuccessRate",
+    "magicHalfFailEligible",
+    "damageNormal",
+    "damageSps",
+    "damageBss",
+    "damageCrit",
+    "damageCritBss",
+    "damageCritPvp",
+    "damageHalfFail",
+    "damageResisted",
+    "randomPercent",
+    "damageRandomMin",
+    "damageRandomMax"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "targetMDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    }
+  }
+}

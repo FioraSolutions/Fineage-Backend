@@ -34,12 +34,12 @@ behavioural parity or production verification.
 | Level | ✅ verified | 🟡 partial | unverified / ❌ | n/a | Total |
 |-------|------------:|-----------:|----------------:|----:|------:|
 | Implemented | 103 | 2 | 0 | 3 | 108 |
-| Parity verified | 3 | 3 | 99 | 3 | 108 |
+| Parity verified | 3 | 4 | 98 | 3 | 108 |
 | Production verified | 0 | 0 | 105 | 3 | 108 |
 
 **Current claim:** 103 of 108 systems are implemented; 3 have full linked parity evidence (movement A/B #1051,
-weight penalty, and mob death AggroList clear #1105) and 3 have partial linked parity evidence (physical
-auto-attack matrix, rows 16/17/72, #979); **no system has linked production evidence**. The 0 production rows are intentionally
+weight penalty, and mob death AggroList clear #1105) and 4 have partial linked parity evidence (physical
+auto-attack matrix, rows 16/17/72, and the magic damage matrix, row 20, #979); **no system has linked production evidence**. The 0 production rows are intentionally
 unverified, not failures. The old 92/4/9/3 counter was stale; the validator now derives these counts from
 the rows.
 
@@ -73,7 +73,7 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 17 | Bow and arrows | ✅ [src](../src/Fineage.Zone/World/ZoneWorldArrows.cs) | 🟡 [PhysAutoMatrixTests](../tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs) + [NetBowArrowTests](../tests/Fineage.Zone.Tests/NetBowArrowTests.cs) | unverified | — | Formula cells: bow range 500, default reuse 1500, interval `timeAtk + (1500*333)/Pspd`, 76·proximity/SS/crit vs Gremlin (`phys-auto-p2m-bow`). Arrow consume/grade/last-arrow already Mobius-traced in `NetBowArrowTests`. Distance-scaled bow damage is Mobius-off by default and not asserted. `Creature` bow branch → `ZoneWorldArrows` / `AttackIntervalMs` |
 | 18 | Physical/magic skill catalog | ✅ [src](../src/Fineage.Zone/Combat/SkillCombatCatalog.cs) | unverified | unverified | — | skill XML → `data/skill-combat.json`; a missing row refuses the cast |
 | 19 | Blow / lethal | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Rolls.cs) | unverified | unverified | — | blow handlers → `ZoneWorldSkills` |
-| 20 | Magic crit / fail | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Magic.cs) | unverified | unverified | — | `Formulas` magic crit → `ZoneWorldSkillDamage` |
+| 20 | Magic crit / fail | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Magic.cs) | 🟡 [MagicMatrixTests](../tests/Fineage.MobiusDiff.Tests/MagicMatrixTests.cs) + [ZoneMagicCritFailTests](../tests/Fineage.Zone.Tests/ZoneMagicCritFailTests.cs) | unverified | — | Seven Java-traced scenarios (HM/EM/DM casters, Willow Staff and unarmed, NPC and player targets, shield-block target): `calcMagicSuccess` rate (incl. negative), `calcMagicDam` base / spiritshot ×2 / blessed ×4 inside √mAtk, crit ×3 (×2.5 player→player) × `MAGIC_CRIT_DMG`, half-fail, resisted, shield mDef-add / perfect block, random-damage spread, `(int)` truncation. NPC M.Atk / M.Def now folded with INT/MEN bonus and levelMod. Not asserted: elemental bonus, PvP/PvE class-balance multipliers (1.0), drain/MP-damage/cubic/signet variants, `MaxMCritRate` only unit-tested. Evidence: [combat-parity.md](combat-parity.md#magic-damage-differential-matrix-979-slice-2). `Formulas.calcMagicDam` → `ZoneWorldSkillDamage.RollSkillDamage` |
 | 21 | Buffs, debuffs, stat funcs, hit-time apply | ✅ [src](../src/Fineage.Zone/World/ZoneWorldAbnormals.cs) | unverified | unverified | — | `handlers/skill/effects` → `ZoneWorldSkills` `ScheduleEffect`; 111/112 effect names full in `skill-effect-coverage.json` |
 | 22 | BlockBuffSlot family | ✅ [src](../src/Fineage.Zone/Combat/PlayableAttackRules.cs) | unverified | unverified | — | `BlockBuffSlot` / `NoblesseBless` / `ProtectionBlessing` → `ZoneWorldAbnormals` slot block, death consume, `PlayableAttackRules` via the effect name |
 | 23 | Cast conditions | ✅ [src](../src/Fineage.Game/Skills/SkillCastConditionEvaluator.cs) | unverified | unverified | — | skill XML `<conditions>` → `SkillCastConditionEvaluator` (37/37 kinds, 189 imported trees) |
