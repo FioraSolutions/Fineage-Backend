@@ -93,6 +93,15 @@ public static partial class Cli
             e.Cancel = true;
             shutdown.Cancel();
         };
+        // A service manager or container stops Login with SIGTERM. Without this the runtime exits on it
+        // straight away and in-flight work (HTTP, Net accept/handlers) is not given a clean stop (#993).
+        using var sigterm = System.Runtime.InteropServices.PosixSignalRegistration.Create(
+            System.Runtime.InteropServices.PosixSignal.SIGTERM,
+            context =>
+            {
+                context.Cancel = true;
+                shutdown.Cancel();
+            });
 
         // Start Net TCP before HTTP so PacketEnvelope login works even if Kestrel hangs.
         // One zone endpoint for the handoff ticket, the startup log and the clients: ZoneHandoff

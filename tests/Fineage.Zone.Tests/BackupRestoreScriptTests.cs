@@ -28,6 +28,9 @@ public sealed class BackupRestoreScriptTests
             Assert.DoesNotContain(legacy, script, StringComparison.Ordinal);
             Assert.DoesNotContain(legacy, File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "restore-drill.sh")), StringComparison.Ordinal);
         }
+
+        // pg_dump rejects the project's Npgsql URL ("invalid connection option Host").
+        Assert.Contains("libpq_url", script, StringComparison.Ordinal);
     }
 
     [Fact]

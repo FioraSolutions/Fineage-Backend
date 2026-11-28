@@ -1,5 +1,7 @@
 # Deployment: readiness, liveness, releases and rollback (#989)
 
+Incident procedures, including [manual rollback](runbook.md#release-rollback) and the health-endpoint drill, are in [`runbook.md`](runbook.md).
+
 ## Health contract
 
 Both processes answer two loopback-reachable JSON endpoints. Body: `{"ok":bool,"checks":[{"name","ok","detail"}]}`;

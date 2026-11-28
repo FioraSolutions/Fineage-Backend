@@ -61,6 +61,26 @@ print(value)
 PY
 }
 
+# FINEAGE_DATABASE_URL is the project's Npgsql form (Host=...;Database=...;Username=...;Password=...).
+# pg_dump/pg_restore only accept a libpq URI or keyword string; feeding the Npgsql form fails with
+# "invalid connection option Host" and writes an empty dump.
+libpq_url() {
+  python3 - "$1" <<'PY'
+import re, sys, urllib.parse
+s = sys.argv[1].strip()
+if s.startswith("postgres"):
+    print(s)
+    raise SystemExit(0)
+parts = {k.lower(): v for k, v in (p.split("=", 1) for p in re.split(r"[;&]", s) if "=" in p)}
+user = urllib.parse.quote(parts.get("username") or parts.get("user") or "fineage", safe="")
+password = urllib.parse.quote(parts.get("password") or "", safe="")
+host = parts.get("host") or "127.0.0.1"
+port = parts.get("port") or "5432"
+db = parts.get("database") or parts.get("db") or "fineage"
+print(f"postgresql://{user}:{password}@{host}:{port}/{db}")
+PY
+}
+
 run_pg_dump() { # container user db out
   local container="$1" user="$2" db="$3" out="$4"
   if [[ -n "$container" ]]; then
@@ -68,7 +88,7 @@ run_pg_dump() { # container user db out
       pg_dump -U "$user" -d "$db" --format=custom --no-owner --no-acl >"$out"
   else
     need_cmd pg_dump
-    pg_dump "$DATABASE_URL" --format=custom --no-owner --no-acl >"$out"
+    pg_dump "$(libpq_url "$DATABASE_URL")" --format=custom --no-owner --no-acl >"$out"
   fi
 }
 
@@ -343,6 +363,11 @@ cmd_restore() {
     local occupied
     occupied="$(run_psql "$container" "$db" "$user" "SELECT to_regclass('public.store_snapshot') IS NOT NULL;")"
     [[ "$occupied" == "f" ]] || die "target database '$db' is not empty; refusing to restore over an existing database"
+  else
+    [[ -n "$database_url" ]] || die "restore requires --pg-container or --database-url"
+    local occupied
+    occupied="$(psql "$(libpq_url "$database_url")" -Atqc "SELECT to_regclass('public.store_snapshot') IS NOT NULL;" 2>/dev/null || echo f)"
+    [[ "$occupied" == "f" ]] || die "target database is not empty; refusing to restore over an existing database"
   fi
   [[ ! -e "$state_dir" || -z "$(ls -A "$state_dir" 2>/dev/null)" ]] ||
     die "target state directory '$state_dir' is not empty"
@@ -355,7 +380,7 @@ cmd_restore() {
       pg_restore -U "$user" -d "$db" --no-owner --no-acl --exit-on-error <"$dir/postgres.dump"
   else
     need_cmd pg_restore
-    pg_restore "$database_url" --no-owner --no-acl --exit-on-error <"$dir/postgres.dump"
+    pg_restore --dbname="$(libpq_url "$database_url")" --no-owner --no-acl --exit-on-error <"$dir/postgres.dump"
   fi
   tar -xzf "$dir/sidecar.tar.gz" -C "$state_dir"
   while IFS=$'\t' read -r sha bytes path; do
