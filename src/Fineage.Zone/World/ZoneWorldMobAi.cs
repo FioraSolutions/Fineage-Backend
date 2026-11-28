@@ -361,7 +361,11 @@ public sealed partial class ZoneWorld
         };
         // Swing now; player HP drops at hitTime (Mobius onHitTimer).
         FanoutAttack(npc, player, attack);
-        QueueMeleeHit(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags));
+        if (CombatTrace.Enabled)
+            CombatTrace.Write("combat.swing",
+                ("t", now), ("atk", npc.ObjectId), ("tgt", player.ObjectId), ("kind", "npc"), ("npcId", npc.NpcId),
+                ("pAtkSpd", NpcPAtkSpd(npc)), ("atkMs", npcAtkMs), ("hitDue", now + npcAtkMs / 2), ("dmg", damage), ("flags", flags));
+        QueueMeleeHit(new PendingMeleeHit(npc.ObjectId, player.ObjectId, damage, now + npcAtkMs / 2, flags, SwingUnixMs: now));
     }
 
 }

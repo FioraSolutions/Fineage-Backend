@@ -595,8 +595,8 @@ public sealed partial class ZoneWorld
             if (!ZoneCombat.Within(player.X, player.Y, entity.X, entity.Y, reach))
                 continue;
             var (damage, flags) = RollPlayerMelee(player, ps, entity, soulshot);
-            QueueAttackerDamageLine(player, entity, damage, flags);
-            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, entity.ObjectId, damage, due, flags));
+            // Mobius onHitTimer -> sendDamageMessage per splash target, at hit time.
+            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, entity.ObjectId, damage, due, flags, AttackerLine: true));
             queued++;
         }
     }

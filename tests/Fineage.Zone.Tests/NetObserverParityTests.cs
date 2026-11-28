@@ -120,12 +120,19 @@ public sealed class NetObserverParityTests
         int misses = hits.Count(h => (h.Flags & ZoneCombat.HitFlagMiss) != 0);
         int landed = hits.Count(h => (h.Flags & ZoneCombat.HitFlagMiss) == 0 && h.Damage > 0);
 
-        // Attacker (Mobius Player.sendDamageMessage): one "missed" per miss, one "you hit" per landed hit.
+        // Attacker (Mobius onHitTimer -> Player.sendDamageMessage, at hitTime): one "missed" per miss, one "you hit"
+        // per landed hit, one "critical" per crit — the last swing's hits may still be in flight.
         var mine = Lines(fa);
-        Assert.Equal(misses, mine.Count(l => l.Id == CombatProtocol.YouMissed));
-        Assert.Equal(landed, mine.Count(l => l.Id == CombatProtocol.HitTargetForDamage));
-        Assert.Equal(hits.Count(h => (h.Flags & ZoneCombat.HitFlagCrit) != 0 && (h.Flags & ZoneCombat.HitFlagMiss) == 0),
-            mine.Count(l => l.Id == CombatProtocol.CriticalHit));
+        int myMissed = mine.Count(l => l.Id == CombatProtocol.YouMissed);
+        int myHit = mine.Count(l => l.Id == CombatProtocol.HitTargetForDamage);
+        Assert.InRange(myMissed + myHit, hits.Count - perSwing, hits.Count);
+        Assert.InRange(myMissed, misses - perSwing, misses);
+        Assert.InRange(myHit, landed - perSwing, landed);
+        int crits = hits.Count(h => (h.Flags & ZoneCombat.HitFlagCrit) != 0 && (h.Flags & ZoneCombat.HitFlagMiss) == 0);
+        Assert.InRange(mine.Count(l => l.Id == CombatProtocol.CriticalHit), crits - perSwing, crits);
+        // Sent with the HP change, so the attacker's lines add up to exactly what the victim lost.
+        Assert.Equal((1_000_000 - b.Entity.CurHp) + (cpBefore - b.Entity.CurCp),
+            mine.Where(l => l.Id == CombatProtocol.HitTargetForDamage).Sum(l => int.Parse(l.Params[1])));
         Assert.DoesNotContain(mine, l => l.Id is CombatProtocol.HitYouForDamage or CombatProtocol.AvoidedAttack);
 
         // Victim: "hit you for" / "you have avoided" at hitTime (the last swing may still be in flight).
