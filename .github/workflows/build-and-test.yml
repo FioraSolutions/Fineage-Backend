@@ -28,6 +28,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - id: agent
+            project: tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj
           - id: game
             project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
           - id: net

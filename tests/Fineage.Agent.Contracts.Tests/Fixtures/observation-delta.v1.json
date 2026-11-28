@@ -1,0 +1,1 @@
+{"schemaVersion":1,"fromVersion":6,"toVersion":7,"correlationId":"corr-1","upserts":[{"objectId":1001,"kind":"npc","x":1,"y":2,"z":3,"name":"Guard"}],"removedObjectIds":[1000],"cursor":{"schemaVersion":1,"snapshotVersion":7,"token":"c7"}}
