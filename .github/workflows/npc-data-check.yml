@@ -1,0 +1,53 @@
+name: npc-data-check
+
+# data/npcs.json must be reproducible from the pinned Mobius CT 0 Interlude datapack
+# (tools/import_npc_templates.py PINNED_MOBIUS_COMMIT) and pass the raid-level guard.
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'data/npcs.json'
+      - 'data/skill-combat.json'
+      - 'tools/import_npc_templates.py'
+      - 'tools/regen_npcs.py'
+      - 'tools/check_npc_guards.py'
+      - 'scripts/gen_npc_*.py'
+      - 'docs/npc-data-overrides.md'
+      - '.github/workflows/npc-data-check.yml'
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  npc-data-check:
+    name: npc-data-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch pinned Mobius CT 0 (stats/npcs + stats/skills only)
+        run: |
+          pin=$(python3 -c "import re;print(re.search(r'PINNED_MOBIUS_COMMIT\s*=\s*\"([0-9a-f]{40})\"', open('tools/import_npc_templates.py').read()).group(1))")
+          mkdir -p "$RUNNER_TEMP/mobius" && cd "$RUNNER_TEMP/mobius"
+          git init -q
+          git remote add origin https://gitlab.com/MobiusDevelopment/L2J_Mobius.git
+          git sparse-checkout set --no-cone /L2J_Mobius_CT_0_Interlude/dist/game/data/stats/npcs/ /L2J_Mobius_CT_0_Interlude/dist/game/data/stats/skills/
+          git fetch -q --depth 1 --filter=blob:none origin "$pin"
+          git checkout -q FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$pin"
+
+      - name: Importer --check vs pinned snapshot
+        run: python3 tools/import_npc_templates.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude" --check
+
+      - name: Raid level == "Raid Boss - Level N" skill
+        run: python3 tools/check_npc_guards.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude" --self-test
+
+      - name: Full regen pipeline reproduces data/npcs.json
+        run: |
+          python3 tools/regen_npcs.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude"
+          git diff --stat --exit-code data/npcs.json
