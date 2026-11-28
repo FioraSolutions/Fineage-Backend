@@ -785,7 +785,8 @@ public static class ConsistencyOracle
 
         bool visibleAtView = PairVisibleAt(observerTimeline, subjectTimeline, viewAt, observer, subject, cellSize);
         if (visibleAtView &&
-            (Math.Abs(view.X - groundX) > PositionTolerance || Math.Abs(view.Y - groundY) > PositionTolerance))
+            (Math.Abs(view.X - groundX) > PositionTolerance || Math.Abs(view.Y - groundY) > PositionTolerance) &&
+            !SubjectReachesViewNext(subjectTimeline, view, viewAt, window))
             return true;
 
         // A MoveState view is the origin of a movement turn the observer received. The next origin in the subject
@@ -808,6 +809,33 @@ public static class ConsistencyOracle
             groundX = point.X;
             groundY = point.Y;
             return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Whether the observer's view is the subject's <em>next</em> own position, received by the subject within the
+    /// causal window after the observer got it. One server event (a TeleportToLocation, a MoveState) is written to
+    /// the subject's socket and every watcher's socket independently, so receive order across bots is not causal:
+    /// in bots-economy-hammer the hub teleport reached watchers 0.1-43 ms before it reached the teleporting bot,
+    /// and the subject's self timeline at the watcher's instant was still the pre-teleport point (#1120). Only
+    /// the next self sample is accepted, so a view frozen at an <em>earlier</em> position still fails, and the
+    /// frozen-follower scan below still runs on the accepted view.
+    /// </summary>
+    static bool SubjectReachesViewNext(
+        PositionTimeline subjectTimeline,
+        BotObservationLog.TrackedEntity view,
+        DateTimeOffset viewAt,
+        long windowTicks)
+    {
+        foreach (var point in subjectTimeline.Points)
+        {
+            if (point.At.UtcTicks <= viewAt.UtcTicks)
+                continue;
+            return point.At.UtcTicks - viewAt.UtcTicks <= windowTicks &&
+                   Math.Abs(view.X - point.X) <= PositionTolerance &&
+                   Math.Abs(view.Y - point.Y) <= PositionTolerance;
         }
 
         return false;
