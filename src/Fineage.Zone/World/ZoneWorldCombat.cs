@@ -64,6 +64,10 @@ public sealed partial class ZoneWorld
             bool alreadySwinging = previous > 0 && previous == requested && intent.ApproachTargetId == 0 &&
                 intent.NextAutoAttackUnixMs > now0;
             // Re-click on the target already being hit: Mobius keeps the running attack, no extra swing.
+            if (CombatTrace.Enabled)
+                CombatTrace.Write("combat.req",
+                    ("t", now0), ("atk", session.ObjectId), ("tgt", requested), ("forced", forced),
+                    ("alreadySwinging", alreadySwinging), ("nextSwing", intent.NextAutoAttackUnixMs));
             error = alreadySwinging ? null : TryAttack(session, targetObjectId, out approachMs, forced);
             if (error == null && !alreadySwinging && approachMs >= 0)
             {
@@ -516,20 +520,27 @@ public sealed partial class ZoneWorld
             SecondHit = dual ? (damage2, flags2) : null
         };
 
-        // Swing now; HP drops at hitTime (Mobius onHitTimer).
+        // Swing now; HP drops at hitTime (Mobius onHitTimer). The attacker's damage lines go out with the hit
+        // (Mobius onHitTimer -> sendDamageMessage), not here: sent at swing start they ran half a swing ahead of
+        // the HP bar and the hit animation.
         FanoutAttack(player, target, attack);
-        QueueAttackerDamageLine(player, target, damage, flags);
-        if (dual)
-            QueueAttackerDamageLine(player, target, damage2, flags2);
         if (ps.Weapon == Fineage.Game.WeaponType.Bow)
             ConsumeBowArrow(player);
         long now = NowUnixMs();
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         long atk = PlayerAttackTimeMs(player.ObjectId);
         long due = now + (dual ? atk / 4 : atk / 2);
-        QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true));
+        if (CombatTrace.Enabled)
+            CombatTrace.Write("combat.swing",
+                ("t", now), ("atk", player.ObjectId), ("tgt", targetId), ("kind", "player"), ("weapon", ps.Weapon.ToString()),
+                ("pAtkSpd", ps.PAtkSpd), ("atkMs", atk), ("hitDue", due), ("dmg", damage), ("flags", flags),
+                ("dmg2", dual ? damage2 : -1), ("flags2", flags2), ("hitDue2", dual ? now + atk / 2 : -1),
+                ("nextSwing", player.Intent.NextAutoAttackUnixMs));
+        QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage, due, flags, RechargeShots: true,
+            AttackerLine: true, SwingUnixMs: now));
         if (dual)
-            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2));
+            QueueMeleeHit(new PendingMeleeHit(player.ObjectId, targetId, damage2, now + atk / 2, flags2,
+                AttackerLine: true, SwingUnixMs: now));
         QueuePoleSplashHits(player, target, ps, soulshot, due);
 
         return null;

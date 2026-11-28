@@ -23,18 +23,38 @@ public sealed partial class ZoneWorld
     void ResolveMeleeHit(PendingMeleeHit hit, long now)
     {
         if (!_byId.TryGetValue(hit.AttackerId, out var attacker) || attacker.CurHp <= 0 || attacker.Dead)
+        {
+            TraceHitDropped(hit, now, "attacker-gone-or-dead");
             return;
+        }
         // Mobius onHitTimer: recharge auto shots at hit time — also when the target died or left reach meanwhile.
         if (hit.RechargeShots && attacker.Kind == ZoneEntityKind.Player)
             RechargeAutoShots(attacker);
         if (!_byId.TryGetValue(hit.TargetId, out var target) || target.CurHp <= 0 || target.Dead)
+        {
+            TraceHitDropped(hit, now, "target-gone-or-dead");
             return;
+        }
         // Mobius onHitTimer has no second range gate (the swing already started in range). We still drop the
         // hit if the target has left the same attack reach used to start the swing — no extra HitRangeTolerance,
         // which previously let a dagger land from ~120 instead of weapon 40 + collisions.
         int reach = AttackReachAgainst(attacker, target);
         if (!ZoneCombat.Within(attacker.X, attacker.Y, target.X, target.Y, reach))
+        {
+            // The client already showed this swing's damage from the Attack packet; this line is the desync.
+            TraceHitDropped(hit, now, "target-left-reach",
+                ("dist", (int)Math.Sqrt(Math.Pow(attacker.X - (double)target.X, 2) + Math.Pow(attacker.Y - (double)target.Y, 2))), ("reach", reach));
             return;
+        }
+        // Mobius onHitTimer -> sendDamageMessage: the attacker's own damage / miss / crit lines at hit time.
+        if (hit.AttackerLine)
+            QueueAttackerDamageLine(attacker, target, hit.Damage, hit.Flags);
+        if (CombatTrace.Enabled)
+            CombatTrace.Write("combat.hit",
+                ("t", now), ("atk", hit.AttackerId), ("tgt", hit.TargetId), ("dmg", hit.Damage), ("flags", hit.Flags),
+                ("due", hit.DueUnixMs), ("lateMs", now - hit.DueUnixMs),
+                ("sinceSwingMs", hit.SwingUnixMs > 0 ? now - hit.SwingUnixMs : -1),
+                ("hpBefore", target.CurHp), ("line", hit.AttackerLine));
 
         // Mobius Creature.doAttack: any swing at a playable (hit or miss) runs updatePvPStatus on the players behind
         // both sides (a summon acts for its owner, a hit on a summon is a hit on its owner).
@@ -245,6 +265,19 @@ public sealed partial class ZoneWorld
         }
 
         return true;
+    }
+
+    static void TraceHitDropped(PendingMeleeHit hit, long now, string reason, params (string Key, object? Value)[] extra)
+    {
+        if (!CombatTrace.Enabled)
+            return;
+        var fields = new List<(string Key, object? Value)>
+        {
+            ("t", now), ("atk", hit.AttackerId), ("tgt", hit.TargetId), ("dmg", hit.Damage), ("flags", hit.Flags),
+            ("due", hit.DueUnixMs), ("lateMs", now - hit.DueUnixMs), ("reason", reason)
+        };
+        fields.AddRange(extra);
+        CombatTrace.Write("combat.hit.dropped", fields.ToArray());
     }
 
     void DespawnNpc(ZoneEntity npc)

@@ -48,12 +48,18 @@ public sealed class NetCombatDamageChatTests
             .ToList();
         var swing = Assert.Single(attacks);
 
-        var lines = rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage));
-        var damageLines = lines
-            .Select(args => (Watchers: Assert.IsAssignableFrom<IReadOnlyList<int>>(args[0]),
-                             Line: Assert.IsType<SystemMessageMsg>(args[1])))
-            .Where(entry => entry.Line.Id == CombatProtocol.HitTargetForDamage)
-            .ToList();
+        // Mobius onHitTimer -> sendDamageMessage: nothing for the attacker at swing start ...
+        Assert.Empty(DamageLines(rec));
+        Assert.Empty(rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Select(args => Assert.IsType<SystemMessageMsg>(args[1]))
+            .Where(line => line.Id == CombatProtocol.YouMissed));
+
+        // ... the line arrives with the hit, half a swing later (before the next swing at a full swing).
+        long swingAt = kit.Now.ToUnixTimeMilliseconds();
+        kit.AdvanceToTickCovering(swingAt + ZoneCombat.AutoAttackIntervalMs / 2);
+        await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
+        Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutAttackState)));
+        var damageLines = DamageLines(rec);
 
         // A miss carries flag 0x80 and no damage, so Mobius emits no hit line at all.
         if (swing.Flags == ZoneCombat.HitFlagMiss)
@@ -68,4 +74,11 @@ public sealed class NetCombatDamageChatTests
         Assert.Equal(swing.Damage.ToString(), hit.Line.Params[1]);
         Assert.Contains("damage", hit.Line.Text);
     }
+
+    static List<(IReadOnlyList<int> Watchers, SystemMessageMsg Line)> DamageLines(NetBridgeRecorder rec) =>
+        rec.Of(nameof(IWorldEventPublisher.FanoutSystemMessage))
+            .Select(args => (Watchers: Assert.IsAssignableFrom<IReadOnlyList<int>>(args[0]),
+                             Line: Assert.IsType<SystemMessageMsg>(args[1])))
+            .Where(entry => entry.Line.Id == CombatProtocol.HitTargetForDamage)
+            .ToList();
 }
