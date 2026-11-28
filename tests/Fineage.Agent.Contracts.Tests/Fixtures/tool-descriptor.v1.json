@@ -1,0 +1,1 @@
+{"schemaVersion":1,"name":"look","description":"Project nearby entities.","inputSchema":{"type":"object"},"billingClass":"Included","priceUnit":"Call","isBillable":false,"riskClass":"Read"}
