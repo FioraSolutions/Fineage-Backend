@@ -90,8 +90,13 @@ public sealed partial class ZoneWorld
         ConditionUsingItemType.Matches(player.Inventory, kinds);
 
     /// <summary>Live buff/debuff stat funcs on <paramref name="entity"/> (players and NPCs).</summary>
-    internal CombatStatMods StatMods(ZoneEntity entity) =>
-        entity.Abnormals.Count == 0 ? CombatStatMods.None : SkillStatEffects.Collect(_statEffects, entity.Abnormals);
+    internal CombatStatMods StatMods(ZoneEntity entity)
+    {
+        var mods = entity.Abnormals.Count == 0
+            ? CombatStatMods.None
+            : SkillStatEffects.Collect(_statEffects, entity.Abnormals);
+        return FoldTestCombatFuncs(entity, mods) ?? CombatStatMods.None;
+    }
 
     double NpcAccuracy(ZoneEntity npc) =>
         StatMods(npc).Apply(CombatStat.Accuracy, ZoneCombat.AccuracyOrEvasion(npc.BaseAccuracy, npc.Dex, npc.Level));

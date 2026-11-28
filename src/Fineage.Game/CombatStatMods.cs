@@ -61,6 +61,8 @@ public enum CombatStat
     WindRes,       // windRes
     EarthRes,      // earthRes
     TransDam,      // transDam (Transfer Pain: percent of incoming damage sent to the servitor)
+    ManaShield,    // manaShield (Arcane Shield 1556: MANA_SHIELD_PERCENT)
+    TransDamToPlayer, // transDamToPlayer (TRANSFER_DAMAGE_TO_PLAYER)
     Cancel,        // cancel / ATTACK_CANCEL (Concentration: folded onto calcAtkBreak init)
     DamageZoneVuln, // damageZoneVuln (Dance of Protection)
     RegCp          // regCp (Mobius REGENERATE_CP_RATE: Clan Morale, Apella sets, Grade Penalty)

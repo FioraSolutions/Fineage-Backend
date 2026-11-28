@@ -218,14 +218,20 @@ public sealed class TargetDamageWorldTests
     [Fact]
     public async Task Cp_absorbed_skill_hit_still_breaks_a_magic_cast()
     {
-        var (kit, attacker, target, session) = await SetupAsync();
+        // Default NetTestKit map is ti_cedric; the elf-start enter of SetupAsync is nowhere
+        // near an attackable, and MovePlayerCoordsForTests does not rebuild the knownlist.
+        // SkillCastConditionsMet then fails silently (returns null) and never arms PendingHit.
+        // Mirror CastInterruptTests: elven_starting, enter already next to the mob.
+        var kit = new NetTestKit(Fineage.Zone.Spawns.SpawnCatalog.LoadDefault(), "elven_starting");
+        var mob = kit.World.AttackableForTest()!;
+        var (_, attacker) = await kit.EnterAsync(classId: 0, level: 40, x: mob.X + 200, y: mob.Y, z: mob.Z);
+        var (session, target) = await kit.EnterAsync(classId: 25, level: 40, x: mob.X + 100, y: mob.Y, z: mob.Z);
         target.MaxHp = target.CurHp = 1_000_000;
         target.MaxCp = target.CurCp = 10_000_000;
         target.KnownSkills[1177] = 1; // Wind Strike
         target.CurMp = 1_000;
-        var mob = kit.World.AttackableForTest()!;
-        kit.World.MovePlayerCoordsForTests(session, mob.X + 100, mob.Y, mob.Z);
         Assert.Null(await kit.World.TrySkillUseAsync(session, 1177, mob.ObjectId, CancellationToken.None));
+        Assert.NotNull(target.PendingHit);
 
         int hp = target.CurHp;
         long now = kit.Now.ToUnixTimeMilliseconds();

@@ -15,7 +15,8 @@ public readonly record struct PlayerCombatStats(
     double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
     int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1,
     double DarkRes = 0d, double HolyRes = 0d, double FireRes = 0d, double WaterRes = 0d,
-    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double DamageZoneVuln = 0d,
+    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double ManaShield = 0d,
+    double TransDamToPlayer = 0d, double DamageZoneVuln = 0d,
     double HolyPower = 0d, double FirePower = 0d);
 
 public sealed partial class ZoneWorld
@@ -85,6 +86,8 @@ public sealed partial class ZoneWorld
             EarthRes: mods.Apply(CombatStat.EarthRes, 0d),
             // Mobius TRANSFER_DAMAGE_PERCENT (transDam): percent of incoming damage sent to the servitor.
             TransDam: mods.Apply(CombatStat.TransDam, 0d),
+            ManaShield: mods.Apply(CombatStat.ManaShield, 0d),
+            TransDamToPlayer: mods.Apply(CombatStat.TransDamToPlayer, 0d),
             DamageZoneVuln: mods.Apply(CombatStat.DamageZoneVuln, 0d),
             HolyPower: mods.Apply(CombatStat.HolyPower, 0d),
             FirePower: mods.Apply(CombatStat.FirePower, 0d));
@@ -137,10 +140,22 @@ public sealed partial class ZoneWorld
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
         var mods = FoldAbnormals(player);
+        mods = FoldTestCombatFuncs(player, mods);
         mods = FoldLearnedClanAndGearPassives(player, mods);
         mods = FoldWeightPenalty(player, mods);
         mods = FoldGradePenalty(player, mods);
         return FoldDeathPenalty(player, mods);
+    }
+
+    static CombatStatMods? FoldTestCombatFuncs(ZoneEntity entity, CombatStatMods? mods)
+    {
+        if (entity.TestCombatFuncs is not { Count: > 0 } funcs)
+            return mods;
+        if (mods is null || ReferenceEquals(mods, CombatStatMods.None))
+            mods = new CombatStatMods();
+        foreach (var func in funcs)
+            mods.Add(func, 1);
+        return mods;
     }
 
     CombatStatMods? FoldAbnormals(ZoneEntity player)
