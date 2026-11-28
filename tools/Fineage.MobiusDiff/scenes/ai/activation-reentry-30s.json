@@ -1,6 +1,6 @@
 {
   "id": "activation-reentry-30s",
-  "description": "Re-entry inside the 90 s hysteresis window. Mobius never deactivated; Fineage must re-wake cleanly.",
+  "description": "Re-entry inside the 90 s hysteresis window. Mobius never deactivated the region (startActivation cancels the pending timer), so the mob keeps its state and stays thinking.",
   "category": "activation",
   "seed": 9882,
   "player": {
@@ -64,7 +64,5 @@
     "reference": "ref/mobius-ct0-interlude"
   },
   "tolerances": {},
-  "knownDivergences": {
-    "npc.mob.thinking": "Mobius keeps an idle region active for 90 s; current Fineage scene trace shows a different activation lifetime. Preserve the observed divergence and file it separately."
-  }
+  "knownDivergences": {}
 }

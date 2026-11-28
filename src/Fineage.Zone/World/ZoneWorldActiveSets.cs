@@ -104,8 +104,10 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius awake predicate: player-active microregion (or neighbour), a live watcher, combat/return home,
-    /// or drifted far enough that AI must return.
+    /// Mobius awake predicate: player-active microregion (or its 1-ring lease), a live watcher, combat/return home,
+    /// or drifted far enough that AI must return. The watcher clause is Fineage's interest proxy for the same thing —
+    /// the production <c>GridAoi</c> watch footprint (3×3 cells) covers the Mobius 3×3 microregion lease — and it
+    /// only reaches as far as a player can actually see the pawn.
     /// </summary>
     bool NpcRegionAwake(ZoneEntity npc)
     {
@@ -146,14 +148,31 @@ public sealed partial class ZoneWorld
         EnqueueThink(npc);
     }
 
-    void ReleaseThink(ZoneEntity npc)
+    /// <summary>
+    /// Drops <see cref="ActiveSets.Thinking"/> unless the pawn still has a reason to run AI. Mobius
+    /// <c>WorldRegion.switchAI(false)</c> does not consult the fight: the region is retired because no playable is in
+    /// its 3x3 neighbourhood, so the target it holds is already out of reach. <paramref name="force"/> is that
+    /// unconditional path (region deactivation); everything else keeps the pawn while it fights, walks home or is
+    /// seen.
+    /// </summary>
+    void ReleaseThink(ZoneEntity npc, bool force = false)
     {
         if ((npc.ActiveSets & ActiveSets.Thinking) == 0)
             return;
-        if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondMaxRange(npc))
+        if (!force)
+        {
+            if (npc.AggroTargetId > 0 || npc.ReturningHome || DriftedBeyondMaxRange(npc))
+                return;
+            // Same Mobius gate as TrackThink: a live watcher or the WorldRegion lease.
+            if (AnyLivePlayerWatching(npc.ObjectId))
+                return;
+        }
+        else if (npc.WalkingRouteName != null || npc.IsBoat)
+        {
+            // Mobius WalkingManager / boat movement is global state: setActive(false) -> switchAI(false) never removes
+            // a walker from the walking task, so the region lease must not freeze one either.
             return;
-        if (AnyLivePlayerWatching(npc.ObjectId))
-            return;
+        }
 
         DequeueThink(npc);
         _byId.Leave(npc, ActiveSets.Thinking);

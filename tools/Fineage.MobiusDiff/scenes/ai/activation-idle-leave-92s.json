@@ -56,7 +56,5 @@
     "reference": "ref/mobius-ct0-interlude"
   },
   "tolerances": {},
-  "knownDivergences": {
-    "npc.mob.thinking": "Mobius deactivates an idle region after 90 s; the Fineage trace still reports thinking=true. Real divergence, separate AI issue."
-  }
+  "knownDivergences": {}
 }
