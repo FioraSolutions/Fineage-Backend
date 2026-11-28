@@ -28,7 +28,7 @@ public sealed class BossScheduleTests
         Assert.Equal("Greyclaw Kutus", kutus.Name);
         Assert.Equal((-54416, 146480, -2887), (kutus.X, kutus.Y, kutus.Z));
         Assert.Equal((43_200_000L, 216_000_000L), (kutus.RespawnMinMillis, kutus.RespawnMaxMillis));
-        Assert.Equal(40330, kutus.MaxHp);
+        Assert.Equal(95986, kutus.MaxHp);
 
         var queen = catalog.Get(GrandId);
         Assert.Equal(BossKind.Grand, queen.Kind);

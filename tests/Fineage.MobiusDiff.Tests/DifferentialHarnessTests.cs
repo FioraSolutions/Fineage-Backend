@@ -50,8 +50,8 @@ public sealed class DifferentialHarnessTests
         var report = ScenarioRunner.Run(scenario, oracle, Data, Npcs);
         Assert.True(report.Pass, string.Join("; ", report.Rows.Where(r => !r.Pass).Select(r => $"{r.Parameter} {r.Actual} != {r.Expected}")));
         var damage = Assert.Single(report.Rows, row => row.Parameter == "damageNoCrit");
-        Assert.Equal(73, (int)damage.Expected);
-        Assert.Equal(73, (int)damage.Actual);
+        Assert.Equal(81, (int)damage.Expected);
+        Assert.Equal(81, (int)damage.Actual);
     }
 
     [Fact]

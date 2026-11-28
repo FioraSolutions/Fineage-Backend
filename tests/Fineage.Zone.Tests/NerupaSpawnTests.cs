@@ -40,7 +40,7 @@ public sealed class NerupaSpawnTests
         Assert.Equal("Folk", nerupa.NpcType);
         Assert.False(nerupa.Attackable);
         Assert.Equal(70, nerupa.Level);
-        Assert.Equal(2444, nerupa.MaxHp);
+        Assert.Equal(3862, nerupa.MaxHp);
 
         // Exactly one lord of this template across every map, in the town object-id band.
         Assert.Single(SpawnCatalog.LoadDefault().Maps.Values.SelectMany(m => m.Npcs), row => row.NpcId == NerupaNpcId);

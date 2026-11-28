@@ -135,6 +135,38 @@ public static partial class ZoneCombat
     public static double AccuracyOrEvasion(double baseValue, int dex, int level) =>
         baseValue + Math.Sqrt(Math.Max(0, dex)) * 6 + Math.Max(1, level);
 
+    /// <summary>Mobius <c>PlayerConfig.MAX_EVASION</c> default.</summary>
+    public const int MaxEvasion = 250;
+
+    /// <summary>
+    /// Mobius <c>FuncAtkAccuracy</c> on a non-player: <c>√DEX · 6 + level</c>, +<c>level − 76</c> above 77, +<c>level − 69</c>
+    /// above 69. The XML <c>attack accuracy</c> is a "TODO: implement me" in <c>NpcData</c> and never read.
+    /// </summary>
+    public static double NpcAccuracyBase(int dex, int level)
+    {
+        double value = Math.Sqrt(Math.Max(0, dex)) * 6 + level;
+        if (level > 77)
+            value += level - 76;
+        if (level > 69)
+            value += level - 69;
+        return value;
+    }
+
+    /// <summary>Mobius <c>FuncAtkEvasion</c> on a non-player: <c>√DEX · 6 + level</c>, +<c>(level − 69) + 2</c> above 69.</summary>
+    public static double NpcEvasionBase(int dex, int level)
+    {
+        double value = Math.Sqrt(Math.Max(0, dex)) * 6 + level;
+        if (level > 69)
+            value += level - 69 + 2;
+        return value;
+    }
+
+    /// <summary><c>CreatureStat.getAccuracy</c>: <c>(int)Math.round(calcStat)</c>.</summary>
+    public static int RoundedAccuracy(double accuracy) => (int)Math.Floor(accuracy + 0.5);
+
+    /// <summary><c>CreatureStat.getEvasionRate</c>: <c>min((int)Math.round(calcStat), MAX_EVASION)</c>.</summary>
+    public static int RoundedEvasion(double evasion) => Math.Min((int)Math.Floor(evasion + 0.5), MaxEvasion);
+
     /// <summary>
     /// One melee swing (Mobius doAttack → calcHitMiss, calcCrit, calcPhysDam): miss → (0, Miss);
     /// crit doubles; damage × (1 + Rnd[−random, random] / 100).

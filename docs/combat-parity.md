@@ -409,7 +409,7 @@ Tunic 426 / Stockings 462. Metrics: STR/DEX/CON/INT/WIT/MEN and bonus-table mult
 P.Def, P.Atk.Spd, M.Atk, M.Def, M.Atk.Spd; accuracy / evasion / crit ‰ / mCrit ‰; max HP/MP/CP.
 Scenarios: `stats-*-40`, `stats-human-*-1`, `stats-human-fighter-40-enchant4`,
 `stats-human-fighter-40-passives` (`AttrStatsMatrixTests`). M.Atk / M.Def / M.Atk.Spd stay as
-untruncated doubles in the formula layer (same class of fix as P.Atk in the auto-attack matrix).
+untruncated doubles in the formula layer for **players** (same class of fix as P.Atk in the auto-attack matrix).
 Do not mark a full matrix row in `docs/mobius-parity-matrix.md` from this slice; there is no
 dedicated six-attribute row.
 
@@ -436,10 +436,10 @@ Divergences found and fixed:
 | Magic crit cap | `getMCriticalHit` capped by `MaxMCritRate` (200 ‰) | uncapped | `MaxMCritRate` in player/world stats and roll |
 | Zero damage | `(int)` damage; `if (damage > 0)` so 0 = no hit | `Math.Max(1, …)` | `MagicDamageFor` returns 0 |
 
-Found but **not** fixed here (NPC derived stats still raw XML in Fineage; Mobius folds them):
-P.Atk `·STR.bonus·levelMod`, P.Def `·levelMod`, P.Atk.Spd `·DEX.bonus`, max HP `·CON.bonus`, max MP `·MEN.bonus`.
-The physical auto-attack matrix NPC-defence cells compared catalog values on both sides, so the NPC side of
-rows 16 / 17 / 72 is not independently Mobius-verified until that fold lands.
+Correction (NPC stat-fold slice below): the slice-2 NPC M.Atk / M.Def fold multiplied the raw **double** XML base
+stats. Mobius stores `CreatureTemplate` P.Atk / M.Atk / P.Def / M.Def as `int` (`StatSet.getInt` truncates), so
+Gremlin M.Def is `(int)29.59 · 1.11 · 0.9 = 28.97`, not 29.56. The new fold truncates first and the slice-2 oracles
+were regenerated.
 
 Out of this slice (still open for #979): blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
 shots consume/auto-charge/grade; cast-break from damage/stun/target death; a full-server oracle
@@ -448,3 +448,46 @@ catalog folds cestus into `Fist`) and servitor features beyond auto-attack stay 
 Arrow consume/wrong-grade/last-arrow already has Mobius-traced world tests in
 `NetBowArrowTests.cs`.
 
+### NPC stat fold (#979 NPC-stat slice)
+
+Mobius `NPC_STD_CALCULATOR` (`FuncMaxHpMul`, `FuncMaxMpMul`, `FuncPAtkMod`, `FuncPDefMod`, `FuncMAtkMod`,
+`FuncMDefMod`, `FuncPAtkSpeed`, `FuncAtkAccuracy`, `FuncAtkEvasion`) never uses the XML numbers as-is. Fineage now
+folds them once, when `NpcCatalog` builds each template, so every consumer (spawns, bosses, combat, load tests)
+sees Mobius values:
+
+| Stat | Mobius | Notes |
+|---|---|---|
+| Max HP | `(int)(float hp · CON.bonus)` | HP/MP are **float** in the template; `getMaxHp` casts `(int)` |
+| Max MP | `(int)(float mp · MEN.bonus)` | |
+| P.Atk | `(int)base · STR.bonus · levelMod` | `levelMod = (level + 89) / 100` |
+| P.Def | `(int)base · levelMod` | |
+| M.Atk | `(int)base · INT.bonus² · levelMod²` | |
+| M.Def | `(int)base · MEN.bonus · levelMod` | |
+| P.Atk.Spd | `Math.round(base · DEX.bonus)` | Gremlin 253 → 278 |
+| Accuracy | `round(√DEX·6 + level + (L>77: L−76) + (L>69: L−69))` | XML `accuracy` is unused (`TODO: Implement me`) |
+| Evasion | `min(250, round(√DEX·6 + level + (L>69: L−69+2)))` | XML `evasion` is unused |
+
+Per-NPC STR / CON / INT / MEN / DEX overrides come from `npcs.json` (`str`, `con`, `int`, `men`, `dex`; defaults 40 / 43 / 21 / 10 / 30 as in
+`CreatureTemplate`). Eight scenarios (`npc-stats-*`, `NpcStatsMatrixTests`) compare the catalog + probe with a Java oracle
+that reads the Mobius `stats/npcs` XML directly, not Fineage's JSON: Gremlin L1, Ant Recruit L33, Alligator L40, Validus L46,
+Hall Keeper Captain L83 (accuracy/evasion >69 bonuses), Greyclaw Kutus raid L23 (non-default DEX/CON/STR/MEN),
+a Turek archer (INT 41) and a Doll Blader (MEN 25). All `phys-auto-*` / `magic-*` oracles were regenerated, so the NPC-defence
+cells of matrix rows 16 / 17 / 72 now come from Mobius XML, not from Fineage's catalog.
+
+Before → after (Mobius-traced):
+
+| NPC | Max HP | Max MP | P.Atk | P.Def | P.Atk.Spd |
+|---|---|---|---|---|---|
+| Gremlin L1 | 40 → 62 | 40 → 44 | 8.475 → 8.64 | 44.44 → 39.6 | 253 → 278 |
+| Ant Recruit L33 | 702 → 1109 | 373 → 413 | 113.5 → 165.4 | 129.2 → 157.4 | 253 → 278 |
+| Alligator L40 | 967 → 1527 | 479 → 531 | 176.4 → 272.4 | 156.6 → 201.2 | 253 → 278 |
+| Validus L46 | 1230 → 1943 | 638 → 707 | 248.1 → 401.8 | 182.2 → 245.7 | 253 → 278 |
+| Hall Keeper Captain L83 | 3836 → 6060 | 1777 → 2168 | 1099 → 2268 | 353.9 → 607.2 | 253 → 278 |
+| Greyclaw Kutus (raid) L23 | 40330 → 95986 | 232 → 514 | 62.9 → 168.7 | 286.9 → 320.3 | 253 → 410 |
+
+Other divergences found: Fineage added XML accuracy/evasion to the hit roll and omitted the `L > 69` bonuses and rounding.
+`knownDivergences`: `data/npcs.json` is a snapshot that drifts from the current Mobius master for about 1,900 NPCs
+(level 1,591, HP 821, P.Def 703, P.Atk 805, DEX 104 of 6,520 rows). The fold keeps JSON values where they differ and upgrades only
+matching fields to full XML precision; goldens use non-drifted NPCs. A re-import is a separate decision because it changes
+levels / spawns. The pilot `physical-attack-human-fighter-40` oracle stays a legacy record: its NPC-defence cells were updated
+(73 → 81) but its player cells (Might/Focus/Haste buffs) belong to the buffs slice and are not Mobius-verified.

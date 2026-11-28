@@ -64,6 +64,16 @@ public static class FineageProbe
             PhysAutoMatrix.Add(metrics, scenario, attacker, target);
         if (scenario.StatsMatrix)
             AttrStatsMatrix.Add(metrics, attacker);
+        if (scenario.NpcStatsMatrix)
+        {
+            metrics["npcLevel"] = attacker.Level;
+            metrics["mAtk"] = attacker.MAtk;
+            metrics["mDef"] = attacker.MDef;
+            metrics["maxHp"] = attacker.MaxHp;
+            metrics["maxMp"] = attacker.MaxMp;
+            metrics["targetPDef"] = target.PDef;
+            metrics["targetEvasion"] = target.Evasion;
+        }
         if (scenario.MagicMatrix)
             MagicDamageMatrix.Add(metrics, scenario, attacker, target);
 
@@ -162,8 +172,8 @@ public static class FineageProbe
     {
         var npc = npcs.Get(npcId);
         double dexBonus = data.Classes!.StatBonuses.Bonus(StatSlot.Dex, npc.Dex);
-        double accuracy = ZoneCombat.AccuracyOrEvasion(npc.Accuracy, npc.Dex, npc.Level);
-        double evasion = ZoneCombat.AccuracyOrEvasion(npc.Evasion, npc.Dex, npc.Level);
+        double accuracy = ZoneCombat.RoundedAccuracy(ZoneCombat.NpcAccuracyBase(npc.Dex, npc.Level));
+        double evasion = ZoneCombat.RoundedEvasion(ZoneCombat.NpcEvasionBase(npc.Dex, npc.Level));
         int critPermille = (int)(npc.Critical * 10 * dexBonus);
         double pAtkSpd = Math.Max(1, npc.AttackSpeed);
         bool bow = string.Equals(npc.AttackType, "BOW", StringComparison.OrdinalIgnoreCase);
@@ -171,7 +181,7 @@ public static class FineageProbe
             npc.PAtk, Math.Max(1d, npc.PDef), pAtkSpd, accuracy, evasion, critPermille, 1d, 0d,
             Math.Max(0, npc.AttackRange), npc.ShieldDef, npc.ShieldRate * dexBonus, npc.RandomDamage,
             playable, bow, ZoneCombat.WeaponReuseDelayMs(bow ? WeaponType.Bow : WeaponType.None),
-            MAtk: npc.MAtk, MDef: npc.MDef, Level: npc.Level);
+            MAtk: npc.MAtk, MDef: npc.MDef, MaxHp: npc.Hp, MaxMp: npc.Mp, Level: npc.Level);
     }
 
 

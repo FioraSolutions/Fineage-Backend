@@ -169,7 +169,7 @@ public sealed class NetPetTests
 
         var wolf = await SummonAsync(bench, owner);
         Assert.Equal((Wolf, 15, SummonKindNet.Pet), (wolf.NpcId, wolf.Level, wolf.Summon!.Kind));
-        Assert.Equal(247, wolf.MaxHp); // npc template at its own level
+        Assert.Equal(390, wolf.MaxHp); // npc template at its own level, folded like Mobius (247 raw XML HP · CON bonus)
         Assert.Equal(wolf.MaxHp, wolf.CurHp);
         Assert.Equal(15, owner.Inventory.Find(CollarOf(owner))!.EnchantLevel);
 
@@ -217,7 +217,7 @@ public sealed class NetPetTests
         long need = bench.World.Pets.ByItem(WolfCollar)!.ExpForLevel(17) - wolf.Summon!.Pet!.Exp;
         bench.World.AddPetExpForTest(owner.Player, need + 5);
         Assert.Equal(17, wolf.Level);
-        Assert.True(wolf.MaxHp > 247);
+        Assert.True(wolf.MaxHp > 390);
         Assert.Equal(17, owner.Inventory.Find(CollarOf(owner))!.EnchantLevel);
         long exp = wolf.Summon.Pet.Exp;
 
