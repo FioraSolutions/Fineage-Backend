@@ -164,10 +164,9 @@ public sealed partial class ZoneWorld
         SetAggroTarget(npc, next);
         if (next > 0 || npc.ReturningHome)
             return;
-        // Mobius: nothing left to hate → the pawn goes back to ACTIVE (idle) and stops walking.
-        npc.Chasing = false;
-        StopTimedMove(npc);
-        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
+        // Mobius `Attackable.reduceHate`: nothing left to hate → `AI_INTENTION_ACTIVE` and gait back to walking —
+        // the same shared disengage as a lost target (walk home only past MaxDriftRange).
+        GoActiveAfterFight(npc, NowUnixMs());
     }
 
     /// <summary>Mobius <c>GeoEngine.canSeeTarget(creature, target)</c>: no closed door between, then geo LOS.</summary>

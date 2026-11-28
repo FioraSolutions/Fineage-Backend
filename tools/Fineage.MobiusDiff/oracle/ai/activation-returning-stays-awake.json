@@ -31,7 +31,7 @@
       "tick": 170,
       "values": {
         "npc.mob.thinking": "true",
-        "npc.mob.returningHome": "true"
+        "npc.mob.returningHome": "false"
       }
     }
   ]

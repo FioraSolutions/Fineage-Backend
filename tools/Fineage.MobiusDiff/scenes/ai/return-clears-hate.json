@@ -1,6 +1,6 @@
 {
   "id": "return-clears-hate",
-  "description": "returnHome clears the Mobius AggroList, including the old hate.",
+  "description": "returnHome clears the Mobius AggroList, including the old hate, and the pawn stays put inside the 300-unit drift box.",
   "category": "chase-return",
   "seed": 9823,
   "player": {
@@ -64,7 +64,5 @@
     "reference": "ref/mobius-ct0-interlude"
   },
   "tolerances": {},
-  "knownDivergences": {
-    "npc.mob.hate.player": "Mobius returnHome clears the AggroList; the Fineage trace leaves hate 1 after the target leaves forget range. Real divergence, separate AI issue."
-  }
+  "knownDivergences": {}
 }

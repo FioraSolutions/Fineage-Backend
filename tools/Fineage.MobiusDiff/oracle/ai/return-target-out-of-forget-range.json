@@ -39,7 +39,7 @@
       "tick": 12,
       "values": {
         "npc.mob.target": "",
-        "npc.mob.returningHome": "true",
+        "npc.mob.returningHome": "false",
         "npc.mob.thinking": "true"
       }
     }

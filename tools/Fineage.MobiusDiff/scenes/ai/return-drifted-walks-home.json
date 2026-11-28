@@ -1,0 +1,71 @@
+{
+  "id": "return-drifted-walks-home",
+  "description": "A mob pulled past MaxDriftRange that loses its target walks back to its spawn at walk speed and stops returning when it arrives (Mobius AttackableAI.thinkActive + CreatureAI.onEvtArrived).",
+  "category": "chase-return",
+  "seed": 9824,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100900,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200131,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 30,
+      "type": "move",
+      "x": 105000,
+      "y": 100000,
+      "z": -3000
+    }
+  ],
+  "observe": {
+    "ticks": [
+      2,
+      10,
+      29,
+      30,
+      31,
+      40,
+      60,
+      80,
+      90
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mob.hate.player",
+      "npc.mob.chasing",
+      "npc.mob.returningHome",
+      "npc.mob.thinking"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/return-drifted-walks-home.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}
