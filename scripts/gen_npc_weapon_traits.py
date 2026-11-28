@@ -75,21 +75,30 @@ def load_skill_traits(skills_dir: pathlib.Path) -> dict[int, list[dict[str, floa
     for f in sorted(skills_dir.glob("*.xml")):
         root = ET.parse(f).getroot()
         for sk in root.iter("skill"):
-            fr = sk.find("for")
-            if fr is None:
+            # HighFive-style <for><effect><param SWORD="..."/></effect></for> and the CT 0
+            # Interlude layout <effects><effect name="DefenceTrait"><SWORD>#t</SWORD></effect>.
+            effects = []
+            for holder in (sk.find("for"), sk.find("effects")):
+                if holder is not None:
+                    effects.extend(holder.findall("effect"))
+            if not effects:
                 continue
             tables = {t.get("name"): (t.text or "").split() for t in sk.findall("table")}
             levels = int(sk.get("levels", "1"))
             sid = int(sk.get("id"))
             level_maps: list[dict[str, float]] = [defaultdict(lambda: 1.0) for _ in range(levels)]
             found = False
-            for effect in fr.findall("effect"):
+            for effect in effects:
                 if effect.get("name") != "DefenceTrait":
                     continue
+                pairs: list[tuple[str, str]] = []
                 for param in effect:
-                    if param.tag != "param":
-                        continue
-                    for name, raw_s in param.attrib.items():
+                    if param.tag == "param":
+                        pairs.extend(param.attrib.items())
+                    elif (param.text or "").strip():
+                        pairs.append((param.tag, param.text.strip()))
+                if pairs:
+                    for name, raw_s in pairs:
                         if name not in TRAITS:
                             continue
                         found = True

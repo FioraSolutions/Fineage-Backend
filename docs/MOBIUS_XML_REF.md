@@ -73,6 +73,32 @@ Import with `--spawn-files` pointing at the relevant XML files.
 | `FINEAGE_MOBIUS_XML_ROOT` | Absolute or relative path to Mobius `dist/game/data` (or legacy `data` root). |
 | `FINEAGE_MOBIUS_IMPORT_ON_BOOT` | When `1` / `true` / `yes`, Zone process runs a small NPC + spawn import into the resolved `data/` directory before listening. |
 
+## NPC templates (`data/npcs.json`) — pinned CT 0 pipeline
+
+`data/npcs.json` is regenerated only by `tools/regen_npcs.py`, which runs
+`tools/import_npc_templates.py` (templates only, `data/spawns` untouched) and then the
+`scripts/gen_npc_{races,weapons,shots,ai_skills,weapon_traits}.py` passes against **one**
+checkout:
+
+```bash
+git clone --filter=blob:none --sparse https://gitlab.com/MobiusDevelopment/L2J_Mobius.git mobius
+git -C mobius sparse-checkout set L2J_Mobius_CT_0_Interlude/dist/game/data/stats/npcs \
+  L2J_Mobius_CT_0_Interlude/dist/game/data/stats/skills
+git -C mobius checkout e4b90cdf6095576aa86bfe3d6886395df1fc7672   # PINNED_MOBIUS_COMMIT
+python3 tools/regen_npcs.py mobius/L2J_Mobius_CT_0_Interlude
+python3 tools/import_npc_templates.py mobius/L2J_Mobius_CT_0_Interlude --check
+```
+
+- The importer refuses any root that is not `L2J_Mobius_CT_0_Interlude` and any checkout whose
+  `stats/npcs` differs from `PINNED_MOBIUS_COMMIT` (`--allow-unpinned` relaxes only the commit
+  check). A Nov 2026 regeneration had picked up `CT_2.4_Epilogue` / `CT_2.6_HighFive` values.
+- `--write-towns` is required to rewrite `data/spawns/<town>.json`; town files carry hand rows.
+- `CUSTOM_NPC_IDS` rows (50007 Andromeda, Mobius `custom/custom.xml`) are kept verbatim.
+- `str` / `con` / `int` / `men` are written when they differ from the `NpcCatalog` defaults
+  40 / 43 / 21 / 10; hp / mp / P.Atk / P.Def / M.Atk / M.Def keep full XML precision.
+- Do not use `Fineage.MobiusImport --npcs --out data` for this file: it writes a different,
+  single-NPC schema.
+
 ## Importer
 
 One-shot CLI (also `--selftest` for CI):
