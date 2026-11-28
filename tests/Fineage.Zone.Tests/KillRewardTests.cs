@@ -1,4 +1,6 @@
+using Fineage.Game.Economy;
 using Fineage.Net.Contract;
+using Fineage.Zone.Drops;
 using Fineage.Zone.Net;
 using Fineage.Zone.Rewards;
 using Fineage.Zone.Spawns;
@@ -40,6 +42,86 @@ public sealed class KillRewardTests
         kit.World.NetBridge = bridge;
         await Task.CompletedTask;
         return (kit, mob, rec);
+    }
+
+    const int IdempotenceMobId = MobiusDropTestSeed.TrainingHallGremlinNpcId;
+
+    /// <summary>One-HP Gremlin with a real Mobius droplist and the reward row, so a death rolls loot and XP/SP.</summary>
+    static SpawnCatalog IdempotenceMap() =>
+        SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
+        {
+            ["idempotence"] = new("idempotence", true,
+            [
+                new SpawnNpcDefinition(IdempotenceMobId, IdempotenceMobId, "Gremlin", NetTestKit.ElfX + 30, NetTestKit.ElfY, NetTestKit.ElfZ, 0, true, 1,
+                    1f, 1f, 1, 0, "", "Monster",
+                    Level: 1, Exp: MobExp, Sp: MobSp, PAtk: 1, PDef: 1, MAtk: 1, MDef: 1,
+                    AttackRange: 40, AttackSpeed: 253, Aggressive: false, AggroRange: 0, ClanHelpRange: 0, Clans: [])
+            ])
+        });
+
+    static async Task<(NetTestKit Kit, ZoneEntity Mob, NetBridgeRecorder Rec)> IdempotenceSetupAsync()
+    {
+        var kit = new NetTestKit(IdempotenceMap(), "idempotence", dropRandom: new Random(MobiusDropTestSeed.DefaultSeed));
+        Assert.True(kit.World.TryGetEntityById(IdempotenceMobId, out var mob));
+        var (bridge, rec) = NetBridgeRecorder.Create();
+        kit.World.NetBridge = bridge;
+        await Task.CompletedTask;
+        return (kit, mob, rec);
+    }
+
+    [Fact]
+    public async Task Repeated_damage_in_the_same_tick_rolls_one_drop_and_pays_rewards_once()
+    {
+        var (kit, mob, rec) = await IdempotenceSetupAsync();
+        var (_, first) = await kit.EnterAsync();
+        var (_, second) = await kit.EnterAsync(x: NetTestKit.ElfX + 10);
+
+        // Two damage sources in one simulation tick. The second one reaches a corpse and must not re-enter the
+        // death transition (Mobius Creature.doDie: "killing is only possible one time").
+        kit.World.DamageNpcByForTest(first, mob, 100);
+        kit.World.DamageNpcByForTest(second, mob, 100);
+
+        Assert.True(mob.Dead);
+        Assert.Equal(0, mob.CurHp);
+        Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDie)));
+        var loot = Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.Loot).Transaction;
+        Assert.Equal((first.ObjectId, IdempotenceMobId), (loot.CausedBy, loot.Reference));
+        Assert.Equal(MobExp, first.Exp + second.Exp);
+        Assert.Equal(MobSp, first.Sp + second.Sp);
+
+        // One corpse lifecycle: decay despawns once and the spawn slot comes back alive.
+        kit.Now = kit.Now.AddMinutes(10);
+        kit.World.AdvanceSpawnsForTests();
+        Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutEntityDespawn)));
+        // Decay schedules the respawn at now + RespawnDelaySeconds; the spawn stage needs the next tick to bring it back.
+        kit.Now = kit.Now.AddSeconds(5);
+        kit.World.AdvanceSpawnsForTests();
+        Assert.True(kit.World.TryGetEntityById(IdempotenceMobId, out var respawned));
+        Assert.False(respawned.Dead);
+        Assert.True(respawned.CurHp > 0);
+    }
+
+    [Fact]
+    public async Task Queued_melee_after_another_killer_does_not_deal_a_second_death()
+    {
+        var (kit, mob, rec) = await IdempotenceSetupAsync();
+        var (swingSession, _) = await kit.EnterAsync();
+        var (_, finisher) = await kit.EnterAsync(x: NetTestKit.ElfX + 10);
+
+        // Queue the swing while the mob is alive (the hit lands at hitTime, not at the attack packet), then let
+        // another source kill the mob before the melee stage resolves the queued hit in this same tick.
+        Assert.Null(await kit.World.TrySelectTargetAsync(swingSession, IdempotenceMobId, CancellationToken.None));
+        Assert.Null(await kit.World.TryAttackAsync(swingSession, IdempotenceMobId, CancellationToken.None));
+        kit.World.DamageNpcByForTest(finisher, mob, 100);
+
+        kit.Now = kit.Now.AddSeconds(30);
+        await kit.World.RunPlayerCombatTickAsync(CancellationToken.None);
+
+        Assert.True(mob.Dead);
+        Assert.Single(rec.Of(nameof(IWorldEventPublisher.FanoutDie)));
+        Assert.Single(kit.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.Loot);
+        Assert.Equal(MobExp, finisher.Exp);
+        Assert.Equal(MobSp, finisher.Sp);
     }
 
     static List<SystemMessageMsg> KillNotices(NetBridgeRecorder rec) =>

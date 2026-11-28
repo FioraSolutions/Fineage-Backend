@@ -73,6 +73,9 @@ public sealed partial class ZoneWorld
         }
     }
 
+    /// <summary>Test hook: one live-loop step, leaving the durable economy on the worker queue.</summary>
+    internal void StepSimulationRawForTests() => StepSimulationRaw();
+
     /// <summary>The step alone: what the live loop runs, leaving the durable economy on the worker queue.</summary>
     void StepSimulationRaw() => RunStep(wall =>
     {
@@ -197,8 +200,11 @@ public sealed partial class ZoneWorld
         _economyPersist?.DrainCompletions(this);
 
         long flushStart = Stopwatch.GetTimestamp();
-        var applied = _ingress.TakeApplied();
-        bool committed = TryCommitDirtyEconomy(discardWithoutPublish: null, heldReplies: applied);
+        BeforeEconomyReplyReleaseForTests?.Invoke();
+        var taken = TakeAppliedWithCarried();
+        bool committed = TryCommitDirtyEconomy(
+            discardWithoutPublish: null, heldReplies: taken, out bool repliesHeld, out var own, out var onOtherCommit);
+        var applied = own ?? taken;
         HashSet<int>? uncommitted = committed ? null : UncommittedEconomicCharacters();
 
         double flushMs = RecordCommandPhase(PhaseFlush, flushStart);
@@ -216,9 +222,28 @@ public sealed partial class ZoneWorld
 
         long replyStart = Stopwatch.GetTimestamp();
         // A batch still on the worker queue answers through its own completion, so this step leaves those replies
-        // alone; everything else answers here, including a commit that failed.
-        if (applied.Count > 0 && _economyPersist is not { HasAwaitingHeldReplies: true })
-            ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
+        // alone; everything else answers here, including a commit that failed. The test is whether *these* replies
+        // rode on a queued batch: "any batch pending" stranded a step's replies forever whenever it had no economy to
+        // commit while someone else's logout batch was in flight (#990 reconnect storm: enters that never answered).
+        // Inside a step a batch that was not queued (a reservation held by another commit, a full worker queue) is
+        // restored dirty and rides the next step's commit, so its replies wait for that commit instead of hearing a
+        // failure for a change that is about to land (#1112).
+        // A change another commit already took (a logout steals every dirty bag) is not durable until that commit
+        // finishes: those replies wait for it across steps instead of hearing success now (#1114).
+        if (onOtherCommit != null)
+            AnswerOrCarryUncommitted(onOtherCommit, OnOtherCommit(onOtherCommit));
+        if (repliesHeld)
+            ForgetCarriedSince(applied);
+        else if (applied.Count > 0)
+        {
+            if (committed)
+            {
+                ForgetCarriedSince(applied);
+                ZoneCommandIngress.AnswerAfterFlush(applied, committed, uncommitted, EconomyCommitFailed);
+            }
+            else
+                AnswerOrCarryUncommitted(applied, uncommitted!);
+        }
         _fanout.Begin();
         double replyMs = RecordCommandPhase(PhaseReply, replyStart);
         return (flushMs, sealMs, replyMs);
@@ -229,14 +254,14 @@ public sealed partial class ZoneWorld
         using (_economyLock.Enter())
         {
             var ids = new HashSet<int>(
-                _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineFreight.Count);
+                _dirtyInventories.Count + _dirtyWarehouses.Count + _dirtyFreight.Count + _dirtyOfflineBags.Count);
             foreach (int id in _dirtyInventories.Keys)
                 ids.Add(id);
             foreach (int id in _dirtyWarehouses.Keys)
                 ids.Add(id);
             foreach (int id in _dirtyFreight.Keys)
                 ids.Add(id);
-            foreach (var bag in _dirtyOfflineFreight)
+            foreach (var bag in _dirtyOfflineBags)
                 ids.Add(bag.CharacterId);
             return ids;
         }
@@ -276,7 +301,7 @@ public sealed partial class ZoneWorld
         nameof(_borders), nameof(_pendingHitStage), nameof(_autoAttackStage), nameof(_mobAttackStage))]
     void InitSimulation(IRegionPartition partition, ISimulationObserver observer, IRegionExecutor executor)
     {
-        _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, () => _clock().ToUnixTimeMilliseconds());
+        _simulationClock = new SimulationClock(ZoneSimulationSettings.StepMilliseconds, _clock);
         _regions = partition;
         _byId = new RegionDirectory<ZoneEntity>(partition, requireOwner: _affinity.Require);
         _simulationObserver = observer;

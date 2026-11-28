@@ -277,6 +277,15 @@ internal sealed class NetZoneSession : IAsyncDisposable
             Payload = payload
         }, ct);
 
+    /// <summary>Test seam for replay/duplicate-request tests: write an explicit RequestSequence.</summary>
+    public Task SendWithSequenceAsync(ushort opcode, uint sequence, byte[] payload, CancellationToken ct) =>
+        NetFraming.WriteAsync(_stream, new PacketEnvelope
+        {
+            Opcode = opcode,
+            RequestSequence = sequence,
+            Payload = payload
+        }, ct);
+
     /// <summary>Reads every frame until <paramref name="quietMs"/> passes with nothing new on the wire.</summary>
     public async Task<List<PacketEnvelope>> DrainAsync(CancellationToken ct, int quietMs = 250)
     {

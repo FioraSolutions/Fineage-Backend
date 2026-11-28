@@ -42,7 +42,7 @@ public sealed partial class ZoneWorld
                 int abnormal = skill.AbnormalLevel > 0 ? skill.AbnormalLevel : skill.Level;
                 string slot = skill.Slot;
                 if (slot.Length == 0)
-                    slot = _game.Skills.Find(skill.SkillId)?.AbnormalType ?? "";
+                    slot = _game.Skills.Require(skill.SkillId).AbnormalType;
                 ZoneAbnormals.Apply(
                     target.Abnormals,
                     skill.SkillId,
@@ -50,7 +50,8 @@ public sealed partial class ZoneWorld
                     skill.AbnormalTimeSeconds,
                     now,
                     skill.Level,
-                    slot);
+                    slot,
+                    effectorObjectId: caster.ObjectId);
                 if (kind is NpcSupportKind.Immobilize or NpcSupportKind.Silence)
                     StopTimedMove(target);
                 FanoutAbnormal(target);
@@ -194,7 +195,7 @@ public sealed partial class ZoneWorld
         if (damage <= 0 || DuelBlocksHit(npc, target))
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyTargetDamage(target, npc, damage);
         FanoutVitals(target, PlayerVitalsStatus(target));
         SendVictimHitLines(npc, target, damage, 0);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
@@ -244,14 +245,16 @@ public sealed partial class ZoneWorld
                 magicLevel = npc.Level;
             // NPC mCritRate table not imported — use unarmed base 10‰ (Mobius default).
             var (damage, _) = ZoneCombat.RollMagicDamage(Rng(_combatRandom, npc), mAtk, targetMDef, power,
-                npc.Level, magicLevel, player.Level, mCritRate: 10);
+                npc.Level, magicLevel, player.Level, mCritRate: 10, casterIsPlayer: false);
             return damage;
         }
 
         bool ss = TryNpcSoulshot(npc);
         // Blow without blowEffect in catalog → physical skill formula (NPC Mortal Blow).
+        var position = ZoneCombat.PositionOf(npc.X, npc.Y, player.X, player.Y, player.Heading);
         return ZoneCombat.PhysicalSkillDamage(
-            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), targetPDef, power, ss, crit: false);
+            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), targetPDef, power, ss, crit: false,
+            proximity: ZoneCombat.ProximityBonus(position));
     }
 
     /// <summary>Mobius <c>Npc.rechargeShots(false, true)</c> for spiritshots.</summary>

@@ -26,6 +26,7 @@ static partial class NormalizedStoreWriter
                  {
                      "DELETE FROM character_skills_save",
                      "DELETE FROM character_skills",
+                     "DELETE FROM character_macros",
                      "DELETE FROM character_shortcuts",
                      "DELETE FROM character_quest_vars",
                      "DELETE FROM character_quests",
@@ -326,6 +327,7 @@ static partial class NormalizedStoreWriter
         ReplaceItems(conn, tx, character.Id, character.Items, character.Warehouse, character.Freight);
         ReplaceQuests(conn, tx, character.Id, character.Quests);
         ReplaceShortcuts(conn, tx, character.Id, character.Shortcuts);
+        ReplaceMacros(conn, tx, character.Id, character.Macros);
         ReplaceLearnedSkills(conn, tx, character.Id, character.LearnedSkills);
         ReplaceEffects(conn, tx, character.Id, character.Effects);
     }

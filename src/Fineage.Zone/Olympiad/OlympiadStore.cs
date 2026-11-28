@@ -1,11 +1,21 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Zone.Olympiad;
 
-public sealed class OlympiadSnapshot
+public sealed class OlympiadSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int Cycle { get; set; } = 1;
     public int Period { get; set; }
     public long OlympiadEndUnixMs { get; set; }
@@ -31,6 +41,8 @@ public sealed class OlympiadHeroRow
     public string Name { get; set; } = "";
     public bool Claimed { get; set; }
     public int Count { get; set; }
+    /// <summary>Mobius <c>heroes.message</c> / <c>RequestWriteHeroWords</c> (max 300).</summary>
+    public string Message { get; set; } = "";
 }
 
 public sealed class OlympiadPassRow
@@ -69,57 +81,5 @@ public sealed class MemoryOlympiadStore : IOlympiadStore
     {
         string json = JsonSerializer.Serialize(source);
         return JsonSerializer.Deserialize<OlympiadSnapshot>(json) ?? new OlympiadSnapshot();
-    }
-}
-
-public sealed class JsonOlympiadStore : IOlympiadStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.Never
-    };
-
-    readonly string _path;
-    readonly object _gate = new();
-
-    public JsonOlympiadStore(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            throw new ArgumentException("Olympiad store path is required.", nameof(path));
-        _path = path;
-    }
-
-    public OlympiadSnapshot Load()
-    {
-        lock (_gate)
-        {
-            if (!File.Exists(_path))
-                return new OlympiadSnapshot();
-            var data = JsonSerializer.Deserialize<OlympiadSnapshot>(File.ReadAllText(_path), JsonOptions)
-                ?? throw new InvalidDataException($"empty olympiad store: {_path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported olympiad store version {data.Version}");
-            data.Granted ??= [];
-            data.Nobles ??= [];
-            data.Heroes ??= [];
-            data.LastPeriod ??= [];
-            data.Passes ??= [];
-            return data;
-        }
-    }
-
-    public void Save(OlympiadSnapshot snapshot)
-    {
-        ArgumentNullException.ThrowIfNull(snapshot);
-        lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
     }
 }

@@ -25,6 +25,8 @@ public sealed partial class MemoryAccountStore
         public List<WeddingCoupleRecord> WeddingCouples { get; set; } = [];
         public int NextWeddingCoupleId { get; set; } = 1;
         public List<CursedWeaponRecord> CursedWeapons { get; set; } = [];
+        public List<WorldStateDocument> WorldState { get; set; } = [];
+        public List<WorldStateImport> WorldStateImports { get; set; } = [];
     }
 
     sealed class AccountDto
@@ -76,6 +78,7 @@ public sealed partial class MemoryAccountStore
         public List<StoredItemDto>? Freight { get; set; }
         public bool Newbie { get; set; } = true;
         public List<StoredShortcutDto>? Shortcuts { get; set; }
+        public List<StoredMacroDto>? Macros { get; set; }
         public List<StoredSkillDto>? LearnedSkills { get; set; }
         public int DeathPenaltyLevel { get; set; }
         public int Karma { get; set; }
@@ -121,6 +124,25 @@ public sealed partial class MemoryAccountStore
         public int Type { get; set; }
         public int Id { get; set; }
         public int Level { get; set; }
+    }
+
+    sealed class StoredMacroDto
+    {
+        public int Id { get; set; }
+        public int Icon { get; set; }
+        public string Name { get; set; } = "";
+        public string Descr { get; set; } = "";
+        public string Acronym { get; set; } = "";
+        public List<StoredMacroCmdDto>? Commands { get; set; }
+    }
+
+    sealed class StoredMacroCmdDto
+    {
+        public int Entry { get; set; }
+        public int Type { get; set; }
+        public int D1 { get; set; }
+        public int D2 { get; set; }
+        public string Cmd { get; set; } = "";
     }
 
     sealed class StoredQuestDto

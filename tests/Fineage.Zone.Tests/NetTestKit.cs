@@ -118,7 +118,9 @@ internal sealed class NetTestKit
     {
         string account = "net" + (++_n);
         Assert.Equal(AddAccountStatus.Created, Store.TryAddAccount(account, "hash", "salt", 1, null));
-        var kit = CharacterInventory.Rows(Game.CreateStarterInventory(classId));
+        var kit = Game.StarterKits.Contains(classId)
+            ? CharacterInventory.Rows(Game.CreateStarterInventory(classId))
+            : [];
         var status = Store.TryAddCharacter(account, "Hero" + _n, classId: classId, race: race, sex: sex, out var created,
             items: kit, hairStyle: 0, hairColor: 0, face: 0, hasPosition: true, x: x, y: y, z: z,
             level: level, maxHp: 100, hp: 100, maxMp: 80, mp: 80);

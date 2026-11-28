@@ -1,12 +1,45 @@
 using Fineage.Game.Skills;
 using Fineage.Protocol;
+using Fineage.Zone.World;
 using Xunit;
 
 namespace Fineage.Zone.Tests;
 
-/// <summary>Trainer foundation: free NPC skills stay the default; SP learn is behind TrainerSpLearn; learned skills persist.</summary>
+/// <summary>
+/// #1049: production default is Mobius SP learn; tests opt into free-grants via <see cref="TestHostDefaults"/>.
+/// </summary>
 public sealed class TrainerFoundationTests
 {
+    [Fact]
+    public void Env_default_and_aliases_resolve_mobius_on()
+    {
+        string? previous = Environment.GetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN");
+        try
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", null);
+            Assert.True(ZoneWorld.ResolveTrainerSpLearnFromEnv());
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", "1");
+            Assert.True(ZoneWorld.ResolveTrainerSpLearnFromEnv());
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", "true");
+            Assert.True(ZoneWorld.ResolveTrainerSpLearnFromEnv());
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", "0");
+            Assert.False(ZoneWorld.ResolveTrainerSpLearnFromEnv());
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", "false");
+            Assert.False(ZoneWorld.ResolveTrainerSpLearnFromEnv());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("FINEAGE_TRAINER_SP_LEARN", previous ?? "0");
+        }
+    }
+
+    [Fact]
+    public void Boot_diagnostic_names_the_effective_mode()
+    {
+        Assert.Contains("mobius", ZoneWorld.DescribeTrainerSpLearnMode(true), StringComparison.Ordinal);
+        Assert.Contains("free-grants", ZoneWorld.DescribeTrainerSpLearnMode(false), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Skill_trees_carry_mobius_levelUpSp()
     {
@@ -16,11 +49,11 @@ public sealed class TrainerFoundationTests
     }
 
     [Fact]
-    public async Task Default_mode_keeps_free_npc_skills_and_refuses_paid_learn()
+    public async Task Free_grant_mode_keeps_npc_skills_and_refuses_paid_learn()
     {
         var kit = new NetTestKit();
-        var (session, elf) = await kit.EnterAsync();
         Assert.False(kit.World.TrainerSpLearn);
+        var (session, elf) = await kit.EnterAsync();
         int before = elf.KnownSkills.Count;
         long sp = elf.Sp;
         Assert.Null(kit.World.TrainerServiceForTest(session, NpcServiceIntent.SkillList));
@@ -61,5 +94,21 @@ public sealed class TrainerFoundationTests
             .First(r => r.LevelUpSp > 0);
         kit.World.TrainerServiceForTest(session, NpcServiceIntent.LearnSkill, row.SkillId);
         Assert.Empty(elf.LearnedSkills);
+    }
+
+    [Fact]
+    public async Task Sp_mode_enter_does_not_auto_grant_npc_tree_skills()
+    {
+        var kit = new NetTestKit();
+        kit.World.TrainerSpLearn = true;
+        var (_, elf) = await kit.EnterAsync(level: 20);
+        // Wind Strike 1 is autoGet; higher Wind Strike rows are learnedByNpc and must stay for the trainer.
+        Assert.True(elf.KnownSkills.TryGetValue(1177, out int wind));
+        Assert.Equal(1, wind);
+        Assert.Empty(elf.LearnedSkills);
+        var game = Fineage.Game.GameData.LoadDefault();
+        Assert.Contains(
+            TrainerSkills.Available(game.SkillTrees, game.Skills, elf.ClassId, elf.Level, elf.KnownSkills, game.Classes),
+            row => row.SkillId == 1177 && row.Level > 1);
     }
 }

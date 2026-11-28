@@ -98,6 +98,24 @@ internal static class FanoutDispatch
             case FanoutKind.MultiSellList:
                 publisher.FanoutMultiSellList(watchers, ((Fineage.Protocol.MultiSellListMsg)args.Payload!));
                 return;
+            case FanoutKind.ShopPreviewList:
+                publisher.FanoutShopPreviewList(watchers, ((Fineage.Protocol.ShopPreviewListMsg)args.Payload!));
+                return;
+            case FanoutKind.ShopPreviewInfo:
+                publisher.FanoutShopPreviewInfo(watchers, ((Fineage.Protocol.ShopPreviewInfoMsg)args.Payload!));
+                return;
+            case FanoutKind.Dice:
+                publisher.FanoutDice(watchers, ((Fineage.Protocol.DiceMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowMiniMap:
+                publisher.FanoutShowMiniMap(watchers, ((Fineage.Protocol.ShowMiniMapMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowCalculator:
+                publisher.FanoutShowCalculator(watchers, ((Fineage.Protocol.ShowCalculatorMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowXMasSeal:
+                publisher.FanoutShowXMasSeal(watchers, ((Fineage.Protocol.ShowXMasSealMsg)args.Payload!));
+                return;
             case FanoutKind.ShopBalance:
                 publisher.FanoutShopBalance(watchers, ((Fineage.Protocol.ShopBalanceMsg)args.Payload!));
                 return;
@@ -131,6 +149,9 @@ internal static class FanoutDispatch
             case FanoutKind.ShortcutInit:
                 publisher.FanoutShortcutInit(watchers, ((Fineage.Protocol.ShortCutInitMsg)args.Payload!));
                 return;
+            case FanoutKind.MacroList:
+                publisher.FanoutMacroList(watchers, ((Fineage.Protocol.MacroListMsg)args.Payload!));
+                return;
             case FanoutKind.ChangeWaitType:
                 publisher.FanoutChangeWaitType(watchers, args.A, args.B, args.C, args.D, args.E);
                 return;
@@ -138,10 +159,10 @@ internal static class FanoutDispatch
                 publisher.FanoutSocialAction(watchers, args.A, args.B);
                 return;
             case FanoutKind.TargetSelected:
-                publisher.FanoutTargetSelected(watchers, args.A, args.B);
+                publisher.FanoutTargetSelected(watchers, args.A, args.B, args.C, args.D, args.E, args.F);
                 return;
             case FanoutKind.TargetUnselected:
-                publisher.FanoutTargetUnselected(watchers, args.A);
+                publisher.FanoutTargetUnselected(watchers, args.A, args.B);
                 return;
             case FanoutKind.AcquireSkillList:
                 publisher.FanoutAcquireSkillList(watchers, ((Fineage.Protocol.AcquireSkillListMsg)args.Payload!));
@@ -283,6 +304,33 @@ internal static class FanoutDispatch
                 return;
             case FanoutKind.CommandChannelInfo:
                 publisher.FanoutCommandChannelInfo(watchers, ((Fineage.Protocol.CommandChannelInfoMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyMatchDetail:
+                publisher.FanoutPartyMatchDetail(watchers, ((Fineage.Protocol.PartyMatchDetailMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyMatchRoomList:
+                publisher.FanoutPartyMatchRoomList(watchers, ((Fineage.Protocol.PartyMatchRoomListMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyRoomMemberList:
+                publisher.FanoutPartyRoomMemberList(watchers, ((Fineage.Protocol.PartyRoomMemberListMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyRoomMemberUpdate:
+                publisher.FanoutPartyRoomMemberUpdate(watchers, ((Fineage.Protocol.PartyRoomMemberUpdateMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyRoomClose:
+                publisher.FanoutPartyRoomClose(watchers);
+                return;
+            case FanoutKind.PartyRoomAskJoin:
+                publisher.FanoutPartyRoomAskJoin(watchers, ((Fineage.Protocol.PartyRoomAskJoinMsg)args.Payload!));
+                return;
+            case FanoutKind.PartyMatchWaitingRoom:
+                publisher.FanoutPartyMatchWaitingRoom(watchers, ((Fineage.Protocol.PartyMatchWaitingRoomMsg)args.Payload!));
+                return;
+            case FanoutKind.ShowBoard:
+                publisher.FanoutShowBoard(watchers, ((Fineage.Protocol.ShowBoardMsg)args.Payload!));
+                return;
+            case FanoutKind.PcCafePointInfo:
+                publisher.FanoutPcCafePointInfo(watchers, ((Fineage.Protocol.PcCafePointInfoMsg)args.Payload!));
                 return;
             case FanoutKind.MagicSkillLaunched:
                 publisher.FanoutMagicSkillLaunched(watchers, args.A, args.B, args.C, ((int[])args.Payload!));

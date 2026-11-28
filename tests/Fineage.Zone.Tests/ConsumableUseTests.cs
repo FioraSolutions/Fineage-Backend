@@ -47,7 +47,7 @@ public sealed class ConsumableUseTests
         var kit = new NetTestKit();
         var rec = Recorder(kit);
         var (s, p) = await kit.EnterAsync(classId: 18);
-        int potion = Grant(kit, p, ManaPotion);
+        int potion = Grant(kit, p, ManaPotion, count: 2);
         int before = p.Inventory!.CountOf(ManaPotion);
         p.CurMp = 0;
 

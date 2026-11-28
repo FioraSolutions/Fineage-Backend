@@ -27,7 +27,7 @@ public sealed partial class ZoneWorld
         if (_geo.HasGeo(npc.X, npc.Y))
         {
             npc.Z = _geo.GetHeight(npc.X, npc.Y, npc.Z);
-            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out bool blocked);
+            (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, wantX, wantY, wantZ, out bool blocked, Doors);
             if (blocked)
             {
                 if (TryNpcPathCacheOnly(npc.X, npc.Y, wantX, wantY, out var cached) && cached.Count > 0)
@@ -68,6 +68,11 @@ public sealed partial class ZoneWorld
     /// Mobius <c>Attackable.returnHome</c> (<c>Attackable.java:1685</c>): <c>clearAggroList()</c> and walk back to the
     /// spawn point. It does <b>not</b> heal — only the distance leash reset does (see
     /// <see cref="TryLeashReset"/>); a mob that simply lost its target heals through the normal regen tick.
+    /// <para>
+    /// Mobius guards the intent itself: <c>thinkActive</c> only issues it when the pawn is past
+    /// <c>MaxDriftRange</c> of its spawn (<c>AttackableAI.java:625-631</c>). Callers that decide on a lost target
+    /// must therefore go through <see cref="GoActiveAfterFight"/>, not call this directly.
+    /// </para>
     /// </summary>
     void ReturnHome(ZoneEntity npc, long now)
     {
@@ -91,6 +96,48 @@ public sealed partial class ZoneWorld
         }
         ZoneHotPathLogs.NpcReturnHome(npc.ObjectId, npc.X, npc.Y, npc.HomeX, npc.HomeY);
         StartNpcMove(npc, npc.HomeX, npc.HomeY, npc.HomeZ, now);
+    }
+
+    /// <summary>
+    /// Mobius <c>AttackableAI</c> has no "return home" flag: intention <c>MOVE_TO</c> exists only while the walk runs,
+    /// and <c>onEvtArrived</c> turns it back into <c>AI_INTENTION_ACTIVE</c> (<c>CreatureAI.java:717-724</c>). A lost
+    /// target therefore does one of two things:
+    /// <list type="bullet">
+    /// <item><b>Past <c>MaxDriftRange</c></b> of the spawn — <c>setWalking()</c> + <c>returnHome()</c>
+    /// (<c>AttackableAI.java:625-631</c>): clear the AggroList and start the walk.</item>
+    /// <item><b>Inside the drift box</b> — plain <c>AI_INTENTION_ACTIVE</c>: keep standing, no walk at all. Walking a
+    /// few steps to the exact spawn point is not something CT0 does, and it also kept the mob out of the
+    /// idle/random-walk cadence.</item>
+    /// </list>
+    /// This is the single entry point for both, so a caller never has to re-derive the drift gate.
+    /// </summary>
+    void GoActiveAfterFight(ZoneEntity npc, long now)
+    {
+        if (npc.ReturningHome || DriftedBeyondMaxRange(npc))
+            ReturnHome(npc, now);
+        else
+            StopFightInPlace(npc);
+    }
+
+    /// <summary>
+    /// Mobius <c>AI_INTENTION_ACTIVE</c> after the fight is over: hate and damage shares dropped, gait back to walk,
+    /// and — if the pawn was still chasing — the movement cancelled with a final <c>StopMove</c> at the current spot.
+    /// </summary>
+    void StopFightInPlace(ZoneEntity npc)
+    {
+        SetAggroTarget(npc, 0);
+        npc.HateList.Clear();
+        npc.DamageBy.Clear();
+        npc.Chasing = false;
+        if (npc.Running)
+        {
+            npc.Running = false;
+            FanoutMoveType(npc);
+        }
+        if (!npc.MoveActive)
+            return;
+        StopTimedMove(npc);
+        BroadcastNpcMove(npc, npc.X, npc.Y, npc.Z);
     }
 
     /// <summary>Mobius attack-timeout <c>teleToLocation(spawn)</c>: drop the fight and snap back to the spawn.</summary>

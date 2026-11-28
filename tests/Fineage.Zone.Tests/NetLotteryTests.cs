@@ -222,32 +222,21 @@ public sealed class NetLotteryTests
     }
 
     [Fact]
-    public void The_board_survives_a_restart_through_the_json_store()
+    public void The_board_survives_a_restart_through_the_saved_world_state()
     {
-        string dir = Path.Combine(Path.GetTempPath(), "fineage-lottery-" + Guid.NewGuid().ToString("N"));
-        try
-        {
-            long now = Start.ToUnixTimeMilliseconds();
-            var board = LotteryBoard.OpenInStateDirectory(dir, now);
-            int end = 0;
-            var t = board.Sell(LotteryBoard.MaskOf([1, 2, 3, 4, 5])!.Value, now);
-            Assert.NotNull(t);
-            board.Tick(board.EndUnixMs, new Seq(0, 1, 2, 3, 4), []);
-            end++;
+        var rig = new WorldStateRig();
+        long now = Start.ToUnixTimeMilliseconds();
+        var board = LotteryBoard.Open(rig.State, now);
+        var t = board.Sell(LotteryBoard.MaskOf([1, 2, 3, 4, 5])!.Value, now);
+        Assert.NotNull(t);
+        board.Tick(board.EndUnixMs, new Seq(0, 1, 2, 3, 4), []);
 
-            var again = LotteryBoard.OpenInStateDirectory(dir, now);
-            Assert.Equal(2, again.Number);
-            Assert.Equal(board.Prize, again.Prize);
-            Assert.Equal(board.EndUnixMs, again.EndUnixMs);
-            Assert.Equal((1, board.Draw(1)!.Prize1), again.Check(t!.Serial));
-            again.Forget(t.Serial);
-            Assert.Null(LotteryBoard.OpenInStateDirectory(dir, now).Ticket(t.Serial));
-            Assert.Equal(1, end);
-        }
-        finally
-        {
-            if (Directory.Exists(dir))
-                Directory.Delete(dir, true);
-        }
+        var again = LotteryBoard.Open(rig.Restart(), now);
+        Assert.Equal(2, again.Number);
+        Assert.Equal(board.Prize, again.Prize);
+        Assert.Equal(board.EndUnixMs, again.EndUnixMs);
+        Assert.Equal((1, board.Draw(1)!.Prize1), again.Check(t!.Serial));
+        again.Forget(t.Serial);
+        Assert.Null(LotteryBoard.Open(rig.Restart(), now).Ticket(t.Serial));
     }
 }

@@ -69,11 +69,14 @@ public sealed partial class ZoneWorld
 
         if (DuelBlocksHit(attacker, target))
             return;
+        // Mobius Creature.isInvul: admin_invul / setInvul blocks HP loss (hits still start combat / hate above).
+        if (target.Invulnerable)
+            return;
         // Mobius CreatureAI.checkTargetLostOrDead (FAKE_DEATH_DAMAGE_STAND=true): a melee hit on a playing-dead pawn
         // stands it up before the damage lands.
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
-        target.CurHp = Math.Max(0, target.CurHp - hit.Damage);
+        ApplyTargetDamage(target, attacker, hit.Damage);
         ApplyReflectAndAbsorb(attacker, target, hit.Damage);
         if (_olympiadArena.Contains(attacker.ObjectId))
             _olympiad.Board.NoteDamage(attacker.ObjectId, hit.Damage);
@@ -107,6 +110,10 @@ public sealed partial class ZoneWorld
     /// </summary>
     void DamageNpcBy(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
+        // Mobius Creature.reduceCurrentHp: once _isDead is set, later hits in the same tick (queued melee,
+        // cubic/signet/skill messages at the stage barrier) are not applied to the corpse at all.
+        if (target.Dead)
+            return;
         var credit = CreditOf(attacker);
         DuelNoteOutsideHit(attacker, target);
         // Castle gates / walls, towers and headquarters have their own Mobius reduceHp rules.
@@ -123,7 +130,7 @@ public sealed partial class ZoneWorld
         if (TryExplodeTreasureBox(attacker, target, now))
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        ApplyTargetDamage(target, attacker, damage);
         ApplyReflectAndAbsorb(attacker, target, damage);
         FanoutVitals(target, StatusFor(target));
         RecordDamage(target, credit, damage);
@@ -137,14 +144,26 @@ public sealed partial class ZoneWorld
         {
             if (attacker.Summon != null)
                 attacker.Summon.TargetId = 0;
-            RemoveDeadNpc(target, killer: credit);
-            TryGrantFestivalBloodOffering(credit, target);
-            GrantKillReward(credit, target);
+            if (RemoveDeadNpc(target, killer: credit))
+            {
+                TryGrantFestivalBloodOffering(credit, target);
+                GrantKillReward(credit, target);
+            }
         }
     }
 
-    void RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
+    /// <summary>
+    /// Mobius <c>Creature.doDie</c>: "killing is only possible one time" — the synchronized guard sets the dead flag
+    /// before rewards, drops or decay, so a second damage source in the same tick cannot roll loot or pay XP again.
+    /// A respawn materializes a fresh entity, so the flag does not leak into the next lifecycle.
+    /// </summary>
+    /// <returns><c>true</c> when this call performed the death transition; <c>false</c> when the NPC was already dead.</returns>
+    bool RemoveDeadNpc(ZoneEntity npc, ZoneEntity? killer = null)
     {
+        if (npc.Dead)
+            return false;
+        npc.Dead = true;
+        npc.CurHp = 0;
         // Kill quest steps are not applied here. IQuestKillHook is the later combat entry.
         if (npc.SiegeNpc != null)
             OnSiegeNpcDied(npc);
@@ -171,6 +190,12 @@ public sealed partial class ZoneWorld
         // Mobius Creature.doDie -> broadcastPacket(new Die(this)): client plays the death animation.
         SetAggroTarget(npc, 0);
         npc.Chasing = false;
+        // Mobius Attackable.getMostHated returns null for a dead owner (isAlikeDead), and the list itself is dropped by
+        // Creature.decayMe (Creature.java:2465) and rebuilt empty by Attackable.onSpawn (Attackable.java:1455). Ending the
+        // fight at the death transition is the same observable state, and it means a corpse can never carry hate into
+        // decay or respawn (no ghost aggro). DamageBy stays: Mobius Attackable.calculateRewards runs inside doDie over
+        // the AggroInfo damage shares, and Fineage pays the kill after the transition.
+        npc.HateList.Clear();
         List<int>? netWatchers = null;
         foreach (var watcher in watchers)
         {
@@ -218,6 +243,8 @@ public sealed partial class ZoneWorld
                     DespawnNpc(minion);
             }
         }
+
+        return true;
     }
 
     void DespawnNpc(ZoneEntity npc)

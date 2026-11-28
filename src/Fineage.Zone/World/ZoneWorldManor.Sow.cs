@@ -93,9 +93,10 @@ public sealed partial class ZoneWorld
         DeferredEffect effect, bool allowDeadTarget = false)
     {
         long now = NowUnixMs();
-        var template = _game.Skills.Find(skillId);
-        if (template == null || !template.TryLevelData(1, out var levelData))
-            return SkillProtocol.Unknown;
+        var template = _game.Skills.Require(skillId);
+        if (!template.TryLevelData(1, out var levelData))
+            throw Fineage.Game.RequiredData.Required.Missing(
+                Fineage.Game.RequiredData.RequiredDataKind.Skill, skillId, $"manor skill {skillId} has no level 1 in skills.json");
         if (player.Dead)
             return SkillProtocol.Dead;
         if (IsCasting(player, now) || IsActionBlocked(player))
@@ -105,6 +106,7 @@ public sealed partial class ZoneWorld
         if (player.CurMp < levelData.MpConsume)
             return SkillProtocol.Mp;
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (!InSkillCastRange(player, target, template.CastRange))
             return SkillProtocol.Range;
 
@@ -191,7 +193,7 @@ public sealed partial class ZoneWorld
         if (itemId <= 0 || count <= 0 || player.Inventory is not { } inventory)
             return;
         GiveItem(session, inventory, itemId, count);
-        string name = _game.Items.TryGet(itemId, out var t) ? t.Name : itemId.ToString();
+        string name = _game.Items.Require(itemId).Name;
         if (count == 1)
             SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
         else
@@ -217,7 +219,7 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
         {
-            var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().ById[npcId];
+            var template = Fineage.Zone.Npcs.NpcCatalog.LoadDefault().Get(npcId);
             int objectId = AllocateQuestNpcObjectId();
             MaterializeSpawn(Fineage.Zone.Spawns.SpawnCatalog.FromTemplate(objectId, template, x, y, z, 0, attackable: true), _activeMapId);
             var npc = _byId[objectId];

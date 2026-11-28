@@ -101,6 +101,33 @@ public sealed class WarehouseLedgerTests
         Assert.Equal(600, bench.World.ClanWarehouseForTest(clanId)[Adena]);
     }
 
+    [Fact]
+    public async Task Refused_withdraw_leaves_bag_and_warehouse_untouched()
+    {
+        var bench = Open();
+        var actor = await bench.EnterAsync(
+            "refuse", "Refuse",
+            items: [new StoredItem(Adena, 200, -1), new StoredItem(Harvester, 1, -1)],
+            x: 0, y: 0, z: 0);
+        int piece = actor.Player.Inventory!.Items.Single(item => item.ItemId == Harvester).ObjectId;
+        Assert.Null(await actor.BypassAsync(KeeperObjectId, "DepositP"));
+        Assert.Null(await actor.Deposit(KeeperObjectId, (piece, 1)));
+        var bag = CharacterInventory.Rows(actor.Player.Inventory);
+        var storedRows = actor.Player.Warehouse!.Items.Select(item => (item.ObjectId, item.ItemId, item.Count)).ToArray();
+        int collision = bench.World.NextItemObjectIdForTests;
+        long tick = bench.Ledger.Entries.Count > 0 ? bench.Ledger.Entries[^1].Transaction.Id.Tick + 1 : 1;
+        Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
+            new LedgerTxId(tick, 0), LedgerTxKind.Adjustment, 0, 0, 0,
+            [new LedgerPosting(Fees, Harvester, -1), new LedgerPosting(LedgerAccount.Inventory(999_999), Harvester, 1, [collision])])).Ok);
+
+        Assert.Null(await actor.BypassAsync(KeeperObjectId, "WithdrawP"));
+        var stored = actor.Player.Warehouse.Items.Single(item => item.ItemId == Harvester);
+        Assert.Equal("ledger_refused", await actor.Withdraw(KeeperObjectId, (stored.ObjectId, 1)));
+        Assert.Equal(bag, CharacterInventory.Rows(actor.Player.Inventory));
+        Assert.Equal(storedRows, actor.Player.Warehouse.Items.Select(item => (item.ObjectId, item.ItemId, item.Count)));
+        Assert.DoesNotContain(bench.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.WarehouseWithdraw);
+    }
+
     static WorldBench Open()
     {
         var map = new SpawnMapDefinition(

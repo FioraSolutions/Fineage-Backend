@@ -70,8 +70,10 @@ public sealed partial class GameData
             throw new DirectoryNotFoundException($"Game data directory not found: {dataDirectory}");
 
         var items = ReadItems(Path.Combine(dataDirectory, ItemsFileName));
-        var kits = ReadKits(Path.Combine(dataDirectory, StarterKitsFileName), items);
+        var kitPath = Path.Combine(dataDirectory, StarterKitsFileName);
+        var kits = ReadKits(kitPath, items);
         var classes = ClassCatalog.Load(dataDirectory);
+        kits.RequireClasses(classes.BaseClassIds, kitPath);
         var quests = QuestCatalog.LoadPack(Path.Combine(dataDirectory, QuestCatalog.DirectoryName), items);
         var skills = SkillCatalog.Load(Path.Combine(dataDirectory, SkillCatalog.FileName));
         var skillTrees = SkillTreeCatalog.Load(Path.Combine(dataDirectory, SkillTreeCatalog.FileName));

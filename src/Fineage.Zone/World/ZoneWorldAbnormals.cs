@@ -47,7 +47,8 @@ public sealed partial class ZoneWorld
             duration,
             nowUnixMs,
             levelData.Level,
-            template.AbnormalType))
+            template.AbnormalType,
+            effectorObjectId: attacker?.ObjectId ?? 0))
             return true;
         if (target.Abnormals.Count > 0)
             _byId.Join(target, ActiveSets.WithAbnormals);

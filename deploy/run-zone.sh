@@ -15,6 +15,9 @@ if [[ -f "$ROOT/fineage.env" ]]; then
   set +a
 fi
 
+# Deployed zones are production: wildcard GM allowlists are rejected unless explicitly overridden.
+export FINEAGE_ENV="${FINEAGE_ENV:-production}"
+
 if [[ -z "${FINEAGE_HANDOFF_SECRET:-}" && -f "$ROOT/handoff.secret" ]]; then
   export FINEAGE_HANDOFF_SECRET
   FINEAGE_HANDOFF_SECRET="$(tr -d '\n\r' < "$ROOT/handoff.secret")"

@@ -1,0 +1,114 @@
+{
+  "id": "physical-attack-human-fighter-40",
+  "description": "Pilot: Human Fighter level 40, Long Sword + Mithril heavy set, Might 3 / Focus 3 / Haste 2, front melee swing against Gremlin (20001). Formula-level stats plus a 20k-swing seeded statistical mean; individual rolls are never compared.",
+  "seed": 9782026,
+  "samples": 20000,
+  "attacker": {
+    "classId": 0,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 2,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 58,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 59,
+        "enchant": 0
+      },
+      {
+        "slot": "gloves",
+        "itemId": 61,
+        "enchant": 0
+      },
+      {
+        "slot": "feet",
+        "itemId": 62,
+        "enchant": 0
+      }
+    ],
+    "buffs": [
+      {
+        "skillId": 1068,
+        "level": 3
+      },
+      {
+        "skillId": 1077,
+        "level": 3
+      },
+      {
+        "skillId": 1086,
+        "level": 2
+      }
+    ]
+  },
+  "target": {
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false,
+    "attackerBow": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "golden": "tools/Fineage.MobiusDiff/oracle/physical-attack-human-fighter-40.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {
+    "default": {
+      "absolute": 0.5,
+      "relative": 0.0
+    },
+    "pAtk": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pDef": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pAtkSpd": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "accuracy": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "evasion": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "critPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "critChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "damageNoCrit": {
+      "absolute": 0.5,
+      "relative": 0.0
+    },
+    "damageMeanPerSwing": {
+      "absolute": 0.25,
+      "relative": 0.02
+    }
+  },
+  "knownDivergences": {
+    "damageNoCrit": "CT0 Formulas.calcPhysDam: 76 * pAtk * proximity / pDef (front proximity 1 for this pilot).",
+    "damageMeanPerSwing": "Seeded Fineage sample mean vs Mobius analytic mean of the same 76·proximity core."
+  }
+}

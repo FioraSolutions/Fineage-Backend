@@ -17,13 +17,17 @@ public sealed class EconomyFaultInjectionTests
     [Fact]
     public async Task Commit_failure_restores_dirty_and_preserves_store()
     {
-        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 1);
+        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 0);
         var bench = new WorldBench(ledgerJournal: journal);
         var player = await bench.EnterAsync(items: [new StoredItem(Adena, 5, -1)]);
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        journal.ArmFailures(1);
+
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var shop = LedgerAccount.Of(SystemAccount.NpcShop);
+        long tick = bench.Ledger.Entries[^1].Transaction.Id.Tick + 1;
         Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
-            new LedgerTxId(1, 0),
+            new LedgerTxId(tick, 0),
             LedgerTxKind.Adjustment,
             0,
             0,
@@ -82,7 +86,13 @@ public sealed class EconomyFaultInjectionTests
         using var metrics = new MetricsCollector();
         Assert.False(bench.World.FlushDirtyInventoriesForTests());
         Assert.True(bench.World.DrainEconomyPersistForTests());
-        Assert.True(metrics.Snapshot().LedgerFlushFailures >= 1);
+        var snapshot = metrics.Snapshot();
+        Assert.True(snapshot.LedgerFlushFailures >= 1);
+        // #992: the ledger-flush alert reads both families; the failing store must move them through the exporter.
+        Assert.True(snapshot.OperationalCounters["fineage.economy.persist.failures"].Values.Sum() >= 1);
+        string text = MetricsText.Prometheus(snapshot, 0, 0, MetricsRole.Zone);
+        Assert.Matches(@"(?m)^fineage_ledger_flush_failures_total [1-9]", text);
+        Assert.Matches(@"(?m)^fineage_economy_persist_failures_total\{reason=""[^""]+""\} [1-9]", text);
         Assert.Equal(7, player.Saved().Sum(row => row.ItemId == Adena ? row.Count : 0));
         EconomyInvariantChecker.AssertHold(bench.World.LedgerForTests);
     }
@@ -114,6 +124,8 @@ public sealed class EconomyFaultInjectionTests
     sealed class FlakyLedgerJournal(int failuresBeforeSuccess) : MemoryLedgerJournal
     {
         int _failuresLeft = failuresBeforeSuccess;
+
+        internal void ArmFailures(int count) => _failuresLeft = count;
         int _unflushed;
 
         public override void Append(LedgerEntry entry)

@@ -139,8 +139,11 @@ public sealed class NetConnection : IAsyncDisposable
 
     ValueTask AcceptFrameAsync(PacketEnvelope envelope, CancellationToken ct)
     {
-        if (envelope.Major != PacketEnvelope.ProtocolMajor)
+        if (!NetProtocol.AcceptsFrame(envelope))
+        {
+            FailProtocol($"protocol_mismatch major={envelope.Major} (expected {PacketEnvelope.ProtocolMajor})");
             return ValueTask.CompletedTask;
+        }
 
         if (envelope.Payload.Length > PacketEnvelope.MaxPayloadBytes)
             return ValueTask.CompletedTask;
@@ -247,9 +250,32 @@ public sealed class NetConnection : IAsyncDisposable
     }
 
     /// <summary>
+    /// The dispatcher could not retain this client's reliable ordered view. Close only this connection; later
+    /// batches skip it through <see cref="IsBoundTo"/> while every other recipient keeps its ordered delivery.
+    /// </summary>
+    public void ShedReliableAudience(string reason) => FailOutbound(reason);
+
+    /// <summary>
     /// The outbound budget for this connection is exhausted, or the stripe could not take a reliable batch.
     /// Close the socket and keep going. The world tick must not wait on this client.
     /// </summary>
+    /// <summary>
+    /// The peer sent a frame this server will not speak (wrong protocol major).
+    /// Close this connection without treating it as a slow-client overflow.
+    /// </summary>
+    internal void FailProtocol(string reason)
+    {
+        if (Interlocked.Exchange(ref _failed, 1) != 0)
+            return;
+
+        NetHostLog.Error($"protocol_rejected {Describe()}: {reason}. Closing the connection.");
+        Volatile.Write(ref _closed, 1);
+        _mailbox.Close();
+        _inbox.Writer.TryComplete();
+        WakePump();
+        try { _stream.Dispose(); } catch { /* the read loop and the pump observe the closed socket */ }
+    }
+
     internal void FailOutbound(string reason)
     {
         if (Interlocked.Exchange(ref _failed, 1) != 0)

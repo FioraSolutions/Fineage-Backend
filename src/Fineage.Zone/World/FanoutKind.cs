@@ -128,6 +128,22 @@ internal enum FanoutKind : byte
     DungeonEntered = 121,
     CursedWeaponList = 122,
     CursedWeaponLocation = 123,
+    ShopPreviewList = 124,
+    ShopPreviewInfo = 125,
+    Dice = 126,
+    ShowMiniMap = 127,
+    ShowCalculator = 128,
+    ShowXMasSeal = 129,
+    MacroList = 130,
+    PartyMatchDetail = 131,
+    PartyMatchRoomList = 132,
+    PartyRoomMemberList = 133,
+    PartyRoomMemberUpdate = 134,
+    PartyRoomClose = 135,
+    PartyRoomAskJoin = 136,
+    PartyMatchWaitingRoom = 137,
+    ShowBoard = 138,
+    PcCafePointInfo = 139,
 }
 
 internal static class FanoutKinds

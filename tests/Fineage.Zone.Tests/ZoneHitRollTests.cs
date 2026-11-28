@@ -38,11 +38,11 @@ public sealed class ZoneHitRollTests
         // hit (0 < 800), crit (44 > 10), spread +10%
         var (crit, cf) = ZoneCombat.RollMelee(new Scripted(0, 10, 10), 29, 44.444, 10, 10, 44, 10);
         Assert.Equal(ZoneCombat.HitFlagCrit, cf);
-        Assert.Equal((int)(70d * 29 / 44.444 * 2 * 1.10), crit);
+        Assert.Equal((int)(76d * 29 / 44.444 * 2 * 1.10), crit);
         // hit, no crit (44 > 999 false), spread −10%
         var (plain, pf) = ZoneCombat.RollMelee(new Scripted(0, 999, -10), 29, 44.444, 10, 10, 44, 10);
         Assert.Equal(0, pf);
-        Assert.Equal((int)(70d * 29 / 44.444 * 0.90), plain);
+        Assert.Equal((int)(76d * 29 / 44.444 * 0.90), plain);
     }
 
     [Fact]

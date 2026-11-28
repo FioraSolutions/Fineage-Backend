@@ -13,6 +13,8 @@ public sealed class TimeSeriesWindow
     public double FanoutEnqueueToMailboxP99Ms { get; init; }
     public double FanoutQueueAgeP99Ms { get; init; }
     public double FanoutQueueDepthMax { get; init; }
+    public double CommandQueueDepthMax { get; init; }
+    public double CommandIngressQueuedMax { get; init; }
 }
 
 public static class TimeSeriesSummaryBuilder
@@ -46,25 +48,77 @@ public static class TimeSeriesSummaryBuilder
                 SubmitToMailboxP99Ms = inWindow.Max(s => s.SubmitToMailboxP99Ms),
                 FanoutEnqueueToMailboxP99Ms = inWindow.Max(s => s.FanoutEnqueueToMailboxP99Ms),
                 FanoutQueueAgeP99Ms = inWindow.Max(s => s.FanoutQueueOldestAgeMs),
-                FanoutQueueDepthMax = inWindow.Max(s => s.FanoutQueueDepth)
+                FanoutQueueDepthMax = inWindow.Max(s => s.FanoutQueueDepth),
+                CommandQueueDepthMax = inWindow.Max(s => s.CommandQueueDepthMax),
+                CommandIngressQueuedMax = inWindow.Max(s => s.CommandIngressQueued)
             });
         }
 
         return windows;
     }
 
-    public static string BacklogTrend(IReadOnlyList<TimeSeriesWindow> windows)
+    public static string BacklogTrend(IReadOnlyList<TimeSeriesWindow> windows) =>
+        Trend(windows, w => w.FanoutQueueDepthMax, "fanout_queue_depth metric absent");
+
+    /// <summary>
+    /// One CountBounds step (see <c>MetricsText</c>) allowed on a lifetime histogram high-water
+    /// before early-third vs late-third max is called growing. <c>fineage_fanout_queue_depth</c>
+    /// (and the command-depth twin) expose a cumulative max, so a single mid-run sample of depth 4
+    /// ratchets every later scrape from 2 to 4 and is not a backlog.
+    /// </summary>
+    public const double QueueTrendAbsoluteSlack = 8;
+
+    /// <summary>Early-third vs late-third max. Used by the queue-depth soak gate (#990, #951).</summary>
+    public static string Trend(
+        IReadOnlyList<TimeSeriesWindow> windows,
+        Func<TimeSeriesWindow, double> selector,
+        string absentText)
     {
         if (windows.Count < 2)
             return "insufficient windows";
-        double first = windows.Take(windows.Count / 3).DefaultIfEmpty().Max(w => w?.FanoutQueueDepthMax ?? 0);
-        double last = windows.TakeLast(windows.Count / 3).DefaultIfEmpty().Max(w => w?.FanoutQueueDepthMax ?? 0);
+        double first = ThirdMedian(windows, selector, first: true);
+        double last = ThirdMedian(windows, selector, first: false);
         if (last <= 0 && first <= 0)
-            return "fanout_queue_depth metric absent";
-        if (last > first * 1.25 + 1)
+            return windows.Any(w => selector(w) > 0) ? "flat" : absentText;
+        if (last > GrowthLimit(first))
             return "growing";
         if (last < first * 0.75)
             return "shrinking";
         return "flat";
+    }
+
+    public static double GrowthLimit(double earlyThirdMax) =>
+        Math.Max(earlyThirdMax * 1.25 + QueueTrendAbsoluteSlack, NextCountBoundsBucket(earlyThirdMax));
+
+    /// <summary>
+    /// Next <c>CountBounds</c> histogram ceiling strictly above <paramref name="early"/>.
+    /// A lifetime scrape max ratchets to this bucket on one new high-water and is not a backlog.
+    /// </summary>
+    public static double NextCountBoundsBucket(double early)
+    {
+        if (early <= 0)
+            return QueueTrendAbsoluteSlack;
+        double bucket = 1;
+        while (bucket <= early)
+            bucket *= 2;
+        return bucket;
+    }
+
+    public static double ThirdMedian(
+        IReadOnlyList<TimeSeriesWindow> windows,
+        Func<TimeSeriesWindow, double> selector,
+        bool first)
+    {
+        if (windows.Count == 0)
+            return 0;
+        int size = Math.Max(1, windows.Count / 3);
+        var values = (first ? windows.Take(size) : windows.TakeLast(size))
+            .Select(selector)
+            .OrderBy(v => v)
+            .ToList();
+        if (values.Count == 0)
+            return 0;
+        int mid = values.Count / 2;
+        return values.Count % 2 == 1 ? values[mid] : (values[mid - 1] + values[mid]) / 2.0;
     }
 }

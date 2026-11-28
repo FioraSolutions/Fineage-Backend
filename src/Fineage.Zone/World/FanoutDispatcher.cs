@@ -8,10 +8,10 @@ namespace Fineage.Zone.World;
 /// <summary>
 /// Delivers sealed world fan-out batches off the simulation thread, in seal order, on one dedicated worker thread.
 /// <para>
-/// The simulation thread never waits here and never delivers a batch itself. The hand-off is an unbounded
-/// concurrent queue: <see cref="Enqueue"/> is a short producer-only lock plus an enqueue, which cannot fail for
-/// capacity, and a <see cref="WorkerWakeup"/> signal. The worker is its own thread, not a thread-pool continuation:
-/// an async wait put its wake-up behind socket pumps on the pool, which was most of the fan-out queue age under load.
+/// The simulation thread never waits here and never delivers a batch itself. <see cref="Enqueue"/> is a short
+/// producer-only capacity decision plus enqueue and a <see cref="WorkerWakeup"/> signal. The worker never takes
+/// the producer lock and runs on its own thread, not a thread-pool continuation: an async wait put its wake-up
+/// behind socket pumps on the pool, which was most of the fan-out queue age under load.
 /// The build stage stays one thread because the world-event publishers keep per-observer state (knownlists,
 /// appearance) that must see batches in seal order; per-connection delivery is parallel on <c>NetFanoutStripes</c>. Backpressure for slow clients lives where the bytes are, in each connection's byte-bounded
 /// <c>OutboundMailbox</c> (shed low-priority frames, then disconnect that client). Everything the worker calls
@@ -19,11 +19,13 @@ namespace Fineage.Zone.World;
 /// never wait on a client.
 /// </para>
 /// <para>
-/// A backlog above the soft limit is counted (<c>fineage_fanout_backlog_soft_exceeded_total</c>) and logged once a
-/// second. Above the hard limit every enqueue is counted on <c>fineage_fanout_backlog_emergency_total</c> and logged
-/// as an error that names the batch the worker is stuck on. That counter must stay 0. The batch is still queued:
-/// delivering it inline would reorder it ahead of older queued batches and move the worker's cost into the tick,
-/// and dropping it would lose reliable gameplay frames.
+/// The queue retains at most the hard batch and hard send-work limits; the one in-flight batch is outside those
+/// bounds. A backlog above the soft limit is counted (<c>fineage_fanout_backlog_soft_exceeded_total</c>) and logged
+/// once a second. At the hard limit visuals are shed, then declared recipients beyond the remaining work are
+/// disconnected; the work charged to the queue is exactly the admitted audience. A batch that still cannot be
+/// retained is refused after its declared recipients are disconnected, never queued at a lower charge than it will
+/// deliver. The normal worker preserves seal order and has no emergency delivery path; emergency enqueues must stay
+/// 0 in normal runs.
 /// </para>
 /// </summary>
 internal sealed class FanoutDispatcher : IDisposable
@@ -37,11 +39,13 @@ internal sealed class FanoutDispatcher : IDisposable
     const string SoftWorkEnv = "FINEAGE_ZONE_FANOUT_BACKLOG_SOFT_WORK";
     const string HardWorkEnv = "FINEAGE_ZONE_FANOUT_BACKLOG_HARD_WORK";
 
-    readonly ConcurrentQueue<(SealedWorldFanoutBatch Batch, long EnqueuedAt)> _queue = new();
+    readonly ConcurrentQueue<QueuedFanoutBatch> _queue = new();
+    sealed record QueuedFanoutBatch(SealedWorldFanoutBatch Batch, long EnqueuedAt, long ChargedWork);
     readonly WorkerWakeup _wakeup = new();
     readonly Thread _worker;
     readonly CancellationTokenSource _cts = new();
     readonly object _enqueueOrder = new();
+    FanoutReliableAdmission? _reliableAdmission;
     readonly int _softBacklog;
     readonly int _hardBacklog;
     readonly int _softWork;
@@ -49,7 +53,9 @@ internal sealed class FanoutDispatcher : IDisposable
     int _closed;
     int _inFlight;
     int _pending;
+    int _queuedItems;
     long _pendingWork;
+    long _queuedWork;
     int _inFlightWork;
     long _inFlightSinceTimestamp;
     long _inFlightTick;
@@ -74,8 +80,10 @@ internal sealed class FanoutDispatcher : IDisposable
         int? softBacklogBatches = null,
         int? hardBacklogBatches = null,
         int? softBacklogWork = null,
-        int? hardBacklogWork = null)
+        int? hardBacklogWork = null,
+        FanoutReliableAdmission? reliableAdmission = null)
     {
+        _reliableAdmission = reliableAdmission;
         _softBacklog = softBacklogBatches ?? ReadLimit(SoftBacklogEnv, DefaultSoftBacklogBatches, "batch");
         _hardBacklog = hardBacklogBatches ?? ReadLimit(HardBacklogEnv, DefaultHardBacklogBatches, "batch");
         if (_softBacklog < 1)
@@ -105,15 +113,32 @@ internal sealed class FanoutDispatcher : IDisposable
         return value;
     }
 
+    /// <summary>
+    /// Per-recipient admission used when the retained hand-off is full. It is set as a plain reference (never as a
+    /// delegate) so the dispatcher worker thread cannot root the owning world; the world must stay collectible when
+    /// tests or callers drop it without disposing.
+    /// </summary>
+    internal FanoutReliableAdmission? ReliableAdmission
+    {
+        get => Volatile.Read(ref _reliableAdmission);
+        set => Volatile.Write(ref _reliableAdmission, value);
+    }
+
     internal int SoftBacklog => _softBacklog;
     internal int HardBacklog => _hardBacklog;
     internal int SoftBacklogWork => _softWork;
     internal int HardBacklogWork => _hardWork;
 
+    /// <summary>Batches waiting in the queue; the one the worker is executing is not retained here.</summary>
+    internal int RetainedItems => Volatile.Read(ref _queuedItems);
+
+    /// <summary>Recipient work waiting in the queue; the one the worker is executing is not retained here.</summary>
+    internal long RetainedWork => Interlocked.Read(ref _queuedWork);
+
     /// <summary>Batches handed over and not yet finished by the worker.</summary>
     internal int Backlog => Volatile.Read(ref _pending);
 
-    /// <summary>Recipient work handed over and not yet finished by the worker (queued plus the one in flight).</summary>
+    /// <summary>Recipient work handed over and not yet finished by the worker (retained plus the one in flight).</summary>
     internal long BacklogWork => Volatile.Read(ref _pendingWork);
 
     /// <summary>
@@ -135,46 +160,96 @@ internal sealed class FanoutDispatcher : IDisposable
         }
 
         long started = Stopwatch.GetTimestamp();
-        long work = batch.SendWork;
-        // Overflow policy: an enqueue that would cross the hard backlog sheds the incoming batch's visual writes down
-        // to its own budget first. Reliable gameplay writes are never dropped, so the hand-off stays bounded by the
-        // number of batches and their send work instead of growing without limit while the worker lags.
-        if (WouldCrossHardLimit(work))
-        {
-            if (TryDropVisualOnlyBatch(batch))
-                return;
-            work = ShedVisualsForOverflow(batch, work);
-        }
-
-        int backlog;
-        long backlogWork;
-        // Producer-only lock: keeps enqueue order equal to seal order when several threads seal.
-        // The worker never takes it, so it cannot make the simulation thread wait on delivery.
+        long previousWork;
+        int previousItems;
+        long chargedWork;
+        bool emergency;
+        string reason = $"tick={batch.Sequence.Tick} phase={batch.Sequence.Phase} seq={batch.Sequence.Sequence}";
+        // Producer-only lock: the capacity check, admission and enqueue are one decision. The worker never takes it,
+        // so encoding, delivery and a full downstream mailbox can never make the simulation thread wait here.
         lock (_enqueueOrder)
         {
-            backlog = Interlocked.Increment(ref _pending);
-            backlogWork = Interlocked.Add(ref _pendingWork, work);
-            _queue.Enqueue((batch, started));
+            previousWork = _queuedWork;
+            previousItems = _queuedItems;
+            long workRoom = Math.Max(0, _hardWork - previousWork);
+            long work = batch.SendWork;
+            emergency = false;
+
+            if (previousItems >= _hardBacklog)
+            {
+                // The hard item bound is the last thing that keeps queue memory finite. Reliable writes cannot be
+                // silently dropped, so first disconnect every declared recipient; nothing live is left to lose.
+                if (TryDropVisualOnlyBatch(batch))
+                    return;
+                AdmitReliable(batch, remainingWork: 0, reason);
+                DropReliableAtHardLimit(batch, batch.SendWork, reason,
+                    $"no FIFO slot under the {_hardBacklog}-batch hard limit");
+                return;
+            }
+
+            if (work > workRoom)
+            {
+                // Visual writes are the class the mailbox may shed for a slow client anyway.
+                if (TryDropVisualOnlyBatch(batch))
+                    return;
+                work = ShedVisualsForOverflow(batch, work, workRoom);
+                if (work > workRoom)
+                {
+                    long admitted = AdmitReliable(batch, workRoom, reason);
+                    if (admitted <= 0)
+                    {
+                        DropReliableAtHardLimit(batch, work, reason,
+                            $"{work} reliable send work does not fit the remaining {workRoom} of {_hardWork}");
+                        return;
+                    }
+
+                    work = admitted;
+                    emergency = true;
+                }
+            }
+
+            chargedWork = work;
+            Interlocked.Increment(ref _queuedItems);
+            Interlocked.Add(ref _queuedWork, chargedWork);
+            int backlog = Interlocked.Increment(ref _pending);
+            long backlogWork = Interlocked.Add(ref _pendingWork, chargedWork);
+            _queue.Enqueue(new QueuedFanoutBatch(batch, started, chargedWork));
+
+            if (emergency)
+            {
+                Interlocked.Increment(ref _emergencyEnqueues);
+                FineageTelemetry.FanoutBacklogEmergency.Add(1);
+                FineageTelemetry.FanoutReliableAudienceShed.Add(1);
+                if (TryRateLimit(ref _lastHardLogMs, Environment.TickCount64))
+                    ZoneLog.Error(
+                        $"fan-out reliable backlog full: admitted {chargedWork}/{batch.SendWork} send work for {reason}; " +
+                        $"disconnected recipients that did not fit queuedWork={_queuedWork} hardWork={_hardWork}. {DescribeWorker()}");
+            }
+
+            _wakeup.Signal();
+
+            double handoffMs = (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency;
+            FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(handoffMs);
+            NoteDroppedVisuals(batch);
+            if ((previousItems <= _softBacklog && _queuedItems > _softBacklog) ||
+                (previousWork <= _softWork && _queuedWork > _softWork))
+                NoteBacklog(batch, backlog, backlogWork);
+            PublishQueue();
         }
-
-        _wakeup.Signal();
-
-        double handoffMs = (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency;
-        FineageTelemetry.FanoutDispatcherEnqueueWaitMilliseconds.Record(handoffMs);
-        NoteDroppedVisuals(batch);
-        if (backlog > _softBacklog || backlogWork > _softWork)
-            NoteBacklog(batch, backlog, backlogWork);
-        PublishQueue();
     }
 
     /// <summary>
-    /// True when handing <paramref name="work"/> over would push the backlog past the hard limit. The check is a
-    /// read of the producer counters without the enqueue lock: a concurrent enqueue may cross the limit first, and
-    /// that enqueue sheds its own batch. Shedding is therefore never missed, only sometimes done twice.
+    /// Keeps only the reliable recipient work that fits <paramref name="remainingWork"/> and returns it. Returns 0
+    /// when no concrete admission is configured: such a publisher cannot say which recipient to shed, so the
+    /// dispatcher refuses the batch instead of charging less work than the batch would deliver.
     /// </summary>
-    bool WouldCrossHardLimit(long work) =>
-        Volatile.Read(ref _pending) + 1 > _hardBacklog ||
-        Volatile.Read(ref _pendingWork) + work > _hardWork;
+    long AdmitReliable(SealedWorldFanoutBatch batch, long remainingWork, string reason)
+    {
+        var admission = ReliableAdmission;
+        return admission is { CanShedRecipients: true }
+            ? batch.AdmitAudience(remainingWork, _hardWork, reason, admission)
+            : 0;
+    }
 
     /// <summary>
     /// Drops a batch that carries nothing but visual writes when the hand-off is already at its hard limit. The whole
@@ -200,14 +275,14 @@ internal sealed class FanoutDispatcher : IDisposable
 
     /// <summary>
     /// Sheds the incoming batch's visual writes so the hand-off stays inside the hard backlog. Returns the work the
-    /// batch now carries. Reliable gameplay writes are never dropped, so a batch with only reliable writes goes over
-    /// the limit and the emergency counter reports it — losing a gameplay frame is worse than a long backlog.
+    /// batch now carries. Reliable gameplay writes are never globally dropped: when they no longer fit, the caller
+    /// selects per-recipient reliable admission and disconnects only clients whose ordered view cannot be retained.
     /// </summary>
-    long ShedVisualsForOverflow(SealedWorldFanoutBatch batch, long work)
+    long ShedVisualsForOverflow(SealedWorldFanoutBatch batch, long work, long room)
     {
-        // Aim the incoming batch at the room left under the hard limit: the hand-off then lands inside it.
-        long room = _hardWork - Volatile.Read(ref _pendingWork);
-        batch.ShedVisualsToBudget(Math.Max(1, room));
+        // Aim the incoming batch at the room left under the hard limit: the hand-off then lands inside it. A room of
+        // zero sheds every visual write; reliable recipients are handled by admission next.
+        batch.ShedVisualsToBudget(Math.Max(0, room));
         // The batch reports its shed count once, so the later NoteDroppedVisuals sees nothing left to count.
         int shed = batch.TakeDroppedVisuals();
         if (shed == 0)
@@ -220,8 +295,27 @@ internal sealed class FanoutDispatcher : IDisposable
             ZoneLog.Warn(
                 $"fan-out hand-off is above its hard limit ({_hardBacklog} batches / {_hardWork} work); " +
                 $"shed {shed} visual writes from batch tick={batch.Sequence.Tick} seq={batch.Sequence.Sequence}, " +
-                $"{work} -> {remaining} send work; reliable writes stay queued. {DescribeWorker()}");
+                $"{work} -> {remaining} send work; reliable writes are admitted next. {DescribeWorker()}");
         return remaining;
+    }
+
+    /// <summary>
+    /// Refuses a reliable batch that cannot be retained. Its declared recipients were already disconnected by
+    /// admission, so no connected client loses a frame silently: it re-enters and receives a fresh knownlist.
+    /// </summary>
+    void DropReliableAtHardLimit(SealedWorldFanoutBatch batch, long work, string reason, string detail)
+    {
+        Interlocked.Increment(ref _overflowDrops);
+        Interlocked.Increment(ref _reliableDrops);
+        FineageTelemetry.FanoutOverflowShed.Add(1);
+        FineageTelemetry.FanoutQueueOverflow.Add(1);
+        FineageTelemetry.FanoutReliableAudienceShed.Add(1);
+        if (TryRateLimit(ref _lastHardLogMs, Environment.TickCount64))
+            ZoneLog.Error(
+                $"fan-out reliable batch refused: {reason}; {detail}; " +
+                $"{work} send work was not retained (queuedWork={Volatile.Read(ref _queuedWork)}/{_hardWork}, " +
+                $"queuedItems={Volatile.Read(ref _queuedItems)}/{_hardBacklog}). {DescribeWorker()}");
+        batch.ReleaseScratchResources();
     }
 
     static void NoteDroppedVisuals(SealedWorldFanoutBatch batch)
@@ -234,38 +328,30 @@ internal sealed class FanoutDispatcher : IDisposable
     long _emergencyEnqueues;
     long _softExceededEnqueues;
     long _overflowDrops;
+    long _reliableDrops;
 
-    /// <summary>Hand-offs this dispatcher dropped or shed at the hard limit (visual-only drops and visual sheds).</summary>
+    /// <summary>Hand-offs this dispatcher dropped or shed at the hard limit (visual drops, visual sheds, reliable drops).</summary>
     public long OverflowDrops => Interlocked.Read(ref _overflowDrops);
 
-    /// <summary>Enqueues this dispatcher saw above the hard backlog limit (the emergency counter; 0 in normal runs).</summary>
+    /// <summary>Reliable batches refused because they could not be retained; their declared recipients were disconnected.</summary>
+    public long ReliableDrops => Interlocked.Read(ref _reliableDrops);
+
+    /// <summary>Reliable enqueues retained after disconnecting the recipients that did not fit the hard limit.</summary>
     public long EmergencyEnqueues => Interlocked.Read(ref _emergencyEnqueues);
 
-    /// <summary>Enqueues this dispatcher saw above the soft backlog limit and at or below the hard one.</summary>
+    /// <summary>Enqueues this dispatcher saw cross the soft item or send-work limit from below.</summary>
     public long SoftExceededEnqueues => Interlocked.Read(ref _softExceededEnqueues);
 
     void NoteBacklog(SealedWorldFanoutBatch batch, int backlog, long backlogWork)
     {
         long nowMs = Environment.TickCount64;
-        if (backlog > _hardBacklog || backlogWork > _hardWork)
-        {
-            Interlocked.Increment(ref _emergencyEnqueues);
-            FineageTelemetry.FanoutBacklogEmergency.Add(1);
-            if (TryRateLimit(ref _lastHardLogMs, nowMs))
-                ZoneLog.Error(
-                    $"fan-out dispatcher backlog {backlog} batches / {backlogWork} send work is above the hard limit " +
-                    $"({_hardBacklog} batches / {_hardWork} work, {HardBacklogEnv} / {HardWorkEnv}); " +
-                    $"queued tick={batch.Sequence.Tick} seq={batch.Sequence.Sequence}; {DescribeWorker()}. " +
-                    "Batches stay queued in order; the worker is not keeping up with the world.");
-            return;
-        }
-
         Interlocked.Increment(ref _softExceededEnqueues);
         FineageTelemetry.FanoutBacklogSoftExceeded.Add(1);
         if (TryRateLimit(ref _lastSoftLogMs, nowMs))
             ZoneLog.Warn(
                 $"fan-out dispatcher backlog {backlog} batches / {backlogWork} send work is above the soft limit " +
-                $"({_softBacklog} batches / {_softWork} work, {SoftBacklogEnv} / {SoftWorkEnv}); {DescribeWorker()}");
+                $"({_softBacklog} batches / {_softWork} work, {SoftBacklogEnv} / {SoftWorkEnv}); " +
+                $"retained={Volatile.Read(ref _queuedItems)}/{Volatile.Read(ref _queuedWork)}; {DescribeWorker()}");
     }
 
     static bool TryRateLimit(ref long last, long nowMs)
@@ -286,8 +372,8 @@ internal sealed class FanoutDispatcher : IDisposable
     void PublishQueue()
     {
         // Batches handed over and not yet picked up by the worker.
-        int depth = Math.Max(0, Volatile.Read(ref _pending) - Volatile.Read(ref _inFlight));
-        long work = Math.Max(0, Volatile.Read(ref _pendingWork) - Volatile.Read(ref _inFlightWork));
+        int depth = Math.Max(0, Volatile.Read(ref _queuedItems));
+        long work = Math.Max(0, Interlocked.Read(ref _queuedWork));
         double ageMs = 0;
         if (depth > 0 && _queue.TryPeek(out var oldest))
             ageMs = Math.Max(0, (Stopwatch.GetTimestamp() - oldest.EnqueuedAt) * 1000.0 / Stopwatch.Frequency);
@@ -309,7 +395,9 @@ internal sealed class FanoutDispatcher : IDisposable
             inner);
 
     internal string DescribeQueue() =>
-        $"fanout backlog pending={Volatile.Read(ref _pending)} inFlight={Volatile.Read(ref _inFlight)} soft={_softBacklog} hard={_hardBacklog}; {DescribeWorker()}";
+        $"fanout backlog pending={Volatile.Read(ref _pending)} inFlight={Volatile.Read(ref _inFlight)} " +
+        $"queuedItems={Volatile.Read(ref _queuedItems)}/{_hardBacklog} queuedWork={Volatile.Read(ref _queuedWork)}/{_hardWork}; " +
+        $"{DescribeWorker()}";
 
     /// <summary>Test and shutdown: wait until the worker queue and in-flight batch are empty.</summary>
     public void WaitUntilIdle(TimeSpan? timeout = null)
@@ -319,7 +407,8 @@ internal sealed class FanoutDispatcher : IDisposable
         var spin = new SpinWait();
         while (sw.Elapsed < limit)
         {
-            if (Volatile.Read(ref _inFlight) == 0 && Volatile.Read(ref _pending) == 0)
+            if (Volatile.Read(ref _inFlight) == 0 && Volatile.Read(ref _pending) == 0 &&
+                Volatile.Read(ref _queuedItems) == 0 && Interlocked.Read(ref _queuedWork) == 0)
             {
                 if (_propagated != null)
                     throw new InvalidOperationException("fan-out delivery failed", _propagated);
@@ -343,7 +432,7 @@ internal sealed class FanoutDispatcher : IDisposable
                 {
                     if (Volatile.Read(ref _closed) != 0)
                         break;
-                    _wakeup.Park(() => !_queue.IsEmpty);
+                    _wakeup.Park(() => !_queue.IsEmpty || Volatile.Read(ref _closed) != 0);
                     continue;
                 }
 
@@ -351,7 +440,11 @@ internal sealed class FanoutDispatcher : IDisposable
                     Thread.Sleep(BatchDelayForTest);
 
                 FineageTelemetry.FanoutDispatchWaitMilliseconds.Record(ElapsedMs(item.EnqueuedAt));
-                long work = item.Batch.SendWork;
+                // The queue was charged exactly what admission left; remove that same amount, not a re-read of the
+                // sealed batch, so RetainedWork/BacklogWork cannot drift when recipients were shed before enqueue.
+                long work = item.ChargedWork;
+                Interlocked.Decrement(ref _queuedItems);
+                Interlocked.Add(ref _queuedWork, -work);
                 Volatile.Write(ref _inFlightTick, item.Batch.Sequence.Tick);
                 Volatile.Write(ref _inFlightSinceTimestamp, Stopwatch.GetTimestamp());
                 Volatile.Write(ref _inFlightWork, (int)Math.Min(int.MaxValue, work));

@@ -195,7 +195,7 @@ public static partial class ZoneCombat
             ? 0
             : Math.Min(missingHp, (int)(absorbDamPercent / 100d * damage));
 
-    /// <summary>Interlude <c>calcPhysDam</c> with skill: 70·(pAtk·(ss?2:1) + power) / (pDef [+ sDef]).</summary>
+    /// <summary>Interlude <c>calcPhysDam</c> with skill: 76·(pAtk·(ss?2:1) + power)·proximity / (pDef [+ sDef]).</summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>
         PhysicalSkillDamage(pAtk, pDef, power, soulshot, crit: false);
 
@@ -205,9 +205,10 @@ public static partial class ZoneCombat
     /// (<c>critDmgAdd · 6.1 · 77 / pDef</c>) that Mobius sums after the multipliers.
     /// </summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot, bool crit,
-        double critDamageMod = 1d, double weaponTraitBonus = 1d, double critDamageAdd = 0)
+        double critDamageMod = 1d, double weaponTraitBonus = 1d, double critDamageAdd = 0, double proximity = 1d)
     {
-        double damage = 70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef);
+        double damage = PhysDamCoefficient * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power))
+            * Math.Max(0d, proximity) / Math.Max(1d, pDef);
         if (crit)
         {
             damage *= 2 * Math.Max(0, critDamageMod);
@@ -237,7 +238,7 @@ public static partial class ZoneCombat
         double rate = PlayerCombatFormulas.MagicCriticalBase(armed, witBonus);
         if (mods != null && !ReferenceEquals(mods, CombatStatMods.None))
             rate = mods.Apply(CombatStat.MCritRate, rate);
-        return (int)rate * 10;
+        return Math.Min((int)rate * 10, MaxMCritRate);
     }
 
     /// <summary>Mobius <c>calcMCrit</c>: rate ‰ &gt; Rnd(1000).</summary>
@@ -247,7 +248,11 @@ public static partial class ZoneCombat
     /// Mobius <c>calcMagicSuccess</c> (MAGIC_SUCCESS_RES 1): rate = 100 − round(1.3^(targetLvl − magicLvl)); success when Rnd(100) &lt; rate.
     /// </summary>
     public static bool RollMagicSuccess(Random rnd, int targetLevel, int magicLevel) =>
-        rnd.Next(100) < 100 - (int)Math.Round((float)Math.Pow(1.3, targetLevel - magicLevel), MidpointRounding.AwayFromZero);
+        rnd.Next(100) < MagicSuccessRate(targetLevel, magicLevel);
+
+    /// <summary>Mobius <c>calcMagicSuccess</c> rate: <c>100 − round((float)1.3^(targetLevel − magicLevel))</c> (may go negative).</summary>
+    public static int MagicSuccessRate(int targetLevel, int magicLevel) =>
+        100 - (int)Math.Round((float)Math.Pow(1.3, targetLevel - magicLevel), MidpointRounding.AwayFromZero);
 
     public enum MagicOutcome { Normal, Critical, HalfFail, Resisted }
 

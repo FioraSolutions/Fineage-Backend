@@ -12,6 +12,7 @@ public sealed class FreightWarehouseTests
     const int KeeperObjectId = 61001;
     const int Adena = 57;
     const int Scroll = 736;
+    const int Harvester = 5125;
 
     static readonly LedgerAccount Fees = LedgerAccount.Of(SystemAccount.Fees);
 
@@ -73,6 +74,36 @@ public sealed class FreightWarehouseTests
             new[] { Line(LedgerAccount.Inventory(receiver.Player.ObjectId), Scroll, 2), Line(freight, Scroll, -2) }.Order(),
             Lines(withdraw));
         Assert.Equal(2, receiver.Player.Inventory!.CountOf(Scroll));
+    }
+
+    [Fact]
+    public async Task Refused_freight_withdraw_leaves_bag_and_freight_untouched()
+    {
+        var bench = Open();
+        var sender = await bench.EnterAsync(
+            "acct", "Sender", items: [new StoredItem(Adena, 5000, -1), new StoredItem(Harvester, 1, -1)], x: 0, y: 0, z: 0);
+        Assert.Equal(CreateCharacterStatus.Ok, bench.Store.TryAddCharacter(
+            "acct", "Receiver", HumanClasses.Fighter, 0, 0, out var created,
+            [new StoredItem(Adena, 100, -1)], hasPosition: true, x: 0, y: 0, z: 0));
+        Assert.Null(await sender.BypassAsync(KeeperObjectId, "package_deposit"));
+        Assert.Null(await sender.World.TryPackageSendAsync(
+            sender.Session, created!.Id,
+            [new WarehouseLine(sender.Player.Inventory!.Items.Single(item => item.ItemId == Harvester).ObjectId, 1)], default));
+        var receiver = await bench.EnterAsync("acct", "Receiver", x: 0, y: 0, z: 0);
+        var bag = CharacterInventory.Rows(receiver.Player.Inventory!);
+        var storedRows = receiver.Player.Freight!.Items.Select(item => (item.ObjectId, item.ItemId, item.Count)).ToArray();
+        int collision = bench.World.NextItemObjectIdForTests;
+        long tick = bench.Ledger.Entries.Count > 0 ? bench.Ledger.Entries[^1].Transaction.Id.Tick + 1 : 1;
+        Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
+            new LedgerTxId(tick, 0), LedgerTxKind.Adjustment, 0, 0, 0,
+            [new LedgerPosting(Fees, Harvester, -1), new LedgerPosting(LedgerAccount.Inventory(999_999), Harvester, 1, [collision])])).Ok);
+
+        Assert.Null(await receiver.BypassAsync(KeeperObjectId, "package_withdraw"));
+        var stack = receiver.Player.Freight.Items.Single(item => item.ItemId == Harvester);
+        Assert.Equal("ledger_refused", await receiver.Withdraw(KeeperObjectId, (stack.ObjectId, 1)));
+        Assert.Equal(bag, CharacterInventory.Rows(receiver.Player.Inventory));
+        Assert.Equal(storedRows, receiver.Player.Freight.Items.Select(item => (item.ObjectId, item.ItemId, item.Count)));
+        Assert.DoesNotContain(bench.Ledger.Entries, entry => entry.Transaction.Kind == LedgerTxKind.FreightWithdraw);
     }
 
     static WorldBench Open()

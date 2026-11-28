@@ -355,7 +355,7 @@ public sealed partial class ZoneWorld
         SelfLine(session, 1749, "Congratulations! You will now graduate from the Clan Academy and leave your current clan. As a graduate of the academy, you can immediately join a clan as a regular member without being subject to any penalties.");
         QueueClearPledge(session);
 
-        if (player.Inventory is { } inventory && _game.Items.TryGet(PledgeProtocol.AcademyCircletItemId, out _))
+        if (player.Inventory is { } inventory && _game.Items.Require(PledgeProtocol.AcademyCircletItemId) is not null)
         {
             var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
             var touches = new List<Fineage.Game.Quests.BagTouch>();

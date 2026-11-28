@@ -13,6 +13,8 @@ Login issues an HMAC handoff token. The zone on **9777** accepts it in the Net `
 | Doc | Role |
 |-----|------|
 | [`docs/net-protocol.md`](docs/net-protocol.md) | **Live wire SoT** — lobby/zone Net opcodes, presence, Postgres, enter-world order |
+| [`docs/adr/0001-custom-net-wire.md`](docs/adr/0001-custom-net-wire.md) | Why Login+Zone speak `PacketEnvelope` 1.0, not retail Interlude framing |
+| [`docs/wire-coverage.md`](docs/wire-coverage.md) | Retail packet → `NetOpcode` mapping and handler wiring (not gameplay parity) |
 | [`docs/spawn-world-coverage.md`](docs/spawn-world-coverage.md) | Mobius spawn maps, hosted defaults, starter continents |
 | [`docs/MOBIUS_XML_REF.md`](docs/MOBIUS_XML_REF.md) | Mobius CT0 XML → `data/` |
 | [`docs/combat-parity.md`](docs/combat-parity.md) | Combat checklist vs Mobius |
@@ -180,7 +182,7 @@ Both processes log through `Microsoft.Extensions.Logging`. The default console f
 
 Connect, disconnect, enter world, and packet errors carry `session`, `account`, `character`, and `packet`. Passwords, handoff tokens, and session keys are not logged. A field named `password`, `token`, `secret`, or `session_key` is dropped, and `password=` / `token=` assignments inside a message are rewritten to `[redacted]`.
 
-Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below):
+Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below). The full list of exported families, with units, sources and tests, is [`docs/operations/metrics.md`](docs/operations/metrics.md); dashboards and alert rules are in [`monitoring/`](docs/operations/monitoring.md):
 
 | Instrument | Kind | Meaning |
 |------------|------|---------|
@@ -188,7 +190,6 @@ Meter **`Fineage.Server`** (OpenTelemetry, and the optional text endpoint below)
 | `fineage.zone.online` | Gauge | Players in the zone simulation |
 | `fineage.frames.in` / `fineage.frames.out` | Counter | Packets by direction |
 | `fineage.bytes.in` / `fineage.bytes.out` | Counter | Packet bytes, header included |
-| `fineage.packets.per_second` | Gauge | Packets/s. Tag `direction` = `in` or `out`. Updated on each summary line and each `/metrics` scrape |
 | `fineage.handler.ms` | Histogram | Packet handler duration |
 | `fineage.tick.ms` | Histogram | Zone simulation tick (HP/MP regen). Zone only |
 | `fineage.packets.rejected` | Counter | Rate limit, unknown opcode, or wrong port |

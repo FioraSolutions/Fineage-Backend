@@ -37,7 +37,7 @@ public sealed class LotteryActor : GlobalActor<LotteryNotice>
         set => _random = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    /// <summary>Swaps in the persisted board (host: <c>lottery.json</c> in the state directory).</summary>
+    /// <summary>Swaps in the persisted board (host: the <c>lottery</c> world_state document, #996).</summary>
     public void Use(LotteryBoard board)
     {
         RequireActorThread();

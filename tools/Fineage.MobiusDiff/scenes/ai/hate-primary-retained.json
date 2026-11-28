@@ -1,0 +1,81 @@
+{
+  "id": "hate-primary-retained",
+  "description": "A smaller hit cannot overtake the current most-hated player.",
+  "category": "hate",
+  "seed": 9811,
+  "player": {
+    "key": "player",
+    "classId": 0,
+    "level": 80,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20157,
+      "fineageId": 20157,
+      "source": "stats/npcs/201xx.xml",
+      "objectId": 9200061,
+      "x": 100250,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 50,
+      "player": "player"
+    },
+    {
+      "tick": 20,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 10,
+      "player": "player2"
+    }
+  ],
+  "observe": {
+    "ticks": [
+      25
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mob.hate.player",
+      "npc.mob.hate.player2"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/hate-primary-retained.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {},
+  "extraPlayers": [
+    {
+      "key": "player2",
+      "classId": 0,
+      "level": 80,
+      "x": 100050,
+      "y": 100000,
+      "z": -3000,
+      "karma": 0,
+      "maxHp": 100000,
+      "hp": 100000
+    }
+  ]
+}

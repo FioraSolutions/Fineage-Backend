@@ -17,44 +17,17 @@ public sealed class MemoryPunishmentStore : IPunishmentStore
     }
 }
 
-public sealed class JsonPunishmentStore : IPunishmentStore
+/// <summary>
+/// The saved punishment layout (#996: the database <c>world_state</c> row <c>punishment</c>, written by the zone and
+/// read by login). Enums are names so a reordered enum cannot turn a ban into a chat ban.
+/// </summary>
+public static class PunishmentStateJson
 {
-    public static readonly JsonSerializerOptions JsonOptions = new()
+    public const string System = "punishment";
+    public const int SchemaVersion = 1;
+
+    public static JsonSerializerOptions Options { get; } = new()
     {
-        WriteIndented = true,
         Converters = { new JsonStringEnumConverter() }
     };
-    readonly string _path;
-    readonly object _gate = new();
-    public string Path => _path;
-    public JsonPunishmentStore(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Punishment store path is required.", nameof(path));
-        _path = path;
-    }
-    public PunishmentSnapshot Load()
-    {
-        lock (_gate)
-        {
-            if (!File.Exists(_path)) return new PunishmentSnapshot();
-            string json = File.ReadAllText(_path);
-            var data = JsonSerializer.Deserialize<PunishmentSnapshot>(json, JsonOptions)
-              ?? throw new InvalidDataException($"empty punishment store: {_path}");
-            if (data.Version != 1) throw new InvalidDataException($"unsupported punishment store version {data.Version}");
-            data.Rows ??= [];
-            return data;
-        }
-    }
-    public void Save(PunishmentSnapshot snapshot)
-    {
-        ArgumentNullException.ThrowIfNull(snapshot);
-        lock (_gate)
-        {
-            string? dir = System.IO.Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
-    }
 }

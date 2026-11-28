@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Fineage.Game.RequiredData;
 
 namespace Fineage.Game.Services;
 
@@ -59,6 +60,21 @@ public sealed class TeleportCatalog
     /// <summary>Every list of <paramref name="npcId"/> (empty when it is no gatekeeper).</summary>
     public IReadOnlyCollection<TeleportList> ListsOf(int npcId) =>
         _byNpc.TryGetValue(npcId, out var lists) ? lists.Values : [];
+
+    /// <summary>
+    /// Required gatekeeper lists. A Teleporter NPC with no destinations throws naming the npc id
+    /// and <c>teleports.json</c> (#954 / #985) — never an empty silent page.
+    /// </summary>
+    public IReadOnlyCollection<TeleportList> RequireLists(int npcId)
+    {
+        var lists = ListsOf(npcId);
+        if (lists.Count > 0)
+            return lists;
+        throw Required.Missing(
+            RequiredDataKind.Teleport,
+            npcId,
+            $"gatekeeper npc {npcId} has no teleport destination list in {FileName}");
+    }
 
     public TeleportList? Find(int npcId, string? listName)
     {

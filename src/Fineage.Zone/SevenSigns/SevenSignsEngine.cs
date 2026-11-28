@@ -1,3 +1,5 @@
+using Fineage.Zone.Persistence;
+
 namespace Fineage.Zone.SevenSigns;
 
 /// <summary>
@@ -57,14 +59,13 @@ public sealed partial class SevenSignsEngine
         get { lock (_gate) return _nextChange; }
     }
 
-    /// <summary>Opens <c>seven-signs.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
-    public static SevenSignsEngine OpenInStateDirectory(string stateDirectory, DateTimeOffset loadedAt, ISevenSignsFestivalHook? festival = null)
+    /// <summary>Opens the Seven Signs state saved in the database (#996).</summary>
+    public static SevenSignsEngine Open(WorldStateStore state, DateTimeOffset loadedAt, ISevenSignsFestivalHook? festival = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "seven-signs.json");
         return new SevenSignsEngine(
             loadedAt,
             SevenSignsOptions.FromEnvironment(),
-            new JsonSevenSignsStore(path),
+            new StoredSevenSignsStore(state),
             festival);
     }
 }

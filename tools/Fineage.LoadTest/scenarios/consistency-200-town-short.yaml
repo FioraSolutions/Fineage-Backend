@@ -1,0 +1,17 @@
+# Short reproduction for the remaining verified-soak consistency FAIL (MissingSpawn/DuplicateSpawn/StalePosition).
+# Same 200-bot town scenario as the acceptance soak, with a 2-minute behavior window and the opt-in bounded
+# frame trace enabled. The trace lands in the report directory as consistency-trace.jsonl.
+name: consistency-200-town-short
+extends: bots-200-town.yaml
+botCount: 200
+rampUpSeconds: 20
+durationSeconds: 100
+combatSkillId: 3
+requireSkillLatencySamples: false
+gatekeeperTravelShare: 0
+consistencyTrace:
+  enabled: true
+  maxIssues: 24
+  maxFramesPerIssue: 200
+  maxBytes: 524288
+  windowSeconds: 8

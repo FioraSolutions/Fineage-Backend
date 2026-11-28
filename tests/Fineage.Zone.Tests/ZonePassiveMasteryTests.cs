@@ -35,8 +35,8 @@ public sealed class ZonePassiveMasteryTests
         p.KnownSkills[141] = 1; // Weapon Mastery: pAtk ×1.085 +2
         p.KnownSkills[231] = 1; // Heavy Armor Mastery: pDef +1.9 using HEAVY
         var s = world.PlayerStats(p);
-        Assert.Equal(33, s.PAtk);  // 29 * 1.085 + 2
-        Assert.Equal(135, s.PDef); // 134 + 1.9
+        Assert.Equal(33, s.PAtk);  // (gear·STR·levelMod) * 1.085 + 2, truncated at UserInfo
+        Assert.Equal(136, s.PDef); // untruncated formula P.Def + Heavy Armor Mastery 1.9, then (int)
     }
 
     [Fact]

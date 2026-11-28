@@ -30,6 +30,14 @@ public interface ILedgerJournal
         Flush();
         write([]);
     }
+
+    /// <summary>
+    /// <see cref="CommitWith"/> for the buffered entries up to and including journal <paramref name="position"/> only:
+    /// the rows of the moves whose bags the caller is writing. A later move's row stays buffered for the transaction
+    /// that carries its own bag, so a crash between the two never leaves a journal row without its bag (#955).
+    /// A journal that stores entries on <see cref="Append"/> has nothing to hold back.
+    /// </summary>
+    void CommitThrough(long position, Action<IReadOnlyList<LedgerEntry>> write) => CommitWith(write);
 }
 
 public class MemoryLedgerJournal : ILedgerJournal

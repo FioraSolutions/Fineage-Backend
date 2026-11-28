@@ -281,6 +281,30 @@ public sealed class EconomyLedgerTests
         Assert.Equal("world:700001/ground", stack.ToString());
     }
 
+    [Fact]
+    public void Tallied_kinds_are_counted_per_reference_for_the_whole_journal_and_survive_replay()
+    {
+        var journal = new MemoryLedgerJournal();
+        var ledger = new EconomyLedger(journal, 10, [LedgerTxKind.ShopBuy]);
+        Assert.True(ledger.Submit(Tx(1, 0, Post(Shop, Adena, -1000), Post(AliceBag, Adena, 1000))).Ok);
+        // Far apart in ticks: the idempotency window forgets the first moves, the tally does not.
+        Assert.True(ledger.Submit(Tx(100, 0, Post(AliceBag, Adena, -40), Post(Shop, Adena, 40))).Ok);
+        Assert.True(ledger.Submit(Tx(1_000, 0, Post(AliceBag, Adena, -60), Post(Shop, Adena, 60))).Ok);
+        Assert.True(ledger.Submit(new LedgerTransaction(new LedgerTxId(1_001, 0), LedgerTxKind.ShopSell, Alice, 30001, 0,
+            [Post(Shop, Adena, -5), Post(AliceBag, Adena, 5)])).Ok);
+
+        var tally = ledger.TallyOf(LedgerTxKind.ShopBuy, 30001);
+        Assert.Equal(3, tally.Moves);
+        Assert.Equal(-900, tally.SystemAmountOf(Adena));
+        Assert.Equal([30001], ledger.TalliedReferences(LedgerTxKind.ShopBuy));
+        Assert.Equal(0, ledger.TallyOf(LedgerTxKind.ShopBuy, 1).Moves);
+        Assert.Throws<InvalidOperationException>(() => ledger.TallyOf(LedgerTxKind.ShopSell, 30001));
+
+        var replayed = new EconomyLedger(new Replay(journal.Entries), 10, [LedgerTxKind.ShopBuy]);
+        Assert.Equal(tally.Moves, replayed.TallyOf(LedgerTxKind.ShopBuy, 30001).Moves);
+        Assert.Equal(-900, replayed.TallyOf(LedgerTxKind.ShopBuy, 30001).SystemAmountOf(Adena));
+    }
+
     static LedgerTransaction Tx(long tick, int sequence, params LedgerPosting[] postings) =>
         new(new LedgerTxId(tick, sequence), LedgerTxKind.ShopBuy, Alice, 30001, tick * 200, postings);
 

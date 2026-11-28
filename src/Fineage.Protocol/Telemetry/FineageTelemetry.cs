@@ -61,6 +61,15 @@ public static class FineageTelemetry
     public static readonly Counter<long> PacketsErrored =
         Meter.CreateCounter<long>("fineage.packets.errored", description: "Packets that produced an error response or failed while handling");
 
+    /// <summary>
+    /// Silent substitution of missing required game data (#985). Must stay at zero;
+    /// any growth means a call site still defaults instead of refusing through
+    /// <c>Fineage.Game.RequiredData</c>.
+    /// </summary>
+    public static readonly Counter<long> DataSilentFallback =
+        Meter.CreateCounter<long>("fineage.data.silent_fallback",
+            description: "Silent fallbacks of required game data (tag kind); target is zero");
+
     public static readonly Histogram<double> HandlerMilliseconds =
         Meter.CreateHistogram<double>("fineage.handler.ms", unit: "ms", description: "Packet handler duration");
 
@@ -291,6 +300,10 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.fanout.overflow.shed",
             description: "Hand-offs that crossed the hard fan-out backlog and shed their visual writes instead of growing the backlog");
 
+    public static readonly Counter<long> FanoutReliableAudienceShed =
+        Meter.CreateCounter<long>("fineage.fanout.reliable.audience_shed",
+            description: "Sealed batches whose recipients above the bounded retained-work limit were disconnected instead of growing the queue");
+
     public static readonly Histogram<double> SocketWriteMilliseconds =
         Meter.CreateHistogram<double>("fineage.socket_write.ms", unit: "ms",
             description: "TCP socket write duration for one outbound frame batch (tag endpoint)");
@@ -319,6 +332,10 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.command.rejected",
             description: "Commands refused by ingress admission (tag reason: queue_depth, queue_age, closed)");
 
+    public static readonly Counter<long> ZoneCommandRejections =
+        Meter.CreateCounter<long>("fineage.zone.command.rejections",
+            description: "Commands refused by ingress admission or apply (tags source, reason)");
+
     public static readonly Histogram<double> CommandQueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
             description: "Time a command waited in ingress before apply (tag class)");
@@ -326,6 +343,7 @@ public static class FineageTelemetry
     static long _tickMaxBits;
     static long _tickRunningBits;
     static long _queueAgeMaxBits;
+    static long _agentQueueOldestAgeBits;
     static long _watchdogStallMaxBits;
     static long _watchdogStallCount;
 
@@ -357,6 +375,22 @@ public static class FineageTelemetry
         NoteMax(ref _queueAgeMaxBits, milliseconds);
     }
 
+    public static void NoteZoneCommandRejection(string source, string reason)
+    {
+        ZoneCommandRejections.Add(
+            1,
+            new KeyValuePair<string, object?>("source", source),
+            new KeyValuePair<string, object?>("reason", reason));
+    }
+
+    /// <summary>Current age of the oldest queued AI command, or 0 when none are waiting.</summary>
+    public static void NoteAgentCommandQueueOldestAge(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            milliseconds = 0;
+        Interlocked.Exchange(ref _agentQueueOldestAgeBits, BitConverter.DoubleToInt64Bits(milliseconds));
+    }
+
     public static void NoteWatchdogStall(double elapsedMilliseconds)
     {
         if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
@@ -377,6 +411,12 @@ public static class FineageTelemetry
         () => ObserveBits(_queueAgeMaxBits),
         unit: "ms",
         description: "Longest per-player ingress queue age observed");
+
+    public static readonly ObservableGauge<double> AgentCommandQueueOldestAgeMilliseconds = Meter.CreateObservableGauge(
+        "fineage.agent.command.queue.oldest_age_ms",
+        () => ObserveBits(_agentQueueOldestAgeBits),
+        unit: "ms",
+        description: "Age of the oldest queued AI command, or 0 when none are waiting");
 
     public static readonly ObservableGauge<double> WatchdogStallMaxMilliseconds = Meter.CreateObservableGauge(
         "fineage.step.watchdog.stall_max_ms",
@@ -415,9 +455,6 @@ public static class FineageTelemetry
         yield return new Measurement<double>(BitConverter.Int64BitsToDouble(Interlocked.Read(ref bits)));
     }
 
-    public static readonly Histogram<int> StageRegions =
-        Meter.CreateHistogram<int>("fineage.tick.stage.regions", unit: "{region}", description: "Regions a simulation stage ran in (tag stage)");
-
     public static readonly Counter<long> StageFailures =
         Meter.CreateCounter<long>("fineage.tick.stage.failures", description: "Simulation stage or region bodies that threw (tag stage)");
 
@@ -429,6 +466,17 @@ public static class FineageTelemetry
 
     public static readonly Counter<long> RegionHandoffs =
         Meter.CreateCounter<long>("fineage.region.handoffs", description: "Entities handed to another region at the end of a step");
+
+    public static readonly Counter<long> StoredStateIssues =
+        Meter.CreateCounter<long>("fineage.state.audit_issues", description: "Saved state that disagrees with the data catalogs or the replayed ledger (tags code, container, severity)");
+
+    /// <summary>#992: every ledger ↔ store ↔ live-world reconciliation run (tags phase, result: ok or violations).</summary>
+    public static readonly Counter<long> EconomyReconcileRuns =
+        Meter.CreateCounter<long>("fineage.economy.reconcile.runs", description: "Economy reconciliation runs (tags phase, result)");
+
+    /// <summary>#992: findings of those runs, one per violation (tags phase, code).</summary>
+    public static readonly Counter<long> EconomyReconcileViolations =
+        Meter.CreateCounter<long>("fineage.economy.reconcile.violations", description: "Economy reconciliation violations (tags phase, code)");
 
     public static readonly Counter<long> LedgerAdjustments =
         Meter.CreateCounter<long>("fineage.ledger.adjustments", description: "Alignment adjustments before a ledger move (tag move_kind)");
@@ -539,43 +587,6 @@ public static class FineageTelemetry
         yield return new Measurement<double>(PersistOldestAgeMs?.Invoke() ?? 0);
     }
 
-    public static readonly ObservableGauge<double> PacketsPerSecond = Meter.CreateObservableGauge(
-        "fineage.packets.per_second",
-        ObservePacketRates,
-        unit: "{packet}/s",
-        description: "Packet rate over the most recent console summary or /metrics scrape window");
-
-    static readonly object RateGate = new();
-    static double _inboundPacketsPerSecond;
-    static double _outboundPacketsPerSecond;
-
-    public static void SetPacketRates(double inboundPerSecond, double outboundPerSecond)
-    {
-        if (double.IsNaN(inboundPerSecond) || inboundPerSecond < 0)
-            inboundPerSecond = 0;
-        if (double.IsNaN(outboundPerSecond) || outboundPerSecond < 0)
-            outboundPerSecond = 0;
-        lock (RateGate)
-        {
-            _inboundPacketsPerSecond = inboundPerSecond;
-            _outboundPacketsPerSecond = outboundPerSecond;
-        }
-    }
-
-    static IEnumerable<Measurement<double>> ObservePacketRates()
-    {
-        double inbound;
-        double outbound;
-        lock (RateGate)
-        {
-            inbound = _inboundPacketsPerSecond;
-            outbound = _outboundPacketsPerSecond;
-        }
-
-        yield return new Measurement<double>(inbound, new KeyValuePair<string, object?>("direction", "in"));
-        yield return new Measurement<double>(outbound, new KeyValuePair<string, object?>("direction", "out"));
-    }
-
     public static readonly ObservableGauge<int> ZoneOnline = Meter.CreateObservableGauge(
         "fineage.zone.online",
         ObserveOnline,
@@ -585,6 +596,27 @@ public static class FineageTelemetry
         "fineage.command.ingress.queued",
         ObserveCommandIngressQueued,
         description: "Player commands waiting for the next simulation drain");
+
+    /// <summary>#992: the process's health contract, exported as <c>fineage_health_*</c> gauges on every scrape.</summary>
+    public static Fineage.Protocol.Health.HealthBoard? Health { get; set; }
+
+    static readonly Lock DiskGate = new();
+    static readonly Dictionary<string, string> Disks = new(StringComparer.Ordinal);
+
+    /// <summary>#992: a directory whose file system free/size bytes are exported as <c>fineage_disk_*{path=label}</c>.</summary>
+    public static void RegisterDiskPath(string label, string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(label);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        lock (DiskGate)
+            Disks[label] = Path.GetFullPath(path);
+    }
+
+    public static IReadOnlyList<KeyValuePair<string, string>> DiskPaths()
+    {
+        lock (DiskGate)
+            return Disks.OrderBy(pair => pair.Key, StringComparer.Ordinal).ToList();
+    }
 
     public static Func<int>? OnlineCount { get; set; }
     public static Func<int>? CommandIngressDepth { get; set; }

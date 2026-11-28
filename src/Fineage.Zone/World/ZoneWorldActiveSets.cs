@@ -19,6 +19,8 @@ public sealed partial class ZoneWorld
     /// <summary>Counts included in simulation overrun warnings.</summary>
     int _spawnedNpcCount;
 
+    internal int SpawnedNpcCount => _spawnedNpcCount;
+
     internal void NoteNpcSpawned() => _spawnedNpcCount++;
 
     internal void NoteNpcDespawned()
@@ -102,7 +104,7 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius awake predicate: player-active tile (or neighbor), a live watcher, combat/return home,
+    /// Mobius awake predicate: player-active microregion (or neighbour), a live watcher, combat/return home,
     /// or drifted far enough that AI must return.
     /// </summary>
     bool NpcRegionAwake(ZoneEntity npc)
@@ -116,7 +118,7 @@ public sealed partial class ZoneWorld
         // Same threshold as AttackableAI thinkActive returnHome (MaxDriftRange), not 2×.
         if (DriftedBeyondMaxRange(npc))
             return true;
-        return IsPlayerRegionActive(_byId.OwnerOf(npc).Region);
+        return IsPlayerRegionActive(MicroRegionAt(npc.InstanceId, npc.X, npc.Y));
     }
 
     /// <summary>

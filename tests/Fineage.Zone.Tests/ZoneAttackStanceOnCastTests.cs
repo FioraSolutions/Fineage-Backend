@@ -76,8 +76,8 @@ public sealed class ZoneAttackStanceOnCastTests
         Learn(caster, PowerStrike);
         int gremlinObjectId = GremlinObjectId(bench.World);
         Assert.True(gremlinObjectId > 0);
-        // Power Strike carries <using kind="SWORD,BLUNT">: the starter kit weapon is not one, so the cast would be
-        // refused with "unsuitable terms" before reaching the stance code.
+        // Power Strike carries <using kind="SWORD,BLUNT">. Official Interlude already equips Squire's Sword;
+        // keep the explicit equip so the test still holds if the create table changes.
         caster.Inventory!.Equip(caster.Inventory.Add(SquiresSword));
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));
         Assert.Null(await bench.World.TryMoveAsync(actor.Session, gremlin.X, gremlin.Y, gremlin.Z,

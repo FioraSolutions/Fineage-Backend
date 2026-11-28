@@ -1,0 +1,41 @@
+name: net-contract-sync
+
+# Compare Fineage.Net.Contract with the Unity client's in-assets copy.
+# Drift must match docs/data/net-contract-client-gap.txt (the pending-sync list).
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare-client-contract:
+    name: compare-client-contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          path: Fineage-Backend
+
+      - name: Checkout Unity client
+        uses: actions/checkout@v4
+        with:
+          repository: FioraSolutions/Fineage
+          ref: dev
+          path: Fineage
+
+      - name: Compare Net contract with the client copy
+        run: |
+          python3 Fineage-Backend/scripts/check-net-contract-sync.py \
+            --backend Fineage-Backend \
+            --client Fineage
+
+      - name: Retail opcode map agrees with wire-coverage.md
+        run: python3 Fineage-Backend/tools/check_retail_opcode_map.py

@@ -142,7 +142,7 @@ public sealed class NpcHtmlTests
         var exchange = registry.Find("exc_multisell 003")!.Handle(call with { Command = "exc_multisell 003" });
         Assert.Equal(3, exchange.MultiSellListId);
         Assert.True(exchange.MultiSellInventoryOnly);
-        Assert.Contains("Wear is not implemented yet.", registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).Html, StringComparison.Ordinal);
+        Assert.Equal(3000100, registry.Find("Wear 3000100")!.Handle(call with { Command = "Wear 3000100" }).WearListId);
         Assert.Equal(NpcServiceIntent.Deposit, registry.Find("DepositP")!.Handle(call with { Command = "DepositP" }).Service);
         Assert.Equal(NpcServiceIntent.Withdraw, registry.Find("WithdrawP")!.Handle(call with { Command = "WithdrawP" }).Service);
         Assert.Equal(NpcServiceIntent.PackageDeposit, registry.Find("package_deposit")!.Handle(call with { Command = "package_deposit" }).Service);
@@ -284,6 +284,37 @@ public sealed class NpcHtmlTests
         Assert.False(NpcHtmlProtocol.InRange(x, y, z, 240, 0, 200));
         Assert.True(ZoneCombat.Within(x, y, 240, 0, NpcHtmlProtocol.InteractionDistance));
         Assert.False(ZoneCombat.Within(x, y, 251, 0, NpcHtmlProtocol.InteractionDistance));
+    }
+
+    /// <summary>
+    /// Mobius <c>RequestBypassToServer</c> validates the <c>npc_</c> branch with <c>isInsideRadius2D</c>, while
+    /// <c>Npc.canInteract</c> (talk) is <c>isInsideRadius3D</c>. Fineage answered both with the sphere, so a pawn on the
+    /// ground below a gatekeeper on a platform was inside 250 along the ground and still got "range" on every link —
+    /// the bot soak reached a gatekeeper dialog but could never follow it to a teleport.
+    /// </summary>
+    [Fact]
+    public async Task Bypass_link_uses_the_flat_circle_while_talk_uses_the_sphere()
+    {
+        const int x = 0, y = 0, z = 0;
+        // 240 along the ground, 200 up: inside the flat circle, outside the sphere.
+        Assert.True(ZoneCombat.Within(x, y, 240, 0, NpcHtmlProtocol.InteractionDistance));
+        Assert.False(NpcHtmlProtocol.InRange(x, y, z, 240, 0, 200));
+
+        var catalog = SampleCatalog();
+        var bench = new WorldBench(
+            spawns: MerchantAt(Spawns.HumanStartX, Spawns.HumanStartY, Spawns.HumanStartZ + 200),
+            html: catalog,
+            bypasses: BypassRegistry.CreateDefault(catalog));
+        BenchPlayer actor = await bench.EnterAsync("browser", "Browser",
+            x: Spawns.HumanStartX + 240, y: Spawns.HumanStartY, z: Spawns.HumanStartZ);
+
+        // Talk still needs the sphere: the pawn is 200 up from the merchant.
+        Assert.Null(await actor.Talk(MerchantObjectId));
+        Assert.Equal(MerchantObjectId, actor.Player.Intent.PendingTalkNpcId);
+
+        // The link is gated by the flat circle, so the same position opens the page the click asked for.
+        Assert.Null(await actor.BypassAsync(MerchantObjectId, "Buy 1"));
+        Assert.NotEmpty(Bench(bench, FanoutHtml));
     }
 
     [Fact]

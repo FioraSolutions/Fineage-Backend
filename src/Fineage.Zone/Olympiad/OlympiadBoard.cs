@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.Olympiad;
 
@@ -51,10 +52,10 @@ public sealed partial class OlympiadBoard
     public OlympiadStadiumCatalog Stadiums { get; }
 
     /// <summary>Opens <c>olympiad.json</c> inside <paramref name="stateDirectory"/> (default <c>data</c>).</summary>
-    public static OlympiadBoard OpenInStateDirectory(string stateDirectory, DateTimeOffset now, OlympiadSettings? settings = null)
+    /// <summary>Opens the Olympiad state saved in the database (#996).</summary>
+    public static OlympiadBoard Open(WorldStateStore state, DateTimeOffset now, OlympiadSettings? settings = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "olympiad.json");
-        return new OlympiadBoard(now, settings ?? OlympiadSettings.FromEnvironment(), new JsonOlympiadStore(path));
+        return new OlympiadBoard(now, settings ?? OlympiadSettings.FromEnvironment(), new StoredOlympiadStore(state));
     }
 
     public bool IsNoble(int characterId)

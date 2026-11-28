@@ -55,6 +55,8 @@ public sealed class NetFanoutStripes : IAsyncDisposable
 
     void Enqueue(ConnectionHandle handle, WorkItem item)
     {
+        if (!handle.Connection.IsBoundTo(handle))
+            return;
         if (Volatile.Read(ref _closed) != 0)
         {
             NetHostLog.Error(

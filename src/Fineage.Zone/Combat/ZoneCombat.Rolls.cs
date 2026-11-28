@@ -168,7 +168,8 @@ public static partial class ZoneCombat
     /// </summary>
     public static (int Damage, byte Flags) RollMelee(Random rnd, double pAtk, double pDef, double accuracy, double evasion,
         int critPermille, int randomPercent, bool soulshot, int shotGrade, double shieldRate, int shieldDef, bool attackerBow,
-        double hitConditionBonus, double critDamageMod, double weaponTraitBonus, double critDamageAdd = 0)
+        double hitConditionBonus, double critDamageMod, double weaponTraitBonus, double critDamageAdd = 0,
+        double proximity = 1d)
     {
         byte ssFlags = soulshot ? (byte)(HitFlagSoulshot | (shotGrade & 0x0F)) : (byte)0;
         if (rnd.Next(1000) >= HitChancePermille(accuracy, evasion, hitConditionBonus))
@@ -182,7 +183,7 @@ public static partial class ZoneCombat
             pAtk *= 2;
         if (shield == ShieldResult.Block)
             pDef += shieldDef;
-        double damage = 70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef);
+        double damage = PhysDamCoefficient * Math.Max(0d, pAtk) * Math.Max(0d, proximity) / Math.Max(1d, pDef);
         if (crit)
         {
             damage *= 2 * Math.Max(0, critDamageMod);

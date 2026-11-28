@@ -142,7 +142,7 @@ public sealed partial class ZoneWorld
             session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         NetBridge?.FanoutSkillList([session.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
-        string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
+        string skillName = _game.Skills.Require(row.SkillId).Name;
         Notice(session, 277, $"You have earned {skillName}.");
         ZoneLog.Info($"transfer skill object={player.ObjectId} skill={row.SkillId} lvl={row.Level} cert={row.CertificateItemId}");
         return null;

@@ -1,3 +1,4 @@
+using Fineage.Zone.Persistence;
 using Fineage.Accounts;
 using Fineage.Protocol;
 using Fineage.Zone.SevenSigns;
@@ -281,33 +282,28 @@ public sealed class SevenSignsEngineTests
     [Fact]
     public void Snapshot_keeps_period_scores_and_player_rows()
     {
-        string path = Path.Combine(Path.GetTempPath(), "fineage-ssq-" + Guid.NewGuid().ToString("n") + ".json");
-        try
+        var rig = new WorldStateRig();
         {
             var clock = new MutableGameClock(Start);
-            var store = new JsonSevenSignsStore(path);
+            var store = new StoredSevenSignsStore(rig.State);
             var engine = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, store);
             var notices = new List<SevenSignsNotice>();
             EnterCompetition(engine, clock, notices);
             Assert.Null(engine.TryJoin(42, 1, false, SevenSignsCabal.Dusk, SevenSignsSeal.Gnosis, null, notices));
             Assert.Null(engine.TryContribute(42, 2, 0, 0));
-            var beforeSave = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
+            rig.Commit();
+            var beforeSave = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new StoredSevenSignsStore(WorldStateStore.Open(rig.Store)));
             Assert.Equal(SevenSignsPeriod.Competition, beforeSave.Period);
             Assert.Equal(SevenSignsCabal.None, (SevenSignsCabal)beforeSave.PlayerCabal(42));
             engine.Save();
 
-            var loaded = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new JsonSevenSignsStore(path));
+            var loaded = new SevenSignsEngine(clock.UtcNow, new SevenSignsOptions { LazyUpdate = true }, new StoredSevenSignsStore(rig.Restart()));
             Assert.Equal(SevenSignsPeriod.Competition, loaded.Period);
             Assert.Equal(SevenSignsCabal.Dusk, (SevenSignsCabal)loaded.PlayerCabal(42));
             Assert.Equal(SevenSignsSeal.Gnosis, (SevenSignsSeal)loaded.PlayerSeal(42));
             Assert.Equal(6, loaded.PlayerContribution(42));
             Assert.Equal(6, loaded.StatusFor(42).PlayerAncientAdena);
             Assert.Equal(6, loaded.StatusFor(42).DuskStonePoints);
-        }
-        finally
-        {
-            if (File.Exists(path))
-                File.Delete(path);
         }
     }
 

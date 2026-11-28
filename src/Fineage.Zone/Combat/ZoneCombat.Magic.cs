@@ -4,33 +4,71 @@ namespace Fineage.Zone.Combat;
 
 public static partial class ZoneCombat
 {
+    /// <summary>Mobius <c>PlayerConfig.MAX_MCRIT_RATE</c> (default 200 ‰), applied by <c>CreatureStat.getMCriticalHit</c>.</summary>
+    public const int MaxMCritRate = 200;
+
+    /// <summary>Mobius <c>calcMagicDam</c> core: <c>(91 · √mAtk) / mDef · power</c> (mAtk already ×2 / ×4 for shots).</summary>
+    public static double MagicBaseDamage(double mAtk, double mDef, double power) =>
+        91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power);
+
+    /// <summary>
+    /// Mobius <c>calcMagicDam</c> after the base: failure branch (player casters only), crit ×3 (×2.5 player→player)
+    /// then <c>MAGIC_CRIT_DMG</c>, then the weapon random multiplier, truncated to int (0 = no hit). A failed magic-success roll never also crits.
+    /// </summary>
+    public static int MagicDamageFor(double baseDamage, MagicOutcome outcome, bool playerVsPlayer,
+        double magicCritDmg = 1d, double randomMultiplier = 1d)
+    {
+        double damage = baseDamage;
+        switch (outcome)
+        {
+            case MagicOutcome.HalfFail:
+                damage /= 2;
+                break;
+            case MagicOutcome.Resisted:
+                damage = 1;
+                break;
+            case MagicOutcome.Critical:
+                damage *= playerVsPlayer ? 2.5 : 3;
+                damage *= Math.Max(0, magicCritDmg);
+                break;
+        }
+
+        damage *= randomMultiplier;
+        // Mobius MagicalDamage effect: (int) damage, and nothing happens when it truncates to 0 (a resisted 1.0 × 0.95 deals no damage).
+        return Math.Max(0, (int)damage);
+    }
+
+    /// <summary>
+    /// Mobius <c>Creature.getRandomDamageMultiplier</c> percent: the weapon <c>RANDOM_DAMAGE</c> stat, or
+    /// <c>5 + (int)√level</c> with no weapon.
+    /// </summary>
+    public static int MagicRandomPercent(bool armed, int weaponRandomDamage, int casterLevel) =>
+        armed ? weaponRandomDamage : 5 + (int)Math.Sqrt(casterLevel);
+
     public static (int Damage, MagicOutcome Outcome) RollMagicDamage(Random rnd, double mAtk, double mDef, double power,
         int casterLevel, int magicLevel, int targetLevel, int mCritRate, bool targetIsPlayer = false,
-        double magicCritDmg = 1d)
+        double magicCritDmg = 1d, bool casterIsPlayer = true, int randomPercent = 0)
     {
-        bool mcrit = RollMCrit(rnd, mCritRate);
-        double damage = 91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power);
+        bool mcrit = RollMCrit(rnd, Math.Min(mCritRate, MaxMCritRate));
+        double baseDamage = MagicBaseDamage(mAtk, mDef, power);
         var outcome = MagicOutcome.Normal;
         if (!RollMagicSuccess(rnd, targetLevel, magicLevel))
         {
-            if (RollMagicSuccess(rnd, targetLevel, magicLevel) && targetLevel - casterLevel <= 9)
+            // Mobius only changes damage on a failed roll for a player caster; an NPC caster keeps full damage and no crit.
+            if (casterIsPlayer)
             {
-                damage /= 2;
-                outcome = MagicOutcome.HalfFail;
-            }
-            else
-            {
-                damage = 1;
-                outcome = MagicOutcome.Resisted;
+                outcome = RollMagicSuccess(rnd, targetLevel, magicLevel) && targetLevel - casterLevel <= 9
+                    ? MagicOutcome.HalfFail
+                    : MagicOutcome.Resisted;
             }
         }
         else if (mcrit)
         {
-            damage *= targetIsPlayer ? 2.5 : 3;
-            damage *= Math.Max(0, magicCritDmg);
             outcome = MagicOutcome.Critical;
         }
-        return (Math.Max(1, (int)damage), outcome);
+
+        double random = randomPercent > 0 ? 1 + (rnd.Next(2 * randomPercent + 1) - randomPercent) / 100d : 1d;
+        return (MagicDamageFor(baseDamage, outcome, casterIsPlayer && targetIsPlayer, magicCritDmg, random), outcome);
     }
 
     public enum BlowOutcome { Failed, Hit, Critical }
@@ -104,9 +142,21 @@ public static partial class ZoneCombat
 
     /// <summary>Interlude <c>calcMagicDam</c> core: 91·√mAtk / mDef · power (no fail / crit).</summary>
     public static int MagicDamage(double mAtk, double mDef, double power) =>
-        Math.Max(1, (int)(91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power)));
+        Math.Max(1, (int)MagicBaseDamage(mAtk, mDef, power));
 
-    /// <summary>Mobius <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements): 70 * pAtk / pDef, min 1.</summary>
-    public static int PhysicalDamage(double pAtk, double pDef) =>
-        Math.Max(1, (int)(70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef)));
+    /// <summary>
+    /// Mobius CT0 <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements):
+    /// <c>76 * pAtk * proximity / pDef</c>, min 1. Proximity is 1 front, 1.1 side, 1.2 behind.
+    /// </summary>
+    public const double PhysDamCoefficient = 76d;
+
+    public static double ProximityBonus(SkillPosition position) => position switch
+    {
+        SkillPosition.Behind => 1.2,
+        SkillPosition.Side => 1.1,
+        _ => 1d,
+    };
+
+    public static int PhysicalDamage(double pAtk, double pDef, double proximity = 1d) =>
+        Math.Max(1, (int)(PhysDamCoefficient * Math.Max(0d, pAtk) * Math.Max(0d, proximity) / Math.Max(1d, pDef)));
 }

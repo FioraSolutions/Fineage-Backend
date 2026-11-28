@@ -1,0 +1,62 @@
+{
+  "id": "death-aggro-cleared",
+  "description": "Death clears target and hate.",
+  "category": "death-respawn",
+  "seed": 9891,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml",
+      "objectId": 9200411,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": 0,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 10,
+      "type": "damage",
+      "npc": "mob",
+      "amount": 9999
+    }
+  ],
+  "observe": {
+    "ticks": [
+      11
+    ],
+    "fields": [
+      "npc.mob.target",
+      "npc.mob.hate.player",
+      "npc.mob.dead"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/death-aggro-cleared.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {
+    "npc.mob.hate.player": "Mobius death clears the AggroList; Fineage leaves the last hate entry on the dead NPC. Real divergence, separate AI issue."
+  }
+}

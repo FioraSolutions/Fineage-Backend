@@ -1,0 +1,38 @@
+{
+  "scenario": "activation-returning-stays-awake",
+  "category": "activation",
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "reference": "ref/mobius-ct0-interlude",
+    "driver": "MobiusAiReferenceModel/v1",
+    "generatedBy": "MobiusAiReferenceModel/v1",
+    "sources": [
+      "Mobius CT0 source ref/mobius-ct0-interlude (AttackableAI, Guard, WorldRegion)",
+      "Mobius CT0 AttackableAI.thinkActive / thinkAttack / addDamageHate / returnHome",
+      "Mobius CT0 Guard.addDamage and WorldRegion 90-second deactivation hysteresis",
+      "data/npcs.json (Mobius stats/npcs transcription)",
+      "data/npc-minions.json (Mobius Privates minions)",
+      "docs/combat-parity.md and docs/mobius-parity-audit.md"
+    ],
+    "fullServerVerified": false,
+    "blocker": "Mobius CT0 source is available at ../../Fineage-Backend/ref/mobius-ct0-interlude, but a full headless GameServer/MySQL runtime is not wired in this checkout; the trace is produced by the independent AI rule model over Mobius-extracted catalogs.",
+    "fineageOutputUsed": false
+  },
+  "npcs": [
+    {
+      "key": "mob",
+      "mobiusId": 20022,
+      "fineageId": 20022,
+      "source": "stats/npcs/200xx.xml"
+    }
+  ],
+  "steps": [
+    {
+      "tick": 170,
+      "values": {
+        "npc.mob.thinking": "true",
+        "npc.mob.returningHome": "false"
+      }
+    }
+  ]
+}

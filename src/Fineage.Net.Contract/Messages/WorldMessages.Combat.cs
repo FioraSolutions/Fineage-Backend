@@ -36,20 +36,31 @@ namespace Fineage.Net.Contract
         public bool? Forced { get; set; }
     }
 
+    /// <summary>
+    /// Zone → client: Mobius <c>MyTargetSelected</c> (self, <see cref="SelectorObjectId"/> = 0) or
+    /// <c>TargetSelected</c> to AOI peers (<see cref="SelectorObjectId"/> = the aiming player).
+    /// </summary>
     public sealed class TargetSelectedNetMsg
     {
         public int TargetObjectId { get; set; }
         public int ColorHint { get; set; }
+        /// <summary>0 = self (nameplate colour). Else object id of the player who aimed.</summary>
+        public int SelectorObjectId { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
     }
 
     /// <summary>
     /// Zone → client: the player's selection was dropped (Mobius <c>TargetUnselected</c>), so the target
-    /// window and nameplate close. Carries the object id that was unselected, 0 when there was none.
+    /// window and nameplate close. Self: <see cref="TargetObjectId"/> is the cleared target.
+    /// Peers: <see cref="SelectorObjectId"/> is the player who cleared (Mobius writes that creature id).
     /// </summary>
-
     public sealed class TargetUnselectedNetMsg
     {
         public int TargetObjectId { get; set; }
+        /// <summary>0 = self clear. Else object id of the player who dropped their aim (peer notify).</summary>
+        public int SelectorObjectId { get; set; }
     }
 
     public sealed class AttackStateMsg

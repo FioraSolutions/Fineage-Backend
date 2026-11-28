@@ -41,6 +41,21 @@ public sealed partial class ZoneWorld
     public const int SysMsgPetAteFood = 1527;
     public const int SysMsgPetUnresponsive = 1864;
     public const int SysMsgItemDisappeared = 301;
+    /// <summary>Mobius <c>THIS_IS_ALREADY_IN_USE_BY_ANOTHER_PET</c>.</summary>
+    public const int SysMsgPetNameInUse = 584;
+    /// <summary>Mobius <c>AN_INVALID_CHARACTER_IS_INCLUDED_IN_THE_PET_S_NAME</c>.</summary>
+    public const int SysMsgPetNameInvalid = 591;
+    /// <summary>Mobius <c>YOU_CANNOT_SET_THE_NAME_OF_THE_PET</c> (already named).</summary>
+    public const int SysMsgPetNameAlreadySet = 695;
+    /// <summary>Mobius <c>YOU_DO_NOT_HAVE_A_PET</c> (servitor out, or no pet).</summary>
+    public const int SysMsgDoNotHaveAPet = 2312;
+    public const int PetNameMinLength = 3;
+    public const int PetNameMaxLength = 16;
+    const string PetNameLengthText = "Your pet's name can be up to 16 characters in length.";
+    const string PetNameInUseText = "This name is already in use by another pet.";
+    const string PetNameInvalidText = "An invalid character is included in the pet's name.";
+    const string PetNameAlreadySetText = "You cannot set the name of the pet.";
+    const string DoNotHaveAPetText = "You do not have a pet.";
 
     /// <summary>Mobius <c>Pet.startFeed</c>: <c>scheduleAtFixedRate(FeedTask, 10000, 10000)</c>.</summary>
     public const int PetFeedTickMs = 10_000;
@@ -179,11 +194,7 @@ public sealed partial class ZoneWorld
     ZoneEntity? SpawnPet(ZoneEntity owner, ItemInstance collar, PetTemplate template, long now)
     {
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(template.NpcId, out var npc))
-        {
-            ZoneLog.Info($"pet skip unknown npcId={template.NpcId}");
-            return null;
-        }
+        var npc = _summonTemplates.Get(template.NpcId);
 
         var stored = LoadPet(collar.ObjectId);
         if (stored != null && stored.NpcId != template.NpcId)
@@ -200,10 +211,13 @@ public sealed partial class ZoneWorld
                     _petMemory[stored.ControlObjectId] = stored;
             }
         }
+        // #984: a saved pet item without a template refuses the summon with the names; skipping it would let the
+        // next pet save delete the row.
+        Fineage.Zone.Persistence.StoredStateAudit.RequireLoadable(stored, _game.Items);
         var bag = new PlayerInventory(_game.Items, _itemIds);
         foreach (var row in stored?.Items ?? [])
         {
-            if (!_game.Items.TryGet(row.ItemId, out _) || row.Count < 1 || row.ObjectId <= 0 || bag.Find(row.ObjectId) != null)
+            if (row.Count < 1 || row.ObjectId <= 0 || bag.Find(row.ObjectId) != null)
                 continue;
             bag.AddRestored(row.ObjectId, row.ItemId, row.Count, row.EnchantLevel);
         }
@@ -452,7 +466,7 @@ public sealed partial class ZoneWorld
 
     string ItemName(string? locale, int itemId)
     {
-        string english = _game.Items.TryGet(itemId, out var def) && def != null ? def.Name : itemId.ToString();
+        string english = _game.Items.Require(itemId).Name;
         return _pages.Name(locale, "item", itemId, english);
     }
 
@@ -557,8 +571,7 @@ public sealed partial class ZoneWorld
             bool up = level > s.Level;
             double hp = s.CurHp, mp = s.CurMp;
             _summonTemplates ??= NpcCatalog.LoadDefault();
-            if (_summonTemplates.ById.TryGetValue(s.NpcId, out var npc))
-                ApplyPetLevel(s, pet, npc, level);
+            ApplyPetLevel(s, pet, _summonTemplates.Get(s.NpcId), level);
             if (!up)
             {
                 s.CurHp = (int)Math.Min(s.MaxHp, hp);
@@ -597,8 +610,7 @@ public sealed partial class ZoneWorld
             if (newLevel != level)
             {
                 _summonTemplates ??= NpcCatalog.LoadDefault();
-                if (_summonTemplates.ById.TryGetValue(s.NpcId, out var npc))
-                    ApplyPetLevel(s, pet, npc, newLevel);
+                ApplyPetLevel(s, pet, _summonTemplates.Get(s.NpcId), newLevel);
                 s.CurHp = 0;
                 s.CurMp = 0;
                 SetCollarLevel(owner, pet, newLevel);
@@ -707,7 +719,7 @@ public sealed partial class ZoneWorld
     }
 
     long WeightOf(int itemId, int count) =>
-        _game.Items.TryGet(itemId, out var def) && def != null ? (long)def.Weight * count : 0;
+        (long)_game.Items.Require(itemId).Weight * count;
 
     bool PetBagFits(PetState pet, ItemInstance item, int count, ZoneSession session)
     {
@@ -953,5 +965,111 @@ public sealed partial class ZoneWorld
     {
         using (_affinity.Step())
             return LoadPet(controlObjectId);
+    }
+
+    // ---------------------------------------------------------------- rename (Mobius RequestChangePetName)
+
+    /// <summary>Mobius <c>RequestChangePetName</c>: set the name once while the pet is out.</summary>
+    public Task<string?> TryChangePetNameAsync(ZoneSession session, ChangePetNameMsg request, CancellationToken ct)
+    {
+        if (!IsLive(session))
+            return Task.FromResult<string?>("world");
+        using (_affinity.Step())
+            return Task.FromResult(TryChangePetName(session, request));
+    }
+
+    string? TryChangePetName(ZoneSession session, ChangePetNameMsg request)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var owner))
+            return "world";
+
+        var summon = SummonOf(owner);
+        if (summon == null)
+            return null;
+
+        if (PetOf(summon) is not { } pet)
+        {
+            SelfLine(session, SysMsgDoNotHaveAPet, DoNotHaveAPetText);
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(pet.Name))
+        {
+            SelfLine(session, SysMsgPetNameAlreadySet, PetNameAlreadySetText);
+            return null;
+        }
+
+        string name = request.Name ?? "";
+        if (PetNameTaken(name, summon.NpcId, pet.ControlObjectId))
+        {
+            SelfLine(session, SysMsgPetNameInUse, PetNameInUseText);
+            return null;
+        }
+
+        if (name.Length < PetNameMinLength || name.Length > PetNameMaxLength)
+        {
+            ZoneLog.Warn(
+                $"pet rename rejected object={owner.ObjectId} collar={pet.ControlObjectId}: length {name.Length} (need {PetNameMinLength}-{PetNameMaxLength})");
+            SelfLine(session, 0, PetNameLengthText);
+            return null;
+        }
+
+        if (!NameRules.IsPetName(name))
+        {
+            ZoneLog.Warn(
+                $"pet rename rejected object={owner.ObjectId} collar={pet.ControlObjectId}: invalid name '{name}'");
+            SelfLine(session, SysMsgPetNameInvalid, PetNameInvalidText);
+            return null;
+        }
+
+        pet.Name = name;
+        summon.Name = name;
+        StorePet(owner, summon);
+        SendSummonInfo(summon);
+        BroadcastPetName(summon, owner.ObjectId);
+        ZoneLog.Info($"pet rename object={owner.ObjectId} collar={pet.ControlObjectId} name={name}");
+        return null;
+    }
+
+    bool PetNameTaken(string name, int npcId, int exceptControlObjectId)
+    {
+        if (string.IsNullOrEmpty(name) || npcId <= 0)
+            return false;
+
+        foreach (int id in _summonIds)
+        {
+            if (!_byId.TryGetValue(id, out var s) || PetOf(s) is not { } other)
+                continue;
+            if (other.ControlObjectId == exceptControlObjectId || s.NpcId != npcId)
+                continue;
+            if (string.Equals(other.Name, name, StringComparison.Ordinal))
+                return true;
+        }
+
+        if (_persist.Enabled)
+            return _persist.PetNameExists(name, npcId, exceptControlObjectId);
+
+        foreach (var row in _petMemory.Values)
+        {
+            if (row.ControlObjectId == exceptControlObjectId || row.NpcId != npcId)
+                continue;
+            if (string.Equals(row.Name, name, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Mobius <c>Summon.broadcastNpcInfo</c>: peers get a fresh EntitySpawn with the new name.</summary>
+    void BroadcastPetName(ZoneEntity summon, int ownerObjectId)
+    {
+        if (NetBridge == null)
+            return;
+        foreach (int watcher in KnownWatchers(summon.ObjectId))
+        {
+            if (watcher == ownerObjectId)
+                continue;
+            NetBridge.FanoutKnownlistDiff(watcher, [summon.ObjectId], []);
+        }
     }
 }

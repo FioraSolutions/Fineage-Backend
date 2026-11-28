@@ -138,6 +138,12 @@ public sealed record MultiSellCommand(int NpcObjectId, int ListId, int EntryId, 
         Completed(world.TryMultiSellAsync(session, NpcObjectId, ListId, EntryId, Amount, CancellationToken.None));
 }
 
+public sealed record PreviewCommand(int NpcObjectId, int ListId, int[] ItemIds) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryPreviewAsync(session, NpcObjectId, ListId, ItemIds, CancellationToken.None));
+}
+
 public sealed record TradeRequestCommand(TradeRequestMsg Request) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
@@ -208,6 +214,18 @@ public sealed record RecipeMakeSelfCommand(RecipeMakeSelfMsg Request) : ZoneComm
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         Completed(world.TryRecipeMakeSelfAsync(session, Request, CancellationToken.None));
+}
+
+public sealed record RecipeBookDestroyCommand(RecipeBookDestroyMsg Request) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryRecipeBookDestroyAsync(session, Request, CancellationToken.None));
+}
+
+public sealed record ChangePetNameCommand(ChangePetNameMsg Request) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryChangePetNameAsync(session, Request, CancellationToken.None));
 }
 
 public sealed record SetRecipeShopCommand(SetRecipeShopMsg Request) : ZoneCommand

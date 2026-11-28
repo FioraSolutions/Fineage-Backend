@@ -9,6 +9,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Fineage.Net.Tests" />
     <InternalsVisibleTo Include="Fineage.Zone" />
+    <InternalsVisibleTo Include="Fineage.Zone.Tests" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fineage.Net.Contract\Fineage.Net.Contract.csproj" />

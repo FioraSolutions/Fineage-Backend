@@ -36,10 +36,17 @@ Headless bots in `tools/Fineage.LoadTest` speak the **same Net `PacketEnvelope` 
 4. Full matrix helper (local VM only — **never** point at public hosts):
 
    ```bash
-   ./scripts/run-load-test.sh matrix
+   ./scripts/run-load-test.sh profile   # all #990 profiles at their YAML defaults
+   ./scripts/run-load-test.sh fast      # 5-minute PR/perf matrix
+   ./scripts/run-load-test.sh soak      # 20-30 minute Release soak
+   ./scripts/run-load-test.sh endurance # 1-2 hour Release endurance
+   ./scripts/run-load-test.sh stability # 8-24 hour, self-hosted/dispatch only
    ```
 
-   Toggles `FINEAGE_ZONE_REGION_WORKERS` between `0` and `4` per run. Parallel region workers stay **off** in production until soak tests pass; the matrix reports behavior with workers enabled for comparison only.
+   Every scenario gets a fresh Login+Zone process, a bounded timeout and its own `load-test-report.md`, so one
+   profile cannot poison the next. `matrix-summary.json` at the report root records commit, Release build,
+   CPU/RAM/OS, .NET, per-scenario durations and gate results. Set `MATRIX_WORKERS="0 4"` to compare sequential
+   and parallel region workers; parallel workers stay **off** in production until soak tests pass.
 
 5. Stop servers:
 
@@ -74,10 +81,13 @@ YAML files under `tools/Fineage.LoadTest/scenarios/` control:
 
 - **Server:** scrape `FINEAGE_ZONE_METRICS_PORT` (`GET /metrics`) — tick histogram, overruns, stage histograms, ingress queue (`fineage_command_ingress_queued`), packet rates, rejects/errors.
 - **Client:** per-bot action RTT, disconnect and stuck counts.
-- **Process:** RSS / VmHWM via `/proc` for the zone PID passed to `--zone-pid`.
+- **Process:** RSS / VmHWM via `/proc` for the zone PID passed to `--zone-pid`; the soak/endurance run also
+  samples RSS every 5 s and gates steady-state growth.
+- **GC/allocations:** `dotnet-counters` `gc-heap-size`, `alloc-rate`, gen0/1/2 and time-in-GC; the same
+  steady-state trend gates compare early and late thirds.
 - **Logs:** `local-logs/login-net.log`, `local-logs/zone-net.log` scanned for exceptions, stage failures, ledger, desync, deadlock, timeout, `handler_error`.
 
-Each run writes **`load-test-report.md`** (LLM-ready, capped at ~30 KiB) and **`load-test-report.json`** under `--report-dir` (aliases: `report.md` / `report.json`). The markdown includes run header (git, build, machine, GC env), peak-scrape latency tables, 10s time-series windows, optional `dotnet-counters` runtime stats, structured Error/Warning counts, bot/oracle stats, **#867 gate verdicts**, and an explicit list of **missing** Prometheus names expected after PR #862. CI (`scripts/ci-load-test-smoke.sh`) prints `load-test-report: …/load-test-report.md` after each run and uploads `local-logs/ci-load-smoke/` as the `load-test-smoke` artifact.
+Each run writes **`load-test-report.md`** (LLM-ready, capped at ~30 KiB) and **`load-test-report.json`** under `--report-dir` (aliases: `report.md` / `report.json`). The markdown includes run header (git, build, machine, GC env), peak-scrape latency tables, 10s time-series windows, optional `dotnet-counters` runtime stats, steady-state RSS/GC/alloc trends, structured Error/Warning counts, bot/oracle stats, **#867 + #990 gate verdicts**, and an explicit list of **missing** Prometheus names expected after PR #862. The matrix runner (`scripts/run-load-test.sh`) checks runner and gate exit codes and writes `matrix-summary.json`/`matrix-summary.md` beside the per-run artifacts. CI uploads `local-logs/loadtest-runs/` for the fast and soak jobs.
 
 ## L2J Mobius comparison
 

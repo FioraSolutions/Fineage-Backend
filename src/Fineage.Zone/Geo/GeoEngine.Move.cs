@@ -6,8 +6,13 @@ public sealed partial class GeoEngine
     /// Mobius <c>getValidLocation</c>/<c>canMoveToTarget</c>: walk the geo cells from origin toward dest; stop at the last
     /// cell before a wall (missing NSWE direction) or a climb above <see cref="MaxClimb"/>. Returns the reachable point with
     /// ground Z. Cells without geo are passed through (Z kept). <paramref name="blocked"/> is true when truncated.
+    /// <para>
+    /// A closed door on the segment is checked first, exactly as Mobius <c>getValidLocation</c> calls
+    /// <c>checkIfDoorsBetween</c> before walking cells: the move is refused at the origin so the caller can path around
+    /// it. <see cref="DoorTable"/> is optional so pure-geo callers keep the previous behavior.
+    /// </para>
     /// </summary>
-    public (int X, int Y, int Z) MoveCheck(int ox, int oy, int oz, int tx, int ty, int tz, out bool blocked)
+    public (int X, int Y, int Z) MoveCheck(int ox, int oy, int oz, int tx, int ty, int tz, out bool blocked, DoorTable? doors = null)
     {
         blocked = false;
         int gx = GeoX(ox), gy = GeoY(oy);
@@ -15,6 +20,12 @@ public sealed partial class GeoEngine
         bool hasCur = CellAt(gx, gy, oz, out int curZ, out byte curNswe);
         if (!hasCur)
             curZ = oz;
+        if (doors != null && doors.Blocks(ox, oy, oz, tx, ty, tz))
+        {
+            blocked = true;
+            return (ox, oy, curZ);
+        }
+
         if (gx == gtx && gy == gty)
             return (tx, ty, hasCur ? curZ : tz);
 

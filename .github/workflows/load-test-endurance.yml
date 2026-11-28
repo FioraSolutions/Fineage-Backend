@@ -1,0 +1,141 @@
+name: load-test-endurance
+
+# Weekly 1-2 hour Release endurance, plus manual 8-24 hour stability runs on a self-hosted runner.
+# No long job is scheduled on ordinary pull requests. GitHub-hosted runners are capped at 6 hours,
+# so stability refuses to start there instead of claiming an 8-24 hour result it cannot produce.
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'endurance (1-2h) or stability (8-24h, self-hosted only)'
+        type: choice
+        default: endurance
+        options: [endurance, stability]
+      hours:
+        description: 'Stability duration in hours (8-24); ignored by endurance'
+        type: string
+        default: '8'
+      runner_label:
+        description: 'Runner label for stability (must be self-hosted)'
+        type: string
+        default: 'ubuntu-latest'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.mode || 'endurance' }}
+  cancel-in-progress: false
+
+env:
+  FINEAGE_DATABASE_URL: Host=127.0.0.1;Port=5432;Database=fineage;Username=fineage;Password=fineage
+  FINEAGE_HANDOFF_SECRET: FineageLoginHandoffV1
+  FINEAGE_LOGIN_LOADTEST_ACCOUNT_PREFIX: loadbot
+  FINEAGE_LOGIN_LOADTEST_PASSWORD: loadtest-pass-v1
+  FINEAGE_LOGIN_METRICS_PORT: 9464
+  FINEAGE_ZONE_METRICS_PORT: 9465
+  FINEAGE_ZONE_REGION_WORKERS: '0'
+  FINEAGE_BUILD_CONFIGURATION: Release
+
+jobs:
+  endurance:
+    name: load-test-endurance-90min
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && inputs.mode == 'endurance') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fineage
+          POSTGRES_PASSWORD: fineage
+          POSTGRES_DB: fineage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fineage -d fineage"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Install dotnet-counters
+        run: |
+          dotnet tool install --global dotnet-counters
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build Release stack
+        run: |
+          dotnet build src/Fineage.Login -c Release -v q
+          dotnet build src/Fineage.Zone -c Release -v q
+          dotnet build tools/Fineage.LoadTest -c Release -v q
+
+      - name: Release endurance matrix (5 x 15 min)
+        env:
+          ENDURANCE_DURATION_SECONDS: '900'
+        run: ./scripts/run-load-test.sh endurance
+
+      - name: Upload endurance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-endurance
+          path: local-logs/loadtest-runs/
+          retention-days: 30
+
+  stability:
+    name: load-test-stability-8-24h
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'stability' }}
+    runs-on: ${{ inputs.runner_label }}
+    timeout-minutes: 1500
+    steps:
+      - name: Refuse 8-24h stability on a GitHub-hosted runner
+        if: ${{ runner.environment != 'self-hosted' }}
+        run: |
+          echo "::error::8-24h stability needs a self-hosted runner with a local Postgres/Zone stack; GitHub-hosted jobs are capped at 6h."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Fineage.Backend.slnx
+
+      - name: Install dotnet-counters
+        run: |
+          dotnet tool install --global dotnet-counters
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Build Release stack
+        run: |
+          dotnet build src/Fineage.Login -c Release -v q
+          dotnet build src/Fineage.Zone -c Release -v q
+          dotnet build tools/Fineage.LoadTest -c Release -v q
+
+      - name: Release stability run
+        env:
+          STABILITY_DURATION_SECONDS: ${{ fromJSON(inputs.hours) * 3600 }}
+        run: ./scripts/run-load-test.sh stability
+
+      - name: Upload stability artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-stability
+          path: local-logs/loadtest-runs/
+          retention-days: 30

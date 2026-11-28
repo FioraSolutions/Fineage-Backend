@@ -1,5 +1,9 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Fineage.Agent.Contracts/Fineage.Agent.Contracts.csproj" />
+    <Project Path="src/Fineage.Agent.Identity/Fineage.Agent.Identity.csproj" />
+    <Project Path="src/Fineage.Agent.Observation/Fineage.Agent.Observation.csproj" />
+    <Project Path="src/Fineage.Agent.Gate/Fineage.Agent.Gate.csproj" />
     <Project Path="src/Fineage.Accounts/Fineage.Accounts.csproj" />
     <Project Path="src/Fineage.Game/Fineage.Game.csproj" />
     <Project Path="src/Fineage.Login/Fineage.Login.csproj" />
@@ -11,12 +15,19 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Fineage.LoadTest/Fineage.LoadTest.csproj" />
+    <Project Path="tools/Fineage.MobiusDiff/Fineage.MobiusDiff.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj" />
+    <Project Path="tests/Fineage.Agent.Identity.Tests/Fineage.Agent.Identity.Tests.csproj" />
+    <Project Path="tests/Fineage.Agent.Observation.Tests/Fineage.Agent.Observation.Tests.csproj" />
+    <Project Path="tests/Fineage.Agent.Gate.Tests/Fineage.Agent.Gate.Tests.csproj" />
     <Project Path="tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj" />
     <Project Path="tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj" />
     <Project Path="tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj" />
     <Project Path="tests/Fineage.Net.Tests/Fineage.Net.Tests.csproj" />
     <Project Path="tests/Fineage.LoadTest.Tests/Fineage.LoadTest.Tests.csproj" />
+    <Project Path="tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj" />
+    <Project Path="tests/Fineage.StateWriteProbe/Fineage.StateWriteProbe.csproj" />
   </Folder>
 </Solution>

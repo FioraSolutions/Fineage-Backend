@@ -74,7 +74,31 @@ public interface IAccountStore
     /// A failure leaves the ledger and every bag, warehouse, and freight hold as they were.
     /// A null list on a bag means that container is not part of this commit. An empty list clears it.
     /// </summary>
-    void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags);
+    /// <remarks>
+    /// <paramref name="worldState"/> is every dirty world subsystem the same batch saw (#996): the lottery ticket, the
+    /// monster race bet or the championship claim commits with the ledger rows that paid for it, or not at all. A
+    /// document older than the stored one (lower revision) is skipped, never written over a newer one.
+    /// </remarks>
+    void CommitEconomy(
+        IReadOnlyList<LedgerEntry> entries,
+        IReadOnlyList<EconomyBagWrite> bags,
+        IReadOnlyList<WorldStateDocument>? worldState = null);
+
+    /// <summary>Every saved world subsystem document (#996). Read at zone start and by the login ban gate.</summary>
+    IReadOnlyList<WorldStateDocument> LoadWorldState();
+
+    /// <summary>One saved world subsystem document, or null when that system has never been saved.</summary>
+    WorldStateDocument? LoadWorldState(string system);
+
+    /// <summary>
+    /// Writes <paramref name="document"/> and its import record in one transaction when the system has no saved
+    /// document yet. False (nothing written) when it already has one: the caller decides whether that is the same
+    /// import finishing or a second source of truth.
+    /// </summary>
+    bool TryImportWorldState(WorldStateDocument document, WorldStateImport import);
+
+    /// <summary>Every legacy sidecar imported so far.</summary>
+    IReadOnlyList<WorldStateImport> ListWorldStateImports();
 
     /// <summary>Writes the last world position. When <paramref name="lastAccess"/> is set and later than the stored value, updates last played.</summary>
     bool TrySavePresence(string account, int characterId, int x, int y, int z, DateTimeOffset? lastAccess);
@@ -127,6 +151,9 @@ public interface IAccountStore
 
     /// <summary>Replaces the character's hotbar (Mobius character_shortcuts). An empty list is a real save.</summary>
     bool TryReplaceShortcuts(string account, int characterId, IReadOnlyList<StoredShortcut> shortcuts);
+
+    /// <summary>Replaces the character's macros (Mobius character_macroses). An empty list is a real save.</summary>
+    bool TryReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros);
 
     /// <summary>Replaces the character's learned skills (Mobius character_skills). An empty list is a real save.</summary>
     bool TryReplaceLearnedSkills(string account, int characterId, IReadOnlyList<StoredSkill> skills);
@@ -199,6 +226,15 @@ public interface IAccountStore
 
     bool SaveSiegableClanHalls(IReadOnlyList<SiegableClanHallSave> halls);
 
+    /// <summary>
+    /// Every character on every account, ordered by id, deleted-pending rows included: the startup state audit
+    /// (#984) reads all saved bags at once to check them against the data catalogs and the replayed ledger.
+    /// </summary>
+    IReadOnlyList<CharacterRecord> ListAllCharacters();
+
+    /// <summary>Every stored pet row, ordered by control object id (startup state audit, #984).</summary>
+    IReadOnlyList<StoredPet> ListAllPets();
+
     /// <summary>The pet behind a collar (Mobius <c>Pet.restore</c> by control item object id), or null for a new pet.</summary>
     StoredPet? FindPet(int controlObjectId);
 
@@ -207,6 +243,12 @@ public interface IAccountStore
 
     /// <summary>Deletes the pet row (Mobius <c>destroyControlItem</c> / decayed corpse).</summary>
     bool DeletePet(int controlObjectId);
+
+    /// <summary>
+    /// Mobius <c>PetNameTable.doesPetNameExist</c>: another pet of the same npc already uses <paramref name="name"/>
+    /// (excluding <paramref name="exceptControlObjectId"/>).
+    /// </summary>
+    bool PetNameExists(string name, int npcId, int exceptControlObjectId);
 
     /// <summary>Writes the character title (Mobius <c>RequestGiveNickName</c> / <c>setTitle</c>).</summary>
     bool TrySetCharacterTitle(string account, int characterId, string title);

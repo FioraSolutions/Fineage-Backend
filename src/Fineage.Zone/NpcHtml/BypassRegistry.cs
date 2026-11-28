@@ -67,8 +67,6 @@ public sealed class BypassRegistry
         registry.Register(new LinkBypassHandler(pages));
         registry.Register(new QuestBypassHandler());
         registry.Register(new ShopBypassHandler());
-        // Mobius Wear opens ShopPreviewList (try-on). Net has no preview window yet.
-        registry.Register(new StubBypassHandler("Wear", "Wear"));
         registry.Register(new TerritoryBypassHandler());
         registry.Register(new TeleportBypassHandler());
         registry.Register(new NoblesSelectBypassHandler());
@@ -80,6 +78,7 @@ public sealed class BypassRegistry
         registry.Register(new TrainerBypassHandler());
         registry.Register(new FishermanBypassHandler());
         registry.Register(new RaidBossRankingBypassHandler());
+        registry.Register(new DungeonGateBypassHandler());
         registry.Register(new LotoBypassHandler());
         registry.Register(new MonsterRaceBypassHandler());
         registry.Register(new SevenSignsBypassHandler());

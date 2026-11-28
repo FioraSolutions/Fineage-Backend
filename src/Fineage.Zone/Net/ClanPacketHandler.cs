@@ -254,6 +254,29 @@ public sealed class ClanPacketHandler
             await _reject(conn, error, "Summon command failed.", ct).ConfigureAwait(false);
     }
 
+    /// <summary>Mobius <c>RequestChangePetName</c> — name the pet once while it is out.</summary>
+    public async Task OnChangePetNameAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeChangePetName(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new ChangePetNameCommand(new ChangePetNameMsg { Name = req.Name }),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Change pet name failed.", ct).ConfigureAwait(false);
+    }
+
     /// <summary>/duel, /partyduel, duel answer, /surrender (Mobius RequestDuelStart / RequestDuelAnswerStart).</summary>
     public async Task OnDuelCommandAsync(
         NetConnection conn,

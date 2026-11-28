@@ -14,22 +14,10 @@ sealed class EnterSelfPrepare
     {
         if (stored?.Items is not { Count: > 0 })
             return null;
-        var known = new List<StoredItem>(stored.Items.Count);
+        // The enter load refused the character already when a row names a missing template.
         foreach (var row in stored.Items)
-        {
-            if (items.TryGet(row.ItemId, out _))
-            {
-                known.Add(row);
-                continue;
-            }
-
-            ZoneLog.Warn(
-                $"inventory drop unknown template char={stored.Id} item={row.ItemId} objectId={row.ObjectId} count={row.Count}");
-        }
-
-        if (known.Count == 0)
-            return null;
-        var inventory = CharacterInventory.Restore(items, ids, known);
+            items.Require(row.ItemId);
+        var inventory = CharacterInventory.Restore(items, ids, stored.Items);
         foreach (var collapsed in inventory.CollapsedStacks)
         {
             ZoneLog.Warn(

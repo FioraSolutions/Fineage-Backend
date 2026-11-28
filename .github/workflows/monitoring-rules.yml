@@ -1,0 +1,56 @@
+name: monitoring-rules
+
+# #992: Prometheus config, recording and alert rules must parse and their promtool unit tests (including the ledger
+# divergence injection) must pass; the Grafana dashboard must be valid JSON. Nothing is deployed.
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PROMETHEUS_VERSION: 3.5.0
+  PROMETHEUS_SHA256: e811827af26d822afb09a4f28314f61b618b12cff5369835a67f674d8b46f39a
+
+jobs:
+  monitoring-rules:
+    name: monitoring-rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install promtool (pinned, checksum verified)
+        run: |
+          set -euo pipefail
+          archive="prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/${archive}"
+          echo "${PROMETHEUS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/prometheus-${PROMETHEUS_VERSION}.linux-amd64" >> "$GITHUB_PATH"
+
+      - name: Check config and rules
+        working-directory: monitoring/prometheus
+        run: |
+          promtool check config prometheus.yml
+          promtool check rules rules/*.yml
+
+      - name: Rule unit tests
+        working-directory: monitoring/prometheus
+        run: promtool test rules tests/*.test.yml
+
+      - name: Dashboards are valid JSON
+        run: |
+          for f in monitoring/grafana/dashboards/*.json; do
+            python3 -m json.tool "$f" > /dev/null
+            echo "ok $f"
+          done

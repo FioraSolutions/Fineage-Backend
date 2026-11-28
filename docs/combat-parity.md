@@ -4,7 +4,7 @@
 - Melee range 80 (atkRange 40 + collisions), server moveToPawn approach / follow re-path.
 - Server-authoritative hitTime: Attack swing broadcast, HP drops at timeAtk/2 (PendingMeleeHit), range re-check at hit.
 - Attack reuse from Pspd: `timeAtk = max(100, 500000 / pAtkSpd)` for players (class template) and NPCs (npcs.json `attackSpeed`).
-- Physical damage core `70 * pAtk / pDef` (min 1): player template P.Atk vs NPC `defence physical`; NPC `attack physical` vs player template P.Def.
+- Physical damage core `76 * pAtk * proximity / pDef` (min 1, CT0 `Formulas.calcPhysDam`): proximity is 1 front, 1.1 side, 1.2 behind. Player template P.Atk vs NPC `defence physical`; NPC `attack physical` vs player template P.Def.
 - npcs.json carries Mobius `pAtk`, `pDef`, `attackSpeed`, `attackRange` for all 6519 templates.
 - Player stat pipeline (`ZoneWorld.PlayerStats`, also feeds UserInfo): P.Atk = (weapon pAtk | fist) * STR * levelMod; M.Atk = (weapon | base) * INT² * levelMod²; P.Def = (base − naked slot share + armor pDef) * levelMod (fighter 31/18/12/7/8/3/1, mystic chest 15 / legs 8, full armor covers legs); M.Def = (41 − jewel shares + jewel mDef) * MEN * levelMod; Pspd = (weapon | 300) * DEX; accuracy = sqrt(DEX)*6 + level; crit = base*10*DEX; levelMod = (lvl+89)/100.
 - Weapon range: reach = weapon `attack_range` + 40 (melee 80, polearm 120, bow 540). items.json carries weapon pAtk/mAtk/pAtkSpd/critRate/attackRange/randomDamage and armor pDef/mDef from Mobius.
@@ -29,7 +29,7 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 
 ## Slice 6 — attack-skill damage and timing
 - `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.
-- Physical skill: 70·(P.Atk·ss + power)/P.Def (shield roll applies); magic: 91·√M.Atk/M.Def·power.
+- Physical skill: 76·(P.Atk·ss + power)·proximity/P.Def (shield roll applies); magic: 91·√M.Atk/M.Def·power.
 - Hit/cool: magic t·333/Cspd, physical t·300/Pspd; reuse t·333/speed. Initial MP at cast start, MP at launch.
 - Skills outside the catalog keep the legacy power+10 stub.
 - Gaps: magic crit/fail, spiritshots, skill crit; blow/energy use the physical formula; caster MP StatusUpdate V2-only.
@@ -44,7 +44,9 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 ## Slice 8 — aggro range, hate list / clan help, attack stance on Net
 - `npcs.json` gains Mobius `ai` aggroRange, clanHelpRange, clans, ignoreNpcIds.
 - Aggressive mobs (isAggressive and aggroRange > 0) scan every 500 ms and attack the first live player inside aggroRange (3D).
-- AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → returnHome.
+- AggroList: hate += damage·100/(level+7) (min 1; aggro/clan call/miss = 1). The mob attacks the most hated valid attacker; when that one dies or leaves, it switches to the next; empty list → disengage.
+- Disengage (`GoActiveAfterFight`, #1104): Mobius has no "return home" state — losing the last target goes to `AI_INTENTION_ACTIVE` (`AttackableAI.java:797-802`), and `thinkActive` starts the walk back only past `MaxDriftRange = 300` of the spawn (`AttackableAI.java:625-631`, `NPC.ini`). Inside that box the mob just stands: it does not invent a short walk to the exact spawn point. Arrival ends the walk (`CreatureAI.onEvtArrived` → `ACTIVE`, `CreatureAI.java:717-724`), so the flag never outlives the trip. `returnHome` clears hate *and* the damage shares (`clearAggroList`, `Attackable.java:1141/:1685`) and never heals. Same entry point serves the `reduceHate`/`stopHating` path. Tests: `ReturnHomeClearsAggroTests`; scenes `return-target-out-of-forget-range`, `return-drifted-walks-home`, `return-clears-hate`, `activation-returning-stays-awake`.
+- Death (Mobius `Creature.doDie`, `Attackable.java:876` `getMostHated` is null for `isAlikeDead`; `Creature.decayMe` `Creature.java:2465` and `Attackable.onSpawn` `Attackable.java:1455` clear the list): `RemoveDeadNpc` clears `HateList`, so a corpse carries no hate into decay or respawn. `DamageBy` is kept because `Attackable.calculateRewards` splits the kill over the AggroInfo damage shares. Test: `DeathClearsAggroTests`; scenes `death-aggro-cleared`, `hate-clear-on-kill`.
 - Clan help: once a second while fighting, idle same-clan mobs within clanHelpRange (minus ignoreNpcIds) join on the same target.
 - Net `AutoAttackStart` 0x0353 / `AutoAttackStop` 0x0354 (entity id): players = 15 s combat window, NPCs = has a target. The client reuses the legacy AutoAttackStart/Stop world apply.
 - Gaps: no LOS/geo check on aggro, no peace-zone or level-gap rules, no stance re-send to a watcher who comes into view mid-fight, V2 gets no stance packets, mob-vs-mob hate not modelled.
@@ -304,8 +306,145 @@ weightproc   = (load - bonusPenalty) * 1000 / maxLoad                    -- Java
   composition with Wind Walk; NPCs never penalised; live `ZoneWorld` — enter, relog, level-1 vs level-2 fanout shapes,
   recovery, level 4 stops the pawn, give/drop/grant through the bag hooks, `MaxLoadOf` folding 150, `BonusWeightPenaltyOf`
   folding 3512, `EtcStatusUpdate` projection + codec roundtrip, and regen halving with carry.
-- **Observation worth knowing:** the shipped starter kit (`initialEquipment.xml:33-45`: 5000 soulshots at weight 4, 50
-  Blessed Scrolls of Escape at 120, potions) weighs 46080 against an 88320 elven-fighter limit — **52%**, so a brand-new
-  character is already at weight-penalty level 1 and regenerates at half rate. That is genuine Mobius behaviour.
+- **Observation worth knowing:** the official Interlude starter kit (`stats/players/initialEquipment.xml`: Squire's
+  Sword, Dagger, Squire's Shirt/Pants, Tutorial Guide) weighs 7821 against an 88320 elven-fighter limit — about **9%**,
+  so a brand-new character is at weight-penalty level 0. The previous custom pack (5000 soulshots, potions, Dice
+  (Clover)) is no longer granted on create.
 - Still open here: pets (Mobius `Pet.refreshOverloaded`, `Pet.java:1205`) — no summon/pet inventory yet; `_dietMode`;
   `EtcStatusUpdate` charges/danger-area/charm/death-penalty stay 0 until those systems exist.
+
+## Slice — CP-aware target damage (Mobius `PlayerStatus.reduceHp`)
+
+Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/status/PlayerStatus.java`
+
+- CP (`reduceHp` 66-225, `reduceCp` 49, `doRegeneration` 391-410) is the first barrier for a player target when the
+  credited attacker is playable (`attacker.isPlayable()`: player or summon) and the call did not set `ignoreCP`:
+  CP absorbs the whole amount while it lasts, otherwise it drops to 0 and the remainder lands on HP. NPC attackers,
+  missing attackers, HP consumption, healing, max-vital setup, death/respawn and admin writes never spend CP.
+- Fineage now has one shared path: `TargetDamage.Split` (pure CP/HP split) and `ZoneWorld.ApplyTargetDamage` (vitals +
+  actual `DamageSplit` return). Melee, player/NPC skill damage, reflect, summon damage, channel ticks, DOT ticks,
+  environment damage zones, siege structures and `CpDamPercent`/`ReduceCp` all use it. `HpDrain` receives the actual
+  HP loss, so a hit fully absorbed by CP does not heal the caster.
+- Death/cast-break/reflect/absorb order is unchanged: reflect and absorb still use the rolled damage like
+  `Creature.doAttack`; `MaybeBreakCast` still sees the rolled amount; a CP-only hit leaves HP untouched but can break a
+  cast, exactly as `PlayerStatus.reduceHp` does.
+- Duel bars now publish live CP and a normal duel end restores the pre-duel CP snapshot with HP/MP
+  (`Duel.PlayerCondition.restoreCondition`); an interrupted duel does not restore.
+- `Formulas.calcPhysDam` is implemented as `76 * damage * proximity / defence` (front 1 / side 1.1 / behind 1.2), matching
+  CT0. The differential pilot `physical-attack-human-fighter-40` records that golden; a leftover P.Atk 42 vs 42.7248
+  (inside the stat tolerance, still visible on `damageNoCrit`) is still open
+  red finding for the next #979 slice; this slice did not change the physical constant.
+- Differential pilot: `cp-reducehp-human-fighter-40` evaluates the source-verified CP branch (full absorb, overflow,
+  NPC attacker bypass, explicit `ignoreCP`) in `MobiusFormulaDriver` and compares it with `TargetDamage.Split`.
+  The golden is generated by `--refresh-oracle`, never hand-entered. Physical stats/rolls remain covered by the existing
+  pilot; categories not represented in the harness stay unverified rather than being asserted.
+- Tests: `TargetDamageSplitTests`, `TargetDamageWorldTests`, `DirectHpWriteGuardTests`, `ZoneCpRegen*`, duel tests,
+  and the MobiusDiff CP/pilot tests. The source guard rejects new subtractive `CurHp` writes outside
+  `ZoneWorldTargetDamage.cs` unless the line carries an explicit `hp-write: <reason>` marker.
+- Incoming redirects now follow the CT0 order in `IncomingDamage.PlanPlayer` / `PlanSummon` and `ApplyTargetDamage`:
+  Transfer Pain (`transDam`, skill 1262) to an in-range servitor (never a pet, never fatal), then Arcane Shield
+  (`manaShield` add 70 on skill 1556: 30% of the remainder is paid as MP; if MP covers it the hit is fully absorbed
+  and the party transfer is skipped; if not, the shield is removed and the leftover continues), then
+  `TRANSFER_DAMAGE_TO_PLAYER` to `TransferDamageToObjectId` (party + range checks, `reduceCp` (which mutates the transferred amount when CP cannot cover it) then
+  `reduceCurrentHp(share)` on the caster, same integer split as `PlayerStatus` / `SummonStatus`). Tests:
+  `IncomingDamagePlanTests`, `IncomingDamageWorldTests`.
+- Still open for #979: CP-damage effect coverage beyond `CpDamPercent`, full-server verification of the differential
+  oracle, remaining golden categories (stats, crit, bow, shots, buff/debuff, cast-break), and the physical
+  remaining golden categories still listed below. DOT still stores the effector object id
+  and routes the CT0 five-argument `reduceCurrentHpByDOT` path with that attacker (playable → CP first, NPC/missing →
+  HP); a persisted abnormal with no effector keeps the no-attacker bypass.
+
+## Physical auto-attack differential matrix (#979)
+
+Java-generated goldens under `tools/Fineage.MobiusDiff/scenarios/phys-auto-*.json`, asserted by
+`tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs`. The oracle evaluates Mobius CT0
+`Formulas.calcPhysDam` / `calcHitMiss` / `calcCrit` / `calcShldUse`,
+`Creature.calculateTimeBetweenAttacks` (`(int)(500000 / getPAtkSpd())`) and
+`calculateReuseTime` (bow default reuse 1500 → `(reuse * 333) / pAtkSpd`).
+ClassBalanceConfig PvP/PvE multipliers are treated as 1.0 (Mobius-custom; Fineage has no
+matching Interlude catalog). Distance-scaled bow damage is off in Mobius
+(`DistanceBowDamage` default `false`) and is not applied. This checkout has no
+`ref/.../dist/game/data/stats` XML, so the Java driver falls back to Fineage's
+Mobius-transcribed JSON catalogs for inputs; the formulas themselves stay in the
+independent Java evaluator.
+
+Two production divergences found by the matrix were fixed in the same slice:
+
+- Intermediate `(int)` truncation in `PlayerCombatFormulas.PhysicalAttack` /
+  `PhysicalDefence` (Human Fighter 40 P.Atk 42 vs Mobius 42.7248, damage 71 vs 73).
+  Combat now keeps the double through `calcPhysDam` (`PAtkPrecise` / `PDefPrecise`);
+  UserInfo still sends the truncated int.
+- Auto-attack interval used `500000 / (int)pAtkSpd` (Long Sword 1201 ms) instead of
+  Mobius `(int)(500000 / getPAtkSpd())` with the double (1199 ms). `AttackTimeMs`
+  and bow reuse now take the precise speed (`PAtkSpdPrecise`). Bows add
+  `calculateReuseTime` on top of `timeAtk` (`PlayerAttackTimeMs`).
+
+Attacker × target cells (and the weapon used when the attacker is a player):
+
+| Cell | Scenario | Front dmg | Side | Back | SS | Crit | Hit ‰ (front) | Interval ms | Notes |
+|------|---------------------|------|------|----|------|----------------|-------------|-------|
+| player→mob sword | `phys-auto-p2m-sword` | 63 | 69 | 76 | 127 | 127 | 980 | 1199 | HF40 Long Sword vs Gremlin (lv 1) |
+| player→mob blunt | `phys-auto-p2m-blunt` | 63 | 69 | 76 | 127 | 127 | 980 | 1199 | Bone Club (same pAtk/pAtkSpd as Long Sword) |
+| player→mob dagger | `phys-auto-p2m-dagger` | 58 | 64 | 69 | 116 | 116 | 980 | 1049 | Crafted Dagger, pAtkSpd 433 |
+| player→mob pole | `phys-auto-p2m-pole` | 63 | 69 | 76 | 127 | 127 | 980 | 1398 | Short Spear, range 80 |
+| player→mob bow | `phys-auto-p2m-bow` | 60 | 66 | 73 | 121 | 121 | 980 | 3100 | range 500, reuse 1549, timeAtk 1551 |
+| player→mob fist | `phys-auto-p2m-fist` | 76 | 84 | 92 | 153 | 153 | 980 | 1398 | Cestus (Interlude `WeaponType.Fist`) |
+| player→mob dual | `phys-auto-p2m-dual` | 193 | 212 | 231 | 386 | 386 | 980 | 1398 | Saber*Saber (no no-grade dual) |
+| player→mob 2h sword | `phys-auto-p2m-bigsword` | 55 | 61 | 66 | 111 | 111 | 980 | 1398 | Brandish; Interlude has no BigSword type |
+| player→mob 2h blunt | `phys-auto-p2m-bigblunt` | 238 | 262 | 285 | 476 | 476 | 980 | 1398 | Atuba Hammer; Interlude has no BigBlunt type |
+| player→player | `phys-auto-p2p-sword-shield` | 9 | 10 | 11 | 18 | 18 | 960 | 1199 | PvP=1, shield sDef 47 rate 22, CP 9 / HP 0 |
+| mob→player | `phys-auto-m2p-gremlin` | 2 | 2 | 2 | 4 | 4 | 292 | 1976 | NPC not playable: CP bypass (HP 2) |
+| summon→mob | `phys-auto-s2m-kat` | 88 | 97 | 106 | 176 | 176 | 980 | 1976 | Kat the Cat 14111 (catalog type Pet) |
+| mob→summon | `phys-auto-m2s-gremlin-kat` | 6 | 7 | 8 | 13 | 13 | 475 | 1976 | no CP on the summon |
+| player→summon | `phys-auto-p2s-sword-kat` | 30 | 33 | 36 | 60 | 60 | 980 | 1199 | Mobius `isPvP` (both playable), multipliers 1.0 |
+| level-gap HF1→gremlin | `phys-auto-p2m-sword-lv1` | 44 | 48 | 53 | 88 | 88 | 782 | 1199 | accuracy uses level 1 |
+| same-level HF40→alligator | `phys-auto-p2m-sword-alligator` | 18 | 19 | 21 | 36 | 36 | 782 | 1199 | Alligator 20135 lv 40 |
+
+### Attribute / derived-stat goldens (slice 1)
+
+Java-driver oracles for the nine Interlude base classes at level 40, Human Fighter / Human Mystic
+at level 1, Human Fighter +4 enchant, and Human Fighter Weapon Mastery 141 L1 + Heavy Armor
+Mastery 231 L1. Fighters wear Long Sword 2 + mithril 58/59/61/62; mystics wear Willow Staff 8 +
+Tunic 426 / Stockings 462. Metrics: STR/DEX/CON/INT/WIT/MEN and bonus-table multipliers; P.Atk,
+P.Def, P.Atk.Spd, M.Atk, M.Def, M.Atk.Spd; accuracy / evasion / crit ‰ / mCrit ‰; max HP/MP/CP.
+Scenarios: `stats-*-40`, `stats-human-*-1`, `stats-human-fighter-40-enchant4`,
+`stats-human-fighter-40-passives` (`AttrStatsMatrixTests`). M.Atk / M.Def / M.Atk.Spd stay as
+untruncated doubles in the formula layer (same class of fix as P.Atk in the auto-attack matrix).
+Do not mark a full matrix row in `docs/mobius-parity-matrix.md` from this slice; there is no
+dedicated six-attribute row.
+
+### Magic damage differential matrix (#979 slice 2)
+
+Seven scenarios (`magic-*`, `MagicMatrixTests`) compare Fineage with a Java oracle that reads the Mobius
+skill XML (`power`, `magicLevel`) and NPC XML (raw stats), folds NPC M.Atk / M.Def like `FuncMAtkMod` /
+`FuncMDefMod`, and evaluates `calcMagicSuccess` + `calcMagicDam` + the `MagicalDamage` effect's `(int)` cast.
+Cells: success rate, normal / spiritshot / blessed spiritshot damage, crit (NPC ×3, player→player ×2.5, with
+`MAGIC_CRIT_DMG`), half-fail, resisted, shield block (`mDef += sDef`) and perfect block, random-damage
+spread bounds. Casters: Human / Elven / Dark Mystic with Willow Staff, unarmed Human Mystic; targets: Gremlin,
+Validus, Skeleton Royal Guard (shield), Basilisk, Ant Recruit, an HF40 player.
+
+Divergences found and fixed:
+
+| Divergence | Mobius | Fineage before | Fix |
+|---|---|---|---|
+| NPC M.Atk / M.Def | `FuncMAtkMod` `mAtk·INT.bonus²·levelMod²`, `FuncMDefMod` `mDef·MEN.bonus·levelMod` (Gremlin mDef 29.59 → 29.56) | raw XML value | folded in `NpcCatalog`; per-NPC `int` / `men` added to `npcs.json` where not 21 / 10 |
+| Player caster M.Atk | untruncated double | cast path used the int display value | `PlayerCombatStats.MAtkPrecise` |
+| Shield vs magic | `mDef += shldDef`, perfect block = 1 | ignored | `RollSkillDamage` rolls the shield |
+| Random damage | `getRandomDamageMultiplier` (weapon `RANDOM_DAMAGE`, else `5+(int)√level`) | none | `MagicRandomPercent` |
+| Failure branch | only a **player** caster halves / resists; an NPC caster keeps full damage and no crit | applied to NPC casters too | `casterIsPlayer` |
+| Crit ×2.5 | only when attacker **and** target are players | any player target | `casterIsPlayer && targetIsPlayer` |
+| Magic crit cap | `getMCriticalHit` capped by `MaxMCritRate` (200 ‰) | uncapped | `MaxMCritRate` in player/world stats and roll |
+| Zero damage | `(int)` damage; `if (damage > 0)` so 0 = no hit | `Math.Max(1, …)` | `MagicDamageFor` returns 0 |
+
+Found but **not** fixed here (NPC derived stats still raw XML in Fineage; Mobius folds them):
+P.Atk `·STR.bonus·levelMod`, P.Def `·levelMod`, P.Atk.Spd `·DEX.bonus`, max HP `·CON.bonus`, max MP `·MEN.bonus`.
+The physical auto-attack matrix NPC-defence cells compared catalog values on both sides, so the NPC side of
+rows 16 / 17 / 72 is not independently Mobius-verified until that fold lands.
+
+Out of this slice (still open for #979): blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
+shots consume/auto-charge/grade; cast-break from damage/stun/target death; a full-server oracle
+(Java driver is not a GameServer; `dist/libs` absent). DualFist as a distinct type (Interlude
+catalog folds cestus into `Fist`) and servitor features beyond auto-attack stay out of scope.
+Arrow consume/wrong-grade/last-arrow already has Mobius-traced world tests in
+`NetBowArrowTests.cs`.
+

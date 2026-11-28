@@ -193,6 +193,10 @@ public sealed partial class ClassCatalog
         return new ExperienceTable(file.MaxLevel, file.MaxPetLevel, toLevel);
     }
 
+    /// <summary>Loads <c>stat-bonuses.json</c> from a data directory (NPC folds use the same table as players).</summary>
+    public static StatBonusTable LoadStatBonuses(string dataDirectory) =>
+        ReadBonuses(Path.Combine(dataDirectory, StatBonusesFileName));
+
     static StatBonusTable ReadBonuses(string path)
     {
         var file = Read<BonusFileDto>(path);

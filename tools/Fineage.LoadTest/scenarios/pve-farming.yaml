@@ -1,0 +1,24 @@
+# #990 — PvE farming: many players kill the arena packs with real attack/skill/move packets.
+# Zone env: FINEAGE_ZONE_LOADTEST_COMBAT=1 FINEAGE_ZONE_EXTRA_MAPS=loadtest_aoe_arena
+# The load-test bot has no corpse-loot or quest flow; drop pickup is a documented gap, not simulated here.
+name: pve-farming
+botCount: 100
+rampUpSeconds: 30
+durationSeconds: 120
+spawnLayout: spread
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+aoiCellSize: 3000
+# Human Fighter at create (Login only allows a base class). Zone promotes load-test
+# accounts to level 77 Warlord (class 3) when FINEAGE_ZONE_LOADTEST_COMBAT=1,
+# same as perf-aoe-train.
+classId: 0
+combatSkillId: 3
+actionWeights:
+  move: 0.20
+  attack: 0.32
+  skill: 0.18
+  sit: 0.10
+  say: 0.08
+  social: 0.12

@@ -70,9 +70,17 @@ public sealed partial class ZoneWorld
     {
         if (skillId <= 0)
             throw new InvalidOperationException($"[town-teleport] {castBy} names no skill id in item-skills.json");
-        return _game.Skills.Find(skillId) ?? throw new InvalidOperationException(
-            $"[town-teleport] skill {skillId} cast by {castBy} is missing from skills.json; " +
-            "import it from Mobius with tools/import_skills.py --add-missing");
+        try
+        {
+            return _game.Skills.Require(skillId);
+        }
+        catch (Fineage.Game.RequiredData.RequiredDataException ex)
+        {
+            throw new InvalidOperationException(
+                $"[town-teleport] skill {skillId} cast by {castBy} is missing from skills.json; " +
+                "import it from Mobius with tools/import_skills.py --add-missing",
+                ex);
+        }
     }
 
     /// <summary>

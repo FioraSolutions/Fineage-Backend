@@ -6,10 +6,27 @@ public sealed class ServerMetricsSampler
     readonly int _loginMetricsPort;
     readonly int _zoneMetricsPort;
 
-    public ServerMetricsSampler(int loginMetricsPort = 9464, int zoneMetricsPort = 9465)
+    public const int DefaultLoginMetricsPort = 9464;
+    public const int DefaultZoneMetricsPort = 9465;
+    const string LoginMetricsPortEnv = "FINEAGE_LOGIN_METRICS_PORT";
+    const string ZoneMetricsPortEnv = "FINEAGE_ZONE_METRICS_PORT";
+
+    /// <summary>
+    /// Ports come from the same environment knobs the servers read, so a stack started on non-default
+    /// ports (an isolated soak beside a running playtest stack) is scraped on the port it actually listens on.
+    /// </summary>
+    public ServerMetricsSampler(int? loginMetricsPort = null, int? zoneMetricsPort = null)
     {
-        _loginMetricsPort = loginMetricsPort;
-        _zoneMetricsPort = zoneMetricsPort;
+        _loginMetricsPort = loginMetricsPort ?? ResolvePort(LoginMetricsPortEnv, DefaultLoginMetricsPort);
+        _zoneMetricsPort = zoneMetricsPort ?? ResolvePort(ZoneMetricsPortEnv, DefaultZoneMetricsPort);
+    }
+
+    static int ResolvePort(string variable, int fallback)
+    {
+        string? text = Environment.GetEnvironmentVariable(variable);
+        if (string.IsNullOrWhiteSpace(text))
+            return fallback;
+        return int.TryParse(text.Trim(), out int port) && port is > 0 and <= 65535 ? port : fallback;
     }
 
     public async Task<List<PrometheusSample>> SampleZoneDuringAsync(TimeSpan interval, TimeSpan duration, CancellationToken ct)
@@ -39,6 +56,13 @@ public sealed class ServerMetricsSampler
     }
 
     public List<string> RawScrapes { get; } = [];
+
+    /// <summary>The exact endpoint the sampler polls; used by the runner's metrics preflight error.</summary>
+    public string ZoneMetricsUrl => $"http://127.0.0.1:{_zoneMetricsPort}/metrics";
+
+    /// <summary>One raw scrape for startup preflight. Null means the endpoint did not answer.</summary>
+    public async Task<string?> FetchZoneRawOnceAsync(CancellationToken ct) =>
+        await FetchAsync(ZoneMetricsUrl, ct);
 
     public async Task<PrometheusSample?> SampleZoneOnceAsync(CancellationToken ct) =>
         await FetchAsync($"http://127.0.0.1:{_zoneMetricsPort}/metrics", ct) is { } t ? PrometheusParser.Parse(t) : null;

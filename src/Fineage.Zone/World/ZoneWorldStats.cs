@@ -15,8 +15,11 @@ public readonly record struct PlayerCombatStats(
     double ReflectDam = 0d, double AbsorbDam = 0d, double HealEffect = 1d,
     int SkillCritical = 0, double SkillCriticalProbability = 1d, int AtkCountMax = 1,
     double DarkRes = 0d, double HolyRes = 0d, double FireRes = 0d, double WaterRes = 0d,
-    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double DamageZoneVuln = 0d,
-    double HolyPower = 0d, double FirePower = 0d);
+    double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double ManaShield = 0d,
+    double TransDamToPlayer = 0d, double DamageZoneVuln = 0d,
+    double HolyPower = 0d, double FirePower = 0d,
+    double PAtkPrecise = 0d, double PDefPrecise = 0d, double PAtkSpdPrecise = 0d,
+    double MAtkPrecise = 0d, double MDefPrecise = 0d, double MAtkSpdPrecise = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -40,14 +43,26 @@ public sealed partial class ZoneWorld
         var gear = GearBases(player, t);
         var formula = PlayerFormulaBases.From(attrs, gear, t.MAtkSpd, level);
         var mods = PlayerStatMods(player);
+        double pAtkPrecise = mods.Apply(CombatStat.PAtk, formula.PAtk);
+        double pDefPrecise = Math.Max(1d, mods.Apply(CombatStat.PDef, formula.PDef));
+        double pAtkSpdPrecise = Math.Max(1d, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd));
+        double mAtkPrecise = mods.Apply(CombatStat.MAtk, formula.MAtk);
+        double mDefPrecise = Math.Max(1d, mods.Apply(CombatStat.MDef, formula.MDef));
+        double mAtkSpdPrecise = Math.Max(1d, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd));
 
         return new PlayerCombatStats(
-            PAtk: mods.Apply(CombatStat.PAtk, formula.PAtk),
-            MAtk: mods.Apply(CombatStat.MAtk, formula.MAtk),
-            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef)),
-            MDef: Math.Max(1, mods.Apply(CombatStat.MDef, formula.MDef)),
-            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd)),
-            MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd)),
+            PAtk: (int)pAtkPrecise,
+            PAtkPrecise: pAtkPrecise,
+            MAtk: (int)mAtkPrecise,
+            MAtkPrecise: mAtkPrecise,
+            PDef: (int)pDefPrecise,
+            PDefPrecise: pDefPrecise,
+            MDef: (int)mDefPrecise,
+            MDefPrecise: mDefPrecise,
+            PAtkSpd: (int)pAtkSpdPrecise,
+            PAtkSpdPrecise: pAtkSpdPrecise,
+            MAtkSpd: (int)mAtkSpdPrecise,
+            MAtkSpdPrecise: mAtkSpdPrecise,
             Accuracy: mods.Apply(CombatStat.Accuracy, formula.Accuracy),
             CritRate: mods.Apply(CombatStat.CritRate, formula.CritRate),
             AttackRange: Math.Max(0, mods.Apply(CombatStat.PAtkRange, gear.AttackRange)),
@@ -58,7 +73,7 @@ public sealed partial class ZoneWorld
             ShieldRate: mods.Apply(CombatStat.RShld, formula.ShieldRate),
             Soulshots: gear.Soulshots,
             WeaponGrade: gear.WeaponGrade,
-            MCritRate: (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10,
+            MCritRate: Math.Min((int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10, ZoneCombat.MaxMCritRate),
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
             BlowRate: mods.Apply(CombatStat.BlowRate, 1d),
@@ -85,6 +100,8 @@ public sealed partial class ZoneWorld
             EarthRes: mods.Apply(CombatStat.EarthRes, 0d),
             // Mobius TRANSFER_DAMAGE_PERCENT (transDam): percent of incoming damage sent to the servitor.
             TransDam: mods.Apply(CombatStat.TransDam, 0d),
+            ManaShield: mods.Apply(CombatStat.ManaShield, 0d),
+            TransDamToPlayer: mods.Apply(CombatStat.TransDamToPlayer, 0d),
             DamageZoneVuln: mods.Apply(CombatStat.DamageZoneVuln, 0d),
             HolyPower: mods.Apply(CombatStat.HolyPower, 0d),
             FirePower: mods.Apply(CombatStat.FirePower, 0d));
@@ -137,10 +154,22 @@ public sealed partial class ZoneWorld
     internal CombatStatMods PlayerStatMods(ZoneEntity player)
     {
         var mods = FoldAbnormals(player);
+        mods = FoldTestCombatFuncs(player, mods);
         mods = FoldLearnedClanAndGearPassives(player, mods);
         mods = FoldWeightPenalty(player, mods);
         mods = FoldGradePenalty(player, mods);
         return FoldDeathPenalty(player, mods);
+    }
+
+    static CombatStatMods? FoldTestCombatFuncs(ZoneEntity entity, CombatStatMods? mods)
+    {
+        if (entity.TestCombatFuncs is not { Count: > 0 } funcs)
+            return mods;
+        if (mods is null || ReferenceEquals(mods, CombatStatMods.None))
+            mods = new CombatStatMods();
+        foreach (var func in funcs)
+            mods.Add(func, 1);
+        return mods;
     }
 
     CombatStatMods? FoldAbnormals(ZoneEntity player)

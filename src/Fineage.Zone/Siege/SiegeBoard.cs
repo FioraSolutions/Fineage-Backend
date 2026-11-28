@@ -129,9 +129,17 @@ public sealed partial class SiegeBoard
             if (castle.SiegeUnixMs == 0)
                 ScheduleOne(castle, nowUnixMs);
             else if (!castle.InProgress && castle.SiegeUnixMs <= nowUnixMs)
+            {
+                ZoneLog.Warn(
+                    $"[siege] castle {castle.Id} siege overdue due={castle.SiegeUnixMs} now={nowUnixMs}; rescheduling once");
                 ScheduleOne(castle, nowUnixMs);
+            }
             else if (castle.InProgress && castle.EndsUnixMs != 0 && castle.EndsUnixMs <= nowUnixMs)
+            {
+                ZoneLog.Warn(
+                    $"[siege] castle {castle.Id} siege end overdue due={castle.EndsUnixMs} now={nowUnixMs}; finishing once");
                 Finish(castle, nowUnixMs);
+            }
         }
 
         Refresh(nowUnixMs);

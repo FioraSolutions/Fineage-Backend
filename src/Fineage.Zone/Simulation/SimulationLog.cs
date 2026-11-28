@@ -1,3 +1,5 @@
+using Fineage.Zone.World;
+
 namespace Fineage.Zone.Simulation;
 
 /// <summary>An input the simulation applies between steps (a player's move, attack, skill use, …).</summary>
@@ -30,7 +32,8 @@ public sealed record CommandLogEntry(
     long WallUnixMs,
     int ActorObjectId,
     ISimulationCommand Command,
-    string Outcome) : SimulationLogEntry(Sequence, Tick, WallUnixMs);
+    string Outcome,
+    CommandSource Source = CommandSource.Player) : SimulationLogEntry(Sequence, Tick, WallUnixMs);
 
 /// <summary>
 /// The per-tick input log of one run: every step and every command, in the order they took the world gate. Replaying
@@ -57,10 +60,16 @@ public sealed class SimulationLog(SimulationLogHeader header)
             _entries.Add(new StepLogEntry(_entries.Count, tick, wallUnixMs));
     }
 
-    public void AppendCommand(long tick, long wallUnixMs, int actorObjectId, ISimulationCommand command, string outcome)
+    public void AppendCommand(
+        long tick,
+        long wallUnixMs,
+        int actorObjectId,
+        ISimulationCommand command,
+        string outcome,
+        CommandSource source = CommandSource.Player)
     {
         ArgumentNullException.ThrowIfNull(command);
         lock (_entries)
-            _entries.Add(new CommandLogEntry(_entries.Count, tick, wallUnixMs, actorObjectId, command, outcome));
+            _entries.Add(new CommandLogEntry(_entries.Count, tick, wallUnixMs, actorObjectId, command, outcome, source));
     }
 }

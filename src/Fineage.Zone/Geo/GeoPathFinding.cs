@@ -16,11 +16,11 @@ public sealed partial class GeoEngine
     public const int PathMargin = 96; // cells (~1.5k units) of detour allowed around the origin/target box
 
     /// <summary>Starts a resumable route search; <see cref="GeoPathSearch.Step"/> spends the caller's node budget.</summary>
-    public GeoPathSearch BeginPath(int ox, int oy, int oz, int tx, int ty, int tz, int? maxNodes = null) =>
-        new(this, ox, oy, oz, tx, ty, tz, maxNodes);
+    public GeoPathSearch BeginPath(int ox, int oy, int oz, int tx, int ty, int tz, int? maxNodes = null, DoorTable? doors = null) =>
+        new(this, ox, oy, oz, tx, ty, tz, maxNodes, doors);
 
     /// <summary>Single-cell step legality (same rules as MoveCheck). Outputs next cell ground Z.</summary>
-    internal bool CanStep(int gx, int gy, int z, int nx, int ny, out int nz)
+    internal bool CanStep(int gx, int gy, int z, int nx, int ny, out int nz, DoorTable? doors = null)
     {
         nz = z;
         if (!CellAt(gx, gy, z, out int cz, out byte cn) || !CellAt(nx, ny, cz, out nz, out _))
@@ -31,6 +31,8 @@ public sealed partial class GeoEngine
         if (sy != 0) need |= sy > 0 ? South : North;
         if ((cn & need) != need || nz - cz > MaxClimb)
             return false;
+        if (doors != null && doors.Blocks(WorldX(gx), WorldY(gy), cz, WorldX(nx), WorldY(ny), nz))
+            return false;
         if (sx != 0 && sy != 0)
         {
             return CellAt(nx, gy, cz, out _, out _) && CellAt(gx, ny, cz, out _, out _)
@@ -40,12 +42,12 @@ public sealed partial class GeoEngine
         return true;
     }
 
-    public List<(int X, int Y, int Z)>? FindPath(int ox, int oy, int oz, int tx, int ty, int tz)
+    public List<(int X, int Y, int Z)>? FindPath(int ox, int oy, int oz, int tx, int ty, int tz, DoorTable? doors = null)
     {
         if (!CellAt(GeoX(ox), GeoY(oy), oz, out _, out _) || !CellAt(GeoX(tx), GeoY(ty), tz, out _, out _))
             return null;
 
-        var search = BeginPath(ox, oy, oz, tx, ty, tz);
+        var search = BeginPath(ox, oy, oz, tx, ty, tz, doors: doors);
         while (search.Step(int.MaxValue) == GeoPathSearch.Status.Running)
         {
         }

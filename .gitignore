@@ -13,6 +13,8 @@ data/*
 !data/wedding.json
 !data/fishing.json
 !data/raid-boss-points.json
+!data/pc-cafe-coupons.json
+!data/npc-location-info.json
 !data/monster-race.json
 !data/recipes.json
 !data/starter-kits.json
@@ -44,6 +46,7 @@ data/*
 !data/olympiad-stadiums.json
 !data/raidbosses.json
 !data/teleports.json
+!data/required-data-registry.json
 !data/walking-routes.json
 !data/boats.json
 !data/gm-teleports.json
@@ -57,6 +60,8 @@ data/*
 !data/augmentation/**
 !data/html/
 !data/html/**
+!data/scripts/
+!data/scripts/**
 !data/l10n/
 !data/l10n/**
 !data/buylists.json
@@ -88,6 +93,7 @@ TestResults/
 # Local run artifacts
 local-data/
 local-logs/
+local-backups/
 .cache/
 publish/
 !data/spoil.json
@@ -99,6 +105,7 @@ publish/
 !data/cubics.json
 !data/xp-percent-lost.json
 !data/item-skills.json
+!data/item-handlers.json
 !data/map-regions.json
 !data/geodata-regions.json
 !data/clan-hall-spawns.json

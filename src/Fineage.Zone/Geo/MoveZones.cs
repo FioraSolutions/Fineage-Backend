@@ -40,12 +40,44 @@ public sealed class DoorTable
 
     readonly List<DoorInstance> _doors;
     readonly Dictionary<int, DoorInstance> _byId = [];
+    readonly Dictionary<long, List<DoorInstance>> _byBlock = [];
+
+    /// <summary>Door footprints indexed in 128-unit blocks so a movement segment only tests nearby doors.</summary>
+    const int IndexBlockCells = 8;
+    const int IndexBlockSize = GeoEngine.CellSize * IndexBlockCells;
 
     public DoorTable(List<DoorInstance> doors)
     {
         _doors = doors;
         foreach (var d in doors)
+        {
             _byId[d.Id] = d;
+            IndexDoor(d);
+        }
+    }
+
+    static int BlockX(int worldX) => GeoEngine.GeoX(worldX) / IndexBlockCells;
+    static int BlockY(int worldY) => GeoEngine.GeoY(worldY) / IndexBlockCells;
+    static long BlockKey(int bx, int by) => ((long)bx << 32) ^ (uint)by;
+
+    void IndexDoor(DoorInstance d)
+    {
+        if (d.Nodes.Length < 2)
+            return;
+        int minX = d.Nodes.Min(n => n.X), maxX = d.Nodes.Max(n => n.X);
+        int minY = d.Nodes.Min(n => n.Y), maxY = d.Nodes.Max(n => n.Y);
+        int bx0 = BlockX(minX), bx1 = BlockX(maxX);
+        int by0 = BlockY(minY), by1 = BlockY(maxY);
+        for (int bx = bx0; bx <= bx1; bx++)
+        {
+            for (int by = by0; by <= by1; by++)
+            {
+                long key = BlockKey(bx, by);
+                if (!_byBlock.TryGetValue(key, out var bucket))
+                    _byBlock[key] = bucket = [];
+                bucket.Add(d);
+            }
+        }
     }
 
     public int Count => _doors.Count;
@@ -115,26 +147,14 @@ public sealed class DoorTable
         stopX = tx; stopY = ty; stopZ = tz;
         if (_doors.Count == 0 || (ox == tx && oy == ty))
             return null;
-        int sMinX = Math.Min(ox, tx), sMaxX = Math.Max(ox, tx), sMinY = Math.Min(oy, ty), sMaxY = Math.Max(oy, ty);
-        int sMinZ = Math.Min(oz, tz), sMaxZ = Math.Max(oz, tz);
         DoorInstance? best = null;
         double bestT = double.MaxValue;
         foreach (var d in _doors)
         {
-            if (d.Open || d.MaxX < sMinX || d.MinX > sMaxX || d.MaxY < sMinY || d.MinY > sMaxY)
-                continue;
-            // Z overlap with a small step margin (mover Z is ground; door spans nodeZ..nodeZ+height).
-            if (sMaxZ < d.MinZ - 64 || sMinZ > d.MaxZ)
-                continue;
-            for (int i = 0; i < d.Nodes.Length; i++)
+            if (Crosses(d, ox, oy, oz, tx, ty, tz, out double t) && t < bestT)
             {
-                var a = d.Nodes[i];
-                var b = d.Nodes[(i + 1) % d.Nodes.Length];
-                if (SegmentT(ox, oy, tx, ty, a.X, a.Y, b.X, b.Y, out double t) && t < bestT)
-                {
-                    bestT = t;
-                    best = d;
-                }
+                bestT = t;
+                best = d;
             }
         }
 
@@ -146,6 +166,85 @@ public sealed class DoorTable
         stopY = oy + (int)Math.Round((ty - oy) * back);
         stopZ = oz + (int)Math.Round((tz - oz) * back);
         return best;
+    }
+
+    /// <summary>
+    /// Mobius <c>DoorData.checkIfDoorsBetween</c> without the stop point: true when any closed door footprint lies on
+    /// the segment within its Z span. Used by geo movement checks and path search so a closed door is a wall, not a
+    /// post-path clip. Only doors indexed near the segment are tested.
+    /// </summary>
+    public bool Blocks(int ox, int oy, int oz, int tx, int ty, int tz)
+    {
+        if (_byBlock.Count == 0 || (ox == tx && oy == ty))
+            return false;
+        int bx0 = BlockX(Math.Min(ox, tx)) - 1, bx1 = BlockX(Math.Max(ox, tx)) + 1;
+        int by0 = BlockY(Math.Min(oy, ty)) - 1, by1 = BlockY(Math.Max(oy, ty)) + 1;
+        for (int bx = bx0; bx <= bx1; bx++)
+        {
+            for (int by = by0; by <= by1; by++)
+            {
+                if (!_byBlock.TryGetValue(BlockKey(bx, by), out var bucket))
+                    continue;
+                foreach (var d in bucket)
+                {
+                    if (Crosses(d, ox, oy, oz, tx, ty, tz, out _))
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>True when any closed door footprint overlaps the world-space box; lets path search skip door checks entirely in open regions.</summary>
+    public bool AnyClosedIn(int minX, int minY, int maxX, int maxY)
+    {
+        if (_byBlock.Count == 0)
+            return false;
+        int bx0 = BlockX(minX), bx1 = BlockX(maxX);
+        int by0 = BlockY(minY), by1 = BlockY(maxY);
+        for (int bx = bx0; bx <= bx1; bx++)
+        {
+            for (int by = by0; by <= by1; by++)
+            {
+                if (!_byBlock.TryGetValue(BlockKey(bx, by), out var bucket))
+                    continue;
+                foreach (var d in bucket)
+                {
+                    if (!d.Open && d.MaxX >= minX && d.MinX <= maxX && d.MaxY >= minY && d.MinY <= maxY)
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    static bool Crosses(DoorInstance d, int ox, int oy, int oz, int tx, int ty, int tz, out double t)
+    {
+        t = double.MaxValue;
+        if (d.Open || d.Nodes.Length < 2)
+            return false;
+        int sMinX = Math.Min(ox, tx), sMaxX = Math.Max(ox, tx), sMinY = Math.Min(oy, ty), sMaxY = Math.Max(oy, ty);
+        if (d.MaxX < sMinX || d.MinX > sMaxX || d.MaxY < sMinY || d.MinY > sMaxY)
+            return false;
+        // Z overlap with a small step margin (mover Z is ground; door spans nodeZ..nodeZ+height).
+        int sMinZ = Math.Min(oz, tz), sMaxZ = Math.Max(oz, tz);
+        if (sMaxZ < d.MinZ - 64 || sMinZ > d.MaxZ)
+            return false;
+        double best = double.MaxValue;
+        for (int i = 0; i < d.Nodes.Length; i++)
+        {
+            var a = d.Nodes[i];
+            var b = d.Nodes[(i + 1) % d.Nodes.Length];
+            if (SegmentT(ox, oy, tx, ty, a.X, a.Y, b.X, b.Y, out double hit) && hit < best)
+                best = hit;
+        }
+
+        if (best == double.MaxValue)
+            return false;
+        t = best;
+        return true;
     }
 
     /// <summary>Intersection parameter t∈[0,1] on segment P (p0→p1) with segment Q (q0→q1).</summary>

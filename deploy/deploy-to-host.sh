@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Sync self-contained publish trees to the live host app root and restart it via systemd.
+# Upload self-contained publish trees as a new release on the live host and activate it health-gated (#989).
+# Each release lands in <app-root>/releases/<id>/ (never edited in place); deploy/release-switch.sh on the host
+# runs the migration preflight, switches the `current` symlink atomically, restarts, waits for /health/ready on
+# Login and Zone, and rolls back to the previous release when readiness does not come.
 # Preserves data/, logs/, fineage.env, and handoff.secret under the app root.
 #
+#   FINEAGE_RELEASE_ID   release directory name   (default: UTC timestamp; the workflow passes the commit sha)
 # Defaults target the live homeserver. Override with:
 #   FINEAGE_DEPLOY_USER  ssh user            (default: nikita)
 #   FINEAGE_HOST         ssh host            (default: homeserver)
@@ -32,78 +36,19 @@ SSH=(ssh -i "$SSH_KEY" -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
 RSYNC=(rsync -az --delete -e "ssh -i $SSH_KEY -o BatchMode=yes -o StrictHostKeyChecking=accept-new")
 
 REMOTE="${DEPLOY_USER}@${HOST}"
-STAGING="/tmp/fineage-deploy-$$"
+RELEASE_ID="${FINEAGE_RELEASE_ID:-$(date -u +%Y%m%d%H%M%S)}"
+PARTIAL="${APP_ROOT}/releases/${RELEASE_ID}.partial"
 
-echo "Deploying to ${REMOTE}:${APP_ROOT} (login/ and zone/ binaries only)…"
+echo "Deploying release ${RELEASE_ID} to ${REMOTE}:${APP_ROOT}…"
 
-"${SSH[@]}" "$REMOTE" "mkdir -p '${STAGING}/login' '${STAGING}/zone' '${APP_ROOT}/login' '${APP_ROOT}/zone' '${APP_ROOT}/logs' '${APP_ROOT}/data'"
+"${SSH[@]}" "$REMOTE" "mkdir -p '${PARTIAL}/login' '${PARTIAL}/zone' '${APP_ROOT}/logs' '${APP_ROOT}/data'"
 
-"${RSYNC[@]}" "${LOGIN_SRC}/" "${REMOTE}:${STAGING}/login/"
-"${RSYNC[@]}" "${ZONE_SRC}/" "${REMOTE}:${STAGING}/zone/"
-"${RSYNC[@]}" "${SCRIPT_DIR}/run-login.sh" "${SCRIPT_DIR}/run-zone.sh" "${SCRIPT_DIR}/../scripts/fetch-geodata.sh" "${REMOTE}:${APP_ROOT}/"
+"${RSYNC[@]}" "${LOGIN_SRC}/" "${REMOTE}:${PARTIAL}/login/"
+"${RSYNC[@]}" "${ZONE_SRC}/" "${REMOTE}:${PARTIAL}/zone/"
+"${RSYNC[@]}" "${SCRIPT_DIR}/run-login.sh" "${SCRIPT_DIR}/run-zone.sh" "${SCRIPT_DIR}/release-switch.sh" \
+  "${SCRIPT_DIR}/../scripts/fetch-geodata.sh" "${REMOTE}:${APP_ROOT}/"
 
-"${SSH[@]}" "$REMOTE" bash -s -- "$STAGING" "$APP_ROOT" "$RESTART" "$LOGIN_UNIT" "$ZONE_UNIT" <<'REMOTE'
-set -euo pipefail
-STAGING="$1"
-APP_ROOT="$2"
-RESTART="$3"
-LOGIN_UNIT="$4"
-ZONE_UNIT="$5"
-
-# Binaries are replaced while the processes are down; systemd units point at these paths.
-rsync -a --delete "${STAGING}/login/" "${APP_ROOT}/login/"
-rsync -a --delete "${STAGING}/zone/" "${APP_ROOT}/zone/"
-chmod +x "${APP_ROOT}/login/Fineage.Login" "${APP_ROOT}/zone/Fineage.Zone" \
-  "${APP_ROOT}/run-login.sh" "${APP_ROOT}/run-zone.sh" "${APP_ROOT}/fetch-geodata.sh"
-rm -rf "${STAGING}"
-
-if [[ "$RESTART" == "systemd" ]]; then
-  # Units are the source of truth on this host; run-*.sh would fight them over the ports.
-  sudo systemctl restart "$LOGIN_UNIT" "$ZONE_UNIT"
-else
-  cd "${APP_ROOT}"
-  ./run-login.sh
-  ./run-zone.sh
-fi
-
-# This shell needs the operator's port overrides, or the probe checks defaults.
-if [[ -f "${APP_ROOT}/fineage.env" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "${APP_ROOT}/fineage.env"
-  set +a
-fi
-
-# Net owns the client listeners: login TCP + HTTP, zone TCP.
-LOGIN_PORT="${FINEAGE_NET_LOGIN_PORT:-9106}"
-ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
-HTTP_PORT="${FINEAGE_LOGIN_HTTP_PORT:-5080}"
-
-deadline=$((SECONDS + 60))
-while (( SECONDS < deadline )); do
-  ok=true
-  for port in "$LOGIN_PORT" "$ZONE_PORT" "$HTTP_PORT"; do
-    if ! timeout 2 bash -c "echo >/dev/tcp/127.0.0.1/${port}" 2>/dev/null; then
-      ok=false
-      break
-    fi
-  done
-  if $ok; then
-    echo "Deploy OK: listeners on 127.0.0.1:${LOGIN_PORT} (login Net), ${ZONE_PORT} (zone Net), ${HTTP_PORT} (login HTTP)."
-    exit 0
-  fi
-  sleep 2
-done
-
-echo "health check failed: expected listeners on 127.0.0.1:${LOGIN_PORT}, ${ZONE_PORT}, and ${HTTP_PORT}" >&2
-if [[ "$RESTART" == "systemd" ]]; then
-  sudo journalctl -u "$LOGIN_UNIT" -n 40 --no-pager >&2 || true
-  sudo journalctl -u "$ZONE_UNIT" -n 40 --no-pager >&2 || true
-else
-  echo "--- login.log (tail) ---" >&2
-  tail -n 40 "${APP_ROOT}/logs/login.log" >&2 || true
-  echo "--- zone.log (tail) ---" >&2
-  tail -n 40 "${APP_ROOT}/logs/zone.log" >&2 || true
-fi
-exit 1
-REMOTE
+# The host script owns preflight, the atomic switch, the readiness gate and the rollback; its exit code is the
+# deploy result (1 = failed, with production on the previous release when a rollback was possible).
+"${SSH[@]}" "$REMOTE" "chmod +x '${APP_ROOT}/run-login.sh' '${APP_ROOT}/run-zone.sh' '${APP_ROOT}/release-switch.sh' '${APP_ROOT}/fetch-geodata.sh' '${PARTIAL}/login/Fineage.Login' '${PARTIAL}/zone/Fineage.Zone' \
+  && FINEAGE_RESTART='${RESTART}' FINEAGE_LOGIN_UNIT='${LOGIN_UNIT}' FINEAGE_ZONE_UNIT='${ZONE_UNIT}' '${APP_ROOT}/release-switch.sh' '${APP_ROOT}' '${RELEASE_ID}'"

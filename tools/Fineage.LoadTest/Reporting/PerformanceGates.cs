@@ -25,6 +25,40 @@ public static class PerformanceGates
 
     public const double FanoutQueueAgeP99GateMs = 40;
 
+    /// <summary>
+    /// #1110: reconnect churn gates the longest single step (<c>fineage_tick_max_ms</c>) because a p99 hides one slow
+    /// step, and the longest freeze of the tick counter between scrapes (<see cref="RunReport.SimulationStallSeconds"/>)
+    /// because the #990 stall was not a slow step at all: the loop could not get a thread to run its next tick for
+    /// 30.8 s while every step stayed under 100 ms. The hang gate only fails at 30 s; churn must stay far below it.
+    /// </summary>
+    public const double ReconnectChurnTickMaxGateMs = 1000;
+
+    /// <summary>Scrape-measured freeze limit for churn profiles; Debug runs after #1110 measured 1.4–4.9 s.</summary>
+    public const double ReconnectChurnStallGateSeconds = 10;
+
+    static readonly Dictionary<string, double> TickMaxByScenario = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["reconnect-storm"] = ReconnectChurnTickMaxGateMs
+    };
+
+    /// <summary>RSS/queue/GC trend gates are evidence gates only once a run is long enough to show a trend.</summary>
+    public const int TrendGateMinDurationSeconds = 300;
+
+    /// <summary>#951: after enter/region-wake has settled, one player in the full world must stay under this p99.</summary>
+    public const double FullWorld1PlayerSteadyTickP99Ms = 50;
+
+    /// <summary>#951: same window, p99.9 budget (a single enter burst must not hide in the tail of a short run).</summary>
+    public const double FullWorld1PlayerSteadyTickP999Ms = 100;
+
+    /// <summary>#951: attribute any single tick above this to a named stage before optimizing.</summary>
+    public const double FullWorld1PlayerTickMaxMs = 200;
+
+    public const double RssGrowthPercentLimit = 10;
+    public const double RssGrowthAbsoluteToleranceMb = 64;
+    public const double GcHeapGrowthPercentLimit = 10;
+    public const double GcHeapAbsoluteToleranceMb = 32;
+    public const double AllocRateGrowthRatioLimit = 1.5;
+
     public static IReadOnlyList<GateVerdict> Evaluate(RunReport report)
     {
         var verdicts = new List<GateVerdict>();
@@ -39,10 +73,13 @@ public static class PerformanceGates
             Observed = tickP99,
             Unit = "ms",
             Passed = tickP99 <= tickLimit || tickP99 <= 0,
-            Note = tickP99 <= 0 ? "no scrape data" : null
+            Note = tickP99 <= 0
+                ? "no scrape data"
+                : "peak scrape / cumulative-window p99; #951 uses the honest histogram windows below"
         });
         double tickP50 = report.Server?.TickP50Ms ?? 0;
         double tickMax = report.TickTrueMaxMs ?? report.Server?.TickMaxMs ?? 0;
+        AppendFullWorldTickGates(verdicts, report, tickMax);
         if (TickP99ByScenario.ContainsKey(scenario))
         {
             verdicts.Add(new GateVerdict
@@ -60,6 +97,31 @@ public static class PerformanceGates
                 Observed = tickMax,
                 Unit = "ms",
                 Passed = true
+            });
+        }
+
+        if (TickMaxByScenario.TryGetValue(scenario, out double tickMaxLimit))
+        {
+            bool missingMax = tickMax <= 0;
+            verdicts.Add(new GateVerdict
+            {
+                Gate = $"tick max <= {tickMaxLimit:0} ms ({scenario})",
+                Limit = tickMaxLimit,
+                Observed = tickMax,
+                Unit = "ms",
+                Passed = !missingMax && tickMax <= tickMaxLimit,
+                Note = missingMax
+                    ? "MISSING: fineage_tick_max_ms gauge and tick histogram max; a churn run without the longest tick proves nothing"
+                    : "longest single tick (fineage_tick_max_ms), not a percentile"
+            });
+            verdicts.Add(new GateVerdict
+            {
+                Gate = $"longest tick freeze <= {ReconnectChurnStallGateSeconds:0} s ({scenario})",
+                Limit = ReconnectChurnStallGateSeconds,
+                Observed = report.SimulationStallSeconds,
+                Unit = "s",
+                Passed = report.SimulationStallSeconds <= ReconnectChurnStallGateSeconds,
+                Note = "fineage_tick_ms_count not advancing between scrapes; catches a loop that cannot get a thread, which no step timer sees"
             });
         }
 
@@ -120,6 +182,8 @@ public static class PerformanceGates
             Note = fanoutAge <= 0 ? "MISSING: fineage_fanout_queue_oldest_age_ms not on scrape (PR #862)" : null
         });
 
+        AppendResourceTrendGates(verdicts, report);
+
         long reliableDrops = report.ReliableOverflowTotal ?? report.Server?.OutboundDropped ?? 0;
         verdicts.Add(new GateVerdict
         {
@@ -147,6 +211,239 @@ public static class PerformanceGates
         }
 
         return verdicts;
+    }
+
+    static void AppendResourceTrendGates(List<GateVerdict> verdicts, RunReport report)
+    {
+        bool evidenceRun = report.DurationSeconds >= TrendGateMinDurationSeconds;
+        var trend = report.ResourceTrend;
+
+        if (trend is { HasRssTrend: true })
+        {
+            double start = trend.RssMbStart ?? 0;
+            double growth = trend.RssGrowthMb ?? 0;
+            double allowed = Math.Max(RssGrowthAbsoluteToleranceMb, start * RssGrowthPercentLimit / 100.0);
+            verdicts.Add(MeasuredTrendVerdict(
+                "RSS steady-state growth <= max(10%, 64 MiB)",
+                allowed,
+                growth,
+                "MiB",
+                growth <= allowed,
+                $"start **{start:0.0}** MiB → end **{trend.RssMbEnd ?? 0:0.0}** MiB, max **{trend.RssMbMax ?? 0:0.0}** MiB, " +
+                $"**{trend.RssGrowthPercent ?? 0:0.0}%** over {trend.RssSampleCount} steady-state samples",
+                evidenceRun));
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "RSS steady-state growth", evidenceRun,
+                "MISSING: no steady-state RSS samples; pass --zone-pid and ensure /proc or ps can read the Zone process");
+        }
+
+        if (trend is { HasGcTrend: true })
+        {
+            double start = trend.GcHeapMbStart ?? 0;
+            double growth = trend.GcHeapGrowthMb ?? 0;
+            double allowed = Math.Max(GcHeapAbsoluteToleranceMb, start * GcHeapGrowthPercentLimit / 100.0);
+            verdicts.Add(MeasuredTrendVerdict(
+                "GC heap steady-state growth <= max(10%, 32 MiB)",
+                allowed,
+                growth,
+                "MiB",
+                growth <= allowed,
+                $"start **{start:0.0}** MiB → end **{trend.GcHeapMbEnd ?? 0:0.0}** MiB, " +
+                $"gen2 Δ **{trend.Gen2CountDelta}** over {trend.GcHeapSampleCount} steady-state samples",
+                evidenceRun));
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "GC heap steady-state growth", evidenceRun,
+                "MISSING: no steady-state dotnet-counters gc-heap-size samples (install dotnet-counters and pass --zone-pid)");
+        }
+
+        if (trend is { HasAllocTrend: true } && trend.AllocRateGrowthRatio is { } ratio)
+        {
+            verdicts.Add(MeasuredTrendVerdict(
+                "allocation rate last third / first third <= 1.5",
+                AllocRateGrowthRatioLimit,
+                ratio,
+                "ratio",
+                ratio <= AllocRateGrowthRatioLimit,
+                $"first third **{trend.AllocRateFirstThirdMbPerSec ?? 0:0.0}** MiB/s, " +
+                $"last third **{trend.AllocRateLastThirdMbPerSec ?? 0:0.0}** MiB/s over {trend.AllocRateSampleCount} samples",
+                evidenceRun));
+        }
+        else
+        {
+            AddMissingTrendGate(verdicts, "allocation rate trend", evidenceRun,
+                "MISSING: no steady-state alloc-rate samples, or fewer than 3 samples");
+        }
+
+        AppendQueueTrendGate(verdicts, report, "fanout depth", w => w.FanoutQueueDepthMax,
+            "fanout_queue_depth metric absent", "fineage_fanout_queue_depth", evidenceRun);
+        AppendQueueTrendGate(verdicts, report, "command depth", w => w.CommandQueueDepthMax,
+            "command_queue_depth metric absent", "fineage_command_queue_depth", evidenceRun);
+        AppendQueueTrendGate(verdicts, report, "command ingress depth", w => w.CommandIngressQueuedMax,
+            "fineage_command_ingress_queued metric absent", "fineage_command_ingress_queued", evidenceRun);
+    }
+
+    static void AppendQueueTrendGate(
+        List<GateVerdict> verdicts,
+        RunReport report,
+        string label,
+        Func<TimeSeriesWindow, double> selector,
+        string absentText,
+        string metricName,
+        bool evidenceRun)
+    {
+        var windows = report.TimeSeriesWindows;
+        string trend = TimeSeriesSummaryBuilder.Trend(windows, selector, absentText);
+        // A present metric with an all-zero histogram is flat, not missing. The peak scrape is the
+        // presence evidence; the numeric series alone cannot distinguish zero from absent.
+        if (trend == absentText &&
+            report.PeakMetricsText?.Contains(metricName, StringComparison.Ordinal) == true)
+            trend = "flat";
+        double first = TimeSeriesSummaryBuilder.ThirdMedian(windows, selector, first: true);
+        double last = TimeSeriesSummaryBuilder.ThirdMedian(windows, selector, first: false);
+        double limit = TimeSeriesSummaryBuilder.GrowthLimit(first);
+        bool trendKnown = trend is not ("insufficient windows" or "growing") && !trend.Contains("absent", StringComparison.Ordinal);
+        bool passed = trend == "flat" || trend == "shrinking" || (trendKnown && last <= limit);
+        string note =
+            $"early third median **{first:0}**, late third median **{last:0}**, trend **{trend}**; " +
+            "thirds use the median so a single scrape spike is not a backlog; " +
+            "a lifetime histogram high-water may still move one CountBounds bucket; " +
+            $"a move of at most {TimeSeriesSummaryBuilder.QueueTrendAbsoluteSlack:0} is treated as flat; " +
+            "gate fails on 'growing' over a run of at least 5 minutes";
+        if (!evidenceRun && (windows.Count < 2 || !trendKnown))
+        {
+            passed = true;
+            note = $"informative only: run is shorter than {TrendGateMinDurationSeconds}s ({note})";
+        }
+        else if (!trendKnown)
+        {
+            passed = false;
+        }
+
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"queue trend: {label} not growing",
+            Limit = first > 0 ? limit : null,
+            Observed = last,
+            Unit = "depth",
+            Passed = passed,
+            Note = note
+        });
+    }
+
+    static double ThirdMax(IReadOnlyList<TimeSeriesWindow> windows, Func<TimeSeriesWindow, double> selector, bool first)
+    {
+        if (windows.Count == 0)
+            return 0;
+        int size = Math.Max(1, windows.Count / 3);
+        var slice = first ? windows.Take(size) : windows.TakeLast(size);
+        return slice.Max(selector);
+    }
+
+    static void AddMissingTrendGate(List<GateVerdict> verdicts, string name, bool evidenceRun, string missing)
+    {
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"{name} (evidence)",
+            Limit = null,
+            Observed = 0,
+            Unit = "",
+            Passed = !evidenceRun,
+            Note = evidenceRun
+                ? missing
+                : $"informative only: run is shorter than {TrendGateMinDurationSeconds}s; {missing}"
+        });
+    }
+
+    static GateVerdict MeasuredTrendVerdict(
+        string name,
+        double? limit,
+        double observed,
+        string unit,
+        bool passed,
+        string note,
+        bool evidenceRun)
+    {
+        if (!evidenceRun)
+        {
+            passed = true;
+            note = $"informative only: run is shorter than {TrendGateMinDurationSeconds}s ({note})";
+        }
+
+        return new GateVerdict
+        {
+            Gate = name,
+            Limit = limit,
+            Observed = observed,
+            Unit = unit,
+            Passed = passed,
+            Note = note
+        };
+    }
+
+    static bool IsFullWorldTickProfile(string scenario) =>
+        scenario.Equals("full-world-1-player", StringComparison.OrdinalIgnoreCase)
+        || scenario.Equals("full-world-0-player-idle", StringComparison.OrdinalIgnoreCase);
+
+    static void AppendFullWorldTickGates(List<GateVerdict> verdicts, RunReport report, double tickMax)
+    {
+        if (!IsFullWorldTickProfile(report.ScenarioName))
+            return;
+
+        TickWindowStats? overall = report.Honest?.TickOverall;
+        TickWindowStats? steady = report.Honest?.TickSteady;
+        bool missingOverall = overall is null || overall.Ticks <= 0;
+        string overallNote = missingOverall
+            ? "MISSING: honest TickOverall histogram window"
+            : $"histogram over the whole run ({overall!.Ticks} ticks), including enter; not the peak scrape p99";
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"full-world overall tick p99 <= {FullWorld1PlayerSteadyTickP99Ms:0} ms ({report.ScenarioName})",
+            Limit = FullWorld1PlayerSteadyTickP99Ms,
+            Observed = overall?.P99Ms ?? 0,
+            Unit = "ms",
+            Passed = !missingOverall && overall!.P99Ms <= FullWorld1PlayerSteadyTickP99Ms,
+            Note = overallNote
+        });
+
+        bool missingSteady = steady is null || steady.Ticks <= 0;
+        string steadyNote = missingSteady
+            ? "MISSING: honest TickSteady histogram window"
+            : $"{steady!.Rule}; {steady.Ticks} ticks";
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"full-world steady tick p99 <= {FullWorld1PlayerSteadyTickP99Ms:0} ms ({report.ScenarioName})",
+            Limit = FullWorld1PlayerSteadyTickP99Ms,
+            Observed = steady?.P99Ms ?? 0,
+            Unit = "ms",
+            Passed = !missingSteady && steady!.P99Ms <= FullWorld1PlayerSteadyTickP99Ms,
+            Note = steadyNote
+        });
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"full-world steady tick p99.9 <= {FullWorld1PlayerSteadyTickP999Ms:0} ms ({report.ScenarioName})",
+            Limit = FullWorld1PlayerSteadyTickP999Ms,
+            Observed = steady?.P999Ms ?? 0,
+            Unit = "ms",
+            Passed = !missingSteady && steady!.P999Ms <= FullWorld1PlayerSteadyTickP999Ms,
+            Note = steadyNote
+        });
+
+        bool missingMax = tickMax <= 0;
+        verdicts.Add(new GateVerdict
+        {
+            Gate = $"full-world tick max <= {FullWorld1PlayerTickMaxMs:0} ms ({report.ScenarioName})",
+            Limit = FullWorld1PlayerTickMaxMs,
+            Observed = tickMax,
+            Unit = "ms",
+            Passed = !missingMax && tickMax <= FullWorld1PlayerTickMaxMs,
+            Note = missingMax
+                ? "MISSING: fineage_tick_max_ms / honest tick max"
+                : "longest single tick (fineage_tick_max_ms), including enter/region-wake; attribute a miss to a named stage"
+        });
     }
 }
 

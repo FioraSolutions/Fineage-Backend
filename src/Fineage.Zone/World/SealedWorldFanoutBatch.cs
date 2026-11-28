@@ -29,6 +29,9 @@ internal sealed class SealedWorldFanoutBatch(
     /// <summary>True when every write left in the batch is a visual one (animations and markers only).</summary>
     public bool HasOnlyVisualWrites() => source.HasOnlyVisualWrites();
 
+    internal long AdmitAudience(long remainingWork, int limit, string reason, Fineage.Net.Host.FanoutReliableAdmission admission) =>
+        source.AdmitAudience(remainingWork, limit, reason, admission);
+
     public WorldFanoutBatch.FanoutSendCursor OpenCursor() => source.OpenCursor();
 
     internal void ReleaseScratchResources() => source.ReleaseAudiences();

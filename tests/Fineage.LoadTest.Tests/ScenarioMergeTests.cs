@@ -36,6 +36,48 @@ public sealed class ScenarioMergeTests : IDisposable
     }
 
     [Fact]
+    public void Child_without_ports_inherits_the_parent_endpoint_not_the_class_defaults()
+    {
+        Write("base.yaml", "name: base\nloginPort: 19107\nzonePort: 19778\n");
+        var child = ScenarioLoader.Load(Write("child.yaml", "name: child\nextends: base.yaml\nbotCount: 3\n"));
+
+        Assert.Equal(19107, child.LoginPort);
+        Assert.Equal(19778, child.ZonePort);
+    }
+
+    [Fact]
+    public void Child_declared_ports_win_over_the_parent_even_when_they_match_the_class_defaults()
+    {
+        Write("base.yaml", "name: base\nloginPort: 19107\nzonePort: 19778\n");
+        var child = ScenarioLoader.Load(Write("child.yaml",
+            "name: child\nextends: base.yaml\nloginPort: 9106\nzonePort: 9777\n"));
+
+        Assert.Equal(9106, child.LoginPort);
+        Assert.Equal(9777, child.ZonePort);
+    }
+
+    [Fact]
+    public void Three_level_extends_chain_keeps_the_grandparent_ports()
+    {
+        Write("root.yaml", "name: root\nloginPort: 19107\nzonePort: 19778\nbotCount: 200\n");
+        Write("middle.yaml", "name: middle\nextends: root.yaml\nrampUpSeconds: 20\n");
+        var child = ScenarioLoader.Load(Write("leaf.yaml", "name: leaf\nextends: middle.yaml\ndurationSeconds: 1800\n"));
+
+        Assert.Equal(19107, child.LoginPort);
+        Assert.Equal(19778, child.ZonePort);
+    }
+
+    [Fact]
+    public void Json_child_without_ports_inherits_the_parent_endpoint()
+    {
+        Write("base.json", """{"name":"base","loginPort":19107,"zonePort":19778}""");
+        var child = ScenarioLoader.Load(Write("child.json", """{"name":"child","extends":"base.json"}"""));
+
+        Assert.Equal(19107, child.LoginPort);
+        Assert.Equal(19778, child.ZonePort);
+    }
+
+    [Fact]
     public void Combined_scenario_runs_the_hammer_mix_without_legacy_combat_actions()
     {
         var s = ScenarioLoader.Load(Path.Combine(HeavyPlayRolesTests.ScenarioDir(), "perf-aoe-combined.yaml"));

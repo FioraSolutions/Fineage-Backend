@@ -1,0 +1,84 @@
+{
+  "id": "magic-human-mystic-40-flamestrike1-skeleton-guard",
+  "description": "#979 magic goldens: HM40 Flame Strike 1 vs Skeleton Royal Guard (L26, shieldDef 53): shield-block mDef add, perfect block = 1.",
+  "magicMatrix": true,
+  "magic": {
+    "skillId": 1181,
+    "level": 1,
+    "critPower": 1.0
+  },
+  "seed": 9782026,
+  "samples": 0,
+  "attacker": {
+    "kind": "player",
+    "classId": 10,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 8,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 426,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 462,
+        "enchant": 0
+      }
+    ]
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20169
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "golden": "tools/Fineage.MobiusDiff/oracles/magic-human-mystic-40-flamestrike1-skeleton-guard.json"
+  },
+  "metrics": [
+    "magicPower",
+    "magicLevel",
+    "casterLevel",
+    "targetLevel",
+    "mAtk",
+    "targetMDef",
+    "magicSuccessRate",
+    "magicHalfFailEligible",
+    "damageNormal",
+    "damageSps",
+    "damageBss",
+    "damageCrit",
+    "damageCritBss",
+    "damageCritPvp",
+    "damageHalfFail",
+    "damageResisted",
+    "randomPercent",
+    "damageRandomMin",
+    "damageRandomMax",
+    "damageShieldBlock",
+    "damagePerfectBlock"
+  ],
+  "tolerances": {
+    "default": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "mAtk": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "targetMDef": {
+      "absolute": 0.01,
+      "relative": 0.0
+    }
+  }
+}

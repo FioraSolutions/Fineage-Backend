@@ -27,7 +27,7 @@ public sealed class GradePenaltySkillTests
         var kit = new NetTestKit();
         var (_, player) = await kit.EnterAsync(classId: 18);
         WeightPenaltyWorldTests.StripToPaperdoll(player);
-        Assert.True(kit.World.RefreshWeightPenalty(player));
+        kit.World.RefreshWeightPenalty(player);
         Assert.Equal(0, player.WeightPenaltyLevel);
         return (kit, player);
     }

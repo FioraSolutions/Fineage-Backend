@@ -72,7 +72,11 @@ public sealed record NpcTemplate(
     /// <summary>Mobius <c>equipment lhand</c> item id (0 = none).</summary>
     int Lhand = 0,
     /// <summary>Mobius <c>stats race</c> (UNDEAD, HUMANOID, …). Empty when omitted.</summary>
-    string Race = "");
+    string Race = "",
+    /// <summary>Mobius <c>stats int</c> (default 21). Folded into <see cref="MAtk"/>.</summary>
+    int Int = 21,
+    /// <summary>Mobius <c>stats men</c> (default 10). Folded into <see cref="MDef"/>.</summary>
+    int Men = 10);
 
 /// <summary>One active Mobius NPC AI attack skill (id + level from skillList).</summary>
 public readonly record struct NpcAiSkill(int SkillId, int Level);
@@ -104,7 +108,8 @@ public sealed class NpcCatalog
     public NpcTemplate Get(int npcId)
     {
         if (!ById.TryGetValue(npcId, out var template))
-            throw new KeyNotFoundException($"NPC template {npcId} is not in the catalog.");
+            throw Fineage.Game.RequiredData.Required.Missing(
+                Fineage.Game.RequiredData.RequiredDataKind.Npc, npcId, $"NPC template {npcId} is missing from {FileName}");
         return template;
     }
 
@@ -136,6 +141,25 @@ public sealed class NpcCatalog
         return Load(directory);
     }
 
+    public const int DefaultInt = 21;
+    public const int DefaultMen = 10;
+
+    /// <summary>Mobius <c>FuncMAtkMod</c> for a non-player: <c>mAtk · INT.bonus² · levelMod²</c>.</summary>
+    static double FoldMAtk(NpcDto row, Fineage.Game.StatBonusTable bonuses)
+    {
+        double intBonus = bonuses.BonusClamped(Fineage.Game.StatSlot.Int, row.Int is > 0 ? row.Int.Value : DefaultInt, out _);
+        double levelMod = (row.Level + 89) / 100d;
+        return Math.Max(0, row.MAtk) * intBonus * intBonus * levelMod * levelMod;
+    }
+
+    /// <summary>Mobius <c>FuncMDefMod</c> for a non-player: <c>mDef · MEN.bonus · levelMod</c>.</summary>
+    static double FoldMDef(NpcDto row, Fineage.Game.StatBonusTable bonuses)
+    {
+        double menBonus = bonuses.BonusClamped(Fineage.Game.StatSlot.Men, row.Men is > 0 ? row.Men.Value : DefaultMen, out _);
+        double levelMod = (row.Level + 89) / 100d;
+        return Math.Max(0, row.MDef) * menBonus * levelMod;
+    }
+
     static NpcCatalog Read(string path)
     {
         FileDto file;
@@ -152,6 +176,11 @@ public sealed class NpcCatalog
         if (file.Npcs == null || file.Npcs.Count == 0)
             throw new InvalidDataException($"{path} has no npcs.");
 
+        // The stat-bonus table is shared with players. A synthetic data root (tests) may omit it; use the default one then.
+        string dataRoot = Path.GetDirectoryName(path)!;
+        if (!File.Exists(Path.Combine(dataRoot, Fineage.Game.ClassCatalog.StatBonusesFileName)))
+            dataRoot = Spawns.GameDataPaths.FindDataDirectory(AppContext.BaseDirectory) ?? dataRoot;
+        var bonuses = Fineage.Game.ClassCatalog.LoadStatBonuses(dataRoot);
         var byId = new Dictionary<int, NpcTemplate>(file.Npcs.Count);
         foreach (var row in file.Npcs)
         {
@@ -169,6 +198,13 @@ public sealed class NpcCatalog
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs run and walk speed.");
             if (row.CollisionRadius <= 0 || row.CollisionHeight <= 0)
                 throw new InvalidDataException($"{path} npc {row.NpcId} needs collision radius and height.");
+            // Mobius resolves an absent <ai aggroRange> to 0 (NpcTemplate StatSet default),
+            // so an explicit 0 is valid non-proactive data. Only a missing JSON field is
+            // a transcription gap; refuse it instead of letting the mob silently stay idle.
+            if (row.Aggressive && row.AggroRange is null)
+                throw new InvalidDataException(
+                    $"{path} npc {row.NpcId} is aggressive but has no aggroRange " +
+                    "(emit the resolved Mobius value, including 0)");
 
             byId.Add(row.NpcId, new NpcTemplate(
                 row.NpcId,
@@ -197,9 +233,9 @@ public sealed class NpcCatalog
                 row.Dex > 0 ? row.Dex : 30,
                 Math.Max(0, row.ShieldDef),
                 Math.Max(0, row.ShieldRate),
-                Math.Max(0, row.MAtk),
-                Math.Max(0, row.MDef),
-                Math.Max(0, row.AggroRange),
+                FoldMAtk(row, bonuses),
+                FoldMDef(row, bonuses),
+                Math.Max(0, row.AggroRange ?? 0),
                 Math.Max(0, row.ClanHelpRange),
                 row.Clans is { Count: > 0 } ? row.Clans : null,
                 row.IgnoreNpcIds is { Count: > 0 } ? row.IgnoreNpcIds : null,
@@ -218,7 +254,9 @@ public sealed class NpcCatalog
                 (row.AttackType ?? "").Trim(),
                 Math.Max(0, row.Rhand),
                 Math.Max(0, row.Lhand),
-                (row.Race ?? "").Trim().ToUpperInvariant()));
+                (row.Race ?? "").Trim().ToUpperInvariant(),
+                row.Int is > 0 ? row.Int.Value : DefaultInt,
+                row.Men is > 0 ? row.Men.Value : DefaultMen));
         }
 
         static IReadOnlyList<NpcAiSkill>? ParseAiSkills(List<AiSkillDto>? rows)
@@ -276,14 +314,20 @@ public sealed class NpcCatalog
         /// <summary>Mobius <c>attack random</c> damage spread in percent.</summary>
         public int RandomDamage { get; set; }
         public int Dex { get; set; }
+        /// <summary>Mobius <c>stats int</c> / <c>men</c> when not the template default (21 / 10).</summary>
+        [System.Text.Json.Serialization.JsonPropertyName("int")] public int? Int { get; set; }
+        public int? Men { get; set; }
         /// <summary>Mobius <c>defence shield</c> / <c>shieldRate</c>.</summary>
         public int ShieldDef { get; set; }
         public int ShieldRate { get; set; }
         /// <summary>Mobius <c>attack magical</c> / <c>defence magical</c>.</summary>
         public double MAtk { get; set; }
         public double MDef { get; set; }
-        /// <summary>Mobius <c>ai aggroRange</c> / <c>clanHelpRange</c> / <c>clanList</c>.</summary>
-        public int AggroRange { get; set; }
+        /// <summary>
+        /// Mobius <c>ai aggroRange</c>; null means the field was not transcribed (rejected for aggressive rows),
+        /// while 0 is Mobius's explicit non-proactive value.
+        /// </summary>
+        public int? AggroRange { get; set; }
         public int ClanHelpRange { get; set; }
         public List<string>? Clans { get; set; }
         public List<int>? IgnoreNpcIds { get; set; }

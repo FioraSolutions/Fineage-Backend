@@ -7,8 +7,9 @@ namespace Fineage.Accounts;
 
 /// <summary>
 /// <see cref="ILedgerJournal"/> on the <c>economy_ledger</c> table. Appends are buffered in memory.
-/// <see cref="Flush"/> inserts that buffer in one transaction. <see cref="CommitWith"/> hands the same buffer to
-/// the caller so the insert can share a transaction with the item rows; a failure puts the buffer back.
+/// <see cref="Flush"/> inserts that buffer in one transaction. <see cref="CommitThrough"/> hands the buffered prefix
+/// a batch's bags depend on to the caller so the insert can share a transaction with the item rows; a failure puts
+/// it back.
 /// </summary>
 public sealed class PostgresLedgerJournal : ILedgerJournal
 {
@@ -81,7 +82,13 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
     /// Removes the buffered entries, calls <paramref name="write"/>, and puts them back if <paramref name="write"/> throws.
     /// The caller inserts them. This method does not open a transaction of its own.
     /// </summary>
-    public void CommitWith(Action<IReadOnlyList<LedgerEntry>> write)
+    public void CommitWith(Action<IReadOnlyList<LedgerEntry>> write) => CommitThrough(long.MaxValue, write);
+
+    /// <summary>
+    /// <see cref="CommitWith"/> for the buffered prefix up to and including <paramref name="position"/>; later entries
+    /// stay buffered for the transaction that carries their bags.
+    /// </summary>
+    public void CommitThrough(long position, Action<IReadOnlyList<LedgerEntry>> write)
     {
         ArgumentNullException.ThrowIfNull(write);
         lock (_flushLock)
@@ -89,8 +96,11 @@ public sealed class PostgresLedgerJournal : ILedgerJournal
             List<LedgerEntry> taken;
             lock (_pendingLock)
             {
-                taken = [.. _pending];
-                _pending.Clear();
+                int count = 0;
+                while (count < _pending.Count && _pending[count].Position <= position)
+                    count++;
+                taken = _pending.GetRange(0, count);
+                _pending.RemoveRange(0, count);
             }
 
             try

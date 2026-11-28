@@ -12,7 +12,7 @@ public sealed partial class MemoryAccountStore
         ArgumentNullException.ThrowIfNull(quests);
         if (!ValidQuests(quests))
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -33,7 +33,7 @@ public sealed partial class MemoryAccountStore
                 return false;
         }
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -55,7 +55,7 @@ public sealed partial class MemoryAccountStore
                 return false;
         }
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -85,7 +85,7 @@ public sealed partial class MemoryAccountStore
                 return false;
         }
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -102,7 +102,7 @@ public sealed partial class MemoryAccountStore
         if (!ValidateSocialList(friends))
             return false;
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -122,7 +122,7 @@ public sealed partial class MemoryAccountStore
         if (!ValidateSocialList(blocked))
             return false;
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -141,7 +141,7 @@ public sealed partial class MemoryAccountStore
     {
         if (characterId < 1)
             return null;
-        lock (_gate)
+        using (EnterStore())
         {
             foreach (var account in _data.Accounts)
             {
@@ -158,7 +158,7 @@ public sealed partial class MemoryAccountStore
         if (string.IsNullOrWhiteSpace(name))
             return null;
         string key = name.Trim();
-        lock (_gate)
+        using (EnterStore())
         {
             foreach (var account in _data.Accounts)
             {
@@ -192,7 +192,7 @@ public sealed partial class MemoryAccountStore
                 return false;
         }
 
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -202,6 +202,46 @@ public sealed partial class MemoryAccountStore
             return true;
         }
     }
+
+    public bool TryReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros)
+    {
+        ArgumentNullException.ThrowIfNull(macros);
+        var ids = new HashSet<int>();
+        foreach (var m in macros)
+        {
+            if (m == null || m.Id <= 0 || string.IsNullOrEmpty(m.Name) || !ids.Add(m.Id))
+                return false;
+            if (m.Commands == null || m.Commands.Count > StoredMacro.MaxCommands)
+                return false;
+        }
+
+        using (EnterStore())
+        {
+            var character = FindCharacter(account, characterId);
+            if (character == null)
+                return false;
+            character.Macros = macros.OrderBy(m => m.Id).Select(CopyMacroDto).ToList();
+            Save();
+            return true;
+        }
+    }
+
+    static StoredMacroDto CopyMacroDto(StoredMacro m) => new()
+    {
+        Id = m.Id,
+        Icon = m.Icon,
+        Name = m.Name ?? "",
+        Descr = m.Descr ?? "",
+        Acronym = m.Acronym ?? "",
+        Commands = (m.Commands ?? []).Select(c => new StoredMacroCmdDto
+        {
+            Entry = c.Entry,
+            Type = c.Type,
+            D1 = c.D1,
+            D2 = c.D2,
+            Cmd = c.Cmd ?? ""
+        }).ToList()
+    };
 
     static bool ValidQuests(IReadOnlyList<QuestSaveRow> quests)
     {
@@ -234,7 +274,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySetLastAccess(string account, int characterId, DateTimeOffset when)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -247,7 +287,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TrySetDeleteAt(string account, int characterId, DateTimeOffset deleteAt)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)
@@ -260,7 +300,7 @@ public sealed partial class MemoryAccountStore
 
     public bool TryClearDeletion(string account, int characterId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var character = FindCharacter(account, characterId);
             if (character == null)

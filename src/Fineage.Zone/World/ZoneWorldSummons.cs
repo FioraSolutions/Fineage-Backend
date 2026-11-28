@@ -115,11 +115,7 @@ public sealed partial class ZoneWorld
     ZoneEntity? SpawnServitor(ZoneEntity owner, SummonSkill skill, SummonLevel row, int skillLevel, long now)
     {
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(row.NpcId, out var template))
-        {
-            ZoneLog.Info($"summon skip unknown npcId={row.NpcId}");
-            return null;
-        }
+        var template = _summonTemplates.Get(row.NpcId);
 
         int objectId = AllocateQuestNpcObjectId();
         // Mobius Summon effect: spawnMe(owner + 20, owner + 20, owner z).
@@ -320,21 +316,22 @@ public sealed partial class ZoneWorld
         SendSummonInfo(summon);
     }
 
-    /// <summary>Hit on a summon (melee, skill): HP, bars to the owner, PvP for a player attacker, death.</summary>
-    void DamageSummon(ZoneEntity attacker, ZoneEntity summon, int damage, long now)
+    /// <summary>Hit on a summon (melee, skill): CP/HP, bars to the owner, PvP for a player attacker, death.</summary>
+    DamageSplit DamageSummon(ZoneEntity attacker, ZoneEntity summon, int damage, long now)
     {
         DuelNoteOutsideHit(attacker, summon);
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         summon.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         if (damage <= 0 || summon.Dead)
-            return;
-        summon.CurHp = Math.Max(0, summon.CurHp - damage);
+            return DamageSplit.None;
+        var dealt = ApplyTargetDamage(summon, attacker, damage);
         FanoutVitals(summon, StatusFor(summon));
         SyncNeedRegen(summon);
         if (summon.CurHp <= 0)
             SummonDied(summon, attacker, now);
         else
             SendSummonInfo(summon);
+        return dealt;
     }
 
     void UnsummonOnLeave(ZoneEntity player)
@@ -469,7 +466,7 @@ public sealed partial class ZoneWorld
                 {
                     FanInventory(session, Collapse(changes));
                     SaveInventory(session, inventory);
-                    string item = _game.Items.TryGet(st.UpkeepItemId, out var def) && def != null ? def.Name : st.UpkeepItemId.ToString();
+                    string item = _game.Items.Require(st.UpkeepItemId).Name;
                     SelfLine(session, SysMsgSummonedMonsterUses, $"A summoned monster uses {item}.", item);
                     st.UpkeepRemainingMs = st.UpkeepIntervalMs;
                 }

@@ -45,7 +45,6 @@ sealed class ZoneSimulationObserver : ISimulationObserver
         var tag = new KeyValuePair<string, object?>("stage", stage);
         double ms = elapsed.TotalMilliseconds;
         FineageTelemetry.StageMilliseconds.Record(ms, tag);
-        FineageTelemetry.StageRegions.Record(regions, tag);
         _stepStages.Add((stage, ms));
     }
 

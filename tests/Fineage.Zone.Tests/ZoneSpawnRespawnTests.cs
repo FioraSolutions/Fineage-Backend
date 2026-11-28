@@ -52,7 +52,7 @@ public sealed class ZoneSpawnRespawnTests
         Assert.Null(await world.TrySelectTargetAsync(session, gremlin.ObjectId,
             CancellationToken.None));
 
-        // Damage is Mobius 70*pAtk/pDef now; swing until the gremlin is dead (attack refused).
+        // Damage is Mobius 76*pAtk*proximity/pDef; swing until the gremlin is dead (attack refused).
         for (int hit = 0; hit < TalkingIsland.GremlinMaxHp; hit++)
         {
             if (await world.TryAttackAsync(session, gremlin.ObjectId,

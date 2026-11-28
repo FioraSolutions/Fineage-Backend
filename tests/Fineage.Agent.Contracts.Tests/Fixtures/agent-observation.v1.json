@@ -1,0 +1,1 @@
+{"schemaVersion":1,"snapshotVersion":7,"correlationId":"corr-1","characterId":"4242","self":{"objectId":4242,"x":10,"y":20,"z":30,"heading":0},"entities":[{"objectId":1000,"kind":"npc","x":1,"y":2,"z":3,"name":"Guard"}],"cursor":{"schemaVersion":1,"snapshotVersion":7,"token":"c7"}}

@@ -1,0 +1,228 @@
+# Fineage alert rules (#992). Every metric read here is in docs/operations/metrics.md with a test
+# (MetricInventoryTests enforces it). Gates come from docs/perf/acceptance-gates.md; the runbook for each alert is
+# docs/operations/monitoring.md#<alert name, lower case>.
+groups:
+  - name: fineage-availability
+    rules:
+      - alert: FineageTargetDown
+        expr: up{job=~"fineage-zone|fineage-login"} == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: /metrics is not answering"
+          runbook: docs/operations/monitoring.md#fineagetargetdown
+      - alert: FineageNotLive
+        expr: fineage_health_live == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: liveness failed (the /health/live contract)"
+          runbook: docs/operations/monitoring.md#fineagenotlive
+      - alert: FineageNotReady
+        expr: fineage_health_ready == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: not ready; failing checks are fineage_health_check == 0"
+          runbook: docs/operations/monitoring.md#fineagenotready
+      - alert: FineageRestarted
+        expr: changes(process_start_time_seconds{job=~"fineage-zone|fineage-login"}[15m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: process restarted in the last 15 minutes"
+          runbook: docs/operations/monitoring.md#fineagerestarted
+
+  - name: fineage-tick
+    rules:
+      - alert: FineageTickFrozen
+        expr: fineage:tick:rate_1m == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: no simulation step finished for over a minute"
+          runbook: docs/operations/monitoring.md#fineagetickfrozen
+      - alert: FineageWatchdogStall
+        expr: delta(fineage_step_watchdog_stalls[5m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: the step watchdog reported a step that had not returned"
+          runbook: docs/operations/monitoring.md#fineagewatchdogstall
+      - alert: FineageTickP99AboveGate
+        expr: fineage:tick_ms:p99_5m > 50
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: tick p99 {{ $value | humanize }} ms is above the 50 ms gate"
+          runbook: docs/operations/monitoring.md#fineagetickp99abovegate
+      - alert: FineageTickP999AboveGate
+        expr: fineage:tick_ms:p999_5m > 100
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: tick p99.9 {{ $value | humanize }} ms is above the 100 ms gate"
+          runbook: docs/operations/monitoring.md#fineagetickp99abovegate
+      - alert: FineageTickSkipped
+        expr: increase(fineage_tick_skipped_total[10m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: late steps jumped over {{ $value | humanize }} ticks in 10 minutes"
+          runbook: docs/operations/monitoring.md#fineagetickp99abovegate
+      - alert: FineageTickStageFailures
+        expr: increase(fineage_tick_stage_failures_total[5m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: simulation stage {{ $labels.stage }} threw"
+          runbook: docs/operations/monitoring.md#fineagetickstagefailures
+
+  - name: fineage-queues
+    rules:
+      - alert: FineageFanoutAgeAboveGate
+        expr: fineage:fanout_queue_oldest_age_ms:p99_5m > 40
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: fan-out queue age p99 {{ $value | humanize }} ms is above the 40 ms gate"
+          runbook: docs/operations/monitoring.md#fineagefanoutageabovegate
+      - alert: FineageSubmitToDequeueAboveGate
+        expr: fineage:command_timeline_ms:p99_5m{phase="submit_to_dequeue"} > 100
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: command submit to dequeue p99 {{ $value | humanize }} ms is above the 100 ms gate"
+          runbook: docs/operations/monitoring.md#fineagesubmittodequeueabovegate
+      - alert: FineageFanoutQueueGrowing
+        expr: deriv(fineage:fanout_queue_depth:p99_5m[30m]) > 0 and fineage:fanout_queue_depth:p99_5m > 32
+        for: 30m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: fan-out queue depth p99 has grown for 30 minutes ({{ $value | humanize }})"
+          runbook: docs/operations/monitoring.md#fineagequeuegrowing
+      - alert: FineageCommandIngressGrowing
+        expr: deriv(fineage_command_ingress_queued[30m]) > 0 and fineage_command_ingress_queued > 256
+        for: 30m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: commands waiting for the simulation have grown for 30 minutes"
+          runbook: docs/operations/monitoring.md#fineagequeuegrowing
+      - alert: FineageSlowClientDisconnectSpike
+        expr: sum by (instance) (increase(fineage_outbound_slow_client_disconnect_total[5m])) > 5
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: {{ $value | humanize }} slow-client disconnects in 5 minutes"
+          runbook: docs/operations/monitoring.md#fineageslowclientdisconnectspike
+      - alert: FineageReliableAudienceShed
+        expr: increase(fineage_fanout_reliable_audience_shed_total[5m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: the fan-out backlog was full and recipients were disconnected"
+          runbook: docs/operations/monitoring.md#fineageslowclientdisconnectspike
+      - alert: FineageFanoutOverflowShed
+        expr: increase(fineage_fanout_overflow_shed_total[5m]) > 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: fan-out hand-off above its hard limit for 5 minutes (visual writes shed)"
+          runbook: docs/operations/monitoring.md#fineageslowclientdisconnectspike
+      - alert: FineageConnectionsRejected
+        expr: increase(fineage_connections_rejected_total[5m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: accepts refused at the connection cap"
+          runbook: docs/operations/monitoring.md#fineageconnectionsrejected
+
+  - name: fineage-economy
+    rules:
+      - alert: FineageLedgerFlushFailures
+        expr: increase(fineage_ledger_flush_failures_total[5m]) > 0 or sum by (job, instance) (increase(fineage_economy_persist_failures_total[5m])) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: auditable economy ledger commits failed and are being retried"
+          runbook: docs/operations/monitoring.md#fineageledgerflushfailures
+      - alert: FineageEconomyPersistStuck
+        expr: fineage_economy_persist_oldest_age_ms > 30000
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: oldest economy commit has waited {{ $value | humanizeDuration }}ms"
+          runbook: docs/operations/monitoring.md#fineageledgerflushfailures
+      - alert: FineageLedgerInvariantViolations
+        expr: increase(fineage_ledger_invariant_violations_total[10m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: auditable economy ledger invariant violated"
+          runbook: docs/operations/monitoring.md#fineagereconcileviolations
+      - alert: FineageReconcileViolations
+        expr: sum by (instance, phase, code) (fineage_economy_reconcile_violations_total) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: {{ $labels.phase }} reconcile found {{ $value }} {{ $labels.code }} finding(s)"
+          runbook: docs/operations/monitoring.md#fineagereconcileviolations
+      - alert: FineageStoredStateAuditErrors
+        expr: sum by (instance, code, container) (fineage_state_audit_issues_total{severity="error"}) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: startup state audit error {{ $labels.code }} in {{ $labels.container }}"
+          runbook: docs/operations/monitoring.md#fineagereconcileviolations
+      - alert: FineageSilentDataFallback
+        expr: sum by (instance, kind) (fineage_data_silent_fallback_total) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: required game data fell back silently ({{ $labels.kind }})"
+          runbook: docs/operations/monitoring.md#fineagesilentdatafallback
+
+  - name: fineage-persistence
+    rules:
+      - alert: FineagePersistWriteSlow
+        expr: fineage:persist_write_ms:p99_5m > 1000
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: {{ $labels.kind }} write p99 {{ $value | humanize }} ms"
+          runbook: docs/operations/monitoring.md#fineagepersistwriteslow
+      - alert: FineageCharacterPersistBehind
+        expr: fineage_persist_oldest_age_ms > 60000
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: oldest unsaved character snapshot is {{ $value | humanize }} ms old"
+          runbook: docs/operations/monitoring.md#fineagepersistwriteslow
+
+  - name: fineage-host
+    rules:
+      - alert: FineageDiskUnreadable
+        expr: fineage_disk_probe_ok == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: cannot read the file system of {{ $labels.path }}"
+          runbook: docs/operations/monitoring.md#fineagedisklow
+      - alert: FineageDiskLow
+        expr: fineage_disk_free_bytes / fineage_disk_size_bytes < 0.10
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: {{ $labels.path }} has {{ $value | humanizePercentage }} free"
+          runbook: docs/operations/monitoring.md#fineagedisklow
+      - alert: FineageDiskCritical
+        expr: fineage_disk_free_bytes / fineage_disk_size_bytes < 0.05
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.instance }}: {{ $labels.path }} has {{ $value | humanizePercentage }} free"
+          runbook: docs/operations/monitoring.md#fineagedisklow
+      - alert: FineageDiskFullIn24h
+        expr: predict_linear(fineage_disk_free_bytes[6h], 24 * 3600) < 0
+        for: 30m
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.instance }}: {{ $labels.path }} fills within 24 h at the 6 h trend"
+          runbook: docs/operations/monitoring.md#fineagedisklow
+      - alert: FineageRssGrowth
+        expr: |
+          (process_resident_memory_bytes - min_over_time(process_resident_memory_bytes[6h])) > 536870912
+          and deriv(process_resident_memory_bytes[1h]) > 0
+        for: 1h
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.job }} {{ $labels.instance }}: RSS grew {{ $value | humanize1024 }}B over its 6 h low and is still rising"
+          runbook: docs/operations/monitoring.md#fineagerssgrowth

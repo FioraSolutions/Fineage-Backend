@@ -74,7 +74,7 @@ public sealed partial class ZoneWorld
         int reflected = ZoneCombat.ReflectedDamage(damage, reflectPct, target.MaxHp, bow);
         if (reflected > 0 && attacker.CurHp > 0)
         {
-            attacker.CurHp = Math.Max(0, attacker.CurHp - reflected);
+            ApplyTargetDamage(attacker, target, reflected);
             if (attacker.Kind == ZoneEntityKind.Player)
                 FanoutVitals(attacker, PlayerVitalsStatus(attacker));
             else

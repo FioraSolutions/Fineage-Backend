@@ -20,7 +20,9 @@ public sealed class ZoneRegionWakeBudgetTests
         try
         {
             const int mobBase = 9_300_000;
-            int spawnX = 100_000, spawnY = 100_000, spawnZ = -3000;
+            // Aligned to a Mobius 2048-unit microregion start so all 40 mobs wake as one activation unit;
+            // the FIFO budget assertion then tests the budget, not the activation radius.
+            int spawnX = 100_352, spawnY = 100_352, spawnZ = -3000;
             var npcs = new SpawnNpcDefinition[40];
             for (int i = 0; i < npcs.Length; i++)
             {

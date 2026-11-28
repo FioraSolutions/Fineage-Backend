@@ -29,7 +29,7 @@ public sealed partial class ZoneWorld
         set => _lottery.Random = value;
     }
 
-    /// <summary>Swap in the persisted board (host: <c>lottery.json</c> in the state directory).</summary>
+    /// <summary>Swap in the persisted board (host: the <c>lottery</c> world_state document, #996).</summary>
     public void UseLottery(LotteryBoard board)
     {
         using (_affinity.Step())

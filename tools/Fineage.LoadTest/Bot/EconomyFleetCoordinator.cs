@@ -93,6 +93,14 @@ public static class EconomyFleetCoordinator
         CancellationToken ct)
     {
         var economy = bot.Scenario.Economy!;
+        // Like a sell with nothing to sell: an order the customer cannot pay materials for is not placed.
+        foreach (var (itemId, count) in economy.ManufactureIngredients)
+        {
+            long held = bot.Bag.Items.Values.Where(item => item.ItemId == itemId).Sum(item => (long)item.Count);
+            if (held < count)
+                return;
+        }
+
         int? maker = fleet.FirstOrDefault(b =>
             Math.Abs(b.BotId) % economy.ManufacturerModulo == economy.ManufacturerRemainder &&
             !b.Stats.Disconnected)?.SelfObjectId;

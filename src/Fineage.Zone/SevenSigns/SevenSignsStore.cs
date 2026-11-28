@@ -1,11 +1,20 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 
 namespace Fineage.Zone.SevenSigns;
 
-public sealed class SevenSignsSnapshot
+public sealed class SevenSignsSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
 
     public int Cycle { get; set; } = 1;
 
@@ -70,55 +79,5 @@ public sealed class MemorySevenSignsStore : ISevenSignsStore
     {
         var json = JsonSerializer.Serialize(source);
         return JsonSerializer.Deserialize<SevenSignsSnapshot>(json) ?? new SevenSignsSnapshot();
-    }
-}
-
-public sealed class JsonSevenSignsStore : ISevenSignsStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.Never
-    };
-
-    readonly string _path;
-    readonly object _gate = new();
-
-    public JsonSevenSignsStore(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            throw new ArgumentException("Seven Signs store path is required.", nameof(path));
-        _path = path;
-    }
-
-    public SevenSignsSnapshot Load()
-    {
-        lock (_gate)
-        {
-            if (!File.Exists(_path))
-                return new SevenSignsSnapshot();
-
-            string json = File.ReadAllText(_path);
-            var data = JsonSerializer.Deserialize<SevenSignsSnapshot>(json, JsonOptions)
-                ?? throw new InvalidDataException($"empty seven signs store: {_path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported seven signs store version {data.Version}");
-            data.Players ??= [];
-            return data;
-        }
-    }
-
-    public void Save(SevenSignsSnapshot snapshot)
-    {
-        ArgumentNullException.ThrowIfNull(snapshot);
-        lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(_path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = _path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, _path, overwrite: true);
-        }
     }
 }

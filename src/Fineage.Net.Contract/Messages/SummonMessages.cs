@@ -41,6 +41,12 @@ namespace Fineage.Net.Contract
         public int Count { get; set; }
     }
 
+    /// <summary>Client → zone: Mobius <c>RequestChangePetName</c> (<see cref="NetOpcode.RequestChangePetName"/>).</summary>
+    public sealed class ChangePetNameNetMsg
+    {
+        public string Name { get; set; } = "";
+    }
+
     /// <summary>Summon kind on the wire (EntitySpawn tail / SummonInfo).</summary>
     public enum SummonKindNet : byte
     {

@@ -41,11 +41,15 @@ public sealed class DungeonCatalog
     };
 
     readonly Dictionary<int, DungeonSite> _byId;
+    readonly Dictionary<int, DungeonSite> _byEntranceNpc;
+    readonly Dictionary<int, DungeonSite> _byExitNpc;
 
     public DungeonCatalog(IEnumerable<DungeonSite> sites)
     {
         ArgumentNullException.ThrowIfNull(sites);
         _byId = [];
+        _byEntranceNpc = [];
+        _byExitNpc = [];
         foreach (var site in sites)
         {
             if (site.Id <= 0)
@@ -58,6 +62,10 @@ public sealed class DungeonCatalog
                 throw new InvalidDataException($"Dungeon {site.Id} charges a fee without an item id.");
             if (!_byId.TryAdd(site.Id, site))
                 throw new InvalidDataException($"Duplicate dungeon id {site.Id}.");
+            if (site.EntranceNpcId > 0 && !_byEntranceNpc.TryAdd(site.EntranceNpcId, site))
+                throw new InvalidDataException($"Duplicate dungeon entrance npc {site.EntranceNpcId}.");
+            if (site.ExitNpcId > 0 && !_byExitNpc.TryAdd(site.ExitNpcId, site))
+                throw new InvalidDataException($"Duplicate dungeon exit npc {site.ExitNpcId}.");
         }
 
         if (_byId.Count == 0)
@@ -67,6 +75,14 @@ public sealed class DungeonCatalog
     public IReadOnlyCollection<DungeonSite> All => _byId.Values;
 
     public bool TryGet(int id, out DungeonSite site) => _byId.TryGetValue(id, out site!);
+
+    /// <summary>Gatekeeper Ziggurat at the surface (Mobius <c>necro</c>/<c>cata</c> HTML).</summary>
+    public bool TryGetByEntranceNpc(int npcId, out DungeonSite site) =>
+        _byEntranceNpc.TryGetValue(npcId, out site!);
+
+    /// <summary>Inner gatekeeper that returns to the surface (Mobius <c>exit</c> HTML).</summary>
+    public bool TryGetByExitNpc(int npcId, out DungeonSite site) =>
+        _byExitNpc.TryGetValue(npcId, out site!);
 
     public static DungeonCatalog Load(string path)
     {

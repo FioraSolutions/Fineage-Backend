@@ -133,6 +133,16 @@ public sealed class BotObservationLog
             _tracker.NoteLocalCommand(opcode, at, targetObjectId, skillId);
     }
 
+    /// <summary>
+    /// Local-only marker frame for a zone session boundary. It is never on the wire (server opcodes stop at the
+    /// 0xFE00 extended block); recording it as a frame keeps the boundary in <see cref="Snapshot"/> so every replay
+    /// of the log (trace builder, tests) sees the same lifecycle the live tracker saw.
+    /// </summary>
+    public const ushort SessionBoundaryOpcode = 0xFFFF;
+
+    /// <summary>A new zone session (relog): every object seen on the previous connection is gone from view.</summary>
+    public void BeginSession(DateTimeOffset at) => Record(SessionBoundaryOpcode, [], at);
+
     public void SetSelfEntity(ulong entityValue)
     {
         lock (_stateGate)
@@ -208,6 +218,7 @@ public sealed class BotObservationLog
         readonly List<LatencySample> _attackSamples = [];
         readonly List<LatencySample> _skillSamples = [];
         readonly List<LatencySample> _legacyCommandToFanoutSamples = [];
+        readonly List<SpawnObservation> _spawnObservations = [];
         ulong _selfEntityValue;
         public ulong SelfEntityValue => _selfEntityValue;
         int _attackSampleCount;
@@ -253,8 +264,42 @@ public sealed class BotObservationLog
 
         public IReadOnlyList<LatencySample> AttackFanoutSamples => _attackSamples;
         public IReadOnlyList<LatencySample> SkillFanoutSamples => _skillSamples;
+        /// <summary>
+        /// Every EntitySpawn this bot received, in arrival order. The consistency oracle uses the timestamps to tell a
+        /// CharInfo presence refresh (owner UserInfo in the same tick) from a lifecycle re-add; the raw open-run counter
+        /// on <see cref="TrackedEntity"/> stays the protocol-blind count.
+        /// </summary>
+        public IReadOnlyList<SpawnObservation> SpawnObservations => _spawnObservations;
 
         public void SetSelfEntity(ulong entityValue) => _selfEntityValue = entityValue;
+
+        /// <summary>
+        /// A relog closes the zone connection and opens a new session whose knownlist starts empty: the server's
+        /// enter-world sends every object in view again, exactly as the Interlude client sees after a restart
+        /// (Mobius <c>RequestRestart</c> → <c>RestartResponse</c> wipes the client world; <c>EnterWorld</c> re-adds it).
+        /// Every life seen on the old connection ends here. Without this the oracle counted one "duplicate spawn"
+        /// per relog for every object in view (#1114: all 12,216 reconnect-storm issues were from relogging observers).
+        /// Duplicates inside one session are still counted.
+        /// </summary>
+        public void BeginSession()
+        {
+            foreach (var key in _byValue.Keys.ToList())
+            {
+                var e = _byValue[key];
+                if (e.Despawned && e.SpawnsWithoutDespawn == 0)
+                    continue;
+                _byValue[key] = e with
+                {
+                    Despawned = true,
+                    SpawnsWithoutDespawn = 0,
+                    IsMoveOrigin = false,
+                    LastDespawnOrdinal = ++_spawnOrdinal
+                };
+            }
+
+            _pendingCombat.Clear();
+            _selfEntityValue = 0;
+        }
 
         public EntityTracker Clone()
         {
@@ -277,6 +322,7 @@ public sealed class BotObservationLog
             t._deathsSeen = _deathsSeen;
             foreach (var (skill, ready) in _skillReadyAt)
                 t._skillReadyAt[skill] = ready;
+            t._spawnObservations.AddRange(_spawnObservations);
             return t;
         }
 
@@ -285,6 +331,9 @@ public sealed class BotObservationLog
             ExpirePending(at);
             switch (opcode)
             {
+                case SessionBoundaryOpcode:
+                    BeginSession();
+                    break;
                 case NetOpcode.EntitySpawn:
                     {
                         var s = NetCodec.DecodeEntitySpawn(payload);
@@ -293,9 +342,10 @@ public sealed class BotObservationLog
                         // A despawn closes the life. The next spawn starts a new open run.
                         // SpawnCount stays lifetime-cumulative; the oracle reads the open run,
                         // otherwise a respawn (gremlin decay + 15s) looks like a spawn with no despawn.
-                        int openRun = previous == null || previous.Despawned
+                        bool openedLife = previous == null || previous.Despawned || previous.SpawnsWithoutDespawn == 0;
+                        int openRun = openedLife
                             ? 1
-                            : previous.SpawnsWithoutDespawn + 1;
+                            : previous!.SpawnsWithoutDespawn + 1;
                         _byValue[s.EntityValue] = new TrackedEntity
                         {
                             ObjectId = oid,
@@ -307,14 +357,22 @@ public sealed class BotObservationLog
                             X = s.X,
                             Y = s.Y,
                             Z = s.Z,
+                            PositionUpdatedAt = at,
                             MaxHp = s.MaxHp,
                             CurHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
+                            HpUpdatedAt = at,
+                            ExpectedPeerHp = s.CurHp > 0 ? s.CurHp : s.MaxHp,
+                            ExpectedPeerHpAt = at,
                             LastSpawnOrdinal = ++_spawnOrdinal,
                             LastDespawnOrdinal = previous?.LastDespawnOrdinal ?? 0,
+                            LastDeathAt = previous?.LastDeathAt,
                             SpawnCount = (previous?.SpawnCount ?? 0) + 1,
                             SpawnsWithoutDespawn = openRun,
-                            Despawned = false
+                            Despawned = false,
+                            IsMoveOrigin = false
                         };
+                        _spawnObservations.Add(new SpawnObservation(
+                            s.EntityValue, oid, at, s.Kind, s.EntityGeneration, s.IsSelf, openedLife));
                         // The entering client's own pawn is the only spawn marked IsSelf.
                         // Target range and AttackState/MagicSkillUse pairing both key off this id.
                         if (s.IsSelf)
@@ -328,7 +386,21 @@ public sealed class BotObservationLog
                         if (_selfEntityValue != 0 && (ulong)(uint)die.KillerObjectId == _selfEntityValue)
                             _killsBySelf++;
                         if (_byValue.TryGetValue(die.EntityValue, out var dead))
-                            _byValue[die.EntityValue] = dead with { Alive = false, CurHp = 0 };
+                        {
+                            // Death ends the current life even though the corpse remains known. Without closing
+                            // the spawn run, a later respawn/CharInfo EntitySpawn looks like a duplicate spawn.
+                            _byValue[die.EntityValue] = dead with
+                            {
+                                Alive = false,
+                                CurHp = 0,
+                                HpUpdatedAt = at,
+                                ExpectedPeerHp = 0,
+                                ExpectedPeerHpAt = at,
+                                LastDeathAt = at,
+                                SpawnsWithoutDespawn = 0,
+                                IsMoveOrigin = false
+                            };
+                        }
                         break;
                     }
                 case NetOpcode.EntityDespawn:
@@ -337,6 +409,8 @@ public sealed class BotObservationLog
                         if (_byValue.TryGetValue(d.EntityValue, out var e))
                         {
                             e.Despawned = true;
+                            e.SpawnsWithoutDespawn = 0;
+                            e.IsMoveOrigin = false;
                             e.LastDespawnOrdinal = ++_spawnOrdinal;
                             _byValue[d.EntityValue] = e;
                         }
@@ -347,12 +421,17 @@ public sealed class BotObservationLog
                     {
                         var m = NetCodec.DecodeMoveState(payload);
                         ulong key = m.EntityValue;
+                        // Origin is where the server says the pawn is when it emits the leg. Dest is only the
+                        // requested endpoint and can be thousands of units away (re-targets, approach toggles);
+                        // treating it as the current position invents pairs along a point never reached.
                         if (_byValue.TryGetValue(key, out var e))
                         {
-                            e.X = m.DestX;
-                            e.Y = m.DestY;
-                            e.Z = m.DestZ;
+                            e.X = m.OriginX;
+                            e.Y = m.OriginY;
+                            e.Z = m.OriginZ;
+                            e.PositionUpdatedAt = at;
                             e.Despawned = false;
+                            e.IsMoveOrigin = true;
                             _byValue[key] = e;
                         }
                         else
@@ -361,10 +440,30 @@ public sealed class BotObservationLog
                             {
                                 ObjectId = (int)m.EntityValue,
                                 EntityGeneration = m.EntityGeneration,
-                                X = m.DestX,
-                                Y = m.DestY,
-                                Z = m.DestZ
+                                X = m.OriginX,
+                                Y = m.OriginY,
+                                Z = m.OriginZ,
+                                PositionUpdatedAt = at,
+                                IsMoveOrigin = true
                             };
+                        }
+
+                        break;
+                    }
+                case NetOpcode.PositionCorrection:
+                    {
+                        // Server-authoritative XYZ after a drift check: the client must treat this as the pawn.
+                        var c = NetCodec.DecodePositionCorrection(payload);
+                        ulong key = c.EntityValue;
+                        if (_byValue.TryGetValue(key, out var e))
+                        {
+                            e.X = c.X;
+                            e.Y = c.Y;
+                            e.Z = c.Z;
+                            e.PositionUpdatedAt = at;
+                            e.Despawned = false;
+                            e.IsMoveOrigin = false;
+                            _byValue[key] = e;
                         }
 
                         break;
@@ -379,6 +478,8 @@ public sealed class BotObservationLog
                             e.X = t.X;
                             e.Y = t.Y;
                             e.Z = t.Z;
+                            e.PositionUpdatedAt = at;
+                            e.IsMoveOrigin = false;
                             _byValue[key] = e;
                         }
 
@@ -390,12 +491,39 @@ public sealed class BotObservationLog
                         ulong key = st.EntityValue;
                         if (_byValue.TryGetValue(key, out var e))
                         {
+                            // Kill/level updates carry Level/Exp/Sp and are sent to the owner only (Mobius
+                            // PlayerStat.addLevel -> updateUserInfo), so they must not become the HP state peers
+                            // are expected to hold.
+                            bool selfOnly = false;
+                            bool sawHp = false;
                             for (int i = 0; i < st.AttributeIds.Length && i < st.Values.Length; i++)
                             {
-                                if (st.AttributeIds[i] == InterludeStatus.CurHp)
-                                    e.CurHp = st.Values[i];
-                                else if (st.AttributeIds[i] == InterludeStatus.MaxHp)
-                                    e.MaxHp = st.Values[i];
+                                switch (st.AttributeIds[i])
+                                {
+                                    case InterludeStatus.CurHp:
+                                        e.CurHp = st.Values[i];
+                                        sawHp = true;
+                                        break;
+                                    case InterludeStatus.MaxHp:
+                                        e.MaxHp = st.Values[i];
+                                        sawHp = true;
+                                        break;
+                                    case InterludeStatus.Level:
+                                    case InterludeStatus.Exp:
+                                    case InterludeStatus.Sp:
+                                        selfOnly = true;
+                                        break;
+                                }
+                            }
+
+                            if (sawHp)
+                            {
+                                e.HpUpdatedAt = at;
+                                if (!selfOnly)
+                                {
+                                    e.ExpectedPeerHp = e.CurHp;
+                                    e.ExpectedPeerHpAt = at;
+                                }
                             }
 
                             _byValue[key] = e;
@@ -575,6 +703,20 @@ public sealed class BotObservationLog
             long SentAtMonotonicTicks,
             DateTimeOffset SentAt);
 
+        /// <summary>
+        /// One EntitySpawn frame as received. <see cref="OpenedLife"/> is true for the first spawn after no known
+        /// entity, a despawn, or a death; all later observations in that run are candidate duplicates until one is
+        /// classified as a CharInfo refresh by the oracle.
+        /// </summary>
+        public readonly record struct SpawnObservation(
+            ulong EntityValue,
+            int ObjectId,
+            DateTimeOffset At,
+            EntityKindNet Kind,
+            uint EntityGeneration,
+            bool IsSelf,
+            bool OpenedLife);
+
         public readonly record struct LatencySample(double Milliseconds, DateTimeOffset ObservedAt);
     }
 
@@ -589,11 +731,28 @@ public sealed class BotObservationLog
         public int X { get; set; }
         public int Y { get; set; }
         public int Z { get; set; }
+        /// <summary>When the position last changed (spawn/move/teleport). The oracle uses it to reject a stale ground.</summary>
+        public DateTimeOffset PositionUpdatedAt { get; set; }
+        /// <summary>
+        /// True when <see cref="PositionUpdatedAt"/> came from a MoveState origin. That origin is the start of a
+        /// movement turn; a later origin is the next turn, not a continuous ground for this view.
+        /// </summary>
+        public bool IsMoveOrigin { get; set; }
         public int CurHp { get; set; }
         public int MaxHp { get; set; }
+        /// <summary>When the last spawn/status/die frame for this entity carried HP.</summary>
+        public DateTimeOffset HpUpdatedAt { get; set; }
+        /// <summary>
+        /// Latest HP the server was expected to fan out to peers for this entity. Owner-only kill/level updates
+        /// update <see cref="CurHp"/> but leave this untouched, so a stale peer bar is not called a desync.
+        /// </summary>
+        public int ExpectedPeerHp { get; set; }
+        public DateTimeOffset ExpectedPeerHpAt { get; set; }
         public bool Despawned { get; set; }
         public long LastSpawnOrdinal { get; set; }
         public long LastDespawnOrdinal { get; set; }
+        /// <summary>When this entity last died. Position comparisons across this instant are cross-life.</summary>
+        public DateTimeOffset? LastDeathAt { get; set; }
         /// <summary>Lifetime EntitySpawn count, including lives closed by EntityDespawn.</summary>
         public int SpawnCount { get; set; }
         /// <summary>EntitySpawns since the last EntityDespawn. 1 on the first spawn of a life.</summary>

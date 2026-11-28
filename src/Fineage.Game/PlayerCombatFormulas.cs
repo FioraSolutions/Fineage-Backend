@@ -9,31 +9,44 @@ public static class PlayerCombatFormulas
     /// <summary>Mobius levelMod = (level + 89) / 100.</summary>
     public static double LevelMod(int level) => PlayerGearBases.LevelMod(level);
 
-    public static int PhysicalAttack(double gearPAtk, double strBonus, double levelMod) =>
-        (int)(gearPAtk * strBonus * levelMod);
+    /// <summary>Mobius <c>FuncPAtkMod</c> / <c>CreatureStat.getPAtk</c>: stays a double through <c>calcPhysDam</c>.</summary>
+    public static double PhysicalAttack(double gearPAtk, double strBonus, double levelMod) =>
+        gearPAtk * strBonus * levelMod;
 
-    public static int MagicalAttack(double gearMAtk, double intBonus, double levelMod) =>
-        (int)(gearMAtk * intBonus * intBonus * levelMod * levelMod);
+    /// <summary>Mobius <c>FuncMAtkMod</c> / <c>CreatureStat.getMAtk</c>: stays a double through <c>calcMagicDam</c>.</summary>
+    public static double MagicalAttack(double gearMAtk, double intBonus, double levelMod) =>
+        gearMAtk * intBonus * intBonus * levelMod * levelMod;
 
-    public static int PhysicalDefence(double gearPDef, double levelMod) =>
-        Math.Max(1, (int)(gearPDef * levelMod));
+    /// <summary>Mobius <c>FuncPDefMod</c> / <c>CreatureStat.getPDef</c>: stays a double through <c>calcPhysDam</c>.</summary>
+    public static double PhysicalDefence(double gearPDef, double levelMod) =>
+        Math.Max(1d, gearPDef * levelMod);
 
-    public static int MagicalDefence(double gearMDef, double menBonus, double levelMod) =>
-        Math.Max(1, (int)(gearMDef * menBonus * levelMod));
+    /// <summary>Mobius <c>FuncMDefMod</c> / <c>CreatureStat.getMDef</c>: stays a double through <c>calcMagicDam</c>.</summary>
+    public static double MagicalDefence(double gearMDef, double menBonus, double levelMod) =>
+        Math.Max(1d, gearMDef * menBonus * levelMod);
 
-    public static int PhysicalAttackSpeed(double gearPAtkSpd, double dexBonus) =>
-        Math.Max(1, (int)(gearPAtkSpd * dexBonus));
+    /// <summary>Mobius <c>FuncPAtkSpeed</c> / <c>CreatureStat.getPAtkSpd</c>: stays a double through <c>calculateTimeBetweenAttacks</c>.</summary>
+    public static double PhysicalAttackSpeed(double gearPAtkSpd, double dexBonus) =>
+        Math.Max(1d, gearPAtkSpd * dexBonus);
 
-    public static int MagicalAttackSpeed(double templateMAtkSpd, double witBonus) =>
-        Math.Max(1, (int)(templateMAtkSpd * witBonus));
+    /// <summary>Mobius <c>FuncMAtkSpeed</c> / <c>CreatureStat.getMAtkSpd</c>: stays a double.</summary>
+    public static double MagicalAttackSpeed(double templateMAtkSpd, double witBonus) =>
+        Math.Max(1d, templateMAtkSpd * witBonus);
 
     /// <summary>Mobius <c>FuncAtkAccuracy</c> with base 0 (players).</summary>
     public static int Accuracy(int dex, int level) =>
         (int)(Math.Sqrt(Math.Max(0, dex)) * 6 + Math.Max(1, level));
 
-    /// <summary>Mobius critRate · DEX bonus · 10 (permille before buff folds).</summary>
-    public static int CriticalRate(int gearCritRate, double dexBonus) =>
-        (int)(gearCritRate * dexBonus * 10);
+    /// <summary>
+    /// Mobius <c>FuncAtkCritical</c> then <c>CreatureStat.getCriticalHit</c>:
+    /// <c>min(gear * DEX.bonus * 10, MAX_PCRIT_RATE)</c> rounded with <c>(int)(val + .5)</c>.
+    /// </summary>
+    public static int CriticalRate(int gearCritRate, double dexBonus)
+    {
+        const int maxPCritRate = 500;
+        double val = Math.Min(gearCritRate * dexBonus * 10, maxPCritRate);
+        return (int)(val + 0.5);
+    }
 
     /// <summary>Mobius <c>FuncAtkEvasion</c> base 0, minus optional shield evasion penalty.</summary>
     public static int Evasion(int dex, int level, int shieldEvasionPenalty = 0) =>
@@ -54,12 +67,12 @@ public static class PlayerCombatFormulas
 /// Pre-mod player combat numbers: formula layer output that Zone folds with <c>CombatStatMods</c>.
 /// </summary>
 public readonly record struct PlayerFormulaBases(
-    int PAtk,
-    int MAtk,
-    int PDef,
-    int MDef,
-    int PAtkSpd,
-    int MAtkSpd,
+    double PAtk,
+    double MAtk,
+    double PDef,
+    double MDef,
+    double PAtkSpd,
+    double MAtkSpd,
     int Accuracy,
     int CritRate,
     int Evasion,

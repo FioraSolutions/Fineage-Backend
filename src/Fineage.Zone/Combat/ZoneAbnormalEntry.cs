@@ -15,4 +15,10 @@ public sealed class ZoneAbnormalEntry
     public long ExpiresAtUnixMs { get; set; }
     /// <summary>Next DamOverTime tick (unix ms). 0 = fire on the first abnormal tick.</summary>
     public long NextDotAtUnixMs { get; set; }
+    /// <summary>
+    /// Mobius <c>BuffInfo.getEffector()</c> object id for the DOT CP gate. 0 when the abnormal came from a
+    /// persisted/restored effect or a system source with no attacker; a DOT tick then resolves no attacker and
+    /// bypasses CP like Mobius does when the effector reference is missing.
+    /// </summary>
+    public int EffectorObjectId { get; set; }
 }

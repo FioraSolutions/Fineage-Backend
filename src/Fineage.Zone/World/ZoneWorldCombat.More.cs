@@ -11,12 +11,17 @@ public sealed partial class ZoneWorld
     // NPCs: template fields folded through StatMods.
     int PlayerPAtkSpd(ZoneEntity player) => PlayerStats(player).PAtkSpd;
 
-    long PlayerAttackTimeMs(int objectId) =>
-        _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
+    long PlayerAttackTimeMs(int objectId)
+    {
+        if (!_byId.TryGetValue(objectId, out var p))
+            return ZoneCombat.AutoAttackIntervalMs;
+        var ps = PlayerStats(p);
+        return ZoneCombat.AttackIntervalMs(ps.PAtkSpdPrecise, ps.Weapon);
+    }
 
-    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtk;
+    double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtkPrecise;
 
-    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
+    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDefPrecise;
 
     int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
 
@@ -77,7 +82,7 @@ public sealed partial class ZoneWorld
         else
         {
             var ts = PlayerStats(target);
-            pDef = Math.Max(1d, ts.PDef);
+            pDef = Math.Max(1d, ts.PDefPrecise);
             evasion = ts.Evasion;
             shieldRate = ShieldRateInArc(target, player, ts.ShieldRate, ts.ShieldDefAngle);
             shieldDef = ts.ShieldDef;
@@ -95,13 +100,14 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
-        return ZoneCombat.RollMelee(Rng(_combatRandom, player), ps.PAtk, pDef,
+        return ZoneCombat.RollMelee(Rng(_combatRandom, player), ps.PAtkPrecise, pDef,
             ps.Accuracy, evasion, critPermille, ps.RandomDamage,
             soulshot, (int)ps.WeaponGrade, shieldRate, shieldDef, ps.Weapon == Fineage.Game.WeaponType.Bow,
             ZoneCombat.HitConditionBonus(player.X, player.Y, player.Z, target.X, target.Y, target.Z, target.Heading, IsNight),
             critDamageMod,
             ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits),
-            ps.CritDmgAdd);
+            ps.CritDmgAdd,
+            ZoneCombat.ProximityBonus(position));
     }
 
     /// <summary>

@@ -25,7 +25,7 @@ public sealed partial class PostgresAccountStore
 
     void HydrateWeddingFromNormalized()
     {
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             var rows = NormalizedStoreWriter.LoadWeddingCouples(conn);

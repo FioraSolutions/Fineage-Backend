@@ -52,6 +52,32 @@ public sealed partial class ZoneWorld
         return Task.FromResult<string?>(null);
     }
 
+    /// <summary>Mobius <c>RequestWriteHeroWords</c> — claimed heroes only; persists on the olympiad board.</summary>
+    public Task<string?> TryWriteHeroWordsAsync(ZoneSession session, string text, CancellationToken ct)
+    {
+        if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player))
+            return Task.FromResult<string?>("world");
+
+        text ??= "";
+        if (text.Length > OlympiadProtocol.HeroMessageMaxLength)
+            return Task.FromResult<string?>("bad_request");
+
+        if (!player.Hero || !_olympiad.Board.IsHero(player.ObjectId))
+        {
+            ZoneLog.Warn($"[olympiad] write hero words rejected non-hero characterId={player.ObjectId}");
+            return Task.FromResult<string?>("forbidden");
+        }
+
+        if (!_olympiad.Board.SetHeroMessage(player.ObjectId, text))
+        {
+            ZoneLog.Warn($"[olympiad] write hero words missing hero row characterId={player.ObjectId}");
+            return Task.FromResult<string?>("forbidden");
+        }
+
+        ZoneLog.Info($"olympiad hero words object={player.ObjectId} len={text.Length}");
+        return Task.FromResult<string?>(null);
+    }
+
     public Task<string?> TryOlympiadRegisterAsync(ZoneSession session, OlympiadRegisterRequestMsg request, CancellationToken ct)
     {
         if (request == null)
@@ -82,18 +108,29 @@ public sealed partial class ZoneWorld
         return RunOlympiadAsync(now => _olympiad.Leave(session.ObjectId, now));
     }
 
-    public Task<string?> TryAdminReportOlympiadAsync(ZoneSession session, int matchId, int winnerObjectId, CancellationToken ct)
+    public Task<string?> TryAdminReportOlympiadAsync(
+        ZoneSession session,
+        int matchId,
+        int winnerObjectId,
+        CancellationToken ct,
+        string source = AdminSourceInternal)
     {
         if (!IsLive(session))
             return Task.FromResult<string?>("world");
         // Rewards may SaveInventory → flush after the change (B8).
-        return Task.FromResult(WithDeferredInventoryPersist(() =>
+        string target = $"match:{matchId} winner:{winnerObjectId}";
+        string before = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
+        string? error = WithDeferredInventoryPersist(() =>
         {
             var step = _olympiad.Board.Report(matchId, winnerObjectId, NowUnixMs());
             if (step.Error == null)
                 ApplyOlympiad(step);
             return step.Error;
-        }));
+        });
+        string after = AdminStateSnapshot(_byId.GetValueOrDefault(session.ObjectId));
+        AuditAdmin(session, _byId.GetValueOrDefault(session.ObjectId), "AdminReportOlympiadResult", target,
+            before, after, source, error);
+        return Task.FromResult(error);
     }
 
     void ApplyOlympiad(IReadOnlyList<OlympiadStep> steps)
@@ -181,8 +218,7 @@ public sealed partial class ZoneWorld
     {
         if (!_byId.TryGetValue(grant.CharacterId, out var entity) || entity.Session == null || entity.Inventory == null)
             return;
-        if (!_game.Items.TryGet(grant.ItemId, out _))
-            return;
+        _ = _game.Items.Require(grant.ItemId);
         RecordBagChange(
             entity,
             LedgerTxKind.OlympiadGrant,

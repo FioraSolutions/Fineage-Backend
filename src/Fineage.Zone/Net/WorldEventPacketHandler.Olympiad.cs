@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Zone.Security;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
@@ -72,6 +73,28 @@ public sealed partial class WorldEventPacketHandler
             await _reject(conn, error, "Olympiad leave was rejected.", ct).ConfigureAwait(false);
     }
 
+    public async Task OnWriteHeroWordsAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var request = NetCodec.DecodeWriteHeroWords(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new WriteHeroWordsCommand(request.Text ?? ""),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Write hero words was rejected.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnAdminReportOlympiadAsync(
         NetConnection conn,
         ZoneSession zoneSession,
@@ -91,10 +114,18 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
+        if (!AdminCommandCatalog.TryGetNet("AdminReportOlympiadResult", out AdminCommandSpec spec))
+            throw new InvalidOperationException("AdminReportOlympiadResult is missing from AdminCommandCatalog.");
+        if (!_world.TryAuthorizeAdmin(zoneSession, spec.MinimumRole, spec.Name, ZoneWorld.AdminSourceNet, out string refusal))
+        {
+            await _reject(conn, refusal, "AdminReportOlympiadResult is forbidden for this character.", ct).ConfigureAwait(false);
+            return;
+        }
+
         var request = NetCodec.DecodeAdminReportOlympiadResult(envelope.Payload);
         string? error = await _world.ExecuteAsync(
             zoneSession,
-            new AdminReportOlympiadCommand(request.MatchId, request.WinnerObjectId),
+            new AdminReportOlympiadCommand(request.MatchId, request.WinnerObjectId, ZoneWorld.AdminSourceNet),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminReportOlympiadResult was rejected.", ct).ConfigureAwait(false);

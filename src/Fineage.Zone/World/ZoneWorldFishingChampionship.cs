@@ -16,11 +16,19 @@ public sealed partial class ZoneWorld
     {
         if (claim)
         {
-            long reward = FishingChampionship.TryClaim(player.Name, out int rank);
-            if (reward > 0 && player.Inventory != null)
+            // #996: the claim mark and the prize are one move, so they commit together (the championship document rides
+            // the economy commit with the ledger row and the bag).
+            if (player.Inventory != null)
             {
                 int itemId = FishingChampionship.Settings.RewardItemId;
-                RecordBagChange(player, LedgerTxKind.FishingChampionshipPrize, LedgerAccount.Of(SystemAccount.Gathering), () => { GiveItem(session, player.Inventory!, itemId, (int)Math.Min(reward, int.MaxValue)); return (string?)null; }, _ => rank);
+                int rank = 0;
+                RecordBagChange(player, LedgerTxKind.FishingChampionshipPrize, LedgerAccount.Of(SystemAccount.Gathering), () =>
+                {
+                    long reward = FishingChampionship.TryClaim(player.Name, out rank);
+                    if (reward > 0)
+                        GiveItem(session, player.Inventory!, itemId, (int)Math.Min(reward, int.MaxValue));
+                    return (string?)null;
+                }, _ => rank);
             }
         }
         var page = _pages.ReadLink(session.Language, npc.NpcType, "Link fisherman/fishing_championship.htm");

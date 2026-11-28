@@ -61,6 +61,24 @@ public sealed class ManorBoard
     public int Mode { get; set; }
     public long NextChangeMs { get; set; }
 
+    /// <summary>
+    /// Mobius <c>CastleManorManager</c> constructor and <c>scheduleModeChange</c>: on every boot the mode is derived from
+    /// the current wall clock and the next boundary is scheduled from that sample. Neither value is persisted, so a
+    /// restart during downtime never replays the cycles it missed; it simply enters the period the wall clock is in.
+    /// </summary>
+    public void RestoreFromWall(long nowUnixMs)
+    {
+        if (!Settings.Enabled)
+        {
+            Mode = ManorProtocol.ModeDisabled;
+            NextChangeMs = 0;
+            return;
+        }
+
+        Mode = ManorRules.ModeAt(nowUnixMs, Settings.UtcOffsetMinutes);
+        NextChangeMs = ManorRules.NextChange(Mode, nowUnixMs, Settings.UtcOffsetMinutes);
+    }
+
     public bool Disabled => Mode == ManorProtocol.ModeDisabled;
     public bool UnderMaintenance => Mode == ManorProtocol.ModeMaintenance;
     public bool Modifiable => Mode == ManorProtocol.ModeModifiable;

@@ -3,6 +3,7 @@
 > **SNAPSHOT** — сверка на коммите `a52304d` / ветке `feat/net-foundation` (2026-11-03).
 > Не считать актуальным для текущего `dev` без повторного прогона.
 > **Live feature status:** [`mobius-parity-matrix.md`](mobius-parity-matrix.md) + tracker [#174](https://github.com/FioraSolutions/Fineage-Backend/issues/174).
+> The matrix separates **Implemented**, **Parity verified** and **Production verified** (#977); do not read a structural counter as behavioural parity.
 > Документ ссылается на `Fineage.Protocol/V2/` как живой транспорт — **удалён**; live wire = Fineage Net (`docs/net-protocol.md`).
 > Doc triage: client [`Docs/DOC_CANON.md`](https://github.com/FioraSolutions/Fineage/blob/dev/Docs/DOC_CANON.md).
 

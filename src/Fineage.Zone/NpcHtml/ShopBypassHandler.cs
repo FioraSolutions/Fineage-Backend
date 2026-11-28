@@ -1,14 +1,14 @@
 namespace Fineage.Zone.NpcHtml;
 
 /// <summary>
-/// Mobius <c>Buy</c>, <c>Sell</c>, <c>Multisell</c>, and <c>exc_multisell</c>.
+/// Mobius <c>Buy</c>, <c>Sell</c>, <c>Wear</c>, <c>Multisell</c>, and <c>exc_multisell</c>.
 /// <c>Exchange</c> is the same inventory-only multisell as <c>exc_multisell</c>.
 /// CT 0 has no <c>Exchange</c> bypass class; the command is registered here so the stub is gone.
 /// The handler only names the window. The world loads the list and edits the bag.
 /// </summary>
 public sealed class ShopBypassHandler : IBypassHandler
 {
-    public IReadOnlyList<string> Commands { get; } = ["Buy", "Sell", "Multisell", "exc_multisell", "Exchange"];
+    public IReadOnlyList<string> Commands { get; } = ["Buy", "Sell", "Wear", "Multisell", "exc_multisell", "Exchange"];
 
     public BypassReply Handle(BypassCall call)
     {
@@ -20,6 +20,13 @@ public sealed class ShopBypassHandler : IBypassHandler
             if (!TryListId(call.Command, out int listId))
                 return BypassReply.Page(Fineage.Protocol.ShopProtocol.NoListHtml);
             return BypassReply.Buy(listId);
+        }
+
+        if (token.Equals("Wear", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!TryListId(call.Command, out int wearListId))
+                return BypassReply.Page(Fineage.Protocol.ShopProtocol.NoListHtml);
+            return BypassReply.Wear(wearListId);
         }
 
         if (!TryListId(call.Command, out int multiId))

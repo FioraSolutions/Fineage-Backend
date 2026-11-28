@@ -30,23 +30,44 @@ namespace Fineage.Net.Contract
         {
             w.WriteInt32(m.TargetObjectId);
             w.WriteInt32(m.ColorHint);
+            // Peer aim (Mobius TargetSelected): selector + pose. Self MyTargetSelected mirror omits the tail.
+            if (m.SelectorObjectId != 0)
+            {
+                w.WriteInt32(m.SelectorObjectId);
+                w.WriteInt32(m.X);
+                w.WriteInt32(m.Y);
+                w.WriteInt32(m.Z);
+            }
         });
 
         public static TargetSelectedNetMsg DecodeTargetSelected(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new TargetSelectedNetMsg { TargetObjectId = r.ReadInt32(), ColorHint = r.ReadInt32() };
+            var m = new TargetSelectedNetMsg { TargetObjectId = r.ReadInt32(), ColorHint = r.ReadInt32() };
+            if (r.Remaining >= 16)
+            {
+                m.SelectorObjectId = r.ReadInt32();
+                m.X = r.ReadInt32();
+                m.Y = r.ReadInt32();
+                m.Z = r.ReadInt32();
+            }
+            return m;
         }
 
         public static byte[] EncodeTargetUnselected(TargetUnselectedNetMsg m) => Write(w =>
         {
             w.WriteInt32(m.TargetObjectId);
+            if (m.SelectorObjectId != 0)
+                w.WriteInt32(m.SelectorObjectId);
         });
 
         public static TargetUnselectedNetMsg DecodeTargetUnselected(ReadOnlySpan<byte> p)
         {
             var r = new Reader(p);
-            return new TargetUnselectedNetMsg { TargetObjectId = r.ReadInt32() };
+            var m = new TargetUnselectedNetMsg { TargetObjectId = r.ReadInt32() };
+            if (r.Remaining >= 4)
+                m.SelectorObjectId = r.ReadInt32();
+            return m;
         }
 
         public static byte[] EncodeAttackState(AttackStateMsg m) => Write(w =>

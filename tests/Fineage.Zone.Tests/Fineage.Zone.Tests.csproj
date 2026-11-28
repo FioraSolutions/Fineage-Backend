@@ -16,7 +16,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fineage.Zone\Fineage.Zone.csproj" />
     <!-- Test fixtures seed via LoginService / LoginHttpHost; production Zone references Accounts only. -->
-    <ProjectReference Include="..\..\src\Fineage.Login\Fineage.Login.csproj" />
+    <ProjectReference Include="../../src/Fineage.Login/Fineage.Login.csproj" />
+    <ProjectReference Include="../../src/Fineage.Agent.Observation/Fineage.Agent.Observation.csproj" />
+    <ProjectReference Include="../../src/Fineage.Agent.Gate/Fineage.Agent.Gate.csproj" />
+    <ProjectReference Include="../../src/Fineage.Agent.Identity/Fineage.Agent.Identity.csproj" />
+    <ProjectReference Include="../../src/Fineage.Agent.Contracts/Fineage.Agent.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Fineage.Game.Tests\Fixtures\skill-combat-snapshot.json" Link="Fixtures\skill-combat-snapshot.json" CopyToOutputDirectory="PreserveNewest" />

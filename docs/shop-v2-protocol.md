@@ -186,9 +186,9 @@ Negative item ids (special multisell products such as fame) are refused with 187
 |-----|--------|------|
 | 0 | npcObjectId | int |
 | 1 | listId | int |
-| 2 | itemId | int |
+| 2 | itemIds | int[] |
 
-The NPC must be in range. The reply is system message 189, `Wear is not available.` The bag does not change. The `Wear` bypass is still the HTML stub.
+Requires an open `Wear` window (`ShopPreviewList`). Charges Mobius `WEAR_PRICE` (10) per item, maps body parts via `PaperdollIndex`, and replies with `ShopPreviewInfo` (1101). Unknown buylist item ids are logged and skipped. Slot conflicts send system message 1368.
 
 ## System messages
 

@@ -76,6 +76,8 @@ public sealed class SkillStatEffectCatalog
         ["windRes"] = CombatStat.WindRes,
         ["earthRes"] = CombatStat.EarthRes,
         ["transDam"] = CombatStat.TransDam,
+        ["manaShield"] = CombatStat.ManaShield,
+        ["transDamToPlayer"] = CombatStat.TransDamToPlayer,
         ["cancel"] = CombatStat.Cancel,
         ["damageZoneVuln"] = CombatStat.DamageZoneVuln
     };

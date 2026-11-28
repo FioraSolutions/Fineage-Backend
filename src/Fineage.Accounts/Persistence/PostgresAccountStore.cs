@@ -1,6 +1,7 @@
-using System.Text;
+using System.Diagnostics;
 using System.Text.Json;
 using Fineage.Game.Quests;
+using Fineage.Protocol.Telemetry;
 using Npgsql;
 
 namespace Fineage.Accounts;
@@ -60,7 +61,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     {
         string snapshotJson = _inner.ExportSnapshot();
         using var _ = JsonDocument.Parse(snapshotJson);
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -75,193 +76,67 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
 
     public void Dispose() => _dataSource.Dispose();
 
+    /// <summary>
+    /// Lock order is strict: durable persistence first, memory second. Snapshot callbacks run after the memory
+    /// lock is released (see <see cref="MemoryAccountStore.AfterSaveSnapshot"/>), so the adapter may take this gate
+    /// there. Any caller that enters this gate while already holding the memory store lock would recreate the
+    /// register/create inversion and is rejected instead of deadlocking.
+    /// </summary>
+    static readonly KeyValuePair<string, object?> GateWait = new("kind", "store_gate_wait");
+    static readonly KeyValuePair<string, object?> GateHold = new("kind", "store_gate_hold");
+
+    readonly struct PersistGuard : IDisposable
+    {
+        readonly object _gate;
+        readonly long _entered;
+
+        internal PersistGuard(object gate, long entered)
+        {
+            _gate = gate;
+            _entered = entered;
+        }
+
+        public void Dispose()
+        {
+            FineageTelemetry.PersistWriteMilliseconds.Record(Stopwatch.GetElapsedTime(_entered).TotalMilliseconds, GateHold);
+            Monitor.Exit(_gate);
+        }
+    }
+
+    /// <summary>
+    /// A single-statement read on its own pooled connection, outside the write gate (#1112). Every write commits before
+    /// it releases the gate, so a read that starts after a write returned already sees it; holding the gate added
+    /// nothing but a place in the queue. On enter-world that queue was behind every logout write in the process:
+    /// 23 handler threads sat in <c>GetLanguage</c> waiting for the gate during a reconnect storm.
+    /// </summary>
+    NpgsqlConnection OpenReadConnection()
+    {
+        if (Monitor.IsEntered(_inner.SyncRoot))
+            throw new InvalidOperationException(
+                "durable store read opened while holding the memory store lock; lock order is persist -> memory");
+        return _dataSource.OpenConnection();
+    }
+
+    PersistGuard EnterPersist()
+    {
+        if (Monitor.IsEntered(_inner.SyncRoot))
+            throw new InvalidOperationException(
+                "durable store gate entered while holding the memory store lock; lock order is persist -> memory");
+        long waitStart = Stopwatch.GetTimestamp();
+        Monitor.Enter(_persistGate);
+        long entered = Stopwatch.GetTimestamp();
+        // #1112: every durable write in the process queues on this one gate; wait and hold are what size it.
+        FineageTelemetry.PersistWriteMilliseconds.Record(Stopwatch.GetElapsedTime(waitStart, entered).TotalMilliseconds, GateWait);
+        return new PersistGuard(_persistGate, entered);
+    }
+
     static void ApplyMigrations(NpgsqlDataSource dataSource)
     {
-        string migrationsDir = FindMigrationsDirectory();
+        // Boot uses the same runner as `Fineage.Login migrate`; checksums and pending plans are
+        // validated before anything is written. See docs/operations/migrations.md.
+        MigrationRunner runner = MigrationRunner.CreateDefault();
         using var conn = dataSource.OpenConnection();
-        using (var lockCmd = conn.CreateCommand())
-        {
-            lockCmd.CommandText = "SELECT pg_advisory_lock(87201401)";
-            lockCmd.ExecuteNonQuery();
-        }
-
-        try
-        {
-            using (var ensure = conn.CreateCommand())
-            {
-                ensure.CommandText =
-                    """
-                    CREATE TABLE IF NOT EXISTS schema_migrations (
-                        id text PRIMARY KEY,
-                        applied_at timestamptz NOT NULL DEFAULT now()
-                    );
-                    """;
-                ensure.ExecuteNonQuery();
-            }
-
-            foreach (string file in Directory.GetFiles(migrationsDir, "*.sql").OrderBy(f => f, StringComparer.Ordinal))
-            {
-                string id = Path.GetFileName(file);
-                using (var check = conn.CreateCommand())
-                {
-                    check.CommandText = "SELECT 1 FROM schema_migrations WHERE id = @id";
-                    check.Parameters.AddWithValue("id", id);
-                    if (check.ExecuteScalar() != null)
-                        continue;
-                }
-
-                string sql = File.ReadAllText(file);
-                using var tx = conn.BeginTransaction();
-                foreach (string statement in SplitSqlStatements(sql))
-                {
-                    using var apply = conn.CreateCommand();
-                    apply.Transaction = tx;
-                    apply.CommandText = statement;
-                    apply.ExecuteNonQuery();
-                }
-
-                using (var mark = conn.CreateCommand())
-                {
-                    mark.Transaction = tx;
-                    mark.CommandText = "INSERT INTO schema_migrations (id) VALUES (@id) ON CONFLICT (id) DO NOTHING";
-                    mark.Parameters.AddWithValue("id", id);
-                    mark.ExecuteNonQuery();
-                }
-
-                tx.Commit();
-            }
-        }
-        finally
-        {
-            using var unlock = conn.CreateCommand();
-            unlock.CommandText = "SELECT pg_advisory_unlock(87201401)";
-            unlock.ExecuteNonQuery();
-        }
-    }
-
-    static IEnumerable<string> SplitSqlStatements(string sql)
-    {
-        // Strip -- comments before splitting on ';' so a semicolon inside a header comment
-        // (e.g. "JSON mirror first; table later") cannot leak as a fake statement.
-        var withoutComments = new StringBuilder(sql.Length);
-        foreach (string line in sql.Split('\n'))
-        {
-            string t = line.TrimStart();
-            if (t.StartsWith("--", StringComparison.Ordinal))
-                continue;
-            withoutComments.AppendLine(line);
-        }
-
-        string text = withoutComments.ToString();
-        var current = new StringBuilder();
-        bool inSingleQuote = false;
-        string? dollarTag = null;
-
-        for (int i = 0; i < text.Length; i++)
-        {
-            char c = text[i];
-            if (dollarTag != null)
-            {
-                if (c == '$' && TryReadDollarDelimiter(text, i, out string closeTag, out int closeEnd)
-                    && closeTag == dollarTag)
-                {
-                    current.Append(text, i, closeEnd - i + 1);
-                    i = closeEnd;
-                    dollarTag = null;
-                }
-                else
-                {
-                    current.Append(c);
-                }
-
-                continue;
-            }
-
-            if (inSingleQuote)
-            {
-                current.Append(c);
-                if (c == '\'')
-                {
-                    if (i + 1 < text.Length && text[i + 1] == '\'')
-                    {
-                        current.Append(text[++i]);
-                    }
-                    else
-                    {
-                        inSingleQuote = false;
-                    }
-                }
-
-                continue;
-            }
-
-            if (c == '\'')
-            {
-                inSingleQuote = true;
-                current.Append(c);
-            }
-            else if (c == '$' && TryReadDollarDelimiter(text, i, out string openTag, out int openEnd))
-            {
-                dollarTag = openTag;
-                current.Append(text, i, openEnd - i + 1);
-                i = openEnd;
-            }
-            else if (c == ';')
-            {
-                string statement = current.ToString().Trim();
-                if (statement.Length > 0)
-                    yield return statement;
-                current.Clear();
-            }
-            else
-            {
-                current.Append(c);
-            }
-        }
-
-        string tail = current.ToString().Trim();
-        if (tail.Length > 0)
-            yield return tail;
-    }
-
-    static bool TryReadDollarDelimiter(string text, int start, out string tag, out int end)
-    {
-        tag = "";
-        end = start;
-        if (start >= text.Length || text[start] != '$')
-            return false;
-
-        int j = start + 1;
-        while (j < text.Length && (char.IsLetterOrDigit(text[j]) || text[j] == '_'))
-            j++;
-
-        if (j >= text.Length || text[j] != '$')
-            return false;
-
-        tag = text.Substring(start + 1, j - start - 1);
-        end = j;
-        return true;
-    }
-
-    static string FindMigrationsDirectory()
-    {
-        string? dir = AppContext.BaseDirectory;
-        for (int i = 0; i < 8 && dir != null; i++)
-        {
-            string candidate = Path.Combine(dir, "Persistence", "Migrations");
-            if (Directory.Exists(candidate))
-                return candidate;
-            candidate = Path.Combine(dir, "migrations");
-            if (Directory.Exists(candidate))
-                return candidate;
-            dir = Directory.GetParent(dir)?.FullName;
-        }
-
-        string src = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Persistence", "Migrations"));
-        if (Directory.Exists(src))
-            return src;
-
-        throw new DirectoryNotFoundException("Could not locate Persistence/Migrations SQL folder.");
+        runner.Apply(new NpgsqlMigrationDatabase(conn));
     }
 
     static string? LoadSnapshot(NpgsqlDataSource dataSource)
@@ -279,7 +154,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
     void WriteSnapshotBackup(string snapshotJson)
     {
         using var _ = JsonDocument.Parse(snapshotJson);
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -320,7 +195,7 @@ public sealed partial class PostgresAccountStore : IAccountStore, IDisposable
 
         // Hot paths write normalized SQL only. Rewriting store_snapshot from this process's
         // partial MemoryAccountStore would clobber the other process's backup JSON (Claude B9).
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             sql(conn);

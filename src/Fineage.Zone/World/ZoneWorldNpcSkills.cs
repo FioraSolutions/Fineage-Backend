@@ -66,8 +66,7 @@ public sealed partial class ZoneWorld
                 ApplyNpcSuicideBlast(npc, skill, range, at);
                 ZoneEntity? credit = _byId.TryGetValue(creditId, out var c) && c.Kind == ZoneEntityKind.Player ? c : null;
                 npc.CurHp = 0;
-                RemoveDeadNpc(npc, killer: credit);
-                if (credit != null)
+                if (RemoveDeadNpc(npc, killer: credit) && credit != null)
                     GrantKillReward(credit, npc);
             })
         });
@@ -92,11 +91,11 @@ public sealed partial class ZoneWorld
             double mAtk = Math.Max(1d, npc.MAtk) * ZoneCombat.SpiritshotMAtkMultiplier(spirit ? 1 : 0);
             var (damage, _) = ZoneCombat.RollMagicDamage(
                 Rng(_combatRandom, npc), mAtk, Math.Max(1d, ps.MDef), skill.Power,
-                npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10);
+                npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10, casterIsPlayer: false);
             if (damage <= 0 || DuelBlocksHit(npc, target))
                 continue;
 
-            target.CurHp = Math.Max(0, target.CurHp - damage);
+            ApplyTargetDamage(target, npc, damage);
             FanoutVitals(target, PlayerVitalsStatus(target));
             SendVictimHitLines(npc, target, damage, 0);
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;

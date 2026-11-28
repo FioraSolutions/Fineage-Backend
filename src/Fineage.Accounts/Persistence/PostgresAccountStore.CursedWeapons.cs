@@ -16,7 +16,7 @@ public sealed partial class PostgresAccountStore
 
     void HydrateCursedWeaponsFromNormalized()
     {
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             try

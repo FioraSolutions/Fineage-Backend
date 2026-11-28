@@ -95,6 +95,9 @@ sealed class ZoneCharacterPersist
     public void DeletePet(int controlObjectId) =>
         Write(nameof(DeletePet), Pet, controlObjectId, "", economic: false, store => store.DeletePet(controlObjectId));
 
+    public bool PetNameExists(string name, int npcId, int exceptControlObjectId) =>
+        _accounts?.PetNameExists(name, npcId, exceptControlObjectId) ?? false;
+
     public void SaveClass(string account, int characterId, int classId) =>
         Write(nameof(SaveClass), Character, characterId, account, economic: false,
             store => store.TrySaveClass(account, characterId, classId));
@@ -170,6 +173,13 @@ sealed class ZoneCharacterPersist
         var copy = Copy(shortcuts);
         return Write(nameof(ReplaceShortcuts), Character, characterId, account, economic: false,
             store => store.TryReplaceShortcuts(account, characterId, copy));
+    }
+
+    public bool ReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros)
+    {
+        var copy = Copy(macros);
+        return Write(nameof(ReplaceMacros), Character, characterId, account, economic: false,
+            store => store.TryReplaceMacros(account, characterId, copy));
     }
 
     public void ReplaceEffects(string account, int characterId, IReadOnlyList<StoredEffect> effects)

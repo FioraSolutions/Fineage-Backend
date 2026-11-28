@@ -1,0 +1,1 @@
+{"schemaVersion":1,"operationId":"op-1","commandId":"cmd-1","correlationId":"corr-1","idempotencyKey":"idem-1","toolName":"look","status":"Succeeded","createdAt":"2026-11-28T06:00:00+00:00","completedAt":"2026-11-28T06:00:01+00:00"}

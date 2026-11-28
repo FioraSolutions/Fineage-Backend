@@ -1,4 +1,5 @@
 using Fineage.Zone;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.World;
 
@@ -37,10 +38,33 @@ public sealed partial class ZoneWorld
             }
 
             CountOnlinePlayers();
-            _sevenSigns.Engine.Save();
-            _bosses.Schedule.Save();
+            _stateFlushes.FlushAll();
         });
     }
+
+    /// <summary>
+    /// The closed shutdown list from issue #984. Startup calls <see cref="ShutdownFlushRegistry.AssertComplete"/> so a
+    /// new sidecar cannot be added without joining this registry.
+    /// </summary>
+    void RegisterStateShutdownFlushes()
+    {
+        _stateFlushes.Register(WorldStateSystems.BossSchedule, () => _bosses.Schedule.Save());
+        _stateFlushes.Register(WorldStateSystems.SevenSigns, () => _sevenSigns.Engine.Save());
+        _stateFlushes.Register(WorldStateSystems.Olympiad, () => _olympiad.Board.Save());
+        _stateFlushes.Register(WorldStateSystems.Lottery, () => _lottery.Board.Save());
+        _stateFlushes.Register(WorldStateSystems.RaidBossPoints, () => _raidBossPoints.Save());
+        _stateFlushes.Register(WorldStateSystems.Punishment, () => _punishments.Save());
+        _stateFlushes.Register(WorldStateSystems.MonsterRace, () => _monsterRace.Board.Save());
+        _stateFlushes.Register(WorldStateSystems.FishingChampionship, () => _fishingChampionship.Board.Save());
+        _stateFlushes.Register(WorldStateSystems.PcCafe, () => _pcCafe.Save());
+        _stateFlushes.AssertComplete();
+    }
+
+    internal IReadOnlyList<string> StateFlushSystems => _stateFlushes.RegisteredSystems;
+
+    internal IReadOnlyList<string> LastStateFlushFailures => _stateFlushes.LastFailures;
+
+    internal void FlushWorldStateForTests() => _stateFlushes.FlushAll();
 
     internal void CloseCommandIngress(string reason) => _ingress.Close(reason);
 }

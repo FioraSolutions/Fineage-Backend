@@ -10,10 +10,10 @@ public sealed record BossStatusCommand(int NpcId) : ZoneCommand
         Completed(world.TryBossStatusAsync(session, NpcId, CancellationToken.None));
 }
 
-public sealed record AdminBossCommand(AdminBossScheduleMsg Request) : ZoneCommand
+public sealed record AdminBossCommand(AdminBossScheduleMsg Request, string Source = ZoneWorld.AdminSourceNet) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
-        Completed(world.TryAdminBossAsync(session, Request, CancellationToken.None));
+        Completed(world.TryAdminBossAsync(session, Request, CancellationToken.None, Source));
 }
 
 public sealed record SiegeListCommand(int CastleId) : ZoneCommand
@@ -34,16 +34,28 @@ public sealed record SiegeAnswerCommand(SiegeDefenderAnswerRequestMsg Request) :
         Completed(world.TrySiegeAnswerAsync(session, Request, CancellationToken.None));
 }
 
-public sealed record AdminCaptureCommand(int CastleId, int ClanId) : ZoneCommand
+public sealed record AdminCaptureCommand(int CastleId, int ClanId, string Source = ZoneWorld.AdminSourceNet) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
-        Completed(world.TryAdminCaptureAsync(session, CastleId, ClanId, CancellationToken.None));
+        Completed(world.TryAdminCaptureAsync(session, CastleId, ClanId, CancellationToken.None, Source));
 }
 
 public sealed record OlympiadStatusCommand : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
         Completed(world.TryOlympiadStatusAsync(session, CancellationToken.None));
+}
+
+public sealed record WriteHeroWordsCommand(string Text) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryWriteHeroWordsAsync(session, Text, CancellationToken.None));
+}
+
+public sealed record PCCafeCouponUseCommand(string Code) : ZoneCommand
+{
+    internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
+        Completed(world.TryPcCafeCouponAsync(session, Code, CancellationToken.None));
 }
 
 public sealed record OlympiadRegisterCommand(OlympiadRegisterRequestMsg Request) : ZoneCommand
@@ -64,10 +76,10 @@ public sealed record OlympiadLeaveCommand : ZoneCommand
         Completed(world.TryOlympiadLeaveAsync(session, CancellationToken.None));
 }
 
-public sealed record AdminReportOlympiadCommand(int MatchId, int WinnerObjectId) : ZoneCommand
+public sealed record AdminReportOlympiadCommand(int MatchId, int WinnerObjectId, string Source = ZoneWorld.AdminSourceNet) : ZoneCommand
 {
     internal override string? Apply(ZoneWorld world, ZoneSession session, TickContext tick) =>
-        Completed(world.TryAdminReportOlympiadAsync(session, MatchId, WinnerObjectId, CancellationToken.None));
+        Completed(world.TryAdminReportOlympiadAsync(session, MatchId, WinnerObjectId, CancellationToken.None, Source));
 }
 
 public sealed record SevenSignsStatusCommand : ZoneCommand

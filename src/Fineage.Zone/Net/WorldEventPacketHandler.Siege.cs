@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Zone.Security;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
@@ -102,10 +103,18 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
+        if (!AdminCommandCatalog.TryGetNet("AdminCaptureCastle", out AdminCommandSpec spec))
+            throw new InvalidOperationException("AdminCaptureCastle is missing from AdminCommandCatalog.");
+        if (!_world.TryAuthorizeAdmin(zoneSession, spec.MinimumRole, spec.Name, ZoneWorld.AdminSourceNet, out string refusal))
+        {
+            await _reject(conn, refusal, "AdminCaptureCastle is forbidden for this character.", ct).ConfigureAwait(false);
+            return;
+        }
+
         var request = NetCodec.DecodeAdminCaptureCastle(envelope.Payload);
         string? error = await _world.ExecuteAsync(
             zoneSession,
-            new AdminCaptureCommand(request.CastleId, request.ClanId),
+            new AdminCaptureCommand(request.CastleId, request.ClanId, ZoneWorld.AdminSourceNet),
             ct)
             .ConfigureAwait(false);
         if (error != null)

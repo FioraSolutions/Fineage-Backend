@@ -10,6 +10,13 @@ public sealed class BotStats
     public volatile bool InWorld;
     public volatile bool Disconnected;
     public string? LastError;
+    /// <summary>
+    /// Handshake step the bot was executing when it failed (for example <c>login_create</c> or <c>enter_world</c>).
+    /// Without it the runner could only report the exception message, not which protocol step produced it.
+    /// </summary>
+    public volatile string EntryPhase = "not_started";
+    /// <summary>Full <see cref="Exception.ToString"/> (type, message, stack) of a failed entry handshake.</summary>
+    public string? EntryFailure;
     public long ActionsAttempted;
     public long ActionsFailed;
     public long RelogsAttempted;

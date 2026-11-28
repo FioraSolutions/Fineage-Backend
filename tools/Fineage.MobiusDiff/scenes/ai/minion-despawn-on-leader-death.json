@@ -1,0 +1,60 @@
+{
+  "id": "minion-despawn-on-leader-death",
+  "description": "Raid-boss death despawns all private minions.",
+  "category": "minions",
+  "seed": 9842,
+  "player": {
+    "key": "player",
+    "classId": 25,
+    "level": 1,
+    "x": 100000,
+    "y": 100000,
+    "z": -3000,
+    "karma": 0,
+    "maxHp": 100000,
+    "hp": 100000
+  },
+  "npcs": [
+    {
+      "key": "boss",
+      "mobiusId": 25001,
+      "fineageId": 25001,
+      "source": "stats/npcs/250xx.xml",
+      "objectId": 9200191,
+      "x": 100300,
+      "y": 100000,
+      "z": -3000,
+      "heading": 0,
+      "respawnDelaySeconds": 0,
+      "respawnRandomSeconds": 0,
+      "globalAggro": -10,
+      "hpPercent": 100,
+      "leader": ""
+    }
+  ],
+  "actions": [
+    {
+      "tick": 40,
+      "type": "damage",
+      "npc": "boss",
+      "amount": 999999
+    }
+  ],
+  "observe": {
+    "ticks": [
+      20,
+      45
+    ],
+    "fields": [
+      "npc.boss.minionCount",
+      "npc.boss.dead"
+    ]
+  },
+  "oracle": {
+    "kind": "mobius-ai-reference-trace",
+    "golden": "tools/Fineage.MobiusDiff/oracle/ai/minion-despawn-on-leader-death.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {},
+  "knownDivergences": {}
+}
