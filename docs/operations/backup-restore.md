@@ -3,7 +3,8 @@
 PostgreSQL and the Zone JSON sidecars are one recovery unit. Losing either half loses
 characters/inventory or world state (boss respawns, Seven Signs, Olympiad, lottery, raid
 points, punishments, monster race, fishing championship). This document is the operator
-contract and the executable drill.
+contract and the executable drill. The incident procedure that uses these commands is
+[`runbook.md`](runbook.md#backup-and-restore).
 
 ## What a backup contains
 
@@ -18,14 +19,15 @@ contract and the executable drill.
 | `sidecars.tsv` | per-file SHA-256, size and path |
 | `manifest.json` | dump/sidecar SHA-256, sizes, database name/version and creation time |
 
-The backup refuses to run when any of the eight canonical sidecars is missing. It never
-writes a partial archive silently. The eight names mirror `WorldStateSystems.All`
-(`src/Fineage.Zone/Persistence/WorldStateShutdown.cs`); a test fails when the script list
-drifts from the C# closed list.
+Since #996 those eight systems live in the `world_state` table and travel inside
+`postgres.dump`; `backup-state.sh` refuses a dump whose TOC lacks `TABLE DATA public world_state`
+(and the other value-bearing tables). The state directory is still archived (`gm-audit.jsonl` and
+any `*.imported-*` cutover files), but no file in it is required. A test fails if the script
+list of dump tables drifts or if it starts requiring the pre-#996 sidecar files again.
 
 ### Taking a backup
 
-With a local `pg_dump` client and the live connection string:
+With a local `pg_dump` client and the live connection string (`FINEAGE_DATABASE_URL` in either the project Npgsql form `Host=...;Database=...;Username=...;Password=...` or a libpq URI — the script converts the former):
 
 ```bash
 FINEAGE_BACKUP_RETENTION_DAYS=14 FINEAGE_BACKUP_RETENTION_COUNT=14 \
