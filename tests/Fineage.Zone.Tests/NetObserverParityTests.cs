@@ -100,6 +100,10 @@ public sealed class NetObserverParityTests
 
         var fa = await AttackAsync(a, b.ObjectId, forced: true);
         await rig.AdvanceAsync(8000);
+        // A miss-heavy streak, or a last swing still in flight, can leave a sliver of CP after a
+        // fixed window. Keep stepping until CP is gone so the CP-first split is fully exercised.
+        for (int i = 0; i < 10 && b.Entity.CurCp > 0; i++)
+            await rig.AdvanceAsync(2000);
 
         fa.AddRange(await a.DrainAsync());
         var fb = await b.DrainAsync();
