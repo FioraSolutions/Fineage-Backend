@@ -251,8 +251,10 @@ public sealed partial class ZoneWorld
 
         bool ss = TryNpcSoulshot(npc);
         // Blow without blowEffect in catalog → physical skill formula (NPC Mortal Blow).
+        var position = ZoneCombat.PositionOf(npc.X, npc.Y, player.X, player.Y, player.Heading);
         return ZoneCombat.PhysicalSkillDamage(
-            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), targetPDef, power, ss, crit: false);
+            StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), targetPDef, power, ss, crit: false,
+            proximity: ZoneCombat.ProximityBonus(position));
     }
 
     /// <summary>Mobius <c>Npc.rechargeShots(false, true)</c> for spiritshots.</summary>

@@ -106,7 +106,19 @@ public static partial class ZoneCombat
     public static int MagicDamage(double mAtk, double mDef, double power) =>
         Math.Max(1, (int)(91d * Math.Sqrt(Math.Max(0, mAtk)) / Math.Max(1d, mDef) * Math.Max(0, power)));
 
-    /// <summary>Mobius <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements): 70 * pAtk / pDef, min 1.</summary>
-    public static int PhysicalDamage(double pAtk, double pDef) =>
-        Math.Max(1, (int)(70d * Math.Max(0d, pAtk) / Math.Max(1d, pDef)));
+    /// <summary>
+    /// Mobius CT0 <c>Formulas.calcPhysDam</c> core (no crit/shots/random/elements):
+    /// <c>76 * pAtk * proximity / pDef</c>, min 1. Proximity is 1 front, 1.1 side, 1.2 behind.
+    /// </summary>
+    public const double PhysDamCoefficient = 76d;
+
+    public static double ProximityBonus(SkillPosition position) => position switch
+    {
+        SkillPosition.Behind => 1.2,
+        SkillPosition.Side => 1.1,
+        _ => 1d,
+    };
+
+    public static int PhysicalDamage(double pAtk, double pDef, double proximity = 1d) =>
+        Math.Max(1, (int)(PhysDamCoefficient * Math.Max(0d, pAtk) * Math.Max(0d, proximity) / Math.Max(1d, pDef)));
 }

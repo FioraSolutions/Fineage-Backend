@@ -4,7 +4,7 @@
 - Melee range 80 (atkRange 40 + collisions), server moveToPawn approach / follow re-path.
 - Server-authoritative hitTime: Attack swing broadcast, HP drops at timeAtk/2 (PendingMeleeHit), range re-check at hit.
 - Attack reuse from Pspd: `timeAtk = max(100, 500000 / pAtkSpd)` for players (class template) and NPCs (npcs.json `attackSpeed`).
-- Physical damage core `70 * pAtk / pDef` (min 1): player template P.Atk vs NPC `defence physical`; NPC `attack physical` vs player template P.Def.
+- Physical damage core `76 * pAtk * proximity / pDef` (min 1, CT0 `Formulas.calcPhysDam`): proximity is 1 front, 1.1 side, 1.2 behind. Player template P.Atk vs NPC `defence physical`; NPC `attack physical` vs player template P.Def.
 - npcs.json carries Mobius `pAtk`, `pDef`, `attackSpeed`, `attackRange` for all 6519 templates.
 - Player stat pipeline (`ZoneWorld.PlayerStats`, also feeds UserInfo): P.Atk = (weapon pAtk | fist) * STR * levelMod; M.Atk = (weapon | base) * INT² * levelMod²; P.Def = (base − naked slot share + armor pDef) * levelMod (fighter 31/18/12/7/8/3/1, mystic chest 15 / legs 8, full armor covers legs); M.Def = (41 − jewel shares + jewel mDef) * MEN * levelMod; Pspd = (weapon | 300) * DEX; accuracy = sqrt(DEX)*6 + level; crit = base*10*DEX; levelMod = (lvl+89)/100.
 - Weapon range: reach = weapon `attack_range` + 40 (melee 80, polearm 120, bow 540). items.json carries weapon pAtk/mAtk/pAtkSpd/critRate/attackRange/randomDamage and armor pDef/mDef from Mobius.
@@ -29,7 +29,7 @@ Feature-level status lives in [`mobius-parity-matrix.md`](mobius-parity-matrix.m
 
 ## Slice 6 — attack-skill damage and timing
 - `data/skill-combat.json` (374 Mobius skills): power/mpConsume/mpInitialConsume per level, hit/cool/reuse, castRange.
-- Physical skill: 70·(P.Atk·ss + power)/P.Def (shield roll applies); magic: 91·√M.Atk/M.Def·power.
+- Physical skill: 76·(P.Atk·ss + power)·proximity/P.Def (shield roll applies); magic: 91·√M.Atk/M.Def·power.
 - Hit/cool: magic t·333/Cspd, physical t·300/Pspd; reuse t·333/speed. Initial MP at cast start, MP at launch.
 - Skills outside the catalog keep the legacy power+10 stub.
 - Gaps: magic crit/fail, spiritshots, skill crit; blow/energy use the physical formula; caster MP StatusUpdate V2-only.
@@ -327,8 +327,9 @@ Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/stat
   cast, exactly as `PlayerStatus.reduceHp` does.
 - Duel bars now publish live CP and a normal duel end restores the pre-duel CP snapshot with HP/MP
   (`Duel.PlayerCondition.restoreCondition`); an interrupted duel does not restore.
-- `Formulas.calcPhysDam` still uses `76 * damage * proximity / defence` in CT0 while Fineage's physical core stays
-  `70 * pAtk / pDef` and omits proximity. The differential pilot `physical-attack-human-fighter-40` keeps that explicit
+- `Formulas.calcPhysDam` is implemented as `76 * damage * proximity / defence` (front 1 / side 1.1 / behind 1.2), matching
+  CT0. The differential pilot `physical-attack-human-fighter-40` records that golden; a leftover P.Atk 42 vs 42.7248
+  (inside the stat tolerance, still visible on `damageNoCrit`) is still open
   red finding for the next #979 slice; this slice did not change the physical constant.
 - Differential pilot: `cp-reducehp-human-fighter-40` evaluates the source-verified CP branch (full absorb, overflow,
   NPC attacker bypass, explicit `ignoreCP`) in `MobiusFormulaDriver` and compares it with `TargetDamage.Split`.
@@ -346,6 +347,6 @@ Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/stat
   `IncomingDamagePlanTests`, `IncomingDamageWorldTests`.
 - Still open for #979: CP-damage effect coverage beyond `CpDamPercent`, full-server verification of the differential
   oracle, remaining golden categories (stats, crit, bow, shots, buff/debuff, cast-break), and the physical
-  `70 * pAtk / pDef` vs Mobius `76 * damage * proximity / defence` finding. DOT still stores the effector object id
+  remaining golden categories still listed below. DOT still stores the effector object id
   and routes the CT0 five-argument `reduceCurrentHpByDOT` path with that attacker (playable → CP first, NPC/missing →
   HP); a persisted abnormal with no effector keeps the no-attacker bypass.

@@ -70,7 +70,7 @@ public sealed class NetSkillTests
         int gremlinObjectId = GremlinObjectId(bench.World);
         Assert.True(gremlinObjectId > 0);
 
-        // Mobius Power Strike: 70·(P.Atk + power)/P.Def. With the kit weapon it one-shots a 96 HP gremlin at L5,
+        // Mobius Power Strike: 76·(P.Atk + power)·proximity/P.Def. With the kit weapon it one-shots a 96 HP gremlin at L5,
         // so cast with the weakest sword (Squire's Sword, P.Atk 6) — Power Strike needs SWORD/BLUNT.
         caster.Inventory!.Equip(caster.Inventory.Add(SquiresSword));
         Assert.True(bench.World.TryGetEntityById(gremlinObjectId, out var gremlin));

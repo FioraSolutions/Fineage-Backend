@@ -103,9 +103,8 @@ the Mobius analytic expectation; deterministic rows compare formula outputs dire
 `physical-attack-human-fighter-40` is the pilot: Human Fighter 40, Long Sword, Mithril heavy set,
 Might 3 / Focus 3 / Haste 2, front melee against Gremlin `20001`.
 
-It currently reports **FAIL only on damage**, because Fineage uses `70·pAtk/pDef` for a plain
-attack and does not apply Mobius proximity, while CT0 `Formulas.calcPhysDam` uses
-`76·damage·proximity/defence`. That is a real formula-level divergence owned by #979, not a
+The damage row uses CT0 `Formulas.calcPhysDam` (`76·damage·proximity/defence`). A remaining
+full-server oracle run is still tracked by #979, not a
 random-roll mismatch. The deterministic stat/probability pilot (`physical-stats-human-fighter-40`)
 passes and is the harness's green dev case.
 
