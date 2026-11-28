@@ -170,7 +170,11 @@ run_one() {
   scenario_env "$scenario"
   export FINEAGE_ZONE_REGION_WORKERS="$workers"
   stop_stack
-  ./scripts/run-local-net.sh start
+  if ! ./scripts/run-local-net.sh start; then
+    echo "FAIL: local stack was not listening (zone boot may still have been in progress)" >&2
+    stop_stack
+    return 1
+  fi
 
   local zone_pid
   zone_pid="$(cat local-logs/zone-net.pid 2>/dev/null || echo 0)"

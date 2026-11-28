@@ -245,8 +245,11 @@ daemonize login-net \
 daemonize zone-net \
   "${ZONE_CMD[@]}" --bind 0.0.0.0 --port "${FINEAGE_NET_ZONE_PORT}" --state-dir local-data
 
+# Full world + geodata can take well over 15s before the zone net port binds (listen is after
+# spawn). A 15s wait returns failure while the process is still booting; if the caller is in
+# `if ! run_one` (set -e disabled), the load runner then starts bots into a closed 9777.
 ok=0
-for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do
+for _ in $(seq 1 90); do
   sleep 1
   if port_open "${FINEAGE_NET_LOGIN_PORT}" && port_open "${FINEAGE_NET_ZONE_PORT}"; then ok=1; break; fi
 done

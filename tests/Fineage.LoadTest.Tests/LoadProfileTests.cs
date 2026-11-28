@@ -111,7 +111,46 @@ public class LoadProfileTests
         var gates = PerformanceGates.Evaluate(Report(HealthyTrend(), durationSeconds: 300, windows: windows));
         var gate = Assert.Single(gates, g => g.Gate.Contains("queue trend: fanout depth", StringComparison.Ordinal));
         Assert.True(gate.Passed, gate.Note);
+        Assert.True(gate.Passed, gate.Note);
         Assert.Contains("flat", gate.Note ?? "");
+    }
+
+    [Fact]
+    public void Lifetime_histogram_high_water_moving_one_count_bounds_bucket_is_not_queue_growth()
+    {
+        // #867 300 s bots-200-town: 38 of 109406 samples in (32, 64] ratcheted the
+        // cumulative fanout_queue_depth max from 32 to 64. Age p99 stayed ~1.3 ms.
+        var windows = Enumerable.Range(0, 9)
+            .Select(i => new TimeSeriesWindow
+            {
+                FanoutQueueDepthMax = i < 5 ? 32 : 64,
+                CommandQueueDepthMax = 1,
+                CommandIngressQueuedMax = 0
+            })
+            .ToList();
+        var gates = PerformanceGates.Evaluate(Report(HealthyTrend(), durationSeconds: 300, windows: windows));
+        var gate = Assert.Single(gates, g => g.Gate.Contains("queue trend: fanout depth", StringComparison.Ordinal));
+        Assert.True(gate.Passed, gate.Note);
+        Assert.Contains("flat", gate.Note ?? "");
+    }
+
+    [Fact]
+    public void One_late_gauge_spike_is_not_queue_growth()
+    {
+        // #867 confirmation run: command ingress is a point-in-time gauge. Almost every
+        // 10 s window was 0; one late scrape saw 79 commands waiting for the next tick.
+        var windows = Enumerable.Range(0, 30)
+            .Select(i => new TimeSeriesWindow
+            {
+                FanoutQueueDepthMax = 8,
+                CommandQueueDepthMax = 1,
+                CommandIngressQueuedMax = i == 26 ? 79 : 0
+            })
+            .ToList();
+        var gates = PerformanceGates.Evaluate(Report(HealthyTrend(), durationSeconds: 300, windows: windows));
+        var gate = Assert.Single(gates, g => g.Gate.Contains("queue trend: command ingress", StringComparison.Ordinal));
+        Assert.True(gate.Passed, gate.Note);
+        Assert.DoesNotContain("trend **growing**", gate.Note ?? "");
     }
 
     [Fact]
@@ -219,6 +258,52 @@ public class LoadProfileTests
         Assert.Equal(220, stats.GcHeapMbSeries[0].Value);
         Assert.Equal(2, stats.AllocRateMbPerSecSeries.Count);
         Assert.Equal(2, stats.AllocRateMbPerSecSeries[^1].Value);
+    }
+
+    [Fact]
+    public void Runtime_csv_naive_timestamps_are_local_clock_not_utc()
+    {
+        const string csv = """
+            Timestamp,Provider,Counter Name,Counter Type,Value
+            2026-11-28T05:19:36,System.Runtime,GC Heap Size (MB),Metric,466
+            2026-11-28T05:19:36Z,System.Runtime,GC Heap Size (MB),Metric,999
+            2026-11-28T05:19:36+03:00,System.Runtime,GC Heap Size (MB),Metric,100
+            """;
+        var stats = RuntimeCountersSampler.ParseCsv(csv);
+        Assert.Equal(3, stats.GcHeapMbSeries.Count);
+        var naive = stats.GcHeapMbSeries[0].At.ToUniversalTime();
+        var zulu = stats.GcHeapMbSeries[1].At.ToUniversalTime();
+        var offset = stats.GcHeapMbSeries[2].At.ToUniversalTime();
+        var expectedLocal = new DateTimeOffset(new DateTime(2026, 11, 28, 5, 19, 36, DateTimeKind.Local)).ToUniversalTime();
+        Assert.Equal(expectedLocal, naive);
+        Assert.Equal(new DateTimeOffset(2026, 11, 28, 5, 19, 36, TimeSpan.Zero), zulu);
+        Assert.Equal(new DateTimeOffset(2026, 11, 28, 2, 19, 36, TimeSpan.Zero), offset);
+    }
+
+    [Fact]
+    public void Gc_heap_trend_excludes_samples_before_steady_state()
+    {
+        var runtime = new RuntimeCounterStats
+        {
+            GcHeapMbSeries =
+            [
+                new RuntimeMetricPoint(new DateTimeOffset(2026, 11, 28, 2, 19, 36, TimeSpan.Zero), 466),
+                new RuntimeMetricPoint(new DateTimeOffset(2026, 11, 28, 2, 21, 6, TimeSpan.Zero), 747),
+                new RuntimeMetricPoint(new DateTimeOffset(2026, 11, 28, 2, 25, 36, TimeSpan.Zero), 804)
+            ]
+        };
+        var trend = ResourceTrendSummaryBuilder.Build(
+            new DateTimeOffset(2026, 11, 28, 2, 21, 5, TimeSpan.Zero),
+            rssSamples: null,
+            runtime);
+        Assert.Equal(2, trend.GcHeapSampleCount);
+        Assert.Equal(747, trend.GcHeapMbStart);
+        Assert.Equal(804, trend.GcHeapMbEnd);
+        Assert.Equal(57, trend.GcHeapGrowthMb);
+        // 10% of 747 is 74.7, above the 32 MiB floor, so this window passes the #990 heap gate.
+        var report = Report(trend, durationSeconds: 300, windows: StableQueues());
+        var gate = Assert.Single(PerformanceGates.Evaluate(report), g => g.Gate.Contains("GC heap", StringComparison.Ordinal));
+        Assert.True(gate.Passed, gate.Note);
     }
 
     static RunReport Report(

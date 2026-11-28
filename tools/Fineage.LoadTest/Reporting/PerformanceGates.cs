@@ -302,14 +302,15 @@ public static class PerformanceGates
         if (trend == absentText &&
             report.PeakMetricsText?.Contains(metricName, StringComparison.Ordinal) == true)
             trend = "flat";
-        double first = ThirdMax(windows, selector, first: true);
-        double last = ThirdMax(windows, selector, first: false);
+        double first = TimeSeriesSummaryBuilder.ThirdMedian(windows, selector, first: true);
+        double last = TimeSeriesSummaryBuilder.ThirdMedian(windows, selector, first: false);
         double limit = TimeSeriesSummaryBuilder.GrowthLimit(first);
         bool trendKnown = trend is not ("insufficient windows" or "growing") && !trend.Contains("absent", StringComparison.Ordinal);
         bool passed = trend == "flat" || trend == "shrinking" || (trendKnown && last <= limit);
         string note =
-            $"early third max **{first:0}**, late third max **{last:0}**, trend **{trend}**; " +
-            "scrape max is the lifetime histogram high-water, not a windowed gauge; " +
+            $"early third median **{first:0}**, late third median **{last:0}**, trend **{trend}**; " +
+            "thirds use the median so a single scrape spike is not a backlog; " +
+            "a lifetime histogram high-water may still move one CountBounds bucket; " +
             $"a move of at most {TimeSeriesSummaryBuilder.QueueTrendAbsoluteSlack:0} is treated as flat; " +
             "gate fails on 'growing' over a run of at least 5 minutes";
         if (!evidenceRun && (windows.Count < 2 || !trendKnown))
