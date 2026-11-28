@@ -398,10 +398,24 @@ Attacker × target cells (and the weapon used when the attacker is a player):
 | level-gap HF1→gremlin | `phys-auto-p2m-sword-lv1` | 44 | 48 | 53 | 88 | 88 | 782 | 1199 | accuracy uses level 1 |
 | same-level HF40→alligator | `phys-auto-p2m-sword-alligator` | 18 | 19 | 21 | 36 | 36 | 782 | 1199 | Alligator 20135 lv 40 |
 
-Out of this slice (still open for #979): six attributes, gear/enchant/passives as a full grid,
-buffs/debuffs, blow/lethal (some coverage already), cast-break, a full-server oracle
-(Java driver is not a GameServer; `dist/libs` absent), DualFist as a distinct type (Interlude
-catalog folds cestus into `Fist`), and servitor features beyond auto-attack (siege, pet inventory).
+### Attribute / derived-stat goldens (slice 1)
+
+Java-driver oracles for the nine Interlude base classes at level 40, Human Fighter / Human Mystic
+at level 1, Human Fighter +4 enchant, and Human Fighter Weapon Mastery 141 L1 + Heavy Armor
+Mastery 231 L1. Fighters wear Long Sword 2 + mithril 58/59/61/62; mystics wear Willow Staff 8 +
+Tunic 426 / Stockings 462. Metrics: STR/DEX/CON/INT/WIT/MEN and bonus-table multipliers; P.Atk,
+P.Def, P.Atk.Spd, M.Atk, M.Def, M.Atk.Spd; accuracy / evasion / crit ‰ / mCrit ‰; max HP/MP/CP.
+Scenarios: `stats-*-40`, `stats-human-*-1`, `stats-human-fighter-40-enchant4`,
+`stats-human-fighter-40-passives` (`AttrStatsMatrixTests`). M.Atk / M.Def / M.Atk.Spd stay as
+untruncated doubles in the formula layer (same class of fix as P.Atk in the auto-attack matrix).
+Do not mark a full matrix row in `docs/mobius-parity-matrix.md` from this slice; there is no
+dedicated six-attribute row.
+
+Out of this slice (still open for #979): magic crit/fail + calcMagicDam (spiritshot/BSS);
+blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
+shots consume/auto-charge/grade; cast-break from damage/stun/target death; a full-server oracle
+(Java driver is not a GameServer; `dist/libs` absent). DualFist as a distinct type (Interlude
+catalog folds cestus into `Fist`) and servitor features beyond auto-attack stay out of scope.
 Arrow consume/wrong-grade/last-arrow already has Mobius-traced world tests in
 `NetBowArrowTests.cs`.
 

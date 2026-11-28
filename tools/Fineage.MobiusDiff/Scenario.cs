@@ -31,6 +31,12 @@ public sealed class Scenario
     public bool Matrix { get; set; }
 
     /// <summary>
+    /// When true, both probes emit the six base attributes, their bonus-table multipliers,
+    /// and the derived combat/vital stats (P.Atk … M.Atk.Spd, accuracy, max HP/MP/CP).
+    /// </summary>
+    public bool StatsMatrix { get; set; }
+
+    /// <summary>
     /// Mobius <c>PlayerStatus.reduceHp</c> CP split cases. Each case emits <c>cpLoss_&lt;key&gt;</c> and
     /// <c>hpLoss_&lt;key&gt;</c> from the same source-verified barrier; empty for ordinary combat scenarios.
     /// </summary>
@@ -63,6 +69,9 @@ public sealed class AttackerSpec
 
     /// <summary>Active abnormals applied through <c>skill-stat-effects.json</c>.</summary>
     public List<BuffSpec> Buffs { get; set; } = new();
+
+    /// <summary>Learned operateType-P skills folded through <c>skill-passives.json</c>.</summary>
+    public List<BuffSpec> Passives { get; set; } = new();
 }
 
 public sealed class GearSpec
