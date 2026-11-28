@@ -24,19 +24,14 @@ public sealed class ZoneGameTime
     }
 
     /// <summary>
-    /// Mobius <c>GameTimeController.getGameTime()</c> — client clock minutes since the reference midnight
-    /// (one IG minute every 10 s real time; <c>ClientSetTime</c> field 1).
+    /// Mobius <c>ClientSetTime</c> field 1: IG minutes into the current IG day (0..1439), one IG minute every
+    /// 10 s real time. The client wraps nothing, so a counter that keeps growing since the reference midnight
+    /// (3073+ after a few real hours) is out of range for its clock.
     /// </summary>
-    public int ClientGameMinutes(long unixMsNow)
-    {
-        long elapsed = unixMsNow - _referenceMidnightUnixMs;
-        return (int)(elapsed / MillisPerRealMinute);
-    }
+    public int ClientGameMinutes(long unixMsNow) => GameMinutes(unixMsNow);
 
     /// <summary>Mobius <c>ClientSetTime</c> field 2 — IG days per real day.</summary>
     public const int ClientClockSpeed = IgDaysPerRealDay;
-
-    static long MillisPerRealMinute => MillisPerIgDay / (24L * 60L);
 
     /// <summary>IG minutes into the current IG day (0..1439), matching Mobius <c>_gameTime</c>.</summary>
     public int GameMinutes(long unixMsNow)
