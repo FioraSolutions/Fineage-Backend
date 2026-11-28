@@ -125,7 +125,8 @@ public sealed class ItemHandlerTailTests
         var kit = new NetTestKit();
         var rec = Recorder(kit);
         var (s, p) = await kit.EnterAsync(classId: 0);
-        int oid = Grant(kit, p, GuideBook);
+        var held = p.Inventory!.Items.FirstOrDefault(item => item.ItemId == GuideBook);
+        int oid = held?.ObjectId ?? Grant(kit, p, GuideBook);
 
         Assert.Null(await kit.World.TryUseItemAsync(s, oid, CancellationToken.None));
 

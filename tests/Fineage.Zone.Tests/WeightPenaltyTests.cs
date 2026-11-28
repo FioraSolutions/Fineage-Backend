@@ -294,11 +294,10 @@ public sealed class WeightPenaltyWorldTests
         var (session, player) = await kit.EnterAsync(classId: 18);
         var (bridge, rec) = NetBridgeRecorder.Create();
         kit.World.NetBridge = bridge;
-        // A fresh Mobius character is not at level 0: initialEquipment.xml:33-45 hands every fighter 5000 soulshots at
-        // weight 4 (item 1835) plus scrolls and potions, which is 46080 of the 88320 limit — 52%, i.e. already
-        // weight-penalty level 1. Strike the bag down to the paperdoll (14650) for a clean baseline.
+        // Official Interlude create gear is light (elven fighter: 7821 of an 88320 limit). Strike the bag
+        // down to the paperdoll so these cases start from a known equipped-only baseline.
         StripToPaperdoll(player);
-        Assert.True(kit.World.RefreshWeightPenalty(player));
+        kit.World.RefreshWeightPenalty(player);
         Assert.Equal(0, player.WeightPenaltyLevel);
         rec.Calls.Clear();
         return (kit, session, player, rec);
@@ -356,11 +355,10 @@ public sealed class WeightPenaltyWorldTests
             WeightPenalty.Level(player.Inventory!.TotalWeight, kit.World.MaxLoadOf(player), kit.World.BonusWeightPenaltyOf(player)),
             player.WeightPenaltyLevel);
 
-        // The shipped Mobius starter kit (initialEquipment.xml:33-45) is 5000 soulshots at weight 4 + scrolls + potions
-        // = 46080 of an 88320 limit, i.e. 52%: a brand-new elven fighter already sits at level 1 and regenerates at half
-        // rate. That is real Mobius behaviour, not a bug — checked here so nobody "fixes" it into level 0 later.
-        Assert.Equal(46_080L, player.Inventory.TotalWeight);
-        Assert.Equal(1, player.WeightPenaltyLevel);
+        // Official Interlude initialEquipment.xml for an elven fighter is Squire's Sword + Dagger + Squire's
+        // Shirt/Pants + Tutorial Guide: 7821 of an 88320 limit (~9%), so a brand-new character is at level 0.
+        Assert.Equal(7_821L, player.Inventory.TotalWeight);
+        Assert.Equal(0, player.WeightPenaltyLevel);
         Assert.NotNull(session);
     }
 
@@ -627,7 +625,7 @@ public sealed class WeightPenaltyWorldTests
 /// </summary>
 public sealed class WeightPenaltyRegenTests
 {
-    /// <summary>Clean baseline: the paperdoll only (14650 of 88320 = 16%), so the penalty level is 0.</summary>
+    /// <summary>Clean baseline: official Interlude paperdoll only (6651 of 88320 ≈ 8%), so the penalty level is 0.</summary>
     static async Task<(NetTestKit Kit, ZoneEntity Player)> SetupAsync()
     {
         var kit = new NetTestKit();
@@ -638,7 +636,7 @@ public sealed class WeightPenaltyRegenTests
         player.Y = 120_000;
         player.Z = -3000;
         WeightPenaltyWorldTests.StripToPaperdoll(player);
-        Assert.True(kit.World.RefreshWeightPenalty(player));
+        kit.World.RefreshWeightPenalty(player);
         Assert.Equal(0, player.WeightPenaltyLevel);
 
         player.CurHp = 1;

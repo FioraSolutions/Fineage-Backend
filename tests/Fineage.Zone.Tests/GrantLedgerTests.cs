@@ -1,4 +1,5 @@
 using Fineage.Accounts;
+using Fineage.Game;
 using Fineage.Game.Economy;
 using Fineage.Login;
 using Fineage.Protocol;
@@ -11,7 +12,7 @@ namespace Fineage.Zone.Tests;
 public sealed class GrantLedgerTests
 {
     const int Adena = 57;
-    const int StarterWeapon = 219;
+    const int StarterWeapon = 2369;
     static readonly LedgerAccount StarterKit = LedgerAccount.Of(SystemAccount.StarterKit);
     static readonly LedgerAccount GmGrants = LedgerAccount.Of(SystemAccount.GmGrants);
 
@@ -53,5 +54,57 @@ public sealed class GrantLedgerTests
         var bag = LedgerAccount.Inventory(player.ObjectId);
         Assert.Contains(tx.Postings, p => p.Account == GmGrants && p.ItemId == Adena && p.Amount == -25);
         Assert.Contains(tx.Postings, p => p.Account == bag && p.ItemId == Adena && p.Amount == 25);
+    }
+
+    [Fact]
+    public async Task Created_character_kit_is_granted_on_enter_and_item_move_does_not_adjust()
+    {
+        var bench = new WorldBench();
+        var login = new LoginService(bench.Store, new HandoffTokens(HandoffTokens.DefaultSecret), bench.Now);
+        Assert.True(login.Register("grant", "secret1").Ok);
+        var created = login.CreateHuman("grant", "Fresh", HumanClasses.Fighter);
+        Assert.True(created.Ok, created.Message);
+        Assert.Contains(created.Value!.Items!, item => item.ItemId == StarterWeapon);
+        Assert.DoesNotContain(bench.Ledger.Entries, e => e.Transaction.Kind == LedgerTxKind.StarterKit);
+
+        var notices = new List<LedgerAdjustmentNotice>();
+        int thread = Environment.CurrentManagedThreadId;
+        void Handler(LedgerAdjustmentNotice notice)
+        {
+            if (Environment.CurrentManagedThreadId != thread)
+                return;
+            notices.Add(notice);
+        }
+
+        LedgerAdjustments.Adjusted += Handler;
+        try
+        {
+            var play = login.Select("grant", created.Value.Id);
+            Assert.True(play.Ok && play.Value != null, play.Message);
+            var session = new ZoneSession();
+            session.Bind(play.Value!.CharacterId, play.Value.Account, play.Value.CharacterName, play.Value.ClassId,
+                play.Value.Race, play.Value.Sex);
+            Assert.True(await bench.World.TryEnterAsync(session, CancellationToken.None));
+            Assert.True(bench.World.TryGetLivePlayer(session, out var live));
+
+            var grant = Assert.Single(bench.Ledger.Entries, e => e.Transaction.Kind == LedgerTxKind.StarterKit).Transaction;
+            Assert.Equal(HumanClasses.Fighter, grant.Reference);
+            var bag = LedgerAccount.Inventory(live.ObjectId);
+            Assert.Contains(grant.Postings, p => p.Account == StarterKit && p.ItemId == StarterWeapon && p.Amount < 0);
+            Assert.Contains(grant.Postings, p => p.Account == bag && p.ItemId == StarterWeapon && p.Amount > 0);
+
+            var dagger = Assert.Single(live.Inventory!.Items, item => item.ItemId == 10);
+            int daggerId = dagger.ObjectId;
+            Assert.Null(await bench.World.TryDropItemAsync(
+                session, daggerId, 1, live.X, live.Y, live.Z, CancellationToken.None));
+            Assert.Null(await bench.World.TryPickupAsync(session, daggerId, CancellationToken.None));
+            Assert.Contains(live.Inventory.Items, item => item.ItemId == 10);
+        }
+        finally
+        {
+            LedgerAdjustments.Adjusted -= Handler;
+        }
+
+        Assert.Empty(notices);
     }
 }

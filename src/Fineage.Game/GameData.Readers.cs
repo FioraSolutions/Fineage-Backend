@@ -136,7 +136,7 @@ public sealed partial class GameData
 
         try
         {
-            return new StarterKits(kits, file.MobiusStartingAdena);
+            return new StarterKits(kits, file.MobiusStartingAdena, path);
         }
         catch (ArgumentException ex)
         {

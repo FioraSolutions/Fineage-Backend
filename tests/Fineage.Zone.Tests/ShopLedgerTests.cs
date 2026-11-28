@@ -14,6 +14,7 @@ public sealed class ShopLedgerTests
 {
     static readonly LedgerAccount Shop = LedgerAccount.Of(SystemAccount.NpcShop);
     static readonly LedgerAccount Untracked = LedgerAccount.Of(SystemAccount.Untracked);
+    static readonly LedgerAccount Starter = LedgerAccount.Of(SystemAccount.StarterKit);
     const ulong ShoppingSeed = 20_261_121;
 
     [Fact]
@@ -29,11 +30,11 @@ public sealed class ShopLedgerTests
         await buyer.BypassAsync(MerchantObjectId, "Buy 1");
         Assert.Null(await buyer.Buy(MerchantObjectId, 1, (Potion, 2)));
 
-        // The bag predates the ledger: the first move opens it from the untracked account, then records the buy.
+        // Enter posts the create grant for the seeded bag, then the buy is recorded against it.
         var opening = bench.Ledger.Entries[0].Transaction;
-        Assert.Equal((new LedgerTxId(tick, 0), LedgerTxKind.Adjustment), (opening.Id, opening.Kind));
+        Assert.Equal((new LedgerTxId(tick, 0), LedgerTxKind.StarterKit), (opening.Id, opening.Kind));
         Assert.Equal(
-            Plain((bag, Sword, 1, $"{sword}"), (bag, Adena, 1000, ""), (Untracked, Adena, -1000, ""), (Untracked, Sword, -1, "")),
+            Plain((bag, Sword, 1, $"{sword}"), (Starter, Sword, -1, ""), (bag, Adena, 1000, ""), (Starter, Adena, -1000, "")),
             opening.Postings.Select(Plain));
         var buy = bench.Ledger.Entries[1].Transaction;
         Assert.Equal((new LedgerTxId(tick, 1), LedgerTxKind.ShopBuy, buyer.ObjectId, MerchantNpcId),
@@ -80,7 +81,7 @@ public sealed class ShopLedgerTests
         Assert.Null(await buyer.Buy(MerchantObjectId, 1, (Potion, 2)));
 
         Assert.Equal(Fineage.Protocol.ShopProtocol.NotEnoughAdena, LastSystemMessage(bench.Rec).Id);
-        Assert.Equal([LedgerTxKind.Adjustment], bench.Ledger.Entries.Select(entry => entry.Transaction.Kind));
+        Assert.Equal([LedgerTxKind.StarterKit], bench.Ledger.Entries.Select(entry => entry.Transaction.Kind));
     }
 
     [Fact]
@@ -126,7 +127,7 @@ public sealed class ShopLedgerTests
     {
         var (recorded, log) = await RecordShoppingAsync();
         Assert.Equal(
-            [LedgerTxKind.Adjustment, LedgerTxKind.ShopBuy, LedgerTxKind.ShopBuy, LedgerTxKind.ShopSell, LedgerTxKind.ShopExchange],
+            [LedgerTxKind.StarterKit, LedgerTxKind.ShopBuy, LedgerTxKind.ShopBuy, LedgerTxKind.ShopSell, LedgerTxKind.ShopExchange],
             recorded.Ledger.Entries.Select(entry => entry.Transaction.Kind));
 
         var clock = new MutableClock();
