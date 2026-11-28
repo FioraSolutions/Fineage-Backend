@@ -75,6 +75,8 @@ Import with `--spawn-files` pointing at the relevant XML files.
 
 ## NPC templates (`data/npcs.json`) — pinned CT 0 pipeline
 
+CI (`.github/workflows/npc-data-check.yml`) fetches the pinned commit (CT 0 `stats/npcs` + `stats/skills` only), runs the importer `--check`, the raid-level guard `tools/check_npc_guards.py` (level == "Raid Boss - Level N" passive), and the full `regen_npcs.py` pipeline, which must leave `data/npcs.json` byte-identical. Per-id deviations are listed in `docs/npc-data-overrides.md`.
+
 `data/npcs.json` is regenerated only by `tools/regen_npcs.py`, which runs
 `tools/import_npc_templates.py` (templates only, `data/spawns` untouched) and then the
 `scripts/gen_npc_{races,weapons,shots,ai_skills,weapon_traits}.py` passes against **one**
