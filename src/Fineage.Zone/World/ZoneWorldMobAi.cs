@@ -244,7 +244,9 @@ public sealed partial class ZoneWorld
             !SameInstance(npc.ObjectId, player.ObjectId) ||
             !ZoneCombat.WithinAggroForgetRange(npc.X, npc.Y, player.X, player.Y))
         {
-            // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> returnHome.
+            // Mobius AggroList: drop the gone target, fall to the next most hated; none left -> disengage.
+            // AggroInfo.checkHate / thinkActive decide *what* disengaging means (walk home only past
+            // MaxDriftRange, otherwise plain ACTIVE), so that decision lives in GoActiveAfterFight.
             npc.HateList.Remove(npc.AggroTargetId);
             int next = MostHated(npc);
             if (next > 0)
@@ -253,7 +255,7 @@ public sealed partial class ZoneWorld
                 npc.NextMobAttackMs = now + ZoneCombat.HitTimeMs(NpcPAtkSpd(npc));
                 return;
             }
-            ReturnHome(npc, now);
+            GoActiveAfterFight(npc, now);
             return;
         }
         int topHate = MostHated(npc);

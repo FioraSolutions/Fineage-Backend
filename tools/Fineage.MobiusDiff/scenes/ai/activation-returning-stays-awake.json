@@ -1,6 +1,6 @@
 {
   "id": "activation-returning-stays-awake",
-  "description": "returnHome remains a think job after the player leaves the region.",
+  "description": "The lost target keeps the mob in the Mobius think set even after the player leaves the region.",
   "category": "activation",
   "seed": 9885,
   "player": {
@@ -62,7 +62,5 @@
     "reference": "ref/mobius-ct0-interlude"
   },
   "tolerances": {},
-  "knownDivergences": {
-    "npc.mob.returningHome": "Mobius returnHome starts a return-home walk and clears hate. The current Fineage trace drops the target but reports returningHome=false; keep this as a real AI divergence with separate ownership."
-  }
+  "knownDivergences": {}
 }

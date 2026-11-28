@@ -27,6 +27,8 @@ public static class MobiusAiReferenceModel
 {
     public const string Driver = "MobiusAiReferenceModel/v1";
     public const long MobiusDeactivationHysteresisMs = 90_000;
+    /// <summary>Mobius <c>NPC.ini MaxDriftRange = 300</c> (<c>Config.java:2200</c>).</summary>
+    public const double MaxDriftRange = 300;
     const int GuardHelpRange = 500;
     const long GuardHelpHate = 10;
 
@@ -44,7 +46,15 @@ public static class MobiusAiReferenceModel
         public string Target { get; set; } = "";
         public Dictionary<string, long> Hate { get; } = new(StringComparer.Ordinal);
         public bool Chasing { get; set; }
+        /// <summary>
+        /// Mobius has no such flag: the fact is <c>getAI().getIntention() == AI_INTENTION_MOVE_TO</c> while the walk
+        /// back is registered in <c>MovementTaskManager</c>. It becomes false on arrival
+        /// (<c>CreatureAI.onEvtArrived</c> → <c>setIntention(AI_INTENTION_ACTIVE)</c>).
+        /// </summary>
         public bool ReturningHome { get; set; }
+        /// <summary>Current pawn position, the Mobius <c>getX()/getY()</c> the AI reads each think.</summary>
+        public double X { get; set; }
+        public double Y { get; set; }
         public bool MinionsSpawned { get; set; }
         public int MinionCount { get; set; }
         public long LastNearTick { get; set; }
@@ -81,7 +91,9 @@ public static class MobiusAiReferenceModel
                 Template = template,
                 Leader = string.IsNullOrWhiteSpace(spec.Leader) ? null : spec.Leader,
                 MaxHp = Math.Max(1, template.Hp),
-                Hp = Math.Max(1, (int)((long)template.Hp * spec.HpPercent / 100))
+                Hp = Math.Max(1, (int)((long)template.Hp * spec.HpPercent / 100)),
+                X = spec.X,
+                Y = spec.Y
             };
         }
 
@@ -256,8 +268,11 @@ public static class MobiusAiReferenceModel
             {
                 npc.Target = "";
                 npc.Hate.Clear();
-                npc.ReturningHome = true;
                 npc.Chasing = false;
+                // Mobius AggroInfo.checkHate zeroes the entry, thinkActive then calls returnHome() only when the
+                // pawn is past MaxDriftRange of its spawn (AttackableAI.java:625-631); inside the drift box the
+                // intention simply falls back to AI_INTENTION_ACTIVE and the pawn stands where it is.
+                Disengage(npc);
                 targetPlayer = null;
             }
 
@@ -268,7 +283,7 @@ public static class MobiusAiReferenceModel
                 {
                     bool allowed = !npc.Guard || candidate.Karma > 0;
                     if (!allowed || !ZoneCombat.WithinProactiveAggroRange(
-                            npc.Spec.X, npc.Spec.Y, npc.Spec.Z,
+                            (int)npc.X, (int)npc.Y, npc.Spec.Z,
                             candidate.X, candidate.Y, candidate.Z, npc.Template.AggroRange))
                         continue;
                     npc.Target = candidate.Spec.Key;
@@ -296,6 +311,9 @@ public static class MobiusAiReferenceModel
                 npc.MinionsSpawned = true;
                 npc.MinionCount = rows.Sum(static r => r.Count);
             }
+
+            // Mobius MovementTaskManager: chase at run speed, returnHome at walk speed, arrival clears MOVE_TO.
+            MoveStep(npc, PlayerOf(players, npc.Target), stepMs);
         }
 
         // Mobius clan help: a fighting mob calls idle same-clan attackables inside its clanHelpRange.
@@ -402,22 +420,97 @@ public static class MobiusAiReferenceModel
     static RefPlayer? PlayerOf(IReadOnlyList<RefPlayer> players, string role) =>
         role.Length == 0 ? null : players.FirstOrDefault(p => p.Spec.Key == role);
 
+    /// <summary>
+    /// Mobius lost-target handling. <c>thinkAttack</c> with no most-hated goes to <c>AI_INTENTION_ACTIVE</c>
+    /// (<c>AttackableAI.java:797-802</c>); <c>thinkActive</c> then starts the walk back only when the pawn is past
+    /// <c>MaxDriftRange</c> of its spawn (<c>AttackableAI.java:625-631</c>, <c>NPC.ini MaxDriftRange = 300</c>).
+    /// </summary>
+    static void Disengage(RefNpc npc)
+    {
+        if (npc.ReturningHome || BeyondDrift(npc))
+            npc.ReturningHome = true;
+    }
+
+    /// <summary>
+    /// <c>MovementTaskManager</c> (100 ms task, <c>Creature.updatePosition</c>): walk along the straight line at
+    /// <c>getMoveSpeed()</c> — run while chasing (<c>setRunning</c> on the attack intention), walk while returning
+    /// (<c>setWalking</c> in <c>thinkActive</c>). Arrival clears the <c>MOVE_TO</c> intention
+    /// (<c>CreatureAI.onEvtArrived</c> → <c>AI_INTENTION_ACTIVE</c>).
+    /// </summary>
+    static void MoveStep(RefNpc npc, RefPlayer? target, long stepMs)
+    {
+        if (npc.Dead || !npc.Present)
+            return;
+        double destX, destY, speed;
+        bool returning = false;
+        if (npc.ReturningHome)
+        {
+            destX = npc.Spec.X;
+            destY = npc.Spec.Y;
+            speed = npc.Template.WalkSpeed;
+            returning = true;
+        }
+        else if (npc.Chasing && target != null)
+        {
+            destX = target.X;
+            destY = target.Y;
+            speed = npc.Template.RunSpeed;
+        }
+        else
+            return;
+
+        if (speed <= 0)
+        {
+            if (returning)
+                npc.ReturningHome = false;
+            npc.Chasing = false;
+            return;
+        }
+
+        double dx = destX - npc.X, dy = destY - npc.Y;
+        double dist = Math.Sqrt(dx * dx + dy * dy);
+        double step = speed * stepMs / 1000.0;
+        // Mobius stops at the requested offset, i.e. at attack reach for a chase and at the spawn for returnHome.
+        double stopAt = returning ? 0 : AttackReach(npc.Template);
+        if (dist <= step + stopAt)
+        {
+            if (returning)
+            {
+                npc.X = destX;
+                npc.Y = destY;
+                // Arrived: Mobius onEvtArrived turns MOVE_TO into AI_INTENTION_ACTIVE.
+                npc.ReturningHome = false;
+            }
+            else
+                npc.Chasing = false;
+            return;
+        }
+
+        double k = (dist - stopAt) > step ? step / dist : (dist - stopAt) / dist;
+        npc.X += dx * k;
+        npc.Y += dy * k;
+    }
+
+    /// <summary>Mobius <c>npc.isInsideRadius2D(spawn, 0, Config.MAX_DRIFT_RANGE)</c>, negated.</summary>
+    static bool BeyondDrift(RefNpc npc) =>
+        Math.Sqrt(Square(npc.X - npc.Spec.X) + Square(npc.Y - npc.Spec.Y)) > MaxDriftRange;
+
     static int NpcDistance(RefNpc npc, RefPlayer player) =>
-        (int)Math.Sqrt(Square(npc.Spec.X - player.X) + Square(npc.Spec.Y - player.Y));
+        (int)Math.Sqrt(Square(npc.X - player.X) + Square(npc.Y - player.Y));
 
     static int NpcDistance(RefNpc a, RefNpc b) =>
-        (int)Math.Sqrt(Square(a.Spec.X - b.Spec.X) + Square(a.Spec.Y - b.Spec.Y));
+        (int)Math.Sqrt(Square(a.X - b.X) + Square(a.Y - b.Y));
 
     static int PlayerDistance(RefNpc npc, RefPlayer player) =>
-        (int)Math.Round(Math.Sqrt(Square(npc.Spec.X - player.X) + Square(npc.Spec.Y - player.Y)));
+        (int)Math.Round(Math.Sqrt(Square(npc.X - player.X) + Square(npc.Y - player.Y)));
 
-    static double Square(int value) => (double)value * value;
+    static double Square(double value) => value * value;
 
     static bool Within(int distance, int range) => distance <= range;
 
     static bool WithinAggroForget(RefNpc npc, RefPlayer player) =>
-        Math.Abs(npc.Spec.X - player.X) <= ZoneCombat.AggroForgetRange &&
-        Math.Abs(npc.Spec.Y - player.Y) <= ZoneCombat.AggroForgetRange;
+        Math.Abs(npc.X - player.X) <= ZoneCombat.AggroForgetRange &&
+        Math.Abs(npc.Y - player.Y) <= ZoneCombat.AggroForgetRange;
 
     static int AttackReach(NpcTemplate template) =>
         Math.Max(ZoneCombat.DefaultWeaponRange, template.AttackRange) +
