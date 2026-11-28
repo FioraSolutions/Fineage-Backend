@@ -34,8 +34,8 @@ public sealed class ZoneNpcAiSkillTests
     public void Physical_npc_skill_damage_uses_power_formula()
     {
         Assert.True(SkillCombatCatalog.LoadDefault().TryGet(4032, out var combat));
-        // lv3 power 219: 70*(pAtk + power)/pDef with pAtk=100, pDef=50, no ss → 70*319/50 = 446
+        // lv3 power 219: 76*(pAtk + power)/pDef with pAtk=100, pDef=50, no ss → 76*319/50 = 484.88
         int dmg = ZoneCombat.PhysicalSkillDamage(100, 50, combat!.PowerAt(3), soulshot: false);
-        Assert.Equal(446, dmg);
+        Assert.Equal(484, dmg);
     }
 }
