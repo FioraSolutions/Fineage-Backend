@@ -151,6 +151,7 @@ public sealed class MetricsSnapshot
         new Dictionary<string, long>(StringComparer.Ordinal);
     public double TickMaxMs { get; init; }
     public double CommandQueueAgeMaxMs { get; init; }
+    public double AgentCommandQueueOldestAgeMs { get; init; }
     public double WatchdogStallMaxMs { get; init; }
     public long WatchdogStalls { get; init; }
 
@@ -499,6 +500,9 @@ public static class MetricsText
         AppendHelp(sb, "fineage_command_queue_age_max_ms", "Longest per-player ingress queue age observed");
         sb.Append("# TYPE fineage_command_queue_age_max_ms gauge\n");
         sb.Append("fineage_command_queue_age_max_ms ").Append(Num(snapshot.CommandQueueAgeMaxMs)).Append('\n');
+        AppendHelp(sb, "fineage_agent_command_queue_oldest_age_ms", "Age of the oldest queued AI command, or 0 when none are waiting");
+        sb.Append("# TYPE fineage_agent_command_queue_oldest_age_ms gauge\n");
+        sb.Append("fineage_agent_command_queue_oldest_age_ms ").Append(Num(snapshot.AgentCommandQueueOldestAgeMs)).Append('\n');
         AppendHelp(sb, "fineage_step_watchdog_stall_max_ms", "Longest watchdog-detected simulation stall");
         sb.Append("# TYPE fineage_step_watchdog_stall_max_ms gauge\n");
         sb.Append("fineage_step_watchdog_stall_max_ms ").Append(Num(snapshot.WatchdogStallMaxMs)).Append('\n');
@@ -535,6 +539,8 @@ public static class MetricsText
         ("fineage.economy.persist.failures", "fineage_economy_persist_failures_total", "Economy durable commits that threw and were put back for retry"),
         ("fineage.economy.reconcile.runs", "fineage_economy_reconcile_runs_total", "Ledger vs store vs live world reconciliations"),
         ("fineage.economy.reconcile.violations", "fineage_economy_reconcile_violations_total", "Findings of those reconciliations; target is zero"),
+        ("fineage.zone.command.rejections", "fineage_zone_command_rejections_total",
+            "Commands refused by ingress admission or apply (labels source, reason)"),
     ];
 
     static void AppendOperational(StringBuilder sb, MetricsSnapshot snapshot)

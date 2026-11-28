@@ -332,6 +332,10 @@ public static class FineageTelemetry
         Meter.CreateCounter<long>("fineage.command.rejected",
             description: "Commands refused by ingress admission (tag reason: queue_depth, queue_age, closed)");
 
+    public static readonly Counter<long> ZoneCommandRejections =
+        Meter.CreateCounter<long>("fineage.zone.command.rejections",
+            description: "Commands refused by ingress admission or apply (tags source, reason)");
+
     public static readonly Histogram<double> CommandQueueWaitMilliseconds =
         Meter.CreateHistogram<double>("fineage.command.queue.wait.ms", unit: "ms",
             description: "Time a command waited in ingress before apply (tag class)");
@@ -339,6 +343,7 @@ public static class FineageTelemetry
     static long _tickMaxBits;
     static long _tickRunningBits;
     static long _queueAgeMaxBits;
+    static long _agentQueueOldestAgeBits;
     static long _watchdogStallMaxBits;
     static long _watchdogStallCount;
 
@@ -370,6 +375,22 @@ public static class FineageTelemetry
         NoteMax(ref _queueAgeMaxBits, milliseconds);
     }
 
+    public static void NoteZoneCommandRejection(string source, string reason)
+    {
+        ZoneCommandRejections.Add(
+            1,
+            new KeyValuePair<string, object?>("source", source),
+            new KeyValuePair<string, object?>("reason", reason));
+    }
+
+    /// <summary>Current age of the oldest queued AI command, or 0 when none are waiting.</summary>
+    public static void NoteAgentCommandQueueOldestAge(double milliseconds)
+    {
+        if (double.IsNaN(milliseconds) || milliseconds < 0)
+            milliseconds = 0;
+        Interlocked.Exchange(ref _agentQueueOldestAgeBits, BitConverter.DoubleToInt64Bits(milliseconds));
+    }
+
     public static void NoteWatchdogStall(double elapsedMilliseconds)
     {
         if (double.IsNaN(elapsedMilliseconds) || elapsedMilliseconds < 0)
@@ -390,6 +411,12 @@ public static class FineageTelemetry
         () => ObserveBits(_queueAgeMaxBits),
         unit: "ms",
         description: "Longest per-player ingress queue age observed");
+
+    public static readonly ObservableGauge<double> AgentCommandQueueOldestAgeMilliseconds = Meter.CreateObservableGauge(
+        "fineage.agent.command.queue.oldest_age_ms",
+        () => ObserveBits(_agentQueueOldestAgeBits),
+        unit: "ms",
+        description: "Age of the oldest queued AI command, or 0 when none are waiting");
 
     public static readonly ObservableGauge<double> WatchdogStallMaxMilliseconds = Meter.CreateObservableGauge(
         "fineage.step.watchdog.stall_max_ms",

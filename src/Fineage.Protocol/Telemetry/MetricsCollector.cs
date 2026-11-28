@@ -110,6 +110,7 @@ public sealed class MetricsCollector : IDisposable
     readonly Dictionary<string, long> _commandRejected = new(StringComparer.Ordinal);
     double _tickMaxMs;
     double _commandQueueAgeMaxMs;
+    double _agentCommandQueueOldestAgeMs;
     double _watchdogStallMaxMs;
     long _watchdogStalls;
 
@@ -126,6 +127,7 @@ public sealed class MetricsCollector : IDisposable
         ["fineage.economy.persist.failures"] = ["reason"],
         ["fineage.economy.reconcile.runs"] = ["phase", "result"],
         ["fineage.economy.reconcile.violations"] = ["phase", "code"],
+        ["fineage.zone.command.rejections"] = ["source", "reason"],
     };
 
     readonly Dictionary<string, Dictionary<string, long>> _operationalCounters = new(StringComparer.Ordinal);
@@ -266,6 +268,7 @@ public sealed class MetricsCollector : IDisposable
                     .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
                 TickMaxMs = _tickMaxMs,
                 CommandQueueAgeMaxMs = _commandQueueAgeMaxMs,
+                AgentCommandQueueOldestAgeMs = _agentCommandQueueOldestAgeMs,
                 WatchdogStallMaxMs = _watchdogStallMaxMs,
                 WatchdogStalls = _watchdogStalls,
                 OperationalCounters = _operationalCounters.ToDictionary(
@@ -870,6 +873,9 @@ public sealed class MetricsCollector : IDisposable
                 break;
             case "fineage.command.queue.age_max_ms":
                 _commandQueueAgeMaxMs = value;
+                break;
+            case "fineage.agent.command.queue.oldest_age_ms":
+                _agentCommandQueueOldestAgeMs = value;
                 break;
             case "fineage.step.watchdog.stall_max_ms":
                 _watchdogStallMaxMs = value;

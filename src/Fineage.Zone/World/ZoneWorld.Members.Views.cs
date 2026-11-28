@@ -59,11 +59,13 @@ public sealed partial class ZoneWorld
             if (_inWorldPlayers[i].ObjectId == entity.ObjectId)
             {
                 _inWorldPlayers[i] = entity;
+                RegisterLiveSession(entity.Session);
                 return;
             }
         }
 
         _inWorldPlayers.Add(entity);
+        RegisterLiveSession(entity.Session);
     }
 
     void ForgetInWorldPlayer(int objectId)
@@ -75,6 +77,7 @@ public sealed partial class ZoneWorld
         }
 
         _observationPublisher.Remove(objectId);
+        UnregisterLiveSession(objectId);
     }
 
     List<ZoneEntity> Players() => new(_inWorldPlayers);

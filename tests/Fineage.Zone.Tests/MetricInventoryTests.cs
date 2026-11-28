@@ -36,6 +36,7 @@ public sealed partial class MetricInventoryTests
         new("container", "inventory-probe"),
         new("severity", "error"),
         new("command", "inventory-probe"),
+        new("source", "player"),
         new("opcode", "inventory-probe"),
         new("pending", 1),
     ];
@@ -252,6 +253,11 @@ public sealed partial class MetricInventoryTests
         {
             FineageTelemetry.NoteCommandQueueAge(Unique());
             return Nothing.Instance;
+        },
+        ["fineage.agent.command.queue.oldest_age_ms"] = () =>
+        {
+            FineageTelemetry.NoteAgentCommandQueueOldestAge(Unique());
+            return new Undo(() => FineageTelemetry.NoteAgentCommandQueueOldestAge(0));
         },
         ["fineage.step.watchdog.stall_max_ms"] = () =>
         {

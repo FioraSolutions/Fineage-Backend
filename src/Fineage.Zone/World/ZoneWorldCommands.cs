@@ -35,7 +35,15 @@ public sealed partial class ZoneWorld
     /// is still queued. The task completes with its rejection reason (or null) once that admission's fan-out was sent.
     /// </summary>
     public Task<string?> ExecuteAsync(ZoneSession session, ZoneCommand command, CancellationToken ct) =>
-        _ingress.Submit(session, command, ct);
+        ExecuteAsync(session, command, CommandSource.Player, ct);
+
+    /// <summary>
+    /// Same ingress as the three-argument overload. <paramref name="source"/> is audit and metric
+    /// metadata only: AI submissions get the same validation, queue, and apply path as players.
+    /// </summary>
+    public Task<string?> ExecuteAsync(
+        ZoneSession session, ZoneCommand command, CommandSource source, CancellationToken ct) =>
+        _ingress.Submit(session, command, source, ct);
 
     /// <summary>
     /// One admission slice while the loop is waiting for the next tick. Same ingress, same <c>commands</c> stage,
@@ -140,7 +148,13 @@ public sealed partial class ZoneWorld
 
                 if (submission.Command.Logged)
                     _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok",
+                        submission.Source);
+                if (error != null && failure is null)
+                {
+                    FineageTelemetry.NoteZoneCommandRejection(
+                        CommandSourceTags.Tag(submission.Source), ApplyReasonTag(error));
+                }
                 _ingress.Record(submission, error, failure);
                 submits.Add(new CommandSubmitMark(submission.CorrelationId, submission.SubmittedAtTicks));
                 applied = true;
@@ -294,4 +308,11 @@ public sealed partial class ZoneWorld
 
     static InvalidOperationException Diverged(SimulationLogEntry entry, string what) =>
         new($"replay diverged at entry {entry.Sequence} ({entry}): {what}");
+
+    static string ApplyReasonTag(string error)
+    {
+        int cut = error.IndexOfAny([' ', ':', '=', ',']);
+        string token = cut < 0 ? error : error[..cut];
+        return token.Length is > 0 and <= 32 ? token : "apply";
+    }
 }

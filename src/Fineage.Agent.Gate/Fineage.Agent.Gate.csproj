@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Agent.Gate</RootNamespace>
+    <Description>Zone-side Agent Gate: resolve the live ZoneSession by ObjectId and submit writes through ZoneCommandIngress with CommandSource=AI. Isolated from the game assemblies' dependency rules (Zone does not reference Contracts).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fineage.Agent.Contracts\Fineage.Agent.Contracts.csproj" />
+    <ProjectReference Include="..\Fineage.Agent.Identity\Fineage.Agent.Identity.csproj" />
+    <ProjectReference Include="..\Fineage.Zone\Fineage.Zone.csproj" />
+  </ItemGroup>
+</Project>
