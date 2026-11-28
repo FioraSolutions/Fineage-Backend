@@ -9,6 +9,12 @@ on:
     paths:
       - 'data/npcs.json'
       - 'data/skill-combat.json'
+      - 'data/npc-ai-support.json'
+      - 'tools/import_skill_combat.py'
+      - 'tools/mobius_pin.py'
+      - 'scripts/sync_skill_defs_from_mobius.py'
+      - 'scripts/gen_transfer_skill_trees.py'
+      - 'docs/data/skill-combat-ct0.md'
       - 'tools/import_npc_templates.py'
       - 'tools/regen_npcs.py'
       - 'tools/check_npc_guards.py'
@@ -43,6 +49,12 @@ jobs:
 
       - name: Importer --check vs pinned snapshot
         run: python3 tools/import_npc_templates.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude" --check
+
+      - name: skill-combat.json == pinned CT 0 (power, mp, hit/cool time, ranges, magicLevel, levels)
+        run: python3 tools/import_skill_combat.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude"
+
+      - name: npc-ai-support.json reproduces from pinned CT 0
+        run: python3 scripts/gen_npc_ai_support.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude" --check
 
       - name: Raid level == "Raid Boss - Level N" skill
         run: python3 tools/check_npc_guards.py "$RUNNER_TEMP/mobius/L2J_Mobius_CT_0_Interlude" --self-test

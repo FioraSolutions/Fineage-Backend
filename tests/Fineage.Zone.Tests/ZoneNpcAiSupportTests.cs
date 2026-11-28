@@ -128,10 +128,11 @@ public sealed class ZoneNpcAiSupportTests
     [Fact]
     public void Catalog_loads_flame_suicide()
     {
+        // CT 0 NPC Death Bomb: affectRange 300, mpConsume lv5 82 (HighFive had 150 / 74 with initial cost folded in).
         var row = NpcAiSupportCatalog.LoadDefault().Get(18301);
         Assert.NotNull(row);
         Assert.Contains(row!.Value.Suicide!, s =>
-            s.SkillId == 4614 && s.Level == 5 && s.Power == 203 && s.AffectRange == 150);
+            s.SkillId == 4614 && s.Level == 5 && s.Power == 203 && s.AffectRange == 300 && s.Mp == 82);
     }
 
     [Fact]
