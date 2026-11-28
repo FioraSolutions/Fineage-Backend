@@ -237,10 +237,24 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         if (comma <= 0)
             return null;
         string token = line[..comma].Trim().Trim('"');
-        return DateTimeOffset.TryParse(token, CultureInfo.InvariantCulture,
-            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var at)
-            ? at
+        // dotnet-counters writes a naive local timestamp (no offset). Treating that as UTC
+        // on a UTC+3 host pulled boot/ramp heap samples into the "steady-state" window.
+        DateTimeStyles style = HasExplicitOffset(token)
+            ? DateTimeStyles.RoundtripKind | DateTimeStyles.AdjustToUniversal
+            : DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal;
+        return DateTimeOffset.TryParse(token, CultureInfo.InvariantCulture, style, out var at)
+            ? at.ToUniversalTime()
             : null;
+    }
+
+    static bool HasExplicitOffset(string token)
+    {
+        if (token.EndsWith('Z') || token.EndsWith('z'))
+            return true;
+        // "...+03:00" / "...-05:00" — a date-only 'T' must not count as a sign.
+        int t = token.IndexOf('T');
+        int start = t >= 0 ? t + 1 : 0;
+        return token.IndexOf('+', start) >= 0 || token.LastIndexOf('-') > start;
     }
 
     static double? LastNumber(string line)

@@ -76,10 +76,10 @@ public static class TimeSeriesSummaryBuilder
     {
         if (windows.Count < 2)
             return "insufficient windows";
-        double first = windows.Take(windows.Count / 3).DefaultIfEmpty().Max(w => w == null ? 0 : selector(w));
-        double last = windows.TakeLast(windows.Count / 3).DefaultIfEmpty().Max(w => w == null ? 0 : selector(w));
+        double first = ThirdMedian(windows, selector, first: true);
+        double last = ThirdMedian(windows, selector, first: false);
         if (last <= 0 && first <= 0)
-            return absentText;
+            return windows.Any(w => selector(w) > 0) ? "flat" : absentText;
         if (last > GrowthLimit(first))
             return "growing";
         if (last < first * 0.75)
@@ -88,5 +88,37 @@ public static class TimeSeriesSummaryBuilder
     }
 
     public static double GrowthLimit(double earlyThirdMax) =>
-        earlyThirdMax * 1.25 + QueueTrendAbsoluteSlack;
+        Math.Max(earlyThirdMax * 1.25 + QueueTrendAbsoluteSlack, NextCountBoundsBucket(earlyThirdMax));
+
+    /// <summary>
+    /// Next <c>CountBounds</c> histogram ceiling strictly above <paramref name="early"/>.
+    /// A lifetime scrape max ratchets to this bucket on one new high-water and is not a backlog.
+    /// </summary>
+    public static double NextCountBoundsBucket(double early)
+    {
+        if (early <= 0)
+            return QueueTrendAbsoluteSlack;
+        double bucket = 1;
+        while (bucket <= early)
+            bucket *= 2;
+        return bucket;
+    }
+
+    public static double ThirdMedian(
+        IReadOnlyList<TimeSeriesWindow> windows,
+        Func<TimeSeriesWindow, double> selector,
+        bool first)
+    {
+        if (windows.Count == 0)
+            return 0;
+        int size = Math.Max(1, windows.Count / 3);
+        var values = (first ? windows.Take(size) : windows.TakeLast(size))
+            .Select(selector)
+            .OrderBy(v => v)
+            .ToList();
+        if (values.Count == 0)
+            return 0;
+        int mid = values.Count / 2;
+        return values.Count % 2 == 1 ? values[mid] : (values[mid - 1] + values[mid]) / 2.0;
+    }
 }

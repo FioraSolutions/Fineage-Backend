@@ -14,6 +14,19 @@ Every perf PR that touches simulation, pathfinding, fan-out, or persistence must
 | `bots-200-town` soak | ≥ 15–30 min green |
 | `perf-aoe-multiparty` soak | ≥ 15 min (report tick + fan-out) |
 
+### Fan-out plan (#867)
+
+The 2026-11-22 audit defects (serial dispatcher, sim-thread drain, locked presence
+lookups, per-frame mailbox, closure batches, unbounded audience intern, lying
+command-to-wire metrics, sync persist on the tick, LINQ `PlanDiff`) are fixed on
+current `dev`. Debug `bots-200-town` (300 s, `78aad0e6`, confirmation after the listen-wait
+fix): **200/200** in world, tick p99 **27.2 ms**, true max **51.6 ms**,
+command→mailboxes p99 **4.9 ms**, fan-out age p99 **4.1 ms**, drops **0**,
+steady heap **−202 MiB**, RSS flat. The original 142–197 ms fan-out-age
+regression is historical. Per-defect commits and tests are in
+[`fanout-867.md`](fanout-867.md).
+
+
 Include a before/after table in the PR description and link artifact paths (`load-test-report.md`, commit SHA, machine notes).
 
 Stage budgets, overflow policies and the metric that measures each stage of the sim → socket chain are in
@@ -97,9 +110,9 @@ After the ramp, the report evaluates steady-state trends:
 | RSS growth | growth > max(10 %, 64 MiB) between first and last steady-state sample | `fineage_zone` RSS via `/proc` or `ps` |
 | GC heap growth | growth > max(10 %, 32 MiB) | `dotnet-counters` `gc-heap-size` |
 | Allocation rate | last-third average > 1.5× first-third average | `dotnet-counters` `alloc-rate` |
-| Fan-out queue depth | late-third max > early-third × 1.25 + 8 | `fineage_fanout_queue_depth` (lifetime histogram high-water, not a windowed gauge) |
-| Command queue depth | late-third max > early-third × 1.25 + 8 | `fineage_command_queue_depth` (same high-water) |
-| Command ingress depth | late-third max > early-third × 1.25 + 8 | `fineage_command_ingress_queued` |
+| Fan-out queue depth | late-third **median** > max(early × 1.25 + 8, next CountBounds bucket) | `fineage_fanout_queue_depth` (lifetime histogram high-water; one bucket step is flat) |
+| Command queue depth | late-third **median** vs the same limit | `fineage_command_queue_depth` |
+| Command ingress depth | late-third **median** vs the same limit | `fineage_command_ingress_queued` (point-in-time gauge; a single scrape spike is not growth) |
 
 A run shorter than 5 minutes emits these as **informative**, including a *measured* RSS / GC / alloc
 growth that would fail a soak; from 5 minutes they are hard gates and missing evidence fails the run.
