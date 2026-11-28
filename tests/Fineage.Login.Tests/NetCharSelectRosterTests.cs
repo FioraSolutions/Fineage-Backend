@@ -21,9 +21,9 @@ public class NetCharSelectRosterTests
 
         var net = new NetLoginServer(service, clock: () => DateTimeOffset.Parse("2026-01-01T00:00:00Z"));
         var stats = CharSelectStats.For(ch);
-        Assert.Equal(219, stats.WeaponItemId);
+        Assert.Equal(2369, stats.WeaponItemId);
         Assert.True(stats.MaxCp > 0);
-        Assert.Equal(219, stats.Paperdoll[(int)PaperdollSlot.RHand]);
+        Assert.Equal(2369, stats.Paperdoll[(int)PaperdollSlot.RHand]);
         Assert.True(stats.Paperdoll[(int)PaperdollSlot.Chest] > 0);
         Assert.True(stats.Paperdoll[(int)PaperdollSlot.Legs] > 0);
 
@@ -65,8 +65,8 @@ public class NetCharSelectRosterTests
         var roster = new CharacterRosterMsg { Characters = [summary] };
         var decoded = NetCodec.DecodeCharacterRoster(NetCodec.EncodeCharacterRoster(roster));
         var row = Assert.Single(decoded.Characters);
-        Assert.Equal(219, row.WeaponItemId);
-        Assert.Equal(219, row.Paperdoll[(int)PaperdollSlot.RHand]);
+        Assert.Equal(2369, row.WeaponItemId);
+        Assert.Equal(2369, row.Paperdoll[(int)PaperdollSlot.RHand]);
         Assert.True(row.Paperdoll[(int)PaperdollSlot.Chest] > 0);
         Assert.True(row.Paperdoll[(int)PaperdollSlot.Legs] > 0);
         Assert.True(row.MaxCp > 0);

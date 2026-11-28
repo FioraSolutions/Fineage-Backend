@@ -77,8 +77,8 @@ public sealed partial class LoginService
                 throw new InvalidDataException($"Interlude starter class {classId} (race {race}) is missing from the datapack.");
             if (template.Spawns.Count == 0 || template.MaxHp <= 0 || template.MaxMp <= 0)
                 throw new InvalidDataException($"Interlude starter class {classId} has no level-1 stats or creation point.");
-            if (_game.StarterKits.ForClass(classId).IsEmpty)
-                throw new InvalidDataException($"Interlude starter class {classId} has no starter kit.");
+            // ForClass throws naming the class id and datapack path when the kit is missing.
+            _ = _game.StarterKits.ForClass(classId);
         }
     }
 

@@ -116,7 +116,7 @@ public class PostgresNormalizedStoreTests
         var created = service.CreateHuman(account, charName, HumanClasses.Fighter);
         Assert.True(created.Ok, created.Message);
         int characterId = created.Value!.Id;
-        int swordOid = created.Value.Items!.Single(item => item.ItemId == 219).ObjectId;
+        int swordOid = created.Value.Items!.Single(item => item.ItemId == 2369).ObjectId;
 
         Assert.True(store.TrySavePresence(account, characterId, 100, 200, 300, DateTimeOffset.UtcNow));
 
@@ -139,7 +139,7 @@ public class PostgresNormalizedStoreTests
             cmd.CommandText =
                 """
                 SELECT object_id, loc, loc_data FROM character_items
-                WHERE character_id = @id AND item_id = 219
+                WHERE character_id = @id AND item_id = 2369
                 """;
             cmd.Parameters.AddWithValue("id", characterId);
             using var reader = cmd.ExecuteReader();
@@ -155,7 +155,7 @@ public class PostgresNormalizedStoreTests
         {
             cmd.CommandText = "SELECT COUNT(*) FROM character_items WHERE character_id = @id";
             cmd.Parameters.AddWithValue("id", characterId);
-            Assert.True(Convert.ToInt64(cmd.ExecuteScalar()) >= 12);
+            Assert.True(Convert.ToInt64(cmd.ExecuteScalar()) >= 5);
         }
     }
 

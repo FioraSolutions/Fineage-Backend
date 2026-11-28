@@ -37,13 +37,17 @@ public sealed class ZoneConsistencyRegressionTests
     [Fact]
     public async Task Ledger_flush_failure_blocks_deferred_inventory_replace()
     {
-        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 1);
+        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 0);
         var bench = new WorldBench(ledgerJournal: journal);
         var player = await bench.EnterAsync(items: [new StoredItem(Adena, 5, -1)]);
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        journal.ArmFailures(1);
+
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var shop = LedgerAccount.Of(SystemAccount.NpcShop);
+        long tick = bench.Ledger.Entries[^1].Transaction.Id.Tick + 1;
         Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
-            new LedgerTxId(1, 0),
+            new LedgerTxId(tick, 0),
             LedgerTxKind.Adjustment,
             0,
             0,
@@ -125,6 +129,8 @@ public sealed class ZoneConsistencyRegressionTests
     sealed class FlakyLedgerJournal(int failuresBeforeSuccess) : MemoryLedgerJournal
     {
         int _failuresLeft = failuresBeforeSuccess;
+
+        internal void ArmFailures(int count) => _failuresLeft = count;
         int _unflushed;
 
         public override void Append(LedgerEntry entry)

@@ -42,7 +42,6 @@ public sealed partial class ZoneWorld
         public CharacterRecord? Stored { get; init; }
         public long CharacterEpoch { get; init; }
         public long PetEpoch { get; init; }
-        public bool ApplyStarterKit { get; init; }
         public string? Failure { get; init; }
     }
 
@@ -200,8 +199,7 @@ public sealed partial class ZoneWorld
             Entity = entity,
             Stored = stored,
             CharacterEpoch = characterEpoch,
-            PetEpoch = petEpoch,
-            ApplyStarterKit = NeedsStarterInventory(stored)
+            PetEpoch = petEpoch
         };
     }
 
@@ -402,8 +400,9 @@ public sealed partial class ZoneWorld
         // No-restart oust and rule-zone membership are world admission. Oust moves the body before AOI enter.
         ApplyNoRestartOnLogin(entity, loaded.Stored?.LastAccess);
         UpdateRuleZoneState(entity);
-        if (loaded.ApplyStarterKit)
-            ApplyStarterKitLedger(entity);
+        // Login-created characters already have the kit in the store; this still posts
+        // the create grant if the journal has never seen the account.
+        ApplyStarterKitLedger(entity);
         if (LoadTestCombatProfileNeeded(entity))
             TryApplyLoadTestCombatProfile(entity);
         // The enter ItemList is version 1. The client treats 0 as "no version" and would not track later updates.

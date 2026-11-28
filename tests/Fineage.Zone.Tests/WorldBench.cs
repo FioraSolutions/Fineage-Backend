@@ -172,7 +172,9 @@ internal sealed class WorldBench
             // An empty array means "start from the class kit"; a non-empty one is the whole bag.
             var kit = items is { Length: > 0 }
                 ? items
-                : CharacterInventory.Rows(Game.CreateStarterInventory(classId));
+                : Game.StarterKits.Contains(classId)
+                    ? CharacterInventory.Rows(Game.CreateStarterInventory(classId))
+                    : [];
             var status = Store.TryAddCharacter(
                 acct, who, classId, race, sex, out var created, kit,
                 hasPosition: true, x: x, y: y, z: z, level: level);

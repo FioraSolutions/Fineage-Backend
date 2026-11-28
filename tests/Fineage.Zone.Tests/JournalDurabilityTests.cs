@@ -23,14 +23,18 @@ public sealed class JournalDurabilityTests
     [Fact]
     public async Task Failed_flush_increments_metric_then_succeeds()
     {
-        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 1);
+        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 0);
         var bench = new WorldBench(ledgerJournal: journal);
         using var metrics = new MetricsCollector();
         var player = await bench.EnterAsync(items: [new StoredItem(57, 10, -1)]);
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        journal.ArmFailures(1);
+
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var shop = LedgerAccount.Of(SystemAccount.NpcShop);
+        long tick = bench.Ledger.Entries[^1].Transaction.Id.Tick + 1;
         Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
-            new LedgerTxId(1, 0),
+            new LedgerTxId(tick, 0),
             LedgerTxKind.Adjustment,
             0,
             0,
@@ -74,6 +78,8 @@ public sealed class JournalDurabilityTests
     sealed class FlakyLedgerJournal(int failuresBeforeSuccess) : MemoryLedgerJournal
     {
         int _failuresLeft = failuresBeforeSuccess;
+
+        internal void ArmFailures(int count) => _failuresLeft = count;
         int _unflushed;
 
         public override void Append(LedgerEntry entry)

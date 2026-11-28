@@ -305,9 +305,10 @@ weightproc   = (load - bonusPenalty) * 1000 / maxLoad                    -- Java
   composition with Wind Walk; NPCs never penalised; live `ZoneWorld` — enter, relog, level-1 vs level-2 fanout shapes,
   recovery, level 4 stops the pawn, give/drop/grant through the bag hooks, `MaxLoadOf` folding 150, `BonusWeightPenaltyOf`
   folding 3512, `EtcStatusUpdate` projection + codec roundtrip, and regen halving with carry.
-- **Observation worth knowing:** the shipped starter kit (`initialEquipment.xml:33-45`: 5000 soulshots at weight 4, 50
-  Blessed Scrolls of Escape at 120, potions) weighs 46080 against an 88320 elven-fighter limit — **52%**, so a brand-new
-  character is already at weight-penalty level 1 and regenerates at half rate. That is genuine Mobius behaviour.
+- **Observation worth knowing:** the official Interlude starter kit (`stats/players/initialEquipment.xml`: Squire's
+  Sword, Dagger, Squire's Shirt/Pants, Tutorial Guide) weighs 7821 against an 88320 elven-fighter limit — about **9%**,
+  so a brand-new character is at weight-penalty level 0. The previous custom pack (5000 soulshots, potions, Dice
+  (Clover)) is no longer granted on create.
 - Still open here: pets (Mobius `Pet.refreshOverloaded`, `Pet.java:1205`) — no summon/pet inventory yet; `_dietMode`;
   `EtcStatusUpdate` charges/danger-area/charm/death-penalty stay 0 until those systems exist.
 

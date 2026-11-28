@@ -17,13 +17,17 @@ public sealed class EconomyFaultInjectionTests
     [Fact]
     public async Task Commit_failure_restores_dirty_and_preserves_store()
     {
-        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 1);
+        var journal = new FlakyLedgerJournal(failuresBeforeSuccess: 0);
         var bench = new WorldBench(ledgerJournal: journal);
         var player = await bench.EnterAsync(items: [new StoredItem(Adena, 5, -1)]);
+        Assert.True(bench.World.DrainEconomyPersistForTests());
+        journal.ArmFailures(1);
+
         var bag = LedgerAccount.Inventory(player.ObjectId);
         var shop = LedgerAccount.Of(SystemAccount.NpcShop);
+        long tick = bench.Ledger.Entries[^1].Transaction.Id.Tick + 1;
         Assert.True(bench.World.LedgerForTests.Submit(new LedgerTransaction(
-            new LedgerTxId(1, 0),
+            new LedgerTxId(tick, 0),
             LedgerTxKind.Adjustment,
             0,
             0,
@@ -120,6 +124,8 @@ public sealed class EconomyFaultInjectionTests
     sealed class FlakyLedgerJournal(int failuresBeforeSuccess) : MemoryLedgerJournal
     {
         int _failuresLeft = failuresBeforeSuccess;
+
+        internal void ArmFailures(int count) => _failuresLeft = count;
         int _unflushed;
 
         public override void Append(LedgerEntry entry)

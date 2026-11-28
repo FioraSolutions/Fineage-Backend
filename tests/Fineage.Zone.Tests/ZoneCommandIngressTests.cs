@@ -183,12 +183,14 @@ public sealed class ZoneCommandIngressTests
     static async Task<List<int>> EnchantLevelsAsync(WorldBench bench)
     {
         const int attempts = 10;
-        var smith = await bench.EnterAsync(items: [new StoredItem(Saber, 1, -1, 4), new StoredItem(BlessedD, attempts, -1)]);
+        var scrolls = Enumerable.Repeat(0, attempts).Select(_ => new StoredItem(BlessedD, 1, -1)).ToArray();
+        var smith = await bench.EnterAsync(items: [new StoredItem(Saber, 1, -1, 4), ..scrolls]);
         int saber = smith.Slot(Saber);
         var levels = new List<int>();
         for (int i = 0; i < attempts; i++)
         {
-            Assert.Null(await bench.World.TryEnchantRequestAsync(smith.Session, smith.Slot(BlessedD), default));
+            int scroll = smith.Inventory.Items.First(item => item.ItemId == BlessedD).ObjectId;
+            Assert.Null(await bench.World.TryEnchantRequestAsync(smith.Session, scroll, default));
             Assert.Null(await bench.World.TryEnchantConfirmAsync(smith.Session, saber, default));
             levels.Add(smith.Inventory.Find(saber)!.EnchantLevel);
         }
