@@ -34,4 +34,7 @@ public enum OperationStatus
     Succeeded = 3,
     Refused = 4,
     Failed = 5,
+    Expired = 6,
+    Cancelled = 7,
+    Unknown = 8,
 }

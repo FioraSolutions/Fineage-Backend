@@ -53,7 +53,36 @@ public sealed class SerializationRoundTripTests
         Assert.Equal(5, quoted);
     }
 
+    [Fact]
+    public void Frozen_action_request_fixture_stays_valid_without_expected_snapshot()
+    {
+        AgentActionRequest request = AgentContractJson.Deserialize<AgentActionRequest>(ReadFixture("agent-action-request.v1.json"));
+        Assert.Null(request.ExpectedSnapshotVersion);
+        AgentActionRequest withExpected = AgentActionRequest.Create(
+            request.CommandId,
+            request.CorrelationId,
+            request.IdempotencyKey,
+            request.Principal,
+            request.ToolName,
+            request.Arguments,
+            request.Deadline,
+            new SnapshotVersion(7));
+        string json = AgentContractJson.Serialize(withExpected);
+        Assert.Contains("expectedSnapshotVersion", json, StringComparison.Ordinal);
+        Assert.Equal(7, AgentContractJson.Deserialize<AgentActionRequest>(json).ExpectedSnapshotVersion!.Value.Value);
+    }
+
+    [Theory]
+    [InlineData(OperationStatus.Expired)]
+    [InlineData(OperationStatus.Cancelled)]
+    [InlineData(OperationStatus.Unknown)]
+    public void Additive_operation_statuses_round_trip(OperationStatus status)
+    {
+        AssertRoundTrip(ContractFixtures.Operation(status));
+    }
+
     static void AssertRoundTrip<T>(T value)
+
     {
         string json = AgentContractJson.Serialize(value);
         T copy = AgentContractJson.Deserialize<T>(json);

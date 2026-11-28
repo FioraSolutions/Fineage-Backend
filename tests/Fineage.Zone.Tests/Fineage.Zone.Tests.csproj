@@ -21,6 +21,7 @@
     <ProjectReference Include="../../src/Fineage.Agent.Gate/Fineage.Agent.Gate.csproj" />
     <ProjectReference Include="../../src/Fineage.Agent.Identity/Fineage.Agent.Identity.csproj" />
     <ProjectReference Include="../../src/Fineage.Agent.Contracts/Fineage.Agent.Contracts.csproj" />
+    <ProjectReference Include="../../src/Fineage.Agent.Operations/Fineage.Agent.Operations.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Fineage.Game.Tests\Fixtures\skill-combat-snapshot.json" Link="Fixtures\skill-combat-snapshot.json" CopyToOutputDirectory="PreserveNewest" />

@@ -109,7 +109,7 @@ static class ContractValidation
 
     public static void RequireRefusalCode(OperationStatus status, string? refusalCode)
     {
-        bool needsCode = status is OperationStatus.Refused or OperationStatus.Failed;
+        bool needsCode = status is OperationStatus.Refused or OperationStatus.Failed or OperationStatus.Expired or OperationStatus.Cancelled;
         if (needsCode && string.IsNullOrWhiteSpace(refusalCode))
         {
             throw new AgentContractException(

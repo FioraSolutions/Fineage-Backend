@@ -75,9 +75,23 @@ public static class ContractFixtures
             "look",
             status,
             OccurredAt,
-            status is OperationStatus.Accepted or OperationStatus.Running ? null : OccurredAt.AddSeconds(1),
-            status is OperationStatus.Refused or OperationStatus.Failed ? AgentRefusalCodes.UnknownTool : null,
-            status is OperationStatus.Refused or OperationStatus.Failed ? "look is not published" : null);
+            status is OperationStatus.Accepted or OperationStatus.Running or OperationStatus.Unknown
+                ? null
+                : OccurredAt.AddSeconds(1),
+            RefusalCodeFor(status),
+            status is OperationStatus.Refused or OperationStatus.Failed or OperationStatus.Expired or OperationStatus.Cancelled
+                ? "look is not published"
+                : null);
+
+
+    static string? RefusalCodeFor(OperationStatus status) =>
+        status switch
+        {
+            OperationStatus.Refused or OperationStatus.Failed => AgentRefusalCodes.UnknownTool,
+            OperationStatus.Expired => AgentRefusalCodes.Expired,
+            OperationStatus.Cancelled => AgentRefusalCodes.Cancelled,
+            _ => null,
+        };
 
     public static AgentEvent Event() =>
         AgentEvent.Create("entity_entered", new CorrelationId("corr-1"), new SnapshotVersion(7), OccurredAt, Object());

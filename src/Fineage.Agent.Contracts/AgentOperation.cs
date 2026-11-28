@@ -21,7 +21,7 @@ public sealed record AgentOperation : IAgentContractDocument
     {
         ContractValidation.RequireSupportedSchema(schemaVersion);
         ContractValidation.RequireRefusalCode(status, refusalCode);
-        bool terminal = status is OperationStatus.Succeeded or OperationStatus.Refused or OperationStatus.Failed;
+        bool terminal = status is OperationStatus.Succeeded or OperationStatus.Refused or OperationStatus.Failed or OperationStatus.Expired or OperationStatus.Cancelled;
         if (terminal && completedAt is null)
         {
             throw new AgentContractException(

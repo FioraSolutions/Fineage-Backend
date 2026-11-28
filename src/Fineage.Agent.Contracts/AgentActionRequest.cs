@@ -16,7 +16,8 @@ public sealed record AgentActionRequest : IAgentContractDocument
         AgentPrincipal principal,
         string toolName,
         JsonElement arguments,
-        DateTimeOffset deadline)
+        DateTimeOffset deadline,
+        SnapshotVersion? expectedSnapshotVersion = null)
     {
         ContractValidation.RequireSupportedSchema(schemaVersion);
         if (principal is null)
@@ -29,6 +30,7 @@ public sealed record AgentActionRequest : IAgentContractDocument
         ToolName = ContractValidation.RequireToolName(toolName);
         Arguments = ContractValidation.RequireObject(arguments, nameof(Arguments));
         Deadline = ContractValidation.RequireUtcTimestamp(deadline, nameof(Deadline));
+        ExpectedSnapshotVersion = expectedSnapshotVersion;
     }
 
     public int SchemaVersion { get; }
@@ -40,6 +42,12 @@ public sealed record AgentActionRequest : IAgentContractDocument
     public JsonElement Arguments { get; }
     public DateTimeOffset Deadline { get; }
 
+    /// <summary>
+    /// Optional observation version the caller acted on. When set, a later world snapshot
+    /// is refused with <see cref="AgentRefusalCodes.StaleSnapshot"/>.
+    /// </summary>
+    public SnapshotVersion? ExpectedSnapshotVersion { get; }
+
     public static AgentActionRequest Create(
         CommandId commandId,
         CorrelationId correlationId,
@@ -47,7 +55,8 @@ public sealed record AgentActionRequest : IAgentContractDocument
         AgentPrincipal principal,
         string toolName,
         JsonElement arguments,
-        DateTimeOffset deadline) =>
+        DateTimeOffset deadline,
+        SnapshotVersion? expectedSnapshotVersion = null) =>
         new(
             AgentContractSchema.Current,
             commandId,
@@ -56,5 +65,6 @@ public sealed record AgentActionRequest : IAgentContractDocument
             principal,
             toolName,
             arguments,
-            deadline);
+            deadline,
+            expectedSnapshotVersion);
 }

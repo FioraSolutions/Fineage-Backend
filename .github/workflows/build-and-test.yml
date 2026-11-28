@@ -36,6 +36,8 @@ jobs:
             project: tests/Fineage.Agent.Observation.Tests/Fineage.Agent.Observation.Tests.csproj
           - id: agent-gate
             project: tests/Fineage.Agent.Gate.Tests/Fineage.Agent.Gate.Tests.csproj
+          - id: agent-operations
+            project: tests/Fineage.Agent.Operations.Tests/Fineage.Agent.Operations.Tests.csproj
           - id: game
             project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
           - id: net

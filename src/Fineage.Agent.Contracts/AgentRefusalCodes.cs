@@ -16,4 +16,7 @@ public static class AgentRefusalCodes
     public const string CharacterNotBound = "character_not_bound";
     public const string ScopeDenied = "scope_denied";
     public const string AgentMismatch = "agent_mismatch";
+    public const string StaleSnapshot = "stale_snapshot";
+    public const string CancelNotAllowed = "cancel_not_allowed";
+    public const string Cancelled = "cancelled";
 }
