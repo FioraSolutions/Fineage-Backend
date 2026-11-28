@@ -152,6 +152,7 @@ public static class Program
         Add(psi, "--ref", refRoot);
         Add(psi, "--reference-label", scenario.Oracle.Reference);
         Add(psi, "--scenario", scenario.Id);
+        Add(psi, "--data", Path.Combine(root, "data"));
         Add(psi, "--class-id", scenario.Attacker.ClassId.ToString());
         Add(psi, "--level", scenario.Attacker.Level.ToString());
         Add(psi, "--npc", scenario.Target.NpcId.ToString());
@@ -159,6 +160,16 @@ public static class Program
         Add(psi, "--buffs", string.Join(",", scenario.Attacker.Buffs.Select(static b => $"{b.SkillId}:{b.Level}")));
         Add(psi, "--side", scenario.Contact.Side);
         Add(psi, "--soulshot", scenario.Contact.Soulshot.ToString().ToLowerInvariant());
+        Add(psi, "--matrix", scenario.Matrix.ToString().ToLowerInvariant());
+        Add(psi, "--attacker-kind", scenario.Attacker.Kind);
+        Add(psi, "--target-kind", scenario.Target.Kind);
+        Add(psi, "--attacker-npc", scenario.Attacker.NpcId.ToString());
+        Add(psi, "--target-class-id", scenario.Target.ClassId.ToString());
+        Add(psi, "--target-level", scenario.Target.Level.ToString());
+        Add(psi, "--target-gear", string.Join(",", scenario.Target.Gear.Select(static g => $"{g.Slot}:{g.ItemId}:{g.Enchant}")));
+        Add(psi, "--target-buffs", string.Join(",", scenario.Target.Buffs.Select(static b => $"{b.SkillId}:{b.Level}")));
+        Add(psi, "--target-hp", scenario.Target.Hp.ToString());
+        Add(psi, "--target-cp", scenario.Target.Cp.ToString());
         if (scenario.CpSplits.Count > 0)
             Add(psi, "--cp-splits", string.Join(";", scenario.CpSplits.Select(static c =>
                 $"{c.Key}:{c.TargetHp}:{c.TargetCp}:{c.Damage}:{c.AttackerPlayable.ToString().ToLowerInvariant()}:{c.IgnoreCp.ToString().ToLowerInvariant()}")));

@@ -11,12 +11,17 @@ public sealed partial class ZoneWorld
     // NPCs: template fields folded through StatMods.
     int PlayerPAtkSpd(ZoneEntity player) => PlayerStats(player).PAtkSpd;
 
-    long PlayerAttackTimeMs(int objectId) =>
-        _byId.TryGetValue(objectId, out var p) ? ZoneCombat.AttackTimeMs(PlayerPAtkSpd(p)) : ZoneCombat.AutoAttackIntervalMs;
+    long PlayerAttackTimeMs(int objectId)
+    {
+        if (!_byId.TryGetValue(objectId, out var p))
+            return ZoneCombat.AutoAttackIntervalMs;
+        var ps = PlayerStats(p);
+        return ZoneCombat.AttackIntervalMs(ps.PAtkSpdPrecise, ps.Weapon);
+    }
 
     double PlayerPAtk(ZoneEntity player) => PlayerStats(player).PAtkPrecise;
 
-    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDef;
+    double PlayerPDef(ZoneEntity player) => PlayerStats(player).PDefPrecise;
 
     int PlayerReach(ZoneEntity player) => ZoneCombat.PlayerAttackReach(PlayerStats(player).AttackRange);
 
@@ -77,7 +82,7 @@ public sealed partial class ZoneWorld
         else
         {
             var ts = PlayerStats(target);
-            pDef = Math.Max(1d, ts.PDef);
+            pDef = Math.Max(1d, ts.PDefPrecise);
             evasion = ts.Evasion;
             shieldRate = ShieldRateInArc(target, player, ts.ShieldRate, ts.ShieldDefAngle);
             shieldDef = ts.ShieldDef;

@@ -116,12 +116,11 @@ public sealed class ZoneStatPipelineTests
 
         p.KnownSkills.Remove(293);
         bag.Equip(bag.Add(70)); // Claymore, lrhand
-        int twoHand = world.PlayerStats(p).PAtk;
-        int twoHandAcc = world.PlayerStats(p).Accuracy;
+        var twoHand = world.PlayerStats(p);
         p.KnownSkills[293] = 1;
-        // pAtk add 4.5 truncates in Apply(int)
-        Assert.Equal(twoHand + 4, world.PlayerStats(p).PAtk);
-        Assert.Equal(twoHandAcc + 3, world.PlayerStats(p).Accuracy);
+        // Skill 293 adds 4.5 P.Atk. Combat keeps the double through Apply, then UserInfo truncates.
+        Assert.Equal((int)(twoHand.PAtkPrecise + 4.5), world.PlayerStats(p).PAtk);
+        Assert.Equal(twoHand.Accuracy + 3, world.PlayerStats(p).Accuracy);
     }
 
     [Fact]

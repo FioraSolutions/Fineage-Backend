@@ -350,3 +350,57 @@ Source: `ref/mobius-ct0-interlude/java/org/l2jmobius/gameserver/model/actor/stat
   remaining golden categories still listed below. DOT still stores the effector object id
   and routes the CT0 five-argument `reduceCurrentHpByDOT` path with that attacker (playable → CP first, NPC/missing →
   HP); a persisted abnormal with no effector keeps the no-attacker bypass.
+
+## Physical auto-attack differential matrix (#979)
+
+Java-generated goldens under `tools/Fineage.MobiusDiff/scenarios/phys-auto-*.json`, asserted by
+`tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs`. The oracle evaluates Mobius CT0
+`Formulas.calcPhysDam` / `calcHitMiss` / `calcCrit` / `calcShldUse`,
+`Creature.calculateTimeBetweenAttacks` (`(int)(500000 / getPAtkSpd())`) and
+`calculateReuseTime` (bow default reuse 1500 → `(reuse * 333) / pAtkSpd`).
+ClassBalanceConfig PvP/PvE multipliers are treated as 1.0 (Mobius-custom; Fineage has no
+matching Interlude catalog). Distance-scaled bow damage is off in Mobius
+(`DistanceBowDamage` default `false`) and is not applied. This checkout has no
+`ref/.../dist/game/data/stats` XML, so the Java driver falls back to Fineage's
+Mobius-transcribed JSON catalogs for inputs; the formulas themselves stay in the
+independent Java evaluator.
+
+Two production divergences found by the matrix were fixed in the same slice:
+
+- Intermediate `(int)` truncation in `PlayerCombatFormulas.PhysicalAttack` /
+  `PhysicalDefence` (Human Fighter 40 P.Atk 42 vs Mobius 42.7248, damage 71 vs 73).
+  Combat now keeps the double through `calcPhysDam` (`PAtkPrecise` / `PDefPrecise`);
+  UserInfo still sends the truncated int.
+- Auto-attack interval used `500000 / (int)pAtkSpd` (Long Sword 1201 ms) instead of
+  Mobius `(int)(500000 / getPAtkSpd())` with the double (1199 ms). `AttackTimeMs`
+  and bow reuse now take the precise speed (`PAtkSpdPrecise`). Bows add
+  `calculateReuseTime` on top of `timeAtk` (`PlayerAttackTimeMs`).
+
+Attacker × target cells (and the weapon used when the attacker is a player):
+
+| Cell | Scenario | Front dmg | Side | Back | SS | Crit | Hit ‰ (front) | Interval ms | Notes |
+|------|---------------------|------|------|----|------|----------------|-------------|-------|
+| player→mob sword | `phys-auto-p2m-sword` | 63 | 69 | 76 | 127 | 127 | 980 | 1199 | HF40 Long Sword vs Gremlin (lv 1) |
+| player→mob blunt | `phys-auto-p2m-blunt` | 63 | 69 | 76 | 127 | 127 | 980 | 1199 | Bone Club (same pAtk/pAtkSpd as Long Sword) |
+| player→mob dagger | `phys-auto-p2m-dagger` | 58 | 64 | 69 | 116 | 116 | 980 | 1049 | Crafted Dagger, pAtkSpd 433 |
+| player→mob pole | `phys-auto-p2m-pole` | 63 | 69 | 76 | 127 | 127 | 980 | 1398 | Short Spear, range 80 |
+| player→mob bow | `phys-auto-p2m-bow` | 60 | 66 | 73 | 121 | 121 | 980 | 3100 | range 500, reuse 1549, timeAtk 1551 |
+| player→mob fist | `phys-auto-p2m-fist` | 76 | 84 | 92 | 153 | 153 | 980 | 1398 | Cestus (Interlude `WeaponType.Fist`) |
+| player→mob dual | `phys-auto-p2m-dual` | 193 | 212 | 231 | 386 | 386 | 980 | 1398 | Saber*Saber (no no-grade dual) |
+| player→mob 2h sword | `phys-auto-p2m-bigsword` | 55 | 61 | 66 | 111 | 111 | 980 | 1398 | Brandish; Interlude has no BigSword type |
+| player→mob 2h blunt | `phys-auto-p2m-bigblunt` | 238 | 262 | 285 | 476 | 476 | 980 | 1398 | Atuba Hammer; Interlude has no BigBlunt type |
+| player→player | `phys-auto-p2p-sword-shield` | 9 | 10 | 11 | 18 | 18 | 960 | 1199 | PvP=1, shield sDef 47 rate 22, CP 9 / HP 0 |
+| mob→player | `phys-auto-m2p-gremlin` | 2 | 2 | 2 | 4 | 4 | 292 | 1976 | NPC not playable: CP bypass (HP 2) |
+| summon→mob | `phys-auto-s2m-kat` | 88 | 97 | 106 | 176 | 176 | 980 | 1976 | Kat the Cat 14111 (catalog type Pet) |
+| mob→summon | `phys-auto-m2s-gremlin-kat` | 6 | 7 | 8 | 13 | 13 | 475 | 1976 | no CP on the summon |
+| player→summon | `phys-auto-p2s-sword-kat` | 30 | 33 | 36 | 60 | 60 | 980 | 1199 | Mobius `isPvP` (both playable), multipliers 1.0 |
+| level-gap HF1→gremlin | `phys-auto-p2m-sword-lv1` | 44 | 48 | 53 | 88 | 88 | 782 | 1199 | accuracy uses level 1 |
+| same-level HF40→alligator | `phys-auto-p2m-sword-alligator` | 18 | 19 | 21 | 36 | 36 | 782 | 1199 | Alligator 20135 lv 40 |
+
+Out of this slice (still open for #979): six attributes, gear/enchant/passives as a full grid,
+buffs/debuffs, blow/lethal (some coverage already), cast-break, a full-server oracle
+(Java driver is not a GameServer; `dist/libs` absent), DualFist as a distinct type (Interlude
+catalog folds cestus into `Fist`), and servitor features beyond auto-attack (siege, pet inventory).
+Arrow consume/wrong-grade/last-arrow already has Mobius-traced world tests in
+`NetBowArrowTests.cs`.
+

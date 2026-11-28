@@ -9,20 +9,23 @@ public static class PlayerCombatFormulas
     /// <summary>Mobius levelMod = (level + 89) / 100.</summary>
     public static double LevelMod(int level) => PlayerGearBases.LevelMod(level);
 
-    public static int PhysicalAttack(double gearPAtk, double strBonus, double levelMod) =>
-        (int)(gearPAtk * strBonus * levelMod);
+    /// <summary>Mobius <c>FuncPAtkMod</c> / <c>CreatureStat.getPAtk</c>: stays a double through <c>calcPhysDam</c>.</summary>
+    public static double PhysicalAttack(double gearPAtk, double strBonus, double levelMod) =>
+        gearPAtk * strBonus * levelMod;
 
     public static int MagicalAttack(double gearMAtk, double intBonus, double levelMod) =>
         (int)(gearMAtk * intBonus * intBonus * levelMod * levelMod);
 
-    public static int PhysicalDefence(double gearPDef, double levelMod) =>
-        Math.Max(1, (int)(gearPDef * levelMod));
+    /// <summary>Mobius <c>FuncPDefMod</c> / <c>CreatureStat.getPDef</c>: stays a double through <c>calcPhysDam</c>.</summary>
+    public static double PhysicalDefence(double gearPDef, double levelMod) =>
+        Math.Max(1d, gearPDef * levelMod);
 
     public static int MagicalDefence(double gearMDef, double menBonus, double levelMod) =>
         Math.Max(1, (int)(gearMDef * menBonus * levelMod));
 
-    public static int PhysicalAttackSpeed(double gearPAtkSpd, double dexBonus) =>
-        Math.Max(1, (int)(gearPAtkSpd * dexBonus));
+    /// <summary>Mobius <c>FuncPAtkSpeed</c> / <c>CreatureStat.getPAtkSpd</c>: stays a double through <c>calculateTimeBetweenAttacks</c>.</summary>
+    public static double PhysicalAttackSpeed(double gearPAtkSpd, double dexBonus) =>
+        Math.Max(1d, gearPAtkSpd * dexBonus);
 
     public static int MagicalAttackSpeed(double templateMAtkSpd, double witBonus) =>
         Math.Max(1, (int)(templateMAtkSpd * witBonus));
@@ -54,11 +57,11 @@ public static class PlayerCombatFormulas
 /// Pre-mod player combat numbers: formula layer output that Zone folds with <c>CombatStatMods</c>.
 /// </summary>
 public readonly record struct PlayerFormulaBases(
-    int PAtk,
+    double PAtk,
     int MAtk,
-    int PDef,
+    double PDef,
     int MDef,
-    int PAtkSpd,
+    double PAtkSpd,
     int MAtkSpd,
     int Accuracy,
     int CritRate,

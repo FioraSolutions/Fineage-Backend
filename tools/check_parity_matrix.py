@@ -145,8 +145,8 @@ def main() -> int:
     production = Counter(str(r["statuses"][2]) for r in rows)
     expected = {
         "Implemented": [impl["verified"], impl["partial"], impl["missing"], impl["n/a"], len(rows)],
-        "Parity verified": [parity["verified"], 0, parity["unverified"], parity["n/a"], len(rows)],
-        "Production verified": [production["verified"], 0, production["unverified"], production["n/a"], len(rows)],
+        "Parity verified": [parity["verified"], parity["partial"], parity["unverified"], parity["n/a"], len(rows)],
+        "Production verified": [production["verified"], production["partial"], production["unverified"], production["n/a"], len(rows)],
     }
 
     counts_bounds = section(lines, "## Counts")

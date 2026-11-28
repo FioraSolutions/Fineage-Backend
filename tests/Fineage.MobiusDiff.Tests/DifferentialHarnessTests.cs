@@ -44,24 +44,14 @@ public sealed class DifferentialHarnessTests
     }
 
     [Fact]
-    public void Pilot_physical_attack_uses_the_ct0_76_proximity_core()
+    public void Pilot_physical_attack_matches_the_ct0_76_proximity_golden()
     {
         var (scenario, oracle) = Load("physical-attack-human-fighter-40");
         var report = ScenarioRunner.Run(scenario, oracle, Data, Npcs);
-        var patk = Assert.Single(report.Rows, row => row.Parameter == "pAtk");
+        Assert.True(report.Pass, string.Join("; ", report.Rows.Where(r => !r.Pass).Select(r => $"{r.Parameter} {r.Actual} != {r.Expected}")));
         var damage = Assert.Single(report.Rows, row => row.Parameter == "damageNoCrit");
-
-        Assert.True(patk.Pass, $"pAtk {patk.Actual} != {patk.Expected}");
-        Assert.True(Assert.Single(report.Rows, row => row.Parameter == "critPermille").Pass);
-        Assert.True(Assert.Single(report.Rows, row => row.Parameter == "hitChancePermille").Pass);
-        Assert.Contains("76", damage.Note);
-
-        // The coefficient now matches CT0. Remaining delta is the P.Atk pipeline
-        // (Fineage ~42 vs Mobius 42.7248, inside the pAtk tolerance of 1, outside damage's 0.5).
-        var npc = Npcs.Get(scenario.Target.NpcId);
-        Assert.Equal(Fineage.Zone.Combat.ZoneCombat.PhysicalDamage(patk.Actual, npc.PDef), (int)damage.Actual);
         Assert.Equal(73, (int)damage.Expected);
-        Assert.Equal(73, Fineage.Zone.Combat.ZoneCombat.PhysicalDamage(patk.Expected, npc.PDef));
+        Assert.Equal(73, (int)damage.Actual);
     }
 
     [Fact]

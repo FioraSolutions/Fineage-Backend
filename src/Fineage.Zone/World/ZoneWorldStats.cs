@@ -18,7 +18,7 @@ public readonly record struct PlayerCombatStats(
     double WindRes = 0d, double EarthRes = 0d, double TransDam = 0d, double ManaShield = 0d,
     double TransDamToPlayer = 0d, double DamageZoneVuln = 0d,
     double HolyPower = 0d, double FirePower = 0d,
-    double PAtkPrecise = 0d);
+    double PAtkPrecise = 0d, double PDefPrecise = 0d, double PAtkSpdPrecise = 0d);
 
 public sealed partial class ZoneWorld
 {
@@ -43,14 +43,18 @@ public sealed partial class ZoneWorld
         var formula = PlayerFormulaBases.From(attrs, gear, t.MAtkSpd, level);
         var mods = PlayerStatMods(player);
         double pAtkPrecise = mods.Apply(CombatStat.PAtk, formula.PAtk);
+        double pDefPrecise = Math.Max(1d, mods.Apply(CombatStat.PDef, formula.PDef));
+        double pAtkSpdPrecise = Math.Max(1d, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd));
 
         return new PlayerCombatStats(
             PAtk: (int)pAtkPrecise,
             PAtkPrecise: pAtkPrecise,
             MAtk: mods.Apply(CombatStat.MAtk, formula.MAtk),
-            PDef: Math.Max(1, mods.Apply(CombatStat.PDef, formula.PDef)),
+            PDef: (int)pDefPrecise,
+            PDefPrecise: pDefPrecise,
             MDef: Math.Max(1, mods.Apply(CombatStat.MDef, formula.MDef)),
-            PAtkSpd: Math.Max(1, mods.Apply(CombatStat.PAtkSpd, formula.PAtkSpd)),
+            PAtkSpd: (int)pAtkSpdPrecise,
+            PAtkSpdPrecise: pAtkSpdPrecise,
             MAtkSpd: Math.Max(1, mods.Apply(CombatStat.MAtkSpd, formula.MAtkSpd)),
             Accuracy: mods.Apply(CombatStat.Accuracy, formula.Accuracy),
             CritRate: mods.Apply(CombatStat.CritRate, formula.CritRate),

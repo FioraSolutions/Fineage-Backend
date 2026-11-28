@@ -154,10 +154,44 @@ public static partial class ZoneCombat
     public static readonly int SampleMeleeDamage = PhysicalDamage(DefaultPlayerPAtk, GremlinPDef);
 
     /// <summary>Mobius <c>Formulas.calculateTimeBetweenAttacks</c>: 500000 / Pspd (ms), floor 100.</summary>
-    public static int AttackTimeMs(int pAtkSpd) => Math.Max(100, 500000 / Math.Max(1, pAtkSpd));
+    public static int AttackTimeMs(int pAtkSpd) => AttackTimeMs((double)pAtkSpd);
+
+    /// <summary>
+    /// Mobius <c>Creature.calculateTimeBetweenAttacks</c>: <c>(int)(500000 / getPAtkSpd())</c>.
+    /// The divisor stays a double; truncating P.Atk.Spd first was a 2 ms miss (416.9 → 416 → 1201 vs 1199).
+    /// </summary>
+    public static int AttackTimeMs(double pAtkSpd) => Math.Max(100, (int)(500000d / Math.Max(1d, pAtkSpd)));
 
     /// <summary>Mobius <c>Creature.doAttack</c>: damage lands at timeAtk / 2.</summary>
     public static int HitTimeMs(int pAtkSpd) => AttackTimeMs(pAtkSpd) / 2;
+
+    /// <summary>
+    /// Mobius <c>Weapon</c> constructor: a ranged weapon with <c>reuse_delay</c> 0 defaults to 1500 ms.
+    /// Interlude items.json does not store the field, so bows use this default.
+    /// </summary>
+    public const int DefaultBowReuseDelayMs = 1500;
+
+    public static int WeaponReuseDelayMs(WeaponType weapon, int storedReuseDelayMs = 0) =>
+        storedReuseDelayMs > 0
+            ? storedReuseDelayMs
+            : weapon == WeaponType.Bow ? DefaultBowReuseDelayMs : 0;
+
+    /// <summary>Mobius <c>Creature.calculateReuseTime</c>: <c>(reuseDelay * 333) / pAtkSpd</c>.</summary>
+    public static int WeaponReuseMs(int reuseDelayMs, int pAtkSpd) =>
+        WeaponReuseMs(reuseDelayMs, (double)pAtkSpd);
+
+    public static int WeaponReuseMs(int reuseDelayMs, double pAtkSpd) =>
+        reuseDelayMs <= 0 ? 0 : (int)(reuseDelayMs * 333d / Math.Max(1d, pAtkSpd));
+
+    /// <summary>
+    /// Mobius <c>doAttack</c> interval until the next swing: <c>calculateTimeBetweenAttacks</c>
+    /// plus bow <c>calculateReuseTime</c> (<c>Creature.java</c> schedules ready-to-act at <c>timeAtk + reuse</c>).
+    /// </summary>
+    public static int AttackIntervalMs(int pAtkSpd, WeaponType weapon, int storedReuseDelayMs = 0) =>
+        AttackIntervalMs((double)pAtkSpd, weapon, storedReuseDelayMs);
+
+    public static int AttackIntervalMs(double pAtkSpd, WeaponType weapon, int storedReuseDelayMs = 0) =>
+        AttackTimeMs(pAtkSpd) + WeaponReuseMs(WeaponReuseDelayMs(weapon, storedReuseDelayMs), pAtkSpd);
 
     /// <summary>Interlude Attack hit flags (client Hit.cs): 0x20 crit, 0x80 miss.</summary>
     public const byte HitFlagCrit = 0x20;

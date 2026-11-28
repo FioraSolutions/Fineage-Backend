@@ -28,7 +28,7 @@ public sealed partial class ZoneWorld
         else
         {
             var ps = PlayerStats(player);
-            pDef = ps.PDef;
+            pDef = ps.PDefPrecise;
             evasion = ps.Evasion;
             shieldRate = ShieldRateInArc(player, npc, ps.ShieldRate, ps.ShieldDefAngle);
             shieldDef = ps.ShieldDef;

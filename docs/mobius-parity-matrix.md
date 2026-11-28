@@ -34,11 +34,12 @@ behavioural parity or production verification.
 | Level | ✅ verified | 🟡 partial | unverified / ❌ | n/a | Total |
 |-------|------------:|-----------:|----------------:|----:|------:|
 | Implemented | 103 | 2 | 0 | 3 | 108 |
-| Parity verified | 2 | 0 | 103 | 3 | 108 |
+| Parity verified | 2 | 3 | 100 | 3 | 108 |
 | Production verified | 0 | 0 | 105 | 3 | 108 |
 
-**Current claim:** 103 of 108 systems are implemented; 2 have linked parity evidence (movement A/B #1051 and
-weight penalty); **no system has linked production evidence**. The 0 production rows are intentionally
+**Current claim:** 103 of 108 systems are implemented; 2 have full linked parity evidence (movement A/B #1051 and
+weight penalty) and 3 have partial linked parity evidence (physical auto-attack matrix, rows 16/17/72, #979);
+**no system has linked production evidence**. The 0 production rows are intentionally
 unverified, not failures. The old 92/4/9/3 counter was stale; the validator now derives these counts from
 the rows.
 
@@ -68,8 +69,8 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 14 | Boats | ✅ [src](../src/Fineage.Zone/World/ZoneWorldBoats.cs) | unverified | unverified | — | `BoatManager.java` → `ZoneWorldBoats` + vehicle opcodes in `NetOpcode` |
 | 15 | Monster race (derby) | ✅ [src](../src/Fineage.Zone/World/ZoneWorldMonsterRace.cs) | unverified | unverified | — | `games/MonsterRaceManager.java` → `ZoneWorldMonsterRace` |
 | **Combat** |
-| 16 | Melee hit/miss/crit/shield/shots/position | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.cs) | unverified | unverified | — | `model/stats/Formulas.java` → `ZoneCombat` |
-| 17 | Bow and arrows | ✅ [src](../src/Fineage.Zone/World/ZoneWorldArrows.cs) | unverified | unverified | — | `Creature` bow branch → `ZoneWorldArrows` |
+| 16 | Melee hit/miss/crit/shield/shots/position | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.cs) | 🟡 [PhysAutoMatrixTests](../tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs) | unverified | — | Auto-attack matrix (#979, #978 harness) asserts Mobius-traced hit/crit/shield/soulshot/position/level-gap/PvP/CP/timing for sword, blunt, dagger, pole, fist, dual, 2h sword, 2h blunt, plus player↔mob/player/summon and mob↔player/summon. Not a full Interlude cartesian (no buffs/enchant/traits grid). Evidence: [combat-parity.md](combat-parity.md#physical-auto-attack-differential-matrix-979). `Formulas.java` → `ZoneCombat` |
+| 17 | Bow and arrows | ✅ [src](../src/Fineage.Zone/World/ZoneWorldArrows.cs) | 🟡 [PhysAutoMatrixTests](../tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs) + [NetBowArrowTests](../tests/Fineage.Zone.Tests/NetBowArrowTests.cs) | unverified | — | Formula cells: bow range 500, default reuse 1500, interval `timeAtk + (1500*333)/Pspd`, 76·proximity/SS/crit vs Gremlin (`phys-auto-p2m-bow`). Arrow consume/grade/last-arrow already Mobius-traced in `NetBowArrowTests`. Distance-scaled bow damage is Mobius-off by default and not asserted. `Creature` bow branch → `ZoneWorldArrows` / `AttackIntervalMs` |
 | 18 | Physical/magic skill catalog | ✅ [src](../src/Fineage.Zone/Combat/SkillCombatCatalog.cs) | unverified | unverified | — | skill XML → `data/skill-combat.json`; a missing row refuses the cast |
 | 19 | Blow / lethal | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Rolls.cs) | unverified | unverified | — | blow handlers → `ZoneWorldSkills` |
 | 20 | Magic crit / fail | ✅ [src](../src/Fineage.Zone/Combat/ZoneCombat.Magic.cs) | unverified | unverified | — | `Formulas` magic crit → `ZoneWorldSkillDamage` |
@@ -128,7 +129,7 @@ Status cells are independent. `✅`/`🟡` in a status column must carry an evid
 | 70 | Community board | ✅ [src](../src/Fineage.Zone/World/ZoneWorldCommunityBoard.cs) | unverified | unverified | — | `CommunityBoardHandler` / `RequestShowBoard` / `RequestBBSwrite` / `ShowBoard` → `CommunityBoardService` + `ZoneWorldCommunityBoard`; missing page logs the page name — #929 |
 | 71 | PC cafe points and coupons | ✅ [src](../src/Fineage.Zone/World/ZoneWorldPcCafe.cs) | unverified | unverified | — | `PcCafePointsManager` / `RequestPCCafeCouponUse` / `ExPCCafePointInfo` → `PcCafePointsManager` + coupon catalog + grant ledger (#933) |
 | **Companions** |
-| 72 | Servitors | ✅ [src](../src/Fineage.Zone/World/ZoneWorldSummons.cs) | unverified | unverified | — | `Servitor.java` → `ZoneWorldSummons` |
+| 72 | Servitors | ✅ [src](../src/Fineage.Zone/World/ZoneWorldSummons.cs) | 🟡 [PhysAutoMatrixTests](../tests/Fineage.MobiusDiff.Tests/PhysAutoMatrixTests.cs) | unverified | — | Auto-attack only: summon→mob (`phys-auto-s2m-kat`), mob→summon, player→summon (Mobius `isPvP`, multipliers 1.0). Kat the Cat 14111 is catalog type Pet (warlock summons in this pack). Siege/pet inventory/other servitor features remain unverified. `Servitor.java` / `Formulas.calcPhysDam` → `ZoneWorldSummons` |
 | 73 | Cubics | ✅ [src](../src/Fineage.Zone/World/ZoneWorldCubics.cs) | unverified | unverified | — | `Cubic.java` → `ZoneWorldCubics` (owner M.Atk is in the success roll) |
 | 74 | Pets (hunger, exp, evolve, feed) | ✅ [src](../src/Fineage.Zone/World/ZoneWorldPets.cs) | unverified | unverified | — | `Pet.java` → `ZoneWorldPets`, `ZoneWorldPets.Evolve` |
 | 75 | Pet rename | ✅ [src](../src/Fineage.Zone/World/ZoneWorldPets.cs) | unverified | unverified | — | `RequestChangePetName.java` → `ZoneWorldPets.TryChangePetName` — #936 |

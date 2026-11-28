@@ -1,0 +1,170 @@
+{
+  "id": "phys-auto-p2m-bow",
+  "description": "HF40 Bow + Wooden Arrow vs Gremlin 20001. Includes bow range 500, default reuse 1500, interval timeAtk+reuse.",
+  "seed": 9782026,
+  "samples": 0,
+  "matrix": true,
+  "attacker": {
+    "kind": "player",
+    "classId": 0,
+    "level": 40,
+    "gear": [
+      {
+        "slot": "rhand",
+        "itemId": 14,
+        "enchant": 0
+      },
+      {
+        "slot": "lhand",
+        "itemId": 17,
+        "enchant": 0
+      },
+      {
+        "slot": "chest",
+        "itemId": 58,
+        "enchant": 0
+      },
+      {
+        "slot": "legs",
+        "itemId": 59,
+        "enchant": 0
+      },
+      {
+        "slot": "gloves",
+        "itemId": 61,
+        "enchant": 0
+      },
+      {
+        "slot": "feet",
+        "itemId": 62,
+        "enchant": 0
+      }
+    ],
+    "buffs": []
+  },
+  "target": {
+    "kind": "npc",
+    "npcId": 20001
+  },
+  "contact": {
+    "side": "front",
+    "soulshot": false,
+    "attackerBow": true
+  },
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "golden": "tools/Fineage.MobiusDiff/oracle/phys-auto-p2m-bow.json",
+    "reference": "ref/mobius-ct0-interlude"
+  },
+  "tolerances": {
+    "default": {
+      "absolute": 0.5,
+      "relative": 0.0
+    },
+    "pAtk": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pDef": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "targetPDef": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "pAtkSpd": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "accuracy": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "evasion": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "targetAccuracy": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "targetEvasion": {
+      "absolute": 1.0,
+      "relative": 0.0
+    },
+    "critPermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChanceFront": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChanceSide": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChanceBehind": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "hitChanceBaseUnclamped": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "critChancePermille": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "attackTimeMs": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "attackIntervalMs": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "bowReuseMs": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "attackRange": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "bowRange": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "shieldDef": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "shieldBlockRate": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "shieldBlockRateVsBow": {
+      "absolute": 0.01,
+      "relative": 0.0
+    },
+    "playableAttacker": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "pvp": {
+      "absolute": 0.0,
+      "relative": 0.0
+    }
+  },
+  "knownDivergences": {
+    "damageFront": "CT0 Formulas.calcPhysDam: 76 * pAtk * proximity / pDef; ClassBalanceConfig PvP/PvE multipliers treated as 1.0.",
+    "attackTimeMs": "Creature.calculateTimeBetweenAttacks: (int)(500000 / pAtkSpd), using the production integer P.Atk.Spd.",
+    "bowReuseMs": "Creature.calculateReuseTime / Weapon default 1500 for ranged: (1500 * 333) / pAtkSpd."
+  }
+}

@@ -25,6 +25,12 @@ public sealed class Scenario
     public ContactSpec Contact { get; set; } = new();
 
     /// <summary>
+    /// When true, both probes emit the deterministic auto-attack matrix (front/side/behind,
+    /// soulshot, crit, shield, timing, range, positional hit chance, CP split for player targets).
+    /// </summary>
+    public bool Matrix { get; set; }
+
+    /// <summary>
     /// Mobius <c>PlayerStatus.reduceHp</c> CP split cases. Each case emits <c>cpLoss_&lt;key&gt;</c> and
     /// <c>hpLoss_&lt;key&gt;</c> from the same source-verified barrier; empty for ordinary combat scenarios.
     /// </summary>
@@ -44,8 +50,14 @@ public sealed class Scenario
 
 public sealed class AttackerSpec
 {
+    /// <summary><c>player</c> (default), <c>npc</c>, or <c>summon</c> (pet/servitor catalog row).</summary>
+    public string Kind { get; set; } = "player";
+
     public int ClassId { get; set; }
     public int Level { get; set; }
+
+    /// <summary>Set when <see cref="Kind"/> is <c>npc</c> or <c>summon</c>.</summary>
+    public int NpcId { get; set; }
 
     public List<GearSpec> Gear { get; set; } = new();
 
@@ -69,7 +81,19 @@ public sealed class BuffSpec
 
 public sealed class TargetSpec
 {
+    /// <summary><c>npc</c> (default when <see cref="NpcId"/> is set), <c>player</c>, or <c>summon</c>.</summary>
+    public string Kind { get; set; } = "";
+
     public int NpcId { get; set; }
+
+    public int ClassId { get; set; }
+    public int Level { get; set; }
+    public List<GearSpec> Gear { get; set; } = new();
+    public List<BuffSpec> Buffs { get; set; } = new();
+
+    /// <summary>Starting bars for the matrix CP/HP split on a player target (defaults 200/200).</summary>
+    public int Hp { get; set; } = 200;
+    public int Cp { get; set; } = 200;
 }
 
 public sealed class ContactSpec
@@ -147,8 +171,21 @@ public static class ScenarioJson
             ?? throw new InvalidDataException($"{path} was empty.");
         if (string.IsNullOrWhiteSpace(scenario.Id))
             throw new InvalidDataException($"{path} has no id.");
-        if (scenario.Attacker.Level < 1)
+        string attackerKind = ActorKinds.Normalize(scenario.Attacker.Kind, playerIfEmpty: true);
+        scenario.Attacker.Kind = attackerKind;
+        string targetKind = ActorKinds.Normalize(
+            scenario.Target.Kind,
+            playerIfEmpty: false,
+            npcIfPositiveId: scenario.Target.NpcId);
+        scenario.Target.Kind = targetKind;
+        if (attackerKind == "player" && scenario.Attacker.Level < 1)
             throw new InvalidDataException($"{path} attacker.level must be positive.");
+        if (attackerKind != "player" && scenario.Attacker.NpcId <= 0)
+            throw new InvalidDataException($"{path} attacker.npcId must be set for {attackerKind} attackers.");
+        if (targetKind != "player" && scenario.Target.NpcId <= 0)
+            throw new InvalidDataException($"{path} target.npcId must be set for {targetKind} targets.");
+        if (targetKind == "player" && scenario.Target.Level < 1)
+            throw new InvalidDataException($"{path} target.level must be positive for a player target.");
         if (scenario.Samples < 0)
             throw new InvalidDataException($"{path} samples cannot be negative.");
         return scenario;
@@ -157,4 +194,24 @@ public static class ScenarioJson
     public static OracleFile LoadOracle(string path) =>
         JsonSerializer.Deserialize<OracleFile>(File.ReadAllText(path), Options)
         ?? throw new InvalidDataException($"{path} was empty.");
+}
+
+
+internal static class ActorKinds
+{
+    public static string Normalize(string? kind, bool playerIfEmpty, int npcIfPositiveId = 0)
+    {
+        if (string.IsNullOrWhiteSpace(kind))
+        {
+            if (playerIfEmpty) return "player";
+            return npcIfPositiveId > 0 ? "npc" : "player";
+        }
+
+        string value = kind.Trim().ToLowerInvariant();
+        if (value is "player" or "npc" or "summon")
+            return value;
+        throw new InvalidDataException($"Unknown actor kind '{kind}' (expected player, npc, or summon).");
+    }
+
+    public static bool IsPlayable(string kind) => kind is "player" or "summon";
 }
