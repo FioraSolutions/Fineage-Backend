@@ -31,6 +31,21 @@ lost the combat transcription and aborts before touching data/npcs.json
 Usage:
   python3 tools/import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude
   python3 tools/import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude --check
+  python3 tools/import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude --write-towns
+
+Source pinning: the datapack must be the CT 0 Interlude chronicle at
+PINNED_MOBIUS_COMMIT (or a later commit whose stats/npcs tree is identical).
+Any other chronicle (CT_2.4_Epilogue, CT_2.6_HighFive, ...) is refused, because a
+Nov 2026 regeneration silently picked up Epilogue/HighFive NPC levels/HP/exp.
+`--allow-unpinned` skips only the commit check (never the chronicle check).
+
+Templates only by default: data/spawns/*.json is NOT rewritten unless
+`--write-towns` is given (town files carry hand-added service rows).
+Rows listed in CUSTOM_NPC_IDS are not in the Mobius retail datapack; they are
+copied verbatim from the committed data/npcs.json, never dropped.
+
+The full NPC pipeline (templates + race/weapon/shot/AI/trait passes) is
+tools/regen_npcs.py.
 
 `--check` regenerates templates in memory only (no data/ writes, no spawn tree
 needed) and compares them with the committed data/npcs.json. It exits non-zero
@@ -42,9 +57,26 @@ from __future__ import annotations
 
 import json
 import math
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+# Mobius CT 0 Interlude commit the committed data/npcs.json is transcribed from
+# (gitlab.com/MobiusDevelopment/L2J_Mobius, master 2026-11-16).
+PINNED_MOBIUS_COMMIT = "e4b90cdf6095576aa86bfe3d6886395df1fc7672"
+CHRONICLE_DIR = "L2J_Mobius_CT_0_Interlude"
+NPC_XML_RELATIVE = f"{CHRONICLE_DIR}/dist/game/data/stats/npcs"
+
+# Fineage/Mobius custom NPCs that are not in the retail stats/npcs/*.xml files.
+# They are preserved verbatim from the committed data/npcs.json.
+CUSTOM_NPC_IDS: dict[int, str] = {
+    50007: "Andromeda, Wedding Manager (Mobius custom/custom.xml, ported in f4d127fc)",
+}
+
+# Mobius NpcData always reads str/con/int/men from <stats>; Fineage's NpcCatalog
+# defaults (40/43/21/10) apply when the key is absent, so only other values are written.
+ATTRIBUTE_DEFAULTS: tuple[tuple[str, int], ...] = (("str", 40), ("con", 43), ("int", 21), ("men", 10))
 
 # Town object ids start here. Legacy gremlin rows stay in 50000–59999.
 # Item instances start at 100000. See Fineage.Game.NpcObjectIdAllocator.
@@ -113,6 +145,23 @@ def positive_stat(text: str | None, fallback: float) -> int | float:
     if value <= 0:
         value = fallback
     return whole_or_float(value)
+
+
+def raw_stat(text: str | None, minimum: float = 0.0) -> int | float:
+    """Full XML precision (Mobius StatSet keeps the double; the zone folds it like
+    NPC_STD_CALCULATOR, truncating P.Atk/P.Def/M.Atk/M.Def to int at fold time)."""
+    if text is None or text.strip() == "":
+        return whole_or_float_exact(minimum)
+    value = float(text)
+    if not math.isfinite(value) or value < minimum:
+        value = minimum
+    return whole_or_float_exact(value)
+
+
+def whole_or_float_exact(value: float) -> int | float:
+    if value == math.trunc(value):
+        return int(value)
+    return value
 
 
 def hp_stat(text: str | None) -> int:
@@ -244,8 +293,8 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 "collisionHeight": positive_stat(None if height is None else height.attrib.get("normal"), 0.1),
                 "attackable": attackable,
                 "aggressive": aggressive,
-                "hp": hp_stat(None if vitals is None else vitals.attrib.get("hp")),
-                "mp": hp_stat(None if vitals is None else vitals.attrib.get("mp")),
+                "hp": raw_stat(None if vitals is None else vitals.attrib.get("hp"), 1.0),
+                "mp": raw_stat(None if vitals is None else vitals.attrib.get("mp"), 0.0),
                 # Mobius NpcData <vitals hpRegen/mpRegen>: NPCStatus.doRegeneration adds
                 # calcStat(REGENERATE_HP_RATE, max(1, baseHpReg)) every 3000 ms, so a damaged
                 # mob heals back instead of staying wounded forever.
@@ -257,8 +306,8 @@ def load_templates(npc_dir: Path) -> list[dict]:
                 "sp": sp,
                 # Combat stats, key order matches the committed data/npcs.json so
                 # a regeneration stays a byte-identical diff. Transcribed values.
-                "pAtk": combat_float(attack, "physical", 3),
-                "pDef": combat_float(defence, "physical", 3),
+                "pAtk": float(raw_stat(attribute(attack, "physical"))),
+                "pDef": float(raw_stat(attribute(defence, "physical"))),
                 "attackSpeed": combat_int(attack, "attackSpeed"),
                 "attackRange": combat_int(attack, "range"),
                 "accuracy": combat_float(attack, "accuracy", 2),
@@ -272,8 +321,12 @@ def load_templates(npc_dir: Path) -> list[dict]:
             if attribute(defence, "shield") is not None:
                 row["shieldDef"] = combat_int(defence, "shield")
                 row["shieldRate"] = combat_int(defence, "shieldRate")
-            row["mAtk"] = combat_float(attack, "magical", 3)
-            row["mDef"] = combat_float(defence, "magical", 3)
+            row["mAtk"] = float(raw_stat(attribute(attack, "magical")))
+            row["mDef"] = float(raw_stat(attribute(defence, "magical")))
+            for key, default in ATTRIBUTE_DEFAULTS:
+                value = combat_int(stats, key, default)
+                if value != default:
+                    row[key] = value
             # Always emit the resolved Mobius value (missing <ai>/aggroRange -> 0).
             # This keeps explicit non-proactive mobs distinguishable from rows the
             # importer failed to populate; the zone validation rejects the latter.
@@ -301,9 +354,28 @@ def load_templates(npc_dir: Path) -> list[dict]:
     return [templates[npc_id] for npc_id in sorted(templates)]
 
 
-# Fields the zone reads for combat parity. They are the ones a "templates only"
-# regression would silently erase, so --check compares just these.
+# Fields --check compares against the committed data/npcs.json. Identity, level,
+# vitals and rewards are included so a wrong-chronicle regeneration (Epilogue /
+# HighFive levels, HP, exp) fails the check, not only a stripped combat block.
 COMBAT_FIELDS: tuple[str, ...] = (
+    "name",
+    "title",
+    "type",
+    "level",
+    "hp",
+    "mp",
+    "exp",
+    "sp",
+    "attackable",
+    "aggressive",
+    "collisionRadius",
+    "collisionHeight",
+    "runSpeed",
+    "walkSpeed",
+    "str",
+    "con",
+    "int",
+    "men",
     "pAtk",
     "mAtk",
     "pDef",
@@ -379,8 +451,10 @@ def compare_with_committed(templates: list[dict], committed: dict[int, dict]) ->
                     problems.append(f"npc {npc_id}: {field} {want!r} != {got!r}")
             elif want != got:
                 problems.append(f"npc {npc_id}: {field} {want!r} != {got!r}")
-    for npc_id in sorted(set(committed) - {row["npcId"] for row in templates}):
+    for npc_id in sorted(set(committed) - {row["npcId"] for row in templates} - set(CUSTOM_NPC_IDS)):
         problems.append(f"npc {npc_id}: present in data/npcs.json but not in the datapack")
+    for npc_id in sorted(set(CUSTOM_NPC_IDS) - set(committed)):
+        problems.append(f"npc {npc_id}: custom row ({CUSTOM_NPC_IDS[npc_id]}) missing from data/npcs.json")
     return problems
 
 
@@ -419,11 +493,74 @@ def spawn_rows(path: Path) -> list[dict]:
     return rows
 
 
+SOURCE_TEXT = (
+    f"L2J Mobius CT 0 Interlude dist/game/data/stats/npcs @ {PINNED_MOBIUS_COMMIT[:12]} "
+    "(values transcribed, XML not copied)"
+)
+
+
+def with_custom_rows(repo: Path, templates: list[dict]) -> list[dict]:
+    """Append CUSTOM_NPC_IDS rows from the committed file (sorted by npcId)."""
+    path = repo / "data" / "npcs.json"
+    committed = {row["npcId"]: row for row in json.loads(path.read_text(encoding="utf-8"))["npcs"]}
+    by_id = {row["npcId"]: row for row in templates}
+    for npc_id, why in CUSTOM_NPC_IDS.items():
+        if npc_id in by_id:
+            raise SystemExit(f"custom npc {npc_id} ({why}) now exists in the datapack; drop it from CUSTOM_NPC_IDS")
+        if npc_id not in committed:
+            raise SystemExit(f"custom npc {npc_id} ({why}) missing from committed data/npcs.json")
+        by_id[npc_id] = committed[npc_id]
+    return [by_id[npc_id] for npc_id in sorted(by_id)]
+
+
+def verify_source(root: Path, npc_dir: Path, allow_unpinned: bool) -> str:
+    """Refuse a non-CT0 chronicle; require the pinned commit's stats/npcs tree."""
+    resolved = root.resolve()
+    if CHRONICLE_DIR not in resolved.parts and resolved.name != CHRONICLE_DIR:
+        raise SystemExit(
+            f"refusing {root}: not an {CHRONICLE_DIR} datapack root "
+            "(Epilogue/HighFive/other chronicles must never feed data/npcs.json)"
+        )
+    if CHRONICLE_DIR not in npc_dir.resolve().parts:
+        raise SystemExit(f"refusing {npc_dir}: stats/npcs is not under {CHRONICLE_DIR}")
+
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["git", "-C", str(npc_dir), *args], capture_output=True, text=True)
+
+    head = git("rev-parse", "HEAD")
+    if head.returncode != 0:
+        if allow_unpinned:
+            return "unpinned (not a git checkout, --allow-unpinned)"
+        raise SystemExit(
+            f"{npc_dir} is not a git checkout; cannot prove it is Mobius {PINNED_MOBIUS_COMMIT[:12]} "
+            "(clone the pinned commit or pass --allow-unpinned)"
+        )
+    sha = head.stdout.strip()
+    if sha == PINNED_MOBIUS_COMMIT:
+        return f"pinned {sha[:12]}"
+    top = git("rev-parse", "--show-toplevel").stdout.strip()
+    rel = npc_dir.resolve().relative_to(Path(top).resolve()).as_posix() if top else NPC_XML_RELATIVE
+    same = subprocess.run(
+        ["git", "-C", top or str(npc_dir), "diff", "--quiet", PINNED_MOBIUS_COMMIT, sha, "--", rel],
+        capture_output=True,
+        text=True,
+    )
+    if same.returncode == 0:
+        return f"{sha[:12]} (stats/npcs identical to pinned {PINNED_MOBIUS_COMMIT[:12]})"
+    if allow_unpinned:
+        return f"unpinned {sha[:12]} (--allow-unpinned)"
+    raise SystemExit(
+        f"Mobius checkout is at {sha[:12]}, and its stats/npcs differs from pinned "
+        f"{PINNED_MOBIUS_COMMIT[:12]} (or the pinned commit is not fetched). Update "
+        "PINNED_MOBIUS_COMMIT deliberately, or pass --allow-unpinned."
+    )
+
+
 def write_templates(repo: Path, templates: list[dict]) -> None:
     path = repo / "data" / "npcs.json"
     lines = [
         "{",
-        '  "source": "L2J Mobius CT 0 Interlude dist/game/data/stats/npcs (values transcribed, XML not copied)",',
+        "  \"source\": " + json.dumps(SOURCE_TEXT) + ",",
         '  "npcs": [',
     ]
     for index, row in enumerate(templates):
@@ -492,20 +629,27 @@ def datapack_dir(root: Path, relative: str) -> Path:
 
 def main() -> None:
     argv = sys.argv[1:]
-    check_only = "--check" in argv
-    if check_only:
-        argv = [a for a in argv if a != "--check"]
-    if len(argv) != 1:
+    flags = {a for a in argv if a.startswith("--")}
+    unknown = flags - {"--check", "--write-towns", "--templates-only", "--allow-unpinned"}
+    args = [a for a in argv if not a.startswith("--")]
+    if unknown or len(args) != 1:
         raise SystemExit(
-            "usage: import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude [--check]"
+            "usage: import_npc_templates.py /path/to/L2J_Mobius_CT_0_Interlude "
+            "[--check] [--write-towns] [--allow-unpinned]"
         )
-    root = Path(argv[0])
+    check_only = "--check" in flags
+    write_towns_too = "--write-towns" in flags
+    if write_towns_too and "--templates-only" in flags:
+        raise SystemExit("--write-towns and --templates-only are exclusive")
+    root = Path(args[0])
     npc_dir = datapack_dir(root, "stats/npcs")
     spawns_dir = datapack_dir(root, "spawns")
     if not npc_dir.is_dir():
         raise SystemExit(f"{root} has no stats/npcs (looked for dist/game/data and data)")
-    if not check_only and not spawns_dir.is_dir():
-        raise SystemExit(f"{root} is not an L2J_Mobius_CT_0_Interlude datapack root")
+    source = verify_source(root, npc_dir, "--allow-unpinned" in flags)
+    print(f"mobius source: {source}")
+    if write_towns_too and not spawns_dir.is_dir():
+        raise SystemExit(f"{root} has no spawns tree (needed by --write-towns)")
 
     repo = Path(__file__).resolve().parents[1]
     templates = load_templates(npc_dir)
@@ -518,17 +662,23 @@ def main() -> None:
         with_attack = sum(1 for row in templates if row["pAtk"] > 0)
         print(f"templates {len(templates)} pAtk>0 rows {with_attack}")
         if problems:
-            print(f"COMBAT DRIFT {len(problems)}")
-            for line in problems:
+            print(f"DRIFT {len(problems)}")
+            for line in problems[:200]:
                 print("  " + line)
+            if len(problems) > 200:
+                print(f"  ... {len(problems) - 200} more")
             raise SystemExit(1)
-        print("combat fields reproducible: 0 mismatches")
+        print("npc template fields reproducible: 0 mismatches")
         return
 
-    write_templates(repo, templates)
-    by_id = {row["npcId"]: row for row in templates}
+    rows = with_custom_rows(repo, templates)
+    write_templates(repo, rows)
+    print(f"templates {len(rows)} ({len(CUSTOM_NPC_IDS)} custom kept)")
+    if not write_towns_too:
+        print("templates only: data/spawns untouched (pass --write-towns to regenerate town files)")
+        return
+    by_id = {row["npcId"]: row for row in rows}
     summary = write_towns(repo, by_id, spawns_dir)
-    print(f"templates {len(templates)}")
     for map_id, count, enabled in summary:
         print(f"spawn {map_id} count={count} enabled={str(enabled).lower()}")
 

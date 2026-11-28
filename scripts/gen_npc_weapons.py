@@ -15,7 +15,8 @@ def load_mobius(npcs_dir: Path) -> dict[int, dict]:
     out: dict[int, dict] = {}
     for f in sorted(npcs_dir.glob("*.xml")):
         root = ET.parse(f).getroot()
-        for npc in root.iter("npc"):
+        # Direct children only: <parameters><minions><npc id=.../> are references, not templates.
+        for npc in root.findall("npc"):
             nid = int(npc.get("id"))
             eq = npc.find("equipment")
             rhand = lhand = 0
