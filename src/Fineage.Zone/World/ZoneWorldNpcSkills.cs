@@ -91,7 +91,7 @@ public sealed partial class ZoneWorld
             double mAtk = Math.Max(1d, npc.MAtk) * ZoneCombat.SpiritshotMAtkMultiplier(spirit ? 1 : 0);
             var (damage, _) = ZoneCombat.RollMagicDamage(
                 Rng(_combatRandom, npc), mAtk, Math.Max(1d, ps.MDef), skill.Power,
-                npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10);
+                npc.Level, magicLevel: npc.Level, target.Level, mCritRate: 10, casterIsPlayer: false);
             if (damage <= 0 || DuelBlocksHit(npc, target))
                 continue;
 

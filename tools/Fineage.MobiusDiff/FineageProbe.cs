@@ -64,6 +64,8 @@ public static class FineageProbe
             PhysAutoMatrix.Add(metrics, scenario, attacker, target);
         if (scenario.StatsMatrix)
             AttrStatsMatrix.Add(metrics, attacker);
+        if (scenario.MagicMatrix)
+            MagicDamageMatrix.Add(metrics, scenario, attacker, target);
 
         return metrics;
     }
@@ -152,7 +154,8 @@ public static class FineageProbe
             attrs.Str, attrs.Dex, attrs.Con, attrs.Int, attrs.Wit, attrs.Men,
             attrs.StrBonus, attrs.DexBonus, attrs.ConBonus, attrs.IntBonus, attrs.WitBonus, attrs.MenBonus,
             mAtk, mDef, mAtkSpd, mCritPermille,
-            template.ModifiedHp(level), template.ModifiedMp(level), template.ModifiedCp(level));
+            template.ModifiedHp(level), template.ModifiedMp(level), template.ModifiedCp(level),
+            level, gearBases.Weapon != WeaponType.None);
     }
 
     static ActorSnapshot MeasureNpc(string scenarioId, int npcId, bool playable, GameData data, NpcCatalog npcs)
@@ -167,7 +170,8 @@ public static class FineageProbe
         return new ActorSnapshot(
             npc.PAtk, Math.Max(1d, npc.PDef), pAtkSpd, accuracy, evasion, critPermille, 1d, 0d,
             Math.Max(0, npc.AttackRange), npc.ShieldDef, npc.ShieldRate * dexBonus, npc.RandomDamage,
-            playable, bow, ZoneCombat.WeaponReuseDelayMs(bow ? WeaponType.Bow : WeaponType.None));
+            playable, bow, ZoneCombat.WeaponReuseDelayMs(bow ? WeaponType.Bow : WeaponType.None),
+            MAtk: npc.MAtk, MDef: npc.MDef, Level: npc.Level);
     }
 
 
@@ -245,7 +249,9 @@ internal readonly record struct ActorSnapshot(
     int MCritPermille = 0,
     int MaxHp = 0,
     int MaxMp = 0,
-    int MaxCp = 0);
+    int MaxCp = 0,
+    int Level = 0,
+    bool Armed = false);
 
 /// <summary>Normalized metric bag. Values are doubles so the same comparator handles points, permille and HP.</summary>
 public sealed class ActualMetrics : Dictionary<string, double>
@@ -343,5 +349,59 @@ internal static class AttrStatsMatrix
         metrics["maxHp"] = a.MaxHp;
         metrics["maxMp"] = a.MaxMp;
         metrics["maxCp"] = a.MaxCp;
+    }
+}
+
+internal static class MagicDamageMatrix
+{
+    public static void Add(ActualMetrics metrics, Scenario scenario, ActorSnapshot a, ActorSnapshot t)
+    {
+        var skills = SkillCombatCatalog.LoadDefault();
+        if (!skills.TryGet(scenario.Magic.SkillId, out var skill))
+            throw new InvalidDataException($"{scenario.Id}: magic skill {scenario.Magic.SkillId} is not in skill-combat.json.");
+        int lvl = scenario.Magic.Level;
+        double power = skill.PowerAt(lvl);
+        int magicLevel = skill.MagicLevelAt(lvl);
+        if (magicLevel <= 0)
+            magicLevel = a.Level;
+
+        metrics["magicPower"] = power;
+        metrics["magicLevel"] = magicLevel;
+        metrics["casterLevel"] = a.Level;
+        metrics["targetLevel"] = t.Level;
+        metrics["mAtk"] = a.MAtk;
+        metrics["targetMDef"] = t.MDef;
+
+        int rate = ZoneCombat.MagicSuccessRate(t.Level, magicLevel);
+        metrics["magicSuccessRate"] = rate;
+        metrics["magicHalfFailEligible"] = t.Level - a.Level <= 9 ? 1 : 0;
+
+        double crit = scenario.Magic.CritPower;
+        bool pvp = scenario.Target.Kind == "player";
+        double baseNormal = ZoneCombat.MagicBaseDamage(a.MAtk, t.MDef, power);
+        double baseSps = ZoneCombat.MagicBaseDamage(a.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(1), t.MDef, power);
+        double baseBss = ZoneCombat.MagicBaseDamage(a.MAtk * ZoneCombat.SpiritshotMAtkMultiplier(2), t.MDef, power);
+        metrics["damageNormal"] = ZoneCombat.MagicDamageFor(baseNormal, ZoneCombat.MagicOutcome.Normal, false);
+        metrics["damageSps"] = ZoneCombat.MagicDamageFor(baseSps, ZoneCombat.MagicOutcome.Normal, false);
+        metrics["damageBss"] = ZoneCombat.MagicDamageFor(baseBss, ZoneCombat.MagicOutcome.Normal, false);
+        metrics["damageCrit"] = ZoneCombat.MagicDamageFor(baseNormal, ZoneCombat.MagicOutcome.Critical, false, crit);
+        metrics["damageCritBss"] = ZoneCombat.MagicDamageFor(baseBss, ZoneCombat.MagicOutcome.Critical, false, crit);
+        metrics["damageCritPvp"] = ZoneCombat.MagicDamageFor(baseNormal, ZoneCombat.MagicOutcome.Critical, true, crit);
+        metrics["damageHalfFail"] = ZoneCombat.MagicDamageFor(baseNormal, ZoneCombat.MagicOutcome.HalfFail, pvp);
+        metrics["damageResisted"] = ZoneCombat.MagicDamageFor(baseNormal, ZoneCombat.MagicOutcome.Resisted, pvp);
+
+        if (t.ShieldDef > 0)
+        {
+            double baseShield = ZoneCombat.MagicBaseDamage(a.MAtk, t.MDef + t.ShieldDef, power);
+            metrics["damageShieldBlock"] = ZoneCombat.MagicDamageFor(baseShield, ZoneCombat.MagicOutcome.Normal, false);
+            metrics["damagePerfectBlock"] = 1;
+        }
+
+        int random = ZoneCombat.MagicRandomPercent(a.Armed, a.RandomDamage, a.Level);
+        metrics["randomPercent"] = random;
+        metrics["damageRandomMin"] = ZoneCombat.MagicDamageFor(
+            baseNormal, ZoneCombat.MagicOutcome.Normal, false, 1d, 1 + -random / 100d);
+        metrics["damageRandomMax"] = ZoneCombat.MagicDamageFor(
+            baseNormal, ZoneCombat.MagicOutcome.Normal, false, 1d, 1 + random / 100d);
     }
 }

@@ -238,7 +238,7 @@ public static partial class ZoneCombat
         double rate = PlayerCombatFormulas.MagicCriticalBase(armed, witBonus);
         if (mods != null && !ReferenceEquals(mods, CombatStatMods.None))
             rate = mods.Apply(CombatStat.MCritRate, rate);
-        return (int)rate * 10;
+        return Math.Min((int)rate * 10, MaxMCritRate);
     }
 
     /// <summary>Mobius <c>calcMCrit</c>: rate ‰ &gt; Rnd(1000).</summary>
@@ -248,7 +248,11 @@ public static partial class ZoneCombat
     /// Mobius <c>calcMagicSuccess</c> (MAGIC_SUCCESS_RES 1): rate = 100 − round(1.3^(targetLvl − magicLvl)); success when Rnd(100) &lt; rate.
     /// </summary>
     public static bool RollMagicSuccess(Random rnd, int targetLevel, int magicLevel) =>
-        rnd.Next(100) < 100 - (int)Math.Round((float)Math.Pow(1.3, targetLevel - magicLevel), MidpointRounding.AwayFromZero);
+        rnd.Next(100) < MagicSuccessRate(targetLevel, magicLevel);
+
+    /// <summary>Mobius <c>calcMagicSuccess</c> rate: <c>100 − round((float)1.3^(targetLevel − magicLevel))</c> (may go negative).</summary>
+    public static int MagicSuccessRate(int targetLevel, int magicLevel) =>
+        100 - (int)Math.Round((float)Math.Pow(1.3, targetLevel - magicLevel), MidpointRounding.AwayFromZero);
 
     public enum MagicOutcome { Normal, Critical, HalfFail, Resisted }
 

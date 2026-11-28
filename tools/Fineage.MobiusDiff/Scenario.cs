@@ -37,6 +37,16 @@ public sealed class Scenario
     public bool StatsMatrix { get; set; }
 
     /// <summary>
+    /// When true, both probes emit the deterministic <c>calcMagicDam</c> cells for <see cref="Magic"/>:
+    /// success rate, base / spiritshot / blessed spiritshot damage, crit (NPC ×3, PvP ×2.5), half-fail,
+    /// resisted, shield block / perfect block, and the random-spread bounds.
+    /// </summary>
+    public bool MagicMatrix { get; set; }
+
+    /// <summary>The magic skill row (power / magicLevel from <c>skill-combat.json</c>) driving <see cref="MagicMatrix"/>.</summary>
+    public MagicSpec Magic { get; set; } = new();
+
+    /// <summary>
     /// Mobius <c>PlayerStatus.reduceHp</c> CP split cases. Each case emits <c>cpLoss_&lt;key&gt;</c> and
     /// <c>hpLoss_&lt;key&gt;</c> from the same source-verified barrier; empty for ordinary combat scenarios.
     /// </summary>
@@ -52,6 +62,15 @@ public sealed class Scenario
 
     /// <summary>Optional human note included in the report for a metric that is expected to expose a known gap.</summary>
     public Dictionary<string, string> KnownDivergences { get; set; } = new();
+}
+
+public sealed class MagicSpec
+{
+    public int SkillId { get; set; }
+    public int Level { get; set; } = 1;
+
+    /// <summary><c>MAGIC_CRIT_DMG</c> stat multiplier folded on a crit (1 = no buff).</summary>
+    public double CritPower { get; set; } = 1d;
 }
 
 public sealed class AttackerSpec

@@ -411,8 +411,35 @@ untruncated doubles in the formula layer (same class of fix as P.Atk in the auto
 Do not mark a full matrix row in `docs/mobius-parity-matrix.md` from this slice; there is no
 dedicated six-attribute row.
 
-Out of this slice (still open for #979): magic crit/fail + calcMagicDam (spiritshot/BSS);
-blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
+### Magic damage differential matrix (#979 slice 2)
+
+Seven scenarios (`magic-*`, `MagicMatrixTests`) compare Fineage with a Java oracle that reads the Mobius
+skill XML (`power`, `magicLevel`) and NPC XML (raw stats), folds NPC M.Atk / M.Def like `FuncMAtkMod` /
+`FuncMDefMod`, and evaluates `calcMagicSuccess` + `calcMagicDam` + the `MagicalDamage` effect's `(int)` cast.
+Cells: success rate, normal / spiritshot / blessed spiritshot damage, crit (NPC ×3, player→player ×2.5, with
+`MAGIC_CRIT_DMG`), half-fail, resisted, shield block (`mDef += sDef`) and perfect block, random-damage
+spread bounds. Casters: Human / Elven / Dark Mystic with Willow Staff, unarmed Human Mystic; targets: Gremlin,
+Validus, Skeleton Royal Guard (shield), Basilisk, Ant Recruit, an HF40 player.
+
+Divergences found and fixed:
+
+| Divergence | Mobius | Fineage before | Fix |
+|---|---|---|---|
+| NPC M.Atk / M.Def | `FuncMAtkMod` `mAtk·INT.bonus²·levelMod²`, `FuncMDefMod` `mDef·MEN.bonus·levelMod` (Gremlin mDef 29.59 → 29.56) | raw XML value | folded in `NpcCatalog`; per-NPC `int` / `men` added to `npcs.json` where not 21 / 10 |
+| Player caster M.Atk | untruncated double | cast path used the int display value | `PlayerCombatStats.MAtkPrecise` |
+| Shield vs magic | `mDef += shldDef`, perfect block = 1 | ignored | `RollSkillDamage` rolls the shield |
+| Random damage | `getRandomDamageMultiplier` (weapon `RANDOM_DAMAGE`, else `5+(int)√level`) | none | `MagicRandomPercent` |
+| Failure branch | only a **player** caster halves / resists; an NPC caster keeps full damage and no crit | applied to NPC casters too | `casterIsPlayer` |
+| Crit ×2.5 | only when attacker **and** target are players | any player target | `casterIsPlayer && targetIsPlayer` |
+| Magic crit cap | `getMCriticalHit` capped by `MaxMCritRate` (200 ‰) | uncapped | `MaxMCritRate` in player/world stats and roll |
+| Zero damage | `(int)` damage; `if (damage > 0)` so 0 = no hit | `Math.Max(1, …)` | `MagicDamageFor` returns 0 |
+
+Found but **not** fixed here (NPC derived stats still raw XML in Fineage; Mobius folds them):
+P.Atk `·STR.bonus·levelMod`, P.Def `·levelMod`, P.Atk.Spd `·DEX.bonus`, max HP `·CON.bonus`, max MP `·MEN.bonus`.
+The physical auto-attack matrix NPC-defence cells compared catalog values on both sides, so the NPC side of
+rows 16 / 17 / 72 is not independently Mobius-verified until that fold lands.
+
+Out of this slice (still open for #979): blow/lethal (some coverage already); buffs/debuffs apply/remove/expire/stack-overwrite;
 shots consume/auto-charge/grade; cast-break from damage/stun/target death; a full-server oracle
 (Java driver is not a GameServer; `dist/libs` absent). DualFist as a distinct type (Interlude
 catalog folds cestus into `Fist`) and servitor features beyond auto-attack stay out of scope.

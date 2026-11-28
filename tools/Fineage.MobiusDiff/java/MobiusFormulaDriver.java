@@ -37,6 +37,7 @@ public final class MobiusFormulaDriver
         String targetKind = kind(opt.getOrDefault("target-kind", "npc"));
         boolean matrix = Boolean.parseBoolean(opt.getOrDefault("matrix", "false"));
         boolean statsMatrix = Boolean.parseBoolean(opt.getOrDefault("stats-matrix", "false"));
+        boolean magicMatrix = Boolean.parseBoolean(opt.getOrDefault("magic-matrix", "false"));
         String side = opt.getOrDefault("side", "front");
         boolean soulshot = Boolean.parseBoolean(opt.getOrDefault("soulshot", "false"));
         String cpSplitSpec = opt.getOrDefault("cp-splits", "");
@@ -58,7 +59,7 @@ public final class MobiusFormulaDriver
         Map<String, Double> metrics = new LinkedHashMap<>();
         metrics.put("pAtk", attacker.pAtk);
         metrics.put("pDef", attacker.pDef);
-        metrics.put("pAtkSpd", matrix || statsMatrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
+        metrics.put("pAtkSpd", matrix || statsMatrix || magicMatrix ? attacker.pAtkSpdRaw : (double) Math.round(attacker.pAtkSpdRaw));
         metrics.put("accuracy", attacker.accuracy);
         metrics.put("evasion", attacker.evasion);
         metrics.put("critPermille", (double) attacker.critPermille);
@@ -81,9 +82,11 @@ public final class MobiusFormulaDriver
             addMatrix(metrics, attacker, target, opt);
         if (statsMatrix)
             addStatMatrix(metrics, attacker);
+        if (magicMatrix)
+            addMagicMatrix(metrics, attacker, target, source, opt);
 
         String out = opt.get("out");
-        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix || statsMatrix);
+        String json = toJson(scenario, referenceLabel, metrics, !cpSplitSpec.isBlank() || hasKey(metrics, "cpLoss_front"), matrix || statsMatrix || magicMatrix);
         if (out == null)
             System.out.println(json);
         else
@@ -199,6 +202,71 @@ public final class MobiusFormulaDriver
             metrics.put("cpLoss_npcBypass", (double) bypass[0]);
             metrics.put("hpLoss_npcBypass", (double) bypass[1]);
         }
+    }
+
+    /**
+     * {@code Formulas.calcMagicDam} / {@code calcMagicSuccess} cells. The mAtk / mDef inputs are the folded stats of
+     * the measured actors; shots multiply mAtk exactly as {@code mAtk *= bss ? 4 : sps ? 2 : 1}.
+     */
+    private static void addMagicMatrix(Map<String, Double> metrics, ActorStats attacker, ActorStats target,
+        DataSource source, Map<String, String> opt) throws Exception
+    {
+        int skillId = intOpt(opt, "magic-skill", 0);
+        int skillLevel = intOpt(opt, "magic-level", 1);
+        double critPower = Double.parseDouble(opt.getOrDefault("magic-crit-power", "1"));
+        double[] skill = source.readMagicSkill(skillId, skillLevel);
+        double power = skill[0];
+        int magicLevel = (int) skill[1];
+        if (magicLevel <= 0)
+            magicLevel = attacker.level;
+
+        metrics.put("magicPower", power);
+        metrics.put("magicLevel", (double) magicLevel);
+        metrics.put("casterLevel", (double) attacker.level);
+        metrics.put("targetLevel", (double) target.level);
+        metrics.put("mAtk", attacker.mAtk);
+        metrics.put("targetMDef", target.mDef);
+
+        // calcMagicSuccess: 100 - round((float) 1.3^(targetLevel - magicLevel)).
+        int rate = 100 - Math.round((float) Math.pow(1.3, target.level - magicLevel));
+        metrics.put("magicSuccessRate", (double) rate);
+        metrics.put("magicHalfFailEligible", target.level - attacker.level <= 9 ? 1.0 : 0.0);
+
+        boolean pvp = target.kindPlayer;
+        double dNormal = magicBase(attacker.mAtk, target.mDef, power);
+        double dSps = magicBase(attacker.mAtk * 2, target.mDef, power);
+        double dBss = magicBase(attacker.mAtk * 4, target.mDef, power);
+        metrics.put("damageNormal", (double) truncate(dNormal));
+        metrics.put("damageSps", (double) truncate(dSps));
+        metrics.put("damageBss", (double) truncate(dBss));
+        metrics.put("damageCrit", (double) truncate(dNormal * 3 * critPower));
+        metrics.put("damageCritBss", (double) truncate(dBss * 3 * critPower));
+        // calcMagicDam: crit is x2.5 only when attacker AND target are players (the PvP probe cell is player vs player).
+        metrics.put("damageCritPvp", (double) truncate(dNormal * 2.5 * critPower));
+        metrics.put("damageHalfFail", (double) truncate(dNormal / 2));
+        metrics.put("damageResisted", 1.0);
+        if (target.shieldDef > 0)
+        {
+            metrics.put("damageShieldBlock", (double) truncate(magicBase(attacker.mAtk, target.mDef + target.shieldDef, power)));
+            metrics.put("damagePerfectBlock", 1.0);
+        }
+
+        // getRandomDamageMultiplier: weapon RANDOM_DAMAGE, or 5 + (int) sqrt(level) unarmed.
+        int random = attacker.armed ? attacker.randomDamage : 5 + (int) Math.sqrt(attacker.level);
+        metrics.put("randomPercent", (double) random);
+        metrics.put("damageRandomMin", (double) truncate(dNormal * (1 + (double) -random / 100)));
+        metrics.put("damageRandomMax", (double) truncate(dNormal * (1 + (double) random / 100)));
+    }
+
+    private static double magicBase(double mAtk, double mDef, double power)
+    {
+        return ((91 * Math.sqrt(mAtk)) / mDef) * power;
+    }
+
+    /** {@code (int) damage}; the MagicalDamage effect does nothing at 0. */
+    private static int truncate(double damage)
+    {
+        return Math.max(0, (int) damage);
     }
 
     private static int[] cpSplit(int damage, int hp, int cp, boolean playable, boolean ignoreCp)
@@ -321,6 +389,9 @@ public final class MobiusFormulaDriver
         a.maxHp = (int) (cls.hp[idx] * conBonus);
         a.maxMp = (int) (cls.mp[idx] * menBonus);
         a.maxCp = (int) (cls.cp[idx] * conBonus);
+        a.level = level;
+        a.armed = weapon != null;
+        a.kindPlayer = true;
         return a;
     }
 
@@ -345,6 +416,14 @@ public final class MobiusFormulaDriver
         a.reuseDelayMs = a.bow ? 1500 : 0;
         a.shieldDef = npc.shieldDef;
         a.shieldRate = npc.shieldRate * dexBonus;
+        // FuncMAtkMod / FuncMDefMod on a non-player: mAtk * INT.bonus^2 * levelMod^2, mDef * MEN.bonus * levelMod.
+        double levelMod = (npc.level + 89) / 100.0;
+        double intBonus = bonus.bonus("INT", npc.intel);
+        double menBonus = bonus.bonus("MEN", npc.men);
+        a.mAtk = npc.mAtk * intBonus * intBonus * levelMod * levelMod;
+        a.mDef = Math.max(1.0, npc.mDef * menBonus * levelMod);
+        a.level = npc.level;
+        a.armed = false;
         return a;
     }
 
@@ -587,17 +666,21 @@ public final class MobiusFormulaDriver
         data.dex = intAttr(stats, "dex", 1);
         data.con = intAttr(stats, "con", 1);
         data.men = intAttr(stats, "men", 1);
+        data.intel = intAttr(stats, "int", 1);
         Element defence = child(stats, "defence");
         data.pDef = doubleAttr(defence, "physical", 0);
         data.mDef = doubleAttr(defence, "magical", 0);
         Element attack = child(stats, "attack");
         data.pAtk = doubleAttr(attack, "physical", 0);
+        data.mAtk = doubleAttr(attack, "magical", 0);
         data.critical = intAttr(attack, "critical", 0);
         data.attackSpeed = intAttr(attack, "attackSpeed", 253);
         data.attackRange = intAttr(attack, "range", 40);
         data.randomDamage = intAttr(attack, "random", 0);
         data.accuracy = doubleAttr(attack, "accuracy", 0);
         data.evasion = doubleAttr(defence, "evasion", 0);
+        data.shieldDef = intAttr(defence, "shield", 0);
+        data.shieldRate = intAttr(defence, "shieldRate", 0);
         String attackType = attack != null ? attack.getAttribute("type") : "";
         data.bow = "BOW".equalsIgnoreCase(attackType);
         return data;
@@ -683,6 +766,31 @@ public final class MobiusFormulaDriver
         return out;
     }
 
+    /** {@code <power>} and {@code <magicLevel>} of one skill level, resolving {@code #table} references. */
+    private static double[] readSkillPowerAndMagicLevel(Path ref, int skillId, int level) throws Exception
+    {
+        int start = (skillId / 100) * 100;
+        Path file = ref.resolve(String.format("dist/game/data/stats/skills/%05d-%05d.xml", start, start + 99));
+        Element root = root(file);
+        Element skill = firstById(root, "skill", skillId);
+        if (skill == null)
+            throw new IllegalArgumentException("Skill " + skillId + " not found in " + file);
+        Map<String, List<String>> tables = new HashMap<>();
+        for (Element e : children(skill))
+        {
+            if ("table".equals(e.getTagName()))
+            {
+                String name = e.getAttribute("name");
+                tables.put(name.startsWith("#") ? name.substring(1) : name, List.of(text(e).trim().split("\\s+")));
+            }
+        }
+        Element power = child(skill, "power");
+        Element magicLevel = child(skill, "magicLevel");
+        return new double[] {
+            power == null ? 0 : resolve(text(power).trim(), tables, level),
+            magicLevel == null ? 0 : resolve(text(magicLevel).trim(), tables, level) };
+    }
+
     private static double resolve(String value, Map<String, List<String>> tables, int level)
     {
         if (value.startsWith("#"))
@@ -724,6 +832,14 @@ public final class MobiusFormulaDriver
             formulas.add("Creature.calculateTimeBetweenAttacks");
             formulas.add("Creature.calculateReuseTime (bow default reuse 1500)");
             formulas.add("ClassBalanceConfig PvP/PvE multipliers treated as 1.0");
+        }
+        if (metrics.containsKey("magicSuccessRate"))
+        {
+            formulas.add("Formulas.calcMagicDam (mAtk x2 sps / x4 bss, 91*sqrt(mAtk)/mDef*power, crit x3 / x2.5 PvP, half-fail, resisted, shield, random)");
+            formulas.add("Formulas.calcMagicSuccess (100 - round((float) 1.3^(targetLevel - magicLevel)))");
+            formulas.add("FuncMAtkMod / FuncMDefMod for NPCs (INT bonus^2 * levelMod^2, MEN bonus * levelMod)");
+            formulas.add("Creature.getRandomDamageMultiplier");
+            formulas.add("MagicalDamage effect ((int) damage; no hit at 0)");
         }
         for (int i = 0; i < formulas.size(); i++)
             b.append("      ").append(q(formulas.get(i))).append(i + 1 == formulas.size() ? "\n" : ",\n");
@@ -879,8 +995,10 @@ public final class MobiusFormulaDriver
         int dex;
         int con;
         int men;
+        int intel;
         double pAtk;
         double pDef;
+        double mAtk;
         double mDef;
         int critical;
         double accuracy;
@@ -914,6 +1032,9 @@ public final class MobiusFormulaDriver
         double strBonus, dexBonus, conBonus, intBonus, witBonus, menBonus;
         double mAtk, mDef, mAtkSpd;
         int mCritPermille, maxHp, maxMp, maxCp;
+        int level;
+        boolean armed;
+        boolean kindPlayer;
     }
 
     private static final class StatBonus
@@ -942,18 +1063,32 @@ public final class MobiusFormulaDriver
     {
         final Path ref;
         final Path data;
+        // Each catalog is read from the Mobius XML when that part of the tree is checked out, else from the Fineage JSON.
         boolean xml;
+        boolean classXml;
+        boolean itemXml;
+        boolean bonusXml;
+        boolean npcXml;
+        boolean skillXml;
         String classesJson;
         String itemsJson;
         String npcsJson;
         String passivesJson;
+        String skillCombatJson;
         StatBonus bonus;
 
         static DataSource open(Path ref, Path data) throws Exception
         {
             DataSource src = new DataSource(ref, data);
-            src.xml = Files.isDirectory(ref.resolve("dist/game/data/stats"));
-            if (!src.xml && (data == null || !Files.isDirectory(data)))
+            Path stats = ref.resolve("dist/game/data/stats");
+            src.classXml = Files.isDirectory(stats.resolve("chars/baseStats"));
+            src.itemXml = Files.isDirectory(stats.resolve("items"));
+            src.bonusXml = Files.isRegularFile(stats.resolve("statBonus.xml"));
+            src.npcXml = Files.isDirectory(stats.resolve("npcs"));
+            src.skillXml = Files.isDirectory(stats.resolve("skills"));
+            src.xml = src.classXml && src.itemXml && src.bonusXml && src.npcXml && src.skillXml;
+            boolean anyXml = src.classXml || src.itemXml || src.bonusXml || src.npcXml || src.skillXml;
+            if (!anyXml && (data == null || !Files.isDirectory(data)))
                 throw new IllegalArgumentException(
                     "Mobius XML tree dist/game/data/stats is missing under " + ref
                         + " and --data (Fineage transcribed catalogs) was not provided.");
@@ -968,7 +1103,7 @@ public final class MobiusFormulaDriver
 
         ClassData readClass(int classId) throws Exception
         {
-            if (xml)
+            if (classXml)
                 return MobiusFormulaDriver.readClass(ref, classId);
             return readClassJson(classId);
         }
@@ -997,14 +1132,27 @@ public final class MobiusFormulaDriver
 
         ItemData readItem(int itemId) throws Exception
         {
-            if (xml)
+            if (itemXml)
                 return MobiusFormulaDriver.readItem(ref, itemId);
             return readItemJson(itemId);
         }
 
+        /** Returns {power, magicLevel} for a skill level: Mobius skill XML when present, else skill-combat.json. */
+        double[] readMagicSkill(int skillId, int level) throws Exception
+        {
+            if (skillXml)
+                return MobiusFormulaDriver.readSkillPowerAndMagicLevel(ref, skillId, level);
+            if (skillCombatJson == null)
+                skillCombatJson = Files.readString(data.resolve("skill-combat.json"), StandardCharsets.UTF_8);
+            String obj = jsonObjectInArray(skillCombatJson, "skills", "skillId", skillId);
+            if (obj == null)
+                throw new IllegalArgumentException("Skill " + skillId + " not found in skill-combat.json");
+            return new double[] { jsonArrayAt(obj, "power", level), jsonArrayAt(obj, "magicLevel", level) };
+        }
+
         NpcData readNpc(int npcId) throws Exception
         {
-            if (xml)
+            if (npcXml)
                 return MobiusFormulaDriver.readNpc(ref, npcId);
             return readNpcJson(npcId);
         }
@@ -1013,7 +1161,7 @@ public final class MobiusFormulaDriver
         {
             if (bonus != null)
                 return bonus;
-            bonus = xml ? MobiusFormulaDriver.readStatBonus(ref) : readStatBonusJson();
+            bonus = bonusXml ? MobiusFormulaDriver.readStatBonus(ref) : readStatBonusJson();
             return bonus;
         }
 
@@ -1021,7 +1169,7 @@ public final class MobiusFormulaDriver
         {
             if (spec == null || spec.isBlank())
                 return List.of();
-            if (!xml)
+            if (!skillXml)
                 throw new IllegalArgumentException(
                     "Buffs require Mobius skill XML under dist/game/data/stats/skills; it is absent in this tree.");
             return MobiusFormulaDriver.readBuffs(ref, spec);
@@ -1129,7 +1277,9 @@ public final class MobiusFormulaDriver
             dataNpc.str = jsonInt(obj, "str", 40);
             dataNpc.dex = jsonInt(obj, "dex", 30);
             dataNpc.con = jsonInt(obj, "con", 43);
-            dataNpc.men = jsonInt(obj, "men", 25);
+            dataNpc.men = jsonInt(obj, "men", 10);
+            dataNpc.intel = jsonInt(obj, "int", 21);
+            dataNpc.mAtk = jsonDouble(obj, "mAtk", 0);
             dataNpc.pAtk = jsonDouble(obj, "pAtk", 0);
             dataNpc.pDef = jsonDouble(obj, "pDef", 0);
             dataNpc.mDef = jsonDouble(obj, "mDef", 0);
@@ -1160,6 +1310,24 @@ public final class MobiusFormulaDriver
             }
             return bonus;
         }
+    }
+
+    /** Element {@code level - 1} (clamped) of a numeric array field inside one JSON object; 0 when absent. */
+    private static double jsonArrayAt(String obj, String field, int level)
+    {
+        int key = obj.indexOf("\"" + field + "\"");
+        if (key < 0)
+            return 0;
+        int open = obj.indexOf('[', key);
+        int close = obj.indexOf(']', open);
+        if (open < 0 || close < 0)
+            return 0;
+        String body = obj.substring(open + 1, close).trim();
+        if (body.isEmpty())
+            return 0;
+        String[] parts = body.split(",");
+        int index = Math.max(0, Math.min(level - 1, parts.length - 1));
+        return Double.parseDouble(parts[index].trim());
     }
 
     private static String jsonObjectInArray(String json, String arrayName, String idField, int id)

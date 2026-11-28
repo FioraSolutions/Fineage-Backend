@@ -73,7 +73,7 @@ public sealed partial class ZoneWorld
             ShieldRate: mods.Apply(CombatStat.RShld, formula.ShieldRate),
             Soulshots: gear.Soulshots,
             WeaponGrade: gear.WeaponGrade,
-            MCritRate: (int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10,
+            MCritRate: Math.Min((int)mods.Apply(CombatStat.MCritRate, formula.MagicCritBase) * 10, ZoneCombat.MaxMCritRate),
             MagicCritDmg: mods.Apply(CombatStat.MagicCritDmg, 1d),
             CritDmg: mods.Apply(CombatStat.CritDmg, 1d),
             BlowRate: mods.Apply(CombatStat.BlowRate, 1d),
