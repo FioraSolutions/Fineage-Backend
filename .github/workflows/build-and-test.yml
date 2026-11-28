@@ -30,6 +30,8 @@ jobs:
         include:
           - id: agent
             project: tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj
+          - id: agent-identity
+            project: tests/Fineage.Agent.Identity.Tests/Fineage.Agent.Identity.Tests.csproj
           - id: game
             project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
           - id: net
