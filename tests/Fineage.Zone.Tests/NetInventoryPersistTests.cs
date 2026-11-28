@@ -50,12 +50,18 @@ public sealed class NetInventoryPersistTests
 
         BenchPlayer actor = await EnterExisting(bench, created.Id, "alice", "OldOne");
 
-        var granted = bench.Store.FindById("alice", created.Id)!;
-        Assert.Contains(granted.Items!, item => item.ItemId == StarterWeapon && item.EquippedSlot == RightHand);
-        int count = granted.Items!.Count;
-        Assert.Equal(count, EnterItems(bench, actor).Length);
+        // Enter grants the kit on the live body only. Inventory is not persisted on the enter
+        // path (ZoneWorldGrantLedger.ApplyStarterKitLedger — no economy I/O on the sim thread).
+        var live = EnterItems(bench, actor);
+        Assert.Contains(live, item => item.ItemId == StarterWeapon && item.EquippedSlot == RightHand);
+        int count = live.Length;
+        Assert.Null(bench.Store.FindById("alice", created.Id)!.Items);
 
         await bench.World.LeaveAsync(actor.Session, CancellationToken.None);
+        var granted = bench.Store.FindById("alice", created.Id)!;
+        Assert.Contains(granted.Items!, item => item.ItemId == StarterWeapon && item.EquippedSlot == RightHand);
+        Assert.Equal(count, granted.Items!.Count);
+
         BenchPlayer again = await EnterExisting(bench, created.Id, "alice", "OldOne");
 
         var rows = EnterItems(bench, again);
