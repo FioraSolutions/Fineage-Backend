@@ -47,11 +47,18 @@ jobs:
             **/*.csproj
             Fineage.Backend.slnx
 
+      # Category=perf already runs in zone-simulation-perf with
+      # ParallelizeTestCollections=false. Running those timing gates here
+      # (full slnx, parallel collections, shared runner) is noisy: this job
+      # failed Debug_tick_p99_with_many_ai_driven_characters at p99=236 ms
+      # (p50=0.30) on promotion PR #1136, while zone-simulation-perf passed.
+      # Category=Load has its own workflows. Slow and Integration stay here.
       - name: Test
         run: >-
           dotnet test Fineage.Backend.slnx
           --configuration Release
           --verbosity ${{ inputs.verbosity }}
+          --filter "Category!=perf&Category!=Load"
           --blame-hang
           --blame-hang-timeout 15m
           --blame-hang-dump-type none
