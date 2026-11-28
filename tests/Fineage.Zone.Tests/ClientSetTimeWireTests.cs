@@ -54,4 +54,18 @@ public sealed class ClientSetTimeWireTests
         Assert.Equal(6, msg.ClockSpeed);
         Assert.Equal(1, msg.GameMinutes);
     }
+
+    [Theory]
+    [InlineData(0L, 0)]
+    [InlineData(1L, 1)]
+    [InlineData(1439L, 1439)]
+    [InlineData(1440L, 0)]
+    [InlineData(3073L, 193)]
+    public void Client_game_minutes_stay_inside_one_ig_day(long minutesSinceReference, int expected)
+    {
+        var refMs = 1_800_000_000_000L;
+        var time = new ZoneGameTime(refMs);
+        var now = refMs + minutesSinceReference * (ZoneGameTime.MillisPerIgDay / (24 * 60));
+        Assert.Equal(expected, time.ClientGameMinutes(now));
+    }
 }
