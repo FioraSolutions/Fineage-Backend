@@ -1,20 +1,39 @@
 # Wire coverage — Mobius CT_0 Interlude packets
 
-Fineage `dev` @ `8daf4209`. Mobius `L2J_Mobius_CT_0_Interlude` @ `5c019037`. Unity client `FioraSolutions/Fineage` `dev` @ `c1e79fe` (`l2-unity`, Net contract via `scripts/sync-net-contract.py`).
+Machine-readable copy of the tables below: [`data/retail-net-opcode-map.json`](data/retail-net-opcode-map.json). Decision record: [`adr/0001-custom-net-wire.md`](adr/0001-custom-net-wire.md). The JSON and these tables must agree; `tools/check_retail_opcode_map.py` and the Net test suite fail when they drift or when a listed Fineage name is missing from `NetOpcode`.
 
-Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`), not the retail byte ids. A packet is **server yes** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
+Fineage speaks its own Net opcodes (`src/Fineage.Net.Contract/Opcodes/NetOpcode.cs`) on the `PacketEnvelope` wire, not the retail byte ids or the retail frame layout. A packet is **server handler** when a Zone/Login/Protocol handler implements that message (often folded into one Net opcode). That proves wiring only. **partial** means the gameplay exists only as a subset, an HTML substitute, or a push with no matching request. **no** means nothing handles it. **n/a** is out of the Interlude Net target (GameGuard, HackShield, GM snoop, Kamael slideshow, debug primitives, player mail, retail NetPing).
 
-The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). **contract** means the synced contract defines the opcode and no gameplay file reads or writes it. Client and server contracts match (252 opcode constants on both sides).
+The Unity client **handles** a packet when a file outside `l2-unity/Assets/Scripts/**/Net/Contract` references the mapped `NetOpcode` (decoder, sender, or apply service). That also proves wiring only. **contract** means the synced contract defines the opcode and no gameplay file reads or writes it.
 
-## Counts
+## Wire parity versus gameplay parity
 
-| Direction | Packets | Server yes | partial | no | n/a | Client yes | contract-only | client no | client n/a |
+These are two different checks. Do not read a `yes` in the tables below, or a name in the `Fineage opcode` column, as "behaviour verified".
+
+| Check | What it measures | Where it lives |
+|---|---|---|
+| **Wire / contract agreement** | Fineage Login+Zone speak `PacketEnvelope` 1.0. Client and backend share `Fineage.Net.Contract`. Retail Interlude packets are mapped to `NetOpcode` names in this file and in the JSON map. | This file, [`data/retail-net-opcode-map.json`](data/retail-net-opcode-map.json), [`adr/0001-custom-net-wire.md`](adr/0001-custom-net-wire.md), `scripts/check-net-contract-sync.py` |
+| **Gameplay / behavioural parity** | A handler's behaviour matches Mobius CT_0 Interlude (and has evidence). | [`mobius-parity-matrix.md`](mobius-parity-matrix.md) only |
+
+**Wire mapping counts** (name present in the `Fineage opcode` column, not "the packet is implemented" and not "the behaviour is verified"): **386** retail packets map to at least one `NetOpcode`; **88** have no Fineage name yet (gap, n/a, or unused). Those 386 mappings collapse onto **237** distinct `NetOpcode` names, because several retail packets fold into one Fineage message.
+
+Client and backend `NetOpcode` constants are **not** currently identical. Backend `NetOpcode` has **293** constants; the Unity client `dev` tree is behind, and the pending file list is [`data/net-contract-client-gap.txt`](data/net-contract-client-gap.txt). Backend CI compares the two trees with the client's `scripts/sync-net-contract.py`.
+
+## Counts — handler coverage only
+
+These counters prove **implementation/handler wiring only**: a `yes` cell means a server or client handler
+exists, not that its behaviour matches Mobius and not that it has run under production conditions. A
+`partial`/`no` cell is a coverage gap. Behavioural parity and production verification live only in
+[`mobius-parity-matrix.md`](mobius-parity-matrix.md); this file never proves either. The numbers must
+match a recount of the tables (enforced by `tools/check_retail_opcode_map.py`).
+
+| Direction | Packets | Server handler | partial | no | n/a | Client handler | contract-only | client no | client n/a |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| C2S | 158 | 104 | 34 | 17 | 3 | 91 | 28 | 36 | 3 |
-| C2S extended (0xD0) | 46 | 32 | 5 | 9 | 0 | 13 | 23 | 10 | 0 |
-| S2C | 270 | 178 | 54 | 31 | 7 | 210 | 6 | 47 | 7 |
+| C2S | 158 | 110 | 33 | 12 | 3 | 97 | 28 | 30 | 3 |
+| C2S extended (0xD0) | 46 | 34 | 5 | 7 | 0 | 15 | 23 | 8 | 0 |
+| S2C | 270 | 186 | 54 | 23 | 7 | 218 | 6 | 39 | 7 |
 
-**In-scope gaps:** server not fully implemented (partial+no) **150**, of which server absent (**no**) **57**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **150**, of which client absent (**no**) **93**.
+**In-scope gaps:** server not fully implemented (partial+no) **134**, of which server absent (**no**) **42**. Client does not apply the mapped opcode (contract-only+no, excluding n/a) **134**, of which client absent (**no**) **77**.
 
 Geodata LOS and pathfinding are server-side region files (`scripts/fetch-geodata.sh`). They have no retail packet of their own.
 
@@ -24,7 +43,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Client → server
 
-| Opcode | Mobius class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|
 | 0x00 | ProtocolVersion | yes | yes | Hello | Fineage Hello, not retail 0x00 |
 | 0x08 | AuthLogin | yes | yes | Auth,ZoneAuth | Login Auth + zone ZoneAuth |
@@ -53,7 +72,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x1f | RequestBuyItem | yes | yes | RequestBuyItem |  |
 | 0x20 | RequestLinkHtml | yes | yes | BypassRequest | LinkBypassHandler |
 | 0x21 | RequestBypassToServer | yes | yes | BypassRequest |  |
-| 0x22 | RequestBBSwrite | no | no |  | community board |
+| 0x22 | RequestBBSwrite | yes | yes | RequestBBSwrite | community board #929 |
 | 0x24 | RequestJoinPledge | yes | yes | ClanInviteRequest |  |
 | 0x25 | RequestAnswerJoinPledge | yes | yes | ClanAnswerJoinRequest |  |
 | 0x26 | RequestWithdrawalPledge | yes | yes | ClanLeaveRequest |  |
@@ -91,7 +110,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x52 | RequestReplySurrenderPledgeWar | yes | yes | PledgeCommand |  |
 | 0x53 | RequestSetPledgeCrest | yes | yes | PledgeCommand | ZoneWorldPledge.Crests |
 | 0x55 | RequestGiveNickName | yes | yes | PledgeCommand | ZoneWorldPledge.Commands |
-| 0x57 | RequestShowBoard | no | no |  | community board |
+| 0x57 | RequestShowBoard | yes | yes | RequestShowBoard | community board #929 |
 | 0x58 | RequestEnchantItem | yes | yes | EnchantRequest | confirm/cancel are EnchantConfirm / EnchantCancel |
 | 0x59 | RequestDestroyItem | yes | yes | DestroyItemRequest |  |
 | 0x5b | SendBypassBuildCmd | partial | no |  | GM commands are admin_* HTML bypasses, not this packet |
@@ -122,8 +141,8 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x7c | RequestTutorialPassCmdToServer | partial | yes | TutorialUi |  |
 | 0x7d | RequestTutorialQuestionMark | partial | yes | TutorialUi |  |
 | 0x7e | RequestTutorialClientEvent | partial | yes | TutorialUi |  |
-| 0x7f | RequestPetition | no | no |  | Say petition types return NotInPetitionChat |
-| 0x80 | RequestPetitionCancel | no | no |  |  |
+| 0x7f | RequestPetition | yes | yes | RequestPetition | petition queue #930 |
+| 0x80 | RequestPetitionCancel | yes | yes | RequestPetitionCancel | petition queue #930 |
 | 0x81 | RequestGmList | partial | no |  | GmListTowns is an admin bypass, not the petition GM list |
 | 0x82 | RequestJoinAlly | yes | yes | AllyInfo | ZoneWorldAlly |
 | 0x83 | RequestAnswerJoinAlly | yes | yes | AllyAskJoin |  |
@@ -156,7 +175,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xaa | BypassUserCmd | yes | no | BypassUserCmd | `UserCommandRegistry`. Unity client does not send `BypassUserCmd` / retail 0xaa yet |
 | 0xab | SnoopQuit | n/a | n/a |  | GM snoop is not a Fineage target |
 | 0xac | RequestRecipeBookOpen | yes | yes | RecipeBookOpen |  |
-| 0xad | RequestRecipeBookDestroy | no | no |  | no forget-recipe opcode |
+| 0xad | RequestRecipeBookDestroy | yes | yes | Net `RecipeBookDestroy` 0x03E6 | #935 |
 | 0xae | RequestRecipeItemMakeInfo | partial | yes | RecipeBookOpen | make info is RecipeItemMakeInfo S2C |
 | 0xaf | RequestRecipeItemMakeSelf | yes | yes | RecipeMakeSelf |  |
 | 0xb1 | RequestRecipeShopMessageSet | partial | yes | SetRecipeShop |  |
@@ -178,7 +197,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xc2 | RequestDeleteMacro | no | no |  |  |
 | 0xc4 | RequestBuySeed | yes | contract | ManorCommand |  |
 | 0xc5 | DlgAnswer | partial | no |  | confirms are per-feature (party, trade, augment), no general ConfirmDlg |
-| 0xc6 | RequestPreviewItem | partial | no |  | Wear bypass is StubBypassHandler; ShopPreviewList not sent |
+| 0xc6 | RequestPreviewItem | yes | yes |  | Wear → ShopPreviewList / ShopPreviewInfo (#924) |
 | 0xc7 | RequestSSQStatus | yes | contract | SevenSignsStatusRequest |  |
 | 0xca | GameGuardReply | n/a | n/a |  | GameGuard is not part of Fineage Net |
 | 0xcc | RequestSendFriendMsg | yes | yes | Say | ChatProtocol.Friend / Tell |
@@ -187,7 +206,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Client → server, extended 0xD0
 
-| Opcode | Mobius class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|
 | 0xd0/0x01 | RequestOustFromPartyRoom | no | no |  |  |
 | 0xd0/0x02 | RequestDismissPartyRoom | no | no |  |  |
@@ -200,7 +219,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0/0x09 | RequestProcureCropList | yes | contract | ManorCommand |  |
 | 0xd0/0x0a | RequestSetSeed | yes | contract | ManorCommand |  |
 | 0xd0/0x0b | RequestSetCrop | yes | contract | ManorCommand |  |
-| 0xd0/0x0c | RequestWriteHeroWords | no | no |  |  |
+| 0xd0/0x0c | RequestWriteHeroWords | yes | yes |  | hero inscription #932 |
 | 0xd0/0x0d | RequestExAskJoinMPCC | yes | contract | CommandChannelAskRequest |  |
 | 0xd0/0x0e | RequestExAcceptJoinMPCC | yes | contract | CommandChannelAcceptRequest |  |
 | 0xd0/0x0f | RequestExOustFromMPCC | yes | contract | CommandChannelOustRequest |  |
@@ -220,7 +239,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0/0x1d | RequestPledgeMemberInfo | yes | yes | PledgeCommand |  |
 | 0xd0/0x1e | RequestPledgeWarList | yes | yes | PledgeWarList |  |
 | 0xd0/0x1f | RequestExFishRanking | partial | no |  | FishingChampionshipBoard has no client ranking packet |
-| 0xd0/0x20 | RequestPCCafeCouponUse | no | no |  | PC cafe points |
+| 0xd0/0x20 | RequestPCCafeCouponUse | yes | yes |  | PC cafe coupon redeem #933 |
 | 0xd0/0x22 | RequestCursedWeaponList | partial | yes | CursedWeaponList | S2C list exists; no C2S refresh |
 | 0xd0/0x23 | RequestCursedWeaponLocation | partial | yes | CursedWeaponLocation | S2C locations; no C2S refresh |
 | 0xd0/0x24 | RequestPledgeReorganizeMember | yes | yes | PledgeCommand |  |
@@ -238,9 +257,9 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 
 ## Server → client
 
-| Opcode | Mobius enum | Java class | Server | Client | Fineage opcode | Gap |
+| Opcode | Mobius enum | Java class | Server handler | Client handler | Fineage opcode | Gap |
 |---|---|---|---|---|---|---|
-| 0x00 | KEY_PACKET | KeyPacket | partial | yes | HelloAck | login hello ack, not a cipher key packet |
+| 0x00 | KEY_PACKET | KeyPacket | partial | yes | HelloAck | login hello ack, not the retail key handshake |
 | 0x01 | CHAR_MOVE_TO_LOCATION | MoveToLocation | yes | yes | MoveState |  |
 | 0x02 | NPC_SAY | NpcSay | yes | yes | CreatureSay |  |
 | 0x03 | CHAR_INFO | CharInfo | yes | yes | EntitySpawn | players |
@@ -326,7 +345,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x69 | SURRENDER_PLEDGE_WAR | SurrenderPledgeWar | yes | yes | PledgeWarList |  |
 | 0x6c | PLEDGE_CREST | PledgeCrest | yes | yes | CrestData |  |
 | 0x6d | SETUP_GAUGE | SetupGauge | partial | yes | MagicSkillUse | cast time is inside MagicSkillUse |
-| 0x6e | SHOW_BOARD | ShowBoard | no | no |  | community board |
+| 0x6e | SHOW_BOARD | ShowBoard | yes | yes | ShowBoard | community board #929 |
 | 0x6f | CHOOSE_INVENTORY_ITEM | ChooseInventoryItem | partial | yes | EnchantResult | enchant window is EnchantRequest/Result, not ChooseInventoryItem |
 | 0x71 | MOVE_TO_LOCATION_IN_VEHICLE | MoveToLocationInVehicle | partial | yes | MoveToLocationInVehicle |  |
 | 0x72 | STOP_MOVE_IN_VEHICLE | StopMoveInVehicle | partial | yes | StopMoveInVehicle |  |
@@ -361,7 +380,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0x9a | PRIVATE_STORE_MANAGE_LIST_SELL | PrivateStoreManageListSell | yes | yes | PrivateStoreListSell |  |
 | 0x9b | PRIVATE_STORE_LIST_SELL | PrivateStoreListSell | yes | yes | PrivateStoreListSell |  |
 | 0x9c | PRIVATE_STORE_MSG_SELL | PrivateStoreMsgSell | yes | yes | PrivateStoreInfo |  |
-| 0x9d | SHOW_MINI_MAP | ShowMiniMap | no | no |  |  |
+| 0x9d | SHOW_MINI_MAP | ShowMiniMap | yes | yes | Net `ShowMiniMap` 0x03EC | #925 Maps |
 | 0xa0 | TUTORIAL_SHOW_HTML | TutorialShowHtml | yes | yes | TutorialUi |  |
 | 0xa1 | TUTORIAL_SHOW_QUESTION_MARK | TutorialShowQuestionMark | yes | yes | TutorialUi |  |
 | 0xa2 | TUTORIAL_ENABLE_CLIENT_EVENT | TutorialEnableClientEvent | yes | yes | TutorialUi |  |
@@ -397,7 +416,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd0 | MULTI_SELL_LIST | MultiSellList | yes | yes | MultiSellList |  |
 | 0xd1 | SET_SUMMON_REMAIN_TIME | SetSummonRemainTime | partial | yes | SummonInfo |  |
 | 0xd3 | NET_PING | NetPing | n/a | n/a |  | not retail NetPing |
-| 0xd4 | DICE | Dice | no | no |  | RollingDice item handler absent |
+| 0xd4 | DICE | Dice | yes | yes | Net `Dice` 0x03EB | #925 RollingDice |
 | 0xd5 | SNOOP | Snoop | n/a | n/a |  | GM snoop |
 | 0xd6 | RECIPE_BOOK_ITEM_LIST | RecipeBookItemList | yes | yes | RecipeBookList |  |
 | 0xd7 | RECIPE_ITEM_MAKE_INFO | RecipeItemMakeInfo | yes | yes | RecipeItemMakeInfo |  |
@@ -405,7 +424,7 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xd9 | RECIPE_SHOP_SELL_LIST | RecipeShopSellList | yes | yes | RecipeShopSellList |  |
 | 0xda | RECIPE_SHOP_ITEM_INFO | RecipeShopItemInfo | yes | yes | RecipeShopItemInfo |  |
 | 0xdb | RECIPE_SHOP_MSG | RecipeShopMsg | partial | yes | RecipeShopItemInfo |  |
-| 0xdc | SHOW_CALCULATOR | ShowCalculator | no | no |  |  |
+| 0xdc | SHOW_CALCULATOR | ShowCalculator | yes | yes | Net `ShowCalculator` 0x03ED | #925 Calculator |
 | 0xdd | MON_RACE_INFO | MonRaceInfo | yes | yes | MonRaceInfo |  |
 | 0xde | SHOW_TOWN_MAP | ShowTownMap | no | no |  |  |
 | 0xdf | OBSERVATION_MODE | ObservationEnter | partial | yes | OlympiadMatch | olympiad observe only |
@@ -424,10 +443,10 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xec | CLIENT_SET_TIME | ClientSetTime | yes | yes | ClientSetTime |  |
 | 0xed | CONFIRM_DLG | ConfirmDlg | partial | no |  | no general confirm dialog |
 | 0xee | PARTY_SPELLED | PartySpelled | yes | yes | PartySpelled |  |
-| 0xef | SHOP_PREVIEW_LIST | ShopPreviewList | no | no |  | Wear stub |
-| 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | no | no |  |  |
+| 0xef | SHOP_PREVIEW_LIST | ShopPreviewList | yes | yes |  | Net 0x03E8 (#924) |
+| 0xf0 | SHOP_PREVIEW_INFO | ShopPreviewInfo | yes | yes |  | Net 0x03E9 (#924) |
 | 0xf1 | CAMERA_MODE | CameraMode | no | no |  |  |
-| 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | no | no |  | SpecialXMas item |
+| 0xf2 | SHOW_XMAS_SEAL | ShowXMasSeal | yes | yes | Net `ShowXMasSeal` 0x03EE | #925 SpecialXMas |
 | 0xf3 | ETC_STATUS_UPDATE | EtcStatusUpdate | yes | yes | EtcStatusUpdate | danger area follows an enabled EffectZone (`showDangerIcon`) |
 | 0xf4 | SHORT_BUFF_STATUS_UPDATE | ShortBuffStatusUpdate | partial | yes | AbnormalStatusUpdate |  |
 | 0xf5 | SSQ_STATUS | SSQStatus | yes | yes | SevenSignsStatus |  |
@@ -473,12 +492,12 @@ Retail opcode ids below are Mobius `ClientPackets` / `ExClientPackets` / `Server
 | 0xfe/0x2d | EX_MAIL_ARRIVED | ExMailArrived | n/a | n/a |  | player mail is not a Fineage Net target |
 | 0xfe/0x2e | EX_STORAGE_MAX_COUNT | ExStorageMaxCount | partial | yes | InventoryUpdate | slot caps are server-side |
 | 0xfe/0x30 | EX_MULTI_PARTY_COMMAND_CHANNEL_INFO | ExMultiPartyCommandChannelInfo | yes | contract | CommandChannelInfo |  |
-| 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | no | no |  |  |
+| 0xfe/0x31 | EX_PC_CAFE_POINT_INFO | ExPCCafePointInfo | yes | yes | ExPCCafePointInfo | PC cafe points #933 |
 | 0xfe/0x32 | EX_SET_COMPASS_ZONE_CODE | ExSetCompassZoneCode | no | no |  | zone rules are server-side (`ZoneTypeRegistry`); compass byte is still not sent |
 | 0xfe/0x33 | EX_GET_BOSS_RECORD | ExGetBossRecord | yes | yes | BossStatus |  |
 | 0xfe/0x34 | EX_ASK_JOIN_PARTY_ROOM | ExAskJoinPartyRoom | no | no |  |  |
 | 0xfe/0x35 | EX_LIST_PARTY_MATCHING_WAITING_ROOM | ExListPartyMatchingWaitingRoom | no | no |  |  |
-| 0xfe/0x37 | EX_SHOW_ADVENTURER_GUIDE_BOOK | ExShowAdventurerGuideBook | no | no |  | RaidbossInfo 31775/31776 still unavailable HTML |
+| 0xfe/0x37 | EX_SHOW_ADVENTURER_GUIDE_BOOK | ExShowAdventurerGuideBook | no | no |  | Adventurer guide book packet still absent; RaidbossInfo HTML via Script host (#919) |
 | 0xfe/0x38 | EX_SHOW_SCREEN_MESSAGE | ExShowScreenMessage | partial | yes | SystemMessage |  |
 | 0xfe/0x39 | PLEDGE_SKILL_LIST | PledgeSkillList | partial | yes | SkillList | clan skills are on the skill list |
 | 0xfe/0x3a | PLEDGE_SKILL_LIST_ADD | PledgeSkillListAdd | partial | yes | SkillList |  |

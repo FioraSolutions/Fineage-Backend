@@ -1,6 +1,7 @@
 using Fineage.Net.Contract;
 using Fineage.Net.Host;
 using Fineage.Protocol;
+using Fineage.Zone.Security;
 using Fineage.Zone.World;
 
 namespace Fineage.Zone.Net;
@@ -58,17 +59,26 @@ public sealed partial class WorldEventPacketHandler
             return;
         }
 
-        // Same gate the V2 listener used: the env flag is the only authority, not the request body.
+        // The env flag enables the surface; the character role authorizes it. Neither is taken from the body.
         if (!_adminCommands)
         {
             await _reject(conn, InventoryProtocol.Forbidden, "AdminBossSchedule is disabled.", ct).ConfigureAwait(false);
             return;
         }
 
+        if (!AdminCommandCatalog.TryGetNet("AdminBossSchedule", out AdminCommandSpec spec))
+            throw new InvalidOperationException("AdminBossSchedule is missing from AdminCommandCatalog.");
+        if (!_world.TryAuthorizeAdmin(zoneSession, spec.MinimumRole, spec.Name, ZoneWorld.AdminSourceNet, out string refusal))
+        {
+            await _reject(conn, refusal, "AdminBossSchedule is forbidden for this character.", ct).ConfigureAwait(false);
+            return;
+        }
+
         var request = NetCodec.DecodeAdminBossSchedule(envelope.Payload);
         string? error = await _world.ExecuteAsync(
             zoneSession,
-            new AdminBossCommand(new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action }),
+            new AdminBossCommand(new AdminBossScheduleMsg { NpcId = request.NpcId, Action = request.Action },
+                ZoneWorld.AdminSourceNet),
             ct).ConfigureAwait(false);
         if (error != null)
             await _reject(conn, error, "AdminBossSchedule was rejected.", ct).ConfigureAwait(false);

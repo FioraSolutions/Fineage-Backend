@@ -26,14 +26,15 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
             sequencer.Submit(batch);
     }
 
-    void RecordPrepared(Action send)
+    Action RecordPrepared(Action send, IReadOnlyList<int> audienceIds)
     {
         var recording = sequencer.Recording;
         var batch = recording ?? new WorldFanoutBatch();
         batch.Bind(inner);
-        batch.AddPrepared(send);
+        batch.AddPrepared(send, audienceIds);
         if (recording == null)
             sequencer.Submit(batch);
+        return send;
     }
 
     /// <summary>StatusUpdate carries a subset of attributes: the merged frame keeps earlier attributes the new one omits.</summary>
@@ -88,7 +89,7 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
         Record(FanoutKind.UserInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
     void IWorldEventPublisher.FanoutCharInfo(IReadOnlyList<int> watcherObjectIds, int objectId) =>
-        RecordPrepared(inner.PrepareCharInfo(watcherObjectIds, objectId));
+        RecordPrepared(inner.PrepareCharInfo(watcherObjectIds, objectId), watcherObjectIds);
 
     void IWorldEventPublisher.FanoutAttackState(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AttackMsg attack) =>
         Record(FanoutKind.AttackState, 0, watcherObjectIds, new FanoutArgs(Payload: attack), replaceable: false);
@@ -144,6 +145,24 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutMultiSellList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MultiSellListMsg list) =>
         Record(FanoutKind.MultiSellList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
 
+    void IWorldEventPublisher.FanoutShopPreviewList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewListMsg list) =>
+        Record(FanoutKind.ShopPreviewList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShopPreviewInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopPreviewInfoMsg info) =>
+        Record(FanoutKind.ShopPreviewInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
+    void IWorldEventPublisher.FanoutDice(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.DiceMsg dice) =>
+        Record(FanoutKind.Dice, dice.ObjectId, watcherObjectIds, new FanoutArgs(Payload: dice), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowMiniMap(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowMiniMapMsg map) =>
+        Record(FanoutKind.ShowMiniMap, 0, watcherObjectIds, new FanoutArgs(Payload: map), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowCalculator(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowCalculatorMsg calc) =>
+        Record(FanoutKind.ShowCalculator, 0, watcherObjectIds, new FanoutArgs(Payload: calc), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowXMasSeal(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowXMasSealMsg seal) =>
+        Record(FanoutKind.ShowXMasSeal, 0, watcherObjectIds, new FanoutArgs(Payload: seal), replaceable: false);
+
     void IWorldEventPublisher.FanoutShopBalance(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShopBalanceMsg balance) =>
         Record(FanoutKind.ShopBalance, 0, watcherObjectIds, new FanoutArgs(Payload: balance), replaceable: false);
 
@@ -177,17 +196,32 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
     void IWorldEventPublisher.FanoutShortcutInit(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShortCutInitMsg init) =>
         Record(FanoutKind.ShortcutInit, 0, watcherObjectIds, new FanoutArgs(Payload: init), replaceable: false);
 
+    void IWorldEventPublisher.FanoutMacroList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.MacroListMsg list) =>
+        Record(FanoutKind.MacroList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
     void IWorldEventPublisher.FanoutChangeWaitType(IReadOnlyList<int> watcherObjectIds, int objectId, int waitType, int x, int y, int z) =>
         Record(FanoutKind.ChangeWaitType, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: waitType, C: x, D: y, E: z), replaceable: false);
 
     void IWorldEventPublisher.FanoutSocialAction(IReadOnlyList<int> watcherObjectIds, int objectId, int actionId) =>
         Record(FanoutKind.SocialAction, 0, watcherObjectIds, new FanoutArgs(A: objectId, B: actionId), replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetSelected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int colorHint) =>
-        Record(FanoutKind.TargetSelected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId, B: colorHint), replaceable: false);
+    void IWorldEventPublisher.FanoutTargetSelected(
+        IReadOnlyList<int> watcherObjectIds,
+        int targetObjectId,
+        int colorHint,
+        int selectorObjectId,
+        int x,
+        int y,
+        int z) =>
+        Record(
+            FanoutKind.TargetSelected,
+            0,
+            watcherObjectIds,
+            new FanoutArgs(A: targetObjectId, B: colorHint, C: selectorObjectId, D: x, E: y, F: z),
+            replaceable: false);
 
-    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId) =>
-        Record(FanoutKind.TargetUnselected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId), replaceable: false);
+    void IWorldEventPublisher.FanoutTargetUnselected(IReadOnlyList<int> watcherObjectIds, int targetObjectId, int selectorObjectId) =>
+        Record(FanoutKind.TargetUnselected, 0, watcherObjectIds, new FanoutArgs(A: targetObjectId, B: selectorObjectId), replaceable: false);
 
     void IWorldEventPublisher.FanoutAcquireSkillList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.AcquireSkillListMsg list) =>
         Record(FanoutKind.AcquireSkillList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
@@ -329,6 +363,33 @@ internal sealed class OutboxingWorldEventPublisher(IWorldEventPublisher inner, W
 
     void IWorldEventPublisher.FanoutCommandChannelInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.CommandChannelInfoMsg info) =>
         Record(FanoutKind.CommandChannelInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyMatchDetail(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchDetailMsg detail) =>
+        Record(FanoutKind.PartyMatchDetail, 0, watcherObjectIds, new FanoutArgs(Payload: detail), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyMatchRoomList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchRoomListMsg list) =>
+        Record(FanoutKind.PartyMatchRoomList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomMemberList(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomMemberListMsg list) =>
+        Record(FanoutKind.PartyRoomMemberList, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomMemberUpdate(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomMemberUpdateMsg update) =>
+        Record(FanoutKind.PartyRoomMemberUpdate, 0, watcherObjectIds, new FanoutArgs(Payload: update), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomClose(IReadOnlyList<int> watcherObjectIds) =>
+        Record(FanoutKind.PartyRoomClose, 0, watcherObjectIds, default, replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyRoomAskJoin(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyRoomAskJoinMsg ask) =>
+        Record(FanoutKind.PartyRoomAskJoin, 0, watcherObjectIds, new FanoutArgs(Payload: ask), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPartyMatchWaitingRoom(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PartyMatchWaitingRoomMsg list) =>
+        Record(FanoutKind.PartyMatchWaitingRoom, 0, watcherObjectIds, new FanoutArgs(Payload: list), replaceable: false);
+
+    void IWorldEventPublisher.FanoutShowBoard(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.ShowBoardMsg board) =>
+        Record(FanoutKind.ShowBoard, 0, watcherObjectIds, new FanoutArgs(Payload: board), replaceable: false);
+
+    void IWorldEventPublisher.FanoutPcCafePointInfo(IReadOnlyList<int> watcherObjectIds, Fineage.Protocol.PcCafePointInfoMsg info) =>
+        Record(FanoutKind.PcCafePointInfo, 0, watcherObjectIds, new FanoutArgs(Payload: info), replaceable: false);
 
     void IWorldEventPublisher.FanoutMagicSkillLaunched(IReadOnlyList<int> watcherObjectIds, int casterObjectId, int skillId, int skillLevel, int[] targetObjectIds)
     {

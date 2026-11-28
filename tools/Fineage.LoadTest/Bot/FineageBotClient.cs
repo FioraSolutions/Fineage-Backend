@@ -51,8 +51,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _stats = stats;
         BotId = botId;
         Scenario = scenario;
-        Account = $"{scenario.AccountPrefix}{botId:D5}";
-        CharacterName = $"Bot{botId:D4}";
+        Account = BotIdentity.AccountName(scenario.AccountPrefix, botId);
+        CharacterName = BotIdentity.CharacterName(scenario.AccountPrefix, botId);
         (_spawnX, _spawnY, _spawnZ) = BotSpawn.Position(scenario, botId);
         _observation = new BotObservationLog(botId, _bag);
         if (scenario.IsGatekeeperTraveler(botId))
@@ -70,6 +70,13 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     public bool IsTraveler => _traveler != null;
 
+    /// <summary>
+    /// Hard ceiling for one login+zone enter handshake. Without it a bot whose Login connection is accepted but no
+    /// reply arrives (or whose registration deadlocks server-side) blocks <see cref="LoadTestRunner"/> forever and
+    /// no failure report is written.
+    /// </summary>
+    public TimeSpan HandshakeTimeout { get; set; } = TimeSpan.FromSeconds(30);
+
     public int BotId { get; }
     public LoadScenario Scenario { get; }
     public string Account { get; }
@@ -78,6 +85,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
     public BotObservationLog ObservationLog => _observation;
     public BotBagTracker Bag => _bag;
     public int SelfObjectId => (int)_selfEntity;
+    /// <summary>Tests replay a log without the enter handshake; lets the roster select the replayed self pawn.</summary>
+    internal void SetSelfEntityForTest(ulong entityValue) => _selfEntity = entityValue;
     internal Random Rng => _rng;
     internal BotPeerDirectory Peers => _peers;
 
@@ -85,28 +94,113 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     public async Task ConnectAndEnterAsync(CancellationToken ct)
     {
+        using var handshake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        handshake.CancelAfter(HandshakeTimeout);
+        try
+        {
+            await ConnectAndEnterCoreAsync(handshake.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"bot {BotId}: login/zone enter handshake exceeded {HandshakeTimeout.TotalSeconds:0}s; {HandshakeTimeline()}");
+        }
+    }
+
+    readonly List<(string Phase, long At)> _handshakeMarks = [];
+
+    /// <summary>
+    /// Where the handshake budget went. Each phase is listed with how long it took, the last one still open at the
+    /// timeout. It also gives the seconds this process was not running, so a box freeze is told apart from a slow segment
+    /// of the login chain (#1114).
+    /// </summary>
+    internal string HandshakeTimeline()
+    {
+        long now = Stopwatch.GetTimestamp();
+        var parts = new List<string>(_handshakeMarks.Count + 1);
+        for (int i = 0; i < _handshakeMarks.Count; i++)
+        {
+            long end = i + 1 < _handshakeMarks.Count ? _handshakeMarks[i + 1].At : now;
+            double ms = Stopwatch.GetElapsedTime(_handshakeMarks[i].At, end).TotalMilliseconds;
+            parts.Add($"{_handshakeMarks[i].Phase}={ms:0}ms{(i + 1 == _handshakeMarks.Count ? "(open)" : "")}");
+        }
+
+        string timeline = parts.Count == 0 ? "phases: none" : "phases: " + string.Join(" ", parts);
+        if (_handshakeMarks.Count > 0 && Diagnostics.HostPauseDetector.Current is { } pauses)
+            timeline += $"; host paused {pauses.PausedSecondsSince(_handshakeMarks[0].At):0.0}s inside it";
+        return timeline;
+    }
+
+    async Task ConnectAndEnterCoreAsync(CancellationToken ct)
+    {
+        EnterPhase("login_connect");
         await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
         _loginStream = _login.GetStream();
         await LoginHandshakeAsync(ct);
 
+        EnterPhase("zone_connect");
         await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
         _zoneStream = _zone.GetStream();
         _zoneReader = new NetFrameReader(_zoneStream);
 
+        EnterPhase("zone_hello");
         await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
         await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
 
+        EnterPhase("zone_auth");
         await ZoneExchangeAsync(
             NetOpcode.ZoneAuth,
             NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
             NetOpcode.ZoneAuthResult,
             ct);
 
+        EnterPhase("enter_world");
         await EnterWorldAsync(ct);
         _stats.InWorld = true;
         if (_selfEntity != 0)
             _peers.Register(BotId, SelfObjectId);
         _receiveTask = Task.Run(() => ReceiveLoopAsync(_receiveCts.Token), CancellationToken.None);
+        EnterPhase("place_at_spawn");
+        await PlaceAtScenarioSpawnAsync(ct);
+    }
+
+    void EnterPhase(string phase)
+    {
+        // login_connect opens every handshake (first login and relog), so it starts a fresh timeline.
+        if (phase == "login_connect")
+            _handshakeMarks.Clear();
+        _handshakeMarks.Add((phase, Stopwatch.GetTimestamp()));
+        _stats.EntryPhase = phase;
+    }
+
+    /// <summary>
+    /// EnterWorld resumes the persisted character position, so a scenario that needs a specific start sends the
+    /// load-test relocation and waits for the arrival frame before any behaviour starts. Without it a bot whose
+    /// character was last saved on a lower geo layer, or in another town, plays from a place the scenario never
+    /// intended and every proximity gate (talk, shop, quest) refuses for range.
+    /// </summary>
+    async Task PlaceAtScenarioSpawnAsync(CancellationToken ct)
+    {
+        if (!Scenario.TeleportToSpawnOnEnter)
+            return;
+        int mark = _observation.FrameCount;
+        await TeleportToAsync(_spawnX, _spawnY, _spawnZ, ct);
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(10);
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (_observation.ContainsOpcodeAfter(mark, NetOpcode.TeleportToLocation))
+                return;
+            if (_observation.ContainsRejectAfter(mark, out string? code))
+                throw new InvalidOperationException(
+                    $"scenario spawn relocation to {_spawnX},{_spawnY},{_spawnZ} rejected: {code}; " +
+                    "start the zone with FINEAGE_ZONE_LOADTEST_TELEPORT=1");
+            await Task.Delay(25, ct).ConfigureAwait(false);
+        }
+
+        throw new TimeoutException(
+            $"scenario spawn relocation to {_spawnX},{_spawnY},{_spawnZ}: no TeleportToLocation within 10s; " +
+            "start the zone with FINEAGE_ZONE_LOADTEST_TELEPORT=1");
     }
 
     async Task ReceiveLoopAsync(CancellationToken ct)
@@ -168,6 +262,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
 
     async Task LoginHandshakeAsync(CancellationToken ct)
     {
+        EnterPhase("login_hello");
         await LoginExchangeAsync(NetOpcode.Hello,
             NetCodec.EncodeHello(new HelloMsg
             {
@@ -176,7 +271,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
             }),
             NetOpcode.HelloAck, ct);
 
-        await LoginExchangeAsync(NetOpcode.Auth,
+        EnterPhase("login_auth");
+        var authPayload = await LoginExchangePayloadAsync(NetOpcode.Auth,
             NetCodec.EncodeAuth(new AuthMsg
             {
                 Account = Account,
@@ -184,7 +280,12 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                 RegisterIfMissing = true
             }),
             NetOpcode.AuthResult, ct);
+        var auth = NetCodec.DecodeAuthResult(authPayload);
+        if (!auth.Ok)
+            throw new InvalidOperationException(
+                $"bot {BotId}: login auth rejected: {auth.Code} {auth.Message}");
 
+        EnterPhase("login_list_characters");
         await LoginWriteAsync(NetOpcode.ListCharacters, [], ct);
         var rosterPayload = await LoginReadUntilAsync(NetOpcode.CharacterRoster, ct);
         var roster = NetCodec.DecodeCharacterRoster(rosterPayload);
@@ -192,7 +293,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         if (roster.Characters.Length == 0)
         {
             var (classId, race) = Scenario.ResolveClassAndRace(BotId);
-            await LoginExchangeAsync(NetOpcode.CreateCharacter,
+            EnterPhase("login_create_character");
+            var createPayload = await LoginExchangePayloadAsync(NetOpcode.CreateCharacter,
                 NetCodec.EncodeCreateCharacter(new CreateCharacterMsg
                 {
                     Name = CharacterName,
@@ -201,14 +303,27 @@ public sealed partial class FineageBotClient : IAsyncDisposable
                     Sex = HumanClasses.SexMale
                 }),
                 NetOpcode.CreateResult, ct);
+            var created = NetCodec.DecodeCreateResult(createPayload);
+            if (!created.Ok)
+                throw new InvalidOperationException(
+                    $"bot {BotId}: character create rejected for {CharacterName} " +
+                    $"(class={classId} race={race}): {created.Code} {created.Message}");
+
+            EnterPhase("login_list_characters");
             await LoginWriteAsync(NetOpcode.ListCharacters, [], ct);
             rosterPayload = await LoginReadUntilAsync(NetOpcode.CharacterRoster, ct);
             roster = NetCodec.DecodeCharacterRoster(rosterPayload);
         }
 
+        if (roster.Characters.Length == 0)
+            throw new InvalidOperationException(
+                $"bot {BotId}: account {Account} returned an empty character roster; " +
+                $"cannot select {CharacterName} and there is no character to fall back to");
+
         var pick = roster.Characters.FirstOrDefault(c => c.Name == CharacterName)
             ?? roster.Characters[0];
 
+        EnterPhase("login_select_character");
         var handoffPayload = await LoginExchangePayloadAsync(NetOpcode.SelectCharacter,
             NetCodec.EncodeSelectCharacter(new SelectCharacterMsg { CharacterId = pick.CharacterId }),
             NetOpcode.Handoff, ct);
@@ -255,6 +370,8 @@ public sealed partial class FineageBotClient : IAsyncDisposable
             {
                 sawWelcome = true;
                 welcomeAt = enterStarted.Elapsed;
+                // The welcome closes the server's part of the enter; what follows is the bot's own settle wait.
+                EnterPhase("enter_settle");
             }
             if (opcode == NetOpcode.EntitySpawn)
             {
@@ -453,6 +570,7 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _peers.Unregister(BotId);
         await StopReceiveLoopAsync();
         TearDownConnections();
+        _observation.BeginSession(DateTimeOffset.UtcNow);
 
         _login = new TcpClient();
         _zone = new TcpClient();
@@ -462,20 +580,36 @@ public sealed partial class FineageBotClient : IAsyncDisposable
         _receiveCts = new CancellationTokenSource();
         _stats.Disconnected = false;
 
-        await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, ct);
-        _loginStream = _login.GetStream();
-        await LoginHandshakeAsync(ct);
-        await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, ct);
-        _zoneStream = _zone.GetStream();
-        _zoneReader = new NetFrameReader(_zoneStream);
-        await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), ct);
-        await ZoneReadUntilAsync(NetOpcode.HelloAck, ct);
-        await ZoneExchangeAsync(
-            NetOpcode.ZoneAuth,
-            NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
-            NetOpcode.ZoneAuthResult,
-            ct);
-        await EnterWorldAsync(ct);
+        using var handshake = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        handshake.CancelAfter(HandshakeTimeout);
+        try
+        {
+            EnterPhase("login_connect");
+            await _login.ConnectAsync(Scenario.LoginHost, Scenario.LoginPort, handshake.Token);
+            _loginStream = _login.GetStream();
+            await LoginHandshakeAsync(handshake.Token);
+            EnterPhase("zone_connect");
+            await _zone.ConnectAsync(_handoff!.ZoneHost, _handoff.ZonePort, handshake.Token);
+            _zoneStream = _zone.GetStream();
+            _zoneReader = new NetFrameReader(_zoneStream);
+            EnterPhase("zone_hello");
+            await ZoneWriteAsync(NetOpcode.Hello, NetCodec.EncodeHello(new HelloMsg { ClientName = "loadtest" }), handshake.Token);
+            await ZoneReadUntilAsync(NetOpcode.HelloAck, handshake.Token);
+            EnterPhase("zone_auth");
+            await ZoneExchangeAsync(
+                NetOpcode.ZoneAuth,
+                NetCodec.EncodeZoneAuth(new ZoneAuthMsg { Account = Account, Token = _handoff.Token }),
+                NetOpcode.ZoneAuthResult,
+                handshake.Token);
+            EnterPhase("enter_world");
+            await EnterWorldAsync(handshake.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && handshake.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"bot {BotId}: relog handshake exceeded {HandshakeTimeout.TotalSeconds:0}s; {HandshakeTimeline()}");
+        }
+
         _stats.InWorld = true;
         if (_selfEntity != 0)
             _peers.Register(BotId, SelfObjectId);

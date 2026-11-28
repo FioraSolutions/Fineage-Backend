@@ -13,6 +13,7 @@ using Fineage.Zone.Bosses;
 using Fineage.Game.Shops;
 using Fineage.Game.Services;
 using Fineage.Zone.NpcHtml;
+using Fineage.Zone.Persistence;
 using Fineage.Zone.Shops;
 using Fineage.Zone.SevenSigns;
 using Fineage.Zone.Dungeons;
@@ -20,6 +21,7 @@ using Fineage.Zone.DimensionalRift;
 using Fineage.Zone.Clan;
 using Fineage.Zone.Siege;
 using Fineage.Zone.Olympiad;
+using Fineage.Zone.Items;
 using Fineage.Zone.Party;
 using Fineage.Zone.Punishment;
 using Fineage.Zone.Fishing;
@@ -30,6 +32,7 @@ using Fineage.Zone.Wedding;
 using System.Reflection;
 using Fineage.Zone.Simulation;
 using Fineage.Zone.CursedWeapons;
+using Fineage.Net.Host;
 
 namespace Fineage.Zone.World;
 
@@ -56,6 +59,7 @@ public sealed partial class ZoneWorld
     readonly QuestMachine _quests;
     readonly QuestJournalGeometry _questGeometry;
     readonly SevenSignsActor _sevenSigns;
+    readonly ShutdownFlushRegistry _stateFlushes = new();
     readonly SevenSignsFestivalCatalog _festivalCatalog;
     readonly SevenSignsFestivalSpawnCatalog _festivalSpawns;
     readonly SevenSignsFestivalRuntime _festivalRuntime;
@@ -81,6 +85,8 @@ public sealed partial class ZoneWorld
     readonly ItemWeights _weights;
     /// <summary>Mobius <c>handler="ItemSkills"</c> items: what a potion or scroll actually does (data/item-skills.json).</summary>
     readonly Fineage.Game.Services.ItemSkillCatalog _itemSkills;
+    /// <summary>Mobius named etc-item handlers (Book / Maps / RollingDice / Calculator / SpecialXMas).</summary>
+    readonly ItemHandlerRegistry _itemHandlers;
     /// <summary>Mobius <c>MapRegionManager</c>: the "nearest town" a Scroll of Escape lands in.</summary>
     readonly Fineage.Game.Services.MapRegionCatalog _mapRegions;
     /// <summary>Mobius clan hall owner restart points (<c>data/clan-hall-spawns.json</c>).</summary>
@@ -127,6 +133,7 @@ public sealed partial class ZoneWorld
     RegionDirectory<ZoneEntity> _byId;
     readonly DropCatalog _dropCatalog;
     readonly EventDropCatalog _eventDropCatalog;
+    readonly Fineage.Zone.SeasonalEvents.SeasonalEventHost _seasonalEvents;
     readonly ZoneRates _rates;
     readonly DropRates _dropRates;
     readonly WorldAffinity _affinity = new();
@@ -154,7 +161,7 @@ public sealed partial class ZoneWorld
     readonly Dictionary<int, (ZoneSession Session, PlayerInventory Inventory)> _dirtyInventories = [];
     readonly Dictionary<int, ZoneEntity> _dirtyWarehouses = [];
     readonly Dictionary<int, ZoneEntity> _dirtyFreight = [];
-    readonly List<EconomyBagWrite> _dirtyOfflineFreight = [];
+    readonly List<EconomyBagWrite> _dirtyOfflineBags = [];
     readonly bool _npcRegen;
     /// <summary><see cref="ZoneNpcSettings.MaxDriftRange"/> read once: it was an environment lookup per NPC per think.</summary>
     readonly int _maxDriftRange;
@@ -192,6 +199,7 @@ public sealed partial class ZoneWorld
         SpawnCatalog? spawnCatalog = null,
         DropCatalog? dropCatalog = null,
         EventDropCatalog? eventDropCatalog = null,
+        Fineage.Zone.SeasonalEvents.SeasonalEventHost? seasonalEvents = null,
         ZoneRates? rates = null,
         DropRates? dropRates = null,
         string? activeMapId = null,
@@ -210,6 +218,7 @@ public sealed partial class ZoneWorld
         BossSchedule? bosses = null,
         Random? bossRandom = null,
         NpcHtmlCatalog? html = null,
+        Fineage.Zone.CommunityBoard.CommunityBoardCatalog? communityBoard = null,
         BypassRegistry? bypasses = null,
         OlympiadBoard? olympiad = null,
         OlympiadSettings? olympiadSettings = null,
@@ -252,10 +261,14 @@ public sealed partial class ZoneWorld
         ILedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
-        Fineage.Game.L10n.LocalizationCatalog? localization = null)
+        Fineage.Game.L10n.LocalizationCatalog? localization = null,
+        Fineage.Zone.Time.IZoneTime? time = null)
     {
+        // A reference, not a lambda: a closure here would be rooted by the fan-out worker thread and keep the whole
+        // world alive when a caller drops it without disposing (the full Zone test suite creates hundreds).
+        _fanoutDispatcher = new FanoutDispatcher { ReliableAdmission = _reliableAudienceAdmission };
         _fanout = new WorldFanoutSequencer(_fanoutDispatcher);
-        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        _clock = time ?? (clock is null ? Fineage.Zone.Time.SystemZoneTime.Instance : new Fineage.Zone.Time.WallClockZoneTime(clock));
         _simulationSeed = simulationSeed ?? ZoneSimulationSettings.WorldSeed();
         InitSimulation(regions ?? GridRegionPartition.MapTiles, simulationObserver ?? new ZoneSimulationObserver(),
             regionExecutor ?? ZoneSimulationSettings.RegionExecutor(ZoneSimulationSettings.RegionWorkers));
@@ -290,6 +303,7 @@ public sealed partial class ZoneWorld
         _spawnCatalog = spawnCatalog ?? SpawnCatalog.LoadDefault();
         _dropCatalog = dropCatalog ?? DropCatalog.LoadDefault();
         _eventDropCatalog = eventDropCatalog ?? EventDropCatalog.LoadDefault();
+        _seasonalEvents = seasonalEvents ?? Fineage.Zone.SeasonalEvents.SeasonalEventHost.LoadDefault();
         _rates = rates ?? ZoneRates.FromEnvironment();
         _dropRates = dropRates ?? _rates.AsDropRates();
         _activeMapId = string.IsNullOrWhiteSpace(activeMapId) ? SpawnCatalog.DefaultMapId : activeMapId.Trim();
@@ -338,6 +352,7 @@ public sealed partial class ZoneWorld
         _html = html ?? NpcHtmlCatalog.LoadDefault();
         _l10n = localization ?? LoadLocalization();
         _pages = new LocalizedHtml(_l10n, _html);
+        InitCommunityBoard(communityBoard);
         _bypasses = bypasses ?? BypassRegistry.CreateDefault(_pages);
         _party = new PartyActor(new PartyMembers(this));
         var resolvedOlympiadSettings = olympiadSettings ?? OlympiadSettings.FromEnvironment();
@@ -365,7 +380,8 @@ public sealed partial class ZoneWorld
                 : new MemoryLedgerJournal());
         _journal = journal;
         _economyPersist = new EconomyPersistService(_accounts, journal, _affinity);
-        _ledger = new EconomyLedger(journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds);
+        _ledger = new EconomyLedger(
+            journal, LedgerIdempotencyMilliseconds / _simulationClock.StepMilliseconds, WorldStateAudit.TalliedKinds);
         foreach (var entry in journal.ReadAll())
             _ledgerIds.Adopt(entry.Transaction.Id);
         ExpireOrphanGroundJournalAccounts();
@@ -379,6 +395,7 @@ public sealed partial class ZoneWorld
         SoulCrystalRandom = Streams(null, RandomPurpose.SoulCrystal);
         RequireRegionStreamsForExecutor();
         _itemSkills = itemSkills ?? Fineage.Game.Services.ItemSkillCatalog.LoadDefault();
+        _itemHandlers = ItemHandlerRegistry.CreateDefault(ItemHandlerCatalog.LoadDefault());
         _mapRegions = mapRegions ?? Fineage.Game.Services.MapRegionCatalog.LoadDefault();
         _clanHallSpawns = clanHallSpawns ?? Fineage.Game.Services.ClanHallSpawnCatalog.LoadDefault();
         _geo = geo ?? SharedGeo.Value;
@@ -424,6 +441,8 @@ public sealed partial class ZoneWorld
         SpawnCastleDoors();
         InitPunishment(punishments);
         InitRaidBossPoints(raidBossPoints);
+        InitPcCafe(null, null);
+        RegisterStateShutdownFlushes();
     }
 
     /// <summary>Bypass handlers. A later <see cref="BypassRegistry.Register"/> replaces a stub.</summary>
@@ -491,6 +510,10 @@ public sealed partial class ZoneWorld
             bool recording = value != null && IsRecordingNetBridge(value);
             _awaitFanoutBeforeCommandComplete = recording;
             _fanoutDispatcher.DeliverSynchronously = recording;
+            _reliableAudienceAdmission = value is Net.NetWorldEventPublisher publisher
+                ? publisher.ReliableAudienceAdmission
+                : new FanoutReliableAdmission();
+            _fanoutDispatcher.ReliableAdmission = _reliableAudienceAdmission;
         }
     }
 
@@ -513,7 +536,8 @@ public sealed partial class ZoneWorld
         if (_awaitFanoutBeforeCommandComplete)
             _fanoutDispatcher.WaitUntilIdle();
     }
-    readonly FanoutDispatcher _fanoutDispatcher = new();
+    FanoutReliableAdmission _reliableAudienceAdmission = new();
+    FanoutDispatcher _fanoutDispatcher;
     readonly WorldFanoutSequencer _fanout;
 
     /// <summary>

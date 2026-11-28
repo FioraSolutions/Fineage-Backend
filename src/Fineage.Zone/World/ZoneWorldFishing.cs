@@ -478,7 +478,7 @@ public sealed partial class ZoneWorld
                     () =>
                     {
                         GiveItem(session, inventory, fishId, 1);
-                        string name = _game.Items.TryGet(fishId, out var t) ? t.Name : fishId.ToString();
+                        string name = _game.Items.Require(fishId).Name;
                         SelfLine(session, ManorProtocol.ObtainedOne, $"You have obtained {name}.", name);
                         RecordFishingChampionshipCatch(player, line.LureId);
                         return true;
@@ -618,7 +618,7 @@ public sealed partial class ZoneWorld
         _persist.ReplaceLearnedSkills(session.Account, session.ObjectId,
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
-        string name = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
+        string name = _game.Skills.Require(row.SkillId).Name;
         SelfLine(session, 277, $"You have earned {name}.", name);
         ShowFishingSkills(session, player, npc);
         return null;

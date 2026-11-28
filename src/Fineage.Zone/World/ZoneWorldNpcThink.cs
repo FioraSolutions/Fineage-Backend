@@ -409,7 +409,7 @@ public sealed partial class ZoneWorld
         if (npc.TryWanderGeoCache(npc.X, npc.Y, x1, y1, out destX, out destY, out destZ))
             return WithinDrift(npc, destX, destY, driftSq);
 
-        (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, x1, y1, z1, out _);
+        (destX, destY, destZ) = _geo.MoveCheck(npc.X, npc.Y, npc.Z, x1, y1, z1, out _, Doors);
         npc.SetWanderGeoCache(npc.X, npc.Y, x1, y1, destX, destY, destZ);
         return WithinDrift(npc, destX, destY, driftSq);
     }

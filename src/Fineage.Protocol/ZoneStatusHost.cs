@@ -7,6 +7,8 @@ namespace Fineage.Protocol;
 
 /// <summary>
 /// Tiny loopback HTTP server. <c>GET /status</c> returns <c>{"playersOnline":n}</c> from the zone simulation.
+/// With a <see cref="Health.HealthBoard"/>, <c>GET /health/live</c> and <c>GET /health/ready</c> return its reports
+/// as JSON with 200 or 503 (#989). It starts before the world loads, so readiness answers 503 while booting.
 /// </summary>
 public sealed class ZoneStatusHost : IAsyncDisposable
 {
@@ -24,10 +26,12 @@ public sealed class ZoneStatusHost : IAsyncDisposable
 
     public int Port { get; }
 
+    public string BaseUrl => $"http://127.0.0.1:{Port}";
+
     public string Url => ZoneStatus.LoopbackUrl(Port);
 
     /// <summary>Binds <c>127.0.0.1</c>. Port <c>0</c> picks an ephemeral port. Returns null when the bind fails.</summary>
-    public static ZoneStatusHost? TryStart(int port, Func<int> playersOnline, TextWriter error)
+    public static ZoneStatusHost? TryStart(int port, Func<int> playersOnline, TextWriter error, Health.HealthBoard? health = null)
     {
         ArgumentNullException.ThrowIfNull(playersOnline);
         ArgumentNullException.ThrowIfNull(error);
@@ -50,7 +54,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
 
         int bound = ((IPEndPoint)listener.LocalEndpoint).Port;
         var cts = new CancellationTokenSource();
-        var loop = Task.Run(() => AcceptAsync(listener, playersOnline, cts.Token));
+        var loop = Task.Run(() => AcceptAsync(listener, playersOnline, health, cts.Token));
         return new ZoneStatusHost(listener, cts, loop, bound);
     }
 
@@ -69,6 +73,21 @@ public sealed class ZoneStatusHost : IAsyncDisposable
         _cts.Dispose();
     }
 
+    /// <summary>The request path of a <c>GET</c> line without the query, or null for anything else.</summary>
+    public static string? GetPath(string requestLine)
+    {
+        if (!requestLine.StartsWith("GET ", StringComparison.Ordinal))
+            return null;
+        int pathEnd = requestLine.IndexOf(' ', 4);
+        if (pathEnd < 0)
+            return null;
+        string path = requestLine[4..pathEnd];
+        int query = path.IndexOf('?');
+        if (query >= 0)
+            path = path[..query];
+        return path.Length > 1 ? path.TrimEnd('/') : path;
+    }
+
     public static bool IsStatusGet(string requestLine)
     {
         if (!requestLine.StartsWith("GET ", StringComparison.Ordinal))
@@ -83,7 +102,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
         return path is "/status" or "/status/";
     }
 
-    static async Task AcceptAsync(TcpListener listener, Func<int> playersOnline, CancellationToken ct)
+    static async Task AcceptAsync(TcpListener listener, Func<int> playersOnline, Health.HealthBoard? health, CancellationToken ct)
     {
         try
         {
@@ -99,7 +118,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
                     break;
                 }
 
-                _ = Task.Run(() => RespondAsync(client, playersOnline, ct), ct);
+                _ = Task.Run(() => RespondAsync(client, playersOnline, health, ct), ct);
             }
         }
         catch (ObjectDisposedException)
@@ -107,7 +126,7 @@ public sealed class ZoneStatusHost : IAsyncDisposable
         }
     }
 
-    static async Task RespondAsync(TcpClient client, Func<int> playersOnline, CancellationToken ct)
+    static async Task RespondAsync(TcpClient client, Func<int> playersOnline, Health.HealthBoard? health, CancellationToken ct)
     {
         using var _ = client;
         try
@@ -121,6 +140,15 @@ public sealed class ZoneStatusHost : IAsyncDisposable
             string head = Encoding.ASCII.GetString(buffer, 0, Math.Max(0, read));
             int lineEnd = head.IndexOf('\r');
             string request = lineEnd >= 0 ? head[..lineEnd] : head;
+            string? path = GetPath(request);
+            if (health != null && path is "/health/live" or "/health/ready")
+            {
+                var report = path == "/health/live" ? health.Liveness() : health.Readiness();
+                await WriteAsync(stream, report.Ok ? "200 OK" : "503 Service Unavailable", "application/json; charset=utf-8",
+                    report.ToJson(), ct).ConfigureAwait(false);
+                return;
+            }
+
             if (!IsStatusGet(request))
             {
                 await WriteAsync(stream, "404 Not Found", "text/plain; charset=utf-8", "not found\n", ct).ConfigureAwait(false);

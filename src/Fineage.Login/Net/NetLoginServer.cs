@@ -25,7 +25,9 @@ public sealed partial class NetLoginServer
         _service = service;
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
         _zoneHost = string.IsNullOrWhiteSpace(zoneHost) ? "127.0.0.1" : zoneHost.Trim();
-        _zonePort = zonePort is > 0 and <= 65535 ? zonePort.Value : NetSettings.ZonePort;
+        // Tickets, the handoff validator and startup configuration share one endpoint. In particular
+        // FINEAGE_ZONE_PORT must not be ignored when FINEAGE_NET_ZONE_PORT still names another Zone.
+        _zonePort = zonePort is > 0 and <= 65535 ? zonePort.Value : ZoneHandoff.AdvertisePort;
         _maxMessagesPerSecond = maxMessagesPerSecond ?? LoginNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
     }

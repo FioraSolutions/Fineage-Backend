@@ -4,71 +4,165 @@ using Fineage.Zone.Simulation;
 namespace Fineage.Zone.World;
 
 /// <summary>
-/// Mobius <c>WorldRegion</c> activation: NPC think/random-walk runs only in tiles that currently have a player
-/// nearby (this region and overlapping neighbours), or while a player watches the mob, or it has drifted far from home.
+/// Mobius <c>WorldRegion</c> activation. Fineage keeps its 32768-unit simulation tiles for ownership and work
+/// partitioning, but activation follows Mobius' 2048-unit regions (<c>World.SHIFT_BY = 11</c>): the microregion a live
+/// player stands in is active immediately, and its 1-ring neighbours after <see cref="NeighborActivationGraceMs"/>.
 /// </summary>
 public sealed partial class ZoneWorld
 {
+    /// <summary>Mobius <c>World.SHIFT_BY</c>: one 32768-unit map tile is 16x16 regions of 2048 units.</summary>
+    internal const int MicroRegionShift = 11;
+    internal const int MicroRegionSize = 1 << MicroRegionShift;
+
+    /// <summary>Mobius <c>World.OFFSET_X = abs(((TILE_X_MIN - TILE_ZERO_COORD_X) * TILE_SIZE) &gt;&gt; SHIFT_BY)</c>.</summary>
+    internal const int MicroRegionOffsetX = 64;
+
+    /// <summary>Mobius <c>World.OFFSET_Y = abs(((TILE_Y_MIN - TILE_ZERO_COORD_Y) * TILE_SIZE) &gt;&gt; SHIFT_BY)</c>.</summary>
+    internal const int MicroRegionOffsetY = 128;
+
+    /// <summary>Mobius default <c>GridNeighborTurnOnTime</c> (seconds): neighbours wake after self has stayed active.</summary>
+    internal const int NeighborActivationGraceMs = 1000;
+
+    /// <summary>Currently active microregions (instance + Mobius region coordinates).</summary>
     readonly HashSet<RegionId> _playerActiveRegions = [];
+
+    /// <summary>Microregions directly occupied by a live player, with the time that occupancy started.</summary>
+    readonly Dictionary<RegionId, long> _playerMicroRegionSinceMs = [];
+
+    // Per-refresh scratch, reused so an idle world does not allocate in the AI stage.
+    readonly HashSet<RegionId> _desiredRegions = [];
+    readonly HashSet<RegionId> _nextDirectRegions = [];
+    readonly List<RegionId> _retiredRegions = [];
+    readonly List<RegionId> _newRegions = [];
+    readonly List<RegionId> _leftDirectRegions = [];
+    readonly List<int> _microRegionQuery = [];
+    readonly List<int> _microRegionMembers = [];
+
     readonly Queue<int> _regionWakeQueue = [];
     readonly HashSet<int> _regionWakeQueued = [];
 
-    /// <summary>Regions with at least one player in range of their tile (test/diagnostics).</summary>
+    /// <summary>Active microregions (test/diagnostics).</summary>
     internal IReadOnlyCollection<RegionId> PlayerActiveRegions => _playerActiveRegions;
 
-    /// <summary>NPCs waiting for a budgeted <see cref="TrackThink"/> after their tile woke (tests/diagnostics).</summary>
+    /// <summary>NPCs waiting for a budgeted <see cref="TrackThink"/> after their microregion woke (tests/diagnostics).</summary>
     internal int PendingRegionWakeCount => _regionWakeQueue.Count;
 
-    /// <summary>How far past a tile edge we still activate neighbours (one map tile).</summary>
-    const int RegionActivationPad = GridRegionPartition.MapTileSize;
+    /// <summary>Mobius <c>World.getRegion(x, y)</c>: 2048-unit microregion with the map-tile origin offset.</summary>
+    internal static RegionId MicroRegionAt(int instanceId, int x, int y) =>
+        new(instanceId, FloorDiv(x, MicroRegionSize) + MicroRegionOffsetX,
+            FloorDiv(y, MicroRegionSize) + MicroRegionOffsetY);
 
     /// <summary>Recomputes Mobius-style active regions from live player positions; call once per AI stage.</summary>
     void RefreshPlayerActiveRegions()
     {
-        var next = new HashSet<RegionId>();
-        foreach (var player in Players())
+        long now = NowUnixMs();
+
+        _nextDirectRegions.Clear();
+        // No copy: this refresh never adds or removes players.
+        foreach (var player in _inWorldPlayers)
         {
             if (player.Session is not { InWorld: true } || player.CurHp <= 0)
                 continue;
-            foreach (var id in _regions.RegionsOverlapping(
-                         player.InstanceId,
-                         player.X - RegionActivationPad,
-                         player.Y - RegionActivationPad,
-                         player.X + RegionActivationPad,
-                         player.Y + RegionActivationPad))
-                next.Add(id);
+            _nextDirectRegions.Add(MicroRegionAt(player.InstanceId, player.X, player.Y));
         }
 
-        foreach (var id in next)
+        // Re-entering a microregion starts a new grace; staying in it keeps the original start.
+        _leftDirectRegions.Clear();
+        foreach (var id in _playerMicroRegionSinceMs.Keys)
         {
-            if (_playerActiveRegions.Add(id))
-                OnRegionActivated(id);
+            if (!_nextDirectRegions.Contains(id))
+                _leftDirectRegions.Add(id);
+        }
+        foreach (var id in _leftDirectRegions)
+            _playerMicroRegionSinceMs.Remove(id);
+        foreach (var id in _nextDirectRegions)
+            _playerMicroRegionSinceMs.TryAdd(id, now);
+
+        _desiredRegions.Clear();
+        foreach (var id in _nextDirectRegions)
+        {
+            _desiredRegions.Add(id);
+            if (now - _playerMicroRegionSinceMs[id] < NeighborActivationGraceMs)
+                continue;
+            AddOneRingNeighbours(_desiredRegions, id);
         }
 
-        var retired = new List<RegionId>();
+        // Retire before adding so a microregion that is still desired never churns.
+        _retiredRegions.Clear();
         foreach (var id in _playerActiveRegions)
         {
-            if (!next.Contains(id))
-                retired.Add(id);
+            if (!_desiredRegions.Contains(id))
+                _retiredRegions.Add(id);
         }
-
-        foreach (var id in retired)
+        foreach (var id in _retiredRegions)
         {
             _playerActiveRegions.Remove(id);
             OnRegionDeactivated(id);
         }
+
+        _newRegions.Clear();
+        foreach (var id in _desiredRegions)
+        {
+            if (!_playerActiveRegions.Contains(id))
+                _newRegions.Add(id);
+        }
+        _newRegions.Sort();
+        foreach (var id in _newRegions)
+        {
+            _playerActiveRegions.Add(id);
+            OnRegionActivated(id);
+        }
     }
 
-    bool IsPlayerRegionActive(RegionId region) => _playerActiveRegions.Contains(region);
-
-    void OnRegionActivated(RegionId region)
+    static void AddOneRingNeighbours(HashSet<RegionId> regions, RegionId center)
     {
-        if (!_byId.TryGetContainer(region, out var container))
-            return;
-        foreach (int id in container.Members.ToArray())
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                if (dx == 0 && dy == 0)
+                    continue;
+                regions.Add(new RegionId(center.InstanceId, center.X + dx, center.Y + dy));
+            }
+        }
+    }
+
+    bool IsPlayerRegionActive(RegionId microRegion) => _playerActiveRegions.Contains(microRegion);
+
+    void OnRegionActivated(RegionId microRegion)
+    {
+        CollectMicroRegionMembers(microRegion);
+        foreach (int id in _microRegionMembers)
         {
             if (_byId.TryGetValue(id, out var entity))
                 QueueRegionWake(entity);
+        }
+    }
+
+    /// <summary>
+    /// Exact entities standing in <paramref name="microRegion"/>. The region directory indexes by its own 3000-unit
+    /// cells, so query the overlapping cells and keep only the coordinates that map to this microregion.
+    /// </summary>
+    void CollectMicroRegionMembers(RegionId microRegion)
+    {
+        _microRegionMembers.Clear();
+        int minX = (microRegion.X - MicroRegionOffsetX) * MicroRegionSize;
+        int minY = (microRegion.Y - MicroRegionOffsetY) * MicroRegionSize;
+        int maxX = minX + MicroRegionSize - 1;
+        int maxY = minY + MicroRegionSize - 1;
+        int cell = _byId.CellSize;
+
+        _microRegionQuery.Clear();
+        _byId.InCells(microRegion.InstanceId,
+            SpatialCells.Of(minX, cell), SpatialCells.Of(minY, cell),
+            SpatialCells.Of(maxX, cell), SpatialCells.Of(maxY, cell), _microRegionQuery);
+
+        foreach (int id in _microRegionQuery)
+        {
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
+            if (MicroRegionAt(entity.InstanceId, entity.X, entity.Y) == microRegion)
+                _microRegionMembers.Add(id);
         }
     }
 
@@ -106,36 +200,21 @@ public sealed partial class ZoneWorld
         NoteActivationBacklog();
     }
 
-    void OnRegionDeactivated(RegionId region) => SuspendNpcRegion(region);
-
-    /// <summary>Mobius inactive region: pause think + idle movement; combat / watched mobs stay awake.</summary>
-    void SuspendNpcRegion(RegionId region)
+    void OnRegionDeactivated(RegionId microRegion)
     {
-        if (!_byId.TryGetContainer(region, out var container))
-            return;
-        foreach (int id in container.Snapshot(ActiveSets.Thinking))
-        {
-            if (_byId.TryGetValue(id, out var npc) && npc.Kind == ZoneEntityKind.Npc)
-                ReleaseThink(npc);
-        }
-
-        foreach (int id in container.Snapshot(ActiveSets.Moving))
+        CollectMicroRegionMembers(microRegion);
+        foreach (int id in _microRegionMembers)
         {
             if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc)
                 continue;
-            if (NpcRegionAwake(npc))
-                continue;
-            SuspendIdleNpcMove(npc);
-        }
-
-        foreach (int id in container.Members)
-        {
-            if (!_byId.TryGetValue(id, out var npc) || npc.Kind != ZoneEntityKind.Npc || !npc.PathfindPending)
-                continue;
-            if (NpcRegionAwake(npc))
-                continue;
-            npc.PathfindPending = false;
-            DequeueNpcPathfind(npc.ObjectId);
+            ReleaseThink(npc);
+            if (npc.MoveActive && !NpcRegionAwake(npc))
+                SuspendIdleNpcMove(npc);
+            if (npc.PathfindPending && !NpcRegionAwake(npc))
+            {
+                npc.PathfindPending = false;
+                DequeueNpcPathfind(npc.ObjectId);
+            }
         }
     }
 
@@ -149,4 +228,12 @@ public sealed partial class ZoneWorld
     }
 
     internal const int RandomWalkThinkIntervalMs = 1000;
+
+    static int FloorDiv(int value, int divisor)
+    {
+        int quotient = value / divisor;
+        if (value < 0 && value % divisor != 0)
+            quotient--;
+        return quotient;
+    }
 }

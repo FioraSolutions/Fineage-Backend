@@ -1,0 +1,21 @@
+# #990 — Raid-boss observer fan-out: one real fighter generates combat traffic while hundreds of
+# observers stay in AOI and record every inbound frame. The load-test data has no scripted raid boss,
+# so the fighter uses the arena pack; this profile measures observer fan-out, not boss AI.
+# Zone env: FINEAGE_ZONE_LOADTEST_COMBAT=1 FINEAGE_ZONE_EXTRA_MAPS=loadtest_aoe_arena
+# Scale observers with --bot-count; the default is a bounded nightly size, not a concurrency ceiling.
+name: raid-boss-observe
+botCount: 500
+rampUpSeconds: 90
+durationSeconds: 180
+spawnLayout: aoe-train
+spawnX: -71100
+spawnY: 258400
+spawnZ: -3148
+aoiCellSize: 3000
+heavyPlay:
+  mode: aoe-train
+  partySize: 9
+  skillRotation: [36, 48]
+actionWeights:
+  sit: 0.92
+  social: 0.08

@@ -75,6 +75,8 @@ public sealed class ZoneTickDeadlockTests
         var slowHandle = new ConnectionHandle(3, 1, slow.Connection);
         var healthyHandle = new ConnectionHandle(4, 1, healthy.Connection);
         byte[] heavy = new byte[40_000];
+        using var metrics = new MetricsCollector();
+        long disconnectsBefore = metrics.Snapshot().OutboundSlowClientDisconnect;
 
         var elapsed = Stopwatch.StartNew();
         // 40 x 40 KB is past the 1 MiB hard limit even if the stripe worker keeps up with the producer.
@@ -113,6 +115,8 @@ public sealed class ZoneTickDeadlockTests
         }, cts.Token);
 
         await closed.Task.WaitAsync(TimeSpan.FromSeconds(5), cts.Token);
+        // #992: the slow-client alert reads this counter; the overflow close itself must move it.
+        Assert.True(metrics.Snapshot().OutboundSlowClientDisconnect - disconnectsBefore >= 1);
     }
 
     [Fact]
@@ -143,8 +147,10 @@ public sealed class ZoneTickDeadlockTests
     }
 
     [Fact]
-    public async Task Movement_coalesce_counts_the_movement_lane()
+    public void Movement_coalesce_counts_the_movement_lane()
     {
+        // Drive OutboundMailbox directly: NetConnection's pump can drain the first MoveState before the
+        // second arrives, so a TCP TrySend pair races and flakes when the coalesce metric stays at 0.
         var count = new long[1];
         using var listener = new MeterListener();
         listener.InstrumentPublished = (instrument, meterListener) =>
@@ -164,18 +170,20 @@ public sealed class ZoneTickDeadlockTests
         listener.Start();
         long start = Volatile.Read(ref count[0]);
 
-        using var listenerTcp = new TcpListener(IPAddress.Loopback, 0);
-        listenerTcp.Start();
-        using var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listenerTcp.LocalEndpoint).Port);
-        using var server = await listenerTcp.AcceptTcpClientAsync();
-        listenerTcp.Stop();
-        await using var conn = new NetConnection(server, inboxCapacity: 4, endpoint: "lane-coalesce", outboundCapacity: 8);
-        Assert.True(conn.TrySend(NetOpcode.MoveState, Move(1)));
-        Assert.True(conn.TrySend(NetOpcode.MoveState, Move(2)));
+        var mailbox = new OutboundMailbox(
+            maxFrames: 64, maxBytes: 64 * 1024, connectionId: 3, endpoint: "lane-coalesce", hardBytes: 64 * 1024);
+        Assert.Equal(MailboxAdmit.Accepted, mailbox.TryAppend(MoveEnvelope(1)));
+        Assert.Equal(MailboxAdmit.Accepted, mailbox.TryAppend(MoveEnvelope(2)));
 
         Assert.True(Volatile.Read(ref count[0]) >= start + 1);
     }
+
+    static PacketEnvelope MoveEnvelope(int destX) => new()
+    {
+        Opcode = NetOpcode.MoveState,
+        Flags = (ushort)PacketFlags.Reliable,
+        Payload = Move(destX)
+    };
 
     static PacketEnvelope Heavy() => new()
     {

@@ -1,0 +1,9 @@
+# Loads monitoring/grafana/dashboards/*.json into Grafana (#992).
+apiVersion: 1
+providers:
+  - name: fineage
+    folder: Fineage
+    type: file
+    disableDeletion: false
+    options:
+      path: /var/lib/grafana/dashboards/fineage

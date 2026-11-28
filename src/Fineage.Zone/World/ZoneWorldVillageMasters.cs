@@ -143,7 +143,7 @@ public sealed partial class ZoneWorld
                             return false;
                     }
 
-                    if (rewardItemId > 0 && rewardCount > 0 && _game.Items.TryGet(rewardItemId, out _))
+                    if (rewardItemId > 0 && rewardCount > 0 && _game.Items.Require(rewardItemId) is not null)
                     {
                         var before = new HashSet<int>(inventory.Items.Select(i => i.ObjectId));
                         foreach (var piece in inventory.AddPieces(rewardItemId, rewardCount))

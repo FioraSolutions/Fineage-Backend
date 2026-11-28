@@ -14,8 +14,11 @@ public sealed class FineageMetricsHost : IAsyncDisposable
     PrometheusEndpoint? _http;
     TrafficTotals _previousScrape;
 
-    FineageMetricsHost(MetricsCollector collector, TrafficTotals baseline)
+    readonly MetricsRole _role;
+
+    FineageMetricsHost(MetricsCollector collector, TrafficTotals baseline, MetricsRole role)
     {
+        _role = role;
         _collector = collector;
         _previousScrape = baseline;
     }
@@ -44,7 +47,8 @@ public sealed class FineageMetricsHost : IAsyncDisposable
             return null;
 
         var collector = new MetricsCollector();
-        var host = new FineageMetricsHost(collector, MetricsText.Totals(collector.Snapshot()));
+        var metricsRole = string.Equals(role, "login", StringComparison.OrdinalIgnoreCase) ? MetricsRole.Login : MetricsRole.Zone;
+        var host = new FineageMetricsHost(collector, MetricsText.Totals(collector.Snapshot()), metricsRole);
         if (port > 0 && !host.TryListen(port, portVariable, output, error))
             port = 0;
 
@@ -121,8 +125,7 @@ public sealed class FineageMetricsHost : IAsyncDisposable
             _previousScrape = current;
             double inbound = MetricsText.Rate(current.FramesIn, previous.FramesIn, elapsed);
             double outbound = MetricsText.Rate(current.FramesOut, previous.FramesOut, elapsed);
-            FineageTelemetry.SetPacketRates(inbound, outbound);
-            return MetricsText.Prometheus(snapshot, inbound, outbound);
+            return MetricsText.Prometheus(snapshot, inbound, outbound, _role);
         }
     }
 
@@ -139,9 +142,6 @@ public sealed class FineageMetricsHost : IAsyncDisposable
                 clock.Restart();
                 MetricsSnapshot snapshot = _collector.Snapshot();
                 TrafficTotals current = MetricsText.Totals(snapshot);
-                double inbound = MetricsText.Rate(current.FramesIn, previous.FramesIn, elapsed);
-                double outbound = MetricsText.Rate(current.FramesOut, previous.FramesOut, elapsed);
-                FineageTelemetry.SetPacketRates(inbound, outbound);
                 output.WriteLine(MetricsText.FormatSummary(previous, current, elapsed));
                 previous = current;
             }

@@ -18,7 +18,18 @@
         "scriptId": "RaidbossInfo",
         "pipeline": "raid_boss_info",
         "npcIds": [31775, 31776],
-        "note": "Adventurer guild raid ranking HTML — stub until ranking actor lands"
+        "note": "Adventurer guild raid location HTML + radar marker (Mobius custom.RaidbossInfo). Points ranking stays on npc 31603."
+      },
+      {
+        "scriptId": "NpcLocationInfo",
+        "pipeline": "npc_location_info",
+        "npcIds": [30598, 30599, 30600, 30601, 30602],
+        "note": "Starter-village Newbie Guide location HTML + radar (Mobius custom.NpcLocationInfo). Same NPCs as NewbieHelper first-talk gift."
+      },
+      {
+        "scriptId": "ShadowWeapons",
+        "pipeline": "shadow_weapons",
+        "note": "Coupon pages for shadow weapon exchange (items 8869/8870). Mobius custom.ShadowWeapons."
       },
       {
         "scriptId": "TeleportToRaceTrack",
@@ -31,7 +42,7 @@
       {
         "scriptId": "DungeonGatekeeper",
         "pipeline": "dungeon_gate",
-        "note": "Catacomb/necropolis Gatekeeper Ziggurats — DungeonEnterRequest + DungeonAccess rules, not Script bypass"
+        "note": "Catacomb/necropolis Gatekeeper Ziggurats — HTML necro/cata/exit → DungeonAccess via BypassRegistry (same as DungeonEnterRequest packet)"
       }
     ]
   },
@@ -53,13 +64,13 @@
     { "id": "MonumentOfHeroes", "pipeline": "monument_of_heroes", "status": "implemented", "mobiusRef": "ai/others/MonumentOfHeroes" },
     { "id": "NewbieTravelToken", "pipeline": "newbie_travel", "status": "implemented", "mobiusRef": "ai/others/NewbieTravelToken" },
     { "id": "NewbieHelper", "pipeline": "newbie_helper", "status": "implemented", "mobiusRef": "ai/others/NewbieHelper" },
-    { "id": "NpcLocationInfo", "pipeline": "stub", "status": "stub", "mobiusRef": "custom/NpcLocationInfo" },
+    { "id": "NpcLocationInfo", "pipeline": "npc_location_info", "status": "implemented", "mobiusRef": "custom/NpcLocationInfo" },
     { "id": "NoblesseTeleport", "pipeline": "noblesse_teleport", "status": "implemented", "mobiusRef": "teleporter/NoblesseTeleport" },
     { "id": "OracleTeleport", "pipeline": "oracle_teleport", "status": "implemented", "mobiusRef": "ai/others/OracleTeleport" },
     { "id": "OrcChange1", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange1" },
     { "id": "OrcChange2", "pipeline": "village_master", "status": "implemented", "mobiusRef": "village_master/OrcChange2" },
-    { "id": "RaidbossInfo", "pipeline": "raid_boss_info", "status": "stub", "mobiusRef": "ai/others/RaidbossInfo" },
-    { "id": "ShadowWeapons", "pipeline": "stub", "status": "stub", "mobiusRef": "ai/others/ShadowWeapons" },
+    { "id": "RaidbossInfo", "pipeline": "raid_boss_info", "status": "implemented", "mobiusRef": "custom/RaidbossInfo" },
+    { "id": "ShadowWeapons", "pipeline": "shadow_weapons", "status": "implemented", "mobiusRef": "custom/ShadowWeapons" },
     { "id": "SymbolMaker", "pipeline": "symbol_maker", "status": "implemented", "mobiusRef": "ai/others/SymbolMaker" },
     { "id": "TeleportToRaceTrack", "pipeline": "monster_race_teleport", "status": "implemented", "mobiusRef": "ai/others/TeleportToRaceTrack" },
     { "id": "Wedding", "pipeline": "wedding", "status": "implemented", "mobiusRef": "ai/others/Wedding" }

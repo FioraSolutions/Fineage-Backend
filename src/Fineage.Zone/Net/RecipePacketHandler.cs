@@ -65,6 +65,28 @@ public sealed class RecipePacketHandler
             await _reject(conn, error, "Recipe make self failed.", ct).ConfigureAwait(false);
     }
 
+    public async Task OnBookDestroyAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        RequireHello(conn);
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+        {
+            await _reject(conn, "not_in_world", "Enter world first.", ct).ConfigureAwait(false);
+            return;
+        }
+
+        var req = NetCodec.DecodeRecipeBookDestroy(envelope.Payload);
+        string? error = await _world.ExecuteAsync(
+            zoneSession,
+            new RecipeBookDestroyCommand(new RecipeBookDestroyMsg { RecipeId = req.RecipeId }),
+            ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Recipe book destroy failed.", ct).ConfigureAwait(false);
+    }
+
     public async Task OnSetShopAsync(
         NetConnection conn,
         ZoneSession zoneSession,

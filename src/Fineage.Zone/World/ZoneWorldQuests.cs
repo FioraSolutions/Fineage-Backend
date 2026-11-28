@@ -119,8 +119,13 @@ public sealed partial class ZoneWorld
             if (!allowApproach || eventName != null)
                 return "range";
             long now = NowUnixMs();
-            if (player.CastingUntilMs > now || player.Sitting)
-                return null;
+            // Mobius CreatureAI.setIntentionInteract: REST or casting → ActionFailed and no INTERACT intention. It is
+            // not saved for after the cast (PlayerAI.saveCurrentIntentionForCast clears the interact target), so the
+            // request is refused here instead of answering with nothing (#1112).
+            if (player.Sitting)
+                return ActionProtocol.Sitting;
+            if (player.CastingUntilMs > now)
+                return NpcHtmlProtocol.Busy;
             player.Intent.AutoAttackTargetId = 0;
             player.Intent.PendingCastSkillId = 0;
             player.Intent.PendingCastAtUnixMs = 0;
@@ -133,6 +138,11 @@ public sealed partial class ZoneWorld
                 player.Intent.PendingTalkAtUnixMs = now + ms;
                 return null;
             }
+
+            // The flat approach already stands at its stop point and the 3D interaction sphere is still out of reach
+            // (a gatekeeper on a ledge high above the pawn). Mobius canInteract fails there and nothing opens.
+            if (!InTalkRange(player, npc))
+                return "range";
         }
 
         player.Intent.PendingTalkNpcId = 0;
@@ -198,7 +208,14 @@ public sealed partial class ZoneWorld
                 }
             }
 
-            Talk(session, npcId, questId: 0, eventName: null, out _, allowApproach: false);
+            // The talk that opens on arrival has no request left to reject, so its refusal goes out as the
+            // ActionFailed equivalent. Dropping it left the client waiting on a dialog that never came (#1112).
+            string? error = Talk(session, npcId, questId: 0, eventName: null, out _, allowApproach: false);
+            if (error != null)
+            {
+                ZoneLog.Warn($"pending talk npc={npc.NpcId} char={player.ObjectId} refused on arrival: {error}");
+                SendActionFailed(player);
+            }
         }
     }
 

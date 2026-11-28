@@ -28,6 +28,9 @@ public sealed partial class NetZoneServer
     readonly TradePacketHandler _trade;
     readonly PartyPacketHandler _party;
     readonly CommandChannelPacketHandler _commandChannel;
+    readonly PartyMatchPacketHandler _partyMatch;
+    readonly CommunityBoardPacketHandler _communityBoard;
+    readonly PetitionPacketHandler _petition;
     readonly FriendPacketHandler _friends;
     readonly WeddingPacketHandler _wedding;
     readonly ShortcutActionPacketHandler _shortcutActions;
@@ -66,7 +69,8 @@ public sealed partial class NetZoneServer
         // Character durable state is loaded by ZoneWorld.TryEnterAsync via the shared store.
         _ = accounts;
         _presence = presence ?? new NetPresenceHub();
-        _clock = clock ?? (() => DateTimeOffset.UtcNow);
+        // Auth handoff expiry and idle are real time, not simulation time: wall-only.
+        _clock = clock ?? (() => Fineage.Zone.Time.SystemZoneTime.Instance.UtcNow);
         _maxMessagesPerSecond = maxMessagesPerSecond ?? ZoneNetSettings.MaxMessagesPerSecond;
         _idleTimeout = idleTimeout ?? TcpSessionSettings.IdleTimeout;
         _adminCommands = adminCommands ?? ZoneAdmin.Enabled;
@@ -76,6 +80,9 @@ public sealed partial class NetZoneServer
         _trade = new TradePacketHandler(_world, RejectAsync);
         _party = new PartyPacketHandler(_world, RejectAsync);
         _commandChannel = new CommandChannelPacketHandler(_world, RejectAsync);
+        _partyMatch = new PartyMatchPacketHandler(_world, RejectAsync);
+        _communityBoard = new CommunityBoardPacketHandler(_world, RejectAsync);
+        _petition = new PetitionPacketHandler(_world, RejectAsync);
         _friends = new FriendPacketHandler(_world, RejectAsync);
         _wedding = new WeddingPacketHandler(_world, RejectAsync);
         _shortcutActions = new ShortcutActionPacketHandler(_world, RejectAsync);

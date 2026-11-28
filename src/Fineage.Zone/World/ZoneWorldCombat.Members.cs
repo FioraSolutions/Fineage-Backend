@@ -28,7 +28,7 @@ public sealed partial class ZoneWorld
         else
         {
             var ps = PlayerStats(player);
-            pDef = ps.PDef;
+            pDef = ps.PDefPrecise;
             evasion = ps.Evasion;
             shieldRate = ShieldRateInArc(player, npc, ps.ShieldRate, ps.ShieldDefAngle);
             shieldDef = ps.ShieldDef;
@@ -36,10 +36,14 @@ public sealed partial class ZoneWorld
         npc.Heading = ZoneCombat.HeadingFrom(npc.X, npc.Y, player.X, player.Y);
         // Mobius Npc.rechargeShots(physical): chance vs SoulShotRate, then stock--; charged for this swing.
         bool ss = TryNpcSoulshot(npc);
+        var position = ZoneCombat.PositionOf(npc.X, npc.Y, player.X, player.Y, player.Heading);
         return ZoneCombat.RollMelee(Rng(_combatRandom, npc), StatMods(npc).Apply(CombatStat.PAtk, npc.PAtk), pDef, NpcAccuracy(npc), evasion,
             NpcCritPermille(npc), npc.RandomDamage, ss, 0, shieldRate, shieldDef, false,
             ZoneCombat.HitConditionBonus(npc.X, npc.Y, npc.Z, player.X, player.Y, player.Z, player.Heading, IsNight),
-            StatMods(npc).Apply(CombatStat.CritDmg, 1d));
+            StatMods(npc).Apply(CombatStat.CritDmg, 1d),
+            weaponTraitBonus: 1d,
+            critDamageAdd: 0,
+            proximity: ZoneCombat.ProximityBonus(position));
     }
 
     /// <summary>Mobius <c>Npc.rechargeShots(true, false)</c>: fire one soulshot if stock and chance allow.</summary>

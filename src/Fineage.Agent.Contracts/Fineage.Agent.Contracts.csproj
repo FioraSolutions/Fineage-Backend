@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Fineage.Agent.Contracts</RootNamespace>
+    <Description>Versioned Agent API contracts (identity, observe, action, operation, event, usage). Not the player PacketEnvelope wire. Isolated from the auditable economy ledger.</Description>
+  </PropertyGroup>
+</Project>

@@ -1,7 +1,10 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Fineage.Game;
+using Fineage.Game.Persistence;
 using Fineage.Protocol;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.MonsterRace;
 
@@ -29,9 +32,18 @@ public sealed class MonsterRaceRunner
     public double CollisionRadius { get; set; }
 }
 
-public sealed class MonsterRaceSnapshot
+public sealed class MonsterRaceSnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int RaceNumber { get; set; } = 1;
     public long CycleStartUnixMs { get; set; }
     public int LastHandledCountdown { get; set; } = -1;
@@ -59,42 +71,6 @@ public sealed class MemoryMonsterRaceStore : IMonsterRaceStore
         _json.Length == 0 ? new MonsterRaceSnapshot() : JsonSerializer.Deserialize<MonsterRaceSnapshot>(_json) ?? new();
 
     public void Save(MonsterRaceSnapshot snapshot) => _json = JsonSerializer.Serialize(snapshot);
-}
-
-public sealed class JsonMonsterRaceStore(string path) : IMonsterRaceStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-    readonly object _gate = new();
-
-    public MonsterRaceSnapshot Load()
-    {
-        lock (_gate)
-        {
-            if (!File.Exists(path))
-                return new MonsterRaceSnapshot();
-            var data = JsonSerializer.Deserialize<MonsterRaceSnapshot>(File.ReadAllText(path), JsonOptions)
-                       ?? throw new InvalidDataException($"empty monster race store: {path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported monster race store version {data.Version}");
-            data.History ??= [];
-            data.BetsPerLane ??= new();
-            data.Runners ??= [];
-            return data;
-        }
-    }
-
-    public void Save(MonsterRaceSnapshot snapshot)
-    {
-        lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, path, overwrite: true);
-        }
-    }
 }
 
 public readonly record struct MonsterRaceSystemNotice(int MessageId, string[] Params, string Text = "");
@@ -146,17 +122,17 @@ public sealed class MonsterRaceBoard
         }
     }
 
-    public static MonsterRaceBoard OpenInStateDirectory(
-        string stateDirectory,
+    /// <summary>Opens the monster race saved in the database (#996).</summary>
+    public static MonsterRaceBoard Open(
+        WorldStateStore state,
         long loadedAtUnixMs,
         ItemCatalog items,
         NpcCatalog npcs,
         Func<int> allocateObjectId,
         MonsterRaceSettings? settings = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "monster-race.json");
         return new MonsterRaceBoard(loadedAtUnixMs, items, npcs, allocateObjectId, settings ?? MonsterRaceSettings.Mobius,
-            new JsonMonsterRaceStore(path));
+            new StoredMonsterRaceStore(state));
     }
 
     public MonsterRaceSettings Settings => _settings;
@@ -305,11 +281,7 @@ public sealed class MonsterRaceBoard
         for (int i = 0; i < MonsterRaceProtocol.RunnerCount; i++)
         {
             int npcId = pool[i];
-            if (!_npcs.ById.TryGetValue(npcId, out var template))
-            {
-                ZoneLog.Warn($"[monster-race] runner npc {npcId} missing from catalog");
-                continue;
-            }
+            var template = _npcs.Get(npcId);
 
             _s.Runners.Add(new MonsterRaceRunner
             {
@@ -359,5 +331,6 @@ public sealed class MonsterRaceBoard
         }
     }
 
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current race board to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
 }

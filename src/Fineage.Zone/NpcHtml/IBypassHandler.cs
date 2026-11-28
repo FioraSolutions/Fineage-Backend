@@ -40,6 +40,8 @@ public sealed class BypassReply
     public string QuestEvent { get; init; } = "";
     public string? Error { get; init; }
     public int? BuyListId { get; init; }
+    /// <summary>Mobius <c>Wear</c> → <c>ShopPreviewList</c>.</summary>
+    public int? WearListId { get; init; }
     public bool OpenSell { get; init; }
     public int? MultiSellListId { get; init; }
     public bool MultiSellInventoryOnly { get; init; }
@@ -63,6 +65,8 @@ public sealed class BypassReply
     };
 
     public static BypassReply Buy(int listId) => new() { BuyListId = listId };
+
+    public static BypassReply Wear(int listId) => new() { WearListId = listId };
 
     public static BypassReply Sell() => new() { OpenSell = true };
 

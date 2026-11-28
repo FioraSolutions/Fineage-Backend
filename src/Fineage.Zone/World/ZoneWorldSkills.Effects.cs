@@ -74,7 +74,14 @@ public sealed partial class ZoneWorld
     /// <summary>
     /// Mobius AURA (around the caster), AREA (around the primary target) and FRONT_AREA (in front of the caster).
     /// </summary>
-    IEnumerable<ZoneEntity> HostileAffectTargets(ZoneEntity caster, ZoneEntity? primary, SkillDefinition template)
+    /// <remarks>
+    /// Candidates come from the caster's AOI neighbourhood, which is exactly the set this used to keep: the old body
+    /// walked <c>_byId.Values</c> and then dropped every entity outside <c>_aoi.GetVisible(caster)</c>, so the whole-world
+    /// scan only threw away 34k entities per cast (~19 ms p99 in <c>commands.apply</c> with one bot in the full world).
+    /// Mobius does the same: the <c>Aura</c> / <c>Area</c> target handlers read <c>World.getVisibleObjectsInRange</c>,
+    /// the caster's surrounding <c>WorldRegion</c>s. Ids stay in ascending object-id order, Mobius' iteration order.
+    /// </remarks>
+    List<ZoneEntity> HostileAffectTargets(ZoneEntity caster, ZoneEntity? primary, SkillDefinition template)
     {
         int range = ResolveAffectRange(template);
         int cx, cy;
@@ -89,8 +96,17 @@ public sealed partial class ZoneWorld
             cy = primary.Y;
         }
 
-        foreach (var entity in _byId.Values)
+        var candidates = t_affectCandidates ??= [];
+        candidates.Clear();
+        _aoi.CollectVisible(caster.ObjectId, candidates);
+        candidates.Sort();
+
+        var targets = new List<ZoneEntity>(candidates.Count);
+        foreach (int id in candidates)
         {
+            // The AOI can still list an id the world already dropped: leave is deferred to the region commit.
+            if (!_byId.TryGetValue(id, out var entity))
+                continue;
             if (entity.Dead || entity.CurHp <= 0)
                 continue;
             if (ReferenceEquals(entity, caster))
@@ -104,13 +120,33 @@ public sealed partial class ZoneWorld
                 continue;
             if (!ZoneCombat.InCastRange(cx, cy, entity.X, entity.Y, range))
                 continue;
+            // VisibleTo also required SameInstance; AOI cells are not instance-scoped, so that check stays here.
+            if (entity.InstanceId != caster.InstanceId)
+                continue;
             if (IsFrontAreaTarget(template) &&
                 !ZoneCombat.IsInFrontOf(entity.X, entity.Y, caster.X, caster.Y, caster.Heading))
                 continue;
-            if (entity.ObjectId != caster.ObjectId && !VisibleTo(caster.ObjectId, entity.ObjectId))
-                continue;
-            yield return entity;
+            targets.Add(entity);
         }
+
+        return targets;
+    }
+
+    [ThreadStatic] static List<int>? t_affectCandidates;
+
+    /// <summary>Test/diagnostics: the object ids <see cref="HostileAffectTargets"/> picks, in order.</summary>
+    internal List<int> HostileAffectTargetIdsForTest(ZoneEntity caster, ZoneEntity? primary, int skillId)
+    {
+        var template = _game.Skills.Find(skillId)
+            ?? throw new InvalidOperationException($"skill {skillId} is not in the catalog");
+        return HostileAffectTargets(caster, primary, template).ConvertAll(static e => e.ObjectId);
+    }
+
+    /// <summary>Test hook: puts an entity into the AOI, which a spawn does through <c>MaterializeSpawn</c>.</summary>
+    internal void EnterAoiForTests(int objectId, int x, int y)
+    {
+        using (_affinity.Step())
+            _aoi.Enter(objectId, x, y);
     }
 
     /// <summary>
@@ -241,7 +277,7 @@ public sealed partial class ZoneWorld
         int damage = (int)(target.CurCp * power / 100d);
         if (damage <= 0)
             return;
-        target.CurCp = Math.Max(0, target.CurCp - damage);
+        ReduceCp(target, damage);
         FanoutVitals(target, PlayerVitalsStatus(target));
         MaybeBreakCast(target, damage);
     }
@@ -266,7 +302,7 @@ public sealed partial class ZoneWorld
             if (outcome == ZoneCombat.LethalOutcome.Full)
             {
                 target.CurCp = 1;
-                target.CurHp = 1;
+                target.CurHp = 1; // hp-write: Lethal sets HP directly, it is not damage routed through CP
             }
             else
                 target.CurCp = 1;
@@ -275,7 +311,7 @@ public sealed partial class ZoneWorld
         else
         {
             if (extra > 0)
-                target.CurHp = Math.Max(1, target.CurHp - extra);
+                target.CurHp = Math.Max(1, target.CurHp - extra); // hp-write: Lethal half-kill sets the remainder
             FanoutVitals(target, StatusFor(target));
         }
         if (caster.Session != null)
@@ -334,7 +370,8 @@ public sealed partial class ZoneWorld
     }
 
     /// <summary>
-    /// Mobius HpDrain: of the landed magic damage, only the HP portion (after CP) is absorbed, × effect power (0.2).
+    /// Mobius HpDrain effect: of the landed magic damage, only the HP portion (after CP) is absorbed, × effect power
+    /// (0.2). Callers pass the actual HP loss returned by <see cref="ApplyTargetDamage"/>, never the raw roll.
     /// </summary>
     internal void ApplyHpDrainAfterDamage(ZoneEntity caster, ZoneEntity target, int damage, int skillId)
     {
@@ -353,15 +390,7 @@ public sealed partial class ZoneWorld
         }
         if (ratio <= 0)
             return;
-        int hpPortion = damage;
-        if (target.Kind == ZoneEntityKind.Player)
-        {
-            // Damage is applied to HP after CP in some paths; we approximate the Mobius split:
-            // drain is 0 when the hit only shaved CP, else damage − cp (already spent) is not recoverable here.
-            // Callers pass the HP actually removed when possible; when only the raw roll is known, assume no CP.
-            hpPortion = damage;
-        }
-        int drain = (int)(ratio * hpPortion);
+        int drain = (int)(ratio * damage);
         if (drain <= 0)
             return;
         int room = Math.Max(0, caster.MaxHp - caster.CurHp);
@@ -604,8 +633,8 @@ public sealed partial class ZoneWorld
         FanoutAbnormal(target);
 
         int range = 2000;
-        var template = _game.Skills.Find(skillId);
-        if (template != null && template.EffectRange > 0)
+        var template = _game.Skills.Require(skillId);
+        if (template.EffectRange > 0)
             range = template.EffectRange;
         var candidates = new List<ZoneEntity>();
         foreach (var entity in _byId.Values)

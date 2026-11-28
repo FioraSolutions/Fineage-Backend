@@ -114,7 +114,7 @@ public sealed partial class ZoneWorld
             player.LearnedSkills.Select(p => new Fineage.Accounts.StoredSkill(p.Key, p.Value)).ToList());
         SaveQuestProgress(session, player); // persists exp/sp like quest rewards
         NetBridge?.FanoutSkillList([player.ObjectId], Fineage.Zone.Net.NetEnterWorldProjector.BuildSkills(player, NowUnixMs()));
-        string skillName = _game.Skills.Find(row.SkillId)?.Name ?? $"Skill {row.SkillId}";
+        string skillName = _game.Skills.Require(row.SkillId).Name;
         // Mobius SystemMessage 277 "You have earned $s1."
         Notice(session, 277, $"You have earned {skillName}.");
         // Mobius re-sends the list after a learn so the bought row leaves the window.
@@ -218,6 +218,7 @@ public sealed partial class ZoneWorld
 
         // Net timed move: measure range from where the pawn really is now, not the last move order.
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
 
         // Mobius Skill.checkCondition (single <see cref="SkillCastConditionEvaluator"/> path).
         var condTarget = ResolveSkillConditionTarget(session, player, request, liveTemplate);

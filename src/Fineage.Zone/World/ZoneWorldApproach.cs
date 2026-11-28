@@ -27,6 +27,7 @@ public sealed partial class ZoneWorld
         long now = NowUnixMs();
         // Net: bring the timed-move position up to date before measuring (the pawn may already be running).
         AdvanceMove(player, now);
+        ReconcileKnownlistAfterCommandAdvance(player);
 
         // Sticky intention: same target, still running a path, target has not drifted -> no re-send, same ETA.
         // If the pawn stopped short (wall / truncated MoveCheck) while still out of range, repath immediately.

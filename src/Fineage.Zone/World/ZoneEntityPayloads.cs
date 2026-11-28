@@ -251,6 +251,12 @@ sealed class ZoneEntityMovePayload
 sealed class ZonePlayerSkillsPayload
 {
     public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts { get; } = [];
+    /// <summary>Mobius MacroList keyed by macro id.</summary>
+    public Dictionary<int, Fineage.Accounts.StoredMacro> Macros { get; } = [];
+    /// <summary>Mobius MacroList._revision (starts at 1).</summary>
+    public int MacroRevision { get; set; } = 1;
+    /// <summary>Next id when creating (Mobius starts at 1000).</summary>
+    public int MacroNextId { get; set; } = Fineage.Accounts.StoredMacro.FirstId;
     public Dictionary<int, int> LearnedSkills { get; } = [];
     public bool HasStatAbnormal { get; set; }
     public List<ZoneAbnormalEntry> Abnormals { get; } = [];
@@ -288,6 +294,8 @@ sealed class ZonePlayerStatusPayload
     public double RegenCarryCp { get; set; }
     public bool SoulshotCharged { get; set; }
     public int SpiritshotCharge { get; set; }
+    /// <summary>Mobius RollingDice flood gate: unix ms when the next roll is allowed.</summary>
+    public long DiceReadyAtMs { get; set; }
     /// <summary>Mobius EtcStatusUpdate charges (Sonic Focus / Focus Force stacks).</summary>
     public int ForceCharges { get; set; }
     /// <summary>Mobius <c>ResetChargesTask</c>: unix ms when stacks clear after 10 min idle (0 = none scheduled).</summary>
@@ -307,6 +315,12 @@ sealed class ZonePlayerStatusPayload
 
     /// <summary>Mobius player element-seed expiry timestamps (FIRE/WATER/WIND/EARTH), unix ms.</summary>
     public Dictionary<string, List<long>> ElementSeedUntilMs { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Mobius <c>Player._isInvul</c> (admin_invul / skills). Blocks incoming HP damage.</summary>
+    public bool Invulnerable { get; set; }
+
+    /// <summary>Mobius GM hide / invis: non-GM peers omit this player from their knownlist.</summary>
+    public bool Invisible { get; set; }
 
     /// <summary>Mobius CA1 channel: skill still ticking until this unix ms. 0 = not channeling.</summary>
     public long ChannelUntilMs { get; set; }

@@ -15,6 +15,10 @@ namespace Fineage.Net.Contract
         public static RecipeMakeSelfNetMsg DecodeRecipeMakeSelf(ReadOnlySpan<byte> p) =>
             new() { RecipeId = new Reader(p).ReadInt32() };
 
+        public static byte[] EncodeRecipeBookDestroy(RecipeBookDestroyNetMsg m) => Write(w => w.WriteInt32(m.RecipeId));
+        public static RecipeBookDestroyNetMsg DecodeRecipeBookDestroy(ReadOnlySpan<byte> p) =>
+            new() { RecipeId = new Reader(p).ReadInt32() };
+
         public static byte[] EncodeRecipeBookList(RecipeBookListNetMsg m) => Write(w =>
         {
             w.WriteInt32(m.Dwarven);

@@ -39,11 +39,7 @@ public sealed partial class ZoneWorld
     ZoneEntity? SpawnQuestNpc(ZoneEntity player, int npcId, int x, int y, int z, int instanceId, int heading, QuestSummon? summon = null)
     {
         var templates = NpcCatalog.LoadDefault();
-        if (!templates.ById.TryGetValue(npcId, out var template))
-        {
-            ZoneLog.Info($"quest spawn skip unknown npcId={npcId}");
-            return null;
-        }
+        var template = templates.Get(npcId);
 
         // A quest-summoned raid boss (Ashutar, Nastron, …) exists once: another summon while it lives does nothing.
         if (string.Equals(template.Type, "RaidBoss", StringComparison.Ordinal) &&

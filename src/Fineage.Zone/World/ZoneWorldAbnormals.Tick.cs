@@ -106,20 +106,26 @@ public sealed partial class ZoneWorld
                 continue;
             }
             // Mobius canKill=false DoTs leave the target at 1 HP.
-            int nextHp = entity.CurHp - dmg;
-            if (nextHp < 1)
-                nextHp = 1;
-            totalDmg += entity.CurHp - nextHp;
-            entity.CurHp = nextHp;
+            int cap = Math.Max(0, entity.CurHp - 1);
+            int amount = Math.Min(dmg, cap);
+            // CT0 DamOverTime passes BuffInfo.getEffector() into reduceCurrentHpByDOT; the shared abnormal now
+            // carries that effector id so a playable attacker spends CP exactly like any other hit.
+            ZoneEntity? attacker = ab.EffectorObjectId > 0 &&
+                _byId.TryGetValue(ab.EffectorObjectId, out var effector) ? effector : null;
+            var dealt = ApplyTargetDamage(entity, attacker, amount);
+            totalDmg += dealt.TotalLoss;
             ab.NextDotAtUnixMs = now + dot.TickMs;
-            hurt = true;
+            hurt |= dealt.TotalLoss > 0;
         }
 
         if (!hurt || totalDmg <= 0)
             return;
         SyncNeedRegen(entity);
-        FanoutVitals(entity, StatusFor(entity));
+        FanoutVitals(entity, entity.Kind == ZoneEntityKind.Player ? PlayerVitalsStatus(entity) : StatusFor(entity));
     }
+
+    /// <summary>Test hook: run one DOT tick pass for a target without the region scheduler.</summary>
+    internal void TickDotDamageForTest(ZoneEntity entity, long now) => TickDotDamage(entity, now);
 
     /// <summary>Test hook: run one abnormal expiry pass and fan-out clears.</summary>
     internal Task RunAbnormalTickAsync(CancellationToken ct)
@@ -252,8 +258,7 @@ public sealed partial class ZoneWorld
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
-        var skill = _game.Skills.Find(effectId)
-            ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (duration).");
+        var skill = _game.Skills.Require(effectId);
         if (skill.AbnormalTimeSeconds <= 0)
             throw new InvalidOperationException($"skill {effectId} has no abnormalTimeSeconds.");
         return skill.AbnormalTimeSeconds;
@@ -263,8 +268,7 @@ public sealed partial class ZoneWorld
     {
         if (effectId <= 0)
             throw new ArgumentOutOfRangeException(nameof(effectId), effectId, "Abnormal effect id required.");
-        var skill = _game.Skills.Find(effectId)
-            ?? throw new InvalidOperationException($"skills.json missing skillId={effectId} (abnormalLevel).");
+        var skill = _game.Skills.Require(effectId);
         if (!skill.TryLevelData(1, out var level) || level.AbnormalLevel <= 0)
             throw new InvalidOperationException($"skill {effectId} lv1 missing abnormalLevel.");
         return level.AbnormalLevel;

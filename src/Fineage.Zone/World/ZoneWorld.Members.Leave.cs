@@ -134,6 +134,10 @@ public sealed partial class ZoneWorld
 
     internal bool FlushDirtyInventoriesForTests() => FlushDirtyInventories();
 
+    /// <summary>Test hook: the logout commit an off-step leaver runs (PersistUnlinkSnapshot), on the caller thread.</summary>
+    internal bool CommitEconomyOffStepForTests(int leavingObjectId) =>
+        TryCommitDirtyEconomy(discardWithoutPublish: leavingObjectId);
+
     internal void StartCharacterSnapshotsForTests() => _snapshots.Start();
 
     internal void PauseCharacterSnapshotsForTests() => _snapshots.PauseForTests();
@@ -151,6 +155,8 @@ public sealed partial class ZoneWorld
     internal void StopEconomyPersistForTests() => _economyPersist?.Stop();
 
     internal int EconomyPersistWriterThreadForTests => _economyPersist?.LastWriterThreadId ?? 0;
+
+    internal int EconomyPersistPendingForTests => _economyPersist?.PendingCount ?? 0;
 
     internal bool DrainEconomyPersistForTests()
     {

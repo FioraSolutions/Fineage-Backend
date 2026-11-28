@@ -50,8 +50,8 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Inventory } =>
             _byId.TryGetValue(account.OwnerId, out var player) && player.Inventory != null
                 ? LedgerInventoryChange.HoldingsFrom(player.Inventory)
-                : _accounts?.FindByCharacterId(account.OwnerId) is { Items: { } stored }
-                    ? HoldingsFromStored(stored)
+                : OfflineInventoryRows(account.OwnerId) is { } stored
+                    ? Fineage.Zone.Persistence.StoredStateAudit.BagHoldings(stored, _game.Items)
                     : throw new InvalidOperationException($"{account} has no inventory in the world or store"),
         { Owner: LedgerOwnerKind.Castle, Container: LedgerContainer.Treasury } =>
             new LedgerHoldings().Add(ShopTrade.AdenaItemId, _siege.Board.Find(account.OwnerId)?.Treasury
@@ -65,7 +65,7 @@ public sealed partial class ZoneWorld
         { Owner: LedgerOwnerKind.Character, Container: LedgerContainer.Freight } freightAccount =>
             _byId.TryGetValue(freightAccount.OwnerId, out var freightOwner) && freightOwner.Freight != null
                 ? HoldingsOf(freightOwner.Freight)
-                : HoldingsFromStored(QueuedFreight(freightAccount.OwnerId)
+                : HoldingsOfStoredWarehouse(QueuedFreight(freightAccount.OwnerId)
                     ?? _accounts?.FindByCharacterId(freightAccount.OwnerId)?.Freight
                     ?? []),
         { Owner: LedgerOwnerKind.Clan, Container: LedgerContainer.Warehouse } =>
@@ -85,39 +85,37 @@ public sealed partial class ZoneWorld
     static LedgerHoldings ProgressHoldingsOf(ZoneEntity player) =>
         new LedgerHoldings().Add(LedgerResourceIds.Sp, player.Sp).Add(LedgerResourceIds.Exp, player.Exp);
 
-    static LedgerHoldings HoldingsFromStored(IReadOnlyList<StoredItem> items)
+    static LedgerHoldings HoldingsOfStoredWarehouse(IReadOnlyList<StoredItem> items)
     {
         var holdings = new LedgerHoldings();
         foreach (var row in items)
-        {
-            if (row.Count <= 0)
-                continue;
-            if (row.Count == 1 && row.ObjectId > 0)
-                holdings.AddPiece(row.ItemId, row.ObjectId);
-            else
-                holdings.Add(row.ItemId, row.Count);
-        }
-
+            holdings.Add(row.ItemId, row.Count);
         return holdings;
     }
 
     /// <summary>
-    /// Freight for a character who is not in the world is queued until the economy commit. Reconciliation has to
-    /// see that queue: the store row is written in the same transaction as the ledger insert, which is after this.
+    /// Containers of a character who is not in the world are queued until the economy commit (#984: the store row and
+    /// the ledger insert land in one transaction). Reconciliation has to see that queue, newest write first.
     /// </summary>
-    IReadOnlyList<StoredItem>? QueuedFreight(int characterId)
+    IReadOnlyList<StoredItem>? QueuedOffline(int characterId, Func<EconomyBagWrite, IReadOnlyList<StoredItem>?> container)
     {
         using (_economyLock.Enter())
         {
-            for (int i = _dirtyOfflineFreight.Count - 1; i >= 0; i--)
+            for (int i = _dirtyOfflineBags.Count - 1; i >= 0; i--)
             {
-                if (_dirtyOfflineFreight[i].CharacterId == characterId)
-                    return _dirtyOfflineFreight[i].Freight;
+                if (_dirtyOfflineBags[i].CharacterId == characterId && container(_dirtyOfflineBags[i]) is { } rows)
+                    return rows;
             }
         }
 
         return null;
     }
+
+    IReadOnlyList<StoredItem>? QueuedFreight(int characterId) => QueuedOffline(characterId, bag => bag.Freight);
+
+    /// <summary>An offline character's bag: the queued write when one is pending, else the store row.</summary>
+    IReadOnlyList<StoredItem>? OfflineInventoryRows(int characterId) =>
+        QueuedOffline(characterId, bag => bag.Inventory) ?? _accounts?.FindByCharacterId(characterId)?.Items;
 
     static LedgerHoldings HoldingsOf(PlayerInventory inventory) => LedgerInventoryChange.HoldingsFrom(inventory);
 
@@ -160,6 +158,29 @@ public sealed partial class ZoneWorld
         player, LedgerTxKind.QuestReward, LedgerAccount.Of(SystemAccount.Quests), step, outcome => outcome.QuestId);
 
     void ObserveLedger(LedgerMove move, LedgerAccount account) => move.Observe(account, LedgerHoldingsOf(account));
+
+    /// <summary>
+    /// One simulation-thread, no-I/O container transfer: all postings and destination ids are planned first;
+    /// only an accepted ledger move may execute the prevalidated inventory mutations.
+    /// </summary>
+    static bool CommitLedgerMutation(
+        LedgerMove move,
+        string operation,
+        Action plan,
+        Action apply,
+        Func<LedgerAccount, LedgerHoldings> holdings)
+    {
+        plan();
+        var rejection = move.CheckCommit();
+        if (rejection != LedgerRejection.None)
+        {
+            ZoneLog.Warn($"{operation} refused: ledger rejected the planned postings ({rejection})");
+            return false;
+        }
+        apply();
+        move.Commit(holdings);
+        return true;
+    }
 
     /// <summary>Opens a shop move: the buyer's inventory and every treasury the shop's tax can reach.</summary>
     LedgerMove BeginShopMove(LedgerTxKind kind, ZoneEntity player, int npcId, int castleId)

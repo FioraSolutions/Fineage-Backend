@@ -87,4 +87,5 @@ public sealed class NetCraftTests
             await kit.World.TryRecipeMakeSelfAsync(session, new RecipeMakeSelfMsg { RecipeId = RecipeListId }, default));
         Assert.Empty(kit.Ledger.Entries);
     }
+
 }

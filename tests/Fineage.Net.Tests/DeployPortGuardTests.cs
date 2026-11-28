@@ -14,11 +14,27 @@ public sealed class DeployPortGuardTests
     public void Deploy_health_check_probes_the_Net_ports()
     {
         string root = RepoRoot();
+        // #989: the host-side gate lives in release-switch.sh; deploy-to-host.sh only uploads and calls it.
+        string gate = File.ReadAllText(Path.Combine(root, "deploy", "release-switch.sh"));
+
+        Assert.Contains("FINEAGE_NET_LOGIN_PORT:-9106", gate, StringComparison.Ordinal);
+        Assert.Contains("FINEAGE_NET_ZONE_PORT:-9777", gate, StringComparison.Ordinal);
+        Assert.DoesNotContain("2106", gate, StringComparison.Ordinal);
+        Assert.DoesNotContain("7777", gate, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Deploy_waits_for_readiness_and_switches_releases_atomically()
+    {
+        string root = RepoRoot();
+        string gate = File.ReadAllText(Path.Combine(root, "deploy", "release-switch.sh"));
         string deploy = File.ReadAllText(Path.Combine(root, "deploy", "deploy-to-host.sh"));
 
-        Assert.Contains("FINEAGE_NET_LOGIN_PORT:-9106", deploy, StringComparison.Ordinal);
-        Assert.Contains("FINEAGE_NET_ZONE_PORT:-9777", deploy, StringComparison.Ordinal);
-        Assert.DoesNotContain("for port in 2106 7777 5080", deploy, StringComparison.Ordinal);
+        Assert.Contains("/health/ready", gate, StringComparison.Ordinal);
+        Assert.Contains("mv -T current.next current", gate, StringComparison.Ordinal);
+        Assert.Contains("rolling back to", gate, StringComparison.Ordinal);
+        Assert.Contains("release-switch.sh", deploy, StringComparison.Ordinal);
+        Assert.DoesNotContain("rsync -a --delete \"${STAGING}", deploy, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -26,12 +42,15 @@ public sealed class DeployPortGuardTests
     {
         string root = RepoRoot();
         string deploy = File.ReadAllText(Path.Combine(root, "deploy", "deploy-to-host.sh"));
+        string gate = File.ReadAllText(Path.Combine(root, "deploy", "release-switch.sh"));
 
         // The live host runs the servers under systemd; run-*.sh would race those units for the ports.
         Assert.Contains("FINEAGE_RESTART:-systemd", deploy, StringComparison.Ordinal);
-        Assert.Contains("sudo systemctl restart", deploy, StringComparison.Ordinal);
+        Assert.Contains("FINEAGE_RESTART:-systemd", gate, StringComparison.Ordinal);
+        Assert.Contains("sudo systemctl restart", gate, StringComparison.Ordinal);
         Assert.DoesNotContain("raspberrypi", deploy, StringComparison.Ordinal);
         Assert.DoesNotContain("/home/pi/", deploy, StringComparison.Ordinal);
+        Assert.DoesNotContain("/home/pi/", gate, StringComparison.Ordinal);
     }
 
     [Fact]

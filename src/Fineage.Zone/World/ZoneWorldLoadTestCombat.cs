@@ -1,4 +1,5 @@
 using Fineage.Game;
+using Fineage.Game.Shops;
 using Fineage.Accounts;
 using Fineage.Protocol;
 
@@ -44,6 +45,9 @@ public sealed partial class ZoneWorld
         player.MaxMp = template.ModifiedMp(player.Level);
         player.CurHp = player.MaxHp;
         player.CurMp = player.MaxMp;
+        // Mobius trainer mode (#1049) no longer auto-grants NPC-tree skills. Perf bots still need the rotation
+        // on KnownSkills: seed LearnedSkills from the class tree at combat level, then refresh.
+        GrantLoadTestRotationSkills(player);
         RefreshKnownSkills(player);
         foreach (int skillId in LoadTestCombatSettings.RequiredSkillIds)
         {
@@ -65,6 +69,12 @@ public sealed partial class ZoneWorld
 
         if (!weapon.IsEquipped)
             player.Inventory.Equip(weapon);
+
+        // Fee-paying flows (gatekeeper teleport, shop, private store, freight) need funds; a blank purse turns every
+        // one of them into a refusal and the perf run measures the rejection path instead of the pipeline.
+        if (player.Inventory.CountOf(ShopTrade.AdenaItemId) <= 0)
+            player.Inventory.Add(ShopTrade.AdenaItemId, LoadTestCombatSettings.StartingAdena);
+
         SaveInventory(player.Session, player.Inventory);
 
         ZoneLog.Info($"loadtest combat profile object={player.ObjectId} class={player.ClassId} level={player.Level}");
@@ -90,4 +100,28 @@ public sealed partial class ZoneWorld
 
     internal bool LoadTestCombatProfileNeeded(ZoneEntity player) =>
         LoadTestCombatSettings.AppliesToAccount(player.Session?.Account);
+
+    void GrantLoadTestRotationSkills(ZoneEntity player)
+    {
+        var tree = _game.SkillTrees.FindClass(player.ClassId)
+            ?? throw new InvalidOperationException(
+                $"loadtest combat profile: skill tree for class {player.ClassId} is missing from the datapack.");
+        foreach (int skillId in LoadTestCombatSettings.RequiredSkillIds)
+        {
+            int level = 0;
+            foreach (var row in tree.Skills)
+            {
+                if (row.SkillId != skillId || row.GetLevel > player.Level)
+                    continue;
+                if (row.Level > level)
+                    level = row.Level;
+            }
+
+            if (level <= 0)
+                throw new InvalidOperationException(
+                    $"loadtest combat profile: class {player.ClassId} level {player.Level} has no tree row for skill {skillId}.");
+            if (!player.LearnedSkills.TryGetValue(skillId, out int have) || have < level)
+                player.LearnedSkills[skillId] = level;
+        }
+    }
 }

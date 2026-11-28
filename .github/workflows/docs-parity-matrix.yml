@@ -1,0 +1,38 @@
+name: docs-parity-matrix
+
+# Fast repo check for the canonical parity matrix. Other workflows ignore docs-only PRs, so this
+# workflow owns the evidence/status gate for issues #977 and #174.
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'docs/mobius-parity-matrix.md'
+      - 'docs/QUEST_STATUS.md'
+      - 'docs/wire-coverage.md'
+      - 'docs/data/retail-net-opcode-map.json'
+      - 'docs/adr/0001-custom-net-wire.md'
+      - 'tools/check_parity_matrix.py'
+      - 'tools/check_retail_opcode_map.py'
+      - 'tools/quest_status.py'
+      - '.github/workflows/docs-parity-matrix.yml'
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-parity-matrix:
+    name: validate-parity-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate evidence links, statuses and counters
+        run: python3 tools/check_parity_matrix.py
+
+      - name: Retail opcode map agrees with wire-coverage.md
+        run: python3 tools/check_retail_opcode_map.py

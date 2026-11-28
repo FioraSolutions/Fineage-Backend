@@ -1,0 +1,46 @@
+{
+  "scenario": "cp-reducehp-human-fighter-40",
+  "oracle": {
+    "kind": "mobius-formula-java",
+    "reference": "ref/mobius-ct0-interlude",
+    "driver": "tools/Fineage.MobiusDiff/java/MobiusFormulaDriver.java",
+    "formulas": [
+      "Formulas.calcPhysDam",
+      "Formulas.calcCrit",
+      "Formulas.calcHitMiss",
+      "FuncPAtkMod",
+      "FuncPDefMod",
+      "FuncAtkAccuracy",
+      "FuncAtkEvasion",
+      "FuncAtkCritical",
+      "FuncPAtkSpeed",
+      "CreatureStat.getCriticalHit",
+      "CreatureStat.getPAtk",
+      "CreatureStat.getPAtkSpd",
+      "PlayerStatus.reduceHp (CP barrier, PlayerStatus.java:212-222)",
+      "PlayerStatus.reduceCp (PlayerStatus.java:49-53)"
+    ],
+    "fullServerVerified": false,
+    "blocker": "Full Mobius GameServer startup is not reproducible in this tree: ref/mobius-ct0-interlude/dist/libs is absent (build.xml/.classpath require mariadb-java-client-2.7.5.jar) and the server needs MySQL. This driver evaluates the pure formula layer from Mobius XML/formulas; it is not a full-server run."
+  },
+  "metrics": {
+    "pAtk": 6.1920000000,
+    "pDef": 103.2000000000,
+    "pAtkSpd": 330.0000000000,
+    "accuracy": 73.0000000000,
+    "evasion": 73.0000000000,
+    "critPermille": 44.0000000000,
+    "hitChancePermille": 980.0000000000,
+    "critChancePermille": 44.0000000000,
+    "damageNoCrit": 10.0000000000,
+    "damageMeanPerSwing": 10.8331230417,
+    "cpLoss_fullAp": 150.0000000000,
+    "hpLoss_fullAp": 0.0000000000,
+    "cpLoss_overflow": 40.0000000000,
+    "hpLoss_overflow": 60.0000000000,
+    "cpLoss_npcBypass": 0.0000000000,
+    "hpLoss_npcBypass": 100.0000000000,
+    "cpLoss_explicitIgnore": 0.0000000000,
+    "hpLoss_explicitIgnore": 100.0000000000
+  }
+}

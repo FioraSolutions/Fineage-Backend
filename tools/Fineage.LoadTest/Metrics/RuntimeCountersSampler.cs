@@ -3,6 +3,8 @@ using System.Globalization;
 
 namespace Fineage.LoadTest.Metrics;
 
+public sealed record RuntimeMetricPoint(DateTimeOffset At, double Value);
+
 public sealed class RuntimeCounterStats
 {
     public string Source { get; init; } = "";
@@ -19,6 +21,11 @@ public sealed class RuntimeCounterStats
     public double ThreadPoolQueueMax { get; init; }
     public double ThreadPoolThreadsMax { get; init; }
     public double LockContentionMax { get; init; }
+
+    /// <summary>Timestamped GC heap and allocation samples; the trend gates filter these to the steady-state window.</summary>
+    public IReadOnlyList<RuntimeMetricPoint> GcHeapMbSeries { get; init; } = [];
+
+    public IReadOnlyList<RuntimeMetricPoint> AllocRateMbPerSecSeries { get; init; } = [];
 }
 
 /// <summary>Samples zone process via dotnet-counters when available; otherwise /proc CPU RSS fallback.</summary>
@@ -28,6 +35,8 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
     readonly List<double> _cpuSamples = [];
     readonly List<double> _allocMb = [];
     readonly List<double> _gcHeapMb = [];
+    readonly List<RuntimeMetricPoint> _allocSeries = [];
+    readonly List<RuntimeMetricPoint> _gcHeapSeries = [];
     readonly List<double> _timeInGc = [];
     readonly List<double> _tpQueue = [];
     readonly List<double> _tpThreads = [];
@@ -138,6 +147,7 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         string? name = CanonicalCounter(line);
         if (name == null || LastNumber(line) is not { } v)
             return;
+        DateTimeOffset at = ParseTimestamp(line) ?? DateTimeOffset.UtcNow;
 
         switch (name)
         {
@@ -145,10 +155,13 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
                 _cpuSamples.Add(v);
                 break;
             case "alloc-rate" or "Allocation Rate (B / sec)":
-                _allocMb.Add(v / (1024 * 1024));
+                double allocMb = v / (1024 * 1024);
+                _allocMb.Add(allocMb);
+                _allocSeries.Add(new RuntimeMetricPoint(at, allocMb));
                 break;
             case "gc-heap-size" or "GC Heap Size (MB)":
                 _gcHeapMb.Add(v);
+                _gcHeapSeries.Add(new RuntimeMetricPoint(at, v));
                 break;
             case "gen-0-gc-count":
                 NoteGen(rate: IsIntervalIncrement(line), ref _gen0Start, ref _gen0End, v);
@@ -216,6 +229,32 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
         if (line.Contains("time-in-gc", StringComparison.Ordinal) || line.Contains("% Time in GC", StringComparison.OrdinalIgnoreCase))
             return "time-in-gc";
         return null;
+    }
+
+    static DateTimeOffset? ParseTimestamp(string line)
+    {
+        int comma = line.IndexOf(',');
+        if (comma <= 0)
+            return null;
+        string token = line[..comma].Trim().Trim('"');
+        // dotnet-counters writes a naive local timestamp (no offset). Treating that as UTC
+        // on a UTC+3 host pulled boot/ramp heap samples into the "steady-state" window.
+        DateTimeStyles style = HasExplicitOffset(token)
+            ? DateTimeStyles.RoundtripKind | DateTimeStyles.AdjustToUniversal
+            : DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal;
+        return DateTimeOffset.TryParse(token, CultureInfo.InvariantCulture, style, out var at)
+            ? at.ToUniversalTime()
+            : null;
+    }
+
+    static bool HasExplicitOffset(string token)
+    {
+        if (token.EndsWith('Z') || token.EndsWith('z'))
+            return true;
+        // "...+03:00" / "...-05:00" — a date-only 'T' must not count as a sign.
+        int t = token.IndexOf('T');
+        int start = t >= 0 ? t + 1 : 0;
+        return token.IndexOf('+', start) >= 0 || token.LastIndexOf('-') > start;
     }
 
     static double? LastNumber(string line)
@@ -308,7 +347,9 @@ public sealed class RuntimeCountersSampler : IAsyncDisposable
             Gen2CountDelta = Delta(_gen2Start, _gen2End),
             ThreadPoolQueueMax = Max(_tpQueue),
             ThreadPoolThreadsMax = Max(_tpThreads),
-            LockContentionMax = Max(_lockContention)
+            LockContentionMax = Max(_lockContention),
+            GcHeapMbSeries = _gcHeapSeries.ToArray(),
+            AllocRateMbPerSecSeries = _allocSeries.ToArray()
         };
     }
 

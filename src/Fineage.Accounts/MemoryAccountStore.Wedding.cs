@@ -4,7 +4,7 @@ public sealed partial class MemoryAccountStore
 {
     public IReadOnlyList<WeddingCoupleRecord> ListWeddingCouples()
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.WeddingCouples.OrderBy(c => c.Id).ToList();
     }
 
@@ -13,7 +13,7 @@ public sealed partial class MemoryAccountStore
         ArgumentNullException.ThrowIfNull(couples);
         if (nextCoupleId < 1)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             _data.WeddingCouples = couples.OrderBy(c => c.Id).ToList();
             _data.NextWeddingCoupleId = nextCoupleId;
@@ -26,7 +26,7 @@ public sealed partial class MemoryAccountStore
     {
         get
         {
-            lock (_gate)
+            using (EnterStore())
                 return Math.Max(1, _data.NextWeddingCoupleId);
         }
     }
@@ -35,7 +35,7 @@ public sealed partial class MemoryAccountStore
     {
         if (characterId <= 0)
             return false;
-        lock (_gate)
+        using (EnterStore())
         {
             int before = _data.WeddingCouples.Count;
             _data.WeddingCouples.RemoveAll(c => c.Player1Id == characterId || c.Player2Id == characterId);

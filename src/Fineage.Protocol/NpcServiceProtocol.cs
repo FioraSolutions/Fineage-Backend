@@ -185,4 +185,10 @@ public static class NpcServiceIntent
     public const string HallTeleport = "hall-teleport";
     public const string HallDeco = "hall-deco";
     public const string HallItemCreate = "hall-item-create";
+
+    /// <summary>Gatekeeper Ziggurat <c>necro</c>/<c>cata</c> enter (Mobius Seven Signs dungeon HTML).</summary>
+    public const string DungeonEnter = "dungeon-enter";
+
+    /// <summary>Inner gatekeeper <c>exit</c> leave (Mobius Seven Signs dungeon HTML).</summary>
+    public const string DungeonExit = "dungeon-exit";
 }

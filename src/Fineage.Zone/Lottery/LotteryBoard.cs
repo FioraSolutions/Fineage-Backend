@@ -1,6 +1,9 @@
 using System.Numerics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 using Fineage.Protocol;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.Lottery;
 
@@ -58,9 +61,18 @@ public sealed class LotteryTicket
     public int Mask { get; set; }
 }
 
-public sealed class LotterySnapshot
+public sealed class LotterySnapshot : IVersionedStateSnapshot
 {
-    public int Version { get; set; } = 1;
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
     public int Number { get; set; } = 1;
     public long Prize { get; set; }
     public long EndUnixMs { get; set; }
@@ -84,41 +96,6 @@ public sealed class MemoryLotteryStore : ILotteryStore
         _json.Length == 0 ? new LotterySnapshot() : JsonSerializer.Deserialize<LotterySnapshot>(_json) ?? new LotterySnapshot();
 
     public void Save(LotterySnapshot snapshot) => _json = JsonSerializer.Serialize(snapshot);
-}
-
-public sealed class JsonLotteryStore(string path) : ILotteryStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-    readonly object _gate = new();
-
-    public LotterySnapshot Load()
-    {
-        lock (_gate)
-        {
-            if (!File.Exists(path))
-                return new LotterySnapshot();
-            var data = JsonSerializer.Deserialize<LotterySnapshot>(File.ReadAllText(path), JsonOptions)
-                ?? throw new InvalidDataException($"empty lottery store: {path}");
-            if (data.Version != 1)
-                throw new InvalidDataException($"unsupported lottery store version {data.Version}");
-            data.Draws ??= [];
-            data.Tickets ??= [];
-            return data;
-        }
-    }
-
-    public void Save(LotterySnapshot snapshot)
-    {
-        lock (_gate)
-        {
-            string? dir = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            string tmp = path + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions));
-            File.Move(tmp, path, overwrite: true);
-        }
-    }
 }
 
 /// <summary>A board event the world announces to everyone online.</summary>
@@ -156,10 +133,10 @@ public sealed class LotteryBoard
         }
     }
 
-    public static LotteryBoard OpenInStateDirectory(string stateDirectory, long loadedAtUnixMs, LotterySettings? settings = null)
+    /// <summary>Opens the lottery saved in the database (#996).</summary>
+    public static LotteryBoard Open(WorldStateStore state, long loadedAtUnixMs, LotterySettings? settings = null)
     {
-        string path = Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "lottery.json");
-        return new LotteryBoard(loadedAtUnixMs, settings ?? LotterySettings.FromEnvironment(), new JsonLotteryStore(path));
+        return new LotteryBoard(loadedAtUnixMs, settings ?? LotterySettings.FromEnvironment(), new StoredLotteryStore(state));
     }
 
     public LotterySettings Settings => _settings;
@@ -277,6 +254,12 @@ public sealed class LotteryBoard
 
         while (now >= _s.EndUnixMs)
         {
+            long overdue = now - _s.EndUnixMs;
+            if (overdue >= 7L * 24 * 3600 * 1000)
+            {
+                ZoneLog.Warn(
+                    $"[lottery] draw overdue by={overdue / 3_600_000}min lottery={_s.Number} due={_s.EndUnixMs} now={now}; drawing once and skipping missed draws");
+            }
             Finish(random, notices);
             _s.EndUnixMs = NextDraw(Math.Max(now, _s.EndUnixMs));
             _s.SuspendAnnounced = now >= _s.EndUnixMs - LotteryProtocol.SalesCloseMs;
@@ -342,5 +325,6 @@ public sealed class LotteryBoard
         _s.Number++;
     }
 
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current board to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
 }

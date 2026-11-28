@@ -126,27 +126,30 @@ public sealed partial class ZoneWorld
         var move = BeginLedgerMove(LedgerTxKind.WarehouseDeposit, player.ObjectId, npc.NpcId);
         ObserveLedger(move, bag);
         ObserveLedger(move, store);
-        if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
+        if (!CommitLedgerMutation(move, $"warehouse deposit object={player.ObjectId} keeper={npc.ObjectId}", () =>
         {
-            Notice(session, NpcServiceProtocol.WarehouseAdena, NpcServiceProtocol.NotEnoughAdenaText);
-            return null;
-        }
-
-        move.Post(bag, WarehouseRules.AdenaItemId, -fee);
-        move.Post(LedgerAccount.Of(SystemAccount.Fees), WarehouseRules.AdenaItemId, fee);
-        foreach (var (item, count, _) in planned)
+            move.Post(bag, WarehouseRules.AdenaItemId, -fee);
+            move.Post(LedgerAccount.Of(SystemAccount.Fees), WarehouseRules.AdenaItemId, fee);
+            foreach (var (item, count, _) in planned)
+            {
+                move.Post(bag, item.ItemId, -count, PiecesOf([item]));
+                move.Post(store, item.ItemId, count);
+            }
+        }, () =>
         {
-            if (!player.Inventory.TryTakeFrom(item.ObjectId, count, out var taken, out bool removed) || taken == null)
-                return "bad_request";
-            changes.Add(removed
-                ? InventoryMessages.RemoveRow(taken, -1)
-                : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
-            wh.Add(taken.ItemId, count, taken.EnchantLevel, out _);
-            move.Post(bag, taken.ItemId, -count, PiecesOf([taken]));
-            move.Post(store, taken.ItemId, count);
-        }
-
-        move.Commit(LedgerHoldingsOf);
+            if (fee > 0 && !Take(player.Inventory, WarehouseRules.AdenaItemId, fee, changes))
+                throw new InvalidOperationException($"warehouse deposit fee plan failed for object {player.ObjectId}");
+            foreach (var (item, count, _) in planned)
+            {
+                if (!player.Inventory.TryTakeFrom(item.ObjectId, count, out var taken, out bool removed) || taken == null)
+                    throw new InvalidOperationException($"warehouse deposit item object={item.ObjectId} changed after preflight");
+                changes.Add(removed
+                    ? InventoryMessages.RemoveRow(taken, -1)
+                    : InventoryMessages.ChangeRow(InventoryChange.Modify, taken));
+                wh.Add(taken.ItemId, count, taken.EnchantLevel, out _);
+            }
+        }, LedgerHoldingsOf))
+            return "ledger_refused";
 
         FanInventory(session, Collapse(changes));
         SaveInventory(session, player.Inventory);

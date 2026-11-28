@@ -14,7 +14,7 @@ External architecture review (sections 6–7): `CheckCommit` alone is not enough
 |-------|----------------|
 | Validate / mutate | Handlers call `CheckCommit`, apply bag/ground changes, `LedgerMove.Commit` (in-memory journal). |
 | Steal | `TryCommitDirtyEconomy` takes dirty bags under `_economyLock`. |
-| Durable commit | **`EconomyPersistService`** (`fineage-economy-persist` thread) runs `ILedgerJournal.CommitWith` + `CommitEconomy`. The simulation thread only `TryEnqueue`s; completions drain at step boundaries (or off-tick callers wait on their own thread). |
+| Durable commit | **`EconomyPersistService`** (`fineage-economy-persist` thread) runs `ILedgerJournal.CommitThrough(batch.LedgerThrough)` + `CommitEconomy`: only the journal rows buffered when the batch's bags were taken, never a later move's row whose bag rides a later batch. A batch queued behind a failed one is held back (fails without writing) until the world has restored the failed bags, so the failed rows never land without them (#955). The simulation thread only `TryEnqueue`s; completions drain at step boundaries (or off-tick callers wait on their own thread). |
 | Publish | After successful commit, `PublishStolenEconomy` sends `InventoryUpdate`. |
 
 Non-economic character snapshots remain on [`CharacterPersistWorker`](../../src/Fineage.Zone/World/CharacterPersistWorker.cs) — same “one writer per concern” policy.

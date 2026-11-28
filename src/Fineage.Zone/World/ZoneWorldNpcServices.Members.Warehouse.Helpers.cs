@@ -123,6 +123,8 @@ public sealed partial class ZoneWorld
         using (_economyLock.Enter())
         {
             _dirtyWarehouses[session.ObjectId] = player;
+            if (_stepping)
+                _economyTouched.Add(session.ObjectId);
             commitNow = !InventoryPersistDeferred;
         }
 

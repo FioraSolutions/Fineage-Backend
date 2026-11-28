@@ -33,7 +33,7 @@ public sealed class ZonePhysCritModsTests
         // hit, then crit; no random spread
         var melee = ZoneCombat.RollMelee(new Seq(0, 0, 0), 100, 50, 100, 0, 500, 0, false, 0, 0, 0, false, 1d, 1.5);
         Assert.Equal(ZoneCombat.HitFlagCrit, (byte)(melee.Flags & ZoneCombat.HitFlagCrit));
-        Assert.Equal((int)(70d * 100 / 50 * 2 * 1.5), melee.Damage);
+        Assert.Equal((int)(76d * 100 / 50 * 2 * 1.5), melee.Damage);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class ZonePhysCritModsTests
         Assert.False(ZoneCombat.RollSkillCrit(new Seq(240), 20, 1.2));
         Assert.False(ZoneCombat.RollSkillCrit(new Seq(0), 0, 2));
 
-        Assert.Equal((int)(70d * (100 * 2 + 50) / 40 * 2 * 1.25),
+        Assert.Equal((int)(76d * (100 * 2 + 50) / 40 * 2 * 1.25),
             ZoneCombat.PhysicalSkillDamage(100, 40, 50, true, crit: true, critDamageMod: 1.25));
     }
 

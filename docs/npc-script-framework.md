@@ -8,9 +8,9 @@ Named Mobius `Quest/Script` bypasses and priority `ai/others` actors are catalog
 |------|---------|----------|
 | Festival guides | `OracleTeleport` | `oracle_teleport` |
 | Newbie guides | `NewbieHelper`, `NewbieTravelToken` | `newbie_helper`, `newbie_travel` |
-| Adventurer guild | `RaidbossInfo` | `raid_boss_info` (stub) |
+| Adventurer guild | `RaidbossInfo` | `raid_boss_info` (Mobius level HTML + radar via `BossCatalog`) |
 | Derby track | `TeleportToRaceTrack` | `monster_race_teleport` |
-| Catacombs/necropolis | `DungeonGatekeeper` | `dungeon_gate` via `DungeonAccess` / `TryDungeonAsync`, not Script bypass |
+| Catacombs/necropolis | `DungeonGatekeeper` | HTML `necro`/`cata`/`exit` → `DungeonAccess` / `TryDungeonAsync` (not Script bypass) |
 | Village masters | `*Change*`, `FirstClassTransferTalk` | `village_master` |
 | Clan / alliance | `ClanMaster`, `AllianceMaster` | `pledge` |
 

@@ -37,7 +37,7 @@ public sealed partial class ZoneWorld
         {
             // L2 geo: server Z = ground under the current XY; dest truncated before walls / steep climbs.
             entity.Z = _geo.GetHeight(entity.X, entity.Y, entity.Z);
-            (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked);
+            (destX, destY, destZ) = _geo.MoveCheck(entity.X, entity.Y, entity.Z, move.DestX, move.DestY, move.DestZ, out bool blocked, Doors);
             if (blocked && TryNpcPathCacheOnly(entity.X, entity.Y, move.DestX, move.DestY, out var path) && path.Count > 0)
             {
                 // A path computed for this cell pair already. Walk it now; a miss waits for the
@@ -79,8 +79,12 @@ public sealed partial class ZoneWorld
 
         // Mobius: knownlist is evaluated at the real (current) position; TickPlayerMovement revalidates it
         // every AoiRefreshDistance of travel so objects enter/leave as the runner passes them.
+        // Compare the destination against the cell the knownlist was last reconciled in, not the AOI's live cell:
+        // AdvanceMove above can cross a cell between ticks, and the AOI store is already in the new cell while the
+        // knownlist still holds the old 3x3 watch set. Skipping on AtCell would leave that cell change unreconciled.
         if (NetBridge is { } bridge && ack != null && _aoi is GridAoi grid &&
-            grid.AtCell(entity.ObjectId, destX, destY))
+            grid.CellKeyAt(destX, destY) == entity.AoiRefreshCell &&
+            grid.CellKeyAt(entity.X, entity.Y) == entity.AoiRefreshCell)
         {
             if (_knownlistDiffActive)
             {
@@ -119,6 +123,38 @@ public sealed partial class ZoneWorld
         SetMoveActive(entity, false);
         entity.MovePath.Clear();
         entity.MoveSegmentDirty = false;
+        // The advance above can be the only movement of this step (client StopMove, cast/attack stop), so it can
+        // cross into a cell the knownlist was never reconciled in. Arrival normally refreshes from the movement
+        // stage, but a stop removes the mover from ActiveSets.Moving before that stage runs. Reconcile here or the
+        // final cell's peers never get a spawn in either direction until the player happens to move again.
+        if (NeedsKnownlistRefreshAfterStop(entity))
+            RefreshMovingKnownlist(entity, ack: null, syncNewWatchers: false);
+    }
+
+    /// <summary>
+    /// A command that advances the pawn itself (attack, cast, sit, interact) can finish the last leg inside the
+    /// command instead of the movement stage. An arrived player leaves ActiveSets.Moving before that stage, so this
+    /// closes the reconcile at the landing cell; a still-moving player is left to the stage's cell/distance gate.
+    /// </summary>
+    void ReconcileKnownlistAfterCommandAdvance(ZoneEntity entity)
+    {
+        if (!entity.MoveActive && NeedsKnownlistRefreshAfterStop(entity))
+            RefreshMovingKnownlist(entity, ack: null, syncNewWatchers: false);
+    }
+
+    /// <summary>
+    /// True when a stopping player advanced past the knownlist anchor since its last reconcile. Unlike
+    /// <see cref="ShouldRefreshKnownlistAfterMove"/> this does not report a refresh for an idle stop, so client
+    /// StopMove spam does not rebuild the 3x3 watch on every packet.
+    /// </summary>
+    bool NeedsKnownlistRefreshAfterStop(ZoneEntity entity)
+    {
+        if (NetBridge == null || entity.Session == null || entity.Kind != ZoneEntityKind.Player)
+            return false;
+        if (_aoi is Interest.GridAoi grid)
+            return grid.CellKeyAt(entity.X, entity.Y) != entity.AoiRefreshCell;
+        long dx = entity.X - entity.AoiRefreshX, dy = entity.Y - entity.AoiRefreshY;
+        return dx * dx + dy * dy >= (long)AoiRefreshDistance * AoiRefreshDistance;
     }
 
     /// <summary>Net StopMove: halt at the server's interpolated position so the correction is truthful.</summary>

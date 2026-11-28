@@ -103,11 +103,18 @@ public sealed class RegionTickScheduler
     public long MillisecondsUntilNextTick(long wallUnixMs) =>
         Math.Clamp(Clock.TimeOf(Tick + 1) - wallUnixMs, 0, StepMilliseconds);
 
+    /// <summary>
+    /// Milliseconds until the next tick on the simulation clock. Unlike <see cref="MillisecondsUntilNextTick"/> this
+    /// ignores a wall-clock jump, so the live loop cannot spin when the system clock moves forward.
+    /// </summary>
+    public long MillisecondsUntilNextSimulationTick(long wallUnixMs) =>
+        Math.Clamp(Clock.TimeOf(Tick + 1) - Clock.SimulationNowUnixMs(wallUnixMs), 0, StepMilliseconds);
+
     public void Step(long wallUnixMs)
     {
         long started = Stopwatch.GetTimestamp();
         long previous = Tick;
-        long next = Math.Max(previous + 1, Clock.TickAt(wallUnixMs));
+        long next = Clock.NextTick(previous, wallUnixMs);
         Tick = next;
         var tick = new TickContext(next, Clock.TimeOf(next), wallUnixMs);
         if (next > previous + 1)

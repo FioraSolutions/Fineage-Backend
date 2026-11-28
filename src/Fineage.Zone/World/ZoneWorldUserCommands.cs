@@ -106,7 +106,7 @@ public sealed partial class ZoneWorld
         if (player.Sitting)
             return RefuseUnstuck(player, "sitting");
 
-        bool gm = ZoneAdmin.IsAdminCharacter(player.Name);
+        bool gm = ZoneAdmin.IsGmCharacter(player.Name);
         // Mobius Unstuck casts 2100 (1 s) for a GM and 2099 (5 min) otherwise; the hit time is the skill's.
         var skill = CatalogCastSkill(gm ? UserCommandProtocol.GmUnstuckSkillId : UserCommandProtocol.PlayerUnstuckSkillId, "/unstuck");
         if (!gm)

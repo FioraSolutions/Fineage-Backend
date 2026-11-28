@@ -1,0 +1,2 @@
+Mobius CT0 Interlude: dist/game/data/scripts/custom/RaidbossInfo/*.htm
+Copied for Fineage Script RaidbossInfo (#919). Do not invent pages.

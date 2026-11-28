@@ -15,7 +15,7 @@ public sealed partial class ZoneWorld
     /// scratch is only valid until the next reconcile, which is exactly the lifetime of this diff.
     /// </para>
     /// </summary>
-    void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack)
+    void RefreshMovingKnownlist(ZoneEntity e, MoveToMsg? ack, bool syncNewWatchers = true)
     {
         StampKnownlistRefreshAnchor(e);
         ReconcileKnownlist(e, ack, before: out var before);
@@ -34,7 +34,8 @@ public sealed partial class ZoneWorld
         removed?.Sort();
         var addedList = (IReadOnlyList<int>?)added ?? [];
         NetBridge.FanoutKnownlistDiff(e.ObjectId, addedList, (IReadOnlyList<int>?)removed ?? []);
-        FanoutMoveSyncToNewWatchers(e, addedList, ack != null);
+        if (syncNewWatchers)
+            FanoutMoveSyncToNewWatchers(e, addedList, ack != null);
     }
 
     /// <summary>Mid-run AOI adds: new player watchers see the mover at the live leg origin.</summary>

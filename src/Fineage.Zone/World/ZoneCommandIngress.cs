@@ -108,7 +108,8 @@ internal sealed class ZoneCommandIngress
         ZoneSession Session,
         ZoneCommand Command,
         TaskCompletionSource<string?> Reply,
-        long SubmittedAtTicks);
+        long SubmittedAtTicks,
+        CommandSource Source = CommandSource.Player);
 
     internal readonly record struct Applied(Submission Submission, string? Error, Exception? Failure);
 
@@ -156,7 +157,10 @@ internal sealed class ZoneCommandIngress
         }
     }
 
-    public Task<string?> Submit(ZoneSession session, ZoneCommand command, CancellationToken ct)
+    public Task<string?> Submit(ZoneSession session, ZoneCommand command, CancellationToken ct) =>
+        Submit(session, command, CommandSource.Player, ct);
+
+    public Task<string?> Submit(ZoneSession session, ZoneCommand command, CommandSource source, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(command);
@@ -165,6 +169,7 @@ internal sealed class ZoneCommandIngress
         string? refusal = null;
         QueueSample sample = default;
         bool refused = false;
+        double agentOldestAgeMs;
         lock (_lock)
         {
             if (_closed != null)
@@ -174,7 +179,7 @@ internal sealed class ZoneCommandIngress
             }
             else
             {
-                var submission = new Submission(++_sequence, session, command, reply, NowTicks());
+                var submission = new Submission(++_sequence, session, command, reply, NowTicks(), source);
                 if (EnqueueLocked(submission, out coalesced, out refusal, out sample))
                 {
                     if (_submitted.CurrentCount == 0)
@@ -185,14 +190,19 @@ internal sealed class ZoneCommandIngress
                     refused = true;
                 }
             }
+
+            agentOldestAgeMs = AgentOldestAgeLocked();
         }
 
         // Everything that can log or record runs off the monitor: a pump thread submitting here must never wait on a
         // histogram append, and the simulation thread must never hold the queue while a pump writes a warning.
+        FineageTelemetry.NoteAgentCommandQueueOldestAge(agentOldestAgeMs);
         if (refused)
         {
             ZoneLog.Warn(refusal!);
-            FineageTelemetry.CommandRejected.Add(1, new KeyValuePair<string, object?>("reason", ReasonTag(refusal!)));
+            string reason = ReasonTag(refusal!);
+            FineageTelemetry.CommandRejected.Add(1, new KeyValuePair<string, object?>("reason", reason));
+            FineageTelemetry.NoteZoneCommandRejection(CommandSourceTags.Tag(source), reason);
             return Task.FromException<string?>(new ZoneIngressRefusal(refusal!));
         }
 
@@ -401,6 +411,7 @@ internal sealed class ZoneCommandIngress
     internal void FinishApply()
     {
         int coalesced;
+        double agentOldestAgeMs;
         lock (_lock)
         {
             double usedMs = TicksToMs(NowTicks() - _sliceStartTicks);
@@ -409,13 +420,34 @@ internal sealed class ZoneCommandIngress
             _coalescedThisTick = 0;
             if (_depth > 0 && _submitted.CurrentCount == 0)
                 _submitted.Release();
+            agentOldestAgeMs = AgentOldestAgeLocked();
         }
 
+        FineageTelemetry.NoteAgentCommandQueueOldestAge(agentOldestAgeMs);
         if (coalesced > 0)
         {
             RecordCoalesced(coalesced);
             ZoneLog.Info($"command ingress coalesced {coalesced} movement command(s): {CoalescedReason}");
         }
+    }
+
+    double AgentOldestAgeLocked()
+    {
+        double max = 0;
+        long now = NowTicks();
+        foreach (var queue in _players.Values)
+        {
+            foreach (var item in queue.Items)
+            {
+                if (item.Source != CommandSource.Ai)
+                    continue;
+                double age = AgeMs(item.SubmittedAtTicks, now);
+                if (age > max)
+                    max = age;
+            }
+        }
+
+        return max;
     }
 
     void AdvanceCursor()
@@ -521,6 +553,9 @@ internal sealed class ZoneCommandIngress
 
     public Task WaitForSubmissionAsync(CancellationToken ct) => _submitted.WaitAsync(ct);
 
+    /// <summary>Blocks the caller until a command is submitted (true) or <paramref name="timeoutMs"/> passes (false).</summary>
+    public bool WaitForSubmission(int timeoutMs, CancellationToken ct) => _submitted.Wait(timeoutMs, ct);
+
     internal int WakeSignalCountForTest => _submitted.CurrentCount;
 
     internal int QueuedDepth
@@ -581,7 +616,7 @@ internal sealed class ZoneCommandIngress
 }
 
 /// <summary>Ingress refused the command before it was applied. <see cref="Coalesced"/> is a superseded movement.</summary>
-internal sealed class ZoneIngressRefusal : InvalidOperationException
+public sealed class ZoneIngressRefusal : InvalidOperationException
 {
     public ZoneIngressRefusal(string reason) : base(reason)
     {

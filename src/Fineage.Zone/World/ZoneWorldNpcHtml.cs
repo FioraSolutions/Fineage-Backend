@@ -23,6 +23,10 @@ public sealed partial class ZoneWorld
         if (TryNormalizeAdminCommand(command, out string adminCmd))
             return TryAdminBypass(session, player, adminCmd);
 
+        // Mobius RequestBypassToServer: community board commands skip NPC / HTML-action validation.
+        if (!string.IsNullOrWhiteSpace(command) && CommunityBoard.IsBoardCommand(command))
+            return TryCommunityBoardBypass(session, player, command.Trim());
+
         if (!BypassCommands.TrySplit(npcObjectId, command, out int resolvedId, out var verb))
             return "bad_request";
         if (!_byId.TryGetValue(resolvedId, out var npc) || npc.Kind != ZoneEntityKind.Npc)
@@ -31,10 +35,11 @@ public sealed partial class ZoneWorld
             return NpcHtmlProtocol.Attackable;
         if (player.Dead)
             return InventoryProtocol.Dead;
-        // Mobius RequestBypassToServer: validateHtmlAction chains the origin object, then isInsideRadiusOfObjectId
-        // (3D INTERACTION_DISTANCE) and npc_ branch is isInsideRadius2D(object, Npc.INTERACTION_DISTANCE).
+        // Mobius RequestBypassToServer: validateHtmlAction chains the origin object, then the npc_ branch is
+        // isInsideRadius2D(object, Npc.INTERACTION_DISTANCE) — a flat circle, not the 3D sphere Npc.canInteract uses.
+        // That is why a gatekeeper on a platform answers talk (3D) but refuses every link when the pawn stands below it.
         // The radius is Npc.INTERACTION_DISTANCE = 250 (Npc.java:110).
-        if (!InTalkRange(player, npc))
+        if (!InInteractGate(player, npc, InteractGate.Circle2D))
             return "range";
 
         if (string.Equals(verb, "DepositC", StringComparison.Ordinal) || string.Equals(verb, "WithdrawC", StringComparison.Ordinal))
@@ -84,6 +89,8 @@ public sealed partial class ZoneWorld
 
         if (reply.BuyListId is int buyListId)
             return OpenBuyList(session, player, npc, buyListId);
+        if (reply.WearListId is int wearListId)
+            return OpenWearList(session, player, npc, wearListId);
         if (reply.OpenSell)
             return OpenSellList(session, player, npc);
         if (reply.MultiSellListId is int multiListId)

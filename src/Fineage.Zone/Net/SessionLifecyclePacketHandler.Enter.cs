@@ -75,6 +75,8 @@ sealed partial class SessionLifecyclePacketHandler
             : new EnterSelfSlot(NetOpcode.ItemList, entity.Inventory!));
         selfSlots.Add(new EnterSelfSlot(NetOpcode.SkillList, EnterSkillCapture.From(entity, nowMs)));
         selfSlots.Add(new EnterSelfSlot(NetOpcode.ShortCutInit, _world.BuildShortcutInit(entity)));
+        foreach (var macroPacket in BuildEnterMacroList(entity))
+            selfSlots.Add(new EnterSelfSlot(NetOpcode.MacroList, macroPacket));
         if (_world.TryBuildPlayerActionStateNet(entity, out var actionState))
             selfSlots.Add(new EnterSelfSlot(NetOpcode.PlayerActionState, actionState));
         if (_world.TryBuildNetAbnormalStatus(entity, out var abnormals))
@@ -153,11 +155,16 @@ sealed partial class SessionLifecyclePacketHandler
 
         knownPlayers = known.Count(row => row is { GroundItem: false, Kind: EntityKindNet.Player });
 
+        IReadOnlyList<PresenceWireSlot> selfFollowUps;
+        using (EnterMetrics.MeasureKnownSnapshot())
+            selfFollowUps = NetEnterWorldProjector.PlanPresenceFollowUps(entity, self, _world);
+
         return new EnterSnapshot
         {
             SessionObjectId = zoneSession.ObjectId,
             Self = projected.Slots,
             SelfRemoteSpawn = projected.Remote,
+            SelfRemoteFollowUps = selfFollowUps,
             Known = known,
             PeerFanout = peerFanout,
             KnownEntityCount = known.Count,
@@ -288,6 +295,76 @@ sealed partial class SessionLifecyclePacketHandler
             rows[i] = ShortcutActionPacketHandler.ToNet(src[i]);
         return new ShortCutInitNetMsg { Shortcuts = rows };
     }
+
+    /// <summary>Mobius MacroList.sendUpdate: one empty packet or one packet per macro.</summary>
+    static List<MacroListNetMsg> BuildEnterMacroList(ZoneEntity entity)
+    {
+        var all = entity.Macros.Values.OrderBy(m => m.Id).ToList();
+        if (all.Count == 0)
+        {
+            return
+            [
+                new MacroListNetMsg
+                {
+                    Revision = entity.MacroRevision,
+                    Count = 0,
+                    HasMacro = false
+                }
+            ];
+        }
+
+        var packets = new List<MacroListNetMsg>(all.Count);
+        foreach (var m in all)
+            packets.Add(ToNetMacroList(entity.MacroRevision, all.Count, m));
+        return packets;
+    }
+
+    internal static MacroListNetMsg ToNetMacroList(MacroListMsg msg) =>
+        msg.Macro == null
+            ? new MacroListNetMsg { Revision = msg.Revision, Count = msg.Count, HasMacro = false }
+            : ToNetMacroList(msg.Revision, msg.Count, msg.Macro);
+
+    static MacroListNetMsg ToNetMacroList(int revision, int count, Fineage.Protocol.MacroEntryMsg m) =>
+        new()
+        {
+            Revision = revision,
+            Count = count,
+            HasMacro = true,
+            MacroId = m.Id,
+            Name = m.Name ?? "",
+            Descr = m.Descr ?? "",
+            Acronym = m.Acronym ?? "",
+            Icon = m.Icon,
+            Commands = (m.Commands ?? []).Select(c => new MacroCmdNet
+            {
+                Entry = c.Entry,
+                Type = c.Type,
+                D1 = c.D1,
+                D2 = c.D2,
+                Cmd = c.Cmd ?? ""
+            }).ToArray()
+        };
+
+    static MacroListNetMsg ToNetMacroList(int revision, int count, Fineage.Accounts.StoredMacro m) =>
+        new()
+        {
+            Revision = revision,
+            Count = count,
+            HasMacro = true,
+            MacroId = m.Id,
+            Name = m.Name ?? "",
+            Descr = m.Descr ?? "",
+            Acronym = m.Acronym ?? "",
+            Icon = m.Icon,
+            Commands = (m.Commands ?? []).Select(c => new MacroCmdNet
+            {
+                Entry = c.Entry,
+                Type = c.Type,
+                D1 = c.D1,
+                D2 = c.D2,
+                Cmd = c.Cmd ?? ""
+            }).ToArray()
+        };
 
     internal static AbnormalStatusUpdateNetMsg ToNetAbnormal(AbnormalStatusUpdateMsg update)
     {

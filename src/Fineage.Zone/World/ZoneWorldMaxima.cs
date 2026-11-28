@@ -42,7 +42,7 @@ public sealed partial class ZoneWorld
         player.MaxMp = maxMp;
         player.MaxCp = maxCp;
         if (player.CurHp > maxHp)
-            player.CurHp = maxHp;
+            player.CurHp = maxHp; // hp-write: max-vital setup, not incoming damage
         if (player.CurMp > maxMp)
             player.CurMp = maxMp;
         if (player.CurCp > maxCp)

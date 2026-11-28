@@ -130,19 +130,23 @@ public sealed partial class ZoneWorld
     /// </summary>
     void ApplyPlayerSkillDamage(ZoneEntity player, ZoneEntity target, int damage, int skillId, int level, long now)
     {
+        // Two pending hits due in the same tick both reach the barrier before either is applied; the first one's
+        // death flag makes the second a no-op instead of a second death/drop/reward roll.
+        if (target.Dead)
+            return;
         if (target.Summon != null)
         {
             UpdatePvPStatus(player, CreditOf(target), now);
-            DamageSummon(player, target, damage, now);
-            if (skillId > 0 && damage > 0)
-                ApplyHpDrainAfterDamage(player, target, damage, skillId);
+            var summonLoss = DamageSummon(player, target, damage, now);
+            if (skillId > 0 && summonLoss.HpLoss > 0)
+                ApplyHpDrainAfterDamage(player, target, summonLoss.HpLoss, skillId);
             return;
         }
         if (target.Kind == ZoneEntityKind.Player)
         {
-            ApplySkillDamageToPlayer(player, target, damage, now);
-            if (skillId > 0 && damage > 0)
-                ApplyHpDrainAfterDamage(player, target, damage, skillId);
+            var playerLoss = ApplySkillDamageToPlayer(player, target, damage, now);
+            if (skillId > 0 && playerLoss.HpLoss > 0)
+                ApplyHpDrainAfterDamage(player, target, playerLoss.HpLoss, skillId);
             return;
         }
         if (SiegeNpcHit(player, target, damage, now))
@@ -161,24 +165,21 @@ public sealed partial class ZoneWorld
         if (TryApplyRaidCurse(target, player, magicSkill, now))
             return;
 
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        var npcLoss = ApplyTargetDamage(target, player, damage);
         FanoutVitals(target, StatusFor(target));
-        if (skillId > 0 && damage > 0)
-            ApplyHpDrainAfterDamage(player, target, damage, skillId);
+        if (skillId > 0 && npcLoss.HpLoss > 0)
+            ApplyHpDrainAfterDamage(player, target, npcLoss.HpLoss, skillId);
         RecordDamage(target, player, damage);
         ApplyQuestAttack(player, target);
         AddHate(target, player, DamageHate(damage, target.Level));
         player.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
 
-        if (target.CurHp <= 0)
-        {
-            RemoveDeadNpc(target, killer: player);
+        if (target.CurHp <= 0 && RemoveDeadNpc(target, killer: player))
             GrantKillReward(player, target);
-        }
     }
 
-    /// <summary>Offensive skill landing on a player: HP, purple name, cast break, death. Same gate as a melee hit.</summary>
-    void ApplySkillDamageToPlayer(ZoneEntity attacker, ZoneEntity target, int damage, long now)
+    /// <summary>Offensive skill landing on a player: CP/HP, purple name, cast break, death. Same gate as a melee hit.</summary>
+    DamageSplit ApplySkillDamageToPlayer(ZoneEntity attacker, ZoneEntity target, int damage, long now)
     {
         // Mobius callSkill: an offensive skill on a playable flags the caster whether it landed for damage or not.
         if (attacker.Kind == ZoneEntityKind.Player)
@@ -187,16 +188,18 @@ public sealed partial class ZoneWorld
         {
             attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
             target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-            return;
+            return DamageSplit.None;
         }
 
         if (DuelBlocksHit(attacker, target))
-            return;
+            return DamageSplit.None;
+        if (target.Invulnerable)
+            return DamageSplit.None;
         // Mobius CreatureAI.checkTargetLostOrDead with Config.FAKE_DEATH_DAMAGE_STAND=true (CT0 default): a hit on a
         // playing-dead pawn stands it up (stopFakeDeath(true)) instead of killing the corpse.
         if (target.FakeDeath)
             WakeUpFromFakeDeath(target, "damage");
-        target.CurHp = Math.Max(0, target.CurHp - damage);
+        var dealt = ApplyTargetDamage(target, attacker, damage);
         ApplyReflectAndAbsorb(attacker, target, damage);
         target.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
         FanoutVitals(target, PlayerVitalsStatus(target));
@@ -206,12 +209,13 @@ public sealed partial class ZoneWorld
         if (target.CurHp > 0)
         {
             MaybeBreakCast(target, damage);
-            return;
+            return dealt;
         }
 
         if (target.Session != null)
             target.Intent.AutoAttackTargetId = 0;
         ApplyPlayerDeath(target, attacker.ObjectId);
+        return dealt;
     }
 
     void CollectAiBusy(TickContext tick, RegionWorkCollector work) => _byId.Collect(ActiveSets.AiBusy, work);

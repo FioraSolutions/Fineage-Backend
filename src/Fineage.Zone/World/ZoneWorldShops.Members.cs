@@ -7,11 +7,128 @@ namespace Fineage.Zone.World;
 
 public sealed partial class ZoneWorld
 {
-    string? Preview(ZoneSession session, int npcObjectId)
+    /// <summary>
+    /// Mobius <c>RequestPreviewItem</c>: charge <see cref="ShopProtocol.WearPrice"/> per item,
+    /// map body parts via <see cref="PaperdollIndex"/>, send <c>ShopPreviewInfo</c>.
+    /// Unknown template ids are logged and skipped (acceptance #924).
+    /// </summary>
+    string? Preview(ZoneSession session, int npcObjectId, int listId, int[] itemIds)
     {
-        if (!TryShopNpc(session, npcObjectId, out _, out _, out var error))
+        if (!TryShopNpc(session, npcObjectId, out var player, out var npc, out var error))
             return error;
+        ClearWearPreviewIfDue(session, player);
+
+        bool shopMatches = player.Shop is { WearOpen: true } shop
+            && shop.NpcObjectId == npc.ObjectId
+            && shop.BuyListId == listId;
+        if (!shopMatches || itemIds == null)
+            return "bad_request";
+        if (itemIds.Length < 1 || itemIds.Length > 100)
+            return "bad_request";
+        if (!_buyLists.TryGet(listId, out var list) || !list.Allows(npc.NpcId))
+            return "bad_request";
+
+        var slots = new int[PaperdollIndex.TotalSlots];
+        var used = new HashSet<int>();
+        int charged = 0;
+        foreach (int itemId in itemIds)
+        {
+            var product = list.Find(itemId);
+            if (product == null)
+            {
+                ZoneLog.Error($"[wear] unknown item id {itemId} on buylist {listId} (npc={npc.NpcId})");
+                continue;
+            }
+
+            var template = _game.Items.Require(itemId);
+
+            if (!template.Equippable)
+                continue;
+
+            var slot = PaperdollIndex.FromBodySlot(template.BodySlot);
+            if (slot == null)
+                continue;
+
+            int index = (int)slot.Value;
+            if (!used.Add(index))
+            {
+                FanNetSystem(session, Line(ShopProtocol.WearSlotConflict, ShopProtocol.WearSlotConflictText));
+                return null;
+            }
+
+            slots[index] = itemId;
+            charged++;
+        }
+
+        if (charged == 0)
+            return null;
+
+        long total = (long)charged * ShopProtocol.WearPrice;
+        if (total > ShopTrade.MaxAdena || total > player.Inventory!.CountOf(ShopTrade.AdenaItemId))
+        {
+            FanNetSystem(session, Line(ShopProtocol.NotEnoughAdena, ShopProtocol.NotEnoughAdenaText));
+            return null;
+        }
+
+        if (!player.Inventory.TryConsume(ShopTrade.AdenaItemId, (int)total, out var adenaStack, out bool removed)
+            || adenaStack == null)
+        {
+            FanNetSystem(session, Line(ShopProtocol.NotEnoughAdena, ShopProtocol.NotEnoughAdenaText));
+            return null;
+        }
+
+        var changes = new List<InventoryUpdateEntryMsg>
+        {
+            removed
+                ? InventoryMessages.RemoveRow(adenaStack, -1)
+                : InventoryMessages.ChangeRow(InventoryChange.Modify, adenaStack)
+        };
+        NetBridge?.FanoutInventoryUpdate([session.ObjectId], new InventoryUpdateMsg { Changes = changes.ToArray() });
+        SaveInventory(session, player.Inventory);
+
+        var info = new ShopPreviewInfoMsg { ItemIdsBySlot = slots };
+        FanNetWearInfo(session, info, Balance(player, npc));
+        player.Shop!.WearPreviewClearAtMs = NowUnixMs() + ShopProtocol.WearDelaySeconds * 1000L;
         return null;
+    }
+
+    ShopPreviewListMsg BuildWearList(ZoneEntity npc, ZoneEntity player, BuyListDefinition list)
+    {
+        int expertise = Expertise.ForLevel(player.Level);
+        var rows = new List<ShopPreviewListItemMsg>();
+        foreach (var product in list.Products)
+        {
+            var template = _game.Items.Require(product.ItemId);
+
+            if (!template.Equippable)
+                continue;
+            if ((int)template.Crystal > expertise)
+                continue;
+            rows.Add(new ShopPreviewListItemMsg
+            {
+                ItemId = product.ItemId,
+                Price = ShopProtocol.WearPrice
+            });
+        }
+
+        return new ShopPreviewListMsg
+        {
+            NpcObjectId = npc.ObjectId,
+            ListId = list.Id,
+            Adena = player.Inventory!.CountOf(ShopTrade.AdenaItemId),
+            Items = rows.ToArray()
+        };
+    }
+
+    void ClearWearPreviewIfDue(ZoneSession session, ZoneEntity player)
+    {
+        if (player.Shop is not { WearPreviewClearAtMs: > 0 } shop)
+            return;
+        if (NowUnixMs() < shop.WearPreviewClearAtMs)
+            return;
+        shop.WearPreviewClearAtMs = 0;
+        FanNetSystem(session, Line(ShopProtocol.WearPreviewEnded, ShopProtocol.WearPreviewEndedText));
+        SelfUserInfo(player);
     }
 
     bool TryShopNpc(ZoneSession session, int npcObjectId, out ZoneEntity player, out ZoneEntity npc, out string? error)
@@ -236,6 +353,24 @@ public sealed partial class ZoneWorld
             return;
         int[] self = [session.ObjectId];
         NetBridge.FanoutMultiSellList(self, multi);
+        NetBridge.FanoutShopBalance(self, balance);
+    }
+
+    void FanNetWear(ZoneSession session, ShopPreviewListMsg preview, ShopBalanceMsg balance)
+    {
+        if (NetBridge == null)
+            return;
+        int[] self = [session.ObjectId];
+        NetBridge.FanoutShopPreviewList(self, preview);
+        NetBridge.FanoutShopBalance(self, balance);
+    }
+
+    void FanNetWearInfo(ZoneSession session, ShopPreviewInfoMsg info, ShopBalanceMsg balance)
+    {
+        if (NetBridge == null)
+            return;
+        int[] self = [session.ObjectId];
+        NetBridge.FanoutShopPreviewInfo(self, info);
         NetBridge.FanoutShopBalance(self, balance);
     }
 

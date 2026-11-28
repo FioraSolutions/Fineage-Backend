@@ -140,11 +140,10 @@ public sealed partial class ZoneWorld
         int skillId = player.ClassId is 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 27 or 28 or 41 or 42 or 43 or 51 or 52 or 94 or 95 or 96 or 97 or 98 or 103 or 104 or 105 or 110 or 111 or 112 or 115 or 116
             ? WeddingRules.InfidelityDebuffSkillMage
             : WeddingRules.InfidelityDebuffSkillFighter;
-        var template = _game.Skills.Find(skillId);
-        if (template == null)
-            return;
+        var template = _game.Skills.Require(skillId);
         if (!template.TryLevelData(1, out var levelData))
-            levelData = new SkillLevelData(1, mpConsume: 0, power: 0);
+            throw Fineage.Game.RequiredData.Required.Missing(
+                Fineage.Game.RequiredData.RequiredDataKind.Skill, skillId, $"wedding infidelity skill {skillId} has no level 1 in skills.json");
         ApplyAbnormalFromSkill(template, levelData, player, NowUnixMs(), attacker: player, force: true);
     }
 

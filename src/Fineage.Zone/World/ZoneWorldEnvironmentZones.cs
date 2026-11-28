@@ -121,12 +121,9 @@ public sealed partial class ZoneWorld
         if (zone.HpPerTick > 0)
         {
             int dmg = Math.Max(1, (int)Math.Round(zone.HpPerTick * vuln));
-            int nextHp = Math.Max(0, entity.CurHp - dmg);
-            if (nextHp != entity.CurHp)
-            {
-                entity.CurHp = nextHp;
+            var dealt = ApplyTargetDamage(entity, attacker: null, dmg);
+            if (dealt.HpLoss > 0)
                 changed = true;
-            }
         }
 
         if (zone.MpPerTick > 0)

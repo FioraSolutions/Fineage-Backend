@@ -22,8 +22,7 @@ public sealed partial class ZoneWorld
 
     void NotifyObtained(ZoneSession session, int itemId, int count)
     {
-        _game.Items.TryGet(itemId, out var template);
-        string name = template?.Name ?? $"item {itemId}";
+        string name = _game.Items.Require(itemId).Name;
         if (itemId == WarehouseRules.AdenaItemId)
             ShotNotice(session, SysMsgObtainedAdena, $"You have obtained {count} adena.");
         else if (count > 1)
@@ -39,7 +38,7 @@ public sealed partial class ZoneWorld
             player.Intent.PendingPickupId = 0;
             player.Intent.PendingPickupAtUnixMs = 0;
         }
-        string name = _game.Items.TryGet(ground.GroundItemId, out var t) ? t.Name : $"item {ground.GroundItemId}";
+        string name = _game.Items.Require(ground.GroundItemId).Name;
         ShotNotice(session, SysMsgFailedToPickup, $"You have failed to pick up {name}.");
     }
 
@@ -131,6 +130,7 @@ public sealed partial class ZoneWorld
         int dropY = useCoords ? y : player.Y;
         int dropZ = useCoords ? z : player.Z;
         AdvanceMove(player, NowUnixMs());
+        ReconcileKnownlistAfterCommandAdvance(player);
         if (useCoords && !ZoneCombat.InDropRange(player.X, player.Y, player.Z, dropX, dropY, dropZ))
         {
             // Mobius: CANNOT_DISCARD_DISTANCE_TOO_FAR, item stays. Re-send the row so a client that
@@ -223,7 +223,15 @@ public sealed partial class ZoneWorld
         long now = NowUnixMs();
         var rolls = DropRoller.RollDeath(definition, dropRng, _dropRates, victimLevel, killerLevel, raid).ToList();
         if (killer != null && !seeded)
+        {
             rolls.AddRange(_eventDropCatalog.RollExtra(dropRng, _dropRates, now, victimLevel, killerLevel));
+            // Mobius LongTimeEvent → EventDropManager.addDrops while the seasonal window is active (#934).
+            foreach (var window in _seasonalEvents.ActiveDropWindows(now))
+            {
+                rolls.AddRange(DropRoller.RollEventDeath(
+                    window.Groups, dropRng, _dropRates, victimLevel, killerLevel, raid: false));
+            }
+        }
         // Mobius NpcTemplate.calculateDrops: a seeded monster drops only adena and seal stones (the crop replaces the rest).
         if (seeded)
             rolls = rolls.Where(s => s.ItemId is 57 or 6360 or 6361 or 6362 || IsHerb(s.ItemId)).ToList();
@@ -246,8 +254,7 @@ public sealed partial class ZoneWorld
         ZoneEntity? autoLooter = AutoLootRecipient(killer, ownerId);
         foreach (var stack in rolls)
         {
-            if (!_game.Items.TryGet(stack.ItemId, out var template))
-                continue;
+            var template = _game.Items.Require(stack.ItemId);
             bool herb = IsHerb(stack.ItemId);
             if (autoLooter != null
                 && _rates.ShouldAutoLootItem(stack.ItemId, raid, herb)
@@ -335,11 +342,7 @@ public sealed partial class ZoneWorld
     {
         if (count <= 0)
             return null;
-        if (!_game.Items.TryGet(itemId, out var template))
-        {
-            ZoneLog.Info($"drop skip unknown item={itemId}");
-            return null;
-        }
+        var template = _game.Items.Require(itemId);
 
         if (piece != null && (template.Stackable || count != 1 || piece.ItemId != itemId))
             throw new ArgumentException($"item {piece.ObjectId} is not one piece of {itemId}", nameof(piece));

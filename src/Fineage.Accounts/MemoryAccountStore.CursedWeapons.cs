@@ -4,14 +4,14 @@ public sealed partial class MemoryAccountStore
 {
     public IReadOnlyList<CursedWeaponRecord> ListCursedWeapons()
     {
-        lock (_gate)
+        using (EnterStore())
             return _data.CursedWeapons.Select(CursedWeaponRecordClone).ToList();
     }
 
     public bool SaveCursedWeapons(IReadOnlyList<CursedWeaponRecord> rows)
     {
         ArgumentNullException.ThrowIfNull(rows);
-        lock (_gate)
+        using (EnterStore())
         {
             _data.CursedWeapons = rows.Select(CursedWeaponRecordClone).ToList();
             return true;

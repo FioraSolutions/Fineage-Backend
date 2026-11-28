@@ -17,25 +17,17 @@ public sealed class GatekeeperTeleportCoverageTests
     const int Adena = 57;
     const string NothingToSay = "I have nothing to say to you.";
 
-    /// <summary>
-    /// Teleporters whose first page Mobius writes from a script, not from <c>html/teleporter</c>: Kurfa and Teranu
-    /// Mardui talk through <c>ai/areas/KetraOrcSupport</c> / <c>VarkaSilenosSupport</c>, which Fineage has not ported.
-    /// Castle chamberlains (Merchant), clan hall managers and dungeon gatekeepers also open script pages, so the page
-    /// check covers plain <c>Teleporter</c> NPCs only; their destinations are all checked below.
-    /// </summary>
-    static readonly HashSet<int> ScriptPageTeleporters = [31376, 31383];
-
     /// <summary>Every Mobius type whose class overrides <c>getHtmlPath</c>: it owns a typed folder.</summary>
     static bool OwnsTypedPage(string? npcType) =>
         npcType is not null && NpcHtmlPaths.Folder(npcType) != "default";
 
     /// <summary>
-    /// The NPC types the report called out by name, where a default page is never legitimate: a ziggurat's page is the
-    /// only way into the Necropolis/Catacomb and a tomb NPC's page is its whole function. Mobius' datapack ships a page
-    /// for all of them, so an NPC of these types that serves "I have nothing to say" is a missing import.
+    /// Types / npc ids that must never fall through to <c>npcdefault.htm</c>. Ziggurats and tomb NPCs are typed
+    /// overrides; Kurfa / Teranu Mardui ship script HTML transcribed into <c>teleporter/</c> (alliance 0 = *-no).
+    /// Full Ketra/Varka reputation first-talk still needs the support AI; the empty dialog is not acceptable.
     /// </summary>
-    static bool MustOwnPage(string? npcType) => npcType is "DungeonGatekeeper" or "SepulcherNpc";
-
+    static bool MustOwnPage(string? npcType, int npcId) =>
+        npcType is "DungeonGatekeeper" or "SepulcherNpc" || npcId is 31376 or 31383;
     [Fact]
     public async Task Every_gatekeeper_page_and_every_destination_lands_or_refuses_with_a_reason()
     {
@@ -81,13 +73,25 @@ public sealed class GatekeeperTeleportCoverageTests
         // that npcId — Mobius' own getHtmlPath returns the same default in that case.
         foreach (var npc in pageOwners)
         {
-            if (!MustOwnPage(npc.NpcType))
+            if (!MustOwnPage(npc.NpcType, npc.NpcId))
                 continue;
             actor.MoveTo(npc.X + 30, npc.Y, npc.Z);
             bench.Rec.Calls.Clear();
             Assert.Null(await actor.Talk(npc.ObjectId));
             if (LastHtml(bench).Contains(NothingToSay, StringComparison.Ordinal))
                 silentPages.Add($"{npc.NpcId} {npc.Name} ({npc.NpcType})");
+        }
+
+        // Kurfa / Teranu are ordinary Teleporter spawns; they are not in pageOwners' MustOwnPage typed set alone.
+        foreach (int npcId in new[] { 31376, 31383 })
+        {
+            var npc = gatekeepers.FirstOrDefault(g => g.NpcId == npcId);
+            Assert.True(npc != null, $"spawned gatekeeper {npcId} missing");
+            actor.MoveTo(npc!.X + 30, npc.Y, npc.Z);
+            bench.Rec.Calls.Clear();
+            Assert.Null(await actor.Talk(npc.ObjectId));
+            if (LastHtml(bench).Contains(NothingToSay, StringComparison.Ordinal))
+                silentPages.Add($"{npc.NpcId} {npc.Name} (Teleporter script page)");
         }
 
         foreach (var npc in gatekeepers)

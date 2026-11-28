@@ -26,14 +26,19 @@ static class OutboundLaneMetrics
             FineageTelemetry.OutboundShedBytes.Add(bytes, Tag(lane));
     }
 
-    /// <summary>Movement and visual eviction can be hot. Snapshot replace and reliable overflow log on their own.</summary>
+    /// <summary>
+    /// Movement and visual eviction can be hot. Snapshot replace and reliable overflow log on their own.
+    /// These paths are the designed backpressure policy, not a fault: a slow client whose mailbox sheds an
+    /// animation is already counted by <see cref="Shed"/> and by evicted/slow-client metrics. Error level made
+    /// every soak report fail with "server logs contain exceptions", so a policy outcome is a warning.
+    /// </summary>
     public static void LogLimited(string message)
     {
         long nowMs = Environment.TickCount64;
         long last = Volatile.Read(ref _lastLogMs);
         if (nowMs - last < 1000 || Interlocked.CompareExchange(ref _lastLogMs, nowMs, last) != last)
             return;
-        NetHostLog.Error(message);
+        NetHostLog.Warn(message);
     }
 
     static KeyValuePair<string, object?> Tag(OutboundLane lane) =>

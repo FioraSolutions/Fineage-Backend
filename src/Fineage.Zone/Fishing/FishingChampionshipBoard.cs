@@ -1,6 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Fineage.Game.Persistence;
 using Fineage.Game.Services;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.Fishing;
 
@@ -38,23 +41,32 @@ public sealed class FishingChampionshipSettings
 }
 
 public sealed class FishingChampionshipEntry { public string Name { get; set; } = ""; public double Length { get; set; } public bool Claimed { get; set; } }
-public sealed class FishingChampionshipSnapshot { public int Version { get; set; } = 1; public long PeriodEndUnixMs; public List<FishingChampionshipEntry> Current { get; set; } = []; public List<FishingChampionshipEntry> Winners { get; set; } = []; }
+public sealed class FishingChampionshipSnapshot : IVersionedStateSnapshot
+{
+    [JsonPropertyName("schemaVersion")]
+    public int SchemaVersion { get; set; } = 1;
+
+    [JsonIgnore]
+    public int Version
+    {
+        get => SchemaVersion;
+        set => SchemaVersion = value;
+    }
+
+    public long PeriodEndUnixMs { get; set; }
+    public List<FishingChampionshipEntry> Current { get; set; } = [];
+    public List<FishingChampionshipEntry> Winners { get; set; } = [];
+}
 
 public interface IFishingChampionshipStore { FishingChampionshipSnapshot Load(); void Save(FishingChampionshipSnapshot snapshot); }
 public sealed class MemoryFishingChampionshipStore : IFishingChampionshipStore { string _json = ""; public FishingChampionshipSnapshot Load() => _json.Length == 0 ? new() : JsonSerializer.Deserialize<FishingChampionshipSnapshot>(_json) ?? new(); public void Save(FishingChampionshipSnapshot s) => _json = JsonSerializer.Serialize(s); }
-public sealed class JsonFishingChampionshipStore(string path) : IFishingChampionshipStore
-{
-    static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true }; readonly object _gate = new();
-    public FishingChampionshipSnapshot Load() { lock (_gate) { if (!File.Exists(path)) return new(); var data = JsonSerializer.Deserialize<FishingChampionshipSnapshot>(File.ReadAllText(path), JsonOptions) ?? throw new InvalidDataException(path); data.Current ??= []; data.Winners ??= []; return data; } }
-    public void Save(FishingChampionshipSnapshot snapshot) { lock (_gate) { Directory.CreateDirectory(Path.GetDirectoryName(path) ?? "."); var tmp = path + ".tmp"; File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot, JsonOptions)); File.Move(tmp, path, true); } }
-}
-
 public sealed class FishingChampionshipBoard
 {
     readonly FishingChampionshipSettings _settings; readonly IFishingChampionshipStore _store; readonly FishingChampionshipSnapshot _s;
     public FishingChampionshipBoard(long loadedAtUnixMs, FishingChampionshipSettings? settings = null, IFishingChampionshipStore? store = null)
     { _settings = settings ?? FishingChampionshipSettings.Default; _store = store ?? new MemoryFishingChampionshipStore(); _s = _store.Load(); if (_s.PeriodEndUnixMs == 0) { _s.PeriodEndUnixMs = loadedAtUnixMs + _settings.PeriodMs; Save(); } }
-    public static FishingChampionshipBoard OpenInStateDirectory(string stateDirectory, long loadedAtUnixMs, FishingChampionshipSettings? settings = null) => new(loadedAtUnixMs, settings, new JsonFishingChampionshipStore(Path.Combine(string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory, "fishing-championship.json")));
+    /// <summary>Production wiring: the championship saved in the database (#996).</summary>
+    public static FishingChampionshipBoard Open(WorldStateStore state, long loadedAtUnixMs, FishingChampionshipSettings? settings = null) => new(loadedAtUnixMs, settings, new StoredFishingChampionshipStore(state));
     public FishingChampionshipSettings Settings => _settings; public long PeriodEndUnixMs => _s.PeriodEndUnixMs;
     public IReadOnlyList<FishingChampionshipEntry> CurrentRanking => SortDesc(_s.Current); public IReadOnlyList<FishingChampionshipEntry> LastWinners => SortDesc(_s.Winners);
     public long MinutesRemaining(long nowUnixMs) => Math.Max(0, (_s.PeriodEndUnixMs - nowUnixMs) / 60_000);
@@ -70,8 +82,9 @@ public sealed class FishingChampionshipBoard
         _s.Current.Remove(_s.Current.OrderBy(e => e.Length).First()); _s.Current.Add(new() { Name = playerName, Length = len }); Save(); return len;
     }
     public long TryClaim(string playerName, out int rank) { rank = 0; var ordered = SortDesc(_s.Winners); for (int i = 0; i < ordered.Count; i++) { if (!ordered[i].Name.Equals(playerName, StringComparison.OrdinalIgnoreCase)) continue; rank = i + 1; if (ordered[i].Claimed || rank > _settings.Rewards.Length) return 0; ordered[i].Claimed = true; Save(); return _settings.Rewards[rank - 1]; } return 0; }
-    public bool Tick(long nowUnixMs) { if (nowUnixMs < _s.PeriodEndUnixMs) return false; _s.Winners = SortDesc(_s.Current).Select(e => new FishingChampionshipEntry { Name = e.Name, Length = e.Length }).ToList(); _s.Current.Clear(); _s.PeriodEndUnixMs = nowUnixMs + _settings.PeriodMs; Save(); return true; }
+    public bool Tick(long nowUnixMs) { if (nowUnixMs < _s.PeriodEndUnixMs) return false; if (nowUnixMs - _s.PeriodEndUnixMs >= _settings.PeriodMs) ZoneLog.Warn($"[fishing-championship] period overdue due={_s.PeriodEndUnixMs} now={nowUnixMs}; settling once and starting the next period"); _s.Winners = SortDesc(_s.Current).Select(e => new FishingChampionshipEntry { Name = e.Name, Length = e.Length }).ToList(); _s.Current.Clear(); _s.PeriodEndUnixMs = nowUnixMs + _settings.PeriodMs; Save(); return true; }
     static List<FishingChampionshipEntry> SortDesc(List<FishingChampionshipEntry> list) => [.. list.OrderByDescending(e => e.Length).ThenBy(e => e.Name, StringComparer.OrdinalIgnoreCase)];
-    void Save() => _store.Save(_s);
+    /// <summary>Writes the current championship to its store; the shutdown registry calls this once the world is drained.</summary>
+    public void Save() => _store.Save(_s);
     public static string FormatLength(double length) => length.ToString("0.00", CultureInfo.InvariantCulture);
 }

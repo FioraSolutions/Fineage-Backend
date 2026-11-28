@@ -30,9 +30,9 @@ public sealed class LoginStatusTests
             Assert.True(up.Headers.CacheControl?.NoStore);
             Assert.Null(up.Headers.CacheControl?.MaxAge);
             string text = await up.Content.ReadAsStringAsync();
-            Assert.Equal("{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":4}", text);
+            Assert.Equal("{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":4,\"database\":true}", text);
             using var doc = JsonDocument.Parse(text);
-            Assert.Equal(4, doc.RootElement.EnumerateObject().Count());
+            Assert.Equal(5, doc.RootElement.EnumerateObject().Count());
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("ok").ValueKind);
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("login").ValueKind);
             Assert.Equal(JsonValueKind.True, doc.RootElement.GetProperty("zone").ValueKind);
@@ -43,7 +43,7 @@ public sealed class LoginStatusTests
         using (HttpResponseMessage empty = await client.GetAsync("/api/status"))
         {
             Assert.Equal(
-                "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0}",
+                "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0,\"database\":true}",
                 await empty.Content.ReadAsStringAsync());
         }
 
@@ -53,14 +53,14 @@ public sealed class LoginStatusTests
             Assert.Equal(HttpStatusCode.OK, down.StatusCode);
             Assert.True(down.Headers.CacheControl?.NoStore);
             Assert.Equal(
-                "{\"ok\":true,\"login\":true,\"zone\":false,\"playersOnline\":0}",
+                "{\"ok\":true,\"login\":true,\"zone\":false,\"playersOnline\":0,\"database\":true}",
                 await down.Content.ReadAsStringAsync());
         }
 
         zone.Reading = new ZoneStatusReading(true, -3);
         using HttpResponseMessage clamped = await client.GetAsync("/api/status");
         Assert.Equal(
-            "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0}",
+            "{\"ok\":true,\"login\":true,\"zone\":true,\"playersOnline\":0,\"database\":true}",
             await clamped.Content.ReadAsStringAsync());
     }
 

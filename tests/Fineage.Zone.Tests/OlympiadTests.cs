@@ -1,3 +1,4 @@
+using Fineage.Zone.Persistence;
 using Fineage.Accounts;
 using Fineage.Login;
 using Fineage.Protocol;
@@ -278,14 +279,14 @@ public class OlympiadTests
     [Fact]
     public void Points_and_noblesse_round_trip_and_weekly_points_honor_the_cap()
     {
-        string path = Path.Combine(Path.GetTempPath(), "olympiad-" + Guid.NewGuid().ToString("n") + ".json");
+        var rig = new WorldStateRig();
         var early = new DateTimeOffset(2026, 10, 1, 18, 30, 0, TimeSpan.Zero);
-        var board = new OlympiadBoard(early, store: new JsonOlympiadStore(path));
+        var board = new OlympiadBoard(early, store: new StoredOlympiadStore(rig.State));
         Assert.True(board.GrantNoblesse(9));
         Assert.Null(board.Register(Noble(9, "Ivo"), true, early.ToUnixTimeMilliseconds()).Error);
         Assert.Equal(18, board.PointsOf(9));
 
-        var reloaded = new OlympiadBoard(early, store: new JsonOlympiadStore(path));
+        var reloaded = new OlympiadBoard(early, store: new StoredOlympiadStore(rig.Restart()));
         Assert.True(reloaded.IsNoble(9));
         Assert.Equal(12, reloaded.PointsOf(9));
 

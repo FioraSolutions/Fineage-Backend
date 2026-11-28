@@ -11,9 +11,19 @@ namespace Fineage.LoadTest.Consistency;
 /// </summary>
 public sealed class PositionTimeline
 {
-    readonly List<(long Ticks, int X, int Y)> _points = [];
+    readonly List<Point> _points = [];
+
+    public readonly record struct Point(DateTimeOffset At, int X, int Y);
 
     public int Count => _points.Count;
+
+    /// <summary>Every position sample in receive-time order. Callers that compare two bots must use the same instant.</summary>
+    public IReadOnlyList<Point> Points => _points;
+
+    public DateTimeOffset? FirstAt => _points.Count == 0 ? null : _points[0].At;
+
+    /// <summary>The newest position frame this bot received about itself.</summary>
+    public DateTimeOffset? LastAt => _points.Count == 0 ? null : _points[^1].At;
 
     public static PositionTimeline From(IEnumerable<ObservedFrame> frames)
     {
@@ -35,8 +45,9 @@ public sealed class PositionTimeline
                 case NetOpcode.MoveState:
                     {
                         var m = NetCodec.DecodeMoveState(f.Payload);
+                        // Origin is the server's actual pawn position for this leg; Dest may be an unreached tip.
                         if (self.Contains(m.EntityValue))
-                            t.Add(f.At, m.DestX, m.DestY);
+                            t.Add(f.At, m.OriginX, m.OriginY);
                         break;
                     }
                 case NetOpcode.PositionCorrection:
@@ -56,17 +67,29 @@ public sealed class PositionTimeline
             }
         }
 
-        t._points.Sort((a, b) => a.Ticks.CompareTo(b.Ticks));
+        t._points.Sort((a, b) => a.At.UtcTicks.CompareTo(b.At.UtcTicks));
         return t;
     }
 
-    public void Add(DateTimeOffset at, int x, int y) => _points.Add((at.UtcTicks, x, y));
+    public void Add(DateTimeOffset at, int x, int y) => _points.Add(new Point(at, x, y));
 
     /// <summary>Last known position at or before <paramref name="at"/>; false before the first point.</summary>
     public bool TryAt(DateTimeOffset at, out int x, out int y)
     {
+        bool found = TryAt(at, out x, out y, out _);
+        return found;
+    }
+
+    /// <summary>
+    /// Last known position at or before <paramref name="at"/> and the timestamp of that sample. A comparison
+    /// against a sample that is minutes old is a comparison across an unobserved movement interval, not a
+    /// position divergence at a common instant.
+    /// </summary>
+    public bool TryAt(DateTimeOffset at, out int x, out int y, out DateTimeOffset sampleAt)
+    {
         x = 0;
         y = 0;
+        sampleAt = default;
         long target = at.UtcTicks;
         int lo = 0;
         int hi = _points.Count - 1;
@@ -74,7 +97,7 @@ public sealed class PositionTimeline
         while (lo <= hi)
         {
             int mid = lo + ((hi - lo) / 2);
-            if (_points[mid].Ticks <= target)
+            if (_points[mid].At.UtcTicks <= target)
             {
                 found = mid;
                 lo = mid + 1;
@@ -87,7 +110,7 @@ public sealed class PositionTimeline
 
         if (found < 0)
             return false;
-        (_, x, y) = _points[found];
+        (sampleAt, x, y) = _points[found];
         return true;
     }
 }

@@ -10,6 +10,11 @@ namespace Fineage.Net.Contract
         public int RecipeId { get; set; }
     }
 
+    public sealed class RecipeBookDestroyNetMsg
+    {
+        public int RecipeId { get; set; }
+    }
+
     public sealed class RecipeBookListNetMsg
     {
         public int Dwarven { get; set; }

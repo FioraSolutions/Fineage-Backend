@@ -197,8 +197,8 @@ public sealed partial class ZoneWorld
         chest.CurHp = 0;
         FanoutVitals(chest, StatusFor(chest));
         opener.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        RemoveDeadNpc(chest, killer: opener);
-        GrantKillReward(opener, chest);
+        if (RemoveDeadNpc(chest, killer: opener))
+            GrantKillReward(opener, chest);
     }
 
     void BroadcastSocial(ZoneEntity actor, int actionId)
@@ -223,8 +223,8 @@ public sealed partial class ZoneWorld
         var credit = CreditOf(attacker);
         RecordDamage(target, credit, Math.Max(1, target.MaxHp));
         attacker.CombatUntilUnixMs = now + ClanProtocol.CombatStanceMillis;
-        RemoveDeadNpc(target, killer: credit);
-        GrantKillReward(credit, target);
+        if (RemoveDeadNpc(target, killer: credit))
+            GrantKillReward(credit, target);
         return true;
     }
 

@@ -19,6 +19,56 @@ public sealed partial class ZoneWorld
         return Task.FromResult(WithDeferredInventoryPersist(() => ApplyDungeon(session, request)));
     }
 
+    /// <summary>
+    /// HTML <c>necro</c>/<c>cata</c>/<c>exit</c> on Gatekeeper Ziggurat NPCs — same path as
+    /// <see cref="TryDungeonAsync"/>, resolved from <see cref="DungeonCatalog"/> by the talking NPC.
+    /// </summary>
+    string? ApplyDungeonGate(ZoneSession session, ZoneEntity player, ZoneEntity npc, bool enter, string verb)
+    {
+        _ = player;
+        DungeonSite site;
+        if (enter)
+        {
+            if (!_dungeons.TryGetByEntranceNpc(npc.NpcId, out site))
+            {
+                ZoneLog.Error($"[dungeon-gate] entrance npcId={npc.NpcId} is not in {DungeonCatalog.FileName}");
+                return DungeonProtocol.Unknown;
+            }
+
+            if (verb.Equals("necro", StringComparison.OrdinalIgnoreCase) && site.Kind != DungeonKind.Necropolis)
+            {
+                ZoneLog.Error(
+                    $"[dungeon-gate] npcId={npc.NpcId} is {site.Kind} but HTML used necro (dungeon {site.Id})");
+                return DungeonProtocol.Unknown;
+            }
+
+            if (verb.Equals("cata", StringComparison.OrdinalIgnoreCase) && site.Kind != DungeonKind.Catacomb)
+            {
+                ZoneLog.Error(
+                    $"[dungeon-gate] npcId={npc.NpcId} is {site.Kind} but HTML used cata (dungeon {site.Id})");
+                return DungeonProtocol.Unknown;
+            }
+
+            return ApplyDungeon(session, new DungeonEnterRequestMsg
+            {
+                DungeonId = site.Id,
+                Action = DungeonProtocol.ActionEnter
+            });
+        }
+
+        if (!_dungeons.TryGetByExitNpc(npc.NpcId, out site))
+        {
+            ZoneLog.Error($"[dungeon-gate] exit npcId={npc.NpcId} is not in {DungeonCatalog.FileName}");
+            return DungeonProtocol.Unknown;
+        }
+
+        return ApplyDungeon(session, new DungeonEnterRequestMsg
+        {
+            DungeonId = site.Id,
+            Action = DungeonProtocol.ActionExit
+        });
+    }
+
     string? ApplyDungeon(ZoneSession session, DungeonEnterRequestMsg request)
     {
         if (!IsLive(session) || !_byId.TryGetValue(session.ObjectId, out var player) || player.Inventory == null)
@@ -189,6 +239,10 @@ public sealed partial class ZoneWorld
             Forget(entity, id);
             removed.Add(id);
         }
+
+        // Teleport reconciled the knownlist at the landing cell; later move starts use this as their anchor so a
+        // same-cell move does not re-plan (and a boundary crossed while running is not mistaken for no change).
+        StampKnownlistRefreshAnchor(entity);
 
         // Mobius onTeleported rebuilds the knownlist. Without this the client keeps the old
         // square's bodies (or drops them with the tile) and never receives them again on the way back.

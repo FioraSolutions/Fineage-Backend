@@ -141,6 +141,10 @@ public sealed partial class ZoneWorld
         foreach (int id in SortedExcept(before, after))
             Forget(entity, id);
 
+        // The anchor advances with the reconcile, not with the AOI store: a move-start shortcut compares the
+        // destination cell against this value, so it must name the cell whose watch set is actually in Knownlist.
+        StampKnownlistRefreshAnchor(entity);
+
         if (netWatchers is { Count: > 0 } && NetBridge != null && ack != null)
         {
             NetBridge.FanoutMoveState(
@@ -166,8 +170,12 @@ public sealed partial class ZoneWorld
         TrackWatcher(self.ObjectId, otherId);
         if (other.Session != null)
         {
-            other.Knownlist.Add(self.ObjectId);
-            TrackWatcher(other.ObjectId, self.ObjectId);
+            // Invisible self must not appear on a non-GM peer's knownlist (Mobius hide / admin_invis).
+            if (!(self.Invisible && !ZoneAdmin.IsAdminCharacter(other.Name)))
+            {
+                other.Knownlist.Add(self.ObjectId);
+                TrackWatcher(other.ObjectId, self.ObjectId);
+            }
         }
         else
             TrackThink(other);
@@ -237,6 +245,7 @@ public sealed partial class ZoneWorld
         _chat.Left(session.ObjectId);
 
         PartyPlayerLeftWorld(session.ObjectId);
+        ClearPartyMatchOnLeave(session.ObjectId);
         TradePlayerLeftWorld(session.ObjectId);
         ForgetRuleZoneState(session.ObjectId);
         PrivateStorePlayerLeftWorld(session.ObjectId);

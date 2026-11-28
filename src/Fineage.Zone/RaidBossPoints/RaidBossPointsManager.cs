@@ -1,3 +1,5 @@
+using Fineage.Zone.Persistence;
+
 namespace Fineage.Zone.RaidBossPoints;
 
 public readonly record struct RaidBossPointsRankEntry(int Rank, int CharacterId, string Name, int TotalPoints);
@@ -21,11 +23,10 @@ public sealed class RaidBossPointsManager
     public static RaidBossPointsManager CreateDefault() =>
         new(RaidBossPointsCatalog.LoadDefault(), new MemoryRaidBossPointsStore());
 
-    public static RaidBossPointsManager OpenInStateDirectory(string stateDirectory)
+    /// <summary>Opens the raid boss points saved in the database (#996).</summary>
+    public static RaidBossPointsManager Open(WorldStateStore state)
     {
-        string dir = string.IsNullOrWhiteSpace(stateDirectory) ? "data" : stateDirectory;
-        string path = Path.Combine(dir, "raid-boss-points-store.json");
-        return new RaidBossPointsManager(RaidBossPointsCatalog.LoadDefault(), new JsonRaidBossPointsStore(path));
+        return new RaidBossPointsManager(RaidBossPointsCatalog.LoadDefault(), new StoredRaidBossPointsStore(state));
     }
 
     void Load()

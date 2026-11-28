@@ -75,9 +75,9 @@ filter is process-global and xUnit runs collections in parallel.
 - `data/skill-trees.json` rows carry Mobius `levelUpSp` (`scripts/gen_skill_sp.py`, 13528 rows).
 - Learned skills persist per character: `CharacterRecord.LearnedSkills`, JSON `learnedSkills`, Postgres `character_skills` (migration 004). Loaded at enter and merged into known skills (max level wins) on top of the class tree.
 - Trainer page `SkillList` bypass (Ellenia 30155, Cobendell 30156, Greenis 30157, Esrandell 30158 pages link it) → `TrainerBypassHandler`:
-  - **Default (`FINEAGE_TRAINER_SP_LEARN` unset)**: NPC-tree skills stay free at their level, exactly as before (Wind Strike etc.). SkillList shows an HTML note with the next level that brings a new skill. `learn_skill` does nothing.
-  - **`FINEAGE_TRAINER_SP_LEARN=1`**: Mobius mode. Only autoGet rows are free; SkillList is an interim HTML list (next level per skill, getLevel reached, SP cost) with `learn_skill <id>` links. Learning spends SP, saves `character_skills`, re-sends `SkillList` (V2 + Net `FanoutSkillList`), SysMsg 277 / 278.
-- **Open question for Nikita: keep free trainer skills or switch to SP-buy?** To flip: set `FINEAGE_TRAINER_SP_LEARN=1` for Zone (e.g. in `run-local-net.sh`). Characters then lose NPC skills they have not bought; consider a one-time grant of currently-known NPC skills into `character_skills` before flipping. Real Mobius UI (AcquireSkillList / RequestAcquireSkillInfo / RequestAcquireSkill) needs Net opcodes + a client window; the HTML list is the stopgap.
+  - **Default (`FINEAGE_TRAINER_SP_LEARN` unset / `1` / `true`)**: Mobius / Interlude parity. Only autoGet rows are free; NPC-tree skills cost SP at a trainer (`learn_skill` / AcquireSkill). Zone boots with `[ZONE] trainer-learn=mobius …`.
+  - **`FINEAGE_TRAINER_SP_LEARN=0` / `false`**: pre-parity Fineage behaviour — NPC-tree skills stay free at level; `learn_skill` does nothing useful. Use only as an explicit divergence.
+- **Migration:** characters that never bought NPC skills under free-grants mode will not have them after the default flip until they learn at a trainer (or an admin grants into `character_skills`). Unit tests force free-grants via `FINEAGE_TRAINER_SP_LEARN=0` in `TestHostDefaults`.
 - Q316 mobs: Mobius spawns Sukar Wererats / Varool at ~(12400..12900, 75500..80200, z -4176) — the underground Elven Ruins, not the village/forest maps we load. Not spawned; needs that dungeon map first.
 
 ## Missing (next bricks, in order)
@@ -92,7 +92,7 @@ filter is process-global and xUnit runs collections in parallel.
 ## Merchant extras + quest-item flag
 
 - `TerritoryStatus` bypass is live (TerritoryBypassHandler → `territorystatus.htm` / `territorynoclan.htm` from Mobius): castle from MerchantTowns (Elven Village → Oren), owner clan + leader + tax from siege state.
-- `Wear` stays a stub: Net has no ShopPreviewList and the client has no preview UI yet.
+- `Wear` opens `ShopPreviewList`; `RequestPreviewItem` charges the wear fee and sends `ShopPreviewInfo` (client try-on UI may still be thin).
 - Equipment exchange link `exc_multisell 003` already works (multisell 3 allows NPCs 30147–30149).
 - Items now carry `quest` (scripts/gen_quest_item_flags.py marks it from Mobius `is_questitem`; 11 items so far, including 7586 Sweet Fluid). Quest items can't be sold, dropped, traded, or put in the warehouse. The flag isn't sent over the Net wire yet, so the client has no quest tab.
 
@@ -133,7 +133,7 @@ Not done / next:
 - Mobius `setClassId` extras: MagicSkillUse 5103 class-change effect broadcast, party/clan member-list refresh,
   `checkPlayerSkills` (drop skills above the new tree), sub-class / `setBaseClass` (we only have one class id).
 - Net client has no dedicated class-change UI: everything is NpcHtml + UserInfo/SkillList it already handles.
-- `FINEAGE_TRAINER_SP_LEARN` stays off by default. Hosted Zone defaults `FINEAGE_ZONE_AOI_CELL` to 3000.
+- `FINEAGE_TRAINER_SP_LEARN` defaults **on** (Mobius SP purchase). Hosted Zone defaults `FINEAGE_ZONE_AOI_CELL` to 3000.
 
 ## Other elven first-job paths (Q406 / Q407 / Q409)
 
@@ -159,7 +159,7 @@ Mobius `onAttack` script values (Q407 "only the attacker who hit it", Q409 "sing
 - **Support Magic** (`data/newbie-buffs.json`, Mobius `handlers/bypasshandlers/SupportMagic.java`): levels 8..39, refused at class level 3, **no isNewbie check** (`requireNewbie: false`). Windows: Wind Walk 4322 8–39, Shield 4323 11–39; fighter 4324 12–38 / 4325 13–38 / 4326 14–38 / 4327 15–37; mage 4328 12–38 / 4329 13–38 / 4330 14–38 / 4331 15–37; Life Cubic 4338 16–36. Too low/high serves Mobius `default/SupportMagicLowLevel.htm` / `SupportMagicHighLevel.htm`. No cooldown/once rule in Mobius (re-castable).
 - **Blessing of Protection** 5182: unchanged (≤39, refused at class level 2).
 - **Newbie Travel Token** (`travelToken` block; Mobius `ai/others/NewbieTravelToken`): Newbie Guide 30599 `Script NewbieTravelToken` shows `newbie_travel/30599.htm` (level ≥20 → `cant-travel.htm`). A destination event takes one token 8542 and teleports (DE 30600, DW 30601, EV 30599, OV 30602, TI 30598). No token → SysMsg 351 (INCORRECT_ITEM_COUNT). Destinations outside loaded maps are refused **before** the token is taken (Fineage deviation; Mobius has the whole world).
-- Stubs: `Script NpcLocationInfo` (Mobius `custom/`, not ported) still shows the unavailable page. Newbie first-talk gift (NewbieHelperGift) unchanged.
+- `Script NpcLocationInfo` serves Mobius guide HTML + radar (`data/html/npc_location_info/`). Newbie first-talk gift (NewbieHelperGift) unchanged.
 - Play: Elven Village → talk to Newbie Guide (30599) → Support Magic at lv 8–39; Travel Token link with token 8542 in bag at lv <20.
 
 ## Elven Underground Fortress (Q316 / Q408 mobs)

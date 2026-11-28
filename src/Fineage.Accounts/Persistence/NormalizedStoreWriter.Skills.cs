@@ -136,6 +136,104 @@ static partial class NormalizedStoreWriter
         }
     }
 
+    public static void ReplaceMacros(
+        NpgsqlConnection conn,
+        NpgsqlTransaction? tx,
+        int characterId,
+        IReadOnlyList<StoredMacro>? macros)
+    {
+        using (var del = conn.CreateCommand())
+        {
+            del.Transaction = tx;
+            del.CommandText = "DELETE FROM character_macros WHERE character_id = @id";
+            del.Parameters.AddWithValue("id", characterId);
+            del.ExecuteNonQuery();
+        }
+
+        if (macros == null)
+            return;
+
+        foreach (var m in macros)
+        {
+            using var ins = conn.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText =
+                """
+                INSERT INTO character_macros (character_id, macro_id, icon, name, descr, acronym, commands)
+                VALUES (@cid, @mid, @icon, @name, @descr, @acronym, @commands)
+                ON CONFLICT (character_id, macro_id) DO UPDATE
+                SET icon = excluded.icon, name = excluded.name, descr = excluded.descr,
+                    acronym = excluded.acronym, commands = excluded.commands
+                """;
+            ins.Parameters.AddWithValue("cid", characterId);
+            ins.Parameters.AddWithValue("mid", m.Id);
+            ins.Parameters.AddWithValue("icon", m.Icon);
+            ins.Parameters.AddWithValue("name", m.Name ?? "");
+            ins.Parameters.AddWithValue("descr", m.Descr ?? "");
+            ins.Parameters.AddWithValue("acronym", m.Acronym ?? "");
+            ins.Parameters.AddWithValue("commands", EncodeMacroCommands(m.Commands));
+            ins.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>Mobius DB commands column: <c>type,d1,d2[,cmd];...</c> capped at 255.</summary>
+    internal static string EncodeMacroCommands(IReadOnlyList<StoredMacroCmd>? commands)
+    {
+        if (commands == null || commands.Count == 0)
+            return "";
+        var sb = new System.Text.StringBuilder(300);
+        foreach (var cmd in commands)
+        {
+            sb.Append(cmd.Type).Append(',').Append(cmd.D1).Append(',').Append(cmd.D2);
+            if (!string.IsNullOrEmpty(cmd.Cmd))
+                sb.Append(',').Append(cmd.Cmd);
+            sb.Append(';');
+        }
+
+        if (sb.Length > StoredMacro.MaxCommandsLength)
+            sb.Length = StoredMacro.MaxCommandsLength;
+        return sb.ToString();
+    }
+
+    static List<StoredMacro>? ReadMacros(JsonElement character)
+    {
+        if (!character.TryGetProperty("macros", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+        var rows = new List<StoredMacro>();
+        foreach (var m in arr.EnumerateArray())
+        {
+            int id = ReadInt(m, "id", 0);
+            if (id <= 0)
+                continue;
+            string name = ReadString(m, "name");
+            if (string.IsNullOrEmpty(name))
+                continue;
+            var cmds = new List<StoredMacroCmd>();
+            if (m.TryGetProperty("commands", out var cmdArr) && cmdArr.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var c in cmdArr.EnumerateArray())
+                {
+                    cmds.Add(new StoredMacroCmd(
+                        ReadInt(c, "entry", cmds.Count),
+                        ReadInt(c, "type", 0),
+                        ReadInt(c, "d1", 0),
+                        ReadInt(c, "d2", 0),
+                        ReadString(c, "cmd")));
+                }
+            }
+
+            rows.Add(new StoredMacro(
+                id,
+                ReadInt(m, "icon", 0),
+                name,
+                ReadString(m, "descr"),
+                ReadString(m, "acronym"),
+                cmds));
+        }
+
+        return rows.Count == 0 ? null : rows;
+    }
+
     static List<StoredShortcut>? ReadShortcuts(JsonElement character)
     {
         if (!character.TryGetProperty("shortcuts", out var arr) || arr.ValueKind != JsonValueKind.Array)
@@ -183,6 +281,9 @@ static partial class NormalizedStoreWriter
 
     static int ReadInt(JsonElement el, string name, int fallback) =>
         el.TryGetProperty(name, out var p) && p.TryGetInt32(out int v) ? v : fallback;
+
+    static string ReadString(JsonElement el, string name) =>
+        el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() ?? "" : "";
 
     static long ReadLong(JsonElement el, string name, long fallback) =>
         el.TryGetProperty(name, out var p) && p.TryGetInt64(out long v) ? v : fallback;

@@ -28,8 +28,18 @@ public sealed class EconomyLedger : IEconomyLedger
     long _position;
     long _latestTick = long.MinValue;
 
-    public EconomyLedger(ILedgerJournal journal, long idempotencyTicks)
+    readonly HashSet<LedgerTxKind> _tallied;
+    readonly Dictionary<(LedgerTxKind Kind, int Reference), Tally> _tallies = [];
+
+    /// <param name="talliedKinds">
+    /// Kinds whose moves are also counted per <see cref="LedgerTransaction.Reference"/>, with what they posted to system
+    /// accounts (<see cref="TallyOf"/>), kept for the whole journal rather than the idempotency window. A subsystem that
+    /// keeps its own state next to those moves (the lottery's tickets for lottery N, the monster race's bets for race N)
+    /// is reconciled against these counts (#996).
+    /// </param>
+    public EconomyLedger(ILedgerJournal journal, long idempotencyTicks, IReadOnlyCollection<LedgerTxKind>? talliedKinds = null)
     {
+        _tallied = talliedKinds is { Count: > 0 } ? [.. talliedKinds] : [];
         _journal = journal ?? throw new ArgumentNullException(nameof(journal));
         if (idempotencyTicks <= 0)
             throw new ArgumentOutOfRangeException(nameof(idempotencyTicks), idempotencyTicks, "The idempotency window must be positive.");
@@ -195,8 +205,47 @@ public sealed class EconomyLedger : IEconomyLedger
         }
     }
 
+    /// <summary>Moves of <paramref name="kind"/> naming <paramref name="reference"/> since the journal began.</summary>
+    public LedgerReferenceTally TallyOf(LedgerTxKind kind, int reference)
+    {
+        if (!_tallied.Contains(kind))
+            throw new InvalidOperationException($"ledger kind {kind} is not tallied; pass it to the EconomyLedger constructor");
+        lock (_sync)
+        {
+            return _tallies.TryGetValue((kind, reference), out var tally)
+                ? new LedgerReferenceTally(kind, reference, tally.Moves, new Dictionary<int, long>(tally.SystemSide))
+                : new LedgerReferenceTally(kind, reference, 0, new Dictionary<int, long>());
+        }
+    }
+
+    /// <summary>Every reference with a tallied move of <paramref name="kind"/>.</summary>
+    public IReadOnlyList<int> TalliedReferences(LedgerTxKind kind)
+    {
+        lock (_sync)
+            return _tallies.Keys.Where(key => key.Kind == kind).Select(key => key.Reference).Order().ToList();
+    }
+
+    sealed class Tally
+    {
+        public int Moves;
+        public readonly Dictionary<int, long> SystemSide = [];
+    }
+
     void Remember(LedgerEntry entry)
     {
+        if (_tallied.Contains(entry.Transaction.Kind))
+        {
+            var key = (entry.Transaction.Kind, entry.Transaction.Reference);
+            if (!_tallies.TryGetValue(key, out var tally))
+                _tallies[key] = tally = new Tally();
+            tally.Moves++;
+            foreach (var posting in entry.Transaction.Postings)
+            {
+                if (posting.Account.IsSystem)
+                    tally.SystemSide[posting.ItemId] = tally.SystemSide.GetValueOrDefault(posting.ItemId) + posting.Amount;
+            }
+        }
+
         _byId.Add(entry.Transaction.Id, entry);
         _recent.Enqueue(entry);
         _latestTick = Math.Max(_latestTick, entry.Transaction.Id.Tick);
@@ -323,4 +372,13 @@ public sealed class EconomyLedger : IEconomyLedger
             _owners[instance] = account;
         return LedgerRejection.None;
     }
+}
+
+/// <summary>
+/// What the journal holds for one kind and reference (#996): how many moves, and the net amount per item they posted to
+/// system accounts (the lottery, the race track, …). Positive is value the system account received.
+/// </summary>
+public sealed record LedgerReferenceTally(LedgerTxKind Kind, int Reference, int Moves, IReadOnlyDictionary<int, long> SystemSide)
+{
+    public long SystemAmountOf(int itemId) => SystemSide.GetValueOrDefault(itemId);
 }

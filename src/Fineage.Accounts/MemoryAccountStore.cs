@@ -21,21 +21,75 @@ public sealed partial class MemoryAccountStore : IAccountStore
     };
 
     readonly object _gate = new();
+    readonly object _snapshotGate = new();
+    readonly object _snapshotWriteGate = new();
     StoreFile _data = new();
     Action<string>? _afterSaveSnapshot;
+    string? _pendingSnapshot;
+    long _pendingSnapshotSequence;
+    long _lastWrittenSnapshotSequence;
 
     MemoryAccountStore()
     {
     }
 
     /// <summary>
-    /// Invoked under the store lock after every successful mutation with the versioned snapshot JSON.
-    /// Handlers must not re-enter the store.
+    /// Invoked after the store lock has been released, with the versioned snapshot JSON captured under that lock.
+    /// <para>
+    /// The callback must never run under <see cref="_gate"/>. Durable writers (<see cref="PostgresAccountStore"/>)
+    /// take their persistence lock inside this callback, while read paths such as <c>ReserveItemObjectIds</c> take
+    /// the persistence lock first and the memory lock second. Running the callback under <see cref="_gate"/> closes
+    /// that cycle and deadlocks a concurrent registration and first-character creation.
+    /// </para>
+    /// Handlers must still not call back into the store (that would recursively flush the pending snapshot).
     /// </summary>
     public Action<string>? AfterSaveSnapshot
     {
         get => _afterSaveSnapshot;
         set => _afterSaveSnapshot = value;
+    }
+
+    /// <summary>The memory mutation monitor. Durable adapters must take their persistence gate before it.</summary>
+    internal object SyncRoot => _gate;
+
+    [ThreadStatic] static HashSet<MemoryAccountStore>? t_dirtyStores;
+
+    static void MarkSnapshotDirty(MemoryAccountStore store) =>
+        (t_dirtyStores ??= new HashSet<MemoryAccountStore>(ReferenceEqualityComparer.Instance)).Add(store);
+
+    static bool TakeSnapshotDirty(MemoryAccountStore store) =>
+        t_dirtyStores?.Remove(store) == true;
+
+    /// <summary>
+    /// Clears the memory lock and only then runs the pending snapshot callback. Nested store calls (re-entrant
+    /// locks) never flush on their own; the outermost guarded call flushes once after releasing the lock.
+    /// </summary>
+    readonly struct StoreGuard : IDisposable
+    {
+        readonly MemoryAccountStore _store;
+        readonly bool _outermost;
+
+        internal StoreGuard(MemoryAccountStore store, bool outermost)
+        {
+            _store = store;
+            _outermost = outermost;
+        }
+
+        public void Dispose()
+        {
+            Monitor.Exit(_store._gate);
+            // Read-only guarded calls must not touch the snapshot writer: a reader that blocks on it while a
+            // durable writer waits for the memory lock would recreate the register/create deadlock.
+            if (_outermost && TakeSnapshotDirty(_store))
+                _store.FlushPendingSnapshot();
+        }
+    }
+
+    StoreGuard EnterStore()
+    {
+        bool outermost = !Monitor.IsEntered(_gate);
+        Monitor.Enter(_gate);
+        return new StoreGuard(this, outermost);
     }
 
     /// <summary>
@@ -57,7 +111,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
     {
         get
         {
-            lock (_gate)
+            using (EnterStore())
                 return _data.NextItemObjectId;
         }
     }
@@ -65,7 +119,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
     public int ReserveItemObjectIds(int count)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
-        lock (_gate)
+        using (EnterStore())
         {
             if (_data.NextItemObjectId < PlayerInventory.FirstObjectId)
                 _data.NextItemObjectId = PlayerInventory.FirstObjectId;
@@ -88,7 +142,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
     /// </summary>
     public void ReloadFromSnapshot(string json)
     {
-        lock (_gate)
+        using (EnterStore())
             LoadFromJson(json);
     }
 
@@ -104,7 +158,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
         string? email = null)
     {
         ArgumentNullException.ThrowIfNull(character);
-        lock (_gate)
+        using (EnterStore())
         {
             var account = FindAccount(character.Account);
             if (account == null)
@@ -148,7 +202,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
     /// <summary>Raises in-memory allocation counters to match durable SQL (<c>store_meta</c> / max ids).</summary>
     public void SyncAllocationCounters(int nextCharacterId, int nextClanId, long nextItemObjectId)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             if (nextCharacterId > _data.NextCharacterId)
                 _data.NextCharacterId = nextCharacterId;
@@ -166,7 +220,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public (int NextCharacterId, int NextClanId, int NextItemObjectId) AllocationCounters()
     {
-        lock (_gate)
+        using (EnterStore())
             return (_data.NextCharacterId, _data.NextClanId, _data.NextItemObjectId);
     }
 
@@ -241,6 +295,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
             }).ToList(),
             Quests = character.Quests?.Select(CopyQuest).ToList(),
             Shortcuts = character.Shortcuts?.Select(CopyShortcut).ToList(),
+            Macros = character.Macros?.Select(CopyMacroDto).ToList(),
             LearnedSkills = character.LearnedSkills?.Select(s => new StoredSkillDto { SkillId = s.SkillId, Level = s.Level }).ToList(),
             DeathPenaltyLevel = character.DeathPenaltyLevel,
             Karma = character.Karma,
@@ -276,13 +331,13 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public string ExportSnapshot()
     {
-        lock (_gate)
+        using (EnterStore())
             return JsonSerializer.Serialize(_data, JsonOptions);
     }
 
     public bool AccountExists(string account)
     {
-        lock (_gate)
+        using (EnterStore())
             return FindAccount(account) != null;
     }
 
@@ -290,7 +345,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
     {
         name = name.Trim();
         string? canonicalEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
-        lock (_gate)
+        using (EnterStore())
         {
             if (FindAccount(name) != null)
                 return AddAccountStatus.NameTaken;
@@ -311,7 +366,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public bool TryGetCredentialByEmail(string email, out AccountCredential credential)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindByEmail(email);
             if (row == null)
@@ -327,7 +382,7 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public bool TryGetCredential(string account, out AccountCredential credential)
     {
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             if (row == null)
@@ -343,14 +398,14 @@ public sealed partial class MemoryAccountStore : IAccountStore
 
     public string GetLanguage(string account)
     {
-        lock (_gate)
+        using (EnterStore())
             return Fineage.Game.L10n.PlayerLocale.Normalize(FindAccount(account)?.Language);
     }
 
     public bool TrySetLanguage(string account, string language)
     {
         string normalized = Fineage.Game.L10n.PlayerLocale.Normalize(language);
-        lock (_gate)
+        using (EnterStore())
         {
             var row = FindAccount(account);
             if (row == null)

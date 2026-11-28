@@ -195,7 +195,7 @@ public static partial class ZoneCombat
             ? 0
             : Math.Min(missingHp, (int)(absorbDamPercent / 100d * damage));
 
-    /// <summary>Interlude <c>calcPhysDam</c> with skill: 70·(pAtk·(ss?2:1) + power) / (pDef [+ sDef]).</summary>
+    /// <summary>Interlude <c>calcPhysDam</c> with skill: 76·(pAtk·(ss?2:1) + power)·proximity / (pDef [+ sDef]).</summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot) =>
         PhysicalSkillDamage(pAtk, pDef, power, soulshot, crit: false);
 
@@ -205,9 +205,10 @@ public static partial class ZoneCombat
     /// (<c>critDmgAdd · 6.1 · 77 / pDef</c>) that Mobius sums after the multipliers.
     /// </summary>
     public static int PhysicalSkillDamage(double pAtk, double pDef, double power, bool soulshot, bool crit,
-        double critDamageMod = 1d, double weaponTraitBonus = 1d, double critDamageAdd = 0)
+        double critDamageMod = 1d, double weaponTraitBonus = 1d, double critDamageAdd = 0, double proximity = 1d)
     {
-        double damage = 70d * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power)) / Math.Max(1d, pDef);
+        double damage = PhysDamCoefficient * (Math.Max(0, pAtk) * (soulshot ? 2 : 1) + Math.Max(0, power))
+            * Math.Max(0d, proximity) / Math.Max(1d, pDef);
         if (crit)
         {
             damage *= 2 * Math.Max(0, critDamageMod);

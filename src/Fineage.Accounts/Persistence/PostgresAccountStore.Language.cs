@@ -10,9 +10,8 @@ public sealed partial class PostgresAccountStore
         if (string.IsNullOrWhiteSpace(account))
             return PlayerLocale.Default;
 
-        lock (_persistGate)
+        using (var conn = OpenReadConnection())
         {
-            using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();
             cmd.CommandText =
                 """
@@ -48,7 +47,7 @@ public sealed partial class PostgresAccountStore
             _inner.EmitSnapshots = previous;
         }
 
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var cmd = conn.CreateCommand();

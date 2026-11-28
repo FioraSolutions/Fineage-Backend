@@ -26,6 +26,9 @@ public sealed class NpcHtmlCatalog
 
     public int Count => _files.Count;
 
+    /// <summary>Every relative path loaded from <c>data/html</c> (forward slashes).</summary>
+    public IReadOnlyCollection<string> RelativePaths => _files.Keys;
+
     public bool Contains(string relative) => _files.ContainsKey(Normalize(relative));
 
     public bool TryGet(string relative, out string html) => _files.TryGetValue(Normalize(relative), out html!);

@@ -132,7 +132,7 @@ public sealed partial class ZoneWorld
         FanInventory(session, Collapse(changes));
         GiveItem(session, bag, step.NextItemId, 1);
         Notice(session, SoulCrystalSucceeded, "The soul crystal succeeded in absorbing a soul.");
-        string name = _game.Items.TryGet(step.NextItemId, out var t) ? t.Name : step.NextItemId.ToString();
+        string name = _game.Items.Require(step.NextItemId).Name;
         SelfLine(session, 54, $"You have earned {name}.", name);
         ZoneLog.Info($"[soul] player={player.ObjectId} crystal {step.ItemId}->{step.NextItemId} npc={npc.NpcId}");
     }

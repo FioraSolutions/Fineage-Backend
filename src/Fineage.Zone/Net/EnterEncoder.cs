@@ -63,6 +63,12 @@ static class EnterEncoder
             foreach (var peer in snapshot.PeerFanout)
             {
                 frames.Add(new NetFrame(peer.PeerObjectId, NetOpcode.EntitySpawn, selfRemote));
+                foreach (var follow in snapshot.SelfRemoteFollowUps)
+                {
+                    byte[] payload = EnterWire.EncodePresence(follow);
+                    frames.Add(new NetFrame(peer.PeerObjectId, follow.Opcode, payload));
+                    bytes += payload.Length;
+                }
                 if (peer.RelationPayload is { } relation)
                 {
                     frames.Add(new NetFrame(peer.PeerObjectId, NetOpcode.RelationChanged, relation));
@@ -100,6 +106,7 @@ static class EnterEncoder
                 _ => throw new InvalidOperationException("enter SkillList slot requires SkillListMsg or EnterSkillCapture")
             })),
             NetOpcode.ShortCutInit => NetCodec.EncodeShortCutInit(SessionLifecyclePacketHandler.ToNetShortcutInit((ShortCutInitMsg)slot.Message!)),
+            NetOpcode.MacroList => NetCodec.EncodeMacroList((MacroListNetMsg)slot.Message!),
             NetOpcode.PlayerActionState => NetCodec.EncodePlayerActionState((PlayerActionStateNetMsg)slot.Message!),
             NetOpcode.AbnormalStatusUpdate => NetCodec.EncodeAbnormalStatusUpdate(
                 SessionLifecyclePacketHandler.ToNetAbnormal((AbnormalStatusUpdateMsg)slot.Message!)),

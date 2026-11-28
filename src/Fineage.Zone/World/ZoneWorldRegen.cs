@@ -11,7 +11,11 @@ namespace Fineage.Zone.World;
 public sealed partial class ZoneWorld
 {
     Task? _simulation;
+    readonly BlockingWorkLane _logoutPersist = new("fineage-logout-persist", threads: 2);
     long _stepStartedTimestamp;
+
+    /// <summary>Stopwatch timestamp of the simulation loop's last pass (#989 liveness/readiness); 0 before start.</summary>
+    long _loopHeartbeat;
     string _stepPhase = "idle";
 
     internal string StepPhase => Volatile.Read(ref _stepPhase);
@@ -29,8 +33,14 @@ public sealed partial class ZoneWorld
         _affinity.Drive();
         _snapshots.Start();
         _economyPersist?.Start();
-        _simulation = Task.Run(() => SimulationLoopAsync(shutdown));
-        _ = Task.Run(() => StepWatchdogAsync(shutdown));
+        _logoutPersist.Start();
+        // #1110: the loop and its watchdog each own a thread. On the thread pool a reconnect storm that parked the
+        // pool's threads in synchronous logout writes left the loop's next wake-up queued behind them, and the tick
+        // stopped for the 30 s those writes waited; the watchdog, also on the pool, could not even report it.
+        _simulation = Task.Factory.StartNew(
+            () => SimulationLoop(shutdown), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        _ = Task.Factory.StartNew(
+            () => StepWatchdog(shutdown), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
     /// <summary>Test hook: production affinity (handlers must go through the ingress) without starting the loop.</summary>
@@ -62,14 +72,16 @@ public sealed partial class ZoneWorld
     /// <see cref="StepSimulation"/> and nothing was logged. The watchdog turns it into a concrete error naming the
     /// stuck stage and region bodies, and repeats while the step lasts.
     /// </summary>
-    async Task StepWatchdogAsync(CancellationToken ct)
+    void StepWatchdog(CancellationToken ct)
     {
+        Thread.CurrentThread.Name ??= "fineage-step-watchdog";
         string? last = null;
         try
         {
             while (true)
             {
-                await Task.Delay(TimeSpan.FromSeconds(1), ct).ConfigureAwait(false);
+                if (ct.WaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
+                    throw new OperationCanceledException(ct);
                 long startedNow = Volatile.Read(ref _stepStartedTimestamp);
                 if (startedNow != 0)
                     FineageTelemetry.NoteTickRunning(Stopwatch.GetElapsedTime(startedNow).TotalMilliseconds);
@@ -114,16 +126,20 @@ public sealed partial class ZoneWorld
     /// boundary of the wall clock so tick time and the wall time handlers read stay a few milliseconds apart. A queued
     /// command wakes the same loop early and is admitted through <see cref="AdmitQueuedCommands"/> before that boundary.
     /// </summary>
-    async Task SimulationLoopAsync(CancellationToken ct)
+    void SimulationLoop(CancellationToken ct)
     {
+        Thread.CurrentThread.Name ??= "fineage-simulation";
+        long wall = _simulationClock.WallUnixMs();
+        _simulationClock.Reanchor(wall);
         using (_affinity.Step())
-            _simulationTicks.Resume(_simulationClock.WallUnixMs());
+            _simulationTicks.Resume(wall);
         try
         {
             while (true)
             {
+                Volatile.Write(ref _loopHeartbeat, Stopwatch.GetTimestamp());
                 ct.ThrowIfCancellationRequested();
-                long wait = _simulationTicks.MillisecondsUntilNextTick(_simulationClock.WallUnixMs());
+                long wait = _simulationTicks.MillisecondsUntilNextSimulationTick(_simulationClock.WallUnixMs());
                 NotePhase("waiting-for-tick");
                 if (wait >= AdmissionGapMs && _ingress.QueuedDepth > 0)
                 {
@@ -131,7 +147,7 @@ public sealed partial class ZoneWorld
                     continue;
                 }
 
-                if (wait > 0 && !await WaitForTickOrCommandAsync(wait, ct).ConfigureAwait(false))
+                if (wait > 0 && !WaitForTickOrCommand(wait, ct))
                     continue;
 
                 long started = Stopwatch.GetTimestamp();
@@ -164,9 +180,12 @@ public sealed partial class ZoneWorld
         finally
         {
             ShutdownSaveOnlinePlayers();
+            // Logouts already handed to the lane finish while the persist workers still run.
+            _logoutPersist.Stop(TimeSpan.FromSeconds(30));
             _snapshots.Stop();
             _economyPersist?.Stop();
             FlushLedgerOnShutdown();
+            AnswerCarriedEconomyRepliesOnShutdown();
             CloseCommandIngress($"the zone simulation stopped at tick {_simulationTicks.Tick}");
         }
     }

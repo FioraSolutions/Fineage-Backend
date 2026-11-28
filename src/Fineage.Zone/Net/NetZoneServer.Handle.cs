@@ -193,6 +193,9 @@ public sealed partial class NetZoneServer
                         case NetOpcode.RequestMultiSellChoose:
                             await _shop.OnMultiSellAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestPreviewItem:
+                            await _shop.OnPreviewAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.WarehouseDepositRequest:
                             await _warehouse.OnDepositAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -235,6 +238,48 @@ public sealed partial class NetZoneServer
                         case NetOpcode.CommandChannelOustRequest:
                             await _commandChannel.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
+                        case NetOpcode.RequestPartyMatchConfig:
+                            await _partyMatch.OnConfigAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchList:
+                            await _partyMatch.OnListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchDetail:
+                            await _partyMatch.OnDetailAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomDismiss:
+                            await _partyMatch.OnDismissAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomWithdraw:
+                            await _partyMatch.OnWithdrawAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomOust:
+                            await _partyMatch.OnOustAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomAskJoin:
+                            await _partyMatch.OnAskJoinAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyRoomAnswerJoin:
+                            await _partyMatch.OnAnswerJoinAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchWaitingList:
+                            await _partyMatch.OnWaitingListAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPartyMatchWaitingExit:
+                            await _partyMatch.OnWaitingExitAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestShowBoard:
+                            await _communityBoard.OnShowBoardAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestBBSwrite:
+                            await _communityBoard.OnBBSwriteAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPetition:
+                            await _petition.OnPetitionAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPetitionCancel:
+                            await _petition.OnCancelAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
                         case NetOpcode.TradeRequest:
                             await _trade.OnRequestAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
@@ -261,6 +306,12 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.RequestShortCutDel:
                             await _shortcutActions.OnShortCutDelAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestMakeMacro:
+                            await _shortcutActions.OnMakeMacroAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestDeleteMacro:
+                            await _shortcutActions.OnDeleteMacroAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.BossStatusRequest:
                             await _worldEvents.OnBossStatusAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -291,6 +342,12 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.OlympiadLeaveRequest:
                             await _worldEvents.OnOlympiadLeaveAsync(conn, zoneSession, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestWriteHeroWords:
+                            await _worldEvents.OnWriteHeroWordsAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestPCCafeCouponUse:
+                            await _worldEvents.OnPCCafeCouponUseAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.AdminReportOlympiadResult:
                             await _worldEvents.OnAdminReportOlympiadAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
@@ -330,6 +387,12 @@ public sealed partial class NetZoneServer
                             break;
                         case NetOpcode.RecipeMakeSelf:
                             await _recipes.OnMakeSelfAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RecipeBookDestroy:
+                            await _recipes.OnBookDestroyAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
+                            break;
+                        case NetOpcode.RequestChangePetName:
+                            await _clan.OnChangePetNameAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);
                             break;
                         case NetOpcode.SetRecipeShop:
                             await _recipes.OnSetShopAsync(conn, zoneSession, envelope, ct).ConfigureAwait(false);

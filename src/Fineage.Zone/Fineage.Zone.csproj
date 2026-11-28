@@ -46,6 +46,7 @@
     <Content Include="..\..\data\npcs.json" Link="data\npcs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\raidbosses.json" Link="data\raidbosses.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\raid-boss-points.json" Link="data\raid-boss-points.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\pc-cafe-coupons.json" Link="data\pc-cafe-coupons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spawns\**\*.json" Link="data\spawns\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\drops\**\*.json" Link="data\drops\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\dungeons.json" Link="data\dungeons.json" CopyToOutputDirectory="PreserveNewest" />
@@ -53,10 +54,12 @@
     <Content Include="..\..\data\seven-signs-festival.json" Link="data\seven-signs-festival.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\seven-signs-festival-spawns.json" Link="data\seven-signs-festival-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\html\**\*.*" Link="data\html\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\scripts\events\**\config.xml" Link="data\scripts\events\%(RecursiveDir)config.xml" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\l10n\**\*.*" Link="data\l10n\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\olympiad-stadiums.json" Link="data\olympiad-stadiums.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\teleports.json" Link="data\teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\geodata-regions.json" Link="data\geodata-regions.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\required-data-registry.json" Link="data\required-data-registry.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\gm-teleports.json" Link="data\gm-teleports.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\village-masters.json" Link="data\village-masters.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\wedding.json" Link="data\wedding.json" CopyToOutputDirectory="PreserveNewest" />
@@ -84,6 +87,7 @@
     <Content Include="..\..\data\cursed-weapons.json" Link="data\cursed-weapons.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-ai-support.json" Link="data\npc-ai-support.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-scripts.json" Link="data\npc-scripts.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\npc-location-info.json" Link="data\npc-location-info.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\npc-minions.json" Link="data\npc-minions.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\herbs.json" Link="data\herbs.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\soul-crystals.json" Link="data\soul-crystals.json" CopyToOutputDirectory="PreserveNewest" />
@@ -100,6 +104,7 @@
     <Content Include="..\..\data\skill-persist-flags.json" Link="data\skill-persist-flags.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\spoil.json" Link="data\spoil.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\item-skills.json" Link="data\item-skills.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\data\item-handlers.json" Link="data\item-handlers.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\map-regions.json" Link="data\map-regions.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\clan-hall-spawns.json" Link="data\clan-hall-spawns.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\data\henna.json" Link="data\henna.json" CopyToOutputDirectory="PreserveNewest" />

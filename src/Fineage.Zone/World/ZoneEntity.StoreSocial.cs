@@ -259,6 +259,13 @@ sealed partial class ZoneEntity
         set => EnsureStatus().SpiritshotCharge = value;
     }
 
+    /// <summary>Mobius RollingDice flood protector: unix ms when the next dice roll is allowed.</summary>
+    public long DiceReadyAtMs
+    {
+        get => Status?.DiceReadyAtMs ?? 0;
+        set => EnsureStatus().DiceReadyAtMs = Math.Max(0, value);
+    }
+
     /// <summary>Mobius force charges (Sonic Focus / Focus Force); surfaced in EtcStatusUpdate.</summary>
     public int ForceCharges
     {

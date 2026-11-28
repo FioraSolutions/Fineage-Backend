@@ -418,6 +418,82 @@ namespace Fineage.Net.Contract
         /// Body is object id and count. 0x03E4 is the user-command opcode.
         /// </summary>
         public const ushort RequestCrystallizeItem = 0x03E5;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestRecipeBookDestroy</c> (retail wire <c>0xad</c>).
+        /// Body is one int32 recipe list id. Reply is <see cref="RecipeBookList"/> for that tab.
+        /// </summary>
+        public const ushort RecipeBookDestroy = 0x03E6;
+        /// <summary>
+        /// Client → zone: Mobius <c>RequestChangePetName</c> (retail wire <c>0x89</c>).
+        /// Body is one string (the new name). Owner-only; pet must be out and unnamed.
+        /// </summary>
+        public const ushort RequestChangePetName = 0x03E7;
+        /// <summary>Zone → client: Mobius <c>ShopPreviewList</c> (retail <c>0xEF</c>). Wear try-on catalog.</summary>
+        public const ushort ShopPreviewList = 0x03E8;
+        /// <summary>Zone → client: Mobius <c>ShopPreviewInfo</c> (retail <c>0xF0</c>). Try-on paperdoll overlay.</summary>
+        public const ushort ShopPreviewInfo = 0x03E9;
+        /// <summary>Client → zone: Mobius <c>RequestPreviewItem</c> (retail <c>0xC6</c>). Pay wear fee and preview.</summary>
+        public const ushort RequestPreviewItem = 0x03EA;
+        /// <summary>Zone → client: Mobius <c>Dice</c> (retail <c>0xD4</c>).</summary>
+        public const ushort Dice = 0x03EB;
+        /// <summary>Zone → client: Mobius <c>ShowMiniMap</c> (retail <c>0x9D</c>).</summary>
+        public const ushort ShowMiniMap = 0x03EC;
+        /// <summary>Zone → client: Mobius <c>ShowCalculator</c> (retail <c>0xDC</c>).</summary>
+        public const ushort ShowCalculator = 0x03ED;
+        /// <summary>Zone → client: Mobius <c>ShowXMasSeal</c> (retail <c>0xF2</c>).</summary>
+        public const ushort ShowXMasSeal = 0x03EE;
+        /// <summary>Client → zone: Mobius <c>RequestMakeMacro</c> (retail <c>0xC1</c>).</summary>
+        public const ushort RequestMakeMacro = 0x03EF;
+        /// <summary>Client → zone: Mobius <c>RequestDeleteMacro</c> (retail <c>0xC2</c>).</summary>
+        public const ushort RequestDeleteMacro = 0x03F0;
+        /// <summary>Zone → client: Mobius <c>SendMacroList</c> (retail <c>0xE7</c>).</summary>
+        public const ushort MacroList = 0x03F1;
+        /// <summary>Client → zone: Mobius <c>RequestPartyMatchConfig</c> (retail <c>0x6F</c>).</summary>
+        public const ushort RequestPartyMatchConfig = 0x03F2;
+        /// <summary>Client → zone: Mobius <c>RequestPartyMatchList</c> (retail <c>0x70</c>).</summary>
+        public const ushort RequestPartyMatchList = 0x03F3;
+        /// <summary>Client → zone: Mobius <c>RequestPartyMatchDetail</c> (retail <c>0x71</c>).</summary>
+        public const ushort RequestPartyMatchDetail = 0x03F4;
+        /// <summary>Zone → client: Mobius <c>PartyMatchDetail</c> (retail <c>0x97</c>).</summary>
+        public const ushort PartyMatchDetail = 0x03F5;
+        /// <summary>Zone → client: Mobius <c>ListPartyWating</c> / <c>PARTY_MATCH_LIST</c> (retail <c>0x96</c>).</summary>
+        public const ushort PartyMatchRoomList = 0x03F6;
+        /// <summary>Client → zone: Mobius <c>RequestShowBoard</c> (retail <c>0x57</c>).</summary>
+        public const ushort RequestShowBoard = 0x03F7;
+        /// <summary>Client → zone: Mobius <c>RequestBBSwrite</c> (retail <c>0x22</c>).</summary>
+        public const ushort RequestBBSwrite = 0x03F8;
+        /// <summary>Zone → client: Mobius <c>ShowBoard</c> (retail <c>0x6E</c>).</summary>
+        public const ushort ShowBoard = 0x03F9;
+        /// <summary>Client → zone: Mobius <c>RequestPetition</c> (retail <c>0x7F</c>).</summary>
+        public const ushort RequestPetition = 0x03FA;
+        /// <summary>Client → zone: Mobius <c>RequestPetitionCancel</c> (retail <c>0x80</c>).</summary>
+        public const ushort RequestPetitionCancel = 0x03FB;
+        /// <summary>Client → zone: <c>RequestOustFromPartyRoom</c> (wire 0xD0 0x01).</summary>
+        public const ushort RequestPartyRoomOust = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x01));
+        /// <summary>Client → zone: <c>RequestDismissPartyRoom</c> (wire 0xD0 0x02).</summary>
+        public const ushort RequestPartyRoomDismiss = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x02));
+        /// <summary>Client → zone: <c>RequestWithdrawPartyRoom</c> (wire 0xD0 0x03).</summary>
+        public const ushort RequestPartyRoomWithdraw = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x03));
+        /// <summary>Client → zone: <c>RequestAskJoinPartyRoom</c> (wire 0xD0 0x14).</summary>
+        public const ushort RequestPartyRoomAskJoin = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x14));
+        /// <summary>Client → zone: <c>AnswerJoinPartyRoom</c> (wire 0xD0 0x15).</summary>
+        public const ushort RequestPartyRoomAnswerJoin = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x15));
+        /// <summary>Client → zone: <c>RequestListPartyMatchingWaitingRoom</c> (wire 0xD0 0x16).</summary>
+        public const ushort RequestPartyMatchWaitingList = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x16));
+        /// <summary>Client → zone: <c>RequestExitPartyMatchingWaitingRoom</c> (wire 0xD0 0x17).</summary>
+        public const ushort RequestPartyMatchWaitingExit = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x17));
+        /// <summary>Zone → client: <c>ExPartyRoomMember</c> (wire 0xFE 0x0E).</summary>
+        public const ushort PartyRoomMemberList = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x0E));
+        /// <summary>Zone → client: <c>ExClosePartyRoom</c> (wire 0xFE 0x0F).</summary>
+        public const ushort PartyRoomClose = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x0F));
+        /// <summary>Zone → client: <c>ExManagePartyRoomMember</c> (wire 0xFE 0x10).</summary>
+        public const ushort PartyRoomMemberUpdate = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x10));
+        /// <summary>Zone → client: <c>ExAskJoinPartyRoom</c> (wire 0xFE 0x34).</summary>
+        public const ushort PartyRoomAskJoin = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x34));
+        /// <summary>Zone → client: <c>ExListPartyMatchingWaitingRoom</c> (wire 0xFE 0x35).</summary>
+        public const ushort PartyMatchWaitingRoom = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x35));
+        /// <summary>Client → zone: Mobius <c>RequestWriteHeroWords</c> (wire 0xD0 0x0C). ExClientPackets.java:43.</summary>
+        public const ushort RequestWriteHeroWords = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0C));
         /// <summary>Client → zone: <c>RequestExAskJoinMPCC</c> (wire 0xD0 0x0D). ExClientPackets.java:95.</summary>
         public const ushort CommandChannelAskRequest = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x0D));
         /// <summary>Client → zone: <c>RequestExAcceptJoinMPCC</c> (wire 0xD0 0x0E). ExClientPackets.java:96.</summary>
@@ -432,6 +508,10 @@ namespace Fineage.Net.Contract
         public const ushort CommandChannelClose = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x26));
         /// <summary>Zone → client: <c>ExMultiPartyCommandChannelInfo</c> (wire 0xFE 0x30). ServerPackets.java:265.</summary>
         public const ushort CommandChannelInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x30));
+        /// <summary>Client → zone: Mobius <c>RequestPCCafeCouponUse</c> (wire 0xD0 0x20). ExClientPackets.java:63.</summary>
+        public const ushort RequestPCCafeCouponUse = unchecked((ushort)(NetOpcodeMobius.ExClientBase | 0x20));
+        /// <summary>Zone → client: Mobius <c>ExPCCafePointInfo</c> (wire 0xFE 0x31). ServerPackets.java:257.</summary>
+        public const ushort ExPCCafePointInfo = unchecked((ushort)(NetOpcodeMobius.ExServerBase | 0x31));
         /// <summary>
         /// Client → zone: Interlude C2S <c>RequestItemList</c>, opcode <c>0x0F</c>, empty body.
         /// Mobius CT_0 Interlude <c>ClientPackets.REQUEST_ITEM_LIST(0x0F, RequestItemList::new)</c>

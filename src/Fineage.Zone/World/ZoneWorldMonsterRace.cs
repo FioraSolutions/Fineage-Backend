@@ -9,6 +9,7 @@ using Fineage.Zone.Inventory;
 using Fineage.Zone.MonsterRace;
 using Fineage.Zone.NpcHtml;
 using Fineage.Zone.Npcs;
+using Fineage.Zone.Persistence;
 
 namespace Fineage.Zone.World;
 
@@ -19,6 +20,23 @@ public sealed partial class ZoneWorld
     PeaceZone[] _monsterRaceBroadcast = [];
 
     internal MonsterRaceBoard MonsterRace => _monsterRace.Board;
+
+    /// <summary>Swap in the persisted board (host: <c>monster-race-state.json</c> in the state directory).</summary>
+    public void UseMonsterRace(MonsterRaceBoard board)
+    {
+        using (_affinity.Step())
+            _monsterRace.Use(board);
+    }
+
+    /// <summary>Production wiring: the monster race saved in the database (#996).</summary>
+    public void UseStoredMonsterRace(WorldStateStore state, long loadedAtUnixMs) =>
+        UseMonsterRace(MonsterRaceBoard.Open(
+            state,
+            loadedAtUnixMs,
+            _game.Items,
+            Npcs.NpcCatalog.LoadDefault(),
+            () => _itemIds.Next(),
+            _monsterRaceSettings));
 
     int AnnounceMonsterRace(IReadOnlyList<MonsterRaceEffect> batches)
     {
@@ -372,6 +390,6 @@ public sealed partial class ZoneWorld
         if (index < 0 || index >= board.Runners.Count)
             return "?";
         int npcId = board.Runners[index].NpcId;
-        return NpcCatalog.LoadDefault().ById.TryGetValue(npcId, out var t) ? t.Name : npcId.ToString(CultureInfo.InvariantCulture);
+        return NpcCatalog.LoadDefault().Get(npcId).Name;
     }
 }

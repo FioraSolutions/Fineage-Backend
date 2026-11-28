@@ -81,8 +81,7 @@ public sealed partial class ZoneWorld
         UnsummonPet(player, summon, 0);
 
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(pet.Template.NpcId, out var npc))
-            throw new InvalidOperationException($"mount npc missing from npc catalog: pet npc id {pet.Template.NpcId}");
+        var npc = _summonTemplates.Get(pet.Template.NpcId);
 
         ApplyMount(player, pet.Template.MountKind, pet.Template.NpcId, collarId, wyvernRent: false, npc.RunSpeed, npc.WalkSpeed);
         return null;
@@ -98,8 +97,7 @@ public sealed partial class ZoneWorld
         UnsummonPet(player, striderSummon, 0);
         var rules = MountRules;
         _summonTemplates ??= NpcCatalog.LoadDefault();
-        if (!_summonTemplates.ById.TryGetValue(rules.WyvernDisplayNpcId, out var npc))
-            throw new InvalidOperationException($"wyvern display npc missing from npc catalog: id {rules.WyvernDisplayNpcId}");
+        var npc = _summonTemplates.Get(rules.WyvernDisplayNpcId);
         ApplyMount(player, PetMountKind.Wyvern, rules.WyvernDisplayNpcId, collarId, wyvernRent: true, npc.RunSpeed, npc.WalkSpeed);
     }
 

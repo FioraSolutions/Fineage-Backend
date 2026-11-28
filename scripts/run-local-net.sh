@@ -22,11 +22,13 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-fineage-backend}"
 # Non-loopback binds refuse DefaultSecret; local SoT binds 0.0.0.0 so set the shared secret.
 export FINEAGE_HANDOFF_SECRET="${FINEAGE_HANDOFF_SECRET:-FineageLoginHandoffV1}"
 # Local playtest: GM chat (//gmshop, //setlevel, …) for allowlisted chars in data/admin-characters.json (KuK).
+# Local playtest is development: the wildcard allowlist stays usable here.
+export FINEAGE_ENV="${FINEAGE_ENV:-development}"
 export FINEAGE_ZONE_ADMIN="${FINEAGE_ZONE_ADMIN:-1}"
 export FINEAGE_ZONE_OUTBOUND_QUEUE="${FINEAGE_ZONE_OUTBOUND_QUEUE:-512}"
 # Do not export DOTNET_GCDynamicAdaptationMode=0 here — Zone keeps DATAS unless a perf run measures otherwise (#867).
 
-PORTS=(5080 9106 9777 7780)
+PORTS=(5080 "${FINEAGE_NET_LOGIN_PORT:-9106}" "${FINEAGE_NET_ZONE_PORT:-9777}" 7780)
 
 bootout_launch_agents() {
   local uid
@@ -181,7 +183,7 @@ launch_agents_loaded() {
 case "$CMD" in
   stop) stop; echo stopped; exit 0;;
   status)
-    for p in 9106 9777 5080; do
+    for p in "${FINEAGE_NET_LOGIN_PORT:-9106}" "${FINEAGE_NET_ZONE_PORT:-9777}" 5080; do
       if port_open "$p"; then echo "$p open"; else echo "$p closed"; fi
     done
     for n in login-net zone-net; do
@@ -220,8 +222,8 @@ else
   exit 1
 fi
 
-export FINEAGE_NET_LOGIN_PORT=9106
-export FINEAGE_NET_ZONE_PORT=9777
+export FINEAGE_NET_LOGIN_PORT="${FINEAGE_NET_LOGIN_PORT:-9106}"
+export FINEAGE_NET_ZONE_PORT="${FINEAGE_NET_ZONE_PORT:-9777}"
 # Documented boot loads the manifest region pack so LOS and pathfinding are on.
 # Load-test scripts set FINEAGE_GEODATA_REQUIRED=0 to keep the stub clamp.
 case "${FINEAGE_GEODATA_REQUIRED:-1}" in
@@ -241,12 +243,15 @@ daemonize login-net \
   "${LOGIN_CMD[@]}" --bind 0.0.0.0 --http-port 5080
 
 daemonize zone-net \
-  "${ZONE_CMD[@]}" --bind 0.0.0.0 --port 9777 --state-dir local-data
+  "${ZONE_CMD[@]}" --bind 0.0.0.0 --port "${FINEAGE_NET_ZONE_PORT}" --state-dir local-data
 
+# Full world + geodata can take well over 15s before the zone net port binds (listen is after
+# spawn). A 15s wait returns failure while the process is still booting; if the caller is in
+# `if ! run_one` (set -e disabled), the load runner then starts bots into a closed 9777.
 ok=0
-for _ in 1 2 3 4 5 6 7 8 9 10 11 12 15; do
+for _ in $(seq 1 90); do
   sleep 1
-  if port_open 9106 && port_open 9777; then ok=1; break; fi
+  if port_open "${FINEAGE_NET_LOGIN_PORT}" && port_open "${FINEAGE_NET_ZONE_PORT}"; then ok=1; break; fi
 done
 if [[ "$ok" != 1 ]]; then
   echo "not listening, see local-logs/*-net.log" >&2
@@ -255,5 +260,5 @@ if [[ "$ok" != 1 ]]; then
   tail -40 local-logs/zone-net.log 2>/dev/null || true
   exit 1
 fi
-echo "Net login=9106 zone=9777 http=5080 | store=postgres | maps=${FINEAGE_ZONE_MAPS:-default} | admin=${FINEAGE_ZONE_ADMIN}"
+echo "Net login=${FINEAGE_NET_LOGIN_PORT} zone=${FINEAGE_NET_ZONE_PORT} http=5080 | store=postgres | maps=${FINEAGE_ZONE_MAPS:-default} | admin=${FINEAGE_ZONE_ADMIN}"
 echo "stop: ./scripts/run-local-net.sh stop"

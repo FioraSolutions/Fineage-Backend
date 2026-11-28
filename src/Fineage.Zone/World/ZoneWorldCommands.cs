@@ -35,7 +35,15 @@ public sealed partial class ZoneWorld
     /// is still queued. The task completes with its rejection reason (or null) once that admission's fan-out was sent.
     /// </summary>
     public Task<string?> ExecuteAsync(ZoneSession session, ZoneCommand command, CancellationToken ct) =>
-        _ingress.Submit(session, command, ct);
+        ExecuteAsync(session, command, CommandSource.Player, ct);
+
+    /// <summary>
+    /// Same ingress as the three-argument overload. <paramref name="source"/> is audit and metric
+    /// metadata only: AI submissions get the same validation, queue, and apply path as players.
+    /// </summary>
+    public Task<string?> ExecuteAsync(
+        ZoneSession session, ZoneCommand command, CommandSource source, CancellationToken ct) =>
+        _ingress.Submit(session, command, source, ct);
 
     /// <summary>
     /// One admission slice while the loop is waiting for the next tick. Same ingress, same <c>commands</c> stage,
@@ -74,28 +82,14 @@ public sealed partial class ZoneWorld
     /// Returns true when the tick is due. Returns false when a command should be admitted and the loop should
     /// look again. Cancelling <paramref name="ct"/> throws.
     /// </summary>
-    async Task<bool> WaitForTickOrCommandAsync(long waitMs, CancellationToken ct)
+    /// <remarks>
+    /// A blocking wait on the loop's own thread: neither the tick nor the wake-up needs a thread-pool thread, so a pool
+    /// starved by blocked handlers cannot hold the next step back (#1110).
+    /// </remarks>
+    bool WaitForTickOrCommand(long waitMs, CancellationToken ct)
     {
-        using var wake = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        Task delay = Task.Delay(TimeSpan.FromMilliseconds(waitMs), wake.Token);
-        Task submitted = _ingress.WaitForSubmissionAsync(wake.Token);
-        Task finished = await Task.WhenAny(delay, submitted).ConfigureAwait(false);
-        wake.Cancel();
-        await ObserveWaitAsync(delay).ConfigureAwait(false);
-        await ObserveWaitAsync(submitted).ConfigureAwait(false);
-        ct.ThrowIfCancellationRequested();
-        return finished == delay && delay.IsCompletedSuccessfully;
-    }
-
-    static async Task ObserveWaitAsync(Task wait)
-    {
-        try
-        {
-            await wait.ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-        }
+        bool submitted = _ingress.WaitForSubmission((int)Math.Min(waitMs, int.MaxValue), ct);
+        return !submitted;
     }
 
     /// <summary>
@@ -154,7 +148,13 @@ public sealed partial class ZoneWorld
 
                 if (submission.Command.Logged)
                     _commandLog?.AppendCommand(tick.Tick, tick.WallUnixMs, submission.Session.ObjectId, submission.Command,
-                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok");
+                        failure != null ? $"threw {failure.GetType().Name}" : error ?? "ok",
+                        submission.Source);
+                if (error != null && failure is null)
+                {
+                    FineageTelemetry.NoteZoneCommandRejection(
+                        CommandSourceTags.Tag(submission.Source), ApplyReasonTag(error));
+                }
                 _ingress.Record(submission, error, failure);
                 submits.Add(new CommandSubmitMark(submission.CorrelationId, submission.SubmittedAtTicks));
                 applied = true;
@@ -168,7 +168,8 @@ public sealed partial class ZoneWorld
         RecordCommandPhaseTicks(PhaseDequeue, dequeueTicks);
         double applyMs = RecordCommandPhaseTicks(PhaseApply, applyTicks);
         double flushMs = 0, sealMs = 0, replyMs = 0;
-        if (applied)
+        // Replies carried from an earlier step still need a commit when no new command arrived (#1112).
+        if (applied || _economyCarried.Count > 0)
             (flushMs, sealMs, replyMs) = ReleaseAppliedCommandReplies(submits);
 
         string? syncIo = _syncIo.ConsumeSummary();
@@ -307,4 +308,11 @@ public sealed partial class ZoneWorld
 
     static InvalidOperationException Diverged(SimulationLogEntry entry, string what) =>
         new($"replay diverged at entry {entry.Sequence} ({entry}): {what}");
+
+    static string ApplyReasonTag(string error)
+    {
+        int cut = error.IndexOfAny([' ', ':', '=', ',']);
+        string token = cut < 0 ? error : error[..cut];
+        return token.Length is > 0 and <= 32 ? token : "apply";
+    }
 }

@@ -47,6 +47,11 @@ public sealed partial class QuestCatalog
 
     public QuestDefinition? Find(int questId) => _byId.TryGetValue(questId, out var quest) ? quest : null;
 
+    /// <summary>Required quest definition; a missing id throws naming <c>quests/</c> (#985).</summary>
+    public QuestDefinition Require(int questId) =>
+        Find(questId) ?? throw Fineage.Game.RequiredData.Required.Missing(
+            Fineage.Game.RequiredData.RequiredDataKind.Quest, questId, $"quest {questId} is missing from {DirectoryName}/");
+
     /// <summary>
     /// Loads <c>data/quests/_meta.json</c> plus every <c>data/quests/*/quest.json</c>.
     /// Dialog HTML may be inline or <c>htmlFile</c> relative to that quest folder (Mobius-style).

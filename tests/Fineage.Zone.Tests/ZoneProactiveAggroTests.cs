@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Fineage.Accounts;
 using Fineage.Game.Economy;
 using Fineage.Login;
@@ -111,24 +112,109 @@ public sealed class ZoneProactiveAggroTests
     }
 
     [Fact]
-    public void Audit_aggressive_monsters_for_missing_or_unusually_large_aggro_range()
+    public void Every_aggressive_npc_has_an_explicit_mobius_aggro_range()
     {
-        var catalog = NpcCatalog.LoadDefault();
+        using var document = JsonDocument.Parse(File.ReadAllText(DataFile(NpcCatalog.FileName)));
         var missing = new List<string>();
-        var large = new List<string>();
-        foreach (var template in catalog.ById.Values)
+        foreach (var row in document.RootElement.GetProperty("npcs").EnumerateArray())
         {
-            if (!template.Aggressive || !template.Attackable || template.Type != "Monster")
+            if (!row.GetProperty("aggressive").GetBoolean())
                 continue;
-            if (template.AggroRange <= 0)
-                missing.Add($"{template.NpcId} {template.Name}");
-            else if (template.AggroRange >= 1000)
-                large.Add($"{template.NpcId} {template.Name} aggroRange={template.AggroRange}");
+            if (!row.TryGetProperty("aggroRange", out _))
+                missing.Add($"{row.GetProperty("npcId").GetInt32()} {row.GetProperty("name").GetString()}");
         }
 
-        Assert.Contains(large, s => s.StartsWith("20472 ", StringComparison.Ordinal));
-        Assert.Equal(9, missing.Count);
-        Assert.All(missing, name => Assert.DoesNotContain("Kaboo Orc Fighter Leader", name));
+        Assert.True(missing.Count == 0,
+            "aggressive NPCs without an explicit Mobius aggroRange: " + string.Join(", ", missing));
+    }
+
+    [Fact]
+    public void Aggressive_mobius_zero_aggro_range_rows_are_explicit_non_proactive_data()
+    {
+        var catalog = NpcCatalog.LoadDefault();
+        var zero = catalog.ById.Values
+            .Where(static t => t.Aggressive && t.Attackable && t.Type == "Monster" && t.AggroRange == 0)
+            .Select(static t => t.NpcId)
+            .Order()
+            .ToArray();
+
+        // Mobius has no <ai> for these nine; NpcTemplate resolves isAggressive=true and aggroRange=0.
+        // They are script-driven/raid minions, not transcription gaps, so no positive value is invented.
+        Assert.Equal(new[] { 18119, 20964, 25224, 25225, 25232, 25239, 25240, 25258, 25262 }, zero);
+        Assert.Contains(catalog.ById.Values, t => t.NpcId == KabooCaptainNpcId && t.AggroRange == 1000);
+    }
+
+    [Fact]
+    public void Catalog_rejects_an_aggressive_npc_without_an_explicit_aggro_range()
+    {
+        string root = NewNpcRoot();
+        try
+        {
+            WriteNpc(root, aggressive: true, aggroRange: null);
+            var error = Assert.Throws<InvalidDataException>(() => NpcCatalog.Load(root));
+            Assert.Contains("aggroRange", error.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Catalog_accepts_an_explicit_zero_aggro_range_as_non_proactive()
+    {
+        string root = NewNpcRoot();
+        try
+        {
+            WriteNpc(root, aggressive: true, aggroRange: 0);
+            var template = NpcCatalog.Load(root).Get(1);
+            Assert.True(template.Aggressive);
+            Assert.Equal(0, template.AggroRange);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    static string NewNpcRoot()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "fineage-npc-aggro-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        return root;
+    }
+
+    static void WriteNpc(string root, bool aggressive, int? aggroRange)
+    {
+        string range = aggroRange is null ? "" : $", \"aggroRange\": {aggroRange.Value}";
+        File.WriteAllText(Path.Combine(root, NpcCatalog.FileName), $$"""
+            {
+              "npcs": [
+                {
+                  "npcId": 1,
+                  "name": "Aggro probe",
+                  "type": "Monster",
+                  "level": 1,
+                  "collisionRadius": 1,
+                  "collisionHeight": 1,
+                  "attackable": true,
+                  "aggressive": {{(aggressive ? "true" : "false")}},
+                  "hp": 1,
+                  "mp": 1,
+                  "runSpeed": 1,
+                  "walkSpeed": 1{{range}}
+                }
+              ]
+            }
+            """);
+    }
+
+    static string DataFile(string name)
+    {
+        string? directory = GameDataPaths.FindDataDirectory(AppContext.BaseDirectory)
+            ?? GameDataPaths.FindDataDirectory(Directory.GetCurrentDirectory());
+        Assert.NotNull(directory);
+        return Path.Combine(directory!, name);
     }
 
     static async Task<(ZoneWorld World, ZoneEntity Player)> EnterWithMobAsync(int offsetX, GeoEngine? geo = null)

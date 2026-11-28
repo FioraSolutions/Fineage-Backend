@@ -15,6 +15,16 @@ public static class ShopProtocol
     public const ushort SellList = 1096;
     public const ushort MultiSellList = 1097;
     public const ushort Balance = 1098;
+    /// <summary>Mobius <c>SHOP_PREVIEW_LIST</c> try-on window.</summary>
+    public const ushort ShopPreviewList = 1100;
+    /// <summary>Mobius <c>SHOP_PREVIEW_INFO</c> paperdoll overlay after pay.</summary>
+    public const ushort ShopPreviewInfo = 1101;
+
+    /// <summary>Mobius <c>Config.WEAR_PRICE</c> default (General.ini WearPrice).</summary>
+    public const int WearPrice = 10;
+
+    /// <summary>Mobius <c>Config.WEAR_DELAY</c> seconds (General.ini WearDelay).</summary>
+    public const int WearDelaySeconds = 5;
 
     public const int NotEnoughAdena = 180;
     public const int WeightLimit = 181;
@@ -27,6 +37,12 @@ public static class ShopProtocol
     public const int OutOfStock = 188;
     public const int WearUnavailable = 189;
 
+    /// <summary>Mobius <c>YOU_ARE_NO_LONGER_TRYING_ON_EQUIPMENT_2</c> (1306).</summary>
+    public const int WearPreviewEnded = 1306;
+
+    /// <summary>Mobius <c>YOU_CAN_NOT_TRY_THOSE_ITEMS_ON_AT_THE_SAME_TIME</c> (1368).</summary>
+    public const int WearSlotConflict = 1368;
+
     public const string NotEnoughAdenaText = "You do not have enough adena.";
     public const string WeightLimitText = "You have exceeded the weight limit.";
     public const string InventoryFullText = "Your inventory is full.";
@@ -36,6 +52,8 @@ public static class ShopProtocol
     public const string NotTradableText = "That item cannot be traded.";
     public const string OutOfStockText = "That item is out of stock.";
     public const string WearUnavailableText = "Wear is not available.";
+    public const string WearPreviewEndedText = "You are no longer trying on equipment.";
+    public const string WearSlotConflictText = "You can not try those items on at the same time.";
     public const string NoListHtml = "<html><body>%npcname%:<br>I have no such list.</body></html>";
     public const string NotMerchantHtml = "<html><body>%npcname%:<br>I do not buy or sell that.</body></html>";
 }

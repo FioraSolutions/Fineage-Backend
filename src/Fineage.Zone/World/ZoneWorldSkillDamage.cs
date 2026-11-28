@@ -126,8 +126,9 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * positional.Apply(CombatStat.CritDmgPos, 1d);
-        return ZoneCombat.PhysicalSkillDamage(ps.PAtk, pDef, power, ss, crit, critDamageMod,
-            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits), ps.CritDmgAdd);
+        return ZoneCombat.PhysicalSkillDamage(ps.PAtkPrecise, pDef, power, ss, crit, critDamageMod,
+            ZoneCombat.AttackTraitBonus(ps.Weapon, defenceTraits, attackTraits), ps.CritDmgAdd,
+            ZoneCombat.ProximityBonus(position));
     }
 
     public const int SysMsgLethalSuccess = 1668;
@@ -157,7 +158,7 @@ public sealed partial class ZoneWorld
         double critDamageMod = positional.IsEmpty
             ? ps.CritDmg
             : ps.CritDmg * ZoneCombat.BlowPositionalCritDamage(positional.Apply(CombatStat.CritDmgPos, 1d));
-        var (damage, outcome) = ZoneCombat.RollBlowDamage(Rng(_combatRandom, player), blow, ps.PAtk, NpcPDef(target), combat.PowerAt(level), ss,
+        var (damage, outcome) = ZoneCombat.RollBlowDamage(Rng(_combatRandom, player), blow, ps.PAtkPrecise, NpcPDef(target), combat.PowerAt(level), ss,
             front, behind, ps.RandomDamage, combat.BaseCritRate, str, ShieldRateInArc(target, player, NpcShieldRate(target), 0), target.ShieldDef, critDamageMod,
             ZoneCombat.AttackTraitBonus(ps.Weapon, target.DefenceTraits, attackTraits), ps.CritDmgAdd);
         int hpAfter = Math.Max(0, target.CurHp - damage);

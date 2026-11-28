@@ -73,6 +73,21 @@ sealed partial class ZoneEntity
     /// <summary>Mobius ShortCuts keyed by world slot (slot + page * 12).</summary>
     public Dictionary<int, Fineage.Accounts.StoredShortcut> Shortcuts => EnsureSkills().Shortcuts;
 
+    /// <summary>Mobius MacroList keyed by macro id.</summary>
+    public Dictionary<int, Fineage.Accounts.StoredMacro> Macros => EnsureSkills().Macros;
+
+    public int MacroRevision
+    {
+        get => EnsureSkills().MacroRevision;
+        set => EnsureSkills().MacroRevision = value;
+    }
+
+    public int MacroNextId
+    {
+        get => EnsureSkills().MacroNextId;
+        set => EnsureSkills().MacroNextId = value;
+    }
+
     /// <summary>Trainer-learned skills (persisted; Mobius character_skills). Merged into KnownSkills.</summary>
     public Dictionary<int, int> LearnedSkills => EnsureSkills().LearnedSkills;
 

@@ -169,6 +169,7 @@ static partial class NormalizedStoreWriter
         ReplaceItems(conn, tx, id, inventory, warehouse);
         ReplaceQuests(conn, tx, id, ReadQuests(ch));
         ReplaceShortcuts(conn, tx, id, ReadShortcuts(ch));
+        ReplaceMacros(conn, tx, id, ReadMacros(ch));
         ReplaceLearnedSkills(conn, tx, id, ReadLearnedSkills(ch));
         ReplaceEffects(conn, tx, id, ReadEffects(ch));
         if (ch.TryGetProperty("classState", out var classState) && classState.ValueKind == JsonValueKind.Object

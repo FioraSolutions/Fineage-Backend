@@ -342,6 +342,24 @@ Both columns are Debug bots-200-town, 4 cores, sequential regions. Before is the
 
 The zone step still stuck once, after the behavior window, with no region bodies in flight (watchdog 180.9 s in the zone log). The runner sampled that log before the watchdog crossed 30 s and printed stall 4.8 s, count 0.
 
+## Verified post-#1040 microregion soak (Nov 26, Debug)
+
+PR [#1040](https://github.com/FioraSolutions/Fineage-Backend/pull/1040) changed shared microregion activation. The acceptance run used the build/provenance-gated runner: the Zone assembly's loaded module id was compared to the DLL on disk and `fineage_build_info` commit was required to match the tested source. A prior 459.6 ms maximum was rejected as unverified because the Zone had been rebuilt while running.
+
+| Gate / metric | Before verified activation work | Post-#1040 clean 30-minute soak |
+| --- | ---: | ---: |
+| Bots / layout / workers | 200 / town / 0 | **200 / 0 disconnects / 0 stuck** |
+| Tick p99 | 54.7 ms | **39.6 ms** (limit 200 ms) |
+| Tick true max | 459.6 ms (invalid provenance) | **67.2 ms** |
+| `commands.apply` p99 | — | **1.9 ms** |
+| `movement.player` p99 | — | **5.0 ms** |
+| `npc.paths` p99 | — | **1.9 ms** |
+| `random-walk` p99 | — | **2.0 ms** |
+| `region_wake` backlog max | 3,089 | **0** |
+| Simulation stall | — | 2.2 s sampled, count 0 |
+
+The 30-minute artifact passed all #867 performance gates. The later 100-second `consistency-200-town-short` reproduction is a separate diagnostic, not a claim that the oracle is clean: after [#1044](https://github.com/FioraSolutions/Fineage-Backend/pull/1044), its tick p99 was **40.3 ms**, true max **178.8 ms**, drops **0**, with matching Zone DLL/commit provenance. It still reports residual MissingSpawn / DuplicateSpawn / MissingCombatFanout issues; StalePosition and HpDesync are zero. Those residuals remain under investigation and must not be conflated with the passing performance acceptance.
+
 ## Reproduce smoke
 
 ```bash
@@ -358,3 +376,81 @@ dotnet tools/Fineage.LoadTest/bin/Release/net10.0/Fineage.LoadTest.dll run \
   --zone-pid "$(cat local-logs/zone-net.pid)" \
   --region-workers 0
 ```
+## P0 fullworld AoE — AOI victim enumeration (Nov 26, Debug)
+
+**Root cause:** `HostileAffectTargets` (and the area/debuff/channel/seed paths that reuse it) enumerated victims by walking `_byId.Values`, i.e. the whole ~34k-NPC world, on every AoE hit. The cost lands in the `commands` step, so the `commands.apply` stage p99 is the direct signal.
+
+**Mechanism changed:** victim selection now takes the player's AOI candidate set, filters by `InstanceId`, and sorts by `ObjectId` for deterministic application. The existing Mobius Aura/Area visible-object semantics are preserved. No fan-out, snapshot, activation or shedding code was touched.
+
+**Measurement tree:** branch `perf/p0-verify-bottlenecks`, base `origin/dev` @ `d123376f2fd2a804927af47b78000b10ad83d988` plus the uncommitted perf edits (the report records the same SHA as `dirty`). The working tree also contains unrelated harness/parity edits (split into PR B/C before merge); they were not part of the measured AoE mechanism and are split out before merge. Debug build, .NET 10.0.13, macOS, 10 cores, sequential regions (`--region-workers 0`), `aoi=grid:3000`, `outboundQ=512`, world 34,374 NPCs. Zone started from `src/Fineage.Zone/bin/Debug/net10.0/Fineage.Zone --bind 127.0.0.1 --port 19777 --state-dir local-data` under `launchctl`; login was already on 19106/15080/19464.
+
+### Final artifact (fresh live zone log)
+
+Paths: `local-logs/final-fullworld-aoe/{report.md,report.json,metrics-peak.txt}`; the scanned log is `local-logs/zone-perf.log` and grew from 18,252 to 70,243 bytes during the run. The previous log is preserved as `local-logs/zone-perf.prev.log`. Startup datapack errors are timestamped 12:25:53Z, before the runner's 12:26:05Z window; `LogScanner` therefore did not attribute them to the run, and there were no in-window fault entries.
+
+| Metric | Value |
+| --- | ---: |
+| Runner / #867 gates | **PASS / PASS** |
+| Bots in world | 1/1 (0 disconnects, 0 stuck) |
+| Tick p50 / p99 / p99.9 (whole run) | 14.7 / 36.8 / 54.8 ms |
+| Tick p99 / p99.9 (steady state) | 35.6 / 39.6 ms |
+| `commands.apply` p99 | 6.4 ms (n=1,128) |
+| `dequeue_to_apply` p99 | 21.9 ms (n=163) |
+| `submit_to_mailbox` p99 | 165.5 ms |
+| Fanout age p99 | 0.6 ms |
+| Reliable drops / overflow | 0 |
+
+### Before/after (same 1-bot `verify-fullworld-aoe` script)
+
+| Run | Artifact | `commands.apply` p99 | `commands.apply` p99.9 | samples |
+| --- | --- | ---: | ---: | ---: |
+| pre-fix baseline | `local-logs/verify-aoe2/report.md` | **19.0 ms** | 37.3 ms | 4,170 |
+| after fix | `local-logs/after-fullworld-aoe/report.md` | **1.8 ms** | 21.0 ms | 3,806 |
+| after fix (final, fresh log) | `local-logs/final-fullworld-aoe/report.md` | **6.4 ms** | 24.7 ms | 1,128 |
+
+`after-fullworld-aoe` still failed the runner only because it scanned the stale whole `/tmp/zone-after.log`; its server gates passed. The final run is the first artifact with a fresh, growing, in-window log.
+
+### Test status after the edits
+
+- `tests/Fineage.LoadTest.Tests`: **82/82 pass** (`local-logs/test-loadtest-full.log`).
+- `tests/Fineage.Zone.Tests` full run: **1792 passed / 20 failed** (`local-logs/test-zone-full.log`). All 20 are Net*/lobby socket-timeout flakes under the full parallel run; none touch the changed files. Rerunning every affected class: **35/35 pass** (`local-logs/test-zone-netretry.log`); `NetDisconnectDespawnTests` also passed 3/3 alone.
+- Focused perf suites from the earlier worker remain green: AreaSkillAoiCoverage 3/3, AreaSkillScalingPerf 2/2, LogScanner 6/6, Skill|Aoe|Area|Combat 191/191, Fanout|Outbox 35/35.
+
+### 30-minute `bots-200-town` acceptance soak (fresh zone)
+
+Paths: `local-logs/soak-200-town-fresh/{report.md,report.json,metrics-peak.txt}`; scanned log `local-logs/zone-soak-200.log` (23 MB by the end). Zone was restarted before the run (34,054 NPCs). Scenario `local-scenarios/bots-200-town-iso-soak.yaml`: 200 bots, 60 s ramp, 1800 s steady, `spawnLayout: town`, Warlord load-test profile, `--region-workers 0`.
+
+| Gate | Limit | Observed |
+| --- | ---: | ---: |
+| Tick p99 | ≤ 200 ms | **78.0 ms** |
+| Tick p99 (steady state) | — | 54.4 ms (p99.9 77.8) |
+| Submit → mailbox p99 | ≤ 1000 ms | **69.7 ms** |
+| Fan-out queue age p99 | ≤ 40 ms | **4.7 ms** |
+| Command → mailboxes p99 | — | 12.8 ms |
+| `commands.apply` p99 | — | 20.0 ms |
+| Reliable drops / overflow | 0 | **0** |
+| In world / disconnects / stuck | 200 / 0 / 0 | **200 / 0 / 0** |
+| Consistency oracle | 0 issues | **0 / 19,701 checks** |
+| Simulation stall | count 0 | 4.6 s sampled, count 0 |
+
+The runner and all #867 gates are **PASS**. Skill→`MagicSkillUse` samples were 0 in the steady window: the town spawn area leaves the melee Warlord skill out of range, so the run records the timeout but the scenario sets `requireSkillLatencySamples: false`; this is a harness placement limitation, not a server latency gate. An earlier attempt on a zone that had already served a prior run reported 6,081 client consistency issues; the fresh-zone rerun above is clean, which points at carried-over zone state rather than this change.
+
+
+### 20-minute `perf-aoe-multiparty` acceptance soak (fresh zone)
+
+Paths: `local-logs/soak-aoe-multiparty-fresh/{report.md,report.json,metrics-peak.txt}`; scanned log `local-logs/zone-soak-aoe.log` (5.9 MB by the end). Fresh zone (34,054 NPCs), scenario `local-scenarios/perf-aoe-multiparty-iso.yaml`: 36 bots, 25 s ramp, 1200 s steady, 9-bot parties, skill rotation 36/48, `--region-workers 0`.
+
+| Gate | Limit | Observed |
+| --- | ---: | ---: |
+| Tick p99 | ≤ 200 ms | **58.6 ms** |
+| Tick p99 (steady state) | — | 48.9 ms (p99.9 70.8) |
+| Submit → mailbox p99 | ≤ 1000 ms | **44.4 ms** |
+| Fan-out queue age p99 | ≤ 40 ms | **0.8 ms** |
+| Command → mailboxes p99 | — | 5.9 ms |
+| `commands.apply` p99 | — | 5.5 ms |
+| Reliable drops / overflow | 0 | **0** |
+| In world / disconnects / stuck | 36 / 0 / 0 | **36 / 0 / 0** |
+| Consistency oracle | 0 issues | **0 / 595 checks** |
+| Simulation stall | count 0 | 2.8 s sampled, count 0 |
+
+Runner and all #867 gates **PASS**. Skill→`MagicSkillUse` samples: 486. Together with the 30-minute 200-bot soak, both performance acceptance soaks are green on the combined local tree. No zone or load-test process is left running; only the pre-existing inactive `fineage-lt-after2` job remains.

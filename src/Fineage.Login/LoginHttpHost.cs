@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Fineage.Accounts;
+using Fineage.Protocol.Health;
 
 namespace Fineage.Login;
 
@@ -16,10 +17,12 @@ public sealed record AuthOkBody(bool Ok, string Username, string Mode);
 public sealed record AuthErrBody(bool Ok, string Error);
 
 /// <summary>
-/// Play-landing status. <paramref name="Ok"/> and <paramref name="Login"/> are true when this process answers.
+/// Play-landing status. <paramref name="Ok"/> is Login readiness (#989: every <c>/health/ready</c> check passes —
+/// database reachable and migrated); <paramref name="Login"/> is true when this process answers.
 /// <paramref name="Zone"/> is Zone reachability. <paramref name="PlayersOnline"/> is the live count, or 0 when Zone is down.
+/// <paramref name="Database"/> is the database check alone.
 /// </summary>
-public sealed record StatusBody(bool Ok, bool Login, bool Zone, int PlayersOnline);
+public sealed record StatusBody(bool Ok, bool Login, bool Zone, int PlayersOnline, bool Database);
 
 /// <summary>Kestrel surface for the play-landing auth contract. Same <see cref="LoginService"/> as TCP login.</summary>
 public sealed class LoginHttpHost : IAsyncDisposable
@@ -47,8 +50,11 @@ public sealed class LoginHttpHost : IAsyncDisposable
         IPAddress address,
         int port,
         CancellationToken ct = default,
-        IZoneStatusSource? zoneStatus = null)
+        IZoneStatusSource? zoneStatus = null,
+        HealthBoard? health = null)
     {
+        // #989: without a board the host still answers liveness; readiness then only says the process is up.
+        var board = health ?? new HealthBoard();
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
             Args = [],
@@ -82,8 +88,12 @@ public sealed class LoginHttpHost : IAsyncDisposable
             }
 
             int players = reading.Reachable ? Math.Max(0, reading.PlayersOnline) : 0;
-            return Results.Json(new StatusBody(true, true, reading.Reachable, players), StatusJson);
+            var ready = board.Readiness();
+            bool database = ready.Checks.Where(check => check.Name == "database").All(check => check.Ok);
+            return Results.Json(new StatusBody(ready.Ok, true, reading.Reachable, players, database), StatusJson);
         });
+        app.MapGet("/health/live", () => Report(board.Liveness()));
+        app.MapGet("/health/ready", () => Report(board.Readiness()));
         app.MapPost("/api/auth/register", (HttpRequest request, CancellationToken token) =>
             HandleAsync(request, token, (user, email, password) => service.RegisterLanding(user, email, password), successStatus: 201));
         app.MapPost("/api/auth/login", (HttpRequest request, CancellationToken token) =>
@@ -189,6 +199,9 @@ public sealed class LoginHttpHost : IAsyncDisposable
         string code = string.IsNullOrEmpty(result.Code) ? "invalid_body" : result.Code;
         return Results.Json(new AuthErrBody(false, code), statusCode: status);
     }
+
+    static IResult Report(HealthReport report) =>
+        Results.Text(report.ToJson(), "application/json; charset=utf-8", statusCode: report.StatusCode);
 
     static IResult Err(int status, string code) =>
         Results.Json(new AuthErrBody(false, code), statusCode: status);

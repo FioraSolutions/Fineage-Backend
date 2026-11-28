@@ -41,6 +41,8 @@ public sealed partial class BossSchedule
 
             if (state.Status == BossLifeStatus.Dead && (state.RespawnUnixMs == 0 || now > state.RespawnUnixMs))
             {
+                ZoneLog.Warn(
+                    $"[boss] saved respawn overdue npcId={definition.NpcId} due={state.RespawnUnixMs} now={now}; spawning once at startup");
                 state.Status = BossLifeStatus.Alive;
                 state.RespawnUnixMs = 0;
                 state.Scheduled = false;

@@ -98,6 +98,52 @@ public sealed class ShortcutActionPacketHandler
         await SendShortcutReplyAsync(conn, delReply, envelope.RequestSequence, ct).ConfigureAwait(false);
     }
 
+    public async Task OnMakeMacroAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+            return;
+
+        var net = NetCodec.DecodeMakeMacro(envelope.Payload);
+        var request = new MakeMacroMsg
+        {
+            Id = net.Id,
+            Name = net.Name ?? "",
+            Descr = net.Descr ?? "",
+            Acronym = net.Acronym ?? "",
+            Icon = net.Icon,
+            Commands = (net.Commands ?? []).Select(c => new MacroCmdMsg
+            {
+                Entry = c.Entry,
+                Type = c.Type,
+                D1 = c.D1,
+                D2 = c.D2,
+                Cmd = c.Cmd ?? ""
+            }).ToArray()
+        };
+        string? error = await _world.TryMakeMacroAsync(zoneSession, request, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Make macro failed.", ct).ConfigureAwait(false);
+    }
+
+    public async Task OnDeleteMacroAsync(
+        NetConnection conn,
+        ZoneSession zoneSession,
+        PacketEnvelope envelope,
+        CancellationToken ct)
+    {
+        if (!zoneSession.Bound || !zoneSession.InWorld)
+            return;
+
+        var del = NetCodec.DecodeDeleteMacro(envelope.Payload);
+        string? error = await _world.TryDeleteMacroAsync(zoneSession, del.Id, ct).ConfigureAwait(false);
+        if (error != null)
+            await _reject(conn, error, "Delete macro failed.", ct).ConfigureAwait(false);
+    }
+
     static async Task SendShortcutReplyAsync(NetConnection conn, ZoneWorld.ShortcutReply reply, uint sequence, CancellationToken ct)
     {
         if (reply.Register != null)

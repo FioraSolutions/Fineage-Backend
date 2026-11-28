@@ -1,0 +1,20 @@
+# Fineage Prometheus configuration (#992). Replace the targets with the hosts that run Login and Zone; the ports are
+# FINEAGE_LOGIN_METRICS_PORT (example 9464) and FINEAGE_ZONE_METRICS_PORT (example 9465), bound to FINEAGE_METRICS_BIND. Retention is a command-line
+# flag, not a config key: run Prometheus with --storage.tsdb.retention.time=90d (see monitoring/docker-compose.yml).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+
+rule_files:
+  - rules/fineage-recording.yml
+  - rules/fineage-alerts.yml
+
+scrape_configs:
+  - job_name: fineage-zone
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["127.0.0.1:9465"]
+  - job_name: fineage-login
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["127.0.0.1:9464"]

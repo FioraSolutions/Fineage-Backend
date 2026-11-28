@@ -97,7 +97,10 @@ public enum SystemAccount
     MonsterRace = 18,
 
     /// <summary>Clan hall function leases and hall rent.</summary>
-    ClanHall = 19
+    ClanHall = 19,
+
+    /// <summary>PC Cafe coupon item grants.</summary>
+    PcCafe = 20
 }
 
 public readonly record struct LedgerAccount(LedgerOwnerKind Owner, int OwnerId, LedgerContainer Container)
@@ -329,6 +332,9 @@ public enum LedgerTxKind
 
     /// <summary>Festival blood offering granted to the party leader on mob kill in a festival instance.</summary>
     FestivalBloodOffering = 60,
+
+    /// <summary>PC Cafe coupon redeem item grant: <c>Reference</c> is item id.</summary>
+    PcCafeCoupon = 61,
 }
 
 /// <summary>

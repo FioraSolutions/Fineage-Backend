@@ -14,11 +14,14 @@ public sealed partial class PostgresAccountStore
     {
         if (controlObjectId <= 0)
             return null;
-        lock (_persistGate)
-        {
-            using var conn = _dataSource.OpenConnection();
-            return NormalizedStoreWriter.LoadPet(conn, controlObjectId);
-        }
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.LoadPet(conn, controlObjectId);
+    }
+
+    public IReadOnlyList<StoredPet> ListAllPets()
+    {
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.LoadAllPets(conn);
     }
 
     public bool SavePet(StoredPet pet) =>
@@ -36,6 +39,14 @@ public sealed partial class PostgresAccountStore
             cmd.Parameters.AddWithValue("id", controlObjectId);
             cmd.ExecuteNonQuery();
         });
+
+    public bool PetNameExists(string name, int npcId, int exceptControlObjectId)
+    {
+        if (string.IsNullOrEmpty(name) || npcId <= 0)
+            return false;
+        using var conn = OpenReadConnection();
+        return NormalizedStoreWriter.PetNameExists(conn, name, npcId, exceptControlObjectId);
+    }
 }
 
 static partial class NormalizedStoreWriter
@@ -77,6 +88,37 @@ static partial class NormalizedStoreWriter
         var items = JsonSerializer.Deserialize<List<StoredItem>>(reader.GetString(8), PetJson) ?? [];
         return new StoredPet(controlObjectId, reader.GetInt32(0), reader.GetInt32(1), reader.GetString(2), reader.GetInt32(3),
             reader.GetInt64(4), reader.GetInt32(5), reader.GetInt32(6), reader.GetInt32(7), items);
+    }
+
+    public static IReadOnlyList<StoredPet> LoadAllPets(NpgsqlConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT control_object_id, owner_character_id, npc_id, name, level, exp, cur_hp, cur_mp, fed, items::text FROM pets ORDER BY control_object_id";
+        using var reader = cmd.ExecuteReader();
+        var pets = new List<StoredPet>();
+        while (reader.Read())
+        {
+            int controlObjectId = reader.GetInt32(0);
+            var items = JsonSerializer.Deserialize<List<StoredItem>>(reader.GetString(9), PetJson)
+                ?? throw new InvalidOperationException($"pets row control_object_id={controlObjectId}: items column is JSON null");
+            pets.Add(new StoredPet(controlObjectId, reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3), reader.GetInt32(4),
+                reader.GetInt64(5), reader.GetInt32(6), reader.GetInt32(7), reader.GetInt32(8), items));
+        }
+
+        return pets;
+    }
+
+    public static bool PetNameExists(NpgsqlConnection conn, string name, int npcId, int exceptControlObjectId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT 1 FROM pets WHERE name = @name AND npc_id = @npc AND control_object_id <> @except LIMIT 1";
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("npc", npcId);
+        cmd.Parameters.AddWithValue("except", exceptControlObjectId);
+        using var reader = cmd.ExecuteReader();
+        return reader.Read();
     }
 
     /// <summary>Bootstrap / recovery: the snapshot's pets into <c>pets</c> (rows already there are replaced).</summary>

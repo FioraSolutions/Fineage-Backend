@@ -1,4 +1,5 @@
 using Fineage.Protocol;
+using Fineage.Zone.Geo;
 using Fineage.Zone.Interest;
 using Fineage.Zone.Spawns;
 using Fineage.Zone.World;
@@ -20,10 +21,11 @@ internal sealed class MoveVisibilityMailbox
 
     readonly MutableClock _clock = new() { Now = ManualSimulationDriver.FixedStartUtc };
 
-    public MoveVisibilityMailbox()
+    public MoveVisibilityMailbox(IAoi? aoi = null, GeoEngine? geo = null)
     {
         Bench = new WorldBench(
-            aoi: new RangeAoi(Range),
+            aoi: aoi ?? new RangeAoi(Range),
+            geo: geo,
             clock: () => _clock.Now,
             spawns: SpawnCatalog.From(new Dictionary<string, SpawnMapDefinition>
             {
@@ -49,6 +51,11 @@ internal sealed class MoveVisibilityMailbox
     public void Step(int n = 1) => Driver.Step(n);
 
     public void AdvanceMs(int totalMs) => Driver.Advance(TimeSpan.FromMilliseconds(totalMs));
+
+    /// <summary>Moves the world clock without running a tick, to exercise a command's own in-step advance.</summary>
+    public void AdvanceClockOnly(int totalMs) => _clock.Now = _clock.Now.AddMilliseconds(totalMs);
+
+    public DateTimeOffset Now => _clock.Now;
 
     public static List<object?[]> MovesFor(NetBridgeRecorder rec, int watcherObjectId, int moverObjectId) =>
         rec.Of(nameof(IWorldEventPublisher.FanoutMoveState))

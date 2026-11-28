@@ -28,6 +28,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - id: agent
+            project: tests/Fineage.Agent.Contracts.Tests/Fineage.Agent.Contracts.Tests.csproj
+          - id: agent-identity
+            project: tests/Fineage.Agent.Identity.Tests/Fineage.Agent.Identity.Tests.csproj
+          - id: agent-observation
+            project: tests/Fineage.Agent.Observation.Tests/Fineage.Agent.Observation.Tests.csproj
+          - id: agent-gate
+            project: tests/Fineage.Agent.Gate.Tests/Fineage.Agent.Gate.Tests.csproj
           - id: game
             project: tests/Fineage.Game.Tests/Fineage.Game.Tests.csproj
           - id: net
@@ -36,6 +44,8 @@ jobs:
             project: tests/Fineage.Login.Tests/Fineage.Login.Tests.csproj
           - id: zone
             project: tests/Fineage.Zone.Tests/Fineage.Zone.Tests.csproj
+          - id: mobiusdiff
+            project: tests/Fineage.MobiusDiff.Tests/Fineage.MobiusDiff.Tests.csproj
     steps:
       - uses: actions/checkout@v4
 

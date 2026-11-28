@@ -61,22 +61,22 @@ public sealed class ZoneCritDamageAddTests
     [Fact]
     public void Melee_crit_adds_the_flat_term_after_the_multipliers()
     {
-        // hit (0), no shield (99), crit (0): 70·100/50 = 140 → ·2 = 280; + 100 · 77 / 50 = +154
+        // hit (0), no shield (99), crit (0): 76·100/50 = 152 → ·2 = 304; + 100 · 77 / 50 = +154
         var plain = ZoneCombat.RollMelee(new Seq(0, 99, 0), 100, 50, 100, 0, 500, 0, false, 0, 0, 0, false, 1d, 1d, 1d);
-        Assert.Equal(280, plain.Damage);
+        Assert.Equal(304, plain.Damage);
 
         var boosted = ZoneCombat.RollMelee(new Seq(0, 99, 0), 100, 50, 100, 0, 500, 0, false, 0, 0, 0, false, 1d, 1d, 1d, 100);
-        Assert.Equal((int)(280 + 100d * 77 / 50), boosted.Damage);
+        Assert.Equal((int)(304 + 100d * 77 / 50), boosted.Damage);
     }
 
     [Fact]
     public void Physical_skill_crit_adds_the_flat_term_after_the_multipliers()
     {
-        // 70·(100 + 50)/40 = 262.5 → ·2 = 525; + 100 · 6.1 · 77 / 40 = +1174.25
+        // 76·(100 + 50)/40 = 285 → ·2 = 570; + 100 · 6.1 · 77 / 40 = +1174.25
         var plain = ZoneCombat.PhysicalSkillDamage(100, 40, 50, soulshot: false, crit: true);
-        Assert.Equal((int)(70d * 150 / 40 * 2), plain);
+        Assert.Equal((int)(76d * 150 / 40 * 2), plain);
 
         var boosted = ZoneCombat.PhysicalSkillDamage(100, 40, 50, soulshot: false, crit: true, critDamageAdd: 100);
-        Assert.Equal((int)(70d * 150 / 40 * 2 + 100 * 6.1 * 77 / 40), boosted);
+        Assert.Equal((int)(76d * 150 / 40 * 2 + 100 * 6.1 * 77 / 40), boosted);
     }
 }

@@ -155,7 +155,9 @@ public sealed class GlobalActorTests
         Assert.NotEqual(first.RespawnUnixMs, other.RespawnUnixMs);
 
         var kit = first.Kit;
-        Assert.False(kit.World.TryGetEntityById(BossObjectId, out _));
+        // Mobius Creature.doDie precedes corpse decay: the dead entity remains addressable until its corpse timeout.
+        Assert.True(kit.World.TryGetEntityById(BossObjectId, out var corpse));
+        Assert.True(corpse.Dead);
         kit.Now = DateTimeOffset.FromUnixTimeMilliseconds(first.RespawnUnixMs - 10_000);
         kit.World.StepSimulation();
         Assert.False(kit.World.TryGetEntityById(BossObjectId, out _));

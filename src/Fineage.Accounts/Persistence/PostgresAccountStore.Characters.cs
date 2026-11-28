@@ -23,7 +23,7 @@ public sealed partial class PostgresAccountStore
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
         long first;
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -48,7 +48,7 @@ public sealed partial class PostgresAccountStore
         // Memory + snapshot JSON are not enough: characters.account FKs this row.
         string account = name.Trim();
         object? canonicalEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -114,7 +114,7 @@ public sealed partial class PostgresAccountStore
             return status;
 
         WriteSnapshotBackup(_inner.ExportSnapshot());
-        lock (_persistGate)
+        using (EnterPersist())
         {
             using var conn = _dataSource.OpenConnection();
             using var tx = conn.BeginTransaction();
@@ -163,11 +163,17 @@ public sealed partial class PostgresAccountStore
                 NormalizedStoreWriter.ReplaceFreightOnly(conn, characterId, record.Freight ?? []);
             });
 
-    public void CommitEconomy(IReadOnlyList<LedgerEntry> entries, IReadOnlyList<EconomyBagWrite> bags)
+    public void CommitEconomy(
+        IReadOnlyList<LedgerEntry> entries,
+        IReadOnlyList<EconomyBagWrite> bags,
+        IReadOnlyList<WorldStateDocument>? worldState = null)
     {
         ArgumentNullException.ThrowIfNull(entries);
         ArgumentNullException.ThrowIfNull(bags);
-        if (entries.Count == 0 && bags.Count == 0)
+        worldState ??= [];
+        foreach (var document in worldState)
+            document.Validate();
+        if (entries.Count == 0 && bags.Count == 0 && worldState.Count == 0)
             return;
 
         // One connection and one transaction: the ledger insert and every item replace commit together.
@@ -199,6 +205,9 @@ public sealed partial class PostgresAccountStore
             }
         }
 
+        // #996: the world subsystems this batch changed (a lottery ticket, a race bet) commit with the ledger rows.
+        if (worldState.Count > 0)
+            WriteWorldState(conn, tx, worldState);
         tx.Commit();
     }
 
@@ -286,8 +295,38 @@ public sealed partial class PostgresAccountStore
     public bool TryReplaceBlocked(string account, int characterId, IReadOnlyList<StoredSocial> blocked, bool blockAll) =>
         _inner.TryReplaceBlocked(account, characterId, blocked, blockAll);
 
-    public CharacterRecord? FindByCharacterId(int characterId) =>
-        _inner.FindByCharacterId(characterId);
+    /// <summary>
+    /// Every character as the normalized tables hold it. <see cref="CommitEconomy"/> writes only those tables, so the
+    /// in-memory snapshot's containers go stale as soon as the zone commits; reading them made the startup audit and
+    /// the economy reconcile report the pre-commit bags (#955). The snapshot only names the characters.
+    /// </summary>
+    public IReadOnlyList<CharacterRecord> ListAllCharacters()
+    {
+        var names = _inner.ListAllCharacters();
+        var records = new List<CharacterRecord>(names.Count);
+        using var conn = _dataSource.OpenConnection();
+        foreach (var known in names)
+            records.Add(LoadNormalized(conn, known.Account, known.Id));
+        return records;
+    }
+
+    CharacterRecord LoadNormalized(NpgsqlConnection conn, string account, int characterId)
+    {
+        var record = NormalizedStoreReader.TryLoadById(conn, account, characterId)
+            ?? throw new InvalidOperationException(
+                $"character {characterId} (account {account}) is in the account snapshot but not in the characters table");
+        Hydrate(conn, record);
+        return record;
+    }
+
+    /// <summary>The normalized row, for the same reason as <see cref="ListAllCharacters"/>.</summary>
+    public CharacterRecord? FindByCharacterId(int characterId)
+    {
+        if (_inner.FindByCharacterId(characterId) is not { } known)
+            return null;
+        using var conn = _dataSource.OpenConnection();
+        return LoadNormalized(conn, known.Account, characterId);
+    }
 
     public CharacterRecord? FindByCharacterName(string name) =>
         _inner.FindByCharacterName(name);
@@ -300,6 +339,17 @@ public sealed partial class PostgresAccountStore
                 using var tx = conn.BeginTransaction();
                 EnsureCharacterRow(conn, account, characterId, tx);
                 NormalizedStoreWriter.ReplaceShortcuts(conn, tx, characterId, shortcuts);
+                tx.Commit();
+            });
+
+    public bool TryReplaceMacros(string account, int characterId, IReadOnlyList<StoredMacro> macros) =>
+        RunSilent(
+            () => _inner.TryReplaceMacros(account, characterId, macros),
+            conn =>
+            {
+                using var tx = conn.BeginTransaction();
+                EnsureCharacterRow(conn, account, characterId, tx);
+                NormalizedStoreWriter.ReplaceMacros(conn, tx, characterId, macros);
                 tx.Commit();
             });
 

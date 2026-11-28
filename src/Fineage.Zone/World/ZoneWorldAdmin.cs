@@ -3,6 +3,7 @@ using Fineage.Game.Economy;
 using Fineage.Game.Shops;
 using Fineage.Protocol;
 using Fineage.Zone.NpcHtml;
+using Fineage.Zone.Security;
 
 namespace Fineage.Zone.World;
 
@@ -18,12 +19,45 @@ public sealed partial class ZoneWorld
     /// </summary>
     string? TryAdminBypass(ZoneSession session, ZoneEntity player, string command)
     {
-        if (!ZoneAdmin.IsAdminCharacter(player.Name))
-            return "forbidden";
-
         string verb = BypassCommands.Token(command);
         string args = ArgsAfter(command, verb);
+        AdminRole role = ZoneAdmin.RoleOf(player.Name);
+        if (role == AdminRole.Player)
+        {
+            AuditAdminDenied(session, verb, AdminAuditTarget(session, args), role, AdminRole.Helper, AdminSourceBypass);
+            return "forbidden";
+        }
 
+        if (!AdminCommandCatalog.TryGetBypass(verb, out AdminCommandSpec spec))
+        {
+            ZoneLog.Warn($"admin unknown cmd={verb} object={player.ObjectId}");
+            FanGmSystem(session, $"Unknown admin command: {verb}" + AdminTeleportHint(verb));
+            AuditAdmin(session, player, verb, AdminAuditTarget(session, args), "", "", AdminSourceBypass,
+                "unknown command");
+            return "bad_request";
+        }
+
+        if (!AdminCommandCatalog.Allows(role, spec.MinimumRole))
+        {
+            AuditAdminDenied(session, verb, AdminAuditTarget(session, args), role, spec.MinimumRole, AdminSourceBypass);
+            return "forbidden";
+        }
+
+        string target = AdminAuditTarget(session, args);
+        string before = AdminAuditState(session, player, target);
+        string? result = DispatchAdminBypass(session, player, verb, args, spec.Family);
+        string after = AdminAuditState(session, player, target);
+        AuditAdmin(session, player, verb, target, before, after, AdminSourceBypass, result);
+        return result;
+    }
+
+    string? DispatchAdminBypass(
+        ZoneSession session,
+        ZoneEntity player,
+        string verb,
+        string args,
+        AdminCommandFamily family)
+    {
         if (verb.Equals("admin_gmshop", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_admin", StringComparison.OrdinalIgnoreCase)
             || verb.Equals("admin_admin7", StringComparison.OrdinalIgnoreCase))
@@ -114,15 +148,22 @@ public sealed partial class ZoneWorld
         if (verb.Equals("admin_kick", StringComparison.OrdinalIgnoreCase))
             return AdminKick(session, player, args);
 
-        if (IsAdminPunishmentVerb(verb))
-            return TryAdminPunishment(session, player, verb, args);
+        return family switch
+        {
+            AdminCommandFamily.Punishment => TryAdminPunishment(session, player, verb, args),
+            AdminCommandFamily.Festival => TryAdminFestival(session, player, verb, args),
+            AdminCommandFamily.Teleport => TryAdminTeleport(session, player, verb, args),
+            AdminCommandFamily.Combat => TryAdminCombat(session, player, verb, args),
+            AdminCommandFamily.Announce => TryAdminAnnounce(session, player, verb, args),
+            AdminCommandFamily.Status => TryAdminStatus(session, player, verb, args),
+            AdminCommandFamily.Petition => TryAdminPetition(session, player, verb, args),
+            AdminCommandFamily.Ride => TryAdminRide(session, player, verb, args),
+            _ => UnknownAdminBypass(session, player, verb)
+        };
+    }
 
-        if (IsAdminFestivalVerb(verb))
-            return TryAdminFestival(session, player, verb, args);
-
-        if (IsAdminTeleportVerb(verb))
-            return TryAdminTeleport(session, player, verb, args);
-
+    string? UnknownAdminBypass(ZoneSession session, ZoneEntity player, string verb)
+    {
         ZoneLog.Warn($"admin unknown cmd={verb} object={player.ObjectId}");
         FanGmSystem(session, $"Unknown admin command: {verb}" + AdminTeleportHint(verb));
         return "bad_request";

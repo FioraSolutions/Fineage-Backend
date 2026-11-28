@@ -62,11 +62,13 @@ public sealed partial class ZoneWorld
         }
 
         int crystalId = EnchantRules.CrystalItemId(item.Template.Crystal);
-        if (crystalId == 0 || !_game.Items.TryGet(crystalId, out var crystalTemplate))
+        if (crystalId == 0)
         {
-            ZoneLog.Error($"[crystallize] item {item.ItemId} grade={item.Template.Crystal} crystal item {crystalId} is missing from items.json");
+            ZoneLog.Error($"[crystallize] item {item.ItemId} grade={item.Template.Crystal} has no crystal item");
             return CrystallizeProtocol.MissingCrystal;
         }
+
+        var crystalTemplate = _game.Items.Require(crystalId);
 
         int yield = CrystallizeRules.Yield(item.Template, item.EnchantLevel, count);
         if (yield < 1)

@@ -186,6 +186,7 @@ static partial class NormalizedStoreReader
         var freight = LoadItems(conn, stub.Id, NormalizedStoreWriter.LocFreight);
         var quests = LoadQuests(conn, stub.Id);
         var shortcuts = LoadShortcuts(conn, stub.Id);
+        var macros = LoadMacros(conn, stub.Id);
         var learned = LoadLearnedSkills(conn, stub.Id);
         var effects = LoadEffects(conn, stub.Id);
         var classState = LoadClassState(conn, stub.Id);
@@ -224,6 +225,7 @@ static partial class NormalizedStoreReader
             freight,
             stub.Newbie,
             shortcuts,
+            macros,
             learned,
             stub.DeathPenaltyLevel,
             stub.Karma,

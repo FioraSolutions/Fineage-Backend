@@ -1,0 +1,5360 @@
+{
+  "version": 1,
+  "source": {
+    "wireCoverage": "docs/wire-coverage.md",
+    "netOpcode": "src/Fineage.Net.Contract/Opcodes/NetOpcode.cs"
+  },
+  "notes": "Machine-readable retail Interlude opcode → Fineage NetOpcode mapping. A non-empty fineageOpcodes list is a name mapping only: it does not mean gameplay behaviour has been verified (see docs/mobius-parity-matrix.md). Handler cells are wiring coverage from docs/wire-coverage.md.",
+  "summary": {
+    "packets": 474,
+    "mapped": 386,
+    "unmapped": 88,
+    "uniqueFineageOpcodes": 237,
+    "counts": {
+      "c2s": {
+        "packets": 158,
+        "serverYes": 110,
+        "serverPartial": 33,
+        "serverNo": 12,
+        "serverNA": 3,
+        "clientYes": 97,
+        "clientContract": 28,
+        "clientNo": 30,
+        "clientNA": 3
+      },
+      "c2s-ex": {
+        "packets": 46,
+        "serverYes": 34,
+        "serverPartial": 5,
+        "serverNo": 7,
+        "serverNA": 0,
+        "clientYes": 15,
+        "clientContract": 23,
+        "clientNo": 8,
+        "clientNA": 0
+      },
+      "s2c": {
+        "packets": 270,
+        "serverYes": 186,
+        "serverPartial": 54,
+        "serverNo": 23,
+        "serverNA": 7,
+        "clientYes": 218,
+        "clientContract": 6,
+        "clientNo": 39,
+        "clientNA": 7
+      }
+    }
+  },
+  "entries": [
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x00",
+      "mobiusClass": "ProtocolVersion",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Hello"
+      ],
+      "gap": "Fineage Hello, not retail 0x00"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x08",
+      "mobiusClass": "AuthLogin",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Auth",
+        "ZoneAuth"
+      ],
+      "gap": "Login Auth + zone ZoneAuth"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x09",
+      "mobiusClass": "Logout",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "TCP close persists in ZoneWorld.Members.Leave; no logout opcode"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0b",
+      "mobiusClass": "CharacterCreate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreateCharacter"
+      ],
+      "gap": "Login CreateCharacter"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0c",
+      "mobiusClass": "CharacterDelete",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DeleteCharacter"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0d",
+      "mobiusClass": "CharacterSelect",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SelectCharacter"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0e",
+      "mobiusClass": "NewCharacter",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "templates are server-side; no NewCharacterSuccess roster"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x62",
+      "mobiusClass": "CharacterRestore",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RestoreCharacter"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x68",
+      "mobiusClass": "RequestPledgeCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x03",
+      "mobiusClass": "EnterWorld",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnterWorld"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x01",
+      "mobiusClass": "MoveToLocation",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MoveInput"
+      ],
+      "gap": "ZoneWorldMovement"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x04",
+      "mobiusClass": "Action",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SelectTarget"
+      ],
+      "gap": "target select; sit/social are RequestActionUse"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0a",
+      "mobiusClass": "AttackRequest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AttackRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x0f",
+      "mobiusClass": "RequestItemList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestItemList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x11",
+      "mobiusClass": "RequestUnEquipItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UnequipItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x12",
+      "mobiusClass": "RequestDropItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DropItemRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x14",
+      "mobiusClass": "UseItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UseItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x15",
+      "mobiusClass": "TradeRequest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x16",
+      "mobiusClass": "AddTradeItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeAddItemRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x17",
+      "mobiusClass": "TradeDone",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeDoneRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x1b",
+      "mobiusClass": "RequestSocialAction",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestActionUse"
+      ],
+      "gap": "folded into RequestActionUse"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x1c",
+      "mobiusClass": "ChangeMoveType2",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestActionUse"
+      ],
+      "gap": "walk/run is action id 1"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x1d",
+      "mobiusClass": "ChangeWaitType2",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestActionUse"
+      ],
+      "gap": "sit/stand is action id 0"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x1e",
+      "mobiusClass": "RequestSellItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestSellItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x1f",
+      "mobiusClass": "RequestBuyItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestBuyItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x20",
+      "mobiusClass": "RequestLinkHtml",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "BypassRequest"
+      ],
+      "gap": "LinkBypassHandler"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x21",
+      "mobiusClass": "RequestBypassToServer",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "BypassRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x22",
+      "mobiusClass": "RequestBBSwrite",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestBBSwrite"
+      ],
+      "gap": "community board #929"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x24",
+      "mobiusClass": "RequestJoinPledge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanInviteRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x25",
+      "mobiusClass": "RequestAnswerJoinPledge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanAnswerJoinRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x26",
+      "mobiusClass": "RequestWithdrawalPledge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanLeaveRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x27",
+      "mobiusClass": "RequestOustPledgeMember",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanKickRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x29",
+      "mobiusClass": "RequestJoinParty",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyInviteRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x2a",
+      "mobiusClass": "RequestAnswerJoinParty",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyAnswerJoinRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x2b",
+      "mobiusClass": "RequestWithDrawalParty",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyLeaveRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x2c",
+      "mobiusClass": "RequestOustPartyMember",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyKickRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x2f",
+      "mobiusClass": "RequestMagicSkillUse",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UseSkill"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x30",
+      "mobiusClass": "Appearing",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "post-teleport Appearing is not handled"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x31",
+      "mobiusClass": "SendWareHouseDepositList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "WarehouseDepositRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x32",
+      "mobiusClass": "SendWareHouseWithDrawList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "WarehouseWithdrawRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x33",
+      "mobiusClass": "RequestShortcutReg",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestShortCutReg"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x35",
+      "mobiusClass": "RequestShortcutDel",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestShortCutDel"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x36",
+      "mobiusClass": "CannotMoveAnymore",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "StopMove"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x37",
+      "mobiusClass": "RequestTargetCanceld",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TargetCancelRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x38",
+      "mobiusClass": "Say2",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Say"
+      ],
+      "gap": "ZoneWorldChat channels including hero and friend"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x3c",
+      "mobiusClass": "RequestPledgeMemberList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": "roster is pushed; no explicit refresh request"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x3f",
+      "mobiusClass": "RequestSkillList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SkillList"
+      ],
+      "gap": "SkillList is pushed on enter; no refresh request"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x41",
+      "mobiusClass": "MoveWithDelta",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "relative-move packet unused"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x42",
+      "mobiusClass": "RequestGetOnVehicle",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "RequestGetOnVehicle"
+      ],
+      "gap": "NetOpcode.ClientPackets"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x43",
+      "mobiusClass": "RequestGetOffVehicle",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "RequestGetOffVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x44",
+      "mobiusClass": "AnswerTradeRequest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeAnswerRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x45",
+      "mobiusClass": "RequestActionUse",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestActionUse"
+      ],
+      "gap": "sit, walk/run, social ids"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x46",
+      "mobiusClass": "RequestRestart",
+      "serverHandler": "yes",
+      "clientHandler": "no",
+      "fineageOpcodes": [
+        "RequestRestart"
+      ],
+      "gap": "persist, keep account, then CharacterRoster"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x47",
+      "mobiusClass": "RequestSiegeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SiegeListRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x48",
+      "mobiusClass": "ValidatePosition",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ValidatePosition"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x4a",
+      "mobiusClass": "StartRotating",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x4b",
+      "mobiusClass": "FinishRotating",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x4d",
+      "mobiusClass": "RequestStartPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": "ZoneWorldPledge.Wars"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x4e",
+      "mobiusClass": "RequestReplyStartPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x4f",
+      "mobiusClass": "RequestStopPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x50",
+      "mobiusClass": "RequestReplyStopPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x51",
+      "mobiusClass": "RequestSurrenderPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x52",
+      "mobiusClass": "RequestReplySurrenderPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x53",
+      "mobiusClass": "RequestSetPledgeCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": "ZoneWorldPledge.Crests"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x55",
+      "mobiusClass": "RequestGiveNickName",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": "ZoneWorldPledge.Commands"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x57",
+      "mobiusClass": "RequestShowBoard",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestShowBoard"
+      ],
+      "gap": "community board #929"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x58",
+      "mobiusClass": "RequestEnchantItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnchantRequest"
+      ],
+      "gap": "confirm/cancel are EnchantConfirm / EnchantCancel"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x59",
+      "mobiusClass": "RequestDestroyItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DestroyItemRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x5b",
+      "mobiusClass": "SendBypassBuildCmd",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "GM commands are admin_* HTML bypasses, not this packet"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x5c",
+      "mobiusClass": "RequestMoveToLocationInVehicle",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "RequestMoveToLocationInVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x5d",
+      "mobiusClass": "CannotMoveAnymoreInVehicle",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CannotMoveAnymoreInVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x5e",
+      "mobiusClass": "RequestFriendInvite",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "FriendInvite"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x5f",
+      "mobiusClass": "RequestAnswerFriendInvite",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "FriendAnswer"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x60",
+      "mobiusClass": "RequestFriendList",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "FriendListRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x61",
+      "mobiusClass": "RequestFriendDel",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "FriendDelete"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x63",
+      "mobiusClass": "RequestQuestList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestQuestList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x64",
+      "mobiusClass": "RequestQuestAbort",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestQuestAbort"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x66",
+      "mobiusClass": "RequestPledgeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeInfo"
+      ],
+      "gap": "PledgeCommand / PledgeInfo"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x67",
+      "mobiusClass": "RequestPledgeExtendedInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeInfo"
+      ],
+      "gap": "folded into pledge info"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x6b",
+      "mobiusClass": "RequestAcquireSkillInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestAcquireSkillInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x6c",
+      "mobiusClass": "RequestAcquireSkill",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestAcquireSkill"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x6d",
+      "mobiusClass": "RequestRestartPoint",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ReviveRequest"
+      ],
+      "gap": "ZoneWorldDeath castle/HQ/town restart"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x6e",
+      "mobiusClass": "RequestGMCommand",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "ZoneWorldAdmin verbs, not RequestGMCommand"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x6f",
+      "mobiusClass": "RequestPartyMatchConfig",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "party matching room"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x70",
+      "mobiusClass": "RequestPartyMatchList",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x71",
+      "mobiusClass": "RequestPartyMatchDetail",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x72",
+      "mobiusClass": "RequestCrystallizeItem",
+      "serverHandler": "yes",
+      "clientHandler": "no",
+      "fineageOpcodes": [
+        "RequestCrystallizeItem"
+      ],
+      "gap": "`CrystallizeRules` + auditable economy ledger. Unity client does not send retail 0x72 yet"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x73",
+      "mobiusClass": "RequestPrivateStoreManageSell",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreSell"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x74",
+      "mobiusClass": "SetPrivateStoreListSell",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreSell"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x76",
+      "mobiusClass": "RequestPrivateStoreQuitSell",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreQuit"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x77",
+      "mobiusClass": "SetPrivateStoreMsgSell",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreSell"
+      ],
+      "gap": "message is part of the sell list, no separate packet"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x79",
+      "mobiusClass": "RequestPrivateStoreBuy",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "PrivateStoreBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x7b",
+      "mobiusClass": "RequestTutorialLinkHtml",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": "TutorialUi covers show/question; link html is bypass"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x7c",
+      "mobiusClass": "RequestTutorialPassCmdToServer",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x7d",
+      "mobiusClass": "RequestTutorialQuestionMark",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x7e",
+      "mobiusClass": "RequestTutorialClientEvent",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x7f",
+      "mobiusClass": "RequestPetition",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestPetition"
+      ],
+      "gap": "petition queue #930"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x80",
+      "mobiusClass": "RequestPetitionCancel",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestPetitionCancel"
+      ],
+      "gap": "petition queue #930"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x81",
+      "mobiusClass": "RequestGmList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "GmListTowns is an admin bypass, not the petition GM list"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x82",
+      "mobiusClass": "RequestJoinAlly",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": "ZoneWorldAlly"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x83",
+      "mobiusClass": "RequestAnswerJoinAlly",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyAskJoin"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x84",
+      "mobiusClass": "AllyLeave",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x85",
+      "mobiusClass": "AllyDismiss",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x86",
+      "mobiusClass": "RequestDismissAlly",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x87",
+      "mobiusClass": "RequestSetAllyCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": "crest blob"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x88",
+      "mobiusClass": "RequestAllyCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x89",
+      "mobiusClass": "RequestChangePetName",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "name field exists; no rename request"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x8a",
+      "mobiusClass": "RequestPetUseItem",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SummonCommand"
+      ],
+      "gap": "pet item use is not a separate opcode"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x8b",
+      "mobiusClass": "RequestGiveItemToPet",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PetInventory"
+      ],
+      "gap": "pet inventory exists; give/get not split"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x8c",
+      "mobiusClass": "RequestGetItemFromPet",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PetInventory"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x8e",
+      "mobiusClass": "RequestAllyInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x8f",
+      "mobiusClass": "RequestPetGetItem",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SummonCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x90",
+      "mobiusClass": "RequestPrivateStoreManageBuy",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x91",
+      "mobiusClass": "SetPrivateStoreListBuy",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x93",
+      "mobiusClass": "RequestPrivateStoreQuitBuy",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreQuit"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x94",
+      "mobiusClass": "SetPrivateStoreMsgBuy",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SetPrivateStoreBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x96",
+      "mobiusClass": "RequestPrivateStoreSell",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "PrivateStoreSellTo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x9d",
+      "mobiusClass": "RequestSkillCoolTime",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "reuse rides SkillList; no SkillCoolTime packet"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x9e",
+      "mobiusClass": "RequestPackageSendableItemList",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "PackageSendableListRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0x9f",
+      "mobiusClass": "RequestPackageSend",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "PackageSendRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa0",
+      "mobiusClass": "RequestBlock",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "BlockRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa2",
+      "mobiusClass": "RequestSiegeAttackerList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SiegeInfo"
+      ],
+      "gap": "folded into SiegeInfo"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa3",
+      "mobiusClass": "RequestSiegeDefenderList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SiegeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa4",
+      "mobiusClass": "RequestJoinSiege",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SiegeRegisterRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa5",
+      "mobiusClass": "RequestConfirmSiegeWaitingList",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SiegeDefenderAnswerRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa7",
+      "mobiusClass": "MultiSellChoose",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestMultiSellChoose"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xa8",
+      "mobiusClass": "RequestNetPing",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "Fineage Net session, not retail NetPing"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xaa",
+      "mobiusClass": "BypassUserCmd",
+      "serverHandler": "yes",
+      "clientHandler": "no",
+      "fineageOpcodes": [
+        "BypassUserCmd"
+      ],
+      "gap": "`UserCommandRegistry`. Unity client does not send `BypassUserCmd` / retail 0xaa yet"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xab",
+      "mobiusClass": "SnoopQuit",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "GM snoop is not a Fineage target"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xac",
+      "mobiusClass": "RequestRecipeBookOpen",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeBookOpen"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xad",
+      "mobiusClass": "RequestRecipeBookDestroy",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeBookDestroy"
+      ],
+      "gap": "#935"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xae",
+      "mobiusClass": "RequestRecipeItemMakeInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeBookOpen"
+      ],
+      "gap": "make info is RecipeItemMakeInfo S2C"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xaf",
+      "mobiusClass": "RequestRecipeItemMakeSelf",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeMakeSelf"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb1",
+      "mobiusClass": "RequestRecipeShopMessageSet",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SetRecipeShop"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb2",
+      "mobiusClass": "RequestRecipeShopListSet",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SetRecipeShop"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb3",
+      "mobiusClass": "RequestRecipeShopManageQuit",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreQuit"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb5",
+      "mobiusClass": "RequestRecipeShopMakeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopMakeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb6",
+      "mobiusClass": "RequestRecipeShopMakeItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopMakeItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb7",
+      "mobiusClass": "RequestRecipeShopManagePrev",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "no prev-page packet; list is RecipeShopSellList"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb8",
+      "mobiusClass": "ObserverReturn",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "OlympiadLeaveRequest"
+      ],
+      "gap": "olympiad observer end only"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xb9",
+      "mobiusClass": "RequestEvaluate",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "no recommendation / evaluate"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xba",
+      "mobiusClass": "RequestHennaItemList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "ZoneWorldSymbolMaker HTML, not HennaEquipList"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xbb",
+      "mobiusClass": "RequestHennaItemInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML symbol maker"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xbc",
+      "mobiusClass": "RequestHennaEquip",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML draw"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xbd",
+      "mobiusClass": "RequestHennaRemoveList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xbe",
+      "mobiusClass": "RequestHennaItemRemoveInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xbf",
+      "mobiusClass": "RequestHennaRemove",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML remove"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc0",
+      "mobiusClass": "RequestPledgePower",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc1",
+      "mobiusClass": "RequestMakeMacro",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc2",
+      "mobiusClass": "RequestDeleteMacro",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc4",
+      "mobiusClass": "RequestBuySeed",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "ManorCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc5",
+      "mobiusClass": "DlgAnswer",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "confirms are per-feature (party, trade, augment), no general ConfirmDlg"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc6",
+      "mobiusClass": "RequestPreviewItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [],
+      "gap": "Wear → ShopPreviewList / ShopPreviewInfo (#924)"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xc7",
+      "mobiusClass": "RequestSSQStatus",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "SevenSignsStatusRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xca",
+      "mobiusClass": "GameGuardReply",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "GameGuard is not part of Fineage Net"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xcc",
+      "mobiusClass": "RequestSendFriendMsg",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Say"
+      ],
+      "gap": "ChatProtocol.Friend / Tell"
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xcd",
+      "mobiusClass": "RequestShowMiniMap",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s",
+      "retailOpcode": "0xcf",
+      "mobiusClass": "RequestRecordInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "knownlist pushes spawns; no client resend request"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x01",
+      "mobiusClass": "RequestOustFromPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x02",
+      "mobiusClass": "RequestDismissPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x03",
+      "mobiusClass": "RequestWithdrawPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x04",
+      "mobiusClass": "RequestChangePartyLeader",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "PartyChangeLeaderRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x05",
+      "mobiusClass": "RequestAutoSoulShot",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RequestAutoSoulShot"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x06",
+      "mobiusClass": "RequestExEnchantSkillInfo",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "RequestEnchantSkillInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x07",
+      "mobiusClass": "RequestExEnchantSkill",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "RequestEnchantSkill"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x08",
+      "mobiusClass": "RequestManorList",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "ManorCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x09",
+      "mobiusClass": "RequestProcureCropList",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "ManorCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0a",
+      "mobiusClass": "RequestSetSeed",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "ManorCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0b",
+      "mobiusClass": "RequestSetCrop",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "ManorCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0c",
+      "mobiusClass": "RequestWriteHeroWords",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [],
+      "gap": "hero inscription #932"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0d",
+      "mobiusClass": "RequestExAskJoinMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelAskRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0e",
+      "mobiusClass": "RequestExAcceptJoinMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelAcceptRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x0f",
+      "mobiusClass": "RequestExOustFromMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelOustRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x10",
+      "mobiusClass": "RequestExPledgeCrestLarge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x11",
+      "mobiusClass": "RequestExSetPledgeCrestLarge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x12",
+      "mobiusClass": "RequestOlympiadObserverEnd",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "OlympiadLeaveRequest"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x13",
+      "mobiusClass": "RequestOlympiadMatchList",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "OlympiadStatusRequest"
+      ],
+      "gap": "status sheet, not the match list packet"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x14",
+      "mobiusClass": "RequestAskJoinPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x15",
+      "mobiusClass": "AnswerJoinPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x16",
+      "mobiusClass": "RequestListPartyMatchingWaitingRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x17",
+      "mobiusClass": "RequestExitPartyMatchingWaitingRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x18",
+      "mobiusClass": "RequestGetBossRecord",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "BossStatusRequest"
+      ],
+      "gap": "RaidBossPoints + BossStatus"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x19",
+      "mobiusClass": "RequestPledgeSetAcademyMaster",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1a",
+      "mobiusClass": "RequestPledgePowerGradeList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1b",
+      "mobiusClass": "RequestPledgeMemberPowerInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1c",
+      "mobiusClass": "RequestPledgeSetMemberPowerGrade",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1d",
+      "mobiusClass": "RequestPledgeMemberInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1e",
+      "mobiusClass": "RequestPledgeWarList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeWarList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x1f",
+      "mobiusClass": "RequestExFishRanking",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "FishingChampionshipBoard has no client ranking packet"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x20",
+      "mobiusClass": "RequestPCCafeCouponUse",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [],
+      "gap": "PC cafe coupon redeem #933"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x22",
+      "mobiusClass": "RequestCursedWeaponList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CursedWeaponList"
+      ],
+      "gap": "S2C list exists; no C2S refresh"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x23",
+      "mobiusClass": "RequestCursedWeaponLocation",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CursedWeaponLocation"
+      ],
+      "gap": "S2C locations; no C2S refresh"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x24",
+      "mobiusClass": "RequestPledgeReorganizeMember",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x26",
+      "mobiusClass": "RequestExMPCCShowPartyMembersInfo",
+      "serverHandler": "partial",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelInfo"
+      ],
+      "gap": "info is server-pushed"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x27",
+      "mobiusClass": "RequestDuelStart",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "DuelCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x28",
+      "mobiusClass": "RequestDuelAnswerStart",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "DuelCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x29",
+      "mobiusClass": "RequestConfirmTargetItem",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentConfirmTarget"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2a",
+      "mobiusClass": "RequestConfirmRefinerItem",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentConfirmRefiner"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2b",
+      "mobiusClass": "RequestConfirmGemStone",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentConfirmGem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2c",
+      "mobiusClass": "RequestRefine",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentRefine"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2d",
+      "mobiusClass": "RequestConfirmCancelItem",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentCancelWindow"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2e",
+      "mobiusClass": "RequestRefineCancel",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "AugmentRefineCancel"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x2f",
+      "mobiusClass": "RequestExMagicSkillUseGround",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UseSkill"
+      ],
+      "gap": "ground target on UseSkill"
+    },
+    {
+      "direction": "c2s-ex",
+      "retailOpcode": "0xd0/0x30",
+      "mobiusClass": "RequestDuelSurrender",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "DuelCommand"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x00",
+      "mobiusEnum": "KEY_PACKET",
+      "mobiusClass": "KeyPacket",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "HelloAck"
+      ],
+      "gap": "login hello ack, not the retail key handshake"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x01",
+      "mobiusEnum": "CHAR_MOVE_TO_LOCATION",
+      "mobiusClass": "MoveToLocation",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MoveState"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x02",
+      "mobiusEnum": "NPC_SAY",
+      "mobiusClass": "NpcSay",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreatureSay"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x03",
+      "mobiusEnum": "CHAR_INFO",
+      "mobiusClass": "CharInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EntitySpawn"
+      ],
+      "gap": "players"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x04",
+      "mobiusEnum": "USER_INFO",
+      "mobiusClass": "UserInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UserInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x05",
+      "mobiusEnum": "ATTACK",
+      "mobiusClass": "Attack",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AttackState"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x06",
+      "mobiusEnum": "DIE",
+      "mobiusClass": "Die",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EntityDie"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x07",
+      "mobiusEnum": "REVIVE",
+      "mobiusClass": "Revive",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Revive"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x0b",
+      "mobiusEnum": "SPAWN_ITEM",
+      "mobiusClass": "SpawnItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DropItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x0c",
+      "mobiusEnum": "DROP_ITEM",
+      "mobiusClass": "DropItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DropItem"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x0d",
+      "mobiusEnum": "GET_ITEM",
+      "mobiusClass": "GetItem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "InventoryUpdate"
+      ],
+      "gap": "pickup deletes the ground item and updates inventory"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x0e",
+      "mobiusEnum": "STATUS_UPDATE",
+      "mobiusClass": "StatusUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "StatusUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x0f",
+      "mobiusEnum": "NPC_HTML_MESSAGE",
+      "mobiusClass": "NpcHtmlMessage",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "NpcHtml"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x10",
+      "mobiusEnum": "SELL_LIST",
+      "mobiusClass": "SellList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SellList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x11",
+      "mobiusEnum": "BUY_LIST",
+      "mobiusClass": "BuyList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "BuyList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x12",
+      "mobiusEnum": "DELETE_OBJECT",
+      "mobiusClass": "DeleteObject",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EntityDespawn"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x13",
+      "mobiusEnum": "CHAR_SELECT_INFO",
+      "mobiusClass": "CharSelectionInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CharacterRoster"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x14",
+      "mobiusEnum": "LOGIN_FAIL",
+      "mobiusClass": "LoginFail",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AuthResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x15",
+      "mobiusEnum": "CHAR_SELECTED",
+      "mobiusClass": "CharSelected",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Handoff"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x16",
+      "mobiusEnum": "NPC_INFO",
+      "mobiusClass": "AbstractNpcInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EntitySpawn"
+      ],
+      "gap": "NPCs and summons share EntitySpawn"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x17",
+      "mobiusEnum": "CHAR_TEMPLATES",
+      "mobiusClass": "NewCharacterSuccess",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "creation uses server templates; packet not sent"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x19",
+      "mobiusEnum": "CHAR_CREATE_OK",
+      "mobiusClass": "CharCreateOk",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreateResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x1a",
+      "mobiusEnum": "CHAR_CREATE_FAIL",
+      "mobiusClass": "CharCreateFail",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreateResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x1b",
+      "mobiusEnum": "ITEM_LIST",
+      "mobiusClass": "ItemList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ItemList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x1c",
+      "mobiusEnum": "SUNRISE",
+      "mobiusClass": "SunRise",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClientSetTime"
+      ],
+      "gap": "ClientSetTime carries game minutes, not SunRise/SunSet"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x1d",
+      "mobiusEnum": "SUNSET",
+      "mobiusClass": "SunSet",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClientSetTime"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x1e",
+      "mobiusEnum": "TRADE_START",
+      "mobiusClass": "TradeStart",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeStart"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x20",
+      "mobiusEnum": "TRADE_OWN_ADD",
+      "mobiusClass": "TradeOwnAdd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeOfferUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x21",
+      "mobiusEnum": "TRADE_OTHER_ADD",
+      "mobiusClass": "TradeOtherAdd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeOfferUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x22",
+      "mobiusEnum": "TRADE_DONE",
+      "mobiusClass": "TradeDone",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeFinished"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x23",
+      "mobiusEnum": "CHAR_DELETE_OK",
+      "mobiusClass": "CharDeleteSuccess",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DeleteResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x24",
+      "mobiusEnum": "CHAR_DELETE_FAIL",
+      "mobiusClass": "CharDeleteFail",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DeleteResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x25",
+      "mobiusEnum": "ACTION_FAIL",
+      "mobiusClass": "ActionFailed",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SystemMessage"
+      ],
+      "gap": "failures are SystemMessage, not ActionFail"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x26",
+      "mobiusEnum": "SERVER_CLOSE",
+      "mobiusClass": "ServerClose",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Reject"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x27",
+      "mobiusEnum": "INVENTORY_UPDATE",
+      "mobiusClass": "InventoryUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "InventoryUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x28",
+      "mobiusEnum": "TELEPORT_TO_LOCATION",
+      "mobiusClass": "TeleportToLocation",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TeleportToLocation"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x29",
+      "mobiusEnum": "TARGET_SELECTED",
+      "mobiusClass": "TargetSelected",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TargetSelected"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2a",
+      "mobiusEnum": "TARGET_UNSELECTED",
+      "mobiusClass": "TargetUnselected",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TargetUnselected"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2b",
+      "mobiusEnum": "AUTO_ATTACK_START",
+      "mobiusClass": "AutoAttackStart",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AutoAttackStart"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2c",
+      "mobiusEnum": "AUTO_ATTACK_STOP",
+      "mobiusClass": "AutoAttackStop",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AutoAttackStop"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2d",
+      "mobiusEnum": "SOCIAL_ACTION",
+      "mobiusClass": "SocialAction",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SocialAction"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2e",
+      "mobiusEnum": "CHANGE_MOVE_TYPE",
+      "mobiusClass": "ChangeMoveType",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ChangeMoveType"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x2f",
+      "mobiusEnum": "CHANGE_WAIT_TYPE",
+      "mobiusClass": "ChangeWaitType",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ChangeWaitType"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x30",
+      "mobiusEnum": "MANAGE_PLEDGE_POWER",
+      "mobiusClass": "ManagePledgePower",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x32",
+      "mobiusEnum": "ASK_JOIN_PLEDGE",
+      "mobiusClass": "AskJoinPledge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanAskJoin"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x33",
+      "mobiusEnum": "JOIN_PLEDGE",
+      "mobiusClass": "JoinPledge",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClanJoinResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x39",
+      "mobiusEnum": "ASK_JOIN_PARTY",
+      "mobiusClass": "AskJoinParty",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyAskJoin"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x3a",
+      "mobiusEnum": "JOIN_PARTY",
+      "mobiusClass": "JoinParty",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyJoinResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x41",
+      "mobiusEnum": "WAREHOUSE_DEPOSIT_LIST",
+      "mobiusClass": "WareHouseDepositList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "WarehouseDepositList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x42",
+      "mobiusEnum": "WAREHOUSE_WITHDRAW_LIST",
+      "mobiusClass": "WareHouseWithdrawalList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "WarehouseWithdrawList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x44",
+      "mobiusEnum": "SHORT_CUT_REGISTER",
+      "mobiusClass": "ShortcutRegister",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShortCutRegister"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x45",
+      "mobiusEnum": "SHORT_CUT_INIT",
+      "mobiusClass": "ShortcutInit",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShortCutInit"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x47",
+      "mobiusEnum": "STOP_MOVE",
+      "mobiusClass": "StopMove",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "StopMove"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x48",
+      "mobiusEnum": "MAGIC_SKILL_USE",
+      "mobiusClass": "MagicSkillUse",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MagicSkillUse"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x49",
+      "mobiusEnum": "MAGIC_SKILL_CANCELD",
+      "mobiusClass": "MagicSkillCanceled",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MagicSkillCanceled"
+      ],
+      "gap": "Mobius enum spelling; Fineage MagicSkillCanceled"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4a",
+      "mobiusEnum": "CREATURE_SAY",
+      "mobiusClass": "CreatureSay",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreatureSay"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4b",
+      "mobiusEnum": "EQUIP_UPDATE",
+      "mobiusClass": "EquipUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "InventoryUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4c",
+      "mobiusEnum": "DOOR_INFO",
+      "mobiusClass": "DoorInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DoorStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4d",
+      "mobiusEnum": "DOOR_STATUS_UPDATE",
+      "mobiusClass": "DoorStatusUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DoorStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4e",
+      "mobiusEnum": "PARTY_SMALL_WINDOW_ALL",
+      "mobiusClass": "PartySmallWindowAll",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x4f",
+      "mobiusEnum": "PARTY_SMALL_WINDOW_ADD",
+      "mobiusClass": "PartySmallWindowAdd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x50",
+      "mobiusEnum": "PARTY_SMALL_WINDOW_DELETE_ALL",
+      "mobiusClass": "PartySmallWindowDeleteAll",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x51",
+      "mobiusEnum": "PARTY_SMALL_WINDOW_DELETE",
+      "mobiusClass": "PartySmallWindowDelete",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x52",
+      "mobiusEnum": "PARTY_SMALL_WINDOW_UPDATE",
+      "mobiusClass": "PartySmallWindowUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x53",
+      "mobiusEnum": "PLEDGE_SHOW_MEMBER_LIST_ALL",
+      "mobiusClass": "PledgeShowMemberListAll",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x54",
+      "mobiusEnum": "PLEDGE_SHOW_MEMBER_LIST_UPDATE",
+      "mobiusClass": "PledgeShowMemberListUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x55",
+      "mobiusEnum": "PLEDGE_SHOW_MEMBER_LIST_ADD",
+      "mobiusClass": "PledgeShowMemberListAdd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x56",
+      "mobiusEnum": "PLEDGE_SHOW_MEMBER_LIST_DELETE",
+      "mobiusClass": "PledgeShowMemberListDelete",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x58",
+      "mobiusEnum": "SKILL_LIST",
+      "mobiusClass": "SkillList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SkillList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x59",
+      "mobiusEnum": "VEHICLE_INFO",
+      "mobiusClass": "VehicleInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "VehicleInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5a",
+      "mobiusEnum": "VEHICLE_DEPARTURE",
+      "mobiusClass": "VehicleDeparture",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "VehicleDeparture"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5b",
+      "mobiusEnum": "VEHICLE_CHECK_LOCATION",
+      "mobiusClass": "VehicleCheckLocation",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "VehicleCheckLocation"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5c",
+      "mobiusEnum": "GET_ON_VEHICLE",
+      "mobiusClass": "GetOnVehicle",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "GetOnVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5d",
+      "mobiusEnum": "GET_OFF_VEHICLE",
+      "mobiusClass": "GetOffVehicle",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "GetOffVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5e",
+      "mobiusEnum": "SEND_TRADE_REQUEST",
+      "mobiusClass": "SendTradeRequest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeAsk"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x5f",
+      "mobiusEnum": "RESTART_RESPONSE",
+      "mobiusClass": "RestartResponse",
+      "serverHandler": "yes",
+      "clientHandler": "no",
+      "fineageOpcodes": [
+        "RestartResponse"
+      ],
+      "gap": "ok flag, then CharacterRoster"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x60",
+      "mobiusEnum": "MOVE_TO_PAWN",
+      "mobiusClass": "MoveToPawn",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MoveState"
+      ],
+      "gap": "interact approach is movement, not MoveToPawn"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x61",
+      "mobiusEnum": "VALIDATE_LOCATION",
+      "mobiusClass": "ValidateLocation",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PositionCorrection"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x62",
+      "mobiusEnum": "BEGIN_ROTATION",
+      "mobiusClass": "StartRotation",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x63",
+      "mobiusEnum": "STOP_ROTATION",
+      "mobiusClass": "StopRotation",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x64",
+      "mobiusEnum": "SYSTEM_MESSAGE",
+      "mobiusClass": "SystemMessage",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SystemMessage"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x65",
+      "mobiusEnum": "START_PLEDGE_WAR",
+      "mobiusClass": "StartPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeWarList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x67",
+      "mobiusEnum": "STOP_PLEDGE_WAR",
+      "mobiusClass": "StopPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeWarList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x69",
+      "mobiusEnum": "SURRENDER_PLEDGE_WAR",
+      "mobiusClass": "SurrenderPledgeWar",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeWarList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x6c",
+      "mobiusEnum": "PLEDGE_CREST",
+      "mobiusClass": "PledgeCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x6d",
+      "mobiusEnum": "SETUP_GAUGE",
+      "mobiusClass": "SetupGauge",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MagicSkillUse"
+      ],
+      "gap": "cast time is inside MagicSkillUse"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x6e",
+      "mobiusEnum": "SHOW_BOARD",
+      "mobiusClass": "ShowBoard",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShowBoard"
+      ],
+      "gap": "community board #929"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x6f",
+      "mobiusEnum": "CHOOSE_INVENTORY_ITEM",
+      "mobiusClass": "ChooseInventoryItem",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnchantResult"
+      ],
+      "gap": "enchant window is EnchantRequest/Result, not ChooseInventoryItem"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x71",
+      "mobiusEnum": "MOVE_TO_LOCATION_IN_VEHICLE",
+      "mobiusClass": "MoveToLocationInVehicle",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MoveToLocationInVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x72",
+      "mobiusEnum": "STOP_MOVE_IN_VEHICLE",
+      "mobiusClass": "StopMoveInVehicle",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "StopMoveInVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x73",
+      "mobiusEnum": "VALIDATE_LOCATION_IN_VEHICLE",
+      "mobiusClass": "ValidateLocationInVehicle",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ValidateLocationInVehicle"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x74",
+      "mobiusEnum": "TRADE_UPDATE",
+      "mobiusClass": "TradeUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeOfferUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x75",
+      "mobiusEnum": "TRADE_PRESS_OWN_OK",
+      "mobiusClass": "TradeDone",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeConfirmState"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x76",
+      "mobiusEnum": "MAGIC_SKILL_LAUNCHED",
+      "mobiusClass": "MagicSkillLaunched",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MagicSkillLaunched"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x7c",
+      "mobiusEnum": "TRADE_PRESS_OTHER_OK",
+      "mobiusClass": "TradeOtherDone",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TradeConfirmState"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x7d",
+      "mobiusEnum": "ASK_JOIN_FRIEND",
+      "mobiusClass": "FriendAddRequest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FriendInviteAsk"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x7e",
+      "mobiusEnum": "LEAVE_WORLD",
+      "mobiusClass": "LeaveWorld",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EntityDespawn"
+      ],
+      "gap": "despawn on disconnect"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x7f",
+      "mobiusEnum": "ABNORMAL_STATUS_UPDATE",
+      "mobiusClass": "AbnormalStatusUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AbnormalStatusUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x80",
+      "mobiusEnum": "QUEST_LIST",
+      "mobiusClass": "QuestList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "QuestList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x81",
+      "mobiusEnum": "ENCHANT_RESULT",
+      "mobiusClass": "EnchantResult",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnchantResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x82",
+      "mobiusEnum": "PLEDGE_SHOW_MEMBER_LIST_DELETE_ALL",
+      "mobiusClass": "PledgeShowMemberListDeleteAll",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x83",
+      "mobiusEnum": "PLEDGE_INFO",
+      "mobiusClass": "PledgeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x86",
+      "mobiusEnum": "RIDE",
+      "mobiusClass": "Ride",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Ride"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x88",
+      "mobiusEnum": "PLEDGE_SHOW_INFO_UPDATE",
+      "mobiusClass": "PledgeShowInfoUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x8a",
+      "mobiusEnum": "ACQUIRE_SKILL_LIST",
+      "mobiusClass": "AcquireSkillList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AcquireSkillList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x8b",
+      "mobiusEnum": "ACQUIRE_SKILL_INFO",
+      "mobiusClass": "AcquireSkillInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AcquireSkillInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x8c",
+      "mobiusEnum": "SERVER_OBJECT_INFO",
+      "mobiusClass": "ServerObjectInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DoorStatus"
+      ],
+      "gap": "doors/siege objects; not every static object"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x8e",
+      "mobiusEnum": "ACQUIRE_SKILL_DONE",
+      "mobiusClass": "AcquireSkillDone",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SkillList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x8f",
+      "mobiusEnum": "GM_VIEW_CHARACTER_INFO",
+      "mobiusClass": "GMViewCharacterInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "admin HTML, not GMView packets"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x90",
+      "mobiusEnum": "GM_VIEW_PLEDGE_INFO",
+      "mobiusClass": "GMViewPledgeInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x91",
+      "mobiusEnum": "GM_VIEW_SKILL_INFO",
+      "mobiusClass": "GMViewSkillInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x93",
+      "mobiusEnum": "GM_VIEW_QUEST_LIST",
+      "mobiusClass": "GmViewQuestInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x94",
+      "mobiusEnum": "GM_VIEW_ITEM_LIST",
+      "mobiusClass": "GMViewItemList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x95",
+      "mobiusEnum": "GM_VIEW_WAREHOUSE_WITHDRAW_LIST",
+      "mobiusClass": "GMViewWarehouseWithdrawList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x96",
+      "mobiusEnum": "PARTY_MATCH_LIST",
+      "mobiusClass": "ListPartyWating",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x97",
+      "mobiusEnum": "PARTY_MATCH_DETAIL",
+      "mobiusClass": "PartyMatchDetail",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x98",
+      "mobiusEnum": "PLAY_SOUND",
+      "mobiusClass": "PlaySound",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PlaySound"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x99",
+      "mobiusEnum": "STATIC_OBJECT",
+      "mobiusClass": "StaticObjectInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DoorStatus"
+      ],
+      "gap": "doors only"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x9a",
+      "mobiusEnum": "PRIVATE_STORE_MANAGE_LIST_SELL",
+      "mobiusClass": "PrivateStoreManageListSell",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreListSell"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x9b",
+      "mobiusEnum": "PRIVATE_STORE_LIST_SELL",
+      "mobiusClass": "PrivateStoreListSell",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreListSell"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x9c",
+      "mobiusEnum": "PRIVATE_STORE_MSG_SELL",
+      "mobiusClass": "PrivateStoreMsgSell",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0x9d",
+      "mobiusEnum": "SHOW_MINI_MAP",
+      "mobiusClass": "ShowMiniMap",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShowMiniMap"
+      ],
+      "gap": "#925 Maps"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa0",
+      "mobiusEnum": "TUTORIAL_SHOW_HTML",
+      "mobiusClass": "TutorialShowHtml",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa1",
+      "mobiusEnum": "TUTORIAL_SHOW_QUESTION_MARK",
+      "mobiusClass": "TutorialShowQuestionMark",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa2",
+      "mobiusEnum": "TUTORIAL_ENABLE_CLIENT_EVENT",
+      "mobiusClass": "TutorialEnableClientEvent",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa3",
+      "mobiusEnum": "TUTORIAL_CLOSE_HTML",
+      "mobiusClass": "TutorialCloseHtml",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TutorialUi"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa6",
+      "mobiusEnum": "MY_TARGET_SELECTED",
+      "mobiusClass": "MyTargetSelected",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "TargetSelected"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa7",
+      "mobiusEnum": "PARTY_MEMBER_POSITION",
+      "mobiusClass": "PartyMemberPosition",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartyMemberPosition"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xa8",
+      "mobiusEnum": "ASK_JOIN_ALLIANCE",
+      "mobiusClass": "AskJoinAlly",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyAskJoin"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xae",
+      "mobiusEnum": "ALLIANCE_CREST",
+      "mobiusClass": "AllyCrest",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb0",
+      "mobiusEnum": "PET_STATUS_SHOW",
+      "mobiusClass": "PetStatusShow",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SummonInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb1",
+      "mobiusEnum": "PET_INFO",
+      "mobiusClass": "PetInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SummonInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb2",
+      "mobiusEnum": "PET_ITEM_LIST",
+      "mobiusClass": "PetItemList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PetInventory"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb3",
+      "mobiusEnum": "PET_INVENTORY_UPDATE",
+      "mobiusClass": "PetInventoryUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PetInventory"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb4",
+      "mobiusEnum": "ALLIANCE_INFO",
+      "mobiusClass": "AllianceInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AllyInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb5",
+      "mobiusEnum": "PET_STATUS_UPDATE",
+      "mobiusClass": "PetStatusUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SummonInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb6",
+      "mobiusEnum": "PET_DELETE",
+      "mobiusClass": "PetDelete",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SummonGone"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb7",
+      "mobiusEnum": "PRIVATE_STORE_BUY_MANAGE_LIST",
+      "mobiusClass": "PrivateStoreManageListBuy",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreListBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb8",
+      "mobiusEnum": "PRIVATE_STORE_BUY_LIST",
+      "mobiusClass": "PrivateStoreListBuy",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreListBuy"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xb9",
+      "mobiusEnum": "PRIVATE_STORE_BUY_MSG",
+      "mobiusClass": "PrivateStoreMsgBuy",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PrivateStoreInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc0",
+      "mobiusEnum": "VEHICLE_START",
+      "mobiusClass": "VehicleStarted",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "VehicleStarted"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc1",
+      "mobiusEnum": "SKILL_COOL_TIME",
+      "mobiusClass": "SkillCoolTime",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "reuse is on SkillList"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc2",
+      "mobiusEnum": "PACKAGE_TO_LIST",
+      "mobiusClass": "PackageToList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PackageToList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc3",
+      "mobiusEnum": "PACKAGE_SENDABLE_LIST",
+      "mobiusClass": "PackageSendableList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PackageSendableList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc4",
+      "mobiusEnum": "EARTHQUAKE",
+      "mobiusClass": "Earthquake",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "rift schedules the warning; comment says the packet is not sent"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc7",
+      "mobiusEnum": "SPECIAL_CAMERA",
+      "mobiusClass": "SpecialCamera",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc8",
+      "mobiusEnum": "NORMAL_CAMERA",
+      "mobiusClass": "NormalCamera",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xc9",
+      "mobiusEnum": "SIEGE_INFO",
+      "mobiusClass": "SiegeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SiegeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xca",
+      "mobiusEnum": "SIEGE_ATTACKER_LIST",
+      "mobiusClass": "SiegeAttackerList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SiegeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xcb",
+      "mobiusEnum": "SIEGE_DEFENDER_LIST",
+      "mobiusClass": "SiegeDefenderList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SiegeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xcc",
+      "mobiusEnum": "NICK_NAME_CHANGED",
+      "mobiusClass": "NicknameChanged",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UserInfo"
+      ],
+      "gap": "title rides UserInfo"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xcd",
+      "mobiusEnum": "PLEDGE_STATUS_CHANGED",
+      "mobiusClass": "PledgeStatusChanged",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xce",
+      "mobiusEnum": "RELATION_CHANGED",
+      "mobiusClass": "RelationChanged",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RelationChanged"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xcf",
+      "mobiusEnum": "EVENT_TRIGGER",
+      "mobiusClass": "OnEventTrigger",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd0",
+      "mobiusEnum": "MULTI_SELL_LIST",
+      "mobiusClass": "MultiSellList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MultiSellList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd1",
+      "mobiusEnum": "SET_SUMMON_REMAIN_TIME",
+      "mobiusClass": "SetSummonRemainTime",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SummonInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd3",
+      "mobiusEnum": "NET_PING",
+      "mobiusClass": "NetPing",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "not retail NetPing"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd4",
+      "mobiusEnum": "DICE",
+      "mobiusClass": "Dice",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "Dice"
+      ],
+      "gap": "#925 RollingDice"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd5",
+      "mobiusEnum": "SNOOP",
+      "mobiusClass": "Snoop",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "GM snoop"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd6",
+      "mobiusEnum": "RECIPE_BOOK_ITEM_LIST",
+      "mobiusClass": "RecipeBookItemList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeBookList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd7",
+      "mobiusEnum": "RECIPE_ITEM_MAKE_INFO",
+      "mobiusClass": "RecipeItemMakeInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeItemMakeInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd8",
+      "mobiusEnum": "RECIPE_SHOP_MANAGE_LIST",
+      "mobiusClass": "RecipeShopManageList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopSellList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xd9",
+      "mobiusEnum": "RECIPE_SHOP_SELL_LIST",
+      "mobiusClass": "RecipeShopSellList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopSellList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xda",
+      "mobiusEnum": "RECIPE_SHOP_ITEM_INFO",
+      "mobiusClass": "RecipeShopItemInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopItemInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xdb",
+      "mobiusEnum": "RECIPE_SHOP_MSG",
+      "mobiusClass": "RecipeShopMsg",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "RecipeShopItemInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xdc",
+      "mobiusEnum": "SHOW_CALCULATOR",
+      "mobiusClass": "ShowCalculator",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShowCalculator"
+      ],
+      "gap": "#925 Calculator"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xdd",
+      "mobiusEnum": "MON_RACE_INFO",
+      "mobiusClass": "MonRaceInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "MonRaceInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xde",
+      "mobiusEnum": "SHOW_TOWN_MAP",
+      "mobiusClass": "ShowTownMap",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xdf",
+      "mobiusEnum": "OBSERVATION_MODE",
+      "mobiusClass": "ObservationEnter",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadMatch"
+      ],
+      "gap": "olympiad observe only"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe0",
+      "mobiusEnum": "OBSERVATION_RETURN",
+      "mobiusClass": "ObservationExit",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe1",
+      "mobiusEnum": "CHAIR_SIT",
+      "mobiusClass": "ChairSit",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ChangeWaitType"
+      ],
+      "gap": "sit pose, not a chair static object"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe2",
+      "mobiusEnum": "HENNA_EQUIP_LIST",
+      "mobiusClass": "HennaEquipList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "HTML symbol maker"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe3",
+      "mobiusEnum": "HENNA_ITEM_INFO",
+      "mobiusClass": "HennaItemDrawInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe4",
+      "mobiusEnum": "HENNA_INFO",
+      "mobiusClass": "HennaInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "dyes ride UserInfo"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe5",
+      "mobiusEnum": "HENNA_REMOVE_LIST",
+      "mobiusClass": "HennaRemoveList",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe6",
+      "mobiusEnum": "HENNA_ITEM_REMOVE_INFO",
+      "mobiusClass": "HennaItemRemoveInfo",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe7",
+      "mobiusEnum": "SEND_MACRO_LIST",
+      "mobiusClass": "SendMacroList",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe8",
+      "mobiusEnum": "BUY_LIST_SEED",
+      "mobiusClass": "BuyListSeed",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xe9",
+      "mobiusEnum": "SELL_LIST_PROCURE",
+      "mobiusClass": "SellListProcure",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xea",
+      "mobiusEnum": "GM_VIEW_HENNA_INFO",
+      "mobiusClass": "GMHennaInfo",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xeb",
+      "mobiusEnum": "RADAR_CONTROL",
+      "mobiusClass": "RadarControl",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "QuestDirection"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xec",
+      "mobiusEnum": "CLIENT_SET_TIME",
+      "mobiusClass": "ClientSetTime",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ClientSetTime"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xed",
+      "mobiusEnum": "CONFIRM_DLG",
+      "mobiusClass": "ConfirmDlg",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "no general confirm dialog"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xee",
+      "mobiusEnum": "PARTY_SPELLED",
+      "mobiusClass": "PartySpelled",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PartySpelled"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xef",
+      "mobiusEnum": "SHOP_PREVIEW_LIST",
+      "mobiusClass": "ShopPreviewList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [],
+      "gap": "Net 0x03E8 (#924)"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf0",
+      "mobiusEnum": "SHOP_PREVIEW_INFO",
+      "mobiusClass": "ShopPreviewInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [],
+      "gap": "Net 0x03E9 (#924)"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf1",
+      "mobiusEnum": "CAMERA_MODE",
+      "mobiusClass": "CameraMode",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf2",
+      "mobiusEnum": "SHOW_XMAS_SEAL",
+      "mobiusClass": "ShowXMasSeal",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ShowXMasSeal"
+      ],
+      "gap": "#925 SpecialXMas"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf3",
+      "mobiusEnum": "ETC_STATUS_UPDATE",
+      "mobiusClass": "EtcStatusUpdate",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EtcStatusUpdate"
+      ],
+      "gap": "danger area follows an enabled EffectZone (`showDangerIcon`)"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf4",
+      "mobiusEnum": "SHORT_BUFF_STATUS_UPDATE",
+      "mobiusClass": "ShortBuffStatusUpdate",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AbnormalStatusUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf5",
+      "mobiusEnum": "SSQ_STATUS",
+      "mobiusClass": "SSQStatus",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SevenSignsStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf7",
+      "mobiusEnum": "AGIT_DECO_INFO",
+      "mobiusClass": "AgitDecoInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AgitDecoInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf8",
+      "mobiusEnum": "SIGNS_SKY",
+      "mobiusClass": "SignsSky",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SevenSignsSky"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xf9",
+      "mobiusEnum": "GAME_GUARD_QUERY",
+      "mobiusClass": "GameGuardQuery",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "GameGuard"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfa",
+      "mobiusEnum": "FRIEND_LIST",
+      "mobiusClass": "FriendList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FriendList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfb",
+      "mobiusEnum": "L2_FRIEND",
+      "mobiusClass": "L2Friend",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FriendList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfc",
+      "mobiusEnum": "FRIEND_STATUS",
+      "mobiusClass": "FriendStatusPacket",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FriendUpdate"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfd",
+      "mobiusEnum": "FRIEND_RECV_MSG",
+      "mobiusClass": "L2FriendSay",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CreatureSay"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x01",
+      "mobiusEnum": "EX_REGEN_MAX",
+      "mobiusClass": "ExRegenMax",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "UserInfo"
+      ],
+      "gap": "regen is in the stat sheet"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x09",
+      "mobiusEnum": "EX_COLOSSEUM_FENCE_INFO",
+      "mobiusClass": "ExColosseumFenceInfo",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "Fence / coliseum fence"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x0e",
+      "mobiusEnum": "EX_PARTY_ROOM_MEMBER",
+      "mobiusClass": "ExPartyRoomMember",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x0f",
+      "mobiusEnum": "EX_CLOSE_PARTY_ROOM",
+      "mobiusClass": "ExClosePartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x10",
+      "mobiusEnum": "EX_MANAGE_PARTY_ROOM_MEMBER",
+      "mobiusClass": "ExManagePartyRoomMember",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x12",
+      "mobiusEnum": "EX_AUTO_SOUL_SHOT",
+      "mobiusClass": "ExAutoSoulShot",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AutoSoulShot"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x13",
+      "mobiusEnum": "EX_FISHING_START",
+      "mobiusClass": "ExFishingStart",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FishingEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x14",
+      "mobiusEnum": "EX_FISHING_END",
+      "mobiusClass": "ExFishingEnd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FishingEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x15",
+      "mobiusEnum": "EX_FISHING_START_COMBAT",
+      "mobiusClass": "ExFishingStartCombat",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FishingEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x16",
+      "mobiusEnum": "EX_FISHING_HP_REGEN",
+      "mobiusClass": "ExFishingHpRegen",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "FishingEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x17",
+      "mobiusEnum": "EX_ENCHANT_SKILL_LIST",
+      "mobiusClass": "ExEnchantSkillList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnchantSkillList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x18",
+      "mobiusEnum": "EX_ENCHANT_SKILL_INFO",
+      "mobiusClass": "ExEnchantSkillInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "EnchantSkillInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x19",
+      "mobiusEnum": "EX_QUEST_INFO",
+      "mobiusClass": "ExShowQuestInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "QuestList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1a",
+      "mobiusEnum": "EX_SHOW_QUEST_MARK",
+      "mobiusClass": "ExShowQuestMark",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "QuestNpcMarks"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1b",
+      "mobiusEnum": "EX_SEND_MANOR_LIST",
+      "mobiusClass": "ExSendManorList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1c",
+      "mobiusEnum": "EX_SHOW_SEED_INFO",
+      "mobiusClass": "ExShowSeedInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1d",
+      "mobiusEnum": "EX_SHOW_CROP_INFO",
+      "mobiusClass": "ExShowCropInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1e",
+      "mobiusEnum": "EX_SHOW_MANOR_DEFAULT_INFO",
+      "mobiusClass": "ExShowManorDefaultInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x1f",
+      "mobiusEnum": "EX_SHOW_SEED_SETTING",
+      "mobiusClass": "ExShowSeedSetting",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x20",
+      "mobiusEnum": "EX_SHOW_CROP_SETTING",
+      "mobiusClass": "ExShowCropSetting",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x21",
+      "mobiusEnum": "EX_SHOW_SELL_CROP_LIST",
+      "mobiusClass": "ExShowSellCropList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x22",
+      "mobiusEnum": "EX_SHOW_PROCURE_CROP_DETAIL",
+      "mobiusClass": "ExShowProcureCropDetail",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ManorInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x23",
+      "mobiusEnum": "EX_HERO_LIST",
+      "mobiusClass": "ExHeroList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadStatus"
+      ],
+      "gap": "hero sheet, not ExHeroList"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x24",
+      "mobiusEnum": "EX_SERVER_PRIMITIVE",
+      "mobiusClass": "ExServerPrimitive",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "debug draw primitive"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x25",
+      "mobiusEnum": "EX_OPEN_MPCC",
+      "mobiusClass": "ExOpenMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelOpen"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x26",
+      "mobiusEnum": "EX_CLOSE_MPCC",
+      "mobiusClass": "ExCloseMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelClose"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x27",
+      "mobiusEnum": "EX_ASK_JOIN_MPCC",
+      "mobiusClass": "ExAskJoinMPCC",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelAskJoin"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x28",
+      "mobiusEnum": "EX_PLEDGE_EMBLEM",
+      "mobiusClass": "ExPledgeEmblem",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CrestData"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x29",
+      "mobiusEnum": "EX_OLYMPIAD_USER_INFO",
+      "mobiusClass": "ExOlympiadUserInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadMatch"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x2a",
+      "mobiusEnum": "EX_OLYMPIAD_SPELLED_INFO",
+      "mobiusClass": "ExOlympiadSpelledInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadMatch"
+      ],
+      "gap": "abnormals during a match use AbnormalStatusUpdate"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x2b",
+      "mobiusEnum": "EX_OLYMPIAD_MODE",
+      "mobiusClass": "ExOlympiadMode",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadMatch"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x2c",
+      "mobiusEnum": "EX_OLYMPIAD_MATCH_END",
+      "mobiusClass": "ExOlympiadMatchEnd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "OlympiadResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x2d",
+      "mobiusEnum": "EX_MAIL_ARRIVED",
+      "mobiusClass": "ExMailArrived",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "player mail is not a Fineage Net target"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x2e",
+      "mobiusEnum": "EX_STORAGE_MAX_COUNT",
+      "mobiusClass": "ExStorageMaxCount",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "InventoryUpdate"
+      ],
+      "gap": "slot caps are server-side"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x30",
+      "mobiusEnum": "EX_MULTI_PARTY_COMMAND_CHANNEL_INFO",
+      "mobiusClass": "ExMultiPartyCommandChannelInfo",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x31",
+      "mobiusEnum": "EX_PC_CAFE_POINT_INFO",
+      "mobiusClass": "ExPCCafePointInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "ExPCCafePointInfo"
+      ],
+      "gap": "PC cafe points #933"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x32",
+      "mobiusEnum": "EX_SET_COMPASS_ZONE_CODE",
+      "mobiusClass": "ExSetCompassZoneCode",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "zone rules are server-side (`ZoneTypeRegistry`); compass byte is still not sent"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x33",
+      "mobiusEnum": "EX_GET_BOSS_RECORD",
+      "mobiusClass": "ExGetBossRecord",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "BossStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x34",
+      "mobiusEnum": "EX_ASK_JOIN_PARTY_ROOM",
+      "mobiusClass": "ExAskJoinPartyRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x35",
+      "mobiusEnum": "EX_LIST_PARTY_MATCHING_WAITING_ROOM",
+      "mobiusClass": "ExListPartyMatchingWaitingRoom",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x37",
+      "mobiusEnum": "EX_SHOW_ADVENTURER_GUIDE_BOOK",
+      "mobiusClass": "ExShowAdventurerGuideBook",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "Adventurer guide book packet still absent; RaidbossInfo HTML via Script host (#919)"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x38",
+      "mobiusEnum": "EX_SHOW_SCREEN_MESSAGE",
+      "mobiusClass": "ExShowScreenMessage",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SystemMessage"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x39",
+      "mobiusEnum": "PLEDGE_SKILL_LIST",
+      "mobiusClass": "PledgeSkillList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SkillList"
+      ],
+      "gap": "clan skills are on the skill list"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3a",
+      "mobiusEnum": "PLEDGE_SKILL_LIST_ADD",
+      "mobiusClass": "PledgeSkillListAdd",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SkillList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3b",
+      "mobiusEnum": "PLEDGE_POWER_GRADE_LIST",
+      "mobiusClass": "PledgePowerGradeList",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3c",
+      "mobiusEnum": "PLEDGE_RECEIVE_POWER_INFO",
+      "mobiusClass": "PledgeReceivePowerInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3d",
+      "mobiusEnum": "PLEDGE_RECEIVE_MEMBER_INFO",
+      "mobiusClass": "PledgeReceiveMemberInfo",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeMemberList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3e",
+      "mobiusEnum": "PLEDGE_RECEIVE_WAR_LIST",
+      "mobiusClass": "PledgeReceiveWarList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeWarList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x3f",
+      "mobiusEnum": "PLEDGE_RECEIVE_SUB_PLEDGE_CREATED",
+      "mobiusClass": "PledgeReceiveSubPledgeCreated",
+      "serverHandler": "partial",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "PledgeStatus"
+      ],
+      "gap": "academy / royal guard"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x40",
+      "mobiusEnum": "EX_RED_SKY",
+      "mobiusClass": "ExRedSky",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "SevenSignsSky"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x43",
+      "mobiusEnum": "SHOW_PC_CAFE_COUPON_SHOW_UI",
+      "mobiusClass": "ShowPCCafeCouponShowUI",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x44",
+      "mobiusEnum": "EX_SEARCH_ORC",
+      "mobiusClass": "ExCaptureOrc",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "capture-the-orc event packet"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x45",
+      "mobiusEnum": "EX_CURSED_WEAPON_LIST",
+      "mobiusClass": "ExCursedWeaponList",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CursedWeaponList"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x46",
+      "mobiusEnum": "EX_CURSED_WEAPON_LOCATION",
+      "mobiusClass": "ExCursedWeaponLocation",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "CursedWeaponLocation"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x47",
+      "mobiusEnum": "EX_RESTART_CLIENT",
+      "mobiusClass": "ExRestartClient",
+      "serverHandler": "no",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x48",
+      "mobiusEnum": "EX_REQUEST_HACK_SHIELD",
+      "mobiusClass": "ExRequestHackShield",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "HackShield"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x49",
+      "mobiusEnum": "EX_USE_SHARED_GROUP_ITEM",
+      "mobiusClass": "ExUseSharedGroupItem",
+      "serverHandler": "partial",
+      "clientHandler": "no",
+      "fineageOpcodes": [],
+      "gap": "shared reuse groups are not a separate packet"
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4a",
+      "mobiusEnum": "EX_MPCC_SHOW_PARTY_MEMBER_INFO",
+      "mobiusClass": "ExMPCCShowPartyMemberInfo",
+      "serverHandler": "yes",
+      "clientHandler": "contract",
+      "fineageOpcodes": [
+        "CommandChannelInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4b",
+      "mobiusEnum": "EX_DUEL_ASK_START",
+      "mobiusClass": "ExDuelAskStart",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DuelEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4c",
+      "mobiusEnum": "EX_DUEL_READY",
+      "mobiusClass": "ExDuelReady",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DuelEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4d",
+      "mobiusEnum": "EX_DUEL_START",
+      "mobiusClass": "ExDuelStart",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DuelEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4e",
+      "mobiusEnum": "EX_DUEL_END",
+      "mobiusClass": "ExDuelEnd",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DuelEvent"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x4f",
+      "mobiusEnum": "EX_DUEL_UPDATE_USER_INFO",
+      "mobiusClass": "ExDuelUpdateUserInfo",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "DuelUserInfo"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x50",
+      "mobiusEnum": "EX_SHOW_VARIATION_MAKE_WINDOW",
+      "mobiusClass": "ExShowVariationMakeWindow",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentShowMakeWindow"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x51",
+      "mobiusEnum": "EX_SHOW_VARIATION_CANCEL_WINDOW",
+      "mobiusClass": "ExShowVariationCancelWindow",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentShowCancelWindow"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x52",
+      "mobiusEnum": "EX_PUT_ITEM_RESULT_FOR_VARIATION_MAKE",
+      "mobiusClass": "ExPutItemResultForVariationMake",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentPutItemResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x53",
+      "mobiusEnum": "EX_PUT_INTENSIVE_RESULT_FOR_VARIATION_MAKE",
+      "mobiusClass": "ExPutIntensiveResultForVariationMake",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentPutRefinerResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x54",
+      "mobiusEnum": "EX_PUT_COMMISSION_RESULT_FOR_VARIATION_MAKE",
+      "mobiusClass": "ExPutCommissionResultForVariationMake",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentPutGemResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x55",
+      "mobiusEnum": "EX_VARIATION_RESULT",
+      "mobiusClass": "ExVariationResult",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentVariationResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x56",
+      "mobiusEnum": "EX_PUT_ITEM_RESULT_FOR_VARIATION_CANCEL",
+      "mobiusClass": "ExPutItemResultForVariationCancel",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentPutCancelItemResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x57",
+      "mobiusEnum": "EX_VARIATION_CANCEL_RESULT",
+      "mobiusClass": "ExVariationCancelResult",
+      "serverHandler": "yes",
+      "clientHandler": "yes",
+      "fineageOpcodes": [
+        "AugmentCancelResult"
+      ],
+      "gap": ""
+    },
+    {
+      "direction": "s2c",
+      "retailOpcode": "0xfe/0x5b",
+      "mobiusEnum": "EX_SHOW_SLIDESHOW_KAMAEL",
+      "mobiusClass": "ExShowSlideshowKamael",
+      "serverHandler": "n/a",
+      "clientHandler": "n/a",
+      "fineageOpcodes": [],
+      "gap": "Kamael is not an Interlude race"
+    }
+  ]
+}

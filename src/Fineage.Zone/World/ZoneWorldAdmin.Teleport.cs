@@ -27,15 +27,6 @@ public sealed partial class ZoneWorld
         ["DWARF"] = "dwarf_town",
     };
 
-    static bool IsAdminTeleportVerb(string verb) => verb.ToLowerInvariant() switch
-    {
-        "admin_show_moves" or "admin_show_moves_other" or "admin_show_teleport" or "admin_teleport_to_character"
-            or "admin_teleportto" or "admin_move_to" or "admin_teleport_character" or "admin_recall" or "admin_tele"
-            or "admin_sendhome" or "admin_gonorth" or "admin_gosouth" or "admin_goeast" or "admin_gowest"
-            or "admin_goup" or "admin_godown" => true,
-        _ => false
-    };
-
     string? TryAdminTeleport(ZoneSession session, ZoneEntity gm, string verb, string args)
     {
         string? refusal = verb.ToLowerInvariant() switch

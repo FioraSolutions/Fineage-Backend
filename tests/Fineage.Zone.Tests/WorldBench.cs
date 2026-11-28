@@ -62,10 +62,12 @@ internal sealed class WorldBench
         Fineage.Game.Economy.MemoryLedgerJournal? ledgerJournal = null,
         PunishmentManager? punishments = null,
         Fineage.Zone.RaidBossPoints.RaidBossPointsManager? raidBossPoints = null,
-        IAccountStore? accounts = null)
+        IAccountStore? accounts = null,
+        MemoryAccountStore? store = null)
     {
         Game = game ?? TestCatalogs.Game;
-        Store = MemoryAccountStore.InMemory();
+        // A restart test hands the previous bench's store in, so the new world loads what the old one committed.
+        Store = store ?? MemoryAccountStore.InMemory();
         Ledger = ledgerJournal ?? new Fineage.Game.Economy.MemoryLedgerJournal();
         Now = clock ?? (() => DateTimeOffset.FromUnixTimeMilliseconds(1_800_000_000_000));
         IRegionExecutor resolvedExecutor = regionExecutor ??
@@ -271,6 +273,9 @@ internal sealed class BenchPlayer
 
     public Task<string?> MultiSell(int npcObjectId, int listId, int entryId, int amount) =>
         World.TryMultiSellAsync(Session, npcObjectId, listId, entryId, amount, CancellationToken.None);
+
+    public Task<string?> Preview(int npcObjectId, int listId, params int[] itemIds) =>
+        World.TryPreviewAsync(Session, npcObjectId, listId, itemIds, CancellationToken.None);
 
     /// <summary>Picks a gatekeeper destination, the same call the teleport page's link lands on.</summary>
     public Task<string?> Teleport(int npcObjectId, string listName, int locationId) =>

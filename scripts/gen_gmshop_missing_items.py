@@ -60,6 +60,43 @@ def wanted_item_ids(lists: dict[int, dict], buy_ids: set[int]) -> set[int]:
     return want
 
 
+def referenced_item_ids() -> set[int]:
+    """Every item id another catalog points at (#985 required-data cross-check)."""
+    data = ROOT / "data"
+    want: set[int] = set()
+
+    def walk(node, keys: tuple[str, ...]) -> None:
+        if isinstance(node, dict):
+            for key in keys:
+                value = node.get(key)
+                if isinstance(value, int) and value > 0:
+                    want.add(value)
+            for value in node.values():
+                walk(value, keys)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value, keys)
+
+    for entry in json.loads(BUYLISTS.read_text())["lists"]:
+        walk(entry.get("items") or [], ("id",))
+    for entry in json.loads((data / "multisell.json").read_text())["lists"]:
+        for row in entry.get("entries") or []:
+            walk(row.get("ingredients") or [], ("id",))
+            walk(row.get("products") or [], ("id",))
+    walk(json.loads((data / "recipes.json").read_text())["recipes"], ("itemId", "recipeItemId"))
+    walk(json.loads((data / "skill-trees.json").read_text())["trees"], ("itemId",))
+    for path in sorted((data / "drops").glob("npc-*.json")):
+        walk(json.loads(path.read_text()), ("itemId",))
+    walk(json.loads((data / "item-equip-skills.json").read_text())["items"], ("itemId",))
+    walk(json.loads((data / "cursed-weapons.json").read_text())["blades"], ("itemId",))
+    walk(json.loads((data / "herbs.json").read_text())["items"], ("itemId",))
+    for row in json.loads((data / "pledge-skills.json").read_text())["skills"]:
+        walk(row.get("items") or [], ("id",))
+    for row in json.loads((data / "summons.json").read_text())["summons"]:
+        walk(row.get("levels") or [], ("itemId", "upkeepItemId"))
+    return want
+
+
 def sets(el: ET.Element) -> dict[str, str]:
     out: dict[str, str] = {}
     for node in el.findall("set"):
@@ -393,13 +430,18 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mobius", type=Path, default=DEFAULT_MOBIUS)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--all-referenced",
+        action="store_true",
+        help="want every item id referenced by buylists, multisell, recipes, skill trees, drops (#985)",
+    )
     args = parser.parse_args()
     if not args.mobius.is_dir():
         raise SystemExit(f"Mobius items dir missing: {args.mobius}")
 
     lists = {int(entry["id"]): entry for entry in json.loads(BUYLISTS.read_text())["lists"]}
     buy_ids = html_buy_list_ids()
-    want = wanted_item_ids(lists, buy_ids)
+    want = referenced_item_ids() if args.all_referenced else wanted_item_ids(lists, buy_ids)
     have = {int(item["id"]) for item in json.loads(ITEMS_JSON.read_text())["items"]}
     missing = sorted(want - have)
     print(f"html-lists={len(buy_ids)} want={len(want)} have={len(have)} missing={len(missing)}")
